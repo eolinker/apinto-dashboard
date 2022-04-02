@@ -6,6 +6,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/internal/template"
 	"log"
 	"net/http"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -22,7 +23,6 @@ func (f ViewHandlerFunc) Lookup(r *http.Request) (view string, data interface{},
 
 type Module struct {
 	Path     string
-	Icon    string
 	Handler IModule
 	Name     string
 	I18nName map[ZoneName]string `json:"i18n_name"`
@@ -39,15 +39,12 @@ type DashboardService struct {
 	defaultZone ZoneName
 	userDetails IUserDetailsService
 	serve http.ServeMux
-
+	defaultModule string
 }
-
 
 func (d *DashboardService) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	d.serve.ServeHTTP(w,req)
-
 }
-
 
 func Create(config *Config)(*DashboardService,error)  {
 	if config.UserDetailsService == nil{
@@ -64,33 +61,36 @@ func Create(config *Config)(*DashboardService,error)  {
 	for _,m:=range config.Modules{
 		 modules = append(modules, &ModuleItem{
 			Name:     m.Name,
-			Icon:     m.Icon,
 			I18nName: m.I18nName,
 			Path:     m.Path,
 		})
 	}
 	mp := NewModuleItemPlan(modules)
+	defaultModule:=config.DefaultModule
+	if defaultModule == ""{
+		defaultModule = modules[0].Name
+	}
 	views:=new(Views)
 	views.mp = mp
+	viewServe:=&http.ServeMux{}
+	views.serve = viewServe
 	apis := new(APIS)
 	for _, m:=range config.Modules{
 
 		path := fmt.Sprint("/", m.Name)
-		views.serve.Handle(path,&ViewServer{
+		viewServe.Handle(path,&ViewServer{
 			handler: m.Handler,
 			modules: mp,
 			name:    m.Name,
 		})
 		service.serve.Handle(path,views)
 
-		views.serve.Handle(fmt.Sprint(path,"/"),&ViewServer{
+		viewServe.Handle(fmt.Sprint(path,"/"),&ViewServer{
 			handler: m.Handler,
 			modules: mp,
 			name:    m.Name,
 		})
 		service.serve.Handle(fmt.Sprint(path,"/"),views)
-
-
 		apis.serve.Handle(fmt.Sprint("/api/",m.Name,"/"),m.Handler)
 		service.serve.Handle(fmt.Sprint("/api/",m.Name,"/"),apis)
 	}
@@ -100,12 +100,26 @@ func Create(config *Config)(*DashboardService,error)  {
 		path = strings.TrimSuffix(path,"/")
 		if len(path)>0{
 			path = fmt.Sprint("/",path,"/")
+			staticServe.Handle(path,http.StripPrefix(path,http.FileServer(http.Dir(dir))))
+
 		}else{
 			path = "/"
+			staticServe.Handle(path,&Views{
+				serve: http.StripPrefix(path,http.FileServer(http.Dir(dir))),
+				mp: mp,
+			})
+
 		}
-		staticServe.Handle(path,http.StripPrefix(path,http.FileServer(http.Dir(dir))))
 	}
-	service.serve.Handle("/",staticServe)
+
+	defaultModulePath := mp.moduleMap[defaultModule].Path
+ 	service.serve.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/"{
+			http.Redirect(w,r,defaultModulePath,302)
+			return
+		}
+		staticServe.ServeHTTP(w,r)
+	})
 	return service,nil
 }
 
@@ -119,7 +133,7 @@ func (A *APIS) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 }
 
 type Views struct {
-	serve http.ServeMux
+	serve http.Handler
 	mp *ModuleItemPlan
 }
 
@@ -131,6 +145,11 @@ func (v *Views) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	v.serve.ServeHTTP(writer,req)
 
 	if writer.statusCode == 200{
+		writer.WriteTo(w)
+		return
+	}
+	ext := filepath.Ext(req.URL.Path)
+	if ext != ""{
 		writer.WriteTo(w)
 		return
 	}
@@ -150,10 +169,9 @@ type ViewServer struct {
 }
 
 func (v *ViewServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	viewName, data, err := v.handler.Lookup(r)
-	if err!=nil{
-		w.WriteHeader(404)
-		fmt.Fprint(w,err)
+	viewName, data, has := v.handler.Lookup(r)
+	if !has{
+		http.NotFound(w,r)
 		return
 	}
 	tp ,err:= template.Load(viewName)
@@ -167,11 +185,9 @@ func (v *ViewServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 type ModuleItem struct {
 	Name string `json:"name"`
-	Icon string `json:"icon"`
-	I18nName map[ZoneName]string `json:"i18n_name"`
+ 	I18nName map[ZoneName]string `json:"i18n_name"`
 	Path string `json:"path"`
 }
-
 
 type ModuleItemPlan struct {
 	modules []*ModuleItem
@@ -210,11 +226,13 @@ func NewTemplateWriter() *TemplateWriter {
 }
 func (t *TemplateWriter) WriteTo(w http.ResponseWriter){
 
-	w.WriteHeader(t.statusCode)
-	h:=w.Header()
-	for k,v:=range t.header{
-		h[k]=v
+
+	for k:=range t.header{
+		w.Header().Set(k,t.header.Get(k))
 	}
+	w.WriteHeader(t.statusCode)
+
+	//w.Write(t.buf.Bytes())
 	t.buf.WriteTo(w)
 }
 func (t *TemplateWriter) Header() http.Header {

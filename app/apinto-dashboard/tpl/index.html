@@ -1,52 +1,86 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
+<!doctype html>
+<html lang="en">
 <head>
-
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <link href="/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rTTiRUKnSWaDu2FjhzWFl8/JuUZMlplyWE/djenb2LoKqkgLGfEGfSrL7XDLoB1M" crossorigin="anonymous">
-
-{{block "title" .}}
-    {{ if .module}}
-    {{if eq (index .module.I18nName .zone) ""}}
-    <title>{{.module.Name}}</title>
-    {{else}}
-    <title>{{index .module.I18nName .zone}}</title>
+    <meta name="description" content="">
+    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+    <meta name="generator" content="Hugo 0.88.1">
+    {{block "title" .}}{{ if .module}}{{if eq (index .module.I18nName .zone) ""}}
+    <title>{{.module.Name}}</title>{{else}}
+    <title>{{index .module.I18nName .zone}}</title>{{end}}{{else}}<title>{{.name}}</title>{{end}}
     {{end}}
-    {{else}}
-    <title>{{.name}}</title>
-    {{end}}
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <style>
+        .bd-placeholder-img {
+            font-size: 1.125rem;
+            text-anchor: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            user-select: none;
+        }
 
+        @media (min-width: 768px) {
+            .bd-placeholder-img-lg {
+                font-size: 3.5rem;
+            }
+        }
+    </style>
+    <!-- Custom styles for this template -->
+    <link href="/css/sidebars.css" rel="stylesheet">
 
-{{end}}
+    <!--    <script src="/js/sidebars.js"></script>-->
 </head>
 <body>
-test
-{{block "top" .}}
-<div>
-    top
-</div>
-
+{{block "icon" .}}
 {{end}}
-{{block "left" .}}
+<main>
 
-<ul class="left">
-    {{range $index,$m:=.modules}}
+    <div class="d-flex flex-column flex-shrink-0 p-3 text-white bg-dark" style="width: 280px;">
+        <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+            <svg class="bi me-2" width="40" height="32">
+                <use xlink:href="#apinto"/>
+            </svg>
+            <span class="fs-4">Dashboard</span>
+        </a>
+        <hr>
+        {{block "left" .}}
 
-    <li>
-        <a href="{{$m.Path}}"  class="select">{{index $m.I18nName $.zone}}</a>
-    </li>
-    {{end}}
-</ul>
+        <ul class="nav nav-pills flex-column mb-auto">
+            {{range $index,$m:=.modules}}<li class="nav-item">{{ if eq $m.Name $.name}}
+                <a href="{{$m.Path}}" class="nav-link active" aria-current="page"><svg class="bi me-2" width="16" height="16"><use xlink:href="#{{$m.Name}}"/></svg>{{index $m.I18nName $.zone}}</a>{{else}}
+                <a href="{{$m.Path}}" class="nav-link text-white"><svg class="bi me-2" width="16" height="16"><use xlink:href="#{{$m.Name}}"/></svg>{{index $m.I18nName $.zone}}</a>{{end}}
+            </li>{{end}}
+        </ul>
 
-{{end}}
+        {{end}}
 
-{{ block "content" .data}}
+        <hr>
+        <div class="dropdown">
+            <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
+               id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+                <img src="" alt="" width="32" height="32" class="rounded-circle me-2">
+                <strong>mdo</strong>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
+                <li><a class="dropdown-item" href="#">New project...</a></li>
+                <li><a class="dropdown-item" href="#">Settings</a></li>
+                <li><a class="dropdown-item" href="#">Profile</a></li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <li><a class="dropdown-item" href="#">Sign out</a></li>
+            </ul>
+        </div>
+    </div>
 
-{{end}}
-
-<script src="/umd/popper.min.js" integrity="sha384-q9CRHqZndzlxGLOj+xrdLDJa9ittGte1NksRmgJKeCV9DrM7Kz868XYqsKWPpAmn" crossorigin="anonymous"></script>
-<script src="/js/bootstrap.min.js" integrity="sha384-YSu1vEueMOXZYSSiTgjRD6egOBAdWrKI6AQBdHjTtvftX42GZLCVzwlxm0RJuipa" crossorigin="anonymous"></script>
+    <div class="b-example-divider"></div>
+    <div class=""></div>
+</main>
+<script src="/umd/popper.min.js"></script>
+<script src="/js/sidebars.js"></script>
+<script src="/js/bootstrap.bundle.min.js"></script>
+<script src="/js/bootstrap.min.js"></script>
 </body>
 </html>

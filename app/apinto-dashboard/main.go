@@ -4,40 +4,35 @@ import (
 	"fmt"
 	apinto "github.com/eolinker/apinto-dashboard"
 	"github.com/eolinker/apinto-dashboard/internal/security"
-	"github.com/eolinker/apinto-dashboard/modules/profession"
+	"log"
 	"net/http"
+	"strings"
 )
 
+func init() {
+	apinto.RetTemplate("tpl","index","icons")
+}
 func main() {
+	cf, err := ReadConfig("config.yml")
+	if err != nil {
+		log.Println("[Error]",err)
+		return
+	}
+
 	config:=new(apinto.Config)
-	config.DefaultZone = apinto.ZhCn
+
+	config.DefaultZone =apinto.ZoneName(strings.ToLower(cf.Zone))
 
 	detailsService := security.NewUserDetailsService()
 	detailsService.Add(security.NewUserDetails("admin","admin", map[string]interface{}{}))
 	config.UserDetailsService =detailsService
-	config.Modules = append(config.Modules, &apinto.Module{
-		Path:     "/discovery/list",
-		Icon:     "",
-		Handler:  profession.NewProfession("discovery"),
-		Name:     "discovery",
-		I18nName: map[apinto.ZoneName]string{
-			apinto.ZhCn:"服务发现",
-			apinto.EnUs: "discovery service",
-		},
-	})
-	config.Modules = append(config.Modules, &apinto.Module{
-		Path:     "/routers/list",
-		Icon:     "",
-		Handler:  profession.NewProfession("routers"),
-		Name:     "routers",
-		I18nName: map[apinto.ZoneName]string{
-			apinto.ZhCn:"路由",
-			apinto.EnUs: "routers",
-		},
-	})
+
+	ms:=toModule(cf)
+	config.Modules = append(config.Modules, ms...)
 	config.Statics = map[string]string{
 		"":"./static",
 		"js":"./static/js",
+		//"css":"./static/css",
 	}
 	service,err := apinto.Create(config)
 

@@ -1,18 +1,17 @@
 package apinto_dashboard
 
 import (
-	"errors"
 	"net/http"
 	"strings"
 )
 
 type IModule interface {
 	http.Handler
-	Lookup(r *http.Request)(view string,data interface{},err error)
+	Lookup(r *http.Request) (view string, data interface{}, has bool)
 }
 
 
-type ModuleViewEmpty struct {
+type ModuleViewFinder struct {
 	views map[string]string
 	prefix string
 	defaultName string
@@ -20,16 +19,16 @@ type ModuleViewEmpty struct {
 
 
 
-func NewViewModuleEmpty(prefix string, views map[string]string, defaultName string) *ModuleViewEmpty {
+func NewViewModuleEmpty(prefix string, views map[string]string, defaultName string) *ModuleViewFinder {
 	 prefix = strings.TrimSuffix(prefix,"/")
-	return &ModuleViewEmpty{
+	return &ModuleViewFinder{
 		views: views,
 		prefix: prefix,
 		defaultName: defaultName,
 	}
 }
 
-func (v *ModuleViewEmpty) Lookup(r *http.Request) (view string, data interface{}, err error) {
+func (v *ModuleViewFinder) Lookup(r *http.Request) (view string,  has bool) {
 	path := r.URL.Path
 	name:= strings.TrimPrefix(path,v.prefix)
 	if name=="" || name =="/"{
@@ -37,9 +36,7 @@ func (v *ModuleViewEmpty) Lookup(r *http.Request) (view string, data interface{}
 	}
 	 name = strings.TrimPrefix(name,"/")
 	vn,has:=v.views[name]
-	if has{
-		return vn,nil,nil
-	}
-	return "",nil,errors.New("404 page not found")
+
+	return vn,has
 }
 
