@@ -7,6 +7,6 @@ const (
 	EnUs ZoneName = "EN_US"
 )
 
-func (zone ZoneName)Read(from map[string]string)string  {
-	return from[string(zone)]
+func (zone ZoneName)Read(from map[ZoneName]string)string  {
+	return from[zone]
 }

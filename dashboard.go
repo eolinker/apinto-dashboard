@@ -1,43 +1,53 @@
 package apinto_dashboard
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/internal/template"
+	"log"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
 type IDashboardAccount interface {
 }
 
-type ViewHandler interface {
-	Server(r *http.Request)(view string,data interface{},err error)
+
+type ViewHandlerFunc func(r *http.Request)(view string,data interface{},err error)
+
+func (f ViewHandlerFunc) Lookup(r *http.Request) (view string, data interface{}, err error) {
+	return f(r)
 }
 
 type Module struct {
 	Path     string
-	Icon     string
-	Views    map[string]ViewHandler
-	Handler  http.Handler
+	Icon    string
+	Handler IModule
 	Name     string
-	I18nName map[string]string `json:"i18n_name"`
+	I18nName map[ZoneName]string `json:"i18n_name"`
 }
 
 type Config struct {
 	DefaultZone ZoneName
 	Modules []*Module
 	UserDetailsService IUserDetailsService
+	Statics map[string]string
+	DefaultModule string
 }
 type DashboardService struct {
 	defaultZone ZoneName
 	userDetails IUserDetailsService
-	server http.ServeMux
+	serve http.ServeMux
+
 }
 
+
 func (d *DashboardService) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	// 处理登陆
-	d.server.ServeHTTP(w,req)
+	d.serve.ServeHTTP(w,req)
+
 }
+
 
 func Create(config *Config)(*DashboardService,error)  {
 	if config.UserDetailsService == nil{
@@ -49,64 +59,172 @@ func Create(config *Config)(*DashboardService,error)  {
 	service := new(DashboardService)
 	service.userDetails = config.UserDetailsService
 	service.defaultZone = config.DefaultZone
-	modules := make([]*ModuleItem,0,len(config.Modules))
+
+	 modules := make([]*ModuleItem,0,len(config.Modules))
 	for _,m:=range config.Modules{
-		modules = append(modules, &ModuleItem{
+		 modules = append(modules, &ModuleItem{
 			Name:     m.Name,
 			Icon:     m.Icon,
 			I18nName: m.I18nName,
 			Path:     m.Path,
 		})
 	}
-
+	mp := NewModuleItemPlan(modules)
+	views:=new(Views)
+	views.mp = mp
+	apis := new(APIS)
 	for _, m:=range config.Modules{
 
-		prefix := fmt.Sprint("/", m.Name)
+		path := fmt.Sprint("/", m.Name)
+		views.serve.Handle(path,&ViewServer{
+			handler: m.Handler,
+			modules: mp,
+			name:    m.Name,
+		})
+		service.serve.Handle(path,views)
 
-		for path,view:=range m.Views {
-			if len(path)>0{
-				path = fmt.Sprint(prefix,"/",strings.TrimPrefix(path,"/"))
-			}
+		views.serve.Handle(fmt.Sprint(path,"/"),&ViewServer{
+			handler: m.Handler,
+			modules: mp,
+			name:    m.Name,
+		})
+		service.serve.Handle(fmt.Sprint(path,"/"),views)
 
-			service.server.Handle(path,&ViewServer{
-				handler: view,
-				modules: modules,
-				name:    m.Name,
-			})
-			
-		}
 
+		apis.serve.Handle(fmt.Sprint("/api/",m.Name,"/"),m.Handler)
+		service.serve.Handle(fmt.Sprint("/api/",m.Name,"/"),apis)
 	}
+	staticServe:=&http.ServeMux{}
+	for path,dir:= range config.Statics{
+		path = strings.TrimPrefix(path,"/")
+		path = strings.TrimSuffix(path,"/")
+		if len(path)>0{
+			path = fmt.Sprint("/",path,"/")
+		}else{
+			path = "/"
+		}
+		staticServe.Handle(path,http.StripPrefix(path,http.FileServer(http.Dir(dir))))
+	}
+	service.serve.Handle("/",staticServe)
 	return service,nil
 }
 
+type APIS struct {
+	serve http.ServeMux
+}
+
+func (A *APIS) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	//todo 处理api接口的登陆
+	A.serve.ServeHTTP(w,req)
+}
+
+type Views struct {
+	serve http.ServeMux
+	mp *ModuleItemPlan
+}
+
+func (v *Views) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	//todo 处理view请求的登陆
+
+	writer := NewTemplateWriter()
+
+	v.serve.ServeHTTP(writer,req)
+
+	if writer.statusCode == 200{
+		writer.WriteTo(w)
+		return
+	}
+	tp, err :=template.Load("error")
+	if err!= nil{
+		log.Println("[ERR] load template<error>:",err)
+		writer.WriteTo(w)
+		return
+	}
+	tp.Execute(w,v.mp.CreateViewData("error",map[string]string{"statusCode":strconv.Itoa(writer.statusCode),"message":writer.buf.String()},nil))
+}
+
 type ViewServer struct {
-	handler ViewHandler
-	modules interface{}
+	handler IModule
+	modules *ModuleItemPlan
 	name string
 }
 
 func (v *ViewServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	viewName, data, err := v.handler.Server(r)
-
-
+	viewName, data, err := v.handler.Lookup(r)
+	if err!=nil{
+		w.WriteHeader(404)
+		fmt.Fprint(w,err)
+		return
+	}
 	tp ,err:= template.Load(viewName)
 	if err!=nil{
 		fmt.Fprint(w,err)
 		return
 	}
-	obj:=make(map[string]interface{})
-	obj["data"]=data
-	obj["error"] = err
-	obj["modules"] = v.modules
-	obj["current"] = v.name
 
-	tp.Execute(w,obj)
+	tp.Execute(w,v.modules.CreateViewData(v.name,data,err))
 }
 
 type ModuleItem struct {
-	Name string
-	Icon string
-	I18nName map[string]string
-	Path string
+	Name string `json:"name"`
+	Icon string `json:"icon"`
+	I18nName map[ZoneName]string `json:"i18n_name"`
+	Path string `json:"path"`
+}
+
+
+type ModuleItemPlan struct {
+	modules []*ModuleItem
+	moduleMap map[string]*ModuleItem
+}
+
+func NewModuleItemPlan(modules []*ModuleItem) *ModuleItemPlan {
+	mp:=make( map[string]*ModuleItem)
+	for _,m:=range modules{
+		mp[m.Name] = m
+	}
+	return &ModuleItemPlan{modules: modules,moduleMap: mp}
+}
+func (mp *ModuleItemPlan)CreateViewData(name string,data interface{},err error ) map[string]interface{} {
+	obj:=make(map[string]interface{})
+	obj["data"]=data
+	obj["error"] = err
+	obj["zone"] = ZhCn
+	obj["modules"] = mp.modules
+	obj["module"] = mp.moduleMap[name]
+	obj["name"] = name
+	return obj
+}
+
+type TemplateWriter struct {
+	buf bytes.Buffer
+	statusCode int
+	header http.Header
+}
+
+func NewTemplateWriter() *TemplateWriter {
+	return &TemplateWriter{
+		statusCode: 200,
+		header: make(http.Header),
+	}
+}
+func (t *TemplateWriter) WriteTo(w http.ResponseWriter){
+
+	w.WriteHeader(t.statusCode)
+	h:=w.Header()
+	for k,v:=range t.header{
+		h[k]=v
+	}
+	t.buf.WriteTo(w)
+}
+func (t *TemplateWriter) Header() http.Header {
+	return t.header
+}
+
+func (t *TemplateWriter) Write(bytes []byte) (int, error) {
+	return t.buf.Write(bytes)
+}
+
+func (t *TemplateWriter) WriteHeader(statusCode int) {
+	t.statusCode = statusCode
 }

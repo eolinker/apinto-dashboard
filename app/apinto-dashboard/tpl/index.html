@@ -1,10 +1,52 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rTTiRUKnSWaDu2FjhzWFl8/JuUZMlplyWE/djenb2LoKqkgLGfEGfSrL7XDLoB1M" crossorigin="anonymous">
+
+{{block "title" .}}
+    {{ if .module}}
+    {{if eq (index .module.I18nName .zone) ""}}
+    <title>{{.module.Name}}</title>
+    {{else}}
+    <title>{{index .module.I18nName .zone}}</title>
+    {{end}}
+    {{else}}
+    <title>{{.name}}</title>
+    {{end}}
+
+
+{{end}}
 </head>
 <body>
+test
+{{block "top" .}}
+<div>
+    top
+</div>
 
+{{end}}
+{{block "left" .}}
+
+<ul class="left">
+    {{range $index,$m:=.modules}}
+
+    <li>
+        <a href="{{$m.Path}}"  class="select">{{index $m.I18nName $.zone}}</a>
+    </li>
+    {{end}}
+</ul>
+
+{{end}}
+
+{{ block "content" .data}}
+
+{{end}}
+
+<script src="/umd/popper.min.js" integrity="sha384-q9CRHqZndzlxGLOj+xrdLDJa9ittGte1NksRmgJKeCV9DrM7Kz868XYqsKWPpAmn" crossorigin="anonymous"></script>
+<script src="/js/bootstrap.min.js" integrity="sha384-YSu1vEueMOXZYSSiTgjRD6egOBAdWrKI6AQBdHjTtvftX42GZLCVzwlxm0RJuipa" crossorigin="anonymous"></script>
 </body>
 </html>
