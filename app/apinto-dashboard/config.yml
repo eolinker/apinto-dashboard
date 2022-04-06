@@ -1,11 +1,7 @@
 zone: zh_cn
 default: upstream
 professions:
-  - name: routers
-    profession: router
-    i18n_name:
-      zh_cn: 路由
-      en_us: routers
+
   - name: services
     profession: service
     i18n_name:
