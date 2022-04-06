@@ -4,6 +4,7 @@ import (
 	"fmt"
 	apinto "github.com/eolinker/apinto-dashboard"
 	"github.com/eolinker/apinto-dashboard/internal/security"
+	"github.com/eolinker/apinto-dashboard/modules/monitor"
 	"log"
 	"net/http"
 	"strings"
@@ -27,6 +28,16 @@ func main() {
 	detailsService.Add(security.NewUserDetails("admin","admin", map[string]interface{}{}))
 	config.UserDetailsService =detailsService
 
+	mm := monitor.NewMonitor("monitors")
+	config.Modules = append(config.Modules, &apinto.Module{
+		Path:     "/monitors",
+		Handler:  mm,
+		Name:     "monitors",
+		I18nName: map[apinto.ZoneName]string{
+			apinto.ZhCn:"监控",
+			apinto.EnUs:"monitors",
+		},
+	})
 	ms:=toModule(cf)
 	config.Modules = append(config.Modules, ms...)
 	config.Statics = map[string]string{

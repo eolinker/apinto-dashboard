@@ -27,60 +27,70 @@
             }
         }
     </style>
-    <!-- Custom styles for this template -->
-    <link href="/css/sidebars.css" rel="stylesheet">
 
-    <!--    <script src="/js/sidebars.js"></script>-->
+    <!-- Custom styles for this template -->
+    <link href="/css/dashboard.css" rel="stylesheet">
 </head>
 <body>
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+<symbol id="apinto" viewBox="0 0 245.13 287.4">
+    <defs>
+        <style>.cls-1{fill:#fff;}</style>
+    </defs>
+    <title>apinto</title>
+    <path class="cls-1" d="M19.36,236H29l19.31,50.19H38.42L34.49,275.8H14L9.93,286.14H0Zm4.9,13.3-6.73,17.23H31Z"/>
+    <path class="cls-1" d="M55.7,236H65.83q8.24,0,11.86,1.52a12.07,12.07,0,0,1,5.73,4.91,15.17,15.17,0,0,1,2.1,8.14,13.61,13.61,0,0,1-2.75,8.73,14.24,14.24,0,0,1-7.45,4.85q-2.76.78-10.07.78v21.26H55.7Zm9.55,19.62h3a16.07,16.07,0,0,0,5-.52,4.38,4.38,0,0,0,2.2-1.69,4.93,4.93,0,0,0,.8-2.86A4.56,4.56,0,0,0,74,246.26q-1.63-1-6.07-1h-2.7Z"/>
+    <path class="cls-1" d="M94.19,236h9.48v50.19H94.19Z"/>
+    <path class="cls-1" d="M114.45,236h9.17l21.47,33V236h9.56v50.19h-9.19L124,253.21v32.93h-9.56Z"/>
+    <path class="cls-1" d="M161.16,236H188.9v9.42h-9.14v40.77h-9.69V245.37h-8.91Z"/>
+    <path class="cls-1" d="M219.15,234.69a24.93,24.93,0,0,1,18.32,7.71,25.64,25.64,0,0,1,7.66,18.8,25.37,25.37,0,0,1-7.56,18.59,26.21,26.21,0,0,1-37.13-.2,26.8,26.8,0,0,1-4-31.8,26.25,26.25,0,0,1,22.7-13.1Zm-.1,9.35a15.76,15.76,0,0,0-11.72,4.84,16.89,16.89,0,0,0-4.74,12.32q0,8.32,6,13.17a16.42,16.42,0,0,0,10.66,3.78,15.55,15.55,0,0,0,11.58-4.91,17.7,17.7,0,0,0,0-24.24A15.69,15.69,0,0,0,219.05,244Z"/>
+    <path class="cls-1" d="M161-.44a84.29,84.29,0,0,0-80.6,60H54.3a10.77,10.77,0,0,0,0,21.53H76.9c0,.86,0,1.73,0,2.6v43.86H54.3a10.77,10.77,0,0,0,0,21.53H76.86v28.35a18,18,0,0,0,18,18H227.13a18,18,0,0,0,18-18V83.7A84.24,84.24,0,0,0,161-.44Zm-.35,91.5a10,10,0,1,1-10-10A10,10,0,0,1,160.64,91.06ZM90.89,177.44V149.09h1a10.77,10.77,0,0,0,0-21.53h-1V83.7c0-.87,0-1.74.06-2.6h1A10.77,10.77,0,0,0,95,60a70.45,70.45,0,0,1,42.9-42.52c-7.47,7.27-13.62,19.34-13.62,39.5v92.26a15.71,15.71,0,0,0,12.14,15.3l71.75,16.83H94.85A4,4,0,0,1,90.89,177.44Z"/>
+    <rect class="cls-1" y="93.99" width="59.12" height="21.53" rx="10.76"/>
+
+</symbol>
+</svg>
 {{block "icon" .}}
 {{end}}
-<main>
+<header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
+    <a href="/" class="navbar-brand col-md-3 col-lg-2 me-0 px-3">
+        <svg class="bi me-2" width="40" height="32">
+            <use xlink:href="#apinto"/>
+        </svg>
+        <span class="fs-4">Dashboard</span>
+    </a>
+    {{block "top" .}}
+    <!-- 这里显示搜索操作-->
+    {{end}}
+</header>
 
-    <div class="d-flex flex-column flex-shrink-0 p-3 text-white bg-dark" style="width: 280px;">
-        <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-            <svg class="bi me-2" width="40" height="32">
-                <use xlink:href="#apinto"/>
-            </svg>
-            <span class="fs-4">Dashboard</span>
-        </a>
-        <hr>
-        {{block "left" .}}
+<div class="container-fluid">
+    <div class="row">
+        <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+            <div class="position-sticky pt-3">
+                {{block "left" .}}
 
-        <ul class="nav nav-pills flex-column mb-auto">
-            {{range $index,$m:=.modules}}<li class="nav-item">{{ if eq $m.Name $.name}}
-                <a href="{{$m.Path}}" class="nav-link active" aria-current="page"><svg class="bi me-2" width="16" height="16"><use xlink:href="#{{$m.Name}}"/></svg>{{index $m.I18nName $.zone}}</a>{{else}}
-                <a href="{{$m.Path}}" class="nav-link text-white"><svg class="bi me-2" width="16" height="16"><use xlink:href="#{{$m.Name}}"/></svg>{{index $m.I18nName $.zone}}</a>{{end}}
-            </li>{{end}}
-        </ul>
+                <ul class="nav flex-column">
+                    {{range $index,$m:=.modules}}<li class="nav-item">{{ if eq $m.Name $.name}}
+                    <a href="{{$m.Path}}" class="nav-link active" aria-current="page"><svg class="bi me-2" width="16" height="16"><use xlink:href="#{{$m.Name}}"/></svg>{{index $m.I18nName $.zone}}</a>{{else}}
+                    <a href="{{$m.Path}}" class="nav-link "><svg class="bi me-2" width="16" height="16"><use xlink:href="#{{$m.Name}}"/></svg>{{index $m.I18nName $.zone}}</a>{{end}}
+                </li>{{end}}
+                </ul>
+                {{end}}
+            </div>
+        </nav>
 
-        {{end}}
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            {{ block "content" .}}
 
-        <hr>
-        <div class="dropdown">
-            <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
-               id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
-                <img src="" alt="" width="32" height="32" class="rounded-circle me-2">
-                <strong>mdo</strong>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
-                <li><a class="dropdown-item" href="#">New project...</a></li>
-                <li><a class="dropdown-item" href="#">Settings</a></li>
-                <li><a class="dropdown-item" href="#">Profile</a></li>
-                <li>
-                    <hr class="dropdown-divider">
-                </li>
-                <li><a class="dropdown-item" href="#">Sign out</a></li>
-            </ul>
-        </div>
+            {{end}}
+        </main>
+
+
     </div>
-
-    <div class="b-example-divider"></div>
-    <div class=""></div>
-</main>
-<script src="/umd/popper.min.js"></script>
-<script src="/js/sidebars.js"></script>
-<script src="/js/bootstrap.bundle.min.js"></script>
+</div>
 <script src="/js/bootstrap.min.js"></script>
+<!--<script src="dashboard.js"></script>-->
+{{ block "script" .}}{{end}}
 </body>
 </html>
