@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	apinto "github.com/eolinker/apinto-dashboard"
-	"github.com/eolinker/apinto-dashboard/modules/profession"
+	"github.com/eolinker/apinto-dashboard/modules/professions"
 	yaml "gopkg.in/yaml.v2"
 	"io/ioutil"
 	"strings"
@@ -11,7 +11,7 @@ import (
 type ProfessionConfigItem struct {
 	Name string `yaml:"name"`
 	I18nNames map[string]string `yaml:"i18n_name"`
-	Profession string `yaml:"profession"`
+	Profession string `yaml:"professions"`
 }
 
 type Config struct {
@@ -46,7 +46,7 @@ func toModule(c *Config)[]*apinto.Module  {
 	for _,cm:=range c.Professions{
 		m:=&apinto.Module{
 			Path:     fmt.Sprintf("/%s/list",cm.Name),
-			Handler:  profession.NewProfession(cm.Name,cm.Profession),
+			Handler:  professions.NewProfession(cm.Name,cm.Profession),
 			Name:     cm.Name,
 			I18nName: make(map[apinto.ZoneName]string),
 		}

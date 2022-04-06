@@ -4,7 +4,9 @@ import (
 	"fmt"
 	apinto "github.com/eolinker/apinto-dashboard"
 	"github.com/eolinker/apinto-dashboard/internal/security"
-	"github.com/eolinker/apinto-dashboard/modules/monitor"
+	activity_log "github.com/eolinker/apinto-dashboard/modules/activity-log"
+	"github.com/eolinker/apinto-dashboard/modules/monitors"
+	"github.com/eolinker/apinto-dashboard/modules/plugins"
 	"log"
 	"net/http"
 	"strings"
@@ -28,10 +30,10 @@ func main() {
 	detailsService.Add(security.NewUserDetails("admin","admin", map[string]interface{}{}))
 	config.UserDetailsService =detailsService
 
-	mm := monitor.NewMonitor("monitors")
+	monitorsModule := monitors.NewMonitor("monitors")
 	config.Modules = append(config.Modules, &apinto.Module{
 		Path:     "/monitors",
-		Handler:  mm,
+		Handler:  monitorsModule,
 		Name:     "monitors",
 		I18nName: map[apinto.ZoneName]string{
 			apinto.ZhCn:"监控",
@@ -40,6 +42,37 @@ func main() {
 	})
 	ms:=toModule(cf)
 	config.Modules = append(config.Modules, ms...)
+
+	plugingModule := plugins.NewPlugins("plugins")
+	config.Modules = append(config.Modules, &apinto.Module{
+		Path:     "/plugins",
+		Handler:  plugingModule,
+		Name:     "plugins",
+		I18nName: map[apinto.ZoneName]string{
+			apinto.ZhCn:"全局插件",
+			apinto.EnUs:"Global Plugins",
+		},
+	})
+	activityLogModule := activity_log.NewActivityLog("activity_log")
+	config.Modules = append(config.Modules, &apinto.Module{
+		Path:     "/activity-log",
+		Handler:  activityLogModule,
+		Name:     "activity-log",
+		I18nName: map[apinto.ZoneName]string{
+			apinto.ZhCn:"操作日志",
+			apinto.EnUs:"Activity log",
+		},
+	})
+	extendersModule := activity_log.NewActivityLog("extenders")
+	config.Modules = append(config.Modules, &apinto.Module{
+		Path:     "/extenders",
+		Handler:  extendersModule,
+		Name:     "extenders",
+		I18nName: map[apinto.ZoneName]string{
+			apinto.ZhCn:"扩展管理",
+			apinto.EnUs:"extenders manager",
+		},
+	})
 	config.Statics = map[string]string{
 		"":"./static",
 		"js":"./static/js",

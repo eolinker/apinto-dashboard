@@ -1,4 +1,4 @@
-package monitor
+package monitors
 
 import (
 	"net/http"

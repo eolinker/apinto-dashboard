@@ -1,4 +1,4 @@
-package profession
+package professions
 
 import (
 	"fmt"
