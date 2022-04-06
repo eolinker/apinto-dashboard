@@ -7,6 +7,7 @@ import (
 	activity_log "github.com/eolinker/apinto-dashboard/modules/activity-log"
 	"github.com/eolinker/apinto-dashboard/modules/monitors"
 	"github.com/eolinker/apinto-dashboard/modules/plugins"
+	"github.com/eolinker/apinto-dashboard/modules/routers"
 	"log"
 	"net/http"
 	"strings"
@@ -38,6 +39,16 @@ func main() {
 		I18nName: map[apinto.ZoneName]string{
 			apinto.ZhCn:"监控",
 			apinto.EnUs:"monitors",
+		},
+	})
+	routersModule := routers.NewRouters()
+	config.Modules = append(config.Modules, &apinto.Module{
+		Path:     "/routers/list",
+		Handler:  routersModule,
+		Name:     "routers",
+		I18nName: map[apinto.ZoneName]string{
+			apinto.ZhCn:"路由",
+			apinto.EnUs:"Ruters",
 		},
 	})
 	ms:=toModule(cf)
