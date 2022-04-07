@@ -1,3 +1,5 @@
+github.com/eolinker/eosc v0.4.2 h1:OIfoeBXrrkx/wiSiLzSveUmQVtxxHkFfVdmufi900gA=
+github.com/eolinker/eosc v0.4.2/go.mod h1:AygkyR271mzCgs19lkyL6oFoIpG9kVh+O+1bZUC/kho=
 github.com/julienschmidt/httprouter v1.3.0 h1:U0609e9tgbseu3rBINet9P48AI/D3oJs4dN7jwJOQ1U=
 github.com/julienschmidt/httprouter v1.3.0/go.mod h1:JR6WtHb+2LUe8TCKY3cZOxFyyO8IZAc4RVcycCCAKdM=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=

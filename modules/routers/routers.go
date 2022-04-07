@@ -2,6 +2,7 @@ package routers
 
 import (
 	apinto_dashboard "github.com/eolinker/apinto-dashboard"
+	"github.com/eolinker/apinto-dashboard/internal/apinto"
 	"net/http"
 )
 
@@ -18,6 +19,7 @@ func (p *Routers) Lookup(r *http.Request) (view string, data interface{}, has bo
 }
 
 func (p *Routers) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	apinto.Handler().ServeHTTP(w, req)
 }
 
 func NewRouters() *Routers {

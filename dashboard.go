@@ -14,8 +14,7 @@ import (
 type IDashboardAccount interface {
 }
 
-
-type ViewHandlerFunc func(r *http.Request)(view string,data interface{},err error)
+type ViewHandlerFunc func(r *http.Request) (view string, data interface{}, err error)
 
 func (f ViewHandlerFunc) Lookup(r *http.Request) (view string, data interface{}, err error) {
 	return f(r)
@@ -23,104 +22,104 @@ func (f ViewHandlerFunc) Lookup(r *http.Request) (view string, data interface{},
 
 type Module struct {
 	Path     string
-	Handler IModule
+	Handler  IModule
 	Name     string
 	I18nName map[ZoneName]string `json:"i18n_name"`
 }
 
 type Config struct {
-	DefaultZone ZoneName
-	Modules []*Module
+	DefaultZone        ZoneName
+	Modules            []*Module
 	UserDetailsService IUserDetailsService
-	Statics map[string]string
-	DefaultModule string
+	Statics            map[string]string
+	DefaultModule      string
 }
 type DashboardService struct {
-	defaultZone ZoneName
-	userDetails IUserDetailsService
-	serve http.ServeMux
+	defaultZone   ZoneName
+	userDetails   IUserDetailsService
+	serve         http.ServeMux
 	defaultModule string
 }
 
 func (d *DashboardService) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	d.serve.ServeHTTP(w,req)
+	d.serve.ServeHTTP(w, req)
 }
 
-func Create(config *Config)(*DashboardService,error)  {
-	if config.UserDetailsService == nil{
-		return nil,ErrorUserDetailsServiceNeed
+func Create(config *Config) (*DashboardService, error) {
+	if config.UserDetailsService == nil {
+		return nil, ErrorUserDetailsServiceNeed
 	}
-	if config.DefaultZone == ""{
+	if config.DefaultZone == "" {
 		config.DefaultZone = ZhCn
 	}
 	service := new(DashboardService)
 	service.userDetails = config.UserDetailsService
 	service.defaultZone = config.DefaultZone
 
-	 modules := make([]*ModuleItem,0,len(config.Modules))
-	for _,m:=range config.Modules{
-		 modules = append(modules, &ModuleItem{
+	modules := make([]*ModuleItem, 0, len(config.Modules))
+	for _, m := range config.Modules {
+		modules = append(modules, &ModuleItem{
 			Name:     m.Name,
 			I18nName: m.I18nName,
 			Path:     m.Path,
 		})
 	}
 	mp := NewModuleItemPlan(modules)
-	defaultModule:=config.DefaultModule
-	if defaultModule == ""{
+	defaultModule := config.DefaultModule
+	if defaultModule == "" {
 		defaultModule = modules[0].Name
 	}
-	views:=new(Views)
+	views := new(Views)
 	views.mp = mp
-	viewServe:=&http.ServeMux{}
+	viewServe := &http.ServeMux{}
 	views.serve = viewServe
 	apis := new(APIS)
-	for _, m:=range config.Modules{
+	for _, m := range config.Modules {
 
 		path := fmt.Sprint("/", m.Name)
-		viewServe.Handle(path,&ViewServer{
+		viewServe.Handle(path, &ViewServer{
 			handler: m.Handler,
 			modules: mp,
 			name:    m.Name,
 		})
-		service.serve.Handle(path,views)
+		service.serve.Handle(path, views)
 
-		viewServe.Handle(fmt.Sprint(path,"/"),&ViewServer{
+		viewServe.Handle(fmt.Sprint(path, "/"), &ViewServer{
 			handler: m.Handler,
 			modules: mp,
 			name:    m.Name,
 		})
-		service.serve.Handle(fmt.Sprint(path,"/"),views)
-		apis.serve.Handle(fmt.Sprint("/api/",m.Name,"/"),m.Handler)
-		service.serve.Handle(fmt.Sprint("/api/",m.Name,"/"),apis)
+		service.serve.Handle(fmt.Sprint(path, "/"), views)
+		apis.serve.Handle(fmt.Sprint("/api/", m.Name, "/"), m.Handler)
+		service.serve.Handle(fmt.Sprint("/api/", m.Name, "/"), apis)
 	}
-	staticServe:=&http.ServeMux{}
-	for path,dir:= range config.Statics{
-		path = strings.TrimPrefix(path,"/")
-		path = strings.TrimSuffix(path,"/")
-		if len(path)>0{
-			path = fmt.Sprint("/",path,"/")
-			staticServe.Handle(path,http.StripPrefix(path,http.FileServer(http.Dir(dir))))
+	staticServe := &http.ServeMux{}
+	for path, dir := range config.Statics {
+		path = strings.TrimPrefix(path, "/")
+		path = strings.TrimSuffix(path, "/")
+		if len(path) > 0 {
+			path = fmt.Sprint("/", path, "/")
+			staticServe.Handle(path, http.StripPrefix(path, http.FileServer(http.Dir(dir))))
 
-		}else{
+		} else {
 			path = "/"
-			staticServe.Handle(path,&Views{
-				serve: http.StripPrefix(path,http.FileServer(http.Dir(dir))),
-				mp: mp,
+			staticServe.Handle(path, &Views{
+				serve: http.StripPrefix(path, http.FileServer(http.Dir(dir))),
+				mp:    mp,
 			})
 
 		}
 	}
 
 	defaultModulePath := mp.moduleMap[defaultModule].Path
- 	service.serve.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/"{
-			http.Redirect(w,r,defaultModulePath,302)
+	service.serve.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/" {
+			http.Redirect(w, r, defaultModulePath, 302)
 			return
 		}
-		staticServe.ServeHTTP(w,r)
+		staticServe.ServeHTTP(w, r)
 	})
-	return service,nil
+	return service, nil
 }
 
 type APIS struct {
@@ -129,12 +128,12 @@ type APIS struct {
 
 func (A *APIS) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	//todo 处理api接口的登陆
-	A.serve.ServeHTTP(w,req)
+	A.serve.ServeHTTP(w, req)
 }
 
 type Views struct {
 	serve http.Handler
-	mp *ModuleItemPlan
+	mp    *ModuleItemPlan
 }
 
 func (v *Views) ServeHTTP(w http.ResponseWriter, req *http.Request) {
@@ -142,68 +141,68 @@ func (v *Views) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	writer := NewTemplateWriter()
 
-	v.serve.ServeHTTP(writer,req)
+	v.serve.ServeHTTP(writer, req)
 
-	if writer.statusCode == 200{
+	if writer.statusCode == 200 {
 		writer.WriteTo(w)
 		return
 	}
 	ext := filepath.Ext(req.URL.Path)
-	if ext != ""{
+	if ext != "" {
 		writer.WriteTo(w)
 		return
 	}
-	tp, err :=template.Load("error")
-	if err!= nil{
-		log.Println("[ERR] load template<error>:",err)
+	tp, err := template.Load("error")
+	if err != nil {
+		log.Println("[ERR] load template<error>:", err)
 		writer.WriteTo(w)
 		return
 	}
-	tp.Execute(w,v.mp.CreateViewData("error",map[string]string{"statusCode":strconv.Itoa(writer.statusCode),"message":writer.buf.String()},nil))
+	tp.Execute(w, v.mp.CreateViewData("error", map[string]string{"statusCode": strconv.Itoa(writer.statusCode), "message": writer.buf.String()}, nil))
 }
 
 type ViewServer struct {
 	handler IModule
 	modules *ModuleItemPlan
-	name string
+	name    string
 }
 
 func (v *ViewServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	viewName, data, has := v.handler.Lookup(r)
-	if !has{
-		http.NotFound(w,r)
+	if !has {
+		http.NotFound(w, r)
 		return
 	}
-	tp ,err:= template.Load(viewName)
-	if err!=nil{
-		fmt.Fprint(w,err)
+	tp, err := template.Load(viewName)
+	if err != nil {
+		fmt.Fprint(w, err)
 		return
 	}
 
-	tp.Execute(w,v.modules.CreateViewData(v.name,data,err))
+	tp.Execute(w, v.modules.CreateViewData(v.name, data, err))
 }
 
 type ModuleItem struct {
-	Name string `json:"name"`
- 	I18nName map[ZoneName]string `json:"i18n_name"`
-	Path string `json:"path"`
+	Name     string              `json:"name"`
+	I18nName map[ZoneName]string `json:"i18n_name"`
+	Path     string              `json:"path"`
 }
 
 type ModuleItemPlan struct {
-	modules []*ModuleItem
+	modules   []*ModuleItem
 	moduleMap map[string]*ModuleItem
 }
 
 func NewModuleItemPlan(modules []*ModuleItem) *ModuleItemPlan {
-	mp:=make( map[string]*ModuleItem)
-	for _,m:=range modules{
+	mp := make(map[string]*ModuleItem)
+	for _, m := range modules {
 		mp[m.Name] = m
 	}
-	return &ModuleItemPlan{modules: modules,moduleMap: mp}
+	return &ModuleItemPlan{modules: modules, moduleMap: mp}
 }
-func (mp *ModuleItemPlan)CreateViewData(name string,data interface{},err error ) map[string]interface{} {
-	obj:=make(map[string]interface{})
-	obj["data"]=data
+func (mp *ModuleItemPlan) CreateViewData(name string, data interface{}, err error) map[string]interface{} {
+	obj := make(map[string]interface{})
+	obj["data"] = data
 	obj["error"] = err
 	obj["zone"] = ZhCn
 	obj["modules"] = mp.modules
@@ -213,22 +212,21 @@ func (mp *ModuleItemPlan)CreateViewData(name string,data interface{},err error )
 }
 
 type TemplateWriter struct {
-	buf bytes.Buffer
+	buf        bytes.Buffer
 	statusCode int
-	header http.Header
+	header     http.Header
 }
 
 func NewTemplateWriter() *TemplateWriter {
 	return &TemplateWriter{
 		statusCode: 200,
-		header: make(http.Header),
+		header:     make(http.Header),
 	}
 }
-func (t *TemplateWriter) WriteTo(w http.ResponseWriter){
+func (t *TemplateWriter) WriteTo(w http.ResponseWriter) {
 
-
-	for k:=range t.header{
-		w.Header().Set(k,t.header.Get(k))
+	for k := range t.header {
+		w.Header().Set(k, t.header.Get(k))
 	}
 	w.WriteHeader(t.statusCode)
 
