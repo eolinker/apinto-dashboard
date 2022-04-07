@@ -20,6 +20,17 @@ type ProfessionRouter struct {
 func NewProfessionRouter() *ProfessionRouter {
 	r := httprouter.New()
 
+	// List
+	r.GET("/api/:profession/", func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+		profession := params.ByName("profession")
+		resp, err := Client().List(profession)
+		if err != nil {
+			writeResult(w, 500, []byte(err.Error()))
+			return
+		}
+		writeResult(w, resp.code, resp.data)
+	})
+
 	// Get
 	r.GET("/api/:profession/:name", func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 		profession := params.ByName("profession")
@@ -32,19 +43,8 @@ func NewProfessionRouter() *ProfessionRouter {
 		writeResult(w, resp.code, resp.data)
 	})
 
-	// List
-	r.GET("/api/:profession", func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-		profession := params.ByName("profession")
-		resp, err := Client().List(profession)
-		if err != nil {
-			writeResult(w, 500, []byte(err.Error()))
-			return
-		}
-		writeResult(w, resp.code, resp.data)
-	})
-
 	// Create
-	r.POST("/api/:profession", func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+	r.POST("/api/:profession/", func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 		profession := params.ByName("profession")
 		data, err := readBody(r.Body)
 		if err != nil {
@@ -109,7 +109,7 @@ func NewProfessionRouter() *ProfessionRouter {
 	r.PATCH("/api/:profession/:name/status", func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 		profession := params.ByName("profession")
 		name := params.ByName("name")
-		if profession != "router" {
+		if profession != "routers" {
 			writeResult(w, 200, []byte("just router can change status"))
 			return
 		}
@@ -120,5 +120,7 @@ func NewProfessionRouter() *ProfessionRouter {
 		}
 		writeResult(w, resp.code, resp.data)
 	})
-	return &ProfessionRouter{}
+	return &ProfessionRouter{
+		Router: r,
+	}
 }
