@@ -39,158 +39,94 @@ func NewAdminClient() *adminClient {
 	}
 }
 
-func (a *adminClient) do(req *http.Request) (*http.Response, error) {
+func (a *adminClient) do(req *http.Request) ([]byte, int, error) {
 	req.Header.Set("Content-Type", "application/json")
-	return a.client.Do(req)
+	resp, err := a.client.Do(req)
+	if err != nil {
+		return nil, 500, err
+	}
+	data, err := ReadBody(resp.Body)
+	if err != nil {
+		return nil, 500, err
+	}
+	return data, resp.StatusCode, nil
+
 }
 
 func (a *adminClient) setUrl(url string) {
 	a.baseUrl = url
 }
 
-func (a *adminClient) List(profession string) (*response, error) {
+func (a *adminClient) List(profession string) ([]byte, int, error) {
 	url := fmt.Sprintf("%s/%s", a.baseUrl, profession)
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	resp, err := a.do(req)
-	if err != nil {
-		return nil, err
-	}
-	data, err := readBody(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	return &response{
-		data: data,
-		code: resp.StatusCode,
-	}, nil
+	return a.do(req)
 }
 
-func (a *adminClient) Get(profession string, name string) (*response, error) {
+func (a *adminClient) Get(profession string, name string) ([]byte, int, error) {
 	url := fmt.Sprintf("%s/%s/%s", a.baseUrl, profession, name)
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	resp, err := a.do(req)
-	if err != nil {
-		return nil, err
-	}
-	data, err := readBody(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	return &response{
-		data: data,
-		code: resp.StatusCode,
-	}, nil
+	return a.do(req)
 }
 
-func (a *adminClient) Update(profession string, name string, body []byte) (*response, error) {
+func (a *adminClient) Update(profession string, name string, body []byte) ([]byte, int, error) {
 	url := fmt.Sprintf("%s/%s/%s", a.baseUrl, profession, name)
 	req, err := http.NewRequest(http.MethodPut, url, bytes.NewReader(body))
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	resp, err := a.do(req)
-	if err != nil {
-		return nil, err
-	}
-	data, err := readBody(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	return &response{
-		data: data,
-		code: resp.StatusCode,
-	}, nil
+	return a.do(req)
 }
 
-func (a *adminClient) Create(profession string, body []byte) (*response, error) {
+func (a *adminClient) Create(profession string, body []byte) ([]byte, int, error) {
 	url := fmt.Sprintf("%s/%s", a.baseUrl, profession)
 	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(body))
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	resp, err := a.do(req)
-	if err != nil {
-		return nil, err
-	}
-	data, err := readBody(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	return &response{
-		data: data,
-		code: resp.StatusCode,
-	}, nil
+	return a.do(req)
 }
 
-func (a *adminClient) Delete(profession string, name string) (*response, error) {
+func (a *adminClient) Delete(profession string, name string) ([]byte, int, error) {
 	url := fmt.Sprintf("%s/%s/%s", a.baseUrl, profession, name)
 	req, err := http.NewRequest(http.MethodDelete, url, nil)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	resp, err := a.do(req)
-	if err != nil {
-		return nil, err
-	}
-	data, err := readBody(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	return &response{
-		data: data,
-		code: resp.StatusCode,
-	}, nil
+	return a.do(req)
 }
 
-func (a *adminClient) Enable(profession string, name string) (*response, error) {
-	// Todo 等apinto完成对接
-	return &response{
-		data: []byte("implementing"),
-		code: http.StatusNotImplemented,
-	}, nil
-}
-
-func (a *adminClient) Patch(profession string, name string, body []byte) (*response, error) {
+func (a *adminClient) Patch(profession string, name string, body []byte) ([]byte, int, error) {
 	// Todo 等apinto完成对接
 	url := fmt.Sprintf("%s/%s/%s", a.baseUrl, profession, name)
 	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(body))
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	resp, err := a.do(req)
+	return a.do(req)
+}
+func (a *adminClient) PatchPath(profession string, name string, path string, body []byte) ([]byte, int, error) {
+	// Todo 等apinto完成对接
+	url := fmt.Sprintf("%s/%s/%s/%s", a.baseUrl, profession, name, path)
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(body))
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	data, err := readBody(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	return &response{
-		data: data,
-		code: resp.StatusCode,
-	}, nil
+	return a.do(req)
 }
 
-func (a *adminClient) Render(profession string, driver string) (interface{}, error) {
+func (a *adminClient) Render(profession string, driver string) ([]byte, int, error) {
 	url := fmt.Sprintf("%s/%s/_render/%s", a.baseUrl, profession, driver)
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	resp, err := a.do(req)
-	if err != nil {
-		return nil, err
-	}
-	data, err := readBody(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	return data, nil
+	return a.do(req)
 }

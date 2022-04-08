@@ -1,6 +1,7 @@
 package apinto
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/eolinker/eosc/log"
 	"io"
@@ -8,21 +9,38 @@ import (
 	"net/http"
 )
 
-type response struct {
-	data []byte
-	code int
+type Response struct {
+	Data map[string]interface{} `json:"data"`
+	Code int                    `json:"code"`
+	Msg  string                 `json:"msg"`
 }
 
-func writeResult(w http.ResponseWriter, status int, data []byte) {
-	w.WriteHeader(status)
-	if len(data) == 0 {
-		w.Write([]byte("{}"))
+func WriteResult(w http.ResponseWriter, status int, data []byte) {
+	var err error
+	res := &Response{
+		Code: status,
+	}
+	if status != http.StatusOK {
+		res.Msg = string(data)
+	} else {
+		err = json.Unmarshal(data, &res.Data)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+		}
+	}
+	d, err := json.Marshal(res)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
 		return
 	}
-	w.Write(data)
+	w.WriteHeader(http.StatusOK)
+	w.Write(d)
 }
 
-func readBody(r io.ReadCloser) ([]byte, error) {
+func ReadBody(r io.ReadCloser) ([]byte, error) {
 	defer func() {
 		if err := r.Close(); err != nil {
 			log.Errorf("failed to close body, err: %s", err.Error())

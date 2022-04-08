@@ -1,15 +1,20 @@
 package apinto
 
+type IAdmin interface {
+	NodeAddr() string
+	UpdateNodes(nodes []string) string
+}
+
 type IClient interface {
-	List(profession string) (*response, error)
-	Get(profession string, name string) (*response, error)
-	Create(profession string, data []byte) (*response, error)
-	Delete(profession string, name string) (*response, error)
-	Update(profession string, name string, data []byte) (*response, error)
-	Patch(profession string, name string, body []byte) (*response, error)
-	Enable(profession string, name string) (*response, error)
+	List(profession string) (data []byte, code int, err error)
+	Get(profession string, name string) (data []byte, code int, err error)
+	Create(profession string, body []byte) (data []byte, code int, err error)
+	Delete(profession string, name string) (data []byte, code int, err error)
+	Update(profession string, name string, body []byte) (data []byte, code int, err error)
+	Patch(profession string, name string, body []byte) (data []byte, code int, err error)
+	PatchPath(profession string, name string, path string, body []byte) (data []byte, code int, err error)
 }
 
 type IRender interface {
-	Render(profession string, driver string) (interface{}, error)
+	Render(profession string, driver string) (data []byte, code int, err error)
 }
