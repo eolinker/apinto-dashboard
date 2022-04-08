@@ -7,19 +7,26 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"sync"
 )
 
+var pool = sync.Pool{
+	New: func() interface{} {
+		return &Response{}
+	},
+}
+
 type Response struct {
-	Data map[string]interface{} `json:"data"`
-	Code int                    `json:"code"`
-	Msg  string                 `json:"msg"`
+	Data interface{} `json:"data"`
+	Code int         `json:"code"`
+	Msg  string      `json:"msg"`
 }
 
 func WriteResult(w http.ResponseWriter, status int, data []byte) {
 	var err error
-	res := &Response{
-		Code: status,
-	}
+	res := pool.Get().(*Response)
+	defer pool.Put(res)
+	res.Code = status
 	if status != http.StatusOK {
 		res.Msg = string(data)
 	} else {
