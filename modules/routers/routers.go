@@ -11,13 +11,19 @@ import (
 
 type Routers struct {
 	*professions.Profession
+	header *professions.ListHeader
 }
 
 func (p *Routers) Lookup(r *http.Request) (view string, data interface{}, has bool) {
 	name, has := p.ModuleViewFinder.Lookup(r)
 	if has {
+		switch name {
+		case "router_list":
+			return name, p.header, true
+		}
 		return name, nil, true
 	}
+
 	return "", nil, false
 }
 
@@ -31,9 +37,18 @@ func NewRouters() *Routers {
 		"create": "router_create",
 		"edit":   "router_edit",
 	}
-	professionsHandler := professions.NewProfession("routers", "router", nil, nil, apinto_dashboard.NewViewModuleEmpty("/routers/", views, "list"))
+	professionsHandler := professions.NewProfession("routers", "router",
+		nil, nil,
+		apinto_dashboard.NewViewModuleEmpty("/routers/", views, "list"))
 	r := &Routers{
 		Profession: professionsHandler,
+		header: &professions.ListHeader{
+			Title: map[apinto_dashboard.ZoneName][]string{
+				apinto_dashboard.ZhCn: {"路由名", "驱动", "域名", "端口", "服务", "状态", "创建时间", "更新时间"},
+				apinto_dashboard.EnUs: {"Name", "Driver", "host", "listen", "service", "status", "创建时间", "更新时间"},
+			},
+			Fields: []string{"name", "driver", "host", "list", "service", "status", "create", "update"},
+		},
 	}
 	r.expandRouter()
 	return r
