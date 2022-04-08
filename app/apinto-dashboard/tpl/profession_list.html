@@ -1,7 +1,45 @@
-{{ block "content" .}}
-
+{{- block "header" . -}}
+<link href="/css/bootstrap-table.min.css" rel="stylesheet"  rel="stylesheet">
+{{- end -}}
+{{- block "content" .}}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">{{.name}}</h1>
 </div>
+<table
+        id="1"
+        data-toggle="1"
+        data-flat="true"
+        data-search="true"
+        data-url="https://live.bootstrap-table.com/json/data3.json">
+    <thead>
+    <tr>
+        <th data-field="github.name" data-sortable="true">Name</th>
+        <th data-field="github.count.stargazers" data-sortable="true">Stargazers</th>
+        <th data-field="github.count.forks" data-sortable="true">Forks</th>
+        <th data-field="github.description" data-sortable="true">Description</th>
+    </tr>
+    </thead>
+</table>
+<table
+        id="table"
+        data-toggle="table"
+        data-flat="true"
+        data-search="true"
+        data-url="/api/{{.name}}">
 
-{{end}}
+
+    <caption>List of {{.name}}</caption>
+    <thead>
+    <tr>
+        {{- range $i,$t := (index .data.Title .zone)}}
+        <th data-field="data.{{index $.data.Fields $i}}" data-sortable="true">{{ $t}}</th>
+        {{- end }}
+    </tr>
+    </thead>
+
+</table>
+{{- end -}}
+{{- block "script" . -}}
+<script src="/js/bootstrap-table-locale-all.min.js"></script>
+<script src="/js/bootstrap-table.min.js"></script>
+{{- end -}}
