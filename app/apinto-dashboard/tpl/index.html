@@ -6,10 +6,17 @@
     <meta name="description" content="">
     <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
     <meta name="generator" content="Hugo 0.88.1">
-    {{block "title" .}}{{ if .module}}{{if eq (index .module.I18nName .zone) ""}}
-    <title>{{.module.Name}}</title>{{else}}
-    <title>{{index .module.I18nName .zone}}</title>{{end}}{{else}}<title>{{.name}}</title>{{end}}
-    {{end}}
+    {{- block "title" . }}
+        {{- if .module }}
+            {{- if eq (index .module.I18nName .zone) "" }}
+    <title>{{.module.Name}}</title>
+            {{- else}}
+    <title>{{index .module.I18nName .zone}}</title>
+        {{- end}}
+        {{- else }}
+    <title>{{.name}}</title>
+        {{- end}}
+    {{- end -}}
     <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <style>
@@ -30,6 +37,8 @@
 
     <!-- Custom styles for this template -->
     <link href="/css/dashboard.css" rel="stylesheet">
+    {{- block "header" .}}
+    {{- end}}
 </head>
 <body>
 
@@ -91,6 +100,8 @@
 
     </div>
 </div>
+
+<script src="/js/jquery-3.0.0.slim.min.js"></script>
 <script src="/js/bootstrap.min.js"></script>
 <!--<script src="dashboard.js"></script>-->
 {{ block "script" .}}{{end}}
