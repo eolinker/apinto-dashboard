@@ -74,35 +74,36 @@
     <!-- 这里显示搜索操作-->
     {{end}}
 </header>
-
 <div class="container-fluid">
     <div class="row">
         <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
-            <div class="position-sticky pt-3">
+            <div class="sidebar-sticky pt-3">
                 {{block "left" .}}
-
                 <ul class="nav flex-column">
-                    {{range $index,$m:=.modules}}<li class="nav-item">{{ if eq $m.Name $.name}}
-                    <a href="{{$m.Path}}" class="nav-link active" aria-current="page"><svg class="bi me-2" width="16" height="16"><use xlink:href="#{{$m.Name}}"/></svg>{{index $m.I18nName $.zone}}</a>{{else}}
-                    <a href="{{$m.Path}}" class="nav-link "><svg class="bi me-2" width="16" height="16"><use xlink:href="#{{$m.Name}}"/></svg>{{index $m.I18nName $.zone}}</a>{{end}}
-                </li>{{end}}
+                    {{- range $index,$m:=.modules -}}
+                    <li class="nav-item">
+                        {{- if eq $m.Name $.name -}}
+                        <a href="{{$m.Path}}" class="nav-link active" aria-current="page"><svg class="bi me-2" width="16" height="16"><use xlink:href="#{{$m.Name}}"/></svg>{{index $m.I18nName $.zone}}</a>
+                        {{- else -}}
+                        <a href="{{$m.Path}}" class="nav-link "><svg class="bi me-2" width="16" height="16"><use xlink:href="#{{$m.Name}}"/></svg>{{index $m.I18nName $.zone}}</a>
+                        {{- end }}
+                </li>
+                    {{- end -}}
                 </ul>
-                {{end}}
+                {{- end -}}
             </div>
         </nav>
 
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
             {{ block "content" .}}
 
             {{end}}
         </main>
-
-
     </div>
 </div>
 
-<script src="/js/jquery-3.0.0.slim.min.js"></script>
-<script src="/js/bootstrap.min.js"></script>
+<script src="/js/jquery-3.0.0.js"></script>
+<script src="/js/bootstrap.js"></script>
 <!--<script src="dashboard.js"></script>-->
 {{ block "script" .}}{{end}}
 </body>
