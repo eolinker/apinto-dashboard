@@ -8,16 +8,26 @@ import (
 	"net/http"
 )
 
+type ListHeader struct {
+	Title  map[apinto_dashboard.ZoneName][]string
+	Fields []string
+}
 type Profession struct {
-	views          *apinto_dashboard.ModuleViewFinder
+	*apinto_dashboard.ModuleViewFinder
+	*httprouter.Router
 	ModuleName     string
 	ProfessionName string
-	Router         *httprouter.Router
+
+	header *ListHeader
 }
 
 func (p *Profession) Lookup(r *http.Request) (view string, data interface{}, has bool) {
-	name, has := p.views.Lookup(r)
+	name, has := p.ModuleViewFinder.Lookup(r)
 	if has {
+		switch name {
+		case "profession_list":
+			return name, p.header, true
+		}
 		return name, nil, true
 	}
 	return "", nil, false
@@ -27,16 +37,24 @@ func (p *Profession) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	p.Router.ServeHTTP(w, req)
 }
 
-func NewProfession(name string, profession string) *Profession {
-	views := map[string]string{
-		"list":   "profession_list",
-		"create": "profession_create",
-		"edit":   "profession_edit",
+func NewProfession(name string, profession string, titles map[apinto_dashboard.ZoneName][]string, fields []string, viewFinder *apinto_dashboard.ModuleViewFinder) *Profession {
+
+	if viewFinder == nil {
+		views := map[string]string{
+			"list":   "profession_list",
+			"create": "profession_create",
+			"edit":   "profession_edit",
+		}
+		viewFinder = apinto_dashboard.NewViewModuleEmpty(fmt.Sprint("/", name, "/"), views, "list")
 	}
 	p := &Profession{
-		ModuleName:     name,
-		ProfessionName: profession,
-		views:          apinto_dashboard.NewViewModuleEmpty(fmt.Sprint("/", name, "/"), views, "list"),
+		ModuleName:       name,
+		ProfessionName:   profession,
+		ModuleViewFinder: viewFinder,
+		header: &ListHeader{
+			Title:  titles,
+			Fields: fields,
+		},
 	}
 	p.createRouter()
 	return p

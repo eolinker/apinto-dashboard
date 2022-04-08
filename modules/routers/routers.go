@@ -11,11 +11,10 @@ import (
 
 type Routers struct {
 	*professions.Profession
-	views *apinto_dashboard.ModuleViewFinder
 }
 
 func (p *Routers) Lookup(r *http.Request) (view string, data interface{}, has bool) {
-	name, has := p.views.Lookup(r)
+	name, has := p.ModuleViewFinder.Lookup(r)
 	if has {
 		return name, nil, true
 	}
@@ -32,9 +31,9 @@ func NewRouters() *Routers {
 		"create": "router_create",
 		"edit":   "router_edit",
 	}
+	professionsHandler := professions.NewProfession("routers", "router", nil, nil, apinto_dashboard.NewViewModuleEmpty("/routers/", views, "list"))
 	r := &Routers{
-		Profession: professions.NewProfession("routers", "router"),
-		views:      apinto_dashboard.NewViewModuleEmpty("/routers/", views, "list"),
+		Profession: professionsHandler,
 	}
 	r.expandRouter()
 	return r
