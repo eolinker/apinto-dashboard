@@ -14,7 +14,7 @@ type ProfessionConfigItem struct {
 	I18nNames  map[string]string   `yaml:"i18n_name"`
 	Titles     map[string][]string `yaml:"titles"`
 	Fields     []string            `yaml:"fields"`
-	Profession string              `yaml:"professions"`
+	Profession string              `yaml:"profession"`
 }
 
 type Config struct {
