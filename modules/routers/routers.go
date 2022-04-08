@@ -1,12 +1,16 @@
 package routers
 
 import (
+	"fmt"
 	apinto_dashboard "github.com/eolinker/apinto-dashboard"
 	"github.com/eolinker/apinto-dashboard/internal/apinto"
+	"github.com/eolinker/apinto-dashboard/modules/professions"
+	"github.com/julienschmidt/httprouter"
 	"net/http"
 )
 
 type Routers struct {
+	*professions.Profession
 	views *apinto_dashboard.ModuleViewFinder
 }
 
@@ -19,7 +23,7 @@ func (p *Routers) Lookup(r *http.Request) (view string, data interface{}, has bo
 }
 
 func (p *Routers) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	apinto.Handler().ServeHTTP(w, req)
+	p.Router.ServeHTTP(w, req)
 }
 
 func NewRouters() *Routers {
@@ -28,8 +32,44 @@ func NewRouters() *Routers {
 		"create": "router_create",
 		"edit":   "router_edit",
 	}
-
-	return &Routers{
-		views: apinto_dashboard.NewViewModuleEmpty("/routers/", views, "list"),
+	r := &Routers{
+		Profession: professions.NewProfession("routers", "router"),
+		views:      apinto_dashboard.NewViewModuleEmpty("/routers/", views, "list"),
 	}
+	r.expandRouter()
+	return r
+}
+
+func (p *Routers) expandRouter() {
+	p.Router.PATCH(fmt.Sprintf("/api/%s/:name", p.ModuleName), func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+		name := params.ByName("name")
+		data, err := apinto.ReadBody(r.Body)
+		if err != nil {
+			apinto.WriteResult(w, 500, []byte(err.Error()))
+			return
+		}
+		data, code, err := apinto.Client().Patch(p.ProfessionName, name, data)
+		if err != nil {
+			apinto.WriteResult(w, 500, []byte(err.Error()))
+			return
+		}
+		apinto.WriteResult(w, code, data)
+	})
+
+	// PatchPath
+	p.Router.PATCH(fmt.Sprintf("/api/%s/:name/*path", p.ModuleName), func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+		name := params.ByName("name")
+		path := params.ByName("path")
+		data, err := apinto.ReadBody(r.Body)
+		if err != nil {
+			apinto.WriteResult(w, 500, []byte(err.Error()))
+			return
+		}
+		data, code, err := apinto.Client().PatchPath(p.ProfessionName, name, path, data)
+		if err != nil {
+			apinto.WriteResult(w, 500, []byte(err.Error()))
+			return
+		}
+		apinto.WriteResult(w, code, data)
+	})
 }
