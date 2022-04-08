@@ -10,12 +10,13 @@
         id="table"
         data-toggle="table"
         data-flat="true"
-        data-url="/api/{{.name}}">
+        data-url="/api/{{.name}}/"
+        data-response-handler="responseHandler">
     <caption>List of {{.name}}</caption>
     <thead>
     <tr>
         {{- range $i,$t := (index .data.Title .zone)}}
-        <th data-field="data.{{index $.data.Fields $i}}" data-sortable="true">{{ $t}}</th>
+        <th data-field="{{index $.data.Fields $i}}" data-sortable="true">{{ $t}}</th>
         {{- end }}
         <th data-field="operate" data-formatter="operateFormatter" data-events="operateEvents">操作</th>
     </tr>
@@ -27,17 +28,20 @@
 <script src="/js/bootstrap-table.min.js"></script>
 <script>
     var $table = $('#table')
-
+    function responseHandler(res) {
+        return res.data
+    }
     function operateFormatter(value, row, index) {
         return [
-            '<a class="like" href="javascript:void(0)" title="Like">',
-            '<i class="fa fa-heart"></i>',
+            '<a class="like" href="/{{.name}}/edit" title="Like">',
+            '编辑',
             '</a>  ',
             '<a class="remove" href="javascript:void(0)" title="Remove">',
-            '<i class="fa fa-trash"></i>',
+            '删除',
             '</a>'
         ].join('')
     }
+
 
     window.operateEvents = {
         'click .like': function (e, value, row, index) {

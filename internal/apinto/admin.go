@@ -27,8 +27,6 @@ type IClient interface {
 type admin struct {
 	lock   sync.RWMutex
 	nodes  []string
-	size   int
-	dead   map[string]int
 	client *http.Client
 }
 
@@ -48,7 +46,6 @@ func (a *admin) GetNode() string {
 func (a *admin) updateNodes(nodes []string) error {
 	a.lock.Lock()
 	a.nodes = nodes
-	a.size = len(nodes)
 	a.lock.Unlock()
 	return nil
 }
@@ -64,13 +61,13 @@ func (a *admin) addNode(node string) error {
 	}
 	a.lock.Lock()
 	a.nodes = append(a.nodes, node)
-	a.size++
+
 	a.lock.Unlock()
 	return nil
 }
 
 func (a *admin) ping(node string) error {
-	url := fmt.Sprintf("%s/profession", node)
+	url := fmt.Sprintf("%s/", node)
 	resp, err := http.Get(url)
 	if err != nil || resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("node addr %s can not be connected", node)
