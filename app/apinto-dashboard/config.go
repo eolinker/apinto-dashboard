@@ -21,6 +21,7 @@ type Config struct {
 	Zone        string                  `yaml:"zone"`
 	Default     string                  `yaml:"default"`
 	Professions []*ProfessionConfigItem `yaml:"professions"`
+	Apinto      []string                `yaml:"apinto"`
 }
 
 func ReadConfig(file string) (*Config, error) {
