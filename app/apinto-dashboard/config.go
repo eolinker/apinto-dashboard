@@ -14,13 +14,14 @@ type ProfessionConfigItem struct {
 	I18nNames  map[string]string   `yaml:"i18n_name"`
 	Titles     map[string][]string `yaml:"titles"`
 	Fields     []string            `yaml:"fields"`
-	Profession string              `yaml:"professions"`
+	Profession string              `yaml:"profession"`
 }
 
 type Config struct {
 	Zone        string                  `yaml:"zone"`
 	Default     string                  `yaml:"default"`
 	Professions []*ProfessionConfigItem `yaml:"professions"`
+	Apinto      []string                `yaml:"apinto"`
 }
 
 func ReadConfig(file string) (*Config, error) {
