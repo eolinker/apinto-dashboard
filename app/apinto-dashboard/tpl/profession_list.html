@@ -16,7 +16,7 @@
     <thead>
     <tr>
         {{- range $i,$t := (index .data.Title .zone)}}
-        <th data-field="{{index $.data.Fields $i}}" data-sortable="true">{{ $t}}</th>
+        <th data-field="{{index $.data.Fields $i}}">{{ $t}}</th>
         {{- end }}
         <th data-field="operate" data-formatter="operateFormatter" data-events="operateEvents">操作</th>
     </tr>
