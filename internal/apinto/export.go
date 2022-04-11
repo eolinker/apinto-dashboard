@@ -24,7 +24,7 @@ func (a *admin) List(profession string) ([]byte, int, error) {
 }
 
 func (a *admin) Get(profession string, name string) ([]byte, int, error) {
-	url := fmt.Sprintf("%s/%s/%s", a.GetNode(), profession, name)
+	url := fmt.Sprintf("/api/%s/%s/%s", a.GetNode(), profession, name)
 	return a.do(http.MethodGet, url, nil)
 }
 
