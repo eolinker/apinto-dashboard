@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	apinto "github.com/eolinker/apinto-dashboard"
+	apintoClient "github.com/eolinker/apinto-dashboard/internal/apinto"
 	"github.com/eolinker/apinto-dashboard/internal/security"
 	activity_log "github.com/eolinker/apinto-dashboard/modules/activity-log"
 	"github.com/eolinker/apinto-dashboard/modules/extenders"
@@ -23,7 +24,7 @@ func main() {
 		log.Println("[Error]", err)
 		return
 	}
-
+	apintoClient.Init(cf.Apinto)
 	config := new(apinto.Config)
 
 	config.DefaultZone = apinto.ZoneName(strings.ToLower(cf.Zone))

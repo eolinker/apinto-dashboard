@@ -1,5 +1,7 @@
 zone: zh_cn
 default: upstream
+apinto:
+  - "http://172.18.189.43:9400"
 professions:
 
   - name: services
