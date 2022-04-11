@@ -29,7 +29,13 @@
 <script>
     var $table = $('#table')
     function responseHandler(res) {
-        return res.data
+        let d = res.data
+        d.forEach((item,index)=>{
+            item["service"] = item["target"]
+
+        })
+
+        return d
     }
     function operateFormatter(value, row, index) {
         return [

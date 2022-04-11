@@ -11,7 +11,7 @@ var (
 
 func init() {
 	// just for test
-	client = NewAdmin([]string{"http://172.18.189.43:31094/api", "http://127.0.0.1:9400/api"})
+	client = NewAdmin([]string{"http://172.18.189.43:9400/api", "http://127.0.0.1:9400/api"})
 }
 
 func Client() IClient {
