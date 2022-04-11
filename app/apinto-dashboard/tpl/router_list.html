@@ -4,6 +4,7 @@
 {{ block "content" .data}}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">路由列表</h1>
+    <button type="button" id="create_btn"  class="btn btn-primary">Create</button>
 </div>
 
 <table
@@ -27,19 +28,21 @@
 {{- block "script" . -}}
 <script src="/js/bootstrap-table.min.js"></script>
 <script>
-    var $table = $('#table')
+    let $table = $('#table')
+    $("#create_btn").click(function () {
+        window.location.href="/{{.name}}/create"
+    })
     function responseHandler(res) {
         let d = res.data
         d.forEach((item,index)=>{
-            item["service"] = item["target"]
+            item["service"] = item["target"].substring(0, item["target"].indexOf("@"))
 
         })
-
         return d
     }
     function operateFormatter(value, row, index) {
         return [
-            '<a class="like" href="/{{.name}}/edit" title="Like">',
+            '<a class="edit" href="/{{.name}}/edit" title="Like">',
             '编辑',
             '</a>  ',
             '<a class="remove" href="javascript:void(0)" title="Remove">',
@@ -47,11 +50,7 @@
             '</a>'
         ].join('')
     }
-
     window.operateEvents = {
-        'click .like': function (e, value, row, index) {
-            alert('You click like action, row: ' + JSON.stringify(row))
-        },
         'click .remove': function (e, value, row, index) {
             $table.bootstrapTable('remove', {
                 field: 'id',
@@ -59,5 +58,6 @@
             })
         }
     }
+
 </script>
 {{- end -}}
