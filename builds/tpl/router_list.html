@@ -52,11 +52,24 @@
     }
     window.operateEvents = {
         'click .remove': function (e, value, row, index) {
-            confirm("删除{{index .module.I18nName .zone}}", "是否确认删除该{{index .module.I18nName .zone}}?", function (){
-                $table.bootstrapTable('remove', {
-                    field: 'id',
-                    values: [row.id]
+            let msg ="确认删除 "+row.name+" {{index .module.I18nName .zone}}?"
+            common.confirm("删除{{index .module.I18nName .zone}}", msg, function (){
+                http.delete( "/api/{{.name}}/"+row.name, null, function (res) {
+                    if(res.code === 200){
+                        common.message("删除成功", "danger")
+                        $table.bootstrapTable('remove', {
+                            field: 'id',
+                            values: [row.id]
+                        })
+                        return
+                    }
+                    common.message(res['msg'], "danger")
+
+                }, function (res) {
+                    common.message(res, "danger")
+                    return
                 })
+
             }, null)
         }
     }
