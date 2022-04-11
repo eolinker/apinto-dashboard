@@ -25,6 +25,8 @@
     </thead>
 
 </table>
+
+
 {{- end -}}
 {{- block "script" . -}}
 <script src="/js/bootstrap-table.min.js"></script>
@@ -32,28 +34,31 @@
     $("#create_btn").click(function () {
         window.location.href="/{{.name}}/create"
     })
+
     let $table = $('#table')
     function responseHandler(res) {
         return res.data
     }
+
     function operateFormatter(value, row, index) {
         return [
             '<a class="edit" href="/{{.name}}/edit" title="Like">',
             '编辑',
             '</a>  ',
-            '<a class="remove" href="javascript:void(0)" title="Remove">',
+            '<a class="remove" href="javascript:void(0)" data-toggle="modal" title="Remove">',
             '删除',
             '</a>'
         ].join('')
     }
 
-
     window.operateEvents = {
         'click .remove': function (e, value, row, index) {
-            $table.bootstrapTable('remove', {
-                field: 'id',
-                values: [row.id]
-            })
+            confirm("删除{{index .module.I18nName .zone}}", "是否确认删除该{{index .module.I18nName .zone}}?", function (){
+                $table.bootstrapTable('remove', {
+                    field: 'id',
+                    values: [row.id]
+                })
+            }, null)
         }
     }
 </script>
