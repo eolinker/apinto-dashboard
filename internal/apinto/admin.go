@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/eolinker/eosc/log"
 	"net/http"
 	"strings"
 	"sync"
@@ -67,7 +68,7 @@ func (a *admin) addNode(node string) error {
 }
 
 func (a *admin) ping(node string) error {
-	url := fmt.Sprintf("%s/", node)
+	url := fmt.Sprintf("%s/api/", node)
 	resp, err := http.Get(url)
 	if err != nil || resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("node addr %s can not be connected", node)
@@ -78,15 +79,19 @@ func (a *admin) ping(node string) error {
 func (a *admin) do(method string, url string, body []byte) ([]byte, int, error) {
 	req, err := a.newRequest(method, url, body)
 	if err != nil {
+		log.Error("new request:", err)
 		return nil, 500, err
 	}
 	req.Header.Add("Content-Type", "application/json")
 	resp, err := a.client.Do(req)
 	if err != nil {
+		log.Error("do request:", err)
 		return nil, 500, err
 	}
 	data, err := ReadBody(resp.Body)
 	if err != nil {
+		log.Error("read body:", err)
+
 		return nil, 500, err
 	}
 	return data, resp.StatusCode, nil
