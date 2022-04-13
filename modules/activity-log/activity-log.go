@@ -5,6 +5,7 @@ import (
 	"fmt"
 	apinto_dashboard "github.com/eolinker/apinto-dashboard"
 	"github.com/eolinker/apinto-dashboard/internal/apinto"
+	"github.com/eolinker/apinto-dashboard/modules/activity-log/db"
 	"github.com/eolinker/apinto-dashboard/modules/professions"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
@@ -19,7 +20,12 @@ type ActivityLog struct {
 	header *professions.ListHeader
 }
 
-func NewActivityLog(name string) *ActivityLog {
+func NewActivityLog(name string) (*ActivityLog, error) {
+	err := db.InitDB()
+	if err != nil {
+		return nil, err
+	}
+
 	views := map[string]string{
 		"list": "activity_log",
 	}
@@ -29,15 +35,15 @@ func NewActivityLog(name string) *ActivityLog {
 		ModuleName:       name,
 		header: &professions.ListHeader{
 			Title: map[apinto_dashboard.ZoneName][]string{
-				apinto_dashboard.ZhCn: {"序号", "用户", "操作", "内容", "操作时间"},
-				apinto_dashboard.EnUs: {"Order", "User", "Operation", "Content", "Time"},
+				apinto_dashboard.ZhCn: {"操作时间", "用户", "内容"},
+				apinto_dashboard.EnUs: {"Time", "User", "Content"},
 			},
-			Fields: []string{"order", "user", "operation", "content", "time"},
+			Fields: []string{"time", "user", "content"},
 		},
 	}
 	activityLog.createRouter()
 
-	return activityLog
+	return activityLog, nil
 }
 
 func (a *ActivityLog) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -70,11 +76,9 @@ func (a *ActivityLog) createRouter() {
 		//}
 		//apinto.WriteResult(w, code, data)
 		fakeData := []map[string]interface{}{{
-			"order":     1,
-			"user":      "admin",
-			"operation": "Create",
-			"content":   "{\"name\":\"demo\",\"driver\":\"http\",\"desc\":\"http\",\"listen\":8080,\"rules\":[{\"location\":\"/Web/Test/params/print\"}],\"target\":\"demo@service\"}",
-			"time":      time.Now().String(),
+			"user":    "admin",
+			"content": "操作:创建 操作对象:demoRouter",
+			"time":    time.Now().Format("2006-01-02 15:04:05"),
 		}}
 		data, _ := json.Marshal(fakeData)
 
