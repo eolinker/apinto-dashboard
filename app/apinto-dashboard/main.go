@@ -66,7 +66,12 @@ func main() {
 			apinto.EnUs: "Global Plugins",
 		},
 	})
-	activityLogModule := activity_log.NewActivityLog("activity-log")
+	activityLogModule, err := activity_log.NewActivityLog("activity-log")
+	if err != nil {
+		log.Println("[Error]", err)
+		return
+	}
+
 	config.Modules = append(config.Modules, &apinto.Module{
 		Path:    "/activity-log",
 		Handler: activityLogModule,
