@@ -15,14 +15,17 @@ func NewLogModule(db *sql.DB) (err error) {
 	return
 }
 
-func GetLogList(page, pageSize int) []byte {
-	list, total := activityLogModule.GetLogList(page, pageSize)
+func GetLogList(page, pageSize int) ([]byte, error) {
+	list, total, err := activityLogModule.GetLogList(page, pageSize)
+	if err != nil {
+		return nil, err
+	}
 	m := make(map[string]interface{})
 	m["list"] = list
 	m["total_num"] = total
 
 	data, _ := json.Marshal(m)
-	return data
+	return data, nil
 }
 
 func InsertLog(user, content, operation, objectName string, args []*dao.Arg) error {
