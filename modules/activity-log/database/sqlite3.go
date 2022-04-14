@@ -1,8 +1,8 @@
-package db
+package database
 
 import (
 	"database/sql"
-	"github.com/eolinker/apinto-dashboard/modules/activity-log/db/module"
+	"github.com/eolinker/apinto-dashboard/modules/activity-log/database/module"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -11,6 +11,8 @@ func InitDB() error {
 	if err != nil {
 		return err
 	}
+
 	err = module.NewLogModule(db)
+
 	return err
 }
