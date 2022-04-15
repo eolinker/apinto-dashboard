@@ -11,13 +11,12 @@ type activityLogDao struct {
 	db *sql.DB
 }
 
-func (a *activityLogDao) GetLogList(page, pageSize int) ([]*LogEntity, int64, error) {
-	list := make([]*LogEntity, 0, pageSize)
+func (a *activityLogDao) GetLogList(offset, limit int) ([]*LogEntity, int64, error) {
+	list := make([]*LogEntity, 0, limit)
 
 	db := a.db
 
 	var totalNum int64
-	offset := (page - 1) * pageSize
 
 	//查询符合要求的总行数
 	err := db.QueryRow("select count(id) from `activityLog`").Scan(&totalNum)
@@ -28,7 +27,7 @@ func (a *activityLogDao) GetLogList(page, pageSize int) ([]*LogEntity, int64, er
 		return list, 0, fmt.Errorf("GetLogList.GetTotalRows Fail. %s", err)
 	}
 
-	rows, err := db.Query("select `user`,`operation`,`object`,`content`,`args`,`timestamp` from `activityLog` ORDER BY `timestamp` DESC limit ? offset ?", pageSize, offset)
+	rows, err := db.Query("select `user`,`operation`,`object`,`content`,`args`,`timestamp` from `activityLog` ORDER BY `timestamp` DESC limit ? offset ?", limit, offset)
 	if err != nil {
 		return list, 0, err
 	}

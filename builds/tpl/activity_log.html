@@ -1,5 +1,5 @@
 {{- block "header" . -}}
-<link href="/css/bootstrap-table.min.css" rel="stylesheet"  rel="stylesheet">
+<link href="/css/bootstrap-table.min.css" rel="stylesheet">
 {{- end -}}
 
 {{ block "content" .}}
@@ -7,19 +7,27 @@
     <h1 class="h2">操作日志</h1>
 </div>
 
-<table
+<table  class="table"
         id="table"
         data-toggle="table"
-        data-flat="true"
-        data-url="/api/{{.name}}/"
-        data-response-handler="responseHandler">
+        data-height="700"
+        data-response-handler="responseHandler"
+        data-pagination="true"
+        data-side-pagination="server"
+        data-total-field="total_num"
+        data-query-params="queryParams"
+        data-data-field="list"
+        data-page-size="20"
+        data-url="/api/{{.name}}/">
     <caption>List of {{.name}}</caption>
     <thead>
-    <tr>
+    <tr class="table-info">
         {{- range $i,$t := (index .data.Title .zone)}}
         <th data-field="{{index $.data.Fields $i}}">{{ $t}}</th>
         {{- end }}
+        <th data-field="args" data-formatter="operateFormatter" data-events="operateEvents">详情</th>
     </tr>
+
     </thead>
 
 </table>
@@ -27,10 +35,57 @@
 {{end}}
 
 {{- block "script" . -}}
+<script src="/js/jquery-3.0.0.js"></script>
+<script src="/umd/popper.min.js"></script>
 <script src="/js/bootstrap-table.min.js"></script>
 <script>
     function responseHandler(res) {
-        return res.data.list
+        return res.data
+    }
+
+    function queryParams(params) {
+        params.asdasd =
+        params.page = 1
+        params.pageSize = 10
+        return params
+    }
+
+    function operateFormatter(value, row, index) {
+        return [
+            '<button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#myModal'+index+'" href="#" title="details">',
+            '详情',
+            '</button>  ',
+            '    <div class="modal fade" id="myModal'+index+'">\n' +
+            '        <div class="modal-dialog modal-lg">\n' +
+            '            <div class="modal-content">\n' +
+            '                <!-- 模态框头部 -->\n' +
+            '                <div class="modal-header">\n' +
+            '                    <h4 class="modal-title">模态框头部</h4>\n' +
+            '                    <button type="button" class="close" data-dismiss="modal">&times;</button>\n' +
+            '                </div>\n' +
+            '                <!-- 模态框主体 -->\n' +
+            '                <div class="modal-body">\n' +
+            '                    模态框内容..\n' +index+row+
+            '                </div>\n' +
+            '                <!-- 模态框底部 -->\n' +
+            '                <div class="modal-footer">\n' +
+            '                    <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>\n' +
+            '                </div>\n' +
+            '            </div>\n' +
+            '        </div>\n' +
+            '    </div>'
+        ].join('')
+
+    }
+
+
+    window.operateEvents = {
+        'click .remove': function (e, value, row, index) {
+            $table.bootstrapTable('remove', {
+                field: 'id',
+                values: [row.id]
+            })
+        }
     }
 </script>
 {{- end -}}
