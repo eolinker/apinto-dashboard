@@ -15,7 +15,8 @@ let http = {
         $.ajax({
             url: url,
             type: type,
-            data: data,
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify(data),
             dataType: 'json',
             success: function (res) {
                 if (success) {

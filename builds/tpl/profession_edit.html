@@ -3,3 +3,9 @@
     <h1 class="h2">编辑{{index .module.I18nName .zone}}</h1>
 </div>
 {{end}}
+{{- block "script" . -}}
+<script>
+
+    console.log("{{.data}}")
+</script>
+{{- end -}}
