@@ -16,6 +16,7 @@ let http = {
             url: url,
             type: type,
             data: data,
+            dataType: 'json',
             success: function (res) {
                 if (success) {
                     success(res)
