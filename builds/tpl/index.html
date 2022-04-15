@@ -83,9 +83,9 @@
                     {{- range $index,$m:=.modules -}}
                     <li class="nav-item">
                         {{- if eq $m.Name $.name -}}
-                        <a href="{{$m.Path}}" class="nav-link active" aria-current="page"><svg class="bi me-2" width="16" height="16"><use xlink:href="#{{$m.Name}}"/></svg>{{index $m.I18nName $.zone}}</a>
+                        <a href="{{$m.Path}}" class="nav-link active" aria-current="page"><svg class="bi me-2" width="16" height="16"><use xlink:href="#{{$m.Name}}"/></svg>  {{index $m.I18nName $.zone}}</a>
                         {{- else -}}
-                        <a href="{{$m.Path}}" class="nav-link "><svg class="bi me-2" width="16" height="16"><use xlink:href="#{{$m.Name}}"/></svg>{{index $m.I18nName $.zone}}</a>
+                        <a href="{{$m.Path}}" class="nav-link "><svg class="bi me-2" width="16" height="16"><use xlink:href="#{{$m.Name}}"/></svg>  {{index $m.I18nName $.zone}}</a>
                         {{- end }}
                     </li>
                     {{- end -}}

@@ -20,6 +20,9 @@ func (p *Routers) Lookup(r *http.Request) (view string, data interface{}, has bo
 		switch name {
 		case "router_list":
 			return name, p.header, true
+		case "router_edit":
+			routerName := r.URL.Query().Get("name")
+			return name, routerName, true
 		}
 		return name, nil, true
 	}
