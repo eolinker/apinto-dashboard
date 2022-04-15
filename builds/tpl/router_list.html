@@ -49,10 +49,52 @@
             '</a>  ',
             '<a class="remove" href="javascript:void(0)" title="Remove">',
             '删除',
-            '</a>'
+            '</a> ',
+            '<a class="status down" href="javascript:void(0)" title="Status">',
+            '下线',
+            '</a>',
         ].join('')
     }
     window.operateEvents = {
+        'click .status': function (e, value, row, index) {
+            let target = $(e.target)
+            let msg = ""
+            if(target.hasClass("up")){
+                msg = "确认发布该路由吗？"
+            }else{
+                msg = "确认下线该路由吗？"
+            }
+            common.confirm("路由状态变更", msg, function (){
+                http.patch("/api/{{.name}}/"+row.name, {"status":!row.status}, function (res) {
+                    if(res.code === 200){
+                        common.message("变更成功", "danger")
+                        if(target.hasClass("up")){
+                            target.removeClass("up")
+                            target.addClass("down")
+                            target.text("下线")
+                        }else{
+                            target.removeClass("down")
+                            target.addClass("up")
+                            target.text("发布")
+                        }
+                        return
+                    }
+                    if (res['msg']){
+                        common.message(res['msg'], "danger")
+                    }else {
+                        common.message("变更失败", "danger")
+                    }
+
+                }, function (res) {
+                    if (res['msg']){
+                        common.message(res['msg'], "danger")
+                    }else {
+                        common.message("变更失败", "danger")
+                    }
+                })
+            })
+
+        },
         'click .remove': function (e, value, row, index) {
             let msg ="确认删除 "+row.name+" {{index .module.I18nName .zone}}?"
             common.confirm("删除{{index .module.I18nName .zone}}", msg, function (){
@@ -65,11 +107,18 @@
                         })
                         return
                     }
-                    common.message(res['msg'], "danger")
+                    if (res['msg']){
+                        common.message(res['msg'], "danger")
+                    }else {
+                        common.message("删除失败", "danger")
+                    }
 
                 }, function (res) {
-                    common.message(res, "danger")
-                    return
+                    if (res['msg']){
+                        common.message(res['msg'], "danger")
+                    }else {
+                        common.message("删除失败", "danger")
+                    }
                 })
 
             }, null)
