@@ -27,6 +27,9 @@ func (p *Profession) Lookup(r *http.Request) (view string, data interface{}, has
 		switch name {
 		case "profession_list":
 			return name, p.header, true
+		case "profession_edit":
+			professionName := r.URL.Query().Get("name")
+			return name, professionName, true
 		}
 		return name, nil, true
 	}

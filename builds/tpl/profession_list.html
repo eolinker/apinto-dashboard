@@ -25,35 +25,62 @@
     </thead>
 
 </table>
+
+
 {{- end -}}
 {{- block "script" . -}}
 <script src="/js/bootstrap-table.min.js"></script>
 <script>
+
     $("#create_btn").click(function () {
         window.location.href="/{{.name}}/create"
     })
+
     let $table = $('#table')
     function responseHandler(res) {
         return res.data
     }
     function operateFormatter(value, row, index) {
         return [
-            '<a class="edit" href="/{{.name}}/edit" title="Like">',
+            '<a class="edit" href="/{{.name}}/edit?name=',
+            row.name,
+            '" title="edit">',
             '编辑',
             '</a>  ',
-            '<a class="remove" href="javascript:void(0)" title="Remove">',
+            '<a class="remove" href="javascript:void(0)" title="remove">',
             '删除',
             '</a>'
         ].join('')
     }
 
-
     window.operateEvents = {
         'click .remove': function (e, value, row, index) {
-            $table.bootstrapTable('remove', {
-                field: 'id',
-                values: [row.id]
-            })
+            let msg ="确认删除 "+row.name+" {{index .module.I18nName .zone}}?"
+            common.confirm("删除{{index .module.I18nName .zone}}", msg, function (){
+                http.delete( "/api/{{.name}}/"+row.name, null, function (res) {
+                    if(res.code === 200){
+                        common.message("删除成功", "danger")
+                        $table.bootstrapTable('remove', {
+                            field: 'id',
+                            values: [row.id]
+                        })
+                        return
+                    }
+                    if (res['msg']){
+                        common.message(res['msg'], "danger")
+                    }else {
+                        common.message("删除失败", "danger")
+                    }
+
+                }, function (res) {
+                    if (res['msg']){
+                        common.message(res['msg'], "danger")
+                    }else {
+                        common.message("删除失败", "danger")
+                    }
+                })
+
+            }, null)
         }
     }
 </script>
