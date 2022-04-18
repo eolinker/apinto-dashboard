@@ -67,14 +67,11 @@ func (a *ActivityLog) createRouter() {
 
 	// List
 	r.GET(fmt.Sprintf("/api/%s/", a.ModuleName), func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-		//TODO  从sqlit读取数据
+		//TODO  从sqlite读取数据
 		offsetStr := r.URL.Query().Get("offset")
 		limitStr := r.URL.Query().Get("limit")
 		offset, _ := strconv.Atoi(offsetStr)
 		limit, _ := strconv.Atoi(limitStr)
-		if offset == 0 {
-			offset = 1
-		}
 		if limit == 0 {
 			limit = 10
 		}

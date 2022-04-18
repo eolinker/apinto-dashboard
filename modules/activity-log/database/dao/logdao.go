@@ -83,18 +83,16 @@ func (a *activityLogDao) initTable() error {
 	const sqlStatement = "CREATE TABLE IF NOT EXISTS `activityLog` (\n `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,\n `user` VARCHAR(20),\n `operation` VARCHAR(20),\n `object` VARCHAR(20),\n `content` VARCHAR(255),\n `args` TEXT,\n `timestamp` INTEGER NOT NULL\n );\n CREATE INDEX IF NOT EXISTS `index_timestamp` ON `activityLog` (`timestamp`);\n"
 	_, err := db.Exec(sqlStatement)
 
-	//for i := 1; i <= 10; i++ {
-	//	err = a.InsertLog("admin", "创建", fmt.Sprintf("demoRouter_%d", i), "", []*Arg{{Key: "avc", Value: "123"}, {Key: "zzz", Value: 321}})
-	//	if err != nil {
-	//		return err
-	//	}
-	//	time.Sleep(time.Second * 1)
-	//	err = a.InsertLog("admin", "删除", fmt.Sprintf("demoRouter_%d", i), "删除", nil)
-	//	if err != nil {
-	//		return err
-	//	}
-	//	time.Sleep(time.Second * 1)
-	//}
+	for i := 1; i <= 10; i++ {
+		err = a.InsertLog("admin", "创建", fmt.Sprintf("demoRouter_%d", i), "创建demoRouter", []*Arg{{Key: "avc", Value: "123"}, {Key: "zzz", Value: 321}})
+		if err != nil {
+			return err
+		}
+		err = a.InsertLog("admin", "删除", fmt.Sprintf("demoRouter_%d", i), "删除", nil)
+		if err != nil {
+			return err
+		}
+	}
 	return err
 }
 
