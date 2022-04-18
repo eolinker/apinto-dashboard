@@ -1,5 +1,112 @@
+{{- block "header" . -}}
+<link href="/css/bootstrap-table.min.css" rel="stylesheet">
+{{- end -}}
+
 {{ block "content" .}}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">操作日志</h1>
 </div>
+
+<table  class="table"
+        id="table"
+        data-toggle="table"
+        data-response-handler="responseHandler"
+        data-pagination="true"
+        data-side-pagination="server"
+        data-total-field="total_num"
+        data-query-params="queryParams"
+        data-data-field="list"
+        data-page-list="[10,25,50,100]"
+        data-url="/api/{{.name}}/">
+    <caption>List of {{.name}}</caption>
+    <div style="margin: 20px;">
+        <input type="text" id="user" class="form-control" style="width: 20%; float: left" placeholder="user" aria-label="Recipient's username" aria-describedby="basic-addon2">
+        <input type="text" id="operation" class="form-control" style="width: 20%; float: left" placeholder="operation">
+        <input type="text" id="object" class="form-control" style="width: 20%; float: left" placeholder="object">
+        <input type="text" id="content" class="form-control" style="width: 20%; float: left" placeholder="content">
+        <button class="btn btn-warning" id="search" type="button" href="/api/{{.name}}/">搜索</button>
+    </div>
+    <thead>
+    <tr class="table-info">
+        {{- range $i,$t := (index .data.Title .zone)}}
+        <th data-field="{{index $.data.Fields $i}}">{{ $t}}</th>
+        {{- end }}
+        <th data-field="args" data-formatter="operateFormatter" >详情</th>
+    </tr>
+
+    </thead>
+
+</table>
+
 {{end}}
+
+{{- block "script" . -}}
+<script src="/js/jquery-3.0.0.js"></script>
+<script src="/js/bootstrap.bundle.min.js"></script>
+<script src="/js/bootstrap-table.min.js"></script>
+<script>
+    function responseHandler(res) {
+        return res.data
+    }
+    const requestParam={
+
+    }
+    const privateFun={};
+    privateFun.changeRequest=(input)=>{
+
+    }
+    function queryParams(params) {
+        requestParam.limit=params.limit
+        requestParam.offset=params.offset
+        privateFun.changeRequest( requestParam)
+        return   requestParam
+    }
+
+    function operateFormatter(value, row, index) {
+        let tmpContent=''
+        if( row.args && row.args.length>0){
+            row.args.forEach((item)=>{
+                tmpContent=tmpContent+`${item.key}:${item.value}<br>`
+            })
+        }
+        if(!row.args)
+            return [
+                '<button class="btn btn-disable  btn-sm" data-toggle="modal" data-target="#myModal'+index+'" href="#" title="details" disabled>'+
+                '详情'+
+                '</button> '
+                ]
+        return [
+            '<button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#myModal'+index+'" href="#" title="details">',
+            '详情',
+            '</button>  ',
+            '    <div class="modal fade" id="myModal'+index+'">\n' +
+            '        <div class="modal-dialog modal-lg">\n' +
+            '            <div class="modal-content">\n' +
+            '                <!-- 模态框头部 -->\n' +
+            '                <div class="modal-header">\n' +
+            '                    <h4 class="modal-title">details</h4>\n' +
+            '                    <button type="button" class="close" data-dismiss="modal">&times;</button>\n' +
+            '                </div>\n' +
+            '                <!-- 模态框主体 -->\n' +
+            '                <div class="modal-body">\n' +
+            tmpContent + '\n' +
+            '                </div>\n' +
+            '                <!-- 模态框底部 -->\n' +
+            '                <div class="modal-footer">\n' +
+            '                    <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>\n' +
+            '                </div>\n' +
+            '            </div>\n' +
+            '        </div>\n' +
+            '    </div>'
+        ].join('')
+
+    }
+
+    $('#search').click(function() {
+        requestParam.user = $("#user").val()
+        requestParam.operation = $("#operation").val()
+        requestParam.object = $("#object").val()
+        requestParam.content = $("#content").val()
+    })
+</script>
+{{- end -}}
