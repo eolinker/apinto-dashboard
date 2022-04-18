@@ -7,6 +7,55 @@
     <h1 class="h2">操作日志</h1>
 </div>
 
+<div class="row clearfix">
+    <div class="col-md-3 column">
+        <form class="form-horizontal" role="form">
+            <div class="form-group">
+                <label for="user" class="col-sm-2 control-label">用户</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="user" placeholder="user"/>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="col-md-3 column">
+        <form class="form-horizontal" role="form">
+            <div class="form-group">
+                <label for="operation" class="col-sm-2 control-label">操作类型</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="operation" placeholder="operation"/>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="col-md-3 column">
+        <form class="form-horizontal" role="form">
+            <div class="form-group">
+                <label for="object" class="col-sm-2 control-label">操作对象</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="object" placeholder="object"/>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="col-md-3 column">
+        <form class="form-horizontal" role="form">
+            <div class="form-group">
+                <label for="content" class="col-sm-2 control-label">内容</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="content" placeholder="content"/>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div style="margin: 20px;">
+
+    <button class="btn btn-warning" id="search" type="button">搜索</button>
+    <button class="btn btn-info" id="reset" type="button">重置</button>
+</div>
+
 <table  class="table"
         id="table"
         data-toggle="table"
@@ -19,13 +68,7 @@
         data-page-list="[10,25,50,100]"
         data-url="/api/{{.name}}/">
     <caption>List of {{.name}}</caption>
-    <div style="margin: 20px;">
-        <input type="text" id="user" class="form-control" style="width: 20%; float: left" placeholder="user" aria-label="Recipient's username" aria-describedby="basic-addon2">
-        <input type="text" id="operation" class="form-control" style="width: 20%; float: left" placeholder="operation">
-        <input type="text" id="object" class="form-control" style="width: 20%; float: left" placeholder="object">
-        <input type="text" id="content" class="form-control" style="width: 20%; float: left" placeholder="content">
-        <button class="btn btn-warning" id="search" type="button" href="/api/{{.name}}/">搜索</button>
-    </div>
+
     <thead>
     <tr class="table-info">
         {{- range $i,$t := (index .data.Title .zone)}}
@@ -42,9 +85,11 @@
 
 {{- block "script" . -}}
 <script src="/js/jquery-3.0.0.js"></script>
-<script src="/js/bootstrap.bundle.min.js"></script>
+<script src="/js/bootstrap.bundle.js"></script>
 <script src="/js/bootstrap-table.min.js"></script>
 <script>
+    let $table = $('#table')
+
     function responseHandler(res) {
         return res.data
     }
@@ -66,7 +111,7 @@
         let tmpContent=''
         if( row.args && row.args.length>0){
             row.args.forEach((item)=>{
-                tmpContent=tmpContent+`${item.key}:${item.value}<br>`
+                tmpContent=tmpContent+`${item.key}: ${item.value}<br>`
             })
         }
         if(!row.args)
@@ -88,7 +133,7 @@
             '                    <button type="button" class="close" data-dismiss="modal">&times;</button>\n' +
             '                </div>\n' +
             '                <!-- 模态框主体 -->\n' +
-            '                <div class="modal-body">\n' +
+            '                <div class="modal-body bg-dark text-light">\n' +
             tmpContent + '\n' +
             '                </div>\n' +
             '                <!-- 模态框底部 -->\n' +
@@ -107,6 +152,32 @@
         requestParam.operation = $("#operation").val()
         requestParam.object = $("#object").val()
         requestParam.content = $("#content").val()
+
+        $table.bootstrapTable(
+            "refresh",
+            {
+                pageNumber: 1,
+            }
+        );
+    })
+
+    $('#reset').click(function() {
+        $("#user").val('')
+        $("#operation").val('')
+        $("#object").val('')
+        $("#content").val('')
+
+        requestParam.user = ''
+        requestParam.operation = ''
+        requestParam.object = ''
+        requestParam.content = ''
+
+        $table.bootstrapTable(
+            "refresh",
+            {
+                pageNumber: 1,
+            }
+        );
     })
 </script>
 {{- end -}}
