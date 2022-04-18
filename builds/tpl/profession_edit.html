@@ -1,4 +1,29 @@
 {{ block "content" .data}}
-</br>
-edit {{.name}}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">编辑{{index .module.I18nName .zone}}</h1>
+</div>
 {{end}}
+{{- block "script" . -}}
+<script>
+    http.get("/api/{{.name}}/{{.data}}", null, function (res) {
+        if(res.code === 200){
+            common.message("获取详情成功", "info")
+            console.log(res.data)
+            return
+        }
+        if (res['msg']){
+            common.message(res['msg'], "danger")
+        }else {
+            common.message("获取详情失败", "danger")
+        }
+
+    }, function (res) {
+        if (res['msg']){
+            common.message(res['msg'], "danger")
+        }else {
+            common.message("获取详情失败", "danger")
+        }
+    })
+</script>
+
+{{- end -}}
