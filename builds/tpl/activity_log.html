@@ -1,5 +1,7 @@
 {{- block "header" . -}}
 <link href="/css/bootstrap-table.min.css" rel="stylesheet">
+<link href="/css/bootstrap.min.css" rel="stylesheet">
+<link href="/css/gijgo.min.css" rel="stylesheet">
 {{- end -}}
 
 {{ block "content" .}}
@@ -8,53 +10,35 @@
 </div>
 
 <div class="row clearfix">
-    <div class="col-md-3 column">
-        <form class="form-horizontal" role="form">
-            <div class="form-group">
-                <label for="user" class="col-sm-2 control-label">用户</label>
-                <div class="col-sm-10">
-                    <input type="text" class="form-control" id="user" placeholder="user"/>
-                </div>
-            </div>
-        </form>
+    <div class="col-md-3 column" >
+        用户:<input type="text" class="form-control" id="user" placeholder="user"/>
     </div>
     <div class="col-md-3 column">
-        <form class="form-horizontal" role="form">
-            <div class="form-group">
-                <label for="operation" class="col-sm-2 control-label">操作类型</label>
-                <div class="col-sm-10">
-                    <input type="text" class="form-control" id="operation" placeholder="operation"/>
-                </div>
-            </div>
-        </form>
+        操作类型:<input type="text" class="form-control" id="operation" placeholder="operation"/>
     </div>
     <div class="col-md-3 column">
-        <form class="form-horizontal" role="form">
-            <div class="form-group">
-                <label for="object" class="col-sm-2 control-label">操作对象</label>
-                <div class="col-sm-10">
-                    <input type="text" class="form-control" id="object" placeholder="object"/>
-                </div>
-            </div>
-        </form>
-    </div>
-    <div class="col-md-3 column">
-        <form class="form-horizontal" role="form">
-            <div class="form-group">
-                <label for="content" class="col-sm-2 control-label">内容</label>
-                <div class="col-sm-10">
-                    <input type="text" class="form-control" id="content" placeholder="content"/>
-                </div>
-            </div>
-        </form>
+        操作对象:<input type="text" class="form-control" id="object" placeholder="object"/>
     </div>
 </div>
 
-<div style="margin: 20px;">
-
-    <button class="btn btn-warning" id="search" type="button">搜索</button>
-    <button class="btn btn-info" id="reset" type="button">重置</button>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-4" style="margin-bottom: 50px;margin-left: -215px;margin-right: 20px">
+            Start Date: <input id="startDate"  />
+        </div>
+        <div class="col-md-4">
+            End Date: <input id="endDate"  />
+        </div>
+        <div class="col-md-1" style="margin: 20px;">
+            <button class="btn btn-warning" id="search" type="button">搜索</button>
+        </div>
+        <div class="col-md-1" style="margin: 20px;margin-left: -50px">
+             <button class="btn btn-info" id="reset" type="button">重置</button>
+        </div>
+    </div>
 </div>
+
+
 
 <table  class="table"
         id="table"
@@ -74,7 +58,7 @@
         {{- range $i,$t := (index .data.Title .zone)}}
         <th data-field="{{index $.data.Fields $i}}">{{ $t}}</th>
         {{- end }}
-        <th data-field="args" data-formatter="operateFormatter" >详情</th>
+        <th data-field="args" data-formatter="operateFormatter" ></th>
     </tr>
 
     </thead>
@@ -85,8 +69,11 @@
 
 {{- block "script" . -}}
 <script src="/js/jquery-3.0.0.js"></script>
+<script src="/js/gijgo.min.js"></script>
+<script src="/js/messages.zh-cn.min.js"></script>
 <script src="/js/bootstrap.bundle.js"></script>
 <script src="/js/bootstrap-table.min.js"></script>
+<script src="/js/bootstrap.min.js"></script>
 <script>
     let $table = $('#table')
 
@@ -153,6 +140,11 @@
         requestParam.object = $("#object").val()
         requestParam.content = $("#content").val()
 
+        var str = '2008-10-09';//PHP中对应的UNIX时间戳为1223559328
+        var arr = str.split("-");
+        var datum = new Date(Date.UTC(arr[0],arr[1]-1,arr[2],-8));
+
+        console.log(datum.getTime()/1000)
         $table.bootstrapTable(
             "refresh",
             {
@@ -166,11 +158,15 @@
         $("#operation").val('')
         $("#object").val('')
         $("#content").val('')
+        $("#startDate").val('')
+        $("#endDate").val('')
 
         requestParam.user = ''
         requestParam.operation = ''
         requestParam.object = ''
         requestParam.content = ''
+        requestParam.startDate = ''
+        requestParam.endDate = ''
 
         $table.bootstrapTable(
             "refresh",
@@ -179,5 +175,25 @@
             }
         );
     })
+
+    $('#startDate').datepicker({
+        locale: 'zh-cn',
+        format: 'yyyy-mm-dd',
+        uiLibrary: 'bootstrap4',
+        maxDate: function () {
+            return $('#endDate').val();
+        },
+        weekStartDay: 1
+    });
+    $('#endDate').datepicker({
+        locale: 'zh-cn',
+        format: 'yyyy-mm-dd',
+        uiLibrary: 'bootstrap4',
+        minDate: function () {
+            return $('#startDate').val();
+        },
+        weekStartDay: 1
+    });
+
 </script>
 {{- end -}}
