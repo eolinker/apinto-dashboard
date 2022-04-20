@@ -17,13 +17,13 @@
                     common.message(errors[0].message, "danger")
                 }
                 else {
-                    JsonEditor.submit("/api/{{.name}}/{{.data}}", editor.jsoneditor.getValue())
+                    JsonEditor.submit("/api/{{.name}}/{{.data.profession}}", editor.jsoneditor.getValue())
                 }
             }
         }
     })
-    JsonEditor.getEditorWithData("form", "{{.name}} - {{.data}}", "/api/{{.name}}/render/{{.data}}", "/api/{{.name}}/{{.data}}", {
+    JsonEditor.getEditorWithData("form", "{{.name}} - {{.data.profession}}", "/api/render/{{.name}}/{{.data.driver}}", {
         prompt_before_delete:true,
-    })
+    }, "/api/{{.name}}/{{.data.profession}}")
 </script>
 {{- end -}}
