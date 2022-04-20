@@ -74,10 +74,22 @@
                             target.removeClass("up")
                             target.addClass("down")
                             target.text("下线")
+                            $table.bootstrapTable('updateRow', {
+                                index: index,
+                                row: {
+                                    status: '下线'
+                                }
+                            })
                         }else{
                             target.removeClass("down")
                             target.addClass("up")
                             target.text("发布")
+                            $table.bootstrapTable('updateRow', {
+                                index: index,
+                                row: {
+                                    status: '发布'
+                                }
+                            })
                         }
                         return
                     }

@@ -71,9 +71,6 @@ let dashboard = {
     getRender: function (url, success, error){
         http.ajax("GET", url, null, success, error, null, false)
     },
-    getDrivers: function (url, success, error){
-        http.ajax("GET", url, null, success, error)
-    },
 }
 let common = {
     confirm :function (title, msg, success, cancel){
@@ -125,10 +122,11 @@ let common = {
         }
         // 创建bootstrap的alert元素
         let divElement = $("<div></div>").addClass('alert').addClass('alert-'+type).addClass('alert-dismissible').addClass('col-md-4').addClass('col-md-offset-4');
+        let scroll = document.body.scrollTop || document.documentElement.scrollTop;
         divElement.css({ // 消息框的定位样式
-            "position": "absolute",
+            "position": "fixed",
             "right":"50px",
-            "top": "80px"
+            "top": scroll + 80 +"px"
         });
         divElement.text(msg); // 设置消息框的内容
         // 消息框添加可以关闭按钮
@@ -157,8 +155,11 @@ let common = {
         setTimeout(function() {
             let IntervalMS = 20; // 每次上浮的间隔毫秒
             let floatSpace = 60; // 上浮的空间(px)
-            let nowTop = divElement.offset().top; // 获取元素当前的top值
+            let scroll = document.body.scrollTop || document.documentElement.scrollTop;
+            let nowTop = divElement.offset().top - scroll; // 获取元素当前的top值
             let stopTop = nowTop - floatSpace;    // 上浮停止时的top值
+            console.log(nowTop)
+            console.log(stopTop)
             divElement.fadeOut(IntervalMS * floatSpace); // 设置元素淡出
 
             let upFloat = setInterval(function(){ // 开始上浮
@@ -207,10 +208,11 @@ let util = {
 }
 let JsonEditor = {
     // default_Schema: {"type":"object","properties":{"cert":{"type":"array","items":{"type":"object","properties":{"crt":{"type":"string"},"key":{"type":"string"}},"additionalProperties":false,"required":["key","crt"]}},"driver":{"type":"string","enum":["http"]},"host":{"type":"array","items":{"type":"string"},"minLength":1},"listen":{"type":"integer","format":"int32","minimum":1},"method":{"type":"array","items":{"type":"string","enum":["GET","POST","PATH","DELETE"]}},"plugins":{"type":"object","additionalProperties":{"type":"object","properties":{"config":{},"disable":{"type":"boolean"}},"additionalProperties":false,"required":["disable","config"]}},"protocol":{"type":"string","enum":["http","https"],"default":"http"},"rules":{"type":"array","items":{"type":"object","properties":{"header":{"type":"object","additionalProperties":{"type":"string"}},"location":{"type":"string","minLength":1},"query":{"type":"object","additionalProperties":{"type":"string"}}},"additionalProperties":false}},"target":{"type":"string","minLength":1}},"additionalProperties":false,"required":["driver","listen","protocol","target"]},
-
     default_Schema: {
         "type": "info",
+        "title": "Apinto",
         "description": "operation error!",
+        "properties":{},
     },
     init: function (theme, iconlib, callbacks){
         JSONEditor.defaults.options.theme = theme;
@@ -219,7 +221,7 @@ let JsonEditor = {
     },
     getEditorWithData: function (id, title, schemaUrl, options, dataUrl) {
         let editor = new JSONEditor(document.getElementById(id), this.getOptions(schemaUrl, title, options));
-        this.setValue(dataUrl, editor)
+        this.setValue(editor, dataUrl)
         return editor
     },
     getEditor: function (id, title, schemaUrl, options) {
@@ -229,7 +231,7 @@ let JsonEditor = {
         options["schema"] = this.getSchema(url, title)
         return options
     },
-    getSchema(url, title){
+    getSchema: function (url, title){
         let schema = this.default_Schema
         dashboard.getRender(url, function (res) {
             if(res.code === 200){
@@ -257,7 +259,13 @@ let JsonEditor = {
         schema["title"]= title
         return schema
     },
-    setValue(url, editor){
+    updateSchema: function(editor, url, title){
+        let id = editor.element.id
+        let options = editor.options
+        editor.destroy()
+        return this.getEditor(id, title, url, options)
+    },
+    setValue: function (editor, url){
         dashboard.get(url, function (res) {
             if(res.code === 200){
                 if (editor["schema"]["properties"]){
@@ -274,7 +282,7 @@ let JsonEditor = {
             editor.disable()
         })
     },
-    update(url, data){
+    update: function (url, data){
         dashboard.update(url, data, function (res) {
             if(res.code === 200){
                 common.message("success", "success")
@@ -286,7 +294,7 @@ let JsonEditor = {
             http.handleError(res, "update error")
         })
     },
-    create(url, data){
+    create: function (url, data){
         dashboard.create(url, data, function (res) {
             if(res.code === 200){
                 common.message("success", "success")
