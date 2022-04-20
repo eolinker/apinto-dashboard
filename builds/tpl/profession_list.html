@@ -68,18 +68,9 @@
                         })
                         return
                     }
-                    if (res['msg']){
-                        common.message(res['msg'], "danger")
-                    }else {
-                        common.message("删除失败", "danger")
-                    }
-
+                    http.handleError(res, "删除失败")
                 }, function (res) {
-                    if (res['msg']){
-                        common.message(res['msg'], "danger")
-                    }else {
-                        common.message("删除失败", "danger")
-                    }
+                    http.handleError(res, "删除失败")
                 })
             }, null)
         }
