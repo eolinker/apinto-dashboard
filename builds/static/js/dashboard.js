@@ -44,6 +44,13 @@ let http = {
         }
         $.ajax(options);
     },
+    handleError: function (res, msg){
+        if (res['msg']){
+            common.message(res['msg'], "danger")
+        }else {
+            common.message(msg, "danger")
+        }
+    }
 }
 let dashboard = {
     get: function (url, success, error){
@@ -63,7 +70,10 @@ let dashboard = {
     },
     getRender: function (url, success, error){
         http.ajax("GET", url, null, success, error, null, false)
-    }
+    },
+    getDrivers: function (url, success, error){
+        http.ajax("GET", url, null, success, error)
+    },
 }
 let common = {
     confirm :function (title, msg, success, cancel){
@@ -188,27 +198,19 @@ let util = {
         Object.keys(high).forEach(function (key){
             if(low[key]){
                 data[key] = low[key]
+            }else {
+                data[key] = null
             }
         })
         return data
     }
 }
-
 let JsonEditor = {
     // default_Schema: {"type":"object","properties":{"cert":{"type":"array","items":{"type":"object","properties":{"crt":{"type":"string"},"key":{"type":"string"}},"additionalProperties":false,"required":["key","crt"]}},"driver":{"type":"string","enum":["http"]},"host":{"type":"array","items":{"type":"string"},"minLength":1},"listen":{"type":"integer","format":"int32","minimum":1},"method":{"type":"array","items":{"type":"string","enum":["GET","POST","PATH","DELETE"]}},"plugins":{"type":"object","additionalProperties":{"type":"object","properties":{"config":{},"disable":{"type":"boolean"}},"additionalProperties":false,"required":["disable","config"]}},"protocol":{"type":"string","enum":["http","https"],"default":"http"},"rules":{"type":"array","items":{"type":"object","properties":{"header":{"type":"object","additionalProperties":{"type":"string"}},"location":{"type":"string","minLength":1},"query":{"type":"object","additionalProperties":{"type":"string"}}},"additionalProperties":false}},"target":{"type":"string","minLength":1}},"additionalProperties":false,"required":["driver","listen","protocol","target"]},
 
     default_Schema: {
-        "type":"object",
-        "properties":{
-            "profession":{
-                "type":"string",
-                "minLength":1,
-                "readOnly":true
-            },
-            "name":{
-                "type":"string",
-            },
-        },
+        "type": "info",
+        "description": "operation error!",
     },
     init: function (theme, iconlib, callbacks){
         JSONEditor.defaults.options.theme = theme;
@@ -222,7 +224,6 @@ let JsonEditor = {
     },
     getEditor: function (id, title, schemaUrl, options) {
         return new JSONEditor(document.getElementById(id), this.getOptions(schemaUrl, title, options));
-
     },
     getOptions: function (url, title, options) {
         options["schema"] = this.getSchema(url, title)
@@ -246,19 +247,12 @@ let JsonEditor = {
                         }
                     }
                 }
-                return
+                schema["title"]= title
+                return schema
             }
-            if (res['msg']){
-                common.message(res['msg'], "danger")
-            }else {
-                common.message("获取render失败", "danger")
-            }
+            http.handleError(res, "获取render失败")
         }, function (res){
-            if (res['msg']){
-                common.message(res['msg'], "danger")
-            }else {
-                common.message("获取render失败", "danger")
-            }
+            http.handleError(res, "获取render失败")
         })
         schema["title"]= title
         return schema
@@ -266,39 +260,42 @@ let JsonEditor = {
     setValue(url, editor){
         dashboard.get(url, function (res) {
             if(res.code === 200){
-                editor.setValue(util.filter(editor["schema"]["properties"], res.data))
+                if (editor["schema"]["properties"]){
+                    editor.setValue(util.filter(editor["schema"]["properties"], res.data))
+                }else {
+                    editor.setValue(res.data)
+                }
                 return
             }
-            if (res['msg']){
-                common.message(res['msg'], "danger")
-            }else {
-                common.message("获取详情失败", "danger")
-            }
+            http.handleError(res, "获取详情失败")
+            editor.disable()
         }, function (res) {
-            if (res['msg']){
-                common.message(res['msg'], "danger")
-            }else {
-                common.message("获取详情失败", "danger")
-            }
+            http.handleError(res, "获取详情失败")
+            editor.disable()
         })
     },
-    submit(url, data){
+    update(url, data){
         dashboard.update(url, data, function (res) {
             if(res.code === 200){
                 common.message("success", "success")
                 return
             }
-            if (res['msg']){
-                common.message(res['msg'], "danger")
-            }else {
-                common.message("error", "danger")
-            }
+            http.handleError(res, "update error")
+
         }, function (res) {
-            if (res['msg']){
-                common.message(res['msg'], "danger")
-            }else {
-                common.message("error", "danger")
+            http.handleError(res, "update error")
+        })
+    },
+    create(url, data){
+        dashboard.create(url, data, function (res) {
+            if(res.code === 200){
+                common.message("success", "success")
+                return
             }
+            http.handleError(res, "create error")
+
+        }, function (res) {
+            http.handleError(res, "create error")
         })
     }
 }

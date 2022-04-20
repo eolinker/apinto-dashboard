@@ -24,10 +24,16 @@ func (p *Routers) Lookup(r *http.Request) (view string, data interface{}, has bo
 			routerName := r.URL.Query().Get("name")
 			driver := r.URL.Query().Get("driver")
 			d := map[string]string{
-				"profession": routerName,
-				"driver":     driver,
+				"name":   routerName,
+				"driver": driver,
 			}
 			return name, d, true
+		case "router_create":
+			drivers := []string{
+				"http",
+				"https",
+			}
+			return name, drivers, true
 		}
 		return name, nil, true
 	}

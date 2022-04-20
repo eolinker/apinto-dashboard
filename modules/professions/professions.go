@@ -31,10 +31,18 @@ func (p *Profession) Lookup(r *http.Request) (view string, data interface{}, has
 			professionName := r.URL.Query().Get("name")
 			driver := r.URL.Query().Get("driver")
 			d := map[string]string{
-				"profession": professionName,
-				"driver":     driver,
+				"name":   professionName,
+				"driver": driver,
 			}
 			return name, d, true
+		case "profession_create":
+			drivers := []string{
+				"apikey",
+				"aksk",
+				"jwt",
+				"basic",
+			}
+			return name, drivers, true
 		}
 		return name, nil, true
 	}
