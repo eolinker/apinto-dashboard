@@ -22,7 +22,12 @@ func (p *Routers) Lookup(r *http.Request) (view string, data interface{}, has bo
 			return name, p.header, true
 		case "router_edit":
 			routerName := r.URL.Query().Get("name")
-			return name, routerName, true
+			driver := r.URL.Query().Get("driver")
+			d := map[string]string{
+				"profession": routerName,
+				"driver":     driver,
+			}
+			return name, d, true
 		}
 		return name, nil, true
 	}
