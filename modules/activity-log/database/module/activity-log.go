@@ -15,8 +15,8 @@ func NewLogModule(db *sql.DB) (err error) {
 	return
 }
 
-func GetLogList(offset, limit int) ([]byte, error) {
-	list, total, err := activityLogModule.GetLogList(offset, limit)
+func GetLogList(offset, limit int, user, operation, object string, startUnix, endUnix int64) ([]byte, error) {
+	list, total, err := activityLogModule.GetLogList(offset, limit, user, operation, object, startUnix, endUnix)
 	if err != nil {
 		return nil, err
 	}

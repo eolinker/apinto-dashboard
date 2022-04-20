@@ -67,30 +67,25 @@ func (a *ActivityLog) createRouter() {
 
 	// List
 	r.GET(fmt.Sprintf("/api/%s/", a.ModuleName), func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-		//TODO  从sqlite读取数据
+		//从sqlite读取数据
 		offsetStr := r.URL.Query().Get("offset")
 		limitStr := r.URL.Query().Get("limit")
+		user := r.URL.Query().Get("user")
+		operation := r.URL.Query().Get("operation")
+		object := r.URL.Query().Get("object")
+		startUnixStr := r.URL.Query().Get("startUnix")
+		endUnixStr := r.URL.Query().Get("endUnix")
+
 		offset, _ := strconv.Atoi(offsetStr)
 		limit, _ := strconv.Atoi(limitStr)
-		if limit == 0 {
-			limit = 10
-		}
+		startUnix, _ := strconv.ParseInt(startUnixStr, 10, 64)
+		endUnix, _ := strconv.ParseInt(endUnixStr, 10, 64)
 
-		data, err := module.GetLogList(offset, limit)
+		data, err := module.GetLogList(offset, limit, user, operation, object, startUnix, endUnix)
 		if err != nil {
 			apinto.WriteResult(w, 500, []byte(err.Error()))
 			return
 		}
-		//stamp := time.Now().Unix()
-		//time.Unix(stamp, 0).Format("2006-01-02 15:04:05")
-		//fakeData := []map[string]interface{}{{
-		//	"user":      "admin",
-		//	"operation": "创建",
-		//	"object":    "demoRouter",
-		//	"content":   "操作:创建 操作对象:demoRouter",
-		//	"timestamp": time.Unix(stamp, 0).Format("2006-01-02 15:04:05"),
-		//}}
-		//data, _ := json.Marshal(fakeData)
 
 		apinto.WriteResult(w, 200, data)
 	})
