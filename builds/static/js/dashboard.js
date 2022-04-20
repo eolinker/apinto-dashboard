@@ -12,28 +12,53 @@ let http = {
         this.ajax("PATCH", url, data, success, error)
     },
     ajax: function (type, url, data, success, error, complete) {
-        $.ajax({
-            url: url,
-            type: type,
-            contentType: "application/json; charset=utf-8",
-            data: JSON.stringify(data),
-            dataType: 'json',
-            success: function (res) {
-                if (success) {
-                    success(res)
-                }
-            },
-            error: function (res) {
-                if (error) {
-                    error(res)
-                }
-            },
-            complete: function (res) {
-                if (complete) {
-                    complete(res)
-                }
-            },
-        });
+        if(data){
+            $.ajax({
+                url: url,
+                type: type,
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(data),
+                dataType: 'json',
+                success: function (res) {
+                    if (success) {
+                        success(res)
+                    }
+                },
+                error: function (res) {
+                    if (error) {
+                        error(res)
+                    }
+                },
+                complete: function (res) {
+                    if (complete) {
+                        complete(res)
+                    }
+                },
+            });
+        }else {
+            $.ajax({
+                url: url,
+                type: type,
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                success: function (res) {
+                    if (success) {
+                        success(res)
+                    }
+                },
+                error: function (res) {
+                    if (error) {
+                        error(res)
+                    }
+                },
+                complete: function (res) {
+                    if (complete) {
+                        complete(res)
+                    }
+                },
+            });
+        }
+
     },
 }
 let common = {
