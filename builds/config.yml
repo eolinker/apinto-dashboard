@@ -2,6 +2,7 @@ zone: zh_cn
 default: upstream
 apinto:
   - "http://172.18.189.43:9400"
+port: 7000
 professions:
 
   - name: services

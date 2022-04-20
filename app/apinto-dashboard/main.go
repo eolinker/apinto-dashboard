@@ -102,5 +102,5 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	http.ListenAndServe(":8080", service)
+	http.ListenAndServe(fmt.Sprintf(":%s", cf.Port), service)
 }
