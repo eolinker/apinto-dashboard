@@ -65,6 +65,16 @@ body {
   text-transform: uppercase;
 }
 
+.btn-disable{
+  cursor: pointer;
+  background-color: #f0f0f0;
+  border-color: #dcdcdc;
+  color:#808080;
+}
+.btn-disable:hover{
+  background-color: #e6e6e6 !important;
+}
+
 /*
  * Navbar
  */
