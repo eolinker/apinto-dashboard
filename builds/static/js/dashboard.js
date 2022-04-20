@@ -2,6 +2,9 @@ let http = {
     post: function (url, data, success, error){
         this.ajax("POST", url, data, success, error)
     },
+    put: function (url, data, success, error){
+        this.ajax("PUT", url, data, success, error)
+    },
     get: function (url, data, success, error){
         this.ajax("GET", url, data, success, error)
     },
@@ -11,55 +14,56 @@ let http = {
     patch: function (url, data, success, error){
         this.ajax("PATCH", url, data, success, error)
     },
-    ajax: function (type, url, data, success, error, complete) {
-        if(data){
-            $.ajax({
-                url: url,
-                type: type,
-                contentType: "application/json; charset=utf-8",
-                data: JSON.stringify(data),
-                dataType: 'json',
-                success: function (res) {
-                    if (success) {
-                        success(res)
-                    }
-                },
-                error: function (res) {
-                    if (error) {
-                        error(res)
-                    }
-                },
-                complete: function (res) {
-                    if (complete) {
-                        complete(res)
-                    }
-                },
-            });
-        }else {
-            $.ajax({
-                url: url,
-                type: type,
-                contentType: "application/json; charset=utf-8",
-                dataType: 'json',
-                success: function (res) {
-                    if (success) {
-                        success(res)
-                    }
-                },
-                error: function (res) {
-                    if (error) {
-                        error(res)
-                    }
-                },
-                complete: function (res) {
-                    if (complete) {
-                        complete(res)
-                    }
-                },
-            });
+    ajax: function (type, url, data, success, error, complete, async) {
+        let options = {
+            url: url,
+            type: type,
+            contentType: "application/json; charset=utf-8",
+            dataType: 'json',
+            success: function (res) {
+                if (success) {
+                    success(res)
+                }
+            },
+            error: function (res) {
+                if (error) {
+                    error(res)
+                }
+            },
+            complete: function (res) {
+                if (complete) {
+                    complete(res)
+                }
+            },
         }
-
+        if (data) {
+            options["data"] = JSON.stringify(data)
+        }
+        if(!async){
+            options["async"] = false
+        }
+        $.ajax(options);
     },
+}
+let dashboard = {
+    get: function (url, success, error){
+        http.get(url, null,  success, error)
+    },
+    update: function (url, data, success, error) {
+        http.put(url, data,  success, error)
+    },
+    patch: function (url, data, success, error) {
+        http.patch(url, data,  success, error)
+    },
+    delete:function (url, success, error){
+        http.delete(url, success, error)
+    },
+    create: function (url, data, success, error){
+        http.post(url, data,  success, error)
+    },
+    getRender: function (url, success, error){
+        http.ajax("GET", url, null, success, error, null, false)
+    }
 }
 let common = {
     confirm :function (title, msg, success, cancel){
@@ -176,5 +180,125 @@ let common = {
                 }, IntervalMS);
             });
         }, 1500);
+    }
+}
+let util = {
+    filter: function (high, low){
+        let data = {}
+        Object.keys(high).forEach(function (key){
+            if(low[key]){
+                data[key] = low[key]
+            }
+        })
+        return data
+    }
+}
+
+let JsonEditor = {
+    // default_Schema: {"type":"object","properties":{"cert":{"type":"array","items":{"type":"object","properties":{"crt":{"type":"string"},"key":{"type":"string"}},"additionalProperties":false,"required":["key","crt"]}},"driver":{"type":"string","enum":["http"]},"host":{"type":"array","items":{"type":"string"},"minLength":1},"listen":{"type":"integer","format":"int32","minimum":1},"method":{"type":"array","items":{"type":"string","enum":["GET","POST","PATH","DELETE"]}},"plugins":{"type":"object","additionalProperties":{"type":"object","properties":{"config":{},"disable":{"type":"boolean"}},"additionalProperties":false,"required":["disable","config"]}},"protocol":{"type":"string","enum":["http","https"],"default":"http"},"rules":{"type":"array","items":{"type":"object","properties":{"header":{"type":"object","additionalProperties":{"type":"string"}},"location":{"type":"string","minLength":1},"query":{"type":"object","additionalProperties":{"type":"string"}}},"additionalProperties":false}},"target":{"type":"string","minLength":1}},"additionalProperties":false,"required":["driver","listen","protocol","target"]},
+
+    default_Schema: {
+        "type":"object",
+        "properties":{
+            "profession":{
+                "type":"string",
+                "minLength":1,
+                "readOnly":true
+            },
+            "name":{
+                "type":"string",
+            },
+        },
+    },
+    init: function (theme, iconlib, callbacks){
+        JSONEditor.defaults.options.theme = theme;
+        JSONEditor.defaults.options.iconlib = iconlib;
+        JSONEditor.defaults.callbacks = callbacks
+    },
+    getEditorWithData: function (id, title, schemaUrl, options, dataUrl) {
+        let editor = new JSONEditor(document.getElementById(id), this.getOptions(schemaUrl, title, options));
+        this.setValue(dataUrl, editor)
+        return editor
+    },
+    getEditor: function (id, title, schemaUrl, options) {
+        return new JSONEditor(document.getElementById(id), this.getOptions(schemaUrl, title, options));
+
+    },
+    getOptions: function (url, title, options) {
+        options["schema"] = this.getSchema(url, title)
+        return options
+    },
+    getSchema(url, title){
+        let schema = this.default_Schema
+        dashboard.getRender(url, function (res) {
+            if(res.code === 200){
+                schema = res.data
+                schema["properties"]["operation"] = {
+                    "type": "button",
+                    "title": "Submit",
+                    "options": {
+                        "button": {
+                            "action": "submit",
+                            "validated": true
+                        },
+                        "inputAttributes": {
+                            "class": "btn btn-primary"
+                        }
+                    }
+                }
+                return
+            }
+            if (res['msg']){
+                common.message(res['msg'], "danger")
+            }else {
+                common.message("获取render失败", "danger")
+            }
+        }, function (res){
+            if (res['msg']){
+                common.message(res['msg'], "danger")
+            }else {
+                common.message("获取render失败", "danger")
+            }
+        })
+        schema["title"]= title
+        return schema
+    },
+    setValue(url, editor){
+        dashboard.get(url, function (res) {
+            if(res.code === 200){
+                editor.setValue(util.filter(editor["schema"]["properties"], res.data))
+                return
+            }
+            if (res['msg']){
+                common.message(res['msg'], "danger")
+            }else {
+                common.message("获取详情失败", "danger")
+            }
+        }, function (res) {
+            if (res['msg']){
+                common.message(res['msg'], "danger")
+            }else {
+                common.message("获取详情失败", "danger")
+            }
+        })
+    },
+    submit(url, data){
+        dashboard.update(url, data, function (res) {
+            if(res.code === 200){
+                common.message("success", "success")
+                return
+            }
+            if (res['msg']){
+                common.message(res['msg'], "danger")
+            }else {
+                common.message("error", "danger")
+            }
+        }, function (res) {
+            if (res['msg']){
+                common.message(res['msg'], "danger")
+            }else {
+                common.message("error", "danger")
+            }
+        })
     }
 }
