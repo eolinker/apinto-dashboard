@@ -11,9 +11,6 @@ import (
 	"strings"
 )
 
-type IDashboardAccount interface {
-}
-
 type ViewHandlerFunc func(r *http.Request) (view string, data interface{}, err error)
 
 func (f ViewHandlerFunc) Lookup(r *http.Request) (view string, data interface{}, err error) {
@@ -34,27 +31,14 @@ type Config struct {
 	Statics            map[string]string
 	DefaultModule      string
 }
-type DashboardService struct {
-	defaultZone   ZoneName
-	userDetails   IUserDetailsService
-	serve         http.ServeMux
-	defaultModule string
-}
 
-func (d *DashboardService) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	d.serve.ServeHTTP(w, req)
-}
-
-func Create(config *Config) (*DashboardService, error) {
+func Create(config *Config) (http.Handler, error) {
 	if config.UserDetailsService == nil {
 		return nil, ErrorUserDetailsServiceNeed
 	}
 	if config.DefaultZone == "" {
 		config.DefaultZone = ZhCn
 	}
-	service := new(DashboardService)
-	service.userDetails = config.UserDetailsService
-	service.defaultZone = config.DefaultZone
 
 	modules := make([]*ModuleItem, 0, len(config.Modules))
 	for _, m := range config.Modules {
@@ -74,6 +58,7 @@ func Create(config *Config) (*DashboardService, error) {
 	viewServe := &http.ServeMux{}
 	views.serve = viewServe
 	apis := new(APIS)
+	serve := &http.ServeMux{}
 	for _, m := range config.Modules {
 
 		path := fmt.Sprint("/", m.Name)
@@ -82,16 +67,16 @@ func Create(config *Config) (*DashboardService, error) {
 			modules: mp,
 			name:    m.Name,
 		})
-		service.serve.Handle(path, views)
+		serve.Handle(path, views)
 
 		viewServe.Handle(fmt.Sprint(path, "/"), &ViewServer{
 			handler: m.Handler,
 			modules: mp,
 			name:    m.Name,
 		})
-		service.serve.Handle(fmt.Sprint(path, "/"), views)
+		serve.Handle(fmt.Sprint(path, "/"), views)
 		apis.serve.Handle(fmt.Sprint("/api/", m.Name, "/"), m.Handler)
-		service.serve.Handle(fmt.Sprint("/api/", m.Name, "/"), apis)
+		serve.Handle(fmt.Sprint("/api/", m.Name, "/"), apis)
 	}
 	staticServe := &http.ServeMux{}
 	for path, dir := range config.Statics {
@@ -107,19 +92,18 @@ func Create(config *Config) (*DashboardService, error) {
 				serve: http.StripPrefix(path, http.FileServer(http.Dir(dir))),
 				mp:    mp,
 			})
-
 		}
 	}
 
 	defaultModulePath := mp.moduleMap[defaultModule].Path
-	service.serve.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	serve.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/" {
 			http.Redirect(w, r, defaultModulePath, 302)
 			return
 		}
 		staticServe.ServeHTTP(w, r)
 	})
-	return service, nil
+	return serve, nil
 }
 
 type APIS struct {
