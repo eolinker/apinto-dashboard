@@ -7,28 +7,39 @@
         <label class="input-group-text" for="drivers">Drivers</label>
     </div>
     <select class="custom-select" id="drivers">
-        {{- range $i,$t := (index .data)}}
-            {{- if eq $i 0}}
-                <option value="{{$t}}" selected>{{$t}}</option>
-            {{- else }}
-                <option value="{{$t}}">{{$t}}</option>
-            {{- end}}
-        {{- end }}
     </select>
 </div>
-<div id="form"></div>
 {{end}}
 {{- block "script" . -}}
 <link href="/css/spectre-icons.css" rel="stylesheet">
 <script type="text/javascript" src="/js/jsoneditor.min.js"></script>
 <script>
-    $(document).ready(function () {
-        let select = $("#drivers")
-        $('.select_content').on('change', "select#drivers", function () {
-            let value = $(this).val();
-            // update schema
-        });
+    initDrivers("drivers", "/api/drivers/{{.name}}")
+    function initDrivers(id, url){
+        dashboard.get(url,function (res) {
+            if(res.code !== 200){
+                http.handleError(res, "获取driver列表失败")
+            }
+            let data = res.data["drivers"]
+            let target = $("#"+id)
+            target.html("")
+            for (let i = 0; i < data.length; i++) {
+                if(i===0){
+                    target.append("<option value='"+data[i].name+"' selected>" + data[i].name + "</option>")
+                }else {
+                    target.append("<option value='"+data[i].name+"'>" + data[i].name + "</option>")
+                }
+            }
+        },function (res) {
+            http.handleError(res, "获取driver列表失败")
+        })
+    }
+    $('.select_content').on('change', "select#drivers", function () {
+        let value = $(this).val();
+        console.log(value)
+        // todo 监听select变化，update schema
     });
+
 </script>
 
 {{- end -}}
