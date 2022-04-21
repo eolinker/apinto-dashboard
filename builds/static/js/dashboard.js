@@ -69,6 +69,9 @@ let dashboard = {
         http.post(url, data,  success, error)
     },
     getRender: function (url, success, error){
+        http.ajax("GET", url, null, success, error)
+    },
+    getWithAsync: function (url, success, error){
         http.ajax("GET", url, null, success, error, null, false)
     },
 }
@@ -158,8 +161,6 @@ let common = {
             let scroll = document.body.scrollTop || document.documentElement.scrollTop;
             let nowTop = divElement.offset().top - scroll; // 获取元素当前的top值
             let stopTop = nowTop - floatSpace;    // 上浮停止时的top值
-            console.log(nowTop)
-            console.log(stopTop)
             divElement.fadeOut(IntervalMS * floatSpace); // 设置元素淡出
 
             let upFloat = setInterval(function(){ // 开始上浮
