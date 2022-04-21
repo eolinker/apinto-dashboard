@@ -8,6 +8,14 @@ type SessionManager struct {
 	sessions map[string]UserDetails
 }
 
+func NewSessionManager() *SessionManager {
+	return &SessionManager{
+		lock:     sync.RWMutex{},
+		users:    make(map[string]string),
+		sessions: make(map[string]UserDetails),
+	}
+}
+
 func (sm *SessionManager) Get(session string) (UserDetails, bool) {
 	sm.lock.RLock()
 	defer sm.lock.RUnlock()

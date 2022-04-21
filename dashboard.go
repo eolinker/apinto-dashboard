@@ -52,9 +52,6 @@ func Create(config *Config) (http.Handler, error) {
 	if defaultModule == "" {
 		defaultModule = modules[0].Name
 	}
-	//views := new(Views)
-	//views.mp = mp
-	//views.serve = viewServe
 
 	serve := &http.ServeMux{}
 	for _, m := range config.Modules {
@@ -65,16 +62,10 @@ func Create(config *Config) (http.Handler, error) {
 			modules: mp,
 			name:    m.Name,
 		}
-		////viewServe.Handle(path, )
-		//serve.Handle(path, viewH)
-		//
-		//viewServe.Handle(fmt.Sprint(path, "/"),viewH )
-		//
-
 		serve.Handle(path, viewH)
 		serve.Handle(fmt.Sprint(path, "/"), viewH)
 		serve.Handle(fmt.Sprint("/api/", m.Name, "/"), m.Handler)
-		//serve.Handle(fmt.Sprint("/api/", m.Name, "/"), apis)
+		serve.Handle(fmt.Sprint("/profession/", m.Name, "/"), m.Handler)
 	}
 	staticServe := &http.ServeMux{}
 
@@ -105,16 +96,7 @@ func Create(config *Config) (http.Handler, error) {
 	return NewAccountHandler(config.UserDetailsService, &Views{
 		serve: serve,
 		mp:    mp,
-	}, []string{"/css/", "/js/", "/umd/", "/fonts/"}), nil
-}
-
-type APIS struct {
-	serve http.ServeMux
-}
-
-func (A *APIS) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	//todo 处理api接口的登陆
-	A.serve.ServeHTTP(w, req)
+	}, []string{"/css/", "/js/", "/umd/", "/fonts/", "/img/"}), nil
 }
 
 var viewExtHtml = map[string]int{
@@ -134,23 +116,15 @@ func (v *Views) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	v.serve.ServeHTTP(cache, req)
 	codeHead := cache.statusCode / 100
-	if codeHead != 4 && codeHead != 5 {
-		cache.WriteTo(w)
-		return
-	}
-	//accepts := req.Header.Get("Accept")
-	//if strings.Contains(accepts, "text/html") || strings.Contains(accepts, "") {
-	//	v.Error(w, cache)
-	//	return
-	//}
-	if !strings.HasPrefix(req.URL.Path, "/api/") {
-		ext := filepath.Ext(req.URL.Path)
-		if viewExtHtml[ext] == 1 {
-			v.Error(w, cache)
-			return
+	if codeHead == 4 || codeHead == 5 {
+		if !strings.HasPrefix(req.URL.Path, "/api/") {
+			ext := filepath.Ext(req.URL.Path)
+			if viewExtHtml[ext] == 1 {
+				v.Error(w, cache)
+				return
+			}
 		}
 	}
-
 	cache.WriteTo(w)
 }
 func (v *Views) Error(w http.ResponseWriter, cache *TemplateWriter) {

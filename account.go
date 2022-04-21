@@ -17,7 +17,7 @@ const (
 
 type AccountHandler struct {
 	userDetailsService IUserDetailsService
-	sessionManager     SessionManager
+	sessionManager     *SessionManager
 	serHandler         http.Handler
 	blackList          map[string]bool
 }
@@ -130,13 +130,22 @@ func (h *AccountHandler) Post(w http.ResponseWriter, r *http.Request) {
 	}
 	sessionId := uuid.New()
 	h.sessionManager.Set(sessionId, userDetails)
-
-	http.SetCookie(w, &http.Cookie{
+	cookie := &http.Cookie{
 		Name:  SessionName,
 		Value: sessionId,
-	})
-
-	h.serHandler.ServeHTTP(w, setUserDetailsToRequest(r, userDetails))
+		Path:  "/",
+	}
+	isRemember := r.FormValue("remember") == "remember-me"
+	if isRemember {
+		cookie.Expires = time.Now().Add(time.Hour * 24)
+	}
+	http.SetCookie(w, cookie)
+	callback := r.FormValue(CallBack)
+	if callback == "" {
+		callback = "/"
+	}
+	http.Redirect(w, r, callback, http.StatusFound)
+	//h.serHandler.ServeHTTP(w, setUserDetailsToRequest(r, userDetails))
 }
 func (h *AccountHandler) Api(w http.ResponseWriter, r *http.Request) {
 	sessionCookie, err := r.Cookie(SessionName)
@@ -156,7 +165,12 @@ func NewAccountHandler(userDetailsService IUserDetailsService, ser http.Handler,
 
 	srv := &http.ServeMux{}
 
-	accountHandler := &AccountHandler{userDetailsService: userDetailsService, serHandler: ser, blackList: make(map[string]bool)}
+	accountHandler := &AccountHandler{
+		userDetailsService: userDetailsService,
+		sessionManager:     NewSessionManager(),
+		serHandler:         ser,
+		blackList:          make(map[string]bool),
+	}
 
 	for _, p := range blacklist {
 		srv.Handle(p, ser)
@@ -181,8 +195,9 @@ func (h *AccountHandler) View(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.SetCookie(w, sessionCookie)
-	sessionCookie.Expires = time.Now().Add(time.Hour * 24)
+	if !sessionCookie.Expires.IsZero() {
+		sessionCookie.Expires = time.Now().Add(time.Hour * 24)
+	}
 	http.SetCookie(w, sessionCookie) // 更新sesion过期时间
 
 	h.serHandler.ServeHTTP(w, setUserDetailsToRequest(r, userDetails))
