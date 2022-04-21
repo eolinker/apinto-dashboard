@@ -29,7 +29,20 @@ func (p *Profession) Lookup(r *http.Request) (view string, data interface{}, has
 			return name, p.header, true
 		case "profession_edit":
 			professionName := r.URL.Query().Get("name")
-			return name, professionName, true
+			driver := r.URL.Query().Get("driver")
+			d := map[string]string{
+				"name":   professionName,
+				"driver": driver,
+			}
+			return name, d, true
+		case "profession_create":
+			drivers := []string{
+				"apikey",
+				"aksk",
+				"jwt",
+				"basic",
+			}
+			return name, drivers, true
 		}
 		return name, nil, true
 	}
@@ -65,6 +78,16 @@ func NewProfession(name string, profession string, titles map[apinto_dashboard.Z
 
 func (p *Profession) createRouter() {
 	r := httprouter.New()
+
+	r.GET(fmt.Sprintf("/api/render/%s/:driver", p.ModuleName), func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+		driver := params.ByName("driver")
+		data, code, err := apinto.Client().Render(p.ProfessionName, driver)
+		if err != nil {
+			apinto.WriteResult(w, 500, []byte(err.Error()))
+			return
+		}
+		apinto.WriteResult(w, code, data)
+	})
 
 	// List
 	r.GET(fmt.Sprintf("/api/%s/", p.ModuleName), func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {

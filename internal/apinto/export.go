@@ -58,3 +58,8 @@ func (a *admin) Render(profession string, driver string) ([]byte, int, error) {
 	url := fmt.Sprintf("%s/api/%s/_render/%s", a.GetNode(), profession, driver)
 	return a.do(http.MethodGet, url, nil)
 }
+
+func (a *admin) Drivers(profession string) (data []byte, code int, err error) {
+	url := fmt.Sprintf("%s/api/profession/%s", a.GetNode(), profession)
+	return a.do(http.MethodGet, url, nil)
+}

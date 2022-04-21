@@ -2,28 +2,28 @@
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">编辑{{index .module.I18nName .zone}}</h1>
 </div>
+<div id="form"></div>
 {{end}}
 {{- block "script" . -}}
+<link href="/css/spectre-icons.css" rel="stylesheet">
+<script type="text/javascript" src="/js/jsoneditor.min.js"></script>
 <script>
-    http.get("/api/{{.name}}/{{.data}}", null, function (res) {
-        if(res.code === 200){
-            common.message("获取详情成功", "info")
-            console.log(res.data)
-            return
-        }
-        if (res['msg']){
-            common.message(res['msg'], "danger")
-        }else {
-            common.message("获取详情失败", "danger")
-        }
-
-    }, function (res) {
-        if (res['msg']){
-            common.message(res['msg'], "danger")
-        }else {
-            common.message("获取详情失败", "danger")
+    JsonEditor.init('bootstrap4', "spectre", {
+        "button" : {
+            "submit" : function (editor, e) {
+                const errors = editor.jsoneditor.validate();
+                if (errors.length) {
+                    common.message(errors[0].message, "danger")
+                }
+                else {
+                    JsonEditor.update("/api/{{.name}}/{{.data.name}}", editor.jsoneditor.getValue())
+                }
+            }
         }
     })
+    JsonEditor.getEditorWithData("form", "{{.name}} - {{.data.name}}", "/api/render/{{.name}}/{{.data.driver}}", {
+        prompt_before_delete:true,
+    }, "/api/{{.name}}/{{.data.profession}}")
 </script>
 
 {{- end -}}
