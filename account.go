@@ -179,6 +179,7 @@ func NewAccountHandler(userDetailsService IUserDetailsService, ser http.Handler,
 	srv.HandleFunc("/login", accountHandler.loginHandler)
 	srv.HandleFunc("/logout", accountHandler.logoutHandler)
 	srv.HandleFunc("/api/", accountHandler.Api)
+	srv.HandleFunc("/profession/", accountHandler.Api)
 	srv.HandleFunc("/", accountHandler.View)
 	return srv
 }
