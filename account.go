@@ -197,8 +197,8 @@ func (h *AccountHandler) View(w http.ResponseWriter, r *http.Request) {
 
 	if !sessionCookie.Expires.IsZero() {
 		sessionCookie.Expires = time.Now().Add(time.Hour * 24)
+		http.SetCookie(w, sessionCookie) // 更新sesion过期时间
 	}
-	http.SetCookie(w, sessionCookie) // 更新sesion过期时间
 
 	h.serHandler.ServeHTTP(w, setUserDetailsToRequest(r, userDetails))
 }
