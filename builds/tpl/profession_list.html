@@ -25,13 +25,29 @@
     </thead>
 
 </table>
+<div class="wrapper">
+    <div class="container_header">
+        <span class="wrapper_title">配置详情</span>
+        <button class="wrapper_button btn btn_default" >关闭</button>
+        <br>
+    </div>
+    <div class="card wrapper_card">
+        <div class="card-header" id="wrapper_detail_header">
+        </div>
+        <div class="card-body wrapper_card_body">
+            <p class="card-text">
+                <code id="wrapper_card_content">
+                </code>
+            </p>
 
+        </div>
+    </div>
+</div>
 
 {{- end -}}
 {{- block "script" . -}}
 <script src="/js/bootstrap-table.min.js"></script>
 <script>
-
     $("#create_btn").click(function () {
         window.location.href="/{{.name}}/create"
     })
@@ -44,8 +60,13 @@
         return [
             '<a class="edit" href="/{{.name}}/edit?name=',
             row.name,
+            '&driver=',
+            row.driver,
             '" title="edit">',
             '编辑',
+            '</a>  ',
+            '<a class="detail" href="javascript:void(0)" title="detail">',
+            '详情',
             '</a>  ',
             '<a class="remove" href="javascript:void(0)" title="remove">',
             '删除',
@@ -57,7 +78,7 @@
         'click .remove': function (e, value, row, index) {
             let msg ="确认删除 "+row.name+" {{index .module.I18nName .zone}}?"
             common.confirm("删除{{index .module.I18nName .zone}}", msg, function (){
-                http.delete( "/api/{{.name}}/"+row.name, null, function (res) {
+                dashboard.delete("/api/{{.name}}/"+row.name, function (res) {
                     if(res.code === 200){
                         common.message("删除成功", "danger")
                         $table.bootstrapTable('remove', {
@@ -66,22 +87,29 @@
                         })
                         return
                     }
-                    if (res['msg']){
-                        common.message(res['msg'], "danger")
-                    }else {
-                        common.message("删除失败", "danger")
-                    }
-
+                    http.handleError(res, "删除失败")
                 }, function (res) {
-                    if (res['msg']){
-                        common.message(res['msg'], "danger")
-                    }else {
-                        common.message("删除失败", "danger")
-                    }
+                    http.handleError(res, "删除失败")
                 })
-
             }, null)
+        },
+        'click .detail': function (e, value, row, index) {
+            $("#wrapper_detail_header").text(row.name)
+            dashboard.get("/api/{{.name}}/"+row.name, function (res) {
+                if(res.code === 200){
+                    $("#wrapper_card_content").text(JSON.stringify(res.data))
+                    $(".wrapper").show(200)
+                    return
+                }
+                http.handleError(res, "获取详情失败")
+            }, function (res) {
+                http.handleError(res, "获取详情失败")
+            })
         }
     }
+    $(".wrapper_button").click(function (){
+        $(".wrapper").hide(200)
+        $("#wrapper_card_content").text("")
+    })
 </script>
 {{- end -}}
