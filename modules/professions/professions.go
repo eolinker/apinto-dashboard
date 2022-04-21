@@ -79,7 +79,7 @@ func NewProfession(name string, profession string, titles map[apinto_dashboard.Z
 func (p *Profession) createRouter() {
 	r := httprouter.New()
 
-	r.GET(fmt.Sprintf("/api/%s/drivers", p.ModuleName), func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+	r.GET(fmt.Sprintf("/api/render/%s/:driver", p.ModuleName), func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 		driver := params.ByName("driver")
 		data, code, err := apinto.Client().Render(p.ProfessionName, driver)
 		if err != nil {

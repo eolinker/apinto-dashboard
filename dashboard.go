@@ -77,10 +77,6 @@ func Create(config *Config) (http.Handler, error) {
 			staticServe.Handle(path, http.StripPrefix(path, http.FileServer(http.Dir(dir))))
 		} else {
 			path = "/"
-			//staticServe.Handle(path, &Views{
-			//	serve: http.StripPrefix(path, http.FileServer(http.Dir(dir))),
-			//	mp:    mp,
-			//})
 			staticServe.Handle(path, http.StripPrefix(path, http.FileServer(http.Dir(dir))))
 		}
 	}
