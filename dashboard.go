@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/internal/template"
-	"log"
 	"net/http"
 	"path/filepath"
 	"strconv"
@@ -53,45 +52,45 @@ func Create(config *Config) (http.Handler, error) {
 	if defaultModule == "" {
 		defaultModule = modules[0].Name
 	}
-	views := new(Views)
-	views.mp = mp
-	viewServe := &http.ServeMux{}
-	views.serve = viewServe
-	apis := new(APIS)
+	//views := new(Views)
+	//views.mp = mp
+	//views.serve = viewServe
+
 	serve := &http.ServeMux{}
 	for _, m := range config.Modules {
 
 		path := fmt.Sprint("/", m.Name)
-		viewServe.Handle(path, &ViewServer{
+		viewH := &ViewServer{
 			handler: m.Handler,
 			modules: mp,
 			name:    m.Name,
-		})
-		serve.Handle(path, views)
+		}
+		////viewServe.Handle(path, )
+		//serve.Handle(path, viewH)
+		//
+		//viewServe.Handle(fmt.Sprint(path, "/"),viewH )
+		//
 
-		viewServe.Handle(fmt.Sprint(path, "/"), &ViewServer{
-			handler: m.Handler,
-			modules: mp,
-			name:    m.Name,
-		})
-		serve.Handle(fmt.Sprint(path, "/"), views)
-		apis.serve.Handle(fmt.Sprint("/api/", m.Name, "/"), m.Handler)
-		serve.Handle(fmt.Sprint("/api/", m.Name, "/"), apis)
+		serve.Handle(path, viewH)
+		serve.Handle(fmt.Sprint(path, "/"), viewH)
+		serve.Handle(fmt.Sprint("/api/", m.Name, "/"), m.Handler)
+		//serve.Handle(fmt.Sprint("/api/", m.Name, "/"), apis)
 	}
 	staticServe := &http.ServeMux{}
+
 	for path, dir := range config.Statics {
 		path = strings.TrimPrefix(path, "/")
 		path = strings.TrimSuffix(path, "/")
 		if len(path) > 0 {
 			path = fmt.Sprint("/", path, "/")
 			staticServe.Handle(path, http.StripPrefix(path, http.FileServer(http.Dir(dir))))
-
 		} else {
 			path = "/"
-			staticServe.Handle(path, &Views{
-				serve: http.StripPrefix(path, http.FileServer(http.Dir(dir))),
-				mp:    mp,
-			})
+			//staticServe.Handle(path, &Views{
+			//	serve: http.StripPrefix(path, http.FileServer(http.Dir(dir))),
+			//	mp:    mp,
+			//})
+			staticServe.Handle(path, http.StripPrefix(path, http.FileServer(http.Dir(dir))))
 		}
 	}
 
@@ -103,7 +102,10 @@ func Create(config *Config) (http.Handler, error) {
 		}
 		staticServe.ServeHTTP(w, r)
 	})
-	return serve, nil
+	return NewAccountHandler(config.UserDetailsService, &Views{
+		serve: serve,
+		mp:    mp,
+	}, []string{"/css/", "/js/", "/umd/", "/fonts/"}), nil
 }
 
 type APIS struct {
@@ -115,34 +117,45 @@ func (A *APIS) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	A.serve.ServeHTTP(w, req)
 }
 
+var viewExtHtml = map[string]int{
+	".html": 1,
+	".htm":  1,
+	"":      1,
+}
+
 type Views struct {
 	serve http.Handler
 	mp    *ModuleItemPlan
 }
 
 func (v *Views) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	//todo 处理view请求的登陆
 
-	writer := NewTemplateWriter()
+	cache := NewTemplateWriter()
 
-	v.serve.ServeHTTP(writer, req)
-
-	if writer.statusCode == 200 {
-		writer.WriteTo(w)
+	v.serve.ServeHTTP(cache, req)
+	codeHead := cache.statusCode / 100
+	if codeHead != 4 && codeHead != 5 {
+		cache.WriteTo(w)
 		return
 	}
-	ext := filepath.Ext(req.URL.Path)
-	if ext != "" {
-		writer.WriteTo(w)
-		return
+	//accepts := req.Header.Get("Accept")
+	//if strings.Contains(accepts, "text/html") || strings.Contains(accepts, "") {
+	//	v.Error(w, cache)
+	//	return
+	//}
+	if !strings.HasPrefix(req.URL.Path, "/api/") {
+		ext := filepath.Ext(req.URL.Path)
+		if viewExtHtml[ext] == 1 {
+			v.Error(w, cache)
+			return
+		}
 	}
-	tp, err := template.Load("error")
-	if err != nil {
-		log.Println("[ERR] load template<error>:", err)
-		writer.WriteTo(w)
-		return
-	}
-	tp.Execute(w, v.mp.CreateViewData("error", map[string]string{"statusCode": strconv.Itoa(writer.statusCode), "message": writer.buf.String()}, nil))
+
+	cache.WriteTo(w)
+}
+func (v *Views) Error(w http.ResponseWriter, cache *TemplateWriter) {
+	template.Execute(w, "login", v.mp.CreateViewData("error", map[string]string{"statusCode": strconv.Itoa(cache.statusCode), "message": cache.buf.String()}, nil))
+
 }
 
 type ViewServer struct {
@@ -157,13 +170,8 @@ func (v *ViewServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	tp, err := template.Load(viewName)
-	if err != nil {
-		fmt.Fprint(w, err)
-		return
-	}
+	template.Execute(w, viewName, v.modules.CreateViewData(v.name, data, nil))
 
-	tp.Execute(w, v.modules.CreateViewData(v.name, data, err))
 }
 
 type ModuleItem struct {
@@ -209,13 +217,16 @@ func NewTemplateWriter() *TemplateWriter {
 }
 func (t *TemplateWriter) WriteTo(w http.ResponseWriter) {
 
-	for k := range t.header {
-		w.Header().Set(k, t.header.Get(k))
-	}
+	t.WriteHeaderTo(w)
 	w.WriteHeader(t.statusCode)
 
 	//w.Write(t.buf.Bytes())
 	t.buf.WriteTo(w)
+}
+func (t *TemplateWriter) WriteHeaderTo(w http.ResponseWriter) {
+	for k := range t.header {
+		w.Header().Set(k, t.header.Get(k))
+	}
 }
 func (t *TemplateWriter) Header() http.Header {
 	return t.header

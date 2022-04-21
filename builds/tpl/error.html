@@ -1,4 +1,4 @@
-{{ block "content" .data}}
-<h>code {{.statusCode}}</h>
-<p>message {{.message}}</p>
+{{ block "content" .}}
+<h>code {{.data.statusCode}}</h>
+<p>message {{.data.message}}</p>
 {{end}}
