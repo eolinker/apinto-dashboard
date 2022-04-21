@@ -17,7 +17,7 @@
             if(!res.data["driver"]){
                 http.handleError(res, "获取driver失败")
             }
-            initRenderForm("/api/render/{{.name}}/"+res.data["driver"], res.data)
+            initRenderForm("/profession/{{.name}}/"+res.data["driver"], res.data)
         },function (res) {
             http.handleError(res, "获取详情失败")
         })
