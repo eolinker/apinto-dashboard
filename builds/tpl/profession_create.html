@@ -14,7 +14,7 @@
 <link href="/css/spectre-icons.css" rel="stylesheet">
 <script type="text/javascript" src="/js/jsoneditor.min.js"></script>
 <script>
-    initDrivers("drivers", "/api/drivers/{{.name}}")
+    initDrivers("drivers", "/profession/{{.name}}/")
     function initDrivers(id, url){
         dashboard.get(url,function (res) {
             if(res.code !== 200){
