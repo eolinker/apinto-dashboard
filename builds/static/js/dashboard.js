@@ -68,9 +68,6 @@ let dashboard = {
     create: function (url, data, success, error){
         http.post(url, data,  success, error)
     },
-    getRender: function (url, success, error){
-        http.ajax("GET", url, null, success, error)
-    },
     getWithAsync: function (url, success, error){
         http.ajax("GET", url, null, success, error, null, false)
     },
@@ -207,6 +204,8 @@ let util = {
         return data
     }
 }
+
+
 let JsonEditor = {
     // default_Schema: {"type":"object","properties":{"cert":{"type":"array","items":{"type":"object","properties":{"crt":{"type":"string"},"key":{"type":"string"}},"additionalProperties":false,"required":["key","crt"]}},"driver":{"type":"string","enum":["http"]},"host":{"type":"array","items":{"type":"string"},"minLength":1},"listen":{"type":"integer","format":"int32","minimum":1},"method":{"type":"array","items":{"type":"string","enum":["GET","POST","PATH","DELETE"]}},"plugins":{"type":"object","additionalProperties":{"type":"object","properties":{"config":{},"disable":{"type":"boolean"}},"additionalProperties":false,"required":["disable","config"]}},"protocol":{"type":"string","enum":["http","https"],"default":"http"},"rules":{"type":"array","items":{"type":"object","properties":{"header":{"type":"object","additionalProperties":{"type":"string"}},"location":{"type":"string","minLength":1},"query":{"type":"object","additionalProperties":{"type":"string"}}},"additionalProperties":false}},"target":{"type":"string","minLength":1}},"additionalProperties":false,"required":["driver","listen","protocol","target"]},
     default_Schema: {
