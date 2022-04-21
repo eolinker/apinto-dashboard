@@ -1,5 +1,199 @@
+{{- block "header" . -}}
+<link href="/css/bootstrap-table.min.css" rel="stylesheet">
+<link href="/css/bootstrap.min.css" rel="stylesheet">
+<link href="/css/gijgo.min.css" rel="stylesheet">
+{{- end -}}
+
 {{ block "content" .}}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">操作日志</h1>
 </div>
+
+<div class="row clearfix">
+    <div class="col-md-3 column" >
+        用户:<input type="text" class="form-control" id="user" placeholder="user"/>
+    </div>
+    <div class="col-md-3 column">
+        操作类型:<input type="text" class="form-control" id="operation" placeholder="operation"/>
+    </div>
+    <div class="col-md-3 column">
+        操作对象:<input type="text" class="form-control" id="object" placeholder="object"/>
+    </div>
+</div>
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-4" style="margin-bottom: 50px;margin-left: -215px;margin-right: 20px">
+            Start Date: <input id="startDate"  />
+        </div>
+        <div class="col-md-4">
+            End Date: <input id="endDate"  />
+        </div>
+        <div class="col-md-1" style="margin: 20px;">
+            <button class="btn btn-warning" id="search" type="button">搜索</button>
+        </div>
+        <div class="col-md-1" style="margin: 20px;margin-left: -50px">
+             <button class="btn btn-info" id="reset" type="button">重置</button>
+        </div>
+    </div>
+</div>
+
+
+
+<table  class="table"
+        id="table"
+        data-toggle="table"
+        data-response-handler="responseHandler"
+        data-pagination="true"
+        data-side-pagination="server"
+        data-total-field="total_num"
+        data-query-params="queryParams"
+        data-data-field="list"
+        data-page-list="[10,25,50,100]"
+        data-url="/api/{{.name}}/">
+    <caption>List of {{.name}}</caption>
+
+    <thead>
+    <tr class="table-info">
+        {{- range $i,$t := (index .data.Title .zone)}}
+        <th data-field="{{index $.data.Fields $i}}">{{ $t}}</th>
+        {{- end }}
+        <th data-field="args" data-formatter="operateFormatter" ></th>
+    </tr>
+
+    </thead>
+
+</table>
+
 {{end}}
+
+{{- block "script" . -}}
+<script src="/js/jquery-3.0.0.js"></script>
+<script src="/js/gijgo.min.js"></script>
+<script src="/js/messages.zh-cn.min.js"></script>
+<script src="/js/bootstrap.bundle.js"></script>
+<script src="/js/bootstrap-table.min.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script>
+    let $table = $('#table')
+
+    function responseHandler(res) {
+        return res.data
+    }
+    const requestParam={
+
+    }
+    const privateFun={};
+    privateFun.changeRequest=(input)=>{
+
+    }
+    function queryParams(params) {
+        requestParam.limit=params.limit
+        requestParam.offset=params.offset
+        privateFun.changeRequest( requestParam)
+        return   requestParam
+    }
+
+    function operateFormatter(value, row, index) {
+        let tmpContent=''
+        if( row.args && row.args.length>0){
+            row.args.forEach((item)=>{
+                tmpContent=tmpContent+`${item.key}: ${item.value}<br>`
+            })
+        }
+        if(!row.args)
+            return [
+                '<button class="btn btn-disable  btn-sm" data-toggle="modal" data-target="#myModal'+index+'" href="#" title="details" disabled>'+
+                '详情'+
+                '</button> '
+                ]
+        return [
+            '<button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#myModal'+index+'" href="#" title="details">',
+            '详情',
+            '</button>  ',
+            '    <div class="modal fade" id="myModal'+index+'">\n' +
+            '        <div class="modal-dialog modal-lg">\n' +
+            '            <div class="modal-content">\n' +
+            '                <!-- 模态框头部 -->\n' +
+            '                <div class="modal-header">\n' +
+            '                    <h4 class="modal-title">details</h4>\n' +
+            '                    <button type="button" class="close" data-dismiss="modal">&times;</button>\n' +
+            '                </div>\n' +
+            '                <!-- 模态框主体 -->\n' +
+            '                <div class="modal-body bg-dark text-light">\n' +
+            tmpContent + '\n' +
+            '                </div>\n' +
+            '                <!-- 模态框底部 -->\n' +
+            '                <div class="modal-footer">\n' +
+            '                    <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>\n' +
+            '                </div>\n' +
+            '            </div>\n' +
+            '        </div>\n' +
+            '    </div>'
+        ].join('')
+
+    }
+
+    $('#search').click(function() {
+        requestParam.user = $("#user").val()
+        requestParam.operation = $("#operation").val()
+        requestParam.object = $("#object").val()
+        requestParam.content = $("#content").val()
+
+        var str = '2008-10-09';//PHP中对应的UNIX时间戳为1223559328
+        var arr = str.split("-");
+        var datum = new Date(Date.UTC(arr[0],arr[1]-1,arr[2],-8));
+
+        console.log(datum.getTime()/1000)
+        $table.bootstrapTable(
+            "refresh",
+            {
+                pageNumber: 1,
+            }
+        );
+    })
+
+    $('#reset').click(function() {
+        $("#user").val('')
+        $("#operation").val('')
+        $("#object").val('')
+        $("#content").val('')
+        $("#startDate").val('')
+        $("#endDate").val('')
+
+        requestParam.user = ''
+        requestParam.operation = ''
+        requestParam.object = ''
+        requestParam.content = ''
+        requestParam.startDate = ''
+        requestParam.endDate = ''
+
+        $table.bootstrapTable(
+            "refresh",
+            {
+                pageNumber: 1,
+            }
+        );
+    })
+
+    $('#startDate').datepicker({
+        locale: 'zh-cn',
+        format: 'yyyy-mm-dd',
+        uiLibrary: 'bootstrap4',
+        maxDate: function () {
+            return $('#endDate').val();
+        },
+        weekStartDay: 1
+    });
+    $('#endDate').datepicker({
+        locale: 'zh-cn',
+        format: 'yyyy-mm-dd',
+        uiLibrary: 'bootstrap4',
+        minDate: function () {
+            return $('#startDate').val();
+        },
+        weekStartDay: 1
+    });
+
+</script>
+{{- end -}}
