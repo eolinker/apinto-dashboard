@@ -5,7 +5,10 @@ import (
 )
 
 type Plugins struct {
-	name string
+	name           string
+	ModuleName     string
+	ProfessionName string
+	workerName     string
 }
 
 func NewPlugins(name string) *Plugins {
@@ -17,5 +20,5 @@ func (p *Plugins) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (p *Plugins) Lookup(r *http.Request) (view string, data interface{}, has bool) {
-	return p.name,"",true
+	return p.name, "", true
 }

@@ -7,44 +7,39 @@
         <label class="input-group-text" for="drivers">Drivers</label>
     </div>
     <select class="custom-select" id="drivers">
-        {{- range $i,$t := (index .data)}}
-            {{- if eq $i 0}}
-                <option value="{{$t}}" selected>{{$t}}</option>
-            {{- else }}
-                <option value="{{$t}}">{{$t}}</option>
-            {{- end}}
-        {{- end }}
     </select>
 </div>
-<div id="form"></div>
 {{end}}
 {{- block "script" . -}}
 <link href="/css/spectre-icons.css" rel="stylesheet">
 <script type="text/javascript" src="/js/jsoneditor.min.js"></script>
 <script>
-    $(document).ready(function () {
-        JsonEditor.init('bootstrap4', "spectre", {
-            "button" : {
-                "submit" : function (editor, e) {
-                    const errors = editor.jsoneditor.validate();
-                    if (errors.length) {
-                        common.message(errors[0].message, "danger")
-                    }
-                    else {
-                        JsonEditor.create("/api/{{.name}}/", editor.jsoneditor.getValue())
-                    }
+    initDrivers("drivers", "/profession/{{.name}}/")
+    function initDrivers(id, url){
+        dashboard.get(url,function (res) {
+            if(res.code !== 200){
+                http.handleError(res, "获取driver列表失败")
+            }
+            let data = res.data["drivers"]
+            let target = $("#"+id)
+            target.html("")
+            for (let i = 0; i < data.length; i++) {
+                if(i===0){
+                    target.append("<option value='"+data[i].name+"' selected>" + data[i].name + "</option>")
+                }else {
+                    target.append("<option value='"+data[i].name+"'>" + data[i].name + "</option>")
                 }
             }
+        },function (res) {
+            http.handleError(res, "获取driver列表失败")
         })
-        let select = $("#drivers")
-        let editor = JsonEditor.getEditor("form", "{{.name}}", "/api/render/{{.name}}/"+select.val(), {
-            prompt_before_delete:true,
-        })
-        $('.select_content').on('change', "select#drivers", function () {
-            let value = $(this).val();
-            editor = JsonEditor.updateSchema(editor, "/api/render/{{.name}}/"+value, "{{.name}}")
-        });
+    }
+    $('.select_content').on('change', "select#drivers", function () {
+        let value = $(this).val();
+        console.log(value)
+        // todo 监听select变化，update schema
     });
+
 </script>
 
 {{- end -}}
