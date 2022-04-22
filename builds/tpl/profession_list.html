@@ -90,9 +90,9 @@
                         })
                         return
                     }
-                    http.handleError(res, "删除失败")
+                    return http.handleError(res, "删除失败")
                 }, function (res) {
-                    http.handleError(res, "删除失败")
+                    return http.handleError(res, "删除失败")
                 })
             }, null)
         },
@@ -115,9 +115,9 @@
                     $(".wrapper").show(200)
                     return
                 }
-                http.handleError(res, "获取详情失败")
+                return http.handleError(res, "获取详情失败")
             }, function (res) {
-                http.handleError(res, "获取详情失败")
+                return http.handleError(res, "获取详情失败")
             })
         }
     }
