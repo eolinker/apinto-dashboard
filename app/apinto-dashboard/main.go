@@ -56,10 +56,10 @@ func main() {
 	ms := toModule(cf)
 	config.Modules = append(config.Modules, ms...)
 
-	plugingModule := plugins.NewPlugins("plugins")
+	pluginModule := plugins.NewPlugins("plugins")
 	config.Modules = append(config.Modules, &apinto.Module{
 		Path:    "/plugins",
-		Handler: plugingModule,
+		Handler: pluginModule,
 		Name:    "plugins",
 		I18nName: map[apinto.ZoneName]string{
 			apinto.ZhCn: "全局插件",
