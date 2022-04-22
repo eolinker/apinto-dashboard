@@ -1,7 +1,45 @@
-{{ block "content" .}}
-create {{.name}}
+{{ block "content" .data}}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">新建{{index .module.I18nName .zone}}</h1>
+</div>
+<div class="select_content input-group mb-3">
+    <div class="input-group-prepend">
+        <label class="input-group-text" for="drivers">Drivers</label>
+    </div>
+    <select class="custom-select" id="drivers">
+    </select>
+</div>
 {{end}}
+{{- block "script" . -}}
+<link href="/css/spectre-icons.css" rel="stylesheet">
+<script type="text/javascript" src="/js/jsoneditor.min.js"></script>
+<script>
+    initDrivers("drivers", "/profession/{{.name}}/")
+    function initDrivers(id, url){
+        dashboard.get(url,function (res) {
+            if(res.code !== 200){
+                http.handleError(res, "获取driver列表失败")
+            }
+            let data = res.data["drivers"]
+            let target = $("#"+id)
+            target.html("")
+            for (let i = 0; i < data.length; i++) {
+                if(i===0){
+                    target.append("<option value='"+data[i].name+"' selected>" + data[i].name + "</option>")
+                }else {
+                    target.append("<option value='"+data[i].name+"'>" + data[i].name + "</option>")
+                }
+            }
+        },function (res) {
+            http.handleError(res, "获取driver列表失败")
+        })
+    }
+    $('.select_content').on('change', "select#drivers", function () {
+        let value = $(this).val();
+        console.log(value)
+        // todo 监听select变化，update schema
+    });
 
-{{block "script" .}}
+</script>
 
-{{end}}
+{{- end -}}

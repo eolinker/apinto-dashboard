@@ -3,9 +3,11 @@ package main
 import (
 	"fmt"
 	apinto "github.com/eolinker/apinto-dashboard"
+	"github.com/eolinker/apinto-dashboard/internal/activity-log/sqlite"
 	apintoClient "github.com/eolinker/apinto-dashboard/internal/apinto"
 	"github.com/eolinker/apinto-dashboard/internal/security"
 	activity_log "github.com/eolinker/apinto-dashboard/modules/activity-log"
+
 	"github.com/eolinker/apinto-dashboard/modules/extenders"
 	"github.com/eolinker/apinto-dashboard/modules/monitors"
 	"github.com/eolinker/apinto-dashboard/modules/plugins"
@@ -19,11 +21,19 @@ func init() {
 	apinto.RetTemplate("tpl", "index", "icons")
 }
 func main() {
+	activityHandler, err := sqlite.NewActivityDao("data/activity-log.db")
+	if err != nil {
+		log.Println("[Error]", err)
+		return
+	}
+
+	apinto.SetActivityLogAddHandler(activityHandler)
 	cf, err := ReadConfig("config.yml")
 	if err != nil {
 		log.Println("[Error]", err)
 		return
 	}
+
 	apintoClient.Init(cf.Apinto)
 	config := new(apinto.Config)
 
@@ -66,7 +76,8 @@ func main() {
 			apinto.EnUs: "Global Plugins",
 		},
 	})
-	activityLogModule, err := activity_log.NewActivityLog("activity-log")
+
+	activityLogModule, err := activity_log.NewActivityLog("activity-log", activityHandler)
 	if err != nil {
 		log.Println("[Error]", err)
 		return
