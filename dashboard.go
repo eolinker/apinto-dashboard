@@ -4,15 +4,11 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/internal/template"
-	"log"
 	"net/http"
 	"path/filepath"
 	"strconv"
 	"strings"
 )
-
-type IDashboardAccount interface {
-}
 
 type ViewHandlerFunc func(r *http.Request) (view string, data interface{}, err error)
 
@@ -31,30 +27,18 @@ type Config struct {
 	DefaultZone        ZoneName
 	Modules            []*Module
 	UserDetailsService IUserDetailsService
+	ActivityLog        interface{}
 	Statics            map[string]string
 	DefaultModule      string
 }
-type DashboardService struct {
-	defaultZone   ZoneName
-	userDetails   IUserDetailsService
-	serve         http.ServeMux
-	defaultModule string
-}
 
-func (d *DashboardService) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	d.serve.ServeHTTP(w, req)
-}
-
-func Create(config *Config) (*DashboardService, error) {
+func Create(config *Config) (http.Handler, error) {
 	if config.UserDetailsService == nil {
 		return nil, ErrorUserDetailsServiceNeed
 	}
 	if config.DefaultZone == "" {
 		config.DefaultZone = ZhCn
 	}
-	service := new(DashboardService)
-	service.userDetails = config.UserDetailsService
-	service.defaultZone = config.DefaultZone
 
 	modules := make([]*ModuleItem, 0, len(config.Modules))
 	for _, m := range config.Modules {
@@ -69,66 +53,53 @@ func Create(config *Config) (*DashboardService, error) {
 	if defaultModule == "" {
 		defaultModule = modules[0].Name
 	}
-	views := new(Views)
-	views.mp = mp
-	viewServe := &http.ServeMux{}
-	views.serve = viewServe
-	apis := new(APIS)
+
+	serve := &http.ServeMux{}
 	for _, m := range config.Modules {
 
 		path := fmt.Sprint("/", m.Name)
-		viewServe.Handle(path, &ViewServer{
+		viewH := &ViewServer{
 			handler: m.Handler,
 			modules: mp,
 			name:    m.Name,
-		})
-		service.serve.Handle(path, views)
-
-		viewServe.Handle(fmt.Sprint(path, "/"), &ViewServer{
-			handler: m.Handler,
-			modules: mp,
-			name:    m.Name,
-		})
-		service.serve.Handle(fmt.Sprint(path, "/"), views)
-		apis.serve.Handle(fmt.Sprint("/api/", m.Name, "/"), m.Handler)
-		service.serve.Handle(fmt.Sprint("/api/", m.Name, "/"), apis)
+		}
+		serve.Handle(path, viewH)
+		serve.Handle(fmt.Sprint(path, "/"), viewH)
+		serve.Handle(fmt.Sprint("/api/", m.Name, "/"), m.Handler)
+		serve.Handle(fmt.Sprint("/profession/", m.Name, "/"), m.Handler)
 	}
 	staticServe := &http.ServeMux{}
+
 	for path, dir := range config.Statics {
 		path = strings.TrimPrefix(path, "/")
 		path = strings.TrimSuffix(path, "/")
 		if len(path) > 0 {
 			path = fmt.Sprint("/", path, "/")
 			staticServe.Handle(path, http.StripPrefix(path, http.FileServer(http.Dir(dir))))
-
 		} else {
 			path = "/"
-			staticServe.Handle(path, &Views{
-				serve: http.StripPrefix(path, http.FileServer(http.Dir(dir))),
-				mp:    mp,
-			})
-
+			staticServe.Handle(path, http.StripPrefix(path, http.FileServer(http.Dir(dir))))
 		}
 	}
 
 	defaultModulePath := mp.moduleMap[defaultModule].Path
-	service.serve.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	serve.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/" {
 			http.Redirect(w, r, defaultModulePath, 302)
 			return
 		}
 		staticServe.ServeHTTP(w, r)
 	})
-	return service, nil
+	return NewAccountHandler(config.UserDetailsService, &Views{
+		serve: serve,
+		mp:    mp,
+	}, []string{"/css/", "/js/", "/umd/", "/fonts/", "/img/"}), nil
 }
 
-type APIS struct {
-	serve http.ServeMux
-}
-
-func (A *APIS) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	//todo 处理api接口的登陆
-	A.serve.ServeHTTP(w, req)
+var viewExtHtml = map[string]int{
+	".html": 1,
+	".htm":  1,
+	"":      1,
 }
 
 type Views struct {
@@ -137,28 +108,25 @@ type Views struct {
 }
 
 func (v *Views) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	//todo 处理view请求的登陆
 
-	writer := NewTemplateWriter()
+	cache := NewTemplateWriter()
 
-	v.serve.ServeHTTP(writer, req)
+	v.serve.ServeHTTP(cache, req)
+	codeHead := cache.statusCode / 100
+	if codeHead == 4 || codeHead == 5 {
+		if !strings.HasPrefix(req.URL.Path, "/api/") {
+			ext := filepath.Ext(req.URL.Path)
+			if viewExtHtml[ext] == 1 {
+				v.Error(w, cache)
+				return
+			}
+		}
+	}
+	cache.WriteTo(w)
+}
+func (v *Views) Error(w http.ResponseWriter, cache *TemplateWriter) {
+	template.Execute(w, "login", v.mp.CreateViewData("error", map[string]string{"statusCode": strconv.Itoa(cache.statusCode), "message": cache.buf.String()}, nil))
 
-	if writer.statusCode == 200 {
-		writer.WriteTo(w)
-		return
-	}
-	ext := filepath.Ext(req.URL.Path)
-	if ext != "" {
-		writer.WriteTo(w)
-		return
-	}
-	tp, err := template.Load("error")
-	if err != nil {
-		log.Println("[ERR] load template<error>:", err)
-		writer.WriteTo(w)
-		return
-	}
-	tp.Execute(w, v.mp.CreateViewData("error", map[string]string{"statusCode": strconv.Itoa(writer.statusCode), "message": writer.buf.String()}, nil))
 }
 
 type ViewServer struct {
@@ -173,13 +141,8 @@ func (v *ViewServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	tp, err := template.Load(viewName)
-	if err != nil {
-		fmt.Fprint(w, err)
-		return
-	}
+	template.Execute(w, viewName, v.modules.CreateViewData(v.name, data, nil))
 
-	tp.Execute(w, v.modules.CreateViewData(v.name, data, err))
 }
 
 type ModuleItem struct {
@@ -225,13 +188,16 @@ func NewTemplateWriter() *TemplateWriter {
 }
 func (t *TemplateWriter) WriteTo(w http.ResponseWriter) {
 
-	for k := range t.header {
-		w.Header().Set(k, t.header.Get(k))
-	}
+	t.WriteHeaderTo(w)
 	w.WriteHeader(t.statusCode)
 
 	//w.Write(t.buf.Bytes())
 	t.buf.WriteTo(w)
+}
+func (t *TemplateWriter) WriteHeaderTo(w http.ResponseWriter) {
+	for k := range t.header {
+		w.Header().Set(k, t.header.Get(k))
+	}
 }
 func (t *TemplateWriter) Header() http.Header {
 	return t.header

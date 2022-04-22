@@ -58,8 +58,9 @@
     <path class="cls-1" d="M510.31,25.6a36.55,36.55,0,0,1,26.85,11.3,37.59,37.59,0,0,1,11.23,27.55,37.2,37.2,0,0,1-11.08,27.26,36.52,36.52,0,0,1-26.9,11.15q-16.56,0-27.52-11.45a38.06,38.06,0,0,1-11-27.21A38.19,38.19,0,0,1,477,44.8a38.49,38.49,0,0,1,33.27-19.2Zm-.15,13.7A23.12,23.12,0,0,0,493,46.4Q486,53.5,486,64.45q0,12.21,8.76,19.3a24,24,0,0,0,15.61,5.56,22.78,22.78,0,0,0,17-7.21,24.42,24.42,0,0,0,7-17.75,24.54,24.54,0,0,0-7.06-17.77A23,23,0,0,0,510.16,39.3Z"/>
 </symbol>
 </svg>
-{{block "icon" .}}
-{{end}}
+{{- block "icon" . -}}
+{{- end -}}
+{{- block "top" . -}}
 <header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
 
 <!--    <div class="d-flex flex-column flex-shrink-0 p-3 text-white bg-dark" >-->
@@ -70,35 +71,39 @@
             <span>Dashboard</span>
         </a>
 
-    {{block "top" .}}
     <!-- 这里显示搜索操作-->
-    {{end}}
+
 </header>
+{{- end -}}
+
 <div class="container-fluid">
     <div class="row">
+        {{- block "left" . -}}
         <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
             <div class="sidebar-sticky pt-3">
-                {{block "left" .}}
+
                 <ul class="nav flex-column">
                     {{- range $index,$m:=.modules -}}
                     <li class="nav-item">
                         {{- if eq $m.Name $.name -}}
-                        <a href="{{$m.Path}}" class="nav-link active" aria-current="page"><svg class="bi me-2" width="16" height="16"><use xlink:href="#{{$m.Name}}"/></svg>{{index $m.I18nName $.zone}}</a>
+                        <a href="{{$m.Path}}" class="nav-link active" aria-current="page"><svg class="bi me-2" width="16" height="16"><use xlink:href="#{{$m.Name}}"/></svg>  {{index $m.I18nName $.zone}}</a>
                         {{- else -}}
-                        <a href="{{$m.Path}}" class="nav-link "><svg class="bi me-2" width="16" height="16"><use xlink:href="#{{$m.Name}}"/></svg>{{index $m.I18nName $.zone}}</a>
+                        <a href="{{$m.Path}}" class="nav-link "><svg class="bi me-2" width="16" height="16"><use xlink:href="#{{$m.Name}}"/></svg>  {{index $m.I18nName $.zone}}</a>
                         {{- end }}
                     </li>
                     {{- end -}}
                 </ul>
-                {{- end -}}
+
             </div>
         </nav>
+        {{- end -}}
 
         <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
             {{ block "content" .}}
 
             {{end}}
         </main>
+
     </div>
 </div>
 
