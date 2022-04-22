@@ -18,7 +18,7 @@
     function initDrivers(id, url){
         dashboard.get(url,function (res) {
             if(res.code !== 200){
-                http.handleError(res, "获取driver列表失败")
+                return http.handleError(res, "获取driver列表失败")
             }
             let data = res.data["drivers"]
             let target = $("#"+id)
@@ -31,7 +31,7 @@
                 }
             }
         },function (res) {
-            http.handleError(res, "获取driver列表失败")
+            return http.handleError(res, "获取driver列表失败")
         })
     }
     $('.select_content').on('change', "select#drivers", function () {
