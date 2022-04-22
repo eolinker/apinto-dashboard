@@ -25,10 +25,10 @@ func NewPlugins(name string) *Plugins {
 		workerName:     "plugin",
 		header: &professions.ListHeader{
 			Title: map[apinto_dashboard.ZoneName][]string{
-				apinto_dashboard.ZhCn: {"ID", "名称", "类型", "状态"},
-				apinto_dashboard.EnUs: {"ID", "Name", "Type", "Status"},
+				apinto_dashboard.ZhCn: {"名称", "扩展ID", "类型", "状态"},
+				apinto_dashboard.EnUs: {"Name", "ID", "Type", "Status"},
 			},
-			Fields: []string{"id", "name", "type", "status"},
+			Fields: []string{"name", "id", "type", "status"},
 		},
 	}
 	p.createRouter()
@@ -56,7 +56,7 @@ func (p *Plugins) createRouter() {
 		apinto.WriteResult(w, code, data)
 	})
 	// Update
-	r.PUT(fmt.Sprintf("/api/%s", p.name), func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+	r.PUT(fmt.Sprintf("/api/%s/", p.name), func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 		data, err := apinto.ReadBody(r.Body)
 		if err != nil {
 			apinto.WriteResult(w, 500, []byte(err.Error()))

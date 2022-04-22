@@ -28,25 +28,25 @@
 
 </table>
 
-<!--<div class="wrapper" style="display: block">-->
-<!--    <div class="wrapper_header">-->
-<!--        <span class="wrapper_title">配置详情</span>-->
-<!--        <button class="wrapper_button btn btn_default" >关闭</button>-->
-<!--        <br>-->
-<!--    </div>-->
-<!--    <div class="wrapper_body">-->
-<!--        adfasfasfdfadsfasfaf-->
-<!--    </div>-->
-<!--    <div class="wrapper_footer row justify-content-between">-->
-<!--        <div class="col-4">-->
-<!--            <button type="button" class="btn btn-outline-secondary">取消</button>-->
-<!--        </div>-->
-<!--        <div class="col-4" style="text-align: right">-->
-<!--            <button type="button" class="btn btn-primary">提交</button>-->
-<!--        </div>-->
-<!--    </div>-->
+<div class="wrapper">
+    <div class="wrapper_header">
+        <span class="wrapper_title">插件配置</span>
+        <button class="wrapper_button btn btn_default" >关闭</button>
+        <br>
+    </div>
+    <div class="wrapper_body">
+        adfasfasfdfadsfasfaf
+    </div>
+    <div class="wrapper_footer row justify-content-between">
+        <div class="col-4">
+            <button type="button" class="btn btn-outline-secondary wrapper_cancel">取消</button>
+        </div>
+        <div class="col-4" style="text-align: right">
+            <button type="button" class="btn btn-primary">提交</button>
+        </div>
+    </div>
 
-<!--</div>-->
+</div>
 {{end}}
 
 {{block "script" .}}
@@ -58,7 +58,14 @@
     $(document).ready(function(){
         $table.bootstrapTable('refreshOptions', {
             onReorderRow: function (newData) {
-                console.log(newData)
+                updateData(newData,function (res){
+                    if(res.code !== 200){
+                        return http.handleError(res, "更新失败")
+                    }
+                    common.message("更新成功", "success")
+                }, function (res){
+                    return http.handleError(res, "更新失败")
+                })
             }
         })
     })
@@ -80,62 +87,54 @@
         ].join('')
     }
 
-    function updateData(data){
-        dashboard.update("/api/{{.name}}", {
+    function updateData(data, success, error){
+        dashboard.update("/api/{{.name}}/", {
             "plugins":data
-        }, function (res){
-            if(res.code !== 200){
-                http.handleError(res, "更新失败")
-                return
-            }
-        }, function (res){
-            http.handleError(res, "更新失败")
-        })
+        }, success, error)
     }
-    function updateRow(table, index, data){
+    function updateRowDetail(table, index, data){
         table.bootstrapTable('updateRow', {
             index: index,
             row: data
         })
     }
     function removeRow(table, field, value){
-
         table.bootstrapTable('remove', {
             field: field,
             values: [value]
         })
+        updateData(table.bootstrapTable('getData'), function (res){
+            if(res.code !== 200){
+                http.handleError(res, "删除失败")
+                window.location.reload()
+                return
+            }
+            common.message("删除成功", "success")
+        }, function (res){
+            http.handleError(res, "删除失败")
+            window.location.reload()
+            return
+        })
     }
     window.operateEvents = {
         'click .edit': function (e, value, row, index) {
-            row.name = "test"
+            $(".wrapper").show()
             console.log(JSON.stringify($table.bootstrapTable('getData')))
         },
         'click .remove': function (e, value, row, index) {
             let msg ="确认删除 "+row.name+" {{index .module.I18nName .zone}}?"
             common.confirm("删除{{index .module.I18nName .zone}}", msg, function (){
-                // dashboard.delete("/api/{{.name}}/"+row.name, function (res) {
-                //     if(res.code === 200){
-                //         common.message("删除成功", "danger")
-                //         $table.bootstrapTable('remove', {
-                //             field: 'id',
-                //             values: [row.id]
-                //         })
-                //         return
-                //     }
-                //     http.handleError(res, "删除失败")
-                // }, function (res) {
-                //     http.handleError(res, "删除失败")
-                // })
-
                 removeRow($table, 'id', row.id)
-                console.log(JSON.stringify($table.bootstrapTable('getData')))
             }, null)
         },
     }
-    // $(".wrapper_button").click(function (){
-    //     $(".wrapper").hide(200)
-    //     $(".wrapper_title").text("")
-    //     $("#wrapper_table_body").html("")
-    // })
+    $(".wrapper_button").click(function (){
+        $(".wrapper").hide(200)
+        $("#wrapper_table_body").html("")
+    })
+    $(".wrapper_cancel").click(function (){
+        $(".wrapper").hide(200)
+        $("#wrapper_table_body").html("")
+    })
 </script>
 {{end}}
