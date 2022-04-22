@@ -27,6 +27,7 @@ type Config struct {
 	DefaultZone        ZoneName
 	Modules            []*Module
 	UserDetailsService IUserDetailsService
+	ActivityLog        interface{}
 	Statics            map[string]string
 	DefaultModule      string
 }
