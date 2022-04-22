@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	apinto "github.com/eolinker/apinto-dashboard"
-	activity_log "github.com/eolinker/apinto-dashboard/modules/activity-log"
+	_ "github.com/mattn/go-sqlite3"
 	"time"
 )
 
@@ -13,10 +13,10 @@ type activityLogDao struct {
 	db *sql.DB
 }
 
-func (a *activityLogDao) GetLogList(offset, limit int, user, operation, object string, startUnix, endUnix int64) ([]*activity_log.LogEntity, int64, error) {
+func (a *activityLogDao) GetLogList(offset, limit int, user, operation, object string, startUnix, endUnix int64) ([]*apinto.LogEntity, int64, error) {
 	db := a.db
 
-	list := make([]*activity_log.LogEntity, 0, limit)
+	list := make([]*apinto.LogEntity, 0, limit)
 	var totalNum int64
 
 	//拼接sql语句
@@ -85,7 +85,7 @@ func (a *activityLogDao) GetLogList(offset, limit int, user, operation, object s
 			return list, 0, fmt.Errorf("GetLogList.Unmarshal args Fail. %s", err)
 		}
 
-		entity := &activity_log.LogEntity{
+		entity := &apinto.LogEntity{
 			Time:      time.Unix(timestamp, 0).Format("2006-01-02 15:04:05"),
 			User:      user,
 			Operation: operation,
@@ -160,7 +160,7 @@ func (a *activityLogDao) initTable() error {
 }
 
 func NewActivityDao(file string) (ISqliteHandler, error) {
-	db, err := sql.Open("sqlite3", "./sqlite.db")
+	db, err := sql.Open("sqlite3", file)
 	if err != nil {
 		return nil, err
 	}
