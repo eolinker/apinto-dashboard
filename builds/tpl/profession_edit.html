@@ -2,28 +2,37 @@
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">编辑{{index .module.I18nName .zone}}</h1>
 </div>
-<div id="form"></div>
 {{end}}
 {{- block "script" . -}}
 <link href="/css/spectre-icons.css" rel="stylesheet">
 <script type="text/javascript" src="/js/jsoneditor.min.js"></script>
 <script>
-    JsonEditor.init('bootstrap4', "spectre", {
-        "button" : {
-            "submit" : function (editor, e) {
-                const errors = editor.jsoneditor.validate();
-                if (errors.length) {
-                    common.message(errors[0].message, "danger")
-                }
-                else {
-                    JsonEditor.update("/api/{{.name}}/{{.data.name}}", editor.jsoneditor.getValue())
-                }
+    initRender("/api/{{.name}}/{{.data}}")
+    function initRender(url) {
+        // todo 获取配置详情，如果同步获取数据详情则使用dashboard.getWithAsync获取
+        dashboard.get(url,function (res) {
+            if(res.code !== 200){
+                http.handleError(res, "获取详情失败")
             }
-        }
-    })
-    JsonEditor.getEditorWithData("form", "{{.name}} - {{.data.name}}", "/api/render/{{.name}}/{{.data.driver}}", {
-        prompt_before_delete:true,
-    }, "/api/{{.name}}/{{.data.profession}}")
+            if(!res.data["driver"]){
+                http.handleError(res, "获取driver失败")
+            }
+            initRenderForm("/profession/{{.name}}/"+res.data["driver"], res.data)
+        },function (res) {
+            http.handleError(res, "获取详情失败")
+        })
+    }
+    function initRenderForm(url, data){
+        dashboard.get(url, function (res) {
+            if(res.code !== 200){
+                http.handleError(res, "获取render失败")
+            }
+            // todo 渲染render, data参数用于初始化
+
+        }, function (res){
+            http.handleError(res, "获取render失败")
+        })
+    }
 </script>
 
 {{- end -}}

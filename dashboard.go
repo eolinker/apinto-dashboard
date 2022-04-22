@@ -114,7 +114,7 @@ func (v *Views) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	v.serve.ServeHTTP(cache, req)
 	codeHead := cache.statusCode / 100
 	if codeHead == 4 || codeHead == 5 {
-		if !strings.HasPrefix(req.URL.Path, "/api/") {
+		if !strings.HasPrefix(req.URL.Path, "/api/") && !strings.HasPrefix(req.URL.Path, "/profession/") {
 			ext := filepath.Ext(req.URL.Path)
 			if viewExtHtml[ext] == 1 {
 				v.Error(w, cache)
@@ -125,7 +125,7 @@ func (v *Views) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	cache.WriteTo(w)
 }
 func (v *Views) Error(w http.ResponseWriter, cache *TemplateWriter) {
-	template.Execute(w, "login", v.mp.CreateViewData("error", map[string]string{"statusCode": strconv.Itoa(cache.statusCode), "message": cache.buf.String()}, nil))
+	template.Execute(w, "error", v.mp.CreateViewData("error", map[string]string{"statusCode": strconv.Itoa(cache.statusCode), "message": cache.buf.String()}, nil))
 
 }
 

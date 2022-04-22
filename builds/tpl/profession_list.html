@@ -26,19 +26,24 @@
 
 </table>
 <div class="wrapper">
-    <div class="container_header">
+    <div class="wrapper_header">
         <span class="wrapper_title">配置详情</span>
         <button class="wrapper_button btn btn_default" >关闭</button>
         <br>
     </div>
-    <div class="card wrapper_card">
-        <div class="card-header" id="wrapper_detail_header">
-        </div>
-        <div class="card-body wrapper_card_body">
-            <p class="card-text">
-                <code id="wrapper_card_content">
-                </code>
-            </p>
+    <div class="card wrapper_body">
+        <div class="card-body">
+            <table class="table table-bordered">
+                <thead class="thead-light">
+                <tr>
+                    <th>Key</th>
+                    <th>Value</th>
+                </tr>
+                </thead>
+                <tbody id="wrapper_table_body">
+                </tbody>
+
+            </table>
 
         </div>
     </div>
@@ -60,8 +65,6 @@
         return [
             '<a class="edit" href="/{{.name}}/edit?name=',
             row.name,
-            '&driver=',
-            row.driver,
             '" title="edit">',
             '编辑',
             '</a>  ',
@@ -94,10 +97,21 @@
             }, null)
         },
         'click .detail': function (e, value, row, index) {
-            $("#wrapper_detail_header").text(row.name)
             dashboard.get("/api/{{.name}}/"+row.name, function (res) {
                 if(res.code === 200){
-                    $("#wrapper_card_content").text(JSON.stringify(res.data))
+                    $(".wrapper_title").text(row.name)
+                    let data = res.data
+                    Object.keys(data).forEach(function (key) {
+                        if(data[key] instanceof Object){
+                            $("#wrapper_table_body").append(
+                                "<tr><td>"+key+"</td><td>"+JSON.stringify(data[key])+"</td></tr>"
+                            )
+                        }else {
+                            $("#wrapper_table_body").append(
+                                "<tr><td>"+key+"</td><td>"+data[key]+"</td></tr>"
+                            )
+                        }
+                    })
                     $(".wrapper").show(200)
                     return
                 }
@@ -109,7 +123,8 @@
     }
     $(".wrapper_button").click(function (){
         $(".wrapper").hide(200)
-        $("#wrapper_card_content").text("")
+        $(".wrapper_title").text("")
+        $("#wrapper_table_body").html("")
     })
 </script>
 {{- end -}}

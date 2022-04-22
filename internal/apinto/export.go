@@ -55,7 +55,7 @@ func (a *admin) PatchPath(profession string, name string, path string, body []by
 }
 
 func (a *admin) Render(profession string, driver string) ([]byte, int, error) {
-	url := fmt.Sprintf("%s/api/%s/_render/%s", a.GetNode(), profession, driver)
+	url := fmt.Sprintf("%s/api/profession/%s/%s", a.GetNode(), profession, driver)
 	return a.do(http.MethodGet, url, nil)
 }
 
