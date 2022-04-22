@@ -1,9 +1,11 @@
-package dao
+package sqlite
 
 import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	apinto "github.com/eolinker/apinto-dashboard"
+	activity_log "github.com/eolinker/apinto-dashboard/modules/activity-log"
 	"time"
 )
 
@@ -11,10 +13,10 @@ type activityLogDao struct {
 	db *sql.DB
 }
 
-func (a *activityLogDao) GetLogList(offset, limit int, user, operation, object string, startUnix, endUnix int64) ([]*LogEntity, int64, error) {
+func (a *activityLogDao) GetLogList(offset, limit int, user, operation, object string, startUnix, endUnix int64) ([]*activity_log.LogEntity, int64, error) {
 	db := a.db
 
-	list := make([]*LogEntity, 0, limit)
+	list := make([]*activity_log.LogEntity, 0, limit)
 	var totalNum int64
 
 	//拼接sql语句
@@ -77,13 +79,13 @@ func (a *activityLogDao) GetLogList(offset, limit int, user, operation, object s
 			return list, 0, err
 		}
 
-		args := make([]Arg, 0)
+		args := make([]*apinto.Arg, 0)
 		err = json.Unmarshal([]byte(argsJson), &args)
 		if err != nil {
 			return list, 0, fmt.Errorf("GetLogList.Unmarshal args Fail. %s", err)
 		}
 
-		entity := &LogEntity{
+		entity := &activity_log.LogEntity{
 			Time:      time.Unix(timestamp, 0).Format("2006-01-02 15:04:05"),
 			User:      user,
 			Operation: operation,
@@ -98,7 +100,7 @@ func (a *activityLogDao) GetLogList(offset, limit int, user, operation, object s
 	return list, totalNum, nil
 }
 
-func (a *activityLogDao) InsertLog(user, operation, object, content string, args []*Arg) error {
+func (a *activityLogDao) Add(user, operation, object, content string, args []*apinto.Arg) error {
 	db := a.db
 
 	timestamp := time.Now().Unix()
@@ -157,12 +159,16 @@ func (a *activityLogDao) initTable() error {
 	return err
 }
 
-func NewActivityDao(db *sql.DB) (ActivityLogDao, error) {
+func NewActivityDao(file string) (ISqliteHandler, error) {
+	db, err := sql.Open("sqlite3", "./sqlite.db")
+	if err != nil {
+		return nil, err
+	}
 	a := &activityLogDao{
 		db: db,
 	}
 
-	err := a.initTable()
+	err = a.initTable()
 	if err != nil {
 		return nil, fmt.Errorf("activityLogDao initTable Fail. %s", err)
 	}
