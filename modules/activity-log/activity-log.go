@@ -1,11 +1,10 @@
 package activity_log
 
 import (
+	"encoding/json"
 	"fmt"
-	apinto_dashboard "github.com/eolinker/apinto-dashboard"
-	"github.com/eolinker/apinto-dashboard/internal/apinto"
-	"github.com/eolinker/apinto-dashboard/modules/activity-log/database"
-	"github.com/eolinker/apinto-dashboard/modules/activity-log/database/module"
+	apinto "github.com/eolinker/apinto-dashboard"
+	response "github.com/eolinker/apinto-dashboard/internal/apinto"
 	"github.com/eolinker/apinto-dashboard/modules/professions"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
@@ -13,32 +12,30 @@ import (
 )
 
 type ActivityLog struct {
-	*apinto_dashboard.ModuleViewFinder
+	*apinto.ModuleViewFinder
 	*httprouter.Router
 	ModuleName string
 	header     *professions.ListHeader
+	dao        apinto.ActivityLogGetHandler
 }
 
-func NewActivityLog(name string) (*ActivityLog, error) {
-	err := database.InitDB()
-	if err != nil {
-		return nil, err
-	}
+func NewActivityLog(name string, dao apinto.ActivityLogGetHandler) (*ActivityLog, error) {
 
 	views := map[string]string{
 		"list": "activity_log",
 	}
 
 	activityLog := &ActivityLog{
-		ModuleViewFinder: apinto_dashboard.NewViewModuleEmpty(fmt.Sprint("/", name, "/"), views, "list"),
+		ModuleViewFinder: apinto.NewViewModuleEmpty(fmt.Sprint("/", name, "/"), views, "list"),
 		ModuleName:       name,
 		header: &professions.ListHeader{
-			Title: map[apinto_dashboard.ZoneName][]string{
-				apinto_dashboard.ZhCn: {"操作时间", "用户", "操作类型", "操作对象", "内容"},
-				apinto_dashboard.EnUs: {"Time", "User", "operation", "object", "Content"},
+			Title: map[apinto.ZoneName][]string{
+				apinto.ZhCn: {"操作时间", "用户", "操作类型", "操作对象", "内容"},
+				apinto.EnUs: {"Time", "User", "operation", "object", "Content"},
 			},
 			Fields: []string{"time", "user", "operation", "object", "content"},
 		},
+		dao: dao,
 	}
 	activityLog.createRouter()
 
@@ -81,14 +78,25 @@ func (a *ActivityLog) createRouter() {
 		startUnix, _ := strconv.ParseInt(startUnixStr, 10, 64)
 		endUnix, _ := strconv.ParseInt(endUnixStr, 10, 64)
 
-		data, err := module.GetLogList(offset, limit, user, operation, object, startUnix, endUnix)
+		data, err := a.getLogList(offset, limit, user, operation, object, startUnix, endUnix)
 		if err != nil {
-			apinto.WriteResult(w, 500, []byte(err.Error()))
+			response.WriteResult(w, 500, []byte(err.Error()))
 			return
 		}
-
-		apinto.WriteResult(w, 200, data)
+		response.WriteResult(w, 200, data)
 	})
 
 	a.Router = r
+}
+func (a *ActivityLog) getLogList(offset, limit int, user, operation, object string, startUnix, endUnix int64) ([]byte, error) {
+	list, total, err := a.dao.GetLogList(offset, limit, user, operation, object, startUnix, endUnix)
+	if err != nil {
+		return nil, err
+	}
+	m := make(map[string]interface{})
+	m["list"] = list
+	m["total_num"] = total
+
+	data, _ := json.Marshal(m)
+	return data, nil
 }

@@ -108,3 +108,100 @@ body {
   border-color: transparent;
   box-shadow: 0 0 0 3px rgba(255, 255, 255, .25);
 }
+
+/**
+ json editor
+*/
+
+.level-2,.je-object__title{
+  font-size: 1rem;
+}
+.btn.btn-secondary{
+  font-size: 0.7rem;
+}
+.je-switcher {
+  margin-bottom: 5px!important;
+}
+.btn-group, .btn-group-vertical {
+  margin-bottom: 10px;
+}
+/**
+  wrapper card
+ */
+.wrapper {
+  margin: 0;
+  padding: 0;
+  outline: none;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  cursor: inherit;
+  right: 0;
+  width: 750px;
+  margin-left: 20px;
+  margin-top: 10px;
+  position: fixed;
+  top: 50px;
+  height: 100%;
+  border-left: 1px solid #e8e8e8;
+  overflow: auto;
+  transition: right 300ms;
+  margin-bottom: -50px;
+  box-shadow: 0px 3px 7px -2px rgba(0, 0, 0, 0.1);
+  z-index: 11;
+  background-color: #ffffff;
+  display: none;
+}
+.wrapper_header {
+  margin: 0;
+  outline: none;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  cursor: inherit;
+  padding: 15px 20px;
+  border-bottom: 1px solid #e8e8e8;
+}
+.wrapper_footer{
+  margin: 10px 0 0 0;
+  outline: none;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  cursor: inherit;
+  padding: 15px 20px;
+  border-top: 1px solid #e8e8e8;
+}
+.wrapper_footer div{
+  padding: 0;
+}
+.wrapper_footer button{
+  font-size: 0.9rem;
+}
+.wrapper_title {
+  font-size: 18px;
+  font-weight: bold;
+}
+.wrapper_button {
+  float: right;
+  margin: 0;
+  outline: none;
+  font-family: inherit;
+  text-decoration: none;
+  background: initial;
+  height: 28px;
+  line-height: 27px;
+  cursor: pointer;
+  border-radius: 3px;
+  font-size: 14px;
+  border-style: solid;
+  border-width: 1px;
+  background-color: #ffffff;
+  color: #000000;
+  border-color: #dcdcdc;
+  padding: 0 15px;
+}
+.wrapper_body {
+  margin: 10px auto;
+  width: 98%;
+}

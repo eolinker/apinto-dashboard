@@ -24,6 +24,29 @@
     </thead>
 
 </table>
+<div class="wrapper">
+    <div class="wrapper_header">
+        <span class="wrapper_title">配置详情</span>
+        <button class="wrapper_button btn btn_default" >关闭</button>
+        <br>
+    </div>
+    <div class="card wrapper_body">
+        <div class="card-body">
+            <table class="table table-bordered">
+                <thead class="thead-light">
+                <tr>
+                    <th>Key</th>
+                    <th>Value</th>
+                </tr>
+                </thead>
+                <tbody id="wrapper_table_body">
+                </tbody>
+
+            </table>
+
+        </div>
+    </div>
+</div>
 {{- end -}}
 {{- block "script" . -}}
 <script src="/js/bootstrap-table.min.js"></script>
@@ -36,28 +59,117 @@
         let d = res.data
         d.forEach((item,index)=>{
             item["service"] = item["target"].substring(0, item["target"].indexOf("@"))
-
         })
         return d
     }
     function operateFormatter(value, row, index) {
         return [
-            '<a class="edit" href="/{{.name}}/edit" title="Like">',
+            '<a class="edit" href="/{{.name}}/edit?name=',
+            row.name,
+            '" title="edit">',
             '编辑',
+            '</a>  ',
+            '<a class="detail" href="javascript:void(0)" title="detail">',
+            '详情',
             '</a>  ',
             '<a class="remove" href="javascript:void(0)" title="Remove">',
             '删除',
-            '</a>'
+            '</a>  ',
+            '<a class="status down" href="javascript:void(0)" title="Status">',
+            '下线',
+            '</a>',
         ].join('')
     }
     window.operateEvents = {
+        'click .status': function (e, value, row, index) {
+            let target = $(e.target)
+            let msg = ""
+            if(target.hasClass("up")){
+                msg = "确认发布该路由吗？"
+            }else{
+                msg = "确认下线该路由吗？"
+            }
+            common.confirm("路由状态变更", msg, function (){
+                dashboard.patch("/api/{{.name}}/"+row.name, {"status":!row.status}, function (res) {
+                    if(res.code === 200){
+                        common.message("变更成功", "danger")
+                        if(target.hasClass("up")){
+                            target.removeClass("up")
+                            target.addClass("down")
+                            target.text("下线")
+                            $table.bootstrapTable('updateRow', {
+                                index: index,
+                                row: {
+                                    status: '下线'
+                                }
+                            })
+                        }else{
+                            target.removeClass("down")
+                            target.addClass("up")
+                            target.text("发布")
+                            $table.bootstrapTable('updateRow', {
+                                index: index,
+                                row: {
+                                    status: '发布'
+                                }
+                            })
+                        }
+                        return
+                    }
+                    http.handleError(res, "变更失败")
+                }, function (res) {
+                    http.handleError(res, "变更失败")
+                })
+            })
+        },
         'click .remove': function (e, value, row, index) {
-            $table.bootstrapTable('remove', {
-                field: 'id',
-                values: [row.id]
+            let msg ="确认删除 "+row.name+" {{index .module.I18nName .zone}}?"
+            common.confirm("删除{{index .module.I18nName .zone}}", msg, function (){
+                dashboard.delete( "/api/{{.name}}/"+row.name, function (res) {
+                    if(res.code === 200){
+                        common.message("删除成功", "danger")
+                        $table.bootstrapTable('remove', {
+                            field: 'id',
+                            values: [row.id]
+                        })
+                        return
+                    }
+                    http.handleError(res, "删除失败")
+                }, function (res) {
+                    http.handleError(res, "删除失败")
+                })
+            }, null)
+        },
+        'click .detail': function (e, value, row, index) {
+            dashboard.get("/api/{{.name}}/"+row.name, function (res) {
+                if(res.code === 200){
+                    $(".wrapper_title").text(row.name)
+                    let data = res.data
+                    Object.keys(data).forEach(function (key) {
+                        if(data[key] instanceof Object){
+                            $("#wrapper_table_body").append(
+                                "<tr><td>"+key+"</td><td>"+JSON.stringify(data[key])+"</td></tr>"
+                            )
+                        }else {
+                            $("#wrapper_table_body").append(
+                                "<tr><td>"+key+"</td><td>"+data[key]+"</td></tr>"
+                            )
+                        }
+                    })
+                    $(".wrapper").show(200)
+                    return
+                }
+                http.handleError(res, "获取详情失败")
+            }, function (res) {
+                http.handleError(res, "获取详情失败")
             })
         }
     }
+    $(".wrapper_button").click(function (){
+        $(".wrapper").hide(200)
+        $(".wrapper_title").text("")
+        $("#wrapper_table_body").html("")
+    })
 
 </script>
 {{- end -}}
