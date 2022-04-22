@@ -143,7 +143,6 @@ body {
   position: fixed;
   top: 50px;
   height: 100%;
-  /*max-height: 100%;*/
   border-left: 1px solid #e8e8e8;
   overflow: auto;
   transition: right 300ms;
@@ -153,7 +152,7 @@ body {
   background-color: #ffffff;
   display: none;
 }
-.container_header {
+.wrapper_header {
   margin: 0;
   outline: none;
   color: inherit;
@@ -162,6 +161,22 @@ body {
   cursor: inherit;
   padding: 15px 20px;
   border-bottom: 1px solid #e8e8e8;
+}
+.wrapper_footer{
+  margin: 10px 0 0 0;
+  outline: none;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  cursor: inherit;
+  padding: 15px 20px;
+  border-top: 1px solid #e8e8e8;
+}
+.wrapper_footer div{
+  padding: 0;
+}
+.wrapper_footer button{
+  font-size: 0.9rem;
 }
 .wrapper_title {
   font-size: 18px;
@@ -186,10 +201,7 @@ body {
   border-color: #dcdcdc;
   padding: 0 15px;
 }
-.wrapper_card {
+.wrapper_body {
   margin: 10px auto;
   width: 98%;
-}
-.wrapper_card_body {
-  max-height: 80%;
 }
