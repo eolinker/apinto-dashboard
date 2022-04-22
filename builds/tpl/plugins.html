@@ -35,16 +35,56 @@
         <br>
     </div>
     <div class="wrapper_body">
-        adfasfasfdfadsfasfaf
+        <form id="form">
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="form_name"><b>Name</b></label>
+                    <input name="name" type="text" disabled class="form-control" id="form_name" value="name">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="form_id"><b>ID</b></label>
+                    <input name="id" type="text" disabled  class="form-control" id="form_id" value="id">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="form_status"><b>Status</b></label>
+                    <select name="status" id="form_status" class="form-control">
+                        <option value="enable">enable</option>
+                        <option value="disable">disable</option>
+                        <option value="global">global</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="form_type"><b>Type</b></label>
+                    <select name="type" id="form_type" class="form-control">
+                        <option value="router">router</option>
+                        <option value="service">service</option>
+                        <option value="upstream">upstream</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="form_config"><b>Config</b></label>
+                <textarea name="config" class="form-control" id="form_config" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="form_init_config"><b>Init Config</b></label>
+                <textarea name="init_config" class="form-control" id="form_init_config" rows="3"></textarea>
+            </div>
+            <div class="row justify-content-between">
+                <div class="col-4">
+                    <button type="button" class="btn btn-outline-secondary wrapper_cancel">取消</button>
+                </div>
+                <div class="col-4" style="text-align: right">
+                    <button type="button" class="btn btn-primary wrapper_submit">提交</button>
+                </div>
+            </div>
+        </form>
+
     </div>
-    <div class="wrapper_footer row justify-content-between">
-        <div class="col-4">
-            <button type="button" class="btn btn-outline-secondary wrapper_cancel">取消</button>
-        </div>
-        <div class="col-4" style="text-align: right">
-            <button type="button" class="btn btn-primary">提交</button>
-        </div>
-    </div>
+
 
 </div>
 {{end}}
@@ -72,10 +112,6 @@
     function responseHandler(res) {
         return res.data["plugins"]
     }
-    $("#create_btn").click(function () {
-        common.message("暂未实现", "info")
-    })
-
     function operateFormatter(value, row, index) {
         return [
             '<a class="edit" href="javascript:void(0)" title="edit">',
@@ -86,24 +122,24 @@
             '</a>'
         ].join('')
     }
-
     function updateData(data, success, error){
         dashboard.update("/api/{{.name}}/", {
             "plugins":data
         }, success, error)
     }
     function updateRowDetail(table, index, data){
-        table.bootstrapTable('updateRow', {
+        $("#"+table).bootstrapTable('updateRow', {
             index: index,
             row: data
         })
     }
     function removeRow(table, field, value){
-        table.bootstrapTable('remove', {
+        let t = $("#"+table)
+        t.bootstrapTable('remove', {
             field: field,
             values: [value]
         })
-        updateData(table.bootstrapTable('getData'), function (res){
+        updateData(t.bootstrapTable('getData'), function (res){
             if(res.code !== 200){
                 http.handleError(res, "删除失败")
                 window.location.reload()
@@ -113,28 +149,70 @@
         }, function (res){
             http.handleError(res, "删除失败")
             window.location.reload()
-            return
         })
     }
     window.operateEvents = {
         'click .edit': function (e, value, row, index) {
-            $(".wrapper").show()
-            console.log(JSON.stringify($table.bootstrapTable('getData')))
+            initForm(index, row)
+            $(".wrapper").show(200)
         },
         'click .remove': function (e, value, row, index) {
             let msg ="确认删除 "+row.name+" {{index .module.I18nName .zone}}?"
             common.confirm("删除{{index .module.I18nName .zone}}", msg, function (){
-                removeRow($table, 'id', row.id)
+                removeRow("table", 'id', row.id)
             }, null)
         },
     }
+    function initForm(index, row) {
+        $("#form").attr("data_index", index)
+        $("#form_id").val(row["id"])
+        $("#form_name").val(row["name"])
+        $("#form_status  option[value='"+row["status"]+"'] ").attr("selected",true)
+        $("#form_type  option[value='"+row["type"]+"'] ").attr("selected",true)
+        if(row["config"]){
+            $("#form_config").val(JSON.stringify(row["config"]))
+        }else {
+            $("#form_config").val(JSON.stringify({}))
+        }
+        if(row["init_config"]){
+            $("#form_init_config").val(JSON.stringify(row["init_config"]))
+        }else {
+            $("#form_init_config").val(JSON.stringify({}))
+        }
+    }
     $(".wrapper_button").click(function (){
         $(".wrapper").hide(200)
-        $("#wrapper_table_body").html("")
     })
     $(".wrapper_cancel").click(function (){
         $(".wrapper").hide(200)
-        $("#wrapper_table_body").html("")
+    })
+    $(".wrapper_submit").click(function (){
+        let d = {};
+        let t = $('#form').serializeArray();
+        $.each(t, function() {
+            if(this.name === "config" || this.name === "init_config"){
+                try {
+                    d[this.name] = JSON.parse(this.value)
+                } catch(e) {
+                    d[this.name] = {}
+                }
+            }else {
+                d[this.name] = this.value;
+            }
+        });
+        updateRowDetail("table", $("#form").attr("data_index"), d)
+        updateData($table.bootstrapTable('getData') ,function (res){
+            if(res.code !== 200){
+                return http.handleError(res, "更新失败")
+            }
+            common.message("更新成功", "success")
+            $(".wrapper_button").click()
+        }, function (res){
+            return http.handleError(res, "更新失败")
+        })
+    })
+    $("#create_btn").click(function () {
+        common.message("暂未实现", "info")
     })
 </script>
 {{end}}
