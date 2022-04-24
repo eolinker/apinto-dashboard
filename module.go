@@ -5,9 +5,12 @@ import (
 	"strings"
 )
 
+type ViewLookup interface {
+	Lookup(r *http.Request) (view string, data interface{}, has bool)
+}
 type IModule interface {
 	http.Handler
-	Lookup(r *http.Request) (view string, data interface{}, has bool)
+	ViewLookup
 }
 
 type ModuleViewFinder struct {

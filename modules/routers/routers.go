@@ -30,17 +30,13 @@ func (p *Routers) Lookup(r *http.Request) (view string, data interface{}, has bo
 	return "", nil, false
 }
 
-func (p *Routers) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	p.Router.ServeHTTP(w, req)
-}
-
-func NewRouters() *Routers {
+func NewRouters(name string) *Routers {
 	views := map[string]string{
 		"list":   "router_list",
 		"create": "router_create",
 		"edit":   "router_edit",
 	}
-	professionsHandler := professions.NewProfession("routers", "router",
+	professionsHandler := professions.NewProfession(name, "router",
 		nil, nil,
 		apinto_dashboard.NewViewModuleEmpty("/routers/", views, "list"))
 	r := &Routers{

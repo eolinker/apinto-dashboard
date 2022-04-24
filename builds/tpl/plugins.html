@@ -1,6 +1,13 @@
 {{- block "header" . -}}
-<link href="/css/bootstrap-table.min.css" rel="stylesheet"  rel="stylesheet">
-<link href="/css/bootstrap-table-reorder-rows.css" rel="stylesheet">
+<link href="/css/bootstrap-table.min.css"  rel="stylesheet">
+<link href="/css/bootstrap-table-reorder-rows.min.css" rel="stylesheet">
+<style>
+    .editor {
+        width: 700px;
+        height: 200px;
+        margin: 10px auto;
+    }
+</style>
 {{- end -}}
 {{ block "content" .}}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
@@ -27,7 +34,6 @@
     </thead>
 
 </table>
-
 <div class="wrapper">
     <div class="wrapper_header">
         <span class="wrapper_title">插件配置</span>
@@ -64,14 +70,13 @@
                     </select>
                 </div>
             </div>
-
             <div class="form-group">
                 <label for="form_config"><b>Config</b></label>
-                <textarea name="config" class="form-control" id="form_config" rows="3"></textarea>
+                <div class="card editor" id="form_config"></div>
             </div>
             <div class="form-group">
                 <label for="form_init_config"><b>Init Config</b></label>
-                <textarea name="init_config" class="form-control" id="form_init_config" rows="3"></textarea>
+                <div  class="card editor" id="form_init_config"></div>
             </div>
             <div class="row justify-content-between">
                 <div class="col-4">
@@ -93,8 +98,11 @@
 <script src="/js/bootstrap-table.min.js"></script>
 <script src="/js/jquery.tablednd.min.js"></script>
 <script src="/js/bootstrap-table-reorder-rows.min.js"></script>
+<script src="/js/ace/ace.js"></script>
 <script>
     let $table = $('#table')
+    let config_editor = aceEditor.InitEditor("form_config")
+    let init_config_editor = aceEditor.InitEditor("form_init_config")
     $(document).ready(function(){
         $table.bootstrapTable('refreshOptions', {
             onReorderRow: function (newData) {
@@ -170,14 +178,14 @@
         $("#form_status  option[value='"+row["status"]+"'] ").attr("selected",true)
         $("#form_type  option[value='"+row["type"]+"'] ").attr("selected",true)
         if(row["config"]){
-            $("#form_config").val(JSON.stringify(row["config"]))
+            config_editor.getSession().setValue(JSON.stringify(row["config"],null,2))
         }else {
-            $("#form_config").val(JSON.stringify({}))
+            config_editor.getSession().setValue(JSON.stringify({}, null, 2))
         }
         if(row["init_config"]){
-            $("#form_init_config").val(JSON.stringify(row["init_config"]))
+            init_config_editor.getSession().setValue(JSON.stringify(row["init_config"], null, 2))
         }else {
-            $("#form_init_config").val(JSON.stringify({}))
+            init_config_editor.getSession().setValue(JSON.stringify({}, null, 2))
         }
     }
     $(".wrapper_button").click(function (){
@@ -188,17 +196,18 @@
     })
     $(".wrapper_submit").click(function (){
         let d = {};
+        let config = config_editor.getSession().getValue()
+        let init_config = init_config_editor.getSession().getValue()
+        try {
+            d["config"] = JSON.parse(config)
+            d["init_config"] = JSON.parse(init_config)
+        } catch(e) {
+            alert("config format is error")
+            return
+        }
         let t = $('#form').serializeArray();
         $.each(t, function() {
-            if(this.name === "config" || this.name === "init_config"){
-                try {
-                    d[this.name] = JSON.parse(this.value)
-                } catch(e) {
-                    d[this.name] = {}
-                }
-            }else {
-                d[this.name] = this.value;
-            }
+            d[this.name] = this.value;
         });
         updateRowDetail("table", $("#form").attr("data_index"), d)
         updateData($table.bootstrapTable('getData') ,function (res){
