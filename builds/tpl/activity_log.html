@@ -16,7 +16,7 @@
         操作类型:<input type="text" class="form-control" id="operation"/>
     </div>
     <div class="col-md-3 column">
-        操作对象:<input type="text" class="form-control" id="object"/>
+        操作对象:<input type="text" class="form-control" id="target"/>
     </div>
 </div>
 
@@ -135,7 +135,7 @@
     $('#search').click(function() {
         requestParam.user = $("#user").val()
         requestParam.operation = $("#operation").val()
-        requestParam.object = $("#object").val()
+        requestParam.target = $("#target").val()
         requestParam.content = $("#content").val()
 
         var startStr = $("#startDate").val();
@@ -163,13 +163,13 @@
     $('#reset').click(function() {
         $("#user").val('')
         $("#operation").val('')
-        $("#object").val('')
+        $("#target").val('')
         $("#startDate").val('')
         $("#endDate").val('')
 
         requestParam.user = ''
         requestParam.operation = ''
-        requestParam.object = ''
+        requestParam.target = ''
         requestParam.startUnix = ''
         requestParam.endUnix = ''
 

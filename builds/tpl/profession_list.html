@@ -25,6 +25,8 @@
     </thead>
 
 </table>
+
+<!--TODO-->
 <div class="wrapper">
     <div class="wrapper_header">
         <span class="wrapper_title">配置详情</span>
@@ -99,6 +101,7 @@
         'click .detail': function (e, value, row, index) {
             dashboard.get("/api/{{.name}}/"+row.name, function (res) {
                 if(res.code === 200){
+                    //text("avas")
                     $(".wrapper_title").text(row.name)
                     let data = res.data
                     Object.keys(data).forEach(function (key) {
