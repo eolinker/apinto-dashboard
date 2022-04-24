@@ -161,12 +161,12 @@ func (a *activityLogDao) initTable() error {
 	return err
 }
 
-func NewActivityDao(file string) (ISqliteHandler, error) {
-	err := createDir(file)
+func NewActivityDao(filePath string) (ISqliteHandler, error) {
+	err := createDir(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("Create DB Dir Fail: %s ", err.Error())
 	}
-	db, err := sql.Open("sqlite3", file)
+	db, err := sql.Open("sqlite3", filePath)
 	if err != nil {
 		return nil, err
 	}
@@ -181,8 +181,8 @@ func NewActivityDao(file string) (ISqliteHandler, error) {
 	return a, nil
 }
 
-func createDir(file string) error {
-	dir := filepath.Dir(file)
+func createDir(filePath string) error {
+	dir := filepath.Dir(filePath)
 	if apinto.IsDirExist(dir) {
 		return nil
 	}
