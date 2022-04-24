@@ -3,17 +3,17 @@ package apinto_dashboard
 import "log"
 
 type ActivityLogAddHandler interface {
-	Add(user, content, operation, object string, args []*Arg) error
+	Add(user, content, operation, target string, args []*Arg) error
 }
 
 type ActivityLogGetHandler interface {
-	GetLogList(offset, limit int, user, operation, object string, startUnix, endUnix int64) ([]*LogEntity, int64, error)
+	GetLogList(offset, limit int, user, operation, target string, startUnix, endUnix int64) ([]*LogEntity, int64, error)
 }
 type LogEntity struct {
 	Time      string `json:"time"`
 	User      string `json:"user"`
 	Operation string `json:"operation"`
-	Object    string `json:"object"`
+	Target    string `json:"target"`
 	Content   string `json:"content"`
 	Args      []*Arg `json:"args"`
 }
@@ -29,9 +29,9 @@ var (
 func SetActivityLogAddHandler(h ActivityLogAddHandler) {
 	activityLogHandler = h
 }
-func AddActivityLog(user, operation, object, content string, args []*Arg) {
+func AddActivityLog(user, operation, target, content string, args []*Arg) {
 	if activityLogHandler != nil {
-		err := activityLogHandler.Add(user, operation, object, content, args)
+		err := activityLogHandler.Add(user, operation, target, content, args)
 		if err != nil {
 			log.Println("[ERR] add log:", err)
 		}
