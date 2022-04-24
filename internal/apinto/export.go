@@ -55,11 +55,11 @@ func (a *admin) PatchPath(profession string, name string, path string, body []by
 }
 
 func (a *admin) Render(profession string, driver string) ([]byte, int, error) {
-	url := fmt.Sprintf("%s/api/profession/%s/%s", a.GetNode(), profession, driver)
+	url := fmt.Sprintf("%s/profession/%s/%s", a.GetNode(), profession, driver)
 	return a.do(http.MethodGet, url, nil)
 }
 
 func (a *admin) Drivers(profession string) (data []byte, code int, err error) {
-	url := fmt.Sprintf("%s/api/profession/%s", a.GetNode(), profession)
+	url := fmt.Sprintf("%s/profession/%s", a.GetNode(), profession)
 	return a.do(http.MethodGet, url, nil)
 }

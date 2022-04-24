@@ -204,106 +204,12 @@ let util = {
         return data
     }
 }
-
-
-let JsonEditor = {
-    // default_Schema: {"type":"object","properties":{"cert":{"type":"array","items":{"type":"object","properties":{"crt":{"type":"string"},"key":{"type":"string"}},"additionalProperties":false,"required":["key","crt"]}},"driver":{"type":"string","enum":["http"]},"host":{"type":"array","items":{"type":"string"},"minLength":1},"listen":{"type":"integer","format":"int32","minimum":1},"method":{"type":"array","items":{"type":"string","enum":["GET","POST","PATH","DELETE"]}},"plugins":{"type":"object","additionalProperties":{"type":"object","properties":{"config":{},"disable":{"type":"boolean"}},"additionalProperties":false,"required":["disable","config"]}},"protocol":{"type":"string","enum":["http","https"],"default":"http"},"rules":{"type":"array","items":{"type":"object","properties":{"header":{"type":"object","additionalProperties":{"type":"string"}},"location":{"type":"string","minLength":1},"query":{"type":"object","additionalProperties":{"type":"string"}}},"additionalProperties":false}},"target":{"type":"string","minLength":1}},"additionalProperties":false,"required":["driver","listen","protocol","target"]},
-    default_Schema: {
-        "type": "info",
-        "title": "Apinto",
-        "description": "operation error!",
-        "properties":{},
-    },
-    init: function (theme, iconlib, callbacks){
-        JSONEditor.defaults.options.theme = theme;
-        JSONEditor.defaults.options.iconlib = iconlib;
-        JSONEditor.defaults.callbacks = callbacks
-    },
-    getEditorWithData: function (id, title, schemaUrl, options, dataUrl) {
-        let editor = new JSONEditor(document.getElementById(id), this.getOptions(schemaUrl, title, options));
-        this.setValue(editor, dataUrl)
+let aceEditor = {
+    InitEditor: function (id){
+        let editor = ace.edit(id);
+        editor.setFontSize(14)
+        editor.setTheme("ace/theme/crimson_editor");
+        editor.session.setMode("ace/mode/json");
         return editor
-    },
-    getEditor: function (id, title, schemaUrl, options) {
-        return new JSONEditor(document.getElementById(id), this.getOptions(schemaUrl, title, options));
-    },
-    getOptions: function (url, title, options) {
-        options["schema"] = this.getSchema(url, title)
-        return options
-    },
-    getSchema: function (url, title){
-        let schema = this.default_Schema
-        dashboard.getRender(url, function (res) {
-            if(res.code === 200){
-                schema = res.data
-                schema["properties"]["operation"] = {
-                    "type": "button",
-                    "title": "Submit",
-                    "options": {
-                        "button": {
-                            "action": "submit",
-                            "validated": true
-                        },
-                        "inputAttributes": {
-                            "class": "btn btn-primary"
-                        }
-                    }
-                }
-                schema["title"]= title
-                return schema
-            }
-            http.handleError(res, "获取render失败")
-        }, function (res){
-            http.handleError(res, "获取render失败")
-        })
-        schema["title"]= title
-        return schema
-    },
-    updateSchema: function(editor, url, title){
-        let id = editor.element.id
-        let options = editor.options
-        editor.destroy()
-        return this.getEditor(id, title, url, options)
-    },
-    setValue: function (editor, url){
-        dashboard.get(url, function (res) {
-            if(res.code === 200){
-                if (editor["schema"]["properties"]){
-                    editor.setValue(util.filter(editor["schema"]["properties"], res.data))
-                }else {
-                    editor.setValue(res.data)
-                }
-                return
-            }
-            http.handleError(res, "获取详情失败")
-            editor.disable()
-        }, function (res) {
-            http.handleError(res, "获取详情失败")
-            editor.disable()
-        })
-    },
-    update: function (url, data){
-        dashboard.update(url, data, function (res) {
-            if(res.code === 200){
-                common.message("success", "success")
-                return
-            }
-            http.handleError(res, "update error")
-
-        }, function (res) {
-            http.handleError(res, "update error")
-        })
-    },
-    create: function (url, data){
-        dashboard.create(url, data, function (res) {
-            if(res.code === 200){
-                common.message("success", "success")
-                return
-            }
-            http.handleError(res, "create error")
-
-        }, function (res) {
-            http.handleError(res, "create error")
-        })
     }
 }

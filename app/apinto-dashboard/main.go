@@ -43,7 +43,7 @@ func main() {
 			apinto.EnUs: "monitors",
 		},
 	})
-	routersModule := routers.NewRouters()
+	routersModule := routers.NewRouters("routers")
 	config.Modules = append(config.Modules, &apinto.Module{
 		Path:    "/routers/list",
 		Handler: routersModule,
@@ -52,6 +52,10 @@ func main() {
 			apinto.ZhCn: "路由",
 			apinto.EnUs: "Ruters",
 		},
+	}, &apinto.Module{
+		Handler: routersModule,
+		Path:    "/profession/routers/",
+		NotView: true,
 	})
 	ms := toModule(cf)
 	config.Modules = append(config.Modules, ms...)
@@ -91,6 +95,7 @@ func main() {
 			apinto.EnUs: "extenders manager",
 		},
 	})
+
 	config.Statics = map[string]string{
 		"":   "./static",
 		"js": "./static/js",
