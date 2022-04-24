@@ -21,6 +21,7 @@ type Module struct {
 	Handler  IModule
 	Name     string
 	I18nName map[ZoneName]string `json:"i18n_name"`
+	NotView  bool
 }
 
 type Config struct {
@@ -41,11 +42,13 @@ func Create(config *Config) (http.Handler, error) {
 
 	modules := make([]*ModuleItem, 0, len(config.Modules))
 	for _, m := range config.Modules {
-		modules = append(modules, &ModuleItem{
-			Name:     m.Name,
-			I18nName: m.I18nName,
-			Path:     m.Path,
-		})
+		if !m.NotView {
+			modules = append(modules, &ModuleItem{
+				Name:     m.Name,
+				I18nName: m.I18nName,
+				Path:     m.Path,
+			})
+		}
 	}
 	mp := NewModuleItemPlan(modules)
 	defaultModule := config.DefaultModule
@@ -57,16 +60,21 @@ func Create(config *Config) (http.Handler, error) {
 	for _, m := range config.Modules {
 
 		path := fmt.Sprint("/", m.Name)
-		viewH := &ViewServer{
-			handler: m.Handler,
-			modules: mp,
-			name:    m.Name,
+		if m.NotView {
+			serve.Handle(m.Path, m.Handler)
+		} else {
+			viewH := &ViewServer{
+				handler: m.Handler,
+				modules: mp,
+				name:    m.Name,
+			}
+			serve.Handle(path, viewH)
+			serve.Handle(fmt.Sprint(path, "/"), viewH)
+			serve.Handle(fmt.Sprintf("/api/%s/", m.Name), m.Handler)
 		}
-		serve.Handle(path, viewH)
-		serve.Handle(fmt.Sprint(path, "/"), viewH)
-		serve.Handle(fmt.Sprint("/api/", m.Name, "/"), m.Handler)
-		serve.Handle(fmt.Sprint("/profession/", m.Name, "/"), m.Handler)
+
 	}
+
 	staticServe := &http.ServeMux{}
 
 	for path, dir := range config.Statics {
@@ -129,7 +137,7 @@ func (v *Views) Error(w http.ResponseWriter, cache *TemplateWriter) {
 }
 
 type ViewServer struct {
-	handler IModule
+	handler ViewLookup
 	modules *ModuleItemPlan
 	name    string
 }

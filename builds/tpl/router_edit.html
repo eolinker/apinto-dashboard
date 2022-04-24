@@ -4,33 +4,33 @@
 </div>
 {{end}}
 {{- block "script" . -}}
-<link href="/css/spectre-icons.css" rel="stylesheet">
-<script type="text/javascript" src="/js/jsoneditor.min.js"></script>
+<!--<link href="/css/spectre-icons.css" rel="stylesheet">-->
+<!--<script type="text/javascript" src="/js/jsoneditor.min.js"></script>-->
 <script>
     initRender("/api/{{.name}}/{{.data}}")
     function initRender(url) {
         // todo 获取配置详情，如果同步获取数据详情则使用dashboard.getWithAsync获取
         dashboard.get(url,function (res) {
             if(res.code !== 200){
-                http.handleError(res, "获取详情失败")
+                return http.handleError(res, "获取详情失败")
             }
             if(!res.data["driver"]){
-                http.handleError(res, "获取driver失败")
+                return http.handleError(res, "获取driver失败")
             }
             initRenderForm("/profession/{{.name}}/"+res.data["driver"], res.data)
         },function (res) {
-            http.handleError(res, "获取详情失败")
+            return http.handleError(res, "获取详情失败")
         })
     }
     function initRenderForm(url, data){
         dashboard.get(url, function (res) {
             if(res.code !== 200){
-                http.handleError(res, "获取render失败")
+                return http.handleError(res, "获取render失败")
             }
             // todo 渲染render, data参数用于初始化
 
         }, function (res){
-            http.handleError(res, "获取render失败")
+            return http.handleError(res, "获取render失败")
         })
     }
 </script>
