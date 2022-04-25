@@ -137,7 +137,6 @@ body {
   font-size: inherit;
   cursor: inherit;
   right: 0;
-  width: 750px;
   margin-left: 20px;
   margin-top: 10px;
   position: fixed;
@@ -151,6 +150,13 @@ body {
   z-index: 11;
   background-color: #ffffff;
   display: none;
+}
+.wrapper_small{
+  width: 750px;
+}
+.wrapper_large{
+
+  width: 80%;
 }
 .wrapper_header {
   margin: 0;

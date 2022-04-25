@@ -34,10 +34,10 @@
     </thead>
 
 </table>
-<div class="wrapper">
+<div class="wrapper wrapper_small" id="detail_container">
     <div class="wrapper_header">
         <span class="wrapper_title">插件配置</span>
-        <button class="wrapper_button btn btn_default" >关闭</button>
+        <button class="wrapper_button btn btn_default" id="detail_close">关闭</button>
         <br>
     </div>
     <div class="wrapper_body">
@@ -80,10 +80,10 @@
             </div>
             <div class="row justify-content-between">
                 <div class="col-4">
-                    <button type="button" class="btn btn-outline-secondary wrapper_cancel">取消</button>
+                    <button type="button" class="btn btn-outline-secondary form_cancel">取消</button>
                 </div>
                 <div class="col-4" style="text-align: right">
-                    <button type="button" class="btn btn-primary wrapper_submit">提交</button>
+                    <button type="button" class="btn btn-primary form_submit">提交</button>
                 </div>
             </div>
         </form>
@@ -162,7 +162,7 @@
     window.operateEvents = {
         'click .edit': function (e, value, row, index) {
             initForm(index, row)
-            $(".wrapper").show(200)
+            $("#detail_container").show(200)
         },
         'click .remove': function (e, value, row, index) {
             let msg ="确认删除 "+row.name+" {{index .module.I18nName .zone}}?"
@@ -188,13 +188,13 @@
             init_config_editor.getSession().setValue(JSON.stringify({}, null, 2))
         }
     }
-    $(".wrapper_button").click(function (){
-        $(".wrapper").hide(200)
+    $("#detail_close").click(function (){
+        $("#detail_container").hide(200)
     })
-    $(".wrapper_cancel").click(function (){
-        $(".wrapper").hide(200)
+    $(".form_cancel").click(function (){
+        $("#detail_container").hide(200)
     })
-    $(".wrapper_submit").click(function (){
+    $(".form_submit").click(function (){
         let d = {};
         let config = config_editor.getSession().getValue()
         let init_config = init_config_editor.getSession().getValue()
@@ -215,7 +215,7 @@
                 return http.handleError(res, "更新失败")
             }
             common.message("更新成功", "success")
-            $(".wrapper_button").click()
+            $("#detail_close").click()
         }, function (res){
             return http.handleError(res, "更新失败")
         })
