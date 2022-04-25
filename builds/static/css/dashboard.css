@@ -109,6 +109,13 @@ body {
   box-shadow: 0 0 0 3px rgba(255, 255, 255, .25);
 }
 
+/**
+ table
+ */
+table td {
+  table-layout:fixed;
+  word-break:break-all
+}
 
 /**
   wrapper card
