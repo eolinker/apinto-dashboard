@@ -134,6 +134,7 @@ let common = {
         $(divElement).append(closeBtn);
         // 消息框放入到页面中
         $('body').append(divElement);
+        divElement.css("z-index","999999")
         return divElement;
     },
 
