@@ -24,6 +24,8 @@ type IClient interface {
 	PatchPath(profession string, name string, path string, body []byte) (data []byte, code int, err error)
 	Render(profession string, driver string) (data []byte, code int, err error)
 	Drivers(profession string) (data []byte, code int, err error)
+	Extenders() (data []byte, code int, err error)
+	Extender(id string) (data []byte, code int, err error)
 }
 
 type admin struct {

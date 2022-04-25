@@ -69,50 +69,5 @@ func (p *Plugins) createRouter() {
 		}
 		apinto.WriteResult(w, code, data)
 	})
-	//r.GET(fmt.Sprintf("/profession/%s/", p.ModuleName), func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-	//	data, code, err := apinto.Client().Drivers(p.ProfessionName)
-	//	if err != nil {
-	//		apinto.WriteResult(w, 500, []byte(err.Error()))
-	//		return
-	//	}
-	//	apinto.WriteResult(w, code, data)
-	//})
-	//
-	//r.GET(fmt.Sprintf("/profession/%s/:driver", p.ModuleName), func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-	//	driver := params.ByName("driver")
-	//	data, code, err := apinto.Client().Render(p.ProfessionName, driver)
-	//	if err != nil {
-	//		apinto.WriteResult(w, 500, []byte(err.Error()))
-	//		return
-	//	}
-	//	apinto.WriteResult(w, code, data)
-	//})
-
-	//
-	//// Get
-	//r.GET(fmt.Sprintf("/api/%s/:name", p.ModuleName), func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-	//	name := params.ByName("name")
-	//	data, code, err := apinto.Client().Get(p.ProfessionName, name)
-	//	if err != nil {
-	//		apinto.WriteResult(w, 500, []byte(err.Error()))
-	//		return
-	//	}
-	//	apinto.WriteResult(w, code, data)
-	//})
-	//
-	//// Create
-	//r.POST(fmt.Sprintf("/api/%s/", p.ModuleName), func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-	//	data, err := apinto.ReadBody(r.Body)
-	//	if err != nil {
-	//		apinto.WriteResult(w, 500, []byte(err.Error()))
-	//		return
-	//	}
-	//	data, code, err := apinto.Client().Create(p.ProfessionName, data)
-	//	if err != nil {
-	//		apinto.WriteResult(w, 500, []byte(err.Error()))
-	//		return
-	//	}
-	//	apinto.WriteResult(w, code, data)
-	//})
 	p.Router = r
 }
