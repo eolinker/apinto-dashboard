@@ -20,10 +20,10 @@ func NewExtenders(name string) *Extenders {
 		name: name,
 		header: &professions.ListHeader{
 			Title: map[apinto_dashboard.ZoneName][]string{
-				apinto_dashboard.ZhCn: {"名称", "扩展ID", "项目", "分组", "版本"},
-				apinto_dashboard.EnUs: {"Name", "ID", "Project", "Group", "Version"},
+				apinto_dashboard.ZhCn: {"名称", "版本", "扩展ID", "项目", "分组"},
+				apinto_dashboard.EnUs: {"Name", "Version", "ID", "Project", "Group"},
 			},
-			Fields: []string{"name", "id", "project", "group", "version"},
+			Fields: []string{"name", "version", "id", "project", "group"},
 		},
 	}
 	e.createRouter()
