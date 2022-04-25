@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>render</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link href="/css/dashboard.css" rel="stylesheet">
+
+</head>
+<body>
+<div id="test">
+    test
+</div>
+<script src="/js/jquery-3.0.0.js"></script>
+<script src="/js/bootstrap.js"></script>
+<script src="/js/dashboard.js"></script>
+<script src="/js/render.js"></script>
+<script>
+
+
+
+    let demoData ={}
+    $(function (){
+        $('#test').formRender({
+            schema:demoSchema,
+            data:demoData,
+            replace:{}
+        });
+    })
+
+</script>
+</body>
+</html>
