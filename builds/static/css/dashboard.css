@@ -109,22 +109,7 @@ body {
   box-shadow: 0 0 0 3px rgba(255, 255, 255, .25);
 }
 
-/**
- json editor
-*/
 
-.level-2,.je-object__title{
-  font-size: 1rem;
-}
-.btn.btn-secondary{
-  font-size: 0.7rem;
-}
-.je-switcher {
-  margin-bottom: 5px!important;
-}
-.btn-group, .btn-group-vertical {
-  margin-bottom: 10px;
-}
 /**
   wrapper card
  */
