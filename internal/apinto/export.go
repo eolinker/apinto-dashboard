@@ -63,3 +63,12 @@ func (a *admin) Drivers(profession string) (data []byte, code int, err error) {
 	url := fmt.Sprintf("%s/profession/%s", a.GetNode(), profession)
 	return a.do(http.MethodGet, url, nil)
 }
+
+func (a *admin) Extenders() (data []byte, code int, err error) {
+	url := fmt.Sprintf("%s/extenders", a.GetNode())
+	return a.do(http.MethodGet, url, nil)
+}
+func (a *admin) Extender(id string) (data []byte, code int, err error) {
+	url := fmt.Sprintf("%s/extender/%s", a.GetNode(), id)
+	return a.do(http.MethodGet, url, nil)
+}
