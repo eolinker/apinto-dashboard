@@ -38,17 +38,17 @@
             <div class="form-row">
                 <div class="form-group col-md-6">
                     <label for="form_name"><b>Name</b></label>
-                    <input name="name" type="text" disabled class="form-control" id="form_name" value="name">
+                    <input name="name" type="text" disabled class="form-control" id="form_name" value="name" required>
                 </div>
                 <div class="form-group col-md-6">
                     <label for="form_id"><b>ID</b></label>
-                    <input name="id" type="text" disabled  class="form-control" id="form_id" value="id">
+                    <input name="id" type="text" disabled  class="form-control" id="form_id" value="id" required>
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group col-md-6">
                     <label for="form_status"><b>Status</b></label>
-                    <select name="status" id="form_status" class="form-control">
+                    <select name="status" id="form_status" class="form-control" required>
                         <option value="enable">enable</option>
                         <option value="disable">disable</option>
                         <option value="global">global</option>
@@ -56,7 +56,7 @@
                 </div>
                 <div class="form-group col-md-6">
                     <label for="form_type"><b>Type</b></label>
-                    <select name="type" id="form_type" class="form-control">
+                    <select name="type" id="form_type" class="form-control" required>
                         <option value="router">router</option>
                         <option value="service">service</option>
                         <option value="upstream">upstream</option>
@@ -96,20 +96,20 @@
             <div class="form-row">
                 <div class="form-group col-md-12">
                     <label for="form_id"><b>ID</b></label>
-                    <select name="id" id="add_form_id" class="form-control">
+                    <select name="id" id="add_form_id" class="form-control" required>
                     </select>
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group col-md-12">
                     <label for="form_name"><b>Name</b></label>
-                    <input name="name" type="text" class="form-control" id="add_form_name">
+                    <input name="name" type="text" class="form-control" id="add_form_name" required>
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group col-md-6">
                     <label for="form_status"><b>Status</b></label>
-                    <select name="status" id="add_form_status" class="form-control">
+                    <select name="status" id="add_form_status" class="form-control" required>
                         <option value="enable">enable</option>
                         <option value="disable">disable</option>
                         <option value="global">global</option>
@@ -117,7 +117,7 @@
                 </div>
                 <div class="form-group col-md-6">
                     <label for="form_type"><b>Type</b></label>
-                    <select name="type" id="add_form_type" class="form-control">
+                    <select name="type" id="add_form_type" class="form-control" required>
                         <option value="router">router</option>
                         <option value="service">service</option>
                         <option value="upstream">upstream</option>
@@ -130,7 +130,7 @@
             </div>
             <div class="form-group">
                 <label for="form_init_config"><b>Init Config</b></label>
-                <div  class="card editor" id="add_form_init_config"></div>
+                <div class="card editor" id="add_form_init_config"></div>
             </div>
             <div class="row justify-content-between">
                 <div class="col-4">
@@ -151,11 +151,32 @@
 <script src="/js/bootstrap-table-reorder-rows.min.js"></script>
 <script src="/js/ace/ace.js"></script>
 <script>
+    /**
+     * dom初始化处理
+     */
     let $table = $('#table')
     let config_editor = aceEditor.InitEditor("form_config")
     let init_config_editor = aceEditor.InitEditor("form_init_config")
     let add_init_config_editor = aceEditor.InitEditor("add_form_init_config")
     let add_config_editor = aceEditor.InitEditor("add_form_config")
+    /**
+     * table相关处理
+     */
+    window.operateEvents = {
+        'click .edit': function (e, value, row, index) {
+            initForm(index, row)
+            $("#detail_container").show()
+        },
+        'click .remove': function (e, value, row, index) {
+            let msg ="确认删除 "+row.name+" {{index .module.I18nName .zone}}?"
+            common.confirm("删除{{index .module.I18nName .zone}}", msg, function (){
+                removeRow("table", 'id', row.id)
+            }, null)
+        },
+    }
+    /**
+     * table拖动事件
+     */
     $(document).ready(function(){
         $table.bootstrapTable('refreshOptions', {
             onReorderRow: function (newData) {
@@ -170,9 +191,23 @@
             }
         })
     })
+
+    /**
+     * table数据初始化过滤
+     * @param res
+     * @returns {*}
+     */
     function responseHandler(res) {
         return res.data["plugins"]
     }
+
+    /**
+     * table操作列渲染
+     * @param value
+     * @param row
+     * @param index
+     * @returns {string}
+     */
     function operateFormatter(value, row, index) {
         return [
             '<a class="edit" href="javascript:void(0)" title="edit">',
@@ -183,17 +218,49 @@
             '</a>'
         ].join('')
     }
+
+    /**
+     * 更新插件全局数据
+     * @param data
+     * @param success
+     * @param error
+     */
     function updateData(data, success, error){
         dashboard.update("/api/{{.name}}/", {
             "plugins":data
         }, success, error)
     }
+
+    /**
+     * 更新table行细节
+     * @param table
+     * @param index
+     * @param data
+     */
     function updateRowDetail(table, index, data){
         $("#"+table).bootstrapTable('updateRow', {
             index: index,
             row: data
         })
     }
+
+    /**
+     * 新增新行
+     * @param table
+     * @param data
+     */
+    function addNewRow(table, data){
+        let res = []
+        res.push(data)
+        $("#"+table).bootstrapTable('append', res)
+    }
+
+    /**
+     * 移除table行
+     * @param table
+     * @param field
+     * @param value
+     */
     function removeRow(table, field, value){
         let t = $("#"+table)
         t.bootstrapTable('remove', {
@@ -212,18 +279,12 @@
             window.location.reload()
         })
     }
-    window.operateEvents = {
-        'click .edit': function (e, value, row, index) {
-            initForm(index, row)
-            $("#detail_container").show()
-        },
-        'click .remove': function (e, value, row, index) {
-            let msg ="确认删除 "+row.name+" {{index .module.I18nName .zone}}?"
-            common.confirm("删除{{index .module.I18nName .zone}}", msg, function (){
-                removeRow("table", 'id', row.id)
-            }, null)
-        },
-    }
+
+    /**
+     * 编辑表单初始化
+     * @param index
+     * @param row
+     */
     function initForm(index, row) {
         $("#form").attr("data_index", index)
         $("#form_id").val(row["id"])
@@ -241,12 +302,19 @@
             init_config_editor.getSession().setValue(JSON.stringify({}, null, 2))
         }
     }
+
+    /**
+     * 编辑表单关闭点击事件
+     */
     $("#detail_close").click(function (){
         $("#detail_container").hide(200)
     })
     $(".form_cancel").click(function (){
         $("#detail_container").hide(200)
     })
+    /**
+     * 编辑表单提交点击事件
+     */
     $(".form_submit").click(function (){
         let d = {};
         let config = config_editor.getSession().getValue()
@@ -255,13 +323,21 @@
             d["config"] = JSON.parse(config)
             d["init_config"] = JSON.parse(init_config)
         } catch(e) {
-            alert("config format is error")
+            common.message("config format is error", "danger")
             return
         }
         let t = $('#form').serializeArray();
-        $.each(t, function() {
-            d[this.name] = this.value;
-        });
+        try {
+            $.each(t, function() {
+                if(this.value.length === 0){
+                    throw "field " + this.name + " can not be null"
+                }
+                d[this.name] = this.value;
+            });
+        } catch(e) {
+            common.message(e, "danger")
+            return
+        }
         updateRowDetail("table", $("#form").attr("data_index"), d)
         updateData($table.bootstrapTable('getData') ,function (res){
             if(res.code !== 200){
@@ -273,55 +349,100 @@
             return http.handleError(res, "更新失败")
         })
     })
+
+    /**
+     * 新增插件处理
+     */
     $("#create_btn").click(function () {
-        common.message("暂未实现", "info")
-        initPluginsIDList("add_form_id", "table")
+        initAddForm("add_form_id", "table")
         $("#add_container").show()
     })
 
+    /**
+     * 新增表单id选项渲染
+     * @param id
+     * @param table
+     */
     function initPluginsIDList(id, table) {
         let exist = {}
-        let data = [
-            {
-                "id": "插件id，{group}:{project}:{name}",
-                "group": "分组",
-                "project": "项目",
-                "name": "插件名称",
-                "version": "项目版本"
-            },
-            {
-                "id": "插件id1",
-                "group": "分组",
-                "project": "项目",
-                "name": "插件名称",
-                "version": "项目版本"
-            },
-            {
-                "id": "插件id2",
-                "group": "分组",
-                "project": "项目",
-                "name": "插件名称",
-                "version": "项目版本"
+        dashboard.get("/api/extenders/", function (res) {
+            if(res.code !== 200){
+                return http.handleError(res, "获取扩展列表失败")
             }
-        ]
-        $("#"+table).bootstrapTable('getData').forEach(function (item) {
-            exist[item.id] = true
+            let data = res.data
+            $("#"+table).bootstrapTable('getData').forEach(function (item) {
+                exist[item.id] = true
+            })
+            let target = $("#"+id)
+            target.html("")
+            for (let i = 0; i < data.length; i++) {
+                if (!exist[data[i].id]){
+                    target.append("<option value='"+data[i].id+"'>" + data[i].id + "</option>")
+                }
+            }
+        }, function (res) {
+            return http.handleError(res, "获取扩展列表失败")
         })
-        let target = $("#"+id)
-        target.html("")
-        for (let i = 0; i < data.length; i++) {
-            if (!exist[data[i].id]){
-                target.append("<option value='"+data[i].id+"'>" + data[i].id + "</option>")
-            }
-        }
+    }
+
+    /**
+     * 初始化新增表单
+     */
+    function initAddForm(id, table) {
+        initPluginsIDList(id, table)
+        $("#add_form_name").val("")
         add_config_editor.getSession().setValue(JSON.stringify({}, null, 2))
         add_init_config_editor.getSession().setValue(JSON.stringify({}, null, 2))
     }
+    /**
+     * 新增表单关闭点击事件
+     */
     $("#add_close").click(function (){
         $("#add_container").hide(200)
     })
     $(".add_form_cancel").click(function (){
         $("#add_container").hide(200)
     })
+    $(".add_form_submit").click(function (){
+        let d = {};
+        let config = add_config_editor.getSession().getValue()
+        let init_config = add_init_config_editor.getSession().getValue()
+        try {
+            d["config"] = JSON.parse(config)
+            d["init_config"] = JSON.parse(init_config)
+        } catch(e) {
+            common.message("config format is error", "danger")
+            return
+        }
+        let t = $('#add_form').serializeArray();
+        try {
+            $.each(t, function() {
+                if(this.value.length === 0){
+                    throw "field " + this.name + " can not be null"
+                }
+                d[this.name] = this.value;
+            });
+        } catch(e) {
+            common.message(e, "danger")
+            return
+        }
+        if(!d["id"] || d["id"].length === 0){
+            common.message("field id can not be null", "danger")
+            return
+        }
+        let data = $table.bootstrapTable('getData')
+        data.push(d)
+        updateData(data ,function (res){
+            if(res.code !== 200){
+                return http.handleError(res, "更新失败")
+            }
+            addNewRow("table", d)
+            common.message("更新成功", "success")
+            $("#add_close").click()
+        }, function (res){
+            return http.handleError(res, "更新失败")
+        })
+    })
+
 </script>
 {{end}}
