@@ -2,6 +2,7 @@ package extenders
 
 import (
 	"fmt"
+	apinto_dashboard "github.com/eolinker/apinto-dashboard"
 	"github.com/eolinker/apinto-dashboard/internal/apinto"
 	"github.com/eolinker/apinto-dashboard/modules/professions"
 	"github.com/julienschmidt/httprouter"
@@ -15,7 +16,16 @@ type Extenders struct {
 }
 
 func NewExtenders(name string) *Extenders {
-	e := &Extenders{name: name}
+	e := &Extenders{
+		name: name,
+		header: &professions.ListHeader{
+			Title: map[apinto_dashboard.ZoneName][]string{
+				apinto_dashboard.ZhCn: {"名称", "扩展ID", "项目", "分组", "版本"},
+				apinto_dashboard.EnUs: {"Name", "ID", "Project", "Group", "Version"},
+			},
+			Fields: []string{"name", "id", "project", "group", "version"},
+		},
+	}
 	e.createRouter()
 	return e
 }
@@ -25,7 +35,7 @@ func (e *Extenders) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (e *Extenders) Lookup(r *http.Request) (view string, data interface{}, has bool) {
-	return e.name, nil, true
+	return e.name, e.header, true
 }
 
 func (e *Extenders) createRouter() {
