@@ -210,6 +210,10 @@ let aceEditor = {
         editor.setFontSize(14)
         editor.setTheme("ace/theme/crimson_editor");
         editor.session.setMode("ace/mode/json");
+        editor.renderer.setScrollMargin(10, 10);
+        editor.setOptions({
+            autoScrollEditorIntoView: true
+        });
         return editor
     }
 }

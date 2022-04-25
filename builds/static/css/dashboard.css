@@ -155,7 +155,6 @@ body {
   width: 750px;
 }
 .wrapper_large{
-
   width: 80%;
 }
 .wrapper_header {
@@ -211,4 +210,10 @@ body {
   margin: 10px auto;
   padding: 0 20px;
   width: 98%;
+}
+
+.editor {
+  width: 100%;
+  height: 200px;
+  margin: 10px auto;
 }
