@@ -73,6 +73,13 @@ let dashboard = {
     },
 }
 let common = {
+    /**
+     * 弹出确认框
+     * @param title
+     * @param msg
+     * @param success
+     * @param cancel
+     */
     confirm :function (title, msg, success, cancel){
         let model = $("#confirmModel")
         if (model.length > 0) {
