@@ -64,12 +64,32 @@
                 </div>
             </div>
             <div class="form-group">
-                <label for="form_config"><b>Config</b></label>
-                <div class="card editor" id="form_config"></div>
+                <div>
+                    <label for="form_config">
+                        <b>Config</b>
+                    </label>
+                    <p class="nav" role="tablist" style="float:right">
+                        <a class="nav-link active" id="form_config_json_tab" data-toggle="tab" href="#form_config" role="tab" aria-controls="json" aria-selected="true">JSON</a>
+                        <a class="nav-link" id="form_config_ui_tab" data-toggle="tab" href="#form_config_ui" role="tab" aria-controls="ui" aria-selected="false">UI</a>
+                    </p>
+                </div>
+                <div class="tab-content" id="form_config_content">
+                    <div class="tab-pane fade show active card editor" id="form_config" role="tabpanel" aria-labelledby="form_config_json_tab"></div>
+                    <div class="tab-pane fade" id="form_config_ui" role="tabpanel" aria-labelledby="form_config_ui_tab">暂不支持</div>
+                </div>
             </div>
             <div class="form-group">
-                <label for="form_init_config"><b>Init Config</b></label>
-                <div  class="card editor" id="form_init_config"></div>
+                <div>
+                    <label for="form_init_config"><b>Init Config</b></label>
+                    <p class="nav" role="tablist" style="float:right">
+                        <a class="nav-link active" id="form_init_config_json_tab" data-toggle="tab" href="#form_init_config" role="tab" aria-controls="json" aria-selected="true">JSON</a>
+                        <a class="nav-link" id="form_init_config_ui_tab" data-toggle="tab" href="#form_init_config_ui" role="tab" aria-controls="ui" aria-selected="false">UI</a>
+                    </p>
+                </div>
+                <div class="tab-content" id="form_init_config_content">
+                    <div class="tab-pane fade show active card editor" id="form_init_config" role="tabpanel" aria-labelledby="form_init_config_json_tab"></div>
+                    <div class="tab-pane fade" id="form_init_config_ui" role="tabpanel" aria-labelledby="form_init_config_ui_tab">暂不支持</div>
+                </div>
             </div>
             <div class="row justify-content-between">
                 <div class="col-4">
@@ -125,12 +145,31 @@
                 </div>
             </div>
             <div class="form-group">
-                <label for="form_config"><b>Config</b></label>
-                <div class="card editor" id="add_form_config"></div>
+                <div>
+                    <label for="add_form_config"><b>Config</b></label>
+                    <p class="nav" role="tablist" style="float:right">
+                        <a class="nav-link active" id="add_form_config_json_tab" data-toggle="tab" href="#add_form_config" role="tab" aria-controls="json" aria-selected="true">JSON</a>
+                        <a class="nav-link" id="add_form_config_ui_tab" data-toggle="tab" href="#add_form_config_ui" role="tab" aria-controls="ui" aria-selected="false">UI</a>
+                    </p>
+                </div>
+                <div class="tab-content" id="add_form_config_content">
+                    <div class="tab-pane fade show active card editor" id="add_form_config" role="tabpanel" aria-labelledby="add_form_config_json_tab"></div>
+                    <div class="tab-pane fade" id="add_form_config_ui" role="tabpanel" aria-labelledby="add_form_config_ui_tab">暂不支持</div>
+                </div>
+
             </div>
             <div class="form-group">
-                <label for="form_init_config"><b>Init Config</b></label>
-                <div class="card editor" id="add_form_init_config"></div>
+                <div>
+                    <label for="add_form_init_config"><b>Init Config</b></label>
+                    <p class="nav" role="tablist" style="float:right">
+                        <a class="nav-link active" id="add_form_init_config_json_tab" data-toggle="tab" href="#add_form_init_config" role="tab" aria-controls="json" aria-selected="true">JSON</a>
+                        <a class="nav-link" id="add_form_init_config_ui_tab" data-toggle="tab" href="#add_form_init_config_ui" role="tab" aria-controls="ui" aria-selected="false">UI</a>
+                    </p>
+                </div>
+                <div class="tab-content" id="add_form_init_config_content">
+                    <div class="tab-pane fade show active card editor" id="add_form_init_config" role="tabpanel" aria-labelledby="add_form_init_config_json_tab"></div>
+                    <div class="tab-pane fade" id="add_form_init_config_ui" role="tabpanel" aria-labelledby="add_form_init_config_ui_tab">暂不支持</div>
+                </div>
             </div>
             <div class="row justify-content-between">
                 <div class="col-4">
@@ -291,15 +330,20 @@
         $("#form_name").val(row["name"])
         $("#form_status  option[value='"+row["status"]+"'] ").attr("selected",true)
         $("#form_type  option[value='"+row["type"]+"'] ").attr("selected",true)
+        // 渲染配置表单
         if(row["config"]){
             config_editor.getSession().setValue(JSON.stringify(row["config"],null,2))
+            // todo json schema渲染
         }else {
             config_editor.getSession().setValue(JSON.stringify({}, null, 2))
+            // todo json schema渲染
         }
         if(row["init_config"]){
             init_config_editor.getSession().setValue(JSON.stringify(row["init_config"], null, 2))
+            // todo json schema渲染
         }else {
             init_config_editor.getSession().setValue(JSON.stringify({}, null, 2))
+            // todo json schema渲染
         }
     }
 
@@ -317,12 +361,21 @@
      */
     $(".form_submit").click(function (){
         let d = {};
-        let config = config_editor.getSession().getValue()
-        let init_config = init_config_editor.getSession().getValue()
         try {
-            d["config"] = JSON.parse(config)
-            d["init_config"] = JSON.parse(init_config)
-        } catch(e) {
+            if ($("#form_config").hasClass("active")){
+                d["config"] = JSON.parse(config_editor.getSession().getValue())
+            }else {
+                // todo json schema获取数据
+
+            }
+            // 渲染init配置表单
+            if ($("#form_init_config").hasClass("active")){
+                d["init_config"] = JSON.parse(init_config_editor.getSession().getValue())
+            }else {
+                // todo json schema获取数据
+
+            }
+        }catch(e) {
             common.message("config format is error", "danger")
             return
         }
@@ -393,6 +446,8 @@
         $("#add_form_name").val("")
         add_config_editor.getSession().setValue(JSON.stringify({}, null, 2))
         add_init_config_editor.getSession().setValue(JSON.stringify({}, null, 2))
+        // todo 获取列表选项进行 json schema初始化渲染
+        console.log($("#"+id).val())
     }
     /**
      * 新增表单关闭点击事件
@@ -405,12 +460,21 @@
     })
     $(".add_form_submit").click(function (){
         let d = {};
-        let config = add_config_editor.getSession().getValue()
-        let init_config = add_init_config_editor.getSession().getValue()
         try {
-            d["config"] = JSON.parse(config)
-            d["init_config"] = JSON.parse(init_config)
-        } catch(e) {
+            if ($("#add_form_config").hasClass("active")){
+                d["config"] = JSON.parse(add_config_editor.getSession().getValue())
+            }else {
+                // todo json schema获取数据
+
+            }
+            // 渲染init配置表单
+            if ($("#add_form_init_config").hasClass("active")){
+                d["init_config"] = JSON.parse(add_init_config_editor.getSession().getValue())
+            }else {
+                // todo json schema获取数据
+
+            }
+        }catch(e) {
             common.message("config format is error", "danger")
             return
         }
@@ -443,6 +507,11 @@
             return http.handleError(res, "更新失败")
         })
     })
+    $('#add_form').on('change', "select#add_form_id", function () {
+        let value = $(this).val();
+        console.log(value)
+        // todo 监听select变化，update schema
+    });
 
 </script>
 {{end}}

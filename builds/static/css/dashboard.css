@@ -209,3 +209,8 @@ table td {
   height: 200px;
   margin: 10px auto;
 }
+.form-group .nav-link.active {
+  color: #495057;
+  font-weight: 700;
+  background-color: #fff;
+}
