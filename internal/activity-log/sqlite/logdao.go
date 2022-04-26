@@ -28,6 +28,8 @@ func (a *activityLogDao) GetLogList(offset, limit int, user, operation, target s
 	params = append(params, startUnix)
 
 	if endUnix != 0 {
+		//因为得到的时间戳精度为年月日，因此结束时间需要改为当天的最后一秒
+		endUnix = endUnix + 86400 - 1
 		totalSQL = totalSQL + " and timestamp <= ?"
 		listSQL = listSQL + " and timestamp <= ?"
 		params = append(params, endUnix)
