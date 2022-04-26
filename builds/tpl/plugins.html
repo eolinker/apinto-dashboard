@@ -418,7 +418,7 @@
      */
     function initPluginsIDList(id, table) {
         let exist = {}
-        dashboard.get("/api/extenders/", function (res) {
+        dashboard.getExtenders(function (res) {
             if(res.code !== 200){
                 return http.handleError(res, "获取扩展列表失败")
             }
