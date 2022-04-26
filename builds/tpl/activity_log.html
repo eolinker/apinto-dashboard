@@ -20,24 +20,18 @@
     </div>
 </div>
 
-<div class="container mt-5">
-    <div class="row">
-        <div class="col-md-4" style="margin-bottom: 50px;margin-left: -215px;margin-right: 20px">
-            开始时间: <input id="startDate"  />
-        </div>
-        <div class="col-md-4">
-            结束时间: <input id="endDate"  />
-        </div>
-        <div class="col-md-1" style="margin: 20px;">
-            <button class="btn btn-warning" id="search" type="button">搜索</button>
-        </div>
-        <div class="col-md-1" style="margin: 20px;margin-left: -50px">
-             <button class="btn btn-info" id="reset" type="button">重置</button>
-        </div>
+<div class="row clearfix" style="margin-top: 20px">
+    <div class="col-md-3 column" >
+        开始时间: <input id="startDate"  />
+    </div>
+    <div class="col-md-3 column">
+        结束时间: <input id="endDate"  />
+    </div>
+    <div class="col-md-3 column" style="margin-top: 20px">
+        <button class="btn btn-warning" id="search" type="button">搜索</button>
+        <button class="btn btn-info" id="reset" type="button">重置</button>
     </div>
 </div>
-
-
 
 <table  class="table"
         id="table"
@@ -49,7 +43,8 @@
         data-query-params="queryParams"
         data-data-field="list"
         data-page-list="[10,25,50,100]"
-        data-url="/api/{{.name}}/">
+        data-url="/api/{{.name}}/"
+        style="margin-top: 40px">
     <caption>List of {{.name}}</caption>
 
     <thead>
@@ -132,8 +127,6 @@
 
     window.operateEvents = {
         'click .detail': function (e, value, row, index) {
-            console.log(row)
-
             $(".wrapper_title").text("Details")
             let data = row.args
             if (data && data.length > 0){
