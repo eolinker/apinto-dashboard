@@ -331,22 +331,20 @@
         $("#form_status  option[value='"+row["status"]+"'] ").attr("selected",true)
         $("#form_type  option[value='"+row["type"]+"'] ").attr("selected",true)
         // 渲染配置表单
+        let config = {}
+        let init_config = {}
         if(row["config"]){
-            config_editor.getSession().setValue(JSON.stringify(row["config"],null,2))
-            // todo json schema渲染
-            updateUiPane("form_config_ui", row["id"], row["config"])
-        }else {
-            config_editor.getSession().setValue(JSON.stringify({}, null, 2))
-            // todo json schema渲染
-            updateUiPane("form_config_ui", row["id"], {})
+            config = row["config"]
         }
         if(row["init_config"]){
-            init_config_editor.getSession().setValue(JSON.stringify(row["init_config"], null, 2))
-            updateUiPane("form_init_config_ui", row["id"], row["init_config"])
-        }else {
-            init_config_editor.getSession().setValue(JSON.stringify({}, null, 2))
-            updateUiPane("form_init_config_ui", row["id"], {})
+            init_config = row["init_config"]
         }
+        config_editor.getSession().setValue(JSON.stringify(config,null,2))
+        init_config_editor.getSession().setValue(JSON.stringify(init_config, null, 2))
+        getRenderInfo(row["id"], function (render) {
+            updateUiPane("form_config_ui", render, config)
+            updateUiPane("form_init_config_ui", render, init_config)
+        })
     }
 
     /**
@@ -449,28 +447,34 @@
         add_config_editor.getSession().setValue(JSON.stringify({}, null, 2))
         add_init_config_editor.getSession().setValue(JSON.stringify({}, null, 2))
         let pluginID = $("#"+id).val()
-        updateUiPane("add_form_config_ui", pluginID, {})
-        updateUiPane("add_form_init_config_ui", pluginID, {})
-    }
+        if (pluginID){
+            getRenderInfo(pluginID, function (render) {
+                updateUiPane("add_form_config_ui", render, {})
+                updateUiPane("add_form_init_config_ui", render, {})
+            })
+        }
 
+    }
     /**
      * 更新ui面板
-     * @param root 根节点
      * @param id 插件id
-     * @param data
      */
-    function updateUiPane(root, id, data){
+    function getRenderInfo(id, success){
         dashboard.getExtenderInfo(id, function (res) {
             if(res.code !== 200){
                 return http.handleError(res, "获取extender信息失败")
             }
-            // todo update schema
-            $("#"+root).val(res.data["render"])
-            console.log(data)
-
+            success(res.data["render"])
         }, function (res){
             return http.handleError(res, "获取extender信息失败")
         })
+    }
+    function updateUiPane(id, render, data){
+        let target = $("#"+id)
+        target.val(render)
+        if(data){
+            target.val(data)
+        }
     }
     /**
      * 新增表单关闭点击事件
@@ -532,8 +536,11 @@
     })
     $('#add_form').on('change', "select#add_form_id", function () {
         let value = $(this).val();
-        updateUiPane("add_form_config_ui", value, {})
-        updateUiPane("add_form_init_config_ui", value, {})
+        getRenderInfo(value, function (render) {
+            updateUiPane("add_form_config_ui", render, {})
+            updateUiPane("add_form_init_config_ui", render, {})
+        })
+
     });
 
 </script>
