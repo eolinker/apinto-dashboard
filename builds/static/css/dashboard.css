@@ -110,11 +110,19 @@ body {
 }
 
 /**
- table
+  table
  */
 table td {
   table-layout:fixed;
   word-break:break-all
+}
+
+/**
+  form
+ */
+.form-group .nav-link.active {
+  color: #495057;
+  font-weight: 700;
 }
 
 /**
@@ -204,12 +212,11 @@ table td {
   width: 98%;
 }
 
+/**
+  editor
+ */
 .editor {
   width: 100%;
   height: 200px;
   margin: 10px auto;
-}
-.form-group .nav-link.active {
-  color: #495057;
-  font-weight: 700;
 }
