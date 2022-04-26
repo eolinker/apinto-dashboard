@@ -105,7 +105,7 @@
 
 
 </div>
-<div class="wrapper col-md-9 ml-sm-auto col-lg-10 px-md-4" id="add_container">
+<div class="wrapper wrapper_small" id="add_container">
     <div class="wrapper_header">
         <span class="wrapper_title">新增插件</span>
         <button class="wrapper_button btn btn_default" id="add_close">关闭</button>
@@ -199,11 +199,23 @@
     let add_init_config_editor = aceEditor.InitEditor("add_form_init_config")
     let add_config_editor = aceEditor.InitEditor("add_form_config")
     /**
+     * 蒙版点击处理
+     */
+    $("body").on('click', 'div.modal-backdrop.fade.show', function () {
+        if($("#detail_container").is(":visible")){
+            $("#detail_close").click()
+        }
+        if ($("#add_container").is(":visible")){
+            $("#add_close").click()
+        }
+    })
+    /**
      * table相关处理
      */
     window.operateEvents = {
         'click .edit': function (e, value, row, index) {
             initForm(index, row)
+            $("body").append("<div class='modal-backdrop fade show'></div>").addClass("modal-open")
             $("#detail_container").show()
         },
         'click .remove': function (e, value, row, index) {
@@ -265,9 +277,7 @@
      * @param error
      */
     function updateData(data, success, error){
-        dashboard.update("/api/{{.name}}/", {
-            "plugins":data
-        }, success, error)
+        dashboard.update("/api/{{.name}}/", {"plugins":data}, success, error)
     }
 
     /**
@@ -351,9 +361,17 @@
      * 编辑表单关闭点击事件
      */
     $("#detail_close").click(function (){
+        if($("body").hasClass("modal-open")){
+            $('body').removeClass("modal-open")
+            $("div.modal-backdrop.fade.show").remove()
+        }
         $("#detail_container").hide(200)
     })
     $(".form_cancel").click(function (){
+        if($("body").hasClass("modal-open")){
+            $('body').removeClass("modal-open")
+            $("div.modal-backdrop.fade.show").remove()
+        }
         $("#detail_container").hide(200)
     })
     /**
@@ -408,6 +426,7 @@
      */
     $("#create_btn").click(function () {
         initAddForm("add_form_id", "table")
+        $("body").append("<div class='modal-backdrop fade show'></div>").addClass("modal-open")
         $("#add_container").show()
     })
 
@@ -455,9 +474,11 @@
         }
 
     }
+
     /**
      * 更新ui面板
-     * @param id 插件id
+     * @param id
+     * @param success
      */
     function getRenderInfo(id, success){
         dashboard.getExtenderInfo(id, function (res) {
@@ -480,9 +501,17 @@
      * 新增表单关闭点击事件
      */
     $("#add_close").click(function (){
+        if($("body").hasClass("modal-open")){
+            $('body').removeClass("modal-open")
+            $("div.modal-backdrop.fade.show").remove()
+        }
         $("#add_container").hide(200)
     })
     $(".add_form_cancel").click(function (){
+        if($("body").hasClass("modal-open")){
+            $('body').removeClass("modal-open")
+            $("div.modal-backdrop.fade.show").remove()
+        }
         $("#add_container").hide(200)
     })
     $(".add_form_submit").click(function (){
@@ -540,7 +569,6 @@
             updateUiPane("add_form_config_ui", render, {})
             updateUiPane("add_form_init_config_ui", render, {})
         })
-
     });
 
 </script>

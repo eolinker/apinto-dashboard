@@ -155,6 +155,7 @@
                             )
                         }
                     })
+                    $('body').append(`<div class="modal-backdrop fade show"></div>`).addClass("modal-open")
                     $("#detail_container").show(200)
                     return
                 }
@@ -168,6 +169,13 @@
         $("#detail_container").hide(200)
         $("#detail_title").text("")
         $("#detail_table_body").html("")
+        if($("body").hasClass("modal-open")){
+            $('body').removeClass("modal-open")
+            $("div.modal-backdrop.fade.show").remove()
+        }
+    })
+    $("body").on('click', 'div.modal-backdrop.fade.show', function () {
+        $("#detail_close").click()
     })
 
 </script>
