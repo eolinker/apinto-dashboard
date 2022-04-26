@@ -71,6 +71,9 @@ let dashboard = {
     getWithAsync: function (url, success, error){
         http.ajax("GET", url, null, success, error, null, false)
     },
+    getExtenders: function (success, error){
+        this.get("/api/extenders/", success, error)
+    }
 }
 let common = {
     /**
