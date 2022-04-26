@@ -57,12 +57,34 @@
         {{- range $i,$t := (index .data.Title .zone)}}
         <th data-field="{{index $.data.Fields $i}}">{{ $t}}</th>
         {{- end }}
-        <th data-field="args" data-formatter="operateFormatter" ></th>
+        <th data-field="args" data-formatter="operateFormatter" data-events="operateEvents"></th>
     </tr>
 
     </thead>
 
 </table>
+
+<div class="wrapper">
+    <div class="wrapper_header">
+        <span class="wrapper_title">配置详情</span>
+        <button class="wrapper_button btn btn_default btn-secondary" >关闭</button>
+        <br>
+    </div>
+    <div class="card wrapper_body">
+        <div class="card-body">
+            <table class="table table-bordered">
+                <thead class="thead-light">
+                <tr>
+                    <th>Key</th>
+                    <th>Value</th>
+                </tr>
+                </thead>
+                <tbody id="wrapper_table_body">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
 {{end}}
 
@@ -93,44 +115,49 @@
     }
 
     function operateFormatter(value, row, index) {
+        return [
+            '<a class="detail btn-warning btn-sm" href="javascript:void(0)" title="details">',
+            '详情',
+            '</a>  ',
+        ].join('')
+
         let tmpContent=''
         if( row.args && row.args.length>0){
             row.args.forEach((item)=>{
                 tmpContent=tmpContent+`${item.key}: ${item.value}<br>`
             })
         }
-        if(!row.args)
-            return [
-                '<button class="btn btn-disable  btn-sm" data-toggle="modal" data-target="#myModal'+index+'" href="#" title="details" disabled>'+
-                '详情'+
-                '</button> '
-                ]
-        return [
-            '<button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#myModal'+index+'" href="#" title="details">',
-            '详情',
-            '</button>  ',
-            '    <div class="modal fade" id="myModal'+index+'">\n' +
-            '        <div class="modal-dialog modal-lg">\n' +
-            '            <div class="modal-content">\n' +
-            '                <!-- 模态框头部 -->\n' +
-            '                <div class="modal-header">\n' +
-            '                    <h4 class="modal-title">details</h4>\n' +
-            '                    <button type="button" class="close" data-dismiss="modal">&times;</button>\n' +
-            '                </div>\n' +
-            '                <!-- 模态框主体 -->\n' +
-            '                <div class="modal-body bg-dark text-light">\n' +
-            tmpContent + '\n' +
-            '                </div>\n' +
-            '                <!-- 模态框底部 -->\n' +
-            '                <div class="modal-footer">\n' +
-            '                    <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>\n' +
-            '                </div>\n' +
-            '            </div>\n' +
-            '        </div>\n' +
-            '    </div>'
-        ].join('')
 
     }
+
+    window.operateEvents = {
+        'click .detail': function (e, value, row, index) {
+            console.log(row)
+
+            $(".wrapper_title").text("Details")
+            let data = row.args
+            if (data && data.length > 0){
+                data.forEach((item)=>{
+                    if(item.value instanceof Object){
+                        $("#wrapper_table_body").append(
+                            "<tr><td>"+item.key+"</td><td>"+JSON.stringify(item.value)+"</td></tr>"
+                        )
+                    }else{
+                        $("#wrapper_table_body").append(
+                            "<tr><td>"+item.key+"</td><td>"+item.value+"</td></tr>"
+                        )
+                    }
+                })
+                $(".wrapper").show(200)
+            }
+        }
+    }
+    $(".wrapper_button").click(function (){
+        $(".wrapper").hide(200)
+        $(".wrapper_title").text("")
+        $("#wrapper_table_body").html("")
+    })
+
 
     $('#search').click(function() {
         requestParam.user = $("#user").val()
