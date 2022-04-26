@@ -334,16 +334,18 @@
         if(row["config"]){
             config_editor.getSession().setValue(JSON.stringify(row["config"],null,2))
             // todo json schema渲染
+            updateUiPane("form_config_ui", row["id"], row["config"])
         }else {
             config_editor.getSession().setValue(JSON.stringify({}, null, 2))
             // todo json schema渲染
+            updateUiPane("form_config_ui", row["id"], {})
         }
         if(row["init_config"]){
             init_config_editor.getSession().setValue(JSON.stringify(row["init_config"], null, 2))
-            // todo json schema渲染
+            updateUiPane("form_init_config_ui", row["id"], row["init_config"])
         }else {
             init_config_editor.getSession().setValue(JSON.stringify({}, null, 2))
-            // todo json schema渲染
+            updateUiPane("form_init_config_ui", row["id"], {})
         }
     }
 
@@ -446,8 +448,29 @@
         $("#add_form_name").val("")
         add_config_editor.getSession().setValue(JSON.stringify({}, null, 2))
         add_init_config_editor.getSession().setValue(JSON.stringify({}, null, 2))
-        // todo 获取列表选项进行 json schema初始化渲染
-        console.log($("#"+id).val())
+        let pluginID = $("#"+id).val()
+        updateUiPane("add_form_config_ui", pluginID, {})
+        updateUiPane("add_form_init_config_ui", pluginID, {})
+    }
+
+    /**
+     * 更新ui面板
+     * @param root 根节点
+     * @param id 插件id
+     * @param data
+     */
+    function updateUiPane(root, id, data){
+        dashboard.getExtenderInfo(id, function (res) {
+            if(res.code !== 200){
+                return http.handleError(res, "获取extender信息失败")
+            }
+            // todo update schema
+            $("#"+root).val(res.data["render"])
+            console.log(data)
+
+        }, function (res){
+            return http.handleError(res, "获取extender信息失败")
+        })
     }
     /**
      * 新增表单关闭点击事件
@@ -509,8 +532,8 @@
     })
     $('#add_form').on('change', "select#add_form_id", function () {
         let value = $(this).val();
-        console.log(value)
-        // todo 监听select变化，update schema
+        updateUiPane("add_form_config_ui", value, {})
+        updateUiPane("add_form_init_config_ui", value, {})
     });
 
 </script>

@@ -73,6 +73,9 @@ let dashboard = {
     },
     getExtenders: function (success, error){
         this.get("/api/extenders/", success, error)
+    },
+    getExtenderInfo: function (id, success, error){
+        this.get("/api/extenders/"+id, success, error)
     }
 }
 let common = {
