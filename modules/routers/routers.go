@@ -43,10 +43,10 @@ func NewRouters(name string) *Routers {
 		Profession: professionsHandler,
 		header: &professions.ListHeader{
 			Title: map[apinto_dashboard.ZoneName][]string{
-				apinto_dashboard.ZhCn: {"路由名", "驱动", "域名", "端口", "服务", "状态", "创建时间", "更新时间"},
-				apinto_dashboard.EnUs: {"Name", "Driver", "Host", "Listen", "Service", "Status", "Create", "Update"},
+				apinto_dashboard.ZhCn: {"路由名", "驱动", "域名", "端口", "服务", "创建时间", "更新时间"},
+				apinto_dashboard.EnUs: {"Name", "Driver", "Host", "Listen", "Service", "Create", "Update"},
 			},
-			Fields: []string{"name", "driver", "host", "listen", "service", "status", "create", "update"},
+			Fields: []string{"name", "driver", "host", "listen", "service", "create", "update"},
 		},
 	}
 	r.expandRouter()
