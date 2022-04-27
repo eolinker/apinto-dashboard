@@ -98,21 +98,17 @@
     const requestParam={
 
     }
-    const privateFun={};
-    privateFun.changeRequest=(input)=>{
 
-    }
     function queryParams(params) {
         requestParam.limit=params.limit
         requestParam.offset=params.offset
-        privateFun.changeRequest( requestParam)
         return   requestParam
     }
 
     function operateFormatter(value, row, index) {
         return [
             '<a class="detail btn-warning btn-sm" href="javascript:void(0)" title="details">',
-            '详情',
+            'detail',
             '</a>  ',
         ].join('')
 
