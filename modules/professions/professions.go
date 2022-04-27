@@ -113,6 +113,8 @@ func (p *Profession) createRouter() {
 				{"user", "unknown"},
 				{"profession", p.ProfessionName},
 				{"url", r.URL.String()},
+				{"error", err.Error()},
+				{"err_from", "dashboard"},
 			})
 
 			apinto.WriteResult(w, 200, []byte(err.Error()))
@@ -122,10 +124,12 @@ func (p *Profession) createRouter() {
 
 		rData, err := apinto.ReadBody(r.Body)
 		if err != nil {
-			apinto_dashboard.AddActivityLog(userName, "create", "", fmt.Sprintf("创建%s失败, Body读取失败 err:%s ", p.ProfessionName, err), []*apinto_dashboard.Arg{
+			apinto_dashboard.AddActivityLog(userName, "create", "", fmt.Sprintf("创建%s失败, Body读取失败", p.ProfessionName), []*apinto_dashboard.Arg{
 				{"user", userName},
 				{"profession", p.ProfessionName},
 				{"url", r.URL.String()},
+				{"error", err.Error()},
+				{"err_from", "dashboard"},
 			})
 
 			apinto.WriteResult(w, 500, []byte(err.Error()))
@@ -134,14 +138,27 @@ func (p *Profession) createRouter() {
 
 		data, code, err := apinto.Client().Create(p.ProfessionName, rData)
 		if err != nil {
+			apinto_dashboard.AddActivityLog(userName, "create", "", fmt.Sprintf("创建%s失败", p.ProfessionName), []*apinto_dashboard.Arg{
+				{"user", userName},
+				{"profession", p.ProfessionName},
+				{"url", r.URL.String()},
+				{"body", string(rData)},
+				{"error", err.Error()},
+				{"err_from", "dashboard"},
+			})
+
+			apinto.WriteResult(w, 500, []byte(err.Error()))
+			return
+		} else if code != 200 {
 			apinto_dashboard.AddActivityLog(userName, "create", "", fmt.Sprintf("创建%s失败, err:%s ", p.ProfessionName, err.Error()), []*apinto_dashboard.Arg{
 				{"user", userName},
 				{"profession", p.ProfessionName},
 				{"url", r.URL.String()},
 				{"body", string(rData)},
+				{"error", string(data)},
+				{"err_from", "apinto"},
 			})
-
-			apinto.WriteResult(w, 500, []byte(err.Error()))
+			apinto.WriteResult(w, code, data)
 			return
 		}
 
@@ -165,6 +182,8 @@ func (p *Profession) createRouter() {
 				{"user", "unknown"},
 				{"profession", p.ProfessionName},
 				{"url", r.URL.String()},
+				{"error", err.Error()},
+				{"err_from", "dashboard"},
 			})
 
 			apinto.WriteResult(w, 200, []byte(err.Error()))
@@ -174,26 +193,42 @@ func (p *Profession) createRouter() {
 
 		rData, err := apinto.ReadBody(r.Body)
 		if err != nil {
-			apinto_dashboard.AddActivityLog(userName, "update", name, fmt.Sprintf("编辑%s失败, Body读取失败 err:%s ", p.ProfessionName, err), []*apinto_dashboard.Arg{
+			apinto_dashboard.AddActivityLog(userName, "update", name, fmt.Sprintf("编辑%s失败, Body读取失败", p.ProfessionName), []*apinto_dashboard.Arg{
 				{"user", userName},
 				{"profession", p.ProfessionName},
 				{"url", r.URL.String()},
+				{"error", err.Error()},
+				{"err_from", "dashboard"},
 			})
 
 			apinto.WriteResult(w, 500, []byte(err.Error()))
 			return
 		}
 
+		//更新
 		data, code, err := apinto.Client().Update(p.ProfessionName, name, rData)
 		if err != nil {
-			apinto_dashboard.AddActivityLog(userName, "update", name, fmt.Sprintf("编辑%s失败, err:%s ", p.ProfessionName, err.Error()), []*apinto_dashboard.Arg{
+			apinto_dashboard.AddActivityLog(userName, "update", name, fmt.Sprintf("编辑%s失败", p.ProfessionName), []*apinto_dashboard.Arg{
 				{"user", userName},
 				{"profession", p.ProfessionName},
 				{"url", r.URL.String()},
 				{"body", string(rData)},
+				{"error", err.Error()},
+				{"err_from", "dashboard"},
 			})
 
 			apinto.WriteResult(w, 500, []byte(err.Error()))
+			return
+		} else if code != 200 {
+			apinto_dashboard.AddActivityLog(userName, "update", name, fmt.Sprintf("编辑%s失败", p.ProfessionName), []*apinto_dashboard.Arg{
+				{"user", userName},
+				{"profession", p.ProfessionName},
+				{"url", r.URL.String()},
+				{"body", string(rData)},
+				{"error", string(data)},
+				{"err_from", "apinto"},
+			})
+			apinto.WriteResult(w, code, data)
 			return
 		}
 		apinto_dashboard.AddActivityLog(userName, "update", name, fmt.Sprintf("编辑%s成功", p.ProfessionName), []*apinto_dashboard.Arg{
@@ -218,15 +253,15 @@ func (p *Profession) createRouter() {
 				{"error", err.Error()},
 				{"err_from", "dashboard"},
 			})
-
 			apinto.WriteResult(w, 200, []byte(err.Error()))
 			return
 		}
 		userName := userInfo.GetUsername()
 
+		//删除
 		data, code, err := apinto.Client().Delete(p.ProfessionName, name)
 		if err != nil {
-			apinto_dashboard.AddActivityLog(userName, "delete", name, fmt.Sprintf("删除%s失败, err:%s ", p.ProfessionName, err.Error()), []*apinto_dashboard.Arg{
+			apinto_dashboard.AddActivityLog(userName, "delete", name, fmt.Sprintf("删除%s失败", p.ProfessionName), []*apinto_dashboard.Arg{
 				{"user", userName},
 				{"profession", p.ProfessionName},
 				{"url", r.URL.String()},
@@ -235,6 +270,16 @@ func (p *Profession) createRouter() {
 			})
 
 			apinto.WriteResult(w, 500, []byte(err.Error()))
+			return
+		} else if code != 200 {
+			apinto_dashboard.AddActivityLog(userName, "delete", name, fmt.Sprintf("删除%s失败", p.ProfessionName), []*apinto_dashboard.Arg{
+				{"user", userName},
+				{"profession", p.ProfessionName},
+				{"url", r.URL.String()},
+				{"error", string(data)},
+				{"err_from", "apinto"},
+			})
+			apinto.WriteResult(w, code, data)
 			return
 		}
 
