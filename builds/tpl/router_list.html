@@ -24,10 +24,10 @@
     </thead>
 
 </table>
-<div class="wrapper">
+<div class="wrapper wrapper_small" id="detail_container">
     <div class="wrapper_header">
-        <span class="wrapper_title">配置详情</span>
-        <button class="wrapper_button btn btn_default" >关闭</button>
+        <span class="wrapper_title" id="detail_title">配置详情</span>
+        <button class="wrapper_button btn btn_default" id="detail_close" >关闭</button>
         <br>
     </div>
     <div class="card wrapper_body">
@@ -39,9 +39,8 @@
                     <th>Value</th>
                 </tr>
                 </thead>
-                <tbody id="wrapper_table_body">
+                <tbody id="detail_table_body">
                 </tbody>
-
             </table>
 
         </div>
@@ -67,7 +66,7 @@
             '<a class="edit" href="/{{.name}}/edit?name=',
             row.name,
             '" title="edit">',
-            '编辑',
+            '配置',
             '</a>  ',
             '<a class="detail" href="javascript:void(0)" title="detail">',
             '详情',
@@ -116,9 +115,9 @@
                         }
                         return
                     }
-                    http.handleError(res, "变更失败")
+                    return http.handleError(res, "变更失败")
                 }, function (res) {
-                    http.handleError(res, "变更失败")
+                    return http.handleError(res, "变更失败")
                 })
             })
         },
@@ -134,41 +133,49 @@
                         })
                         return
                     }
-                    http.handleError(res, "删除失败")
+                    return http.handleError(res, "删除失败")
                 }, function (res) {
-                    http.handleError(res, "删除失败")
+                    return http.handleError(res, "删除失败")
                 })
             }, null)
         },
         'click .detail': function (e, value, row, index) {
             dashboard.get("/api/{{.name}}/"+row.name, function (res) {
                 if(res.code === 200){
-                    $(".wrapper_title").text(row.name)
+                    $("#detail_title").text(row.name)
                     let data = res.data
                     Object.keys(data).forEach(function (key) {
                         if(data[key] instanceof Object){
-                            $("#wrapper_table_body").append(
+                            $("#detail_table_body").append(
                                 "<tr><td>"+key+"</td><td>"+JSON.stringify(data[key])+"</td></tr>"
                             )
                         }else {
-                            $("#wrapper_table_body").append(
+                            $("#detail_table_body").append(
                                 "<tr><td>"+key+"</td><td>"+data[key]+"</td></tr>"
                             )
                         }
                     })
-                    $(".wrapper").show(200)
+                    $('body').append(`<div class="modal-backdrop fade show"></div>`).addClass("modal-open")
+                    $("#detail_container").show(200)
                     return
                 }
-                http.handleError(res, "获取详情失败")
+                return http.handleError(res, "获取详情失败")
             }, function (res) {
-                http.handleError(res, "获取详情失败")
+                return http.handleError(res, "获取详情失败")
             })
         }
     }
-    $(".wrapper_button").click(function (){
-        $(".wrapper").hide(200)
-        $(".wrapper_title").text("")
-        $("#wrapper_table_body").html("")
+    $("#detail_close").click(function (){
+        $("#detail_container").hide(200)
+        $("#detail_title").text("")
+        $("#detail_table_body").html("")
+        if($("body").hasClass("modal-open")){
+            $('body').removeClass("modal-open")
+            $("div.modal-backdrop.fade.show").remove()
+        }
+    })
+    $("body").on('click', 'div.modal-backdrop.fade.show', function () {
+        $("#detail_close").click()
     })
 
 </script>
