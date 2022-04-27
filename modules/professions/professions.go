@@ -21,6 +21,14 @@ type Profession struct {
 	header *ListHeader
 }
 
+func (p *Profession) Paths() []string {
+	paths := make([]string, 0, 2)
+	paths = append(paths, fmt.Sprintf("/profession/%s/", p.ModuleName))
+	paths = append(paths, fmt.Sprintf("/api/%s/", p.ModuleName))
+
+	return paths
+}
+
 func (p *Profession) Lookup(r *http.Request) (view string, data interface{}, has bool) {
 	name, has := p.ModuleViewFinder.Lookup(r)
 	if has {
@@ -74,7 +82,6 @@ func (p *Profession) createRouter() {
 		}
 		apinto.WriteResult(w, code, data)
 	})
-
 	r.GET(fmt.Sprintf("/profession/%s/:driver", p.ModuleName), func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 		driver := params.ByName("driver")
 		data, code, err := apinto.Client().Render(p.ProfessionName, driver)
@@ -84,6 +91,7 @@ func (p *Profession) createRouter() {
 		}
 		apinto.WriteResult(w, code, data)
 	})
+
 	// List
 	r.GET(fmt.Sprintf("/api/%s/", p.ModuleName), func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 		data, code, err := apinto.Client().List(p.ProfessionName)

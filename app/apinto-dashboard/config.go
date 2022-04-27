@@ -84,11 +84,17 @@ func toModule(c *Config) []*apinto.Module {
 			Handler:  professions.NewProfession(cm.Name, cm.Profession, titles, fields, nil),
 			Name:     cm.Name,
 			I18nName: make(map[apinto.ZoneName]string),
+			NotView:  false,
 		}
 		for k, v := range cm.I18nNames {
 			m.I18nName[apinto.ZoneName(strings.ToLower(k))] = v
 		}
 		r = append(r, m)
+		r = append(r, &apinto.Module{
+			NotView: true,
+			Handler: m.Handler,
+			Path:    fmt.Sprintf("/profession/%s/", cm.Name),
+		})
 	}
 	return r
 }
