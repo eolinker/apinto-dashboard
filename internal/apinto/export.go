@@ -10,7 +10,6 @@ var (
 )
 
 func Init(address []string) {
-	// just for test
 	client = NewAdmin(address)
 }
 
