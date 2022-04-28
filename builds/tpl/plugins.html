@@ -351,7 +351,7 @@
         }
         config_editor.getSession().setValue(JSON.stringify(config,null,2))
         init_config_editor.getSession().setValue(JSON.stringify(init_config, null, 2))
-        getRenderInfo(row["id"], function (render) {
+        getRenderInfo(row["id"].replaceAll(":","/"), function (render) {
             updateUiPane("form_config_ui", render, config)
             updateUiPane("form_init_config_ui", render, init_config)
         })
@@ -449,7 +449,7 @@
             target.html("")
             for (let i = 0; i < data.length; i++) {
                 if (!exist[data[i].id]){
-                    target.append("<option value='"+data[i].id+"'>" + data[i].id + "</option>")
+                    target.append("<option value='"+data[i].id.replaceAll(":", "/")+"'>" + data[i].id + "</option>")
                 }
             }
         }, function (res) {
@@ -490,6 +490,7 @@
             return http.handleError(res, "获取extender信息失败")
         })
     }
+
     function updateUiPane(id, render, data){
         let target = $("#"+id)
         target.val(render)

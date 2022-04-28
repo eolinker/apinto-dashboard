@@ -20,10 +20,10 @@ func NewExtenders(name string) *Extenders {
 		name: name,
 		header: &professions.ListHeader{
 			Title: map[apinto_dashboard.ZoneName][]string{
-				apinto_dashboard.ZhCn: {"名称", "版本", "扩展ID", "项目", "分组"},
-				apinto_dashboard.EnUs: {"Name", "Version", "ID", "Project", "Group"},
+				apinto_dashboard.ZhCn: {"扩展ID", "版本", "项目", "分组", "名称"},
+				apinto_dashboard.EnUs: {"ID", "Version", "Project", "Group", "Name"},
 			},
-			Fields: []string{"name", "version", "id", "project", "group"},
+			Fields: []string{"id", "version", "project", "group", "name"},
 		},
 	}
 	e.createRouter()
@@ -48,9 +48,11 @@ func (e *Extenders) createRouter() {
 		}
 		apinto.WriteResult(w, code, data)
 	})
-	r.GET(fmt.Sprintf("/api/%s/:id", e.name), func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-		id := params.ByName("id")
-		data, code, err := apinto.Client().Extender(id)
+	r.GET(fmt.Sprintf("/api/%s/:group/:project/:name", e.name), func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+		group := params.ByName("group")
+		project := params.ByName("project")
+		name := params.ByName("name")
+		data, code, err := apinto.Client().Extender(group, project, name)
 		if err != nil {
 			apinto.WriteResult(w, 500, []byte(err.Error()))
 			return

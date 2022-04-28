@@ -116,9 +116,9 @@
                     let content = ""
                     Object.keys(data).forEach(function (key) {
                         if(data[key] instanceof Object){
-                            content += "<tr><td>"+key+"</td><td>"+JSON.stringify(data[key])+"</td></tr>"
+                            content += "<tr><td style='min-width: 100px'>"+key+"</td><td>"+JSON.stringify(data[key])+"</td></tr>"
                         }else {
-                            content += "<tr><td>"+key+"</td><td>"+data[key]+"</td></tr>"
+                            content += "<tr><td style='min-width: 100px'>"+key+"</td><td>"+data[key]+"</td></tr>"
                         }
                     })
                     detail.show(row.name, content)
