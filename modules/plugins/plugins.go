@@ -59,7 +59,7 @@ func (p *Plugins) createRouter() {
 	r.PUT(fmt.Sprintf("/api/%s/", p.name), func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 		userName := apinto_dashboard.MustUsername(r)
 
-		var logContent string
+		logContent := "编辑全局插件失败"
 		logArgs := make([]*apinto_dashboard.Arg, 0, 6)
 		logArgs = append(logArgs,
 			&apinto_dashboard.Arg{Key: "user", Value: userName},
@@ -68,12 +68,12 @@ func (p *Plugins) createRouter() {
 		)
 
 		defer func() {
-			apinto_dashboard.AddActivityLog(userName, "update", "", logContent, logArgs)
+			apinto_dashboard.AddActivityLog(userName, "update", "全局插件", logContent, logArgs)
 		}()
 
 		rData, err := apinto.ReadBody(r.Body)
 		if err != nil {
-			logContent = fmt.Sprintf("编辑%s失败, Body读取失败", p.ProfessionName)
+			logContent = "编辑全局插件失败:Body读取失败"
 			logArgs = append(logArgs,
 				&apinto_dashboard.Arg{Key: "error", Value: err.Error()},
 				&apinto_dashboard.Arg{Key: "err_from", Value: "dashboard"},
@@ -86,7 +86,6 @@ func (p *Plugins) createRouter() {
 		//更新全局插件
 		data, code, err := apinto.Client().Update(p.ProfessionName, p.workerName, rData)
 		if err != nil {
-			logContent = fmt.Sprintf("编辑%s失败", p.ProfessionName)
 			logArgs = append(logArgs,
 				&apinto_dashboard.Arg{Key: "request_body", Value: string(rData)},
 				&apinto_dashboard.Arg{Key: "error", Value: err.Error()},
@@ -95,7 +94,6 @@ func (p *Plugins) createRouter() {
 
 			apinto.WriteResult(w, 500, []byte(err.Error()))
 		} else if code != 200 {
-			logContent = fmt.Sprintf("编辑%s失败", p.ProfessionName)
 			logArgs = append(logArgs,
 				&apinto_dashboard.Arg{Key: "request_body", Value: string(rData)},
 				&apinto_dashboard.Arg{Key: "error", Value: string(data)},
@@ -104,7 +102,7 @@ func (p *Plugins) createRouter() {
 
 			apinto.WriteResult(w, code, data)
 		} else {
-			logContent = fmt.Sprintf("编辑%s成功", p.ProfessionName)
+			logContent = "编辑全局插件成功"
 			logArgs = append(logArgs,
 				&apinto_dashboard.Arg{Key: "request_body", Value: string(rData)},
 			)
