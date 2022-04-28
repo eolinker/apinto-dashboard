@@ -54,20 +54,20 @@ func (a *admin) PatchPath(profession string, name string, path string, body []by
 }
 
 func (a *admin) Render(profession string, driver string) ([]byte, int, error) {
-	url := fmt.Sprintf("%s/profession/%s/%s", a.GetNode(), profession, driver)
+	url := fmt.Sprintf("%s/profession/%s/driver?name=%s", a.GetNode(), profession, driver)
 	return a.do(http.MethodGet, url, nil)
 }
 
 func (a *admin) Drivers(profession string) (data []byte, code int, err error) {
-	url := fmt.Sprintf("%s/profession/%s", a.GetNode(), profession)
+	url := fmt.Sprintf("%s/profession/%s/drivers", a.GetNode(), profession)
 	return a.do(http.MethodGet, url, nil)
 }
 
 func (a *admin) Extenders() (data []byte, code int, err error) {
-	url := fmt.Sprintf("%s/extenders", a.GetNode())
+	url := fmt.Sprintf("%s/extender", a.GetNode())
 	return a.do(http.MethodGet, url, nil)
 }
-func (a *admin) Extender(id string) (data []byte, code int, err error) {
-	url := fmt.Sprintf("%s/extender/%s", a.GetNode(), id)
+func (a *admin) Extender(group string, project string, name string) (data []byte, code int, err error) {
+	url := fmt.Sprintf("%s/extender/%s:%s/%s", a.GetNode(), group, project, name)
 	return a.do(http.MethodGet, url, nil)
 }
