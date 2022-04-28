@@ -295,3 +295,23 @@ let modal = {
 
     }
 }
+
+let validate = {
+    _validator: null,
+    djv: function () {
+        if(this._validator){
+            return this._validator
+        }
+        this._validator = new djv({
+            errorHandler(type) {
+                return `errors.push({
+                  type: '${type}',
+                  schema: '${this.schema[this.schema.length - 1]}',
+                  data: '${this.data[this.data.length - 1]}'
+                });`;
+            }
+        })
+        return this._validator
+    }
+
+}

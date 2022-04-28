@@ -2,11 +2,19 @@
 function FormRender(panel,schema,generator){
     const RootId = "FormRender"
     function CheckBySchema(schema,value){
-
-        return "message"
+        let validator = validate.djv()
+        if (!validator.resolved.hasOwnProperty(this.id)) {
+            validator.addSchema(this.id, schema);
+        }
+        let err = validator.validate(this.id, value)
+        if(err){
+            console.log(err)
+            return false
+        }
+        return true
     }
     function ValidHandler(schema){
-        let rs = CheckBySchema(schema,$(this).val())
+        let rs = CheckBySchema.apply(this,[schema,$(this).val()])
         let validPanel = $('validation_'+$(this).attr("id"))
         if( rs === true) {
             $(this).removeClass("is-invalid")
@@ -276,7 +284,7 @@ function FormRender(panel,schema,generator){
                 let v = $(this).val()
 
                 if (v !== ""){
-                    if (ValidHandler.apply(this,schema)){
+                    if (ValidHandler.apply(this,[schema])){
                         add(v)
                         $(this).val("")
                     }
