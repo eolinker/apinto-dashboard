@@ -72,7 +72,7 @@ func (h *AccountHandler) Post(w http.ResponseWriter, r *http.Request) {
 	if userName == "" {
 		template.Execute(w, "login", map[string]interface{}{
 			"code":    1,
-			"message": "user name mash input",
+			"message": "user name mush input",
 		})
 		return
 	}
@@ -91,7 +91,7 @@ func (h *AccountHandler) Post(w http.ResponseWriter, r *http.Request) {
 			"code":    3,
 			"message": "username not exist",
 		})
-		AddActivityLog("unknown", "login", "system", "登陆失败，用户已过期", []*Arg{{Key: "username", Value: userName}, {Key: "callback", Value: callback}})
+		AddActivityLog("unknown", "login", "system", "登陆失败，用户不存在", []*Arg{{Key: "username", Value: userName}, {Key: "callback", Value: callback}})
 
 		return
 	}

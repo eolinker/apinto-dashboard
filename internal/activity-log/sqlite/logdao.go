@@ -6,6 +6,8 @@ import (
 	"fmt"
 	apinto "github.com/eolinker/apinto-dashboard"
 	_ "github.com/mattn/go-sqlite3"
+	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -13,7 +15,7 @@ type activityLogDao struct {
 	db *sql.DB
 }
 
-func (a *activityLogDao) GetLogList(offset, limit int, user, operation, object string, startUnix, endUnix int64) ([]*apinto.LogEntity, int64, error) {
+func (a *activityLogDao) GetLogList(offset, limit int, user, operation, target string, startUnix, endUnix int64) ([]*apinto.LogEntity, int64, error) {
 	db := a.db
 
 	list := make([]*apinto.LogEntity, 0, limit)
@@ -21,11 +23,13 @@ func (a *activityLogDao) GetLogList(offset, limit int, user, operation, object s
 
 	//拼接sql语句
 	totalSQL := "select count(id) from `activityLog` where timestamp >= ?"
-	listSQL := "select `user`,`operation`,`object`,`content`,`args`,`timestamp` from `activityLog` where timestamp >= ?"
+	listSQL := "select `user`,`operation`,`target`,`content`,`args`,`timestamp` from `activityLog` where timestamp >= ?"
 	params := make([]interface{}, 0, 2)
 	params = append(params, startUnix)
 
 	if endUnix != 0 {
+		//因为得到的时间戳精度为年月日，因此结束时间需要改为当天的最后一秒
+		endUnix = endUnix + 86400 - 1
 		totalSQL = totalSQL + " and timestamp <= ?"
 		listSQL = listSQL + " and timestamp <= ?"
 		params = append(params, endUnix)
@@ -43,10 +47,10 @@ func (a *activityLogDao) GetLogList(offset, limit int, user, operation, object s
 		params = append(params, operation)
 	}
 
-	if object != "" {
-		totalSQL = totalSQL + " and object = ?"
-		listSQL = listSQL + " and object = ?"
-		params = append(params, object)
+	if target != "" {
+		totalSQL = totalSQL + " and target = ?"
+		listSQL = listSQL + " and target = ?"
+		params = append(params, target)
 	}
 
 	//查询符合要求的总行数
@@ -74,7 +78,7 @@ func (a *activityLogDao) GetLogList(offset, limit int, user, operation, object s
 			timestamp         int64
 		)
 
-		err = rows.Scan(&user, &operation, &object, &content, &argsJson, &timestamp)
+		err = rows.Scan(&user, &operation, &target, &content, &argsJson, &timestamp)
 		if err != nil {
 			return list, 0, err
 		}
@@ -89,7 +93,7 @@ func (a *activityLogDao) GetLogList(offset, limit int, user, operation, object s
 			Time:      time.Unix(timestamp, 0).Format("2006-01-02 15:04:05"),
 			User:      user,
 			Operation: operation,
-			Object:    object,
+			Target:    target,
 			Content:   content,
 			Args:      args,
 		}
@@ -100,7 +104,7 @@ func (a *activityLogDao) GetLogList(offset, limit int, user, operation, object s
 	return list, totalNum, nil
 }
 
-func (a *activityLogDao) Add(user, operation, object, content string, args []*apinto.Arg) error {
+func (a *activityLogDao) Add(user, operation, target, content string, args []*apinto.Arg) error {
 	db := a.db
 
 	timestamp := time.Now().Unix()
@@ -108,14 +112,14 @@ func (a *activityLogDao) Add(user, operation, object, content string, args []*ap
 	if len(details) == 0 {
 		details = []byte{'[', ']'}
 	}
-	const sqlStatement = "INSERT INTO `activityLog` (`user`,`operation`,`object`,`content`,`args`,`timestamp`) VALUES (?,?,?,?,?,?);"
-	_, err := db.Exec(sqlStatement, user, operation, object, content, details, timestamp)
+	const sqlStatement = "INSERT INTO `activityLog` (`user`,`operation`,`target`,`content`,`args`,`timestamp`) VALUES (?,?,?,?,?,?);"
+	_, err := db.Exec(sqlStatement, user, operation, target, content, details, timestamp)
 	return err
 }
 
 func (a *activityLogDao) initTable() error {
 	db := a.db
-	const sqlStatement = "CREATE TABLE IF NOT EXISTS `activityLog` (\n `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,\n `user` VARCHAR(20),\n `operation` VARCHAR(20),\n `object` VARCHAR(20),\n `content` VARCHAR(255),\n `args` TEXT,\n `timestamp` INTEGER NOT NULL\n );\n CREATE INDEX IF NOT EXISTS `index_timestamp` ON `activityLog` (`timestamp`);\n"
+	const sqlStatement = "CREATE TABLE IF NOT EXISTS `activityLog` (\n `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,\n `user` VARCHAR(20),\n `operation` VARCHAR(20),\n `target` VARCHAR(20),\n `content` VARCHAR(255),\n `args` TEXT,\n `timestamp` INTEGER NOT NULL\n );\n CREATE INDEX IF NOT EXISTS `index_timestamp` ON `activityLog` (`timestamp`);\n"
 	_, err := db.Exec(sqlStatement)
 
 	//刷数据
@@ -159,8 +163,12 @@ func (a *activityLogDao) initTable() error {
 	return err
 }
 
-func NewActivityDao(file string) (ISqliteHandler, error) {
-	db, err := sql.Open("sqlite3", file)
+func NewActivityDao(filePath string) (ISqliteHandler, error) {
+	err := createDir(filePath)
+	if err != nil {
+		return nil, fmt.Errorf("Create DB Dir Fail: %s ", err.Error())
+	}
+	db, err := sql.Open("sqlite3", filePath)
 	if err != nil {
 		return nil, err
 	}
@@ -173,4 +181,12 @@ func NewActivityDao(file string) (ISqliteHandler, error) {
 		return nil, fmt.Errorf("activityLogDao initTable Fail. %s", err)
 	}
 	return a, nil
+}
+
+func createDir(filePath string) error {
+	dir := filepath.Dir(filePath)
+	if apinto.IsDirExist(dir) {
+		return nil
+	}
+	return os.Mkdir(dir, os.ModeDir)
 }

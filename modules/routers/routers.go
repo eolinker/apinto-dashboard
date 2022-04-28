@@ -30,27 +30,23 @@ func (p *Routers) Lookup(r *http.Request) (view string, data interface{}, has bo
 	return "", nil, false
 }
 
-func (p *Routers) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	p.Router.ServeHTTP(w, req)
-}
-
-func NewRouters() *Routers {
+func NewRouters(name string) *Routers {
 	views := map[string]string{
 		"list":   "router_list",
 		"create": "router_create",
 		"edit":   "router_edit",
 	}
-	professionsHandler := professions.NewProfession("routers", "router",
+	professionsHandler := professions.NewProfession(name, "router",
 		nil, nil,
 		apinto_dashboard.NewViewModuleEmpty("/routers/", views, "list"))
 	r := &Routers{
 		Profession: professionsHandler,
 		header: &professions.ListHeader{
 			Title: map[apinto_dashboard.ZoneName][]string{
-				apinto_dashboard.ZhCn: {"路由名", "驱动", "域名", "端口", "服务", "状态", "创建时间", "更新时间"},
-				apinto_dashboard.EnUs: {"Name", "Driver", "Host", "Listen", "Service", "Status", "Create", "Update"},
+				apinto_dashboard.ZhCn: {"路由名", "驱动", "域名", "端口", "服务", "创建时间", "更新时间"},
+				apinto_dashboard.EnUs: {"Name", "Driver", "Host", "Listen", "Service", "Create", "Update"},
 			},
-			Fields: []string{"name", "driver", "host", "listen", "service", "status", "create", "update"},
+			Fields: []string{"name", "driver", "host", "listen", "service", "create", "update"},
 		},
 	}
 	r.expandRouter()
