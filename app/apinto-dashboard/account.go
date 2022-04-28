@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"github.com/eolinker/apinto-dashboard/internal/security"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
@@ -33,7 +34,7 @@ func InitUserDetails(detailsService *security.UserDetailsService, config *UserDe
 	}
 	accountCfg, err := ReadAccountConfig(config.File)
 	if err != nil {
-		return err
+		return fmt.Errorf("ReadAccountConfig fail. %s", err)
 	}
 
 	if accountCfg == nil || len(accountCfg.AccountList) == 0 {
