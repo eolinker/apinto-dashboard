@@ -40,7 +40,11 @@ func main() {
 	config.DefaultZone = apinto.ZoneName(strings.ToLower(cf.Zone))
 
 	detailsService := security.NewUserDetailsService()
-	detailsService.Add(security.NewUserDetails("admin", "admin", map[string]interface{}{}))
+	err = InitUserDetails(detailsService, cf.UserDetails)
+	if err != nil {
+		log.Println("[Error]", err)
+		return
+	}
 	config.UserDetailsService = detailsService
 
 	monitorsModule := monitors.NewMonitor("monitors")
