@@ -234,13 +234,13 @@ let aceEditor = {
 let modal = {
     table: function (id){
         let target = $("#"+id)
-        target.removeClass("wrapper").removeClass("wrapper_small").html("")
-        target.addClass("wrapper").addClass("wrapper_small").append(`<div class="wrapper_header">
-            <span class="wrapper_title" id="${id}_title"></span>
-            <button class="wrapper_button btn btn_default" id="${id}_close" >关闭</button>
+        target.removeClass("pop_window").removeClass("pop_window_small").html("")
+        target.addClass("pop_window").addClass("pop_window_small").append(`<div class="pop_window_header">
+            <span class="pop_window_title" id="${id}_title"></span>
+            <button class="pop_window_button btn btn_default" id="${id}_close" >关闭</button>
             <br>
         </div>
-        <div class="card wrapper_body">
+        <div class="card pop_window_body">
             <div class="card-body">
                 <table class="table table-bordered">
                     <thead class="thead-light">
@@ -287,7 +287,7 @@ let modal = {
         target.destroy = function () {
             target.hide()
             close.unbind("click")
-            target.removeClass("wrapper").removeClass("wrapper_small").html("")
+            target.removeClass("pop_window").removeClass("pop_window_small").html("")
         }
         return target
     },
