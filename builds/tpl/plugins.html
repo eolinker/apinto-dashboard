@@ -7,6 +7,10 @@
         height: 200px;
         margin: 10px auto;
     }
+    .editor_large {
+        height: 200px;
+        margin: 10px auto;
+    }
 </style>
 {{- end -}}
 {{ block "content" .}}
@@ -34,10 +38,10 @@
     </thead>
 
 </table>
-<div class="wrapper">
+<div class="wrapper wrapper_small" id="detail_container">
     <div class="wrapper_header">
         <span class="wrapper_title">插件配置</span>
-        <button class="wrapper_button btn btn_default" >关闭</button>
+        <button class="wrapper_button btn btn_default" id="detail_close">关闭</button>
         <br>
     </div>
     <div class="wrapper_body">
@@ -80,10 +84,74 @@
             </div>
             <div class="row justify-content-between">
                 <div class="col-4">
-                    <button type="button" class="btn btn-outline-secondary wrapper_cancel">取消</button>
+                    <button type="button" class="btn btn-outline-secondary form_cancel">取消</button>
                 </div>
                 <div class="col-4" style="text-align: right">
-                    <button type="button" class="btn btn-primary wrapper_submit">提交</button>
+                    <button type="button" class="btn btn-primary form_submit">提交</button>
+                </div>
+            </div>
+        </form>
+
+    </div>
+
+
+</div>
+<div class="wrapper wrapper_large" id="add_container">
+    <div class="wrapper_header">
+        <span class="wrapper_title">新增插件</span>
+        <button class="wrapper_button btn btn_default" id="add_close">关闭</button>
+        <br>
+    </div>
+    <div class="wrapper_body">
+        <form id="add_form">
+            <div class="form-row">
+                <div class="form-group col-md-12">
+                    <label for="form_id"><b>ID</b></label>
+                    <select name="id" id="add_form_id" class="form-control">
+                        <option value="enable">enable</option>
+                        <option value="disable">disable</option>
+                        <option value="global">global</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-12">
+                    <label for="form_name"><b>Name</b></label>
+                    <input name="name" type="text" class="form-control" id="add_form_name">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="form_status"><b>Status</b></label>
+                    <select name="status" id="add_form_status" class="form-control">
+                        <option value="enable">enable</option>
+                        <option value="disable">disable</option>
+                        <option value="global">global</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="form_type"><b>Type</b></label>
+                    <select name="type" id="add_form_type" class="form-control">
+                        <option value="router">router</option>
+                        <option value="service">service</option>
+                        <option value="upstream">upstream</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="form_config"><b>Config</b></label>
+                <div class="card editor_large" id="add_form_config"></div>
+            </div>
+            <div class="form-group">
+                <label for="form_init_config"><b>Init Config</b></label>
+                <div  class="card editor_large" id="add_form_init_config"></div>
+            </div>
+            <div class="row justify-content-between">
+                <div class="col-4">
+                    <button type="button" class="btn btn-outline-secondary add_form_cancel">取消</button>
+                </div>
+                <div class="col-4" style="text-align: right">
+                    <button type="button" class="btn btn-primary add_form_submit">提交</button>
                 </div>
             </div>
         </form>
@@ -103,6 +171,8 @@
     let $table = $('#table')
     let config_editor = aceEditor.InitEditor("form_config")
     let init_config_editor = aceEditor.InitEditor("form_init_config")
+    let add_init_config_editor = aceEditor.InitEditor("add_form_init_config")
+    let add_config_editor = aceEditor.InitEditor("add_form_config")
     $(document).ready(function(){
         $table.bootstrapTable('refreshOptions', {
             onReorderRow: function (newData) {
@@ -162,7 +232,7 @@
     window.operateEvents = {
         'click .edit': function (e, value, row, index) {
             initForm(index, row)
-            $(".wrapper").show(200)
+            $("#detail_container").show(200)
         },
         'click .remove': function (e, value, row, index) {
             let msg ="确认删除 "+row.name+" {{index .module.I18nName .zone}}?"
@@ -188,13 +258,13 @@
             init_config_editor.getSession().setValue(JSON.stringify({}, null, 2))
         }
     }
-    $(".wrapper_button").click(function (){
-        $(".wrapper").hide(200)
+    $("#detail_close").click(function (){
+        $("#detail_container").hide(200)
     })
-    $(".wrapper_cancel").click(function (){
-        $(".wrapper").hide(200)
+    $(".form_cancel").click(function (){
+        $("#detail_container").hide(200)
     })
-    $(".wrapper_submit").click(function (){
+    $(".form_submit").click(function (){
         let d = {};
         let config = config_editor.getSession().getValue()
         let init_config = init_config_editor.getSession().getValue()
@@ -215,13 +285,22 @@
                 return http.handleError(res, "更新失败")
             }
             common.message("更新成功", "success")
-            $(".wrapper_button").click()
+            $("#detail_close").click()
         }, function (res){
             return http.handleError(res, "更新失败")
         })
     })
     $("#create_btn").click(function () {
         common.message("暂未实现", "info")
+        filterPluginsID("table")
+        $("#add_container").show(200)
     })
+
+    function filterPluginsID(table) {
+        $("#"+table).bootstrapTable('getData').forEach(function (item) {
+            console.log(item.id)
+        })
+
+    }
 </script>
 {{end}}
