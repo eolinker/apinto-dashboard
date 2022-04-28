@@ -25,7 +25,7 @@ type IClient interface {
 	Render(profession string, driver string) (data []byte, code int, err error)
 	Drivers(profession string) (data []byte, code int, err error)
 	Extenders() (data []byte, code int, err error)
-	Extender(id string) (data []byte, code int, err error)
+	Extender(group string, project string, name string) (data []byte, code int, err error)
 }
 
 type admin struct {
