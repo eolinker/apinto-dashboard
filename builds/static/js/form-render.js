@@ -2,6 +2,17 @@
 function FormRender(panel,schema,generator){
     const RootId = "FormRender"
     function CheckBySchema(schema,value){
+        const env = new djv({
+            errorHandler(type) {
+                return `errors.push({
+                      type: '${type}',
+                      schema: '${this.schema[this.schema.length - 1]}',
+                      data: '${this.data[this.data.length - 1]}'
+                    });`;
+                }
+        });
+        env.addSchema('test', schema);
+        console.log(env.validate('test', value));
         return false
     }
     function ValidHandler(schema){
