@@ -103,13 +103,13 @@
     window.operateEvents = {
         'click .detail': function (e, value, row, index) {
             let data = row.args
-            content = ""
+            let content = ""
             if (data && data.length > 0){
                 data.forEach((item)=>{
                     if(item.value instanceof Object){
-                        content += "<tr><td>"+item.key+"</td><td>"+JSON.stringify(item.value)+"</td></tr>"
+                        content += "<tr><td style='min-width: 100px'>"+item.key+"</td><td>"+JSON.stringify(item.value)+"</td></tr>"
                     }else{
-                        content += "<tr><td>"+item.key+"</td><td>"+item.value+"</td></tr>"
+                        content += "<tr><td style='min-width: 100px'>"+item.key+"</td><td>"+item.value+"</td></tr>"
                     }
                 })
             }
