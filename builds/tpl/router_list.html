@@ -1,5 +1,6 @@
 {{- block "header" . -}}
 <link href="/css/bootstrap-table.min.css" rel="stylesheet"  rel="stylesheet">
+<link href="/css/bootstrap-switch.min.css" rel="stylesheet"  rel="stylesheet">
 {{- end -}}
 {{ block "content" .data}}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
@@ -19,47 +20,60 @@
         {{- range $i,$t := (index .data.Title .zone)}}
         <th data-field="{{index $.data.Fields $i}}">{{ $t}}</th>
         {{- end }}
-        <th data-field="operate" data-formatter="operateFormatter" data-events="operateEvents">操作</th>
+        <th data-field="status" data-align="center" data-formatter="statusSwitch">状态</th>
+        <th data-field="operate" data-align="center" data-formatter="operateFormatter" data-events="operateEvents">操作</th>
     </tr>
     </thead>
 
 </table>
-<div class="wrapper wrapper_small" id="detail_container">
-    <div class="wrapper_header">
-        <span class="wrapper_title" id="detail_title">配置详情</span>
-        <button class="wrapper_button btn btn_default" id="detail_close" >关闭</button>
-        <br>
-    </div>
-    <div class="card wrapper_body">
-        <div class="card-body">
-            <table class="table table-bordered">
-                <thead class="thead-light">
-                <tr>
-                    <th>Key</th>
-                    <th>Value</th>
-                </tr>
-                </thead>
-                <tbody id="detail_table_body">
-                </tbody>
-            </table>
+<div id="detail_container">
 
-        </div>
-    </div>
 </div>
+<!--<div class="wrapper wrapper_small" id="detail_container">-->
+<!--    <div class="wrapper_header">-->
+<!--        <span class="wrapper_title" id="detail_title">配置详情</span>-->
+<!--        <button class="wrapper_button btn btn_default" id="detail_close" >关闭</button>-->
+<!--        <br>-->
+<!--    </div>-->
+<!--    <div class="card wrapper_body">-->
+<!--        <div class="card-body">-->
+<!--            <table class="table table-bordered">-->
+<!--                <thead class="thead-light">-->
+<!--                <tr>-->
+<!--                    <th>属性</th>-->
+<!--                    <th>配置</th>-->
+<!--                </tr>-->
+<!--                </thead>-->
+<!--                <tbody id="detail_table_body">-->
+<!--                </tbody>-->
+<!--            </table>-->
+
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
 {{- end -}}
 {{- block "script" . -}}
 <script src="/js/bootstrap-table.min.js"></script>
+<script src="/js/bootstrap-switch.min.js"></script>
 <script>
     let $table = $('#table')
+    let detail = modal.table("detail_container")
     $("#create_btn").click(function () {
         window.location.href="/{{.name}}/create"
     })
     function responseHandler(res) {
         let d = res.data
         d.forEach((item,index)=>{
-            item["service"] = item["target"].substring(0, item["target"].indexOf("@"))
+            item["service"] = item["target"]
         })
         return d
+    }
+    function statusSwitch(value, row, index){
+        if (row["status"]) {
+            return "<input value=" + row.name + " name='status' type='checkbox' checked />";
+        } else {
+            return "<input value=" + row.name + " name='status' type='checkbox' />";
+        }
     }
     function operateFormatter(value, row, index) {
         return [
@@ -74,53 +88,9 @@
             '<a class="remove" href="javascript:void(0)" title="Remove">',
             '删除',
             '</a>  ',
-            '<a class="status down" href="javascript:void(0)" title="Status">',
-            '下线',
-            '</a>',
         ].join('')
     }
     window.operateEvents = {
-        'click .status': function (e, value, row, index) {
-            let target = $(e.target)
-            let msg = ""
-            if(target.hasClass("up")){
-                msg = "确认发布该路由吗？"
-            }else{
-                msg = "确认下线该路由吗？"
-            }
-            common.confirm("路由状态变更", msg, function (){
-                dashboard.patch("/api/{{.name}}/"+row.name, {"status":!row.status}, function (res) {
-                    if(res.code === 200){
-                        common.message("变更成功", "danger")
-                        if(target.hasClass("up")){
-                            target.removeClass("up")
-                            target.addClass("down")
-                            target.text("下线")
-                            $table.bootstrapTable('updateRow', {
-                                index: index,
-                                row: {
-                                    status: '下线'
-                                }
-                            })
-                        }else{
-                            target.removeClass("down")
-                            target.addClass("up")
-                            target.text("发布")
-                            $table.bootstrapTable('updateRow', {
-                                index: index,
-                                row: {
-                                    status: '发布'
-                                }
-                            })
-                        }
-                        return
-                    }
-                    return http.handleError(res, "变更失败")
-                }, function (res) {
-                    return http.handleError(res, "变更失败")
-                })
-            })
-        },
         'click .remove': function (e, value, row, index) {
             let msg ="确认删除 "+row.name+" {{index .module.I18nName .zone}}?"
             common.confirm("删除{{index .module.I18nName .zone}}", msg, function (){
@@ -142,21 +112,16 @@
         'click .detail': function (e, value, row, index) {
             dashboard.get("/api/{{.name}}/"+row.name, function (res) {
                 if(res.code === 200){
-                    $("#detail_title").text(row.name)
                     let data = res.data
+                    let content = ""
                     Object.keys(data).forEach(function (key) {
                         if(data[key] instanceof Object){
-                            $("#detail_table_body").append(
-                                "<tr><td>"+key+"</td><td>"+JSON.stringify(data[key])+"</td></tr>"
-                            )
+                            content += "<tr><td>"+key+"</td><td>"+JSON.stringify(data[key])+"</td></tr>"
                         }else {
-                            $("#detail_table_body").append(
-                                "<tr><td>"+key+"</td><td>"+data[key]+"</td></tr>"
-                            )
+                            content += "<tr><td>"+key+"</td><td>"+data[key]+"</td></tr>"
                         }
                     })
-                    $('body').append(`<div class="modal-backdrop fade show"></div>`).addClass("modal-open")
-                    $("#detail_container").show(200)
+                    detail.show(row.name, content)
                     return
                 }
                 return http.handleError(res, "获取详情失败")
@@ -165,17 +130,32 @@
             })
         }
     }
-    $("#detail_close").click(function (){
-        $("#detail_container").hide(200)
-        $("#detail_title").text("")
-        $("#detail_table_body").html("")
-        if($("body").hasClass("modal-open")){
-            $('body').removeClass("modal-open")
-            $("div.modal-backdrop.fade.show").remove()
-        }
-    })
-    $("body").on('click', 'div.modal-backdrop.fade.show', function () {
-        $("#detail_close").click()
+    $(document).ready(function(){
+        $table.bootstrapTable('refreshOptions', {
+            onLoadSuccess: function () {	//在成功加载远程数据时触发
+                $("[name='status']").bootstrapSwitch({
+                    onText : "发布",
+                    offText : "下线",
+                    onColor : "success",
+                    offColor : "warning",
+                    size : "small",
+                    onSwitchChange : function(event, status) {
+                        let target = $(this)
+                        dashboard.patch("/api/{{.name}}/"+this.value, {"status":status}, function (res) {
+                            if(res.code === 200){
+                                common.message("变更成功", "success")
+                                return
+                            }
+                            target.bootstrapSwitch("toggleState", true);
+                            return http.handleError(res, "变更失败")
+                        }, function (res) {
+                            target.bootstrapSwitch("toggleState", true);
+                            return http.handleError(res, "变更失败")
+                        })
+                    }
+                });
+            }
+        })
     })
 
 </script>

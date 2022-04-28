@@ -231,3 +231,67 @@ let aceEditor = {
         return editor
     }
 }
+let modal = {
+    table: function (id){
+        let target = $("#"+id)
+        target.removeClass("pop_window").removeClass("pop_window_small").html("")
+        target.addClass("pop_window").addClass("pop_window_small").append(`<div class="pop_window_header">
+            <span class="pop_window_title" id="${id}_title"></span>
+            <button class="pop_window_button btn btn_default" id="${id}_close" >关闭</button>
+            <br>
+        </div>
+        <div class="card pop_window_body">
+            <div class="card-body">
+                <table class="table table-bordered">
+                    <thead class="thead-light">
+                    <tr>
+                        <th>属性</th>
+                        <th>配置</th>
+                    </tr>
+                    </thead>
+                    <tbody id="${id}_body">
+                    </tbody>
+                </table>
+    
+            </div>
+        </div>`
+        )
+        let close = $(`#${id}_close`)
+        close.unbind("click");
+        close.click(function (){
+            target.animate({
+                width:'toggle'
+            }, "fast", function () {
+                $(`#${id}_title`).text("")
+                $(`#${id}_body`).html("")
+                if($("body").hasClass("modal-open")){
+                    $('body').removeClass("modal-open")
+                    $("div.modal-backdrop.fade.show").remove()
+                }
+            });
+        })
+        $("body").on('click', 'div.modal-backdrop.fade.show', function () {
+            $(`#${id}_close`).click()
+        })
+        target.show = function (title, body) {
+            $(`#${id}_title`).text(title)
+            $(`#${id}_body`).html(body)
+            $("body").append("<div class='modal-backdrop fade show'></div>").addClass("modal-open")
+            target.animate({
+                width:'toggle'
+            }, "fast");
+        }
+        target.hide = function () {
+            close.click()
+        }
+        target.destroy = function () {
+            target.hide()
+            close.unbind("click")
+            target.removeClass("pop_window").removeClass("pop_window_small").html("")
+        }
+        return target
+    },
+    form: function (id) {
+
+    }
+}
