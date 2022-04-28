@@ -126,9 +126,9 @@ table td {
 }
 
 /**
-  wrapper card
+  pop_window card
  */
-.wrapper {
+.pop_window {
   margin: 0;
   padding: 0;
   outline: none;
@@ -151,13 +151,13 @@ table td {
   background-color: #ffffff;
   display: none;
 }
-.wrapper_small{
+.pop_window_small{
   width: 750px;
 }
-.wrapper_large{
+.pop_window_large{
   width: 80%;
 }
-.wrapper_header {
+.pop_window_header {
   margin: 0;
   outline: none;
   color: inherit;
@@ -167,7 +167,7 @@ table td {
   padding: 15px 20px;
   border-bottom: 1px solid #e8e8e8;
 }
-.wrapper_footer{
+.pop_window_footer{
   margin: 10px 0 0 0;
   outline: none;
   color: inherit;
@@ -177,17 +177,17 @@ table td {
   padding: 15px 20px;
   /*border-top: 1px solid #e8e8e8;*/
 }
-.wrapper_footer div{
+.pop_window_footer div{
   padding: 0;
 }
-.wrapper_footer button{
+.pop_window_footer button{
   font-size: 0.9rem;
 }
-.wrapper_title {
+.pop_window_title {
   font-size: 18px;
   font-weight: bold;
 }
-.wrapper_button {
+.pop_window_button {
   float: right;
   margin: 0;
   outline: none;
@@ -206,7 +206,7 @@ table td {
   border-color: #dcdcdc;
   padding: 0 15px;
 }
-.wrapper_body {
+.pop_window_body {
   margin: 10px auto;
   padding: 0 20px;
   width: 98%;
