@@ -196,7 +196,9 @@ function FormRender(panel,schema,generator){
         }
     }
     class InterObjRender{
-        constructor(panel,schema,generator,path) {}
+        constructor(panel,schema,generator,path) {
+
+        }
         set Value(v){
 
         }
@@ -365,6 +367,25 @@ function FormRender(panel,schema,generator){
             }
         }
     }
+
+    class TopFormRender {
+
+        constructor(panel,schema,generator) {
+
+            if(!generator || typeof generator !== "function"){
+                generator = BaseGenerator
+            }
+            $(panel).html('<form class=""></form>')
+
+            this.Object = generator($(panel).children("form"),schema,generator,RootId)
+        }
+        get Value(){
+            return this.Object.Value
+        }
+        set Value(v){
+            this.Object.Value = v
+        }
+    }
     function BaseGenerator(panel,schema,generator,path){
         switch (schema["type"]){
             case "object":{
@@ -394,25 +415,6 @@ function FormRender(panel,schema,generator){
         }
         return new BaseInputRender(panel,schema,path)
     }
-    class TopFormRender {
-
-        constructor(panel,schema,generator) {
-
-            if(!generator || typeof generator !== "function"){
-                generator = BaseGenerator
-            }
-            $(panel).html('<form class=""></form>')
-
-            this.Object = generator($(panel).children("form"),schema,generator,RootId)
-        }
-        get Value(){
-            return this.Object.Value
-        }
-        set Value(v){
-            this.Object.Value = v
-        }
-    }
-
     return new TopFormRender(panel,schema,generator);
 }
 
