@@ -14,25 +14,24 @@ function FormRender(panel,schema,generator){
         return true
     }
     function ValidHandler(schema){
+        
         let rs = CheckBySchema.apply(this,[schema,$(this).val()])
-        let validPanel = $('validation_'+$(this).attr("id"))
+        // let validPanel = $('validation_'+$(this).attr("id"))
         if( rs === true) {
             $(this).removeClass("is-invalid")
             $(this).addClass("is-valid")
-            // if (){
-            //     $(this).after('<div class="valid-feedback">ok</div>')
-            // }else{
-            validPanel.remove("invalid-feedback")
-            validPanel.add("valid-feedback")
-            // }
+            // validPanel.html("")
+            // validPanel.remove("invalid-feedback")
+            // validPanel.add("valid-feedback")
+
             return true
         }else{
             $(this).removeClass("is-valid")
             $(this).addClass("is-invalid")
 
-            validPanel.html(rs)
-            validPanel.remove("valid-feedback")
-            validPanel.add("invalid-feedback")
+            // validPanel.html(rs)
+            // validPanel.remove("valid-feedback")
+            // validPanel.add("invalid-feedback")
 
             return false
         }
@@ -190,7 +189,8 @@ function FormRender(panel,schema,generator){
         if(schema["required"]){
             input += ' required'
         }
-        input+='/><div id="validation_'+id+'" class="valid-feedback">\n</div>'
+        input+='/>'
+            // '<div id="validation_'+id+'" class="valid-feedback">\n</div>'
 
         return input
     }
