@@ -21,14 +21,19 @@ func init() {
 	apinto.RetTemplate("tpl", "index", "icons")
 }
 func main() {
-	activityHandler, err := sqlite.NewActivityDao("data/activity-log.db")
+
+	cf, err := ReadConfig("config.yml")
 	if err != nil {
 		log.Println("[Error]", err)
 		return
 	}
-
-	apinto.SetActivityLogAddHandler(activityHandler)
-	cf, err := ReadConfig("config.yml")
+	detailsService := security.NewUserDetailsService()
+	err = InitUserDetails(detailsService, cf.UserDetails)
+	if err != nil {
+		log.Println("[Error]", err)
+		return
+	}
+	activityHandler, err := sqlite.NewActivityDao("data/activity-log.db")
 	if err != nil {
 		log.Println("[Error]", err)
 		return
@@ -39,12 +44,7 @@ func main() {
 
 	config.DefaultZone = apinto.ZoneName(strings.ToLower(cf.Zone))
 
-	detailsService := security.NewUserDetailsService()
-	err = InitUserDetails(detailsService, cf.UserDetails)
-	if err != nil {
-		log.Println("[Error]", err)
-		return
-	}
+	apinto.SetActivityLogAddHandler(activityHandler)
 	config.UserDetailsService = detailsService
 
 	monitorsModule := monitors.NewMonitor("monitors")
