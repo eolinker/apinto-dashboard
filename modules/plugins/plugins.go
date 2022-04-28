@@ -57,67 +57,61 @@ func (p *Plugins) createRouter() {
 	})
 	// Update
 	r.PUT(fmt.Sprintf("/api/%s/", p.name), func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-		userInfo, err := apinto_dashboard.UserDetailsFromRequest(r)
-		if err != nil {
-			apinto_dashboard.AddActivityLog("unknown", "update", "", fmt.Sprintf("编辑%s失败, 用户未登录", p.ProfessionName), []*apinto_dashboard.Arg{
-				{"user", "unknown"},
-				{"profession", p.ProfessionName},
-				{"url", r.URL.String()},
-				{"error", err.Error()},
-				{"err_from", "dashboard"},
-			})
+		userName := apinto_dashboard.MustUsername(r)
 
-			apinto.WriteResult(w, 200, []byte(err.Error()))
-			return
-		}
-		userName := userInfo.GetUsername()
+		var logContent string
+		logArgs := make([]*apinto_dashboard.Arg, 0, 6)
+		logArgs = append(logArgs,
+			&apinto_dashboard.Arg{Key: "user", Value: userName},
+			&apinto_dashboard.Arg{Key: "profession", Value: p.ProfessionName},
+			&apinto_dashboard.Arg{Key: "url", Value: r.URL.String()},
+		)
+
+		defer func() {
+			apinto_dashboard.AddActivityLog(userName, "update", "", logContent, logArgs)
+		}()
 
 		rData, err := apinto.ReadBody(r.Body)
 		if err != nil {
-			apinto_dashboard.AddActivityLog(userName, "update", "", fmt.Sprintf("编辑%s失败, Body读取失败", p.ProfessionName), []*apinto_dashboard.Arg{
-				{"user", userName},
-				{"profession", p.ProfessionName},
-				{"url", r.URL.String()},
-				{"error", err.Error()},
-				{"err_from", "dashboard"},
-			})
+			logContent = fmt.Sprintf("编辑%s失败, Body读取失败", p.ProfessionName)
+			logArgs = append(logArgs,
+				&apinto_dashboard.Arg{Key: "error", Value: err.Error()},
+				&apinto_dashboard.Arg{Key: "err_from", Value: "dashboard"},
+			)
 
 			apinto.WriteResult(w, 500, []byte(err.Error()))
 			return
 		}
+
+		//更新全局插件
 		data, code, err := apinto.Client().Update(p.ProfessionName, p.workerName, rData)
 		if err != nil {
-			apinto_dashboard.AddActivityLog(userName, "update", "", fmt.Sprintf("编辑%s失败", p.ProfessionName), []*apinto_dashboard.Arg{
-				{"user", userName},
-				{"profession", p.ProfessionName},
-				{"url", r.URL.String()},
-				{"body", string(rData)},
-				{"error", err.Error()},
-				{"err_from", "dashboard"},
-			})
+			logContent = fmt.Sprintf("编辑%s失败", p.ProfessionName)
+			logArgs = append(logArgs,
+				&apinto_dashboard.Arg{Key: "request_body", Value: string(rData)},
+				&apinto_dashboard.Arg{Key: "error", Value: err.Error()},
+				&apinto_dashboard.Arg{Key: "err_from", Value: "dashboard"},
+			)
 
 			apinto.WriteResult(w, 500, []byte(err.Error()))
-			return
 		} else if code != 200 {
-			apinto_dashboard.AddActivityLog(userName, "update", "", fmt.Sprintf("编辑%s失败", p.ProfessionName), []*apinto_dashboard.Arg{
-				{"user", userName},
-				{"profession", p.ProfessionName},
-				{"url", r.URL.String()},
-				{"body", string(rData)},
-				{"error", string(data)},
-				{"err_from", "apinto"},
-			})
-			apinto.WriteResult(w, code, data)
-			return
-		}
-		apinto_dashboard.AddActivityLog(userName, "update", "", fmt.Sprintf("编辑%s成功", p.ProfessionName), []*apinto_dashboard.Arg{
-			{"user", userName},
-			{"profession", p.ProfessionName},
-			{"url", r.URL.String()},
-			{"body", string(rData)},
-		})
+			logContent = fmt.Sprintf("编辑%s失败", p.ProfessionName)
+			logArgs = append(logArgs,
+				&apinto_dashboard.Arg{Key: "request_body", Value: string(rData)},
+				&apinto_dashboard.Arg{Key: "error", Value: string(data)},
+				&apinto_dashboard.Arg{Key: "err_from", Value: "apinto"},
+			)
 
-		apinto.WriteResult(w, code, data)
+			apinto.WriteResult(w, code, data)
+		} else {
+			logContent = fmt.Sprintf("编辑%s成功", p.ProfessionName)
+			logArgs = append(logArgs,
+				&apinto_dashboard.Arg{Key: "request_body", Value: string(rData)},
+			)
+
+			apinto.WriteResult(w, code, data)
+		}
+
 	})
 	p.Router = r
 }
