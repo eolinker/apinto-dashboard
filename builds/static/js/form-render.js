@@ -16,20 +16,49 @@ function FormRender(panel,schema,generator){
         return false
     }
     function ValidHandler(schema){
-        if(CheckBySchema(schema,$(this).val())){
+        let rs = CheckBySchema(schema,$(this).val())
+        let validPanel = $('validation_'+$(this).attr("id"))
+        if( rs === true) {
             $(this).removeClass("is-invalid")
             $(this).addClass("is-valid")
+            // if (){
+            //     $(this).after('<div class="valid-feedback">ok</div>')
+            // }else{
+            validPanel.remove("invalid-feedback")
+            validPanel.add("valid-feedback")
+            // }
             return true
         }else{
             $(this).removeClass("is-valid")
             $(this).addClass("is-invalid")
+
+            validPanel.html(rs)
+            validPanel.remove("valid-feedback")
+            validPanel.add("invalid-feedback")
+
             return false
         }
     }
     function InputValid(schema,Id){
         $("#"+Id).on("change",function (){
-            ValidHandler.apply(this,schema)
+            ValidHandler.apply(this,[schema])
         })
+    }
+    class BaseEnumRender {
+        constructor(panel,schema,path) {
+
+            const Id = path
+            this.Id = Id
+
+            $(panel).append(createEnum(schema,Id))
+            // InputValid(schema,Id)
+        }
+        get Value(){
+            return $("#"+this.Id).val()
+        }
+        set Value(v){
+            $("#"+this.Id).val(v)
+        }
     }
     class BaseInputRender {
         constructor(panel,schema,path) {
@@ -74,14 +103,13 @@ function FormRender(panel,schema,generator){
     }
 
     function createFieldPanel(panel,schema,id,appendAttr){
-        $(panel).append('<div class="form-group row"></div>')
+        $(panel).append('<div class="form-group row mb-3""></div>')
         let fieldPanel = $(panel).children().last()
         fieldPanel.append(createLabel(schema,id,appendAttr))
         fieldPanel.append('<div class="col-sm-10"></div>')
         return fieldPanel.children().last()
     }
-
-    function createInput(schema,id,appendAttr){
+    function createEnum(schema,id,appendAttr){
         let readOnly = ""
         this.schema = schema
         if (schema["readonly"] === true){
@@ -91,7 +119,12 @@ function FormRender(panel,schema,generator){
         if (schema["enum"]){
             let enums = schema["enum"]
 
-            let select = '<select '+readOnly+'  class="form-control" id="'+id+'">'
+            let select = '<select '+readOnly+' '+appendAttr+' class="form-control" id="'+id+'"'
+            if (schema["required"]){
+                select += " required"
+            }
+            select += ">"
+
             for (let i in enums){
                 if (typeof value != "undefined" &&  value === enums[i]){
                     select += '<option>'+enums[i]+'</option>'
@@ -103,7 +136,15 @@ function FormRender(panel,schema,generator){
 
             return select
         }
-        let input = '<input '+readOnly +' class="form-control" id="'+id+'" ';
+    }
+    function createInput(schema,id,appendAttr){
+        let readOnly = ""
+        this.schema = schema
+        if (schema["readonly"] === true){
+            readOnly = "readonly"
+        }
+
+        let input = '<input '+readOnly +' class="form-control is-valid" id="'+id+'" aria-describedby="validation_'+id+'" ';
         if (appendAttr){
             input += appendAttr
         }
@@ -148,7 +189,10 @@ function FormRender(panel,schema,generator){
         if (typeof value != "undefined"){
             input += 'value="'+value+'"'
         }
-        input+=' />'
+        if(schema["required"]){
+            input += ' required'
+        }
+        input+='/><div id="validation_'+id+'" class="valid-feedback">\n</div>'
 
         return input
     }
@@ -355,6 +399,9 @@ function FormRender(panel,schema,generator){
                 return new MapRender(panel,schema,generator,path)
             }
         }
+        if (schema["enum"]){
+            return new BaseEnumRender(panel,schema,path)
+        }
         return new BaseInputRender(panel,schema,path)
     }
     class TopFormRender {
@@ -364,7 +411,7 @@ function FormRender(panel,schema,generator){
             if(!generator || typeof generator !== "function"){
                 generator = BaseGenerator
             }
-            $(panel).html('<form></form>')
+            $(panel).html('<form class=""></form>')
 
             this.Object = generator($(panel).children("form"),schema,generator,RootId)
         }
