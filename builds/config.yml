@@ -3,6 +3,9 @@ default: upstream
 apinto:
   - "http://172.18.189.43:9400"
 port: 8080
+user_details:
+  type: file
+  file: /etc/data/dashboard/account.yaml
 professions:
 
   - name: services
