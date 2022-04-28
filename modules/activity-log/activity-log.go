@@ -31,9 +31,9 @@ func NewActivityLog(name string, dao apinto.ActivityLogGetHandler) (*ActivityLog
 		header: &professions.ListHeader{
 			Title: map[apinto.ZoneName][]string{
 				apinto.ZhCn: {"操作时间", "用户", "操作类型", "操作对象", "内容"},
-				apinto.EnUs: {"Time", "User", "operation", "object", "Content"},
+				apinto.EnUs: {"Time", "User", "operation", "target", "Content"},
 			},
-			Fields: []string{"time", "user", "operation", "object", "content"},
+			Fields: []string{"time", "user", "operation", "target", "content"},
 		},
 		dao: dao,
 	}
@@ -69,7 +69,7 @@ func (a *ActivityLog) createRouter() {
 		limitStr := r.URL.Query().Get("limit")
 		user := r.URL.Query().Get("user")
 		operation := r.URL.Query().Get("operation")
-		object := r.URL.Query().Get("object")
+		target := r.URL.Query().Get("target")
 		startUnixStr := r.URL.Query().Get("startUnix")
 		endUnixStr := r.URL.Query().Get("endUnix")
 
@@ -78,7 +78,7 @@ func (a *ActivityLog) createRouter() {
 		startUnix, _ := strconv.ParseInt(startUnixStr, 10, 64)
 		endUnix, _ := strconv.ParseInt(endUnixStr, 10, 64)
 
-		data, err := a.getLogList(offset, limit, user, operation, object, startUnix, endUnix)
+		data, err := a.getLogList(offset, limit, user, operation, target, startUnix, endUnix)
 		if err != nil {
 			response.WriteResult(w, 500, []byte(err.Error()))
 			return
@@ -88,8 +88,8 @@ func (a *ActivityLog) createRouter() {
 
 	a.Router = r
 }
-func (a *ActivityLog) getLogList(offset, limit int, user, operation, object string, startUnix, endUnix int64) ([]byte, error) {
-	list, total, err := a.dao.GetLogList(offset, limit, user, operation, object, startUnix, endUnix)
+func (a *ActivityLog) getLogList(offset, limit int, user, operation, target string, startUnix, endUnix int64) ([]byte, error) {
+	list, total, err := a.dao.GetLogList(offset, limit, user, operation, target, startUnix, endUnix)
 	if err != nil {
 		return nil, err
 	}
