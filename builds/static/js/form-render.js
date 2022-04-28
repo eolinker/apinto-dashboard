@@ -1,20 +1,35 @@
 
 function FormRender(panel,schema,generator){
     const RootId = "FormRender"
-    class BaseCheck{
-        constructor(schema) {
-            this.Schema = schema
-        }
-        get Value();
-        Check(){
-
+    function CheckBySchema(schema,value){
+        return false
+    }
+    function ValidHandler(schema){
+        if(CheckBySchema(schema,$(this).val())){
+            $(this).removeClass("is-invalid")
+            $(this).addClass("is-valid")
+            return true
+        }else{
+            $(this).removeClass("is-valid")
+            $(this).addClass("is-invalid")
+            return false
         }
     }
-    class BaseInputRender extends BaseCheck{
+    function InputValid(schema,Id){
+        $("#"+Id).on("change",function (){
+            ValidHandler.apply(this,schema)
+        })
+    }
+    class BaseInputRender {
         constructor(panel,schema,path) {
-            super(schema)
-            this.Id = path
-            $(panel).append(createInput(schema,this.Id))
+
+            const Id = path
+            this.Id = Id
+
+            $(panel).append(createInput(schema,Id))
+
+            InputValid(schema,Id)
+
         }
         get Value(){
             return $("#"+this.Id).val()
@@ -162,7 +177,6 @@ function FormRender(panel,schema,generator){
             let p =$(panel);
             p.append('<div id="'+Id+'_items" class="border p-sm-1 btn-toolbar " role="toolbar"></div>')
             const itemPanel = p.children('#'+Id+'_items')
-            this.ItemPanel = itemPanel
             for (let i in schema["enum"]){
                 let e  = schema["enum"][i]
                 let itemId = Id+'_'+e
@@ -210,23 +224,18 @@ function FormRender(panel,schema,generator){
                 '</div>'+
                 createInput(schema,Id+'_new','aria-describedby="btnGroupAddon_'+Id+'_new" placeholder="Input new" ')+
                 '</div>')
-            $('#'+Id+"_new").blur(function (){
+
+            $('#'+Id+"_new").on("change",function (){
                 let v = $(this).val()
+
                 if (v !== ""){
-                    add(v)
-                    $(this).val("")
-                }
-            })
-            $('#'+Id+"_new").keyup(function (event){
-                if(event.which === 13){
-                    let v = $(this).val()
-                    if (v !== ""){
+                    if (ValidHandler.apply(this,schema)){
                         add(v)
                         $(this).val("")
                     }
                 }
-
             })
+
             let lastIndex = 0
 
             function add(value){
