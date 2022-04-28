@@ -53,7 +53,7 @@ func main() {
 			apinto.EnUs: "monitors",
 		},
 	})
-	routersModule := routers.NewRouters()
+	routersModule := routers.NewRouters("routers")
 	config.Modules = append(config.Modules, &apinto.Module{
 		Path:    "/routers/list",
 		Handler: routersModule,
@@ -62,14 +62,18 @@ func main() {
 			apinto.ZhCn: "路由",
 			apinto.EnUs: "Ruters",
 		},
+	}, &apinto.Module{
+		Handler: routersModule,
+		Path:    "/profession/routers/",
+		NotView: true,
 	})
 	ms := toModule(cf)
 	config.Modules = append(config.Modules, ms...)
 
-	plugingModule := plugins.NewPlugins("plugins")
+	pluginModule := plugins.NewPlugins("plugins")
 	config.Modules = append(config.Modules, &apinto.Module{
 		Path:    "/plugins",
-		Handler: plugingModule,
+		Handler: pluginModule,
 		Name:    "plugins",
 		I18nName: map[apinto.ZoneName]string{
 			apinto.ZhCn: "全局插件",
@@ -102,6 +106,7 @@ func main() {
 			apinto.EnUs: "extenders manager",
 		},
 	})
+
 	config.Statics = map[string]string{
 		"":   "./static",
 		"js": "./static/js",

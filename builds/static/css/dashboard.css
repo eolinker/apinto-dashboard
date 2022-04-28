@@ -110,25 +110,25 @@ body {
 }
 
 /**
- json editor
-*/
-
-.level-2,.je-object__title{
-  font-size: 1rem;
-}
-.btn.btn-secondary{
-  font-size: 0.7rem;
-}
-.je-switcher {
-  margin-bottom: 5px!important;
-}
-.btn-group, .btn-group-vertical {
-  margin-bottom: 10px;
-}
-/**
-  wrapper card
+  table
  */
-.wrapper {
+table td {
+  table-layout:fixed;
+  word-break:break-all
+}
+
+/**
+  form
+ */
+.form-group .nav-link.active {
+  color: #495057;
+  font-weight: 700;
+}
+
+/**
+  pop_window card
+ */
+.pop_window {
   margin: 0;
   padding: 0;
   outline: none;
@@ -137,22 +137,27 @@ body {
   font-size: inherit;
   cursor: inherit;
   right: 0;
-  width: 750px;
   margin-left: 20px;
-  margin-top: 10px;
+  margin-top: 20px;
   position: fixed;
-  top: 50px;
+  top: 0;
   height: 100%;
   border-left: 1px solid #e8e8e8;
   overflow: auto;
   transition: right 300ms;
   margin-bottom: -50px;
   box-shadow: 0px 3px 7px -2px rgba(0, 0, 0, 0.1);
-  z-index: 11;
+  z-index: 1050;
   background-color: #ffffff;
   display: none;
 }
-.wrapper_header {
+.pop_window_small{
+  width: 750px;
+}
+.pop_window_large{
+  width: 80%;
+}
+.pop_window_header {
   margin: 0;
   outline: none;
   color: inherit;
@@ -162,7 +167,7 @@ body {
   padding: 15px 20px;
   border-bottom: 1px solid #e8e8e8;
 }
-.wrapper_footer{
+.pop_window_footer{
   margin: 10px 0 0 0;
   outline: none;
   color: inherit;
@@ -170,19 +175,19 @@ body {
   font-size: inherit;
   cursor: inherit;
   padding: 15px 20px;
-  border-top: 1px solid #e8e8e8;
+  /*border-top: 1px solid #e8e8e8;*/
 }
-.wrapper_footer div{
+.pop_window_footer div{
   padding: 0;
 }
-.wrapper_footer button{
+.pop_window_footer button{
   font-size: 0.9rem;
 }
-.wrapper_title {
+.pop_window_title {
   font-size: 18px;
   font-weight: bold;
 }
-.wrapper_button {
+.pop_window_button {
   float: right;
   margin: 0;
   outline: none;
@@ -201,7 +206,17 @@ body {
   border-color: #dcdcdc;
   padding: 0 15px;
 }
-.wrapper_body {
+.pop_window_body {
   margin: 10px auto;
+  padding: 0 20px;
   width: 98%;
+}
+
+/**
+  editor
+ */
+.editor {
+  width: 100%;
+  height: 200px;
+  margin: 10px auto;
 }
