@@ -22,6 +22,7 @@ type Config struct {
 	Default     string                  `yaml:"default"`
 	Professions []*ProfessionConfigItem `yaml:"professions"`
 	Apinto      []string                `yaml:"apinto"`
+	Port        string                  `yaml:"port"`
 }
 
 func ReadConfig(file string) (*Config, error) {

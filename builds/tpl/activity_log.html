@@ -1,6 +1,5 @@
 {{- block "header" . -}}
 <link href="/css/bootstrap-table.min.css" rel="stylesheet">
-<link href="/css/bootstrap.min.css" rel="stylesheet">
 <link href="/css/gijgo.min.css" rel="stylesheet">
 {{- end -}}
 
@@ -11,23 +10,23 @@
 
 <div class="row clearfix">
     <div class="col-md-3 column" >
-        用户:<input type="text" class="form-control" id="user" placeholder="user"/>
+        用户:<input type="text" class="form-control" id="user"/>
     </div>
     <div class="col-md-3 column">
-        操作类型:<input type="text" class="form-control" id="operation" placeholder="operation"/>
+        操作类型:<input type="text" class="form-control" id="operation"/>
     </div>
     <div class="col-md-3 column">
-        操作对象:<input type="text" class="form-control" id="object" placeholder="object"/>
+        操作对象:<input type="text" class="form-control" id="object"/>
     </div>
 </div>
 
 <div class="container mt-5">
     <div class="row">
         <div class="col-md-4" style="margin-bottom: 50px;margin-left: -215px;margin-right: 20px">
-            Start Date: <input id="startDate"  />
+            开始时间: <input id="startDate"  />
         </div>
         <div class="col-md-4">
-            End Date: <input id="endDate"  />
+            结束时间: <input id="endDate"  />
         </div>
         <div class="col-md-1" style="margin: 20px;">
             <button class="btn btn-warning" id="search" type="button">搜索</button>
@@ -73,7 +72,6 @@
 <script src="/js/messages.zh-cn.min.js"></script>
 <script src="/js/bootstrap.bundle.js"></script>
 <script src="/js/bootstrap-table.min.js"></script>
-<script src="/js/bootstrap.min.js"></script>
 <script>
     let $table = $('#table')
 
@@ -140,11 +138,20 @@
         requestParam.object = $("#object").val()
         requestParam.content = $("#content").val()
 
-        var str = '2008-10-09';//PHP中对应的UNIX时间戳为1223559328
-        var arr = str.split("-");
-        var datum = new Date(Date.UTC(arr[0],arr[1]-1,arr[2],-8));
+        var startStr = $("#startDate").val();
+        if (startStr.length > 0){
+            var startArr = startStr.split("-");
+            var startDatum = new Date(Date.UTC(startArr[0],startArr[1]-1,startArr[2],-8));
+            requestParam.startUnix = startDatum.getTime()/1000
+        }
 
-        console.log(datum.getTime()/1000)
+        var endtStr = $("#endDate").val();
+        if (endtStr.length > 0){
+            var endArr = endtStr.split("-");
+            var endDatum = new Date(Date.UTC(endArr[0],endArr[1]-1,endArr[2],-8));
+            requestParam.endUnix = endDatum.getTime()/1000
+        }
+
         $table.bootstrapTable(
             "refresh",
             {
@@ -157,16 +164,14 @@
         $("#user").val('')
         $("#operation").val('')
         $("#object").val('')
-        $("#content").val('')
         $("#startDate").val('')
         $("#endDate").val('')
 
         requestParam.user = ''
         requestParam.operation = ''
         requestParam.object = ''
-        requestParam.content = ''
-        requestParam.startDate = ''
-        requestParam.endDate = ''
+        requestParam.startUnix = ''
+        requestParam.endUnix = ''
 
         $table.bootstrapTable(
             "refresh",
