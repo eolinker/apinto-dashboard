@@ -2,22 +2,36 @@
 function FormRender(panel,schema,generator){
     const RootId = "FormRender"
     function CheckBySchema(schema,value){
-        return false
+
+        return "message"
     }
     function ValidHandler(schema){
-        if(CheckBySchema(schema,$(this).val())){
+        let rs = CheckBySchema(schema,$(this).val())
+        let validPanel = $('validation_'+$(this).attr("id"))
+        if( rs === true) {
             $(this).removeClass("is-invalid")
             $(this).addClass("is-valid")
+            // if (){
+            //     $(this).after('<div class="valid-feedback">ok</div>')
+            // }else{
+            validPanel.remove("invalid-feedback")
+            validPanel.add("valid-feedback")
+            // }
             return true
         }else{
             $(this).removeClass("is-valid")
             $(this).addClass("is-invalid")
+
+            validPanel.html(rs)
+            validPanel.remove("valid-feedback")
+            validPanel.add("invalid-feedback")
+
             return false
         }
     }
     function InputValid(schema,Id){
         $("#"+Id).on("change",function (){
-            ValidHandler.apply(this,schema)
+            ValidHandler.apply(this,[schema])
         })
     }
     class BaseInputRender {
@@ -63,10 +77,10 @@ function FormRender(panel,schema,generator){
     }
 
     function createFieldPanel(panel,schema,id,appendAttr){
-        $(panel).append('<div class="form-group row"></div>')
+        $(panel).append('<div class="form-group row mb-3""></div>')
         let fieldPanel = $(panel).children().last()
         fieldPanel.append(createLabel(schema,id,appendAttr))
-        fieldPanel.append('<div class="col-sm-10"></div>')
+        fieldPanel.append('<div class="col-sm-10 border"></div>')
         return fieldPanel.children().last()
     }
 
@@ -92,7 +106,7 @@ function FormRender(panel,schema,generator){
 
             return select
         }
-        let input = '<input '+readOnly +' class="form-control" id="'+id+'" ';
+        let input = '<input '+readOnly +' class="form-control is-valid" id="'+id+'" aria-describedby="validation_'+id+'" ';
         if (appendAttr){
             input += appendAttr
         }
@@ -137,7 +151,10 @@ function FormRender(panel,schema,generator){
         if (typeof value != "undefined"){
             input += 'value="'+value+'"'
         }
-        input+=' />'
+        if(schema["required"]){
+            input += ' required'
+        }
+        input+='/><div id="validation_'+id+'" class="valid-feedback">\n</div>'
 
         return input
     }
@@ -353,7 +370,7 @@ function FormRender(panel,schema,generator){
             if(!generator || typeof generator !== "function"){
                 generator = BaseGenerator
             }
-            $(panel).html('<form></form>')
+            $(panel).html('<form class=""></form>')
 
             this.Object = generator($(panel).children("form"),schema,generator,RootId)
         }
