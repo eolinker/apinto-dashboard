@@ -16,28 +16,22 @@
         操作类型:<input type="text" class="form-control" id="operation"/>
     </div>
     <div class="col-md-3 column">
-        操作对象:<input type="text" class="form-control" id="object"/>
+        操作对象:<input type="text" class="form-control" id="target"/>
     </div>
 </div>
 
-<div class="container mt-5">
-    <div class="row">
-        <div class="col-md-4" style="margin-bottom: 50px;margin-left: -215px;margin-right: 20px">
-            开始时间: <input id="startDate"  />
-        </div>
-        <div class="col-md-4">
-            结束时间: <input id="endDate"  />
-        </div>
-        <div class="col-md-1" style="margin: 20px;">
-            <button class="btn btn-warning" id="search" type="button">搜索</button>
-        </div>
-        <div class="col-md-1" style="margin: 20px;margin-left: -50px">
-             <button class="btn btn-info" id="reset" type="button">重置</button>
-        </div>
+<div class="row clearfix" style="margin-top: 20px">
+    <div class="col-md-3 column" >
+        开始时间: <input id="startDate"  />
+    </div>
+    <div class="col-md-3 column">
+        结束时间: <input id="endDate"  />
+    </div>
+    <div class="col-md-3 column" style="margin-top: 20px">
+        <button class="btn btn-warning" id="search" type="button">搜索</button>
+        <button class="btn btn-info" id="reset" type="button">重置</button>
     </div>
 </div>
-
-
 
 <table  class="table"
         id="table"
@@ -49,7 +43,8 @@
         data-query-params="queryParams"
         data-data-field="list"
         data-page-list="[10,25,50,100]"
-        data-url="/api/{{.name}}/">
+        data-url="/api/{{.name}}/"
+        style="margin-top: 40px">
     <caption>List of {{.name}}</caption>
 
     <thead>
@@ -57,12 +52,34 @@
         {{- range $i,$t := (index .data.Title .zone)}}
         <th data-field="{{index $.data.Fields $i}}">{{ $t}}</th>
         {{- end }}
-        <th data-field="args" data-formatter="operateFormatter" ></th>
+        <th data-field="args" data-formatter="operateFormatter" data-events="operateEvents"></th>
     </tr>
 
     </thead>
 
 </table>
+
+<div class="wrapper wrapper_small" id="detail_container">
+    <div class="wrapper_header">
+        <span class="wrapper_title" id="detail_title">配置详情</span>
+        <button class="wrapper_button btn btn_default btn-secondary" id="detail_close" >关闭</button>
+        <br>
+    </div>
+    <div class="card wrapper_body">
+        <div class="card-body">
+            <table class="table table-bordered">
+                <thead class="thead-light">
+                <tr>
+                    <th>Key</th>
+                    <th>Value</th>
+                </tr>
+                </thead>
+                <tbody id="detail_table_body">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
 {{end}}
 
@@ -81,61 +98,68 @@
     const requestParam={
 
     }
-    const privateFun={};
-    privateFun.changeRequest=(input)=>{
 
-    }
     function queryParams(params) {
         requestParam.limit=params.limit
         requestParam.offset=params.offset
-        privateFun.changeRequest( requestParam)
         return   requestParam
     }
 
     function operateFormatter(value, row, index) {
+        return [
+            '<a class="detail btn-warning btn-sm" href="javascript:void(0)" title="details">',
+            'detail',
+            '</a>  ',
+        ].join('')
+
         let tmpContent=''
         if( row.args && row.args.length>0){
             row.args.forEach((item)=>{
                 tmpContent=tmpContent+`${item.key}: ${item.value}<br>`
             })
         }
-        if(!row.args)
-            return [
-                '<button class="btn btn-disable  btn-sm" data-toggle="modal" data-target="#myModal'+index+'" href="#" title="details" disabled>'+
-                '详情'+
-                '</button> '
-                ]
-        return [
-            '<button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#myModal'+index+'" href="#" title="details">',
-            '详情',
-            '</button>  ',
-            '    <div class="modal fade" id="myModal'+index+'">\n' +
-            '        <div class="modal-dialog modal-lg">\n' +
-            '            <div class="modal-content">\n' +
-            '                <!-- 模态框头部 -->\n' +
-            '                <div class="modal-header">\n' +
-            '                    <h4 class="modal-title">details</h4>\n' +
-            '                    <button type="button" class="close" data-dismiss="modal">&times;</button>\n' +
-            '                </div>\n' +
-            '                <!-- 模态框主体 -->\n' +
-            '                <div class="modal-body bg-dark text-light">\n' +
-            tmpContent + '\n' +
-            '                </div>\n' +
-            '                <!-- 模态框底部 -->\n' +
-            '                <div class="modal-footer">\n' +
-            '                    <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>\n' +
-            '                </div>\n' +
-            '            </div>\n' +
-            '        </div>\n' +
-            '    </div>'
-        ].join('')
 
     }
+
+    window.operateEvents = {
+        'click .detail': function (e, value, row, index) {
+            $("#detail_title").text("Details")
+            let data = row.args
+            if (data && data.length > 0){
+                data.forEach((item)=>{
+                    if(item.value instanceof Object){
+                        $("#detail_table_body").append(
+                            "<tr><td>"+item.key+"</td><td>"+JSON.stringify(item.value)+"</td></tr>"
+                        )
+                    }else{
+                        $("#detail_table_body").append(
+                            "<tr><td>"+item.key+"</td><td>"+item.value+"</td></tr>"
+                        )
+                    }
+                })
+                $("body").append("<div class='modal-backdrop fade show'></div>").addClass("modal-open")
+                $("#detail_container").show(200)
+            }
+        }
+    }
+    $("#detail_close").click(function (){
+        $("#detail_container").hide(200)
+        $("#detail_title").text("")
+        $("#detail_table_body").html("")
+        if($("body").hasClass("modal-open")){
+            $('body').removeClass("modal-open")
+            $("div.modal-backdrop.fade.show").remove()
+        }
+    })
+    $("body").on('click', 'div.modal-backdrop.fade.show', function () {
+        $("#detail_close").click()
+    })
+
 
     $('#search').click(function() {
         requestParam.user = $("#user").val()
         requestParam.operation = $("#operation").val()
-        requestParam.object = $("#object").val()
+        requestParam.target = $("#target").val()
         requestParam.content = $("#content").val()
 
         var startStr = $("#startDate").val();
@@ -163,13 +187,13 @@
     $('#reset').click(function() {
         $("#user").val('')
         $("#operation").val('')
-        $("#object").val('')
+        $("#target").val('')
         $("#startDate").val('')
         $("#endDate").val('')
 
         requestParam.user = ''
         requestParam.operation = ''
-        requestParam.object = ''
+        requestParam.target = ''
         requestParam.startUnix = ''
         requestParam.endUnix = ''
 
