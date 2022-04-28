@@ -71,8 +71,21 @@ let dashboard = {
     getWithAsync: function (url, success, error){
         http.ajax("GET", url, null, success, error, null, false)
     },
+    getExtenders: function (success, error){
+        this.get("/api/extenders/", success, error)
+    },
+    getExtenderInfo: function (id, success, error){
+        this.get("/api/extenders/"+id, success, error)
+    }
 }
 let common = {
+    /**
+     * 弹出确认框
+     * @param title
+     * @param msg
+     * @param success
+     * @param cancel
+     */
     confirm :function (title, msg, success, cancel){
         let model = $("#confirmModel")
         if (model.length > 0) {
@@ -134,6 +147,7 @@ let common = {
         $(divElement).append(closeBtn);
         // 消息框放入到页面中
         $('body').append(divElement);
+        divElement.css("z-index","999999")
         return divElement;
     },
 
@@ -210,6 +224,10 @@ let aceEditor = {
         editor.setFontSize(14)
         editor.setTheme("ace/theme/crimson_editor");
         editor.session.setMode("ace/mode/json");
+        editor.renderer.setScrollMargin(10, 10);
+        editor.setOptions({
+            autoScrollEditorIntoView: true
+        });
         return editor
     }
 }
