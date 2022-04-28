@@ -14,8 +14,11 @@ function FormRender(panel,schema,generator){
         return true
     }
     function ValidHandler(schema){
-        
-        let rs = CheckBySchema.apply(this,[schema,$(this).val()])
+        let value =$(this).val()
+        if (schema["type"] === "integer" || schema["type"] === "number"){
+            value = Number(value)
+        }
+        let rs = CheckBySchema.apply(this,[schema,value])
         // let validPanel = $('validation_'+$(this).attr("id"))
         if( rs === true) {
             $(this).removeClass("is-invalid")
