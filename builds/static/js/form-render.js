@@ -1,12 +1,12 @@
 
 function FormRender(panel,schema,generator){
     const RootId = "FormRender"
-    function CheckBySchema(schema,value){
+    function CheckBySchema(id, schema,value){
         let validator = validate.djv()
-        if (!validator.resolved.hasOwnProperty(this.id)) {
-            validator.addSchema(this.id, schema);
+        if (!validator.resolved.hasOwnProperty(id)) {
+            validator.addSchema(id, schema);
         }
-        let err = validator.validate(this.id, value)
+        let err = validator.validate(id, value)
         if(err){
             console.log(err)
             return false
@@ -18,7 +18,7 @@ function FormRender(panel,schema,generator){
         if (schema["type"] === "integer" || schema["type"] === "number"){
             value = Number(value)
         }
-        let rs = CheckBySchema.apply(this,[schema,value])
+        let rs = CheckBySchema(this.id, schema, value)
         // let validPanel = $('validation_'+$(this).attr("id"))
         if( rs === true) {
             $(this).removeClass("is-invalid")
@@ -147,7 +147,7 @@ function FormRender(panel,schema,generator){
             readOnly = "readonly"
         }
 
-        let input = '<input '+readOnly +' class="form-control is-valid" id="'+id+'" aria-describedby="validation_'+id+'" ';
+        let input = '<input '+readOnly +' class="form-control" id="'+id+'" aria-describedby="validation_'+id+'" ';
         if (appendAttr){
             input += appendAttr
         }
@@ -420,7 +420,8 @@ function FormRender(panel,schema,generator){
             if(!generator || typeof generator !== "function"){
                 generator = BaseGenerator
             }
-            $(panel).html('<form class=""></form>')
+            $(panel).empty()
+            $(panel).append('<form class=""></form>')
 
             this.Object = generator($(panel).children("form"),schema,generator,RootId)
         }
