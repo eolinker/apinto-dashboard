@@ -236,13 +236,14 @@ function FormRender(panel,schema,generator){
         constructor(panel,schema,generator,path) {
             const Id = path;
             this.Id = Id;
-            this.Enum = schema["enum"]
+            const items = schema["items"]
+            this.Enum = items["enum"]
 
             let p =$(panel);
             p.append('<div id="'+Id+'_items" class="border p-sm-1 btn-toolbar " role="toolbar"></div>')
             const itemPanel = p.children('#'+Id+'_items')
-            for (let i in schema["enum"]){
-                let e  = schema["enum"][i]
+            for (let i in items["enum"]){
+                let e  = items["enum"][i]
                 let itemId = Id+'_'+e
                 itemPanel.append('<div class="custom-control custom-checkbox custom-control-inline">\n' +
                     '  <input type="checkbox" id="'+itemId+'" value="'+e+'" name="'+Id+'" class="custom-control-input">\n' +
