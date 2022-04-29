@@ -64,12 +64,15 @@ func (h *AccountHandler) Post(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
+	callback := r.FormValue(CallBack)
+	if callback == "" {
+		callback = "/"
+	}
 	userName := r.FormValue("username")
 	if userName == "" {
 		template.Execute(w, "login", map[string]interface{}{
 			"code":    1,
-			"message": "user name mash input",
+			"message": "user name mush input",
 		})
 		return
 	}
@@ -88,6 +91,8 @@ func (h *AccountHandler) Post(w http.ResponseWriter, r *http.Request) {
 			"code":    3,
 			"message": "username not exist",
 		})
+		AddActivityLog("unknown", "login", "system", "登陆失败，用户不存在", []*Arg{{Key: "username", Value: userName}, {Key: "callback", Value: callback}})
+
 		return
 	}
 	if !strings.EqualFold(password, userDetails.GetPassword()) {
@@ -95,6 +100,8 @@ func (h *AccountHandler) Post(w http.ResponseWriter, r *http.Request) {
 			"code":    4,
 			"message": "username or password wrong",
 		})
+		AddActivityLog("unknown", "login", "system", "登陆失败，密码错误", []*Arg{{Key: "username", Value: userName}, {Key: "callback", Value: callback}})
+
 		return
 	}
 	if !userDetails.IsAccountNonExpired() {
@@ -102,6 +109,8 @@ func (h *AccountHandler) Post(w http.ResponseWriter, r *http.Request) {
 			"code":    5,
 			"message": "user is expired",
 		})
+		AddActivityLog(userDetails.GetUsername(), "login", "system", "登陆失败，用户已过期", []*Arg{{Key: "username", Value: userName}, {Key: "callback", Value: callback}})
+
 		return
 	}
 	if !userDetails.IsEnabled() {
@@ -109,6 +118,7 @@ func (h *AccountHandler) Post(w http.ResponseWriter, r *http.Request) {
 			"code":    6,
 			"message": "user is not enabled",
 		})
+		AddActivityLog(userDetails.GetUsername(), "login", "system", "登陆失败，用户未激活", nil)
 
 		return
 	}
@@ -117,6 +127,7 @@ func (h *AccountHandler) Post(w http.ResponseWriter, r *http.Request) {
 			"code":    7,
 			"message": "user is locked",
 		})
+		AddActivityLog(userDetails.GetUsername(), "login", "system", "登陆失败，用户已锁定", []*Arg{{Key: "username", Value: userName}, {Key: "callback", Value: callback}})
 
 		return
 	}
@@ -125,6 +136,7 @@ func (h *AccountHandler) Post(w http.ResponseWriter, r *http.Request) {
 			"code":    8,
 			"message": "user is credentials expires",
 		})
+		AddActivityLog(userDetails.GetUsername(), "login", "system", "登陆失败，证书已过期", []*Arg{{Key: "username", Value: userName}, {Key: "callback", Value: callback}})
 
 		return
 	}
@@ -140,10 +152,8 @@ func (h *AccountHandler) Post(w http.ResponseWriter, r *http.Request) {
 		cookie.Expires = time.Now().Add(time.Hour * 24)
 	}
 	http.SetCookie(w, cookie)
-	callback := r.FormValue(CallBack)
-	if callback == "" {
-		callback = "/"
-	}
+
+	AddActivityLog(userDetails.GetUsername(), "login", "system", "成功登陆", []*Arg{{Key: "username", Value: userName}, {Key: "callback", Value: callback}})
 	http.Redirect(w, r, callback, http.StatusFound)
 	//h.serHandler.ServeHTTP(w, setUserDetailsToRequest(r, userDetails))
 }

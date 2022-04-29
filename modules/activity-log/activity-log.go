@@ -1,11 +1,10 @@
 package activity_log
 
 import (
+	"encoding/json"
 	"fmt"
-	apinto_dashboard "github.com/eolinker/apinto-dashboard"
-	"github.com/eolinker/apinto-dashboard/internal/apinto"
-	"github.com/eolinker/apinto-dashboard/modules/activity-log/database"
-	"github.com/eolinker/apinto-dashboard/modules/activity-log/database/module"
+	apinto "github.com/eolinker/apinto-dashboard"
+	response "github.com/eolinker/apinto-dashboard/internal/apinto"
 	"github.com/eolinker/apinto-dashboard/modules/professions"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
@@ -13,32 +12,30 @@ import (
 )
 
 type ActivityLog struct {
-	*apinto_dashboard.ModuleViewFinder
+	*apinto.ModuleViewFinder
 	*httprouter.Router
 	ModuleName string
 	header     *professions.ListHeader
+	dao        apinto.ActivityLogGetHandler
 }
 
-func NewActivityLog(name string) (*ActivityLog, error) {
-	err := database.InitDB()
-	if err != nil {
-		return nil, err
-	}
+func NewActivityLog(name string, dao apinto.ActivityLogGetHandler) (*ActivityLog, error) {
 
 	views := map[string]string{
 		"list": "activity_log",
 	}
 
 	activityLog := &ActivityLog{
-		ModuleViewFinder: apinto_dashboard.NewViewModuleEmpty(fmt.Sprint("/", name, "/"), views, "list"),
+		ModuleViewFinder: apinto.NewViewModuleEmpty(fmt.Sprint("/", name, "/"), views, "list"),
 		ModuleName:       name,
 		header: &professions.ListHeader{
-			Title: map[apinto_dashboard.ZoneName][]string{
-				apinto_dashboard.ZhCn: {"操作时间", "用户", "操作类型", "操作对象", "内容"},
-				apinto_dashboard.EnUs: {"Time", "User", "operation", "object", "Content"},
+			Title: map[apinto.ZoneName][]string{
+				apinto.ZhCn: {"操作时间", "用户", "操作类型", "操作对象", "内容"},
+				apinto.EnUs: {"Time", "User", "operation", "target", "Content"},
 			},
-			Fields: []string{"time", "user", "operation", "object", "content"},
+			Fields: []string{"time", "user", "operation", "target", "content"},
 		},
+		dao: dao,
 	}
 	activityLog.createRouter()
 
@@ -67,33 +64,39 @@ func (a *ActivityLog) createRouter() {
 
 	// List
 	r.GET(fmt.Sprintf("/api/%s/", a.ModuleName), func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-		//TODO  从sqlite读取数据
+		//从sqlite读取数据
 		offsetStr := r.URL.Query().Get("offset")
 		limitStr := r.URL.Query().Get("limit")
+		user := r.URL.Query().Get("user")
+		operation := r.URL.Query().Get("operation")
+		target := r.URL.Query().Get("target")
+		startUnixStr := r.URL.Query().Get("startUnix")
+		endUnixStr := r.URL.Query().Get("endUnix")
+
 		offset, _ := strconv.Atoi(offsetStr)
 		limit, _ := strconv.Atoi(limitStr)
-		if limit == 0 {
-			limit = 10
-		}
+		startUnix, _ := strconv.ParseInt(startUnixStr, 10, 64)
+		endUnix, _ := strconv.ParseInt(endUnixStr, 10, 64)
 
-		data, err := module.GetLogList(offset, limit)
+		data, err := a.getLogList(offset, limit, user, operation, target, startUnix, endUnix)
 		if err != nil {
-			apinto.WriteResult(w, 500, []byte(err.Error()))
+			response.WriteResult(w, 500, []byte(err.Error()))
 			return
 		}
-		//stamp := time.Now().Unix()
-		//time.Unix(stamp, 0).Format("2006-01-02 15:04:05")
-		//fakeData := []map[string]interface{}{{
-		//	"user":      "admin",
-		//	"operation": "创建",
-		//	"object":    "demoRouter",
-		//	"content":   "操作:创建 操作对象:demoRouter",
-		//	"timestamp": time.Unix(stamp, 0).Format("2006-01-02 15:04:05"),
-		//}}
-		//data, _ := json.Marshal(fakeData)
-
-		apinto.WriteResult(w, 200, data)
+		response.WriteResult(w, 200, data)
 	})
 
 	a.Router = r
+}
+func (a *ActivityLog) getLogList(offset, limit int, user, operation, target string, startUnix, endUnix int64) ([]byte, error) {
+	list, total, err := a.dao.GetLogList(offset, limit, user, operation, target, startUnix, endUnix)
+	if err != nil {
+		return nil, err
+	}
+	m := make(map[string]interface{})
+	m["list"] = list
+	m["total_num"] = total
+
+	data, _ := json.Marshal(m)
+	return data, nil
 }

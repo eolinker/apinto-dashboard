@@ -21,6 +21,7 @@ type Module struct {
 	Handler  IModule
 	Name     string
 	I18nName map[ZoneName]string `json:"i18n_name"`
+	NotView  bool
 }
 
 type Config struct {
@@ -41,11 +42,13 @@ func Create(config *Config) (http.Handler, error) {
 
 	modules := make([]*ModuleItem, 0, len(config.Modules))
 	for _, m := range config.Modules {
-		modules = append(modules, &ModuleItem{
-			Name:     m.Name,
-			I18nName: m.I18nName,
-			Path:     m.Path,
-		})
+		if !m.NotView {
+			modules = append(modules, &ModuleItem{
+				Name:     m.Name,
+				I18nName: m.I18nName,
+				Path:     m.Path,
+			})
+		}
 	}
 	mp := NewModuleItemPlan(modules)
 	defaultModule := config.DefaultModule
@@ -57,16 +60,21 @@ func Create(config *Config) (http.Handler, error) {
 	for _, m := range config.Modules {
 
 		path := fmt.Sprint("/", m.Name)
-		viewH := &ViewServer{
-			handler: m.Handler,
-			modules: mp,
-			name:    m.Name,
+		if m.NotView {
+			serve.Handle(m.Path, m.Handler)
+		} else {
+			viewH := &ViewServer{
+				handler: m.Handler,
+				modules: mp,
+				name:    m.Name,
+			}
+			serve.Handle(path, viewH)
+			serve.Handle(fmt.Sprint(path, "/"), viewH)
+			serve.Handle(fmt.Sprintf("/api/%s/", m.Name), m.Handler)
 		}
-		serve.Handle(path, viewH)
-		serve.Handle(fmt.Sprint(path, "/"), viewH)
-		serve.Handle(fmt.Sprint("/api/", m.Name, "/"), m.Handler)
-		serve.Handle(fmt.Sprint("/profession/", m.Name, "/"), m.Handler)
+
 	}
+
 	staticServe := &http.ServeMux{}
 
 	for path, dir := range config.Statics {
@@ -124,12 +132,12 @@ func (v *Views) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	cache.WriteTo(w)
 }
 func (v *Views) Error(w http.ResponseWriter, cache *TemplateWriter) {
-	template.Execute(w, "error", v.mp.CreateViewData("error", map[string]string{"statusCode": strconv.Itoa(cache.statusCode), "message": cache.buf.String()}, nil))
+	template.Execute(w, "error", v.mp.CreateViewData("error", map[string]string{"statusCode": strconv.Itoa(cache.statusCode), "message": cache.buf.String()}, nil, nil))
 
 }
 
 type ViewServer struct {
-	handler IModule
+	handler ViewLookup
 	modules *ModuleItemPlan
 	name    string
 }
@@ -140,7 +148,9 @@ func (v *ViewServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	template.Execute(w, viewName, v.modules.CreateViewData(v.name, data, nil))
+	userDetails, _ := UserDetailsFromRequest(r)
+
+	template.Execute(w, viewName, v.modules.CreateViewData(v.name, data, nil, userDetails))
 
 }
 
@@ -162,7 +172,7 @@ func NewModuleItemPlan(modules []*ModuleItem) *ModuleItemPlan {
 	}
 	return &ModuleItemPlan{modules: modules, moduleMap: mp}
 }
-func (mp *ModuleItemPlan) CreateViewData(name string, data interface{}, err error) map[string]interface{} {
+func (mp *ModuleItemPlan) CreateViewData(name string, data interface{}, err error, user UserDetails) map[string]interface{} {
 	obj := make(map[string]interface{})
 	obj["data"] = data
 	obj["error"] = err
@@ -170,6 +180,7 @@ func (mp *ModuleItemPlan) CreateViewData(name string, data interface{}, err erro
 	obj["modules"] = mp.modules
 	obj["module"] = mp.moduleMap[name]
 	obj["name"] = name
+	obj["user"] = user
 	return obj
 }
 

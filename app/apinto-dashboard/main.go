@@ -3,9 +3,11 @@ package main
 import (
 	"fmt"
 	apinto "github.com/eolinker/apinto-dashboard"
+	"github.com/eolinker/apinto-dashboard/internal/activity-log/sqlite"
 	apintoClient "github.com/eolinker/apinto-dashboard/internal/apinto"
 	"github.com/eolinker/apinto-dashboard/internal/security"
 	activity_log "github.com/eolinker/apinto-dashboard/modules/activity-log"
+
 	"github.com/eolinker/apinto-dashboard/modules/extenders"
 	"github.com/eolinker/apinto-dashboard/modules/monitors"
 	"github.com/eolinker/apinto-dashboard/modules/plugins"
@@ -19,18 +21,30 @@ func init() {
 	apinto.RetTemplate("tpl", "index", "icons")
 }
 func main() {
+
 	cf, err := ReadConfig("config.yml")
 	if err != nil {
 		log.Println("[Error]", err)
 		return
 	}
+	detailsService := security.NewUserDetailsService()
+	err = InitUserDetails(detailsService, cf.UserDetails)
+	if err != nil {
+		log.Println("[Error]", err)
+		return
+	}
+	activityHandler, err := sqlite.NewActivityDao("data/activity-log.db")
+	if err != nil {
+		log.Println("[Error]", err)
+		return
+	}
+
 	apintoClient.Init(cf.Apinto)
 	config := new(apinto.Config)
 
 	config.DefaultZone = apinto.ZoneName(strings.ToLower(cf.Zone))
 
-	detailsService := security.NewUserDetailsService()
-	detailsService.Add(security.NewUserDetails("admin", "admin", map[string]interface{}{}))
+	apinto.SetActivityLogAddHandler(activityHandler)
 	config.UserDetailsService = detailsService
 
 	monitorsModule := monitors.NewMonitor("monitors")
@@ -43,7 +57,7 @@ func main() {
 			apinto.EnUs: "monitors",
 		},
 	})
-	routersModule := routers.NewRouters()
+	routersModule := routers.NewRouters("routers")
 	config.Modules = append(config.Modules, &apinto.Module{
 		Path:    "/routers/list",
 		Handler: routersModule,
@@ -52,21 +66,26 @@ func main() {
 			apinto.ZhCn: "路由",
 			apinto.EnUs: "Ruters",
 		},
+	}, &apinto.Module{
+		Handler: routersModule,
+		Path:    "/profession/routers/",
+		NotView: true,
 	})
 	ms := toModule(cf)
 	config.Modules = append(config.Modules, ms...)
 
-	plugingModule := plugins.NewPlugins("plugins")
+	pluginModule := plugins.NewPlugins("plugins")
 	config.Modules = append(config.Modules, &apinto.Module{
 		Path:    "/plugins",
-		Handler: plugingModule,
+		Handler: pluginModule,
 		Name:    "plugins",
 		I18nName: map[apinto.ZoneName]string{
 			apinto.ZhCn: "全局插件",
 			apinto.EnUs: "Global Plugins",
 		},
 	})
-	activityLogModule, err := activity_log.NewActivityLog("activity-log")
+
+	activityLogModule, err := activity_log.NewActivityLog("activity-log", activityHandler)
 	if err != nil {
 		log.Println("[Error]", err)
 		return
@@ -91,6 +110,7 @@ func main() {
 			apinto.EnUs: "extenders manager",
 		},
 	})
+
 	config.Statics = map[string]string{
 		"":   "./static",
 		"js": "./static/js",
@@ -102,5 +122,5 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	http.ListenAndServe(":8080", service)
+	http.ListenAndServe(fmt.Sprintf(":%s", cf.Port), service)
 }
