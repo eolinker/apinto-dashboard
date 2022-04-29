@@ -131,7 +131,7 @@ func (p *Profession) createRouter() {
 
 		rData, err := apinto.ReadBody(r.Body)
 		if err != nil {
-			logContent = fmt.Sprintf("编辑%s失败, Body读取失败", p.ProfessionName)
+			logContent = fmt.Sprintf("编辑%s失败:Body读取失败", p.ProfessionName)
 			logArgs = append(logArgs,
 				&apinto_dashboard.Arg{Key: "error", Value: err.Error()},
 				&apinto_dashboard.Arg{Key: "err_from", Value: "dashboard"},
@@ -190,7 +190,7 @@ func (p *Profession) createRouter() {
 
 		rData, err := apinto.ReadBody(r.Body)
 		if err != nil {
-			logContent = fmt.Sprintf("编辑%s失败, Body读取失败", p.ProfessionName)
+			logContent = fmt.Sprintf("编辑%s失败:Body读取失败", p.ProfessionName)
 			logArgs = append(logArgs,
 				&apinto_dashboard.Arg{Key: "error", Value: err.Error()},
 				&apinto_dashboard.Arg{Key: "err_from", Value: "dashboard"},
