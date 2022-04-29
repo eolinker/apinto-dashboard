@@ -64,7 +64,7 @@ func (a *admin) Drivers(profession string) (data []byte, code int, err error) {
 }
 
 func (a *admin) Extenders() (data []byte, code int, err error) {
-	url := fmt.Sprintf("%s/extender", a.GetNode())
+	url := fmt.Sprintf("%s/extender/", a.GetNode())
 	return a.do(http.MethodGet, url, nil)
 }
 func (a *admin) Extender(group string, project string, name string) (data []byte, code int, err error) {
