@@ -9,10 +9,36 @@
     <select class="custom-select" id="drivers">
     </select>
 </div>
+<div id="form"></div>
+<div id="form_button" class="row justify-content-between" style="display: none">
+    <div class="col-4">
+        <button type="button" class="btn btn-outline-secondary form_reset">重置</button>
+    </div>
+    <div class="col-4" style="text-align: right">
+        <button type="button" class="btn btn-primary form_submit">提交</button>
+    </div>
+</div>
 {{end}}
 {{- block "script" . -}}
+<script src="/js/form-render.js"></script>
+<script src="/js/djv.js"></script>
 <script>
     initDrivers("drivers", "/profession/{{.name}}/")
+    let ui_pane = null
+    $('.select_content').on('change', "select#drivers", function () {
+        getDriverInfo($(this).val(), function (render) {
+            ui_pane = updateUiPane("form", render)
+            let btn = "#form_button"
+            if (!$(btn).is(":visible")){
+                $(btn).show()
+            }
+        })
+    });
+    $("#form_button").on("click", "button.form_reset", function () {
+        resetBtn()
+    }).on("click", "button.form_submit", function () {
+        submitBtn()
+    })
     function initDrivers(id, url){
         dashboard.get(url,function (res) {
             if(res.code !== 200){
@@ -20,7 +46,7 @@
             }
             let data = res.data["drivers"]
             let target = $("#"+id)
-            target.html("")
+            target.empty()
             for (let i = 0; i < data.length; i++) {
                 if(i===0){
                     target.append("<option value='"+data[i].name+"' selected>" + data[i].name + "</option>")
@@ -28,27 +54,51 @@
                     target.append("<option value='"+data[i].name+"'>" + data[i].name + "</option>")
                 }
             }
+            getDriverInfo(target.val(), function (render) {
+                ui_pane = updateUiPane("form", render)
+                let btn = "#form_button"
+                if (!$(btn).is(":visible")){
+                    $(btn).show()
+                }
+            })
         },function (res) {
             return http.handleError(res, "获取driver列表失败")
         })
     }
-    function initRenderForm(url){
-        dashboard.get(url, function (res) {
+    function getDriverInfo(name, success){
+        dashboard.get("/profession/{{.name}}/"+name, function (res) {
             if(res.code !== 200){
-                return http.handleError(res, "获取render失败")
+                return http.handleError(res, "获取driver信息失败")
             }
-            // todo 渲染render, data参数用于初始化
-            // res.data["render"]
-
-        }, function (res){
-            return http.handleError(res, "获取render失败")
+            success(res.data["render"])
+        }, function (res) {
+            return http.handleError(res, "获取driver信息失败")
         })
     }
-    $('.select_content').on('change', "select#drivers", function () {
-        let value = $(this).val();
-        // todo 监听select变化，update schema
-        initRenderForm("/profession/{{.name}}/" + value)
-    });
+    function updateUiPane(id, render){
+        return new FormRender($("#"+id), render)
+    }
+    function resetBtn(){
+        if(ui_pane){
+            ui_pane.Value = {}
+        }
+    }
+    function submitBtn(){
+        if(ui_pane && ui_pane.check()){
+            dashboard.create("/api/{{.name}}/", ui_pane.Value, function (res){
+                if(res.code !== 200){
+                    http.handleError(res, "新增失败")
+                    return
+                }
+                common.message("新增成功", "success")
+                window.location.back()
+            }, function (res){
+                http.handleError(res, "新增失败")
+            })
+        }else {
+            common.message("config format error", "danger")
+        }
+    }
 </script>
 
 {{- end -}}
