@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>render</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link href="/css/dashboard.css" rel="stylesheet">
+    <style>
+        .editor {
+            width: 100%;
+            height: 800px;
+            margin: 10px auto;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+    </div>
+    <div class="row">
+
+        <div class="col-5">
+            <label for="inputJsonSchema"><b>input json schema</b></label>
+            <div class="card editor" id="inputJsonSchema"></div>
+        </div>
+        <div class="col-1">
+            <button type="button" onclick="change()" class="btn btn-primary">转换</button>
+        </div>
+        <div class="col-5">
+
+            <label for="outputRender"><b>render</b></label>
+            <div class="card editor" id="outputRender"></div>
+
+        </div>
+    </div>
+    <div class="row">
+
+    </div>
+</div>
+<script src="/js/jquery-3.0.0.js"></script>
+<script src="/js/bootstrap.js"></script>
+<script src="/js/dashboard.js"></script>
+<script src="/js/render.demo.js"></script>
+<script src="/js/ace/ace.js"></script>
+
+<script>
+    let initDemo = {
+        "type": "object",
+        "properties": {
+            "cert": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "crt": {
+                            "type": "string"
+                        },
+                        "key": {
+                            "type": "string"
+                        }
+                    },
+                    "additionalProperties": false,
+                    "required": ["key", "crt"]
+                }
+            },
+            "driver": {
+                "type": "string",
+                "enum": ["http"]
+            },
+            "host": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                },
+                "minLength": 1
+            },
+            "listen": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 1
+            },
+            "method": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "enum": ["GET", "POST", "PATH", "DELETE"]
+                }
+            },
+            "plugins": {
+                "type": "object",
+                "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                        "config": {},
+                        "disable": {
+                            "type": "boolean"
+                        }
+                    },
+                    "additionalProperties": false,
+                    "required": ["disable", "config"]
+                }
+            },
+            "protocol": {
+                "type": "string",
+                "enum": ["http", "https"],
+                "default": "http"
+            },
+            "rules": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "header": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        },
+                        "location": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "query": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "target": {
+                "type": "string",
+                "format": "text",
+                "minLength": 1,
+            }
+        },
+        "additionalProperties": false,
+        "required": ["driver", "listen", "protocol", "target"]
+    }
+    let inputJsonSchema = aceEditor.InitEditor("inputJsonSchema")
+    let outputRender = aceEditor.InitEditor("outputRender")
+    outputRender.setReadOnly(true)
+
+    inputJsonSchema.getSession().setValue(JSON.stringify(initDemo, null, 4))
+
+    function change() {
+        let value = inputJsonSchema.getSession().getValue()
+        let data = JSON.parse(value)
+
+        outputRender.getSession().setValue(JSON.stringify(PropertiesToArray(data), null, 4))
+    }
+
+    change();
+
+</script>
+</body>
+</html>
