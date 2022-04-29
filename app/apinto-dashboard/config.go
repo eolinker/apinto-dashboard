@@ -17,12 +17,18 @@ type ProfessionConfigItem struct {
 	Profession string              `yaml:"profession"`
 }
 
+type UserDetailsConfig struct {
+	Type string `yaml:"type"`
+	File string `yaml:"file"`
+}
+
 type Config struct {
 	Zone        string                  `yaml:"zone"`
 	Default     string                  `yaml:"default"`
 	Professions []*ProfessionConfigItem `yaml:"professions"`
 	Apinto      []string                `yaml:"apinto"`
 	Port        string                  `yaml:"port"`
+	UserDetails *UserDetailsConfig      `yaml:"user_details"`
 }
 
 func ReadConfig(file string) (*Config, error) {

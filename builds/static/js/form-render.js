@@ -147,7 +147,7 @@ function FormRender(panel,schema,generator){
             readOnly = "readonly"
         }
 
-        let input = '<input '+readOnly +' class="form-control is-valid" id="'+id+'" aria-describedby="validation_'+id+'" ';
+        let input = '<input '+readOnly +' class="form-control" id="'+id+'" aria-describedby="validation_'+id+'" ';
         if (appendAttr){
             input += appendAttr
         }
@@ -236,13 +236,14 @@ function FormRender(panel,schema,generator){
         constructor(panel,schema,generator,path) {
             const Id = path;
             this.Id = Id;
-            this.Enum = schema["enum"]
+            const items = schema["items"]
+            this.Enum = items["enum"]
 
             let p =$(panel);
             p.append('<div id="'+Id+'_items" class="border p-sm-1 btn-toolbar " role="toolbar"></div>')
             const itemPanel = p.children('#'+Id+'_items')
-            for (let i in schema["enum"]){
-                let e  = schema["enum"][i]
+            for (let i in items["enum"]){
+                let e  = items["enum"][i]
                 let itemId = Id+'_'+e
                 itemPanel.append('<div class="custom-control custom-checkbox custom-control-inline">\n' +
                     '  <input type="checkbox" id="'+itemId+'" value="'+e+'" name="'+Id+'" class="custom-control-input">\n' +
@@ -419,7 +420,8 @@ function FormRender(panel,schema,generator){
             if(!generator || typeof generator !== "function"){
                 generator = BaseGenerator
             }
-            $(panel).html('<form class=""></form>')
+            $(panel).empty()
+            $(panel).append('<form class=""></form>')
 
             this.Object = generator($(panel).children("form"),schema,generator,RootId)
         }
