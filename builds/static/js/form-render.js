@@ -1,12 +1,12 @@
 
 function FormRender(panel,schema,generator){
     const RootId = "FormRender"
-    function CheckBySchema(schema,value){
+    function CheckBySchema(id, schema,value){
         let validator = validate.djv()
-        if (!validator.resolved.hasOwnProperty(this.id)) {
-            validator.addSchema(this.id, schema);
+        if (!validator.resolved.hasOwnProperty(id)) {
+            validator.addSchema(id, schema);
         }
-        let err = validator.validate(this.id, value)
+        let err = validator.validate(id, value)
         if(err){
             console.log(err)
             return false
@@ -18,7 +18,7 @@ function FormRender(panel,schema,generator){
         if (schema["type"] === "integer" || schema["type"] === "number"){
             value = Number(value)
         }
-        let rs = CheckBySchema.apply(this,[schema,value])
+        let rs = CheckBySchema(this.id, schema, value)
         // let validPanel = $('validation_'+$(this).attr("id"))
         if( rs === true) {
             $(this).removeClass("is-invalid")
