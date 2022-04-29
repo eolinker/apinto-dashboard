@@ -495,7 +495,6 @@
     function getRenderInfo(id, success){
         dashboard.getExtenderInfo(id, function (res) {
             if(res.code !== 200){
-                success(jsonSchemaDemo)
                 return http.handleError(res, "获取extender信息失败")
             }
             success(res.data["render"])

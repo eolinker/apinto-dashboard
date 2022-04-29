@@ -205,19 +205,6 @@ let common = {
         }, 1500);
     }
 }
-let util = {
-    filter: function (high, low){
-        let data = {}
-        Object.keys(high).forEach(function (key){
-            if(low[key]){
-                data[key] = low[key]
-            }else {
-                data[key] = null
-            }
-        })
-        return data
-    }
-}
 let aceEditor = {
     InitEditor: function (id){
         let editor = ace.edit(id);
@@ -290,9 +277,6 @@ let modal = {
             target.removeClass("pop_window").removeClass("pop_window_small").html("")
         }
         return target
-    },
-    form: function (id) {
-
     }
 }
 
@@ -315,7 +299,151 @@ let validate = {
     }
 }
 
-let jsonSchemaDemo = {
+class Render {
+    constructor(id, schema, data, callback) {
+        let target = $("#"+id)
+        let renderHandler = new FormRender(target, schema)
+        if(data){
+            renderHandler.Value = data
+        }
+        if (callback){
+            callback()
+        }
+        this.pane = renderHandler
+        this.id = id
+    }
+    Reset(schema){
+        this.Destroy()
+        this.pane = new FormRender($("#"+this.id), schema)
+    }
+    ResetVal(){
+        if (this.pane){
+            this.pane.Value = {}
+        }
+    }
+    Value(){
+        if (this.pane){
+            return this.pane.Value
+        }
+        return {}
+    }
+    Check() {
+        if (this.pane){
+            return this.pane.check()
+        }
+        return false
+    }
+    Submit(success, error){
+        if(this.Check()){
+            success(this.Value())
+        }else {
+            error()
+        }
+    }
+    Destroy(){
+        this.id = null
+        this.pane = null
+    }
+}
+class ProfessionRender {
+    constructor(module, name, uiID){
+        this.module = module
+        this.name = name
+        this.uiId = uiID
+        this.buttonId = this.uiId+"_button"
+        this.ui = null
+        this.generateBtn()
+    }
+    generateBtn(){
+        let o = this
+        $(`#${this.uiId}`).after(`<div id="${this.buttonId}" class="row justify-content-between" style="display: none">
+                                    <div class="col-4">
+                                        <button type="button" class="btn btn-outline-secondary ${this.buttonId}_reset">重置</button>
+                                    </div>
+                                    <div class="col-4" style="text-align: right">
+                                        <button type="button" class="btn btn-primary ${this.buttonId}_submit">提交</button>
+                                    </div>
+                                </div>`)
+        $(`#${this.buttonId}`).on("click", `button.${this.buttonId}_reset`, function () {
+            o.resetEvent()
+        }).on("click", `button.${this.buttonId}_submit`, function () {
+            o.submitEvent()
+        })
+    }
+    resetEvent(){
+        if (this.ui){
+            this.ui.ResetVal()
+        }
+    }
+    submitEvent(){
+        if (this.ui){
+            this.ui.Submit(function (data) {
+                dashboard.update(`/api/${this.module}/${this.name}`,  data, function (res){
+                    if(res.code !== 200){
+                        http.handleError(res, "更新失败")
+                        return
+                    }
+                    common.message("更新成功", "success")
+                }, function (res){
+                    http.handleError(res, "更新失败")
+                })
+            }, function () {
+                common.message("config format error", "danger")
+            })
+        }
+
+    }
+}
+class ProfessionCreator extends ProfessionRender{
+    constructor(module, name, uiID, callback){
+        super(module, name, uiID)
+        this.initRender()
+        if (callback){
+            callback()
+        }
+    }
+
+}
+class ProfessionEditor extends ProfessionRender{
+    constructor(module, name, uiID, callback){
+        super(module, name, uiID)
+        this.initRender()
+        if (callback){
+            callback()
+        }
+    }
+    initRender() {
+        let o = this
+        dashboard.get(`/api/${this.module}/${this.name}`,function (res) {
+            if(res.code !== 200){
+                return http.handleError(res, "获取详情失败")
+            }
+            if(!res.data["driver"]){
+                return http.handleError(res, "获取driver失败")
+            }
+            o.initRenderForm(res.data["driver"], res.data)
+        },function (res) {
+            return http.handleError(res, "获取详情失败")
+        })
+    }
+    initRenderForm(driver, data){
+        let o = this
+        dashboard.get(`/profession/${this.module}/${driver}`, function (res) {
+            if(res.code !== 200){
+                return http.handleError(res, "获取render失败")
+            }
+            o.ui = new Render(o.uiId, res.data["render"], data, function () {
+                let btn = "#" + o.buttonId
+                if (!$(btn).is(":visible")){
+                    $(btn).show()
+                }
+            })
+        }, function (res){
+            return http.handleError(res, "获取render失败")
+        })
+    }
+}
+let demoSchema = {
     "type": "object",
     "properties": [
         {
