@@ -4,6 +4,8 @@
 </div>
 {{end}}
 {{- block "script" . -}}
+<script src="/js/form-render.js"></script>
+<script src="/js/djv.js"></script>
 <script>
     initRender("/api/{{.name}}/{{.data}}")
     function initRender(url) {
