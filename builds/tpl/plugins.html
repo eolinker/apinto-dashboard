@@ -64,7 +64,7 @@
                 </div>
             </div>
             <div class="form-group">
-                <div>
+                <div class="clearfix">
                     <label for="form_config">
                         <b>Config</b>
                     </label>
@@ -75,11 +75,11 @@
                 </div>
                 <div class="tab-content" id="form_config_content">
                     <div class="tab-pane fade show active card editor" id="form_config" role="tabpanel" aria-labelledby="form_config_json_tab"></div>
-                    <div class="tab-pane fade" id="form_config_ui" role="tabpanel" aria-labelledby="form_config_ui_tab">暂不支持</div>
+                    <div class="tab-pane fade" id="form_config_ui"  role="tabpanel" aria-labelledby="form_config_ui_tab">暂不支持</div>
                 </div>
             </div>
             <div class="form-group">
-                <div>
+                <div class="clearfix">
                     <label for="form_init_config"><b>Init Config</b></label>
                     <p class="nav" role="tablist" style="float:right">
                         <a class="nav-link active" id="form_init_config_json_tab" data-toggle="tab" href="#form_init_config" role="tab" aria-controls="json" aria-selected="true">JSON</a>
@@ -145,7 +145,7 @@
                 </div>
             </div>
             <div class="form-group">
-                <div>
+                <div class="clearfix">
                     <label for="add_form_config"><b>Config</b></label>
                     <p class="nav" role="tablist" style="float:right">
                         <a class="nav-link active" id="add_form_config_json_tab" data-toggle="tab" href="#add_form_config" role="tab" aria-controls="json" aria-selected="true">JSON</a>
@@ -159,7 +159,7 @@
 
             </div>
             <div class="form-group">
-                <div>
+                <div class="clearfix">
                     <label for="add_form_init_config"><b>Init Config</b></label>
                     <p class="nav" role="tablist" style="float:right">
                         <a class="nav-link active" id="add_form_init_config_json_tab" data-toggle="tab" href="#add_form_init_config" role="tab" aria-controls="json" aria-selected="true">JSON</a>
@@ -189,6 +189,8 @@
 <script src="/js/jquery.tablednd.min.js"></script>
 <script src="/js/bootstrap-table-reorder-rows.min.js"></script>
 <script src="/js/ace/ace.js"></script>
+<script src="/js/form-render.js"></script>
+<script src="/js/djv.js"></script>
 <script>
     /**
      * dom初始化处理
@@ -483,9 +485,11 @@
     function getRenderInfo(id, success){
         dashboard.getExtenderInfo(id, function (res) {
             if(res.code !== 200){
-                return http.handleError(res, "获取extender信息失败")
+                // return http.handleError(res, "获取extender信息失败")
+                http.handleError(res, "获取extender信息失败")
             }
-            success(res.data["render"])
+            // success(res.data["render"])
+            success(jsonSchemaDemo)
         }, function (res){
             return http.handleError(res, "获取extender信息失败")
         })
@@ -493,9 +497,9 @@
 
     function updateUiPane(id, render, data){
         let target = $("#"+id)
-        target.val(render)
+        let renderHandler = new FormRender(target, render)
         if(data){
-            target.val(data)
+            renderHandler.Value = data
         }
     }
     /**

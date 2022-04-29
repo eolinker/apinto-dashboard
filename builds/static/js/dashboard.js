@@ -313,5 +313,110 @@ let validate = {
         })
         return this._validator
     }
+}
 
+let jsonSchemaDemo = {
+    "type": "object",
+    "properties": [
+        {
+            "name": "driver",
+            "readonly": true,
+            "type": "string",
+            "enum": [
+                "http"
+            ],
+            "required": true
+        },
+        {
+            "name": "host",
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "minLength": 1
+        },
+        {
+            "name": "listen",
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1,
+            "required": true
+        },
+        {
+            "name": "method",
+            "type": "array",
+            "items": {
+                "type": "string",
+                "enum": [
+                    "GET",
+                    "POST",
+                    "PATH",
+                    "DELETE"
+                ]
+            }
+        },
+        {
+            "name": "plugins",
+            "type": "map",
+            "items": {
+                "type": "object",
+                "properties": [
+                    {
+                        "name": "config",
+                        "required": true
+                    },
+                    {
+                        "name": "disable",
+                        "type": "boolean",
+                        "required": true
+                    }
+                ]
+            }
+        },
+        {
+            "name": "protocol",
+            "type": "string",
+            "enum": [
+                "http",
+                "https"
+            ],
+            "default": "http",
+            "required": true
+        },
+        {
+            "name": "rules",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": [
+                    {
+                        "name": "header",
+                        "type": "map",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "location",
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    {
+                        "name": "query",
+                        "type": "map",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "target",
+            "type": "string",
+            "format": "text",
+            "minLength": 1,
+            "required": true
+        }
+    ]
 }

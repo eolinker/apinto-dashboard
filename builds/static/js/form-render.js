@@ -419,7 +419,8 @@ function FormRender(panel,schema,generator){
             if(!generator || typeof generator !== "function"){
                 generator = BaseGenerator
             }
-            $(panel).html('<form class=""></form>')
+            $(panel).empty()
+            $(panel).append('<form class=""></form>')
 
             this.Object = generator($(panel).children("form"),schema,generator,RootId)
         }
