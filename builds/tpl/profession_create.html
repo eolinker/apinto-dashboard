@@ -26,16 +26,14 @@
     let ui_pane = null
     initDrivers("drivers", "/profession/{{.name}}/")
     $('.select_content').on('change', "select#drivers", function () {
-        getDriverInfo($(this).val(), function (render) {
-            ui_pane = updateUiPane("form", render)
-            let btn = "#form_button"
-            if (!$(btn).is(":visible")){
-                $(btn).show()
-            }
+        getDriverInfo($(this).val(), function (schema) {
+            ui_pane.Reset(schema)
         })
     });
     $("#form_button").on("click", "button.form_reset", function () {
-        resetBtn()
+        if (ui_pane){
+            ui_pane.ResetVal()
+        }
     }).on("click", "button.form_submit", function () {
         submitBtn()
     })
@@ -54,13 +52,13 @@
                     target.append("<option value='"+data[i].name+"'>" + data[i].name + "</option>")
                 }
             }
-            getDriverInfo(target.val(), function (render) {
-                ui_pane = updateUiPane("form", render)
-                let btn = "#form_button"
-                if (!$(btn).is(":visible")){
-                    $(btn).show()
-                }
-
+            getDriverInfo(target.val(), function (schema) {
+                ui_pane = new Render("form", schema, null, function () {
+                    let btn = "#form_button"
+                    if (!$(btn).is(":visible")){
+                        $(btn).show()
+                    }
+                })
             })
         },function (res) {
             return http.handleError(res, "获取driver列表失败")
@@ -82,17 +80,9 @@
         })
     }
 
-    function updateUiPane(id, render){
-        return new FormRender($("#"+id), render)
-    }
-    function resetBtn(){
-        if(ui_pane){
-            ui_pane.Value = {}
-        }
-    }
     function submitBtn(){
-        if(ui_pane && ui_pane.check()){
-            dashboard.create("/api/{{.name}}/", ui_pane.Value, function (res){
+        ui_pane.Submit(function (data) {
+            dashboard.create("/api/{{.name}}/", data, function (res){
                 if(res.code !== 200){
                     http.handleError(res, "新增失败")
                     return
@@ -102,9 +92,9 @@
             }, function (res){
                 http.handleError(res, "新增失败")
             })
-        }else {
+        }, function () {
             common.message("config format error", "danger")
-        }
+        })
     }
 </script>
 
