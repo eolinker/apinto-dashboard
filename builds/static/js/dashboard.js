@@ -341,18 +341,39 @@ class Render {
         }
     }
     Destroy(){
-        this.id = null
         this.pane = null
     }
 }
 class ProfessionRender {
-    constructor(module, name, uiID){
+    constructor(module, uiID){
         this.module = module
-        this.name = name
         this.uiId = uiID
         this.buttonId = this.uiId+"_button"
         this.ui = null
         this.generateBtn()
+    }
+    getDriverInfo(driver, success){
+        dashboard.get(`/profession/${this.module}/${driver}`, function (res) {
+            if(res.code !== 200){
+                return http.handleError(res, "获取driver信息失败")
+            }
+            success(res.data["render"])
+        }, function (res) {
+            return http.handleError(res, "获取driver信息失败")
+        })
+    }
+    updateUi(render, data){
+        let btn = "#" + this.buttonId
+        this.ui = new Render(this.uiId, render, data, function () {
+            if ($(btn).length > 0 && !$(btn).is(":visible")){
+                $(btn).show()
+            }
+        })
+    }
+    resetUi(render){
+        if (this.ui){
+            this.ui.Reset(render)
+        }
     }
     generateBtn(){
         let o = this
@@ -375,10 +396,91 @@ class ProfessionRender {
             this.ui.ResetVal()
         }
     }
+    submitEvent(){}
+}
+class ProfessionCreator extends ProfessionRender{
+    constructor(module, uiID, selectID){
+        super(module, uiID)
+        this.selectID = selectID
+        this.init()
+    }
+    init(){
+        let o = this
+        dashboard.get(`/profession/${this.module}/`,function (res) {
+            if(res.code !== 200){
+                return http.handleError(res, "获取driver列表失败")
+            }
+            let data = res.data["drivers"]
+            let target = $("#"+o.selectID)
+            target.empty()
+            for (let i = 0; i < data.length; i++) {
+                if(i===0){
+                    target.append("<option value='"+data[i].name+"' selected>" + data[i].name + "</option>")
+                }else {
+                    target.append("<option value='"+data[i].name+"'>" + data[i].name + "</option>")
+                }
+            }
+            o.getDriverInfo(target.val(), function (render) {
+                o.updateUi(render, null)
+            })
+            target.change(function () {
+                o.getDriverInfo($(this).val(), function (render) {
+                    o.resetUi(render)
+                })
+            });
+        },function (res) {
+            return http.handleError(res, "获取driver列表失败")
+        })
+    }
+
     submitEvent(){
         if (this.ui){
+            let url = `/api/${this.module}/`
             this.ui.Submit(function (data) {
-                dashboard.update(`/api/${this.module}/${this.name}`,  data, function (res){
+                dashboard.create(url, data, function (res){
+                    if(res.code !== 200){
+                        http.handleError(res, "新增失败")
+                        return
+                    }
+                    common.message("新增成功", "success")
+                    window.location.back()
+                }, function (res){
+                    http.handleError(res, "新增失败")
+                })
+            }, function () {
+                common.message("config format error", "danger")
+            })
+        }
+    }
+
+}
+class ProfessionEditor extends ProfessionRender{
+    constructor(module, name, uiID){
+        super(module, uiID)
+        this.name = name
+        this.init()
+    }
+    init() {
+        let o = this
+        dashboard.get(`/api/${this.module}/${this.name}`,function (res) {
+            if(res.code !== 200){
+                return http.handleError(res, "获取详情失败")
+            }
+            if(!res.data["driver"]){
+                return http.handleError(res, "获取driver失败")
+            }
+            o.getDriverInfo(res.data["driver"], function (render) {
+                o.updateUi(render, res.data)
+            })
+        },function (res) {
+            return http.handleError(res, "获取详情失败")
+        })
+    }
+    submitEvent(){
+        if (this.ui){
+            let url = `/api/${this.module}/${this.name}`
+            this.ui.Submit(function (data) {
+                dashboard.update(url,  data, function (res){
                     if(res.code !== 200){
                         http.handleError(res, "更新失败")
                         return
@@ -393,158 +495,4 @@ class ProfessionRender {
         }
 
     }
-}
-class ProfessionCreator extends ProfessionRender{
-    constructor(module, name, uiID, callback){
-        super(module, name, uiID)
-        this.initRender()
-        if (callback){
-            callback()
-        }
-    }
-
-}
-class ProfessionEditor extends ProfessionRender{
-    constructor(module, name, uiID, callback){
-        super(module, name, uiID)
-        this.initRender()
-        if (callback){
-            callback()
-        }
-    }
-    initRender() {
-        let o = this
-        dashboard.get(`/api/${this.module}/${this.name}`,function (res) {
-            if(res.code !== 200){
-                return http.handleError(res, "获取详情失败")
-            }
-            if(!res.data["driver"]){
-                return http.handleError(res, "获取driver失败")
-            }
-            o.initRenderForm(res.data["driver"], res.data)
-        },function (res) {
-            return http.handleError(res, "获取详情失败")
-        })
-    }
-    initRenderForm(driver, data){
-        let o = this
-        dashboard.get(`/profession/${this.module}/${driver}`, function (res) {
-            if(res.code !== 200){
-                return http.handleError(res, "获取render失败")
-            }
-            o.ui = new Render(o.uiId, res.data["render"], data, function () {
-                let btn = "#" + o.buttonId
-                if (!$(btn).is(":visible")){
-                    $(btn).show()
-                }
-            })
-        }, function (res){
-            return http.handleError(res, "获取render失败")
-        })
-    }
-}
-let demoSchema = {
-    "type": "object",
-    "properties": [
-        {
-            "name": "driver",
-            "readonly": true,
-            "type": "string",
-            "enum": [
-                "http"
-            ],
-            "required": true
-        },
-        {
-            "name": "host",
-            "type": "array",
-            "items": {
-                "type": "string"
-            },
-            "minLength": 1
-        },
-        {
-            "name": "listen",
-            "type": "integer",
-            "format": "int32",
-            "minimum": 1,
-            "required": true
-        },
-        {
-            "name": "method",
-            "type": "array",
-            "items": {
-                "type": "string",
-                "enum": [
-                    "GET",
-                    "POST",
-                    "PATH",
-                    "DELETE"
-                ]
-            }
-        },
-        {
-            "name": "plugins",
-            "type": "map",
-            "items": {
-                "type": "object",
-                "properties": [
-                    {
-                        "name": "config",
-                        "required": true
-                    },
-                    {
-                        "name": "disable",
-                        "type": "boolean",
-                        "required": true
-                    }
-                ]
-            }
-        },
-        {
-            "name": "protocol",
-            "type": "string",
-            "enum": [
-                "http",
-                "https"
-            ],
-            "default": "http",
-            "required": true
-        },
-        {
-            "name": "rules",
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": [
-                    {
-                        "name": "header",
-                        "type": "map",
-                        "items": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "location",
-                        "type": "string",
-                        "minLength": 1
-                    },
-                    {
-                        "name": "query",
-                        "type": "map",
-                        "items": {
-                            "type": "string"
-                        }
-                    }
-                ]
-            }
-        },
-        {
-            "name": "target",
-            "type": "string",
-            "format": "text",
-            "minLength": 1,
-            "required": true
-        }
-    ]
 }

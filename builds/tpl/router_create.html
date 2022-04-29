@@ -10,89 +10,14 @@
     </select>
 </div>
 <div id="form"></div>
-<div id="form_button" class="row justify-content-between" style="display: none">
-    <div class="col-4">
-        <button type="button" class="btn btn-outline-secondary form_reset">重置</button>
-    </div>
-    <div class="col-4" style="text-align: right">
-        <button type="button" class="btn btn-primary form_submit">提交</button>
-    </div>
-</div>
 {{end}}
 {{- block "script" . -}}
 <script src="/js/form-render.js"></script>
 <script src="/js/djv.js"></script>
 <script>
-    let ui_pane = null
-    initDrivers("drivers", "/profession/{{.name}}/")
-    $('.select_content').on('change', "select#drivers", function () {
-        getDriverInfo($(this).val(), function (schema) {
-            ui_pane.Reset(schema)
-        })
-    });
-    $("#form_button").on("click", "button.form_reset", function () {
-        if (ui_pane){
-            ui_pane.ResetVal()
-        }
-    }).on("click", "button.form_submit", function () {
-        submitBtn()
+    $(document).ready(function () {
+        let creator = new ProfessionCreator("{{.name}}","form", "drivers")
     })
-    function initDrivers(id, url){
-        dashboard.get(url,function (res) {
-            if(res.code !== 200){
-                return http.handleError(res, "获取driver列表失败")
-            }
-            let data = res.data["drivers"]
-            let target = $("#"+id)
-            target.empty()
-            for (let i = 0; i < data.length; i++) {
-                if(i===0){
-                    target.append("<option value='"+data[i].name+"' selected>" + data[i].name + "</option>")
-                }else {
-                    target.append("<option value='"+data[i].name+"'>" + data[i].name + "</option>")
-                }
-            }
-            getDriverInfo(target.val(), function (schema) {
-                ui_pane = new Render("form", schema, null, function () {
-                    let btn = "#form_button"
-                    if (!$(btn).is(":visible")){
-                        $(btn).show()
-                    }
-                })
-            })
-        },function (res) {
-            return http.handleError(res, "获取driver列表失败")
-        })
-    }
-    function getDriverInfo(name, success){
-        dashboard.get("/profession/{{.name}}/"+name, function (res) {
-            if(res.code !== 200){
-                return http.handleError(res, "获取driver信息失败")
-            }
-            success(res.data["render"])
-        }, function (res) {
-            return http.handleError(res, "获取driver信息失败")
-        })
-    }
-
-    function submitBtn(){
-        if (ui_pane){
-            ui_pane.Submit(function (data) {
-                dashboard.create("/api/{{.name}}/", data, function (res){
-                    if(res.code !== 200){
-                        http.handleError(res, "新增失败")
-                        return
-                    }
-                    common.message("新增成功", "success")
-                    window.location.back()
-                }, function (res){
-                    http.handleError(res, "新增失败")
-                })
-            }, function () {
-                common.message("config format error", "danger")
-            })
-        }
-    }
 </script>
 
 {{- end -}}
