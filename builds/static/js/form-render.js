@@ -147,7 +147,7 @@ function FormRender(panel,schema,generator){
             readOnly = "readonly"
         }
 
-        let input = '<input '+readOnly +' class="form-control is-valid" id="'+id+'" aria-describedby="validation_'+id+'" ';
+        let input = '<input '+readOnly +' class="form-control" id="'+id+'" aria-describedby="validation_'+id+'" ';
         if (appendAttr){
             input += appendAttr
         }
