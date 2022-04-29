@@ -20,33 +20,13 @@
         {{- range $i,$t := (index .data.Title .zone)}}
         <th data-field="{{index $.data.Fields $i}}">{{ $t}}</th>
         {{- end }}
-        <th data-field="operate" data-formatter="operateFormatter" data-events="operateEvents">操作</th>
+        <th data-field="operate" data-formatter="operateFormatter" data-align="center" data-events="operateEvents">操作</th>
     </tr>
     </thead>
 
 </table>
-<div class="wrapper">
-    <div class="wrapper_header">
-        <span class="wrapper_title">配置详情</span>
-        <button class="wrapper_button btn btn_default" >关闭</button>
-        <br>
-    </div>
-    <div class="card wrapper_body">
-        <div class="card-body">
-            <table class="table table-bordered">
-                <thead class="thead-light">
-                <tr>
-                    <th>Key</th>
-                    <th>Value</th>
-                </tr>
-                </thead>
-                <tbody id="wrapper_table_body">
-                </tbody>
+<div id="detail_container">
 
-            </table>
-
-        </div>
-    </div>
 </div>
 
 {{- end -}}
@@ -58,6 +38,9 @@
     })
 
     let $table = $('#table')
+
+    let detail = modal.table("detail_container")
+
     function responseHandler(res) {
         return res.data
     }
@@ -66,7 +49,7 @@
             '<a class="edit" href="/{{.name}}/edit?name=',
             row.name,
             '" title="edit">',
-            '编辑',
+            '配置',
             '</a>  ',
             '<a class="detail" href="javascript:void(0)" title="detail">',
             '详情',
@@ -99,20 +82,17 @@
         'click .detail': function (e, value, row, index) {
             dashboard.get("/api/{{.name}}/"+row.name, function (res) {
                 if(res.code === 200){
-                    $(".wrapper_title").text(row.name)
+                    $("#detail_title").text(row.name)
                     let data = res.data
+                    let content = ""
                     Object.keys(data).forEach(function (key) {
                         if(data[key] instanceof Object){
-                            $("#wrapper_table_body").append(
-                                "<tr><td>"+key+"</td><td>"+JSON.stringify(data[key])+"</td></tr>"
-                            )
+                            content += "<tr><td style='min-width: 100px'>"+key+"</td><td>"+JSON.stringify(data[key])+"</td></tr>"
                         }else {
-                            $("#wrapper_table_body").append(
-                                "<tr><td>"+key+"</td><td>"+data[key]+"</td></tr>"
-                            )
+                            content += "<tr><td style='min-width: 100px'>"+key+"</td><td>"+data[key]+"</td></tr>"
                         }
                     })
-                    $(".wrapper").show(200)
+                    detail.show(row.name, content)
                     return
                 }
                 return http.handleError(res, "获取详情失败")
@@ -121,10 +101,5 @@
             })
         }
     }
-    $(".wrapper_button").click(function (){
-        $(".wrapper").hide(200)
-        $(".wrapper_title").text("")
-        $("#wrapper_table_body").html("")
-    })
 </script>
 {{- end -}}

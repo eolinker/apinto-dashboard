@@ -4,8 +4,6 @@
 </div>
 {{end}}
 {{- block "script" . -}}
-<link href="/css/spectre-icons.css" rel="stylesheet">
-<script type="text/javascript" src="/js/jsoneditor.min.js"></script>
 <script>
     initRender("/api/{{.name}}/{{.data}}")
     function initRender(url) {
@@ -28,6 +26,7 @@
                 return http.handleError(res, "获取render失败")
             }
             // todo 渲染render, data参数用于初始化
+            // res.data["render"]
 
         }, function (res){
             return http.handleError(res, "获取render失败")
