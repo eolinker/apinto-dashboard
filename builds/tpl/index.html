@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+    <meta name="generator" content="Hugo 0.88.1">
+    {{- block "title" . }}
+        {{- if .module }}
+            {{- if eq (index .module.I18nName .zone) "" }}
+    <title>{{.module.Name}}</title>
+            {{- else}}
+    <title>{{index .module.I18nName .zone}}</title>
+        {{- end}}
+        {{- else }}
+    <title>{{.name}}</title>
+        {{- end}}
+    {{- end -}}
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <style>
+        .bd-placeholder-img {
+            font-size: 1.125rem;
+            text-anchor: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            user-select: none;
+        }
+
+        @media (min-width: 768px) {
+            .bd-placeholder-img-lg {
+                font-size: 3.5rem;
+            }
+        }
+    </style>
+
+    <!-- Custom styles for this template -->
+    <link href="/css/dashboard.css" rel="stylesheet">
+    {{- block "header" .}}
+    {{- end}}
+</head>
+<body>
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+<symbol id="apinto" viewBox="0 0 590.55 122.66">
+    <defs>
+        <style>.cls-1{fill:#24539c;}</style>
+    </defs>
+    <title>apinto</title>
+    <path class="cls-1" d="M100.82,0A52.78,52.78,0,0,0,50.35,37.58H34a6.73,6.73,0,0,0-6.74,6.74h0A6.74,6.74,0,0,0,34,51.06H48.17c0,.54,0,1.08,0,1.63V80.15H34a6.74,6.74,0,0,0-6.74,6.75h0A6.74,6.74,0,0,0,34,93.64H48.13v17.75A11.28,11.28,0,0,0,59.4,122.66h82.84a11.28,11.28,0,0,0,11.27-11.27V52.69A52.75,52.75,0,0,0,100.82,0Zm-.22,57.3a6.24,6.24,0,1,1-6.24-6.24A6.23,6.23,0,0,1,100.6,57.3ZM56.92,111.39V93.64h.63a6.74,6.74,0,0,0,6.74-6.74h0a6.75,6.75,0,0,0-6.74-6.75h-.63V52.69c0-.55,0-1.09,0-1.63h.59a6.74,6.74,0,0,0,6.74-6.74h0a6.73,6.73,0,0,0-4.79-6.45A44.11,44.11,0,0,1,86.36,11.25C81.68,15.8,77.84,23.36,77.84,36V93.75a9.83,9.83,0,0,0,7.59,9.58l44.94,10.54h-71A2.48,2.48,0,0,1,56.92,111.39Z"/>
+    <path class="cls-1" d="M37,65.87a6.74,6.74,0,0,0-6.74-6.74H6.74a6.74,6.74,0,0,0,0,13.48H30.28A6.74,6.74,0,0,0,37,65.87Z"/>
+    <path class="cls-1" d="M217.49,27.45h14.2L260,101H245.43l-5.75-15.15h-30l-6,15.15H189.13ZM224.68,47,214.81,72.2h19.68Z"/>
+    <path class="cls-1" d="M270.76,27.45h14.85q12.06,0,17.38,2.22a17.74,17.74,0,0,1,8.4,7.2,22.27,22.27,0,0,1,3.08,11.93,20,20,0,0,1-4,12.8,20.82,20.82,0,0,1-10.93,7.1q-4,1.15-14.75,1.15V101h-14Zm14,28.75h4.45a24.08,24.08,0,0,0,7.3-.75A6.48,6.48,0,0,0,299.74,53a7.32,7.32,0,0,0,1.18-4.19,6.71,6.71,0,0,0-3.3-6.23c-1.61-1-4.57-1.45-8.91-1.45h-3.95Z"/>
+    <path class="cls-1" d="M327.17,27.45h13.9V101h-13.9Z"/>
+    <path class="cls-1" d="M356.87,27.45H370.3l31.48,48.4V27.45h14V101H402.31L370.87,52.75V101h-14Z"/>
+    <path class="cls-1" d="M425.33,27.45H466v13.8h-13.4V101h-14.2V41.25H425.33Z"/>
+    <path class="cls-1" d="M510.31,25.6a36.55,36.55,0,0,1,26.85,11.3,37.59,37.59,0,0,1,11.23,27.55,37.2,37.2,0,0,1-11.08,27.26,36.52,36.52,0,0,1-26.9,11.15q-16.56,0-27.52-11.45a38.06,38.06,0,0,1-11-27.21A38.19,38.19,0,0,1,477,44.8a38.49,38.49,0,0,1,33.27-19.2Zm-.15,13.7A23.12,23.12,0,0,0,493,46.4Q486,53.5,486,64.45q0,12.21,8.76,19.3a24,24,0,0,0,15.61,5.56,22.78,22.78,0,0,0,17-7.21,24.42,24.42,0,0,0,7-17.75,24.54,24.54,0,0,0-7.06-17.77A23,23,0,0,0,510.16,39.3Z"/>
+</symbol>
+</svg>
+{{- block "icon" . -}}
+{{- end -}}
+{{- block "top" . -}}
+<header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
+
+<!--    <div class="d-flex flex-column flex-shrink-0 p-3 text-white bg-dark" >-->
+        <a href="/" class="navbar-brand col-md-3 col-lg-2 me-0 px-3" >
+            <svg class="bi me-2" width="140" height="32" >
+                <use xlink:href="#apinto"/>
+            </svg>
+            <span>Dashboard</span>
+        </a>
+
+    <!-- 这里显示搜索操作-->
+
+</header>
+{{- end -}}
+
+<div class="container-fluid">
+    <div class="row">
+        {{- block "left" . -}}
+        <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+            <div class="sidebar-sticky pt-3">
+
+                <ul class="nav flex-column">
+                    {{- range $index,$m:=.modules -}}
+                    <li class="nav-item">
+                        {{- if eq $m.Name $.name -}}
+                        <a href="{{$m.Path}}" class="nav-link active" aria-current="page"><svg class="bi me-2" width="16" height="16"><use xlink:href="#{{$m.Name}}"/></svg>  {{index $m.I18nName $.zone}}</a>
+                        {{- else -}}
+                        <a href="{{$m.Path}}" class="nav-link "><svg class="bi me-2" width="16" height="16"><use xlink:href="#{{$m.Name}}"/></svg>  {{index $m.I18nName $.zone}}</a>
+                        {{- end }}
+                    </li>
+                    {{- end -}}
+                </ul>
+
+            </div>
+        </nav>
+        {{- end -}}
+
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+            {{ block "content" .}}
+
+            {{end}}
+        </main>
+
+    </div>
+</div>
+
+<script src="/js/jquery-3.0.0.js"></script>
+<script src="/js/bootstrap.js"></script>
+<script src="/js/dashboard.js"></script>
+{{ block "script" .}}{{end}}
+</body>
+</html>
