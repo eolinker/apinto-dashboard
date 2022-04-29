@@ -150,6 +150,7 @@
         let jsonSHow = aceEditor.InitEditor("json")
         $("#btnShow").on("click", function (){
             console.log("show")
+            console.log(renderHandler.Value)
             jsonSHow.getSession().setValue(JSON.stringify(renderHandler.Value, null, 4))
         })
     })
