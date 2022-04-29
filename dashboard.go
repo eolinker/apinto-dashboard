@@ -132,7 +132,7 @@ func (v *Views) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	cache.WriteTo(w)
 }
 func (v *Views) Error(w http.ResponseWriter, cache *TemplateWriter) {
-	template.Execute(w, "error", v.mp.CreateViewData("error", map[string]string{"statusCode": strconv.Itoa(cache.statusCode), "message": cache.buf.String()}, nil))
+	template.Execute(w, "error", v.mp.CreateViewData("error", map[string]string{"statusCode": strconv.Itoa(cache.statusCode), "message": cache.buf.String()}, nil, nil))
 
 }
 
@@ -148,7 +148,9 @@ func (v *ViewServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	template.Execute(w, viewName, v.modules.CreateViewData(v.name, data, nil))
+	userDetails, _ := UserDetailsFromRequest(r)
+
+	template.Execute(w, viewName, v.modules.CreateViewData(v.name, data, nil, userDetails))
 
 }
 
@@ -170,7 +172,7 @@ func NewModuleItemPlan(modules []*ModuleItem) *ModuleItemPlan {
 	}
 	return &ModuleItemPlan{modules: modules, moduleMap: mp}
 }
-func (mp *ModuleItemPlan) CreateViewData(name string, data interface{}, err error) map[string]interface{} {
+func (mp *ModuleItemPlan) CreateViewData(name string, data interface{}, err error, user UserDetails) map[string]interface{} {
 	obj := make(map[string]interface{})
 	obj["data"] = data
 	obj["error"] = err
@@ -178,6 +180,7 @@ func (mp *ModuleItemPlan) CreateViewData(name string, data interface{}, err erro
 	obj["modules"] = mp.modules
 	obj["module"] = mp.moduleMap[name]
 	obj["name"] = name
+	obj["user"] = user
 	return obj
 }
 

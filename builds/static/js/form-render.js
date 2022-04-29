@@ -77,6 +77,9 @@ function FormRender(panel,schema,generator){
         set Value(v){
             $("#"+this.Id).val(v)
         }
+        check(){
+
+        }
     }
 
     function createLabel(schema,id,appendAttr){
@@ -205,6 +208,9 @@ function FormRender(panel,schema,generator){
         get Value(){
             return {}
         }
+        check(){
+
+        }
     }
     class InterObjRender{
         constructor(panel,schema,generator,path) {
@@ -265,10 +271,12 @@ function FormRender(panel,schema,generator){
                 $("#"+itemId).attr("checked",list.includes(v))
             }
         }
+
     }
     class ArrayRenderSimple {
         constructor(panel,schema,generator,path) {
-
+            this.Schema = schema
+            const items = schema["items"]
             const Id = path;
             this.Id = Id;
             let p =$(panel);
@@ -280,14 +288,14 @@ function FormRender(panel,schema,generator){
                 '<div class="input-group-prepend ">' +
                 '<div class="input-group-text  btn" id="btnGroupAddon_'+Id+'_new">+</div>' +
                 '</div>'+
-                createInput(schema,Id+'_new','aria-describedby="btnGroupAddon_'+Id+'_new" placeholder="Input new" ')+
+                createInput(items,Id+'_new','aria-describedby="btnGroupAddon_'+Id+'_new" placeholder="Input new" ')+
                 '</div>')
 
             $('#'+Id+"_new").on("change",function (){
                 let v = $(this).val()
 
                 if (v !== ""){
-                    if (ValidHandler.apply(this,[schema])){
+                    if (ValidHandler.apply(this,[items])){
                         add(v)
                         $(this).val("")
                     }
@@ -303,7 +311,7 @@ function FormRender(panel,schema,generator){
                     '<div class="input-group-prepend">\n' +
                     '<button class="btn btn-danger" id="btnGroupAddon_'+itemId+'" type="button" aria-describedby="btnGroupAddon_'+itemId+'" data-itemId="'+itemId+'"> - </button>\n' +
                     '</div>\n' +
-                    createInput(schema,itemId,appendAtt) +
+                    createInput(items,itemId,appendAtt) +
                     '</div>')
                 $("#"+itemId).val(value)
                 return false
@@ -315,7 +323,24 @@ function FormRender(panel,schema,generator){
             })
 
         }
+        check(){
 
+            const arrayId = "[array-for='"+this.Id+"']"
+            if(schema["minLength"]>0 &&  $(arrayId).length === 0){
+                return false
+            }
+            let rel = true
+            const items = this.Schema
+            $(arrayId).each(function (){
+               if( CheckBySchema(this.id,items,$(this).val()) !== true){
+                   rel = false
+                   return false
+               }
+            })
+
+            return rel
+
+        }
         get Value(){
             let val = []
             $("[array-for='"+this.Id+"']").each(function (){
@@ -327,7 +352,8 @@ function FormRender(panel,schema,generator){
             if (!Array.isArray(vs)){
                 return
             }
-            let list =  $("[array-for='"+this.Id+"']")
+            const arrayId = "[array-for='"+this.Id+"']"
+            let list =  $(arrayId)
             if (list.length < vs.length){
                 let num = vs.length - list.length
                 for (let i = 0; i < num; i++) {
@@ -340,7 +366,7 @@ function FormRender(panel,schema,generator){
                 }
             }
             let index = 0;
-            $("[array-for='"+this.Id+"']").each(function (){
+            $(arrayId).each(function (){
                 $(this).val(vs[index])
                 index ++;
             })
@@ -377,6 +403,13 @@ function FormRender(panel,schema,generator){
                 fi.Value = v[k]
             }
         }
+        check(){
+            for (let k in this.Fields){
+              if(! this.Fields[k].check()){
+                  return false
+              }
+            }
+        }
     }
 
     class TopFormRender {
@@ -389,6 +422,9 @@ function FormRender(panel,schema,generator){
             $(panel).html('<form class=""></form>')
 
             this.Object = generator($(panel).children("form"),schema,generator,RootId)
+        }
+        check(){
+            return this.Object.check()
         }
         get Value(){
             return this.Object.Value
@@ -406,16 +442,16 @@ function FormRender(panel,schema,generator){
                 const items = schema["items"]
                 switch (items["type"]){
                     case "object":{
-                        return new InterObjRender(panel,items,generator,path)
+                        return new InterObjRender(panel,schema,generator,path)
                     }
                     case "map":{
-                        return new InterMapRender(panel,items,generator,path)
+                        return new InterMapRender(panel,schema,generator,path)
                     }
                 }
                 if (items["enum"]){
-                    return new ArrayRenderEnum(panel,items,generator,path)
+                    return new ArrayRenderEnum(panel,schema,generator,path)
                 }
-                return new ArrayRenderSimple(panel,items,generator,path)
+                return new ArrayRenderSimple(panel,schema,generator,path)
             }
             case "map":{
                 return new MapRender(panel,schema,generator,path)
