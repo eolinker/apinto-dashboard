@@ -77,10 +77,10 @@
 
     {{if .user}}
     <div class="dropdown">
-        <span class="rounded-circle" style="position: absolute; top: -43px; right: 170px; z-index: 1021;">
-            <svg width="32" height="32"><use xlink:href="#user-icon"/></svg>
-        </span>
-        <a class="nav-link dropdown-toggle " data-toggle="dropdown"  role="button"  style="position: absolute; top: -53px; right: 75px; z-index: 1021;">
+        <a class="nav-link dropdown-toggle " data-toggle="dropdown"  role="button"  style="position: absolute; top: -53px; right: 40px; z-index: 1021;">
+            <span style="position: relative;right:3px;top:-3px">
+                <svg width="30" height="30"><use xlink:href="#user-icon"/></svg>
+            </span>
             <span class="account-user-name" style="color: #FFFFFF;font-size: 20px;">{{ .user.GetUsername }}</span>
         </a>
         <div class="dropdown-menu dropdown-menu-left dropdown-menu-animated topbar-dropdown-menu profile-dropdown">
