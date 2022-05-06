@@ -8,24 +8,8 @@
     <button type="button" id="create_btn"  class="btn btn-primary">Add</button>
 </div>
 
-<table
-        id="table"
-        data-toggle="table"
-        data-flat="true"
-        data-url="/api/{{.name}}/"
-        data-reorderable-rows="true"
-        data-use-row-attr-func="true"
-        data-response-handler="responseHandler">
+<table id="table">
     <caption>List of {{.name}}</caption>
-    <thead>
-    <tr>
-        {{- range $i,$t := (index .data.Title .zone)}}
-        <th data-field="{{index $.data.Fields $i}}">{{ $t}}</th>
-        {{- end }}
-        <th data-field="operate" data-formatter="operateFormatter" data-align="center" data-events="operateEvents">操作</th>
-    </tr>
-    </thead>
-
 </table>
 <div class="pop_window pop_window_small" id="detail_container">
     <div class="pop_window_header">
@@ -192,10 +176,89 @@
 <script src="/js/form-render.js"></script>
 <script src="/js/djv.js"></script>
 <script>
+
     /**
      * dom初始化处理
      */
-    let $table = $('#table')
+    let tableEvents = {
+        'click .edit': function (e, value, row, index) {
+            initForm(index, row)
+            $("body").append("<div class='modal-backdrop fade show'></div>").addClass("modal-open")
+            $("#detail_container").show()
+        },
+        'click .remove': function (e, value, row, index) {
+            let msg ="确认删除 "+row.name+" {{index .module.I18nName .zone}}?"
+            common.confirm("删除{{index .module.I18nName .zone}}", msg, function (){
+                $table.RemoveRow('id', row.id, function () {
+                    updateData($table.GetData(), function (res){
+                        if(res.code !== 200){
+                            http.handleError(res, "删除失败")
+                            window.location.reload()
+                            return
+                        }
+                        common.message("删除成功", "success")
+                    }, function (res){
+                        http.handleError(res, "删除失败")
+                        window.location.reload()
+                    })
+                })
+            }, null)
+        },
+    }
+    let $table = new Table("table", {
+        url:"/api/{{.name}}/",
+        columns: getColumns(),
+        flat:true,
+        responseHandler: responseHandler,
+        reorderableRows:true,
+        useRowAttrFunc: true,
+        onReorderRow: reorderRow,
+    })
+    function operateFormatter(value, row, index) {
+        return [
+            '<a class="edit" href="javascript:void(0)" title="edit">',
+            '配置',
+            '</a>  ',
+            '<a class="remove" href="javascript:void(0)" title="remove">',
+            '删除',
+            '</a>'
+        ].join('')
+    }
+    function responseHandler (res) {
+        return res.data["plugins"]
+    }
+    function reorderRow(newData) {
+        updateData(newData,function (res){
+            if(res.code !== 200){
+                return http.handleError(res, "更新失败")
+            }
+            common.message("更新成功", "success")
+        }, function (res){
+            return http.handleError(res, "更新失败")
+        })
+    }
+    function getColumns() {
+        let data = []
+        "{{- range $i,$t := (index .data.Title .zone)}}"
+            data.push({
+                field: "{{index $.data.Fields $i}}",
+                title:"{{ $t}}"
+            })
+        "{{- end }}"
+        data.push({
+            title: "操作",
+            field: "operate",
+            formatter: operateFormatter,
+            events:tableEvents,
+            align:"center"
+        })
+        return data
+    }
+
+    let edit_config_ui_id = "form_config_ui"
+    let edit_config_init_ui_id = "form_init_config_ui"
+    let add_config_ui_id = "add_form_config_ui"
+    let add_config_init_ui_id = "add_form_init_config_ui"
     let edit_config_ui = null
     let edit_init_config_ui = null
     let add_config_ui = null
@@ -204,6 +267,7 @@
     let init_config_editor = aceEditor.InitEditor("form_init_config")
     let add_init_config_editor = aceEditor.InitEditor("add_form_init_config")
     let add_config_editor = aceEditor.InitEditor("add_form_config")
+
     /**
      * 蒙版点击处理
      */
@@ -215,66 +279,6 @@
             $("#add_close").click()
         }
     })
-    /**
-     * table相关处理
-     */
-    window.operateEvents = {
-        'click .edit': function (e, value, row, index) {
-            initForm(index, row)
-            $("body").append("<div class='modal-backdrop fade show'></div>").addClass("modal-open")
-            $("#detail_container").show()
-        },
-        'click .remove': function (e, value, row, index) {
-            let msg ="确认删除 "+row.name+" {{index .module.I18nName .zone}}?"
-            common.confirm("删除{{index .module.I18nName .zone}}", msg, function (){
-                removeRow("table", 'id', row.id)
-            }, null)
-        },
-    }
-    /**
-     * table拖动事件
-     */
-    $(document).ready(function(){
-        $table.bootstrapTable('refreshOptions', {
-            onReorderRow: function (newData) {
-                updateData(newData,function (res){
-                    if(res.code !== 200){
-                        return http.handleError(res, "更新失败")
-                    }
-                    common.message("更新成功", "success")
-                }, function (res){
-                    return http.handleError(res, "更新失败")
-                })
-            }
-        })
-    })
-
-    /**
-     * table数据初始化过滤
-     * @param res
-     * @returns {*}
-     */
-    function responseHandler(res) {
-        return res.data["plugins"]
-    }
-
-    /**
-     * table操作列渲染
-     * @param value
-     * @param row
-     * @param index
-     * @returns {string}
-     */
-    function operateFormatter(value, row, index) {
-        return [
-            '<a class="edit" href="javascript:void(0)" title="edit">',
-            '配置',
-            '</a>  ',
-            '<a class="remove" href="javascript:void(0)" title="remove">',
-            '删除',
-            '</a>'
-        ].join('')
-    }
 
     /**
      * 更新插件全局数据
@@ -284,55 +288,6 @@
      */
     function updateData(data, success, error){
         dashboard.update("/api/{{.name}}/", {"plugins":data}, success, error)
-    }
-
-    /**
-     * 更新table行细节
-     * @param table
-     * @param index
-     * @param data
-     */
-    function updateRowDetail(table, index, data){
-        $("#"+table).bootstrapTable('updateRow', {
-            index: index,
-            row: data
-        })
-    }
-
-    /**
-     * 新增新行
-     * @param table
-     * @param data
-     */
-    function addNewRow(table, data){
-        let res = []
-        res.push(data)
-        $("#"+table).bootstrapTable('append', res)
-    }
-
-    /**
-     * 移除table行
-     * @param table
-     * @param field
-     * @param value
-     */
-    function removeRow(table, field, value){
-        let t = $("#"+table)
-        t.bootstrapTable('remove', {
-            field: field,
-            values: [value]
-        })
-        updateData(t.bootstrapTable('getData'), function (res){
-            if(res.code !== 200){
-                http.handleError(res, "删除失败")
-                window.location.reload()
-                return
-            }
-            common.message("删除成功", "success")
-        }, function (res){
-            http.handleError(res, "删除失败")
-            window.location.reload()
-        })
     }
 
     /**
@@ -358,8 +313,19 @@
         config_editor.getSession().setValue(JSON.stringify(config,null,2))
         init_config_editor.getSession().setValue(JSON.stringify(init_config, null, 2))
         getRenderInfo(row["id"].replaceAll(":","/"), function (render) {
-            edit_config_ui = updateUiPane("form_config_ui", render, config)
-            edit_init_config_ui = updateUiPane("form_init_config_ui", render, init_config)
+            if (!edit_config_ui){
+                edit_config_ui = new Render(edit_config_ui_id, render, config)
+            }else {
+                edit_config_ui.Reset(render)
+                edit_config_ui.SetVal(config)
+            }
+
+            if (!edit_init_config_ui) {
+                edit_init_config_ui = new Render(edit_config_init_ui_id, render, init_config)
+            } else {
+                edit_init_config_ui.Reset(render)
+                edit_init_config_ui.SetVal(init_config)
+            }
         })
     }
 
@@ -389,7 +355,7 @@
             if ($("#form_config").hasClass("active")){
                 d["config"] = JSON.parse(config_editor.getSession().getValue())
             }else {
-                if (edit_config_ui.check()){
+                if (edit_config_ui.Check()){
                     d["config"] = edit_config_ui.Value
                 }else {
                     throw "config format is error"
@@ -399,7 +365,7 @@
             if ($("#form_init_config").hasClass("active")){
                 d["init_config"] = JSON.parse(init_config_editor.getSession().getValue())
             }else {
-                if (edit_init_config_ui.check()){
+                if (edit_init_config_ui.Check()){
                     d["init_config"] = edit_init_config_ui.Value
                 }else {
                     throw "config format is error"
@@ -421,16 +387,18 @@
             common.message(e, "danger")
             return
         }
-        updateRowDetail("table", $("#form").attr("data_index"), d)
-        updateData($table.bootstrapTable('getData') ,function (res){
-            if(res.code !== 200){
+        $table.UpdateRowDetail($("#form").attr("data_index"), d, function () {
+            updateData($table.GetData() ,function (res){
+                if(res.code !== 200){
+                    return http.handleError(res, "更新失败")
+                }
+                common.message("更新成功", "success")
+                $("#detail_close").click()
+            }, function (res){
                 return http.handleError(res, "更新失败")
-            }
-            common.message("更新成功", "success")
-            $("#detail_close").click()
-        }, function (res){
-            return http.handleError(res, "更新失败")
+            })
         })
+
     })
 
     /**
@@ -445,16 +413,15 @@
     /**
      * 新增表单id选项渲染
      * @param id
-     * @param table
      */
-    function initPluginsIDList(id, table) {
+    function initPluginsIDList(id) {
         let exist = {}
         dashboard.getExtenders(function (res) {
             if(res.code !== 200){
                 return http.handleError(res, "获取扩展列表失败")
             }
             let data = res.data
-            $("#"+table).bootstrapTable('getData').forEach(function (item) {
+            $table.forEach(function (item) {
                 exist[item.id] = true
             })
             let target = $("#"+id)
@@ -472,16 +439,24 @@
     /**
      * 初始化新增表单
      */
-    function initAddForm(id, table) {
-        initPluginsIDList(id, table)
+    function initAddForm(id) {
+        initPluginsIDList(id)
         $("#add_form_name").val("")
         add_config_editor.getSession().setValue(JSON.stringify({}, null, 2))
         add_init_config_editor.getSession().setValue(JSON.stringify({}, null, 2))
         let pluginID = $("#"+id).val()
         if (pluginID){
             getRenderInfo(pluginID, function (render) {
-                add_config_ui = updateUiPane("add_form_config_ui", render, {})
-                add_init_config_ui = updateUiPane("add_form_init_config_ui", render, {})
+                if (!add_config_ui){
+                    add_config_ui = new Render(add_config_ui_id, render)
+                }else {
+                    add_config_ui.Reset(render)
+                }
+                if (!add_init_config_ui){
+                    add_init_config_ui = new Render(add_config_init_ui_id, render)
+                }else {
+                    add_init_config_ui.Reset(render)
+                }
             })
         }
 
@@ -503,14 +478,7 @@
         })
     }
 
-    function updateUiPane(id, render, data){
-        let target = $("#"+id)
-        let renderHandler = new FormRender(target, render)
-        if(data){
-            renderHandler.Value = data
-        }
-        return renderHandler
-    }
+
     /**
      * 新增表单关闭点击事件
      */
@@ -534,7 +502,7 @@
             if ($("#add_form_config").hasClass("active")){
                 d["config"] = JSON.parse(add_config_editor.getSession().getValue())
             }else {
-                if (add_config_ui.check()){
+                if (add_config_ui.Check()){
                     d["config"] = add_config_ui.Value
                 }else {
                     throw "config format is error"
@@ -544,7 +512,7 @@
             if ($("#add_form_init_config").hasClass("active")){
                 d["init_config"] = JSON.parse(add_init_config_editor.getSession().getValue())
             }else {
-                if (add_init_config_ui.check()){
+                if (add_init_config_ui.Check()){
                     d["init_config"] = add_init_config_ui.Value
                 }else {
                     throw "init config format is error"
@@ -570,13 +538,13 @@
             common.message("field id can not be null", "danger")
             return
         }
-        let data = $table.bootstrapTable('getData')
+        let data = $table.GetData()
         data.push(d)
         updateData(data ,function (res){
             if(res.code !== 200){
                 return http.handleError(res, "更新失败")
             }
-            addNewRow("table", d)
+            $table.AddNewRow(d)
             common.message("更新成功", "success")
             $("#add_close").click()
         }, function (res){
@@ -586,8 +554,8 @@
     $('#add_form').on('change', "select#add_form_id", function () {
         let value = $(this).val();
         getRenderInfo(value, function (render) {
-            add_config_ui = updateUiPane("add_form_config_ui", render, {})
-            add_init_config_ui = updateUiPane("add_form_init_config_ui", render, {})
+            add_config_ui.Reset(render)
+            add_init_config_ui.Reset(render)
         })
     });
 
