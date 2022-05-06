@@ -74,19 +74,23 @@
     <!-- 这里显示搜索操作-->
 
 </header>
-<div class="dropdown">
-    <a class="nav-link dropdown-toggle " data-toggle="dropdown"  role="button"  style="position: absolute; top: -53px; right: 75px; z-index: 1021;">
-        <span class="rounded-circle" >
-            <svg width="32" height="32"><use xlink:href="#user-icon"/></svg>
-        </span>
-        <span class="account-user-name" style="color: #FFFFFF;font-size: 20px;">{{ .user.GetUsername }}</span>
-    </a>
-    <div class="dropdown-menu dropdown-menu-left dropdown-menu-animated topbar-dropdown-menu profile-dropdown">
-        <h5 class="dropdown-header">Welcome !</h5>
-        <div class="dropdown-divider"></div>
-        <a class="dropdown-item" href="/logout"> 退出登录</a>
+
+    {{if .user}}
+    <div class="dropdown">
+        <a class="nav-link dropdown-toggle " data-toggle="dropdown"  role="button"  style="position: absolute; top: -53px; right: 75px; z-index: 1021;">
+            <span class="rounded-circle" >
+                <svg width="32" height="32"><use xlink:href="#user-icon"/></svg>
+            </span>
+            <span class="account-user-name" style="color: #FFFFFF;font-size: 20px;">{{ .user.GetUsername }}</span>
+        </a>
+        <div class="dropdown-menu dropdown-menu-left dropdown-menu-animated topbar-dropdown-menu profile-dropdown">
+            <h5 class="dropdown-header">Welcome !</h5>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="/logout"> 退出登录</a>
+        </div>
     </div>
-</div>
+    {{end}}
+
 {{- end -}}
 
 <div class="container-fluid">
