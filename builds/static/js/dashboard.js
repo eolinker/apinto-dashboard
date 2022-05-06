@@ -298,6 +298,39 @@ let validate = {
         return this._validator
     }
 }
+class Table{
+    constructor(id, options) {
+        this.id = id
+        this.table = $('#'+id)
+        $('#table').bootstrapTable(options)
+    }
+    GetData() {
+        return this.table.bootstrapTable('getData')
+    }
+    UpdateRowDetail(index, data, callback) {
+        this.table.bootstrapTable('updateRow', {
+            index: index,
+            row: data
+        })
+        if (callback){
+            callback()
+        }
+    }
+    AddNewRow(data){
+        let res = []
+        res.push(data)
+        this.table.bootstrapTable('append', res)
+    }
+    RemoveRow(field, value, callback){
+        this.table.bootstrapTable('remove', {
+            field: field,
+            values: [value]
+        })
+        if (callback){
+            callback()
+        }
+    }
+}
 
 class Render {
     constructor(id, schema, data, callback) {
@@ -309,27 +342,30 @@ class Render {
         if (callback){
             callback()
         }
-        this.pane = renderHandler
+        this.panel = renderHandler
         this.id = id
     }
     Reset(schema){
         this.Destroy()
-        this.pane = new FormRender($("#"+this.id), schema)
+        this.panel = new FormRender($("#"+this.id), schema)
     }
     ResetVal(){
-        if (this.pane){
-            this.pane.Value = {}
+        if (this.panel){
+            this.panel.Value = {}
         }
     }
+    SetVal(data) {
+        this.panel.Value = data
+    }
     Value(){
-        if (this.pane){
-            return this.pane.Value
+        if (this.panel){
+            return this.panel.Value
         }
         return {}
     }
     Check() {
-        if (this.pane){
-            return this.pane.check()
+        if (this.panel){
+            return this.panel.check()
         }
         return false
     }
@@ -341,7 +377,7 @@ class Render {
         }
     }
     Destroy(){
-        this.pane = null
+        this.panel = null
     }
 }
 class ProfessionRender {
