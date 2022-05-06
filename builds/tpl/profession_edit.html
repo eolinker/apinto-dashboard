@@ -12,63 +12,6 @@
     $(document).ready(function () {
         let editor = new ProfessionEditor("{{.name}}","{{.data}}","form")
     })
-
-    // let ui_pane = null
-    // initRender("/api/{{.name}}/{{.data}}")
-    // $("#form_button").on("click", "button.form_reset", function () {
-    //     if (ui_pane){
-    //         ui_pane.ResetVal()
-    //     }
-    // }).on("click", "button.form_submit", function () {
-    //     submitBtn()
-    // })
-    // function initRender(url) {
-    //     dashboard.get(url,function (res) {
-    //         if(res.code !== 200){
-    //             return http.handleError(res, "获取详情失败")
-    //         }
-    //         if(!res.data["driver"]){
-    //             return http.handleError(res, "获取driver失败")
-    //         }
-    //         initRenderForm("form","/profession/{{.name}}/"+res.data["driver"], res.data)
-    //     },function (res) {
-    //         return http.handleError(res, "获取详情失败")
-    //     })
-    // }
-    // function initRenderForm(id, url, data){
-    //     dashboard.get(url, function (res) {
-    //         if(res.code !== 200){
-    //             return http.handleError(res, "获取render失败")
-    //         }
-    //         ui_pane = new Render(id, res.data["render"], data, function () {
-    //             let btn = "#form_button"
-    //             if (!$(btn).is(":visible")){
-    //                 $(btn).show()
-    //             }
-    //         })
-    //     }, function (res){
-    //         return http.handleError(res, "获取render失败")
-    //     })
-    // }
-    //
-    // function submitBtn(){
-    //     if (ui_pane){
-    //         ui_pane.Submit(function (data) {
-    //             dashboard.update("/api/{{.name}}/{{.data}}", data, function (res){
-    //                 if(res.code !== 200){
-    //                     http.handleError(res, "更新失败")
-    //                     return
-    //                 }
-    //                 common.message("更新成功", "success")
-    //             }, function (res){
-    //                 http.handleError(res, "更新失败")
-    //             })
-    //         }, function () {
-    //             common.message("config format error", "danger")
-    //         })
-    //     }
-    //
-    // }
 </script>
 
 {{- end -}}
