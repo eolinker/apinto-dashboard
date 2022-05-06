@@ -26,12 +26,19 @@ func (h *AccountHandler) logoutHandler(w http.ResponseWriter, r *http.Request) {
 	sessionCookie, err := r.Cookie(SessionName)
 	if err == nil {
 		if sessionCookie.Value != "" {
+			userDetails, has := h.sessionManager.Get(sessionCookie.Value)
+			if has {
+				userName := userDetails.GetUsername()
+				AddActivityLog(userName, "logout", "system", "退出登录", []*Arg{{Key: "username", Value: userName}})
+			}
 
 			h.sessionManager.Delete(sessionCookie.Value)
 			sessionCookie.Value = ""
 			http.SetCookie(w, sessionCookie)
+
 		}
 	}
+
 	h.toLogin(w, r, "/")
 
 }
