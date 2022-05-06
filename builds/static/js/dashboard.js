@@ -205,19 +205,6 @@ let common = {
         }, 1500);
     }
 }
-let util = {
-    filter: function (high, low){
-        let data = {}
-        Object.keys(high).forEach(function (key){
-            if(low[key]){
-                data[key] = low[key]
-            }else {
-                data[key] = null
-            }
-        })
-        return data
-    }
-}
 let aceEditor = {
     InitEditor: function (id){
         let editor = ace.edit(id);
@@ -290,9 +277,6 @@ let modal = {
             target.removeClass("pop_window").removeClass("pop_window_small").html("")
         }
         return target
-    },
-    form: function (id) {
-
     }
 }
 
@@ -313,5 +297,202 @@ let validate = {
         })
         return this._validator
     }
+}
 
+class Render {
+    constructor(id, schema, data, callback) {
+        let target = $("#"+id)
+        let renderHandler = new FormRender(target, schema)
+        if(data){
+            renderHandler.Value = data
+        }
+        if (callback){
+            callback()
+        }
+        this.pane = renderHandler
+        this.id = id
+    }
+    Reset(schema){
+        this.Destroy()
+        this.pane = new FormRender($("#"+this.id), schema)
+    }
+    ResetVal(){
+        if (this.pane){
+            this.pane.Value = {}
+        }
+    }
+    Value(){
+        if (this.pane){
+            return this.pane.Value
+        }
+        return {}
+    }
+    Check() {
+        if (this.pane){
+            return this.pane.check()
+        }
+        return false
+    }
+    Submit(success, error){
+        if(this.Check()){
+            success(this.Value())
+        }else {
+            error()
+        }
+    }
+    Destroy(){
+        this.pane = null
+    }
+}
+class ProfessionRender {
+    constructor(module, uiID){
+        this.module = module
+        this.uiId = uiID
+        this.buttonId = this.uiId+"_button"
+        this.ui = null
+        this.generateBtn()
+    }
+    getDriverInfo(driver, success){
+        dashboard.get(`/profession/${this.module}/${driver}`, function (res) {
+            if(res.code !== 200){
+                return http.handleError(res, "获取driver信息失败")
+            }
+            success(res.data["render"])
+        }, function (res) {
+            return http.handleError(res, "获取driver信息失败")
+        })
+    }
+    updateUi(render, data){
+        let btn = "#" + this.buttonId
+        this.ui = new Render(this.uiId, render, data, function () {
+            if ($(btn).length > 0 && !$(btn).is(":visible")){
+                $(btn).show()
+            }
+        })
+    }
+    resetUi(render){
+        if (this.ui){
+            this.ui.Reset(render)
+        }
+    }
+    generateBtn(){
+        let o = this
+        $(`#${this.uiId}`).after(`<div id="${this.buttonId}" class="row justify-content-between" style="display: none">
+                                    <div class="col-4">
+                                        <button type="button" class="btn btn-outline-secondary ${this.buttonId}_reset">重置</button>
+                                    </div>
+                                    <div class="col-4" style="text-align: right">
+                                        <button type="button" class="btn btn-primary ${this.buttonId}_submit">提交</button>
+                                    </div>
+                                </div>`)
+        $(`#${this.buttonId}`).on("click", `button.${this.buttonId}_reset`, function () {
+            o.resetEvent()
+        }).on("click", `button.${this.buttonId}_submit`, function () {
+            o.submitEvent()
+        })
+    }
+    resetEvent(){
+        if (this.ui){
+            this.ui.ResetVal()
+        }
+    }
+    submitEvent(){}
+}
+class ProfessionCreator extends ProfessionRender{
+    constructor(module, uiID, selectID){
+        super(module, uiID)
+        this.selectID = selectID
+        this.init()
+    }
+    init(){
+        let o = this
+        dashboard.get(`/profession/${this.module}/`,function (res) {
+            if(res.code !== 200){
+                return http.handleError(res, "获取driver列表失败")
+            }
+            let data = res.data["drivers"]
+            let target = $("#"+o.selectID)
+            target.empty()
+            for (let i = 0; i < data.length; i++) {
+                if(i===0){
+                    target.append("<option value='"+data[i].name+"' selected>" + data[i].name + "</option>")
+                }else {
+                    target.append("<option value='"+data[i].name+"'>" + data[i].name + "</option>")
+                }
+            }
+            o.getDriverInfo(target.val(), function (render) {
+                o.updateUi(render, null)
+            })
+            target.change(function () {
+                o.getDriverInfo($(this).val(), function (render) {
+                    o.resetUi(render)
+                })
+            });
+        },function (res) {
+            return http.handleError(res, "获取driver列表失败")
+        })
+    }
+
+    submitEvent(){
+        if (this.ui){
+            let url = `/api/${this.module}/`
+            this.ui.Submit(function (data) {
+                dashboard.create(url, data, function (res){
+                    if(res.code !== 200){
+                        http.handleError(res, "新增失败")
+                        return
+                    }
+                    common.message("新增成功", "success")
+                    window.location.back()
+                }, function (res){
+                    http.handleError(res, "新增失败")
+                })
+            }, function () {
+                common.message("config format error", "danger")
+            })
+        }
+    }
+
+}
+class ProfessionEditor extends ProfessionRender{
+    constructor(module, name, uiID){
+        super(module, uiID)
+        this.name = name
+        this.init()
+    }
+    init() {
+        let o = this
+        dashboard.get(`/api/${this.module}/${this.name}`,function (res) {
+            if(res.code !== 200){
+                return http.handleError(res, "获取详情失败")
+            }
+            if(!res.data["driver"]){
+                return http.handleError(res, "获取driver失败")
+            }
+            o.getDriverInfo(res.data["driver"], function (render) {
+                o.updateUi(render, res.data)
+            })
+        },function (res) {
+            return http.handleError(res, "获取详情失败")
+        })
+    }
+    submitEvent(){
+        if (this.ui){
+            let url = `/api/${this.module}/${this.name}`
+            this.ui.Submit(function (data) {
+                dashboard.update(url,  data, function (res){
+                    if(res.code !== 200){
+                        http.handleError(res, "更新失败")
+                        return
+                    }
+                    common.message("更新成功", "success")
+                }, function (res){
+                    http.handleError(res, "更新失败")
+                })
+            }, function () {
+                common.message("config format error", "danger")
+            })
+        }
+
+    }
 }
