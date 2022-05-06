@@ -298,6 +298,26 @@ let validate = {
         return this._validator
     }
 }
+class Ace{
+    constructor(id) {
+        this.id = id
+        let editor = ace.edit(id);
+        editor.setFontSize(14)
+        editor.setTheme("ace/theme/crimson_editor");
+        editor.session.setMode("ace/mode/json");
+        editor.renderer.setScrollMargin(10, 10);
+        editor.setOptions({
+            autoScrollEditorIntoView: true
+        });
+        this.editor = editor
+    }
+    get Value(){
+        return this.editor.getSession().getValue()
+    }
+    set Value(v){
+        this.editor.getSession().setValue(v)
+    }
+}
 class Table{
     constructor(id, options) {
         this.id = id
@@ -354,10 +374,10 @@ class Render {
             this.panel.Value = {}
         }
     }
-    SetVal(data) {
+    set Value(data){
         this.panel.Value = data
     }
-    Value(){
+    get Value(){
         if (this.panel){
             return this.panel.Value
         }

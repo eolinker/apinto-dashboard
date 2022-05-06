@@ -263,10 +263,10 @@
     let edit_init_config_ui = null
     let add_config_ui = null
     let add_init_config_ui = null
-    let config_editor = aceEditor.InitEditor("form_config")
-    let init_config_editor = aceEditor.InitEditor("form_init_config")
-    let add_init_config_editor = aceEditor.InitEditor("add_form_init_config")
-    let add_config_editor = aceEditor.InitEditor("add_form_config")
+    let config_editor = new Ace("form_config")
+    let init_config_editor = new Ace("form_init_config")
+    let add_init_config_editor = new Ace("add_form_init_config")
+    let add_config_editor = new Ace("add_form_config")
 
     /**
      * 蒙版点击处理
@@ -310,21 +310,21 @@
         if(row["init_config"]){
             init_config = row["init_config"]
         }
-        config_editor.getSession().setValue(JSON.stringify(config,null,2))
-        init_config_editor.getSession().setValue(JSON.stringify(init_config, null, 2))
+        config_editor.Value = JSON.stringify(config,null,2)
+        init_config_editor.Value = JSON.stringify(init_config, null, 2)
         getRenderInfo(row["id"].replaceAll(":","/"), function (render) {
             if (!edit_config_ui){
                 edit_config_ui = new Render(edit_config_ui_id, render, config)
             }else {
                 edit_config_ui.Reset(render)
-                edit_config_ui.SetVal(config)
+                edit_config_ui.Value = config
             }
 
             if (!edit_init_config_ui) {
                 edit_init_config_ui = new Render(edit_config_init_ui_id, render, init_config)
             } else {
                 edit_init_config_ui.Reset(render)
-                edit_init_config_ui.SetVal(init_config)
+                edit_init_config_ui.Value = init_config
             }
         })
     }
@@ -353,7 +353,7 @@
         let d = {};
         try {
             if ($("#form_config").hasClass("active")){
-                d["config"] = JSON.parse(config_editor.getSession().getValue())
+                d["config"] = JSON.parse(config_editor.Value)
             }else {
                 if (edit_config_ui.Check()){
                     d["config"] = edit_config_ui.Value
@@ -363,7 +363,7 @@
             }
             // 渲染init配置表单
             if ($("#form_init_config").hasClass("active")){
-                d["init_config"] = JSON.parse(init_config_editor.getSession().getValue())
+                d["init_config"] = JSON.parse(init_config_editor.Value)
             }else {
                 if (edit_init_config_ui.Check()){
                     d["init_config"] = edit_init_config_ui.Value
@@ -421,7 +421,7 @@
                 return http.handleError(res, "获取扩展列表失败")
             }
             let data = res.data
-            $table.forEach(function (item) {
+            $table.GetData().forEach(function (item) {
                 exist[item.id] = true
             })
             let target = $("#"+id)
@@ -442,8 +442,8 @@
     function initAddForm(id) {
         initPluginsIDList(id)
         $("#add_form_name").val("")
-        add_config_editor.getSession().setValue(JSON.stringify({}, null, 2))
-        add_init_config_editor.getSession().setValue(JSON.stringify({}, null, 2))
+        add_config_editor.Value = JSON.stringify({}, null, 2)
+        add_init_config_editor.Value = JSON.stringify({}, null, 2)
         let pluginID = $("#"+id).val()
         if (pluginID){
             getRenderInfo(pluginID, function (render) {
@@ -500,7 +500,7 @@
         let d = {};
         try {
             if ($("#add_form_config").hasClass("active")){
-                d["config"] = JSON.parse(add_config_editor.getSession().getValue())
+                d["config"] = JSON.parse(add_config_editor.Value)
             }else {
                 if (add_config_ui.Check()){
                     d["config"] = add_config_ui.Value
@@ -510,7 +510,7 @@
             }
             // 渲染init配置表单
             if ($("#add_form_init_config").hasClass("active")){
-                d["init_config"] = JSON.parse(add_init_config_editor.getSession().getValue())
+                d["init_config"] = JSON.parse(add_init_config_editor.Value)
             }else {
                 if (add_init_config_ui.Check()){
                     d["init_config"] = add_init_config_ui.Value
