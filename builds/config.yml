@@ -18,11 +18,11 @@ professions:
     i18n_name:
       zh_cn: 上游
       en_us: upstreams
-  - name: discovers
-    profession: discover
+  - name: discoveries
+    profession: discovery
     i18n_name:
       zh_cn: 服务发现
-      en_us: discovers
+      en_us: discoveries
   - name: auths
     profession: auth
     i18n_name:
