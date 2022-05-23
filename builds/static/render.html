@@ -5,6 +5,8 @@
     <title>render</title>
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link href="/css/dashboard.css" rel="stylesheet">
+    <link href="/css/bootstrap-table.min.css" rel="stylesheet"  rel="stylesheet">
+
     <style>
         .editor {
             width: 100%;
@@ -27,6 +29,8 @@
 <script src="/js/bootstrap.js"></script>
 <script src="/js/dashboard.js"></script>
 <script src="/js/form-render.js"></script>
+<script src="/js/bootstrap-table.min.js"></script>
+<script src="/js/bootstrap-table-editor.js"></script>
 <script src="/js/ace/ace.js"></script>
 <script src="/js/djv.js"></script>
 <script>
@@ -109,8 +113,8 @@
                             {
                                 "name": "header",
                                 "type": "map",
-                                "items": {
-                                    "type": "string"
+                                "items":{
+                                    "type":"string"
                                 }
                             },
                             {
@@ -145,7 +149,9 @@
             "host": ["hosta", "hostb"],
             "protocol": "https",
             "target": "1@service",
-            "method":["POST"]
+            "method":["POST"],
+
+            "rules":[{"header":{"name":"ss","auth":"xxxxxxxxxx"},"location":"/api/path","query":{}},{"header":{"name":"ss"},"location":"/api/path","query":{}}]
         }
         let jsonSHow = aceEditor.InitEditor("json")
         $("#btnShow").on("click", function (){

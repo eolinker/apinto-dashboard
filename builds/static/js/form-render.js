@@ -19,23 +19,13 @@ function FormRender(panel,schema,generator){
             value = Number(value)
         }
         let rs = CheckBySchema(this.id, schema, value)
-        // let validPanel = $('validation_'+$(this).attr("id"))
         if( rs === true) {
             $(this).removeClass("is-invalid")
             $(this).addClass("is-valid")
-            // validPanel.html("")
-            // validPanel.remove("invalid-feedback")
-            // validPanel.add("valid-feedback")
-
             return true
         }else{
             $(this).removeClass("is-valid")
             $(this).addClass("is-invalid")
-
-            // validPanel.html(rs)
-            // validPanel.remove("valid-feedback")
-            // validPanel.add("invalid-feedback")
-
             return false
         }
     }
@@ -81,15 +71,18 @@ function FormRender(panel,schema,generator){
 
         }
     }
-
-    function createLabel(schema,id,appendAttr){
-        if (!appendAttr){
-            appendAttr =""
-        }
+    function getLabel(schema){
         let label = schema["label"]
         if (!label || label.trim() === ""){
             label = schema["name"]
         }
+        return label
+    }
+    function createLabel(schema,id,appendAttr){
+        if (!appendAttr){
+            appendAttr =""
+        }
+
         let labelHtml = '<label class="col-sm-2 col-form-label text-right"'
         if (id){
             labelHtml +=' for="'+id+'"'
@@ -101,7 +94,7 @@ function FormRender(panel,schema,generator){
         if (schema["required"]){
             labelHtml += '<span style="color: red">*</span>'
         }
-        labelHtml += label+'</label>'
+        labelHtml += getLabel(schema)+'</label>'
         return labelHtml
     }
 
@@ -177,7 +170,7 @@ function FormRender(panel,schema,generator){
                 }
                 break
             }
-            case "integer":{
+            case "integer","number":{
                 input += ' type="number"'
                 break
             }
@@ -196,13 +189,57 @@ function FormRender(panel,schema,generator){
             input += ' required'
         }
         input+='/>'
-            // '<div id="validation_'+id+'" class="valid-feedback">\n</div>'
-
         return input
     }
     class MapRender{
-        constructor(panel,schema,generator,path) {}
+        constructor(panel,schema,generator,path) {
+            this.Schema = schema
+            this.Id = path;
+            $(panel).append("<div id='"+path+"_panel' class='container-fluid'></div>")
+            this.PanelId = "#"+path+"_panel"
+            this.GeneratorHandler = generator
+
+        }
         set Value(v){
+
+            const Items = this.Schema["items"]
+            const Id = this.Id
+            const keySchema = {type:"string"}
+
+            $(this.PanelId).empty()
+            switch (Items["type"]){
+                case "object","map":{
+                    break
+                }
+                default:{
+                    $(this.PanelId).append('<div class="input-group input-group-sm m-2">' +
+                        '<div class="input-group-prepend">' +
+                        '<div class="input-group-text  btn" id="btnGroupAddon_'+Id+'_new">+</div>' +
+                        '</div>'+
+                        createInput(keySchema,Id+'_key','aria-describedby="btnGroupAddon_'+Id+'_new" placeholder="Input new key" ')+
+                        '<div class="input-group-prepend ">' +
+                        '<div class="input-group-text  btn" id="btnGroupAddon_'+Id+'_eq">=</div>' +
+                        '</div>'+
+                        createInput(Items,Id+'_value','aria-describedby="btnGroupAddon_'+Id+'_eq" placeholder="Input new value" ')+
+
+                        '</div>')
+
+                for(let k in v){
+                    $(this.PanelId).append('<div class="input-group input-group-sm m-2"></div>')
+                    let itemPanel =  $(this.PanelId).children().last()
+                    itemPanel.append(
+                        '<div class="input-group-prepend">' +
+                        '<button class="btn btn-danger" id="btnGroupAddon_'+Id+'_key_'+k+'" type="button" data-itemId="'+Id+'_key"> - </button>\n' +
+                        '</div>')
+                    let childItemKey = new BaseInputRender(itemPanel,keySchema,Id+"_key_"+k)
+                    childItemKey.Value = k
+                    itemPanel.append('<div class="input-group-prepend"><div class="input-group-text  btn" >=</div></div>')
+                    let childItemValue = new BaseInputRender(itemPanel,Items,Id+"_value_"+k)
+                    childItemValue.Value = v[k]
+                }
+                break
+                }
+            }
 
         }
         get Value(){
@@ -215,12 +252,197 @@ function FormRender(panel,schema,generator){
     class InterObjRender{
         constructor(panel,schema,generator,path) {
 
+            const Id = path;
+            this.Id = Id;
+            this.Schema = schema
+            const items = schema["items"]
+            console.assert(items["type"]==="object")
+            const p = $(panel)
+            this.panelId = Id+'_items'
+            p.append('<div id="'+Id+'_toolbar">\n' +
+                '  <button id="'+Id+'_AddButton" class="btn btn-secondary">Add</button>\n' +
+                '</div>')
+            $("#"+Id+"_AddButton").on("click",function (event){
+                Table.bootstrapTable('append', {})
+                Table.bootstrapTable('scrollTo', 'bottom')
+                return false
+            })
+            p.append('<table  id="'+this.panelId +'"></table>')
+            const Table = $("#"+this.panelId)
+            Table.delegate("a.remove","click",function (event){
+                let rowIndex = $(this).attr("array-row")
+                Table.bootstrapTable('remove', {
+                    field: '$index',
+                    values: [Number(rowIndex)]
+                })
+            })
+            this.Table = Table
+            const properties = items["properties"]
+            let lastDetailRow = undefined
+            let lastField = undefined
+            function DetailFormatterHandler(fieldIndex){
+
+                this.detailFormatter = function (index, row, $element){
+
+                    if(typeof lastDetailRow !== "undefined" && lastDetailRow !== index ){
+                        Table.bootstrapTable('collapseRow', lastDetailRow)
+                    }
+                    lastDetailRow = index
+                    lastField = fieldIndex
+                    let item = properties[fieldIndex]
+                    let child =  generator($element,item,generator,path+"_"+item["name"])
+                    child.Value = row[item.name]
+                    return ""
+                }
+                return this
+            }
+
+            function NotDetailFormatterMap(index, row, $element){
+                if (typeof lastDetailRow !== "undefined"){
+                    Table.bootstrapTable('collapseRow')
+                    lastDetailRow = undefined
+                    lastField = undefined
+                }
+                Table.bootstrapTable('collapseAllRows')
+
+                return ''
+            }
+            function formatterKV(v){
+                let html =""
+                for (let k in v){
+                    html+="<span class='btn btn-outline-secondary btn-sm'>"+k+"="+v[k]+"</span>\n"
+                }
+                html+= ""
+                return html
+            }
+
+
+            const columns =[]
+            columns.push({
+                title:"",
+                field:"__index",
+                sortable:false,
+                editable:false,
+                detailFormatter:NotDetailFormatterMap,
+                formatter: function (v,row,index){
+                    return index
+                }
+            })
+
+            for(let i in properties){
+                const item = properties[i]
+                switch (item["type"]){
+                    case "object":{
+                        columns.push({
+                            title:getLabel(item),
+                            field:item["name"],
+                            sortable:false,
+                            editable:false,
+                            formatter: formatterKV,
+                            detailFormatter:new DetailFormatterHandler(i).detailFormatter
+                        })
+                        break
+                    }
+                    case "map":{
+                        columns.push({
+                            title:getLabel(item),
+                            field:item["name"],
+                            sortable:false,
+                            editable:false,
+                            formatter:formatterKV,
+                            detailFormatter:new DetailFormatterHandler(i).detailFormatter
+                        })
+                        break
+                    }
+                    case "array":{
+                        columns.push({
+                            title:getLabel(item),
+                            field:item["name"],
+                            sortable:false,
+                            editable:false,
+                            formatter: formatterKV,
+                            detailFormatter:new DetailFormatterHandler(i).detailFormatter,
+                        })
+                        break
+                    }
+                    default:{
+                        if (item["enum"]){
+                            columns.push({
+                                title:getLabel(item),
+                                field:item["name"],
+                                sortable:true,
+                                detailFormatter:NotDetailFormatterMap,
+                                editable: {
+                                    type:"select",
+                                    options:{
+                                        items:item["enum"]
+                                    }
+                                },
+                            })
+                        }else{
+                            let typeInput = "text"
+                            if (item["type"] === "number" || item["type"] === "integer"){
+                                typeInput = "number"
+                            }
+                            columns.push({
+
+                                title:getLabel(item),
+                                field:item["name"],
+                                sortable:true,
+                                width:200,
+                                detailFormatter:NotDetailFormatterMap,
+                                editable:{
+                                    type:typeInput
+                                }
+                            })
+                        }
+                        break
+                    }
+                }
+            }
+            columns.push({
+                title:"操作",
+                field:"",
+                sortable:false,
+                editable:false,
+                formatter: function (v,row,index){
+                    return "<a class=\"remove\" href=\"javascript:void(0)\" array-row=\""+index+"\" title=\"remove\">删除</a>"
+                }
+            })
+            const _This = this
+            const tableOptions = {
+                columns:columns,
+                editable: true,
+                // toolbar:'#'+Id+'toolbar',
+
+                detailView:true,
+                detailViewByClick:true,
+                detailViewIcon: false,
+                width: "100%",
+                onEditorShown:function (field, row, $el, editable){
+                    Table.bootstrapTable('collapseAllRows')
+
+                    return true;
+                },
+                onEditorSave:function (field, row, oldValue, $el){
+                    if (field !=="__index", _This.Data){
+                        const rowIndex = $el.parent().data("index")
+                        _This.Data[rowIndex][field] = row[field]
+                    }
+                    return true;
+                },
+            }
+            Table.bootstrapTable(tableOptions);
         }
         set Value(v){
-
+            if (!v){
+                v = []
+            }
+            this.Table.bootstrapTable("load",v)
+            this.Data = v
         }
         get Value(){
-            return {}
+            return  this.Data
         }
     }
     class InterMapRender{
@@ -294,9 +516,11 @@ function FormRender(panel,schema,generator){
 
             $('#'+Id+"_new").on("change",function (){
                 let v = $(this).val()
-
+                if (items["type"] === "integer" || items["type"] === "number"){
+                    v = Number(value)
+                }
                 if (v !== ""){
-                    if (ValidHandler.apply(this,[items])){
+                    if (CheckBySchema(Id,items,v)){
                         add(v)
                         $(this).val("")
                     }
@@ -332,8 +556,9 @@ function FormRender(panel,schema,generator){
             }
             let rel = true
             const items = this.Schema
+            const Id = this.Id
             $(arrayId).each(function (){
-               if( CheckBySchema(this.id,items,$(this).val()) !== true){
+               if( CheckBySchema(Id,items,$(this).val()) !== true){
                    rel = false
                    return false
                }
