@@ -129,7 +129,7 @@
             item = that.data[$tr.data('index')],
             index = $td[0].cellIndex,
             fields = that.getVisibleFields(),
-            field = fields[that.options.detailView && !that.options.cardView ? index - 1 : index],
+            field = fields[that.options.detailView && that.options.detailViewIcon ? index - 1 : index],
             column = that.columns[that.fieldsColumnsIndex[field]],
             value = getItemField(item, field, that.options.escape),
             dataIndex = $td.parent().data('index');
@@ -169,7 +169,7 @@
             item = that.data[$tr.data('index')],
             index = $td[0].cellIndex,
             fields = that.getVisibleFields(),
-            field = fields[that.options.detailView && !that.options.cardView ? index - 1 : index],
+            field = fields[that.options.detailView && that.options.detailViewIcon ? index - 1 : index],
             column = that.columns[that.fieldsColumnsIndex[field]],
             value = getItemField(item, field, that.options.escape),
             dataIndex = $td.parent().data('index');
