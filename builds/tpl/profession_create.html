@@ -1,0 +1,32 @@
+{{ block "content" .data}}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">新建{{index .module.I18nName .zone}}</h1>
+</div>
+<div class="select_content input-group mb-3">
+    <div class="input-group-prepend">
+        <label class="input-group-text" for="drivers">Drivers</label>
+    </div>
+    <select class="custom-select" id="drivers">
+    </select>
+</div>
+<div id="form"></div>
+<div id="form_button" class="row justify-content-between" style="display: none">
+    <div class="col-4">
+        <button type="button" class="btn btn-outline-secondary form_reset">重置</button>
+    </div>
+    <div class="col-4" style="text-align: right">
+        <button type="button" class="btn btn-primary form_submit">提交</button>
+    </div>
+</div>
+{{end}}
+{{- block "script" . -}}
+<script src="/js/form-render.js"></script>
+<script src="/js/djv.js"></script>
+<script>
+    $(document).ready(function () {
+        let creator = new ProfessionCreator("{{.name}}","form", "drivers")
+    })
+
+</script>
+
+{{- end -}}

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>render</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link href="/css/dashboard.css" rel="stylesheet">
+    <link href="/css/bootstrap-table.min.css" rel="stylesheet"  rel="stylesheet">
+
+    <style>
+        .editor {
+            width: 100%;
+            height: 300px;
+            margin: 10px auto;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div id="test"></div>
+    <div class="row">
+        <button type="button" id="btnShow" class="btn btn-primary">show</button>
+    </div>
+    <div id="json" class="card editor">
+
+    </div>
+</div>
+<script src="/js/jquery-3.0.0.js"></script>
+<script src="/js/bootstrap.js"></script>
+<script src="/js/dashboard.js"></script>
+<script src="/js/form-render.js"></script>
+<script src="/js/bootstrap-table.min.js"></script>
+<script src="/js/bootstrap-table-editor.js"></script>
+<script src="/js/ace/ace.js"></script>
+<script src="/js/djv.js"></script>
+<script>
+
+    $(function () {
+        const demoSchema = {
+            "type": "object",
+            "properties": [
+                {
+                    "name": "driver",
+                    "readonly": true,
+                    "type": "string",
+                    "enum": [
+                        "http"
+                    ],
+                    "required": true
+                },
+                {
+                    "name": "host",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "minLength": 1
+                },
+                {
+                    "name": "listen",
+                    "type": "integer",
+                    "format": "int32",
+                    "minimum": 1,
+                    "required": true
+                },
+                {
+                    "name": "method",
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "enum": [
+                            "GET",
+                            "POST",
+                            "PATH",
+                            "DELETE"
+                        ]
+                    }
+                },
+                {
+                    "name": "plugins",
+                    "type": "map",
+                    "items": {
+                        "type": "object",
+                        "properties": [
+                            {
+                                "name": "config",
+                                "required": true
+                            },
+                            {
+                                "name": "disable",
+                                "type": "boolean",
+                                "required": true
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "protocol",
+                    "type": "string",
+                    "enum": [
+                        "http",
+                        "https"
+                    ],
+                    "default": "http",
+                    "required": true
+                },
+                {
+                    "name": "rules",
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": [
+                            {
+                                "name": "header",
+                                "type": "map",
+                                "items":{
+                                    "type":"string"
+                                }
+                            },
+                            {
+                                "name": "location",
+                                "type": "string",
+                                "minLength": 1
+                            },
+                            {
+                                "name": "query",
+                                "type": "map",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "target",
+                    "type": "string",
+                    "format": "text",
+                    "minLength": 1,
+                    "required": true
+                }
+            ]
+        }
+        const renderHandler = new FormRender($("#test"), demoSchema)
+        console.log("before:", renderHandler.Value)
+        renderHandler.Value = {
+            "driver": "http",
+            "listen": 0,
+            "host": ["hosta", "hostb"],
+            "protocol": "https",
+            "target": "1@service",
+            "method":["POST"],
+
+            "rules":[{"header":{"name":"ss","auth":"xxxxxxxxxx"},"location":"/api/path","query":{}},{"header":{"name":"ss"},"location":"/api/path","query":{}}]
+        }
+        let jsonSHow = aceEditor.InitEditor("json")
+        $("#btnShow").on("click", function (){
+            console.log("show")
+            console.log(renderHandler.Value)
+            jsonSHow.getSession().setValue(JSON.stringify(renderHandler.Value, null, 4))
+        })
+    })
+
+</script>
+</body>
+</html>

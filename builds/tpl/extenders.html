@@ -1,0 +1,30 @@
+{{- block "header" . -}}
+<link href="/css/bootstrap-table.min.css"  rel="stylesheet">
+{{- end -}}
+{{ block "content" .}}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">扩展管理</h1>
+</div>
+<table
+        id="table"
+        data-toggle="table"
+        data-flat="true"
+        data-url="/api/{{.name}}/"
+        data-reorderable-rows="true"
+        data-use-row-attr-func="true"
+        data-response-handler="responseHandler">
+    <caption>List of {{.name}}</caption>
+    <thead>
+    <tr>
+        {{- range $i,$t := (index .data.Title .zone)}}
+        <th data-field="{{index $.data.Fields $i}}">{{ $t}}</th>
+        {{- end }}
+    </tr>
+    </thead>
+
+</table>
+{{end}}
+{{block "script" .}}
+<script src="/js/bootstrap-table.min.js"></script>
+
+{{end}}
