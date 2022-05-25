@@ -26,5 +26,10 @@
 {{end}}
 {{block "script" .}}
 <script src="/js/bootstrap-table.min.js"></script>
-
+<script>
+    function responseHandler(res) {
+        let d = res.data
+        return d
+    }
+</script>
 {{end}}
