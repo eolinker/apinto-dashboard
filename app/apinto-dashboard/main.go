@@ -112,15 +112,20 @@ func main() {
 	})
 
 	config.Statics = map[string]string{
-		"":   "./static",
-		"js": "./static/js",
+		"":    "./static",
+		"js":  "./static/js",
+		"umd": "./static/umd",
 		//"css":"./static/css",
 	}
 	service, err := apinto.Create(config)
 
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return
 	}
-	http.ListenAndServe(fmt.Sprintf(":%s", cf.Port), service)
+	err = http.ListenAndServe(fmt.Sprintf(":%s", cf.Port), service)
+	if err != nil {
+		log.Panic(err)
+		return
+	}
 }
