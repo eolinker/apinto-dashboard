@@ -8,12 +8,7 @@
     <button type="button" id="create_btn"  class="btn btn-primary">Create</button>
 </div>
 
-<table
-        id="table"
-        data-toggle="table"
-        data-flat="true"
-        data-url="/api/{{.name}}/"
-        data-response-handler="responseHandler">
+<table id="table">
     <caption>List of {{.name}}</caption>
     <thead>
     <tr>
@@ -131,7 +126,11 @@
         }
     }
     $(document).ready(function(){
-        $table.bootstrapTable('refreshOptions', {
+        $table.bootstrapTable({
+            url:"/api/routers/",
+            responseHandler:responseHandler,
+            toggle:"table",
+            flat:true,
             onLoadSuccess: function () {	//在成功加载远程数据时触发
                 $("[name='status']").bootstrapSwitch({
                     onText : "发布",
