@@ -59,7 +59,6 @@ func Create(config *Config) (http.Handler, error) {
 	serve := &http.ServeMux{}
 	for _, m := range config.Modules {
 
-		path := fmt.Sprint("/", m.Name)
 		if m.NotView {
 			serve.Handle(m.Path, m.Handler)
 		} else {
@@ -68,6 +67,7 @@ func Create(config *Config) (http.Handler, error) {
 				modules: mp,
 				name:    m.Name,
 			}
+			path := fmt.Sprint("/", m.Name)
 			serve.Handle(path, viewH)
 			serve.Handle(fmt.Sprint(path, "/"), viewH)
 			serve.Handle(fmt.Sprintf("/api/%s/", m.Name), m.Handler)
