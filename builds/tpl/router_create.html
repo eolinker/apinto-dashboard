@@ -1,22 +1,65 @@
+{{- block "header" .}}
+<link href="/css/bootstrap4-toggle.css" rel="stylesheet">
+{{- end}}
 {{ block "content" .data}}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">新建路由</h1>
 </div>
-<div class="select_content input-group mb-3">
-    <div class="input-group-prepend">
-        <label class="input-group-text" for="drivers">Drivers</label>
+
+
+<form>
+    <div class="form-group row mb-3"><label class="col-sm-2 col-form-label text-right"
+                                            for="inputId">Id</label>
+        <div class="col-sm-10">
+            <input class="form-control" id="inputId"/>
+
+        </div>
+
     </div>
-    <select class="custom-select" id="drivers">
-    </select>
-</div>
-<div id="form"></div>
+    <div class="form-group row mb-3"><label class="col-sm-2 col-form-label text-right"
+                                            for="inputName">Name</label>
+        <div class="col-sm-10">
+            <input class="form-control" id="inputName"/>
+        </div>
+
+    </div>
+    <div class="form-group row mb-3"><label class="col-sm-2 col-form-label text-right"
+                                            for="inputDrivers">Driver</label>
+        <div class="col-sm-10">
+            <select class="custom-select" id="inputDrivers"></select>
+        </div>
+
+    </div>
+    <div id="formRenderPanel">
+
+    </div>
+    <div id="form_button" class="row justify-content-between" style="display: none">
+        <div class="col-4">
+            <button type="button" class="btn btn-outline-secondary form_reset">重置</button>
+        </div>
+        <div class="col-4" style="text-align: right">
+            <button type="button" class="btn btn-primary form_submit">提交</button>
+        </div>
+    </div>
+</form>
 {{end}}
 {{- block "script" . -}}
+
 <script src="/js/form-render.js"></script>
+<script src="/js/bootstrap-table.min.js"></script>
+<script src="/js/bootstrap-table-editor.js"></script>
+<script src="/js/bootstrap4-toggle.min.js"></script>
 <script src="/js/djv.js"></script>
+
 <script>
     $(document).ready(function () {
-        let creator = new ProfessionCreator("{{.name}}","form", "drivers")
+        let creator = new ProfessionCreator("{{.name}}", {
+            "panel":$("#formRenderPanel"),
+            "drivers":$("#inputDrivers"),
+            "name":$("#inputName"),
+            "id":$("#inputId"),
+            "btns":$("#form_button")
+        })
     })
 </script>
 

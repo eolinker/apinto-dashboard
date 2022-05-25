@@ -1,5 +1,5 @@
 
-function FormRender(panel,schema,generator){
+
     const RootId = "FormRender"
     function CheckBySchema(id, schema,value){
         let validator = validate.djv()
@@ -48,6 +48,29 @@ function FormRender(panel,schema,generator){
         }
         set Value(v){
             $("#"+this.Id).val(v)
+        }
+    }
+    class SwitchRender {
+        constructor(panel,schema,path) {
+
+            const Id = path
+            this.Id = Id
+
+            $(panel).append('<input id="'+Id+'" type="checkbox" data-toggle="switchbutton" data-size="sm"/>')
+            $("#"+Id).bootstrapToggle()
+            InputValid(schema,Id)
+
+        }
+        get Value(){
+            return $("#"+this.Id).checked
+        }
+        set Value(v){
+            if (v === true || v === "true"){
+                $("#"+this.Id).attr('checked', 'checked');
+            }else{
+                $("#"+this.Id).removeAttr('checked');
+            }
+
         }
     }
     class BaseInputRender {
@@ -148,6 +171,7 @@ function FormRender(panel,schema,generator){
         function readFormatForString(format){
 
             switch (format){
+
                 case "email","password","date","time","number":{
                     return format
                 }
@@ -156,6 +180,9 @@ function FormRender(panel,schema,generator){
                 }
                 case "date-time":{
                     return 'datetime-local'
+                }
+                case "boolean":{
+                    return "checkbox"
                 }
                 default:{
                     return "text"
@@ -638,58 +665,58 @@ function FormRender(panel,schema,generator){
         }
     }
 
-    class TopFormRender {
 
-        constructor(panel,schema,generator) {
-
-            if(!generator || typeof generator !== "function"){
-                generator = BaseGenerator
+function BaseGenerator(panel,schema,generator,path){
+    switch (schema["type"]){
+        case "object":{
+            return new ObjectRender(panel,schema,generator,path)
+        }
+        case "array":{
+            const items = schema["items"]
+            switch (items["type"]){
+                case "object":{
+                    return new InterObjRender(panel,schema,generator,path)
+                }
+                case "map":{
+                    return new InterMapRender(panel,schema,generator,path)
+                }
             }
-            $(panel).empty()
-            $(panel).append('<form class=""></form>')
-
-            this.Object = generator($(panel).children("form"),schema,generator,RootId)
+            if (items["enum"]){
+                return new ArrayRenderEnum(panel,schema,generator,path)
+            }
+            return new ArrayRenderSimple(panel,schema,generator,path)
         }
-        check(){
-            return this.Object.check()
+        case "map":{
+            return new MapRender(panel,schema,generator,path)
         }
-        get Value(){
-            return this.Object.Value
-        }
-        set Value(v){
-            this.Object.Value = v
+        case "boolean":{
+            return new SwitchRender(panel,schema,path)
         }
     }
-    function BaseGenerator(panel,schema,generator,path){
-        switch (schema["type"]){
-            case "object":{
-                return new ObjectRender(panel,schema,generator,path)
-            }
-            case "array":{
-                const items = schema["items"]
-                switch (items["type"]){
-                    case "object":{
-                        return new InterObjRender(panel,schema,generator,path)
-                    }
-                    case "map":{
-                        return new InterMapRender(panel,schema,generator,path)
-                    }
-                }
-                if (items["enum"]){
-                    return new ArrayRenderEnum(panel,schema,generator,path)
-                }
-                return new ArrayRenderSimple(panel,schema,generator,path)
-            }
-            case "map":{
-                return new MapRender(panel,schema,generator,path)
-            }
-        }
-        if (schema["enum"]){
-            return new BaseEnumRender(panel,schema,path)
-        }
-        return new BaseInputRender(panel,schema,path)
+    if (schema["enum"]){
+        return new BaseEnumRender(panel,schema,path)
     }
-    return new TopFormRender(panel,schema,generator);
+    return new BaseInputRender(panel,schema,path)
 }
 
+class FormRender {
+
+    constructor(panel,schema,generator) {
+
+        if(!generator || typeof generator !== "function"){
+            generator = BaseGenerator
+        }
+        $(panel).empty()
+        this.Object = generator($(panel),schema,generator,RootId)
+    }
+    check(){
+        return this.Object.check()
+    }
+    get Value(){
+        return this.Object.Value
+    }
+    set Value(v){
+        this.Object.Value = v
+    }
+}
 
