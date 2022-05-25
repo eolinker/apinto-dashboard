@@ -56,19 +56,19 @@
             const Id = path
             this.Id = Id
 
-            $(panel).append('<input id="switch_'+Id+'}" type="checkbox" data-toggle="toggle" >')
-
+            $(panel).append('<input id="'+Id+'" type="checkbox" data-toggle="switchbutton" data-size="sm"/>')
+            $("#"+Id).bootstrapToggle()
             InputValid(schema,Id)
 
         }
         get Value(){
-            return $("#switch_"+this.Id).checked
+            return $("#"+this.Id).checked
         }
         set Value(v){
             if (v === true || v === "true"){
-                $("#switch_"+this.Id).attr('checked', 'checked');
+                $("#"+this.Id).attr('checked', 'checked');
             }else{
-                $("#switch_"+this.Id).removeAttr('checked');
+                $("#"+this.Id).removeAttr('checked');
             }
 
         }

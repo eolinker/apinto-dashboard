@@ -1,9 +1,21 @@
+{{- block "header" .}}
+<link href="/css/bootstrap4-toggle.css" rel="stylesheet">
+{{- end}}
 {{ block "content" .data}}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">新建{{index .module.I18nName .zone}}</h1>
 </div>
 
+    <form class="form">
+        <div>
+            <input type="checkbox" checked="" data-toggle="toggle" data-size="xs">
+        </div>
+        <input   type="checkbox" data-toggle="toggle"/>
+<!--        <div class="form-row">-->
+<!--            <div class="toggle btn btn-primary btn-xs" data-toggle="toggle" role="button" style="width: 42.6796px; height: 18.5938px;"><input type="checkbox" checked="" data-toggle="toggle" data-size="xs"><div class="toggle-group"><label for="" class="btn btn-primary btn-xs toggle-on">On</label><label for="" class="btn btn-light btn-xs toggle-off">Off</label><span class="toggle-handle btn btn-light btn-xs"></span></div></div>-->
+<!--        </div>-->
 
+    </form>
     <form >
         <div class="form-group row mb-3"><label class="col-sm-2 col-form-label text-right"
                                                 for="inputId">Id</label>
@@ -48,9 +60,9 @@
 
 {{end}}
 {{- block "script" . -}}
-<script src="/js/jquery-3.0.0.js"></script>
 <script src="/js/bootstrap-table.min.js"></script>
 <script src="/js/bootstrap-table-editor.js"></script>
+<script src="/js/bootstrap4-toggle.min.js"></script>
 <script src="/js/form-render.js"></script>
 <script src="/js/djv.js"></script>
 
