@@ -1,8 +1,8 @@
 zone: zh_cn
 default: upstream
 apinto:
-  - "http://172.18.189.43:9400"
-port: 8080
+  - "http://127.0.0.1:9400"
+port: 8081
 user_details:
   type: file
   file: ./account.yaml

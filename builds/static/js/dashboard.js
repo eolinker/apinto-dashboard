@@ -353,9 +353,9 @@ class Table{
 }
 
 class Render {
-    constructor(id, schema, data, callback) {
-        let target = $("#"+id)
-        let renderHandler = new FormRender(target, schema)
+    constructor(panel, schema, data,generator, callback) {
+        let target = $(panel)
+        let renderHandler = new FormRender(target, schema,generator)
         if(data){
             renderHandler.Value = data
         }
@@ -363,11 +363,12 @@ class Render {
             callback()
         }
         this.panel = renderHandler
-        this.id = id
+        this.target = target
+        this.generator = generator
     }
     Reset(schema){
         this.Destroy()
-        this.panel = new FormRender($("#"+this.id), schema)
+        this.panel = new FormRender(this.target, schema,this.generator)
     }
     ResetVal(){
         if (this.panel){
@@ -401,10 +402,9 @@ class Render {
     }
 }
 class ProfessionRender {
-    constructor(module, uiID){
+    constructor(module, options){
         this.module = module
-        this.uiId = uiID
-        this.buttonId = this.uiId+"_button"
+        this.options = options
         this.ui = null
         this.generateBtn()
     }
@@ -418,9 +418,11 @@ class ProfessionRender {
             return http.handleError(res, "获取driver信息失败")
         })
     }
+
     updateUi(render, data){
-        let btn = "#" + this.buttonId
-        this.ui = new Render(this.uiId, render, data, function () {
+        render = formatProfessionRender(render)
+        let btn = this.options["btns"]
+        this.ui = new Render(this.options["panel"], render, data, this.generator,function () {
             if ($(btn).length > 0 && !$(btn).is(":visible")){
                 $(btn).show()
             }
@@ -433,7 +435,7 @@ class ProfessionRender {
     }
     generateBtn(){
         let o = this
-        $(`#${this.uiId}`).after(`<div id="${this.buttonId}" class="row justify-content-between" style="display: none">
+        $(o.options["panel"]).after(`<div id="${this.buttonId}" class="row justify-content-between" style="display: none">
                                     <div class="col-4">
                                         <button type="button" class="btn btn-outline-secondary ${this.buttonId}_reset">重置</button>
                                     </div>
@@ -455,10 +457,36 @@ class ProfessionRender {
     submitEvent(){}
 }
 class ProfessionCreator extends ProfessionRender{
-    constructor(module, uiID, selectID){
-        super(module, uiID)
-        this.selectID = selectID
+    generator (panel,schema,generator,path){
+        return BaseGenerator(panel,schema,generator,path)
+    }
+    constructor(module, options){
+        super(module, options)
+        this.options = options
+        this.initName()
         this.init()
+    }
+    initName(){
+        const nameRule = /^[a-zA-Z\d_]+$/;
+        let o = this
+        $(o.options["id"]).attr("readonly",true)
+        $(o.options["id"]).val(`@${o.module}`)
+        $(o.options["name"]).on("change",function (e){
+            let v = $(this).val()
+            $(o.options["id"]).val(`${v}@${o.module}`)
+
+            if( nameRule.test(v)) {
+                $(this).removeClass("is-invalid")
+                $(this).addClass("is-valid")
+                return true
+            }else{
+                $(this).removeClass("is-valid")
+                $(this).addClass("is-invalid")
+                return false
+            }
+            return true
+        })
+
     }
     init(){
         let o = this
@@ -466,8 +494,8 @@ class ProfessionCreator extends ProfessionRender{
             if(res.code !== 200){
                 return http.handleError(res, "获取driver列表失败")
             }
-            let data = res.data["drivers"]
-            let target = $("#"+o.selectID)
+            let data = res.data
+            let target = $(o.options["drivers"])
             target.empty()
             for (let i = 0; i < data.length; i++) {
                 if(i===0){
@@ -512,10 +540,14 @@ class ProfessionCreator extends ProfessionRender{
 }
 class ProfessionEditor extends ProfessionRender{
     constructor(module, name, uiID){
-        super(module, uiID)
+        let generator = function (panel,schema,generator,path){
+            return BaseGenerator(panel,schema,generator,path)
+        }
+        super(module, uiID,generator)
         this.name = name
         this.init()
     }
+
     init() {
         let o = this
         dashboard.get(`/api/${this.module}/${this.name}`,function (res) {
@@ -551,4 +583,23 @@ class ProfessionEditor extends ProfessionRender{
         }
 
     }
+}
+
+function formatProfessionRender(render){
+    const defaultFields ={"id":true,"name":true,"driver":true}
+    if ( typeof render === "undefined"){
+        throw "undefined"
+    }
+    let properties = render["properties"]
+    let newProperties = new Array()
+
+    for (let i in properties){
+        let name = properties[i].name
+        if ( defaultFields[name]!==true){
+            newProperties.push(properties[i])
+        }
+    }
+    render["properties"] = newProperties
+    return render
+
 }
