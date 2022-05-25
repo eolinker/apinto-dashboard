@@ -1,3 +1,6 @@
+{{- block "header" .}}
+<link href="/css/bootstrap4-toggle.css" rel="stylesheet">
+{{- end}}
 {{ block "content" .data}}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">新建路由</h1>
@@ -9,6 +12,7 @@
                                             for="inputId">Id</label>
         <div class="col-sm-10">
             <input class="form-control" id="inputId"/>
+
         </div>
 
     </div>
@@ -44,9 +48,9 @@
 <script src="/js/form-render.js"></script>
 <script src="/js/bootstrap-table.min.js"></script>
 <script src="/js/bootstrap-table-editor.js"></script>
+<script src="/js/bootstrap4-toggle.min.js"></script>
 <script src="/js/djv.js"></script>
-<link href="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/css/bootstrap4-toggle.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/js/bootstrap4-toggle.min.js"></script>
+
 <script>
     $(document).ready(function () {
         let creator = new ProfessionCreator("{{.name}}", {

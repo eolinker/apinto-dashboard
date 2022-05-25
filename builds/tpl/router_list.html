@@ -64,10 +64,10 @@
         return d
     }
     function statusSwitch(value, row, index){
-        if (row["status"]) {
-            return "<input value=" + row.name + " name='status' type='checkbox' checked />";
+        if (row["disable"]) {
+            return "<input value=" + row.name + " name='disable' type='checkbox' checked />";
         } else {
-            return "<input value=" + row.name + " name='status' type='checkbox' />";
+            return "<input value=" + row.name + " name='disable' type='checkbox' />";
         }
     }
     function operateFormatter(value, row, index) {
@@ -132,15 +132,15 @@
             toggle:"table",
             flat:true,
             onLoadSuccess: function () {	//在成功加载远程数据时触发
-                $("[name='status']").bootstrapSwitch({
+                $("[name='disable']").bootstrapSwitch({
                     onText : "发布",
                     offText : "下线",
                     onColor : "success",
                     offColor : "warning",
                     size : "small",
-                    onSwitchChange : function(event, status) {
+                    onSwitchChange : function(event, disable) {
                         let target = $(this)
-                        dashboard.patch("/api/{{.name}}/"+this.value, {"status":status}, function (res) {
+                        dashboard.patch("/api/{{.name}}/"+this.value, {"disable":disable}, function (res) {
                             if(res.code === 200){
                                 common.message("变更成功", "success")
                                 return
