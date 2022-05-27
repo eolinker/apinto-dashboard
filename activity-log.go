@@ -1,6 +1,10 @@
 package apinto_dashboard
 
-import "log"
+import (
+	"log"
+	"net/http"
+	"strings"
+)
 
 type ActivityLogAddHandler interface {
 	Add(user, content, operation, target string, args []*Arg) error
@@ -24,16 +28,38 @@ type Arg struct {
 
 var (
 	activityLogHandler ActivityLogAddHandler
+	isFileterForwarded bool
 )
 
-func SetActivityLogAddHandler(h ActivityLogAddHandler) {
+func SetActivityLogAddHandler(h ActivityLogAddHandler, fileterForwarded bool) {
 	activityLogHandler = h
+	isFileterForwarded = fileterForwarded
 }
-func AddActivityLog(user, operation, target, content string, args []*Arg) {
+func AddActivityLog(r *http.Request, user, operation, target, content string, args []*Arg) {
 	if activityLogHandler != nil {
+		_ = getIP(r)
 		err := activityLogHandler.Add(user, operation, target, content, args)
 		if err != nil {
 			log.Println("[ERR] add log:", err)
 		}
 	}
+}
+
+func getIP(r *http.Request) string {
+	if !isFileterForwarded {
+		forwarded := r.Header.Get("x-forwarded-for")
+		if len(forwarded) > 0 {
+			if i := strings.Index(forwarded, ","); i > 0 {
+				return forwarded[:i]
+			}
+			return forwarded
+		}
+	}
+
+	remoteIP := r.RemoteAddr
+	idx := strings.LastIndex(remoteIP, ":")
+	if idx != -1 {
+		return remoteIP[:idx]
+	}
+	return remoteIP
 }
