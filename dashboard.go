@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/internal/template"
+	"github.com/eolinker/eosc/log"
 	"net/http"
 	"path/filepath"
 	"strconv"
@@ -143,6 +144,7 @@ type ViewServer struct {
 }
 
 func (v *ViewServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	log.Debug("request:", r.RequestURI)
 	viewName, data, has := v.handler.Lookup(r)
 	if !has {
 		http.NotFound(w, r)
