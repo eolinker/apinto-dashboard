@@ -33,11 +33,11 @@ var (
 )
 
 const (
-	OPT_LOGIN  = "login"
-	OPT_LOGOUT = "logout"
-	OPT_CREATE = "create"
-	OPT_UPDATE = "update"
-	OPT_DELETE = "delete"
+	OptLogin  = "login"
+	OptLogout = "logout"
+	OptCreate = "create"
+	OptUpdate = "update"
+	OptDelete = "delete"
 )
 
 func SetActivityLogAddHandler(h ActivityLogAddHandler, fileterForwarded bool) {
