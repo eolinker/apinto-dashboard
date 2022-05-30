@@ -32,6 +32,14 @@ var (
 	isFileterForwarded bool
 )
 
+const (
+	OPT_LOGIN  = "login"
+	OPT_LOGOUT = "logout"
+	OPT_CREATE = "create"
+	OPT_UPDATE = "update"
+	OPT_DELETE = "delete"
+)
+
 func SetActivityLogAddHandler(h ActivityLogAddHandler, fileterForwarded bool) {
 	activityLogHandler = h
 	isFileterForwarded = fileterForwarded
