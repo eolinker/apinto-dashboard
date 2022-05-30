@@ -30,10 +30,10 @@ func NewActivityLog(name string, dao apinto.ActivityLogGetHandler) (*ActivityLog
 		ModuleName:       name,
 		header: &professions.ListHeader{
 			Title: map[apinto.ZoneName][]string{
-				apinto.ZhCn: {"操作时间", "用户", "操作类型", "操作对象", "内容"},
-				apinto.EnUs: {"Time", "User", "operation", "target", "Content"},
+				apinto.ZhCn: {"操作时间", "用户", "操作类型", "操作对象", "内容", "IP"},
+				apinto.EnUs: {"Time", "User", "operation", "target", "Content", "IP"},
 			},
-			Fields: []string{"time", "user", "operation", "target", "content"},
+			Fields: []string{"time", "user", "operation", "target", "content", "ip"},
 		},
 		dao: dao,
 	}
