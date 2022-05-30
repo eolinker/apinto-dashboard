@@ -649,45 +649,7 @@ class ArrayRenderSimple {
         })
 
     }
-    //
-    // check() {
-    //
-    //     const arrayId = "[array-for='" + this.Id + "']"
-    //     if (this.Schema["minLength"] > 0 && $(arrayId).length === 0) {
-    //         return false
-    //     }
-    //     let rel = true
-    //     const items = this.Schema
-    //     const Id = this.Id
-    //     $(arrayId).each(function () {
-    //         if (CheckBySchema(Id, items, $(this).val()) !== true) {
-    //             rel = false
-    //             return false
-    //         }
-    //     })
-    //
-    //     return rel
-    //
-    // }
-    // check() {
-    //
-    //     const arrayId = "[array-for='" + this.Id + "']"
-    //     if (this.Schema["minLength"] > 0 && $(arrayId).length === 0) {
-    //         return false
-    //     }
-    //     let rel = true
-    //     const items = this.Schema
-    //     const Id = this.Id
-    //     $(arrayId).each(function () {
-    //         if (CheckBySchema(Id, items, $(this).val()) !== true) {
-    //             rel = false
-    //             return false
-    //         }
-    //     })
-    //
-    //     return rel
-    //
-    // }
+
 
     get Value() {
         let val = []
@@ -758,13 +720,6 @@ class ObjectRender {
         }
     }
 
-    // check() {
-    //     for (let k in this.Fields) {
-    //         if (!this.Fields[k].check()) {
-    //             return false
-    //         }
-    //     }
-    // }
 }
 
 
@@ -854,13 +809,11 @@ class FormRender {
         if (typeof this.JsonSchema === undefined || this.JsonSchema === null){
             this.JsonSchema = this.toJsonSchema(this.Schema.cloneNode(true))
         }
-        if (this.djv === null || typeof this.djv === "undefined"){
-            this.djv = validate.Create()
-        }
-        let r = CheckBySchema(this.ObjectName,this.JsonSchema,this.Object.Value)
-        if (r !== true){
-            common.message(r,"danger")
-        }
+        // if (this.djv === null || typeof this.djv === "undefined"){
+        //     this.djv = validate.Create()
+        // }
+        return  CheckBySchema(this.ObjectName,this.JsonSchema,this.Object.Value)
+
     }
 
     get Value() {

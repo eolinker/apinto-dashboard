@@ -192,7 +192,8 @@
         'click .remove': function (e, value, row, index) {
             let msg ="确认删除 "+row.name+" {{index .module.I18nName .zone}}?"
             common.confirm("删除{{index .module.I18nName .zone}}", msg, function (){
-                $table.RemoveRow('id', row.id, function () {
+
+                $table.RemoveRow('name', row.name, function () {
                     updateData($table.GetData(), function (res){
                         if(res.code !== 200){
                             http.handleError(res, "删除失败")
@@ -438,6 +439,8 @@
             for (let i = 0; i < data.length; i++) {
                 if (!exist[data[i].id]){
                     target.append(`<option value="${data[i].id}">${ data[i].id }</option>`)
+                }else {
+                    console.log(`strip:${data[i].id}`)
                 }
             }
         }, function (res) {
@@ -503,6 +506,25 @@
         }
         $("#add_container").hide(200)
     })
+    $("#add_form_name").bind("change",function (){
+        let newName = $(this).val()
+        let exist = false
+        $table.GetData().forEach(function (item) {
+            if (item.name === newName ){
+                exist = true
+                return false
+            }
+        })
+        if (exist !== true) {
+            $(this).removeClass("is-invalid")
+            $(this).addClass("is-valid")
+
+        } else {
+            $(this).removeClass("is-valid")
+            $(this).addClass("is-invalid")
+
+        }
+    })
     $(".add_form_cancel").click(function (){
         if($("body").hasClass("modal-open")){
             $('body').removeClass("modal-open")
@@ -516,10 +538,11 @@
             if ($("#add_form_config").hasClass("active")){
                 d["config"] = JSON.parse(add_config_editor.Value)
             }else {
-                if (add_config_ui.Check()){
+                let ckr = add_config_ui.Check();
+                if (ckr !== true){
                     d["config"] = add_config_ui.Value
                 }else {
-                    throw "config format is error"
+                    throw "config format is error:"+ckr
                 }
             }
             // 渲染init配置表单
@@ -533,7 +556,7 @@
                 }
             }
         }catch(e) {
-            common.message("config format is error", "danger")
+            common.message("config format is error:"+e, "danger")
             return
         }
         let t = $('#add_form').serializeArray();
@@ -553,12 +576,19 @@
             return
         }
         let data = $table.GetData()
+        for (let i in data){
+            if (data[i].name === d.name){
+                common.message(`plugin name:${d.name} is exist`,"danger")
+                return
+            }
+        }
         data.push(d)
         updateData(data ,function (res){
             if(res.code !== 200){
                 return http.handleError(res, "更新失败")
             }
-            $table.AddNewRow(d)
+            $table.AddNewRow(res.data["plugins"])
+            // $table.AddNewRow(d)
             common.message("更新成功", "success")
             $("#add_close").click()
         }, function (res){
