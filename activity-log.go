@@ -7,7 +7,7 @@ import (
 )
 
 type ActivityLogAddHandler interface {
-	Add(user, content, operation, target string, args []*Arg) error
+	Add(user, ip, content, operation, target string, args []*Arg) error
 }
 
 type ActivityLogGetHandler interface {
@@ -16,6 +16,7 @@ type ActivityLogGetHandler interface {
 type LogEntity struct {
 	Time      string `json:"time"`
 	User      string `json:"user"`
+	IP        string `json:"ip"`
 	Operation string `json:"operation"`
 	Target    string `json:"target"`
 	Content   string `json:"content"`
@@ -37,8 +38,7 @@ func SetActivityLogAddHandler(h ActivityLogAddHandler, fileterForwarded bool) {
 }
 func AddActivityLog(r *http.Request, user, operation, target, content string, args []*Arg) {
 	if activityLogHandler != nil {
-		_ = getIP(r)
-		err := activityLogHandler.Add(user, operation, target, content, args)
+		err := activityLogHandler.Add(user, getIP(r), operation, target, content, args)
 		if err != nil {
 			log.Println("[ERR] add log:", err)
 		}
@@ -58,7 +58,7 @@ func getIP(r *http.Request) string {
 
 	remoteIP := r.RemoteAddr
 	idx := strings.LastIndex(remoteIP, ":")
-	if idx != -1 {
+	if idx > 0 {
 		return remoteIP[:idx]
 	}
 	return remoteIP
