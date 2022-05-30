@@ -95,11 +95,11 @@ class SwitchRender extends BaseValue {
 
         const Id = path
         this.Id = Id
+        let $switch = $(`<input id="${Id}" type="checkbox" data-toggle="toggle" data-size="sm"/>`)
 
-        $(panel).append('<input id="' + Id + '" type="checkbox" data-toggle="toggle" data-size="sm"/>')
-        $("#" + Id).bootstrapToggle()
+        $(panel).append($switch)
+        $switch.bootstrapToggle()
         InputValid(schema, Id)
-
     }
 
     get Value() {
@@ -118,8 +118,9 @@ class SwitchRender extends BaseValue {
 class RequireRender extends BaseValue {
     constructor(panel, schema, path) {
         super(schema, path)
-        $(panel).append(`<select id=${path} class="form-controller></select>`)
-        this.DOM = $(`#${path}`)
+        this.DOM = $(`<select id=${path} class="form-controller"></select>`)
+
+        $(panel).append(this.DOM)
     }
 }
 
@@ -154,12 +155,12 @@ function createLabel(schema, id, appendAttr) {
 
     let labelHtml = '<label class="col-sm-2 col-form-label text-right"'
     if (id) {
-        labelHtml += ' for="' + id + '"'
+        labelHtml += ` for="${id}"`
     }
     if (appendAttr) {
-        labelHtml += ' ' + appendAttr
+        labelHtml += ` ${appendAttr}`
     }
-    labelHtml += '>'
+    labelHtml += `>`
     if (schema["required"]) {
         labelHtml += '<span style="color: red">*</span>'
     }
@@ -174,7 +175,22 @@ function createFieldPanel(panel, schema, id, appendAttr) {
     fieldPanel.append('<div class="col-sm-10"></div>')
     return fieldPanel.children().last()
 }
+class FieldPanel {
+    constructor(panel, schema, generator,id) {
+        const $FieldValuePanel = $(`<div class="col-sm-10"></div>`)
+        const $FieldPanel = $(`<div class="form-group row mb-3">${createLabel(schema,id)}</div>`)
+        $FieldPanel.append($FieldValuePanel)
+        panel.append($FieldPanel)
+        this.$Value = generator($FieldValuePanel,schema,generator,id)
+    }
+    set Value(v){
+        this.$Value.Value = v
+    }
+    get Value(){
+        return this.$Value.Value
+    }
 
+}
 function createEnum(schema, id, appendAttr) {
     let readOnly = ""
     this.schema = schema
@@ -185,9 +201,9 @@ function createEnum(schema, id, appendAttr) {
     if (schema["enum"]) {
         let enums = schema["enum"]
 
-        let select = '<select ' + readOnly + ' ' + appendAttr + ' class="form-control" id="' + id + '"'
+        let select = `<select ${readOnly} ${appendAttr} class="form-control" id="${id}"`
         if (schema["required"]) {
-            select += " required"
+            select += ` required`
         }
         select += ">"
 
@@ -211,7 +227,7 @@ function createInput(schema, id, appendAttr) {
         readOnly = "readonly"
     }
 
-    let input = '<input ' + readOnly + ' class="form-control" id="' + id + '" aria-describedby="validation_' + id + '" ';
+    let input = `<input ${readOnly} class="form-control" id="${id}" aria-describedby="validation_${id}" `;
     if (appendAttr) {
         input += appendAttr
     }
@@ -278,8 +294,9 @@ class MapRender extends BaseValue {
 
         this.Schema = schema
         this.Id = path;
-        $(panel).append("<div id='" + path + "_panel' class='container-fluid'></div>")
-        this.PanelId = "#" + path + "_panel"
+        this.$Panel =$(`<div id='${path}_panel' class='container-fluid'></div>`)
+        $(panel).append(this.$Panel)
+
         this.GeneratorHandler = generator
 
     }
@@ -290,32 +307,32 @@ class MapRender extends BaseValue {
         const Id = this.Id
         const keySchema = {type: "string"}
 
-        $(this.PanelId).empty()
+        this.$Panel.empty()
         switch (Items["type"]) {
             case "object", "map": {
                 break
             }
             default: {
-                $(this.PanelId).append('<div class="input-group input-group-sm m-2">' +
-                    '<div class="input-group-prepend">' +
-                    '<div class="input-group-text  btn" id="btnGroupAddon_' + Id + '_new">+</div>' +
-                    '</div>' +
-                    createInput(keySchema, Id + '_key', 'aria-describedby="btnGroupAddon_' + Id + '_new" placeholder="Input new key" ') +
-                    '<div class="input-group-prepend ">' +
-                    '<div class="input-group-text  btn" id="btnGroupAddon_' + Id + '_eq">=</div>' +
-                    '</div>' +
-                    createInput(Items, Id + '_value', 'aria-describedby="btnGroupAddon_' + Id + '_eq" placeholder="Input new value" ') +
-
-                    '</div>')
+                this.$Panel.append(`
+<div class="input-group input-group-sm m-2">
+    <div class="input-group-prepend">
+        <div class="input-group-text  btn" id="btnGroupAddon_${Id}_new">+</div>
+    </div>
+    ${createInput(keySchema, `${Id}_key`, `aria-describedby="btnGroupAddon_${Id}_new" placeholder="Input new key" `)}
+    <div class="input-group-prepend ">
+        <div class="input-group-text  btn" id="btnGroupAddon_${Id}_eq">=</div>
+    </div>
+    ${createInput(Items, `${Id}_value`, `aria-describedby="btnGroupAddon_${Id}_eq" placeholder="Input new value" `)}
+</div>`)
 
                 for (let k in v) {
                     $(this.PanelId).append('<div class="input-group input-group-sm m-2"></div>')
                     let itemPanel = $(this.PanelId).children().last()
-                    itemPanel.append(
-                        '<div class="input-group-prepend">' +
-                        '<button class="btn btn-danger" id="btnGroupAddon_' + Id + '_key_' + k + '" type="button" data-itemId="' + Id + '_key"> - </button>\n' +
-                        '</div>')
-                    let childItemKey = new BaseInputRender(itemPanel, keySchema, Id + "_key_" + k)
+                    itemPanel.append(`
+<div class="input-group-prepend">
+    <button class="btn btn-danger" id="btnGroupAddon_${Id}_key_${k}" type="button" data-itemId="${Id}_key"> - </button>
+</div>`)
+                    let childItemKey = new BaseInputRender(itemPanel, keySchema, `${Id}_key_${k}`)
                     childItemKey.Value = k
                     itemPanel.append('<div class="input-group-prepend"><div class="input-group-text  btn" >=</div></div>')
                     let childItemValue = new BaseInputRender(itemPanel, Items, Id + "_value_" + k)
@@ -342,25 +359,27 @@ class InnerObjectRender{
         const items = schema["items"]
 
         const p = $(panel)
-        this.panelId = Id + '_items'
-        p.append('<div id="' + Id + '_toolbar">\n' +
-            '  <button id="' + Id + '_AddButton" class="btn btn-secondary">Add</button>\n' +
-            '</div>')
-        $("#" + Id + "_AddButton").on("click", function (event) {
-            Table.bootstrapTable('append', {})
-            Table.bootstrapTable('scrollTo', 'bottom')
+        const $btn = $(`
+<div id="${Id}_toolbar">
+<button id="${Id}_AddButton" type="button" class="btn btn-secondary">Add</button>
+</div>`)
+        p.append($btn)
+        $btn.on("click","button", function (event) {
+            $Table.bootstrapTable('append', [{}])
+            $Table.bootstrapTable('scrollTo', 'bottom')
             return false
         })
-        p.append('<table  id="' + this.panelId + '"></table>')
-        const Table = $("#" + this.panelId)
-        Table.delegate("a.remove", "click", function (event) {
+
+        const $Table = $(`<table  id="${Id}_items"></table>`)
+        p.append($Table)
+        $Table.delegate("a.remove", "click", function (event) {
             let rowIndex = $(this).attr("array-row")
-            Table.bootstrapTable('remove', {
+            $Table.bootstrapTable('remove', {
                 field: '$index',
                 values: [Number(rowIndex)]
             })
         })
-        this.Table = Table
+        this.Table = $Table
         const properties = items["properties"]
         let lastDetailRow = undefined
         let lastField = undefined
@@ -370,7 +389,7 @@ class InnerObjectRender{
             this.detailFormatter = function (index, row, $element) {
 
                 if (typeof lastDetailRow !== "undefined" && lastDetailRow !== index) {
-                    Table.bootstrapTable('collapseRow', lastDetailRow)
+                    $Table.bootstrapTable('collapseRow', lastDetailRow)
                 }
                 lastDetailRow = index
                 lastField = fieldIndex
@@ -384,11 +403,11 @@ class InnerObjectRender{
 
         function NotDetailFormatterMap(index, row, $element) {
             if (typeof lastDetailRow !== "undefined") {
-                Table.bootstrapTable('collapseRow')
+               $Table.bootstrapTable('collapseRow')
                 lastDetailRow = undefined
                 lastField = undefined
             }
-            Table.bootstrapTable('collapseAllRows')
+            $Table.bootstrapTable('collapseAllRows')
 
             return ''
         }
@@ -492,33 +511,33 @@ class InnerObjectRender{
             sortable: false,
             editable: false,
             formatter: function (v, row, index) {
-                return "<a class=\"remove\" href=\"javascript:void(0)\" array-row=\"" + index + "\" title=\"remove\">删除</a>"
+                return `<a class="remove" href="javascript:void(0)" array-row="${index}" title="remove">删除</a>`
             }
         })
-        const _This = this
+
         const tableOptions = {
             columns: columns,
             editable: true,
-            // toolbar:'#'+Id+'toolbar',
+
 
             detailView: true,
             detailViewByClick: true,
             detailViewIcon: false,
             width: "100%",
             onEditorShown: function (field, row, $el, editable) {
-                Table.bootstrapTable('collapseAllRows')
-
+                $Table.bootstrapTable('collapseAllRows')
                 return true;
             },
             onEditorSave: function (field, row, oldValue, $el) {
-                if (field !== "__index", _This.Data) {
-                    const rowIndex = $el.parent().data("index")
-                    _This.Data[rowIndex][field] = row[field]
-                }
-                return true;
+                // let data = $Table.bootstrapTable('getData')
+                // if (field !== "__index" ) {
+                //     const rowIndex = $el.parent().data("index")
+                //     data.Data[rowIndex][field] = row
+                // }
+                // return true;
             },
         }
-        Table.bootstrapTable(tableOptions);
+        $Table.bootstrapTable(tableOptions);
         this.Value = []
     }
 
@@ -527,11 +546,10 @@ class InnerObjectRender{
             v = []
         }
         this.Table.bootstrapTable("load", v)
-        this.Data = v
     }
 
     get Value() {
-        return this.Data
+        return this.Table.bootstrapTable('getData')
     }
 
 }
@@ -564,7 +582,7 @@ class ArrayRenderEnum {
         for (let i in items["enum"]) {
             let e = items["enum"][i]
             let itemId = Id + '_' + e
-            itemPanel +=`<div class="custom-control custom-checkbox custom-control-inline"><input type="checkbox" id="${itemId}" value="${e}" name="${Id}" class="custom-control-input"> <label class="custom-control-label" for="' + itemId + '">${e}</label></div>`
+            itemPanel +=`<div class="custom-control custom-checkbox custom-control-inline"><input type="checkbox" id="${itemId}" value="${e}" name="${Id}" class="custom-control-input"> <label class="custom-control-label" for="${itemId}">${e}</label></div>`
         }
         itemPanel += '</div>'
         p.append(itemPanel)
@@ -603,18 +621,18 @@ class ArrayRenderSimple {
         const Id = path;
         this.Id = Id;
         let p = $(panel);
-
-        p.append('<div id="' + Id + '_items" class="border p-sm-1 btn-toolbar " role="toolbar"></div>')
-
-        const itemPanel = p.children('#' + Id + '_items')
-        itemPanel.append('<div class="input-group input-group-sm m-2">' +
-            '<div class="input-group-prepend ">' +
-            '<div class="input-group-text  btn" id="btnGroupAddon_' + Id + '_new">+</div>' +
-            '</div>' +
-            createInput(items, Id + '_new', 'aria-describedby="btnGroupAddon_' + Id + '_new" placeholder="Input new" ') +
-            '</div>')
-
-        $('#' + Id + "_new").on("change", function () {
+        const $itemPanel = $(`<div id="${Id}_items" class="border p-sm-1 btn-toolbar " role="toolbar"></div>`)
+        p.append($itemPanel)
+        const $newInput = $(createInput(items, `${Id}_new`, `aria-describedby="btnGroupAddon_${Id}_new" placeholder="Input new" `) )
+        const $newItem = $(`
+<div class="input-group input-group-sm m-2">
+    <div class="input-group-prepend ">
+        <div class="input-group-text  btn" id="btnGroupAddon_${Id}_new">+</div>
+    </div>
+</div>`)
+        $newItem.append($newInput)
+        $itemPanel.append($newItem)
+        $newInput.on("change", function () {
             let v = $(this).val()
             if (items["type"] === "integer" || items["type"] === "number") {
                 v = Number(value)
@@ -625,27 +643,32 @@ class ArrayRenderSimple {
                     $(this).val("")
                 }
             }
+            return false
         })
 
         let lastIndex = 0
 
         function add(value) {
-            const itemId = Id + "_item_" + (lastIndex++)
-            const appendAtt = 'array-for="' + Id + '" aria-describedby="btnGroupAddon_' + itemId + '"'
-            itemPanel.append('<div class="input-group input-group-sm m-2" id="array-item_' + itemId + '">\n' +
-                '<div class="input-group-prepend">\n' +
-                '<button class="btn btn-danger" id="btnGroupAddon_' + itemId + '" type="button" aria-describedby="btnGroupAddon_' + itemId + '" data-itemId="' + itemId + '"> - </button>\n' +
-                '</div>\n' +
-                createInput(items, itemId, appendAtt) +
-                '</div>')
-            $("#" + itemId).val(value)
+            const itemId = `${Id}_item_${lastIndex++}`
+
+            const appendAtt = ` array-for="${Id}" aria-describedby="btnGroupAddon_${itemId}" `
+            const $itemInput = $( createInput(items, itemId, appendAtt))
+            const $item = $(`
+<div class="input-group input-group-sm m-2" id="array-item_${itemId}">
+    <div class="input-group-prepend">
+        <button class="btn btn-danger" id="btnGroupAddon_${itemId}" type="button" aria-describedby="btnGroupAddon_${itemId}" data-itemId="${itemId}"> - </button>
+    </div>
+</div>`)
+            $item.append($itemInput)
+            $itemPanel.append($item)
+            $itemInput.val(value)
             return false
         }
 
         this.add = add
-        itemPanel.delegate('button', "click", function () {
+        $itemPanel.delegate('button', "click", function () {
             let itemId = $(this).attr('data-itemId')
-            itemPanel.children('#array-item_' + itemId).remove()
+            $itemPanel.children(`#array-item_${itemId}`).remove()
         })
 
     }
@@ -696,8 +719,8 @@ class ObjectRender {
             let sub = properties[i]
             let name = sub["name"]
             const subId = path + "." + name
-            const fieldPanel = createFieldPanel(panel, sub, subId)
-            this.Fields[name] = generator(fieldPanel, sub, generator, subId)
+            // const fieldPanel = createFieldPanel(panel, sub, subId)
+            this.Fields[name] = new FieldPanel(panel, sub, generator, subId)
         }
     }
 
