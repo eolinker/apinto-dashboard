@@ -44,7 +44,7 @@ func main() {
 
 	config.DefaultZone = apinto.ZoneName(strings.ToLower(cf.Zone))
 
-	apinto.SetActivityLogAddHandler(activityHandler)
+	apinto.SetActivityLogAddHandler(activityHandler, cf.FilterForwarded)
 	config.UserDetailsService = detailsService
 
 	monitorsModule := monitors.NewMonitor("monitors")

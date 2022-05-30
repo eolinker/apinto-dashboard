@@ -68,7 +68,7 @@ func (p *Plugins) createRouter() {
 		)
 
 		defer func() {
-			apinto_dashboard.AddActivityLog(userName, "update", "全局插件", logContent, logArgs)
+			apinto_dashboard.AddActivityLog(r, userName, "update", "全局插件", logContent, logArgs)
 		}()
 
 		rData, err := apinto.ReadBody(r.Body)
