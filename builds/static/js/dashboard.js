@@ -339,9 +339,9 @@ class Table{
         }
     }
     AddNewRow(data){
-        let res = []
-        res.push(data)
-        this.Table.bootstrapTable('append', res)
+        // let res = []
+        // res.push(data)
+        this.Table.bootstrapTable('refresh')
     }
     RemoveRow(field, value, callback){
         this.Table.bootstrapTable('remove', {
@@ -356,9 +356,9 @@ class Table{
 
 class Render {
     constructor(panel, schema,name, data,generator, callback) {
-        if (typeof data === "undefined"){
-            data = {}
-        }
+        // if (typeof data === "undefined"){
+        //     data = {}
+        // }
         let target = $(panel)
         this.InitValue = data
 
@@ -400,7 +400,7 @@ class Render {
         return false
     }
     Submit(success, error){
-        if(this.Check()){
+        if(this.Check() === true ){
             success(this.Value())
         }else {
             error()
