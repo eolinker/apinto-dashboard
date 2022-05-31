@@ -30,7 +30,7 @@ func (h *AccountHandler) logoutHandler(w http.ResponseWriter, r *http.Request) {
 			userDetails, has := h.sessionManager.Get(sessionCookie.Value)
 			if has {
 				userName := userDetails.GetUsername()
-				AddActivityLog(userName, "logout", "system", "退出登录", []*Arg{{Key: "username", Value: userName}})
+				AddActivityLog(r, userName, OptLogout, "system", "退出登录", []*Arg{{Key: "username", Value: userName}})
 			}
 
 			h.sessionManager.Delete(sessionCookie.Value)
@@ -99,7 +99,7 @@ func (h *AccountHandler) Post(w http.ResponseWriter, r *http.Request) {
 			"code":    3,
 			"message": "username not exist",
 		})
-		AddActivityLog("unknown", "login", "system", "登陆失败，用户不存在", []*Arg{{Key: "username", Value: userName}, {Key: "callback", Value: callback}})
+		AddActivityLog(r, "unknown", OptLogin, "system", "登陆失败，用户不存在", []*Arg{{Key: "username", Value: userName}, {Key: "callback", Value: callback}})
 
 		return
 	}
@@ -108,7 +108,7 @@ func (h *AccountHandler) Post(w http.ResponseWriter, r *http.Request) {
 			"code":    4,
 			"message": "username or password wrong",
 		})
-		AddActivityLog("unknown", "login", "system", "登陆失败，密码错误", []*Arg{{Key: "username", Value: userName}, {Key: "callback", Value: callback}})
+		AddActivityLog(r, "unknown", OptLogin, "system", "登陆失败，密码错误", []*Arg{{Key: "username", Value: userName}, {Key: "callback", Value: callback}})
 
 		return
 	}
@@ -117,7 +117,7 @@ func (h *AccountHandler) Post(w http.ResponseWriter, r *http.Request) {
 			"code":    5,
 			"message": "user is expired",
 		})
-		AddActivityLog(userDetails.GetUsername(), "login", "system", "登陆失败，用户已过期", []*Arg{{Key: "username", Value: userName}, {Key: "callback", Value: callback}})
+		AddActivityLog(r, userDetails.GetUsername(), OptLogin, "system", "登陆失败，用户已过期", []*Arg{{Key: "username", Value: userName}, {Key: "callback", Value: callback}})
 
 		return
 	}
@@ -126,7 +126,7 @@ func (h *AccountHandler) Post(w http.ResponseWriter, r *http.Request) {
 			"code":    6,
 			"message": "user is not enabled",
 		})
-		AddActivityLog(userDetails.GetUsername(), "login", "system", "登陆失败，用户未激活", nil)
+		AddActivityLog(r, userDetails.GetUsername(), OptLogin, "system", "登陆失败，用户未激活", nil)
 
 		return
 	}
@@ -135,7 +135,7 @@ func (h *AccountHandler) Post(w http.ResponseWriter, r *http.Request) {
 			"code":    7,
 			"message": "user is locked",
 		})
-		AddActivityLog(userDetails.GetUsername(), "login", "system", "登陆失败，用户已锁定", []*Arg{{Key: "username", Value: userName}, {Key: "callback", Value: callback}})
+		AddActivityLog(r, userDetails.GetUsername(), OptLogin, "system", "登陆失败，用户已锁定", []*Arg{{Key: "username", Value: userName}, {Key: "callback", Value: callback}})
 
 		return
 	}
@@ -144,7 +144,7 @@ func (h *AccountHandler) Post(w http.ResponseWriter, r *http.Request) {
 			"code":    8,
 			"message": "user is credentials expires",
 		})
-		AddActivityLog(userDetails.GetUsername(), "login", "system", "登陆失败，证书已过期", []*Arg{{Key: "username", Value: userName}, {Key: "callback", Value: callback}})
+		AddActivityLog(r, userDetails.GetUsername(), OptLogin, "system", "登陆失败，证书已过期", []*Arg{{Key: "username", Value: userName}, {Key: "callback", Value: callback}})
 
 		return
 	}
@@ -161,7 +161,7 @@ func (h *AccountHandler) Post(w http.ResponseWriter, r *http.Request) {
 	}
 	http.SetCookie(w, cookie)
 
-	AddActivityLog(userDetails.GetUsername(), "login", "system", "成功登陆", []*Arg{{Key: "username", Value: userName}, {Key: "callback", Value: callback}})
+	AddActivityLog(r, userDetails.GetUsername(), OptLogin, "system", "成功登陆", []*Arg{{Key: "username", Value: userName}, {Key: "callback", Value: callback}})
 	http.Redirect(w, r, callback, http.StatusFound)
 	//h.serHandler.ServeHTTP(w, setUserDetailsToRequest(r, userDetails))
 }
