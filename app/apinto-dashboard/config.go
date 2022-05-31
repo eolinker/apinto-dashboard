@@ -23,12 +23,13 @@ type UserDetailsConfig struct {
 }
 
 type Config struct {
-	Zone        string                  `yaml:"zone"`
-	Default     string                  `yaml:"default"`
-	Professions []*ProfessionConfigItem `yaml:"professions"`
-	Apinto      []string                `yaml:"apinto"`
-	Port        string                  `yaml:"port"`
-	UserDetails *UserDetailsConfig      `yaml:"user_details"`
+	Zone            string                  `yaml:"zone"`
+	Default         string                  `yaml:"default"`
+	Apinto          []string                `yaml:"apinto"`
+	Port            string                  `yaml:"port"`
+	FilterForwarded bool                    `yaml:"filter_forwarded"`
+	UserDetails     *UserDetailsConfig      `yaml:"user_details"`
+	Professions     []*ProfessionConfigItem `yaml:"professions"`
 }
 
 func ReadConfig(file string) (*Config, error) {
