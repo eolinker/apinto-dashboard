@@ -30,9 +30,12 @@ function ValidHandler(v,schema,id) {
     }
 }
 
-function InputValid(schema, Id) {
-    $("#" + Id).on("change", function () {
-        ValidHandler($(this).val(), schema,Id)
+function InputValid(schema, target) {
+
+    $(target).on("change", function () {
+        let id = this.id
+        console.log("change:",id)
+        ValidHandler($(this).val(), schema,id)
     })
 }
 
@@ -59,13 +62,18 @@ function valueForType(t, v) {
 }
 
 class BaseValue {
-    constructor(schema, path) {
+    constructor(schema, target) {
         this.Schema = schema
-        this.Id = path
+        this.Target = target
+        if (typeof schema["default"] !== "undefined") {
+            this.Value = schema["default"]
+        }
+        InputValid(schema,target)
+
     }
 
     get Value() {
-        let val = $("#" + this.Id).val()
+        let val = $(this.Target).val()
         return valueForType(this.Schema["type"], val)
     }
 
@@ -76,34 +84,35 @@ class BaseValue {
                v = this.Schema["default"]
             }
         }
-        $("#" + this.Id).val(v)
+        $(this.Target).val(v)
     }
 
 }
 
 class BaseEnumRender extends BaseValue {
     constructor(panel, schema, path) {
-        super(schema, path)
-        $(panel).append(createEnum(schema, this.Id))
+        super(schema, $(createEnum(schema, path)))
+
+        $(panel).append(this.Target)
+
+        // this.Target.on("click",function (){
+        //     $(this).trigger("change")
+        // })
     }
 
 }
 
 class SwitchRender extends BaseValue {
     constructor(panel, schema, path) {
-        super(schema, path)
+        super(schema, $(`<input id="${path}" type="checkbox" class="form-control-sm" data-toggle="toggle" data-size="sm"/>`))
 
-        const Id = path
-        this.Id = Id
-        let $switch = $(`<input id="${Id}" type="checkbox" data-toggle="toggle" data-size="sm"/>`)
-
-        $(panel).append($switch)
-        $switch.bootstrapToggle()
-        InputValid(schema, Id)
+        $(panel).append(this.Target)
+        this.Target.bootstrapToggle()
+        this.Value = false
     }
 
     get Value() {
-       return  document.getElementById(this.Id).checked
+       return  $(this.target).attr("checked") === "checked"
     }
 
     set Value(v) {
@@ -117,25 +126,25 @@ class SwitchRender extends BaseValue {
 
 class RequireRender extends BaseValue {
     constructor(panel, schema, path) {
-        super(schema, path)
-        this.DOM = $(`<select id=${path} class="form-controller"></select>`)
+        super(schema, $(`<select id=${path} class="form-controller form-control-sm"></select>`))
+        $(panel).append(this.Target)
 
-        $(panel).append(this.DOM)
     }
 }
 
 class BaseInputRender extends BaseValue {
     constructor(panel, schema, path) {
-        super(schema, path)
-        const Id = path
+
+        super(schema, $(createInput(schema, path)))
 
 
-        $(panel).append(createInput(schema, Id))
+        $(panel).append(this.Target)
 
-        InputValid(schema, Id)
-        if (typeof schema["default"] !== "undefined") {
-            this.Value = schema["default"]
-        }
+        // this.Target.on("click",function (){
+        //     $(this).trigger("change")
+        // })
+
+
     }
 }
 
@@ -144,7 +153,9 @@ function getLabel(schema) {
     if (!label || label.trim() === "") {
         label = schema["name"]
     }
+
     label = label.replace(label[0], label[0].toUpperCase());
+    label = label.replaceAll("_"," ")
     return label
 }
 
@@ -152,36 +163,41 @@ function createLabel(schema, id, appendAttr) {
     if (!appendAttr) {
         appendAttr = ""
     }
-
-    let labelHtml = '<label class="col-sm-2 col-form-label text-right"'
+    if (typeof appendAttr === "undefined") {
+        appendAttr = ""
+    }
+    let idFor = ""
     if (id) {
-        labelHtml += ` for="${id}"`
+        idFor = ` for="${id}"`
     }
-    if (appendAttr) {
-        labelHtml += ` ${appendAttr}`
-    }
-    labelHtml += `>`
+    let require = ""
     if (schema["required"]) {
-        labelHtml += '<span style="color: red">*</span>'
+        require = '<span style="color: red">*</span>'
     }
-    labelHtml += getLabel(schema) + '</label>'
-    return labelHtml
+    return `<label class="col-sm-3 col-form-label text-right text-nowrap" ${idFor} ${appendAttr}>${require}${getLabel(schema)}:</label>`
 }
 
-function createFieldPanel(panel, schema, id, appendAttr) {
-    $(panel).append('<div class="form-group row mb-3"></div>')
-    let fieldPanel = $(panel).children().last()
-    fieldPanel.append(createLabel(schema, id, appendAttr))
-    fieldPanel.append('<div class="col-sm-10"></div>')
-    return fieldPanel.children().last()
-}
 class FieldPanel {
     constructor(panel, schema, generator,id) {
-        const $FieldValuePanel = $(`<div class="col-sm-10"></div>`)
-        const $FieldPanel = $(`<div class="form-group row mb-3">${createLabel(schema,id)}</div>`)
-        $FieldPanel.append($FieldValuePanel)
-        panel.append($FieldPanel)
-        this.$Value = generator($FieldValuePanel,schema,generator,id)
+
+        if (schema["type"] === "object"){
+            const $FieldLabelPanel = $(`<div class="form-group row mb-1 overflow-hidden">${createLabel(schema,id)}</div>`)
+            panel.append($FieldLabelPanel)
+            const $FieldValuePanel = $(`
+<div class="form-group row mb-1 overflow-hidden">
+    <div class="col-sm-11 offset-sm-1 border p-sm-1">
+    </div>
+</div>`)
+            panel.append($FieldValuePanel)
+            this.$Value = generator($FieldValuePanel.children(),schema,generator,id)
+
+        }else{
+            const $FieldValuePanel = $(`<div class="col-sm-9"></div>`)
+            this.$Panel  = $(`<div class="form-group row mb-1 overflow-hidden">${createLabel(schema,id)}</div>`)
+            this.$Panel.append($FieldValuePanel)
+            panel.append(this.$Panel)
+            this.$Value = generator($FieldValuePanel,schema,generator,id)
+        }
     }
     set Value(v){
         this.$Value.Value = v
@@ -197,26 +213,27 @@ function createEnum(schema, id, appendAttr) {
     if (schema["readonly"] === true) {
         readOnly = "readonly"
     }
-
+    if (typeof appendAttr === "undefined"){
+        appendAttr = ""
+    }
     if (schema["enum"]) {
         let enums = schema["enum"]
-
-        let select = `<select ${readOnly} ${appendAttr} class="form-control" id="${id}"`
+        let require = ""
         if (schema["required"]) {
-            select += ` required`
+            require = `required`
         }
-        select += ">"
+        let $select = $(`<select ${readOnly} ${appendAttr} class="form-control form-control-sm" id="${id}" ${require}></select>`)
 
         for (let i in enums) {
-            if (typeof value != "undefined" && value === enums[i]) {
-                select += '<option>' + enums[i] + '</option>'
-            } else {
-                select += '<option selected>' + enums[i] + '</option>'
-            }
+            $select.append(`<option>${enums[i]}</option>`)
+            // if (typeof value !== "undefined" && value === enums[i]) {
+            //     $select.append(`<option>${enums[i]}</option>`)
+            // } else {
+            //     $select.append(`<option selected>${enums[i]}</option>`)
+            // }
         }
-        select += '</select>'
 
-        return select
+        return $select
     }
 }
 
@@ -227,7 +244,7 @@ function createInput(schema, id, appendAttr) {
         readOnly = "readonly"
     }
 
-    let input = `<input ${readOnly} class="form-control" id="${id}" aria-describedby="validation_${id}" `;
+    let input = `<input ${readOnly} class="form-control form-control-sm" id="${id}" aria-describedby="validation_${id}" `;
     if (appendAttr) {
         input += appendAttr
     }
@@ -287,10 +304,9 @@ function createInput(schema, id, appendAttr) {
     return input
 }
 
-class MapRender extends BaseValue {
+class MapRender   {
 
     constructor(panel, schema, generator, path) {
-        super(schema, path)
 
         this.Schema = schema
         this.Id = path;
@@ -554,9 +570,9 @@ class InnerObjectRender{
 
 }
 
-class InnerMapRender extends BaseValue{
+class InnerMapRender {
     constructor(panel, schema, generator, path) {
-        super(schema,path)
+        // super(schema,path)
     }
 
     set Value(v) {
@@ -797,26 +813,28 @@ function BaseGenerator(panel, schema, generator, path) {
 }
 
 class FormRender {
-    toJsonSchema(schema){
+    toJsonSchema(s){
+        let schema = Object.assign({},s)
         switch (schema["type"]){
             case "map":{
                 schema["type"] = "object"
                 schema["additionalProperties"]=this.toJsonSchema(schema["items"])
-                schema.delete("items")
+                delete schema["items"]
                 break
             }
             case "object":{
                 let properties = schema["properties"]
-                schema["properties"] = {
-                }
+                schema["properties"] = {}
                  for (let i in properties){
-                    let n = this.toJsonSchema(properties[i])
-                     schema.properties[n.name] = n
+                    let name =properties[i].name
+                     schema.properties[name] = this.toJsonSchema(properties[i])
                 }
             }
         }
+        delete schema["name"]
+        delete schema["switch"]
 
-        return schema
+         return schema
     }
     constructor(panel, schema, generator,name) {
         this.Schema = schema
@@ -829,13 +847,14 @@ class FormRender {
     }
 
     check() {
-        if (typeof this.JsonSchema === undefined || this.JsonSchema === null){
-            this.JsonSchema = this.toJsonSchema(this.Schema.cloneNode(true))
+        if (typeof this.JsonSchema === "undefined" || this.JsonSchema === null){
+            this.JsonSchema = this.toJsonSchema(this.Schema)
+             console.log(JSON.stringify(this.JsonSchema))
         }
         // if (this.djv === null || typeof this.djv === "undefined"){
         //     this.djv = validate.Create()
         // }
-        return  CheckBySchema(this.ObjectName,this.JsonSchema,this.Object.Value)
+        return  CheckBySchema(this.ObjectName,this.JsonSchema,this.Value)
 
     }
 

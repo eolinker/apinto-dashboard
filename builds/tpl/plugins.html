@@ -69,12 +69,12 @@
                     <label for="form_init_config"><b>Init Config</b></label>
                     <p class="nav" role="tablist" style="float:right">
                         <a class="nav-link active" id="form_init_config_json_tab" data-toggle="tab" href="#form_init_config" role="tab" aria-controls="json" aria-selected="true">JSON</a>
-                        <a class="nav-link" id="form_init_config_ui_tab" data-toggle="tab" href="#form_init_config_ui" role="tab" aria-controls="ui" aria-selected="false">UI</a>
+<!--                        <a class="nav-link" id="form_init_config_ui_tab" data-toggle="tab" href="#form_init_config_ui" role="tab" aria-controls="ui" aria-selected="false">UI</a>-->
                     </p>
                 </div>
                 <div class="tab-content" id="form_init_config_content">
                     <div class="tab-pane fade show active card editor" id="form_init_config" role="tabpanel" aria-labelledby="form_init_config_json_tab"></div>
-                    <div class="tab-pane fade" id="form_init_config_ui" role="tabpanel" aria-labelledby="form_init_config_ui_tab"></div>
+<!--                    <div class="tab-pane fade" id="form_init_config_ui" role="tabpanel" aria-labelledby="form_init_config_ui_tab"></div>-->
                 </div>
             </div>
             <div class="row justify-content-between">
@@ -149,12 +149,11 @@
                     <label for="add_form_init_config"><b>Init Config</b></label>
                     <p class="nav" role="tablist" style="float:right">
                         <a class="nav-link active" id="add_form_init_config_json_tab" data-toggle="tab" href="#add_form_init_config" role="tab" aria-controls="json" aria-selected="true">JSON</a>
-                        <a class="nav-link" id="add_form_init_config_ui_tab" data-toggle="tab" href="#add_form_init_config_ui" role="tab" aria-controls="ui" aria-selected="false">UI</a>
+<!--                        <a class="nav-link" id="add_form_init_config_ui_tab" data-toggle="tab" href="#add_form_init_config_ui" role="tab" aria-controls="ui" aria-selected="false">UI</a>-->
                     </p>
                 </div>
                 <div class="tab-content" id="add_form_init_config_content">
                     <div class="tab-pane fade show active card editor" id="add_form_init_config" role="tabpanel" aria-labelledby="add_form_init_config_json_tab"></div>
-                    <div class="tab-pane fade" id="add_form_init_config_ui" role="tabpanel" aria-labelledby="add_form_init_config_ui_tab"></div>
                 </div>
             </div>
             <div class="row justify-content-between">
@@ -171,8 +170,8 @@
 {{end}}
 
 {{block "script" .}}
-<script src="/js/bootstrap-table.min.js"></script>
 <script src="/js/jquery.tablednd.min.js"></script>
+<script src="/js/bootstrap-table.min.js"></script>
 <script src="/js/bootstrap4-toggle.js"></script>
 <script src="/js/bootstrap-table-reorder-rows.min.js"></script>
 <script src="/js/ace/ace.js"></script>
@@ -264,13 +263,13 @@
     }
 
     let edit_config_ui_id = "#form_config_ui"
-    let edit_config_init_ui_id = "#form_init_config_ui"
+    // let edit_config_init_ui_id = "#form_init_config_ui"
     let add_config_ui_id = "#add_form_config_ui"
-    let add_config_init_ui_id = "#add_form_init_config_ui"
+    // let add_config_init_ui_id = "#add_form_init_config_ui"
     let edit_config_ui = null
-    let edit_init_config_ui = null
+    // let edit_init_config_ui = null
     let add_config_ui = null
-    let add_init_config_ui = null
+    // let add_init_config_ui = null
     let config_editor = new Ace("form_config")
     let init_config_editor = new Ace("form_init_config")
     let add_init_config_editor = new Ace("add_form_init_config")
@@ -328,14 +327,14 @@
                 edit_config_ui.Value = config
             }
 
-            if (!edit_init_config_ui) {
-                edit_init_config_ui = new Render(edit_config_init_ui_id, {
-                    type:"map",
-                    items:{
-                        type: "string"
-                    }
-                },"plugin_edit_init_config", init_config)
-            }
+            // if (!edit_init_config_ui) {
+            //     edit_init_config_ui = new Render(edit_config_init_ui_id, {
+            //         type:"map",
+            //         items:{
+            //             type: "string"
+            //         }
+            //     },"plugin_edit_init_config", init_config)
+            // }
         })
     }
 
@@ -371,16 +370,18 @@
                     throw "config format is error"
                 }
             }
-            // 渲染init配置表单
-            if ($("#form_init_config").hasClass("active")){
-                d["init_config"] = JSON.parse(init_config_editor.Value)
-            }else {
-                if (edit_init_config_ui.Check()){
-                    d["init_config"] = edit_init_config_ui.Value
-                }else {
-                    throw "config format is error"
-                }
-            }
+            d["init_config"] = JSON.parse(init_config_editor.Value)
+
+            // // 渲染init配置表单
+            // if ($("#form_init_config").hasClass("active")){
+            //     d["init_config"] = JSON.parse(init_config_editor.Value)
+            // }else {
+            //     if (edit_init_config_ui.Check()){
+            //         d["init_config"] = edit_init_config_ui.Value
+            //     }else {
+            //         throw "config format is error"
+            //     }
+            // }
         }catch(e) {
             common.message("config format is error", "danger")
             return
@@ -454,6 +455,7 @@
     function initAddForm(id) {
         initPluginsIDList(id)
         $("#add_form_name").val("")
+        $("#add_form_name").change()
         add_config_editor.Value = JSON.stringify({}, null, 2)
         add_init_config_editor.Value = JSON.stringify({}, null, 2)
         let pluginID = $("#"+id).val()
@@ -464,14 +466,14 @@
                 }else {
                     add_config_ui.Reset(render,driver)
                 }
-                if (!add_init_config_ui){
-                    add_init_config_ui = new Render(add_config_init_ui_id, {
-                        type:"map",
-                        items:{
-                            type: "string"
-                        }
-                    },"plugin_add_init_config")
-                }
+                // if (!add_init_config_ui){
+                //     add_init_config_ui = new Render(add_config_init_ui_id, {
+                //         type:"map",
+                //         items:{
+                //             type: "string"
+                //         }
+                //     },"plugin_add_init_config")
+                // }
             })
         }
 
@@ -508,6 +510,11 @@
     })
     $("#add_form_name").bind("change",function (){
         let newName = $(this).val()
+        if (newName.length === 0){
+            $(this).removeClass("is-invalid")
+            $(this).removeClass("is-valid")
+            return
+        }
         let exist = false
         $table.GetData().forEach(function (item) {
             if (item.name === newName ){
@@ -545,16 +552,17 @@
                     throw "config format is error:"+ckr
                 }
             }
-            // 渲染init配置表单
-            if ($("#add_form_init_config").hasClass("active")){
-                d["init_config"] = JSON.parse(add_init_config_editor.Value)
-            }else {
-                if (add_init_config_ui.Check()){
-                    d["init_config"] = add_init_config_ui.Value
-                }else {
-                    throw "init config format is error"
-                }
-            }
+            d["init_config"] = JSON.parse(add_init_config_editor.Value)
+            // // 渲染init配置表单
+            // if ($("#add_form_init_config").hasClass("active")){
+            //     d["init_config"] = JSON.parse(add_init_config_editor.Value)
+            // }else {
+            //     if (add_init_config_ui.Check()){
+            //         d["init_config"] = add_init_config_ui.Value
+            //     }else {
+            //         throw "init config format is error"
+            //     }
+            // }
         }catch(e) {
             common.message("config format is error:"+e, "danger")
             return
