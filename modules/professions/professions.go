@@ -126,7 +126,7 @@ func (p *Profession) createRouter() {
 		)
 
 		defer func() {
-			apinto_dashboard.AddActivityLog(userName, "create", "", logContent, logArgs)
+			apinto_dashboard.AddActivityLog(r, userName, apinto_dashboard.OptCreate, "", logContent, logArgs)
 		}()
 
 		rData, err := apinto.ReadBody(r.Body)
@@ -185,7 +185,7 @@ func (p *Profession) createRouter() {
 		)
 
 		defer func() {
-			apinto_dashboard.AddActivityLog(userName, "update", name, logContent, logArgs)
+			apinto_dashboard.AddActivityLog(r, userName, apinto_dashboard.OptUpdate, name, logContent, logArgs)
 		}()
 
 		rData, err := apinto.ReadBody(r.Body)
@@ -245,7 +245,7 @@ func (p *Profession) createRouter() {
 		)
 
 		defer func() {
-			apinto_dashboard.AddActivityLog(userName, "delete", name, logContent, logArgs)
+			apinto_dashboard.AddActivityLog(r, userName, apinto_dashboard.OptDelete, name, logContent, logArgs)
 		}()
 
 		//删除
