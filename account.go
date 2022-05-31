@@ -3,6 +3,7 @@ package apinto_dashboard
 import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/internal/template"
+	"github.com/eolinker/eosc/log"
 	"github.com/go-basic/uuid"
 	"net/http"
 	"net/url"
@@ -165,6 +166,7 @@ func (h *AccountHandler) Post(w http.ResponseWriter, r *http.Request) {
 	//h.serHandler.ServeHTTP(w, setUserDetailsToRequest(r, userDetails))
 }
 func (h *AccountHandler) Api(w http.ResponseWriter, r *http.Request) {
+	log.Debug("request api:", r.RequestURI)
 	sessionCookie, err := r.Cookie(SessionName)
 	if err != nil {
 
@@ -172,7 +174,6 @@ func (h *AccountHandler) Api(w http.ResponseWriter, r *http.Request) {
 	}
 	userDetails, has := h.sessionManager.Get(sessionCookie.Value)
 	if !has {
-
 		return
 	}
 	h.serHandler.ServeHTTP(w, setUserDetailsToRequest(r, userDetails))
