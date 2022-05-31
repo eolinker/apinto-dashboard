@@ -282,11 +282,15 @@ let modal = {
 
 let validate = {
     _validator: null,
-    djv: function () {
+    Default: function () {
         if(this._validator){
             return this._validator
         }
-        this._validator = new djv({
+        this._validator = this.Create()
+        return this._validator
+    },
+    Create:function (){
+        return new djv({
             errorHandler(type) {
                 return `errors.push({
                   type: '${type}',
@@ -295,7 +299,6 @@ let validate = {
                 });`;
             }
         })
-        return this._validator
     }
 }
 class Ace{
@@ -319,16 +322,15 @@ class Ace{
     }
 }
 class Table{
-    constructor(id, options) {
-        this.id = id
-        this.table = $('#'+id)
-        $('#table').bootstrapTable(options)
+    constructor(table, options) {
+        this.Table = table
+        $(this.Table).bootstrapTable(options)
     }
     GetData() {
-        return this.table.bootstrapTable('getData')
+        return $(this.Table).bootstrapTable('getData')
     }
     UpdateRowDetail(index, data, callback) {
-        this.table.bootstrapTable('updateRow', {
+        $(this.Table).bootstrapTable('updateRow', {
             index: index,
             row: data
         })
@@ -337,12 +339,12 @@ class Table{
         }
     }
     AddNewRow(data){
-        let res = []
-        res.push(data)
-        this.table.bootstrapTable('append', res)
+        // let res = []
+        // res.push(data)
+        this.Table.bootstrapTable('refresh')
     }
     RemoveRow(field, value, callback){
-        this.table.bootstrapTable('remove', {
+        this.Table.bootstrapTable('remove', {
             field: field,
             values: [value]
         })
@@ -353,9 +355,14 @@ class Table{
 }
 
 class Render {
-    constructor(panel, schema, data,generator, callback) {
+    constructor(panel, schema,name, data,generator, callback) {
+        // if (typeof data === "undefined"){
+        //     data = {}
+        // }
         let target = $(panel)
-        let renderHandler = new FormRender(target, schema,generator)
+        this.InitValue = data
+
+        let renderHandler = new FormRender(target, schema,generator,name)
         if(data){
             renderHandler.Value = data
         }
@@ -366,16 +373,18 @@ class Render {
         this.target = target
         this.generator = generator
     }
-    Reset(schema){
+    Reset(schema,name){
         this.Destroy()
-        this.panel = new FormRender(this.target, schema,this.generator)
+        this.panel = new FormRender(this.target, schema,this.generator,name)
     }
     ResetVal(){
         if (this.panel){
-            this.panel.Value = {}
+            this.panel.Value = this.InitValue
         }
     }
     set Value(data){
+
+        this.InitValue = data
         this.panel.Value = data
     }
     get Value(){
@@ -391,8 +400,8 @@ class Render {
         return false
     }
     Submit(success, error){
-        if(this.Check()){
-            success(this.Value())
+        if(this.Check() === true ){
+            success(this.Value)
         }else {
             error()
         }
@@ -413,39 +422,41 @@ class ProfessionRender {
             if(res.code !== 200){
                 return http.handleError(res, "获取driver信息失败")
             }
-            success(res.data["render"])
+            success(driver,res.data["render"])
         }, function (res) {
             return http.handleError(res, "获取driver信息失败")
         })
     }
 
-    updateUi(render, data){
+    updateUi(driver,render, data){
         render = formatProfessionRender(render)
         let btn = this.options["btns"]
-        this.ui = new Render(this.options["panel"], render, data, this.generator,function () {
+        this.ui = new Render(this.options["panel"], render,driver, data, this.generator,function () {
             if ($(btn).length > 0 && !$(btn).is(":visible")){
                 $(btn).show()
             }
         })
     }
-    resetUi(render){
+    resetUi(driver,render){
         if (this.ui){
-            this.ui.Reset(render)
+            render = formatProfessionRender(render)
+            this.ui.Reset(render,driver)
         }
     }
     generateBtn(){
         let o = this
-        $(o.options["panel"]).after(`<div id="${this.buttonId}" class="row justify-content-between" style="display: none">
-                                    <div class="col-4">
-                                        <button type="button" class="btn btn-outline-secondary ${this.buttonId}_reset">重置</button>
-                                    </div>
-                                    <div class="col-4" style="text-align: right">
-                                        <button type="button" class="btn btn-primary ${this.buttonId}_submit">提交</button>
-                                    </div>
-                                </div>`)
-        $(`#${this.buttonId}`).on("click", `button.${this.buttonId}_reset`, function () {
+        // $(o.options["panel"]).after(`<div id="${this.buttonId}" class="row justify-content-between" style="display: none">
+        //                             <div class="col-4">
+        //                                 <button type="button" class="btn btn-outline-secondary ${this.buttonId}_reset">重置</button>
+        //                             </div>
+        //                             <div class="col-4" style="text-align: right">
+        //                                 <button type="button" class="btn btn-primary ${this.buttonId}_submit">提交</button>
+        //                             </div>
+        //                         </div>`)
+        $(this.options["btns"]).on("click","button[name=reset]",function (){
             o.resetEvent()
-        }).on("click", `button.${this.buttonId}_submit`, function () {
+        })
+        $(this.options["btns"]).find("button[name=submit]").bind("click",function (){
             o.submitEvent()
         })
     }
@@ -504,12 +515,12 @@ class ProfessionCreator extends ProfessionRender{
                     target.append("<option value='"+data[i].name+"'>" + data[i].name + "</option>")
                 }
             }
-            o.getDriverInfo(target.val(), function (render) {
-                o.updateUi(render, null)
+            o.getDriverInfo(target.val(), function (driver,render) {
+                o.updateUi(driver,render, null)
             })
             target.change(function () {
-                o.getDriverInfo($(this).val(), function (render) {
-                    o.resetUi(render)
+                o.getDriverInfo($(this).val(), function (driver,render) {
+                    o.resetUi(driver,render,null)
                 })
             });
         },function (res) {
@@ -518,9 +529,12 @@ class ProfessionCreator extends ProfessionRender{
     }
 
     submitEvent(){
+        const o = this
         if (this.ui){
             let url = `/api/${this.module}/`
             this.ui.Submit(function (data) {
+                data["name"] = $(o.options["name"]).val()
+                data["driver"] = $(o.options["drivers"]).val()
                 dashboard.create(url, data, function (res){
                     if(res.code !== 200){
                         http.handleError(res, "新增失败")
@@ -539,11 +553,12 @@ class ProfessionCreator extends ProfessionRender{
 
 }
 class ProfessionEditor extends ProfessionRender{
-    constructor(module, name, uiID){
-        let generator = function (panel,schema,generator,path){
-            return BaseGenerator(panel,schema,generator,path)
-        }
-        super(module, uiID,generator)
+    generator (panel,schema,generator,path){
+        return BaseGenerator(panel,schema,generator,path)
+    }
+    constructor(module, options){
+
+        super(module, options)
         this.name = name
         this.init()
     }
@@ -557,8 +572,8 @@ class ProfessionEditor extends ProfessionRender{
             if(!res.data["driver"]){
                 return http.handleError(res, "获取driver失败")
             }
-            o.getDriverInfo(res.data["driver"], function (render) {
-                o.updateUi(render, res.data)
+            o.getDriverInfo(res.data["driver"], function (driver,render) {
+                o.updateUi(driver,render, res.data)
             })
         },function (res) {
             return http.handleError(res, "获取详情失败")
