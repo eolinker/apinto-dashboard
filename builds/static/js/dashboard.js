@@ -401,7 +401,7 @@ class Render {
     }
     Submit(success, error){
         if(this.Check() === true ){
-            success(this.Value())
+            success(this.Value)
         }else {
             error()
         }
@@ -529,9 +529,12 @@ class ProfessionCreator extends ProfessionRender{
     }
 
     submitEvent(){
+        const o = this
         if (this.ui){
             let url = `/api/${this.module}/`
             this.ui.Submit(function (data) {
+                data["name"] = $(o.options["name"]).val()
+                data["driver"] = $(o.options["drivers"]).val()
                 dashboard.create(url, data, function (res){
                     if(res.code !== 200){
                         http.handleError(res, "新增失败")

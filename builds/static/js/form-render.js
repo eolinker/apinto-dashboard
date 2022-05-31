@@ -1,16 +1,20 @@
 const RootId = "FormRender"
-
+const env = new djv();
 function CheckBySchema(id, schema, value) {
-    let validator = validate.Default()
-    if (!validator.resolved.hasOwnProperty(id)) {
-        validator.addSchema(id, schema);
+    if (!env.resolved.hasOwnProperty(id)) {
+        env.addSchema(id, schema);
     }
-    let err = validator.validate(id, value)
-    if (err) {
-        console.log(err)
-        return false
-    }
-    return true
+    return  env.validate(id, value);
+    // let validator = validate.Default()
+    // if (!validator.resolved.hasOwnProperty(id)) {
+    //     validator.addSchema(id, schema);
+    // }
+    // let err = validator.validate(id, value)
+    // if (err) {
+    //     console.log(err)
+    //     return false
+    // }
+    // return true
 }
 
 function ValidHandler(v,schema,id) {
@@ -41,7 +45,8 @@ function InputValid(schema, target) {
 
 function valueForType(t, v) {
     switch (t) {
-        case "integer", "number": {
+        case "integer":
+        case "number": {
             return Number(v)
         }
         case "boolean": {
@@ -49,7 +54,8 @@ function valueForType(t, v) {
                 return false
             }
             switch (String(v).toLowerCase()) {
-                case "on", "true": {
+                case "on":
+                case "true": {
                     return true
                 }
                 default: {
@@ -58,30 +64,34 @@ function valueForType(t, v) {
             }
         }
     }
+
     return v
 }
 
-class BaseValue {
+class BaseValue  {
     constructor(schema, target) {
-        this.Schema = schema
+
+        this.Schema = new SchemaHandler(schema)
         this.Target = target
         if (typeof schema["default"] !== "undefined") {
             this.Value = schema["default"]
         }
-        InputValid(schema,target)
+        InputValid(this.Schema.JsonSchema,target)
 
     }
 
     get Value() {
-        let val = $(this.Target).val()
-        return valueForType(this.Schema["type"], val)
+        let val =  valueForType(this.Schema.Schema["type"], $(this.Target).val())
+        console.log(`get value:${this.Target.attr("id")}[${typeof val}]=${val}`)
+        return val
     }
 
     set Value(v) {
 
         if ( typeof v === "undefined"){
-            if (typeof this.Schema["default"] !== "undefined") {
-               v = this.Schema["default"]
+            let schema = this.Schema.Schema
+            if (typeof schema["default"] !== "undefined") {
+               v = schema["default"]
             }
         }
         $(this.Target).val(v)
@@ -112,7 +122,9 @@ class SwitchRender extends BaseValue {
     }
 
     get Value() {
-       return  $(this.target).attr("checked") === "checked"
+        const val =  $(this.Target).attr("checked") === "checked"
+
+        return val
     }
 
     set Value(v) {
@@ -279,10 +291,10 @@ function createInput(schema, id, appendAttr) {
             }
             break
         }
-        case "integer": {
-        }
+        case "integer":
         case "number": {
             input += ' type="number"'
+            input += ' value="0"'
             break
         }
         default: {
@@ -631,7 +643,7 @@ class ArrayRenderEnum {
 
 class ArrayRenderSimple {
     constructor(panel, schema, generator, path) {
-
+        this.JsonSchema = new SchemaHandler(schema["items"])
         this.Schema = schema
         const items = schema["items"]
         const Id = path;
@@ -654,7 +666,7 @@ class ArrayRenderSimple {
                 v = Number(value)
             }
             if (v !== "") {
-                if (CheckBySchema(Id, items, v)) {
+                if (CheckBySchema(Id, this.JsonSchema.JsonSchema, v)) {
                     add(v)
                     $(this).val("")
                 }
@@ -811,8 +823,10 @@ function BaseGenerator(panel, schema, generator, path) {
     }
     throw `unknown type:${schema["type"]}`
 }
-
-class FormRender {
+class SchemaHandler {
+    constructor(schema) {
+        this.s = schema
+    }
     toJsonSchema(s){
         let schema = Object.assign({},s)
         switch (schema["type"]){
@@ -822,22 +836,42 @@ class FormRender {
                 delete schema["items"]
                 break
             }
+            case "require":{
+                schema["type"] = "string"
+                break
+            }
             case "object":{
                 let properties = schema["properties"]
                 schema["properties"] = {}
-                 for (let i in properties){
+                for (let i in properties){
                     let name =properties[i].name
-                     schema.properties[name] = this.toJsonSchema(properties[i])
+                    schema.properties[name] = this.toJsonSchema(properties[i])
                 }
             }
         }
         delete schema["name"]
         delete schema["switch"]
+        delete schema["skill"]
 
-         return schema
+        return schema
     }
+
+    get JsonSchema(){
+        if (typeof this.v === "undefined" || this.v === null){
+            this.v = this.toJsonSchema(this.s)
+            console.log(JSON.stringify(this.v))
+        }
+        return this.v
+    }
+    get Schema(){
+        return this.s
+    }
+}
+class FormRender {
+
     constructor(panel, schema, generator,name) {
         this.Schema = schema
+        this.JsonSchema = new SchemaHandler(schema)
         if (!generator || typeof generator !== "function") {
             generator = BaseGenerator
         }
@@ -847,14 +881,19 @@ class FormRender {
     }
 
     check() {
-        if (typeof this.JsonSchema === "undefined" || this.JsonSchema === null){
-            this.JsonSchema = this.toJsonSchema(this.Schema)
-             console.log(JSON.stringify(this.JsonSchema))
-        }
+
         // if (this.djv === null || typeof this.djv === "undefined"){
         //     this.djv = validate.Create()
         // }
-        return  CheckBySchema(this.ObjectName,this.JsonSchema,this.Value)
+        let r =  CheckBySchema(this.ObjectName,this.JsonSchema.JsonSchema,this.Value)
+        console.log(`check:${this.ObjectName} = ${JSON.stringify(this.Value)} :${JSON.stringify(r)}`);
+        if(typeof r === "undefined"){
+            return true
+        }
+        common.message(
+            r
+        )
+        return  r
 
     }
 
