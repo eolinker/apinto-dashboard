@@ -147,7 +147,9 @@ class SwitchRender extends BaseValue {
 
 class RequireRender extends BaseValue {
     constructor(panel, schema, path) {
-        super(schema, $(`<select id=${path} class="form-controller form-control-sm"></select>`))
+        super(schema, $(`<select id=${path} class="form-control form-control-sm">
+<option value="">请选择</option>
+</select>`))
         $(panel).append(this.Target)
 
     }
@@ -843,6 +845,10 @@ class SchemaHandler {
                 schema["type"] = "object"
                 schema["additionalProperties"]=this.toJsonSchema(schema["items"])
                 delete schema["items"]
+                break
+            }
+            case "array":{
+                schema["items"] = this.toJsonSchema(schema["items"])
                 break
             }
             case "require":{
