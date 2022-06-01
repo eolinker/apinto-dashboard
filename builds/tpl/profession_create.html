@@ -60,6 +60,9 @@
 <script src="/js/form-render.js"></script>
 <script src="/js/render.js"></script>
 <script>
+    function Back(){
+        window.location.href = '/{{.module.Name}}/list'
+    }
     $(document).ready(function () {
 
         let creator = new ProfessionCreator("{{.name}}", {

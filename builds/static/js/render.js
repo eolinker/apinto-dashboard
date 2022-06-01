@@ -1,4 +1,4 @@
-
+const nameRule = /^[a-zA-Z\d_]+$/;
 class Render {
     constructor(panel, schema,name, data,generator, callback) {
         // if (typeof data === "undefined"){
@@ -116,7 +116,7 @@ class ProfessionCreator extends ProfessionRender{
         this.init()
     }
     initName(){
-        const nameRule = /^[a-zA-Z\d_]+$/;
+
         let o = this
         $(o.options["id"]).attr("readonly",true)
         $(o.options["id"]).val(`@${o.module}`)
@@ -171,7 +171,14 @@ class ProfessionCreator extends ProfessionRender{
         if (this.ui){
             let url = `/api/${this.module}/`
             this.ui.Submit(function (data) {
-                data["name"] = $(o.options["name"]).val()
+                let name =  $(o.options["name"]).val()
+                if(!nameRule.test(name)) {
+                    $(this).removeClass("is-valid")
+                    $(this).addClass("is-invalid")
+                    common.message("name invalid","danger")
+                    return
+                }
+                data["name"] = name
                 data["driver"] = $(o.options["drivers"]).val()
                 dashboard.create(url, data, function (res){
                     if(res.code !== 200){
@@ -179,7 +186,7 @@ class ProfessionCreator extends ProfessionRender{
                         return
                     }
                     common.message("新增成功", "success")
-                    window.location.back()
+                    Back()
                 }, function (res){
                     http.handleError(res, "新增失败")
                 })
