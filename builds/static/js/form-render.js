@@ -48,7 +48,7 @@ function InputValid(schema, target) {
     $(target).on("change", function () {
         let id = this.id
         console.log("change:",id)
-        ValidHandler($(this).val(), schema,id)
+        ValidHandler.apply(this,[$(this).val(), schema,id])
     })
 }
 
@@ -882,6 +882,9 @@ function BaseGenerator(options) {
         }
         case "require": {
             return new RequireRender(options)
+        }
+        case "formatter" :{
+            return null
         }
     }
     throw `unknown type:${schema["type"]}`
