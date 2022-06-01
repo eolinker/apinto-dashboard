@@ -59,8 +59,15 @@
 <script src="/js/render.js"></script>
 
 <script>
+    const ModuleName = function (){
+        return "{{.module.Name}}"
+    }
+    function Back(){
+        window.location.href = '/{{.module.Name}}/list'
+    }
     $(document).ready(function () {
         let creator = new ProfessionCreator("{{.name}}", {
+            "profession":"{{.data}}",
             "panel":$("#formRenderPanel"),
             "drivers":$("#inputDrivers"),
             "name":$("#inputName"),
