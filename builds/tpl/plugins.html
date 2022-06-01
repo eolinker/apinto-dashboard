@@ -1,0 +1,615 @@
+{{- block "header" . -}}
+<link href="/css/bootstrap-table.min.css"  rel="stylesheet">
+<link href="/css/bootstrap-table-reorder-rows.min.css" rel="stylesheet">
+<link href="/css/bootstrap4-toggle.css" rel="stylesheet">
+{{- end -}}
+
+{{ block "content" .}}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">全局插件</h1>
+    <button type="button" id="create_btn"  class="btn btn-primary">Add</button>
+</div>
+
+<table id="table">
+    <caption>List of {{.name}}</caption>
+</table>
+<div class="pop_window pop_window_small" id="detail_container">
+    <div class="pop_window_header">
+        <span class="pop_window_title">插件配置</span>
+        <button class="pop_window_button btn btn_default" id="detail_close">关闭</button>
+        <br>
+    </div>
+    <div class="pop_window_body">
+        <form id="form">
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="form_name"><b>Name</b></label>
+                    <input name="name" type="text" disabled class="form-control" id="form_name" value="name" required>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="form_id"><b>ID</b></label>
+                    <input name="id" type="text" disabled  class="form-control" id="form_id" value="id" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="form_status"><b>Status</b></label>
+                    <select name="status" id="form_status" class="form-control" required>
+                        <option value="enable">enable</option>
+                        <option value="disable">disable</option>
+                        <option value="global">global</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="form_type"><b>Type</b></label>
+                    <select name="type" id="form_type" class="form-control" required>
+                        <option value="router">router</option>
+                        <option value="service">service</option>
+                        <option value="upstream">upstream</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="clearfix">
+                    <label for="form_config">
+                        <b>Config</b>
+                    </label>
+                    <p class="nav" role="tablist" style="float:right">
+                        <a class="nav-link active" id="form_config_json_tab" data-toggle="tab" href="#form_config" role="tab" aria-controls="json" aria-selected="true">JSON</a>
+                        <a class="nav-link" id="form_config_ui_tab" data-toggle="tab" href="#form_config_ui" role="tab" aria-controls="ui" aria-selected="false">UI</a>
+                    </p>
+                </div>
+                <div class="tab-content" id="form_config_content">
+                    <div class="tab-pane fade show active card editor" id="form_config" role="tabpanel" aria-labelledby="form_config_json_tab"></div>
+                    <div class="tab-pane fade" id="form_config_ui"  role="tabpanel" aria-labelledby="form_config_ui_tab"></div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="clearfix">
+                    <label for="form_init_config"><b>Init Config</b></label>
+                    <p class="nav" role="tablist" style="float:right">
+                        <a class="nav-link active" id="form_init_config_json_tab" data-toggle="tab" href="#form_init_config" role="tab" aria-controls="json" aria-selected="true">JSON</a>
+<!--                        <a class="nav-link" id="form_init_config_ui_tab" data-toggle="tab" href="#form_init_config_ui" role="tab" aria-controls="ui" aria-selected="false">UI</a>-->
+                    </p>
+                </div>
+                <div class="tab-content" id="form_init_config_content">
+                    <div class="tab-pane fade show active card editor" id="form_init_config" role="tabpanel" aria-labelledby="form_init_config_json_tab"></div>
+<!--                    <div class="tab-pane fade" id="form_init_config_ui" role="tabpanel" aria-labelledby="form_init_config_ui_tab"></div>-->
+                </div>
+            </div>
+            <div class="row justify-content-between">
+                <div class="col-4">
+                    <button type="button" class="btn btn-outline-secondary form_cancel">取消</button>
+                </div>
+                <div class="col-4" style="text-align: right">
+                    <button type="button" class="btn btn-primary form_submit">提交</button>
+                </div>
+            </div>
+        </form>
+
+    </div>
+
+
+</div>
+<div class="pop_window pop_window_small" id="add_container">
+    <div class="pop_window_header">
+        <span class="pop_window_title">新增插件</span>
+        <button class="pop_window_button btn btn_default" id="add_close">关闭</button>
+        <br>
+    </div>
+    <div class="pop_window_body">
+        <form id="add_form">
+            <div class="form-row">
+                <div class="form-group col-md-12">
+                    <label for="form_id"><b>ID</b></label>
+                    <select name="id" id="add_form_id" class="form-control" required>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-12">
+                    <label for="form_name"><b>Name</b></label>
+                    <input name="name" type="text" class="form-control" id="add_form_name" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="form_status"><b>Status</b></label>
+                    <select name="status" id="add_form_status" class="form-control" required>
+                        <option value="enable">enable</option>
+                        <option value="disable">disable</option>
+                        <option value="global">global</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="form_type"><b>Type</b></label>
+                    <select name="type" id="add_form_type" class="form-control" required>
+                        <option value="router">router</option>
+                        <option value="service">service</option>
+                        <option value="upstream">upstream</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="clearfix">
+                    <label for="add_form_config"><b>Config</b></label>
+                    <p class="nav" role="tablist" style="float:right">
+                        <a class="nav-link active" id="add_form_config_json_tab" data-toggle="tab" href="#add_form_config" role="tab" aria-controls="json" aria-selected="true">JSON</a>
+                        <a class="nav-link" id="add_form_config_ui_tab" data-toggle="tab" href="#add_form_config_ui" role="tab" aria-controls="ui" aria-selected="false">UI</a>
+                    </p>
+                </div>
+                <div class="tab-content" id="add_form_config_content">
+                    <div class="tab-pane fade show active card editor" id="add_form_config" role="tabpanel" aria-labelledby="add_form_config_json_tab"></div>
+                    <div class="tab-pane fade" id="add_form_config_ui" role="tabpanel" aria-labelledby="add_form_config_ui_tab"></div>
+                </div>
+
+            </div>
+            <div class="form-group">
+                <div class="clearfix">
+                    <label for="add_form_init_config"><b>Init Config</b></label>
+                    <p class="nav" role="tablist" style="float:right">
+                        <a class="nav-link active" id="add_form_init_config_json_tab" data-toggle="tab" href="#add_form_init_config" role="tab" aria-controls="json" aria-selected="true">JSON</a>
+<!--                        <a class="nav-link" id="add_form_init_config_ui_tab" data-toggle="tab" href="#add_form_init_config_ui" role="tab" aria-controls="ui" aria-selected="false">UI</a>-->
+                    </p>
+                </div>
+                <div class="tab-content" id="add_form_init_config_content">
+                    <div class="tab-pane fade show active card editor" id="add_form_init_config" role="tabpanel" aria-labelledby="add_form_init_config_json_tab"></div>
+                </div>
+            </div>
+            <div class="row justify-content-between">
+                <div class="col-4">
+                    <button type="button" class="btn btn-outline-secondary add_form_cancel">取消</button>
+                </div>
+                <div class="col-4" style="text-align: right">
+                    <button type="button" class="btn btn-primary add_form_submit">提交</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{{end}}
+
+{{block "script" .}}
+<script src="/js/jquery.tablednd.min.js"></script>
+<script src="/js/bootstrap-table.min.js"></script>
+<script src="/js/bootstrap4-toggle.js"></script>
+<script src="/js/bootstrap-table-reorder-rows.min.js"></script>
+<script src="/js/ace/ace.js"></script>
+<script src="/js/form-render.js"></script>
+<script src="/js/djv.js"></script>
+<script>
+
+    /**
+     * dom初始化处理
+     */
+    let tableEvents = {
+        'click .edit': function (e, value, row, index) {
+            initForm(index, row)
+            $("body").append("<div class='modal-backdrop fade show'></div>").addClass("modal-open")
+            $("#detail_container").show()
+        },
+        'click .remove': function (e, value, row, index) {
+            let msg ="确认删除 "+row.name+" {{index .module.I18nName .zone}}?"
+            common.confirm("删除{{index .module.I18nName .zone}}", msg, function (){
+
+                $table.RemoveRow('name', row.name, function () {
+                    updateData($table.GetData(), function (res){
+                        if(res.code !== 200){
+                            http.handleError(res, "删除失败")
+                            window.location.reload()
+                            return
+                        }
+                        common.message("删除成功", "success")
+                    }, function (res){
+                        http.handleError(res, "删除失败")
+                        window.location.reload()
+                    })
+                })
+            }, null)
+        },
+    }
+    let $table = new Table($("#table"), {
+        url:"/api/{{.name}}/",
+        columns: getColumns(),
+        flat:true,
+        responseHandler: responseHandler,
+        reorderTableRows:true,
+        useRowAttrFunc: true,
+        onReorderRow: reorderRow,
+    })
+    function operateFormatter(value, row, index) {
+        return [
+            '<a class="edit" href="javascript:void(0)" title="edit">',
+            '配置',
+            '</a>  ',
+            '<a class="remove" href="javascript:void(0)" title="remove">',
+            '删除',
+            '</a>'
+        ].join('')
+    }
+    function responseHandler (res) {
+        let pl = res.data["plugins"]
+        if (pl === null || typeof pl === "undefined"){
+            return []
+        }
+        return  pl
+    }
+    function reorderRow(newData) {
+        updateData(newData,function (res){
+            if(res.code !== 200){
+                return http.handleError(res, "更新失败")
+            }
+            common.message("更新成功", "success")
+        }, function (res){
+            return http.handleError(res, "更新失败")
+        })
+    }
+    function getColumns() {
+        let data = []
+        "{{- range $i,$t := (index .data.Title .zone)}}"
+            data.push({
+                field: "{{index $.data.Fields $i}}",
+                title:"{{ $t}}"
+            })
+        "{{- end }}"
+        data.push({
+            title: "操作",
+            field: "operate",
+            formatter: operateFormatter,
+            events:tableEvents,
+            align:"center"
+        })
+        return data
+    }
+
+    let edit_config_ui_id = "#form_config_ui"
+    // let edit_config_init_ui_id = "#form_init_config_ui"
+    let add_config_ui_id = "#add_form_config_ui"
+    // let add_config_init_ui_id = "#add_form_init_config_ui"
+    let edit_config_ui = null
+    // let edit_init_config_ui = null
+    let add_config_ui = null
+    // let add_init_config_ui = null
+    let config_editor = new Ace("form_config")
+    let init_config_editor = new Ace("form_init_config")
+    let add_init_config_editor = new Ace("add_form_init_config")
+    let add_config_editor = new Ace("add_form_config")
+
+    /**
+     * 蒙版点击处理
+     */
+    $("body").on('click', 'div.modal-backdrop.fade.show', function () {
+        if($("#detail_container").is(":visible")){
+            $("#detail_close").click()
+        }
+        if ($("#add_container").is(":visible")){
+            $("#add_close").click()
+        }
+    })
+
+    /**
+     * 更新插件全局数据
+     * @param data
+     * @param success
+     * @param error
+     */
+    function updateData(data, success, error){
+        dashboard.update("/api/{{.name}}/", {"plugins":data}, success, error)
+    }
+
+    /**
+     * 编辑表单初始化
+     * @param index
+     * @param row
+     */
+    function initForm(index, row) {
+        $("#form").attr("data_index", index)
+        $("#form_id").val(row["id"])
+        $("#form_name").val(row["name"])
+        $("#form_status  option[value='"+row["status"]+"'] ").attr("selected",true)
+        $("#form_type  option[value='"+row["type"]+"'] ").attr("selected",true)
+        // 渲染配置表单
+        let config = {}
+        let init_config = {}
+        if(row["config"]){
+            config = row["config"]
+        }
+        if(row["init_config"]){
+            init_config = row["init_config"]
+        }
+        config_editor.Value = JSON.stringify(config,null,2)
+        init_config_editor.Value = JSON.stringify(init_config, null, 2)
+        getRenderInfo(row["id"], function (driver,render) {
+            if (!edit_config_ui){
+                edit_config_ui = new Render(edit_config_ui_id, render,`plugin_edit.${driver}`, config)
+            }else {
+                edit_config_ui.Reset(render,driver)
+                edit_config_ui.Value = config
+            }
+
+            // if (!edit_init_config_ui) {
+            //     edit_init_config_ui = new Render(edit_config_init_ui_id, {
+            //         type:"map",
+            //         items:{
+            //             type: "string"
+            //         }
+            //     },"plugin_edit_init_config", init_config)
+            // }
+        })
+    }
+
+    /**
+     * 编辑表单关闭点击事件
+     */
+    $("#detail_close").click(function (){
+        if($("body").hasClass("modal-open")){
+            $('body').removeClass("modal-open")
+            $("div.modal-backdrop.fade.show").remove()
+        }
+        $("#detail_container").hide(200)
+    })
+    $(".form_cancel").click(function (){
+        if($("body").hasClass("modal-open")){
+            $('body').removeClass("modal-open")
+            $("div.modal-backdrop.fade.show").remove()
+        }
+        $("#detail_container").hide(200)
+    })
+    /**
+     * 编辑表单提交点击事件
+     */
+    $(".form_submit").click(function (){
+        let d = {};
+        try {
+            if ($("#form_config").hasClass("active")){
+                d["config"] = JSON.parse(config_editor.Value)
+            }else {
+                if (edit_config_ui.Check()){
+                    d["config"] = edit_config_ui.Value
+                }else {
+                    throw "config format is error"
+                }
+            }
+            d["init_config"] = JSON.parse(init_config_editor.Value)
+
+            // // 渲染init配置表单
+            // if ($("#form_init_config").hasClass("active")){
+            //     d["init_config"] = JSON.parse(init_config_editor.Value)
+            // }else {
+            //     if (edit_init_config_ui.Check()){
+            //         d["init_config"] = edit_init_config_ui.Value
+            //     }else {
+            //         throw "config format is error"
+            //     }
+            // }
+        }catch(e) {
+            common.message("config format is error", "danger")
+            return
+        }
+        let t = $('#form').serializeArray();
+        try {
+            $.each(t, function() {
+                if(this.value.length === 0){
+                    throw "field " + this.name + " can not be null"
+                }
+                d[this.name] = this.value;
+            });
+        } catch(e) {
+            common.message(e, "danger")
+            return
+        }
+        $table.UpdateRowDetail($("#form").attr("data_index"), d, function () {
+            updateData($table.GetData() ,function (res){
+                if(res.code !== 200){
+                    return http.handleError(res, "更新失败")
+                }
+                common.message("更新成功", "success")
+                $("#detail_close").click()
+            }, function (res){
+                return http.handleError(res, "更新失败")
+            })
+        })
+
+    })
+
+    /**
+     * 新增插件处理
+     */
+    $("#create_btn").click(function () {
+        initAddForm("add_form_id")
+        $("body").append("<div class='modal-backdrop fade show'></div>").addClass("modal-open")
+        $("#add_container").show()
+    })
+
+    /**
+     * 新增表单id选项渲染
+     * @param id
+     */
+    function initPluginsIDList(id) {
+        let exist = {}
+        dashboard.getExtenders(function (res) {
+            if(res.code !== 200){
+                return http.handleError(res, "获取扩展列表失败")
+            }
+            let data = res.data
+            $table.GetData().forEach(function (item) {
+                exist[item.id] = true
+            })
+            let target = $("#"+id)
+            target.html("")
+            for (let i = 0; i < data.length; i++) {
+                if (!exist[data[i].id]){
+                    target.append(`<option value="${data[i].id}">${ data[i].id }</option>`)
+                }else {
+                    console.log(`strip:${data[i].id}`)
+                }
+            }
+        }, function (res) {
+            return http.handleError(res, "获取扩展列表失败")
+        })
+    }
+
+    /**
+     * 初始化新增表单
+     */
+    function initAddForm(id) {
+        initPluginsIDList(id)
+        $("#add_form_name").val("")
+        $("#add_form_name").change()
+        add_config_editor.Value = JSON.stringify({}, null, 2)
+        add_init_config_editor.Value = JSON.stringify({}, null, 2)
+        let pluginID = $("#"+id).val()
+        if (pluginID){
+            getRenderInfo(pluginID, function (driver,render) {
+                if (!add_config_ui){
+                    add_config_ui = new Render(add_config_ui_id, render,`plugin_add.${driver}`)
+                }else {
+                    add_config_ui.Reset(render,driver)
+                }
+                // if (!add_init_config_ui){
+                //     add_init_config_ui = new Render(add_config_init_ui_id, {
+                //         type:"map",
+                //         items:{
+                //             type: "string"
+                //         }
+                //     },"plugin_add_init_config")
+                // }
+            })
+        }
+
+    }
+
+    /**
+     * 更新ui面板
+     * @param id
+     * @param success
+     */
+    function getRenderInfo(id, success){
+        let path = id.replaceAll(":","/")
+        let n = id.replaceAll(":","_")
+        dashboard.getExtenderInfo(path, function (res) {
+            if(res.code !== 200){
+                return http.handleError(res, "获取extender信息失败")
+            }
+            success(n,res.data["render"])
+        }, function (res){
+            return http.handleError(res, "获取extender信息失败")
+        })
+    }
+
+
+    /**
+     * 新增表单关闭点击事件
+     */
+    $("#add_close").click(function (){
+        if($("body").hasClass("modal-open")){
+            $('body').removeClass("modal-open")
+            $("div.modal-backdrop.fade.show").remove()
+        }
+        $("#add_container").hide(200)
+    })
+    $("#add_form_name").bind("change",function (){
+        let newName = $(this).val()
+        if (newName.length === 0){
+            $(this).removeClass("is-invalid")
+            $(this).removeClass("is-valid")
+            return
+        }
+        let exist = false
+        $table.GetData().forEach(function (item) {
+            if (item.name === newName ){
+                exist = true
+                return false
+            }
+        })
+        if (exist !== true) {
+            $(this).removeClass("is-invalid")
+            $(this).addClass("is-valid")
+
+        } else {
+            $(this).removeClass("is-valid")
+            $(this).addClass("is-invalid")
+
+        }
+    })
+    $(".add_form_cancel").click(function (){
+        if($("body").hasClass("modal-open")){
+            $('body').removeClass("modal-open")
+            $("div.modal-backdrop.fade.show").remove()
+        }
+        $("#add_container").hide(200)
+    })
+    $(".add_form_submit").click(function (){
+        let d = {};
+        try {
+            if ($("#add_form_config").hasClass("active")){
+                d["config"] = JSON.parse(add_config_editor.Value)
+            }else {
+                let ckr = add_config_ui.Check();
+                if (ckr !== true){
+                    d["config"] = add_config_ui.Value
+                }else {
+                    throw "config format is error:"+ckr
+                }
+            }
+            d["init_config"] = JSON.parse(add_init_config_editor.Value)
+            // // 渲染init配置表单
+            // if ($("#add_form_init_config").hasClass("active")){
+            //     d["init_config"] = JSON.parse(add_init_config_editor.Value)
+            // }else {
+            //     if (add_init_config_ui.Check()){
+            //         d["init_config"] = add_init_config_ui.Value
+            //     }else {
+            //         throw "init config format is error"
+            //     }
+            // }
+        }catch(e) {
+            common.message("config format is error:"+e, "danger")
+            return
+        }
+        let t = $('#add_form').serializeArray();
+        try {
+            $.each(t, function() {
+                if(this.value.length === 0){
+                    throw "field " + this.name + " can not be null"
+                }
+                d[this.name] = this.value;
+            });
+        } catch(e) {
+            common.message(e, "danger")
+            return
+        }
+        if(!d["id"] || d["id"].length === 0){
+            common.message("field id can not be null", "danger")
+            return
+        }
+        let data = $table.GetData()
+        for (let i in data){
+            if (data[i].name === d.name){
+                common.message(`plugin name:${d.name} is exist`,"danger")
+                return
+            }
+        }
+        data.push(d)
+        updateData(data ,function (res){
+            if(res.code !== 200){
+                return http.handleError(res, "更新失败")
+            }
+            $table.AddNewRow(res.data["plugins"])
+            // $table.AddNewRow(d)
+            common.message("更新成功", "success")
+            $("#add_close").click()
+        }, function (res){
+            return http.handleError(res, "更新失败")
+        })
+    })
+    $('#add_form').on('change', "select#add_form_id", function () {
+        let value = $(this).val();
+        getRenderInfo(value, function (driver,render) {
+            add_config_ui.Reset(render,`plugin_add.${driver}`)
+            add_init_config_ui.Reset(render,`plugin_add.${driver}`)
+        })
+    });
+
+</script>
+{{end}}

@@ -10,15 +10,24 @@ type userDetailsKey struct{}
 // UserDetailsKey  is the request context key under which UserDetails are stored.
 var UserDetailsKey = userDetailsKey{}
 
-func UserDetailsFromRequest(req *http.Request) (UserDetails,error) {
-	value,ok := req.Context().Value(UserDetailsKey).(UserDetails)
-	if !ok{
+func UserDetailsFromRequest(req *http.Request) (UserDetails, error) {
+	value, ok := req.Context().Value(UserDetailsKey).(UserDetails)
+	if !ok {
 		return nil, ErrorNotLogin
 	}
-	return value,nil
+	return value, nil
 }
-func setUserDetailsToRequest(req *http.Request, details UserDetails) *http.Request{
-	if details == nil{
+
+func MustUsername(req *http.Request) string {
+	userInfo, err := UserDetailsFromRequest(req)
+	if err != nil {
+		return "unknown"
+	}
+	return userInfo.GetUsername()
+}
+
+func setUserDetailsToRequest(req *http.Request, details UserDetails) *http.Request {
+	if details == nil {
 		return req
 	}
 	ctx := req.Context()
