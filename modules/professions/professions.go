@@ -21,14 +21,6 @@ type Profession struct {
 	header *ListHeader
 }
 
-func (p *Profession) Paths() []string {
-	paths := make([]string, 0, 2)
-	paths = append(paths, fmt.Sprintf("/profession/%s/", p.ModuleName))
-	paths = append(paths, fmt.Sprintf("/api/%s/", p.ModuleName))
-
-	return paths
-}
-
 func (p *Profession) Lookup(r *http.Request) (view string, data interface{}, has bool) {
 	name, has := p.ModuleViewFinder.Lookup(r)
 	if has {
@@ -38,6 +30,8 @@ func (p *Profession) Lookup(r *http.Request) (view string, data interface{}, has
 		case "profession_edit":
 			workerName := r.URL.Query().Get("name")
 			return name, workerName, true
+		case "profession_create":
+			return name, p.ProfessionName, true
 		}
 		return name, nil, true
 	}
@@ -74,6 +68,19 @@ func NewProfession(name string, profession string, titles map[apinto_dashboard.Z
 func (p *Profession) createRouter() {
 	r := httprouter.New()
 	p.Router = r
+	r.GET(fmt.Sprintf("/skill/%s", p.ModuleName), func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+		skill := r.URL.Query().Get("skill")
+		if skill == "" {
+			apinto.WriteResult(w, 500, []byte("need skill"))
+			return
+		}
+		data, code, err := apinto.Client().Skill(p.ProfessionName, skill)
+		if err != nil {
+			apinto.WriteResult(w, 500, []byte(err.Error()))
+			return
+		}
+		apinto.WriteResult(w, code, data)
+	})
 	r.GET(fmt.Sprintf("/profession/%s/", p.ModuleName), func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 		data, code, err := apinto.Client().Drivers(p.ProfessionName)
 		if err != nil {
