@@ -1,6 +1,15 @@
 const RootId = "FormRender"
-const env = new djv();
+
+const validate = {
+    _validator: null,
+    djv: function () {
+
+        this._validator = new djv()
+        return this._validator
+    },
+}
 function CheckBySchema(id, schema, value) {
+    let env = validate.djv()
     if (!env.resolved.hasOwnProperty(id)) {
         env.addSchema(id, schema);
     }
