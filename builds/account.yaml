@@ -1,0 +1,9 @@
+account_list:
+- user_name: admin
+  password: admin
+  info:
+    desc: admin用户
+- user_name: chenjiekun
+  password: chenjiekun
+  info:
+    desc: 测试用户cjk
