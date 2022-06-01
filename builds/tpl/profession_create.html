@@ -60,6 +60,9 @@
 <script src="/js/form-render.js"></script>
 <script src="/js/render.js"></script>
 <script>
+    const ModuleName = function (){
+        return "{{.module.Name}}"
+    }
     function Back(){
         window.location.href = '/{{.module.Name}}/list'
     }
