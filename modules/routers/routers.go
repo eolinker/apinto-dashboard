@@ -1,33 +1,88 @@
 package routers
 
 import (
+	"fmt"
 	apinto_dashboard "github.com/eolinker/apinto-dashboard"
+	"github.com/eolinker/apinto-dashboard/internal/apinto"
+	"github.com/eolinker/apinto-dashboard/modules/professions"
+	"github.com/julienschmidt/httprouter"
 	"net/http"
 )
 
 type Routers struct {
-	views *apinto_dashboard.ModuleViewFinder
+	*professions.Profession
+	header *professions.ListHeader
 }
 
 func (p *Routers) Lookup(r *http.Request) (view string, data interface{}, has bool) {
-	name, has := p.views.Lookup(r)
-	if has{
-		return name,nil,true
+	name, has := p.ModuleViewFinder.Lookup(r)
+	if has {
+		switch name {
+		case "router_list":
+			return name, p.header, true
+		case "router_edit":
+			routerName := r.URL.Query().Get("name")
+			return name, routerName, true
+		}
+		return name, nil, true
 	}
-	return "",nil,false
+
+	return "", nil, false
 }
 
-func (p *Routers) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-
-}
-
-func NewRouters() *Routers {
+func NewRouters(name string) *Routers {
 	views := map[string]string{
-		"list":"router_list",
-		"create":"router_create",
-		"edit":"router_edit",
+		"list":   "router_list",
+		"create": "router_create",
+		"edit":   "router_edit",
 	}
-	return &Routers{
-		views:	apinto_dashboard.NewViewModuleEmpty("/routers/", views, "list"),
+	professionsHandler := professions.NewProfession(name, "router",
+		nil, nil,
+		apinto_dashboard.NewViewModuleEmpty("/routers/", views, "list"))
+	r := &Routers{
+		Profession: professionsHandler,
+		header: &professions.ListHeader{
+			Title: map[apinto_dashboard.ZoneName][]string{
+				apinto_dashboard.ZhCn: {"路由名", "驱动", "域名", "端口", "服务", "创建时间", "更新时间"},
+				apinto_dashboard.EnUs: {"Name", "Driver", "Host", "Listen", "Service", "Create", "Update"},
+			},
+			Fields: []string{"name", "driver", "host", "listen", "service", "create", "update"},
+		},
 	}
+	r.expandRouter()
+	return r
+}
+
+func (p *Routers) expandRouter() {
+	p.Router.PATCH(fmt.Sprintf("/api/%s/:name", p.ModuleName), func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+		name := params.ByName("name")
+		data, err := apinto.ReadBody(r.Body)
+		if err != nil {
+			apinto.WriteResult(w, 500, []byte(err.Error()))
+			return
+		}
+		data, code, err := apinto.Client().Patch(p.ProfessionName, name, data)
+		if err != nil {
+			apinto.WriteResult(w, 500, []byte(err.Error()))
+			return
+		}
+		apinto.WriteResult(w, code, data)
+	})
+
+	// PatchPath
+	p.Router.PATCH(fmt.Sprintf("/api/%s/:name/*path", p.ModuleName), func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+		name := params.ByName("name")
+		path := params.ByName("path")
+		data, err := apinto.ReadBody(r.Body)
+		if err != nil {
+			apinto.WriteResult(w, 500, []byte(err.Error()))
+			return
+		}
+		data, code, err := apinto.Client().PatchPath(p.ProfessionName, name, path, data)
+		if err != nil {
+			apinto.WriteResult(w, 500, []byte(err.Error()))
+			return
+		}
+		apinto.WriteResult(w, code, data)
+	})
 }
