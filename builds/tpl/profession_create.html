@@ -66,6 +66,7 @@
     $(document).ready(function () {
 
         let creator = new ProfessionCreator("{{.name}}", {
+            "profession":"{{.data}}",
             "panel":$("#formRenderPanel"),
             "drivers":$("#inputDrivers"),
             "name":$("#inputName"),

@@ -119,10 +119,10 @@ class ProfessionCreator extends ProfessionRender{
 
         let o = this
         $(o.options["id"]).attr("readonly",true)
-        $(o.options["id"]).val(`@${o.module}`)
+        $(o.options["id"]).val(`@${o.options["profession"]}`)
         $(o.options["name"]).on("change",function (e){
             let v = $(this).val()
-            $(o.options["id"]).val(`${v}@${o.module}`)
+            $(o.options["id"]).val(`${v}@${o.options["profession"]}`)
 
             if( nameRule.test(v)) {
                 $(this).removeClass("is-invalid")

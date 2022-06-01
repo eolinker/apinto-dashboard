@@ -26,6 +26,7 @@ type IClient interface {
 	Drivers(profession string) (data []byte, code int, err error)
 	Extenders() (data []byte, code int, err error)
 	Extender(group string, project string, name string) (data []byte, code int, err error)
+	Skill(profession string, skill string) (data []byte, code int, err error)
 }
 
 type admin struct {

@@ -76,6 +76,9 @@ let dashboard = {
     },
     getExtenderInfo: function (id, success, error){
         this.get("/api/extenders/"+id, success, error)
+    },
+    searchSkill:function (module,skill,success,error){
+        this.get(`/skill/${module}?skill=${skill}`, success, error)
     }
 }
 let common = {
