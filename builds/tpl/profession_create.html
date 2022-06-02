@@ -1,33 +1,26 @@
-{{- block "header" .}}
+{{block "header" .}}
+
+<link href="/css/bootstrap-table.min.css"  rel="stylesheet">
+<link href="/css/bootstrap-table-reorder-rows.min.css" rel="stylesheet">
 <link href="/css/bootstrap4-toggle.css" rel="stylesheet">
-{{- end}}
+
+{{end}}
 {{ block "content" .data}}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">新建{{index .module.I18nName .zone}}</h1>
 </div>
-
-    <form class="form">
-        <div>
-            <input type="checkbox" checked="" data-toggle="toggle" data-size="xs">
-        </div>
-        <input   type="checkbox" data-toggle="toggle"/>
-<!--        <div class="form-row">-->
-<!--            <div class="toggle btn btn-primary btn-xs" data-toggle="toggle" role="button" style="width: 42.6796px; height: 18.5938px;"><input type="checkbox" checked="" data-toggle="toggle" data-size="xs"><div class="toggle-group"><label for="" class="btn btn-primary btn-xs toggle-on">On</label><label for="" class="btn btn-light btn-xs toggle-off">Off</label><span class="toggle-handle btn btn-light btn-xs"></span></div></div>-->
-<!--        </div>-->
-
-    </form>
-    <form >
-        <div class="form-group row mb-3"><label class="col-sm-2 col-form-label text-right"
+    <form  class="container">
+        <div class="form-group row mb-1 "><label class="col-sm-3 col-form-label text-right"
                                                 for="inputId">Id</label>
-            <div class="col-sm-10">
-                <input class="form-control" type="text" id="inputId"/>
+            <div class="col-sm-9">
+                <input class="form-control form-control-sm" type="text" id="inputId"/>
             </div>
 
         </div>
-        <div class="form-group row mb-3"><label class="col-sm-2 colsf-form-label text-right"
+        <div class="form-group row mb-1"><label class="col-sm-3 colsf-form-label text-right"
                                                 for="inputName">Name</label>
-            <div class="col-sm-10">
-                <input class="form-control" type="text" id="inputName" required/>
+            <div class="col-sm-9">
+                <input class="form-control form-control-sm" type="text" id="inputName" required/>
                 <small id="passwordHelpInline" class="text-muted">
                    只能使用英文字母、数字、下划线
                 </small>
@@ -37,10 +30,10 @@
             </div>
 
         </div>
-        <div class="form-group row mb-3"><label class="col-sm-2 col-form-label text-right"
+        <div class="form-group row mb-1"><label class="col-sm-3 col-form-label text-right"
                                                 for="inputDrivers">Driver</label>
-            <div class="col-sm-10">
-                <select class="custom-select" id="inputDrivers"></select>
+            <div class="col-sm-9">
+                <select class="form-control form-control-sm" id="inputDrivers"></select>
             </div>
 
         </div>
@@ -49,10 +42,10 @@
         </div>
         <div id="form_button" class="row justify-content-between" style="display: none">
             <div class="col-4">
-                <button type="button" class="btn btn-outline-secondary form_reset">重置</button>
+                <button type="button" name="reset" class="btn btn-outline-secondary form_reset">重置</button>
             </div>
             <div class="col-4" style="text-align: right">
-                <button type="button" class="btn btn-primary form_submit">提交</button>
+                <button type="button" name="submit" class="btn btn-primary form_submit">提交</button>
             </div>
         </div>
     </form>
@@ -63,13 +56,20 @@
 <script src="/js/bootstrap-table.min.js"></script>
 <script src="/js/bootstrap-table-editor.js"></script>
 <script src="/js/bootstrap4-toggle.min.js"></script>
-<script src="/js/form-render.js"></script>
 <script src="/js/djv.js"></script>
-
-
+<script src="/js/form-render.js"></script>
+<script src="/js/render.js"></script>
 <script>
+    const ModuleName = function (){
+        return "{{.module.Name}}"
+    }
+    function Back(){
+        window.location.href = '/{{.module.Name}}/list'
+    }
     $(document).ready(function () {
+
         let creator = new ProfessionCreator("{{.name}}", {
+            "profession":"{{.data}}",
             "panel":$("#formRenderPanel"),
             "drivers":$("#inputDrivers"),
             "name":$("#inputName"),
