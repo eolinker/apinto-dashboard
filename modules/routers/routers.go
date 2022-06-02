@@ -2,11 +2,12 @@ package routers
 
 import (
 	"fmt"
+	"net/http"
+
 	apinto_dashboard "github.com/eolinker/apinto-dashboard"
 	"github.com/eolinker/apinto-dashboard/internal/apinto"
 	"github.com/eolinker/apinto-dashboard/modules/professions"
 	"github.com/julienschmidt/httprouter"
-	"net/http"
 )
 
 type Routers struct {
@@ -23,7 +24,10 @@ func (p *Routers) Lookup(r *http.Request) (view string, data interface{}, has bo
 		case "router_edit":
 			routerName := r.URL.Query().Get("name")
 			return name, routerName, true
+		case "router_create":
+			return name, p.ProfessionName, true
 		}
+
 		return name, nil, true
 	}
 
