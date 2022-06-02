@@ -149,10 +149,10 @@ function createInput(schema, id, appendAttr) {
     return input
 }
 
-function getLabel(schema) {
+function getLabel(name,schema) {
     let label = schema["label"]
     if (!label || label.trim() === "") {
-        label = schema["name"]
+        label = name
     }
 
     label = label.replace(label[0], label[0].toUpperCase());
@@ -160,7 +160,7 @@ function getLabel(schema) {
     return label
 }
 
-function createLabel(schema, id, appendAttr) {
+function createLabel(name,schema, id, appendAttr) {
     if (!appendAttr) {
         appendAttr = ""
     }
@@ -175,7 +175,7 @@ function createLabel(schema, id, appendAttr) {
     if (schema["required"]) {
         require = '<span style="color: red">*</span>'
     }
-    return `<label class="col-sm-3 col-form-label text-right text-nowrap" ${idFor} ${appendAttr}>${require}${getLabel(schema)}:</label>`
+    return `<label class="col-sm-3 col-form-label text-right text-nowrap" ${idFor} ${appendAttr}>${require}${getLabel(name,schema)}:</label>`
 }
 
 class BaseValue  {
@@ -194,7 +194,7 @@ class BaseValue  {
         const id =  this.Target.attr("id")
         console.debug("ValidHandler:",id,"=",v)
         let value = v
-        value = valueForType(this.schema["eo:type"], value)
+        value = valueForType(this.Schema["eo:type"], value)
 
         let rs = CheckBySchema(id, this.Schema, value)
         if (typeof rs === "undefined") {
@@ -321,7 +321,8 @@ class BaseInputRender extends BaseValue {
 }
 
 class FieldPanel {
-    constructor(options) {
+    constructor(name,options) {
+
 
         const panel=options["panel"]
         const schema=options["schema"]
@@ -329,7 +330,7 @@ class FieldPanel {
         const id = options["path"]
 
         if (schema["eo:type"] === "object"){
-            const $FieldLabelPanel = $(`<div class="form-group row mb-1 overflow-hidden">${createLabel(schema,id)}</div>`)
+            const $FieldLabelPanel = $(`<div class="form-group row mb-1 overflow-hidden">${createLabel(name,schema,id)}</div>`)
             panel.append($FieldLabelPanel)
             const $FieldValuePanel = $(`
 <div class="form-group row mb-1 overflow-hidden">
@@ -341,7 +342,7 @@ class FieldPanel {
 
         }else{
             const $FieldValuePanel = $(`<div class="col-sm-9"></div>`)
-            this.$Panel  = $(`<div class="form-group row mb-1 overflow-hidden">${createLabel(schema,id)}</div>`)
+            this.$Panel  = $(`<div class="form-group row mb-1 overflow-hidden">${createLabel(name,schema,id)}</div>`)
             this.$Panel.append($FieldValuePanel)
             panel.append(this.$Panel)
             this.$Value = generator({panel:$FieldValuePanel,schema:schema,generator: generator,path:id})
@@ -519,7 +520,7 @@ class InnerObjectRender{
             switch (item["eo:type"]) {
                 case "object": {
                     columns.push({
-                        title: getLabel(item),
+                        title: getLabel(name,item),
                         field: item["name"],
                         sortable: false,
                         editable: false,
@@ -530,7 +531,7 @@ class InnerObjectRender{
                 }
                 case "map": {
                     columns.push({
-                        title: getLabel(item),
+                        title: getLabel(name,item),
                         field: name,
                         sortable: false,
                         editable: false,
@@ -541,7 +542,7 @@ class InnerObjectRender{
                 }
                 case "array": {
                     columns.push({
-                        title: getLabel(item),
+                        title: getLabel(name,item),
                         field: name,
                         sortable: false,
                         editable: false,
@@ -553,7 +554,7 @@ class InnerObjectRender{
                 default: {
                     if (item["enum"]) {
                         columns.push({
-                            title: getLabel(item),
+                            title: getLabel(name,item),
                             field: name,
                             sortable: true,
                             detailFormatter: NotDetailFormatterMap,
@@ -571,7 +572,7 @@ class InnerObjectRender{
                         }
                         columns.push({
 
-                            title: getLabel(item),
+                            title: getLabel(name,item),
                             field: name,
                             sortable: true,
                             width: 200,
@@ -815,7 +816,7 @@ class ObjectRender {
             let sub = properties[name]
             const subId = `${Id}.${name}`
 
-            this.Fields[name] = new FieldPanel({
+            this.Fields[name] = new FieldPanel(name,{
                 panel:panel,
                 schema:sub,
                 generator:generator,
