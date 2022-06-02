@@ -281,15 +281,18 @@ function formatProfessionRender(render) {
         throw "undefined"
     }
     let properties = render["properties"]
-    let newProperties = new Array()
-
-    for (let i in properties) {
-        let name = properties[i].name
+    let uiSort = render["ui:sort"]
+    let newUiSort = new Array()
+    for (let i in uiSort) {
+        let name = uiSort[i]
         if (defaultFields[name] !== true) {
-            newProperties.push(properties[i])
+            newUiSort.push(name)
+        }else{
+            delete properties[name]
         }
     }
-    render["properties"] = newProperties
+    render["properties"] = properties
+    render["ui:sort"] = newUiSort
     return render
 
 }
