@@ -3,7 +3,9 @@ const RootId = "FormRender"
 const validate = {
     _validator: null,
     djv: function () {
-
+        if (this._validator){
+            return this._validator
+        }
         this._validator = new djv()
         return this._validator
     },
@@ -24,32 +26,6 @@ function CheckBySchema(id, schema, value) {
     //     return false
     // }
     // return true
-}
-
-function ValidHandler(v,schema,id) {
-    console.debug("ValidHandler:",id,"=",v)
-    let value = v
-    value = valueForType(schema["type"], value)
-
-    let rs = CheckBySchema(id, schema, value)
-    if (rs === true) {
-        $(this).removeClass("is-invalid")
-        $(this).addClass("is-valid")
-        return true
-    } else {
-        $(this).removeClass("is-valid")
-        $(this).addClass("is-invalid")
-        return false
-    }
-}
-
-function InputValid(schema, target) {
-
-    $(target).on("change", function () {
-        let id = this.id
-        console.log("change:",id)
-        ValidHandler.apply(this,[$(this).val(), schema,id])
-    })
 }
 
 function valueForType(t, v) {
@@ -205,14 +181,37 @@ function createLabel(schema, id, appendAttr) {
 class BaseValue  {
     constructor(schema, target) {
 
-        this.Schema =schema
+        this.Schema = schema
         this.Target = target
         if (typeof schema["default"] !== "undefined") {
             this.Value = schema["default"]
         }
         const JsonSchema = new SchemaHandler(schema).JsonSchema
-        InputValid(JsonSchema,target)
+        this.InputValid(JsonSchema,target)
+    }
 
+    ValidHandler(v) {
+        const id =  this.Target.attr("id")
+        console.debug("ValidHandler:",id,"=",v)
+        let value = v
+        value = valueForType(this.Schema["type"], value)
+
+        let rs = CheckBySchema(id, this.Schema, value)
+        if (typeof rs === "undefined") {
+            $(this).removeClass("is-invalid")
+            $(this).addClass("is-valid")
+
+        } else {
+            $(this).removeClass("is-valid")
+            $(this).addClass("is-invalid")
+
+        }
+    }
+    InputValid(schema, target) {
+        const o = this
+        $(target).on("change", function () {
+            o.ValidHandler($(this).val(), schema)
+        })
     }
 
     get Value() {
@@ -315,6 +314,9 @@ class BaseInputRender extends BaseValue {
         const panel = options["panel"]
         super(options["schema"], $(createInput(schema, path)))
         $(panel).append(this.Target)
+        if (schema["description"] && schema["description"].length >0){
+            $(panel).append(`<small id="help:${path}" class="text-muted">${schema["description"]}</small>`)
+        }
     }
 }
 
@@ -720,7 +722,8 @@ class ArrayRenderSimple {
                 v = Number(value)
             }
             if (v !== "") {
-                if (CheckBySchema(Id, JsonSchema.JsonSchema, v)) {
+               let ckr = CheckBySchema(Id, JsonSchema.JsonSchema, v)
+                if (typeof ckr === "undefined") {
                     add(v)
                     $(this).val("")
                 }
@@ -966,9 +969,7 @@ class FormRender {
 
     check() {
 
-        // if (this.djv === null || typeof this.djv === "undefined"){
-        //     this.djv = validate.Create()
-        // }
+
         let r =  CheckBySchema(this.ObjectName,this.JsonSchema.JsonSchema,this.Value)
         console.log(`check:${this.ObjectName} = ${JSON.stringify(this.Value)} :${JSON.stringify(r)}`);
         if(typeof r === "undefined"){
