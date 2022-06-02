@@ -116,7 +116,7 @@ function createInput(schema, id, appendAttr) {
         }
     }
 
-    switch (schema["type"]) {
+    switch (schema["eo:type"]) {
         case "string": {
             input += ' type="' + readFormatForString(schema["format"]) + '"'
             if (schema["format"] === 'password') {
@@ -131,7 +131,7 @@ function createInput(schema, id, appendAttr) {
             break
         }
         default: {
-            throw `now allow [${schema["type"]} for input]`
+            throw `now allow [${schema["eo:type"]} for input]`
         }
     }
     if (schema["maxLength"]) {
@@ -194,7 +194,7 @@ class BaseValue  {
         const id =  this.Target.attr("id")
         console.debug("ValidHandler:",id,"=",v)
         let value = v
-        value = valueForType(this.Schema["type"], value)
+        value = valueForType(this.schema["eo:type"], value)
 
         let rs = CheckBySchema(id, this.Schema, value)
         if (typeof rs === "undefined") {
@@ -215,7 +215,7 @@ class BaseValue  {
     }
 
     get Value() {
-        let val =  valueForType(this.Schema["type"], $(this.Target).val())
+        let val =  valueForType(this.schema["eo:type"], $(this.Target).val())
         console.log(`get value:${this.Target.attr("id")}[${typeof val}]=${val}`)
         return val
     }
@@ -328,7 +328,7 @@ class FieldPanel {
         const generator = options["generator"]
         const id = options["path"]
 
-        if (schema["type"] === "object"){
+        if (schema["eo:type"] === "object"){
             const $FieldLabelPanel = $(`<div class="form-group row mb-1 overflow-hidden">${createLabel(schema,id)}</div>`)
             panel.append($FieldLabelPanel)
             const $FieldValuePanel = $(`
@@ -376,12 +376,12 @@ class MapRender   {
 
     set Value(v) {
 
-        const Items = this.Schema["items"]
+        const Items = this.Schema["additionalProperties"]
         const Id = this.Id
         const keySchema = {type: "string"}
 
         this.$Panel.empty()
-        switch (Items["type"]) {
+        switch (Items["eo:type"]) {
             case "object", "map": {
                 break
             }
@@ -457,6 +457,7 @@ class InnerObjectRender{
         })
         this.Table = $Table
         const properties = items["properties"]
+        const uiSort = items["ui:sort"]
         let lastDetailRow = undefined
         let lastField = undefined
 
@@ -469,10 +470,11 @@ class InnerObjectRender{
                 }
                 lastDetailRow = index
                 lastField = fieldIndex
-                let item = properties[fieldIndex]
+                let name = uiSort[fieldIndex]
+                let item = properties[name]
 
-                let child = generator({panel:$element, schema:item, generator:generator, path:`${Id}_${item["name"]}`})
-                child.Value = row[item.name]
+                let child = generator({panel:$element, schema:item, generator:generator, path:`${Id}_${name}`})
+                child.Value = row[name]
                 return ""
             }
             return this
@@ -511,9 +513,10 @@ class InnerObjectRender{
             }
         })
 
-        for (let i in properties) {
-            const item = properties[i]
-            switch (item["type"]) {
+        for (let i in uiSort) {
+            let name = uiSort[i]
+            const item = properties[name]
+            switch (item["eo:type"]) {
                 case "object": {
                     columns.push({
                         title: getLabel(item),
@@ -528,7 +531,7 @@ class InnerObjectRender{
                 case "map": {
                     columns.push({
                         title: getLabel(item),
-                        field: item["name"],
+                        field: name,
                         sortable: false,
                         editable: false,
                         formatter: formatterKV,
@@ -539,7 +542,7 @@ class InnerObjectRender{
                 case "array": {
                     columns.push({
                         title: getLabel(item),
-                        field: item["name"],
+                        field: name,
                         sortable: false,
                         editable: false,
                         formatter: formatterKV,
@@ -551,7 +554,7 @@ class InnerObjectRender{
                     if (item["enum"]) {
                         columns.push({
                             title: getLabel(item),
-                            field: item["name"],
+                            field: name,
                             sortable: true,
                             detailFormatter: NotDetailFormatterMap,
                             editable: {
@@ -563,13 +566,13 @@ class InnerObjectRender{
                         })
                     } else {
                         let typeInput = "text"
-                        if (item["type"] === "number" || item["type"] === "integer") {
+                        if (item["eo:type"] === "number" || item["eo:type"] === "integer") {
                             typeInput = "number"
                         }
                         columns.push({
 
                             title: getLabel(item),
-                            field: item["name"],
+                            field: name,
                             sortable: true,
                             width: 200,
                             detailFormatter: NotDetailFormatterMap,
@@ -691,7 +694,7 @@ class ArrayRenderEnum {
     }
 
 }
-
+// 基础类型的数组
 class ArrayRenderSimple {
     constructor(options) {
         const panel=options["panel"]
@@ -718,7 +721,7 @@ class ArrayRenderSimple {
         $itemPanel.append($newItem)
         $newInput.on("change", function () {
             let v = $(this).val()
-            if (items["type"] === "integer" || items["type"] === "number") {
+            if (items["eo:type"] === "integer" || items["eo:type"] === "number") {
                 v = Number(value)
             }
             if (v !== "") {
@@ -791,7 +794,7 @@ class ArrayRenderSimple {
         })
     }
 }
-
+// 结构体
 class ObjectRender {
     constructor(options) {
         this.Options = options
@@ -801,14 +804,15 @@ class ObjectRender {
         const generator = options["generator"]
         this.Fields = {}
 
-        if (schema["type"] !== "object") {
+        if (schema["eo:type"] !== "object") {
             return
         }
 
         let properties = options["schema"]["properties"]
-        for (let i in properties) {
-            let sub = properties[i]
-            let name = sub["name"]
+        let sorts = options["schema"]["ui:sort"]
+        for (let i in sorts) {
+            let name = sorts[i]
+            let sub = properties[name]
             const subId = `${Id}.${name}`
 
             this.Fields[name] = new FieldPanel({
@@ -844,13 +848,13 @@ class ObjectRender {
 
 function BaseGenerator(options) {
     const schema = options["schema"]
-    switch (schema["type"]) {
+    switch (schema["eo:type"]) {
         case "object": {
             return new ObjectRender(options)
         }
         case "array": {
             const items = schema["items"]
-            switch (items["type"]) {
+            switch (items["eo:type"]) {
                 case "object": {
                     return new InnerObjectRender(options)
                 }
@@ -868,7 +872,7 @@ function BaseGenerator(options) {
                     return new ArrayRenderSimple(options)
                 }
             }
-            throw `not allow type:${schema["type"]} in array`
+            throw `not allow type:${schema["eo:type"]} in array`
         }
         case "map": {
             return new MapRender(options)
@@ -893,7 +897,7 @@ function BaseGenerator(options) {
             return null
         }
     }
-    throw `unknown type:${schema["type"]}`
+    throw `unknown type:${schema["eo:type"]}`
 }
 class SchemaHandler {
     constructor(schema) {
@@ -901,30 +905,18 @@ class SchemaHandler {
     }
     toJsonSchema(s){
         let schema = Object.assign({},s)
-        switch (schema["type"]){
+        switch (schema["eo:type"]){
             case "map":{
-                schema["type"] = "object"
-                schema["additionalProperties"]=this.toJsonSchema(schema["items"])
-                delete schema["items"]
+                schema["additionalProperties"] = this.toJsonSchema(schema["additionalProperties"])
                 break
             }
             case "array":{
                 schema["items"] = this.toJsonSchema(schema["items"])
                 break
             }
-            case "require":{
-                schema["type"] = "string"
-                break
-            }
-            case "object":{
-                let properties = schema["properties"]
-                schema["properties"] = {}
-                for (let i in properties){
-                    let name =properties[i].name
-                    schema.properties[name] = this.toJsonSchema(properties[i])
-                }
-            }
         }
+        delete schema["ui:sort"]
+        delete schema["eo:type"]
         delete schema["name"]
         delete schema["switch"]
         delete schema["skill"]
