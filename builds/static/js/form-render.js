@@ -259,19 +259,22 @@ class SwitchRender extends BaseValue {
         super(schema, $(`<input id="${path}" type="checkbox" class="form-control-sm" data-toggle="toggle" data-size="sm"/>`))
 
         $(panel).append(this.Target)
-        this.Target.bootstrapToggle()
+        this.Target.bootstrapToggle({
+            on: 'Enabled',
+            off: 'Disabled'
+        })
         this.Value = false
     }
 
     get Value() {
-        return $(this.Target).attr("checked") === "checked"
+        return $(this.Target).prop("checked")
     }
 
     set Value(v) {
         if (v === true || v === "true") {
-            $(this.Target).attr('checked', 'checked');
+            this.Target.bootstrapToggle("on");
         } else {
-            $(this.Target).removeAttr('checked');
+            this.Target.bootstrapToggle("off");
         }
     }
 }
@@ -945,9 +948,11 @@ class FormRender {
         // const generator = options["generator"]
         const name = options["name"]
         const newOption = Object.assign({
-            generator:BaseGenerator,
-        },options)
 
+        },options)
+        if (!newOption.generator){
+            newOption.generator = BaseGenerator
+        }
         this.JsonSchema = new SchemaHandler(schema)
         // if (!generator || typeof generator !== "function") {
         //     options["generator"] = BaseGenerator
@@ -956,7 +961,7 @@ class FormRender {
         this.ObjectName = `${RootId}.${name}`
         newOption["path"] = this.ObjectName
 
-        this.Object = newOption.generator(newOption)
+        this.Object = newOption["generator"](newOption)
     }
 
     check() {
