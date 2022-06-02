@@ -297,10 +297,10 @@ class Ace{
         this.editor = editor
     }
     get Value(){
-        return this.editor.getSession().getValue()
+        return JSON.parse(this.editor.getSession().getValue())
     }
     set Value(v){
-        this.editor.getSession().setValue(v)
+        this.editor.getSession().setValue(JSON.stringify(v, null, 2))
     }
 }
 class Table{
