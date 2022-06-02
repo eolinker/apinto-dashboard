@@ -3,7 +3,7 @@ const nameRule = /^[a-zA-Z\d_]+$/;
 class Render {
     constructor(panel, schema, name, data, generator, callback) {
         const options = {
-            panel: panel,
+            panel: $(panel),
             schema: schema,
             name: name,
             generator: generator
