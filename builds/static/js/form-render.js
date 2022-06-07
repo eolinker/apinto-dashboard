@@ -215,7 +215,7 @@ class BaseValue  {
     }
 
     get Value() {
-        let val =  valueForType(this.schema["eo:type"], $(this.Target).val())
+        let val =  valueForType(this.Schema["eo:type"], $(this.Target).val())
         console.log(`get value:${this.Target.attr("id")}[${typeof val}]=${val}`)
         return val
     }
