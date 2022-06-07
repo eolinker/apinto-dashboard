@@ -259,8 +259,8 @@ class SwitchRender extends BaseValue {
 
         $(panel).append(this.Target)
         this.Target.bootstrapToggle({
-            on: 'Enabled',
-            off: 'Disabled'
+            on: '开启',
+            off: '关闭'
         })
         this.Value = false
     }
@@ -379,13 +379,13 @@ class MapRender   {
 
         const Items = this.Schema["additionalProperties"]
         const Id = this.Id
-        const keySchema = {type: "string"}
+        const keySchema = {type: "string","eo:type":"string"}
 
         this.$Panel.empty()
         switch (Items["eo:type"]) {
-            case "object", "map": {
-                break
-            }
+            case "object":
+            case "map":
+                break;
             default: {
                 this.$Panel.append(`
 <div class="input-group input-group-sm m-2">
@@ -411,7 +411,7 @@ class MapRender   {
                     childItemKey.Value = k
                     itemPanel.append('<div class="input-group-prepend"><div class="input-group-text  btn" >=</div></div>')
                     let childItemValue = new BaseInputRender({panel:itemPanel, schema:Items, path:`${Id}_value_${k}`})
-                    childItemValue.Value = v[k]
+                    childItemValue.Value = v[k];
                 }
                 break
             }
@@ -849,6 +849,7 @@ class ObjectRender {
 
 function BaseGenerator(options) {
     const schema = options["schema"]
+    console.log('BaseGenerator',schema)
     switch (schema["eo:type"]) {
         case "object": {
             return new ObjectRender(options)

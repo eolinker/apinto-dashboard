@@ -11,7 +11,9 @@ class Render {
         let target = $(panel)
         this.InitValue = data
 
+
         let renderHandler = new FormRender(options)
+
         if (data) {
             renderHandler.Value = data
         }
@@ -240,14 +242,16 @@ class ProfessionEditor extends ProfessionRender {
     init() {
         let o = this
         dashboard.get(`/api/${this.module}/${this.name}`, function (res) {
-            if (res.code !== 200) {
+            if (res.code !== 200 || res.data.length < 1) {
                 return http.handleError(res, "获取详情失败")
             }
-            if (!res.data["driver"]) {
+            let data = res.data[0]
+            if (!data["driver"]) {
                 return http.handleError(res, "获取driver失败")
             }
-            o.getDriverInfo(res.data["driver"], function (driver, render) {
-                o.updateUi(driver, render, res.data)
+
+            o.getDriverInfo(data["driver"], function (driver, render) {
+                o.updateUi(driver, render, data)
             })
         }, function (res) {
             return http.handleError(res, "获取详情失败")
