@@ -70,6 +70,10 @@ func main() {
 		Handler: routersModule,
 		Path:    "/profession/routers/",
 		NotView: true,
+	}, &apinto.Module{
+		NotView: true,
+		Handler: routersModule,
+		Path:    "/skill/routers",
 	})
 	ms := toModule(cf)
 	config.Modules = append(config.Modules, ms...)
