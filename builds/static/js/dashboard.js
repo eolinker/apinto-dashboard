@@ -63,7 +63,7 @@ let dashboard = {
         http.patch(url, data,  success, error)
     },
     delete:function (url, success, error){
-        http.delete(url, success, error)
+        http.delete(url,"", success, error)
     },
     create: function (url, data, success, error){
         http.post(url, data,  success, error)
