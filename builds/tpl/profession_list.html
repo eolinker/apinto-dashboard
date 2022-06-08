@@ -65,6 +65,7 @@
             let msg ="确认删除 "+row.name+" {{index .module.I18nName .zone}}?"
             common.confirm("删除{{index .module.I18nName .zone}}", msg, function (){
                 dashboard.delete("/api/{{.name}}/"+row.name, function (res) {
+                    console.log(`res.code`)
                     if(res.code === 200){
                         common.message("删除成功", "danger")
                         $table.bootstrapTable('remove', {
@@ -75,6 +76,7 @@
                     }
                     return http.handleError(res, "删除失败")
                 }, function (res) {
+                    console.log("delete")
                     return http.handleError(res, "删除失败")
                 })
             }, null)
