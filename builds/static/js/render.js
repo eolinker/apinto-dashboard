@@ -257,7 +257,7 @@ class ProfessionEditor extends ProfessionRender {
             }
 
             let data = res.data
-            data["scheme"] = res.data["scheme"].toUpperCase()
+
             o.getDriverInfo(res.data["driver"], function (driver, render) {
                 o.updateUi(driver, render, data)
             })
