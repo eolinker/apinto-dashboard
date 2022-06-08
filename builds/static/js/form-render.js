@@ -849,7 +849,6 @@ class ObjectRender {
 
 function BaseGenerator(options) {
     const schema = options["schema"]
-    console.log('BaseGenerator',schema)
     switch (schema["eo:type"]) {
         case "object": {
             return new ObjectRender(options)
