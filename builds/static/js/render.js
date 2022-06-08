@@ -17,6 +17,7 @@ class Render {
         if (data) {
             renderHandler.Value = data
         }
+        console.log("render data",data)
         if (callback) {
             callback()
         }
@@ -235,9 +236,23 @@ class ProfessionEditor extends ProfessionRender {
     constructor(module, options) {
 
         super(module, options)
-        this.name = name
+        this.name = options["worker"]
         this.init()
     }
+
+    initData(data) {
+        let o = this
+        $(o.options["id"]).attr("readonly", true)
+        $(o.options["id"]).val(`${data["id"]}`)
+
+        $(o.options["name"]).attr("readonly", true)
+        $(o.options["name"]).val(`${data["name"]}`)
+
+        $(o.options["drivers"]).attr("disabled", true)
+        $(o.options["drivers"]).append(`<option value="${data["driver"]}">${data["driver"]}</option>`)
+        $(o.options["drivers"]).val(`${data["driver"]}`)
+    }
+
 
     init() {
         let o = this
@@ -245,14 +260,13 @@ class ProfessionEditor extends ProfessionRender {
             if (res.code !== 200 || res.data.length < 1) {
                 return http.handleError(res, "获取详情失败")
             }
-            let data = res.data[0]
-            if (!data["driver"]) {
-                return http.handleError(res, "获取driver失败")
-            }
 
-            o.getDriverInfo(data["driver"], function (driver, render) {
+            let data = res.data
+            data["scheme"] = res.data["scheme"].toUpperCase()
+            o.getDriverInfo(res.data["driver"], function (driver, render) {
                 o.updateUi(driver, render, data)
             })
+            o.initData(data)
         }, function (res) {
             return http.handleError(res, "获取详情失败")
         })
