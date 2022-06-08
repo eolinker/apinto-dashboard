@@ -316,9 +316,8 @@ class RequireRender extends BaseValue {
         dashboard.searchSkill(ModuleName(),schema["skill"],function (res){
             let lastValue =
             $(select).empty()
-            if(schema["require"]){
+            if(schema["required"]){
                 $(select).append(`<option value="">请选择</option>`)
-
             }else{
                 $(select).append(`<option value="">不启用</option>`)
             }
