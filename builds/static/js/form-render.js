@@ -319,7 +319,11 @@ class RequireRender extends BaseValue {
             if(schema["required"]){
                 $(select).append(`<option value="">请选择</option>`)
             }else{
-                $(select).append(`<option value="">不启用</option>`)
+                if (schema["empty_label"]){
+                    $(select).append(`<option value="">${schema["empty_label"]}</option>`)
+                }else {
+                    $(select).append(`<option value="">不启用</option>`)
+                }
             }
             for (let i in res.data){
                 let d = res.data[i]
@@ -482,8 +486,8 @@ class InnerObjectRender extends BaseChangeHandler{
         const items = schema["items"]
         const p = $(panel)
         const $btn = $(`
-<div id="${Id}_toolbar">
-<button id="${Id}_AddButton" type="button" class="btn btn-secondary">Add</button>
+<div id="${Id}_toolbar" class="m-1">
+<button id="${Id}_AddButton" type="button" class="btn btn-secondary btn-sm">Add</button>
 </div>`)
         p.append($btn)
         $btn.on("click","button", function (event) {
@@ -506,21 +510,30 @@ class InnerObjectRender extends BaseChangeHandler{
         const uiSort = items["ui:sort"]
         let lastDetailRow = undefined
         let lastField = undefined
+        let lastValue = undefined
         const o = this
         function DetailFormatterHandler(fieldIndex) {
 
             this.detailFormatter = function (index, row, $element) {
 
-                if (typeof lastDetailRow !== "undefined" && lastDetailRow !== index) {
+                if (typeof lastDetailRow !== "undefined" && index!== lastDetailRow ) {
+
+                    let data = $Table.bootstrapTable('getData')
+                    data[lastDetailRow][lastField] = lastValue.Value
+                    $Table.bootstrapTable("updateRow",{
+                        index: 1,
+                        row: data[lastDetailRow]
+                    })
                     $Table.bootstrapTable('collapseRow', lastDetailRow)
                 }
+
                 lastDetailRow = index
-                lastField = fieldIndex
+
                 let name = uiSort[fieldIndex]
                 let item = properties[name]
-
-                let child = generator({panel:$element, schema:item, generator:generator, path:`${Id}_${name}`})
-                child.Value = row[name]
+                lastField = name
+                lastValue = generator({panel:$element, schema:item, generator:generator, path:`${Id}_${name}`})
+                lastValue.Value = row[name]
                 return ""
             }
             return this
@@ -528,7 +541,14 @@ class InnerObjectRender extends BaseChangeHandler{
 
         function NotDetailFormatterMap(index, row, $element) {
             if (typeof lastDetailRow !== "undefined") {
-               $Table.bootstrapTable('collapseRow')
+                let data = $Table.bootstrapTable('getData')
+                data[lastDetailRow][lastField] = lastValue.Value
+                $Table.bootstrapTable("updateRow",{
+                    index: 1,
+                    row: data[lastDetailRow]
+                })
+                $Table.bootstrapTable('collapseRow', lastDetailRow)
+
                 lastDetailRow = undefined
                 lastField = undefined
             }
@@ -549,13 +569,13 @@ class InnerObjectRender extends BaseChangeHandler{
 
         const columns = []
         columns.push({
-            title: "",
+            title: "index",
             field: "__index",
             sortable: false,
             editable: false,
             detailFormatter: NotDetailFormatterMap,
             formatter: function (v, row, index) {
-                return index
+                return index+1
             }
         })
 
@@ -665,6 +685,9 @@ class InnerObjectRender extends BaseChangeHandler{
 
                 o.onChange()
             },
+            onCollapseRow:function (index, row, detailView) {
+                console.log(index,row,detailView)
+            }
         }
         $Table.bootstrapTable(tableOptions);
         this.Value = []
@@ -812,7 +835,7 @@ class ArrayRenderSimple extends BaseChangeHandler{
 
         $itemPanel.delegate('button', "click", function () {
             let itemId = $(this).attr('data-itemId')
-            $itemPanel.children(`#array-item_${itemId}`).remove()
+            $(document.getElementById(`array-item_${itemId}`)).remove()
             o.onChange()
         })
 
@@ -902,7 +925,7 @@ class ObjectRender extends BaseChangeHandler{
 
         switch (typeof value  ){
             case "string":{
-                value = `"{value}"`
+                value = `"${value}"`
                 break
             }
             case "object":
