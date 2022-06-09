@@ -177,7 +177,25 @@ function createLabel(name,schema, id, appendAttr) {
     }
     return `<label class="col-sm-3 col-form-label text-right text-nowrap" ${idFor} ${appendAttr}>${require}${getLabel(name,schema)}:</label>`
 }
+class BaseChangeHandler {
+    constructor(id) {
+        this.Id = id
+    }
+    onChange(fn){
 
+        if (fn){
+            if(!this.ChangeHandler){
+                this.ChangeHandler = new Array()
+            }
+            this.ChangeHandler.push(fn)
+        }else{
+            console.log("change:",this.Id)
+            for(let i in this.ChangeHandler){
+                this.ChangeHandler[i].apply(this)
+            }
+        }
+    }
+}
 class BaseValue  {
     constructor(schema, target) {
 
@@ -189,7 +207,12 @@ class BaseValue  {
         const JsonSchema = new SchemaHandler(schema).JsonSchema
         this.InputValid(JsonSchema,target)
     }
-
+    onChange(fn){
+        const o = this
+        $(this.Target).on("change",function (){
+            fn.apply(o)
+        })
+    }
     ValidHandler(v) {
         const id =  this.Target.attr("id")
         console.debug("ValidHandler:",id,"=",v)
@@ -293,9 +316,8 @@ class RequireRender extends BaseValue {
         dashboard.searchSkill(ModuleName(),schema["skill"],function (res){
             let lastValue =
             $(select).empty()
-            if(schema["require"]){
+            if(schema["required"]){
                 $(select).append(`<option value="">请选择</option>`)
-
             }else{
                 $(select).append(`<option value="">不启用</option>`)
             }
@@ -321,24 +343,26 @@ class BaseInputRender extends BaseValue {
 }
 
 class FieldPanel {
-    constructor(name,options) {
-
-
+    constructor(name,options,parent) {
         const panel=options["panel"]
         const schema=options["schema"]
         const generator = options["generator"]
         const id = options["path"]
-
+        this.Parent = parent
+        this.Id = id
         if (schema["eo:type"] === "object"){
-            const $FieldLabelPanel = $(`<div class="form-group row mb-1 overflow-hidden">${createLabel(name,schema,id)}</div>`)
-            panel.append($FieldLabelPanel)
+            this.$Panel = $(`<div class="form-group row mb-1 overflow-hidden">${createLabel(name,schema,id)}</div>`)
+            panel.append(this.$Panel)
+//             const $FieldValuePanel = $(`
+// <div class="form-group row mb-1 overflow-hidden">
+//     <div class="col-sm-11 offset-sm-1 border p-sm-1">
+//     </div>
+// </div>`)
             const $FieldValuePanel = $(`
-<div class="form-group row mb-1 overflow-hidden">
     <div class="col-sm-11 offset-sm-1 border p-sm-1">
-    </div>
-</div>`)
-            panel.append($FieldValuePanel)
-             this.$Value = generator({panel:$FieldValuePanel.children(),schema:schema,generator: generator,path:id})
+    </div>`)
+            this.$Panel.append($FieldValuePanel)
+             this.$Value = generator({panel:$FieldValuePanel,schema:schema,generator: generator,path:id})
 
         }else{
             const $FieldValuePanel = $(`<div class="col-sm-9"></div>`)
@@ -348,18 +372,38 @@ class FieldPanel {
             this.$Value = generator({panel:$FieldValuePanel,schema:schema,generator: generator,path:id})
         }
     }
+    onChange(fn){
+        console.log(this.Id)
+        const o = this
+        this.$Value.onChange(function (){
+            fn.apply(o)
+        })
+    }
+    Show(){
+
+        $(this.$Panel).show()
+    }
+    Hide(){
+        $(this.$Panel).hide()
+    }
     set Value(v){
         this.$Value.Value = v
     }
     get Value(){
-        return this.$Value.Value
+        if ($(this.$Panel).is(":visible")){
+            return this.$Value.Value
+        }else{
+            return {}
+        }
+
     }
 
 }
 
-class MapRender   {
+class MapRender extends BaseChangeHandler {
 
     constructor(options) {
+        super(options["path"])
         const panel=options["panel"]
         const schema=options["schema"]
         const generator = options["generator"]
@@ -425,8 +469,9 @@ class MapRender   {
 
 }
 
-class InnerObjectRender{
+class InnerObjectRender extends BaseChangeHandler{
     constructor(options) {
+        super(options["path"])
         const panel=options["panel"]
         const schema=options["schema"]
         const generator = options["generator"]
@@ -461,7 +506,7 @@ class InnerObjectRender{
         const uiSort = items["ui:sort"]
         let lastDetailRow = undefined
         let lastField = undefined
-
+        const o = this
         function DetailFormatterHandler(fieldIndex) {
 
             this.detailFormatter = function (index, row, $element) {
@@ -525,7 +570,8 @@ class InnerObjectRender{
                         sortable: false,
                         editable: false,
                         formatter: formatterKV,
-                        detailFormatter: new DetailFormatterHandler(i).detailFormatter
+                        detailFormatter: new DetailFormatterHandler(i).detailFormatter,
+
                     })
                     break
                 }
@@ -616,6 +662,8 @@ class InnerObjectRender{
                 //     data.Data[rowIndex][field] = row
                 // }
                 // return true;
+
+                o.onChange()
             },
         }
         $Table.bootstrapTable(tableOptions);
@@ -635,8 +683,9 @@ class InnerObjectRender{
 
 }
 
-class InnerMapRender {
+class InnerMapRender extends BaseChangeHandler{
     constructor(options) {
+        super(options["path"])
         // super(options["schema"],path)
     }
 
@@ -671,6 +720,9 @@ class ArrayRenderEnum {
         p.append(itemPanel)
     }
 
+    onChange(fn){
+
+    }
     get Value() {
         const list = []
         $(`input[name="${this.Id}"]`).each(function () {
@@ -695,9 +747,11 @@ class ArrayRenderEnum {
     }
 
 }
+
 // 基础类型的数组
-class ArrayRenderSimple {
+class ArrayRenderSimple extends BaseChangeHandler{
     constructor(options) {
+        super(options["path"])
         const panel=options["panel"]
         const schema=options["schema"]
         const generator = options["generator"]
@@ -736,7 +790,7 @@ class ArrayRenderSimple {
         })
 
         let lastIndex = 0
-
+        const o = this
         function add(value) {
             const itemId = `${Id}_item_${lastIndex++}`
 
@@ -751,17 +805,18 @@ class ArrayRenderSimple {
             $item.append($itemInput)
             $itemPanel.append($item)
             $itemInput.val(value)
+            o.onChange()
             return false
         }
 
-        this.add = add
+
         $itemPanel.delegate('button', "click", function () {
             let itemId = $(this).attr('data-itemId')
             $itemPanel.children(`#array-item_${itemId}`).remove()
+            o.onChange()
         })
 
     }
-
 
     get Value() {
         let val = []
@@ -796,8 +851,9 @@ class ArrayRenderSimple {
     }
 }
 // 结构体
-class ObjectRender {
+class ObjectRender extends BaseChangeHandler{
     constructor(options) {
+        super(options["path"])
         this.Options = options
         const panel = options["panel"]
         const schema = options["schema"]
@@ -808,7 +864,7 @@ class ObjectRender {
         if (schema["eo:type"] !== "object") {
             return
         }
-
+        const o = this
         let properties = options["schema"]["properties"]
         let sorts = options["schema"]["ui:sort"]
         for (let i in sorts) {
@@ -816,15 +872,64 @@ class ObjectRender {
             let sub = properties[name]
             const subId = `${Id}.${name}`
 
-            this.Fields[name] = new FieldPanel(name,{
+           let field = new FieldPanel(name,{
                 panel:panel,
                 schema:sub,
                 generator:generator,
                 path:subId
+            },this)
+            this.Fields[name] =field
+            field.onChange(function (){
+                o.switch(name,this.Value)
+                o.onChange()
             })
         }
-    }
 
+        let Switches = {}
+        for (let name in properties){
+            let sub = properties[name]
+            if (sub["switch"]){
+                Switches[name] = sub["switch"]
+            }
+        }
+        this.Switches = Switches
+        for (let name in this.Fields){
+            this.switch(name,this.Fields[name].Value)
+        }
+
+    }
+    switch(name,value){
+
+        switch (typeof value  ){
+            case "string":{
+                value = `"{value}"`
+                break
+            }
+            case "object":
+            case "undefined":{
+                return
+            }
+            default:{
+                break
+            }
+        }
+
+        for (let f in this.Switches){
+            let expression = this.Switches[f]
+            try {
+                let funcStr = `(function(${name}){return ${expression}})(${value})`
+                console.log(funcStr)
+                let r = eval( funcStr)
+                if (r === true){
+                    this.Fields[f].Show()
+                }else{
+                    this.Fields[f].Hide()
+                }
+            }catch (e) {
+                console.log(e)
+            }
+        }
+    }
     get Value() {
         let v = {}
         for (let k in this.Fields) {
