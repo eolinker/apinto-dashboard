@@ -37,9 +37,9 @@ class Render {
     }
 
     ResetVal() {
-        if (this.panel) {
+
             this.panel.Value = this.InitValue
-        }
+
     }
 
     set Value(data) {
@@ -49,24 +49,19 @@ class Render {
     }
 
     get Value() {
-        if (this.panel) {
-            return this.panel.Value
-        }
-        return {}
+        return this.panel.Value
     }
 
     Check() {
-        if (this.panel) {
-            return this.panel.check()
-        }
-        return false
+        return this.panel.check()
     }
 
     Submit(success, error) {
-        if (this.Check() === true) {
+        let ckr  = this.Check()
+        if (ckr  === true) {
             success(this.Value)
         } else {
-            error()
+            error(ckr)
         }
     }
 
@@ -220,8 +215,8 @@ class ProfessionCreator extends ProfessionRender {
                 }, function (res) {
                     http.handleError(res, "新增失败")
                 })
-            }, function () {
-                common.message("config format error", "danger")
+            }, function (err) {
+                common.message("config format error:"+err, "danger")
             })
         }
     }
@@ -262,7 +257,7 @@ class ProfessionEditor extends ProfessionRender {
             }
 
             let data = res.data
-            data["scheme"] = res.data["scheme"].toUpperCase()
+
             o.getDriverInfo(res.data["driver"], function (driver, render) {
                 o.updateUi(driver, render, data)
             })
@@ -282,11 +277,12 @@ class ProfessionEditor extends ProfessionRender {
                         return
                     }
                     common.message("更新成功", "success")
+                    Back()
                 }, function (res) {
                     http.handleError(res, "更新失败")
                 })
-            }, function () {
-                common.message("config format error", "danger")
+            }, function (err) {
+                common.message("config format error:"+err, "danger")
             })
         }
 
