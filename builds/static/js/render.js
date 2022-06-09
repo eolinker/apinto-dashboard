@@ -1,16 +1,14 @@
 const nameRule = /^[a-zA-Z\d_]+$/;
 
 class Render {
-    constructor(panel, schema, name, data, generator, callback) {
+    constructor(panel, schema, name, data,  callback) {
         const options = {
             panel: $(panel),
             schema: schema,
             name: name,
-            generator: generator
         }
         let target = $(panel)
         this.InitValue = data
-
 
         let renderHandler = new FormRender(options)
 
@@ -23,7 +21,7 @@ class Render {
         }
         this.panel = renderHandler
         this.target = target
-        this.generator = generator
+
     }
 
     Reset(schema, name) {
@@ -31,7 +29,6 @@ class Render {
         this.panel = new FormRender({
             panel: this.target,
             schema: schema,
-            generator: this.generator,
             name: name
         })
     }
@@ -92,7 +89,7 @@ class ProfessionRender {
     updateUi(driver, render, data) {
         render = formatProfessionRender(render)
         let btn = this.options["btns"]
-        this.ui = new Render(this.options["panel"], render, driver, data, this.generator, function () {
+        this.ui = new Render(this.options["panel"], render, driver, data,  function () {
             if ($(btn).length > 0 && !$(btn).is(":visible")) {
                 $(btn).show()
             }
