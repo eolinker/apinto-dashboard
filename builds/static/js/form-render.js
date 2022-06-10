@@ -104,12 +104,15 @@ function createEnum(schema, id,required, appendAttr) {
 
 function createInput(schema, id,required, appendAttr) {
     let readOnly = ""
-    this.schema = schema
+
     if (schema["readonly"] === true) {
         readOnly = "readonly"
     }
-
-    let input = `<input ${readOnly} class="form-control form-control-sm" id="${id}" aria-describedby="validation_${id}" `;
+    let idstr = ""
+    if (id && id.length>0){
+        idstr = `id="${id}"`
+    }
+    let input = `<input ${readOnly} class="form-control form-control-sm" ${idstr} aria-describedby="validation_${id}" `;
     if (appendAttr) {
         input += appendAttr
     }
@@ -192,10 +195,10 @@ function createLabel(name,schema, id,required, appendAttr) {
         idFor = ` for="${id}"`
     }
     let require = ""
-    if (required) {
+    if (required === true) {
         require = '<span style="color: red">*</span>'
     }
-    return `<label class="col-sm-3 col-form-label text-right text-nowrap" ${idFor} ${appendAttr}>${require}${getLabel(name,schema)}:</label>`
+    return `<label class=" col-form-label  text-nowrap" ${idFor} ${appendAttr}>${require}${getLabel(name,schema)}</label>`
 }
 class BaseChangeHandler {
     constructor(path) {
@@ -233,21 +236,24 @@ class BaseValue {
             fn.apply(o)
         })
     }
+    isOk(v){
+        return
+    }
     ValidHandler(v) {
         const id =  this.Id
         console.debug("ValidHandler:",id,"=",v)
         let value = v
         value = valueForType(this.Schema["eo:type"], value)
-
-        let rs = CheckBySchema(id, this.Schema, value)
+        let rs = this.isOk(v)
         if (typeof rs === "undefined") {
-            $(this).removeClass("is-invalid")
-            $(this).addClass("is-valid")
-
+            rs = CheckBySchema(id, this.Schema, value)
+        }
+        if (typeof rs === "undefined") {
+            $(this.Target).removeClass("is-invalid")
+            $(this.Target).addClass("is-valid")
         } else {
-            $(this).removeClass("is-valid")
-            $(this).addClass("is-invalid")
-
+            $(this.Target).removeClass("is-valid")
+            $(this.Target).addClass("is-invalid")
         }
     }
     InputValid(schema, target) {
@@ -258,9 +264,7 @@ class BaseValue {
     }
 
     get Value() {
-        let val =  valueForType(this.Schema["eo:type"], $(this.Target).val())
-        console.log(`get value:${this.Target.attr("id")}[${typeof val}]=${val}`)
-        return val
+        return valueForType(this.Schema["eo:type"], $(this.Target).val())
     }
 
     set Value(v) {
@@ -271,7 +275,17 @@ class BaseValue {
                v = schema["default"]
             }
         }
-        $(this.Target).val(v)
+        switch($(this.Target).get(0).tagName ){
+            case "select":{
+                $(this.Target).find(`option[value="${v}"]`).prop("selected", true);
+                break
+            }
+            default:{
+                $(this.Target).val(v)
+            }
+        }
+
+
     }
 
 }
@@ -327,9 +341,8 @@ class RequireRender extends BaseValue {
         const path = options["path"]
         const panel = options["panel"]
 
-        super(schema, $(`<select id=${readId(path)} class="form-control form-control-sm">
- 
-</select>`),path)
+        super(schema, $(`<select id=${readId(path)} class="form-control form-control-sm"></select>`),path)
+        this.MOptions = options
         $(panel).append(this.Target)
 
         const select = this.Target
@@ -351,9 +364,12 @@ class RequireRender extends BaseValue {
             }
         })
     }
-    set Value(v){
-        v= v.toLowerCase()
-        $(this.Target).find(`option[value="${v}"]`).prop("selected", true);
+    isOk(v) {
+        if (!v || v.length === 0){
+            if (this.MOptions["required"]){
+                return "请选择"
+            }
+        }
     }
 }
 
@@ -371,32 +387,20 @@ class BaseInputRender extends BaseValue {
 }
 
 class FieldPanel {
-    constructor(name,options,parent) {
+    constructor(name,options) {
         const panel=options["panel"]
         const schema=options["schema"]
 
-        this.Parent = parent
-        this.Id = readId(options["path"])
-        if (schema["eo:type"] === "object"){
-            this.$Panel = $(`<div class="form-group row mb-1 overflow-hidden">${createLabel(name,schema,this.Id,options["required"])}</div>`)
-            panel.append(this.$Panel)
-//             const $FieldValuePanel = $(`
-// <div class="form-group row mb-1 overflow-hidden">
-//     <div class="col-sm-11 offset-sm-1 border p-sm-1">
-//     </div>
-// </div>`)
-            const $FieldValuePanel = $(`
-    <div class="col-sm-11 offset-sm-1 border p-sm-1">
-    </div>`)
-            this.$Panel.append($FieldValuePanel)
-             this.$Value = readGenerator(options)({panel:$FieldValuePanel,schema:schema,generator: options["generator"],path:options["path"],name:name})
 
-        }else{
-            const $FieldValuePanel = $(`<div class="col-sm-9"></div>`)
-            this.$Panel  = $(`<div class="form-group row mb-1 overflow-hidden">${createLabel(name,schema,this.Id,options["required"])}</div>`)
-            this.$Panel.append($FieldValuePanel)
-            panel.append(this.$Panel)
-            this.$Value = readGenerator(options)({panel:$FieldValuePanel,schema:schema,generator: options["generator"],path:options["path"],name})
+        this.Id = readId(options["path"])
+        this.$Panel = $(`<div class=""></div>`)
+        panel.append(this.$Panel)
+        let valuePanel = $(`<div class=""></div>`)
+        this.$Panel.append(`<div class="">${createLabel(name,schema,this.Id,options["required"])}</div>`)
+        this.$Panel.append(valuePanel)
+        this.$Value = readGenerator(options)({panel:valuePanel,schema:schema,generator: options["generator"],path:options["path"],name:name,required:options["required"]})
+        if (schema["type"] === "object"){
+            valuePanel.addClass("border-top pl-5")
         }
     }
     onChange(fn){
@@ -430,7 +434,81 @@ class PluginsRender extends BaseChangeHandler{
     constructor(options) {
         super(options["path"]);
 
+    }
+}
+class SimpleMapRender extends BaseChangeHandler{
+    constructor(options) {
+        super(options["path"]);
+        this.MOptions = options
+        const panel=options["panel"]
+        this.Schema = options["schema"]
+        this.Items = this.Schema["additionalProperties"]
+        let myPanel = $(`<div class="border-top pt-1"></div>`)
+        this.$itemPanel = $(`<div id="${this.Id}_maps" class="pt-1" role="toolbar"></div>`)
+        panel.append(myPanel)
+        myPanel.append(this.$itemPanel)
 
+        this.ItemCount = 0
+        this.Values = {}
+        myPanel.append(`<div class="pt-1"> <button id="${this.Id}_add" type="button" class="btn btn-success btn-sm">+</button></div>`)
+        const o = this
+        myPanel.on("click",`#${this.Id}_add`,function (){
+            o.add()
+        })
+    }
+    add(k,v) {
+        let index = this.ItemCount++
+        let $item = $(`<div class="input-group input-group-sm mt-2" data-index="${index}">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">key</span>
+                        </div>
+                        </div>`)
+        this.$itemPanel.append($item)
+        let keyInput = readGenerator(this.MOptions)({
+            schema: {"type": "string", "eo:type": "string"},
+            panel: $item,
+            path: `${this.MOptions["path"]}.item_key_${index}`
+        })
+        $item.append(`<div class="input-group-prepend"><span class="input-group-text">value</span></div>`)
+
+
+        let valueInput = readGenerator(this.MOptions)({
+            schema: this.Items,
+            panel: $item,
+            path: `${this.MOptions["path"]}.item_value_${index}`
+        })
+        $item.append(`<div class="input-group-prepend"><button type="button" class="btn btn-danger" > - </button></div>`)
+        let it = {key: keyInput, value: valueInput}
+        this.Values[index] = it
+        $($item).on("click", "button", function () {
+            $item.remove()
+            delete this.Values[index]
+        })
+        if (k){
+            keyInput.Value = k
+        }
+        if (v){
+            valueInput.Value = k
+        }
+        return it
+    }
+    get Value(){
+        let v={}
+        for (let i in this.Values){
+            let it = this.Values[i]
+            let key = it.key.Value
+            if (key.length>0){
+                v[key] = it.value.Value
+            }
+        }
+        return v
+    }
+    set Value(v){
+        this.$itemPanel.empty()
+
+        for (let k in v){
+            this.add(k,v[k])
+        }
     }
 }
 class MapRender extends BaseChangeHandler {
@@ -441,10 +519,8 @@ class MapRender extends BaseChangeHandler {
         const panel=options["panel"]
         this.Schema = options["schema"]
 
-        this.$Panel =$(`<div id='${path}_panel' class='container-fluid'></div>`)
+        this.$Panel =$(`<div id='${path}_panel'></div>`)
         $(panel).append(this.$Panel)
-
-
 
     }
 
@@ -465,11 +541,11 @@ class MapRender extends BaseChangeHandler {
     <div class="input-group-prepend">
         <div class="input-group-text  btn" id="btnGroupAddon_${Id}_new">+</div>
     </div>
-    ${createInput(keySchema, `${Id}_key`, `aria-describedby="btnGroupAddon_${Id}_new" placeholder="Input new key" `)}
+    ${createInput(keySchema, `${Id}_key`, true,`aria-describedby="btnGroupAddon_${Id}_new" placeholder="Input new key" `)}
     <div class="input-group-prepend ">
         <div class="input-group-text  btn" id="btnGroupAddon_${Id}_eq">=</div>
     </div>
-    ${createInput(Items, `${Id}_value`, `aria-describedby="btnGroupAddon_${Id}_eq" placeholder="Input new value" `)}
+    ${createInput(Items, `${Id}_value`, true,`aria-describedby="btnGroupAddon_${Id}_eq" placeholder="Input new value" `)}
 </div>`)
 
                 for (let k in v) {
@@ -738,7 +814,7 @@ class ArrayRenderEnum extends BaseChangeHandler{
         this.Enum = items["enum"]
 
         let p = $(panel);
-        let itemPanel = `<div id="${Id}_items" class="border p-sm-1 btn-toolbar " role="toolbar">`
+        let itemPanel = `<div id="${Id}_items" class="border p-sm-1 btn-toolbar form-control" role="toolbar">`
 
         for (let i in items["enum"]) {
             let e = items["enum"][i]
@@ -784,57 +860,39 @@ class ArrayRenderSimple extends BaseChangeHandler{
 
         const Id = this.Id
 
-        const JsonSchema = new SchemaHandler(schema["items"])
-
         const items = schema["items"]
-
-        let p = $(panel);
-        const $itemPanel = $(`<div id="${Id}_items" class="border p-sm-1 btn-toolbar " role="toolbar"></div>`)
-        p.append($itemPanel)
-        const $newInput = $(createInput(items, `${Id}_new`, `aria-describedby="btnGroupAddon_${Id}_new" placeholder="Input new" `) )
-        const $newItem = $(`
-<div class="input-group input-group-sm m-2">
-    <div class="input-group-prepend ">
-        <div class="input-group-text  btn" id="btnGroupAddon_${Id}_new">+</div>
-    </div>
-</div>`)
-        $newItem.append($newInput)
-        $itemPanel.append($newItem)
-        $newInput.on("change", function () {
-            let v = $(this).val()
-            if (items["eo:type"] === "integer" || items["eo:type"] === "number") {
-                v = Number(value)
-            }
-            if (v !== "") {
-               let ckr = CheckBySchema(Id, JsonSchema.JsonSchema, v)
-                if (typeof ckr === "undefined") {
-                    add(v)
-                    $(this).val("")
-                }
-            }
-            return false
+        let myPanel = $(`<div class="border-top pt-1"></div>`)
+        const $itemPanel = $(`<div id="${Id}_items" class="pt-1" role="toolbar"></div>`)
+        panel.append(myPanel)
+        myPanel.append($itemPanel)
+        myPanel.append(`<div class="pt-1"> <button id="${this.Id}_add" type="button" class="btn btn-success btn-sm">+</button></div>`)
+        myPanel.on("click",`#${this.Id}_add`,function (){
+            add()[0].focus()
         })
-
+        this.ItemPanel = $itemPanel
         let lastIndex = 0
         const o = this
-        function add(value) {
+        function add() {
             const itemId = `${Id}_item_${lastIndex++}`
 
             const appendAtt = ` array-for="${Id}" aria-describedby="btnGroupAddon_${itemId}" `
-            const $itemInput = $( createInput(items, itemId, appendAtt))
+            const $itemInput = $(createInput(items, itemId,true, appendAtt))
             const $item = $(`
 <div class="input-group input-group-sm m-2" id="array-item_${itemId}">
     <div class="input-group-prepend">
         <button class="btn btn-danger" id="btnGroupAddon_${itemId}" type="button" aria-describedby="btnGroupAddon_${itemId}" data-itemId="${itemId}"> - </button>
     </div>
 </div>`)
-            $item.append($itemInput)
+            $item.prepend($itemInput)
             $itemPanel.append($item)
-            $itemInput.val(value)
-            o.onChange()
-            return false
-        }
 
+            $itemInput.on("change",function (){
+                o.onChange()
+            })
+
+            return $itemInput
+        }
+        this.add = add
 
         $itemPanel.delegate('button', "click", function () {
             let itemId = $(this).attr('data-itemId')
@@ -846,7 +904,7 @@ class ArrayRenderSimple extends BaseChangeHandler{
 
     get Value() {
         let val = []
-        $(`[array-for='${this.Id}']`).each(function () {
+        this.ItemPanel.find(`[array-for='${this.Id}']`).each(function () {
             val.push($(this).val())
         })
         return val
@@ -885,8 +943,9 @@ class ObjectRender extends BaseChangeHandler{
         const schema = options["schema"]
         const Id = this.Id
 
+        this.$Panel = panel
         this.Fields = {}
-
+        // $(panel).append(this.$Panel)
         if (schema["eo:type"] !== "object") {
             return
         }
@@ -900,12 +959,12 @@ class ObjectRender extends BaseChangeHandler{
             const subId = `${Id}.${name}`
 
            let field = new FieldPanel(name,{
-                panel:panel,
+                panel:this.$Panel,
                 schema:sub,
                 generator:readGenerator(options),
                 path:subId,
                 required:requiredData[name]===true,
-            },this)
+            })
             this.Fields[name] =field
             field.onChange(function (){
                 o.switch(name,this.Value)
@@ -946,7 +1005,7 @@ class ObjectRender extends BaseChangeHandler{
             let expression = this.Switches[f]
             try {
                 let funcStr = `(function(${name}){return ${expression}})(${value})`
-                console.log(funcStr)
+                // console.log(funcStr)
                 let r = eval( funcStr)
                 if (r === true){
                     this.Fields[f].Show()
@@ -954,7 +1013,7 @@ class ObjectRender extends BaseChangeHandler{
                     this.Fields[f].Hide()
                 }
             }catch (e) {
-                console.log(e)
+                // console.log(e)
             }
         }
     }
@@ -1020,7 +1079,7 @@ function BaseGenerator(options) {
                     return new MapRender(options)
                 }
             }
-            return new MapRender(options)
+            return new SimpleMapRender(options)
         }
         case "boolean": {
             return new SwitchRender(options)
