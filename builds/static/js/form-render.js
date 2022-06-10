@@ -865,16 +865,26 @@ class ArrayRenderSimple extends BaseChangeHandler{
         const $itemPanel = $(`<div id="${Id}_items" class="pt-1" role="toolbar"></div>`)
         panel.append(myPanel)
         myPanel.append($itemPanel)
-        myPanel.append(`<div class="pt-1"> <button id="${this.Id}_add" type="button" class="btn btn-success btn-sm">+</button></div>`)
-        myPanel.on("click",`#${this.Id}_add`,function (){
-            add()[0].focus()
+        myPanel.append(`<div class="pt-1"> <button id="${Id}_add" type="button" class="btn btn-success btn-sm">+</button></div>`)
+        myPanel.on("click",`#${Id}_add`,function (){
+            let isEmpty = false
+            $itemPanel.find(`[array-for='${Id}']`).each(function () {
+                if ($(this).val().length <1){
+                    isEmpty = true
+                    $(this)[0].focus()
+                    return false
+                }
+            })
+            if (!isEmpty){
+                add()[0].focus()
+            }
+
         })
         this.ItemPanel = $itemPanel
         let lastIndex = 0
         const o = this
         function add() {
             const itemId = `${Id}_item_${lastIndex++}`
-
             const appendAtt = ` array-for="${Id}" aria-describedby="btnGroupAddon_${itemId}" `
             const $itemInput = $(createInput(items, itemId,true, appendAtt))
             const $item = $(`
