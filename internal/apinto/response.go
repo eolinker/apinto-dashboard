@@ -29,7 +29,7 @@ func WriteResult(w http.ResponseWriter, status int, data []byte) {
 	res.Code = status
 	if status != http.StatusOK {
 		res.Msg = string(data)
-	} else {
+	} else if len(data) > 0 {
 		err = json.Unmarshal(data, &res.Data)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
