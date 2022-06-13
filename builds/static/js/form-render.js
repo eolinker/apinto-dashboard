@@ -1019,12 +1019,15 @@ class ObjectRender extends BaseChangeHandler{
         }
     }
     get Value() {
-        let v = {}
+        let vs = {}
         for (let k in this.Fields) {
             let fi = this.Fields[k]
-            v[k] = fi.Value
+            let v = fi.Value
+            if (v){
+                vs[k] = v
+            }
         }
-        return v
+        return vs
     }
 
     set Value(v) {
