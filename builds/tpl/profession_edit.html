@@ -22,19 +22,26 @@
             <small id="passwordHelpInline" class="text-muted">
                 只能使用英文字母、数字、下划线
             </small></div>
-
         <div>
             <input class="form-control form-control-sm" type="text" id="inputName" required/>
             <div class="invalid-feedback">
                 Name 格式错误
             </div>
         </div>
-
     </div>
+
     <div class="mt-2">
         <div><label for="inputDrivers">Driver</label></div>
         <div>
             <select class="form-control form-control-sm" id="inputDrivers"></select>
+        </div>
+    </div>
+    <div class="mt-2">
+        <div>
+            <label for="inputDescription">描述</label>
+        </div>
+        <div>
+            <textarea class="form-control" rows="3"  type="text" id="inputDescription"></textarea>
         </div>
     </div>
     <div id="formRenderPanel">
@@ -71,6 +78,7 @@
             "worker":"{{.data}}",
             "panel":$("#formRenderPanel"),
             "drivers":$("#inputDrivers"),
+            "description":$("inputDescription"),
             "name":$("#inputName"),
             "id":$("#inputId"),
             "btns":$("#form_button")
