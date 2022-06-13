@@ -65,12 +65,12 @@ func (p *Routers) expandRouter() {
 			apinto.WriteResult(w, 500, []byte(err.Error()))
 			return
 		}
-		data, code, err := apinto.Client().Patch(p.ProfessionName, name, data)
+		rdata, code, err := apinto.Client().Patch(p.ProfessionName, name, data)
 		if err != nil {
 			apinto.WriteResult(w, 500, []byte(err.Error()))
 			return
 		}
-		apinto.WriteResult(w, code, data)
+		apinto.WriteResult(w, code, rdata)
 	})
 
 	// PatchPath
