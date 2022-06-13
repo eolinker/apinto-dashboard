@@ -334,6 +334,58 @@ class SwitchRender extends BaseValue {
         }
     }
 }
+class PopPanel  {
+    constructor(options,callbackFn,v) {
+
+        const $Panel = $(`<div class="pop_window pop_window_small p-3" id="detail_container">
+    <div class="pop_window_header">
+        <span class="pop_window_title">${options["title"]}</span>
+        <button class="pop_window_button btn btn_default close" >关闭</button>
+        <br>
+    </div>
+   
+</div>`)
+
+        let $Fade = $("<div class='modal-backdrop fade show modal-open'></div>")
+        let $Body = $(` <div class="pop_window_body"></div>`)
+        $("body").append($Fade)
+        $("body").append($Panel)
+        $Panel.append($Body)
+
+        let $Value = readGenerator(options)({
+            schema:options["schema"],
+            path:options["path"],
+            panel:$Body,
+            generator:readGenerator(options)
+        })
+        if (v){
+            $Value.Value = v
+        }
+         $Panel.append(`<div class="row justify-content-between">
+                <div class="col-4">
+                    <button type="button" class="btn btn-outline-secondary form_cancel">取消</button>
+                </div>
+                <div class="col-4" style="text-align: right">
+                    <button type="button" class="btn btn-primary form_submit">提交</button>
+                </div>
+            </div>`)
+        let close = function (){
+            $Fade.remove()
+            $Panel.remove()
+        }
+        $Panel.show()
+        $Fade.click(function (){
+            close()
+
+        })
+        $Panel.on("click","button.close",close)
+        $Panel.on("click","button.form_cancel",close)
+        $Panel.on("click","button.form_submit",function (){
+            callbackFn($Value.Value)
+            close()
+        })
+    }
+}
 
 class RequireRender extends BaseValue {
     constructor(options) {
@@ -390,17 +442,23 @@ class FieldPanel {
     constructor(name,options) {
         const panel=options["panel"]
         const schema=options["schema"]
-
-
         this.Id = readId(options["path"])
         this.$Panel = $(`<div class=""></div>`)
         panel.append(this.$Panel)
         let valuePanel = $(`<div class=""></div>`)
         this.$Panel.append(`<div class="">${createLabel(name,schema,this.Id,options["required"])}</div>`)
         this.$Panel.append(valuePanel)
-        this.$Value = readGenerator(options)({panel:valuePanel,schema:schema,generator: options["generator"],path:options["path"],name:name,required:options["required"]})
-        if (schema["type"] === "object"){
-            valuePanel.addClass("border-top pl-5")
+        this.$Value = readGenerator(options)({panel:valuePanel,schema:schema,parent:options["parent"],generator:readGenerator(options),path:options["path"],name:name,required:options["required"]})
+
+        switch (schema["type"]){
+            case "array":{
+                if (schema["items"]["enum"]){
+                    break
+                }
+            }
+            case  "object": {
+                valuePanel.addClass("border-top border-bottom px-3 py-1")
+            }
         }
     }
     onChange(fn){
@@ -430,10 +488,9 @@ class FieldPanel {
     }
 
 }
-class PluginsRender extends BaseChangeHandler{
+class PluginsRender extends BaseChangeHandler {
     constructor(options) {
-        super(options["path"]);
-
+        super(options["path"])
     }
 }
 class SimpleMapRender extends BaseChangeHandler{
@@ -443,7 +500,7 @@ class SimpleMapRender extends BaseChangeHandler{
         const panel=options["panel"]
         this.Schema = options["schema"]
         this.Items = this.Schema["additionalProperties"]
-        let myPanel = $(`<div class="border-top pt-1"></div>`)
+        let myPanel = $(`<div class="pt-1"></div>`)
         this.$itemPanel = $(`<div id="${this.Id}_maps" class="pt-1" role="toolbar"></div>`)
         panel.append(myPanel)
         myPanel.append(this.$itemPanel)
@@ -453,7 +510,20 @@ class SimpleMapRender extends BaseChangeHandler{
         myPanel.append(`<div class="pt-1"> <button id="${this.Id}_add" type="button" class="btn btn-success btn-sm">+</button></div>`)
         const o = this
         myPanel.on("click",`#${this.Id}_add`,function (){
-            o.add()
+            let isEmpty = false
+
+            for (let k in o.Values){
+                let it = o.Values[k];
+                if(it.key.Value.length<1){
+                    isEmpty = true
+                    $(it.key.Target)[0].focus()
+                    break
+                }
+            }
+
+            if (!isEmpty){
+                o.add().key.Target[0].focus()
+            }
         })
     }
     add(k,v) {
@@ -464,31 +534,27 @@ class SimpleMapRender extends BaseChangeHandler{
                         </div>
                         </div>`)
         this.$itemPanel.append($item)
-        let keyInput = readGenerator(this.MOptions)({
-            schema: {"type": "string", "eo:type": "string"},
-            panel: $item,
-            path: `${this.MOptions["path"]}.item_key_${index}`
-        })
+        let $keyInput = $(createInput({"type": "string", "eo:type": "string"},`${this.Id}.item_key_${index}`,true))
+        $item.append($keyInput)
         $item.append(`<div class="input-group-prepend"><span class="input-group-text">value</span></div>`)
 
-
-        let valueInput = readGenerator(this.MOptions)({
-            schema: this.Items,
-            panel: $item,
-            path: `${this.MOptions["path"]}.item_value_${index}`
-        })
+        let keyInput = new BaseValue({"type": "string", "eo:type": "string"},$keyInput,`${this.Id}.item_key_${index}`)
+        let $valueInput = $(createInput(this.Items,`${this.Id}.item_value_${index}`,true))
+        $item.append($valueInput)
+        let valueInput = new BaseValue(this.Items,$valueInput,`${this.Id}.item_value_${index}`)
         $item.append(`<div class="input-group-prepend"><button type="button" class="btn btn-danger" > - </button></div>`)
         let it = {key: keyInput, value: valueInput}
         this.Values[index] = it
+        const o = this
         $($item).on("click", "button", function () {
             $item.remove()
-            delete this.Values[index]
+            delete o.Values[index]
         })
         if (k){
             keyInput.Value = k
         }
         if (v){
-            valueInput.Value = k
+            valueInput.Value = v
         }
         return it
     }
@@ -505,7 +571,7 @@ class SimpleMapRender extends BaseChangeHandler{
     }
     set Value(v){
         this.$itemPanel.empty()
-
+        this.Values={}
         for (let k in v){
             this.add(k,v[k])
         }
@@ -574,7 +640,7 @@ class MapRender extends BaseChangeHandler {
 
 }
 
-class InnerObjectRender extends BaseChangeHandler{
+class ObjectArrayRender extends BaseChangeHandler{
     constructor(options) {
         super(options["path"])
         const panel=options["panel"]
@@ -589,94 +655,47 @@ class InnerObjectRender extends BaseChangeHandler{
 </div>`)
         p.append($btn)
         $btn.on("click","button", function (event) {
-            $Table.bootstrapTable('append', [{}])
-            $Table.bootstrapTable('scrollTo', 'bottom')
+           new PopPanel({
+                   path:`${options["path"]}.items`,
+                   schema:items,
+                   name:options["name"],
+                   title:`添加 ${getLabel(options["name"],options["schema"])}`
+               },
+               function (v){
+                   $Table.bootstrapTable("append",[v])
+                   $table.bootstrapTable('scrollTo', 'bottom')
+                   O.onChange()
+               })
             return false
         })
 
         const $Table = $(`<table  id="${Id}_items"></table>`)
         p.append($Table)
-        $Table.delegate("a.remove", "click", function (event) {
-            let rowIndex = $(this).attr("array-row")
-            $Table.bootstrapTable('remove', {
-                field: '$index',
-                values: [Number(rowIndex)]
-            })
-        })
+
         this.Table = $Table
         const properties = items["properties"]
         const uiSort = items["ui:sort"]
-        let lastDetailRow = undefined
-        let lastField = undefined
-        let lastValue = undefined
-        const o = this
-        function DetailFormatterHandler(fieldIndex) {
-
-            this.detailFormatter = function (index, row, $element) {
-
-                if (typeof lastDetailRow !== "undefined" && index!== lastDetailRow ) {
-
-                    let data = $Table.bootstrapTable('getData')
-                    data[lastDetailRow][lastField] = lastValue.Value
-                    $Table.bootstrapTable("updateRow",{
-                        index: 1,
-                        row: data[lastDetailRow]
-                    })
-                    $Table.bootstrapTable('collapseRow', lastDetailRow)
-                }
-
-                lastDetailRow = index
-
-                let name = uiSort[fieldIndex]
-                let item = properties[name]
-                lastField = name
-                lastValue = readGenerator(options)({panel:$element, schema:item, generator:options["generator"], path:`${Id}_${name}`,name:name})
-                lastValue.Value = row[name]
-                return ""
-            }
-            return this
-        }
-
-        function NotDetailFormatterMap(index, row, $element) {
-            if (typeof lastDetailRow !== "undefined") {
-                let data = $Table.bootstrapTable('getData')
-                data[lastDetailRow][lastField] = lastValue.Value
-                $Table.bootstrapTable("updateRow",{
-                    index: 1,
-                    row: data[lastDetailRow]
-                })
-                $Table.bootstrapTable('collapseRow', lastDetailRow)
-
-                lastDetailRow = undefined
-                lastField = undefined
-            }
-            $Table.bootstrapTable('collapseAllRows')
-
-            return ''
-        }
-
+        
         function formatterKV(v) {
             let html = ""
             for (let k in v) {
-                html += "<span class='btn btn-outline-secondary btn-sm'>" + k + "=" + v[k] + "</span>\n"
+                html += "<span class='px-1 border btn-sm  btn-outline-secondary'>" + k + "=" + v[k] + "</span>\n"
             }
             html += ""
             return html
         }
-
 
         const columns = []
         columns.push({
             title: "index",
             field: "__index",
             sortable: false,
-            editable: false,
-            detailFormatter: NotDetailFormatterMap,
+
             formatter: function (v, row, index) {
                 return index+1
             }
         })
-
+        const O = this
         for (let i in uiSort) {
             let name = uiSort[i]
             const item = properties[name]
@@ -686,9 +705,8 @@ class InnerObjectRender extends BaseChangeHandler{
                         title: getLabel(name,item),
                         field: item["name"],
                         sortable: false,
-                        editable: false,
-                        formatter: formatterKV,
-                        detailFormatter: new DetailFormatterHandler(i).detailFormatter,
+
+                        formatter: JSON.stringify,
 
                     })
                     break
@@ -700,7 +718,6 @@ class InnerObjectRender extends BaseChangeHandler{
                         sortable: false,
                         editable: false,
                         formatter: formatterKV,
-                        detailFormatter: new DetailFormatterHandler(i).detailFormatter
                     })
                     break
                 }
@@ -711,41 +728,17 @@ class InnerObjectRender extends BaseChangeHandler{
                         sortable: false,
                         editable: false,
                         formatter: formatterKV,
-                        detailFormatter: new DetailFormatterHandler(i).detailFormatter,
                     })
                     break
                 }
                 default: {
-                    if (item["enum"]) {
-                        columns.push({
-                            title: getLabel(name,item),
-                            field: name,
-                            sortable: true,
-                            detailFormatter: NotDetailFormatterMap,
-                            editable: {
-                                type: "select",
-                                options: {
-                                    items: item["enum"]
-                                }
-                            },
-                        })
-                    } else {
-                        let typeInput = "text"
-                        if (item["eo:type"] === "number" || item["eo:type"] === "integer") {
-                            typeInput = "number"
-                        }
-                        columns.push({
 
+                        columns.push({
                             title: getLabel(name,item),
                             field: name,
                             sortable: true,
-                            width: 200,
-                            detailFormatter: NotDetailFormatterMap,
-                            editable: {
-                                type: typeInput
-                            }
                         })
-                    }
+
                     break
                 }
             }
@@ -756,36 +749,44 @@ class InnerObjectRender extends BaseChangeHandler{
             sortable: false,
             editable: false,
             formatter: function (v, row, index) {
-                return `<a class="remove" href="javascript:void(0)" array-row="${index}" title="remove">删除</a>`
+                return `<a class="edit" href="javascript:void(0)" array-row="${index}" title="edit">配置</a> <a class="remove" href="javascript:void(0)" array-row="${index}" title="remove">删除</a>`
+            },
+            events:{
+                "click .remove":function (e,value,row,index) {
+                    // let rowIndex = $(this).attr("array-row")
+                    $Table.bootstrapTable('remove', {
+                        field: '$index',
+                        values: [index]
+                    })
+                    O.onChange()
+                },
+                "click .edit":function (e,value,row,index){
+                    new PopPanel({
+                        path:`${options["path"]}.items`,
+                        schema:items,
+                        name:options["name"],
+                            title:`修改 ${getLabel(options["name"],options["schema"])}:${index+1}`
+                        },
+                    function (v){
+                        $Table.bootstrapTable("updateRow",{
+                            index:index,
+                            row:v
+                        })
+                        O.onChange()
+                    },row)
+                }
             }
         })
 
         const tableOptions = {
             columns: columns,
-            editable: true,
-
-
-            detailView: true,
-            detailViewByClick: true,
-            detailViewIcon: false,
             width: "100%",
-            onEditorShown: function (field, row, $el, editable) {
-                $Table.bootstrapTable('collapseAllRows')
-                return true;
-            },
-            onEditorSave: function (field, row, oldValue, $el) {
-                // let data = $Table.bootstrapTable('getData')
-                // if (field !== "__index" ) {
-                //     const rowIndex = $el.parent().data("index")
-                //     data.Data[rowIndex][field] = row
-                // }
-                // return true;
-
-                o.onChange()
-            },
-            onCollapseRow:function (index, row, detailView) {
-                console.log(index,row,detailView)
+            useRowAttrFunc: true,
+            reorderableRows:true,
+            onReorderRow:function (data){
+                $Table.bootstrapTable("refresh")
             }
+
         }
         $Table.bootstrapTable(tableOptions);
         this.Value = []
@@ -855,68 +856,69 @@ class ArrayRenderEnum extends BaseChangeHandler{
 class ArrayRenderSimple extends BaseChangeHandler{
     constructor(options) {
         super(options["path"])
-        const panel=options["panel"]
-        const schema=options["schema"]
-
+        const panel = options["panel"]
+        const schema = options["schema"]
+        this.Options = options
         const Id = this.Id
-
-        const items = schema["items"]
-        let myPanel = $(`<div class="border-top pt-1"></div>`)
-        const $itemPanel = $(`<div id="${Id}_items" class="pt-1" role="toolbar"></div>`)
+        this.ValuesList = {}
+        this.SchemaItems = schema["items"]
+        let myPanel = $(`<div class=""></div>`)
+        const $itemPanel = $(`<div id="${Id}_items" class="" role="toolbar"></div>`)
         panel.append(myPanel)
         myPanel.append($itemPanel)
-        myPanel.append(`<div class="pt-1"> <button id="${Id}_add" type="button" class="btn btn-success btn-sm">+</button></div>`)
-        myPanel.on("click",`#${Id}_add`,function (){
+        myPanel.append(`<div class=""> <button id="${Id}_add" type="button" class="btn btn-success btn-sm">+</button></div>`)
+        myPanel.on("click", `#${Id}_add`, function () {
             let isEmpty = false
-            $itemPanel.find(`[array-for='${Id}']`).each(function () {
-                if ($(this).val().length <1){
+            $itemPanel.find(`input`).each(function () {
+                if ($(this).val().length < 1) {
                     isEmpty = true
                     $(this)[0].focus()
                     return false
                 }
             })
-            if (!isEmpty){
-                add()[0].focus()
+            if (!isEmpty) {
+               o.add()[0].focus()
             }
-
         })
         this.ItemPanel = $itemPanel
-        let lastIndex = 0
+        this.lastIndex = 0
         const o = this
-        function add() {
-            const itemId = `${Id}_item_${lastIndex++}`
-            const appendAtt = ` array-for="${Id}" aria-describedby="btnGroupAddon_${itemId}" `
-            const $itemInput = $(createInput(items, itemId,true, appendAtt))
-            const $item = $(`
-<div class="input-group input-group-sm m-2" id="array-item_${itemId}">
+    }
+    add() {
+        const index = this.lastIndex++
+        const itemId = `${this.Id}_item_${index}`
+        // const appendAtt = ` array-for="${this.Id}" aria-describedby="btnGroupAddon_${itemId}" `
+        const $item = $(`
+<div class="input-group input-group-sm m-2" >
     <div class="input-group-prepend">
-        <button class="btn btn-danger" id="btnGroupAddon_${itemId}" type="button" aria-describedby="btnGroupAddon_${itemId}" data-itemId="${itemId}"> - </button>
+        <button class="btn btn-danger"  type="button" aria-describedby="btnGroupAddon_${itemId}" data-itemId="${itemId}"> - </button>
     </div>
 </div>`)
-            $item.prepend($itemInput)
-            $itemPanel.append($item)
+        this.ItemPanel.append($item)
+        const $itemInput =$(createInput(this.SchemaItems, itemId, true))
 
-            $itemInput.on("change",function (){
-                o.onChange()
-            })
-
-            return $itemInput
-        }
-        this.add = add
-
-        $itemPanel.delegate('button', "click", function () {
-            let itemId = $(this).attr('data-itemId')
-            $(document.getElementById(`array-item_${itemId}`)).remove()
+        $item.prepend($itemInput)
+        this.ValuesList[index] = new BaseValue(this.SchemaItems,$itemInput , this.Id)
+        const o = this
+        this.ValuesList[index].onChange(function () {
             o.onChange()
         })
+        $item.on("click", "button", function () {
+            $item.remove()
+            this.ValuesList[index] = null
+            delete this.ValuesList[index]
+        })
 
+        return $itemInput
     }
-
     get Value() {
         let val = []
-        this.ItemPanel.find(`[array-for='${this.Id}']`).each(function () {
-            val.push($(this).val())
-        })
+        let indexList= Object.keys(this.ValuesList)
+        indexList.sort()
+        for (let i in indexList){
+            let ind = indexList[i]
+            val.push(this.ValuesList[ind].Value)
+        }
         return val
     }
 
@@ -924,24 +926,12 @@ class ArrayRenderSimple extends BaseChangeHandler{
         if (!Array.isArray(vs)) {
             return
         }
-        const arrayId = `[array-for='${this.Id}']`
-        let list = $(arrayId)
-        if (list.length < vs.length) {
-            let num = vs.length - list.length
-            for (let i = 0; i < num; i++) {
-                this.add()
-            }
-        } else if (list.length > vs.length) {
-            let num = vs.length - list.length
-            for (let i = 0; i < num; i++) {
-                list.last().remove()
-            }
+        this.ValuesList = {}
+        this.ItemPanel.empty()
+
+        for (let i in vs){
+            this.add().val(vs[i])
         }
-        let index = 0;
-        $(arrayId).each(function () {
-            $(this).val(vs[index])
-            index++;
-        })
     }
 }
 // 结构体
@@ -974,6 +964,7 @@ class ObjectRender extends BaseChangeHandler{
                 generator:readGenerator(options),
                 path:subId,
                 required:requiredData[name]===true,
+                parent:schema
             })
             this.Fields[name] =field
             field.onChange(function (){
@@ -1060,7 +1051,7 @@ function BaseGenerator(options) {
             const items = schema["items"]
             switch (items["eo:type"]) {
                 case "object": {
-                    return new InnerObjectRender(options)
+                    return new ObjectArrayRender(options)
                 }
                 case "map": {
                     throw "now support map in array"
@@ -1076,8 +1067,18 @@ function BaseGenerator(options) {
                     }
                     return new ArrayRenderSimple(options)
                 }
+                case "array":{
+                    throw `not allow type:${items["eo:type"]} in array`
+                }
+                case "require":{
+                    return new RequireRender(options)
+                }
+                default:{
+                    throw `unknown type:${items["eo:type"]} in array`
+
+                }
             }
-            throw `not allow type:${schema["eo:type"]} in array`
+
         }
         case "map": {
             let item = schema["additionalProperties"];

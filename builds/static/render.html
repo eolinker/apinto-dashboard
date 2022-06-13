@@ -7,6 +7,8 @@
     <link href="/css/dashboard.css" rel="stylesheet">
     <link href="/css/bootstrap-table.min.css" rel="stylesheet" rel="stylesheet">
     <link href="/css/bootstrap4-toggle.css" rel="stylesheet">
+    <link href="/css/bootstrap-table-reorder-rows.min.css" rel="stylesheet">
+
     <style>
         .editor {
             width: 100%;
@@ -41,59 +43,7 @@
     </style>
 </head>
 <body>
-<div class="container">
 
-    <div class="">
-        <div class="">
-
-
-                <label class="text-nowrap">域名</label>
-
-
-            <div class="">
-                <div class=" border-top ">
-
-                    <div class="input-group input-group-sm mt-2">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text">key</span>
-                        </div>
-                        <input type="text" aria-label="First name" class="form-control">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text">value</span>
-                        </div>
-                        <input type="text" aria-label="Last name" class="form-control">
-                        <div class="input-group-prepend">
-                            <button type="button" class="btn btn-danger" > - </button>
-                        </div>
-                    </div>
-
-                    <div class="input-group input-group-sm mt-2">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text">key</span>
-                        </div>
-                        <input type="text" aria-label="First name" class="form-control">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text">value</span>
-                        </div>
-                        <input type="text" aria-label="Last name" class="form-control">
-                        <div class="input-group-prepend">
-                            <button type="button" class="btn btn-danger" > - </button>
-                        </div>
-                    </div>
-
-                 </div>
-
-            <div class="mt-2">
-                <a href="#" class="btn btn-link btn-warning btn-sm">+</a>
-            </div>
-
-            </div>
-
-        </div>
-    </div>
-
-
-</div>
 <div class="container">
     <div id="test"></div>
     <div class="row">
@@ -104,11 +54,14 @@
     </div>
 </div>
 <script src="/js/jquery-3.0.0.js"></script>
+<script src="/js/jquery.tablednd.min.js"></script>
+
 <script src="/js/bootstrap.js"></script>
 <script src="/js/dashboard.js"></script>
 <script src="/js/form-render.js"></script>
 <script src="/js/bootstrap-table.min.js"></script>
-<script src="/js/bootstrap-table-editor.js"></script>
+<script src="/js/bootstrap-table-reorder-rows.min.js"></script>
+
 <script src="/js/bootstrap4-toggle.min.js"></script>
 <script src="/js/ace/ace.js"></script>
 <script src="/js/djv.js"></script>
