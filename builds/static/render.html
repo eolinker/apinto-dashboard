@@ -5,7 +5,9 @@
     <title>render</title>
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link href="/css/dashboard.css" rel="stylesheet">
-    <link href="/css/bootstrap-table.min.css" rel="stylesheet"  rel="stylesheet">
+    <link href="/css/bootstrap-table.min.css" rel="stylesheet" rel="stylesheet">
+    <link href="/css/bootstrap4-toggle.css" rel="stylesheet">
+    <link href="/css/bootstrap-table-reorder-rows.min.css" rel="stylesheet">
 
     <style>
         .editor {
@@ -13,9 +15,35 @@
             height: 300px;
             margin: 10px auto;
         }
+        .btn-circle {
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            padding: 6px 0;
+            font-size: 12px;
+            line-height: 1.428571429;
+            border-radius: 15px;
+        }
+        .btn-circle.btn-lg {
+            width: 50px;
+            height: 50px;
+            padding: 10px 16px;
+            font-size: 18px;
+            line-height: 1.33;
+            border-radius: 25px;
+        }
+        .btn-circle.btn-xl {
+            width: 70px;
+            height: 70px;
+            padding: 10px 16px;
+            font-size: 24px;
+            line-height: 1.33;
+            border-radius: 35px;
+        }
     </style>
 </head>
 <body>
+
 <div class="container">
     <div id="test"></div>
     <div class="row">
@@ -26,135 +54,175 @@
     </div>
 </div>
 <script src="/js/jquery-3.0.0.js"></script>
+<script src="/js/jquery.tablednd.min.js"></script>
+
 <script src="/js/bootstrap.js"></script>
 <script src="/js/dashboard.js"></script>
 <script src="/js/form-render.js"></script>
 <script src="/js/bootstrap-table.min.js"></script>
-<script src="/js/bootstrap-table-editor.js"></script>
+<script src="/js/bootstrap-table-reorder-rows.min.js"></script>
+
+<script src="/js/bootstrap4-toggle.min.js"></script>
 <script src="/js/ace/ace.js"></script>
 <script src="/js/djv.js"></script>
 <script>
-
+    function ModuleName(){
+        return "routers"
+    }
     $(function () {
         const demoSchema = {
-            "type": "object",
-            "properties": [
-                {
-                    "name": "driver",
-                    "readonly": true,
-                    "type": "string",
-                    "enum": [
-                        "http"
-                    ],
-                    "required": true
+            "eo:type": "object",
+            "properties": {
+                "disable": {
+                    "eo:type": "boolean",
+                    "label": "是否启用",
+                    "type": "boolean"
                 },
-                {
-                    "name": "host",
-                    "type": "array",
+                "host": {
+                    "eo:type": "array",
                     "items": {
+                        "eo:type": "string",
                         "type": "string"
                     },
-                    "minLength": 1
+                    "label": "域名",
+                    "type": "array"
                 },
-                {
-                    "name": "listen",
-                    "type": "integer",
+                "listen": {
+                    "default": 80,
+                    "description": "使用端口",
+                    "eo:type": "integer",
                     "format": "int32",
-                    "minimum": 1,
-                    "required": true
+                    "label": "端口号",
+                    "maximum": 65535,
+                    "type": "integer"
                 },
-                {
-                    "name": "method",
-                    "type": "array",
+                "method": {
+                    "eo:type": "array",
                     "items": {
-                        "type": "string",
                         "enum": [
                             "GET",
                             "POST",
+                            "PUT",
+                            "DELETE",
                             "PATH",
-                            "DELETE"
-                        ]
+                            "HEAD",
+                            "OPTIONS"
+                        ],
+                        "eo:type": "string",
+                        "type": "string"
+                    },
+                    "label": "请求方式",
+                    "type": "array"
+                },
+                "map":{
+                    "eo:type":"map",
+                    "type":"object",
+                    "additionalProperties":{
+                        "eo:type":"number",
+                        "type":"number"
                     }
                 },
-                {
-                    "name": "plugins",
-                    "type": "map",
-                    "items": {
-                        "type": "object",
-                        "properties": [
-                            {
-                                "name": "config",
-                                "required": true
-                            },
-                            {
-                                "name": "disable",
-                                "type": "boolean",
-                                "required": true
+                "plugins": {
+                    "additionalProperties": {
+                        "eo:type": "object",
+                        "properties": {
+                            "config": {},
+                            "disable": {
+                                "eo:type": "boolean",
+                                "type": "boolean"
                             }
-                        ]
-                    }
-                },
-                {
-                    "name": "protocol",
-                    "type": "string",
-                    "enum": [
-                        "http",
-                        "https"
-                    ],
-                    "default": "http",
-                    "required": true
-                },
-                {
-                    "name": "rules",
-                    "type": "array",
-                    "items": {
+                        },
                         "type": "object",
-                        "properties": [
-                            {
-                                "name": "header",
-                                "type": "map",
-                                "items":{
-                                    "type":"string"
-                                }
-                            },
-                            {
-                                "name": "location",
-                                "type": "string",
-                                "minLength": 1
-                            },
-                            {
-                                "name": "query",
-                                "type": "map",
-                                "items": {
+                        "ui:sort": [
+                            "disable",
+                            "config"
+                        ]
+                    },
+                    "eo:type": "map",
+                    "label": "插件配置",
+                    "type": "object"
+                },
+                "rules": {
+                    "eo:type": "array",
+                    "items": {
+                        "eo:type": "object",
+                        "properties": {
+                            "header": {
+                                "additionalProperties": {
+                                    "eo:type": "string",
                                     "type": "string"
-                                }
+                                },
+                                "eo:type": "map",
+                                "type": "object"
+                            },
+                            "location": {
+                                "eo:type": "string",
+                                "type": "string"
+                            },
+                            "query": {
+                                "additionalProperties": {
+                                    "eo:type": "string",
+                                    "type": "string"
+                                },
+                                "eo:type": "map",
+                                "type": "object"
                             }
+                        },
+                        "type": "object",
+                        "ui:sort": [
+                            "location",
+                            "header",
+                            "query"
                         ]
-                    }
+                    },
+                    "label": "路由规则",
+                    "type": "array"
                 },
-                {
-                    "name": "target",
-                    "type": "string",
-                    "format": "text",
-                    "minLength": 1,
-                    "required": true
+                "target": {
+                    "eo:type": "require",
+                    "label": "目标服务",
+                    "skill": "github.com/eolinker/apinto/service.service.IService",
+                    "type": "string"
                 }
+            },
+            "required": [
+                "target"
+            ],
+            "type": "object",
+            "ui:sort": [
+                "listen",
+                "method",
+                "host",
+                "rules",
+                "target",
+                "disable",
+                "plugins",
+                "map"
             ]
         }
-        const renderHandler = new FormRender($("#test"), demoSchema)
+        const renderHandler = new FormRender({
+            "panel": $("#test"),
+            "schema": demoSchema,
+            "name": "test"
+        })
         console.log("before:", renderHandler.Value)
         renderHandler.Value = {
             "driver": "http",
             "listen": 0,
             "host": ["hosta", "hostb"],
             "protocol": "https",
-            "target": "1@service",
-            "method":["POST"],
+            "target": "demoanonymous@service",
+            "method": ["POST"],
 
-            "rules":[{"header":{"name":"ss","auth":"xxxxxxxxxx"},"location":"/api/path","query":{}},{"header":{"name":"ss"},"location":"/api/path","query":{}}]
+            "rules": [{
+                "header": {"name": "ss", "auth": "xxxxxxxxxx"},
+                "location": "/api/path",
+                "query": {}
+            }, {"header": {"name": "ss"}, "location": "/api/path", "query": {}}]
+            ,"map":{"a":1,"b":2}
         }
         let jsonSHow = aceEditor.InitEditor("json")
-        $("#btnShow").on("click", function (){
+        $("#btnShow").on("click", function () {
             console.log("show")
             console.log(renderHandler.Value)
             jsonSHow.getSession().setValue(JSON.stringify(renderHandler.Value, null, 4))

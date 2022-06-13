@@ -7,12 +7,13 @@ import (
 	apintoClient "github.com/eolinker/apinto-dashboard/internal/apinto"
 	"github.com/eolinker/apinto-dashboard/internal/security"
 	activity_log "github.com/eolinker/apinto-dashboard/modules/activity-log"
+	"os"
 
 	"github.com/eolinker/apinto-dashboard/modules/extenders"
 	"github.com/eolinker/apinto-dashboard/modules/monitors"
 	"github.com/eolinker/apinto-dashboard/modules/plugins"
 	"github.com/eolinker/apinto-dashboard/modules/routers"
-	"log"
+	"github.com/eolinker/eosc/log"
 	"net/http"
 	"strings"
 )
@@ -21,21 +22,27 @@ func init() {
 	apinto.RetTemplate("tpl", "index", "icons")
 }
 func main() {
-
+	transport := log.NewTransport(os.Stderr, log.DebugLevel)
+	transport.SetFormatter(&log.LineFormatter{
+		TimestampFormat:  "2006-01-02 15:04:05",
+		CallerPrettyfier: nil,
+	})
+	log.Reset(transport)
+	log.SetPrefix("[dashboard]")
 	cf, err := ReadConfig("config.yml")
 	if err != nil {
-		log.Println("[Error]", err)
+		log.Panic(err)
 		return
 	}
 	detailsService := security.NewUserDetailsService()
 	err = InitUserDetails(detailsService, cf.UserDetails)
 	if err != nil {
-		log.Println("[Error]", err)
+		log.Panic(err)
 		return
 	}
 	activityHandler, err := sqlite.NewActivityDao("data/activity-log.db")
 	if err != nil {
-		log.Println("[Error]", err)
+		log.Panic(err)
 		return
 	}
 
@@ -91,7 +98,7 @@ func main() {
 
 	activityLogModule, err := activity_log.NewActivityLog("activity-log", activityHandler)
 	if err != nil {
-		log.Println("[Error]", err)
+		log.Panic(err)
 		return
 	}
 
@@ -124,7 +131,7 @@ func main() {
 	service, err := apinto.Create(config)
 
 	if err != nil {
-		log.Println(err)
+		log.Panic(err)
 		return
 	}
 	err = http.ListenAndServe(fmt.Sprintf(":%s", cf.Port), service)
