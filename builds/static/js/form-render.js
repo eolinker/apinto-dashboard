@@ -663,7 +663,7 @@ class ObjectArrayRender extends BaseChangeHandler{
                },
                function (v){
                    $Table.bootstrapTable("append",[v])
-                   $table.bootstrapTable('scrollTo', 'bottom')
+                   $Table.bootstrapTable('scrollTo', 'bottom')
                    O.onChange()
                })
             return false
