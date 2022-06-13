@@ -163,6 +163,9 @@
 <script src="/js/form-render.js"></script>
 <script src="/js/render.js"></script>
 <script>
+    const ModuleName = function () {
+        return "routers"
+    }
 
     /**
      * dom初始化处理
@@ -198,7 +201,7 @@
         columns: getColumns(),
         flat:true,
         responseHandler: responseHandler,
-        reorderTableRows:true,
+        reorderableRows:true,
         useRowAttrFunc: true,
         onReorderRow: reorderRow,
     })
