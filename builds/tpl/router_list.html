@@ -50,6 +50,7 @@
 {{- block "script" . -}}
 <script src="/js/bootstrap-table.min.js"></script>
 <script src="/js/bootstrap-switch.min.js"></script>
+<script src="/js/form-render.js"></script>
 <script>
     let $table = $('#table')
     let detail = modal.table("detail_container")
@@ -70,6 +71,46 @@
             return "<input value=" + row.name + " name='disable' type='checkbox' />";
         }
     }
+
+    function detailFormatter(name,data) {
+        let content = ""
+        dashboard.get("/profession/{{.name}}/"+`${data["driver"]}`, function (res) {
+            if (res.code !== 200) {
+                return http.handleError(res, "获取driver信息失败")
+            }
+            let render = res.data["render"]
+            let sort = render["ui:sort"]
+            let properties = render["properties"]
+            if (sort != "undefined" && typeof sort == "object") {
+                content += "<tr><td style='min-width: 100px'>"+"ID"+"</td><td>"+data["id"]+"</td></tr>"
+                content += "<tr><td style='min-width: 100px'>"+"Name"+"</td><td>"+data["name"]+"</td></tr>"
+                content += "<tr><td style='min-width: 100px'>"+"Driver"+"</td><td>"+data["driver"]+"</td></tr>"
+                Object.keys(sort).forEach(function (index) {
+                    let key = sort[index]
+                    let label = getLabel(key,properties[key])
+                    if(data[key] instanceof Object){
+                        content += "<tr><td style='min-width: 100px'>"+label+"</td><td>"+JSON.stringify(data[key])+"</td></tr>"
+                    }else {
+                        content += "<tr><td style='min-width: 100px'>"+label+"</td><td>"+data[key]+"</td></tr>"
+                    }
+                })
+                content += "<tr><td style='min-width: 100px'>"+"更新时间"+"</td><td>"+data["update"]+"</td></tr>"
+                content += "<tr><td style='min-width: 100px'>"+"创建时间"+"</td><td>"+data["create"]+"</td></tr>"
+            } else {
+                Object.keys(data).forEach(function (key) {
+                    if(data[key] instanceof Object){
+                        content += "<tr><td style='min-width: 100px'>"+key+"</td><td>"+JSON.stringify(data[key])+"</td></tr>"
+                    }else {
+                        content += "<tr><td style='min-width: 100px'>"+key+"</td><td>"+data[key]+"</td></tr>"
+                    }
+                })
+            }
+        }, function (res) {
+            return http.handleError(res, "获取driver信息失败")
+        })
+        detail.show(name, content)
+    }
+
     function operateFormatter(value, row, index) {
         return [
             '<a class="edit" href="/{{.name}}/edit?name=',
@@ -108,15 +149,7 @@
             dashboard.get("/api/{{.name}}/"+row.name, function (res) {
                 if(res.code === 200){
                     let data = res.data
-                    let content = ""
-                    Object.keys(data).forEach(function (key) {
-                        if(data[key] instanceof Object){
-                            content += "<tr><td style='min-width: 100px'>"+key+"</td><td>"+JSON.stringify(data[key])+"</td></tr>"
-                        }else {
-                            content += "<tr><td style='min-width: 100px'>"+key+"</td><td>"+data[key]+"</td></tr>"
-                        }
-                    })
-                    detail.show(row.name, content)
+                    this.detailFormatter(row.name,data)
                     return
                 }
                 return http.handleError(res, "获取详情失败")
