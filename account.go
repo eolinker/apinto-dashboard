@@ -166,7 +166,7 @@ func (h *AccountHandler) Post(w http.ResponseWriter, r *http.Request) {
 	//h.serHandler.ServeHTTP(w, setUserDetailsToRequest(r, userDetails))
 }
 func (h *AccountHandler) Api(w http.ResponseWriter, r *http.Request) {
-	log.Debug("request api:", r.RequestURI)
+	log.Debug("request api:", r.Method, " ", r.RequestURI)
 	sessionCookie, err := r.Cookie(SessionName)
 	if err != nil {
 
