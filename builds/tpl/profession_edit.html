@@ -9,32 +9,33 @@
 </div>
 <div id="form"></div>
 <form  class="container">
-    <div class="form-group row mb-1 "><label class="col-sm-3 col-form-label text-right"
-                                             for="inputId">Id</label>
-        <div class="col-sm-9">
+    <div class="mt-2">
+        <div>
+            <label for="inputId">Id</label>
+        </div>
+        <div>
             <input class="form-control form-control-sm" type="text" id="inputId"/>
         </div>
-
     </div>
-    <div class="form-group row mb-1"><label class="col-sm-3 colsf-form-label text-right"
-                                            for="inputName">Name</label>
-        <div class="col-sm-9">
-            <input class="form-control form-control-sm" type="text" id="inputName" required/>
+    <div class="mt-2">
+        <div><label for="inputName">Name</label>
             <small id="passwordHelpInline" class="text-muted">
                 只能使用英文字母、数字、下划线
-            </small>
+            </small></div>
+
+        <div>
+            <input class="form-control form-control-sm" type="text" id="inputName" required/>
             <div class="invalid-feedback">
                 Name 格式错误
             </div>
         </div>
 
     </div>
-    <div class="form-group row mb-1"><label class="col-sm-3 col-form-label text-right"
-                                            for="inputDrivers">Driver</label>
-        <div class="col-sm-9">
+    <div class="mt-2">
+        <div><label for="inputDrivers">Driver</label></div>
+        <div>
             <select class="form-control form-control-sm" id="inputDrivers"></select>
         </div>
-
     </div>
     <div id="formRenderPanel">
 
