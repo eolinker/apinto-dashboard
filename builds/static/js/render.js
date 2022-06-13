@@ -1,16 +1,14 @@
 const nameRule = /^[a-zA-Z\d_]+$/;
 
 class Render {
-    constructor(panel, schema, name, data, generator, callback) {
+    constructor(panel, schema, name, data,  callback) {
         const options = {
             panel: $(panel),
             schema: schema,
             name: name,
-            generator: generator
         }
         let target = $(panel)
         this.InitValue = data
-
 
         let renderHandler = new FormRender(options)
 
@@ -23,7 +21,7 @@ class Render {
         }
         this.panel = renderHandler
         this.target = target
-        this.generator = generator
+
     }
 
     Reset(schema, name) {
@@ -31,15 +29,14 @@ class Render {
         this.panel = new FormRender({
             panel: this.target,
             schema: schema,
-            generator: this.generator,
             name: name
         })
     }
 
     ResetVal() {
-        if (this.panel) {
+
             this.panel.Value = this.InitValue
-        }
+
     }
 
     set Value(data) {
@@ -49,24 +46,19 @@ class Render {
     }
 
     get Value() {
-        if (this.panel) {
-            return this.panel.Value
-        }
-        return {}
+        return this.panel.Value
     }
 
     Check() {
-        if (this.panel) {
-            return this.panel.check()
-        }
-        return false
+        return this.panel.check()
     }
 
     Submit(success, error) {
-        if (this.Check() === true) {
+        let ckr  = this.Check()
+        if (ckr  === true) {
             success(this.Value)
         } else {
-            error()
+            error(ckr)
         }
     }
 
@@ -97,7 +89,7 @@ class ProfessionRender {
     updateUi(driver, render, data) {
         render = formatProfessionRender(render)
         let btn = this.options["btns"]
-        this.ui = new Render(this.options["panel"], render, driver, data, this.generator, function () {
+        this.ui = new Render(this.options["panel"], render, driver, data,  function () {
             if ($(btn).length > 0 && !$(btn).is(":visible")) {
                 $(btn).show()
             }
@@ -220,8 +212,8 @@ class ProfessionCreator extends ProfessionRender {
                 }, function (res) {
                     http.handleError(res, "新增失败")
                 })
-            }, function () {
-                common.message("config format error", "danger")
+            }, function (err) {
+                common.message("config format error:"+err, "danger")
             })
         }
     }
@@ -262,7 +254,7 @@ class ProfessionEditor extends ProfessionRender {
             }
 
             let data = res.data
-            data["scheme"] = res.data["scheme"].toUpperCase()
+
             o.getDriverInfo(res.data["driver"], function (driver, render) {
                 o.updateUi(driver, render, data)
             })
@@ -282,11 +274,12 @@ class ProfessionEditor extends ProfessionRender {
                         return
                     }
                     common.message("更新成功", "success")
+                    Back()
                 }, function (res) {
                     http.handleError(res, "更新失败")
                 })
-            }, function () {
-                common.message("config format error", "danger")
+            }, function (err) {
+                common.message("config format error:"+err, "danger")
             })
         }
 
