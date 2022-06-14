@@ -118,8 +118,14 @@
                     "eo:type":"map",
                     "type":"object",
                     "additionalProperties":{
-                        "eo:type":"number",
-                        "type":"number"
+                        "eo:type":"object",
+                        "type":"object",
+                        "ui:sort":["a","b"],
+                        "properties":{
+
+                            "a":{"type":"string","eo:type":"string"},
+                            "b":{"type":"number","eo:type":"number"},
+                        }
                     }
                 },
                 "plugins": {
@@ -219,7 +225,7 @@
                 "location": "/api/path",
                 "query": {}
             }, {"header": {"name": "ss"}, "location": "/api/path", "query": {}}]
-            ,"map":{"a":1,"b":2}
+            ,"map":{"a":{"a":"a","b":1},"b":{"a":"b","b":"2"}}
         }
         let jsonSHow = aceEditor.InitEditor("json")
         $("#btnShow").on("click", function () {
