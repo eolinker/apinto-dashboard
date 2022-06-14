@@ -1,6 +1,6 @@
-const RootId = "FormRender"
+let RootId = "FormRender"
 
-const validate = {
+let validate = {
     _validator: null,
     djv: function () {
         if (this._validator){
@@ -227,11 +227,11 @@ class BaseValue {
         if (typeof schema["default"] !== "undefined") {
             this.Value = schema["default"]
         }
-        const JsonSchema = new SchemaHandler(schema).JsonSchema
+        let JsonSchema = new SchemaHandler(schema).JsonSchema
         this.InputValid(JsonSchema,target)
     }
     onChange(fn){
-        const o = this
+        let o = this
         $(this.Target).on("change",function (){
             fn.apply(o)
         })
@@ -240,7 +240,7 @@ class BaseValue {
         return
     }
     ValidHandler(v) {
-        const id =  this.Id
+        let id =  this.Id
         console.debug("ValidHandler:",id,"=",v)
         let value = v
         value = valueForType(this.Schema["eo:type"], value)
@@ -257,7 +257,7 @@ class BaseValue {
         }
     }
     InputValid(schema, target) {
-        const o = this
+        let o = this
         $(target).on("change", function () {
             o.ValidHandler($(this).val(), schema)
         })
@@ -292,9 +292,9 @@ class BaseValue {
 
 class BaseEnumRender extends BaseValue {
     constructor(options) {
-        const schema = options["schema"]
-        const path = options["path"]
-        const panel = options["panel"]
+        let schema = options["schema"]
+        let path = options["path"]
+        let panel = options["panel"]
         super(schema, $(createEnum(schema, readId(path))),path)
 
         $(panel).append(this.Target)
@@ -308,9 +308,9 @@ class BaseEnumRender extends BaseValue {
 
 class SwitchRender extends BaseValue {
     constructor(options) {
-        const schema = options["schema"]
-        const path = options["path"]
-        const panel = options["panel"]
+        let schema = options["schema"]
+        let path = options["path"]
+        let panel = options["panel"]
 
         super(schema, $(`<input id="${readId(path)}" type="checkbox" class="form-control-sm" data-toggle="toggle" data-size="sm"/>`),path)
 
@@ -337,7 +337,7 @@ class SwitchRender extends BaseValue {
 class PopPanel  {
     constructor(options,callbackFn,v) {
 
-        const $Panel = $(`<div class="pop_window pop_window_small p-3" id="detail_container">
+        let $Panel = $(`<div class="pop_window pop_window_small p-3" id="detail_container">
     <div class="pop_window_header">
         <span class="pop_window_title">${options["title"]}</span>
         <button class="pop_window_button btn btn_default close" >关闭</button>
@@ -386,18 +386,83 @@ class PopPanel  {
         })
     }
 }
+function PopPanelMap (options,callbackFn,keyHas,v) {
+
+        let $Panel = $(`<div class="pop_window pop_window_small p-3" id="detail_container">
+    <div class="pop_window_header">
+        <span class="pop_window_title">${options["title"]}</span>
+        <button class="pop_window_button btn btn_default close" >关闭</button>
+  
+    </div>
+   
+</div>`)
+
+        let $Fade = $("<div class='modal-backdrop fade show modal-open'></div>")
+        let $Body = $(` <div class="pop_window_body"></div>`)
+        $("body").append($Fade)
+        $("body").append($Panel)
+        $Panel.append($Body)
+
+        let $KeyInput = new FieldPanel("key",{
+            schema:{"type":"string","eo:type":"string","pattern":"[a-zA-Z0-9]+[a-zA-Z0-9_]*"},
+            required:true,
+            path:`${options["path"]}.key`,
+            panel:$Body
+        })
+        let $Value = readGenerator(options)({
+            schema:options["schema"],
+            path:options["path"],
+            panel:$Body,
+            generator:readGenerator(options)
+        })
+        if (v){
+            $KeyInput.Value = v["__key"]
+            $Value.Value = v
+            $KeyInput.$Value.Target.attr("readonly", true)
+
+        }
+        $Panel.append(`<div class="row justify-content-between">
+                <div class="col-4">
+                    <button type="button" class="btn btn-outline-secondary form_cancel">取消</button>
+                </div>
+                <div class="col-4" style="text-align: right">
+                    <button type="button" class="btn btn-primary form_submit">提交</button>
+                </div>
+            </div>`)
+        let close = function (){
+            $Fade.remove()
+            $Panel.remove()
+        }
+        $Panel.show()
+        $Fade.click(function (){
+            close()
+        })
+        $Panel.on("click","button.close",close)
+        $Panel.on("click","button.form_cancel",close)
+        $Panel.on("click","button.form_submit",function (){
+            let key = $KeyInput.Value
+            if (key.length<1){
+                $KeyInput.$Value.Target.addClass("is-invalid")
+                return
+            }
+            let v = $Value.Value
+            v["__key"]= key
+            callbackFn(v)
+            close()
+        })
+    }
 
 class RequireRender extends BaseValue {
     constructor(options) {
-        const schema = options["schema"]
-        const path = options["path"]
-        const panel = options["panel"]
+        let schema = options["schema"]
+        let path = options["path"]
+        let panel = options["panel"]
 
         super(schema, $(`<select id=${readId(path)} class="form-control form-control-sm"></select>`),path)
         this.MOptions = options
         $(panel).append(this.Target)
 
-        const select = this.Target
+        let select = this.Target
         dashboard.searchSkill(ModuleName(),schema["skill"],function (res){
 
             $(select).empty()
@@ -427,9 +492,9 @@ class RequireRender extends BaseValue {
 
 class BaseInputRender extends BaseValue {
     constructor(options) {
-        const schema = options["schema"]
-        const path = options["path"]
-        const panel = options["panel"]
+        let schema = options["schema"]
+        let path = options["path"]
+        let panel = options["panel"]
         super(options["schema"], $(createInput(schema, readId(path),options["required"])),path)
         $(panel).append(this.Target)
         if (schema["description"] && schema["description"].length >0){
@@ -437,11 +502,11 @@ class BaseInputRender extends BaseValue {
         }
     }
 }
-
+//字段封装
 class FieldPanel {
     constructor(name,options) {
-        const panel=options["panel"]
-        const schema=options["schema"]
+        let panel=options["panel"]
+        let schema=options["schema"]
         this.Id = readId(options["path"])
         this.$Panel = $(`<div class=""></div>`)
         panel.append(this.$Panel)
@@ -463,7 +528,7 @@ class FieldPanel {
     }
     onChange(fn){
         console.log(this.Id)
-        const o = this
+        let o = this
         this.$Value.onChange(function (){
             fn.apply(o)
         })
@@ -486,18 +551,14 @@ class FieldPanel {
         }
 
     }
+}
 
-}
-class PluginsRender extends BaseChangeHandler {
-    constructor(options) {
-        super(options["path"])
-    }
-}
+// 简单map
 class SimpleMapRender extends BaseChangeHandler{
     constructor(options) {
         super(options["path"]);
         this.MOptions = options
-        const panel=options["panel"]
+        let panel=options["panel"]
         this.Schema = options["schema"]
         this.Items = this.Schema["additionalProperties"]
         let myPanel = $(`<div class="pt-1"></div>`)
@@ -508,7 +569,7 @@ class SimpleMapRender extends BaseChangeHandler{
         this.ItemCount = 0
         this.Values = {}
         myPanel.append(`<div class="pt-1"> <button id="${this.Id}_add" type="button" class="btn btn-success btn-sm">+</button></div>`)
-        const o = this
+        let o = this
         myPanel.on("click",`#${this.Id}_add`,function (){
             let isEmpty = false
 
@@ -545,7 +606,7 @@ class SimpleMapRender extends BaseChangeHandler{
         $item.append(`<div class="input-group-prepend"><button type="button" class="btn btn-danger" > - </button></div>`)
         let it = {key: keyInput, value: valueInput}
         this.Values[index] = it
-        const o = this
+        let o = this
         $($item).on("click", "button", function () {
             $item.remove()
             delete o.Values[index]
@@ -577,105 +638,42 @@ class SimpleMapRender extends BaseChangeHandler{
         }
     }
 }
-class MapRender extends BaseChangeHandler {
-
-    constructor(options) {
-
-        super(options)
-        const panel=options["panel"]
-        this.Schema = options["schema"]
-
-        this.$Panel =$(`<div id='${path}_panel'></div>`)
-        $(panel).append(this.$Panel)
-
-    }
-
-    set Value(v) {
-
-        const Items = this.Schema["additionalProperties"]
-        const Id = this.Id
-        const keySchema = {type: "string","eo:type":"string"}
-
-        this.$Panel.empty()
-        switch (Items["eo:type"]) {
-            case "object":
-            case "map":
-                break;
-            default: {
-                this.$Panel.append(`
-<div class="input-group input-group-sm m-2">
-    <div class="input-group-prepend">
-        <div class="input-group-text  btn" id="btnGroupAddon_${Id}_new">+</div>
-    </div>
-    ${createInput(keySchema, `${Id}_key`, true,`aria-describedby="btnGroupAddon_${Id}_new" placeholder="Input new key" `)}
-    <div class="input-group-prepend ">
-        <div class="input-group-text  btn" id="btnGroupAddon_${Id}_eq">=</div>
-    </div>
-    ${createInput(Items, `${Id}_value`, true,`aria-describedby="btnGroupAddon_${Id}_eq" placeholder="Input new value" `)}
-</div>`)
-
-                for (let k in v) {
-                    $(this.$Panel).append('<div class="input-group input-group-sm m-2"></div>')
-                    let itemPanel = $(this.$Panel).children().last()
-                    itemPanel.append(`
-<div class="input-group-prepend">
-    <button class="btn btn-danger" id="btnGroupAddon_${Id}_key_${k}" type="button" data-itemId="${Id}_key"> - </button>
-</div>`)
-
-                    let childItemKey = new BaseInputRender({panel:itemPanel, schema:keySchema, path:`${Id}_key_${k}`})
-                    childItemKey.Value = k
-                    itemPanel.append('<div class="input-group-prepend"><div class="input-group-text  btn" >=</div></div>')
-                    let childItemValue = new BaseInputRender({panel:itemPanel, schema:Items, path:`${Id}_value_${k}`})
-                    childItemValue.Value = v[k];
-                }
-                break
-            }
-        }
-
-    }
-
-    get Value() {
-        return {}
-    }
-
-}
-
 class ObjectArrayRender extends BaseChangeHandler{
     constructor(options) {
         super(options["path"])
-        const panel=options["panel"]
-        const schema=options["schema"]
+        let panel=options["panel"]
+        let schema=options["schema"]
 
-        const Id = this.Id;
-        const items = schema["items"]
-        const p = $(panel)
-        const $btn = $(`
+        let Id = this.Id;
+        let items = schema["items"]
+        let p = $(panel)
+        let $btn = $(`
 <div id="${Id}_toolbar" class="m-1">
 <button id="${Id}_AddButton" type="button" class="btn btn-secondary btn-sm">Add</button>
 </div>`)
         p.append($btn)
         $btn.on("click","button", function (event) {
-           new PopPanel({
-                   path:`${options["path"]}.items`,
-                   schema:items,
-                   name:options["name"],
-                   title:`添加 ${getLabel(options["name"],options["schema"])}`
-               },
-               function (v){
-                   $Table.bootstrapTable("append",[v])
-                   $Table.bootstrapTable('scrollTo', 'bottom')
-                   O.onChange()
-               })
+            new PopPanel({
+                    path:`${options["path"]}.items`,
+                    schema:items,
+                    name:options["name"],
+                    title:`添加 ${getLabel(options["name"],options["schema"])}`
+                },
+                function (v){
+                    $Table.bootstrapTable("append",[v])
+                    $Table.bootstrapTable('scrollTo', 'bottom')
+                    O.onChange()
+                })
             return false
         })
 
-        const $Table = $(`<table  id="${Id}_items"></table>`)
+        let $Table = $(`<table  id="${Id}_items"></table>`)
         p.append($Table)
 
         this.Table = $Table
-        const properties = items["properties"]
-        const uiSort = items["ui:sort"]
-        
+        let properties = items["properties"]
+        let uiSort = items["ui:sort"]
+
         function formatterKV(v) {
             let html = ""
             for (let k in v) {
@@ -685,7 +683,7 @@ class ObjectArrayRender extends BaseChangeHandler{
             return html
         }
 
-        const columns = []
+        let columns = []
         columns.push({
             title: "index",
             field: "__index",
@@ -695,10 +693,10 @@ class ObjectArrayRender extends BaseChangeHandler{
                 return index+1
             }
         })
-        const O = this
+        let O = this
         for (let i in uiSort) {
             let name = uiSort[i]
-            const item = properties[name]
+            let item = properties[name]
             switch (item["eo:type"]) {
                 case "object": {
                     columns.push({
@@ -733,11 +731,11 @@ class ObjectArrayRender extends BaseChangeHandler{
                 }
                 default: {
 
-                        columns.push({
-                            title: getLabel(name,item),
-                            field: name,
-                            sortable: true,
-                        })
+                    columns.push({
+                        title: getLabel(name,item),
+                        field: name,
+                        sortable: true,
+                    })
 
                     break
                 }
@@ -762,23 +760,23 @@ class ObjectArrayRender extends BaseChangeHandler{
                 },
                 "click .edit":function (e,value,row,index){
                     new PopPanel({
-                        path:`${options["path"]}.items`,
-                        schema:items,
-                        name:options["name"],
+                            path:`${options["path"]}.items`,
+                            schema:items,
+                            name:options["name"],
                             title:`修改 ${getLabel(options["name"],options["schema"])}:${index+1}`
                         },
-                    function (v){
-                        $Table.bootstrapTable("updateRow",{
-                            index:index,
-                            row:v
-                        })
-                        O.onChange()
-                    },row)
+                        function (v){
+                            $Table.bootstrapTable("updateRow",{
+                                index:index,
+                                row:v
+                            })
+                            O.onChange()
+                        },row)
                 }
             }
         })
 
-        const tableOptions = {
+        let tableOptions = {
             columns: columns,
             width: "100%",
             useRowAttrFunc: true,
@@ -804,14 +802,194 @@ class ObjectArrayRender extends BaseChangeHandler{
     }
 
 }
+// 结构体map
+class ObjectMapRender extends BaseChangeHandler{
+    constructor(options) {
+        super(options["path"])
+        let panel=options["panel"]
+        let schema=options["schema"]
+
+        let Id = this.Id;
+        let items = schema["additionalProperties"]
+
+        let $btn = $(`
+<div id="${Id}_toolbar" class="m-1">
+<button id="${Id}_AddButton" type="button" class="btn btn-secondary btn-sm">Add</button>
+</div>`)
+        $(panel).append($btn)
+        $btn.on("click","button", function (event) {
+             PopPanelMap({
+                   path:`${options["path"]}.items`,
+                   schema:items,
+                   name:options["name"],
+                   title:`添加 ${getLabel(options["name"],options["schema"])}`
+               },
+               function (v){
+                   $Table.bootstrapTable("append",[v])
+                   $Table.bootstrapTable('scrollTo', 'bottom')
+                   O.onChange()
+               },function (k){
+                    let vs = O.Value;
+                    return  vs.hasOwnProperty(k)
+               })
+            return false
+        })
+
+        let $Table = $(`<table  id="${Id}_items"></table>`)
+        $(panel).append($Table)
+
+        this.Table = $Table
+        let properties = items["properties"]
+        let uiSort = items["ui:sort"]
+        
+        function formatterKV(v) {
+            let html = ""
+            for (let k in v) {
+                html += "<span class='px-1 border btn-sm  btn-outline-secondary'>" + k + "=" + v[k] + "</span>\n"
+            }
+            html += ""
+            return html
+        }
+        let columns = []
+        columns.push({
+            title: "key",
+            field: "__key",
+            sortable: false,
+        })
+        let O = this
+        for (let i in uiSort) {
+            let name = uiSort[i]
+            let item = properties[name]
+            switch (item["eo:type"]) {
+                case "object": {
+                    columns.push({
+                        title: getLabel(name,item),
+                        field: item["name"],
+                        sortable: false,
+
+                        formatter: JSON.stringify,
+
+                    })
+                    break
+                }
+                case "map": {
+                    columns.push({
+                        title: getLabel(name,item),
+                        field: name,
+                        sortable: false,
+                        editable: false,
+                        formatter: formatterKV,
+                    })
+                    break
+                }
+                case "array": {
+                    columns.push({
+                        title: getLabel(name,item),
+                        field: name,
+                        sortable: false,
+                        editable: false,
+                        formatter: JSON.stringify,
+                    })
+                    break
+                }
+                default: {
+
+                        columns.push({
+                            title: getLabel(name,item),
+                            field: name,
+                            sortable: true,
+                        })
+
+                    break
+                }
+            }
+        }
+        columns.push({
+            title: "操作",
+            field: "",
+            sortable: false,
+            editable: false,
+            formatter: function (v, row, index) {
+                return `<a class="edit" href="javascript:void(0)"  title="edit">配置</a> <a class="remove" href="javascript:void(0)"  title="remove">删除</a>`
+            },
+            events:{
+                "click .remove":function (e,value,row,index) {
+                    // let rowIndex = $(this).attr("array-row")
+                    $Table.bootstrapTable('remove', {
+                        field: '$index',
+                        values: [index]
+                    })
+                    O.onChange()
+                },
+                "click .edit":function (e,value,row,index){
+                    PopPanelMap({
+                        path:`${options["path"]}.items`,
+                        schema:items,
+                        name:options["name"],
+                            title:`修改 ${getLabel(options["name"],options["schema"])}:${index+1}`
+                        },
+                    function (v){
+                        $Table.bootstrapTable("updateRow",{
+                            index:index,
+                            row:v
+                        })
+
+                        O.onChange()
+                        return true
+                    },function (k){
+                            let vs = O.Value;
+                            return  vs.hasOwnProperty(k)
+                        }
+                        ,row)
+                }
+            }
+        })
+
+        let tableOptions = {
+            columns: columns,
+            width: "100%",
+        }
+        $Table.bootstrapTable(tableOptions);
+
+    }
+
+    set Value(vs) {
+        if (!vs || typeof vs == "undefined") {
+            vs = {}
+        }
+        let list = new Array()
+        for (let k in vs){
+            let v = vs[k]
+            v["__key"] = k
+            list.push(v)
+        }
+        list.sort((a,b)=>{
+            return a.__key - b.__key
+        })
+        this.Table.bootstrapTable("load", list)
+    }
+
+    get Value() {
+        let list =  this.Table.bootstrapTable('getData')
+        let vs = {}
+        for (let i in list){
+            let v = Object.assign({},list[i])
+            let key = v["__key"]
+            delete v["__key"]
+            vs[key] = v
+        }
+        return vs
+    }
+
+}
 
 class ArrayRenderEnum extends BaseChangeHandler{
     constructor(options) {
         super(options["path"])
-        const panel=options["panel"]
-        const schema=options["schema"]
-        const Id = this.Id
-        const items = schema["items"]
+        let panel=options["panel"]
+        let schema=options["schema"]
+        let Id = this.Id
+        let items = schema["items"]
         this.Enum = items["enum"]
 
         let p = $(panel);
@@ -828,7 +1006,7 @@ class ArrayRenderEnum extends BaseChangeHandler{
 
 
     get Value() {
-        const list = []
+        let list = []
         $(`input[name="${this.Id}"]`).each(function () {
             if ($(this).is(':checked')) {
                 list.push($(this).val())
@@ -841,11 +1019,11 @@ class ArrayRenderEnum extends BaseChangeHandler{
         if (!vs) {
             vs = []
         }
-        const list = vs
+        let list = vs
 
         for (let i in this.Enum) {
             let v = this.Enum[i]
-            const itemId = this.Id + '_' + v
+            let itemId = this.Id + '_' + v
             $("#" + itemId).attr("checked", list.includes(v))
         }
     }
@@ -856,14 +1034,14 @@ class ArrayRenderEnum extends BaseChangeHandler{
 class ArrayRenderSimple extends BaseChangeHandler{
     constructor(options) {
         super(options["path"])
-        const panel = options["panel"]
-        const schema = options["schema"]
+        let panel = options["panel"]
+        let schema = options["schema"]
         this.Options = options
-        const Id = this.Id
+        let Id = this.Id
         this.ValuesList = {}
         this.SchemaItems = schema["items"]
         let myPanel = $(`<div class=""></div>`)
-        const $itemPanel = $(`<div id="${Id}_items" class="" role="toolbar"></div>`)
+        let $itemPanel = $(`<div id="${Id}_items" class="" role="toolbar"></div>`)
         panel.append(myPanel)
         myPanel.append($itemPanel)
         myPanel.append(`<div class=""> <button id="${Id}_add" type="button" class="btn btn-success btn-sm">+</button></div>`)
@@ -882,24 +1060,24 @@ class ArrayRenderSimple extends BaseChangeHandler{
         })
         this.ItemPanel = $itemPanel
         this.lastIndex = 0
-        const o = this
+        let o = this
     }
     add() {
-        const index = this.lastIndex++
-        const itemId = `${this.Id}_item_${index}`
-        // const appendAtt = ` array-for="${this.Id}" aria-describedby="btnGroupAddon_${itemId}" `
-        const $item = $(`
+        let index = this.lastIndex++
+        let itemId = `${this.Id}_item_${index}`
+        // let appendAtt = ` array-for="${this.Id}" aria-describedby="btnGroupAddon_${itemId}" `
+        let $item = $(`
 <div class="input-group input-group-sm m-2" >
     <div class="input-group-prepend">
         <button class="btn btn-danger"  type="button" aria-describedby="btnGroupAddon_${itemId}" data-itemId="${itemId}"> - </button>
     </div>
 </div>`)
         this.ItemPanel.append($item)
-        const $itemInput =$(createInput(this.SchemaItems, itemId, true))
+        let $itemInput =$(createInput(this.SchemaItems, itemId, true))
 
         $item.prepend($itemInput)
         this.ValuesList[index] = new BaseValue(this.SchemaItems,$itemInput , this.Id)
-        const o = this
+        let o = this
         this.ValuesList[index].onChange(function () {
             o.onChange()
         })
@@ -939,9 +1117,9 @@ class ObjectRender extends BaseChangeHandler{
     constructor(options) {
         super(options["path"])
         this.Options = options
-        const panel = options["panel"]
-        const schema = options["schema"]
-        const Id = this.Id
+        let panel = options["panel"]
+        let schema = options["schema"]
+        let Id = this.Id
 
         this.$Panel = panel
         this.Fields = {}
@@ -949,14 +1127,14 @@ class ObjectRender extends BaseChangeHandler{
         if (schema["eo:type"] !== "object") {
             return
         }
-        const o = this
-        let properties = options["schema"]["properties"]
-        let sorts = options["schema"]["ui:sort"]
+        let o = this
+        let properties = schema["properties"]
+        let sorts = schema["ui:sort"]
         let requiredData = requiredMap(schema["required"])
         for (let i in sorts) {
             let name = sorts[i]
             let sub = properties[name]
-            const subId = `${Id}.${name}`
+            let subId = `${Id}.${name}`
 
            let field = new FieldPanel(name,{
                 panel:this.$Panel,
@@ -1023,7 +1201,7 @@ class ObjectRender extends BaseChangeHandler{
         for (let k in this.Fields) {
             let fi = this.Fields[k]
             let v = fi.Value
-            if (v){
+            if (typeof v !== "undefined"){
                 vs[k] = v
             }
         }
@@ -1041,17 +1219,283 @@ class ObjectRender extends BaseChangeHandler{
     }
 
 }
+// 插件弹出窗
+class PopPanelPlugin {
+    constructor() {
 
+    }
+
+    /**
+     * 更新ui面板
+     * @param id
+     * @param success
+     */
+    getRenderInfo(id, success){
+        let path = id.replaceAll(":","/")
+        let n = id.replaceAll(":","_")
+        dashboard.getExtenderInfo(path, function (res) {
+            if(res.code !== 200){
+                return http.handleError(res, "获取extender信息失败")
+            }
+            success(n,res.data["render"])
+        }, function (res){
+            return http.handleError(res, "获取extender信息失败")
+        })
+    }
+    show(exclude,callbackFn,data){
+        if (this.IsInit === true){
+            this.render(exclude,callbackFn,data)
+            return
+        }
+        let o = this
+        o.IsInit = true
+        dashboard.get(`/api/plugins`,function (pluginsData){
+            o.IsInit = true
+            o.Plugins = pluginsData.data["plugins"]
+            o.PluginsExtenders = new Map(
+                o.Plugins.map(object => {
+                    return [object.name, object.id];
+                }),
+            );
+            o.render(exclude,callbackFn,data)
+        },function (err){
+            o.IsInit = false
+            common.message(err,"danger")
+        })
+    }
+
+    render(exclude,callbackFn,data){
+
+        let $Panel = $(`
+<div class="pop_window pop_window_small p-3" id="detail_container">
+    <div class="pop_window_header">
+        <span class="pop_window_title">插件信息</span>
+        <button class="pop_window_button btn btn_default close" >关闭</button>
+    </div>
+</div>`)
+
+        let $Fade = $("<div class='modal-backdrop fade show modal-open'></div>")
+        let $Body = $(` <div class="pop_window_body"></div>`)
+        $("body").append($Fade)
+        $("body").append($Panel)
+        $Panel.append($Body)
+
+        let $PluginName  = $(`<select class="form-control form-control-sm"  ></select>`)
+
+        let $Disable = $(`<input type="checkbox" class="form-control-sm" data-toggle="toggle" data-size="sm"/>`)
+
+        $Body.append(
+            $(`<div><div><label class=" col-form-label  text-nowrap" for="FormRender_test_target"><span style="color: red">*</span>目标服务</label></div></div>`)
+                .append($PluginName)
+        )
+        $Body.append(
+            $(`<div><div><label class=" col-form-label  text-nowrap" for="FormRender_test_target"><span style="color: red">*</span>是否禁用</label></div></div>`)
+                .append($Disable)
+        )
+        $Disable.bootstrapToggle({
+            on: '禁用',
+            off: '启用'
+        })
+        let $Config = $(`<div class="border-top p-1"></div>`)
+        $Body.append(
+            $(`<div><div><label class=" col-form-label  text-nowrap" for="FormRender_test_target"><span style="color: red">*</span>插件配置</label></div></div>`)
+                .append($Config)
+        )
+        let O= this
+        function renderConfig(name){
+            O.getRenderInfo(O.PluginsExtenders.get(name),function (driver,render){
+                $Config.empty()
+                O.ConfigTarget = new ObjectRender({
+                    path:'plugins.${name}',
+                    panel:$Config,
+                    schema:render
+                })
+                if (data){
+                    O.ConfigTarget.Value = data.config
+                }
+            })
+        }
+        if (data){
+            if (data.disable === true || data.disable === "true") {
+                $Disable.bootstrapToggle("on");
+            } else {
+                $Disable.bootstrapToggle("off");
+            }
+            $PluginName.prepend(`<option value="${data.name}" selected>${data.name}</option>`)
+            renderConfig(data.name)
+        }else{
+            $Disable.bootstrapToggle("off");
+            let set = new Set(exclude)
+            let first = true
+            for (let i in this.Plugins){
+                let p = this.Plugins[i]
+                if (!set.has(p.name)){
+                    $PluginName.append(`<option value="${p.name}" ${first?"selected":""}>${p.name}</option>`)
+                    first = false
+                }
+            }
+            if ($PluginName.children().length>0){
+                renderConfig($PluginName.val())
+            }
+
+            $PluginName.on("change",function (){
+                let name = $(this).val()
+                renderConfig(name)
+            })
+
+        }
+        $Panel.append(`<div class="row justify-content-between">
+                <div class="col-4">
+                    <button type="button" class="btn btn-outline-secondary form_cancel">取消</button>
+                </div>
+                <div class="col-4" style="text-align: right">
+                    <button type="button" class="btn btn-primary form_submit">提交</button>
+                </div>
+            </div>`)
+        let close = function (){
+            $Fade.remove()
+            $Panel.remove()
+        }
+        $Panel.show()
+        $Fade.click(function (){
+            close()
+        })
+        $Panel.on("click","button.close",close)
+        $Panel.on("click","button.form_cancel",close)
+        $Panel.on("click","button.form_submit",function (){
+            callbackFn({name:$PluginName.val(),disable: $($Disable).prop("checked"),config:O.ConfigTarget.Value})
+            close()
+        })
+    }
+}
+
+// 插件配置表
+class PluginsRender extends BaseChangeHandler{
+    constructor(options) {
+        super(options["path"])
+        let panel=options["panel"]
+        let schema=options["schema"]
+        let items =schema["additionalProperties"]
+        let Id = this.Id
+        this.PopPanel = new PopPanelPlugin()
+        let $Table = $(`<table  id="${Id}_items"></table>`)
+        $(panel).append($Table)
+
+        this.Table = $Table
+        let O = this
+
+        let tableOptions = {
+            columns:  [{
+                title: "插件名",
+                field: "name",
+                sortable: false,
+            }
+                ,{
+                    title:"状态",
+                    field:"disable",
+                    formatter:function (v, row, index){
+                        return v === true ?`<span>禁用</span>`:`<span>启用</span>`
+                    }
+                },
+                {
+                    title:"配置",
+                    field:"config",
+                    formatter:JSON.stringify
+                },
+                {
+                    title: "操作",
+                    field: "",
+                    sortable: false,
+                    editable: false,
+                    formatter: function (v, row, index) {
+                        return `<a class="edit" href="javascript:void(0)"  title="edit">配置</a> <a class="remove" href="javascript:void(0)"  title="remove">删除</a>`
+                    },
+                    events:{
+                        "click .remove":function (e,value,row,index) {
+                            $Table.bootstrapTable('remove', {
+                                field: '$index',
+                                values: [index]
+                            })
+                            O.onChange()
+                        },
+                        "click .edit":function (e,value,row,index){
+                            O.PopPanel.show(Object.keys(O.Value),
+                                function (v){
+                                    $Table.bootstrapTable("updateRow",{
+                                        index:index,
+                                        row:v
+                                    })
+
+                                    O.onChange()
+                                    return true
+                                },row)
+                        }
+                    }
+                }],
+            width: "100%",
+        }
+
+        $Table.bootstrapTable(tableOptions);
+
+
+            let $btn = $(`
+<div id="${Id}_toolbar" class="m-1">
+<button id="${Id}_AddButton" type="button" class="btn btn-secondary btn-sm">Add</button>
+</div>`)
+            $(panel).prepend($btn)
+            $btn.on("click","button", function (event) {
+                O.PopPanel.show(Object.keys(O.Value),
+                    function (v){
+                        $Table.bootstrapTable("append",[v])
+                        $Table.bootstrapTable('scrollTo', 'bottom')
+                        O.onChange()
+                    })
+                return false
+            })
+    }
+
+    set Value(vs) {
+        if (!vs || typeof vs == "undefined") {
+            vs = {}
+        }
+        let list = new Array()
+        for (let k in vs){
+            let v = vs[k]
+            v["name"] = k
+            list.push(v)
+        }
+        list.sort((a,b)=>{
+            return a.name - b.name
+        })
+        this.Table.bootstrapTable("load", list)
+    }
+
+    get Value() {
+        let list =  this.Table.bootstrapTable('getData')
+        let vs = {}
+        for (let i in list){
+
+            let v = list[i]
+            let key = v["name"]
+            vs[key] = {
+                disable:v["disable"],
+                config:v["config"],
+            }
+        }
+        return vs
+    }
+
+}
 
 function BaseGenerator(options) {
 
-    const schema = options["schema"]
+    let schema = options["schema"]
     switch (schema["eo:type"]) {
         case "object": {
             return new ObjectRender(options)
         }
         case "array": {
-            const items = schema["items"]
+            let items = schema["items"]
             switch (items["eo:type"]) {
                 case "object": {
                     return new ObjectArrayRender(options)
@@ -1090,7 +1534,7 @@ function BaseGenerator(options) {
                     if(options["name"] === "plugins"){
                         return new PluginsRender(options)
                     }
-                    return new MapRender(options)
+                    return new ObjectMapRender(options)
                 }
             }
             return new SimpleMapRender(options)
