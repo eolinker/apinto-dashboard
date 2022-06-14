@@ -132,7 +132,7 @@
             common.confirm("删除{{index .module.I18nName .zone}}", msg, function (){
                 dashboard.delete( "/api/{{.name}}/"+row.name, function (res) {
                     if(res.code === 200){
-                        common.message("删除成功", "danger")
+                        common.message("删除成功", "success")
                         $table.bootstrapTable('remove', {
                             field: 'id',
                             values: [row.id]
