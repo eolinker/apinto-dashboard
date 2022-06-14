@@ -140,9 +140,10 @@ let common = {
         let divElement = $("<div></div>").addClass('alert').addClass('alert-'+type).addClass('alert-dismissible').addClass('col-md-4').addClass('col-md-offset-4');
         let scroll = document.body.scrollTop || document.documentElement.scrollTop;
         divElement.css({ // 消息框的定位样式
-            "position": "fixed",
-            "right":"50px",
-            "top": scroll + 80 +"px"
+            // "position": "fixed",
+            // "right":"50px",
+            "margin-left": "unset",
+            "margin": "auto",
         });
         divElement.text(msg); // 设置消息框的内容
         // 消息框添加可以关闭按钮
@@ -205,9 +206,10 @@ let common = {
                     }
                 }, IntervalMS);
             });
-        }, 1500);
+        }, 15000);
     }
 }
+
 let aceEditor = {
     InitEditor: function (id){
         let editor = ace.edit(id);
