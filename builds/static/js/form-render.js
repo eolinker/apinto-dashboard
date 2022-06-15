@@ -914,7 +914,9 @@ class FormatterConfigRender extends BaseChangeHandler {
  
   <button id="${Id}_AddButton" type="button" class="btn btn-secondary btn-sm">Add</button>
  
-
+  <small>
+  <a href="https://help.apinto.com/docs/formatter/" target="formatter" class="btn-link" >formatter 配置说明</a>
+</small>
 </div>`)
         $(panel).append($btn)
         $btn.on("click", "button", function (event) {
