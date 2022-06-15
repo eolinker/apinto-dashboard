@@ -277,15 +277,20 @@ class BaseValue {
         }
         switch($(this.Target).get(0).tagName ){
             case "select":{
-                $(this.Target).find(`option[value="${v}"]`).prop("selected", true);
+                if ($(this.Target).prop("multiple")){
+                    for (let i in v){
+                        let item = v[i]
+                        $(this.Target).find(`option[value="${item}"]`).prop("selected", true);
+                    }
+                }else{
+                    $(this.Target).find(`option[value="${v}"]`).prop("selected", true);
+                }
                 break
             }
             default:{
                 $(this.Target).val(v)
             }
         }
-
-
     }
 
 }
@@ -480,6 +485,50 @@ class RequireRender extends BaseValue {
                 $(select).append(`<option value="${d.id}">${d.id}[${d.driver}]</option>`)
             }
         })
+    }
+    isOk(v) {
+        if (!v || v.length === 0){
+            if (this.MOptions["required"]){
+                return "请选择"
+            }
+        }
+    }
+}
+class RequireArrayRender extends BaseValue {
+    constructor(options) {
+        let schema = options["schema"]
+        let path = options["path"]
+        let panel = options["panel"]
+
+        super(schema, $(`<select id=${readId(path)} data-live-search="true" class="selectpicker form-control form-control-sm" title="请选择" data-width="100%" data-size="5" data-selected-text-format="count>4" multiple></select>`),path)
+        this.MOptions = options
+        $(panel).append(this.Target)
+
+        let $Select = this.Target
+        dashboard.searchSkill(ModuleName(),schema["skill"],function (res){
+
+            $($Select).empty()
+            // if(options["required"]){
+            //     $($Select).append(`<option value="">请选择</option>`)
+            // }else{
+            //     if (schema["empty_label"]){
+            //         $($Select).append(`<option value="">${schema["empty_label"]}</option>`)
+            //     }else {
+            //         $($Select).append(`<option value="">不启用</option>`)
+            //     }
+            // }
+            for (let i in res.data){
+                let d = res.data[i]
+                $($Select).append(`<option value="${d.id}">${d.id}[${d.driver}]</option>`)
+            }
+            $Select.selectpicker()
+        })
+    }
+    set Value(vs){
+        this.Target.selectpicker('val', vs);
+    }
+    get Value(){
+        return this.Target.selectpicker('val');
     }
     isOk(v) {
         if (!v || v.length === 0){
@@ -1146,7 +1195,7 @@ class ObjectRender extends BaseChangeHandler{
             })
             this.Fields[name] =field
             field.onChange(function (){
-                o.switch(name,this.Value)
+                o.switchPanel(name,this.Value)
                 o.onChange()
             })
         }
@@ -1160,11 +1209,11 @@ class ObjectRender extends BaseChangeHandler{
         }
         this.Switches = Switches
         for (let name in this.Fields){
-            this.switch(name,this.Fields[name].Value)
+            this.switchPanel(name,this.Fields[name].Value)
         }
 
     }
-    switch(name,value){
+    switchPanel(name,value){
 
         switch (typeof value  ){
             case "string":{
@@ -1192,6 +1241,7 @@ class ObjectRender extends BaseChangeHandler{
                     this.Fields[f].Hide()
                 }
             }catch (e) {
+
                 // console.log(e)
             }
         }
@@ -1215,6 +1265,7 @@ class ObjectRender extends BaseChangeHandler{
         for (let k in this.Fields) {
             let fi = this.Fields[k]
             fi.Value = v[k]
+            this.switchPanel(k,v[k])
         }
     }
 
@@ -1282,7 +1333,7 @@ class PopPanelPlugin {
 
         let $PluginName  = $(`<select class="form-control form-control-sm"  ></select>`)
 
-        let $Disable = $(`<input type="checkbox" class="form-control-sm" data-toggle="toggle" data-size="sm"/>`)
+        let $Disable = $(`<input type="checkbox" class="form-control-sm form-control" data-toggle="toggle" data-size="sm"/>`)
 
         $Body.append(
             $(`<div><div><label class=" col-form-label  text-nowrap" for="FormRender_test_target"><span style="color: red">*</span>目标服务</label></div></div>`)
@@ -1394,7 +1445,7 @@ class PluginsRender extends BaseChangeHandler{
                     title:"状态",
                     field:"disable",
                     formatter:function (v, row, index){
-                        return v === true ?`<span>禁用</span>`:`<span>启用</span>`
+                        return v === true ?`<span class="btn-danger btn btn-sm">禁用</span>`:`<span class="btn btn-sm btn-outline-primary">启用</span>`
                     }
                 },
                 {
@@ -1518,7 +1569,7 @@ function BaseGenerator(options) {
                     throw `not allow type:${items["eo:type"]} in array`
                 }
                 case "require":{
-                    return new RequireRender(options)
+                    return new RequireArrayRender(options)
                 }
                 default:{
                     throw `unknown type:${items["eo:type"]} in array`
