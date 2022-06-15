@@ -1195,7 +1195,7 @@ class ObjectRender extends BaseChangeHandler{
             })
             this.Fields[name] =field
             field.onChange(function (){
-                o.switch(name,this.Value)
+                o.switchPanel(name,this.Value)
                 o.onChange()
             })
         }
@@ -1209,11 +1209,11 @@ class ObjectRender extends BaseChangeHandler{
         }
         this.Switches = Switches
         for (let name in this.Fields){
-            this.switch(name,this.Fields[name].Value)
+            this.switchPanel(name,this.Fields[name].Value)
         }
 
     }
-    switch(name,value){
+    switchPanel(name,value){
 
         switch (typeof value  ){
             case "string":{
@@ -1241,6 +1241,7 @@ class ObjectRender extends BaseChangeHandler{
                     this.Fields[f].Hide()
                 }
             }catch (e) {
+
                 // console.log(e)
             }
         }
@@ -1264,6 +1265,7 @@ class ObjectRender extends BaseChangeHandler{
         for (let k in this.Fields) {
             let fi = this.Fields[k]
             fi.Value = v[k]
+            this.switchPanel(k,v[k])
         }
     }
 
