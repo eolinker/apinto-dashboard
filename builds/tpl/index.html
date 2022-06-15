@@ -62,7 +62,7 @@
 {{- block "icon" . -}}
 {{- end -}}
 {{- block "top" . -}}
-<header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
+<header class="navbar navbar-light sticky-top bg-light flex-md-nowrap p-0 border border-secondary">
 
 <!--    <div class="d-flex flex-column flex-shrink-0 p-3 text-white bg-dark" >-->
         <a href="/" class="navbar-brand col-md-3 col-lg-2 me-0 px-3" >
@@ -104,7 +104,7 @@
                     {{- range $index,$m:=.modules -}}
                     <li class="nav-item">
                         {{- if eq $m.Name $.name -}}
-                        <a href="{{$m.Path}}" class="nav-link active" aria-current="page"><svg class="bi me-2" width="16" height="16"><use xlink:href="#{{$m.Name}}"/></svg>  {{index $m.I18nName $.zone}}</a>
+                        <a href="{{$m.Path}}" class="nav-link active" aria-current="page"><svg class="bi me-2" width="40" height="16"><use xlink:href="#{{$m.Name}}"/></svg>  {{index $m.I18nName $.zone}}</a>
                         {{- else -}}
                         <a href="{{$m.Path}}" class="nav-link "><svg class="bi me-2" width="16" height="16"><use xlink:href="#{{$m.Name}}"/></svg>  {{index $m.I18nName $.zone}}</a>
                         {{- end }}
