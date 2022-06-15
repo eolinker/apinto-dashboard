@@ -575,6 +575,43 @@ class FieldPanel {
     }
 }
 
+class DatetimeRender extends BaseChangeHandler {
+    constructor(options) {
+        super(options["path"]);
+        this.Options = options
+        this.Panel = options["panel"]
+        this.Scheme = options["scheme"]
+        this.Panel.append(`
+            <div class="form-group">
+<!--                <label for="dtp_input1" class="col-md-2 control-label"></label>-->
+                <div class="input-group date form_datetime col-md-5" data-date-format="dd MM yyyy - HH:ii p" id="${this.Id}_date">
+                    <input class="form-control" size="16" type="text" value="" readonly id="${this.Id}_date_data">
+                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                    <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                </div>
+<!--                <input type="hidden" id="dtp_input1" value="" /><br/>-->
+            </div>
+            `)
+        $(`#${this.Id}_date`).datetimepicker({
+            format: 'yyyy-mm-dd hh:ii:ss',
+            weekStart: 1,
+            todayBtn:  1,
+            autoclose: 1,
+            todayHighlight: 1,
+            startView: 2,
+            forceParse: 0,
+            showMeridian: 1
+        });
+    }
+    get Value() {
+        let v = $(`#${this.Id}_date_data`).val()
+        if (typeof v == "undefined" || v === "") {
+            return "no expired"
+        }
+        return v
+    }
+}
+
 // 简单map
 class SimpleMapRender extends BaseChangeHandler {
     constructor(options) {
@@ -670,7 +707,7 @@ class ObjectArrayRender extends BaseChangeHandler {
         let $Panel = $(`<div class="pop_window pop_window_small p-3" id="detail_container">
     <div class="pop_window_header">
         <span class="pop_window_title">${options["title"]}</span>
-        <button class="pop_window_button btn btn_default close" >关闭</button>
+<!--        <button class="pop_window_button btn btn_default close" >关闭</button>-->
         <br>
     </div>
    
@@ -681,6 +718,7 @@ class ObjectArrayRender extends BaseChangeHandler {
         $("body").append($Fade)
         $("body").append($Panel)
         $Panel.append($Body)
+        // 判断是否为时间戳
 
         let $Value = readGenerator(options)({
             schema: options["schema"],
@@ -821,7 +859,8 @@ class ObjectArrayRender extends BaseChangeHandler {
     }
 
     get Value() {
-        return this.Table.bootstrapTable('getData')
+        let data = this.Table.bootstrapTable('getData')
+        return data
     }
 
 }
@@ -1062,6 +1101,7 @@ class ObjectMapRender extends BaseChangeHandler {
             path: `${options["path"]}.key`,
             panel: $Body
         })
+
         let $Value = readGenerator(options)({
             schema: options["schema"],
             path: options["path"],
@@ -1752,7 +1792,21 @@ class PluginsRender extends BaseChangeHandler {
 function BaseGenerator(options) {
 
     let schema = options["schema"]
-    switch (schema["eo:type"]) {
+    let eoType = schema["eo:type"]
+    let format = schema["format"]
+    if ( typeof format != "undefined" ) {
+        let dataFormat=["date-time","time","date","duration"]
+        for (let value of dataFormat) {
+            if (value==format) {
+                eoType = "date-time"
+                delete(options["schema"]["format"])
+                break
+            }
+        }
+    }
+
+
+    switch (eoType) {
         case "object": {
             return new ObjectRender(options)
         }
@@ -1815,6 +1869,9 @@ function BaseGenerator(options) {
         }
         case "require": {
             return new RequireRender(options)
+        }
+        case "date-time":{
+            return new DatetimeRender(options)
         }
         case "formatter" : {
             return new FormatterConfigRender(options)
