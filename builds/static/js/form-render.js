@@ -634,8 +634,32 @@ class InnerObjectRender extends BaseChangeHandler{
                 lastValue.Value = row[name]
                 return ""
             }
+
+            this.datetimeFormatter = function (index,row,$element) {
+                if (typeof lastDetailRow !== "undefined" && index!== lastDetailRow ) {
+                    console.log(123)
+                    let data = $Table.bootstrapTable('getData')
+                    data[lastDetailRow][lastField] = lastValue.Value
+                    $Table.bootstrapTable("updateRow",{
+                        index: 1,
+                        row: data[lastDetailRow]
+                    })
+                    $Table.bootstrapTable('collapseRow', lastDetailRow)
+                }
+
+                lastDetailRow = index
+
+                let name = uiSort[fieldIndex]
+                let item = properties[name]
+                // lastField = name
+                // lastValue = readGenerator(options)({panel:$element, schema:item, generator:options["generator"], path:`${Id}_${name}`,name:name})
+                // lastValue.Value = row[name]
+                return ""
+            }
             return this
+
         }
+
 
         function NotDetailFormatterMap(index, row, $element) {
             if (typeof lastDetailRow !== "undefined") {
@@ -661,6 +685,26 @@ class InnerObjectRender extends BaseChangeHandler{
                 html += "<span class='btn btn-outline-secondary btn-sm'>" + k + "=" + v[k] + "</span>\n"
             }
             html += ""
+            return html
+        }
+
+        function formatterDate(initDate) {
+            let html = `
+                <div class="input-group date form_datetime col-md-5" data-date="1979-09-16T05:25:07Z" data-date-format="dd MM yyyy - HH:ii p" data-link-field="dtp_input1">
+                    <input class="form-control" size="16" type="text" value="" readonly>
+                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                    <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                </div>`
+            $(".form_datetime").datetimepicker({
+                weekStart: 1,
+                todayBtn:  1,
+                autoclose: 1,
+                todayHighlight: 1,
+                startView: 2,
+                forceParse: 1,
+                showMeridian: 1,
+                initialDate:initDate
+            });
             return html
         }
 
@@ -714,6 +758,24 @@ class InnerObjectRender extends BaseChangeHandler{
                         detailFormatter: new DetailFormatterHandler(i).detailFormatter,
                     })
                     break
+                }
+                case "integer":
+                case "number":{
+                    let typeInput = "number"
+                    if (item["format"] == "date-time") {
+                        columns.push({
+
+                            title: getLabel(name,item),
+                            field: name,
+                            sortable: false,
+                            formatter:formatterDate,
+                            detailFormatter: new DetailFormatterHandler(i).datetimeFormatter,
+                            editable: {
+                                type:typeInput
+                            }
+                        })
+                        break
+                    }
                 }
                 default: {
                     if (item["enum"]) {
