@@ -140,10 +140,9 @@ let common = {
         let divElement = $("<div></div>").addClass('alert').addClass('alert-'+type).addClass('alert-dismissible').addClass('col-md-4').addClass('col-md-offset-4');
         let scroll = document.body.scrollTop || document.documentElement.scrollTop;
         divElement.css({ // 消息框的定位样式
-            // "position": "fixed",
-            // "right":"50px",
-            "margin-left": "unset",
-            "margin": "auto",
+            "position": "fixed",
+            "right":"50px",
+            "top": scroll + 80 +"px"
         });
         divElement.text(msg); // 设置消息框的内容
         // 消息框添加可以关闭按钮
@@ -206,7 +205,7 @@ let common = {
                     }
                 }, IntervalMS);
             });
-        }, 15000);
+        }, 1500);
     }
 }
 
@@ -228,6 +227,7 @@ let modal = {
         let target = $("#"+id)
         target.removeClass("pop_window").removeClass("pop_window_small").html("")
         target.addClass("pop_window").addClass("pop_window_small").append(`<div class="pop_window_header">
+            <span class="pop_window_title" id="${id}_title"></span>
             <span class="pop_window_title" id="${id}_title"></span>
             <button class="pop_window_button btn btn_default" id="${id}_close" >关闭</button>
             <br>
