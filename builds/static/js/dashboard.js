@@ -140,10 +140,9 @@ let common = {
         let divElement = $("<div></div>").addClass('alert').addClass('alert-'+type).addClass('alert-dismissible').addClass('col-md-4').addClass('col-md-offset-4');
         let scroll = document.body.scrollTop || document.documentElement.scrollTop;
         divElement.css({ // 消息框的定位样式
-            // "position": "fixed",
-            // "right":"50px",
-            "margin-left": "unset",
-            "margin": "auto",
+            "position": "fixed",
+            "right":"50px",
+            "top": scroll + 80 +"px"
         });
         divElement.text(msg); // 设置消息框的内容
         // 消息框添加可以关闭按钮
@@ -282,32 +281,6 @@ let modal = {
             close.unbind("click")
             target.removeClass("pop_window").removeClass("pop_window_small").html("")
         }
-        return target
-    }
-}
-
-let date = {
-    datetime:function (id,initDate){
-        let target = $("#"+id)
-        // 清空目标html
-        target.html("")
-        target.append(`
-            <div class="input-group date form_datetime col-md-5" data-date="1979-09-16T05:25:07Z" data-date-format="dd MM yyyy - HH:ii p" data-link-field="dtp_input1">
-                <input class="form-control" size="16" type="text" value="" readonly>
-                <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
-                <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
-            </div>`)
-        target.datetimepicker({
-            weekStart: 1,
-            todayBtn:  1,
-            autoclose: 1,
-            todayHighlight: 1,
-            startView: 2,
-            forceParse: 1,
-            showMeridian: 1,
-            initialDate:initDate
-        });
-
         return target
     }
 }
