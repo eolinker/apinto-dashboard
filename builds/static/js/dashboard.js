@@ -206,7 +206,7 @@ let common = {
                     }
                 }, IntervalMS);
             });
-        }, 15000);
+        }, 1500);
     }
 }
 
@@ -228,6 +228,7 @@ let modal = {
         let target = $("#"+id)
         target.removeClass("pop_window").removeClass("pop_window_small").html("")
         target.addClass("pop_window").addClass("pop_window_small").append(`<div class="pop_window_header">
+            <span class="pop_window_title" id="${id}_title"></span>
             <span class="pop_window_title" id="${id}_title"></span>
             <button class="pop_window_button btn btn_default" id="${id}_close" >关闭</button>
             <br>
@@ -281,6 +282,32 @@ let modal = {
             close.unbind("click")
             target.removeClass("pop_window").removeClass("pop_window_small").html("")
         }
+        return target
+    }
+}
+
+let date = {
+    datetime:function (id,initDate){
+        let target = $("#"+id)
+        // 清空目标html
+        target.html("")
+        target.append(`
+            <div class="input-group date form_datetime col-md-5" data-date="1979-09-16T05:25:07Z" data-date-format="dd MM yyyy - HH:ii p" data-link-field="dtp_input1">
+                <input class="form-control" size="16" type="text" value="" readonly>
+                <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+            </div>`)
+        target.datetimepicker({
+            weekStart: 1,
+            todayBtn:  1,
+            autoclose: 1,
+            todayHighlight: 1,
+            startView: 2,
+            forceParse: 1,
+            showMeridian: 1,
+            initialDate:initDate
+        });
+
         return target
     }
 }
