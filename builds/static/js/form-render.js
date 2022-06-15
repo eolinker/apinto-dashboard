@@ -1,41 +1,103 @@
-const RootId = "FormRender"
+let RootId = "FormRender"
 
-const validate = {
+let validate = {
     _validator: null,
     djv: function () {
-        if (this._validator){
+        if (this._validator) {
             return this._validator
         }
         this._validator = new djv()
         return this._validator
     },
 }
-function requiredMap(required){
-    if (!required){
+function formatterKV(v) {
+    let html = ""
+    for (let k in v) {
+        html += "<span class='px-1 border btn-sm  btn-outline-secondary'>" + k + "=" + v[k] + "</span>\n"
+    }
+    html += ""
+    return html
+}
+function configTable(uiSort,properties){
+    let columns = []
+    for (let i in uiSort) {
+        let name = uiSort[i]
+        let item = properties[name]
+        switch (item["eo:type"]) {
+            case "object": {
+                columns.push({
+                    title: getLabel(name, item),
+                    field: item["name"],
+                    sortable: false,
+
+                    formatter: JSON.stringify,
+
+                })
+                break
+            }
+            case "map": {
+                columns.push({
+                    title: getLabel(name, item),
+                    field: name,
+                    sortable: false,
+                    editable: false,
+                    formatter: formatterKV,
+                })
+                break
+            }
+            case "array": {
+                columns.push({
+                    title: getLabel(name, item),
+                    field: name,
+                    sortable: false,
+                    editable: false,
+                    formatter: formatterKV,
+                })
+                break
+            }
+            default: {
+
+                columns.push({
+                    title: getLabel(name, item),
+                    field: name,
+                    sortable: true,
+                })
+
+                break
+            }
+        }
+    }
+    return columns
+}
+function requiredMap(required) {
+    if (!required) {
         return {}
     }
     let r = {}
-    for (let i in required){
+    for (let i in required) {
         r[required[i]] = true
     }
     return r
 }
-function readId(path){
-    return path.replaceAll(".","_")
+
+function readId(path) {
+    return path.replaceAll(".", "_")
 }
-function readGenerator(options){
+
+function readGenerator(options) {
     let fn = options["generator"]
-    if (!fn){
+    if (!fn) {
         return BaseGenerator
     }
-    return  fn
+    return fn
 }
+
 function CheckBySchema(id, schema, value) {
     let env = validate.djv()
     if (!env.resolved.hasOwnProperty(id)) {
         env.addSchema(id, schema);
     }
-    return  env.validate(id, value);
+    return env.validate(id, value);
     // let validator = validate.Default()
     // if (!validator.resolved.hasOwnProperty(id)) {
     //     validator.addSchema(id, schema);
@@ -72,13 +134,14 @@ function valueForType(t, v) {
 
     return v
 }
-function createEnum(schema, id,required, appendAttr) {
+
+function createEnum(schema, id, required, appendAttr) {
     let readOnly = ""
     this.schema = schema
     if (schema["readonly"] === true) {
         readOnly = "readonly"
     }
-    if (typeof appendAttr === "undefined"){
+    if (typeof appendAttr === "undefined") {
         appendAttr = ""
     }
     if (schema["enum"]) {
@@ -102,14 +165,14 @@ function createEnum(schema, id,required, appendAttr) {
     }
 }
 
-function createInput(schema, id,required, appendAttr) {
+function createInput(schema, id, required, appendAttr) {
     let readOnly = ""
 
     if (schema["readonly"] === true) {
         readOnly = "readonly"
     }
     let idstr = ""
-    if (id && id.length>0){
+    if (id && id.length > 0) {
         idstr = `id="${id}"`
     }
     let input = `<input ${readOnly} class="form-control form-control-sm" ${idstr} aria-describedby="validation_${id}" `;
@@ -172,18 +235,18 @@ function createInput(schema, id,required, appendAttr) {
     return input
 }
 
-function getLabel(name,schema) {
+function getLabel(name, schema) {
     let label = schema["label"]
     if (!label || label.trim() === "") {
         label = name
     }
 
     label = label.replace(label[0], label[0].toUpperCase());
-    label = label.replaceAll("_"," ")
+    label = label.replaceAll("_", " ")
     return label
 }
 
-function createLabel(name,schema, id,required, appendAttr) {
+function createLabel(name, schema, id, required, appendAttr) {
     if (!appendAttr) {
         appendAttr = ""
     }
@@ -198,50 +261,56 @@ function createLabel(name,schema, id,required, appendAttr) {
     if (required === true) {
         require = '<span style="color: red">*</span>'
     }
-    return `<label class=" col-form-label  text-nowrap" ${idFor} ${appendAttr}>${require}${getLabel(name,schema)}</label>`
+    return `<label class=" col-form-label  text-nowrap" ${idFor} ${appendAttr}>${require}${getLabel(name, schema)}</label>`
 }
+
 class BaseChangeHandler {
     constructor(path) {
         this.Id = readId(path)
     }
-    onChange(fn){
 
-        if (fn){
-            if(!this.ChangeHandler){
+    onChange(fn) {
+
+        if (fn) {
+            if (!this.ChangeHandler) {
                 this.ChangeHandler = new Array()
             }
             this.ChangeHandler.push(fn)
-        }else{
-            console.log("change:",this.Id)
-            for(let i in this.ChangeHandler){
+        } else {
+            console.log("change:", this.Id)
+            for (let i in this.ChangeHandler) {
                 this.ChangeHandler[i].apply(this)
             }
         }
     }
 }
+
 class BaseValue {
-    constructor(schema, target,path) {
+    constructor(schema, target, path) {
         this.Id = readId(path)
         this.Schema = schema
         this.Target = target
         if (typeof schema["default"] !== "undefined") {
             this.Value = schema["default"]
         }
-        const JsonSchema = new SchemaHandler(schema).JsonSchema
-        this.InputValid(JsonSchema,target)
+        let JsonSchema = new SchemaHandler(schema).JsonSchema
+        this.InputValid(JsonSchema, target)
     }
-    onChange(fn){
-        const o = this
-        $(this.Target).on("change",function (){
+
+    onChange(fn) {
+        let o = this
+        $(this.Target).on("change", function () {
             fn.apply(o)
         })
     }
-    isOk(v){
+
+    isOk(v) {
         return
     }
+
     ValidHandler(v) {
-        const id =  this.Id
-        console.debug("ValidHandler:",id,"=",v)
+        let id = this.Id
+        console.debug("ValidHandler:", id, "=", v)
         let value = v
         value = valueForType(this.Schema["eo:type"], value)
         let rs = this.isOk(v)
@@ -256,8 +325,9 @@ class BaseValue {
             $(this.Target).addClass("is-invalid")
         }
     }
+
     InputValid(schema, target) {
-        const o = this
+        let o = this
         $(target).on("change", function () {
             o.ValidHandler($(this).val(), schema)
         })
@@ -269,33 +339,38 @@ class BaseValue {
 
     set Value(v) {
 
-        if ( typeof v === "undefined"){
+        if (typeof v === "undefined") {
             let schema = this.Schema
             if (typeof schema["default"] !== "undefined") {
-               v = schema["default"]
+                v = schema["default"]
             }
         }
-        switch($(this.Target).get(0).tagName ){
-            case "select":{
-                $(this.Target).find(`option[value="${v}"]`).prop("selected", true);
+        switch ($(this.Target).get(0).tagName) {
+            case "select": {
+                if ($(this.Target).prop("multiple")) {
+                    for (let i in v) {
+                        let item = v[i]
+                        $(this.Target).find(`option[value="${item}"]`).prop("selected", true);
+                    }
+                } else {
+                    $(this.Target).find(`option[value="${v}"]`).prop("selected", true);
+                }
                 break
             }
-            default:{
+            default: {
                 $(this.Target).val(v)
             }
         }
-
-
     }
 
 }
 
 class BaseEnumRender extends BaseValue {
     constructor(options) {
-        const schema = options["schema"]
-        const path = options["path"]
-        const panel = options["panel"]
-        super(schema, $(createEnum(schema, readId(path))),path)
+        let schema = options["schema"]
+        let path = options["path"]
+        let panel = options["panel"]
+        super(schema, $(createEnum(schema, readId(path))), path)
 
         $(panel).append(this.Target)
 
@@ -308,11 +383,11 @@ class BaseEnumRender extends BaseValue {
 
 class SwitchRender extends BaseValue {
     constructor(options) {
-        const schema = options["schema"]
-        const path = options["path"]
-        const panel = options["panel"]
+        let schema = options["schema"]
+        let path = options["path"]
+        let panel = options["panel"]
 
-        super(schema, $(`<input id="${readId(path)}" type="checkbox" class="form-control-sm" data-toggle="toggle" data-size="sm"/>`),path)
+        super(schema, $(`<input id="${readId(path)}" type="checkbox" class="form-control-sm" data-toggle="toggle" data-size="sm"/>`), path)
 
         $(panel).append(this.Target)
         this.Target.bootstrapToggle({
@@ -335,38 +410,88 @@ class SwitchRender extends BaseValue {
     }
 }
 
+
 class RequireRender extends BaseValue {
     constructor(options) {
-        const schema = options["schema"]
-        const path = options["path"]
-        const panel = options["panel"]
+        let schema = options["schema"]
+        let path = options["path"]
+        let panel = options["panel"]
 
-        super(schema, $(`<select id=${readId(path)} class="form-control form-control-sm"></select>`),path)
+        super(schema, $(`<select id=${readId(path)} class="form-control form-control-sm"></select>`), path)
         this.MOptions = options
         $(panel).append(this.Target)
 
-        const select = this.Target
-        dashboard.searchSkill(ModuleName(),schema["skill"],function (res){
+        let select = this.Target
+        dashboard.searchSkill(ModuleName(), schema["skill"], function (res) {
 
             $(select).empty()
-            if(options["required"]){
+            if (options["required"]) {
                 $(select).append(`<option value="">请选择</option>`)
-            }else{
-                if (schema["empty_label"]){
+            } else {
+                if (schema["empty_label"]) {
                     $(select).append(`<option value="">${schema["empty_label"]}</option>`)
-                }else {
+                } else {
                     $(select).append(`<option value="">不启用</option>`)
                 }
             }
-            for (let i in res.data){
+            for (let i in res.data) {
                 let d = res.data[i]
                 $(select).append(`<option value="${d.id}">${d.id}[${d.driver}]</option>`)
             }
         })
     }
+
     isOk(v) {
-        if (!v || v.length === 0){
-            if (this.MOptions["required"]){
+        if (!v || v.length === 0) {
+            if (this.MOptions["required"]) {
+                return "请选择"
+            }
+        }
+    }
+}
+
+class RequireArrayRender extends BaseValue {
+    constructor(options) {
+        let schema = options["schema"]
+        let path = options["path"]
+        let panel = options["panel"]
+
+        super(schema, $(`<select id=${readId(path)} data-live-search="true" class="selectpicker form-control form-control-sm" title="请选择" data-width="100%" data-size="5" data-selected-text-format="count>4" multiple></select>`), path)
+        this.MOptions = options
+        $(panel).append(this.Target)
+
+        let $Select = this.Target
+        dashboard.searchSkill(ModuleName(), schema["skill"], function (res) {
+
+            $($Select).empty()
+            // if(options["required"]){
+            //     $($Select).append(`<option value="">请选择</option>`)
+            // }else{
+            //     if (schema["empty_label"]){
+            //         $($Select).append(`<option value="">${schema["empty_label"]}</option>`)
+            //     }else {
+            //         $($Select).append(`<option value="">不启用</option>`)
+            //     }
+            // }
+            for (let i in res.data) {
+                let d = res.data[i]
+                $($Select).append(`<option value="${d.id}">${d.id}[${d.driver}]</option>`)
+            }
+            $Select.selectpicker()
+        })
+    }
+
+    set Value(vs) {
+        this.Target.selectpicker('val', vs);
+    }
+
+    get Value() {
+        return this.Target.selectpicker('val');
+    }
+
+    isOk(v) {
+        if (!v || v.length === 0) {
+            if (this.MOptions["required"]) {
                 return "请选择"
             }
         }
@@ -375,75 +500,90 @@ class RequireRender extends BaseValue {
 
 class BaseInputRender extends BaseValue {
     constructor(options) {
-        const schema = options["schema"]
-        const path = options["path"]
-        const panel = options["panel"]
-        super(options["schema"], $(createInput(schema, readId(path),options["required"])),path)
+        let schema = options["schema"]
+        let path = options["path"]
+        let panel = options["panel"]
+        super(options["schema"], $(createInput(schema, readId(path), options["required"])), path)
         $(panel).append(this.Target)
-        if (schema["description"] && schema["description"].length >0){
+        if (schema["description"] && schema["description"].length > 0) {
             $(panel).append(`<small id="help:${path}" class="text-muted">${schema["description"]}</small>`)
         }
     }
 }
 
+//字段封装
 class FieldPanel {
-    constructor(name,options) {
-        const panel=options["panel"]
-        const schema=options["schema"]
-
-
+    constructor(name, options) {
+        let panel = options["panel"]
+        let schema = options["schema"]
         this.Id = readId(options["path"])
         this.$Panel = $(`<div class=""></div>`)
         panel.append(this.$Panel)
         let valuePanel = $(`<div class=""></div>`)
-        this.$Panel.append(`<div class="">${createLabel(name,schema,this.Id,options["required"])}</div>`)
+        this.$Panel.append(`<div class="">${createLabel(name, schema, this.Id, options["required"])}</div>`)
         this.$Panel.append(valuePanel)
-        this.$Value = readGenerator(options)({panel:valuePanel,schema:schema,generator: options["generator"],path:options["path"],name:name,required:options["required"]})
-        if (schema["type"] === "object"){
-            valuePanel.addClass("border-top pl-5")
+        this.$Value = readGenerator(options)({
+            panel: valuePanel,
+            schema: schema,
+            parent: options["parent"],
+            generator: readGenerator(options),
+            path: options["path"],
+            name: name,
+            required: options["required"]
+        })
+
+        switch (schema["type"]) {
+            case "array": {
+                if (schema["items"]["enum"]) {
+                    break
+                }
+            }
+            case  "object": {
+                valuePanel.addClass("border-top border-bottom px-3 py-1")
+            }
         }
     }
-    onChange(fn){
+
+    onChange(fn) {
         console.log(this.Id)
-        const o = this
-        this.$Value.onChange(function (){
+        let o = this
+        this.$Value.onChange(function () {
             fn.apply(o)
         })
     }
-    Show(){
+
+    Show() {
 
         $(this.$Panel).show()
     }
-    Hide(){
+
+    Hide() {
         $(this.$Panel).hide()
     }
-    set Value(v){
+
+    set Value(v) {
         this.$Value.Value = v
     }
-    get Value(){
-        if ($(this.$Panel).is(":visible")){
+
+    get Value() {
+        if ($(this.$Panel).is(":visible")) {
             return this.$Value.Value
-        }else{
+        } else {
             return {}
         }
 
     }
-
 }
-class PluginsRender extends BaseChangeHandler{
-    constructor(options) {
-        super(options["path"]);
 
-    }
-}
-class SimpleMapRender extends BaseChangeHandler{
+// 简单map
+class SimpleMapRender extends BaseChangeHandler {
     constructor(options) {
         super(options["path"]);
         this.MOptions = options
-        const panel=options["panel"]
+        let panel = options["panel"]
         this.Schema = options["schema"]
         this.Items = this.Schema["additionalProperties"]
-        let myPanel = $(`<div class="border-top pt-1"></div>`)
+        let myPanel = $(`<div class="pt-1"></div>`)
         this.$itemPanel = $(`<div id="${this.Id}_maps" class="pt-1" role="toolbar"></div>`)
         panel.append(myPanel)
         myPanel.append(this.$itemPanel)
@@ -451,12 +591,26 @@ class SimpleMapRender extends BaseChangeHandler{
         this.ItemCount = 0
         this.Values = {}
         myPanel.append(`<div class="pt-1"> <button id="${this.Id}_add" type="button" class="btn btn-success btn-sm">+</button></div>`)
-        const o = this
-        myPanel.on("click",`#${this.Id}_add`,function (){
-            o.add()
+        let o = this
+        myPanel.on("click", `#${this.Id}_add`, function () {
+            let isEmpty = false
+
+            for (let k in o.Values) {
+                let it = o.Values[k];
+                if (it.key.Value.length < 1) {
+                    isEmpty = true
+                    $(it.key.Target)[0].focus()
+                    break
+                }
+            }
+
+            if (!isEmpty) {
+                o.add().key.Target[0].focus()
+            }
         })
     }
-    add(k,v) {
+
+    add(k, v) {
         let index = this.ItemCount++
         let $item = $(`<div class="input-group input-group-sm mt-2" data-index="${index}">
                         <div class="input-group-prepend">
@@ -464,390 +618,196 @@ class SimpleMapRender extends BaseChangeHandler{
                         </div>
                         </div>`)
         this.$itemPanel.append($item)
-        let keyInput = readGenerator(this.MOptions)({
-            schema: {"type": "string", "eo:type": "string"},
-            panel: $item,
-            path: `${this.MOptions["path"]}.item_key_${index}`
-        })
+        let $keyInput = $(createInput({"type": "string", "eo:type": "string"}, `${this.Id}.item_key_${index}`, true))
+        $item.append($keyInput)
         $item.append(`<div class="input-group-prepend"><span class="input-group-text">value</span></div>`)
 
-
-        let valueInput = readGenerator(this.MOptions)({
-            schema: this.Items,
-            panel: $item,
-            path: `${this.MOptions["path"]}.item_value_${index}`
-        })
+        let keyInput = new BaseValue({"type": "string", "eo:type": "string"}, $keyInput, `${this.Id}.item_key_${index}`)
+        let $valueInput = $(createInput(this.Items, `${this.Id}.item_value_${index}`, true))
+        $item.append($valueInput)
+        let valueInput = new BaseValue(this.Items, $valueInput, `${this.Id}.item_value_${index}`)
         $item.append(`<div class="input-group-prepend"><button type="button" class="btn btn-danger" > - </button></div>`)
         let it = {key: keyInput, value: valueInput}
         this.Values[index] = it
+        let o = this
         $($item).on("click", "button", function () {
             $item.remove()
-            delete this.Values[index]
+            delete o.Values[index]
         })
-        if (k){
+        if (k) {
             keyInput.Value = k
         }
-        if (v){
-            valueInput.Value = k
+        if (v) {
+            valueInput.Value = v
         }
         return it
     }
-    get Value(){
-        let v={}
-        for (let i in this.Values){
+
+    get Value() {
+        let v = {}
+        for (let i in this.Values) {
             let it = this.Values[i]
             let key = it.key.Value
-            if (key.length>0){
+            if (key.length > 0) {
                 v[key] = it.value.Value
             }
         }
         return v
     }
-    set Value(v){
-        this.$itemPanel.empty()
-
-        for (let k in v){
-            this.add(k,v[k])
-        }
-    }
-}
-class MapRender extends BaseChangeHandler {
-
-    constructor(options) {
-
-        super(options)
-        const panel=options["panel"]
-        this.Schema = options["schema"]
-
-        this.$Panel =$(`<div id='${path}_panel'></div>`)
-        $(panel).append(this.$Panel)
-
-    }
 
     set Value(v) {
-
-        const Items = this.Schema["additionalProperties"]
-        const Id = this.Id
-        const keySchema = {type: "string","eo:type":"string"}
-
-        this.$Panel.empty()
-        switch (Items["eo:type"]) {
-            case "object":
-            case "map":
-                break;
-            default: {
-                this.$Panel.append(`
-<div class="input-group input-group-sm m-2">
-    <div class="input-group-prepend">
-        <div class="input-group-text  btn" id="btnGroupAddon_${Id}_new">+</div>
-    </div>
-    ${createInput(keySchema, `${Id}_key`, true,`aria-describedby="btnGroupAddon_${Id}_new" placeholder="Input new key" `)}
-    <div class="input-group-prepend ">
-        <div class="input-group-text  btn" id="btnGroupAddon_${Id}_eq">=</div>
-    </div>
-    ${createInput(Items, `${Id}_value`, true,`aria-describedby="btnGroupAddon_${Id}_eq" placeholder="Input new value" `)}
-</div>`)
-
-                for (let k in v) {
-                    $(this.$Panel).append('<div class="input-group input-group-sm m-2"></div>')
-                    let itemPanel = $(this.$Panel).children().last()
-                    itemPanel.append(`
-<div class="input-group-prepend">
-    <button class="btn btn-danger" id="btnGroupAddon_${Id}_key_${k}" type="button" data-itemId="${Id}_key"> - </button>
-</div>`)
-
-                    let childItemKey = new BaseInputRender({panel:itemPanel, schema:keySchema, path:`${Id}_key_${k}`})
-                    childItemKey.Value = k
-                    itemPanel.append('<div class="input-group-prepend"><div class="input-group-text  btn" >=</div></div>')
-                    let childItemValue = new BaseInputRender({panel:itemPanel, schema:Items, path:`${Id}_value_${k}`})
-                    childItemValue.Value = v[k];
-                }
-                break
-            }
+        this.$itemPanel.empty()
+        this.Values = {}
+        for (let k in v) {
+            this.add(k, v[k])
         }
-
     }
-
-    get Value() {
-        return {}
-    }
-
 }
 
-class InnerObjectRender extends BaseChangeHandler{
+class ObjectArrayRender extends BaseChangeHandler {
+    PopPanel(options, callbackFn, v) {
+
+        let $Panel = $(`<div class="pop_window pop_window_small p-3" id="detail_container">
+    <div class="pop_window_header">
+        <span class="pop_window_title">${options["title"]}</span>
+        <button class="pop_window_button btn btn_default close" >关闭</button>
+        <br>
+    </div>
+   
+</div>`)
+
+        let $Fade = $("<div class='modal-backdrop fade show modal-open'></div>")
+        let $Body = $(` <div class="pop_window_body"></div>`)
+        $("body").append($Fade)
+        $("body").append($Panel)
+        $Panel.append($Body)
+
+        let $Value = readGenerator(options)({
+            schema: options["schema"],
+            path: options["path"],
+            panel: $Body,
+            generator: readGenerator(options)
+        })
+        if (v) {
+            $Value.Value = v
+        }
+        $Panel.append(`<div class="row justify-content-between">
+                <div class="col-4">
+                    <button type="button" class="btn btn-outline-secondary form_cancel">取消</button>
+                </div>
+                <div class="col-4" style="text-align: right">
+                    <button type="button" class="btn btn-primary form_submit">提交</button>
+                </div>
+            </div>`)
+        let close = function () {
+            $Fade.remove()
+            $Panel.remove()
+        }
+        $Panel.show()
+        $Fade.click(function () {
+            close()
+
+        })
+        $Panel.on("click", "button.close", close)
+        $Panel.on("click", "button.form_cancel", close)
+        $Panel.on("click", "button.form_submit", function () {
+            callbackFn($Value.Value)
+            close()
+        })
+    }
+
     constructor(options) {
         super(options["path"])
-        const panel=options["panel"]
-        const schema=options["schema"]
-
-        const Id = this.Id;
-        const items = schema["items"]
-        const p = $(panel)
-        const $btn = $(`
+        let panel = options["panel"]
+        let schema = options["schema"]
+        let O = this
+        let Id = this.Id;
+        let items = schema["items"]
+        let p = $(panel)
+        let $btn = $(`
 <div id="${Id}_toolbar" class="m-1">
 <button id="${Id}_AddButton" type="button" class="btn btn-secondary btn-sm">Add</button>
 </div>`)
         p.append($btn)
-        $btn.on("click","button", function (event) {
-            $Table.bootstrapTable('append', [{}])
-            $Table.bootstrapTable('scrollTo', 'bottom')
+        $btn.on("click", "button", function (event) {
+            O.PopPanel({
+                    path: `${options["path"]}.items`,
+                    schema: items,
+                    name: options["name"],
+                    title: `添加 ${getLabel(options["name"], options["schema"])}`
+                },
+                function (v) {
+                    $Table.bootstrapTable("append", [v])
+                    $Table.bootstrapTable('scrollTo', 'bottom')
+                    O.onChange()
+                })
             return false
         })
 
-        const $Table = $(`<table  id="${Id}_items"></table>`)
+        let $Table = $(`<table  id="${Id}_items"></table>`)
         p.append($Table)
-        $Table.delegate("a.remove", "click", function (event) {
-            let rowIndex = $(this).attr("array-row")
-            $Table.bootstrapTable('remove', {
-                field: '$index',
-                values: [Number(rowIndex)]
-            })
-        })
+
         this.Table = $Table
-        const properties = items["properties"]
-        const uiSort = items["ui:sort"]
-        let lastDetailRow = undefined
-        let lastField = undefined
-        let lastValue = undefined
-        const o = this
-        function DetailFormatterHandler(fieldIndex) {
-
-            this.detailFormatter = function (index, row, $element) {
-
-                if (typeof lastDetailRow !== "undefined" && index!== lastDetailRow ) {
-
-                    let data = $Table.bootstrapTable('getData')
-                    data[lastDetailRow][lastField] = lastValue.Value
-                    $Table.bootstrapTable("updateRow",{
-                        index: 1,
-                        row: data[lastDetailRow]
-                    })
-                    $Table.bootstrapTable('collapseRow', lastDetailRow)
-                }
-
-                lastDetailRow = index
-
-                let name = uiSort[fieldIndex]
-                let item = properties[name]
-                lastField = name
-                lastValue = readGenerator(options)({panel:$element, schema:item, generator:options["generator"], path:`${Id}_${name}`,name:name})
-                lastValue.Value = row[name]
-                return ""
-            }
-
-            this.datetimeFormatter = function (index,row,$element) {
-                if (typeof lastDetailRow !== "undefined" && index!== lastDetailRow ) {
-                    console.log(123)
-                    let data = $Table.bootstrapTable('getData')
-                    data[lastDetailRow][lastField] = lastValue.Value
-                    $Table.bootstrapTable("updateRow",{
-                        index: 1,
-                        row: data[lastDetailRow]
-                    })
-                    $Table.bootstrapTable('collapseRow', lastDetailRow)
-                }
-
-                lastDetailRow = index
-
-                let name = uiSort[fieldIndex]
-                let item = properties[name]
-                // lastField = name
-                // lastValue = readGenerator(options)({panel:$element, schema:item, generator:options["generator"], path:`${Id}_${name}`,name:name})
-                // lastValue.Value = row[name]
-                return ""
-            }
-            return this
-
-        }
+        let properties = items["properties"]
+        let uiSort = items["ui:sort"]
 
 
-        function NotDetailFormatterMap(index, row, $element) {
-            if (typeof lastDetailRow !== "undefined") {
-                let data = $Table.bootstrapTable('getData')
-                data[lastDetailRow][lastField] = lastValue.Value
-                $Table.bootstrapTable("updateRow",{
-                    index: 1,
-                    row: data[lastDetailRow]
-                })
-                $Table.bootstrapTable('collapseRow', lastDetailRow)
-
-                lastDetailRow = undefined
-                lastField = undefined
-            }
-            $Table.bootstrapTable('collapseAllRows')
-
-            return ''
-        }
-
-        function formatterKV(v) {
-            let html = ""
-            for (let k in v) {
-                html += "<span class='btn btn-outline-secondary btn-sm'>" + k + "=" + v[k] + "</span>\n"
-            }
-            html += ""
-            return html
-        }
-
-        function formatterDate(initDate) {
-            let html = `
-                <div class="input-group date form_datetime col-md-5" data-date="1979-09-16T05:25:07Z" data-date-format="dd MM yyyy - HH:ii p" data-link-field="dtp_input1">
-                    <input class="form-control" size="16" type="text" value="" readonly>
-                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
-                    <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
-                </div>`
-            $(".form_datetime").datetimepicker({
-                weekStart: 1,
-                todayBtn:  1,
-                autoclose: 1,
-                todayHighlight: 1,
-                startView: 2,
-                forceParse: 1,
-                showMeridian: 1,
-                initialDate:initDate
-            });
-            return html
-        }
-
-
-        const columns = []
+        let columns = []
         columns.push({
             title: "index",
             field: "__index",
             sortable: false,
-            editable: false,
-            detailFormatter: NotDetailFormatterMap,
+
             formatter: function (v, row, index) {
-                return index+1
+                return index + 1
             }
         })
 
-        for (let i in uiSort) {
-            let name = uiSort[i]
-            const item = properties[name]
-            switch (item["eo:type"]) {
-                case "object": {
-                    columns.push({
-                        title: getLabel(name,item),
-                        field: item["name"],
-                        sortable: false,
-                        editable: false,
-                        formatter: formatterKV,
-                        detailFormatter: new DetailFormatterHandler(i).detailFormatter,
-
-                    })
-                    break
-                }
-                case "map": {
-                    columns.push({
-                        title: getLabel(name,item),
-                        field: name,
-                        sortable: false,
-                        editable: false,
-                        formatter: formatterKV,
-                        detailFormatter: new DetailFormatterHandler(i).detailFormatter
-                    })
-                    break
-                }
-                case "array": {
-                    columns.push({
-                        title: getLabel(name,item),
-                        field: name,
-                        sortable: false,
-                        editable: false,
-                        formatter: formatterKV,
-                        detailFormatter: new DetailFormatterHandler(i).detailFormatter,
-                    })
-                    break
-                }
-                case "integer":
-                case "number":{
-                    let typeInput = "number"
-                    if (item["format"] == "date-time") {
-                        columns.push({
-
-                            title: getLabel(name,item),
-                            field: name,
-                            sortable: false,
-                            formatter:formatterDate,
-                            detailFormatter: new DetailFormatterHandler(i).datetimeFormatter,
-                            editable: {
-                                type:typeInput
-                            }
-                        })
-                        break
-                    }
-                }
-                default: {
-                    if (item["enum"]) {
-                        columns.push({
-                            title: getLabel(name,item),
-                            field: name,
-                            sortable: true,
-                            detailFormatter: NotDetailFormatterMap,
-                            editable: {
-                                type: "select",
-                                options: {
-                                    items: item["enum"]
-                                }
-                            },
-                        })
-                    } else {
-                        let typeInput = "text"
-                        if (item["eo:type"] === "number" || item["eo:type"] === "integer") {
-                            typeInput = "number"
-                        }
-                        columns.push({
-
-                            title: getLabel(name,item),
-                            field: name,
-                            sortable: true,
-                            width: 200,
-                            detailFormatter: NotDetailFormatterMap,
-                            editable: {
-                                type: typeInput
-                            }
-                        })
-                    }
-                    break
-                }
-            }
-        }
+        columns.push(...configTable(uiSort,properties))
         columns.push({
             title: "操作",
             field: "",
             sortable: false,
             editable: false,
             formatter: function (v, row, index) {
-                return `<a class="remove" href="javascript:void(0)" array-row="${index}" title="remove">删除</a>`
+                return `<a class="edit" href="javascript:void(0)" array-row="${index}" title="edit">配置</a> <a class="remove" href="javascript:void(0)" array-row="${index}" title="remove">删除</a>`
+            },
+            events: {
+                "click .remove": function (e, value, row, index) {
+                    // let rowIndex = $(this).attr("array-row")
+                    $Table.bootstrapTable('remove', {
+                        field: '$index',
+                        values: [index]
+                    })
+                    O.onChange()
+                },
+                "click .edit": function (e, value, row, index) {
+                    O.PopPanel({
+                            path: `${options["path"]}.items`,
+                            schema: items,
+                            name: options["name"],
+                            title: `修改 ${getLabel(options["name"], options["schema"])}:${index + 1}`
+                        },
+                        function (v) {
+                            $Table.bootstrapTable("updateRow", {
+                                index: index,
+                                row: v
+                            })
+                            O.onChange()
+                        }, row)
+                }
             }
         })
 
-        const tableOptions = {
+        let tableOptions = {
             columns: columns,
-            editable: true,
-
-
-            detailView: true,
-            detailViewByClick: true,
-            detailViewIcon: false,
             width: "100%",
-            onEditorShown: function (field, row, $el, editable) {
-                $Table.bootstrapTable('collapseAllRows')
-                return true;
-            },
-            onEditorSave: function (field, row, oldValue, $el) {
-                // let data = $Table.bootstrapTable('getData')
-                // if (field !== "__index" ) {
-                //     const rowIndex = $el.parent().data("index")
-                //     data.Data[rowIndex][field] = row
-                // }
-                // return true;
-
-                o.onChange()
-            },
-            onCollapseRow:function (index, row, detailView) {
-                console.log(index,row,detailView)
+            useRowAttrFunc: true,
+            reorderableRows: true,
+            onReorderRow: function (data) {
+                $Table.bootstrapTable("refresh")
             }
+
         }
         $Table.bootstrapTable(tableOptions);
         this.Value = []
@@ -865,14 +825,421 @@ class InnerObjectRender extends BaseChangeHandler{
     }
 
 }
+// output 用到到 formatter类型
+class FormatterConfigRender extends BaseChangeHandler {
+    PopPanel( callbackFn, keyHas, v) {
+        let title = "增加配置"
+        if (v){
+            title = "修改配置"
+        }
+        let $Panel = $(`<div class="pop_window pop_window_small p-3" id="detail_container">
+    <div class="pop_window_header">
+        <span class="pop_window_title">${title}</span>
+        <button class="pop_window_button btn btn_default close" >关闭</button>
+  
+    </div>
+   
+</div>`)
 
-class ArrayRenderEnum extends BaseChangeHandler{
+        let $Fade = $("<div class='modal-backdrop fade show modal-open'></div>")
+        let $Body = $(` <div class="pop_window_body"></div>`)
+        $("body").append($Fade)
+        $("body").append($Panel)
+        $Panel.append($Body)
+
+        let $KeyInput = new FieldPanel("key", {
+            schema: {"type": "string", "eo:type": "string", "pattern": "[a-zA-Z0-9]+[a-zA-Z0-9_]*"},
+            required: true,
+            path: `Formatter.key`,
+            panel: $Body
+        })
+        let $Value = new FieldPanel("配置",{
+            schema: {"type":"array","eo:type":"array","items":{"type":"string","eo:type":"string"}},
+            path: "Formatter.items",
+            panel: $Body,
+        })
+        if (v) {
+            $KeyInput.Value = v["key"]
+            $Value.Value = v["value"]
+            if (v["key"] === "fields"){
+                $KeyInput.$Value.Target.attr("readonly", true)
+            }
+        }
+        $Panel.append(`<div class="row justify-content-between">
+                <div class="col-4">
+                    <button type="button" class="btn btn-outline-secondary form_cancel">取消</button>
+                </div>
+                <div class="col-4" style="text-align: right">
+                    <button type="button" class="btn btn-primary form_submit">提交</button>
+                </div>
+            </div>`)
+        let close = function () {
+            $Fade.remove()
+            $Panel.remove()
+        }
+        $Panel.show()
+        $Fade.click(function () {
+            close()
+        })
+        $Panel.on("click", "button.close", close)
+        $Panel.on("click", "button.form_cancel", close)
+        $Panel.on("click", "button.form_submit", function () {
+            let key = $KeyInput.Value
+            if (key.length < 1) {
+                $KeyInput.$Value.Target.addClass("is-invalid")
+                return
+            }
+            if (keyHas && keyHas(key) === true){
+                $KeyInput.$Value.Target.addClass("is-invalid")
+                return
+            }
+            let v = $Value.Value
+
+            callbackFn({
+                "key":key,
+                "value":v
+            })
+            close()
+        })
+    }
+
     constructor(options) {
         super(options["path"])
-        const panel=options["panel"]
-        const schema=options["schema"]
-        const Id = this.Id
-        const items = schema["items"]
+        let panel = options["panel"]
+        let O = this
+        let Id = this.Id;
+
+        let $btn = $(`
+<div id="${Id}_toolbar" class="m-1">
+ 
+  <button id="${Id}_AddButton" type="button" class="btn btn-secondary btn-sm">Add</button>
+ 
+
+</div>`)
+        $(panel).append($btn)
+        $btn.on("click", "button", function (event) {
+            O.PopPanel(
+                function (v) {
+                    $Table.bootstrapTable("append", [v])
+                    $Table.bootstrapTable('scrollTo', 'bottom')
+                    O.onChange()
+                }, function (k) {
+                    let vs = O.Value;
+                    return typeof vs[k] !== "undefined"
+                })
+            return false
+        })
+
+        let $Table = $(`<table  id="${Id}_items"></table>`)
+        $(panel).append($Table)
+
+        this.Table = $Table
+
+        let columns = []
+        columns.push({
+            title: "name",
+            field: "key",
+            sortable: false,
+        })
+        columns.push({
+            title:"config",
+            field:"value",
+            sortable:false,
+            formatter:function  (v, row, index){
+                let html = '<ul>'
+                for (let i in v){
+                    let it = v[i]
+                    html += `<li><span></span>${it}</li>`
+                }
+                html +='</ul>'
+                return html
+            }
+        })
+
+         columns.push({
+            title: "操作",
+            field: "",
+            sortable: false,
+            editable: false,
+            formatter: function (v, row, index) {
+                return `<a class="edit" href="javascript:void(0)"  title="edit">配置</a> <a class="remove" href="javascript:void(0)"  title="remove">删除</a>`
+            },
+            events: {
+                "click .remove": function (e, value, row, index) {
+                    // let rowIndex = $(this).attr("array-row")
+                    $Table.bootstrapTable('remove', {
+                        field: '$index',
+                        values: [index]
+                    })
+                    O.onChange()
+                },
+                "click .edit": function (e, value, row, index) {
+                    O.PopPanel(
+                        function (v) {
+                            $Table.bootstrapTable("updateRow", {
+                                index: index,
+                                row: v
+                            })
+
+                            O.onChange()
+                            return true
+                        }, function (k) {
+                          return false
+                        }
+                        , row)
+                }
+            }
+        })
+
+        let tableOptions = {
+            columns: columns,
+            width: "100%",
+        }
+        $Table.bootstrapTable(tableOptions);
+
+    }
+
+    set Value(vs) {
+        if (!vs || typeof vs == "undefined") {
+            vs = {}
+        }
+        let list = new Array()
+        for (let k in vs) {
+            let v = vs[k]
+            list.push({
+                "key":k,
+                "value":v
+            } )
+        }
+        list.sort((a, b) => {
+            if (a.key === "fields"){
+                return -1
+            }
+            return a.key - b.key
+        })
+        this.Table.bootstrapTable("load", list)
+    }
+
+    get Value() {
+        let list = this.Table.bootstrapTable('getData')
+        let vs = {}
+        for (let i in list) {
+            let v = Object.assign({}, list[i])
+            let key = v["key"]
+
+            vs[key] = v["value"]
+        }
+        return vs
+    }
+
+}
+
+// 结构体map
+class ObjectMapRender extends BaseChangeHandler {
+
+    PopPanelObjectMap(options, callbackFn, keyHas, v) {
+
+        let $Panel = $(`<div class="pop_window pop_window_small p-3" id="detail_container">
+    <div class="pop_window_header">
+        <span class="pop_window_title">${options["title"]}</span>
+        <button class="pop_window_button btn btn_default close" >关闭</button>
+  
+    </div>
+   
+</div>`)
+
+        let $Fade = $("<div class='modal-backdrop fade show modal-open'></div>")
+        let $Body = $(` <div class="pop_window_body"></div>`)
+        $("body").append($Fade)
+        $("body").append($Panel)
+        $Panel.append($Body)
+
+        let $KeyInput = new FieldPanel("key", {
+            schema: {"type": "string", "eo:type": "string", "pattern": "[a-zA-Z0-9]+[a-zA-Z0-9_]*"},
+            required: true,
+            path: `${options["path"]}.key`,
+            panel: $Body
+        })
+        let $Value = readGenerator(options)({
+            schema: options["schema"],
+            path: options["path"],
+            panel: $Body,
+            generator: readGenerator(options)
+        })
+        if (v) {
+            $KeyInput.Value = v["__key"]
+            $Value.Value = v
+            $KeyInput.$Value.Target.attr("readonly", true)
+
+        }
+        $Panel.append(`<div class="row justify-content-between">
+                <div class="col-4">
+                    <button type="button" class="btn btn-outline-secondary form_cancel">取消</button>
+                </div>
+                <div class="col-4" style="text-align: right">
+                    <button type="button" class="btn btn-primary form_submit">提交</button>
+                </div>
+            </div>`)
+        let close = function () {
+            $Fade.remove()
+            $Panel.remove()
+        }
+        $Panel.show()
+        $Fade.click(function () {
+            close()
+        })
+        $Panel.on("click", "button.close", close)
+        $Panel.on("click", "button.form_cancel", close)
+        $Panel.on("click", "button.form_submit", function () {
+            let key = $KeyInput.Value
+            if (key.length < 1) {
+                $KeyInput.$Value.Target.addClass("is-invalid")
+                return
+            }
+            if (keyHas && keyHas(key) === true){
+                $KeyInput.$Value.Target.addClass("is-invalid")
+                return
+            }
+            let v = $Value.Value
+            v["__key"] = key
+            callbackFn(v)
+            close()
+        })
+    }
+
+    constructor(options) {
+        super(options["path"])
+        let panel = options["panel"]
+        let schema = options["schema"]
+        let O = this
+        let Id = this.Id;
+        let items = schema["additionalProperties"]
+
+        let $btn = $(`
+<div id="${Id}_toolbar" class="m-1">
+<button id="${Id}_AddButton" type="button" class="btn btn-secondary btn-sm">Add</button>
+</div>`)
+        $(panel).append($btn)
+        $btn.on("click", "button", function (event) {
+            O.PopPanelObjectMap({
+                    path: `${options["path"]}.items`,
+                    schema: items,
+                    name: options["name"],
+                    title: `添加 ${getLabel(options["name"], options["schema"])}`
+                },
+                function (v) {
+                    $Table.bootstrapTable("append", [v])
+                    $Table.bootstrapTable('scrollTo', 'bottom')
+                    O.onChange()
+                }, function (k) {
+                    let vs = O.Value;
+                    return vs.hasOwnProperty(k)
+                })
+            return false
+        })
+
+        let $Table = $(`<table  id="${Id}_items"></table>`)
+        $(panel).append($Table)
+
+        this.Table = $Table
+        let properties = items["properties"]
+        let uiSort = items["ui:sort"]
+
+        let columns = []
+        columns.push({
+            title: "key",
+            field: "key",
+            sortable: false,
+        })
+        columns.push(...configTable(uiSort,properties))
+
+        columns.push({
+            title: "操作",
+            field: "",
+            sortable: false,
+            editable: false,
+            formatter: function (v, row, index) {
+                return `<a class="edit" href="javascript:void(0)"  title="edit">配置</a> <a class="remove" href="javascript:void(0)"  title="remove">删除</a>`
+            },
+            events: {
+                "click .remove": function (e, value, row, index) {
+                    // let rowIndex = $(this).attr("array-row")
+                    $Table.bootstrapTable('remove', {
+                        field: '$index',
+                        values: [index]
+                    })
+                    O.onChange()
+                },
+                "click .edit": function (e, value, row, index) {
+                    O.PopPanelObjectMap({
+                            path: `${options["path"]}.items`,
+                            schema: items,
+                            name: options["name"],
+                            title: `修改 ${getLabel(options["name"], options["schema"])}:${index + 1}`
+                        },
+                        function (v) {
+                            $Table.bootstrapTable("updateRow", {
+                                index: index,
+                                row: v
+                            })
+
+                            O.onChange()
+                            return true
+                        }, function (k) {
+                            let vs = O.Value;
+                            return vs.hasOwnProperty(k)
+                        }
+                        , row)
+                }
+            }
+        })
+
+        let tableOptions = {
+            columns: columns,
+            width: "100%",
+        }
+        $Table.bootstrapTable(tableOptions);
+
+    }
+
+    set Value(vs) {
+        if (!vs || typeof vs == "undefined") {
+            vs = {}
+        }
+        let list = new Array()
+        for (let k in vs) {
+            let v = vs[k]
+            v["__key"] = k
+            list.push(v)
+        }
+        list.sort((a, b) => {
+            return a.__key - b.__key
+        })
+        this.Table.bootstrapTable("load", list)
+    }
+
+    get Value() {
+        let list = this.Table.bootstrapTable('getData')
+        let vs = {}
+        for (let i in list) {
+            let v = Object.assign({}, list[i])
+            let key = v["__key"]
+            delete v["__key"]
+            vs[key] = v
+        }
+        return vs
+    }
+
+}
+
+// 带枚举的基础数组
+class ArrayRenderEnum extends BaseChangeHandler {
+    constructor(options) {
+        super(options["path"])
+        let panel = options["panel"]
+        let schema = options["schema"]
+        let Id = this.Id
+        let items = schema["items"]
         this.Enum = items["enum"]
 
         let p = $(panel);
@@ -881,7 +1248,7 @@ class ArrayRenderEnum extends BaseChangeHandler{
         for (let i in items["enum"]) {
             let e = items["enum"][i]
             let itemId = `${Id}_${e}`
-            itemPanel +=`<div class="custom-control custom-checkbox custom-control-inline"><input type="checkbox" id="${itemId}" value="${e}" name="${Id}" class="custom-control-input"> <label class="custom-control-label" for="${itemId}">${e}</label></div>`
+            itemPanel += `<div class="custom-control custom-checkbox custom-control-inline"><input type="checkbox" id="${itemId}" value="${e}" name="${Id}" class="custom-control-input"> <label class="custom-control-label" for="${itemId}">${e}</label></div>`
         }
         itemPanel += '</div>'
         p.append(itemPanel)
@@ -889,7 +1256,7 @@ class ArrayRenderEnum extends BaseChangeHandler{
 
 
     get Value() {
-        const list = []
+        let list = []
         $(`input[name="${this.Id}"]`).each(function () {
             if ($(this).is(':checked')) {
                 list.push($(this).val())
@@ -902,11 +1269,11 @@ class ArrayRenderEnum extends BaseChangeHandler{
         if (!vs) {
             vs = []
         }
-        const list = vs
+        let list = vs
 
         for (let i in this.Enum) {
             let v = this.Enum[i]
-            const itemId = this.Id + '_' + v
+            let itemId = this.Id + '_' + v
             $("#" + itemId).attr("checked", list.includes(v))
         }
     }
@@ -914,71 +1281,73 @@ class ArrayRenderEnum extends BaseChangeHandler{
 }
 
 // 基础类型的数组
-class ArrayRenderSimple extends BaseChangeHandler{
+class ArrayRenderSimple extends BaseChangeHandler {
     constructor(options) {
         super(options["path"])
-        const panel=options["panel"]
-        const schema=options["schema"]
-
-        const Id = this.Id
-
-        const items = schema["items"]
-        let myPanel = $(`<div class="border-top pt-1"></div>`)
-        const $itemPanel = $(`<div id="${Id}_items" class="pt-1" role="toolbar"></div>`)
+        let panel = options["panel"]
+        let schema = options["schema"]
+        this.Options = options
+        let Id = this.Id
+        this.ValuesList = {}
+        this.SchemaItems = schema["items"]
+        let myPanel = $(`<div class=""></div>`)
+        let $itemPanel = $(`<div id="${Id}_items" class="" role="toolbar"></div>`)
         panel.append(myPanel)
         myPanel.append($itemPanel)
-        myPanel.append(`<div class="pt-1"> <button id="${Id}_add" type="button" class="btn btn-success btn-sm">+</button></div>`)
-        myPanel.on("click",`#${Id}_add`,function (){
+        myPanel.append(`<div class=""> <button id="${Id}_add" type="button" class="btn btn-success btn-sm">+</button></div>`)
+        myPanel.on("click", `#${Id}_add`, function () {
             let isEmpty = false
-            $itemPanel.find(`[array-for='${Id}']`).each(function () {
-                if ($(this).val().length <1){
+            $itemPanel.find(`input`).each(function () {
+                if ($(this).val().length < 1) {
                     isEmpty = true
                     $(this)[0].focus()
                     return false
                 }
             })
-            if (!isEmpty){
-                add()[0].focus()
+            if (!isEmpty) {
+                o.add()[0].focus()
             }
-
         })
         this.ItemPanel = $itemPanel
-        let lastIndex = 0
-        const o = this
-        function add() {
-            const itemId = `${Id}_item_${lastIndex++}`
-            const appendAtt = ` array-for="${Id}" aria-describedby="btnGroupAddon_${itemId}" `
-            const $itemInput = $(createInput(items, itemId,true, appendAtt))
-            const $item = $(`
-<div class="input-group input-group-sm m-2" id="array-item_${itemId}">
+        this.lastIndex = 0
+        let o = this
+    }
+
+    add() {
+        let index = this.lastIndex++
+        let itemId = `${this.Id}_item_${index}`
+        // let appendAtt = ` array-for="${this.Id}" aria-describedby="btnGroupAddon_${itemId}" `
+        let $item = $(`
+<div class="input-group input-group-sm m-2" >
     <div class="input-group-prepend">
-        <button class="btn btn-danger" id="btnGroupAddon_${itemId}" type="button" aria-describedby="btnGroupAddon_${itemId}" data-itemId="${itemId}"> - </button>
+        <button class="btn btn-danger"  type="button" aria-describedby="btnGroupAddon_${itemId}" data-itemId="${itemId}"> - </button>
     </div>
 </div>`)
-            $item.prepend($itemInput)
-            $itemPanel.append($item)
+        this.ItemPanel.append($item)
+        let $itemInput = $(createInput(this.SchemaItems, itemId, true))
 
-            $itemInput.on("change",function (){
-                o.onChange()
-            })
-
-            return $itemInput
-        }
-        this.add = add
-
-        $itemPanel.delegate('button', "click", function () {
-            let itemId = $(this).attr('data-itemId')
-            $(document.getElementById(`array-item_${itemId}`)).remove()
+        $item.prepend($itemInput)
+        this.ValuesList[index] = new BaseValue(this.SchemaItems, $itemInput, this.Id)
+        let o = this
+        this.ValuesList[index].onChange(function () {
             o.onChange()
         })
+        $item.on("click", "button", function () {
+            $item.remove()
+           delete o.ValuesList[index]
+        })
 
+        return $itemInput
     }
 
     get Value() {
         let val = []
-        this.ItemPanel.find(`[array-for='${this.Id}']`).each(function () {
-            val.push($(this).val())
-        })
+        let indexList = Object.keys(this.ValuesList)
+        indexList.sort()
+        for (let i in indexList) {
+            let ind = indexList[i]
+            val.push(this.ValuesList[ind].Value)
+        }
         return val
     }
 
@@ -986,34 +1355,23 @@ class ArrayRenderSimple extends BaseChangeHandler{
         if (!Array.isArray(vs)) {
             return
         }
-        const arrayId = `[array-for='${this.Id}']`
-        let list = $(arrayId)
-        if (list.length < vs.length) {
-            let num = vs.length - list.length
-            for (let i = 0; i < num; i++) {
-                this.add()
-            }
-        } else if (list.length > vs.length) {
-            let num = vs.length - list.length
-            for (let i = 0; i < num; i++) {
-                list.last().remove()
-            }
+        this.ValuesList = {}
+        this.ItemPanel.empty()
+
+        for (let i in vs) {
+            this.add().val(vs[i])
         }
-        let index = 0;
-        $(arrayId).each(function () {
-            $(this).val(vs[index])
-            index++;
-        })
     }
 }
+
 // 结构体
-class ObjectRender extends BaseChangeHandler{
+class ObjectRender extends BaseChangeHandler {
     constructor(options) {
         super(options["path"])
         this.Options = options
-        const panel = options["panel"]
-        const schema = options["schema"]
-        const Id = this.Id
+        let panel = options["panel"]
+        let schema = options["schema"]
+        let Id = this.Id
 
         this.$Panel = panel
         this.Fields = {}
@@ -1021,108 +1379,386 @@ class ObjectRender extends BaseChangeHandler{
         if (schema["eo:type"] !== "object") {
             return
         }
-        const o = this
-        let properties = options["schema"]["properties"]
-        let sorts = options["schema"]["ui:sort"]
+        let o = this
+        let properties = schema["properties"]
+        let sorts = schema["ui:sort"]
         let requiredData = requiredMap(schema["required"])
         for (let i in sorts) {
             let name = sorts[i]
             let sub = properties[name]
-            const subId = `${Id}.${name}`
+            let subId = `${Id}.${name}`
 
-           let field = new FieldPanel(name,{
-                panel:this.$Panel,
-                schema:sub,
-                generator:readGenerator(options),
-                path:subId,
-                required:requiredData[name]===true,
+            let field = new FieldPanel(name, {
+                panel: this.$Panel,
+                schema: sub,
+                generator: readGenerator(options),
+                path: subId,
+                required: requiredData[name] === true,
+                parent: schema
             })
-            this.Fields[name] =field
-            field.onChange(function (){
-                o.switch(name,this.Value)
+            this.Fields[name] = field
+            field.onChange(function () {
+                o.switchPanel(name, this.Value)
                 o.onChange()
             })
         }
 
         let Switches = {}
-        for (let name in properties){
+        for (let name in properties) {
             let sub = properties[name]
-            if (sub["switch"]){
+            if (sub["switch"]) {
                 Switches[name] = sub["switch"]
             }
         }
         this.Switches = Switches
-        for (let name in this.Fields){
-            this.switch(name,this.Fields[name].Value)
+        for (let name in this.Fields) {
+            this.switchPanel(name, this.Fields[name].Value)
         }
 
     }
-    switch(name,value){
 
-        switch (typeof value  ){
-            case "string":{
+    switchPanel(name, value) {
+
+        switch (typeof value) {
+            case "string": {
                 value = `"${value}"`
                 break
             }
             case "object":
-            case "undefined":{
+            case "undefined": {
                 return
             }
-            default:{
+            default: {
                 break
             }
         }
 
-        for (let f in this.Switches){
+        for (let f in this.Switches) {
             let expression = this.Switches[f]
             try {
                 let funcStr = `(function(${name}){return ${expression}})(${value})`
                 // console.log(funcStr)
-                let r = eval( funcStr)
-                if (r === true){
+                let r = eval(funcStr)
+                if (r === true) {
                     this.Fields[f].Show()
-                }else{
+                } else {
                     this.Fields[f].Hide()
                 }
-            }catch (e) {
+            } catch (e) {
+
                 // console.log(e)
             }
         }
     }
+
     get Value() {
-        let v = {}
+        let vs = {}
         for (let k in this.Fields) {
             let fi = this.Fields[k]
-            v[k] = fi.Value
+            let v = fi.Value
+            if (typeof v !== "undefined") {
+                vs[k] = v
+            }
         }
-        return v
+        return vs
     }
 
     set Value(v) {
-        if (!v || typeof v === "undefined"){
+        if (!v || typeof v === "undefined") {
             v = {}
         }
         for (let k in this.Fields) {
             let fi = this.Fields[k]
             fi.Value = v[k]
+            this.switchPanel(k, v[k])
         }
     }
 
 }
 
+// 插件弹出窗
+class PopPanelPlugin {
+    constructor() {
+
+    }
+
+    /**
+     * 更新ui面板
+     * @param id
+     * @param success
+     */
+    getRenderInfo(id, success) {
+        let path = id.replaceAll(":", "/")
+        let n = id.replaceAll(":", "_")
+        dashboard.getExtenderInfo(path, function (res) {
+            if (res.code !== 200) {
+                return http.handleError(res, "获取extender信息失败")
+            }
+            success(n, res.data["render"])
+        }, function (res) {
+            return http.handleError(res, "获取extender信息失败")
+        })
+    }
+
+    show(exclude, callbackFn, data) {
+        if (this.IsInit === true) {
+            this.render(exclude, callbackFn, data)
+            return
+        }
+        let o = this
+        o.IsInit = true
+        dashboard.get(`/api/plugins`, function (pluginsData) {
+            o.IsInit = true
+            o.Plugins = pluginsData.data["plugins"]
+            o.PluginsExtenders = new Map(
+                o.Plugins.map(object => {
+                    return [object.name, object.id];
+                }),
+            );
+            o.render(exclude, callbackFn, data)
+        }, function (err) {
+            o.IsInit = false
+            common.message(err, "danger")
+        })
+    }
+
+    render(exclude, callbackFn, data) {
+
+        let $Panel = $(`
+<div class="pop_window pop_window_small p-3" id="detail_container">
+    <div class="pop_window_header">
+        <span class="pop_window_title">插件信息</span>
+        <button class="pop_window_button btn btn_default close" >关闭</button>
+    </div>
+</div>`)
+
+        let $Fade = $("<div class='modal-backdrop fade show modal-open'></div>")
+        let $Body = $(` <div class="pop_window_body"></div>`)
+        $("body").append($Fade)
+        $("body").append($Panel)
+        $Panel.append($Body)
+
+        let $PluginName = $(`<select class="form-control form-control-sm"  ></select>`)
+
+        let $Disable = $(`<input type="checkbox" class="form-control-sm form-control" data-toggle="toggle" data-size="sm"/>`)
+
+        $Body.append(
+            $(`<div><div><label class=" col-form-label  text-nowrap" for="FormRender_test_target"><span style="color: red">*</span>目标服务</label></div></div>`)
+                .append($PluginName)
+        )
+        $Body.append(
+            $(`<div><div><label class=" col-form-label  text-nowrap" for="FormRender_test_target"><span style="color: red">*</span>是否禁用</label></div></div>`)
+                .append($Disable)
+        )
+        $Disable.bootstrapToggle({
+            on: '禁用',
+            off: '启用'
+        })
+        let $Config = $(`<div class="border-top p-1"></div>`)
+        $Body.append(
+            $(`<div><div><label class=" col-form-label  text-nowrap" for="FormRender_test_target"><span style="color: red">*</span>插件配置</label></div></div>`)
+                .append($Config)
+        )
+        let O = this
+
+        function renderConfig(name) {
+            O.getRenderInfo(O.PluginsExtenders.get(name), function (driver, render) {
+                $Config.empty()
+                O.ConfigTarget = new ObjectRender({
+                    path: 'plugins.${name}',
+                    panel: $Config,
+                    schema: render
+                })
+                if (data) {
+                    O.ConfigTarget.Value = data.config
+                }
+            })
+        }
+
+        if (data) {
+            if (data.disable === true || data.disable === "true") {
+                $Disable.bootstrapToggle("on");
+            } else {
+                $Disable.bootstrapToggle("off");
+            }
+            $PluginName.prepend(`<option value="${data.name}" selected>${data.name}</option>`)
+            renderConfig(data.name)
+        } else {
+            $Disable.bootstrapToggle("off");
+            let set = new Set(exclude)
+            let first = true
+            for (let i in this.Plugins) {
+                let p = this.Plugins[i]
+                if (!set.has(p.name)) {
+                    $PluginName.append(`<option value="${p.name}" ${first ? "selected" : ""}>${p.name}</option>`)
+                    first = false
+                }
+            }
+            if ($PluginName.children().length > 0) {
+                renderConfig($PluginName.val())
+            }
+
+            $PluginName.on("change", function () {
+                let name = $(this).val()
+                renderConfig(name)
+            })
+
+        }
+        $Panel.append(`<div class="row justify-content-between">
+                <div class="col-4">
+                    <button type="button" class="btn btn-outline-secondary form_cancel">取消</button>
+                </div>
+                <div class="col-4" style="text-align: right">
+                    <button type="button" class="btn btn-primary form_submit">提交</button>
+                </div>
+            </div>`)
+        let close = function () {
+            $Fade.remove()
+            $Panel.remove()
+        }
+        $Panel.show()
+        $Fade.click(function () {
+            close()
+        })
+        $Panel.on("click", "button.close", close)
+        $Panel.on("click", "button.form_cancel", close)
+        $Panel.on("click", "button.form_submit", function () {
+            callbackFn({name: $PluginName.val(), disable: $($Disable).prop("checked"), config: O.ConfigTarget.Value})
+            close()
+        })
+    }
+}
+
+// 插件配置表
+class PluginsRender extends BaseChangeHandler {
+    constructor(options) {
+        super(options["path"])
+        let panel = options["panel"]
+        let schema = options["schema"]
+        let items = schema["additionalProperties"]
+        let Id = this.Id
+        this.PopPanel = new PopPanelPlugin()
+        let $Table = $(`<table  id="${Id}_items"></table>`)
+        $(panel).append($Table)
+
+        this.Table = $Table
+        let O = this
+
+        let tableOptions = {
+            columns: [{
+                title: "插件名",
+                field: "name",
+                sortable: false,
+            }
+                , {
+                    title: "状态",
+                    field: "disable",
+                    formatter: function (v, row, index) {
+                        return v === true ? `<span class="btn-danger btn btn-sm">禁用</span>` : `<span class="btn btn-sm btn-outline-primary">启用</span>`
+                    }
+                },
+                {
+                    title: "配置",
+                    field: "config",
+                    formatter: JSON.stringify
+                },
+                {
+                    title: "操作",
+                    field: "",
+                    sortable: false,
+                    editable: false,
+                    formatter: function (v, row, index) {
+                        return `<a class="edit" href="javascript:void(0)"  title="edit">配置</a> <a class="remove" href="javascript:void(0)"  title="remove">删除</a>`
+                    },
+                    events: {
+                        "click .remove": function (e, value, row, index) {
+                            $Table.bootstrapTable('remove', {
+                                field: '$index',
+                                values: [index]
+                            })
+                            O.onChange()
+                        },
+                        "click .edit": function (e, value, row, index) {
+                            O.PopPanel.show(Object.keys(O.Value),
+                                function (v) {
+                                    $Table.bootstrapTable("updateRow", {
+                                        index: index,
+                                        row: v
+                                    })
+
+                                    O.onChange()
+                                    return true
+                                }, row)
+                        }
+                    }
+                }],
+            width: "100%",
+        }
+
+        $Table.bootstrapTable(tableOptions);
+
+
+        let $btn = $(`
+<div id="${Id}_toolbar" class="m-1">
+<button id="${Id}_AddButton" type="button" class="btn btn-secondary btn-sm">Add</button>
+</div>`)
+        $(panel).prepend($btn)
+        $btn.on("click", "button", function (event) {
+            O.PopPanel.show(Object.keys(O.Value),
+                function (v) {
+                    $Table.bootstrapTable("append", [v])
+                    $Table.bootstrapTable('scrollTo', 'bottom')
+                    O.onChange()
+                })
+            return false
+        })
+    }
+
+    set Value(vs) {
+        if (!vs || typeof vs == "undefined") {
+            vs = {}
+        }
+        let list = new Array()
+        for (let k in vs) {
+            let v = vs[k]
+            v["name"] = k
+            list.push(v)
+        }
+        list.sort((a, b) => {
+            return a.name - b.name
+        })
+        this.Table.bootstrapTable("load", list)
+    }
+
+    get Value() {
+        let list = this.Table.bootstrapTable('getData')
+        let vs = {}
+        for (let i in list) {
+
+            let v = list[i]
+            let key = v["name"]
+            vs[key] = {
+                disable: v["disable"],
+                config: v["config"],
+            }
+        }
+        return vs
+    }
+
+}
 
 function BaseGenerator(options) {
 
-    const schema = options["schema"]
+    let schema = options["schema"]
     switch (schema["eo:type"]) {
         case "object": {
             return new ObjectRender(options)
         }
         case "array": {
-            const items = schema["items"]
+            let items = schema["items"]
             switch (items["eo:type"]) {
                 case "object": {
-                    return new InnerObjectRender(options)
+                    return new ObjectArrayRender(options)
                 }
                 case "map": {
                     throw "now support map in array"
@@ -1138,17 +1774,26 @@ function BaseGenerator(options) {
                     }
                     return new ArrayRenderSimple(options)
                 }
+                case "array": {
+                    throw `not allow type:${items["eo:type"]} in array`
+                }
+                case "require": {
+                    return new RequireArrayRender(options)
+                }
+                default: {
+                    throw `unknown type:${items["eo:type"]} in array`
+                }
             }
-            throw `not allow type:${schema["eo:type"]} in array`
+
         }
         case "map": {
             let item = schema["additionalProperties"];
-            switch (item["type"]){
-                case "object":{
-                    if(options["name"] === "plugins"){
+            switch (item["type"]) {
+                case "object": {
+                    if (options["name"] === "plugins") {
                         return new PluginsRender(options)
                     }
-                    return new MapRender(options)
+                    return new ObjectMapRender(options)
                 }
             }
             return new SimpleMapRender(options)
@@ -1169,24 +1814,26 @@ function BaseGenerator(options) {
         case "require": {
             return new RequireRender(options)
         }
-        case "formatter" :{
-            return null
+        case "formatter" : {
+            return new FormatterConfigRender(options)
         }
     }
     throw `unknown type:${schema["eo:type"]}`
 }
+
 class SchemaHandler {
     constructor(schema) {
         this.s = schema
     }
-    toJsonSchema(s){
-        let schema = Object.assign({},s)
-        switch (schema["eo:type"]){
-            case "map":{
+
+    toJsonSchema(s) {
+        let schema = Object.assign({}, s)
+        switch (schema["eo:type"]) {
+            case "map": {
                 schema["additionalProperties"] = this.toJsonSchema(schema["additionalProperties"])
                 break
             }
-            case "array":{
+            case "array": {
                 schema["items"] = this.toJsonSchema(schema["items"])
                 break
             }
@@ -1200,17 +1847,19 @@ class SchemaHandler {
         return schema
     }
 
-    get JsonSchema(){
-        if (typeof this.v === "undefined" || this.v === null){
+    get JsonSchema() {
+        if (typeof this.v === "undefined" || this.v === null) {
             this.v = this.toJsonSchema(this.s)
             console.log(JSON.stringify(this.v))
         }
         return this.v
     }
-    get Schema(){
+
+    get Schema() {
         return this.s
     }
 }
+
 class FormRender {
 
     constructor(options) {
@@ -1221,24 +1870,24 @@ class FormRender {
         $(options["panel"]).empty()
 
         this.Object = readGenerator(options)({
-            generator:options["generator"],
-            panel:options["panel"],
-            schema:options["schema"],
+            generator: options["generator"],
+            panel: options["panel"],
+            schema: options["schema"],
             path: this.ObjectName,
-            name:options["name"],
+            name: options["name"],
         })
 
     }
 
     check() {
 
-        let r =  CheckBySchema(this.ObjectName,this.JsonSchema.JsonSchema,this.Value)
+        let r = CheckBySchema(this.ObjectName, this.JsonSchema.JsonSchema, this.Value)
         console.log(`check:${this.ObjectName} = ${JSON.stringify(this.Value)} :${JSON.stringify(r)}`);
-        if(typeof r === "undefined"){
+        if (typeof r === "undefined") {
             return true
         }
-  
-        return  JSON.stringify(r)
+
+        return JSON.stringify(r)
 
     }
 
