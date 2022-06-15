@@ -202,6 +202,7 @@ class ProfessionCreator extends ProfessionRender {
                 }
                 data["name"] = name
                 data["driver"] = $(o.options["drivers"]).val()
+                data["description"] = $(o.options["description"]).val()
                 dashboard.create(url, data, function (res) {
                     if (res.code !== 200) {
                         http.handleError(res, "新增失败")
@@ -243,6 +244,8 @@ class ProfessionEditor extends ProfessionRender {
         $(o.options["drivers"]).attr("disabled", true)
         $(o.options["drivers"]).append(`<option value="${data["driver"]}">${data["driver"]}</option>`)
         $(o.options["drivers"]).val(`${data["driver"]}`)
+
+        $(o.options["description"]).val(`${data["description"]}`)
     }
 
 
@@ -266,8 +269,10 @@ class ProfessionEditor extends ProfessionRender {
 
     submitEvent() {
         if (this.ui) {
+            let o = this
             let url = `/api/${this.module}/${this.name}`
             this.ui.Submit(function (data) {
+                data["description"] = $(o.options["description"]).val()
                 dashboard.update(url, data, function (res) {
                     if (res.code !== 200) {
                         http.handleError(res, "更新失败")
@@ -287,7 +292,7 @@ class ProfessionEditor extends ProfessionRender {
 }
 
 function formatProfessionRender(render) {
-    const defaultFields = {"id": true, "name": true, "driver": true}
+    const defaultFields = {"id": true, "name": true, "driver": true,"description":true}
     if (typeof render === "undefined") {
         throw "undefined"
     }

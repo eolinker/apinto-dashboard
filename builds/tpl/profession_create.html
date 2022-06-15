@@ -3,7 +3,7 @@
 <link href="/css/bootstrap-table.min.css" rel="stylesheet">
 <link href="/css/bootstrap-table-reorder-rows.min.css" rel="stylesheet">
 <link href="/css/bootstrap4-toggle.css" rel="stylesheet">
-<link href="/css/bootstrap-datetimepicker.min.css" rel="stylesheet" media="screen">
+<link href="/css/bootstrap-select.min.css" rel="stylesheet">
 
 {{end}}
 {{ block "content" .data}}
@@ -39,6 +39,14 @@
             <select class="form-control form-control-sm" id="inputDrivers"></select>
         </div>
     </div>
+    <div class="mt-2">
+        <div>
+            <label for="inputDescription">描述</label>
+        </div>
+        <div>
+            <textarea class="form-control" rows="3"  type="text" id="inputDescription"></textarea>
+        </div>
+    </div>
     <div id="formRenderPanel">
 
     </div>
@@ -53,13 +61,15 @@
 </form>
 {{end}}
 {{- block "script" . -}}
+<script src="/js/jquery.tablednd.min.js"></script>
 <script src="/js/bootstrap-table.min.js"></script>
-<script src="/js/bootstrap-table-editor.js"></script>
 <script src="/js/bootstrap4-toggle.min.js"></script>
+<script src="/js/bootstrap-table-reorder-rows.min.js"></script>
+<script src="/js/bootstrap-select.min.js"></script>
+
 <script src="/js/djv.js"></script>
 <script src="/js/form-render.js"></script>
 <script src="/js/render.js"></script>
-<script src="/js/bootstrap-datetimepicker.js" charset="UTF-8"></script>
 <script>
     const ModuleName = function () {
         return "{{.module.Name}}"
@@ -77,7 +87,8 @@
             "drivers": $("#inputDrivers"),
             "name": $("#inputName"),
             "id": $("#inputId"),
-            "btns": $("#form_button")
+            "btns": $("#form_button"),
+            "description":$("#inputDescription"),
         })
 
     })
