@@ -20,20 +20,42 @@ function formatterKV(v) {
 }
 function configTable(uiSort,properties){
     let columns = []
+    let dataFormat=new Set(["date-time","time","date","duration"])
+
     for (let i in uiSort) {
         let name = uiSort[i]
         let item = properties[name]
+        let format = item["format"]
+        if (typeof format != "undefined" && dataFormat.has(format)) {
+            item["eo:type"] = "date-time"
+            item["eo:format"] = format
+            if (item["type"] !== "string") {
+                delete (item["format"])
+            }
+        }
         switch (item["eo:type"]) {
             case "object": {
                 columns.push({
                     title: getLabel(name, item),
-                    field: item["name"],
+                    field: name,
                     sortable: false,
 
                     formatter: JSON.stringify,
 
                 })
                 break
+            }
+            case "date-time":{
+                columns.push({
+                    title: getLabel(name, item),
+                    field: name,
+                    sortable: false,
+
+                    formatter: function (v){
+                       return new Date(v)
+                    },
+
+                })
             }
             case "map": {
                 columns.push({
@@ -580,35 +602,36 @@ class DatetimeRender extends BaseChangeHandler {
         super(options["path"]);
         this.Options = options
         let $Panel = $(options["panel"])
-        let Schema = options["schema"]
+        this.Schema = options["schema"]
         $Panel.addClass("form-group")
-        let $DataTool = $(`
-        <div class="input-group date" >
-            <div class="input-group-append"><span></span></div>
-            <div class="input-group-append"><span class="glyphicon glyphicon-th">xx</span></div>
-        </div>
-            `)
-        let input = $(`<input class="form-control"  type="text" value=""  /> `)
-        this.ValueTarget = new BaseValue({
-            type:"string",
-            format:Schema["eo:format"]
-        }, input,options["path"])
-        $DataTool.prepend(input)
-        $Panel.append($DataTool)
-        $DataTool.datetimepicker({
-            format: 'yyyy-mm-dd hh:ii:ss',
-            weekStart: 1,
-            todayBtn:  1,
-            autoclose: 1,
-            todayHighlight: 1,
-            startView: 2,
-            forceParse: 0,
-            showMeridian: 1
+        this.$DateTool = $(`
+        <div class="input-group date"  data-target-input="nearest" id="${this.Id}">
+            <div class="input-group-append" data-target="#${this.Id}" data-toggle="datetimepicker">
+                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+            </div>
+        </div>`)
+        let input = $(`<input type="text" class="form-control datetimepicker-input" readonly data-target="#${this.Id}" data-toggle="datetimepicker"/>`)
+        this.$DateTool.prepend(input)
+        $Panel.append(this.$DateTool)
+        this.$DateTool.datetimepicker({
+            locale: 'ru',
+            viewDate:"date"
         });
+    }
+    set Value(v){
+         if (this.Schema["type"]!=="string"){
+            v = new Date(v)
+        }
+        console.log(this.$DateTool.datetimepicker("viewDate",v))
+
     }
     get Value() {
 
-        return this.ValueTarget.Value
+        let v =  this.$DateTool.datetimepicker("viewDate")
+        if (this.Schema["type"]!=="string"){
+            v = v.toDate().getTime()
+        }
+        return v
     }
 }
 
