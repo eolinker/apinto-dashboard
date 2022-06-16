@@ -312,7 +312,7 @@ class BaseValue {
         let id = this.Id
         console.debug("ValidHandler:", id, "=", v)
         let value = v
-        value = valueForType(this.Schema["eo:type"], value)
+        value = valueForType(this.Schema["type"], value)
         let rs = this.isOk(v)
         if (typeof rs === "undefined") {
             rs = CheckBySchema(id, this.Schema, value)
@@ -334,7 +334,7 @@ class BaseValue {
     }
 
     get Value() {
-        return valueForType(this.Schema["eo:type"], $(this.Target).val())
+        return valueForType(this.Schema["type"], $(this.Target).val())
     }
 
     set Value(v) {
@@ -579,20 +579,20 @@ class DatetimeRender extends BaseChangeHandler {
     constructor(options) {
         super(options["path"]);
         this.Options = options
-        this.Panel = options["panel"]
-        this.Scheme = options["scheme"]
-        this.Panel.append(`
-            <div class="form-group">
-<!--                <label for="dtp_input1" class="col-md-2 control-label"></label>-->
-                <div class="input-group date form_datetime col-md-5" data-date-format="dd MM yyyy - HH:ii p" id="${this.Id}_date">
-                    <input class="form-control" size="16" type="text" value="" readonly id="${this.Id}_date_data">
-                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
-                    <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
-                </div>
-<!--                <input type="hidden" id="dtp_input1" value="" /><br/>-->
-            </div>
+        let $Panel = $(options["panel"])
+        let Schema = options["schema"]
+        $Panel.addClass("form-group")
+        let $DataTool = $(`
+        <div class="input-group date" >
+            <div class="input-group-append"><span></span></div>
+            <div class="input-group-append"><span class="glyphicon glyphicon-th">xx</span></div>
+        </div>
             `)
-        $(`#${this.Id}_date`).datetimepicker({
+        let input = $(`<input class="form-control"  type="text" value=""  /> `)
+        this.ValueTarget = new BaseValue(Schema, input,options["path"])
+        $DataTool.prepend(input)
+        $Panel.append($DataTool)
+        $DataTool.datetimepicker({
             format: 'yyyy-mm-dd hh:ii:ss',
             weekStart: 1,
             todayBtn:  1,
@@ -604,11 +604,8 @@ class DatetimeRender extends BaseChangeHandler {
         });
     }
     get Value() {
-        let v = $(`#${this.Id}_date_data`).val()
-        if (typeof v == "undefined" || v === "") {
-            return "no expired"
-        }
-        return v
+
+        return this.ValueTarget.Value
     }
 }
 
@@ -1797,14 +1794,17 @@ function BaseGenerator(options) {
     if ( typeof format != "undefined" ) {
         let dataFormat=["date-time","time","date","duration"]
         for (let value of dataFormat) {
-            if (value==format) {
+            if (value === format) {
                 eoType = "date-time"
-                delete(options["schema"]["format"])
+
                 break
             }
         }
     }
 
+    if( schema["type"] !== "string"){
+        delete(options["schema"]["format"])
+    }
 
     switch (eoType) {
         case "object": {
