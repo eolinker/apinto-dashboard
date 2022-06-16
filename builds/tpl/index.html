@@ -73,24 +73,23 @@
         </a>
 
     <!-- 这里显示搜索操作-->
-
-</header>
-
     {{if .user}}
     <div class="dropdown">
-        <a class="nav-link dropdown-toggle " data-toggle="dropdown"  role="button"  style="position: absolute; top: -53px; right: 40px; z-index: 1021;">
+        <a class="nav-link dropdown-toggle " data-toggle="dropdown"  role="button"  style="position: absolute; top: -25px; right: 40px; z-index: 1021;">
             <span style="position: relative;right:3px;top:-3px">
                 <svg width="30" height="30"><use xlink:href="#user-icon"/></svg>
             </span>
-            <span class="account-user-name" style="color: #FFFFFF;font-size: 20px;">{{ .user.GetUsername }}</span>
+            <span class="account-user-name" style="color: #000000;font-size: 20px;">{{ .user.GetUsername }}</span>
         </a>
-        <div class="dropdown-menu dropdown-menu-left dropdown-menu-animated topbar-dropdown-menu profile-dropdown">
+        <div class="dropdown-menu dropdown-menu-left dropdown-menu-animated topbar-dropdown-menu profile-dropdown" style="position: absolute;top:27px;  left:-165px; z-index: 1021;">
             <h5 class="dropdown-header">Welcome !</h5>
             <div class="dropdown-divider"></div>
             <a class="dropdown-item" href="/logout"> 登出 </a>
         </div>
     </div>
     {{end}}
+    
+</header>
 
 {{- end -}}
 
