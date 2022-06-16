@@ -6,18 +6,17 @@
     <meta name="description" content="">
     <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
     <meta name="generator" content="Hugo 0.88.1">
-    <title>Apinto Dashboard</title>
-<!--    {{- block "title" . }}-->
-<!--        {{- if .module }}-->
-<!--            {{- if eq (index .module.I18nName .zone) "" }}-->
-<!--    <title>{{.module.Name}}</title>-->
-<!--            {{- else}}-->
-<!--    <title>{{index .module.I18nName .zone}}</title>-->
-<!--        {{- end}}-->
-<!--        {{- else }}-->
-<!--    <title>{{.name}}</title>-->
-<!--        {{- end}}-->
-<!--    {{- end -}}-->
+    {{- block "title" . }}
+        {{- if .module }}
+            {{- if eq (index .module.I18nName .zone) "" }}
+    <title>{{.module.Name}}</title>
+            {{- else}}
+    <title>{{index .module.I18nName .zone}}</title>
+        {{- end}}
+        {{- else }}
+    <title>{{.name}}</title>
+        {{- end}}
+    {{- end -}}
     <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="/css/bootstrap.css">
     <style>
