@@ -74,6 +74,8 @@
                 content += "<tr><td style='min-width: 100px'>"+"ID"+"</td><td>"+data["id"]+"</td></tr>"
                 content += "<tr><td style='min-width: 100px'>"+"Name"+"</td><td>"+data["name"]+"</td></tr>"
                 content += "<tr><td style='min-width: 100px'>"+"Driver"+"</td><td>"+data["driver"]+"</td></tr>"
+                content += "<tr><td style='min-width: 100px'>"+"描述"+"</td><td>"+data["description"]+"</td></tr>"
+
                 Object.keys(sort).forEach(function (index) {
                     let key = sort[index]
                     let label = getLabel(key,properties[key])
