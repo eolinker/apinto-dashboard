@@ -62,33 +62,36 @@
 {{- block "icon" . -}}
 {{- end -}}
 {{- block "top" . -}}
-<header class="navbar navbar-light sticky-top bg-light flex-md-nowrap p-0 border border-secondary">
+<header class="navbar navbar-dark sticky-top bg-light flex-md-nowrap p-0 border-bottom ">
 
 <!--    <div class="d-flex flex-column flex-shrink-0 p-3 text-white bg-dark" >-->
-        <a href="/" class="navbar-brand col-md-3 col-lg-2 me-0 px-3" >
+    <div class="float-left">
+        <a href="/" class="navbar-brand mx-3" >
             <svg class="bi me-2" width="140" height="32" >
                 <use xlink:href="#apinto"/>
             </svg>
             <span>Dashboard</span>
         </a>
-
-    <!-- 这里显示搜索操作-->
+    </div>
     {{if .user}}
-    <div class="dropdown">
-        <a class="nav-link dropdown-toggle " data-toggle="dropdown"  role="button"  style="position: absolute; top: -25px; right: 40px; z-index: 1021;">
+    <div class="float-right pr-5 pr-md-5">
+        <div class="dropdown">
+            <a class="nav-link dropdown-toggle" data-toggle="dropdown"  role="button" >
             <span style="position: relative;right:3px;top:-3px">
                 <svg width="30" height="30"><use xlink:href="#user-icon"/></svg>
             </span>
-            <span class="account-user-name" style="color: #000000;font-size: 20px;">{{ .user.GetUsername }}</span>
-        </a>
-        <div class="dropdown-menu dropdown-menu-left dropdown-menu-animated topbar-dropdown-menu profile-dropdown" style="position: absolute;top:27px;  left:-165px; z-index: 1021;">
-            <h5 class="dropdown-header">Welcome !</h5>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="/logout"> 登出 </a>
+                <span class="account-user-name">{{ .user.GetUsername }}</span>
+            </a>
+            <div class="dropdown-menu dropdown-menu-left dropdown-menu-animated topbar-dropdown-menu profile-dropdown mt-2 mr-4">
+                <h5 class="dropdown-header">Welcome !</h5>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="/logout"> 登出 </a>
+            </div>
         </div>
     </div>
+
     {{end}}
-    
+
 </header>
 
 {{- end -}}
