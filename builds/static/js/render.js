@@ -31,6 +31,7 @@ class Render {
             schema: schema,
             name: name
         })
+        this.InitValue = {}
     }
 
     ResetVal() {
