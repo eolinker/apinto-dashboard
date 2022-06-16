@@ -589,7 +589,10 @@ class DatetimeRender extends BaseChangeHandler {
         </div>
             `)
         let input = $(`<input class="form-control"  type="text" value=""  /> `)
-        this.ValueTarget = new BaseValue(Schema, input,options["path"])
+        this.ValueTarget = new BaseValue({
+            type:"string",
+            format:Schema["eo:format"]
+        }, input,options["path"])
         $DataTool.prepend(input)
         $Panel.append($DataTool)
         $DataTool.datetimepicker({
@@ -1789,24 +1792,18 @@ class PluginsRender extends BaseChangeHandler {
 function BaseGenerator(options) {
 
     let schema = options["schema"]
-    let eoType = schema["eo:type"]
     let format = schema["format"]
     if ( typeof format != "undefined" ) {
-        let dataFormat=["date-time","time","date","duration"]
-        for (let value of dataFormat) {
-            if (value === format) {
-                eoType = "date-time"
-
-                break
+        let dataFormat=new Set(["date-time","time","date","duration"])
+        if (dataFormat.has(format)){
+            options["schema"]["eo:type"] = "date-time"
+            options["schema"]["eo:format"] = format
+            if( schema["type"] !== "string"){
+                delete(options["schema"]["format"])
             }
         }
     }
-
-    if( schema["type"] !== "string"){
-        delete(options["schema"]["format"])
-    }
-
-    switch (eoType) {
+    switch (schema["eo:type"]) {
         case "object": {
             return new ObjectRender(options)
         }
