@@ -604,18 +604,32 @@ class DatetimeRender extends BaseChangeHandler {
         let $Panel = $(options["panel"])
         this.Schema = options["schema"]
         $Panel.addClass("form-group")
+        // this.$DateTool = $(`
+        // <div class="input-group date"  data-target-input="nearest" id="${this.Id}">
+        //     <div class="input-group-append" data-target="#${this.Id}" data-toggle="datetimepicker">
+        //         <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+        //     </div>
+        // </div>`)
+        // let input = $(`<input type="text" class="form-control datetimepicker-input" readonly data-target="#${this.Id}" data-toggle="datetimepicker"/>`)
+        // this.$DateTool.prepend(input)
+        // $Panel.append(this.$DateTool)
+        // this.$DateTool.datetimepicker({
+        //     locale: 'ru',
+        //     viewDate:"date"
+        // });
         this.$DateTool = $(`
-        <div class="input-group date"  data-target-input="nearest" id="${this.Id}">
-            <div class="input-group-append" data-target="#${this.Id}" data-toggle="datetimepicker">
-                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-            </div>
-        </div>`)
-        let input = $(`<input type="text" class="form-control datetimepicker-input" readonly data-target="#${this.Id}" data-toggle="datetimepicker"/>`)
+            <div class="input-group date form_datetime col-md-5" data-link-field="${this.Id}"></div>`)
+        let input = $(`<input type="text" class="form-control datetimepicker-input" readonly id="${this.Id}"/>`)
         this.$DateTool.prepend(input)
         $Panel.append(this.$DateTool)
         this.$DateTool.datetimepicker({
-            locale: 'ru',
-            viewDate:"date"
+            eekStart: 1,
+            todayBtn:  1,
+            autoclose: 1,
+            todayHighlight: 1,
+            startView: 2,
+            forceParse: 0,
+            showMeridian: 1
         });
     }
     set Value(v){
