@@ -20,20 +20,42 @@ function formatterKV(v) {
 }
 function configTable(uiSort,properties){
     let columns = []
+    let dataFormat=new Set(["date-time","time","date","duration"])
+
     for (let i in uiSort) {
         let name = uiSort[i]
         let item = properties[name]
+        let format = item["format"]
+        if (typeof format != "undefined" && dataFormat.has(format)) {
+            item["eo:type"] = "date-time"
+            item["eo:format"] = format
+            if (item["type"] !== "string") {
+                delete (item["format"])
+            }
+        }
         switch (item["eo:type"]) {
             case "object": {
                 columns.push({
                     title: getLabel(name, item),
-                    field: item["name"],
+                    field: name,
                     sortable: false,
 
                     formatter: JSON.stringify,
 
                 })
                 break
+            }
+            case "date-time":{
+                columns.push({
+                    title: getLabel(name, item),
+                    field: name,
+                    sortable: false,
+
+                    formatter: function (v){
+                       return new Date(v)
+                    },
+
+                })
             }
             case "map": {
                 columns.push({
@@ -580,32 +602,36 @@ class DatetimeRender extends BaseChangeHandler {
         super(options["path"]);
         this.Options = options
         let $Panel = $(options["panel"])
-        let Schema = options["schema"]
+        this.Schema = options["schema"]
         $Panel.addClass("form-group")
-        let $DataTool = $(`
-        <div class="input-group date" >
-            <div class="input-group-append"><span></span></div>
-            <div class="input-group-append"><span class="glyphicon glyphicon-th">xx</span></div>
-        </div>
-            `)
-        let input = $(`<input class="form-control"  type="text" value=""  /> `)
-        this.ValueTarget = new BaseValue(Schema, input,options["path"])
-        $DataTool.prepend(input)
-        $Panel.append($DataTool)
-        $DataTool.datetimepicker({
-            format: 'yyyy-mm-dd hh:ii:ss',
-            weekStart: 1,
-            todayBtn:  1,
-            autoclose: 1,
-            todayHighlight: 1,
-            startView: 2,
-            forceParse: 0,
-            showMeridian: 1
+        this.$DateTool = $(`
+        <div class="input-group date"  data-target-input="nearest" id="${this.Id}">
+            <div class="input-group-append" data-target="#${this.Id}" data-toggle="datetimepicker">
+                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+            </div>
+        </div>`)
+        let input = $(`<input type="text" class="form-control datetimepicker-input" readonly data-target="#${this.Id}" data-toggle="datetimepicker"/>`)
+        this.$DateTool.prepend(input)
+        $Panel.append(this.$DateTool)
+        this.$DateTool.datetimepicker({
+            locale: 'ru',
+            viewDate:"date"
         });
+    }
+    set Value(v){
+         if (this.Schema["type"]!=="string"){
+            v = new Date(v)
+        }
+        console.log(this.$DateTool.datetimepicker("viewDate",v))
+
     }
     get Value() {
 
-        return this.ValueTarget.Value
+        let v =  this.$DateTool.datetimepicker("viewDate")
+        if (this.Schema["type"]!=="string"){
+            v = v.toDate().getTime()
+        }
+        return v
     }
 }
 
@@ -1582,7 +1608,7 @@ class PopPanelPlugin {
         let $Disable = $(`<input type="checkbox" class="form-control-sm form-control" data-toggle="toggle" data-size="sm"/>`)
 
         $Body.append(
-            $(`<div><div><label class=" col-form-label  text-nowrap" for="FormRender_test_target"><span style="color: red">*</span>目标服务</label></div></div>`)
+            $(`<div><div><label class=" col-form-label  text-nowrap" for="FormRender_test_target"><span style="color: red">*</span>选择插件</label></div></div>`)
                 .append($PluginName)
         )
         $Body.append(
@@ -1693,7 +1719,7 @@ class PluginsRender extends BaseChangeHandler {
                     title: "状态",
                     field: "disable",
                     formatter: function (v, row, index) {
-                        return v === true ? `<span class="btn-danger btn btn-sm">禁用</span>` : `<span class="btn btn-sm btn-outline-primary">启用</span>`
+                        return v === true ? `<span class="badge badge-danger">禁用</span>` : `<span class="badge-primary"">启用</span>`
                     }
                 },
                 {
@@ -1789,24 +1815,18 @@ class PluginsRender extends BaseChangeHandler {
 function BaseGenerator(options) {
 
     let schema = options["schema"]
-    let eoType = schema["eo:type"]
     let format = schema["format"]
     if ( typeof format != "undefined" ) {
-        let dataFormat=["date-time","time","date","duration"]
-        for (let value of dataFormat) {
-            if (value === format) {
-                eoType = "date-time"
-
-                break
+        let dataFormat=new Set(["date-time","time","date","duration"])
+        if (dataFormat.has(format)){
+            options["schema"]["eo:type"] = "date-time"
+            options["schema"]["eo:format"] = format
+            if( schema["type"] !== "string"){
+                delete(options["schema"]["format"])
             }
         }
     }
-
-    if( schema["type"] !== "string"){
-        delete(options["schema"]["format"])
-    }
-
-    switch (eoType) {
+    switch (schema["eo:type"]) {
         case "object": {
             return new ObjectRender(options)
         }
