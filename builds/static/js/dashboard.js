@@ -138,11 +138,11 @@ let common = {
         }
         // 创建bootstrap的alert元素
         let divElement = $("<div></div>").addClass('alert').addClass('alert-'+type).addClass('alert-dismissible').addClass('col-md-4').addClass('col-md-offset-4');
-        let scroll = document.body.scrollTop || document.documentElement.scrollTop;
+        // let scroll = document.body.scrollTop || document.documentElement.scrollTop;
         divElement.css({ // 消息框的定位样式
             "position": "fixed",
-            "right":"50px",
-            "top": scroll + 80 +"px"
+            "right":"10px",
+            "top":  "60px"
         });
         divElement.text(msg); // 设置消息框的内容
         // 消息框添加可以关闭按钮
@@ -172,8 +172,8 @@ let common = {
         setTimeout(function() {
             let IntervalMS = 20; // 每次上浮的间隔毫秒
             let floatSpace = 60; // 上浮的空间(px)
-            let scroll = document.body.scrollTop || document.documentElement.scrollTop;
-            let nowTop = divElement.offset().top - scroll; // 获取元素当前的top值
+            // let scroll = document.body.scrollTop || document.documentElement.scrollTop;
+            let nowTop = divElement.offset().top ; // 获取元素当前的top值
             let stopTop = nowTop - floatSpace;    // 上浮停止时的top值
             divElement.fadeOut(IntervalMS * floatSpace); // 设置元素淡出
 
