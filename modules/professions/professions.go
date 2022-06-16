@@ -129,11 +129,11 @@ func (p *Profession) createRouter() {
 		logArgs = append(logArgs,
 			&apinto_dashboard.Arg{Key: "user", Value: userName},
 			&apinto_dashboard.Arg{Key: "profession", Value: p.ProfessionName},
-			&apinto_dashboard.Arg{Key: "url", Value: r.URL.String()},
+			&apinto_dashboard.Arg{Key: "url", Value: fmt.Sprintf("%s %s", r.Method, r.URL.String())},
 		)
 
 		defer func() {
-			apinto_dashboard.AddActivityLog(r, userName, apinto_dashboard.OptCreate, "", logContent, logArgs)
+			apinto_dashboard.AddActivityLog(r, userName, apinto_dashboard.OptCreate, p.ProfessionName, logContent, logArgs)
 		}()
 
 		rData, err := apinto.ReadBody(r.Body)
@@ -188,11 +188,12 @@ func (p *Profession) createRouter() {
 		logArgs = append(logArgs,
 			&apinto_dashboard.Arg{Key: "user", Value: userName},
 			&apinto_dashboard.Arg{Key: "profession", Value: p.ProfessionName},
-			&apinto_dashboard.Arg{Key: "url", Value: r.URL.String()},
+			&apinto_dashboard.Arg{Key: "url", Value: fmt.Sprintf("%s %s", r.Method, r.URL.String())},
 		)
 
+		target := fmt.Sprintf("%s/%s", p.ProfessionName, name)
 		defer func() {
-			apinto_dashboard.AddActivityLog(r, userName, apinto_dashboard.OptUpdate, name, logContent, logArgs)
+			apinto_dashboard.AddActivityLog(r, userName, apinto_dashboard.OptUpdate, target, logContent, logArgs)
 		}()
 
 		rData, err := apinto.ReadBody(r.Body)
@@ -248,11 +249,12 @@ func (p *Profession) createRouter() {
 		logArgs = append(logArgs,
 			&apinto_dashboard.Arg{Key: "user", Value: userName},
 			&apinto_dashboard.Arg{Key: "profession", Value: p.ProfessionName},
-			&apinto_dashboard.Arg{Key: "url", Value: r.URL.String()},
+			&apinto_dashboard.Arg{Key: "url", Value: fmt.Sprintf("%s %s", r.Method, r.URL.String())},
 		)
 
+		target := fmt.Sprintf("%s/%s", p.ProfessionName, name)
 		defer func() {
-			apinto_dashboard.AddActivityLog(r, userName, apinto_dashboard.OptDelete, name, logContent, logArgs)
+			apinto_dashboard.AddActivityLog(r, userName, apinto_dashboard.OptDelete, target, logContent, logArgs)
 		}()
 
 		//删除

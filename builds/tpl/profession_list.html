@@ -32,6 +32,7 @@
 {{- end -}}
 {{- block "script" . -}}
 <script src="/js/bootstrap-table.min.js"></script>
+<script src="/js/form-render.js"></script>
 <script>
     $("#create_btn").click(function () {
         window.location.href="/{{.name}}/create"
@@ -60,6 +61,45 @@
         ].join('')
     }
 
+    function detailFormatter(name,data) {
+        let content = ""
+        dashboard.get("/profession/{{.name}}/"+`${data["driver"]}`, function (res) {
+            if (res.code !== 200) {
+                return http.handleError(res, "获取driver信息失败")
+            }
+            let render = res.data["render"]
+            let sort = render["ui:sort"]
+            let properties = render["properties"]
+            if (sort != "undefined" && typeof sort == "object") {
+                content += "<tr><td style='min-width: 100px'>"+"ID"+"</td><td>"+data["id"]+"</td></tr>"
+                content += "<tr><td style='min-width: 100px'>"+"Name"+"</td><td>"+data["name"]+"</td></tr>"
+                content += "<tr><td style='min-width: 100px'>"+"Driver"+"</td><td>"+data["driver"]+"</td></tr>"
+                Object.keys(sort).forEach(function (index) {
+                    let key = sort[index]
+                    let label = getLabel(key,properties[key])
+                    if(data[key] instanceof Object){
+                        content += "<tr><td style='min-width: 100px'>"+label+"</td><td>"+JSON.stringify(data[key])+"</td></tr>"
+                    }else {
+                        content += "<tr><td style='min-width: 100px'>"+label+"</td><td>"+data[key]+"</td></tr>"
+                    }
+                })
+                content += "<tr><td style='min-width: 100px'>"+"更新时间"+"</td><td>"+data["update"]+"</td></tr>"
+                content += "<tr><td style='min-width: 100px'>"+"创建时间"+"</td><td>"+data["create"]+"</td></tr>"
+            } else {
+                Object.keys(data).forEach(function (key) {
+                    if(data[key] instanceof Object){
+                        content += "<tr><td style='min-width: 100px'>"+key+"</td><td>"+JSON.stringify(data[key])+"</td></tr>"
+                    }else {
+                        content += "<tr><td style='min-width: 100px'>"+key+"</td><td>"+data[key]+"</td></tr>"
+                    }
+                })
+            }
+        }, function (res) {
+            return http.handleError(res, "获取driver信息失败")
+        })
+        detail.show(name, content)
+    }
+
     window.operateEvents = {
         'click .remove': function (e, value, row, index) {
             let msg ="确认删除 "+row.name+" {{index .module.I18nName .zone}}?"
@@ -67,7 +107,7 @@
                 dashboard.delete("/api/{{.name}}/"+row.name, function (res) {
                     console.log(`res.code`)
                     if(res.code === 200){
-                        common.message("删除成功", "danger")
+                        common.message("删除成功", "success")
                         $table.bootstrapTable('remove', {
                             field: 'id',
                             values: [row.id]
@@ -86,15 +126,9 @@
                 if(res.code === 200){
                     $("#detail_title").text(row.name)
                     let data = res.data
-                    let content = ""
-                    Object.keys(data).forEach(function (key) {
-                        if(data[key] instanceof Object){
-                            content += "<tr><td style='min-width: 100px'>"+key+"</td><td>"+JSON.stringify(data[key])+"</td></tr>"
-                        }else {
-                            content += "<tr><td style='min-width: 100px'>"+key+"</td><td>"+data[key]+"</td></tr>"
-                        }
-                    })
-                    detail.show(row.name, content)
+
+                    this.detailFormatter(row.name,data)
+
                     return
                 }
                 return http.handleError(res, "获取详情失败")
