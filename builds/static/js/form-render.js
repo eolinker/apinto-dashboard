@@ -21,7 +21,6 @@ function formatterKV(v) {
 function configTable(uiSort,properties){
     let columns = []
     let dataFormat=new Set(["date-time","time","date","duration"])
-
     for (let i in uiSort) {
         let name = uiSort[i]
         let item = properties[name]
@@ -50,12 +49,9 @@ function configTable(uiSort,properties){
                     title: getLabel(name, item),
                     field: name,
                     sortable: false,
-
-                    formatter: function (v){
-                       return new Date(v)
-                    },
-
+                    formatter: date.formatDate
                 })
+                break
             }
             case "map": {
                 columns.push({
@@ -619,32 +615,44 @@ class DatetimeRender extends BaseChangeHandler {
         //     viewDate:"date"
         // });
         this.$DateTool = $(`
-            <div class="input-group date form_datetime col-md-5" data-link-field="${this.Id}"></div>`)
-        let input = $(`<input type="text" class="form-control datetimepicker-input" readonly id="${this.Id}"/>`)
+             <div class="input-group date form_datetime" data-link-field="${this.Id}">
+                </div>
+`)
+        let input = $(`<input type="text" class="form-control col-md-5" readonly id="${this.Id}"/>`)
         this.$DateTool.prepend(input)
         $Panel.append(this.$DateTool)
         this.$DateTool.datetimepicker({
+            format:"yyyy-MM-dd hh:ii",
             eekStart: 1,
             todayBtn:  1,
-            autoclose: 1,
             todayHighlight: 1,
             startView: 2,
             forceParse: 0,
-            showMeridian: 1
+            showMeridian: 1,
+            pickerPosition: "bottom-left"
         });
     }
     set Value(v){
          if (this.Schema["type"]!=="string"){
-            v = new Date(v)
+             if (v===0){
+                 v =  ""
+             }
+            v = date.formatDate(v)
         }
-        console.log(this.$DateTool.datetimepicker("viewDate",v))
-
+        $(`#${this.Id}`).val(v)
     }
     get Value() {
 
-        let v =  this.$DateTool.datetimepicker("viewDate")
+        // let v =  this.$DateTool.datetimepicker("viewDate")
+        // if (this.Schema["type"]!=="string"){
+        //     v = v.toDate().getTime()
+        // }
+        let v = $(`#${this.Id}`).val()
         if (this.Schema["type"]!=="string"){
-            v = v.toDate().getTime()
+           if (v === ""){
+               return 0
+           }
+           return new Date(v).getTime()
         }
         return v
     }

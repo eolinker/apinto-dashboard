@@ -285,6 +285,24 @@ let modal = {
     }
 }
 
+let date = {
+    formatDate:function (v){
+        let date = new Date(v)
+        let year = date.getFullYear()
+        let month = date.getMonth()
+        let day = date.getDay()
+        let hour = date.getHours()
+        let minute = date.getMinutes()
+        let fn = function (v) {
+            if (v < 10) {
+                v = "0" + v
+            }
+            return v
+        }
+        return year + "-" + fn(month) + "-" + fn(day) + " " + fn(hour) + ":" + fn(minute)
+    }
+}
+
 class Ace{
     constructor(id) {
         this.id = id
