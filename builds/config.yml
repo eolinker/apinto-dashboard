@@ -6,7 +6,7 @@ port: 8081
 filter_forwarded: false
 user_details:
   type: file
-  file: ./account.yaml
+  file: ./account.yml
 professions:
 
   - name: services
