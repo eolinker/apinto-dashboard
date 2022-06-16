@@ -1608,7 +1608,7 @@ class PopPanelPlugin {
         let $Disable = $(`<input type="checkbox" class="form-control-sm form-control" data-toggle="toggle" data-size="sm"/>`)
 
         $Body.append(
-            $(`<div><div><label class=" col-form-label  text-nowrap" for="FormRender_test_target"><span style="color: red">*</span>目标服务</label></div></div>`)
+            $(`<div><div><label class=" col-form-label  text-nowrap" for="FormRender_test_target"><span style="color: red">*</span>选择插件</label></div></div>`)
                 .append($PluginName)
         )
         $Body.append(
@@ -1719,7 +1719,7 @@ class PluginsRender extends BaseChangeHandler {
                     title: "状态",
                     field: "disable",
                     formatter: function (v, row, index) {
-                        return v === true ? `<span class="btn-danger btn btn-sm">禁用</span>` : `<span class="btn btn-sm btn-outline-primary">启用</span>`
+                        return v === true ? `<span class="badge badge-danger">禁用</span>` : `<span class="badge-primary"">启用</span>`
                     }
                 },
                 {
