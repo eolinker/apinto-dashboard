@@ -457,11 +457,12 @@
         if (pluginID){
             getRenderInfo(pluginID, function (driver,render) {
                 if (!add_config_ui){
-                    add_config_ui = new Render(add_config_ui_id, render,`plugin_add.${driver}`)
+                    add_config_ui = new Render(add_config_ui_id, render,`plugin_add.${driver}`,add_config_editor)
                 }else {
                     add_config_ui.Reset(render,driver)
+
                 }
-                add_config_editor.Value = {}
+                add_config_editor.Value = add_config_ui.Value
                 add_init_config_editor.Value = {}
 
             })
@@ -588,6 +589,7 @@
         let value = $(this).val();
         getRenderInfo(value, function (driver,render) {
             add_config_ui.Reset(render,`plugin_add.${driver}`)
+            add_config_editor.Value = add_config_ui.Value
         })
     });
 

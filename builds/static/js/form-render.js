@@ -588,11 +588,12 @@ class FieldPanel {
     }
 
     get Value() {
-        if ($(this.$Panel).is(":visible")) {
+        // if ($(this.$Panel).is(":visible")) {
+        //     return this.$Value.Value
+        // } else {
+        //     return {}
+        // }
             return this.$Value.Value
-        } else {
-            return {}
-        }
 
     }
 }
