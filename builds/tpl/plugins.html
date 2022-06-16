@@ -337,7 +337,7 @@
         }
         $("#detail_container").hide(200)
     })
-    $('a[data-toggle="tab"]').on('shown.bs.tab', function (event) {
+    $('a[data-toggle="tab"]').on('show.bs.tab', function (event) {
         let id = $(event.target).attr("id")
         console.debug("id")
         switch (id){
