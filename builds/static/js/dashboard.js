@@ -208,6 +208,7 @@ let common = {
         }, 1500);
     }
 }
+
 let aceEditor = {
     InitEditor: function (id){
         let editor = ace.edit(id);
@@ -226,6 +227,7 @@ let modal = {
         let target = $("#"+id)
         target.removeClass("pop_window").removeClass("pop_window_small").html("")
         target.addClass("pop_window").addClass("pop_window_small").append(`<div class="pop_window_header">
+            <span class="pop_window_title" id="${id}_title"></span>
             <span class="pop_window_title" id="${id}_title"></span>
             <button class="pop_window_button btn btn_default" id="${id}_close" >关闭</button>
             <br>
