@@ -62,35 +62,37 @@
 {{- block "icon" . -}}
 {{- end -}}
 {{- block "top" . -}}
-<header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
+<header class="navbar navbar-dark sticky-top bg-light flex-md-nowrap p-0 border-bottom ">
 
 <!--    <div class="d-flex flex-column flex-shrink-0 p-3 text-white bg-dark" >-->
-        <a href="/" class="navbar-brand col-md-3 col-lg-2 me-0 px-3" >
+    <div class="float-left">
+        <a href="/" class="navbar-brand mx-3" >
             <svg class="bi me-2" width="140" height="32" >
                 <use xlink:href="#apinto"/>
             </svg>
             <span>Dashboard</span>
         </a>
-
-    <!-- 这里显示搜索操作-->
-
-</header>
-
+    </div>
     {{if .user}}
-    <div class="dropdown">
-        <a class="nav-link dropdown-toggle " data-toggle="dropdown"  role="button"  style="position: absolute; top: -53px; right: 40px; z-index: 1021;">
+    <div class="float-right pr-5 pr-md-5">
+        <div class="dropdown">
+            <a class="nav-link dropdown-toggle" data-toggle="dropdown"  role="button" >
             <span style="position: relative;right:3px;top:-3px">
                 <svg width="30" height="30"><use xlink:href="#user-icon"/></svg>
             </span>
-            <span class="account-user-name" style="color: #FFFFFF;font-size: 20px;">{{ .user.GetUsername }}</span>
-        </a>
-        <div class="dropdown-menu dropdown-menu-left dropdown-menu-animated topbar-dropdown-menu profile-dropdown">
-            <h5 class="dropdown-header">Welcome !</h5>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="/logout"> 登出 </a>
+                <span class="account-user-name">{{ .user.GetUsername }}</span>
+            </a>
+            <div class="dropdown-menu dropdown-menu-left dropdown-menu-animated topbar-dropdown-menu profile-dropdown mt-2 mr-4">
+                <h5 class="dropdown-header">Welcome !</h5>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="/logout"> 登出 </a>
+            </div>
         </div>
     </div>
+
     {{end}}
+
+</header>
 
 {{- end -}}
 
@@ -104,7 +106,7 @@
                     {{- range $index,$m:=.modules -}}
                     <li class="nav-item">
                         {{- if eq $m.Name $.name -}}
-                        <a href="{{$m.Path}}" class="nav-link active" aria-current="page"><svg class="bi me-2" width="16" height="16"><use xlink:href="#{{$m.Name}}"/></svg>  {{index $m.I18nName $.zone}}</a>
+                        <a href="{{$m.Path}}" class="nav-link active" aria-current="page"><svg class="bi me-2" width="40" height="16"><use xlink:href="#{{$m.Name}}"/></svg>  {{index $m.I18nName $.zone}}</a>
                         {{- else -}}
                         <a href="{{$m.Path}}" class="nav-link "><svg class="bi me-2" width="16" height="16"><use xlink:href="#{{$m.Name}}"/></svg>  {{index $m.I18nName $.zone}}</a>
                         {{- end }}
@@ -126,8 +128,10 @@
 </div>
 
 
+<script src="/umd/popper.min.js"></script>
 <script src="/js/jquery-3.0.0.js"></script>
-<script src="/js/bootstrap.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<!--<script src="/js/moment.min.js"></script>-->
 <script src="/js/dashboard.js"></script>
 {{ block "script" .}}{{end}}
 </body>
