@@ -59,17 +59,14 @@
     })
     function responseHandler(res) {
         let d = res.data
-        // d.forEach((item,index)=>{
-        //     item["service"] = item["target"]
-        // })
         return d
     }
-    function statusSwitch(value, row, index){
+    function statusSwitch(value, row, index,field){
+
         if (row["disable"]) {
-            return "<input value=" + row.name + " name='disable' type='checkbox' checked />";
-        } else {
-            return "<input value=" + row.name + " name='disable' type='checkbox' />";
+           return `<input value="${row.name}" name="disable" type="checkbox" checked />`
         }
+        return `<input value="${row.name}" name="disable" type="checkbox" />`
     }
 
     function detailFormatter(name,data) {
@@ -158,8 +155,8 @@
             })
         }
     }
-    function renderStatus(){
-        $("[name='disable']").bootstrapSwitch({
+    function renderSwitch(){
+        this.bootstrapSwitch({
             onText : "发布",
             offText : "下线",
             onColor : "success",
@@ -181,6 +178,9 @@
             }
         });
     }
+    function renderStatus(){
+        renderSwitch.apply( $("[name='disable']"))
+    }
     $(document).ready(function(){
         $table.bootstrapTable({
             url:"/api/routers/",
@@ -189,7 +189,7 @@
             flat:true,
             onSort:function (name, order){
 
-                $table.bootstrapTable('refresh')
+                // $table.bootstrapTable('refresh')
 
             },
             onLoadSuccess: function () {	//在成功加载远程数据时触发
