@@ -2,11 +2,12 @@ package routers
 
 import (
 	"fmt"
+	"net/http"
+
 	apinto_dashboard "github.com/eolinker/apinto-dashboard"
 	"github.com/eolinker/apinto-dashboard/internal/apinto"
 	"github.com/eolinker/apinto-dashboard/modules/professions"
 	"github.com/julienschmidt/httprouter"
-	"net/http"
 )
 
 type Routers struct {
@@ -23,7 +24,10 @@ func (p *Routers) Lookup(r *http.Request) (view string, data interface{}, has bo
 		case "router_edit":
 			routerName := r.URL.Query().Get("name")
 			return name, routerName, true
+		case "router_create":
+			return name, p.ProfessionName, true
 		}
+
 		return name, nil, true
 	}
 
@@ -46,7 +50,7 @@ func NewRouters(name string) *Routers {
 				apinto_dashboard.ZhCn: {"路由名", "驱动", "域名", "端口", "服务", "创建时间", "更新时间"},
 				apinto_dashboard.EnUs: {"Name", "Driver", "Host", "Listen", "Service", "Create", "Update"},
 			},
-			Fields: []string{"name", "driver", "host", "listen", "service", "create", "update"},
+			Fields: []string{"name", "driver", "host", "listen", "target", "create", "update"},
 		},
 	}
 	r.expandRouter()
@@ -61,12 +65,12 @@ func (p *Routers) expandRouter() {
 			apinto.WriteResult(w, 500, []byte(err.Error()))
 			return
 		}
-		data, code, err := apinto.Client().Patch(p.ProfessionName, name, data)
+		rdata, code, err := apinto.Client().Patch(p.ProfessionName, name, data)
 		if err != nil {
 			apinto.WriteResult(w, 500, []byte(err.Error()))
 			return
 		}
-		apinto.WriteResult(w, code, data)
+		apinto.WriteResult(w, code, rdata)
 	})
 
 	// PatchPath

@@ -71,3 +71,8 @@ func (a *admin) Extender(group string, project string, name string) (data []byte
 	url := fmt.Sprintf("%s/extender/%s:%s/%s", a.GetNode(), group, project, name)
 	return a.do(http.MethodGet, url, nil)
 }
+func (a *admin) Skill(profession string, skill string) (data []byte, code int, err error) {
+	url := fmt.Sprintf("%s/profession/%s/skill?skill=%s", a.GetNode(), profession, skill)
+
+	return a.do(http.MethodGet, url, nil)
+}
