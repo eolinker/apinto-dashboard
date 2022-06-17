@@ -290,16 +290,14 @@ let date = {
         let date = new Date(v)
         let year = date.getFullYear()
         let month = date.getMonth()
-        let day = date.getDay()
-        let hour = date.getHours()
-        let minute = date.getMinutes()
+        let day = date.getDate()
         let fn = function (v) {
             if (v < 10) {
                 v = "0" + v
             }
             return v
         }
-        return year + "-" + fn(month) + "-" + fn(day) + " " + fn(hour) + ":" + fn(minute)
+        return year + "-" + fn(month+1) + "-" + fn(day)
     }
 }
 
