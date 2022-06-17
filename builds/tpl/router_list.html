@@ -9,7 +9,7 @@
 </div>
 
 <table id="table">
-    <caption>List of {{.name}}</caption>
+<!--    <caption>List of {{.name}}</caption>-->
     <thead>
     <tr>
         {{- range $i,$t := (index .data.Title .zone)}}
@@ -173,7 +173,7 @@
                     size : "small",
                     onSwitchChange : function(event, disable) {
                         let target = $(this)
-                        dashboard.patch("/api/{{.name}}/"+this.value, {"disable":disable}, function (res) {
+                        dashboard.patch("/api/{{.name}}/"+this.value, {"disable":!disable}, function (res) {
                             if(res.code === 200){
                                 common.message("变更成功", "success")
                                 return
