@@ -604,27 +604,30 @@ class DatetimeRender extends BaseChangeHandler {
             <div class="form-group">
                 <div class="input-group date form_datetime col-md-5" data-date-format="dd MM yyyy - HH:ii p" id="${this.Id}_date">
                     <input class="form-control" size="16" type="text" value="" readonly id="${this.Id}_date_data">
-                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"><svg xmlns="http://www.w3.org/2000/svg" width="30" height="35" fill="currentColor" class="bi bi-calendar2-x" viewBox="0 0 16 16">
+                    <span class="input-group-addon col-md-1"><span class="glyphicon glyphicon-remove"><svg xmlns="http://www.w3.org/2000/svg" width="25" height="35" fill="currentColor" class="bi bi-calendar2-x" viewBox="0 0 16 16">
   <path d="M6.146 8.146a.5.5 0 0 1 .708 0L8 9.293l1.146-1.147a.5.5 0 1 1 .708.708L8.707 10l1.147 1.146a.5.5 0 0 1-.708.708L8 10.707l-1.146 1.147a.5.5 0 0 1-.708-.708L7.293 10 6.146 8.854a.5.5 0 0 1 0-.708z"/>
   <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM2 2a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1H2z"/>
   <path d="M2.5 4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5V4z"/>
 </svg></span></span>
-                    <span class="input-group-addon"><span class="glyphicon glyphicon-th"><svg xmlns="http://www.w3.org/2000/svg" width="30" height="35" fill="currentColor" class="bi bi-calendar-date" viewBox="0 0 16 16">
+                    <span class="input-group-addon col-md-1"><span class="glyphicon glyphicon-th"><svg xmlns="http://www.w3.org/2000/svg" width="25" height="35" fill="currentColor" class="bi bi-calendar-date" viewBox="0 0 16 16">
   <path d="M6.445 11.688V6.354h-.633A12.6 12.6 0 0 0 4.5 7.16v.695c.375-.257.969-.62 1.258-.777h.012v4.61h.675zm1.188-1.305c.047.64.594 1.406 1.703 1.406 1.258 0 2-1.066 2-2.871 0-1.934-.781-2.668-1.953-2.668-.926 0-1.797.672-1.797 1.809 0 1.16.824 1.77 1.676 1.77.746 0 1.23-.376 1.383-.79h.027c-.004 1.316-.461 2.164-1.305 2.164-.664 0-1.008-.45-1.05-.82h-.684zm2.953-2.317c0 .696-.559 1.18-1.184 1.18-.601 0-1.144-.383-1.144-1.2 0-.823.582-1.21 1.168-1.21.633 0 1.16.398 1.16 1.23z"/>
   <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
 </svg></span></span>
                 </div>
             </div>
             `)
+        let now = new Date()
+        let formatDate = date.formatDate(now.getTime())
         $(`#${this.Id}_date`).datetimepicker({
-            format: 'yyyy-mm-dd hh:ii',
-            weekStart: 1,
+            format: 'yyyy-mm-dd',
+            minView:2,
+            weekStart: 0,
             todayBtn:  1,
-            autoclose: 1,
             todayHighlight: 1,
             startView: 2,
             forceParse: 0,
-            showMeridian: 1
+            autoclose:1,
+            startDate:formatDate,
         });
     }
     set Value(v){
@@ -634,15 +637,10 @@ class DatetimeRender extends BaseChangeHandler {
              }
             v = date.formatDate(v)
         }
-        $(`#${this.Id}`).val(v)
+        $(`#${this.Id}_date_data`).val(v)
     }
     get Value() {
-
-        // let v =  this.$DateTool.datetimepicker("viewDate")
-        // if (this.Schema["type"]!=="string"){
-        //     v = v.toDate().getTime()
-        // }
-        let v = $(`#${this.Id}`).val()
+        let v = $(`#${this.Id}_date_data`).val()
         if (this.Schema["type"]!=="string"){
            if (v === ""){
                return 0
