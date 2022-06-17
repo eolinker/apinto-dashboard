@@ -51,7 +51,7 @@ function configTable(uiSort,properties){
                     sortable: false,
                     formatter: function (v) {
                         if (v === 0) {
-                            return "no expired"
+                            return "不过期"
                         }
                         return date.formatDate(v)
                     }
