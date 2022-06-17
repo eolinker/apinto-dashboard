@@ -50,7 +50,7 @@ func NewRouters(name string) *Routers {
 				apinto_dashboard.ZhCn: {"路由名", "驱动", "域名", "端口", "服务", "创建时间", "更新时间"},
 				apinto_dashboard.EnUs: {"Name", "Driver", "Host", "Listen", "Service", "Create", "Update"},
 			},
-			Fields: []string{"name", "driver", "host", "listen", "service", "create", "update"},
+			Fields: []string{"name", "driver", "host", "listen", "target", "create", "update"},
 		},
 	}
 	r.expandRouter()
