@@ -9,11 +9,11 @@
 </div>
 
 <table id="table">
-<!--    <caption>List of {{.name}}</caption>-->
+    <caption>List of {{.name}}</caption>
     <thead>
     <tr>
         {{- range $i,$t := (index .data.Title .zone)}}
-        <th data-field="{{index $.data.Fields $i}}">{{ $t}}</th>
+        <th data-field="{{index $.data.Fields $i}}" data-sortable="true" >{{ $t}}</th>
         {{- end }}
         <th data-field="status" data-align="center" data-formatter="statusSwitch">状态</th>
         <th data-field="operate" data-align="center" data-formatter="operateFormatter" data-events="operateEvents">操作</th>
@@ -59,9 +59,9 @@
     })
     function responseHandler(res) {
         let d = res.data
-        d.forEach((item,index)=>{
-            item["service"] = item["target"]
-        })
+        // d.forEach((item,index)=>{
+        //     item["service"] = item["target"]
+        // })
         return d
     }
     function statusSwitch(value, row, index){
@@ -158,34 +158,42 @@
             })
         }
     }
+    function renderStatus(){
+        $("[name='disable']").bootstrapSwitch({
+            onText : "发布",
+            offText : "下线",
+            onColor : "success",
+            offColor : "warning",
+            size : "small",
+            onSwitchChange : function(event, disable) {
+                let target = $(this)
+                dashboard.patch("/api/{{.name}}/"+this.value, {"disable":disable}, function (res) {
+                    if(res.code === 200){
+                        common.message("变更成功", "success")
+                        return
+                    }
+                    target.bootstrapSwitch("toggleState", true);
+                    return http.handleError(res, "变更失败")
+                }, function (res) {
+                    target.bootstrapSwitch("toggleState", true);
+                    return http.handleError(res, "变更失败")
+                })
+            }
+        });
+    }
     $(document).ready(function(){
         $table.bootstrapTable({
             url:"/api/routers/",
             responseHandler:responseHandler,
             toggle:"table",
             flat:true,
+            onSort:function (name, order){
+
+                $table.bootstrapTable('refresh')
+
+            },
             onLoadSuccess: function () {	//在成功加载远程数据时触发
-                $("[name='disable']").bootstrapSwitch({
-                    onText : "发布",
-                    offText : "下线",
-                    onColor : "success",
-                    offColor : "warning",
-                    size : "small",
-                    onSwitchChange : function(event, disable) {
-                        let target = $(this)
-                        dashboard.patch("/api/{{.name}}/"+this.value, {"disable":!disable}, function (res) {
-                            if(res.code === 200){
-                                common.message("变更成功", "success")
-                                return
-                            }
-                            target.bootstrapSwitch("toggleState", true);
-                            return http.handleError(res, "变更失败")
-                        }, function (res) {
-                            target.bootstrapSwitch("toggleState", true);
-                            return http.handleError(res, "变更失败")
-                        })
-                    }
-                });
+                renderStatus()
             }
         })
     })
