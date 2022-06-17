@@ -542,6 +542,7 @@ class FieldPanel {
         let schema = options["schema"]
         this.Id = readId(options["path"])
         this.$Panel = $(`<div class=""></div>`)
+        this.Enable = true
         panel.append(this.$Panel)
         let valuePanel = $(`<div class=""></div>`)
         this.$Panel.append(`<div class="">${createLabel(name, schema, this.Id, options["required"])}</div>`)
@@ -577,11 +578,12 @@ class FieldPanel {
     }
 
     Show() {
-
+        this.Enable = true
         $(this.$Panel).show()
     }
 
     Hide() {
+        this.Enable = false
         $(this.$Panel).hide()
     }
 
@@ -595,8 +597,10 @@ class FieldPanel {
         // } else {
         //     return {}
         // }
+        if (this.Enable){
             return this.$Value.Value
-
+        }
+        return  undefined
     }
 }
 
