@@ -6,7 +6,17 @@
 
 **Apinto Dashboard**是开源网关**Apinto**的可视化UI项目，极大简化了配置**Apinto**网关的流程操作，降低学习和使用成本。
 
+大家不再需要通过命令行Curl编写复杂的指令，只需要在界面上轻轻一点，就可以完成路由等模块的创建及查看操作，配置信息也会瞬间同步到**Apinto** 开源网关中。
 
+### 编译
+
+1. 进入**build/cmd**文件夹，执行编译脚本
+
+```
+cd build/cmd && ./build.sh {版本号}
+```
+
+2. 编译后的文件即可在
 
 ### 部署
 
@@ -14,7 +24,7 @@
 2. 下载并解压安装包
 
 ```
-wget https://github.com/eolinker/apinto-dashboard/releases/download/v0.5.1/apinto-dashboard-v1.0.0.linux.x64.tar.gz && tar -zxvf apinto-dashboard-v1.0.0.linux.x64.tar.gz && cd apinto-dashboard
+wget https://github.com/eolinker/apinto-dashboard/releases/download/v1.0.0-beta/apinto-dashboard-v1.0.0-beta.linux.x64.tar.gz && tar -zxvf apinto-dashboard-v1.0.0-beta.linux.x64.tar.gz && cd apinto-dashboard
 ```
 
 3. 编辑配置文件config.yml
@@ -86,4 +96,22 @@ nohup ./apinto-dashboard > logs/stdout_apinto-dashboard_"$(date \"+%Y%m%d-%H%M%S
 
 6. 在浏览器中输入账号密码登录即可
 
-至此，部署启用教程已结束，如需了解更多使用教程，请点击[更多](https://help.apinto.com/docs/apinto-dashboard)
+至此，部署启用教程已结束，如需了解更多使用教程，请点击[更多](https://help.apinto.com/docs/apinto-dashboard)（教程文档正在赶工中）
+
+### 联系我们
+
+- **帮助文档**：[https://help.apinto.com](https://help.apinto.com/)
+
+- **QQ群**: 725853895
+- **Slack**：[加入我们](https://join.slack.com/t/slack-zer6755/shared_invite/zt-u7wzqp1u-aNA0XK9Bdb3kOpN03jRmYQ)
+- **官网**：[https://www.apinto.com](https://www.apinto.com/)
+- **论坛**：[https://community.apinto.com](https://community.apinto.com/)
+- **微信群**：[![img](https://user-images.githubusercontent.com/25589530/149860447-5879437b-3cda-4833-aee3-69a2e538e85d.png)](https://user-images.githubusercontent.com/25589530/149860447-5879437b-3cda-4833-aee3-69a2e538e85d.png)
+
+### 关于我们
+
+EOLINK 是领先的 API 管理服务供应商，为全球超过3000家企业提供专业的 API 研发管理、API自动化测试、API监控、API网关等服务。是首家为ITSS（中国电子工业标准化技术协会）制定API研发管理行业规范的企业。
+
+官方网站：[https://www.eolink.com](https://www.eolink.com/)
+
+免费下载PC桌面端：https://www.eolink.com/pc/
