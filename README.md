@@ -13,7 +13,7 @@
 1. 进入**build/cmd**文件夹，执行编译脚本
 
 ```
-cd build/cmd && ./build.sh {版本号}
+cd builds/cmd && ./build.sh {版本号}
 ```
 
 2. 编译后的文件即可在
