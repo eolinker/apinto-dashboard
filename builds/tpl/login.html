@@ -45,10 +45,18 @@
   border-top-left-radius: 0;
   border-top-right-radius: 0;
  }
-
+ main{
+  margin-left: unset;
+  margin: auto;
+ }
 </style>
 
 {{- end}}
+
+{{- block "title" . }}
+<title>Apinto Dashboard</title>
+{{- end -}}
+
 {{- block "left" . -}}
 <!--none-->
 {{- end -}}
@@ -71,7 +79,10 @@
  <p class="mt-5 mb-3 text-muted">&copy; 2022-2023</p>
 </form>
 {{- end -}}
-
 {{- block "script" . -}}
-{{if .data.code eq 1}}{{end}}
+{{if .code}}
+<script>
+ common.message("{{.message}}","danger")
+</script>
+{{end}}
 {{- end -}}

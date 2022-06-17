@@ -63,7 +63,7 @@ let dashboard = {
         http.patch(url, data,  success, error)
     },
     delete:function (url, success, error){
-        http.delete(url, success, error)
+        http.delete(url,"", success, error)
     },
     create: function (url, data, success, error){
         http.post(url, data,  success, error)
@@ -76,6 +76,9 @@ let dashboard = {
     },
     getExtenderInfo: function (id, success, error){
         this.get("/api/extenders/"+id, success, error)
+    },
+    searchSkill:function (module,skill,success,error){
+        this.get(`/skill/${module}?skill=${skill}`, success, error)
     }
 }
 let common = {
@@ -135,11 +138,11 @@ let common = {
         }
         // 创建bootstrap的alert元素
         let divElement = $("<div></div>").addClass('alert').addClass('alert-'+type).addClass('alert-dismissible').addClass('col-md-4').addClass('col-md-offset-4');
-        let scroll = document.body.scrollTop || document.documentElement.scrollTop;
+        // let scroll = document.body.scrollTop || document.documentElement.scrollTop;
         divElement.css({ // 消息框的定位样式
             "position": "fixed",
-            "right":"50px",
-            "top": scroll + 80 +"px"
+            "right":"10px",
+            "top":  "60px"
         });
         divElement.text(msg); // 设置消息框的内容
         // 消息框添加可以关闭按钮
@@ -169,8 +172,8 @@ let common = {
         setTimeout(function() {
             let IntervalMS = 20; // 每次上浮的间隔毫秒
             let floatSpace = 60; // 上浮的空间(px)
-            let scroll = document.body.scrollTop || document.documentElement.scrollTop;
-            let nowTop = divElement.offset().top - scroll; // 获取元素当前的top值
+            // let scroll = document.body.scrollTop || document.documentElement.scrollTop;
+            let nowTop = divElement.offset().top ; // 获取元素当前的top值
             let stopTop = nowTop - floatSpace;    // 上浮停止时的top值
             divElement.fadeOut(IntervalMS * floatSpace); // 设置元素淡出
 
@@ -205,6 +208,7 @@ let common = {
         }, 1500);
     }
 }
+
 let aceEditor = {
     InitEditor: function (id){
         let editor = ace.edit(id);
@@ -223,6 +227,7 @@ let modal = {
         let target = $("#"+id)
         target.removeClass("pop_window").removeClass("pop_window_small").html("")
         target.addClass("pop_window").addClass("pop_window_small").append(`<div class="pop_window_header">
+            <span class="pop_window_title" id="${id}_title"></span>
             <span class="pop_window_title" id="${id}_title"></span>
             <button class="pop_window_button btn btn_default" id="${id}_close" >关闭</button>
             <br>
@@ -280,6 +285,22 @@ let modal = {
     }
 }
 
+let date = {
+    formatDate:function (v){
+        let date = new Date(v)
+        let year = date.getFullYear()
+        let month = date.getMonth()
+        let day = date.getDate()
+        let fn = function (v) {
+            if (v < 10) {
+                v = "0" + v
+            }
+            return v
+        }
+        return year + "-" + fn(month+1) + "-" + fn(day)
+    }
+}
+
 class Ace{
     constructor(id) {
         this.id = id
@@ -294,10 +315,10 @@ class Ace{
         this.editor = editor
     }
     get Value(){
-        return this.editor.getSession().getValue()
+        return JSON.parse(this.editor.getSession().getValue())
     }
     set Value(v){
-        this.editor.getSession().setValue(v)
+        this.editor.getSession().setValue(JSON.stringify(v, null, 2))
     }
 }
 class Table{

@@ -5,7 +5,7 @@
 {{ block "content" .data}}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">路由列表</h1>
-    <button type="button" id="create_btn"  class="btn btn-primary">Create</button>
+    <button type="button" id="create_btn"  class="btn btn-primary">创建</button>
 </div>
 
 <table id="table">
@@ -13,7 +13,7 @@
     <thead>
     <tr>
         {{- range $i,$t := (index .data.Title .zone)}}
-        <th data-field="{{index $.data.Fields $i}}">{{ $t}}</th>
+        <th data-field="{{index $.data.Fields $i}}" data-sortable="true" >{{ $t}}</th>
         {{- end }}
         <th data-field="status" data-align="center" data-formatter="statusSwitch">状态</th>
         <th data-field="operate" data-align="center" data-formatter="operateFormatter" data-events="operateEvents">操作</th>
@@ -50,6 +50,7 @@
 {{- block "script" . -}}
 <script src="/js/bootstrap-table.min.js"></script>
 <script src="/js/bootstrap-switch.min.js"></script>
+<script src="/js/form-render.js"></script>
 <script>
     let $table = $('#table')
     let detail = modal.table("detail_container")
@@ -58,18 +59,55 @@
     })
     function responseHandler(res) {
         let d = res.data
-        d.forEach((item,index)=>{
-            item["service"] = item["target"]
-        })
         return d
     }
-    function statusSwitch(value, row, index){
+    function statusSwitch(value, row, index,field){
+
         if (row["disable"]) {
-            return "<input value=" + row.name + " name='disable' type='checkbox' checked />";
-        } else {
-            return "<input value=" + row.name + " name='disable' type='checkbox' />";
+           return `<input value="${row.name}" name="disable" type="checkbox" checked />`
         }
+        return `<input value="${row.name}" name="disable" type="checkbox" />`
     }
+
+    function detailFormatter(name,data) {
+        let content = ""
+        dashboard.get("/profession/{{.name}}/"+`${data["driver"]}`, function (res) {
+            if (res.code !== 200) {
+                return http.handleError(res, "获取driver信息失败")
+            }
+            let render = res.data["render"]
+            let sort = render["ui:sort"]
+            let properties = render["properties"]
+            if (sort != "undefined" && typeof sort == "object") {
+                content += "<tr><td style='min-width: 100px'>"+"ID"+"</td><td>"+data["id"]+"</td></tr>"
+                content += "<tr><td style='min-width: 100px'>"+"Name"+"</td><td>"+data["name"]+"</td></tr>"
+                content += "<tr><td style='min-width: 100px'>"+"Driver"+"</td><td>"+data["driver"]+"</td></tr>"
+                Object.keys(sort).forEach(function (index) {
+                    let key = sort[index]
+                    let label = getLabel(key,properties[key])
+                    if(data[key] instanceof Object){
+                        content += "<tr><td style='min-width: 100px'>"+label+"</td><td>"+JSON.stringify(data[key])+"</td></tr>"
+                    }else {
+                        content += "<tr><td style='min-width: 100px'>"+label+"</td><td>"+data[key]+"</td></tr>"
+                    }
+                })
+                content += "<tr><td style='min-width: 100px'>"+"更新时间"+"</td><td>"+data["update"]+"</td></tr>"
+                content += "<tr><td style='min-width: 100px'>"+"创建时间"+"</td><td>"+data["create"]+"</td></tr>"
+            } else {
+                Object.keys(data).forEach(function (key) {
+                    if(data[key] instanceof Object){
+                        content += "<tr><td style='min-width: 100px'>"+key+"</td><td>"+JSON.stringify(data[key])+"</td></tr>"
+                    }else {
+                        content += "<tr><td style='min-width: 100px'>"+key+"</td><td>"+data[key]+"</td></tr>"
+                    }
+                })
+            }
+        }, function (res) {
+            return http.handleError(res, "获取driver信息失败")
+        })
+        detail.show(name, content)
+    }
+
     function operateFormatter(value, row, index) {
         return [
             '<a class="edit" href="/{{.name}}/edit?name=',
@@ -91,7 +129,7 @@
             common.confirm("删除{{index .module.I18nName .zone}}", msg, function (){
                 dashboard.delete( "/api/{{.name}}/"+row.name, function (res) {
                     if(res.code === 200){
-                        common.message("删除成功", "danger")
+                        common.message("删除成功", "success")
                         $table.bootstrapTable('remove', {
                             field: 'id',
                             values: [row.id]
@@ -108,15 +146,7 @@
             dashboard.get("/api/{{.name}}/"+row.name, function (res) {
                 if(res.code === 200){
                     let data = res.data
-                    let content = ""
-                    Object.keys(data).forEach(function (key) {
-                        if(data[key] instanceof Object){
-                            content += "<tr><td style='min-width: 100px'>"+key+"</td><td>"+JSON.stringify(data[key])+"</td></tr>"
-                        }else {
-                            content += "<tr><td style='min-width: 100px'>"+key+"</td><td>"+data[key]+"</td></tr>"
-                        }
-                    })
-                    detail.show(row.name, content)
+                    this.detailFormatter(row.name,data)
                     return
                 }
                 return http.handleError(res, "获取详情失败")
@@ -125,34 +155,45 @@
             })
         }
     }
+    function renderSwitch(){
+        this.bootstrapSwitch({
+            onText : "发布",
+            offText : "下线",
+            onColor : "success",
+            offColor : "warning",
+            size : "small",
+            onSwitchChange : function(event, disable) {
+                let target = $(this)
+                dashboard.patch("/api/{{.name}}/"+this.value, {"disable":disable}, function (res) {
+                    if(res.code === 200){
+                        common.message("变更成功", "success")
+                        return
+                    }
+                    target.bootstrapSwitch("toggleState", true);
+                    return http.handleError(res, "变更失败")
+                }, function (res) {
+                    target.bootstrapSwitch("toggleState", true);
+                    return http.handleError(res, "变更失败")
+                })
+            }
+        });
+    }
+    function renderStatus(){
+        renderSwitch.apply( $("[name='disable']"))
+    }
     $(document).ready(function(){
         $table.bootstrapTable({
             url:"/api/routers/",
             responseHandler:responseHandler,
             toggle:"table",
             flat:true,
+            onSort:function (name, order){
+
+                // $table.bootstrapTable('refresh')
+
+            },
             onLoadSuccess: function () {	//在成功加载远程数据时触发
-                $("[name='disable']").bootstrapSwitch({
-                    onText : "发布",
-                    offText : "下线",
-                    onColor : "success",
-                    offColor : "warning",
-                    size : "small",
-                    onSwitchChange : function(event, disable) {
-                        let target = $(this)
-                        dashboard.patch("/api/{{.name}}/"+this.value, {"disable":disable}, function (res) {
-                            if(res.code === 200){
-                                common.message("变更成功", "success")
-                                return
-                            }
-                            target.bootstrapSwitch("toggleState", true);
-                            return http.handleError(res, "变更失败")
-                        }, function (res) {
-                            target.bootstrapSwitch("toggleState", true);
-                            return http.handleError(res, "变更失败")
-                        })
-                    }
-                });
+                renderStatus()
             }
         })
     })

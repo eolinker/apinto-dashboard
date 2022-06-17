@@ -101,6 +101,10 @@ func toModule(c *Config) []*apinto.Module {
 			NotView: true,
 			Handler: m.Handler,
 			Path:    fmt.Sprintf("/profession/%s/", cm.Name),
+		}, &apinto.Module{
+			NotView: true,
+			Handler: m.Handler,
+			Path:    fmt.Sprintf("/skill/%s", cm.Name),
 		})
 	}
 	return r

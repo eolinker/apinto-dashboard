@@ -25,10 +25,10 @@ func NewPlugins(name string) *Plugins {
 		workerName:     "plugin",
 		header: &professions.ListHeader{
 			Title: map[apinto_dashboard.ZoneName][]string{
-				apinto_dashboard.ZhCn: {"名称", "扩展ID", "类型", "状态"},
-				apinto_dashboard.EnUs: {"Name", "ID", "Type", "Status"},
+				apinto_dashboard.ZhCn: {"名称", "扩展ID", "状态"},
+				apinto_dashboard.EnUs: {"Name", "ID", "Status"},
 			},
-			Fields: []string{"name", "id", "type", "status"},
+			Fields: []string{"name", "id", "status"},
 		},
 	}
 	p.createRouter()

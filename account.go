@@ -2,13 +2,14 @@ package apinto_dashboard
 
 import (
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/internal/template"
-	"github.com/eolinker/eosc/log"
-	"github.com/go-basic/uuid"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/eolinker/apinto-dashboard/internal/template"
+	"github.com/eolinker/eosc/log"
+	"github.com/go-basic/uuid"
 )
 
 const (
@@ -49,6 +50,7 @@ func (h *AccountHandler) toLogin(w http.ResponseWriter, request *http.Request, c
 	vs.Set(CallBack, callback)
 	http.Redirect(w, request, fmt.Sprintf("/login?%s", vs.Encode()), http.StatusSeeOther)
 }
+
 func (h *AccountHandler) loginHandler(w http.ResponseWriter, request *http.Request) {
 	switch request.Method {
 	case http.MethodGet:
@@ -166,7 +168,7 @@ func (h *AccountHandler) Post(w http.ResponseWriter, r *http.Request) {
 	//h.serHandler.ServeHTTP(w, setUserDetailsToRequest(r, userDetails))
 }
 func (h *AccountHandler) Api(w http.ResponseWriter, r *http.Request) {
-	log.Debug("request api:", r.RequestURI)
+	log.Debug("request api:", r.Method, " ", r.RequestURI)
 	sessionCookie, err := r.Cookie(SessionName)
 	if err != nil {
 

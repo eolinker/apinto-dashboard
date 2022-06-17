@@ -2,12 +2,14 @@
 <link href="/css/bootstrap-table.min.css"  rel="stylesheet">
 <link href="/css/bootstrap-table-reorder-rows.min.css" rel="stylesheet">
 <link href="/css/bootstrap4-toggle.css" rel="stylesheet">
+<link href="/css/bootstrap-select.min.css" rel="stylesheet">
+
 {{- end -}}
 
 {{ block "content" .}}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">全局插件</h1>
-    <button type="button" id="create_btn"  class="btn btn-primary">Add</button>
+    <button type="button" id="create_btn"  class="btn btn-primary">新增</button>
 </div>
 
 <table id="table">
@@ -24,28 +26,20 @@
             <div class="form-row">
                 <div class="form-group col-md-6">
                     <label for="form_name"><b>Name</b></label>
-                    <input name="name" type="text" disabled class="form-control" id="form_name" value="name" required>
+                    <input static-field name="name" type="text" disabled class="form-control" id="form_name" value="name" required>
                 </div>
                 <div class="form-group col-md-6">
                     <label for="form_id"><b>ID</b></label>
-                    <input name="id" type="text" disabled  class="form-control" id="form_id" value="id" required>
+                    <input static-field name="id" type="text" disabled  class="form-control" id="form_id" value="id" required>
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group col-md-6">
                     <label for="form_status"><b>Status</b></label>
-                    <select name="status" id="form_status" class="form-control" required>
+                    <select static-field name="status" id="form_status" class="form-control" required>
                         <option value="enable">enable</option>
                         <option value="disable">disable</option>
                         <option value="global">global</option>
-                    </select>
-                </div>
-                <div class="form-group col-md-6">
-                    <label for="form_type"><b>Type</b></label>
-                    <select name="type" id="form_type" class="form-control" required>
-                        <option value="router">router</option>
-                        <option value="service">service</option>
-                        <option value="upstream">upstream</option>
                     </select>
                 </div>
             </div>
@@ -121,14 +115,6 @@
                         <option value="global">global</option>
                     </select>
                 </div>
-                <div class="form-group col-md-6">
-                    <label for="form_type"><b>Type</b></label>
-                    <select name="type" id="add_form_type" class="form-control" required>
-                        <option value="router">router</option>
-                        <option value="service">service</option>
-                        <option value="upstream">upstream</option>
-                    </select>
-                </div>
             </div>
             <div class="form-group">
                 <div class="clearfix">
@@ -174,11 +160,15 @@
 <script src="/js/bootstrap-table.min.js"></script>
 <script src="/js/bootstrap4-toggle.js"></script>
 <script src="/js/bootstrap-table-reorder-rows.min.js"></script>
+<script src="/js/bootstrap-select.min.js"></script>
 <script src="/js/ace/ace.js"></script>
 <script src="/js/djv.js"></script>
 <script src="/js/form-render.js"></script>
 <script src="/js/render.js"></script>
 <script>
+    const ModuleName = function () {
+        return "routers"
+    }
 
     /**
      * dom初始化处理
@@ -214,7 +204,7 @@
         columns: getColumns(),
         flat:true,
         responseHandler: responseHandler,
-        reorderTableRows:true,
+        reorderableRows:true,
         useRowAttrFunc: true,
         onReorderRow: reorderRow,
     })
@@ -318,8 +308,8 @@
         if(row["init_config"]){
             init_config = row["init_config"]
         }
-        config_editor.Value = JSON.stringify(config,null,2)
-        init_config_editor.Value = JSON.stringify(init_config, null, 2)
+        config_editor.Value = config
+        init_config_editor.Value = init_config
         getRenderInfo(row["id"], function (driver,render) {
             if (!edit_config_ui){
                 edit_config_ui = new Render(edit_config_ui_id, render,`plugin_edit.${driver}`, config)
@@ -327,15 +317,6 @@
                 edit_config_ui.Reset(render,driver)
                 edit_config_ui.Value = config
             }
-
-            // if (!edit_init_config_ui) {
-            //     edit_init_config_ui = new Render(edit_config_init_ui_id, {
-            //         type:"map",
-            //         items:{
-            //             type: "string"
-            //         }
-            //     },"plugin_edit_init_config", init_config)
-            // }
         })
     }
 
@@ -356,6 +337,28 @@
         }
         $("#detail_container").hide(200)
     })
+    $('a[data-toggle="tab"]').on('show.bs.tab', function (event) {
+        let id = $(event.target).attr("id")
+        console.debug("id")
+        switch (id){
+            case "add_form_config_ui_tab":{
+                add_config_ui.Value = add_config_editor.Value
+                return
+            }
+            case "add_form_config_json_tab":{
+                add_config_editor.Value =add_config_ui.Value
+                return;
+            }
+            case "form_config_ui_tab":{
+                edit_config_ui.Value = config_editor.Value
+                return
+            }
+            case "form_config_json_tab":{
+                config_editor.Value = edit_config_ui.Value
+                return;
+            }
+        }
+    })
     /**
      * 编辑表单提交点击事件
      */
@@ -363,26 +366,17 @@
         let d = {};
         try {
             if ($("#form_config").hasClass("active")){
-                d["config"] = JSON.parse(config_editor.Value)
+                d["config"] = config_editor.Value
             }else {
-                if (edit_config_ui.Check()){
+                let ckr = edit_config_ui.Check()
+                if (ckr === true){
                     d["config"] = edit_config_ui.Value
                 }else {
-                    throw "config format is error"
+                    throw "config format is error:"+ckr
                 }
             }
-            d["init_config"] = JSON.parse(init_config_editor.Value)
+            d["init_config"] = init_config_editor.Value
 
-            // // 渲染init配置表单
-            // if ($("#form_init_config").hasClass("active")){
-            //     d["init_config"] = JSON.parse(init_config_editor.Value)
-            // }else {
-            //     if (edit_init_config_ui.Check()){
-            //         d["init_config"] = edit_init_config_ui.Value
-            //     }else {
-            //         throw "config format is error"
-            //     }
-            // }
         }catch(e) {
             common.message("config format is error", "danger")
             return
@@ -457,24 +451,20 @@
         initPluginsIDList(id)
         $("#add_form_name").val("")
         $("#add_form_name").change()
-        add_config_editor.Value = JSON.stringify({}, null, 2)
-        add_init_config_editor.Value = JSON.stringify({}, null, 2)
-        let pluginID = $("#"+id).val()
+        add_config_editor.Value = {}
+        add_init_config_editor.Value = {}
+        let pluginID = $(`#${id}`).val()
         if (pluginID){
             getRenderInfo(pluginID, function (driver,render) {
                 if (!add_config_ui){
-                    add_config_ui = new Render(add_config_ui_id, render,`plugin_add.${driver}`)
+                    add_config_ui = new Render(add_config_ui_id, render,`plugin_add.${driver}`,add_config_editor)
                 }else {
                     add_config_ui.Reset(render,driver)
+
                 }
-                // if (!add_init_config_ui){
-                //     add_init_config_ui = new Render(add_config_init_ui_id, {
-                //         type:"map",
-                //         items:{
-                //             type: "string"
-                //         }
-                //     },"plugin_add_init_config")
-                // }
+                add_config_editor.Value = add_config_ui.Value
+                add_init_config_editor.Value = {}
+
             })
         }
 
@@ -544,26 +534,17 @@
         let d = {};
         try {
             if ($("#add_form_config").hasClass("active")){
-                d["config"] = JSON.parse(add_config_editor.Value)
+                d["config"] = add_config_editor.Value
             }else {
                 let ckr = add_config_ui.Check();
-                if (ckr !== true){
+                if (ckr === true){
                     d["config"] = add_config_ui.Value
                 }else {
                     throw "config format is error:"+ckr
                 }
             }
-            d["init_config"] = JSON.parse(add_init_config_editor.Value)
-            // // 渲染init配置表单
-            // if ($("#add_form_init_config").hasClass("active")){
-            //     d["init_config"] = JSON.parse(add_init_config_editor.Value)
-            // }else {
-            //     if (add_init_config_ui.Check()){
-            //         d["init_config"] = add_init_config_ui.Value
-            //     }else {
-            //         throw "init config format is error"
-            //     }
-            // }
+            d["init_config"] = add_init_config_editor.Value
+
         }catch(e) {
             common.message("config format is error:"+e, "danger")
             return
@@ -608,7 +589,7 @@
         let value = $(this).val();
         getRenderInfo(value, function (driver,render) {
             add_config_ui.Reset(render,`plugin_add.${driver}`)
-            add_init_config_ui.Reset(render,`plugin_add.${driver}`)
+            add_config_editor.Value = add_config_ui.Value
         })
     });
 
