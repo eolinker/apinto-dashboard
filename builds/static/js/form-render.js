@@ -49,7 +49,13 @@ function configTable(uiSort,properties){
                     title: getLabel(name, item),
                     field: name,
                     sortable: false,
-                    formatter: date.formatDate
+                    formatter: function (v) {
+                        if (v === 0) {
+                            return "no expired"
+                        }
+                        return date.formatDate(v)
+                    }
+
                 })
                 break
             }
