@@ -1,7 +1,7 @@
 zone: zh_cn
 default: upstream
 apinto:
-  - "http://172.18.189.43:9400"
+  - "http://127.0.0.1:9400"
 port: 8081
 filter_forwarded: false
 user_details:
