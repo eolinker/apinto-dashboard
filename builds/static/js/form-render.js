@@ -1656,7 +1656,7 @@ class PopPanelPlugin {
             O.getRenderInfo(O.PluginsExtenders.get(name), function (driver, render) {
                 $Config.empty()
                 O.ConfigTarget = new ObjectRender({
-                    path: 'plugins.${name}',
+                    path: `plugins.${name}`,
                     panel: $Config,
                     schema: render
                 })
