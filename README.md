@@ -92,7 +92,7 @@ nohup ./apinto-dashboard > logs/stdout_apinto-dashboard_"$(date \"+%Y%m%d-%H%M%S
 
 5. 浏览器打开**Apinto Dashboard**地址，本示例在本地部署，因此ip为127.0.0.1，端口为8081
 
-![image-20220616181447371](/Users/liujian/Library/Application Support/typora-user-images/image-20220616181447371.png)
+![image-20220616181447371](https://user-images.githubusercontent.com/14105999/174442723-1fe42ac5-012c-4f60-b1ec-e147d8d8ca9b.png)
 
 6. 在浏览器中输入账号密码登录即可
 
