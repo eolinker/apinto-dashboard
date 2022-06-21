@@ -61,13 +61,13 @@
         let d = res.data
         return d
     }
-    // function statusSwitch(value, row, index,field){
-    //
-    //     if (row["disable"]) {
-    //        return `<input value="${row.name}" name="disable" type="checkbox" checked />`
-    //     }
-    //     return `<input value="${row.name}" name="disable" type="checkbox" />`
-    // }
+    function statusSwitch(value, row, index,field){
+
+        if (row["disable"]) {
+           return `<input value="${row.name}" name="disable" type="checkbox" checked />`
+        }
+        return `<input value="${row.name}" name="disable" type="checkbox" />`
+    }
 
     function detailFormatter(name,data) {
         let content = ""
