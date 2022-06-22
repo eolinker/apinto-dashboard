@@ -2,26 +2,29 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	apinto "github.com/eolinker/apinto-dashboard"
 	"github.com/eolinker/apinto-dashboard/internal/activity-log/sqlite"
 	apintoClient "github.com/eolinker/apinto-dashboard/internal/apinto"
 	"github.com/eolinker/apinto-dashboard/internal/security"
 	activity_log "github.com/eolinker/apinto-dashboard/modules/activity-log"
-	"os"
+
+	"net/http"
+	"strings"
 
 	"github.com/eolinker/apinto-dashboard/modules/extenders"
 	"github.com/eolinker/apinto-dashboard/modules/monitors"
 	"github.com/eolinker/apinto-dashboard/modules/plugins"
 	"github.com/eolinker/apinto-dashboard/modules/routers"
 	"github.com/eolinker/eosc/log"
-	"net/http"
-	"strings"
 )
 
 func init() {
 	apinto.RetTemplate("tpl", "index", "icons")
 }
 func main() {
+	// TODO: 日志设置
 	transport := log.NewTransport(os.Stderr, log.DebugLevel)
 	transport.SetFormatter(&log.LineFormatter{
 		TimestampFormat:  "2006-01-02 15:04:05",
