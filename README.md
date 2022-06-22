@@ -53,13 +53,8 @@ professions:    # 流程阶段，下面配置中的name和profession为dashboard
   - name: services    # dashboard模块：服务
     profession: service # apinto模块：服务
     i18n_name:    # 国际化语言名称
-      zh_cn: 服务    # 中文描述
-      en_us: services    # 英文描述
-  - name: upstreams    # dashboard模块：上游
-    profession: upstream    # apinto模块：上游
-    i18n_name:
-      zh_cn: 上游
-      en_us: upstreams
+      zh_cn: 上游服务   # 中文描述
+      en_us: upstream services  # 英文描述
   - name: discoveries    # dashboard模块：服务发现
     profession: discovery    # apinto模块：服务发现
     i18n_name:
