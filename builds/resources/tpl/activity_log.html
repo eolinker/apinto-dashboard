@@ -1,0 +1,197 @@
+{{- block "header" . -}}
+<link href="/css/bootstrap-table.min.css" rel="stylesheet">
+<link href="/css/gijgo.min.css" rel="stylesheet">
+{{- end -}}
+
+{{ block "content" .}}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">操作日志</h1>
+</div>
+
+<div class="row clearfix">
+    <div class="col-md-3 column" >
+        用户:<input type="text" class="form-control" id="user"/>
+    </div>
+    <div class="col-md-3 column">
+        操作类型:
+        <select type="text" class="form-control" id="operation">
+            <option></option>
+            <option>login</option>
+            <option>logout</option>
+            <option>create</option>
+            <option>update</option>
+            <option>delete</option>
+        </select>
+    </div>
+    <div class="col-md-3 column">
+        操作对象:<input type="text" class="form-control" id="target"/>
+    </div>
+</div>
+
+<div class="row clearfix" style="margin-top: 20px">
+    <div class="col-md-3 column" >
+        开始时间: <input id="startDate"  />
+    </div>
+    <div class="col-md-3 column">
+        结束时间: <input id="endDate"  />
+    </div>
+    <div class="col-md-3 column" style="margin-top: 20px">
+        <button class="btn btn-warning" id="search" type="button">搜索</button>
+        <button class="btn btn-info" id="reset" type="button">重置</button>
+    </div>
+</div>
+
+<table  class="table"
+        id="table"
+        data-toggle="table"
+        data-response-handler="responseHandler"
+        data-pagination="true"
+        data-side-pagination="server"
+        data-total-field="total_num"
+        data-query-params="queryParams"
+        data-data-field="list"
+        data-page-list="[10,25,50,100]"
+        data-url="/api/{{.name}}/"
+        style="margin-top: 40px">
+    <caption>List of {{.name}}</caption>
+
+    <thead>
+    <tr class="table-info">
+        {{- range $i,$t := (index .data.Title .zone)}}
+        <th data-field="{{index $.data.Fields $i}}">{{ $t}}</th>
+        {{- end }}
+        <th data-field="args" data-formatter="operateFormatter" data-align="center" data-events="operateEvents"></th>
+    </tr>
+    </thead>
+</table>
+
+<div id="detail_container">
+</div>
+
+{{end}}
+
+{{- block "script" . -}}
+<script src="/js/jquery-3.0.0.js"></script>
+<script src="/js/gijgo.min.js"></script>
+<script src="/js/messages.zh-cn.min.js"></script>
+
+<script src="/js/bootstrap-table.min.js"></script>
+<script>
+    let $table = $('#table')
+    let detail = modal.table("detail_container")
+    function responseHandler(res) {
+        return res.data
+    }
+    const requestParam={
+
+    }
+
+    function queryParams(params) {
+        requestParam.limit=params.limit
+        requestParam.offset=params.offset
+        return   requestParam
+    }
+
+    function operateFormatter(value, row, index) {
+        return [
+            '<a class="detail btn-warning btn-sm" href="javascript:void(0)" title="details">',
+            '详情',
+            '</a>  ',
+        ].join('')
+
+        let tmpContent=''
+        if( row.args && row.args.length>0){
+            row.args.forEach((item)=>{
+                tmpContent=tmpContent+`${item.key}: ${item.value}<br>`
+            })
+        }
+
+    }
+
+    window.operateEvents = {
+        'click .detail': function (e, value, row, index) {
+            let data = row.args
+            let content = ""
+            if (data && data.length > 0){
+                data.forEach((item)=>{
+                    if(item.value instanceof Object){
+                        content += "<tr><td style='min-width: 100px'>"+item.key+"</td><td>"+JSON.stringify(item.value)+"</td></tr>"
+                    }else{
+                        content += "<tr><td style='min-width: 100px'>"+item.key+"</td><td>"+item.value+"</td></tr>"
+                    }
+                })
+            }
+            detail.show("Details", content)
+        }
+    }
+
+    $('#search').click(function() {
+        requestParam.user = $("#user").val()
+        requestParam.operation = $("#operation").val()
+        requestParam.target = $("#target").val()
+        requestParam.content = $("#content").val()
+
+        var startStr = $("#startDate").val();
+        if (startStr.length > 0){
+            var startArr = startStr.split("-");
+            var startDatum = new Date(Date.UTC(startArr[0],startArr[1]-1,startArr[2],-8));
+            requestParam.startUnix = startDatum.getTime()/1000
+        }
+
+        var endtStr = $("#endDate").val();
+        if (endtStr.length > 0){
+            var endArr = endtStr.split("-");
+            var endDatum = new Date(Date.UTC(endArr[0],endArr[1]-1,endArr[2],-8));
+            requestParam.endUnix = endDatum.getTime()/1000
+        }
+
+        $table.bootstrapTable(
+            "refresh",
+            {
+                pageNumber: 1,
+            }
+        );
+    })
+
+    $('#reset').click(function() {
+        $("#user").val('')
+        $("#operation").val('')
+        $("#target").val('')
+        $("#startDate").val('')
+        $("#endDate").val('')
+
+        requestParam.user = ''
+        requestParam.operation = ''
+        requestParam.target = ''
+        requestParam.startUnix = ''
+        requestParam.endUnix = ''
+
+        $table.bootstrapTable(
+            "refresh",
+            {
+                pageNumber: 1,
+            }
+        );
+    })
+
+    $('#startDate').datepicker({
+        locale: 'zh-cn',
+        format: 'yyyy-mm-dd',
+        uiLibrary: 'bootstrap4',
+        maxDate: function () {
+            return $('#endDate').val();
+        },
+        weekStartDay: 1
+    });
+    $('#endDate').datepicker({
+        locale: 'zh-cn',
+        format: 'yyyy-mm-dd',
+        uiLibrary: 'bootstrap4',
+        minDate: function () {
+            return $('#startDate').val();
+        },
+        weekStartDay: 1
+    });
+
+</script>
+{{- end -}}
