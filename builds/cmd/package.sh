@@ -15,6 +15,6 @@ then
     exit 1
   fi
 fi
-packageApp apinto $VERSION
+packageApp apinto-dashboard $VERSION
 
 cd ${ORGPATH}
