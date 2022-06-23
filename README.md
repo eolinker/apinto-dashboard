@@ -17,7 +17,7 @@
 
 **Apinto Dashboard**与**Apinto**交互流程如下图所示
 
-![Apinto Dashboard与Apinto交互流程图](http://data.eolinker.com/course/fJuUBps1c6317b59fcb35d659957c75b544dcaf27f8e2b7.jpeg)
+![Apinto Dashboard与Apinto交互流程图](https://user-images.githubusercontent.com/14105999/175314303-4df9bfad-2abc-4e4a-9f24-30a8e3b64802.jpg)
 
 ### 编译
 
