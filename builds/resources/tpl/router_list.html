@@ -157,10 +157,11 @@
     }
     function renderSwitch(){
         this.bootstrapSwitch({
-            onText : "发布",
-            offText : "下线",
-            onColor : "success",
-            offColor : "warning",
+            onText : "下线",
+            offText : "发布",
+            onColor : "warning",
+            offColor : "success",
+            inverse: true,
             size : "small",
             onSwitchChange : function(event, disable) {
                 let target = $(this)
@@ -188,9 +189,7 @@
             toggle:"table",
             flat:true,
             onSort:function (name, order){
-
                 // $table.bootstrapTable('refresh')
-
             },
             onLoadSuccess: function () {	//在成功加载远程数据时触发
                 renderStatus()
