@@ -125,12 +125,6 @@ func main() {
 		},
 	})
 
-	config.Statics = map[string]string{
-		"":    "./static",
-		"js":  "./static/js",
-		"umd": "./static/umd",
-		//"css":"./static/css",
-	}
 	service, err := apinto.Create(config)
 
 	if err != nil {
