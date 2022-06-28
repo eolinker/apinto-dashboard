@@ -83,7 +83,6 @@ func readEmbed(path string) (*template.Template, error) {
 	t, err := template.ParseFS(tplFile, ps...)
 
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 
