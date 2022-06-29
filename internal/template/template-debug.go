@@ -4,7 +4,10 @@
 package template
 
 import (
+	"fmt"
 	"html/template"
+	"path/filepath"
+	"strings"
 )
 
 var (
