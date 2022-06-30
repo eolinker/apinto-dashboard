@@ -1,5 +1,5 @@
 zone: zh_cn
-default: upstream
+default: monitor
 apinto:
   - "http://127.0.0.1:9400"
 port: 8081
