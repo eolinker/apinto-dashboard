@@ -87,7 +87,7 @@ func (h *AccountHandler) Post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	password := r.FormValue("password")
-	if userName == "" {
+	if password == "" {
 		template.Execute(w, "login", map[string]interface{}{
 			"code":    2,
 			"message": "password mash input",
