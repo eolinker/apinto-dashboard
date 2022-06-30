@@ -644,8 +644,9 @@ class DatetimeRender extends BaseChangeHandler {
          if (this.Schema["type"]!=="string"){
              if (v===0){
                  v =  ""
+             } else {
+                 v = date.formatDate(v)
              }
-            v = date.formatDate(v)
         }
         $(`#${this.Id}_date_data`).val(v)
     }
