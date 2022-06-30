@@ -12,5 +12,8 @@ OUTPATH="${BasePath}/out/apinto-dashboard-${VERSION}"
 buildApp apinto-dashboard $VERSION
 
 cp -a ${BasePath}/builds/resources/*  ${OUTPATH}/
+cp -a ${BasePath}/builds/static  ${OUTPATH}/
+cp -a ${BasePath}/builds/tpl  ${OUTPATH}/
+
 
 cd ${ORGPATH}
