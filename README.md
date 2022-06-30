@@ -4,7 +4,7 @@
 
 * **Apinto Dashboard**项目**main**分支与**Apinto**项目**main**分支同步更新
 
-* 当前**Apinto Dashboard**最新版本为**v1.0.1-beta**，**Apinto**要求版本不低于**v0.6.1**
+* 当前**Apinto Dashboard**最新版本为**v1.0.3-beta**，**Apinto**要求版本不低于**v0.6.1**
 
 注意：main分支为开发主要分支，频繁更新可能导致使用不稳定，若需要使用稳定版本，请查看[release](https://github.com/eolinker/apinto-dashboard/releases)
 
@@ -17,7 +17,7 @@
 
 **Apinto Dashboard**与**Apinto**交互流程如下图所示
 
-![Apinto Dashboard与Apinto交互流程图](http://data.eolinker.com/course/fJuUBps1c6317b59fcb35d659957c75b544dcaf27f8e2b7.jpeg)
+![Apinto Dashboard与Apinto交互流程图](https://user-images.githubusercontent.com/14105999/175314303-4df9bfad-2abc-4e4a-9f24-30a8e3b64802.jpg)
 
 ### 编译
 
@@ -35,14 +35,14 @@ cd builds/cmd && ./build.sh {版本号}
 2. 下载并解压安装包
 
 ```
-wget https://github.com/eolinker/apinto-dashboard/releases/download/v1.0.2-beta/apinto-dashboard-v1.0.2-beta.linux.x64.tar.gz && tar -zxvf apinto-dashboard-v1.0.2-beta.linux.x64.tar.gz && cd apinto-dashboard
+wget https://github.com/eolinker/apinto-dashboard/releases/download/v1.0.3-beta/apinto-dashboard-v1.0.3-beta.linux.x64.tar.gz && tar -zxvf apinto-dashboard-v1.0.3-beta.linux.x64.tar.gz && cd apinto-dashboard
 ```
 
 3. 编辑配置文件config.yml
 
 ```yaml
 zone: zh_cn # 时区，根据时区获取当地语言的前端渲染页面，可选项：zh_cn｜ja_jp｜ en_us，当前版本仅支持zh_cn
-default: upstream
+default: monitor
 apinto:		# Apinto openAPI地址列表，若有多个节点，可填写多个节点的openAPI地址
   - "http://127.0.0.1:9400"   
 port: 8081    # dashboard监听端口
