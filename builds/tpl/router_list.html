@@ -134,6 +134,7 @@
                             field: 'id',
                             values: [row.id]
                         })
+                        renderStatus()
                         return
                     }
                     return http.handleError(res, "删除失败")
@@ -168,6 +169,7 @@
                 dashboard.patch("/api/{{.name}}/"+this.value, {"disable":disable}, function (res) {
                     if(res.code === 200){
                         common.message("变更成功", "success")
+                        target.bootstrapSwitch("toggleState", true);
                         return
                     }
                     target.bootstrapSwitch("toggleState", true);
@@ -176,7 +178,8 @@
                     target.bootstrapSwitch("toggleState", true);
                     return http.handleError(res, "变更失败")
                 })
-            }
+            },
+
         });
     }
     function renderStatus(){
@@ -189,13 +192,12 @@
             toggle:"table",
             flat:true,
             onSort:function (name, order){
-
-                // $table.bootstrapTable('refresh')
+                $table.bootstrapTable('refresh')
 
             },
             onLoadSuccess: function () {	//在成功加载远程数据时触发
                 renderStatus()
-            }
+            },
         })
     })
 
