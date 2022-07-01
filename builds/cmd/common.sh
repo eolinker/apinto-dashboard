@@ -48,3 +48,12 @@ function packageApp(){
     tar -zcf "${BasePath}/out/${APP}-${VERSION}.linux.x64.tar.gz" --xform 's#^#apinto-dashboard/#'  *
     cd "${BasePath}"
 }
+
+#创建docker镜像
+function dockerBuild(){
+    APP=$1
+    VERSION=$2
+    cd "${BasePath}/out/${APP}-${VERSION}"
+    docker build -t eolinker/${APP}:${VERSION} .
+    cd "${BasePath}"
+}
