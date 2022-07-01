@@ -11,7 +11,9 @@ VERSION=$(genVersion $1)
 OUTPATH="${BasePath}/out/apinto-dashboard-${VERSION}"
 buildApp apinto-dashboard $VERSION
 
-cp -a ${BasePath}/builds/resources/*  ${OUTPATH}/
+cp -a ${BasePath}/builds/account.yml  ${OUTPATH}/
+cp -a ${BasePath}/builds/config.yml  ${OUTPATH}/
+cp -a ${BasePath}/builds/Dockerfile  ${OUTPATH}/
 cp -a ${BasePath}/builds/static  ${OUTPATH}/
 cp -a ${BasePath}/builds/tpl  ${OUTPATH}/
 
