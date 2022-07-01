@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	apinto "github.com/eolinker/apinto-dashboard"
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 	"os"
 	"path/filepath"
 	"time"
@@ -131,7 +131,7 @@ func NewActivityDao(filePath string) (ISqliteHandler, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Create DB Dir Fail: %s ", err.Error())
 	}
-	db, err := sql.Open("sqlite3", filePath)
+	db, err := sql.Open("sqlite", filePath)
 	if err != nil {
 		return nil, err
 	}
