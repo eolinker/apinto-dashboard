@@ -173,7 +173,6 @@
                 dashboard.patch("/api/{{.name}}/"+this.value, {"disable":disable}, function (res) {
                     if(res.code === 200){
                         common.message("变更成功", "success")
-                        target.bootstrapSwitch("toggleState", true);
                         return
                     }
                     target.bootstrapSwitch("toggleState", true);
