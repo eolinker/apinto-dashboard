@@ -1601,7 +1601,12 @@ class PopPanelPlugin {
         o.IsInit = true
         dashboard.get(`/api/plugins`, function (pluginsData) {
             o.IsInit = true
-            o.Plugins = pluginsData.data["plugins"]
+            if (pluginsData.data["plugins"]){
+                o.Plugins =pluginsData.data["plugins"]
+            }else {
+                o.Plugins =[]
+            }
+
             o.PluginsExtenders = new Map(
                 o.Plugins.map(object => {
                     return [object.name, object.id];
