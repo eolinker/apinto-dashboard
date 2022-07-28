@@ -3,7 +3,7 @@ module github.com/eolinker/apinto-dashboard
 go 1.17
 
 require (
-	github.com/eolinker/eosc v0.4.2
+	github.com/eolinker/eosc v0.5.2
 	github.com/go-basic/uuid v1.0.0
 	github.com/julienschmidt/httprouter v1.3.0
 	gopkg.in/yaml.v2 v2.4.0
@@ -30,4 +30,3 @@ require (
 	modernc.org/token v1.0.0 // indirect
 )
 
-replace github.com/eolinker/eosc => ../eosc
