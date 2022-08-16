@@ -13,6 +13,11 @@ professions:
     i18n_name:
       zh_cn: 上游服务
       en_us: upstream services
+  - name: templates
+    profession: template
+    i18n_name:
+      zh_cn: 模版
+      en_us: template
   - name: discoveries
     profession: discovery
     i18n_name:
