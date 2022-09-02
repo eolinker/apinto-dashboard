@@ -23,11 +23,11 @@ professions:
     i18n_name:
       zh_cn: 服务发现
       en_us: discoveries
-  - name: auths
-    profession: auth
+  - name: apps
+    profession: app
     i18n_name:
-      zh_cn: 鉴权
-      en_us: auths
+      zh_cn: 应用
+      en_us: apps
   - name: outputs
     profession: output
     i18n_name:
