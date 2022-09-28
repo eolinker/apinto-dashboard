@@ -13,16 +13,16 @@ professions:
     i18n_name:
       zh_cn: 上游服务
       en_us: upstream services
+  - name: templates
+    profession: template
+    i18n_name:
+      zh_cn: 模版
+      en_us: template
   - name: discoveries
     profession: discovery
     i18n_name:
       zh_cn: 服务发现
       en_us: discoveries
-  - name: auths
-    profession: auth
-    i18n_name:
-      zh_cn: 鉴权
-      en_us: auths
   - name: outputs
     profession: output
     i18n_name:
