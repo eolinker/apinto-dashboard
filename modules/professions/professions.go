@@ -2,10 +2,11 @@ package professions
 
 import (
 	"fmt"
+	"net/http"
+
 	apinto_dashboard "github.com/eolinker/apinto-dashboard"
 	"github.com/eolinker/apinto-dashboard/internal/apinto"
 	"github.com/julienschmidt/httprouter"
-	"net/http"
 )
 
 type ListHeader struct {
@@ -68,6 +69,7 @@ func NewProfession(name string, profession string, titles map[apinto_dashboard.Z
 func (p *Profession) createRouter() {
 	r := httprouter.New()
 	p.Router = r
+
 	r.GET(fmt.Sprintf("/skill/%s", p.ModuleName), func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 		skill := r.URL.Query().Get("skill")
 		if skill == "" {
