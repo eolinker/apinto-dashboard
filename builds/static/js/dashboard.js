@@ -79,7 +79,10 @@ let dashboard = {
     },
     searchSkill:function (module,skill,success,error){
         this.get(`/skill/${module}?skill=${skill}`, success, error)
-    }
+    },
+    additionRender:function (driver,success,error){
+        this.get(`/setting/${driver}`, success, error)
+    },
 }
 let common = {
     /**

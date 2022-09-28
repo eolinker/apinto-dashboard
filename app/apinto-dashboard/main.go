@@ -4,11 +4,14 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/eolinker/apinto-dashboard/modules/apps"
+
 	apinto "github.com/eolinker/apinto-dashboard"
 	"github.com/eolinker/apinto-dashboard/internal/activity-log/sqlite"
 	apintoClient "github.com/eolinker/apinto-dashboard/internal/apinto"
 	"github.com/eolinker/apinto-dashboard/internal/security"
 	activity_log "github.com/eolinker/apinto-dashboard/modules/activity-log"
+	"github.com/eolinker/apinto-dashboard/modules/render"
 
 	"net/http"
 	"strings"
@@ -85,6 +88,25 @@ func main() {
 		Handler: routersModule,
 		Path:    "/skill/routers",
 	})
+	appModule := apps.NewApps("apps")
+	config.Modules = append(config.Modules, &apinto.Module{
+		Path:    "/apps/list",
+		Handler: appModule,
+		Name:    "apps",
+		I18nName: map[apinto.ZoneName]string{
+			apinto.ZhCn: "应用",
+			apinto.EnUs: "Apps",
+		},
+	}, &apinto.Module{
+		Handler: appModule,
+		Path:    "/profession/apps/",
+		NotView: true,
+	}, &apinto.Module{
+		NotView: true,
+		Handler: appModule,
+		Path:    "/skill/apps",
+	})
+
 	ms := toModule(cf)
 	config.Modules = append(config.Modules, ms...)
 
@@ -97,6 +119,13 @@ func main() {
 			apinto.ZhCn: "全局插件",
 			apinto.EnUs: "Global Plugins",
 		},
+	})
+
+	renderModule := render.NewRender()
+	config.Modules = append(config.Modules, &apinto.Module{
+		Handler: renderModule,
+		Path:    "/setting/",
+		NotView: true,
 	})
 
 	activityLogModule, err := activity_log.NewActivityLog("activity-log", activityHandler)
