@@ -200,6 +200,7 @@ func NewAccountHandler(userDetailsService IUserDetailsService, ser http.Handler,
 	srv.HandleFunc("/logout", accountHandler.logoutHandler)
 	srv.HandleFunc("/api/", accountHandler.Api)
 	srv.HandleFunc("/profession/", accountHandler.Api)
+	srv.HandleFunc("/setting/", accountHandler.Api)
 	srv.HandleFunc("/", accountHandler.View)
 	return srv
 }
