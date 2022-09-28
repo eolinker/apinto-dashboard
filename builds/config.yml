@@ -23,11 +23,6 @@ professions:
     i18n_name:
       zh_cn: 服务发现
       en_us: discoveries
-  - name: apps
-    profession: app
-    i18n_name:
-      zh_cn: 应用
-      en_us: apps
   - name: outputs
     profession: output
     i18n_name:
