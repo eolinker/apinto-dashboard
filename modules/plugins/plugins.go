@@ -2,11 +2,12 @@ package plugins
 
 import (
 	"fmt"
+	"net/http"
+
 	apinto_dashboard "github.com/eolinker/apinto-dashboard"
 	"github.com/eolinker/apinto-dashboard/internal/apinto"
 	"github.com/eolinker/apinto-dashboard/modules/professions"
 	"github.com/julienschmidt/httprouter"
-	"net/http"
 )
 
 type Plugins struct {

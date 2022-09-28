@@ -4,7 +4,7 @@
 {{- end -}}
 {{ block "content" .data}}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">路由列表</h1>
+    <h1 class="h2">应用列表</h1>
     <button type="button" id="create_btn"  class="btn btn-primary">创建</button>
 </div>
 
@@ -131,6 +131,7 @@
         'click .remove': function (e, value, row, index) {
             let msg ="确认删除 "+row.name+" {{index .module.I18nName .zone}}?"
             common.confirm("删除{{index .module.I18nName .zone}}", msg, function (){
+
                 dashboard.delete( "/api/{{.name}}/"+row.name, function (res) {
                     if(res.code === 200){
                         common.message("删除成功", "success")
@@ -162,8 +163,8 @@
     }
     function renderSwitch(){
         this.bootstrapSwitch({
-            onText : "下线",
-            offText : "发布",
+            onText : "禁用",
+            offText : "启用",
             onColor : "warning",
             offColor : "success",
             inverse: true,
@@ -190,7 +191,7 @@
     }
     $(document).ready(function(){
         $table.bootstrapTable({
-            url:"/api/routers/",
+            url:"/api/apps/",
             responseHandler:responseHandler,
             toggle:"table",
             flat:true,
