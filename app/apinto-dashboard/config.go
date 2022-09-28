@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
+	"strings"
+
 	apinto "github.com/eolinker/apinto-dashboard"
 	"github.com/eolinker/apinto-dashboard/modules/professions"
 	yaml "gopkg.in/yaml.v2"
-	"io/ioutil"
-	"strings"
 )
 
 type ProfessionConfigItem struct {
@@ -15,6 +16,7 @@ type ProfessionConfigItem struct {
 	Titles     map[string][]string `yaml:"titles"`
 	Fields     []string            `yaml:"fields"`
 	Profession string              `yaml:"profession"`
+	Disable    bool                `yaml:"disable"`
 }
 
 type UserDetailsConfig struct {
@@ -91,7 +93,7 @@ func toModule(c *Config) []*apinto.Module {
 			Handler:  professions.NewProfession(cm.Name, cm.Profession, titles, fields, nil),
 			Name:     cm.Name,
 			I18nName: make(map[apinto.ZoneName]string),
-			NotView:  false,
+			//NotView:  cm.Disable,
 		}
 		for k, v := range cm.I18nNames {
 			m.I18nName[apinto.ZoneName(strings.ToLower(k))] = v
