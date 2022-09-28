@@ -13,7 +13,17 @@ let validate = {
 function formatterKV(v) {
     let html = ""
     for (let k in v) {
-        html += "<span class='px-1 border btn-sm  btn-outline-secondary'>" + k + "=" + v[k] + "</span>\n"
+        let value = ""
+        switch (typeof v[k]){
+            case "object":
+                value = JSON.stringify(v[k])
+                break
+            default:
+                value = v[k]
+                break
+        }
+
+        html += "<span class='px-1 border btn-sm  btn-outline-secondary'>" + k + "=" + value + "</span><br>"
     }
     html += ""
     return html
@@ -753,7 +763,6 @@ class SimpleMapRender extends BaseChangeHandler {
 
 class ObjectArrayRender extends BaseChangeHandler {
     PopPanel(options, callbackFn, v) {
-
         let $Panel = $(`<div class="pop_window pop_window_small p-3" id="detail_container">
     <div class="pop_window_header">
         <span class="pop_window_title">${options["title"]}</span>
@@ -773,6 +782,7 @@ class ObjectArrayRender extends BaseChangeHandler {
         let $Value = readGenerator(options)({
             schema: options["schema"],
             path: options["path"],
+            // render: options["render"],
             panel: $Body,
             generator: readGenerator(options)
         })
@@ -874,6 +884,7 @@ class ObjectArrayRender extends BaseChangeHandler {
                             path: `${options["path"]}.items`,
                             schema: items,
                             name: options["name"],
+                            // render: options["render"],
                             title: `修改 ${getLabel(options["name"], options["schema"])}:${index + 1}`
                         },
                         function (v) {
@@ -886,7 +897,6 @@ class ObjectArrayRender extends BaseChangeHandler {
                 }
             }
         })
-
         let tableOptions = {
             columns: columns,
             width: "100%",
@@ -897,6 +907,7 @@ class ObjectArrayRender extends BaseChangeHandler {
             }
 
         }
+
         $Table.bootstrapTable(tableOptions);
         this.Value = []
     }
@@ -905,11 +916,15 @@ class ObjectArrayRender extends BaseChangeHandler {
         if (!v || typeof v == "undefined") {
             v = []
         }
+        console.log("set data:",v)
+
+
         this.Table.bootstrapTable("load", v)
     }
 
     get Value() {
         let data = this.Table.bootstrapTable('getData')
+        console.log("get data:",data)
         return data
     }
 
@@ -1155,6 +1170,7 @@ class ObjectMapRender extends BaseChangeHandler {
         let $Value = readGenerator(options)({
             schema: options["schema"],
             path: options["path"],
+
             panel: $Body,
             generator: readGenerator(options)
         })
@@ -1486,6 +1502,7 @@ class ObjectRender extends BaseChangeHandler {
                 generator: readGenerator(options),
                 path: subId,
                 required: requiredData[name] === true,
+                // render : options["render"],
                 parent: schema
             })
             this.Fields[name] = field
@@ -1601,7 +1618,12 @@ class PopPanelPlugin {
         o.IsInit = true
         dashboard.get(`/api/plugins`, function (pluginsData) {
             o.IsInit = true
-            o.Plugins = pluginsData.data["plugins"]
+            if (pluginsData.data["plugins"]){
+                o.Plugins =pluginsData.data["plugins"]
+            }else {
+                o.Plugins =[]
+            }
+
             o.PluginsExtenders = new Map(
                 o.Plugins.map(object => {
                     return [object.name, object.id];
@@ -1839,6 +1861,254 @@ class PluginsRender extends BaseChangeHandler {
 
 }
 
+// 弹出额外render窗
+class PopPanelAdditionRender {
+    constructor() {
+
+    }
+
+    show(exclude, callbackFn, data) {
+        if (this.IsInit === true) {
+            this.render(exclude, callbackFn, data)
+            return
+        }
+        let o = this
+        o.IsInit = true
+        dashboard.additionRender(`auth`, function (res) {
+            o.IsInit = true
+            if (res.data){
+                o.Renders = res.data
+            }else {
+                o.Renders =[]
+            }
+
+            o.AdditionalRenders = new Map(
+                o.Renders.map(object => {
+                    return [object.name, object.render];
+                }),
+            );
+            o.render(exclude, callbackFn, data)
+        }, function (err) {
+            o.IsInit = false
+            common.message(err, "danger")
+        })
+    }
+
+    render(exclude, callbackFn, data) {
+
+        let $Panel = $(`
+<div class="pop_window pop_window_small p-3" id="detail_container">
+    <div class="pop_window_header">
+        <span class="pop_window_title">配置信息</span>
+        <button class="pop_window_button btn btn_default close" >关闭</button>
+    </div>
+</div>`)
+
+        let $Fade = $("<div class='modal-backdrop fade show modal-open'></div>")
+        let $Body = $(` <div class="pop_window_body"></div>`)
+        $("body").append($Fade)
+        $("body").append($Panel)
+        $Panel.append($Body)
+
+        let $DriverName = $(`<select class="form-control form-control-sm"  ></select>`)
+
+        $Body.append(
+            $(`<div><div><label class=" col-form-label  text-nowrap" for="FormRender_test_target"><span style="color: red">*</span>选择驱动</label></div></div>`)
+                .append($DriverName)
+        )
+
+        let $Config = $(`<div class="border-top p-1"></div>`)
+        $Body.append(
+            $(`<div><div><label class=" col-form-label  text-nowrap" for="FormRender_test_target"><span style="color: red">*</span>配置</label></div></div>`)
+                .append($Config)
+        )
+        let O = this
+        function renderConfig(name) {
+            let render = O.AdditionalRenders.get(name)
+            if (render) {
+                $Config.empty()
+                O.ConfigTarget = new ObjectRender({
+                    path: `auth.${name}`,
+                    panel: $Config,
+                    schema: render,
+                })
+                if (data) {
+                    O.ConfigTarget.Value = data
+                }
+            }
+        }
+
+        if (data) {
+            $DriverName.prepend(`<option value="${data.type}" selected>${data.type}</option>`)
+            renderConfig(data.type)
+        } else {
+            let set = new Set(exclude)
+            let first = true
+            for (let i in this.Renders) {
+                let p = this.Renders[i]
+                if (!set.has(p.name)) {
+                    $DriverName.append(`<option value="${p.name}" ${first ? "selected" : ""}>${p.name}</option>`)
+                    first = false
+                }
+            }
+            if ($DriverName.children().length > 0) {
+                renderConfig($DriverName.val())
+            }
+
+            $DriverName.on("change", function () {
+                let name = $(this).val()
+                renderConfig(name)
+            })
+
+        }
+        $Panel.append(`<div class="row justify-content-between">
+                <div class="col-4">
+                    <button type="button" class="btn btn-outline-secondary form_cancel">取消</button>
+                </div>
+                <div class="col-4" style="text-align: right">
+                    <button type="button" class="btn btn-primary form_submit">提交</button>
+                </div>
+            </div>`)
+        let close = function () {
+            $Fade.remove()
+            $Panel.remove()
+        }
+        $Panel.show()
+        $Fade.click(function () {
+            close()
+        })
+        $Panel.on("click", "button.close", close)
+        $Panel.on("click", "button.form_cancel", close)
+        $Panel.on("click", "button.form_submit", function () {
+            let v =  O.ConfigTarget.Value
+            v['type'] = $DriverName.val()
+            callbackFn(v)
+            close()
+        })
+    }
+}
+
+// 额外Render
+class AdditionRender extends BaseChangeHandler {
+    constructor(options) {
+        super(options["path"])
+        let panel = options["panel"]
+        let schema = options["schema"]
+        let items = schema["items"]
+        let Id = this.Id
+        this.PopPanel = new PopPanelAdditionRender()
+        let $Table = $(`<table  id="${Id}_items"></table>`)
+        $(panel).append($Table)
+
+        this.Table = $Table
+        let O = this
+
+        let properties = items["properties"]
+        let uiSort = items["ui:sort"]
+
+        let columns = []
+        columns.push({
+            title: "index",
+            field: "__index",
+            sortable: false,
+
+            formatter: function (v, row, index) {
+                return index + 1
+            }
+        })
+
+        columns.push(...configTable(uiSort,properties))
+        columns.push({
+            title: "操作",
+            field: "",
+            sortable: false,
+            editable: false,
+            formatter: function (v, row, index) {
+                return `<a class="edit" href="javascript:void(0)" array-row="${index}" title="edit">配置</a> <a class="remove" href="javascript:void(0)" array-row="${index}" title="remove">删除</a>`
+            },
+            events: {
+                "click .remove": function (e, value, row, index) {
+                    // let rowIndex = $(this).attr("array-row")
+                    $Table.bootstrapTable('remove', {
+                        field: '$index',
+                        values: [index]
+                    })
+                    this.onChange()
+                },
+                "click .edit": function (e, value, row, index) {
+                    O.PopPanel.show(Object.keys(O.Value),
+                        function (v) {
+                            $Table.bootstrapTable("updateRow", {
+                                index: index,
+                                row: v
+                            })
+
+                            O.onChange()
+                            return true
+                        }, row)
+                }
+            }
+        })
+        let tableOptions = {
+            columns: columns,
+            width: "100%",
+            useRowAttrFunc: true,
+            reorderableRows: true,
+            onReorderRow: function (data) {
+                $Table.bootstrapTable("refresh")
+            }
+
+        }
+
+        $Table.bootstrapTable(tableOptions);
+
+
+
+        let $btn = $(`
+<div id="${Id}_toolbar" class="m-1">
+<button id="${Id}_AddButton" type="button" class="btn btn-secondary btn-sm">Add</button>
+</div>`)
+        $(panel).prepend($btn)
+        $btn.on("click", "button", function (event) {
+            O.PopPanel.show(Object.keys(O.Value),
+                function (v) {
+                    $Table.bootstrapTable("append", [v])
+                    $Table.bootstrapTable('scrollTo', 'bottom')
+                    O.onChange()
+                })
+            return false
+        })
+    }
+
+    set Value(vs) {
+        if (!vs || typeof vs == "undefined") {
+            vs = {}
+        }
+        let list = new Array()
+        for (let k in vs) {
+            let v = vs[k]
+            v["name"] = k
+            list.push(v)
+        }
+        list.sort((a, b) => {
+            return a.name - b.name
+        })
+        this.Table.bootstrapTable("load", list)
+    }
+
+    get Value() {
+        let list = this.Table.bootstrapTable('getData')
+        // let vs = {}
+        // for (let i in list) {
+        //
+        //     let v = list[i]
+        //     vs[v["name"]] = v
+        // }
+        return list
+    }
+
+}
+
 function BaseGenerator(options) {
 
     let schema = options["schema"]
@@ -1853,6 +2123,7 @@ function BaseGenerator(options) {
             }
         }
     }
+
     switch (schema["eo:type"]) {
         case "object": {
             return new ObjectRender(options)
@@ -1900,6 +2171,27 @@ function BaseGenerator(options) {
                 }
             }
             return new SimpleMapRender(options)
+        }
+        case "interface": {
+            let typ = schema["type"]
+            switch (typ){
+                case "array":{
+                    let item = schema["items"]
+                    switch (item["type"]) {
+                        case "object": {
+                            return new AdditionRender(options)
+                        }
+                    }
+                }
+            }
+            switch (item["type"]) {
+                case "object": {
+                    if (options["name"] === "plugins") {
+                        return new PluginsRender(options)
+                    }
+                    return new ObjectMapRender(options)
+                }
+            }
         }
         case "boolean": {
             return new SwitchRender(options)

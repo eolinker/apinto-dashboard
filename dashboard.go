@@ -29,7 +29,6 @@ type Config struct {
 	DefaultZone        ZoneName
 	Modules            []*Module
 	UserDetailsService IUserDetailsService
-	Statics            map[string]string
 	DefaultModule      string
 }
 
@@ -78,17 +77,7 @@ func Create(config *Config) (http.Handler, error) {
 
 	staticServe := &http.ServeMux{}
 
-	for path, dir := range config.Statics {
-		path = strings.TrimPrefix(path, "/")
-		path = strings.TrimSuffix(path, "/")
-		if len(path) > 0 {
-			path = fmt.Sprint("/", path, "/")
-			staticServe.Handle(path, http.StripPrefix(path, http.FileServer(http.Dir(dir))))
-		} else {
-			path = "/"
-			staticServe.Handle(path, http.StripPrefix(path, http.FileServer(http.Dir(dir))))
-		}
-	}
+	staticServe.Handle("/", http.FileServer(getStaticFiles()))
 
 	defaultModulePath := mp.moduleMap[defaultModule].Path
 	serve.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
