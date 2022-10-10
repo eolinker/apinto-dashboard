@@ -27,17 +27,19 @@
 cd builds/cmd && ./build.sh {版本号}
 ```
 
-2. 编译后的文件存放在**out/apinto-dashboard-{版本号}**文件夹中
+2. 编译后的文件存放在 **out/apinto-dashboard-{版本号}** 文件夹中
 
 ### 部署
 
 1. 启动**Apinto**开源网关，Apinto启动教程请[点击](https://github.com/eolinker/apinto/#get-start)
+
 2. 下载并解压安装包
 
 ```
 wget https://github.com/eolinker/apinto-dashboard/releases/download/${version}/apinto-dashboard-${version}.linux.x64.tar.gz && tar -zxvf apinto-dashboard-${version}.linux.x64.tar.gz && cd apinto-dashboard
 ```
-上述命令的${version}为apinto dashboard的版本号，需要根据Apinto的版本部署对应的Apinto Dashboard版本
+
+上述命令中的 **${version}** 为 **Apinto dashboard**的版本号，需要根据 **Apinto** 版本部署对应的 **Apinto Dashboard** 版本
 
 下表为Apinto和Apinto Dashboard的版本联系
 
@@ -46,7 +48,9 @@ wget https://github.com/eolinker/apinto-dashboard/releases/download/${version}/a
 | 0.8.x        | v1.1.0-beta          |
 | v0.6.x-0.7.x | v1.0.4-beta          |
 
+
 下列示例命令以Apinto Dashboard v1.1.0-beta版本为例
+
 ```
 wget https://github.com/eolinker/apinto-dashboard/releases/download/v1.1.0-beta/apinto-dashboard-v1.1.0-beta.linux.x64.tar.gz && tar -zxvf apinto-dashboard-v1.1.0-beta.linux.x64.tar.gz && cd apinto-dashboard
 ```
