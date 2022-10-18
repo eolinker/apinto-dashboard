@@ -4,7 +4,7 @@
 
 * **Apinto Dashboard**项目**main**分支与**Apinto**项目**main**分支同步更新
 
-* 当前**Apinto Dashboard**最新版本为**v1.0.4-beta**，**Apinto**要求版本不低于**v0.6.4**
+* 当前**Apinto Dashboard**最新版本为**v1.1.0-beta**，**Apinto**要求版本不低于**v0.6.4**
 
 注意：main分支为开发主要分支，频繁更新可能导致使用不稳定，若需要使用稳定版本，请查看[release](https://github.com/eolinker/apinto-dashboard/releases)
 
