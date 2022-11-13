@@ -17,7 +17,7 @@ VERSION=$(genVersion $1)
 folder="${BasePath}/out/apinto-dashboard-${VERSION}"
 if [[ ! -d "$folder" ]]
 then
-  mkdir "$folder"
+  mkdir -p "$folder"
   ${CMD}/build.sh $1
   if [[ "$?" != "0" ]]
   then
