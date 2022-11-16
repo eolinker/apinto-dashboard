@@ -1,6 +1,6 @@
 {{- block "header" . -}}
-<link href="/css/bootstrap-table.min.css" rel="stylesheet"  rel="stylesheet">
-<link href="/css/bootstrap-switch.min.css" rel="stylesheet"  rel="stylesheet">
+<link href="/css/bootstrap-table.min.css" rel="stylesheet" rel="stylesheet">
+<link href="/css/bootstrap-switch.min.css" rel="stylesheet" rel="stylesheet">
 {{- end -}}
 {{ block "content" .data}}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
@@ -8,7 +8,11 @@
     <button type="button" id="create_btn"  class="btn btn-primary">创建</button>
 </div>
 
-<table id="table">
+<table id="table"
+       data-sort-name="update"
+       data-sort-order="desc"
+>
+
     <caption>List of {{.name}}</caption>
     <thead>
     <tr>
@@ -134,6 +138,7 @@
                             field: 'id',
                             values: [row.id]
                         })
+                        renderStatus()
                         return
                     }
                     return http.handleError(res, "删除失败")
@@ -176,7 +181,8 @@
                     target.bootstrapSwitch("toggleState", true);
                     return http.handleError(res, "变更失败")
                 })
-            }
+            },
+
         });
     }
     function renderStatus(){
@@ -189,13 +195,12 @@
             toggle:"table",
             flat:true,
             onSort:function (name, order){
-
-                // $table.bootstrapTable('refresh')
+                $table.bootstrapTable('refresh')
 
             },
             onLoadSuccess: function () {	//在成功加载远程数据时触发
                 renderStatus()
-            }
+            },
         })
     })
 

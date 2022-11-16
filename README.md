@@ -4,7 +4,7 @@
 
 * **Apinto Dashboard**项目**main**分支与**Apinto**项目**main**分支同步更新
 
-* 当前**Apinto Dashboard**最新版本为**v1.0.3-beta**，**Apinto**要求版本不低于**v0.6.1**
+* 当前**Apinto Dashboard**最新版本为**v1.1.0-beta**，**Apinto**要求版本不低于**v0.6.4**
 
 注意：main分支为开发主要分支，频繁更新可能导致使用不稳定，若需要使用稳定版本，请查看[release](https://github.com/eolinker/apinto-dashboard/releases)
 
@@ -27,16 +27,34 @@
 cd builds/cmd && ./build.sh {版本号}
 ```
 
-2. 编译后的文件即可在
+2. 编译后的文件存放在 **out/apinto-dashboard-{版本号}** 文件夹中
 
 ### 部署
 
 1. 启动**Apinto**开源网关，Apinto启动教程请[点击](https://github.com/eolinker/apinto/#get-start)
+
 2. 下载并解压安装包
 
 ```
-wget https://github.com/eolinker/apinto-dashboard/releases/download/v1.0.3-beta/apinto-dashboard-v1.0.3-beta.linux.x64.tar.gz && tar -zxvf apinto-dashboard-v1.0.3-beta.linux.x64.tar.gz && cd apinto-dashboard
+wget https://github.com/eolinker/apinto-dashboard/releases/download/${version}/apinto-dashboard-${version}.linux.x64.tar.gz && tar -zxvf apinto-dashboard-${version}.linux.x64.tar.gz && cd apinto-dashboard
 ```
+
+上述命令中的 **${version}** 为 **Apinto dashboard**的版本号，需要根据 **Apinto** 版本部署对应的 **Apinto Dashboard** 版本
+
+下表为Apinto和Apinto Dashboard的版本联系
+
+| Apinto版本   | Apinto Dashboard版本 |
+| ------------ | -------------------- |
+| 0.8.x        | v1.1.0-beta          |
+| v0.6.x-0.7.x | v1.0.4-beta          |
+
+
+下列示例命令以Apinto Dashboard v1.1.0-beta版本为例
+
+```
+wget https://github.com/eolinker/apinto-dashboard/releases/download/v1.1.0-beta/apinto-dashboard-v1.1.0-beta.linux.x64.tar.gz && tar -zxvf apinto-dashboard-v1.1.0-beta.linux.x64.tar.gz && cd apinto-dashboard
+```
+
 
 3. 编辑配置文件config.yml
 
@@ -55,16 +73,16 @@ professions:    # 流程阶段，下面配置中的name和profession为dashboard
     i18n_name:    # 国际化语言名称
       zh_cn: 上游服务   # 中文描述
       en_us: upstream services  # 英文描述
+  - name: templates  # dashboard模块：插件模版
+    profession: template # apinto模块：插件模版
+    i18n_name:
+      zh_cn: 模版
+      en_us: template
   - name: discoveries    # dashboard模块：服务发现
     profession: discovery    # apinto模块：服务发现
     i18n_name:
       zh_cn: 服务发现
       en_us: discoveries
-  - name: auths        # dashboard模块：鉴权
-    profession: auth    # apinto模块：鉴权
-    i18n_name:
-      zh_cn: 鉴权
-      en_us: auths
   - name: outputs        # dashboard模块：输出器
     profession: output    # apinto模块：输出器
     i18n_name:
