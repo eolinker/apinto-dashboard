@@ -3,6 +3,9 @@
 FROM alpine:latest
 MAINTAINER eolink
 
+ENV TZ Asia/Shanghai
+RUN apk upgrade && apk add tzdata && cp /usr/share/zoneinfo/${TZ} /etc/localtime && echo ${TZ} > /etc/timezone
+
 #设置环境变量
 ENV DASHBOARD_CONFIG=/apinto-dashboard/config.yml
 
@@ -20,7 +23,10 @@ RUN mkdir /lib64 && ln -s /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2
 #Copy : Dockerfile  account.yml  apinto-dashboard  config.yml static  tpl  version
 COPY ./ /apinto-dashboard
 
+
 WORKDIR /apinto-dashboard
+
+
 
 #容器启动命令
 CMD ./apinto-dashboard
