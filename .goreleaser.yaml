@@ -34,11 +34,11 @@ archives:
     name_template: "{{ .ProjectName }}_{{ .Tag }}_{{ .Os }}_{{ .Arch }}"
     files:
       - src: 'builds/account.yml'
-        dst: /
+        dst: account.yml
       - src: 'builds/config.yml'
-        dst: /
+        dst: config.yml
       - src: 'builds/Dockerfile'
-        dst: /
+        dst: Dockerfile
       - src: 'builds/static/*'
         dst: /static
         strip_parent: true
