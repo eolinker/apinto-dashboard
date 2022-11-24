@@ -45,7 +45,7 @@ wget https://github.com/eolinker/apinto-dashboard/releases/download/${version}/a
 
 | Apinto版本   | Apinto Dashboard版本 |
 | ------------ | -------------------- |
-| 0.8.x        | v1.1.2-beta          |
+| 0.8.x        | v1.1.3-beta          |
 | v0.6.x-0.7.x | v1.0.4-beta          |
 
 
