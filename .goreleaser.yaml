@@ -32,7 +32,6 @@ builds:
       - -X "github.com/eolinker/apinto-dashboard/version.buildTime={{.Date}}"
       - -X "github.com/eolinker/apinto-dashboard/version.buildUser=goreleaser"
       - -X "github.com/eolinker/apinto-dashboard/version.goVersion={{.Env.GOVERSION}}"
-      - -X "github.com/eolinker/apinto-dashboard/version.eoscVersion={{.Env.EoscVersion}}"
 archives:
   - id: default
     format: tar.gz
