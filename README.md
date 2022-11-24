@@ -4,7 +4,7 @@
 
 * **Apinto Dashboard**项目**main**分支与**Apinto**项目**main**分支同步更新
 
-* 当前**Apinto Dashboard**最新版本为**v1.1.2-beta**，**Apinto**要求版本不低于**v0.8.4**
+* 当前**Apinto Dashboard**最新版本为**v1.1.3-beta**，**Apinto**要求版本不低于**v0.8.4**
 
 注意：main分支为开发主要分支，频繁更新可能导致使用不稳定，若需要使用稳定版本，请查看[release](https://github.com/eolinker/apinto-dashboard/releases)
 
@@ -49,10 +49,10 @@ wget https://github.com/eolinker/apinto-dashboard/releases/download/${version}/a
 | v0.6.x-0.7.x | v1.0.4-beta          |
 
 
-下列示例命令以Apinto Dashboard v1.1.2-beta版本为例
+下列示例命令以Apinto Dashboard v1.1.3-beta版本为例
 
 ```
-wget https://github.com/eolinker/apinto-dashboard/releases/download/v1.1.2-beta/apinto-dashboard_v1.1.2-beta_linux_amd64.tar.gz && tar -zxvf apinto-dashboard_v1.1.2-beta_linux_amd64.tar.gz && cd apinto-dashboard
+wget https://github.com/eolinker/apinto-dashboard/releases/download/v1.1.3-beta/apinto-dashboard_v1.1.3-beta_linux_amd64.tar.gz && tar -zxvf apinto-dashboard_v1.1.3-beta_linux_amd64.tar.gz && cd apinto-dashboard
 ```
 
 apinto-dashboard支持在arm64、i386、amd64架构上运行，请根据需要下载对应架构及系统的安装包，安装包下载请[点击](https://github.com/eolinker/apinto-dashboard/releases)跳转
