@@ -11,7 +11,6 @@ var goVersion = "unknown"
 var gitCommit = "unknown"
 var buildTime = "unknown"
 var buildUser = "unknown"
-var eoscVersion = "unknown"
 
 var profileInfo []byte
 
@@ -22,7 +21,6 @@ func init() {
 	fmt.Fprintf(buffer, "Git commit hash: %s\n", gitCommit)
 	fmt.Fprintf(buffer, "Built on: %s\n", buildTime)
 	fmt.Fprintf(buffer, "Built by: %s\n", buildUser)
-	fmt.Fprintf(buffer, "Built by eosc version: %s\n", eoscVersion)
 	profileInfo = buffer.Bytes()
 }
 
