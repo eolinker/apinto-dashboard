@@ -42,9 +42,6 @@ archives:
       - src: 'builds/static/*'
         dst: /static
         strip_parent: true
-      - src: 'builds/tpl/*'
-        dst: /tpl
-        strip_parent: true
 release:
   name_template: "{{ .Tag }}"
   mode: append
