@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/eolinker/apinto-dashboard/app/apinto-dashboard/version"
+
 	"github.com/eolinker/apinto-dashboard/modules/apps"
 
 	apinto "github.com/eolinker/apinto-dashboard"
@@ -160,6 +162,7 @@ func main() {
 		log.Panic(err)
 		return
 	}
+	version.Println()
 	err = http.ListenAndServe(fmt.Sprintf(":%s", cf.Port), service)
 	if err != nil {
 		log.Panic(err)
