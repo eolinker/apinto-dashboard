@@ -27,11 +27,11 @@ builds:
     gobinary: go
     ldflags:
       - -s -w
-      - -X "github.com/eolinker/apinto-dashboard/version.Version={{.Version}}"
-      - -X "github.com/eolinker/apinto-dashboard/version.gitCommit={{.Commit}}"
-      - -X "github.com/eolinker/apinto-dashboard/version.buildTime={{.Date}}"
-      - -X "github.com/eolinker/apinto-dashboard/version.buildUser=goreleaser"
-      - -X "github.com/eolinker/apinto-dashboard/version.goVersion={{.Env.GOVERSION}}"
+      - -X "github.com/eolinker/apinto-dashboard/app/apinto-dashboard/version.Version={{.Version}}"
+      - -X "github.com/eolinker/apinto-dashboard/app/apinto-dashboard/version.gitCommit={{.Commit}}"
+      - -X "github.com/eolinker/apinto-dashboard/app/apinto-dashboard/version.buildTime={{.Date}}"
+      - -X "github.com/eolinker/apinto-dashboard/app/apinto-dashboard/version.buildUser=goreleaser"
+      - -X "github.com/eolinker/apinto-dashboard/app/apinto-dashboard/version.goVersion={{.Env.GOVERSION}}"
 archives:
   - id: default
     format: tar.gz
