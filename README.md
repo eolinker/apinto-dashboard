@@ -4,7 +4,7 @@
 
 * **Apinto Dashboard**项目**main**分支与**Apinto**项目**main**分支同步更新
 
-* 当前**Apinto Dashboard**最新版本为**v1.1.0-beta**，**Apinto**要求版本不低于**v0.6.4**
+* 当前**Apinto Dashboard**最新版本为**v1.1.3-beta**，**Apinto**要求版本不低于**v0.8.4**
 
 注意：main分支为开发主要分支，频繁更新可能导致使用不稳定，若需要使用稳定版本，请查看[release](https://github.com/eolinker/apinto-dashboard/releases)
 
@@ -36,7 +36,7 @@ cd builds/cmd && ./build.sh {版本号}
 2. 下载并解压安装包
 
 ```
-wget https://github.com/eolinker/apinto-dashboard/releases/download/${version}/apinto-dashboard-${version}.linux.x64.tar.gz && tar -zxvf apinto-dashboard-${version}.linux.x64.tar.gz && cd apinto-dashboard
+wget https://github.com/eolinker/apinto-dashboard/releases/download/${version}/apinto-dashboard_${version}_linux_amd64.tar.gz && tar -zxvf apinto-dashboard_${version}_linux_amd64.tar.gz && cd apinto-dashboard
 ```
 
 上述命令中的 **${version}** 为 **Apinto dashboard**的版本号，需要根据 **Apinto** 版本部署对应的 **Apinto Dashboard** 版本
@@ -45,16 +45,17 @@ wget https://github.com/eolinker/apinto-dashboard/releases/download/${version}/a
 
 | Apinto版本   | Apinto Dashboard版本 |
 | ------------ | -------------------- |
-| 0.8.x        | v1.1.0-beta          |
+| 0.8.x        | v1.1.3-beta          |
 | v0.6.x-0.7.x | v1.0.4-beta          |
 
 
-下列示例命令以Apinto Dashboard v1.1.0-beta版本为例
+下列示例命令以Apinto Dashboard v1.1.3-beta版本为例
 
 ```
-wget https://github.com/eolinker/apinto-dashboard/releases/download/v1.1.0-beta/apinto-dashboard-v1.1.0-beta.linux.x64.tar.gz && tar -zxvf apinto-dashboard-v1.1.0-beta.linux.x64.tar.gz && cd apinto-dashboard
+wget https://github.com/eolinker/apinto-dashboard/releases/download/v1.1.3-beta/apinto-dashboard_v1.1.3-beta_linux_amd64.tar.gz && tar -zxvf apinto-dashboard_v1.1.3-beta_linux_amd64.tar.gz && cd apinto-dashboard
 ```
 
+apinto-dashboard支持在arm64、i386、amd64架构上运行，请根据需要下载对应架构及系统的安装包，安装包下载请[点击](https://github.com/eolinker/apinto-dashboard/releases)跳转
 
 3. 编辑配置文件config.yml
 
@@ -120,12 +121,11 @@ nohup ./apinto-dashboard > logs/stdout_apinto-dashboard_"$(date ‘+%Y%m%d-%H%M%
 
 6. 在浏览器中输入账号密码登录即可
 
-至此，部署启用教程已结束，如需了解更多使用教程，请点击[更多](https://help.apinto.com/docs/apinto-dashboard)（教程文档正在赶工中）
+至此，部署启用教程已结束，如需了解更多使用教程，请点击[更多](https://help.apinto.com/docs/apinto-dashboard)
 
 ### 联系我们
 
 - **帮助文档**：[https://help.apinto.com](https://help.apinto.com/)
-
 - **QQ群**: 725853895
 - **Slack**：[加入我们](https://join.slack.com/t/slack-zer6755/shared_invite/zt-u7wzqp1u-aNA0XK9Bdb3kOpN03jRmYQ)
 - **官网**：[https://www.apinto.com](https://www.apinto.com/)
