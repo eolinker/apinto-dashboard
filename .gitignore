@@ -18,3 +18,4 @@
 /out/
 /builds/sqlite.db
 *.DS_Store
+/dist/
