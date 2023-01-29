@@ -199,6 +199,30 @@ function createEnum(schema, id, required, appendAttr) {
     }
 }
 
+function createText(schema, id, required, appendAttr) {
+    let readOnly = ""
+
+    if (schema["readonly"] === true) {
+        readOnly = "readonly"
+    }
+    let idstr = ""
+    if (id && id.length > 0) {
+        idstr = `id="${id}"`
+    }
+    // let input = `<textarea class="form-control" rows="3"  type="text" id="inputDescription"></textarea>`
+    let input = `<textarea ${readOnly} class="form-control form-control-sm" rows="3" ${idstr} aria-describedby="validation_${id}"`;
+    if (appendAttr) {
+        input += appendAttr
+    }
+
+
+    if (required) {
+        input += ' required'
+    }
+    input += '></textarea>'
+    return input
+}
+
 function createInput(schema, id, required, appendAttr) {
     let readOnly = ""
 
@@ -538,6 +562,19 @@ class BaseInputRender extends BaseValue {
         let path = options["path"]
         let panel = options["panel"]
         super(options["schema"], $(createInput(schema, readId(path), options["required"])), path)
+        $(panel).append(this.Target)
+        if (schema["description"] && schema["description"].length > 0) {
+            $(panel).append(`<small id="help:${path}" class="text-muted">${schema["description"]}</small>`)
+        }
+    }
+}
+
+class BaseInputTextRender extends BaseValue {
+    constructor(options) {
+        let schema = options["schema"]
+        let path = options["path"]
+        let panel = options["panel"]
+        super(options["schema"], $(createText(schema, readId(path), options["required"])), path)
         $(panel).append(this.Target)
         if (schema["description"] && schema["description"].length > 0) {
             $(panel).append(`<small id="help:${path}" class="text-muted">${schema["description"]}</small>`)
@@ -2200,9 +2237,14 @@ function BaseGenerator(options) {
         }
         case "number": {
         }
+        case "text":{
+        }
         case "string": {
             if (schema["enum"]) {
                 return new BaseEnumRender(options)
+            }
+            if (schema["format"] === "text") {
+                return new BaseInputTextRender(options)
             }
             return new BaseInputRender(options)
         }
