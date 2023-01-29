@@ -28,3 +28,8 @@ professions:
     i18n_name:
       zh_cn: 输出
       en_us: outputs
+  - name: certificates
+    profession: certificate
+    i18n_name:
+      zh_cn: 证书
+      en_us: certificates
