@@ -121,7 +121,7 @@ nohup ./apinto-dashboard > logs/stdout_apinto-dashboard_"$(date ‘+%Y%m%d-%H%M%
 
 6. 在浏览器中输入账号密码登录即可
 
-至此，部署启用教程已结束，如需了解更多使用教程，请点击[更多](https://help.apinto.com/docs/apinto-dashboard)
+至此，部署启用教程已结束，如需了解更多使用教程，请点击[更多](https://help.apinto.com/docs/dashboard/)
 
 ### 联系我们
 
