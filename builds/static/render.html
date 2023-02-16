@@ -45,13 +45,19 @@
 <body>
 
 <div class="container">
-    <div id="test"></div>
+    <div class="row">
+        <div id="test"></div>
+    </div>
+
     <div class="row">
         <button type="button" id="btnShow" class="btn btn-primary">show</button>
     </div>
-    <div id="json" class="card editor">
+    <div class="row">
+        <div id="json" class="card editor">
 
+        </div>
     </div>
+
 </div>
 <script src="/js/jquery-3.0.0.js"></script>
 <script src="/js/jquery.tablednd.min.js"></script>
@@ -73,6 +79,12 @@
         const demoSchema = {
             "eo:type": "object",
             "properties": {
+                "file":{
+                    "eo:type": "string",
+                    "type":"string",
+                    "label": "文件",
+                    "format":"file",
+                },
                 "disable": {
                     "eo:type": "boolean",
                     "label": "是否启用",
@@ -196,6 +208,7 @@
             ],
             "type": "object",
             "ui:sort": [
+
                 "listen",
                 "method",
                 "host",
@@ -203,7 +216,8 @@
                 "target",
                 "disable",
                 "plugins",
-                "map"
+                "map",
+                 "file"
             ]
         }
         const renderHandler = new FormRender({
