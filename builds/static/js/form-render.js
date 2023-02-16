@@ -242,7 +242,11 @@ function createInput(schema, id, required, appendAttr) {
 
         switch (format) {
 
-            case "email", "password", "date", "time", "number": {
+            case "email":{}
+            case "password":{}
+            case "date":{}
+            case "time":{}
+                case "number": {
                 return format
             }
             case "idn-email": {
@@ -331,7 +335,7 @@ class BaseChangeHandler {
 
         if (fn) {
             if (!this.ChangeHandler) {
-                this.ChangeHandler = new Array()
+                this.ChangeHandler = []
             }
             this.ChangeHandler.push(fn)
         } else {
@@ -579,6 +583,56 @@ class BaseInputTextRender extends BaseValue {
         if (schema["description"] && schema["description"].length > 0) {
             $(panel).append(`<small id="help:${path}" class="text-muted">${schema["description"]}</small>`)
         }
+    }
+}
+class FileRender  {
+    constructor(options) {
+
+        let schema = options["schema"]
+        let path = options["path"]
+        let panel = options["panel"]
+        let id = readId(path)
+
+        let rowPanel = $(`<div class="input-group mb-3">
+  <div class="custom-file">
+    <input type="file" id="${id}" class="custom-file-input" />
+    <label class="custom-file-label" for="inputGroupFile02" aria-describedby="inputGroupFileAddon02">Choose file</label>
+  </div>
+</div>`)
+
+        $(panel).append(rowPanel)
+        this.Id = readId(path)
+        this.Schema = schema
+        this.Target =  $(rowPanel).find(`#${id}`)
+
+
+        if (schema["description"] && schema["description"].length > 0) {
+            $(panel).append(`<small id="help:${path}" class="text-muted">${schema["description"]}</small>`)
+        }
+        const O = this
+        this.Target.on("change",function (){
+
+            if (this.files.length == 0){
+                return
+            }
+            let reader = new FileReader()
+            reader.onload=function (e){
+                O.$Value = this.result
+            }
+            reader.readAsDataURL(this.files[0])
+        })
+    }
+    set Value(v) {
+        this.$Value = v
+    }
+    onChange(fn) {
+        let o = this
+        $(this.Target).on("change", function () {
+            fn.apply(o)
+        })
+    }
+    get Value() {
+        return this.$Value
     }
 }
 
@@ -2243,8 +2297,13 @@ function BaseGenerator(options) {
             if (schema["enum"]) {
                 return new BaseEnumRender(options)
             }
-            if (schema["format"] === "text") {
-                return new BaseInputTextRender(options)
+            switch (schema["format"] ) {
+                case "text":{
+                    return new BaseInputTextRender(options)
+                }
+                case "file":{
+                    return new FileRender(options)
+                }
             }
             return new BaseInputRender(options)
         }
