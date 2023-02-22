@@ -585,54 +585,104 @@ class BaseInputTextRender extends BaseValue {
         }
     }
 }
-class FileRender  {
+class FileRender extends BaseChangeHandler {
     constructor(options) {
-
+        super(options["path"])
         let schema = options["schema"]
         let path = options["path"]
         let panel = options["panel"]
         let id = readId(path)
-
-        let rowPanel = $(`<div class="input-group mb-3">
-  <div class="custom-file">
-    <input type="file" id="${id}" class="custom-file-input" />
-    <label class="custom-file-label" for="inputGroupFile02" aria-describedby="inputGroupFileAddon02">Choose file</label>
-  </div>
-</div>`)
-
-        $(panel).append(rowPanel)
-        this.Id = readId(path)
+        this.Id = id
         this.Schema = schema
-        this.Target =  $(rowPanel).find(`#${id}`)
+        let input = $(`<input type="file" multiple id="${id}" class="custom-file-input" />`)
+
+        $(panel).append(input)
+        const $this = this;
+        this.$Value = [];
 
 
         if (schema["description"] && schema["description"].length > 0) {
             $(panel).append(`<small id="help:${path}" class="text-muted">${schema["description"]}</small>`)
         }
-        const O = this
-        this.Target.on("change",function (){
 
-            if (this.files.length == 0){
-                return
-            }
-            let reader = new FileReader()
-            reader.onload=function (e){
-                O.$Value = this.result
-            }
-            reader.readAsDataURL(this.files[0])
-        })
+
     }
+
+
     set Value(v) {
+        if (typeof v !== "array"){
+            v= []
+        }
         this.$Value = v
-    }
-    onChange(fn) {
-        let o = this
-        $(this.Target).on("change", function () {
-            fn.apply(o)
+        let initialPreview=[],initialPreviewConfig=[]
+        let $this = this
+        this.$Value.forEach((v,i)=>{
+            let item = DecodeFile(v);
+            // console.log(item.DataUrl)
+            initialPreview.push(item.DataUrl)
+            initialPreviewConfig.push({
+                caption: item.name,
+                size:item.size,
+                key:`${item.size}_${item.name}`,
+                filetype:item.type,
+                fieldId: item.index,
+            })
         })
+        $(`#${this.Id}`).fileinput('destroy').fileinput({
+            showUpload:false,
+            uploadUrl: '#',
+            fileActionSettings:{
+                showRotate:false,
+                showUpload:false,
+            },
+            generateFileId:function (file){
+                if(!file){
+                    return null
+                }
+                return file.size +"_" + _getFileName(file)
+            },
+            initialPreviewAsData: true,
+            overwriteInitial: false,
+            initialPreview: initialPreview,
+            initialPreviewConfig: initialPreviewConfig,
+        }).on("filebeforeload", function(event, file, index, reader) {
+            console.log("try add:index="+index)
+            if (!file){
+                return false;
+            }
+            let key = file.size +"_"+file.name
+            for(let v of $this.$Value){
+                if (v.index === key){
+                    return false
+                }
+            }
+            return true
+
+        }).on('fileloaded', function(event, file, previewId, fileId, index, reader) {
+            console.log("add:index="+index+", fileId="+fileId)
+            let f = new FileItem(_getFileName(file),file.size,file.type,reader.result);
+            $this.$Value.push(f)
+            $this.onChange()
+        }).on('filepreremove', function(event, id, index) {
+            console.log("try remove:"+index+", id="+id)
+             for (let i=0;i<$this.$Value.length;i++){
+
+                if ($this.$Value[i].index === index){
+                    console.log("remove:"+index+" at "+i)
+                    $this.$Value.splice(i,1)
+                    break
+                }
+            }
+            $this.onChange()
+        });
     }
+
     get Value() {
-        return this.$Value
+        let vs =[]
+        for (let v of this.$Value){
+            vs.push(v.Value)
+        }
+        return vs
     }
 }
 
@@ -2217,7 +2267,10 @@ function BaseGenerator(options) {
 
     switch (schema["eo:type"]) {
         case "object": {
-            return new ObjectRender(options)
+            return new ObjectRender(options);
+        }
+        case "eofiles":{
+            return new FileRender(options);
         }
         case "array": {
             let items = schema["items"]
@@ -2300,9 +2353,6 @@ function BaseGenerator(options) {
             switch (schema["format"] ) {
                 case "text":{
                     return new BaseInputTextRender(options)
-                }
-                case "file":{
-                    return new FileRender(options)
                 }
             }
             return new BaseInputRender(options)
