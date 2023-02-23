@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link href="/bootstrap-icons-1.10.3/bootstrap-icons.css" rel="stylesheet">
+    <link href="/css/dashboard.css" rel="stylesheet">
+    <link href="/css/fileinput.min.css" media="all" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<div class="container my-4">
+
+    <input type="file" multiple id="inp-add-2" name="inp-add-2" >
+
+</div>
+
+</body>
+<script src="/js/jquery-3.0.0.js"></script>
+<script src="/js/bootstrap.js"></script>
+<script src="/js/dashboard.js"></script>
+<script src="/js/ace/ace.js"></script>
+<script src="/js/pako.min.js"></script>
+<script src="/js/fileinput.min.js"></script>
+<script src="/js/file-render.js"></script>
+
+<script>
+    'use strict';
+    const input = [{"name":"screenshot-20230221-173637.png","size":4570,"type":"image/png","data":"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"}]
+
+
+    $(document).ready(function () {
+        let initialPreview=[],initialPreviewConfig=[]
+
+        input.forEach((v,i)=>{
+            let item = DecodeFile(v);
+            // console.log(item.DataUrl)
+            initialPreview.push(item.DataUrl)
+            initialPreviewConfig.push({
+                caption: item.name,
+                size:item.size,
+                key:`${item.size}_${item.name}`,
+
+                filetype:item.type,
+            })
+        })
+        $('#inp-add-2').fileinput({
+            "showUpload":false,
+            uploadUrl: '#',
+            fileActionSettings:{
+                showRotate:false,
+                showUpload:false,
+            },
+            initialPreviewAsData: true,
+            overwriteInitial: false,
+            initialPreview: initialPreview,
+            initialPreviewConfig: initialPreviewConfig,
+        }).on("filebeforeload", function(event, file, index, reader) {
+            console.log("fileBeforeLoad: index="+index)
+                if (!file){
+                    return false;
+                }
+
+
+        }).on('fileloaded', function(event, file, previewId, fileId, index, reader) {
+            console.log("fileLoaded: index="+index+", fieldId="+fileId)
+            let newfileItem = new FileItem(file.name,file.size,file.type,reader.result);
+            let strValue = JSON.stringify(newfileItem.Value)
+                console.log(strValue)
+        }).on('fileremoved', function(event, id, index) {
+            console.log('fileremoved: id = ' + id + ', index = ' + index);
+        }).on('filepreremove', function(event, id, index) {
+            console.log('filepreremove: id = ' + id + ', index = ' + index);
+        });;
+
+    });
+</script>
+</html>
