@@ -8,7 +8,9 @@
     <link href="/css/bootstrap-table.min.css" rel="stylesheet" rel="stylesheet">
     <link href="/css/bootstrap4-toggle.css" rel="stylesheet">
     <link href="/css/bootstrap-table-reorder-rows.min.css" rel="stylesheet">
-
+    <link href="/bootstrap-icons-1.10.3/bootstrap-icons.css" rel="stylesheet">
+    <link href="/css/dashboard.css" rel="stylesheet">
+    <link href="/css/fileinput.min.css" media="all" rel="stylesheet" type="text/css"/>
     <style>
         .editor {
             width: 100%;
@@ -45,13 +47,19 @@
 <body>
 
 <div class="container">
-    <div id="test"></div>
+    <div class="row">
+        <div id="test"></div>
+    </div>
+
     <div class="row">
         <button type="button" id="btnShow" class="btn btn-primary">show</button>
     </div>
-    <div id="json" class="card editor">
+    <div class="row">
+        <div id="json" class="card editor">
 
+        </div>
     </div>
+
 </div>
 <script src="/js/jquery-3.0.0.js"></script>
 <script src="/js/jquery.tablednd.min.js"></script>
@@ -65,6 +73,9 @@
 <script src="/js/bootstrap4-toggle.min.js"></script>
 <script src="/js/ace/ace.js"></script>
 <script src="/js/djv.js"></script>
+<script src="/js/pako.min.js"></script>
+<script src="/js/fileinput.js"></script>
+<script src="/js/file-render.js"></script>
 <script>
     function ModuleName(){
         return "routers"
@@ -73,6 +84,12 @@
         const demoSchema = {
             "eo:type": "object",
             "properties": {
+                "file":{
+                    "eo:type": "eofile",
+                    "type":"array",
+                    "label": "文件",
+                    "items":{"type":"object"}
+                 },
                 "disable": {
                     "eo:type": "boolean",
                     "label": "是否启用",
@@ -196,6 +213,7 @@
             ],
             "type": "object",
             "ui:sort": [
+
                 "listen",
                 "method",
                 "host",
@@ -203,7 +221,8 @@
                 "target",
                 "disable",
                 "plugins",
-                "map"
+                "map",
+                 "file"
             ]
         }
         const renderHandler = new FormRender({
