@@ -597,8 +597,8 @@ class FileRender extends BaseChangeHandler {
         let input = $(`<input type="file" id="${id}" class="custom-file-input" />`)
 
         $(panel).append(input)
-        const $this = this;
-        this.$Value = [];
+
+        this.$Value = null;
 
         if (schema["description"] && schema["description"].length > 0) {
             $(panel).append(`<small id="help:${path}" class="text-muted">${schema["description"]}</small>`)
@@ -608,14 +608,14 @@ class FileRender extends BaseChangeHandler {
 
 
     set Value(v) {
-        if (typeof v === "array" ){
+        if (Array.isArray(v) ){
             if (v.length >0){
                 v= v[0]
             }else{
                 v = null
             }
         }
-        this.$Value = v
+
         let initialPreview=[],initialPreviewConfig=[]
         let $this = this
         if (v){
@@ -625,19 +625,28 @@ class FileRender extends BaseChangeHandler {
             initialPreviewConfig.push({
                 caption: item.name,
                 size:item.size,
-                key:`${item.size}_${item.name}`,
+                key:1,
                 filetype:item.type,
-                fieldId: item.index,
+                fileId: item.index,
             })
+            this.$Value = item
+        }else{
+            this.$Value = null
         }
 
         $(`#${this.Id}`).fileinput('destroy').fileinput({
             showUpload:false,
             uploadUrl: '#',
+            deleteUrl:"#",
             autoReplace: true,
             overwriteInitial: true,
             showUploadedThumbs: false,
+            initialPreviewAsData: true,
+            initialPreviewFileType:"text",
+            initialPreviewShowDelete:false,
+            showRemove: true,
             maxFileCount: 1,
+            minFileCount: 0,
             fileActionSettings:{
                 showRotate:false,
                 showUpload:false,
@@ -648,7 +657,6 @@ class FileRender extends BaseChangeHandler {
                 }
                 return file.size +"_" + _getFileName(file)
             },
-            initialPreviewAsData: true,
 
             initialPreview: initialPreview,
             initialPreviewConfig: initialPreviewConfig,
@@ -683,7 +691,7 @@ class FileListRender extends BaseChangeHandler {
         let input = $(`<input type="file" multiple id="${id}" class="custom-file-input" />`)
 
         $(panel).append(input)
-        const $this = this;
+
         this.$Value = [];
 
 
@@ -695,32 +703,44 @@ class FileListRender extends BaseChangeHandler {
     }
 
 
-    set Value(v) {
-        if (typeof v !== "array"){
-            v= []
+    set Value(vs) {
+        if (!Array.isArray(vs)){
+            vs= []
         }
-        this.$Value = v
+
         let initialPreview=[],initialPreviewConfig=[]
         let $this = this
-        this.$Value.forEach((v,i)=>{
+
+        const its = []
+        vs.forEach((v,i)=>{
             let item = DecodeFile(v);
+            its.push(item)
             // console.log(item.DataUrl)
             initialPreview.push(item.DataUrl)
             initialPreviewConfig.push({
+                fileindex:item.index,
                 caption: item.name,
                 size:item.size,
-                key:`${item.size}_${item.name}`,
+                filename:item.name,
+                key:i,
                 filetype:item.type,
-                fieldId: item.index,
+                fileId: item.index,
+                type: item.type.split("/")[0],
+
             })
         })
+        this.$Value = its
+        let isInit = true
         $(`#${this.Id}`).fileinput('destroy').fileinput({
             showUpload:false,
             uploadUrl: '#',
             fileActionSettings:{
                 showRotate:false,
                 showUpload:false,
+                showRemove: true,
             },
+            minFileCount: 0,
+            maxFileCount: 0,
             generateFileId:function (file){
                 if(!file){
                     return null
@@ -728,7 +748,9 @@ class FileListRender extends BaseChangeHandler {
                 return file.size +"_" + _getFileName(file)
             },
             initialPreviewAsData: true,
-            overwriteInitial: false,
+            initialPreviewFileType:"text",
+            overwriteInitial: true,
+            initialPreviewShowDelete:false,
             initialPreview: initialPreview,
             initialPreviewConfig: initialPreviewConfig,
         }).on("filebeforeload", function(event, file, index, reader) {
@@ -736,7 +758,7 @@ class FileListRender extends BaseChangeHandler {
             if (!file){
                 return false;
             }
-            let key = file.size +"_"+file.name
+            let key = file.size +"_"+_getFileName(file)
             for(let v of $this.$Value){
                 if (v.index === key){
                     return false
@@ -746,9 +768,15 @@ class FileListRender extends BaseChangeHandler {
 
         }).on('fileloaded', function(event, file, previewId, fileId, index, reader) {
             console.log("add:index="+index+", fileId="+fileId)
+            if (isInit){
+                $this.$Value = []
+                isInit = false
+            }
             let f = new FileItem(_getFileName(file),file.size,file.type,reader.result);
             $this.$Value.push(f)
             $this.onChange()
+        }).on('filepreremove', function(event, id, index) {
+            console.log('id = ' + id + ', index = ' + index);
         }).on('filepreremove', function(event, id, index) {
             console.log("try remove:"+index+", id="+id)
              for (let i=0;i<$this.$Value.length;i++){
@@ -760,9 +788,11 @@ class FileListRender extends BaseChangeHandler {
                 }
             }
             $this.onChange()
+        }).on('filepredelete', function(event, key, jqXHR, data) {
+            console.log('Key = ' + key);
         }).on('fileclear', function(event) {
             $this.$Value = []
-        });;
+        });
     }
 
     get Value() {

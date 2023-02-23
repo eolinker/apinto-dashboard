@@ -6,7 +6,11 @@ class FileItem {
         this.$name = name;
         this.$size = size;
         this.$data = data;
+        if (!type || type === "" ){
+            type = "text/plain"
+        }
         this.$type = type;
+
     }
     get name(){
         return this.$name
