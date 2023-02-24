@@ -5,6 +5,9 @@
     <title>render</title>
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link href="/css/dashboard.css" rel="stylesheet">
+    <link href="/bootstrap-icons-1.10.3/bootstrap-icons.css" rel="stylesheet">
+    <link href="/css/dashboard.css" rel="stylesheet">
+    <link href="/css/fileinput.min.css" media="all" rel="stylesheet" type="text/css"/>
     <style>
         .editor {
             width: 100%;
@@ -42,7 +45,9 @@
 <script src="/js/dashboard.js"></script>
 <script src="/js/render.demo.js"></script>
 <script src="/js/ace/ace.js"></script>
-
+<script src="/js/pako.min.js"></script>
+<script src="/js/fileinput.min.js"></script>
+<script src="/js/file-render.js"></script>
 <script>
     let initDemo = {
         "type": "object",
@@ -84,6 +89,10 @@
                 "items": {
                     "type": "string",
                     "enum": ["GET", "POST", "PATH", "DELETE"]
+                },
+                "files":{
+                  "type":"object",
+                  "eotype": "files"
                 }
             },
             "plugins": {
@@ -134,6 +143,11 @@
                 "type": "string",
                 "format": "text",
                 "minLength": 1,
+            },
+            "file":{
+                "type":"array",
+                "eotype":"files",
+                "items":{"type":"object"}
             }
         },
         "additionalProperties": false,
