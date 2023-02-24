@@ -30,4 +30,3 @@ require (
 	modernc.org/token v1.0.0 // indirect
 )
 
-replace github.com/eolinker/eosc => ../eosc
