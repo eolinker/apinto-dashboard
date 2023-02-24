@@ -242,7 +242,11 @@ function createInput(schema, id, required, appendAttr) {
 
         switch (format) {
 
-            case "email", "password", "date", "time", "number": {
+            case "email":{}
+            case "password":{}
+            case "date":{}
+            case "time":{}
+                case "number": {
                 return format
             }
             case "idn-email": {
@@ -331,7 +335,7 @@ class BaseChangeHandler {
 
         if (fn) {
             if (!this.ChangeHandler) {
-                this.ChangeHandler = new Array()
+                this.ChangeHandler = []
             }
             this.ChangeHandler.push(fn)
         } else {
@@ -579,6 +583,224 @@ class BaseInputTextRender extends BaseValue {
         if (schema["description"] && schema["description"].length > 0) {
             $(panel).append(`<small id="help:${path}" class="text-muted">${schema["description"]}</small>`)
         }
+    }
+}
+class FileRender extends BaseChangeHandler {
+    constructor(options) {
+        super(options["path"])
+        let schema = options["schema"]
+        let path = options["path"]
+        let panel = options["panel"]
+        let id = readId(path)
+        this.Id = id
+        this.Schema = schema
+        let input = $(`<input type="file" id="${id}" class="custom-file-input" />`)
+
+        $(panel).append(input)
+
+        this.$Value = null;
+
+        if (schema["description"] && schema["description"].length > 0) {
+            $(panel).append(`<small id="help:${path}" class="text-muted">${schema["description"]}</small>`)
+        }
+
+    }
+
+
+    set Value(v) {
+        if (Array.isArray(v) ){
+            if (v.length >0){
+                v= v[0]
+            }else{
+                v = null
+            }
+        }
+
+        let initialPreview=[],initialPreviewConfig=[]
+        let $this = this
+        if (v){
+            let item = DecodeFile(v);
+            // console.log(item.DataUrl)
+            initialPreview.push(item.DataUrl)
+            initialPreviewConfig.push({
+                caption: item.name,
+                size:item.size,
+                key:1,
+                filetype:item.type,
+                fileId: item.index,
+            })
+            this.$Value = item
+        }else{
+            this.$Value = null
+        }
+
+        $(`#${this.Id}`).fileinput('destroy').fileinput({
+            showUpload:false,
+            uploadUrl: '#',
+            deleteUrl:"#",
+            autoReplace: true,
+            overwriteInitial: true,
+            showUploadedThumbs: false,
+            initialPreviewAsData: true,
+            initialPreviewFileType:"text",
+            initialPreviewShowDelete:false,
+            showRemove: true,
+            maxFileCount: 1,
+            minFileCount: 0,
+            fileActionSettings:{
+                showRotate:false,
+                showUpload:false,
+            },
+            generateFileId:function (file){
+                if(!file){
+                    return null
+                }
+                return file.size +"_" + _getFileName(file)
+            },
+
+            initialPreview: initialPreview,
+            initialPreviewConfig: initialPreviewConfig,
+        }).on('fileloaded', function(event, file, previewId, fileId, index, reader) {
+            console.log("add:index="+index+", fileId="+fileId)
+            $this.$Value = new FileItem(_getFileName(file), file.size, file.type, reader.result)
+            $this.onChange()
+        }).on('filepreremove', function(event, id, index) {
+            $this.$Value = null
+            $this.onChange()
+        }).on('fileclear', function(event) {
+            $this.$Value = null
+        });
+    }
+
+    get Value() {
+       if (this.$Value){
+           return this.$Value.Value
+       }
+        return null
+    }
+}
+class FileListRender extends BaseChangeHandler {
+    constructor(options) {
+        super(options["path"])
+        let schema = options["schema"]
+        let path = options["path"]
+        let panel = options["panel"]
+        let id = readId(path)
+        this.Id = id
+        this.Schema = schema
+        let input = $(`<input type="file" multiple id="${id}" class="custom-file-input" />`)
+
+        $(panel).append(input)
+
+        this.$Value = [];
+
+
+        if (schema["description"] && schema["description"].length > 0) {
+            $(panel).append(`<small id="help:${path}" class="text-muted">${schema["description"]}</small>`)
+        }
+
+
+    }
+
+
+    set Value(vs) {
+        if (!Array.isArray(vs)){
+            vs= []
+        }
+
+        let initialPreview=[],initialPreviewConfig=[]
+        let $this = this
+
+        const its = []
+        vs.forEach((v,i)=>{
+            let item = DecodeFile(v);
+            its.push(item)
+            // console.log(item.DataUrl)
+            initialPreview.push(item.DataUrl)
+            initialPreviewConfig.push({
+                fileindex:item.index,
+                caption: item.name,
+                size:item.size,
+                filename:item.name,
+                key:i,
+                filetype:item.type,
+                fileId: item.index,
+                type: item.type.split("/")[0],
+
+            })
+        })
+        this.$Value = its
+        let isInit = true
+        $(`#${this.Id}`).fileinput('destroy').fileinput({
+            showUpload:false,
+            uploadUrl: '#',
+            fileActionSettings:{
+                showRotate:false,
+                showUpload:false,
+                showRemove: true,
+            },
+            minFileCount: 0,
+            maxFileCount: 0,
+            generateFileId:function (file){
+                if(!file){
+                    return null
+                }
+                return file.size +"_" + _getFileName(file)
+            },
+            initialPreviewAsData: true,
+            initialPreviewFileType:"text",
+            overwriteInitial: true,
+            initialPreviewShowDelete:false,
+            initialPreview: initialPreview,
+            initialPreviewConfig: initialPreviewConfig,
+        }).on("filebeforeload", function(event, file, index, reader) {
+            console.log("try add:index="+index)
+            if (!file){
+                return false;
+            }
+            let key = file.size +"_"+_getFileName(file)
+            for(let v of $this.$Value){
+                if (v.index === key){
+                    return false
+                }
+            }
+            return true
+
+        }).on('fileloaded', function(event, file, previewId, fileId, index, reader) {
+            console.log("add:index="+index+", fileId="+fileId)
+            if (isInit){
+                $this.$Value = []
+                isInit = false
+            }
+            let f = new FileItem(_getFileName(file),file.size,file.type,reader.result);
+            $this.$Value.push(f)
+            $this.onChange()
+        }).on('filepreremove', function(event, id, index) {
+            console.log('id = ' + id + ', index = ' + index);
+        }).on('filepreremove', function(event, id, index) {
+            console.log("try remove:"+index+", id="+id)
+             for (let i=0;i<$this.$Value.length;i++){
+
+                if ($this.$Value[i].index === index){
+                    console.log("remove:"+index+" at "+i)
+                    $this.$Value.splice(i,1)
+                    break
+                }
+            }
+            $this.onChange()
+        }).on('filepredelete', function(event, key, jqXHR, data) {
+            console.log('Key = ' + key);
+        }).on('fileclear', function(event) {
+            $this.$Value = []
+        });
+    }
+
+    get Value() {
+        let vs =[]
+        for (let v of this.$Value){
+            vs.push(v.Value)
+        }
+        return vs
     }
 }
 
@@ -2163,7 +2385,13 @@ function BaseGenerator(options) {
 
     switch (schema["eo:type"]) {
         case "object": {
-            return new ObjectRender(options)
+            return new ObjectRender(options);
+        }
+        case "eofile":{
+            return new FileRender(options);
+        }
+        case "eofiles":{
+            return new FileListRender(options);
         }
         case "array": {
             let items = schema["items"]
@@ -2243,8 +2471,10 @@ function BaseGenerator(options) {
             if (schema["enum"]) {
                 return new BaseEnumRender(options)
             }
-            if (schema["format"] === "text") {
-                return new BaseInputTextRender(options)
+            switch (schema["format"] ) {
+                case "text":{
+                    return new BaseInputTextRender(options)
+                }
             }
             return new BaseInputRender(options)
         }
