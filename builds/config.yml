@@ -33,3 +33,8 @@ professions:
     i18n_name:
       zh_cn: 证书
       en_us: certificates
+  - name: transcode
+    profession: transcode
+    i18n_name:
+      zh_cn: 编码器
+      en_us: transcode
