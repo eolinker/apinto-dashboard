@@ -692,7 +692,7 @@ class FileListRender extends BaseChangeHandler {
 
         $(panel).append(input)
 
-        this.$Value = [];
+        this.Value = [];
 
 
         if (schema["description"] && schema["description"].length > 0) {
