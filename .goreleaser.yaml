@@ -17,7 +17,7 @@ builds:
     targets:
       - linux_arm64
       - linux_amd64
-      - linux_386
+#      - linux_386
       - darwin_arm64
       - darwin_amd64
     dir: ./app/apinto-dashboard
@@ -32,6 +32,8 @@ builds:
       - -X "github.com/eolinker/apinto-dashboard/app/apinto-dashboard/version.buildTime={{.Date}}"
       - -X "github.com/eolinker/apinto-dashboard/app/apinto-dashboard/version.buildUser=goreleaser"
       - -X "github.com/eolinker/apinto-dashboard/app/apinto-dashboard/version.goVersion={{.Env.GOVERSION}}"
+    env:
+      - CGO_ENABLED=0
 archives:
   - id: default
     format: tar.gz
