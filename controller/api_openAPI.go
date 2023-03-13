@@ -5,6 +5,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/dto"
 	"github.com/eolinker/apinto-dashboard/enum"
+	"github.com/eolinker/apinto-dashboard/modules/api/api-dto"
 	"github.com/eolinker/apinto-dashboard/service"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/gin-gonic/gin"
@@ -169,9 +170,9 @@ func (a *apiOpenAPIController) syncAPI(ginCtx *gin.Context) {
 		return
 	}
 
-	resultList := make([]dto.ImportAPIListItem, 0)
+	resultList := make([]api_dto.ImportAPIListItem, 0)
 	for _, item := range checkList {
-		resultList = append(resultList, dto.ImportAPIListItem{
+		resultList = append(resultList, api_dto.ImportAPIListItem{
 			Name:   item.Name,
 			Method: item.Method,
 			Path:   item.Path,
