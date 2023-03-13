@@ -1,0 +1,94 @@
+<div class="">
+  <div class="list-header pl-btnbase pr-btnrbase py-btnybase">
+    <div class="pb-btnbase">
+      <label class="">选择时间：</label>
+      <eo-ng-radio-group
+        class="date-picker-button-group"
+        [(ngModel)]="timeButton"
+        [nzOptions]="timeButtonOptions"
+        nzStyle="button"
+        nzButtonStyle="solid"
+      ></eo-ng-radio-group>
+      <nz-range-picker
+        class="date-picker-button-group"
+        [nzDisabledDate]="disabledDate"
+        [(ngModel)]="datePickerValue"
+        (nzOnOpenChange)="openDatePicker($event)"
+      ></nz-range-picker>
+    </div>
+
+    <div class="">
+      <label class="">策略名称：</label>
+      <div class="inline-block w-INPUT_NORMAL">
+        <eo-ng-search-input-group
+          [eoSingle]="false"
+          [eoInputVal]="queryData.strategyName"
+          (eoClick)="queryData.strategyName = ''; getHistoryList()"
+        >
+          <input
+            type="text"
+            eo-ng-input
+            placeholder="请输入"
+            [(ngModel)]="queryData.strategyName"
+          />
+        </eo-ng-search-input-group>
+      </div>
+      <button class="ml-btnybase" eo-ng-button (click)="clearSearch()">
+        重置
+      </button>
+      <button
+        class="ant-btn-primary ml-btnybase"
+        eo-ng-button
+        (click)="getHistoryList()"
+      >
+        查询
+      </button>
+    </div>
+  </div>
+  <div class="list-content">
+    <eo-ng-apinto-table
+      [nzTbody]="historyTableBody"
+      [nzThead]="historyTableHead"
+      [nzData]="historyList"
+      [nzNoScroll]="true"
+      [nzShowPagination]="true"
+      [nzFrontPagination]="false"
+      [nzTotal]="queryData.total"
+      [(nzPageIndex)]="queryData.pageNum"
+      [(nzPageSize)]="queryData.pageSize"
+      (nzPageIndexChange)="getHistoryList()"
+      (nzPageSizeChange)="getHistoryList()"
+    >
+    </eo-ng-apinto-table>
+    <ng-template #historyContentTpl let-item="item" let-rowItem="rowItem">
+      <span
+        class="default-tpl-td-span"
+        eoNgFeedbackTooltip
+        [nzTooltipTitle]="generateHtmlTpl"
+        [nzTooltipTitleContext]="{ rowItem: rowItem, item: item }"
+        [nzTooltipVisible]="false"
+        [nzTooltipTrigger]="'hover'"
+        [innerHtml]="item[rowItem.key]"
+      >
+      </span>
+      <ng-template #generateHtmlTpl>
+        <span [innerHtml]="item[rowItem.key]"></span>
+      </ng-template>
+    </ng-template>
+  </div>
+</div>
+<ng-template #historyStatusTpl let-item="item">
+  <ng-container [ngSwitch]="item.status">
+    <span *ngSwitchCase="0"> 未发送</span>
+    <span *ngSwitchCase="1"> 已发送</span>
+    <span
+      *ngSwitchDefault
+      eoNgFeedbackTooltip
+      [nzTooltipTitle]="item.errMsg"
+      [nzTooltipVisible]="false"
+      [nzTooltipTrigger]="'hover'"
+    >
+      {{ item.status === 2 ? '发送失败' : '部分成功' }}</span
+    >
+  </ng-container>
+</ng-template>

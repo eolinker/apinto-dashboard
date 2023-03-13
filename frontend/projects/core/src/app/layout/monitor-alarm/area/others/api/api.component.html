@@ -1,0 +1,7 @@
+<ng-container *ngIf="showTotal; else showDetailTpl">
+  <eo-ng-monitor-alarm-area-api-total> </eo-ng-monitor-alarm-area-api-total>
+</ng-container>
+<ng-template #showDetailTpl>
+  <eo-ng-monitor-alarm-area-others-detail>
+  </eo-ng-monitor-alarm-area-others-detail>
+</ng-template>

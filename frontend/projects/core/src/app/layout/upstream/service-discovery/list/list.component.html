@@ -1,0 +1,50 @@
+<!--
+ * @Author: MengjieYang yangmengjie@eolink.com
+ * @Date: 2022-08-11 21:57:39
+ * @LastEditors: MengjieYang yangmengjie@eolink.com
+ * @LastEditTime: 2022-08-14 23:34:42
+ * @FilePath: /apinto/src/app/layout/upstream/service-discovery-list/service-discovery-list.component.html
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+-->
+<div class="">
+  <div
+    class="list-header pl-btnbase pr-btnrbase py-btnybase flex flex-nowrap items-center justify-between"
+  >
+    <button
+      eo-ng-button
+      class="ant-btn-primary"
+      eoNgUserAccess="upstream/serv-discovery"
+      (disabledEdit)="disabledEdit($event)"
+      (click)="addService()"
+    >
+      新建服务
+    </button>
+
+    <eo-ng-search-input-group
+      class="inline-block"
+      [eoInputVal]="serviceNameForSear"
+      (eoClick)="serviceNameForSear = ''; getServicesList()"
+    >
+      <input
+        class="search"
+        type="text"
+        eo-ng-input
+        placeholder="搜索服务名称"
+        [(ngModel)]="serviceNameForSear"
+        (keyup.enter)="getServicesList()"
+      />
+    </eo-ng-search-input-group>
+  </div>
+
+  <div class="list-content">
+    <eo-ng-apinto-table
+      class=""
+      [nzTbody]="servicesTableBody"
+      [nzThead]="servicesTableHeadName"
+      [nzData]="servicesList"
+      [nzTrClick]="serviceTableClick"
+      [nzMaxOperatorButton]="2"
+    >
+    </eo-ng-apinto-table>
+  </div>
+</div>

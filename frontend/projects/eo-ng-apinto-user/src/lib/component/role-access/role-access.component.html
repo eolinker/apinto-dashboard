@@ -1,0 +1,22 @@
+<div style="width: 100%">
+  <eo-ng-apinto-table
+    class="drawer-table"
+    [nzTbody]="accessTbody"
+    [nzThead]="accessThead"
+    [(nzData)]="listOfAccess"
+    [nzNoScroll]="true"
+    nzTableLayout="fixed"
+  >
+  </eo-ng-apinto-table>
+</div>
+<ng-template #operatorTpl let-item="item">
+  <ng-container *ngFor="let acc of item.access">
+    <label
+      eo-ng-checkbox
+      [(ngModel)]="acc.checked"
+      [disabled]="disabled"
+      (ngModelChange)="changeAccessSet(acc)"
+      >{{ acc.title }}</label
+    >
+  </ng-container>
+</ng-template>

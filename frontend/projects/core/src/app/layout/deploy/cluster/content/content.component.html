@@ -1,0 +1,93 @@
+<!--
+ * @Author: MengjieYang yangmengjie@eolink.com
+ * @Date: 2022-07-28 22:12:29
+ * @LastEditors: MengjieYang yangmengjie@eolink.com
+ * @LastEditTime: 2022-07-29 02:55:07
+ * @FilePath: /apinto/src/app/layout/deploy/deploy-cluster-content/deploy-cluster-content.component.html
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+-->
+<div class="">
+  <div
+    class="cluster-desc-block bg-bar-theme pl-btnbase pr-btnrbase py-btnybase"
+  >
+    <section>
+      <span class="cluster-desc-title">{{ clusterName }}:</span>
+      <div
+        style="overflow: 'hidden'"
+        [ngStyle]="{ 'min-width': disabled ? 'unset' : '400px' }"
+      >
+        <span
+          class="cluster-desc-content"
+          [ngStyle]="{
+            visibility: disabled ? 'unset' : 'hidden',
+            height: disabled ? '32px' : '0px'
+          }"
+        >
+          <span
+            eoNgFeedbackTooltip
+            [nzTooltipTitle]="_clusterDesc"
+            nzTooltipPlacement="bottom"
+            [nzTooltipVisible]="false"
+            nzTooltipTrigger="hover"
+            class="cluster-desc-text"
+            >{{ clusterDesc }}</span
+          >
+          <button
+            eo-ng-button
+            nzType="text"
+            eoNgUserAccess="deploy/cluster"
+            *ngIf="disabled"
+            (click)="disabled = false"
+          >
+            <svg class="iconpark-icon"><use href="#edit"></use></svg>
+          </button>
+        </span>
+        <section>
+          <input
+            class="cluster-desc-content"
+            *ngIf="!disabled"
+            eo-ng-input
+            [(ngModel)]="_clusterDesc"
+            (keyup.enter)="save()"
+          />
+          <button
+            eo-ng-button
+            nzType="text"
+            eoNgUserAccess="deploy/cluster"
+            *ngIf="!disabled"
+            (click)="save()"
+          >
+            <svg class="iconpark-icon"><use href="#check"></use></svg>
+          </button>
+          <button
+            eo-ng-button
+            nzType="text"
+            *ngIf="!disabled"
+            (click)="_clusterDesc = clusterDesc; disabled = true"
+          >
+            <svg class="iconpark-icon"><use href="#close"></use></svg>
+          </button>
+        </section>
+      </div>
+    </section>
+  </div>
+
+  <eo-ng-tabs [nzLinkRouter]="true" [nzOptions]="tabOptions"></eo-ng-tabs>
+  <ng-template #tab1>
+    <span>环境变量</span>
+  </ng-template>
+
+  <ng-template #tab2>
+    <span>证书管理</span>
+  </ng-template>
+
+  <ng-template #tab3>
+    <span>网关节点</span>
+  </ng-template>
+
+  <ng-template #tab4>
+    <span>配置管理</span>
+  </ng-template>
+
+  <router-outlet></router-outlet>
+</div>

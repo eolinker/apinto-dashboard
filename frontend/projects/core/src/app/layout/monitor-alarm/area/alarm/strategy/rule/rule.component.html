@@ -1,0 +1,50 @@
+<!--
+ * @Author: MengjieYang yangmengjie@eolink.com
+ * @Date: 2023-01-17 22:16:45
+ * @LastEditors: MengjieYang yangmengjie@eolink.com
+ * @LastEditTime: 2023-01-17 23:36:06
+ * @FilePath: /apinto/projects/core/src/app/layout/monitor-alarm/area/alarm/strategy/rule/rule.component.html
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+-->
+<ng-container
+  *ngFor="
+    let condition of rulesList;
+    index as i;
+    let isLast = last;
+    let isFirst = first
+  "
+>
+  <eo-ng-monitor-conditional-query
+    [quota]="quota"
+    [deleteFirst]="!isFirst"
+    [(rulesData)]="condition.condition"
+    (rulesDataChange)="checkRuleEmpty($event, i)"
+  ></eo-ng-monitor-conditional-query>
+
+  <div class="mt-[12px]">
+    <eo-ng-select
+      class="mr-[8px] w-INPUT_NORMAL"
+      [ngClass]="{ 'ml-[30px]': condition.condition.length > 1 }"
+      [nzShowCheckAll]="true"
+      nzMode="multiple"
+      nzPlaceHolder="请选择通知渠道"
+      [(ngModel)]="condition.channelUuids"
+      [ngModelOptions]="{ standalone: true }"
+      [nzOptions]="listOfChannels"
+      (ngModelChange)="rulesListChange.emit(rulesList)"
+    ></eo-ng-select
+    ><a *ngIf="!isFirst" (click)="deleteQueryGroup(i)">删除条件组</a>
+  </div>
+  <nz-divider *ngIf="!isLast" [nzDashed]="true"></nz-divider>
+</ng-container>
+<button
+  eo-ng-button
+  class="mt-btnbase w-INPUT_NORMAL"
+  [ngStyle]="{
+    'margin-left':
+      rulesList[rulesList.length - 1].condition.length > 1 ? '30px' : '0px'
+  }"
+  (click)="addQueryGroup()"
+>
+  + 新增条件组
+</button>

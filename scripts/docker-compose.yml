@@ -1,0 +1,152 @@
+version: '3'
+services:
+  mysql:
+    image: docker.eolinker.com/docker/apinto-mysql:5.7.21
+    privileged: true
+    restart: always
+    container_name: apinto_mysql
+    hostname: apinto_mysql
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_DATABASES=apinto;user_center #自动创建数据库
+#    volumes:
+#      - /usr/local/app/mysql/data:/var/lib/mysql
+    networks:
+      - apinto
+  apinto-dashboard:
+    image: docker.eolinker.com/docker/apinto-dashboard:1.9.3
+    container_name: apserver
+    privileged: true
+    restart: always
+    networks:
+      - apinto
+    ports:
+      - "8081:8080"
+    depends_on:
+      - usercenter
+      - mysql
+    environment:
+      - MYSQL_USER_NAME=root
+      - MYSQL_PWD=123456
+      - MYSQL_IP=apinto_mysql
+      - MYSQL_PORT=3306                 #mysql端口
+      - MYSQL_DB="apinto"
+      - USER_CENTER_URL=usercenter:19007
+      - ERROR_DIR=../work/logs                # 日志放置目录
+      - ERROR_FILE_NAME=error.log          # 错误日志文件名
+      - ERROR_LOG_LEVEL=info               # 错误日志等级,可选:panic,fatal,error,warning,info,debug,trace 不填或者非法则为info
+      - ERROR_EXPIRE=7d                    # 错误日志过期时间，默认单位为天，d|天，h|小时, 不合法配置默认为7d
+      - ERROR_PERIOD=day                  # 错误日志切割周期，仅支持day、hour
+      - REDIS_ADDR=192.168.72.128:7004;192.168.72.128:7001;192.168.72.128:7002;192.168.72.128:7003 #Redis集群地址 多个用;隔开
+      - REDIS_USER_NAME=""                   # Redis用户名
+      - REDIS_PWD=redispwd                         # Redis密码
+      #volumes:
+      # - /usr/local/apinto-dashboard:/apinto-dashboard/work   #挂载log到主机目录
+  redis_single:
+    container_name: user_center_redis
+    image: docker.eolinker.com/docker/redis:6.2.7
+    command: --requirepass "123456"
+    privileged: true
+    hostname: user_center_redis
+    restart: always
+#    volumes:
+#      - /usr/local/app/apinto-dashboard/redis/single/data:/data
+    networks:
+      - apinto
+    ports:
+      - "6379:6379"
+  usercenter:
+    container_name: usercenter
+    image: docker.eolinker.com/docker/user-center:1.0.0.2
+    privileged: true
+    restart: always
+    hostname: usercenter
+    networks:
+      - apinto
+    ports:
+      - "19007:19007"
+    depends_on:
+      - mysql
+      - redis_single
+    environment:
+      - MYSQL_USER=root
+      - MYSQL_PWD=123456
+      - MYSQL_HOST=apinto_mysql
+      - MYSQL_PORT=3306
+      - MYSQL_DBNAME=user_center
+      - REDIS_HOST=user_center_redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=123456
+      - REDIS_DB=0
+#    volumes:
+#     - /usr/local/app/apinto-dashboard/user_center/log:/opt/eo-usercenter/work/log   #挂载log到主机目录
+  redis_cluster1:
+    container_name: redis_node1
+    image: docker.eolinker.com/docker/redis:6.2.7
+#    command: redis-server /usr/local/etc/redis/redis.conf
+    command: --cluster-enabled yes --appendonly yes --port 7001 --requirepass redispwd
+    hostname: redis_node1
+    privileged: true
+    restart: always
+#    volumes:
+#      - /usr/local/app/apinto-dashboard/cluster_redis/node1/data:/data
+    network_mode: host
+  redis_cluster2:
+    container_name: redis_node2
+    image: docker.eolinker.com/docker/redis:6.2.7
+    command: --cluster-enabled yes --appendonly yes --port 7002 --requirepass redispwd
+    hostname: redis_node2
+    privileged: true
+    restart: always
+#    volumes:
+#      - /usr/local/app/apinto-dashboard/cluster_redis/node2/data:/data
+    network_mode: host
+  redis_cluster3:
+    container_name: redis_node3
+    image: docker.eolinker.com/docker/redis:6.2.7
+    command: --cluster-enabled yes --appendonly yes --port 7003 --requirepass redispwd
+    hostname: redis_node3
+    privileged: true
+    restart: always
+#    volumes:
+#      - /usr/local/app/apinto-dashboard/cluster_redis/node3/redis.conf:/usr/local/etc/redis/redis.conf
+    network_mode: host
+  redis_cluster4:
+    container_name: redis_node4
+    image: docker.eolinker.com/docker/redis:6.2.7
+    command: --cluster-enabled yes --appendonly yes --port 7004 --requirepass redispwd
+    privileged: true
+    restart: always
+    hostname: redis_node4
+#    volumes:
+#      - /usr/local/app/apinto-dashboard/cluster_redis/node4/redis.conf:/usr/local/etc/redis/redis.conf
+    network_mode: host
+  redis_cluster5:
+    container_name: redis_node5
+    image: docker.eolinker.com/docker/redis:6.2.7
+    command: --cluster-enabled yes --appendonly yes --port 7005 --requirepass redispwd
+    privileged: true
+    hostname: redis_node5
+    restart: always
+#    volumes:
+#      - /usr/local/app/apinto-dashboard/cluster_redis/node5/redis.conf:/usr/local/etc/redis/redis.conf
+    network_mode: host
+  redis_cluster6:
+    container_name: redis_node6
+    image: docker.eolinker.com/docker/redis:6.2.7
+    command: --cluster-enabled yes --appendonly yes --port 7006 --requirepass redispwd
+    privileged: true
+    restart: always
+    hostname: redis_node6
+#    volumes:
+#      - /usr/local/app/apinto-dashboard/cluster_redis/node6/redis.conf:/usr/local/etc/redis/redis.conf
+    network_mode: host
+networks:
+  apinto:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.100.0.0/24
