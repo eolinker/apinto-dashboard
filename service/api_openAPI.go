@@ -209,10 +209,10 @@ func (a *apiOpenAPIService) SyncImport(ctx context.Context, namespaceID, appID i
 				return err
 			}
 			//添加版本信息
-			apiVersionInfo := &entry.APIVersion{
+			apiVersionInfo := &api_entry.APIVersion{
 				ApiID:       apiInfo.Id,
 				NamespaceID: namespaceID,
-				APIVersionConfig: entry.APIVersionConfig{
+				APIVersionConfig: api_entry.APIVersionConfig{
 					Driver:           "http", //默认
 					RequestPath:      apiInfo.RequestPath,
 					RequestPathLabel: apiInfo.RequestPathLabel,
@@ -223,8 +223,8 @@ func (a *apiOpenAPIService) SyncImport(ctx context.Context, namespaceID, appID i
 					Timeout:          10000,
 					Retry:            0,
 					EnableWebsocket:  false,
-					Match:            []*entry.MatchConf{},
-					Header:           []*entry.ProxyHeader{},
+					Match:            []*api_entry.MatchConf{},
+					Header:           []*api_entry.ProxyHeader{},
 				},
 				Operator:   0, //匿名
 				CreateTime: t,

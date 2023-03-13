@@ -5,9 +5,9 @@ import (
 	"fmt"
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/common"
-	"github.com/eolinker/apinto-dashboard/dto"
-	"github.com/eolinker/apinto-dashboard/entry"
 	"github.com/eolinker/apinto-dashboard/enum"
+	"github.com/eolinker/apinto-dashboard/modules/api/api-dto"
+	api_entry "github.com/eolinker/apinto-dashboard/modules/api/api-entry"
 	"net/textproto"
 	"strings"
 )
@@ -18,7 +18,7 @@ type apiHTTP struct {
 
 const apintoRestfulRegexp = "([0-9a-zA-Z-_]+)"
 
-func (a *apiHTTP) CheckInput(input *dto.APIInfo) error {
+func (a *apiHTTP) CheckInput(input *api_dto.APIInfo) error {
 	input.UUID = strings.TrimSpace(input.UUID)
 	if input.UUID != "" {
 		err := common.IsMatchString(common.UUIDExp, input.UUID)
@@ -36,11 +36,11 @@ func (a *apiHTTP) CheckInput(input *dto.APIInfo) error {
 	}
 
 	if input.Match == nil {
-		input.Match = []*entry.MatchConf{}
+		input.Match = []*api_entry.MatchConf{}
 	}
 
 	if input.Header == nil {
-		input.Header = []*entry.ProxyHeader{}
+		input.Header = []*api_entry.ProxyHeader{}
 	}
 
 	for _, m := range input.Method {
@@ -151,7 +151,7 @@ func (a *apiHTTP) CheckInput(input *dto.APIInfo) error {
 	return nil
 }
 
-func (a *apiHTTP) ToApinto(name, desc string, disable bool, method []string, requestPath, requestPathLabel, proxyPath, serviceName string, timeout, retry int, enableWebsocket bool, match []*entry.MatchConf, header []*entry.ProxyHeader) *v1.RouterConfig {
+func (a *apiHTTP) ToApinto(name, desc string, disable bool, method []string, requestPath, requestPathLabel, proxyPath, serviceName string, timeout, retry int, enableWebsocket bool, match []*api_entry.MatchConf, header []*api_entry.ProxyHeader) *v1.RouterConfig {
 
 	rewriteHeaders := make(map[string]string)
 	for _, ph := range header {

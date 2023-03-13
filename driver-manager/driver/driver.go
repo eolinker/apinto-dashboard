@@ -3,8 +3,8 @@ package driver
 import (
 	"errors"
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
-	"github.com/eolinker/apinto-dashboard/dto"
 	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/modules/api/api-dto"
 	apimodel "github.com/eolinker/apinto-dashboard/modules/api/model"
 )
 
@@ -54,8 +54,8 @@ type IAuthDriver interface {
 }
 
 type IAPIDriver interface {
-	CheckInput(input *dto.APIInfo) error
-	ToApinto(name, desc string, disable bool, method []string, requestPath, requestPathLabel, proxyPath, serviceName string, timeout, retry int, enableWebsocket bool, match []*entry.MatchConf, header []*entry.ProxyHeader) *v1.RouterConfig
+	CheckInput(input *api_dto.APIInfo) error
+	ToApinto(name, desc string, disable bool, method []string, requestPath, requestPathLabel, proxyPath, serviceName string, timeout, retry int, enableWebsocket bool, match []*api_entry.MatchConf, header []*api_entry.ProxyHeader) *v1.RouterConfig
 }
 
 // IAPISyncFormatDriver 同步api所需的文件格式驱动
