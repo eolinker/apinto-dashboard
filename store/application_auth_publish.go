@@ -13,11 +13,11 @@ type IApplicationAuthPublishStore interface {
 }
 
 type applicationAuthPublishStore struct {
-	*baseStore[entry.ApplicationAuthPublish]
+	*BaseStore[entry.ApplicationAuthPublish]
 }
 
 func newApplicationAuthPublishStore(db IDB) IApplicationAuthPublishStore {
-	return &applicationAuthPublishStore{baseStore: createStore[entry.ApplicationAuthPublish](db)}
+	return &applicationAuthPublishStore{BaseStore: CreateStore[entry.ApplicationAuthPublish](db)}
 }
 
 // Reset 外部保证事务

@@ -5,7 +5,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/entry"
 	"github.com/eolinker/apinto-dashboard/enum"
-	"github.com/eolinker/apinto-dashboard/model"
+	apimodel "github.com/eolinker/apinto-dashboard/modules/api/model"
 	"github.com/go-basic/uuid"
 	"net/url"
 	"strings"
@@ -16,7 +16,7 @@ type OpenAPI2 struct {
 	format string
 }
 
-func (o *OpenAPI2) FormatAPI(data []byte, namespaceID, appID int, groupID, prefix, label string) ([]*model.APIInfo, error) {
+func (o *OpenAPI2) FormatAPI(data []byte, namespaceID, appID int, groupID, prefix, label string) ([]*apimodel.APIInfo, error) {
 	openAPI2Config := new(OpenAPI2Config)
 	reader := bytes.NewReader(data)
 	if err := common.DecodeYAML(reader, openAPI2Config); err != nil {
@@ -32,7 +32,7 @@ func (o *OpenAPI2) FormatAPI(data []byte, namespaceID, appID int, groupID, prefi
 		prefix = "/" + strings.Trim(prefix, "/")
 	}
 
-	apiList := make([]*model.APIInfo, 0)
+	apiList := make([]*apimodel.APIInfo, 0)
 	t := time.Now()
 	for path, pathMap := range openAPI2Config.Paths {
 		//对路径进行转义
@@ -48,7 +48,7 @@ func (o *OpenAPI2) FormatAPI(data []byte, namespaceID, appID int, groupID, prefi
 			if name == "" {
 				name = method + "-" + prefix + decodedPath
 			}
-			apiList = append(apiList, &model.APIInfo{
+			apiList = append(apiList, &apimodel.APIInfo{
 				API: &entry.API{
 					NamespaceId:      namespaceID,
 					UUID:             uuid.New(),

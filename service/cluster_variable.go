@@ -30,7 +30,7 @@ type IClusterVariableService interface {
 	Publish(ctx context.Context, namespaceId, userId int, clusterName, versionName, desc, source string) error
 	GetSyncConf(ctx context.Context, namespaceId int, clusterName string) (*model.ClustersVariables, error)
 	PublishHistory(ctx context.Context, namespaceId, pageNum, pageSize int, clusterName string) ([]*model.VariablePublish, int, error)
-	getPublishVersion(ctx context.Context, clusterId int) (*model.VariablePublishVersion, error)
+	GetPublishVersion(ctx context.Context, clusterId int) (*model.VariablePublishVersion, error)
 	IResetOnlineService
 }
 
@@ -93,7 +93,7 @@ func (c *clusterVariableService) GetList(ctx context.Context, namespaceID int, c
 	})
 
 	//获取该集群当前版本的已发布环境变量
-	variablePublishVersionEntry, err := c.getPublishVersion(ctx, cluster.Id)
+	variablePublishVersionEntry, err := c.GetPublishVersion(ctx, cluster.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -190,10 +190,10 @@ func (c *clusterVariableService) Create(ctx context.Context, namespaceID int, cl
 		return err
 	}
 
-	if err = c.lockService.lock(lockNameVariable, cluster.Id); err != nil {
+	if err = c.lockService.Lock(LockNameVariable, cluster.Id); err != nil {
 		return err
 	}
-	defer c.lockService.unlock(lockNameVariable, cluster.Id)
+	defer c.lockService.Unlock(LockNameVariable, cluster.Id)
 
 	//验证新增的集群环境变量和当前工作空间的环境变量没有冲突
 	globalVariable, err := c.globalVariableStore.GetGlobalVariableIDByKey(ctx, namespaceID, key)
@@ -264,10 +264,10 @@ func (c *clusterVariableService) Update(ctx context.Context, namespaceID int, cl
 		return errors.New("globalVariable key is not exist. ")
 	}
 
-	if err = c.lockService.lock(lockNameVariable, cluster.Id); err != nil {
+	if err = c.lockService.Lock(LockNameVariable, cluster.Id); err != nil {
 		return err
 	}
-	defer c.lockService.unlock(lockNameVariable, cluster.Id)
+	defer c.lockService.Unlock(LockNameVariable, cluster.Id)
 
 	clusterVariable, err := c.clusterVariableStore.GetClusterVariableByClusterIDByGlobalID(ctx, cluster.Id, globalVariable.Id)
 	if err != nil {
@@ -337,10 +337,10 @@ func (c *clusterVariableService) Delete(ctx context.Context, namespaceID int, cl
 		return errors.New("globalVariable Key is not exist. ")
 	}
 
-	if err = c.lockService.lock(lockNameVariable, cluster.Id); err != nil {
+	if err = c.lockService.Lock(LockNameVariable, cluster.Id); err != nil {
 		return err
 	}
-	defer c.lockService.unlock(lockNameVariable, cluster.Id)
+	defer c.lockService.Unlock(LockNameVariable, cluster.Id)
 
 	//检查variable_cluster表中是否有该集群环境变量，没有则直接返回
 	clusterVariable, err := c.clusterVariableStore.GetClusterVariableByClusterIDByGlobalID(ctx, cluster.Id, globalVariable.Id)
@@ -611,10 +611,10 @@ func (c *clusterVariableService) Publish(ctx context.Context, namespaceId, userI
 		return err
 	}
 
-	if err = c.lockService.lock(lockNameVariable, cluster.Id); err != nil {
+	if err = c.lockService.Lock(LockNameVariable, cluster.Id); err != nil {
 		return err
 	}
-	defer c.lockService.unlock(lockNameVariable, cluster.Id)
+	defer c.lockService.Unlock(LockNameVariable, cluster.Id)
 
 	//查询版本名称是否重复
 	publishHistory, err := c.variablePublishHistoryStore.GetByVersionName(ctx, versionName, cluster.Id)
@@ -642,7 +642,7 @@ func (c *clusterVariableService) Publish(ctx context.Context, namespaceId, userI
 	}
 
 	//获取集群当前运行的版本
-	currentVersion, err := c.getPublishVersion(ctx, cluster.Id)
+	currentVersion, err := c.GetPublishVersion(ctx, cluster.Id)
 	if err != nil {
 		return err
 	}
@@ -853,7 +853,7 @@ func (c *clusterVariableService) PublishHistory(ctx context.Context, namespaceId
 	return resp, count, nil
 }
 
-func (c *clusterVariableService) getPublishVersion(ctx context.Context, clusterId int) (*model.VariablePublishVersion, error) {
+func (c *clusterVariableService) GetPublishVersion(ctx context.Context, clusterId int) (*model.VariablePublishVersion, error) {
 	//获取集群当前运行的版本
 	currentRuntime, err := c.variableRuntimeStore.GetForCluster(ctx, clusterId, clusterId)
 	if err != nil && err != gorm.ErrRecordNotFound {

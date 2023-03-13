@@ -15,7 +15,7 @@ type IMonitorStore interface {
 }
 
 type monitorStore struct {
-	*baseStore[entry.MonitorPartition]
+	*BaseStore[entry.MonitorPartition]
 }
 
 func (e *monitorStore) GetByUUID(ctx context.Context, namespaceId int, uuid string) (*entry.MonitorPartition, error) {
@@ -31,5 +31,5 @@ func (e *monitorStore) GetByName(ctx context.Context, namespaceId int, name stri
 }
 
 func newMonitorStore(db IDB) IMonitorStore {
-	return &monitorStore{baseStore: createStore[entry.MonitorPartition](db)}
+	return &monitorStore{BaseStore: CreateStore[entry.MonitorPartition](db)}
 }

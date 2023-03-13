@@ -13,11 +13,11 @@ type INoticeChannelStore interface {
 }
 
 type noticeChannelStore struct {
-	*baseStore[entry.NoticeChannel]
+	*BaseStore[entry.NoticeChannel]
 }
 
 func newNoticeChannelStore(db IDB) INoticeChannelStore {
-	return &noticeChannelStore{baseStore: createStore[entry.NoticeChannel](db)}
+	return &noticeChannelStore{BaseStore: CreateStore[entry.NoticeChannel](db)}
 }
 
 func (n *noticeChannelStore) GetByType(ctx context.Context, namespaceId, typ_ int) ([]*entry.NoticeChannel, error) {

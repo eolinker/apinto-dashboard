@@ -2,17 +2,17 @@ package cache
 
 import (
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/model"
+	apimodel "github.com/eolinker/apinto-dashboard/modules/api/model"
 	"github.com/go-redis/redis/v8"
 )
 
 type IBatchOnlineApiTaskCache interface {
-	IRedisCache[model.BatchOnlineCheckTask]
+	IRedisCache[apimodel.BatchOnlineCheckTask]
 	Key(token string) string
 }
 
 type batchOnlineApiTaskCache struct {
-	*redisCache[model.BatchOnlineCheckTask]
+	*redisCache[apimodel.BatchOnlineCheckTask]
 }
 
 func (i *batchOnlineApiTaskCache) Key(token string) string {
@@ -21,7 +21,7 @@ func (i *batchOnlineApiTaskCache) Key(token string) string {
 
 func newBatchOnlineTaskCache(client *redis.ClusterClient) IBatchOnlineApiTaskCache {
 	cache := &batchOnlineApiTaskCache{
-		redisCache: createRedisCache[model.BatchOnlineCheckTask](client),
+		redisCache: createRedisCache[apimodel.BatchOnlineCheckTask](client),
 	}
 	return cache
 

@@ -29,7 +29,7 @@ type IExternalApplicationService interface {
 	CheckExtAPPToken(ctx context.Context, namespaceId int, token string) (int, error)
 
 	UpdateExtAPPTags(ctx context.Context, namespaceId, appID int, label string) error
-	getExtAppName(ctx context.Context, id int) (string, error)
+	GetExtAppName(ctx context.Context, id int) (string, error)
 }
 
 type externalApplicationService struct {
@@ -144,11 +144,11 @@ func (e *externalApplicationService) UpdateApp(ctx context.Context, namespaceId,
 		return err
 	}
 
-	err = e.lockService.lock(lockNameExtApp, appInfo.Id)
+	err = e.lockService.Lock(LockNameExtApp, appInfo.Id)
 	if err != nil {
 		return err
 	}
-	defer e.lockService.unlock(lockNameExtApp, appInfo.Id)
+	defer e.lockService.Unlock(LockNameExtApp, appInfo.Id)
 
 	_, err = e.externalAppStore.GetByUUID(ctx, namespaceId, input.Id)
 	if err != nil {
@@ -189,11 +189,11 @@ func (e *externalApplicationService) DelApp(ctx context.Context, namespaceId, us
 		return err
 	}
 
-	err = e.lockService.lock(lockNameExtApp, appInfo.Id)
+	err = e.lockService.Lock(LockNameExtApp, appInfo.Id)
 	if err != nil {
 		return err
 	}
-	defer e.lockService.unlock(lockNameExtApp, appInfo.Id)
+	defer e.lockService.Unlock(LockNameExtApp, appInfo.Id)
 
 	appInfo, err = e.externalAppStore.GetByUUID(ctx, namespaceId, uuid)
 	if err != nil {
@@ -223,11 +223,11 @@ func (e *externalApplicationService) Enable(ctx context.Context, namespaceId, us
 		return err
 	}
 
-	err = e.lockService.lock(lockNameExtApp, appInfo.Id)
+	err = e.lockService.Lock(LockNameExtApp, appInfo.Id)
 	if err != nil {
 		return err
 	}
-	defer e.lockService.unlock(lockNameExtApp, appInfo.Id)
+	defer e.lockService.Unlock(LockNameExtApp, appInfo.Id)
 
 	appInfo, err = e.externalAppStore.GetByUUID(ctx, namespaceId, uuid)
 	if err != nil {
@@ -260,11 +260,11 @@ func (e *externalApplicationService) Disable(ctx context.Context, namespaceId, u
 		return err
 	}
 
-	err = e.lockService.lock(lockNameExtApp, appInfo.Id)
+	err = e.lockService.Lock(LockNameExtApp, appInfo.Id)
 	if err != nil {
 		return err
 	}
-	defer e.lockService.unlock(lockNameExtApp, appInfo.Id)
+	defer e.lockService.Unlock(LockNameExtApp, appInfo.Id)
 
 	appInfo, err = e.externalAppStore.GetByUUID(ctx, namespaceId, uuid)
 	if err != nil {
@@ -297,11 +297,11 @@ func (e *externalApplicationService) FlushToken(ctx context.Context, namespaceId
 		return err
 	}
 
-	err = e.lockService.lock(lockNameExtApp, appInfo.Id)
+	err = e.lockService.Lock(LockNameExtApp, appInfo.Id)
 	if err != nil {
 		return err
 	}
-	defer e.lockService.unlock(lockNameExtApp, appInfo.Id)
+	defer e.lockService.Unlock(LockNameExtApp, appInfo.Id)
 
 	appInfo, err = e.externalAppStore.GetByUUID(ctx, namespaceId, uuid)
 	if err != nil {
@@ -360,7 +360,7 @@ func (e *externalApplicationService) UpdateExtAPPTags(ctx context.Context, names
 	return e.externalAppStore.Save(ctx, app)
 }
 
-func (e *externalApplicationService) getExtAppName(ctx context.Context, id int) (string, error) {
+func (e *externalApplicationService) GetExtAppName(ctx context.Context, id int) (string, error) {
 	info, err := e.externalAppStore.Get(ctx, id)
 	if err != nil {
 		return "", err

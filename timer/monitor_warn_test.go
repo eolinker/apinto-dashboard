@@ -129,10 +129,10 @@ func getClustersNames(names []string) []*model.Cluster {
 	return list
 }
 
-func getApiList(apiIds []string) []*model.APIInfo {
-	list := make([]*model.APIInfo, 0)
+func getApiList(apiIds []string) []*apimodel.APIInfo {
+	list := make([]*apimodel.APIInfo, 0)
 	for i, id := range apiIds {
-		list = append(list, &model.APIInfo{
+		list = append(list, &apimodel.APIInfo{
 			API: &entry.API{
 				Id:               i + 1,
 				NamespaceId:      0,
@@ -146,7 +146,7 @@ func getApiList(apiIds []string) []*model.APIInfo {
 	return list
 }
 
-func getServiceList() []*model.ServiceListItem {
+func getServiceList() []*upstream_model.ServiceListItem {
 	return nil
 }
 

@@ -19,14 +19,14 @@ func RegisterClusterNodeRouter(router gin.IRoutes) {
 	c := &clusterNodeController{}
 	bean.Autowired(&c.clusterNodeService)
 
-	router.GET("/cluster/:cluster_name/nodes", genAccessHandler(access.ClusterView, access.ClusterEdit), c.nodes)
-	router.POST("/cluster/:cluster_name/node/reset", genAccessHandler(access.ClusterEdit), c.reset)
-	router.PUT("/cluster/:cluster_name/node", genAccessHandler(access.ClusterEdit), c.put)
+	router.GET("/cluster/:cluster_name/nodes", GenAccessHandler(access.ClusterView, access.ClusterEdit), c.nodes)
+	router.POST("/cluster/:cluster_name/node/reset", GenAccessHandler(access.ClusterEdit), c.reset)
+	router.PUT("/cluster/:cluster_name/node", GenAccessHandler(access.ClusterEdit), c.put)
 }
 
 // gets  获取节点列表
 func (c *clusterNodeController) nodes(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Param("cluster_name")
 
 	nodes, isUpdate, err := c.clusterNodeService.QueryList(ginCtx, namespaceId, clusterName)
@@ -54,7 +54,7 @@ func (c *clusterNodeController) nodes(ginCtx *gin.Context) {
 
 // reset 重置节点信息
 func (c *clusterNodeController) reset(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Param("cluster_name")
 
 	input := &dto.ClusterNodeInput{}
@@ -67,7 +67,7 @@ func (c *clusterNodeController) reset(ginCtx *gin.Context) {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult("cluster_add is null or source is null"))
 		return
 	}
-	userId := getUserId(ginCtx)
+	userId := GetUserId(ginCtx)
 	if err := c.clusterNodeService.Reset(ginCtx, namespaceId, userId, clusterName, input.ClusterAddr, input.Source); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -78,7 +78,7 @@ func (c *clusterNodeController) reset(ginCtx *gin.Context) {
 // post 更新节点信息
 func (c *clusterNodeController) put(ginCtx *gin.Context) {
 
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Param("cluster_name")
 
 	err := c.clusterNodeService.Update(ginCtx, namespaceId, clusterName)

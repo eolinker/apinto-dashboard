@@ -21,10 +21,10 @@ func RegisterVariablesRouter(router gin.IRoutes) {
 	c := &variablesController{}
 	bean.Autowired(&c.globalVariableService)
 
-	router.GET("/variables", genAccessHandler(access.VariableView, access.VariableEdit, access.ServiceView, access.DiscoveryView), c.gets)
-	router.GET("/variable", genAccessHandler(access.VariableView, access.VariableEdit), c.get)
-	router.POST("/variable", genAccessHandler(access.VariableEdit, access.ServiceEdit, access.DiscoveryEdit), logHandler(enum.LogOperateTypeCreate, enum.LogKindGlobalVariable), c.post)
-	router.DELETE("/variable", genAccessHandler(access.VariableEdit), logHandler(enum.LogOperateTypeDelete, enum.LogKindGlobalVariable), c.del)
+	router.GET("/variables", GenAccessHandler(access.VariableView, access.VariableEdit, access.ServiceView, access.DiscoveryView), c.gets)
+	router.GET("/variable", GenAccessHandler(access.VariableView, access.VariableEdit), c.get)
+	router.POST("/variable", GenAccessHandler(access.VariableEdit, access.ServiceEdit, access.DiscoveryEdit), LogHandler(enum.LogOperateTypeCreate, enum.LogKindGlobalVariable), c.post)
+	router.DELETE("/variable", GenAccessHandler(access.VariableEdit), LogHandler(enum.LogOperateTypeDelete, enum.LogKindGlobalVariable), c.del)
 }
 
 // 获取全局环境变量列表
@@ -40,7 +40,7 @@ func (e *variablesController) gets(ginCtx *gin.Context) {
 		pageSize = 20
 	}
 
-	namespaceID := getNamespaceId(ginCtx)
+	namespaceID := GetNamespaceId(ginCtx)
 	key := ginCtx.Query("key")
 	status := ginCtx.Query("status")
 	if status != "" && !enum.CheckVariableUsageStatus(status) {
@@ -73,7 +73,7 @@ func (e *variablesController) gets(ginCtx *gin.Context) {
 
 // 获取单个全局环境变量使用信息
 func (e *variablesController) get(ginCtx *gin.Context) {
-	namespaceID := getNamespaceId(ginCtx)
+	namespaceID := GetNamespaceId(ginCtx)
 	key := ginCtx.Query("key")
 	if key == "" {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("GetGlobalVariable Info fail. err: key can't be nil")))
@@ -121,8 +121,8 @@ func (e *variablesController) post(ginCtx *gin.Context) {
 		return
 	}
 
-	namespaceID := getNamespaceId(ginCtx)
-	userId := getUserId(ginCtx)
+	namespaceID := GetNamespaceId(ginCtx)
+	userId := GetUserId(ginCtx)
 	_, err := e.globalVariableService.Create(ginCtx, namespaceID, userId, input.Key, input.Desc)
 	if err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("Create GlobalVariable fail. err:%s", err.Error())))
@@ -140,8 +140,8 @@ func (e *variablesController) del(ginCtx *gin.Context) {
 		return
 	}
 
-	namespaceID := getNamespaceId(ginCtx)
-	userID := getUserId(ginCtx)
+	namespaceID := GetNamespaceId(ginCtx)
+	userID := GetUserId(ginCtx)
 	err := e.globalVariableService.Delete(ginCtx, namespaceID, userID, key)
 	if err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("Delete GlobalVariable fail. err:%s", err.Error())))

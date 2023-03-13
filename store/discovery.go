@@ -12,11 +12,11 @@ type IDiscoveryStore interface {
 }
 
 type discoveryStore struct {
-	*baseStore[entry.Discovery]
+	*BaseStore[entry.Discovery]
 }
 
 func newDiscoveryStore(db IDB) IDiscoveryStore {
-	return &discoveryStore{baseStore: createStore[entry.Discovery](db)}
+	return &discoveryStore{BaseStore: CreateStore[entry.Discovery](db)}
 }
 
 func (d *discoveryStore) GetList(ctx context.Context, namespaceID int, searchName string) ([]*entry.Discovery, error) {

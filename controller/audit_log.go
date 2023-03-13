@@ -21,13 +21,13 @@ func RegisterAuditLogRouter(router gin.IRoutes) {
 	a := &auditLogController{}
 	bean.Autowired(&a.auditLogService)
 
-	router.GET("/audit-logs", genAccessHandler(access.AuditLogView), a.getLogs)
-	router.GET("/audit-log", genAccessHandler(access.AuditLogView), a.getDetail)
+	router.GET("/audit-logs", GenAccessHandler(access.AuditLogView), a.getLogs)
+	router.GET("/audit-log", GenAccessHandler(access.AuditLogView), a.getDetail)
 	router.GET("/audit-log/kinds", a.getTargets)
 }
 
 func (a *auditLogController) getLogs(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 
 	operateType := ginCtx.Query("operate_type")
 	kind := ginCtx.Query("kind")

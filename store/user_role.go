@@ -15,11 +15,11 @@ type IUserRoleStore interface {
 }
 
 type userRoleStore struct {
-	*baseStore[entry.UserRole]
+	*BaseStore[entry.UserRole]
 }
 
 func newUserRoleStore(db IDB) IUserRoleStore {
-	return &userRoleStore{baseStore: createStore[entry.UserRole](db)}
+	return &userRoleStore{BaseStore: CreateStore[entry.UserRole](db)}
 }
 
 func (u *userRoleStore) DelByUserId(ctx context.Context, userId int) error {

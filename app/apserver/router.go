@@ -5,6 +5,8 @@ import (
 	"github.com/eolinker/apinto-dashboard/controller"
 	user_center "github.com/eolinker/apinto-dashboard/controller/user-center"
 	"github.com/eolinker/apinto-dashboard/filter"
+	apiController "github.com/eolinker/apinto-dashboard/modules/api/controller"
+	upstream_controller "github.com/eolinker/apinto-dashboard/modules/upstream/controller"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -29,12 +31,12 @@ func registerRouter(engine *gin.Engine) {
 	controller.RegisterClusterNodeRouter(routes)
 	controller.RegisterClusterConfigRouter(routes)
 	controller.RegisterVariablesRouter(routes)
-	controller.RegisterServiceRouter(routes)
+	upstream_controller.RegisterServiceRouter(routes)
 	controller.RegisterDiscoveryRouter(routes)
 	controller.RegisterApplicationRouter(routes)
 	controller.RegisterCommonGroupRouter(routes)
 	controller.RegisterEnumRouter(routes)
-	controller.RegisterAPIRouter(routes)
+	apiController.RegisterAPIRouter(routes)
 	controller.RegisterRandomRouter(routes)
 
 	controller.RegisterStrategyCommonRouter(routes)

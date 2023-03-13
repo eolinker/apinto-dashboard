@@ -46,5 +46,5 @@ func (s *variableRuntimeHandler) Decode(r *entry.Runtime) *entry.VariableRuntime
 
 func newVariableRuntimeStore(db IDB) IVariableRuntimeStore {
 	var runTimeHandler BaseKindHandler[entry.VariableRuntime, entry.Runtime] = new(variableRuntimeHandler)
-	return createRuntime[entry.VariableRuntime](runTimeHandler, db)
+	return CreateRuntime[entry.VariableRuntime](runTimeHandler, db)
 }

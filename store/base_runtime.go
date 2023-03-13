@@ -48,7 +48,7 @@ func (b *BaseRuntime[T]) OnlineCount(ctx context.Context, target int) (int64, er
 	return count, nil
 }
 
-func createRuntime[T any](handler BaseKindHandler[T, entry.Runtime], db IDB) *BaseRuntime[T] {
+func CreateRuntime[T any](handler BaseKindHandler[T, entry.Runtime], db IDB) *BaseRuntime[T] {
 	return &BaseRuntime[T]{
 		BaseKindStore: CreateBaseKindStore[T, entry.Runtime](handler, db),
 	}

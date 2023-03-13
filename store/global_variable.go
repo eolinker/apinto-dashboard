@@ -14,11 +14,11 @@ type IGlobalVariableStore interface {
 }
 
 type globalVariableStore struct {
-	*baseStore[entry.Variables]
+	*BaseStore[entry.Variables]
 }
 
 func newGlobalVariableStore(db IDB) IGlobalVariableStore {
-	return &globalVariableStore{baseStore: createStore[entry.Variables](db)}
+	return &globalVariableStore{BaseStore: CreateStore[entry.Variables](db)}
 }
 
 func (g *globalVariableStore) GetList(ctx context.Context, pageNum, pageSize, namespaceID int, searchName string) ([]*entry.Variables, int, error) {

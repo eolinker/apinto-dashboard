@@ -7,7 +7,11 @@ import (
 
 func InitStoreDB(idb *gorm.DB) {
 	var db IDB = &myDB{db: idb}
+	runHandler(db)
+	innetHandler(db)
 
+}
+func innetHandler(db IDB) {
 	cluster := newClusterStore(db)
 	clusterHistory := newClusterHistoryStore(db)
 	clusterCertificate := newClusterCertificateStore(db)
@@ -26,15 +30,10 @@ func InitStoreDB(idb *gorm.DB) {
 
 	discovery := newDiscoveryStore(db)
 
-	service := newServiceStore(db)
 	namespace := newNamespaceStore(db)
 
 	commonGroup := newCommonGroupStore(db)
 
-	serviceVersionStore := newServiceVersionStore(db)
-	serviceStatStore := newServiceStatStore(db)
-	serviceRuntime := newServiceRuntimeStore(db)
-	serviceHistory := newServiceHistoryStore(db)
 	quote := newQuoteStore(db)
 
 	discoveryVersionStore := newDiscoveryVersionStore(db)
@@ -53,12 +52,6 @@ func InitStoreDB(idb *gorm.DB) {
 	applicationAuthPublish := newApplicationAuthPublishStore(db)
 	applicationHistory := newApplicationHistoryStore(db)
 	applicationAuthHistory := newApplicationAuthHistoryStore(db)
-
-	api := newAPIStore(db)
-	apiStat := newAPIStatStore(db)
-	apiRuntime := newApiRuntimeStore(db)
-	apiVersion := newAPIVersionStore(db)
-	apiHistory := newApiHistoryStore(db)
 
 	strategy := newStrategyStore(db)
 	strategyStat := newStrategyStatStore(db)
@@ -102,7 +95,6 @@ func InitStoreDB(idb *gorm.DB) {
 	bean.Injection(&variableRuntime)
 	bean.Injection(&variablePublishHistory)
 
-	bean.Injection(&serviceRuntime)
 	bean.Injection(&namespace)
 
 	bean.Injection(&discovery)
@@ -110,14 +102,7 @@ func InitStoreDB(idb *gorm.DB) {
 	bean.Injection(&discoveryStatStore)
 	bean.Injection(&discoveryRuntime)
 	bean.Injection(&discoveryHistory)
-
-	bean.Injection(&service)
 	bean.Injection(&commonGroup)
-
-	bean.Injection(&serviceRuntime)
-	bean.Injection(&serviceVersionStore)
-	bean.Injection(&serviceHistory)
-	bean.Injection(&serviceStatStore)
 
 	bean.Injection(&application)
 	bean.Injection(&applicationRuntime)
@@ -130,12 +115,6 @@ func InitStoreDB(idb *gorm.DB) {
 	bean.Injection(&applicationAuthPublish)
 	bean.Injection(&applicationHistory)
 	bean.Injection(&applicationAuthHistory)
-
-	bean.Injection(&api)
-	bean.Injection(&apiStat)
-	bean.Injection(&apiRuntime)
-	bean.Injection(&apiVersion)
-	bean.Injection(&apiHistory)
 
 	bean.Injection(&strategy)
 	bean.Injection(&strategyStat)
@@ -161,5 +140,4 @@ func InitStoreDB(idb *gorm.DB) {
 
 	bean.Injection(&iWarnStrategyStore)
 	bean.Injection(&iWarnHistoryStore)
-
 }

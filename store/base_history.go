@@ -24,7 +24,7 @@ type DecodeHistory[T any] interface {
 }
 type BaseHistory[T any] struct {
 	kind    entry.HistoryKind
-	myStore *baseStore[entry.History]
+	myStore *BaseStore[entry.History]
 	decoder DecodeHistory[T]
 }
 
@@ -146,10 +146,10 @@ func (b *BaseHistory[T]) LatestOne(ctx context.Context, target int) (*T, error) 
 	return b.decoder.Decode(first), nil
 }
 
-func createHistory[T any](decoder DecodeHistory[T], db IDB, kind entry.HistoryKind) BaseHistoryStore[T] {
+func CreateHistory[T any](decoder DecodeHistory[T], db IDB, kind entry.HistoryKind) BaseHistoryStore[T] {
 	return &BaseHistory[T]{
 		kind:    kind,
-		myStore: createStore[entry.History](db),
+		myStore: CreateStore[entry.History](db),
 		decoder: decoder,
 	}
 }

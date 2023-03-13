@@ -22,22 +22,22 @@ func RegisterDiscoveryRouter(router gin.IRouter) {
 	c := &discoveryController{}
 	bean.Autowired(&c.discoveryService)
 
-	router.GET("/discoveries", genAccessHandler(access.DiscoveryView, access.DiscoveryEdit), c.getList)
-	router.GET("/discovery", genAccessHandler(access.DiscoveryView, access.DiscoveryEdit), c.getInfo)
-	router.POST("/discovery", genAccessHandler(access.DiscoveryEdit), logHandler(enum.LogOperateTypeCreate, enum.LogKindDiscovery), c.create)
-	router.PUT("/discovery", genAccessHandler(access.DiscoveryEdit), logHandler(enum.LogOperateTypeEdit, enum.LogKindDiscovery), c.update)
-	router.DELETE("/discovery", genAccessHandler(access.DiscoveryEdit), logHandler(enum.LogOperateTypeDelete, enum.LogKindDiscovery), c.delete)
+	router.GET("/discoveries", GenAccessHandler(access.DiscoveryView, access.DiscoveryEdit), c.getList)
+	router.GET("/discovery", GenAccessHandler(access.DiscoveryView, access.DiscoveryEdit), c.getInfo)
+	router.POST("/discovery", GenAccessHandler(access.DiscoveryEdit), LogHandler(enum.LogOperateTypeCreate, enum.LogKindDiscovery), c.create)
+	router.PUT("/discovery", GenAccessHandler(access.DiscoveryEdit), LogHandler(enum.LogOperateTypeEdit, enum.LogKindDiscovery), c.update)
+	router.DELETE("/discovery", GenAccessHandler(access.DiscoveryEdit), LogHandler(enum.LogOperateTypeDelete, enum.LogKindDiscovery), c.delete)
 	router.GET("/discovery/enum", c.getEnum)
-	router.GET("/discovery/drivers", genAccessHandler(access.DiscoveryView, access.DiscoveryEdit), c.getDrivers)
+	router.GET("/discovery/drivers", GenAccessHandler(access.DiscoveryView, access.DiscoveryEdit), c.getDrivers)
 
-	router.PUT("/discovery/:discovery_name/online", genAccessHandler(access.DiscoveryEdit), logHandler(enum.LogOperateTypePublish, enum.LogKindDiscovery), c.online)
-	router.PUT("/discovery/:discovery_name/offline", genAccessHandler(access.DiscoveryEdit), logHandler(enum.LogOperateTypePublish, enum.LogKindDiscovery), c.offline)
-	router.GET("/discovery/:discovery_name/onlines", genAccessHandler(access.DiscoveryView, access.DiscoveryEdit), c.getOnlineList)
+	router.PUT("/discovery/:discovery_name/online", GenAccessHandler(access.DiscoveryEdit), LogHandler(enum.LogOperateTypePublish, enum.LogKindDiscovery), c.online)
+	router.PUT("/discovery/:discovery_name/offline", GenAccessHandler(access.DiscoveryEdit), LogHandler(enum.LogOperateTypePublish, enum.LogKindDiscovery), c.offline)
+	router.GET("/discovery/:discovery_name/onlines", GenAccessHandler(access.DiscoveryView, access.DiscoveryEdit), c.getOnlineList)
 }
 
 // getList 获取注册中心列表
 func (d *discoveryController) getList(ginCtx *gin.Context) {
-	namespaceID := getNamespaceId(ginCtx)
+	namespaceID := GetNamespaceId(ginCtx)
 	searchName := ginCtx.Query("name")
 
 	listItem, err := d.discoveryService.GetDiscoveryList(ginCtx, namespaceID, searchName)
@@ -67,7 +67,7 @@ func (d *discoveryController) getList(ginCtx *gin.Context) {
 
 // getInfo 获取注册中心配置信息
 func (d *discoveryController) getInfo(ginCtx *gin.Context) {
-	namespaceID := getNamespaceId(ginCtx)
+	namespaceID := GetNamespaceId(ginCtx)
 	discoveryName := ginCtx.Query("name")
 	if discoveryName == "" {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("GetDiscoveryInfo fail. err: discoveryName can't be nil")))
@@ -95,8 +95,8 @@ func (d *discoveryController) getInfo(ginCtx *gin.Context) {
 
 // create 新建注册中心
 func (d *discoveryController) create(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
-	operator := getUserId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
+	operator := GetUserId(ginCtx)
 
 	input := new(dto.DiscoveryInfoProxy)
 	if err := ginCtx.BindJSON(input); err != nil {
@@ -128,13 +128,13 @@ func (d *discoveryController) create(ginCtx *gin.Context) {
 
 // alter 修改注册中心
 func (d *discoveryController) update(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	discoveryName := ginCtx.Query("name")
 	if discoveryName == "" {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("UpdateDiscovery Info fail. err: discoveryName can't be nil")))
 		return
 	}
-	operator := getUserId(ginCtx)
+	operator := GetUserId(ginCtx)
 
 	input := new(dto.DiscoveryInfoProxy)
 	if err := ginCtx.BindJSON(input); err != nil {
@@ -155,14 +155,14 @@ func (d *discoveryController) update(ginCtx *gin.Context) {
 
 // delete 删除注册中心
 func (d *discoveryController) delete(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	discoveryName := ginCtx.Query("name")
 	if discoveryName == "" {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("DeleteDiscovery Info fail. err: discoveryName can't be nil")))
 		return
 	}
 
-	userId := getUserId(ginCtx)
+	userId := GetUserId(ginCtx)
 	err := d.discoveryService.DeleteDiscovery(ginCtx, namespaceId, userId, discoveryName)
 	if err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("DeleteDiscovery fail. err:%s", err.Error())))
@@ -174,7 +174,7 @@ func (d *discoveryController) delete(ginCtx *gin.Context) {
 
 // getEnum 获取作为选项的注册中心列表
 func (d *discoveryController) getEnum(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 
 	enumList, err := d.discoveryService.GetDiscoveryEnum(ginCtx, namespaceId)
 	if err != nil {
@@ -216,10 +216,10 @@ func (d *discoveryController) getDrivers(ginCtx *gin.Context) {
 
 // online 上线
 func (d *discoveryController) online(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	discoveryName := ginCtx.Param("discovery_name")
 	input := &dto.UpdateOnlineStatusInput{}
-	operator := getUserId(ginCtx)
+	operator := GetUserId(ginCtx)
 
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
@@ -251,10 +251,10 @@ func (d *discoveryController) online(ginCtx *gin.Context) {
 
 // online 下线
 func (d *discoveryController) offline(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	discoveryName := ginCtx.Param("discovery_name")
 	input := &dto.UpdateOnlineStatusInput{}
-	operator := getUserId(ginCtx)
+	operator := GetUserId(ginCtx)
 
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
@@ -270,7 +270,7 @@ func (d *discoveryController) offline(ginCtx *gin.Context) {
 
 // getOnlineList 上线管理列表
 func (d *discoveryController) getOnlineList(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	discoveryName := ginCtx.Param("discovery_name")
 	if discoveryName == "" {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult("discovery_name can't be nil. "))

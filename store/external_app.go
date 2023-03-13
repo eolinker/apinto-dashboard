@@ -18,7 +18,7 @@ type IExternalApplicationStore interface {
 }
 
 type externalApplicationStore struct {
-	*baseStore[entry.ExternalApplication]
+	*BaseStore[entry.ExternalApplication]
 }
 
 func (e *externalApplicationStore) GetByUUID(ctx context.Context, namespaceId int, uuid string) (*entry.ExternalApplication, error) {
@@ -43,5 +43,5 @@ func (e *externalApplicationStore) GetByToken(ctx context.Context, namespaceId i
 }
 
 func newExternalApplicationStore(db IDB) IExternalApplicationStore {
-	return &externalApplicationStore{baseStore: createStore[entry.ExternalApplication](db)}
+	return &externalApplicationStore{BaseStore: CreateStore[entry.ExternalApplication](db)}
 }
