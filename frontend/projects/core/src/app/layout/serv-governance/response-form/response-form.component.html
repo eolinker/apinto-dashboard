@@ -1,0 +1,97 @@
+<!--
+ * @Author: MengjieYang yangmengjie@eolink.com
+ * @Date: 2022-10-27 17:54:32
+ * @LastEditors: MengjieYang yangmengjie@eolink.com
+ * @LastEditTime: 2022-10-27 20:18:29
+ * @FilePath: /projects/core/src/app/layout/serv-governance/response-form/response-form.component.html
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+-->
+
+<form
+  nz-form
+  [nzNoColon]="true"
+  [nzAutoTips]="autoTips"
+  [formGroup]="_responseForm"
+  autocomplete="off"
+>
+  <nz-form-item>
+    <label class="label" style="width: 138px"
+      ><span class="required-symbol">*</span>HTTP状态码：</label
+    >
+    <nz-form-control [nzErrorTip]="httpErrorTpl">
+      <input
+        class="w-INPUT_NORMAL"
+        type="number"
+        eo-ng-input
+        required
+        placeholder="请输入"
+        formControlName="status_code"
+      />
+
+      <ng-template #httpErrorTpl let-control>
+        <ng-container *ngIf="control.hasError('required')">必填项</ng-container>
+        <ng-container *ngIf="control.hasError('pattern')"
+          >请输入三位数字</ng-container
+        >
+      </ng-template>
+    </nz-form-control>
+  </nz-form-item>
+
+  <nz-form-item>
+    <label class="label" style="width: 138px"
+      ><span class="required-symbol">*</span>Content-Type：</label
+    >
+    <nz-form-control>
+      <eo-ng-select
+        nzShowSearch
+        nzAllowClear
+        class="w-INPUT_NORMAL"
+        required
+        formControlName="content_type"
+        (nzOnSearch)="changeContentType($event)"
+        [nzOptions]="contentTypeList"
+        nzPlaceHolder="请选择"
+      >
+      </eo-ng-select>
+    </nz-form-control>
+  </nz-form-item>
+  <nz-form-item>
+    <label class="label" style="width: 138px"
+      ><span class="required-symbol">*</span> Charset：</label
+    >
+    <nz-form-control>
+      <eo-ng-select
+        class="w-INPUT_NORMAL"
+        required
+        formControlName="charset"
+        [nzOptions]="charsetList"
+        nzPlaceHolder="请选择"
+      ></eo-ng-select>
+    </nz-form-control>
+  </nz-form-item>
+  <nz-form-item>
+    <label class="label" style="width: 138px">Header参数：</label>
+    <nz-form-control>
+      <div class="">
+        <eo-ng-apinto-table
+          class="arrayItem fuse-header"
+          [nzTbody]="responseHeaderTableBody"
+          [nzData]="responseHeaderList"
+          [nzNoScroll]="true"
+        >
+        </eo-ng-apinto-table>
+      </div>
+    </nz-form-control>
+  </nz-form-item>
+  <nz-form-item>
+    <label class="label" style="width: 138px">Body：</label>
+    <nz-form-control>
+      <input
+        class="w-INPUT_NORMAL"
+        eo-ng-input
+        placeholder="请输入"
+        formControlName="body"
+      />
+    </nz-form-control>
+  </nz-form-item>
+</form>

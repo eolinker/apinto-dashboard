@@ -1,0 +1,14 @@
+{
+  "/api": {
+    "target": "http://business.dev.apinto.com",
+    "changeOrigin": true
+  },
+  "/_system": {
+    "target": "http://business.dev.apinto.com",
+    "changeOrigin": true
+  },
+  "/sso": {
+    "target": "http://business.dev.apinto.com",
+    "changeOrigin": true
+  }
+}

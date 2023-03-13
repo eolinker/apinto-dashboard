@@ -1,0 +1,72 @@
+<div class="mt-formtop">
+  <form
+    nz-form
+    [nzNoColon]="true"
+    [nzAutoTips]="autoTips"
+    [formGroup]="validateForm"
+    autocomplete="off"
+  >
+    <nz-form-item>
+      <nz-form-label [nzSpan]="7" nzRequired>应用名称：</nz-form-label>
+      <nz-form-control [nzSpan]="12">
+        <input
+          eo-ng-input
+          required
+          name="name"
+          class="w-INPUT_NORMAL"
+          placeholder="请输入"
+          formControlName="name"
+          eoNgUserAccess="system/ext-app"
+          (disabledEdit)="disabledEdit($event)"
+        />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="7" nzRequired>应用ID：</nz-form-label>
+      <nz-form-control [nzSpan]="12">
+        <input
+          eo-ng-input
+          required
+          name="id"
+          class="w-INPUT_NORMAL"
+          placeholder="请输入"
+          formControlName="id"
+          eoNgUserAccess="system/ext-app"
+        />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item class="mb-0">
+      <nz-form-label [nzSpan]="7">描述：</nz-form-label>
+      <nz-form-control [nzSpan]="12">
+        <textarea
+          name="desc"
+          class="w-INPUT_NORMAL"
+          rows="3"
+          eo-ng-input
+          formControlName="desc"
+          placeholder="请输入"
+          eoNgUserAccess="system/ext-app"
+        ></textarea>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item class="mb-0 sticky bg-white bottom-0 py-mbase">
+      <nz-form-control [nzOffset]="7" [nzSpan]="12">
+        <button
+          class="ant-btn-primary"
+          type="submit"
+          eo-ng-button
+          eoNgUserAccess="system/ext-app"
+          (click)="saveApplication()"
+        >
+          {{ editPage ? '提交' : '保存' }}
+        </button>
+        <button eo-ng-button class="ml-btnybase" (click)="backToList()">
+          取消
+        </button>
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+</div>

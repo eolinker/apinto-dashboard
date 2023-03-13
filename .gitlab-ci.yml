@@ -1,0 +1,107 @@
+variables:
+  PATH: /usr/local/sonar-scanner/sonar-scanner-4.4.0.2170-linux/bin:/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/data/golang/go/bin/:/root/go/bin:/root/.nvm/versions/node/v16.12.0/bin
+  GOROOT: /data/golang/go
+  GOPROXY: https://goproxy.cn
+  SAVE_DIR: /opt/apinto-dashboard
+  VERSION: $CI_COMMIT_SHORT_SHA
+  APP: apserver
+  APP_PRE: ${APP}_${VERSION}
+  BUILD_DIR: apserver-build
+
+default:
+  cache:
+    # key:
+    #   files:
+    #     - frontend/yarn.lock
+    paths:
+      # - frontend/.yarn-cache/
+      - controller/dist/
+      - ${BUILD_DIR}
+
+stages:
+  - notice
+  - check
+  - build
+  - publish
+
+feishu-informer: # 飞书回调
+  stage: notice
+  variables:
+    DIFF_URL: "$CI_MERGE_REQUEST_PROJECT_URL/-/merge_requests/$CI_MERGE_REQUEST_IID/diffs"
+  rules:
+    - if: $CI_PIPELINE_SOURCE=="merge_request_event"
+  script:
+    - echo "merge request"
+    - |
+      curl -X POST -H "Content-Type: application/json" \
+      -d "{\"msg_type\":\"text\",\"content\":{\"text\":\"项目：${CI_PROJECT_NAME}\\n提交人：${GITLAB_USER_NAME}\\n提交信息：${CI_MERGE_REQUEST_TITLE}\\n合并分支信息：${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME} -> ${CI_MERGE_REQUEST_TARGET_BRANCH_NAME}\\n差异性地址：${DIFF_URL}\\n请及时review代码\"}}" \
+      https://open.feishu.cn/open-apis/bot/v2/hook/1c334752-2874-41a1-8f1b-3060f2d46b6c
+checker:
+  stage: check
+  rules:
+    - if: $CI_COMMIT_BRANCH=="develop" && $CI_COMMIT_TITLE !~ /^frontend/ # 前端提交不触发检查
+  script:
+    - set +e
+    - sed -i '/replace github.com\/eolinker\/eosc => */d' go.mod
+    - go mod tidy
+    - go test -covermode=atomic -coverpkg=./... -coverprofile=coverage.data -timeout=1m ./...
+    - golangci-lint run --timeout=3m --out-format checkstyle --issues-exit-code 0 ./... > report.xml
+    - sonar-scanner
+
+frontend-builder: # 前端构建
+  stage: build
+  rules:
+    - if: ($CI_COMMIT_TITLE =~ /^frontend/ || $CI_MERGE_REQUEST_TITLE =~ /^frontend/) && ($CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "test") # 当前端提交后触发
+  script:
+    # - echo 'yarn-offline-mirror ".yarn-cache/"' >> frontend/.yarnrc
+    # - echo 'yarn-offline-mirror-pruning true' >> frontend/.yarnrc
+    - sed -i '/replace github.com\/eolinker\/eosc => */d' go.mod
+    - go mod tidy
+    - ./scripts/build.sh $BUILD_DIR all ${VERSION}
+
+golang-builder:
+  stage: build
+  rules:
+    - if: ($CI_COMMIT_TITLE !~ /^frontend/ || $CI_MERGE_REQUEST_TITLE !~ /^frontend/) && ($CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "test") # 当后端提交后触发
+  script:
+    - sed -i '/replace github.com\/eolinker\/eosc => */d' go.mod
+    - go mod tidy
+    - ./scripts/build.sh $BUILD_DIR backend ${VERSION}
+deployer:
+  stage: publish
+  rules:
+    - if: $CI_COMMIT_BRANCH=="develop"
+      variables:
+        DEPLOY_SERVER: root@172.18.189.43
+        DEPLOY_DESC: "DEV 环境"
+        VIEW_ADDR: http://business.dev.apinto.com
+    - if: $CI_COMMIT_BRANCH=="test"
+      variables:
+        DEPLOY_SERVER: root@172.18.65.60
+        DEPLOY_DESC: "TEST 环境"
+        VIEW_ADDR: http://business.test.apinto.com
+  script:
+    - set -e
+    - scp $BUILD_DIR/${APP_PRE}_linux_amd64.tar.gz ${DEPLOY_SERVER}:${SAVE_DIR}
+    - ssh ${DEPLOY_SERVER} "cd ${SAVE_DIR};tar -zxvf ${APP_PRE}_linux_amd64.tar.gz;cd ${APP_PRE};./install.sh ${SAVE_DIR};./run.sh restart;cd ${SAVE_DIR};./clean.sh ${APP_PRE}"
+    - |
+      curl -X POST -H "Content-Type: application/json" \
+      -d "{\"msg_type\":\"text\",\"content\":{\"text\":\"项目：apinto\\n环境：${DEPLOY_DESC}\\n更新部署完成.\\n访问地址：${VIEW_ADDR}\"}}" \
+      https://open.feishu.cn/open-apis/bot/v2/hook/aaf65fe6-6523-4e3c-abfc-4772c7b30cf8
+  when: on_success
+publisher:
+  stage: publish
+  only:
+    - tags
+  when: on_success
+  script:
+    - sed -i '/replace github.com\/eolinker\/eosc => */d' go.mod
+    - go mod tidy
+    - cp scripts/docker_run.sh scripts/resource/
+    - GOVERSION=$(go version) goreleaser release --skip-validate --rm-dist --skip-publish
+    - mkdir -p /data/pkg/apserver/${CI_COMMIT_TAG}
+    - cp -if apinto-build/*.tar.gz /data/pkg/apserver/${CI_COMMIT_TAG}
+    - cd scripts && ./docker_build.sh apinto-build ${CI_COMMIT_TAG}
+#    - cp -if apinto-build/apserver_${CI_COMMIT_TAG}_linux_amd64.tar.gz scripts/apinto-dashboard.tar.gz
+#    - cd scripts && docker build -t docker.eolinker.com/docker/apinto-dashboard:${CI_COMMIT_TAG} ./
+    - docker push docker.eolinker.com/docker/apinto-dashboard:${CI_COMMIT_TAG}

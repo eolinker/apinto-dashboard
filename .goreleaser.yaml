@@ -1,6 +1,8 @@
 # .goreleaser.yml
+dist: apinto-build
+
 builds:
-  - id: apinto-dashboard
+  - id: apserver
     goos:
       - linux
       - darwin
@@ -17,41 +19,32 @@ builds:
     targets:
       - linux_arm64
       - linux_amd64
-#      - linux_386
+      - linux_386
       - darwin_arm64
       - darwin_amd64
-    dir: ./app/apinto-dashboard
-    main: .
-    binary: apinto-dashboard
+    tags:
+      - release
+      - mysql
+    dir: ./app/apserver
+    main: ./
+    binary: apserver
     builder: go
     gobinary: go
     ldflags:
       - -s -w
-      - -X "github.com/eolinker/apinto-dashboard/app/apinto-dashboard/version.Version={{.Version}}"
-      - -X "github.com/eolinker/apinto-dashboard/app/apinto-dashboard/version.gitCommit={{.Commit}}"
-      - -X "github.com/eolinker/apinto-dashboard/app/apinto-dashboard/version.buildTime={{.Date}}"
-      - -X "github.com/eolinker/apinto-dashboard/app/apinto-dashboard/version.buildUser=goreleaser"
-      - -X "github.com/eolinker/apinto-dashboard/app/apinto-dashboard/version.goVersion={{.Env.GOVERSION}}"
-    env:
-      - CGO_ENABLED=0
+      - -X "github.com/eolinker/apinto-dashboard/app/apserver/version.Version={{.Version}}"
+      - -X "github.com/eolinker/apinto-dashboard/app/apserver/version.gitcommit={{.Commit}}"
+      - -X "github.com/eolinker/apinto-dashboard/app/apserver/version.buildtime={{.Date}}"
+      - -X "github.com/eolinker/apinto-dashboard/app/apserver/version.builduser=goreleaser"
+      - -X "github.com/eolinker/apinto-dashboard/app/apserver/version.goversion={{.Env.GOVERSION}}"
+
 archives:
   - id: default
     format: tar.gz
-    wrap_in_directory: apinto-dashboard
-    name_template: "{{ .ProjectName }}_{{ .Tag }}_{{ .Os }}_{{ .Arch }}"
+    wrap_in_directory: "apserver_{{ .Tag }}"
+    name_template: "apserver_{{ .Tag }}_{{ .Os }}_{{ .Arch }}"
     files:
-      - src: 'builds/account.yml'
+      - src: 'scripts/resource/*'
         dst: /
         strip_parent: true
-      - src: 'builds/config.yml'
-        dst: /
-        strip_parent: true
-      - src: 'builds/Dockerfile'
-        dst: /
-        strip_parent: true
-      - src: 'builds/static/*'
-        dst: /static
-        strip_parent: true
-release:
-  name_template: "{{ .Tag }}"
-  mode: append
+

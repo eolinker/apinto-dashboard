@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "outDir": "../../dist/eo-ng-apinto-table/tsc-bundle",
+    "module": "umd",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "lib": ["es2015", "dom"],
+    "noImplicitAny": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true
+  },
+  "exclude": [
+    "./**/*.test.ts",
+    "./**/test.ts",
+    "./**/*.spec.ts",
+    "./**/*.test.js",
+    "./**/*.spec.js"
+  ]
+}

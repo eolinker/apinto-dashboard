@@ -1,0 +1,100 @@
+<div class="monitor-total-content">
+  <div class="list-header pl-btnbase pr-btnrbase py-btnybase">
+    <div class="group-search-large">
+      <label class="label">选择时间：</label>
+      <eo-ng-radio-group
+        class="date-picker-button-group"
+        [(ngModel)]="timeButton"
+        [nzOptions]="timeButtonOptions"
+        nzStyle="button"
+        nzButtonStyle="solid"
+      ></eo-ng-radio-group>
+      <nz-range-picker
+        class="date-picker-button-group"
+        [nzDisabledDate]="disabledDate"
+        [(ngModel)]="datePickerValue"
+        (nzOnOpenChange)="openDatePicker($event)"
+      ></nz-range-picker>
+    </div>
+
+    <div class="group-search-large">
+      <label class="label">筛选集群：</label>
+      <eo-ng-select
+        class="w-INPUT_NORMAL"
+        [(ngModel)]="queryData.clusters"
+        [nzOptions]="listOfClusters"
+        nzMode="multiple"
+        nzPlaceHolder="请选择"
+      ></eo-ng-select>
+      <label class="ml-btnybase label">选择上游：</label>
+      <eo-ng-select
+        class="w-INPUT_NORMAL"
+        [(ngModel)]="queryData.services"
+        (ngModelChange)="queryData.apiIds = []"
+        [nzOptions]="listOfServices"
+        [nzMaxTagCount]="1"
+        [nzMaxTagPlaceholder]="tagPlaceHolderTpl"
+        nzMode="multiple"
+        nzPlaceHolder="请选择"
+        (nzOpenChange)="serviceChanged($event)"
+      ></eo-ng-select>
+      <ng-template #tagPlaceHolderTpl let-selectedList
+        >and {{ selectedList.length }} more selected</ng-template
+      >
+    </div>
+
+    <div class="group-search-large flex-nowrap">
+      <label class="label">搜索内容：</label>
+      <div class="w-INPUT_NORMAL inline-block">
+        <eo-ng-search-input-group
+          [eoSingle]="false"
+          [eoInputVal]="queryData.path"
+          (eoClick)="queryData.path = ''; getApiTableList()"
+        >
+          <input
+            class="search"
+            type="text"
+            eo-ng-input
+            placeholder="请输入请求路径进行搜索"
+            [(ngModel)]="queryData.path"
+          />
+        </eo-ng-search-input-group>
+      </div>
+      <label class="ml-btnybase label inline-block w-[70px]"> 选择API：</label>
+      <eo-ng-select
+        class="w-INPUT_NORMAL"
+        [(ngModel)]="queryData.apiIds"
+        [nzOptions]="listOfApis"
+        nzMode="multiple"
+        [nzMaxTagCount]="3"
+        [nzMaxTagPlaceholder]="tagPlaceHolderTpl"
+        [nzAllowClear]="true"
+        nzPlaceHolder="请选择"
+      ></eo-ng-select>
+      <button class="ml-btnybase" eo-ng-button (click)="clearSearch()">
+        重置
+      </button>
+      <button
+        class="ant-btn-primary ml-btnybase"
+        eo-ng-button
+        (click)="getApiTableList()"
+      >
+        查询
+      </button>
+      <button class="ml-btnybase" eo-ng-button (click)="export()">导出</button>
+    </div>
+  </div>
+  <div class="list-content">
+    <eo-ng-monitor-alarm-table
+      type="apiTotal"
+      [nzTableList]="apisList"
+      [nzTableBody]="apiTableBody"
+      [nzTableHead]="apiTableName"
+      [nzTableConfig]="apiTableConfig"
+      [nzDropdownMenu]="apiTableDropdownMenu"
+      [nzShowPagination]="true"
+      (btnClick)="goToDetail($event)"
+      (tableConfigChange)="getNewTableConfig($event)"
+    ></eo-ng-monitor-alarm-table>
+  </div>
+</div>

@@ -1,0 +1,24 @@
+org: "eolink"
+bucket: "test_apinto1"
+token: "pFxrbhxUU-JxhLo_eAwfP31xZ1JH_8KlBaAx_lPb6jsGFe-N6DisczXGmjg-d7R_dDO1BJr4vzP3g6BNKUpE_w=="
+influxdb_url: "http://172.18.166.219:8087"
+
+#apserver开发环境地址
+apserver_addr: "127.0.0.1:8080"
+#apserver_session可以登陆开发环境admin用F12去获取
+apserver_session: "8840c44c-4130-a36b-e00d-1bb07ae35fc0"
+#apserver的api分组id, 为空则是所有api
+group_uuid: "ca54f3b7-54ca-43a7-b02b-278a377fa1c6"
+
+#开始时间 格式为 "2006-01-02T15:04:05.000"
+start_time: "2022-12-31 12:00:00"
+end_time: "2022-12-31 12:00:00"
+#时间间隔，即从开始到结束, 格式为数字加单位 如 "1s","3m","4h", "5d"
+time_interval: "1s"
+#每次间隔的记录插入数
+concurrency_per_interval: 1
+
+#集群id，插入记录时所需的集群信息
+cluster_id: "3d22f81e-9cb9-4e35-b404-b009e454d089"
+#node,插入记录时的集群节点信息
+node: "e6476ef63a8764f9"

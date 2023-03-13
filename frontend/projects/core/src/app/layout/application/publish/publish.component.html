@@ -1,0 +1,22 @@
+<div class="">
+  <div class="list-content tab-list">
+    <eo-ng-apinto-table
+      class=""
+      [nzTbody]="clustersTableBody"
+      [nzThead]="clustersTableHeadName"
+      [nzData]="clustersList"
+      [nzMaxOperatorButton]="2"
+      eoNgUserAccess="application"
+      (disabledEdit)="disabledEdit($event)"
+      [nzNoScroll]="true"
+    >
+    </eo-ng-apinto-table>
+  </div>
+</div>
+<ng-template #clusterStatusTpl let-item="item">
+  <eo-ng-table-status [status]="item.status"></eo-ng-table-status>
+</ng-template>
+
+<ng-template #disabledStatusTpl let-item="item">
+  <eo-ng-table-disabled [disable]="item.disable"></eo-ng-table-disabled>
+</ng-template>

@@ -1,0 +1,4 @@
+- module: user
+  desc: 用户信息模块
+  functions:
+    - function: 'getUser()'

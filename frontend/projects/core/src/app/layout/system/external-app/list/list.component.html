@@ -1,0 +1,64 @@
+<div class="">
+  <div
+    class="list-header pl-btnbase pr-btnrbase py-btnybase flex flex-nowrap items-center justify-between"
+  >
+    <div>
+      <button
+        eo-ng-button
+        class="ant-btn-primary"
+        eoNgUserAccess="system/ext-app"
+        (disabledEdit)="disabledEdit($event)"
+        (click)="addApp()"
+      >
+        新建应用
+      </button>
+    </div>
+  </div>
+  <div class="list-content">
+    <eo-ng-apinto-table
+      class=""
+      [nzTbody]="appsTableBody"
+      [nzThead]="appsTableHeadName"
+      [nzData]="appsList"
+      [nzTrClick]="appsTableClick"
+      [nzMaxOperatorButton]="4"
+    >
+    </eo-ng-apinto-table>
+  </div>
+</div>
+
+<ng-template #copyTokenTpl let-item="item">
+  <button
+    class="ant-btn eo-ng-table-btn eo-ng-table-delete-btn ant-btn-text"
+    style="
+      display: 'inline-flex';
+      justify-content: 'center';
+      align-items: 'center';
+      vertical-align: 'middle';
+    "
+    eo-copy
+    [copyText]="item.data.token"
+    copyType="click"
+    (copyCallback)="callback()"
+    (click)="$event.stopPropagation()"
+  >
+    <span
+      eoNgFeedbackTooltip
+      nzTooltipTitle="复制Token"
+      nzTooltipPlacement="top"
+      [nzTooltipVisible]="false"
+      nzTooltipTrigger="hover"
+      ><svg class="iconpark-icon"><use href="#copy"></use></svg
+    ></span>
+  </button>
+</ng-template>
+
+<ng-template #switchTpl let-item="item">
+  <eo-ng-switch
+    [(ngModel)]="item.status_boolean"
+    [nzControl]="true"
+    eoNgUserAccess="system/ext-app"
+    (click)="disabledApp(item, $event)"
+    [nzDisabled]="nzDisabled"
+  ></eo-ng-switch>
+</ng-template>
