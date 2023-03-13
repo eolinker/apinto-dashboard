@@ -1,0 +1,10 @@
+stages:
+  - exec
+
+init_job:
+  resource_group: $CI_PROJECT_NAME
+  stage: exec
+  trigger:
+    include: deploy.gitlab-ci.yml
+    strategy: depend
+

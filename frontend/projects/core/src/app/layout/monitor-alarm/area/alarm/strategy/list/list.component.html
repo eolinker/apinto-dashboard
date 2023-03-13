@@ -1,0 +1,91 @@
+<div class="monitor-total-content">
+  <div class="list-header pl-btnbase pr-btnrbase py-btnybase">
+    <div class="pb-btnbase">
+      <label class="label">告警维度：</label>
+      <eo-ng-select
+        class="w-INPUT_NORMAL"
+        [(ngModel)]="queryData.warnDimension"
+        [nzOptions]="listOfMetrics"
+        nzMode="multiple"
+        nzPlaceHolder="请选择"
+        eoNgUserAccess="monitor-alarm"
+        (disabledEdit)="disabledEdit($event)"
+      ></eo-ng-select>
+      <label class="ml-btnybase label">告警启停：</label>
+      <eo-ng-select
+        class="w-INPUT_NORMAL"
+        [nzAllowClear]="true"
+        [(ngModel)]="queryData.status"
+        [nzOptions]="listOfStatus"
+        nzPlaceHolder="请选择"
+      ></eo-ng-select>
+    </div>
+
+    <div class="pb-0">
+      <label class="label">策略名称：</label>
+      <div class="inline-block w-INPUT_NORMAL">
+        <eo-ng-search-input-group
+          [eoSingle]="false"
+          [eoInputVal]="queryData.strategyName"
+          (eoClick)="queryData.strategyName = ''; getStrategyList()"
+        >
+          <input
+            type="text"
+            eo-ng-input
+            placeholder="请输入"
+            [(ngModel)]="queryData.strategyName"
+          />
+        </eo-ng-search-input-group>
+      </div>
+      <button class="ml-btnybase" eo-ng-button (click)="clearSearch()">
+        重置
+      </button>
+      <button
+        class="ant-btn-primary ml-btnybase"
+        eo-ng-button
+        (click)="getStrategyList()"
+      >
+        查询
+      </button>
+      <button
+        eo-ng-button
+        nzType="primary"
+        class="ant-btn-primary ml-btnybase"
+        (click)="addNewStrategy()"
+      >
+        <svg class="iconpark-icon"><use href="#add"></use></svg>
+        <span class="ml-label"> 新增告警策略</span>
+      </button>
+    </div>
+  </div>
+  <div class="list-content">
+    <eo-ng-apinto-table
+      [nzTbody]="strategyTableBody"
+      [nzThead]="strategyTableHead"
+      [nzData]="strategyList"
+      [nzNoScroll]="true"
+      [nzShowPagination]="true"
+      [nzFrontPagination]="false"
+      [nzTotal]="queryData.total"
+      [nzMaxOperatorButton]="2"
+      [(nzPageIndex)]="queryData.pageNum"
+      [(nzPageSize)]="queryData.pageSize"
+      (nzPageIndexChange)="getStrategyList()"
+      (nzPageSizeChange)="getStrategyList()"
+      [nzTableTheadConfig]="strategyTableDropdownMenu"
+      (nzChangeTableConfigChange)="changeMenu($event?.value, $event.item)"
+      [nzTrClick]="viewStrategy"
+    >
+    </eo-ng-apinto-table>
+  </div>
+  <ng-template #switchTpl let-item="item">
+    <eo-ng-switch
+      [(ngModel)]="item.isEnable"
+      [nzLoading]="item.loading"
+      [nzControl]="true"
+      eoNgUserAccess="monitor-alarm"
+      (click)="disabledStrategy(item, $event)"
+      [nzDisabled]="nzDisabled"
+    ></eo-ng-switch>
+  </ng-template>
+</div>

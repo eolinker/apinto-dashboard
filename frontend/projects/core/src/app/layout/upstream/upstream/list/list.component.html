@@ -1,0 +1,56 @@
+<!--
+ * @Author: MengjieYang yangmengjie@eolink.com
+ * @Date: 2022-08-17 23:42:52
+ * @LastEditors: MengjieYang yangmengjie@eolink.com
+ * @LastEditTime: 2022-08-29 00:23:16
+ * @FilePath: /apinto/src/app/layout/upstream/upstream/upstream-list/upstream-list.component.html
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+-->
+<div class="">
+  <div
+    class="list-header pl-btnbase pr-btnrbase py-btnybase flex flex-nowrap items-center justify-between"
+  >
+    <button
+      eo-ng-button
+      class="ant-btn-primary"
+      eoNgUserAccess="upstream/upstream"
+      (disabledEdit)="disabledEdit($event)"
+      (click)="addUpstream()"
+    >
+      新建上游
+    </button>
+
+    <eo-ng-search-input-group
+      class="inline-block"
+      [eoInputVal]="upstreamNameForSear"
+      (eoClick)="upstreamNameForSear = ''; getUpstreamsList()"
+    >
+      <input
+        class="search"
+        type="text"
+        eo-ng-input
+        placeholder="搜索上游名称"
+        [(ngModel)]="upstreamNameForSear"
+        (keyup.enter)="getUpstreamsList()"
+      />
+    </eo-ng-search-input-group>
+  </div>
+  <div class="list-content pb-[4px]">
+    <eo-ng-apinto-table
+      class=""
+      [nzTbody]="upstreamsTableBody"
+      [nzThead]="upstreamsTableHeadName"
+      [nzData]="upstreamsList"
+      [nzTrClick]="upstreamTableClick"
+      [nzMaxOperatorButton]="2"
+      [nzShowPagination]="true"
+      [nzFrontPagination]="false"
+      [nzTotal]="total"
+      [(nzPageIndex)]="page_num"
+      [(nzPageSize)]="page_size"
+      (nzPageIndexChange)="getUpstreamsList()"
+      (nzPageSizeChange)="getUpstreamsList()"
+    >
+    </eo-ng-apinto-table>
+  </div>
+</div>

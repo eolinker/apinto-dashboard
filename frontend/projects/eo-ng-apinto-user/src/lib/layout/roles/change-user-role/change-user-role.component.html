@@ -1,0 +1,35 @@
+<div class="drawer-table">
+  <div
+    class="pl-btnbase pr-btnrbase pb-btnybase flex flex-nowrap items-center justify-between"
+  >
+    <div></div>
+    <div class="floatR group-search-large">
+      <eo-ng-search-input-group
+        [eoInputVal]="addUserKeyword"
+        (eoClick)="addUserKeyword = ''; getAddUsersList()"
+      >
+        <input
+          class="search"
+          type="text"
+          eo-ng-input
+          placeholder="搜索账号或邮箱或名称"
+          [(ngModel)]="addUserKeyword"
+          (ngModelChange)="getAddUsersList()"
+        />
+      </eo-ng-search-input-group>
+    </div>
+  </div>
+  <div>
+    <div class="list-content" style="padding-bottom: 0px">
+      <eo-ng-apinto-table
+        [nzTbody]="addUsersTableBody"
+        [nzThead]="addUsersTableHeadName"
+        [nzData]="addUsersList"
+        [nzNoScroll]="true"
+        [nzTrClick]="addUsersTableClick"
+        nzTableLayout="fixed"
+      >
+      </eo-ng-apinto-table>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,184 @@
+<eo-ng-feedback-alert
+  *ngIf="!nzDisabled"
+  nzType="info"
+  [nzMessage]="
+    editPage
+      ? '可编辑分区内容，点击测试成功后自动提交，并更新分区告警内容；可删除当前分区。'
+      : '请填写新建分区内容，点击测试成功后自动提交，查看分区告警内容。'
+  "
+  nzShowIcon
+  [nzBanner]="true"
+  [nzCloseable]="true"
+></eo-ng-feedback-alert>
+
+<div class="mt-mbase">
+  <form
+    nz-form
+    [nzNoColon]="true"
+    [nzAutoTips]="autoTips"
+    [formGroup]="validateForm"
+    autocomplete="off"
+  >
+    <nz-form-item>
+      <nz-form-label [nzSpan]="9" nzRequired>分区名称：</nz-form-label>
+      <nz-form-control
+        [nzSpan]="10"
+        [nzErrorTip]="nameErrorTpl"
+        nzExtra="长度不超过16个字符"
+      >
+        <input
+          class="w-INPUT_NORMAL"
+          type="text"
+          eo-ng-input
+          name="name"
+          formControlName="name"
+          placeholder="请输入"
+          required
+          eoNgUserAccess="monitor-alarm"
+          (disabledEdit)="disabledEdit($event)"
+        />
+        <ng-template #nameErrorTpl let-control>
+          <ng-container *ngIf="control.hasError('required')"
+            >必填项</ng-container
+          >
+          <ng-container *ngIf="control.hasError('length')"
+            >长度不超过16个字符</ng-container
+          >
+          <ng-container *ngIf="control.hasError('overlap')"
+            >分区名称不可重复</ng-container
+          >
+        </ng-template>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="9" nzRequired>数据源类型：</nz-form-label>
+      <nz-form-control [nzSpan]="10">
+        <eo-ng-select
+          class="w-INPUT_NORMAL"
+          name="sourceType"
+          required
+          formControlName="sourceType"
+          [nzOptions]="serviceTypeList"
+          nzPlaceHolder="请选择"
+          [nzDisabled]="nzDisabled"
+          eoNgUserAccess="monitor-alarm"
+        ></eo-ng-select>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="9" nzRequired>数据源地址：</nz-form-label>
+      <nz-form-control [nzSpan]="10" nzErrorTip="请输入数据源地址">
+        <input
+          eo-ng-input
+          class="w-INPUT_NORMAL"
+          name="addr"
+          placeholder="请输入"
+          formControlName="addr"
+          eoNgUserAccess="monitor-alarm"
+        />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="9" nzRequired>Organization：</nz-form-label>
+      <nz-form-control [nzSpan]="10" nzErrorTip="请输入数据源地址">
+        <input
+          eo-ng-input
+          class="w-INPUT_NORMAL"
+          name="org"
+          placeholder="请输入"
+          formControlName="org"
+          eoNgUserAccess="monitor-alarm"
+        />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="9">鉴权Token：</nz-form-label>
+      <nz-form-control [nzSpan]="10" nzErrorTip="请输入数据源地址">
+        <input
+          eo-ng-input
+          class="w-INPUT_NORMAL"
+          name="token"
+          placeholder="请输入"
+          formControlName="token"
+          eoNgUserAccess="monitor-alarm"
+        />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item class="mb-0">
+      <nz-form-label [nzSpan]="9" nzRequired>关联集群：</nz-form-label>
+      <div nz-col [nzSpan]="10">
+        <eo-ng-input-group [nzCompact]="true">
+          <nz-form-control style="width: auto !important">
+            <eo-ng-select
+              style="border-bottom-right-radius: 0; border-top-right-radius: 0"
+              name="env"
+              class="w-[120px]"
+              required
+              formControlName="env"
+              (ngModelChange)="changeClustersList($event)"
+              [nzOptions]="envList"
+              nzPlaceHolder="请选择"
+              [nzDisabled]="nzDisabled"
+              eoNgUserAccess="monitor-alarm"
+            ></eo-ng-select>
+          </nz-form-control>
+          <nz-form-control>
+            <eo-ng-select
+              class="w-[226px]"
+              style="width: 226px !important"
+              name="clusterNames"
+              required
+              [nzShowCheckAll]="true"
+              [nzMaxTagCount]="3"
+              nzMode="multiple"
+              formControlName="clusterNames"
+              [nzOptions]="clustersList"
+              nzPlaceHolder="请选择"
+              [nzDisabled]="nzDisabled"
+              eoNgUserAccess="monitor-alarm"
+            ></eo-ng-select>
+          </nz-form-control>
+        </eo-ng-input-group>
+      </div>
+    </nz-form-item>
+    <nz-form-item class="mb-0 sticky bg-white bottom-0 py-mbase">
+      <nz-form-control [nzOffset]="9" [nzSpan]="18">
+        <button
+          class="ant-btn-primary"
+          eoNgUserAccess="monitor-alarm"
+          type="submit"
+          eo-ng-button
+          (click)="testLink()"
+        >
+          {{ tabs.list.length > 0 ? '提交' : '测试链接' }}
+        </button>
+        <button
+          *ngIf="editPage || tabs.list.length > 0"
+          eo-ng-button
+          class="ml-btnybase"
+          (click)="backToList()"
+        >
+          取消
+        </button>
+
+        <a
+          *ngIf="editPage"
+          eoNgUserAccess="monitor-alarm"
+          style="
+            display: 'block';
+            color: var(--MAIN_THEME_BG);
+            font-size: 14px;
+            margin-top: 15px;
+          "
+          (click)="deleteModal()"
+          >删除当前分区</a
+        >
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+</div>

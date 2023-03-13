@@ -1,0 +1,35 @@
+<eo-ng-apinto-table
+  class="arrayItem"
+  [nzTbody]="rulesTableBody"
+  [nzData]="_ruleData"
+  [nzDataItem]="ruleDataItem"
+  [nzNoScroll]="true"
+  (nzDataChange)="rulesDataChange.emit($event)"
+>
+</eo-ng-apinto-table>
+<ng-template #andColTpl>
+  <span
+    class="block w-[24px] h-[24px] rounded-DEFAULT bg-[#EAF0FD] text-[#3168EC] text-center"
+  >
+    且</span
+  >
+</ng-template>
+<ng-template #alertValueTpl let-item="item" let-index="index">
+  <!-- {{ show(item) }} -->
+  <eo-ng-input-group
+    class="w-[142px]"
+    [nzSuffix]="
+      (rateList.indexOf(item.compare) === -1 ? valueUnitMap.get(quota) : '%') ||
+      ' '
+    "
+  >
+    <input
+      class="hover:border-0 focus:border-0"
+      type="number"
+      eo-ng-input
+      [(ngModel)]="item.value"
+      placeholder="请输入阈值"
+      (ngModelChange)="rulesDataChange.emit(_ruleData)"
+    />
+  </eo-ng-input-group>
+</ng-template>

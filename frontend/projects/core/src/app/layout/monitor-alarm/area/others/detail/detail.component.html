@@ -1,0 +1,149 @@
+<div class="">
+  <div
+    class="list-header pl-btnbase pr-btnrbase py-btnybase sticky top-0 bg-FIX_BG z-10"
+  >
+    <div class="group-search-large">
+      <label class="ml-btnybase label">选择时间：</label>
+      <eo-ng-radio-group
+        class="date-picker-button-group"
+        [(ngModel)]="timeButton"
+        [nzOptions]="timeButtonOptions"
+        nzStyle="button"
+        nzButtonStyle="solid"
+      ></eo-ng-radio-group>
+      <nz-range-picker
+        class="date-picker-button-group"
+        [nzDisabledDate]="disabledDate"
+        [(ngModel)]="datePickerValue"
+        (nzOnOpenChange)="openDatePicker($event)"
+      ></nz-range-picker>
+    </div>
+
+    <div class="group-search-large">
+      <label class="ml-btnybase label">筛选集群：</label>
+      <eo-ng-select
+        class="w-INPUT_NORMAL"
+        [(ngModel)]="queryData.clusters"
+        [nzOptions]="listOfClusters"
+        nzMode="multiple"
+        [nzShowCheckAll]="true"
+        nzPlaceHolder="请选择"
+      ></eo-ng-select>
+      <button class="ml-btnybase" eo-ng-button (click)="clearSearch()">
+        重置
+      </button>
+      <button
+        class="ant-btn-primary ml-btnybase"
+        eo-ng-button
+        (click)="getMonitorData()"
+      >
+        查询
+      </button>
+    </div>
+  </div>
+  <div class="line-block eo-ng-monitor-detail-pie">
+    <eo-ng-monitor-line-graph
+      [titles]="['调用量统计']"
+      [lineData]="invokeStatic"
+      [yAxisTitle]="timeUnit"
+      [type]="lineGraphType"
+    ></eo-ng-monitor-line-graph>
+  </div>
+  <div class="table-block not-lr-border monitor-table">
+    <eo-ng-monitor-alarm-table
+      *ngIf="type === 'app'"
+      [title]="breadcrumbName"
+      [type]="type + '-Api-Detail'"
+      [nzShowSearch]="true"
+      nzSearchKeyName="API名称"
+      [nzShowPagination]="true"
+      [nzTableList]="tableList.api"
+      [nzTableBody]="apiTableBody"
+      [nzTableHead]="apiTableName"
+      [nzTableConfig]="apiTableConfig"
+      [nzDropdownMenu]="apiTableDropdownMenu"
+      (btnClick)="goToDetail($event, 'api')"
+      (tableConfigChange)="getNewTableConfig($event)"
+      [nzMonitorDT]="true"
+    ></eo-ng-monitor-alarm-table>
+    <eo-ng-monitor-alarm-table
+      *ngIf="type === 'api'"
+      [title]="breadcrumbName"
+      [type]="type + '-App-Detail'"
+      [nzShowSearch]="true"
+      nzSearchKeyName="应用名称"
+      [nzShowPagination]="true"
+      [nzTableList]="tableList.app"
+      [nzTableBody]="appTableBody"
+      [nzTableHead]="appTableName"
+      [nzTableConfig]="appTableConfig"
+      [nzDropdownMenu]="appTableDropdownMenu"
+      (btnClick)="goToDetail($event, 'app')"
+      (tableConfigChange)="getNewTableConfig($event)"
+      [nzMonitorDT]="true"
+    ></eo-ng-monitor-alarm-table>
+
+    <p class="p-title" *ngIf="type === 'service'">{{ breadcrumbName }}</p>
+
+    <eo-ng-tabs
+      *ngIf="type === 'service'"
+      [(nzSelectedIndex)]="selectedIndex"
+      (nzSelectedIndexChange)="tableChange($event)"
+      [nzOptions]="tabsList"
+    ></eo-ng-tabs>
+
+    <ng-template #nodeTableTpl>
+      <eo-ng-monitor-alarm-table
+        [type]="type + '-Addr-Detail'"
+        [nzShowSearch]="true"
+        nzSearchKeyName="目标节点"
+        [nzShowPagination]="true"
+        [nzTableList]="tableList.addr"
+        [nzTableConfig]="nodeTableConfig"
+        [nzTableBody]="nodeTableBody"
+        [nzTableHead]="nodeTableName"
+        [nzDropdownMenu]="nodeTableDropdownMenu"
+        (btnClick)="goToDetail($event, 'addr')"
+        (tableConfigChange)="getNewTableConfig($event)"
+        [nzMonitorDT]="true"
+      ></eo-ng-monitor-alarm-table>
+    </ng-template>
+
+    <ng-template #apiProxyTableTpl>
+      <eo-ng-monitor-alarm-table
+        [type]="type + '-Api-Detail'"
+        [nzShowSearch]="true"
+        nzSearchKeyName="API名称"
+        [nzTableList]="tableList.api"
+        [nzTableConfig]="apiProxyTableConfig"
+        [nzTableBody]="apiProxyTableBody"
+        [nzTableHead]="apiProxyTableName"
+        [nzDropdownMenu]="apiProxyTableDropdownMenu"
+        [nzShowPagination]="true"
+        (btnClick)="goToDetail($event, 'api')"
+        (tableConfigChange)="getNewTableConfig($event)"
+        [nzMonitorDT]="true"
+      ></eo-ng-monitor-alarm-table>
+    </ng-template>
+  </div>
+  <ng-template #modalTpl>
+    <div
+      class="pl-btnbase pb-btnybase flex flex-nowrap items-center justify-between"
+    >
+      <div></div>
+      <label class="compare-checkbox" eo-ng-checkbox [(ngModel)]="compareTotal"
+        >加入总体数据对比</label
+      >
+    </div>
+    <eo-ng-monitor-line-graph
+      [titles]="['调用量统计']"
+      [lineData]="detailInvokeStatic"
+      [compare]="compareTotal"
+      [yAxisTitle]="timeUnit"
+      [compareData]="invokeStatic"
+      [type]="lineGraphType"
+      [dataTitle]="dataName"
+      [modalTitle]="modalTitle"
+    ></eo-ng-monitor-line-graph>
+  </ng-template>
+</div>
