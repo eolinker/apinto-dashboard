@@ -9,6 +9,10 @@ import (
 	"github.com/eolinker/apinto-dashboard/common"
 	driver_manager "github.com/eolinker/apinto-dashboard/driver-manager"
 	"github.com/eolinker/apinto-dashboard/model"
+	service2 "github.com/eolinker/apinto-dashboard/modules/api"
+	apimodel "github.com/eolinker/apinto-dashboard/modules/api/model"
+	"github.com/eolinker/apinto-dashboard/modules/upstream"
+	upstream_model "github.com/eolinker/apinto-dashboard/modules/upstream/model"
 	"github.com/eolinker/apinto-dashboard/service"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
@@ -33,8 +37,8 @@ type monitorWarn struct {
 	userService          service.IUserInfoService
 	clusterService       service.IClusterService
 	warnHistoryService   service.IWarnHistoryService
-	apiService           service.IAPIService
-	service              service.IService
+	apiService           service2.IAPIService
+	service              upstream.IService
 	commonCache          cache.ICommonCache
 	noticeChannelService service.INoticeChannelService
 	noticeChannelDriver  driver_manager.INoticeChannelDriverManager
@@ -105,7 +109,7 @@ func (mon *monitorWarn) monitorWarn() {
 
 }
 
-func (mon *monitorWarn) task(ctx context.Context, namespaceId int, key string, endTime time.Time, strategies []*model.WarnStrategy, userMaps map[int]*model.UserInfo, apiMaps map[string]*model.APIInfo, serviceMaps map[string]*model.ServiceListItem, noticeChannelMaps map[string]*model.NoticeChannel) {
+func (mon *monitorWarn) task(ctx context.Context, namespaceId int, key string, endTime time.Time, strategies []*model.WarnStrategy, userMaps map[int]*model.UserInfo, apiMaps map[string]*apimodel.APIInfo, serviceMaps map[string]*upstream_model.ServiceListItem, noticeChannelMaps map[string]*model.NoticeChannel) {
 
 	//key+时间戳
 	lockKey := fmt.Sprintf("%s_%d", key, endTime.Unix())
@@ -344,7 +348,7 @@ func getWarnHistoryInfo(strategy *model.WarnStrategy, warnList []model.NoticeCha
 
 // 告警计算 判断是否触发告警
 func (mon *monitorWarn) warnCount(ctx context.Context, namespaceId int, startTime, endTime time.Time, targetValue float64,
-	strategy *model.WarnStrategy, rule *model.WarnStrategyConfigRule, values []string, apiMaps map[string]*model.APIInfo, clusterMaps map[string]*model.Cluster, statistics map[string]float64) []model.NoticeChannelWarn {
+	strategy *model.WarnStrategy, rule *model.WarnStrategyConfigRule, values []string, apiMaps map[string]*apimodel.APIInfo, clusterMaps map[string]*model.Cluster, statistics map[string]float64) []model.NoticeChannelWarn {
 	warnCount := 0
 
 	ratio := 0.0
@@ -755,7 +759,7 @@ func (mon *monitorWarn) getClustersByPartitionUuid(ctx context.Context, namespac
 	return
 }
 
-func (mon *monitorWarn) getSourceInfo(ctx context.Context, namespaceId int) (apiMaps map[string]*model.APIInfo, serviceMaps map[string]*model.ServiceListItem, noticeChannelMap map[string]*model.NoticeChannel, err error) {
+func (mon *monitorWarn) getSourceInfo(ctx context.Context, namespaceId int) (apiMaps map[string]*apimodel.APIInfo, serviceMaps map[string]*upstream_model.ServiceListItem, noticeChannelMap map[string]*model.NoticeChannel, err error) {
 	errGroup, _ := errgroup.WithContext(ctx)
 
 	errGroup.Go(func() error {
@@ -764,7 +768,7 @@ func (mon *monitorWarn) getSourceInfo(ctx context.Context, namespaceId int) (api
 			log.Errorf("monitorWarn-apiService.GetAPIInfoAll err=%s", err.Error())
 			return err
 		}
-		apiMaps = common.SliceToMap(apiInfos, func(t *model.APIInfo) string {
+		apiMaps = common.SliceToMap(apiInfos, func(t *apimodel.APIInfo) string {
 			return t.UUID
 		})
 		return nil
@@ -775,7 +779,7 @@ func (mon *monitorWarn) getSourceInfo(ctx context.Context, namespaceId int) (api
 			log.Errorf("monitorWarn-service.GetServiceListAll err=%s", err.Error())
 			return err
 		}
-		serviceMaps = common.SliceToMap(serviceListAll, func(t *model.ServiceListItem) string {
+		serviceMaps = common.SliceToMap(serviceListAll, func(t *upstream_model.ServiceListItem) string {
 			return t.Name
 		})
 		return nil
@@ -803,7 +807,7 @@ func (mon *monitorWarn) getSourceInfo(ctx context.Context, namespaceId int) (api
 }
 
 // 获取实际的告警目标
-func (mon *monitorWarn) getRealTargetValues(apiMaps map[string]*model.APIInfo, serviceMaps map[string]*model.ServiceListItem, clusterMaps map[string]*model.Cluster, dimension, rule string, oldValues []string) []string {
+func (mon *monitorWarn) getRealTargetValues(apiMaps map[string]*apimodel.APIInfo, serviceMaps map[string]*upstream_model.ServiceListItem, clusterMaps map[string]*model.Cluster, dimension, rule string, oldValues []string) []string {
 	values := make([]string, 0)
 	switch dimension {
 	case model.DimensionTypeApi:

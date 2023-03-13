@@ -55,14 +55,14 @@ type IBaseStore[T any] interface {
 
 type txContextKey struct{}
 
-type baseStore[T any] struct {
+type BaseStore[T any] struct {
 	IDB
 	uniqueList []string
 	targetType *T
 }
 
-func createStore[T any](db IDB) *baseStore[T] {
-	b := &baseStore[T]{
+func CreateStore[T any](db IDB) *BaseStore[T] {
+	b := &BaseStore[T]{
 		IDB:        db,
 		targetType: new(T),
 	}
@@ -79,7 +79,7 @@ func createStore[T any](db IDB) *baseStore[T] {
 	return b
 }
 
-func (b *baseStore[T]) Get(ctx context.Context, id int) (*T, error) {
+func (b *BaseStore[T]) Get(ctx context.Context, id int) (*T, error) {
 	value := new(T)
 	err := b.DB(ctx).First(value, id).Error
 	if err != nil {
@@ -88,7 +88,7 @@ func (b *baseStore[T]) Get(ctx context.Context, id int) (*T, error) {
 	return value, nil
 }
 
-func (b *baseStore[T]) Save(ctx context.Context, t *T) error {
+func (b *BaseStore[T]) Save(ctx context.Context, t *T) error {
 
 	var v interface{} = t
 	if table, ok := v.(Table); ok {
@@ -104,7 +104,7 @@ func (b *baseStore[T]) Save(ctx context.Context, t *T) error {
 	return b.Insert(ctx, t)
 }
 
-func (b *baseStore[T]) UpdateByUnique(ctx context.Context, t *T, uniques []string) error {
+func (b *BaseStore[T]) UpdateByUnique(ctx context.Context, t *T, uniques []string) error {
 	columns := make([]clause.Column, 0, len(uniques))
 	for _, unique := range uniques {
 		columns = append(columns, clause.Column{
@@ -117,27 +117,27 @@ func (b *baseStore[T]) UpdateByUnique(ctx context.Context, t *T, uniques []strin
 	}).Create(t).Error
 }
 
-func (b *baseStore[T]) Delete(ctx context.Context, id int) (int, error) {
+func (b *BaseStore[T]) Delete(ctx context.Context, id int) (int, error) {
 
 	result := b.DB(ctx).Delete(b.targetType, id)
 
 	return int(result.RowsAffected), result.Error
 }
 
-func (b *baseStore[T]) UpdateWhere(ctx context.Context, t *T, m map[string]interface{}) (int, error) {
+func (b *BaseStore[T]) UpdateWhere(ctx context.Context, t *T, m map[string]interface{}) (int, error) {
 
 	result := b.DB(ctx).Model(t).Updates(m)
 
 	return int(result.RowsAffected), result.Error
 }
 
-func (b *baseStore[T]) Update(ctx context.Context, t *T) (int, error) {
+func (b *BaseStore[T]) Update(ctx context.Context, t *T) (int, error) {
 
 	result := b.DB(ctx).Updates(t)
 
 	return int(result.RowsAffected), result.Error
 }
-func (b *baseStore[T]) DeleteWhere(ctx context.Context, m map[string]interface{}) (int, error) {
+func (b *BaseStore[T]) DeleteWhere(ctx context.Context, m map[string]interface{}) (int, error) {
 	if len(m) == 0 {
 		return 0, gorm.ErrMissingWhereClause
 	}
@@ -146,12 +146,12 @@ func (b *baseStore[T]) DeleteWhere(ctx context.Context, m map[string]interface{}
 	return int(result.RowsAffected), result.Error
 }
 
-func (b *baseStore[T]) Insert(ctx context.Context, t ...*T) error {
+func (b *BaseStore[T]) Insert(ctx context.Context, t ...*T) error {
 
 	return b.DB(ctx).Create(t).Error
 }
 
-func (b *baseStore[T]) List(ctx context.Context, m map[string]interface{}) ([]*T, error) {
+func (b *BaseStore[T]) List(ctx context.Context, m map[string]interface{}) ([]*T, error) {
 	list := make([]*T, 0)
 
 	err := b.DB(ctx).Where(m).Find(&list).Error
@@ -161,7 +161,7 @@ func (b *baseStore[T]) List(ctx context.Context, m map[string]interface{}) ([]*T
 
 	return list, nil
 }
-func (b *baseStore[T]) ListQuery(ctx context.Context, where string, args []interface{}, order string) ([]*T, error) {
+func (b *BaseStore[T]) ListQuery(ctx context.Context, where string, args []interface{}, order string) ([]*T, error) {
 	list := make([]*T, 0)
 	db := b.DB(ctx)
 	db = db.Where(where, args...)
@@ -176,7 +176,7 @@ func (b *baseStore[T]) ListQuery(ctx context.Context, where string, args []inter
 	return list, nil
 }
 
-func (b *baseStore[T]) First(ctx context.Context, m map[string]interface{}) (*T, error) {
+func (b *BaseStore[T]) First(ctx context.Context, m map[string]interface{}) (*T, error) {
 	value := new(T)
 	db := b.DB(ctx)
 
@@ -187,7 +187,7 @@ func (b *baseStore[T]) First(ctx context.Context, m map[string]interface{}) (*T,
 
 	return value, nil
 }
-func (b *baseStore[T]) FirstQuery(ctx context.Context, where string, args []interface{}, order string) (*T, error) {
+func (b *BaseStore[T]) FirstQuery(ctx context.Context, where string, args []interface{}, order string) (*T, error) {
 	value := new(T)
 	db := b.DB(ctx)
 	if order != "" {
@@ -200,7 +200,7 @@ func (b *baseStore[T]) FirstQuery(ctx context.Context, where string, args []inte
 
 	return value, nil
 }
-func (b *baseStore[T]) ListPage(ctx context.Context, where string, pageNum, pageSize int, args []interface{}, order string) ([]*T, int, error) {
+func (b *BaseStore[T]) ListPage(ctx context.Context, where string, pageNum, pageSize int, args []interface{}, order string) ([]*T, int, error) {
 	list := make([]*T, 0, pageSize)
 	db := b.DB(ctx).Where(where, args...)
 	if order != "" {
@@ -216,7 +216,7 @@ func (b *baseStore[T]) ListPage(ctx context.Context, where string, pageNum, page
 }
 
 // Transaction 执行事务
-func (b *baseStore[T]) Transaction(ctx context.Context, f func(context.Context) error) error {
+func (b *BaseStore[T]) Transaction(ctx context.Context, f func(context.Context) error) error {
 	return b.DB(ctx).Transaction(func(tx *gorm.DB) error {
 		txCtx := context.WithValue(ctx, txContextKey{}, tx)
 		return f(txCtx)

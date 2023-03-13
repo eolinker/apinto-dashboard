@@ -19,11 +19,11 @@ type IUserInfoStore interface {
 }
 
 type userInfoStore struct {
-	*baseStore[entry.UserInfo]
+	*BaseStore[entry.UserInfo]
 }
 
 func newUserInfoStore(db IDB) IUserInfoStore {
-	return &userInfoStore{baseStore: createStore[entry.UserInfo](db)}
+	return &userInfoStore{BaseStore: CreateStore[entry.UserInfo](db)}
 }
 
 func (u *userInfoStore) GetByUUID(ctx context.Context, uuid string) (*entry.UserInfo, error) {

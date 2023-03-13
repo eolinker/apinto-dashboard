@@ -24,31 +24,31 @@ func RegisterUserRouter(router gin.IRoutes) {
 
 	router.GET("/access", u.getAllAccess)
 	router.GET("/my/modules", u.getUserAccess)
-	router.PUT("/my/profile", logHandler(enum.LogOperateTypeEdit, enum.LogKindUser), u.updateMyProfile)
+	router.PUT("/my/profile", LogHandler(enum.LogOperateTypeEdit, enum.LogKindUser), u.updateMyProfile)
 	router.GET("/my/profile", u.getMyProfile)
-	router.POST("/my/password", logHandler(enum.LogOperateTypeEdit, enum.LogKindUser), u.updateMyPassword)
+	router.POST("/my/password", LogHandler(enum.LogOperateTypeEdit, enum.LogKindUser), u.updateMyPassword)
 
-	router.GET("/roles", genAccessHandler(access.UserRoleView, access.UserRoleEdit), u.getRoleList)
-	router.GET("/role", genAccessHandler(access.UserRoleView, access.UserRoleEdit), u.getRoleInfo)
+	router.GET("/roles", GenAccessHandler(access.UserRoleView, access.UserRoleEdit), u.getRoleList)
+	router.GET("/role", GenAccessHandler(access.UserRoleView, access.UserRoleEdit), u.getRoleInfo)
 	router.GET("/role/options", u.getRoleOptions)
-	router.POST("/role", genAccessHandler(access.UserRoleEdit), logHandler(enum.LogOperateTypeCreate, enum.LogKindRole), u.createRole)
-	router.PUT("/role", genAccessHandler(access.UserRoleEdit), logHandler(enum.LogOperateTypeEdit, enum.LogKindRole), u.updateRole)
-	router.DELETE("/role", genAccessHandler(access.UserRoleEdit), logHandler(enum.LogOperateTypeDelete, enum.LogKindRole), u.deleteRole)
-	router.POST("/role/batch-update", genAccessHandler(access.UserRoleEdit), logHandler(enum.LogOperateTypeEdit, enum.LogKindRole), u.roleBatchUpdate)
-	router.POST("/role/batch-delete", genAccessHandler(access.UserRoleEdit), logHandler(enum.LogOperateTypeEdit, enum.LogKindRole), u.roleBatchRemove)
+	router.POST("/role", GenAccessHandler(access.UserRoleEdit), LogHandler(enum.LogOperateTypeCreate, enum.LogKindRole), u.createRole)
+	router.PUT("/role", GenAccessHandler(access.UserRoleEdit), LogHandler(enum.LogOperateTypeEdit, enum.LogKindRole), u.updateRole)
+	router.DELETE("/role", GenAccessHandler(access.UserRoleEdit), LogHandler(enum.LogOperateTypeDelete, enum.LogKindRole), u.deleteRole)
+	router.POST("/role/batch-update", GenAccessHandler(access.UserRoleEdit), LogHandler(enum.LogOperateTypeEdit, enum.LogKindRole), u.roleBatchUpdate)
+	router.POST("/role/batch-delete", GenAccessHandler(access.UserRoleEdit), LogHandler(enum.LogOperateTypeEdit, enum.LogKindRole), u.roleBatchRemove)
 
-	router.POST("/user/delete", genAccessHandler(access.UserRoleEdit), logHandler(enum.LogOperateTypeDelete, enum.LogKindUser), u.delUser)
-	router.POST("/user/profile", genAccessHandler(access.UserRoleEdit), logHandler(enum.LogOperateTypeCreate, enum.LogKindUser), u.createUser)
-	router.PATCH("/user/profile", genAccessHandler(access.UserRoleEdit), logHandler(enum.LogOperateTypeEdit, enum.LogKindUser), u.patchUser)
-	router.PUT("/user/profile", genAccessHandler(access.UserRoleEdit), logHandler(enum.LogOperateTypeEdit, enum.LogKindUser), u.updateUser)
-	router.GET("/user/profile", genAccessHandler(access.UserRoleView, access.UserRoleEdit), u.getUser)
-	router.GET("/user/list", genAccessHandler(access.UserRoleView, access.UserRoleEdit), u.getUserList)
+	router.POST("/user/delete", GenAccessHandler(access.UserRoleEdit), LogHandler(enum.LogOperateTypeDelete, enum.LogKindUser), u.delUser)
+	router.POST("/user/profile", GenAccessHandler(access.UserRoleEdit), LogHandler(enum.LogOperateTypeCreate, enum.LogKindUser), u.createUser)
+	router.PATCH("/user/profile", GenAccessHandler(access.UserRoleEdit), LogHandler(enum.LogOperateTypeEdit, enum.LogKindUser), u.patchUser)
+	router.PUT("/user/profile", GenAccessHandler(access.UserRoleEdit), LogHandler(enum.LogOperateTypeEdit, enum.LogKindUser), u.updateUser)
+	router.GET("/user/profile", GenAccessHandler(access.UserRoleView, access.UserRoleEdit), u.getUser)
+	router.GET("/user/list", GenAccessHandler(access.UserRoleView, access.UserRoleEdit), u.getUserList)
 	router.GET("/user/enum", u.getUserList)
-	router.POST("/user/password-reset", genAccessHandler(access.UserRoleEdit), logHandler(enum.LogOperateTypeEdit, enum.LogKindUser), u.resetUserPwd)
+	router.POST("/user/password-reset", GenAccessHandler(access.UserRoleEdit), LogHandler(enum.LogOperateTypeEdit, enum.LogKindUser), u.resetUserPwd)
 }
 
 func (u *userController) getMyProfile(ginCtx *gin.Context) {
-	userId := getUserId(ginCtx)
+	userId := GetUserId(ginCtx)
 
 	userInfo, err := u.userInfo.GetUserInfo(ginCtx, userId)
 	if err != nil {
@@ -85,7 +85,7 @@ func (u *userController) getMyProfile(ginCtx *gin.Context) {
 }
 
 func (u *userController) updateMyProfile(ginCtx *gin.Context) {
-	userId := getUserId(ginCtx)
+	userId := GetUserId(ginCtx)
 
 	req := &dto.UpdateMyProfileReq{}
 	err := ginCtx.BindJSON(req)
@@ -103,7 +103,7 @@ func (u *userController) updateMyProfile(ginCtx *gin.Context) {
 }
 
 func (u *userController) updateMyPassword(ginCtx *gin.Context) {
-	userId := getUserId(ginCtx)
+	userId := GetUserId(ginCtx)
 
 	req := &dto.UpdateMyPasswordReq{}
 	err := ginCtx.BindJSON(req)
@@ -150,7 +150,7 @@ func getModules(modules []*access.GlobalAccess) []*dto.SystemModuleItem {
 }
 
 func (u *userController) getUserAccess(ginCtx *gin.Context) {
-	userID := getUserId(ginCtx)
+	userID := GetUserId(ginCtx)
 
 	accessSet, err := u.userInfo.GetAccessInfo(ginCtx, userID)
 	if err != nil {
@@ -193,7 +193,7 @@ func (u *userController) getUserAccess(ginCtx *gin.Context) {
 }
 
 func (u *userController) getRoleList(ginCtx *gin.Context) {
-	userID := getUserId(ginCtx)
+	userID := GetUserId(ginCtx)
 	roleList, totalUsers, err := u.userInfo.GetRoleList(ginCtx, userID)
 	if err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("GetRoleList fail. err:%s", err.Error())))
@@ -261,7 +261,7 @@ func (u *userController) getRoleOptions(ginCtx *gin.Context) {
 }
 
 func (u *userController) createRole(ginCtx *gin.Context) {
-	userID := getUserId(ginCtx)
+	userID := GetUserId(ginCtx)
 
 	input := new(dto.ProxyRoleInfo)
 	if err := ginCtx.BindJSON(input); err != nil {
@@ -285,7 +285,7 @@ func (u *userController) createRole(ginCtx *gin.Context) {
 }
 
 func (u *userController) updateRole(ginCtx *gin.Context) {
-	userID := getUserId(ginCtx)
+	userID := GetUserId(ginCtx)
 
 	roleID := ginCtx.Query("id")
 	if roleID == "" {
@@ -315,7 +315,7 @@ func (u *userController) updateRole(ginCtx *gin.Context) {
 }
 
 func (u *userController) deleteRole(ginCtx *gin.Context) {
-	userID := getUserId(ginCtx)
+	userID := GetUserId(ginCtx)
 	roleID := ginCtx.Query("id")
 	if roleID == "" {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("DeleteRole fail. err: id can't be nil")))
@@ -364,7 +364,7 @@ func (u *userController) roleBatchRemove(ginCtx *gin.Context) {
 }
 
 func (u *userController) delUser(ginCtx *gin.Context) {
-	userID := getUserId(ginCtx)
+	userID := GetUserId(ginCtx)
 
 	req := &dto.DelUserReq{}
 	if err := ginCtx.BindJSON(req); err != nil {
@@ -388,7 +388,7 @@ func (u *userController) delUser(ginCtx *gin.Context) {
 }
 
 func (u *userController) createUser(ginCtx *gin.Context) {
-	userID := getUserId(ginCtx)
+	userID := GetUserId(ginCtx)
 
 	req := &dto.SaveUserReq{}
 	if err := ginCtx.BindJSON(req); err != nil {
@@ -410,7 +410,7 @@ func (u *userController) createUser(ginCtx *gin.Context) {
 }
 
 func (u *userController) patchUser(ginCtx *gin.Context) {
-	operator := getUserId(ginCtx)
+	operator := GetUserId(ginCtx)
 	userIDStr := ginCtx.Query("id")
 
 	userId, err := strconv.Atoi(userIDStr)
@@ -435,7 +435,7 @@ func (u *userController) patchUser(ginCtx *gin.Context) {
 }
 
 func (u *userController) updateUser(ginCtx *gin.Context) {
-	operator := getUserId(ginCtx)
+	operator := GetUserId(ginCtx)
 
 	userIdStr := ginCtx.Query("id")
 	userId, err := strconv.Atoi(userIdStr)
@@ -574,7 +574,7 @@ func (u *userController) getUser(ginCtx *gin.Context) {
 
 func (u *userController) resetUserPwd(ginCtx *gin.Context) {
 
-	operator := getUserId(ginCtx)
+	operator := GetUserId(ginCtx)
 
 	resetPasswordReq := new(dto.ResetPasswordReq)
 	err := ginCtx.BindJSON(resetPasswordReq)

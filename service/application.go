@@ -201,10 +201,10 @@ func (a *applicationService) Online(ctx context.Context, namespaceId, userId int
 		return err
 	}
 
-	if err = a.lockService.lock(lockNameApplication, applicationId); err != nil {
+	if err = a.lockService.Lock(LockNameApplication, applicationId); err != nil {
 		return err
 	}
-	defer a.lockService.unlock(lockNameApplication, applicationId)
+	defer a.lockService.Unlock(LockNameApplication, applicationId)
 
 	//拿到锁后需要重新获取下信息
 	application, err = a.applicationStore.GetByIdStr(ctx, namespaceId, id)
@@ -314,10 +314,10 @@ func (a *applicationService) Offline(ctx context.Context, namespaceId, userId in
 		return err
 	}
 
-	if err = a.lockService.lock(lockNameApplication, applicationId); err != nil {
+	if err = a.lockService.Lock(LockNameApplication, applicationId); err != nil {
 		return err
 	}
-	defer a.lockService.unlock(lockNameApplication, applicationId)
+	defer a.lockService.Unlock(LockNameApplication, applicationId)
 
 	//拿到锁后需要重新获取下信息
 	application, err = a.applicationStore.GetByIdStr(ctx, namespaceId, id)
@@ -384,10 +384,10 @@ func (a *applicationService) Disable(ctx context.Context, namespaceId, userId in
 		return err
 	}
 
-	if err = a.lockService.lock(lockNameApplication, applicationId); err != nil {
+	if err = a.lockService.Lock(LockNameApplication, applicationId); err != nil {
 		return err
 	}
-	defer a.lockService.unlock(lockNameApplication, applicationId)
+	defer a.lockService.Unlock(LockNameApplication, applicationId)
 
 	//拿到锁后需要重新获取下信息
 	application, err = a.applicationStore.GetByIdStr(ctx, namespaceId, id)

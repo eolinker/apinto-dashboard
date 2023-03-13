@@ -12,11 +12,11 @@ type IWarnHistoryIStore interface {
 }
 
 type WarnHistoryStore struct {
-	*baseStore[entry.WarnHistory]
+	*BaseStore[entry.WarnHistory]
 }
 
 func newWarnHistoryIStore(db IDB) IWarnHistoryIStore {
-	return &WarnHistoryStore{baseStore: createStore[entry.WarnHistory](db)}
+	return &WarnHistoryStore{BaseStore: CreateStore[entry.WarnHistory](db)}
 }
 
 func (w *WarnHistoryStore) GetPage(ctx context.Context, partitionId int, name string, pageNum, pageSize int, startTime, endTime time.Time) ([]*entry.WarnHistory, int64, error) {

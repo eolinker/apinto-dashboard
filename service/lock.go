@@ -7,33 +7,33 @@ import (
 	"sync/atomic"
 )
 
-type lockNameType string
+type LockNameType = string
 
-var (
-	lockNameDiscovery    lockNameType = "discovery"
-	lockNameService      lockNameType = "service"
-	lockNameVariable     lockNameType = "variable"
-	lockNameApplication  lockNameType = "application"
-	lockNameAPI          lockNameType = "api"
-	lockNameStrategy     lockNameType = "strategy"
-	lockNameExtApp       lockNameType = "ext-app"
-	lockNameMonPartition lockNameType = "monitor-partition"
+const (
+	LockNameDiscovery    = "discovery"
+	LockNameService      = "service"
+	LockNameVariable     = "variable"
+	LockNameApplication  = "application"
+	LockNameAPI          = "api"
+	LockNameStrategy     = "strategy"
+	LockNameExtApp       = "ext-app"
+	LockNameMonPartition = "monitor-partition"
 )
 
 type IAsynLockService interface {
-	lock(name lockNameType, id int) error
-	deleteLock(name lockNameType, id int)
-	unlock(name lockNameType, id int)
+	Lock(name LockNameType, id int) error
+	DeleteLock(name LockNameType, id int)
+	Unlock(name LockNameType, id int)
 }
 
 type ISyncLockService interface {
-	lock(name lockNameType, id int) error
-	deleteLock(name lockNameType, id int)
-	unlock(name lockNameType, id int)
+	Lock(name LockNameType, id int) error
+	DeleteLock(name LockNameType, id int)
+	Unlock(name LockNameType, id int)
 }
 
 // 异步锁
-func newAsynLockService() IAsynLockService {
+func NewAsynLockService() IAsynLockService {
 	lockService := &asynLock{
 		lockMaps: &sync.Map{},
 	}
@@ -41,7 +41,7 @@ func newAsynLockService() IAsynLockService {
 }
 
 // 同步锁
-func newSyncLockService() ISyncLockService {
+func NewSyncLockService() ISyncLockService {
 	lockService := &syncLock{
 		lockMaps: &sync.Map{},
 	}
@@ -52,7 +52,7 @@ type syncLock struct {
 	lockMaps *sync.Map
 }
 
-func (s *syncLock) lock(name lockNameType, id int) error {
+func (s *syncLock) Lock(name LockNameType, id int) error {
 	key := fmt.Sprintf("%s_%d", name, id)
 	s.lockMaps.LoadOrStore(key, new(sync.Mutex))
 	if v, ok := s.lockMaps.Load(key); ok {
@@ -62,12 +62,12 @@ func (s *syncLock) lock(name lockNameType, id int) error {
 	return nil
 }
 
-func (s *syncLock) deleteLock(name lockNameType, id int) {
+func (s *syncLock) DeleteLock(name LockNameType, id int) {
 	key := fmt.Sprintf("%s_%d", name, id)
 	s.lockMaps.Delete(key)
 }
 
-func (s *syncLock) unlock(name lockNameType, id int) {
+func (s *syncLock) Unlock(name LockNameType, id int) {
 	key := fmt.Sprintf("%s_%d", name, id)
 	if v, ok := s.lockMaps.Load(key); ok {
 		mutex := v.(*sync.Mutex)
@@ -80,7 +80,7 @@ type asynLock struct {
 	lockMaps *sync.Map
 }
 
-func (a *asynLock) lock(name lockNameType, id int) error {
+func (a *asynLock) Lock(name LockNameType, id int) error {
 	key := fmt.Sprintf("%s_%d", name, id)
 	a.lockMaps.LoadOrStore(key, new(int32))
 	if v, ok := a.lockMaps.Load(key); ok {
@@ -94,12 +94,12 @@ func (a *asynLock) lock(name lockNameType, id int) error {
 	return nil
 }
 
-func (a *asynLock) deleteLock(name lockNameType, id int) {
+func (a *asynLock) DeleteLock(name LockNameType, id int) {
 	key := fmt.Sprintf("%s_%d", name, id)
 	a.lockMaps.Delete(key)
 }
 
-func (a *asynLock) unlock(name lockNameType, id int) {
+func (a *asynLock) Unlock(name LockNameType, id int) {
 	key := fmt.Sprintf("%s_%d", name, id)
 	if v, ok := a.lockMaps.Load(key); ok {
 		atomic.StoreInt32(v.(*int32), 0)

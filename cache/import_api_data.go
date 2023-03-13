@@ -2,17 +2,17 @@ package cache
 
 import (
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/model"
+	apimodel "github.com/eolinker/apinto-dashboard/modules/api/model"
 	"github.com/go-redis/redis/v8"
 )
 
 type IImportApiCache interface {
-	IRedisCache[model.ImportAPIRedisData]
+	IRedisCache[apimodel.ImportAPIRedisData]
 	Key(token string) string
 }
 
 type importApiCache struct {
-	*redisCache[model.ImportAPIRedisData]
+	*redisCache[apimodel.ImportAPIRedisData]
 }
 
 func (i *importApiCache) Key(token string) string {
@@ -21,7 +21,7 @@ func (i *importApiCache) Key(token string) string {
 
 func newImportCache(client *redis.ClusterClient) IImportApiCache {
 	cache := &importApiCache{
-		redisCache: createRedisCache[model.ImportAPIRedisData](client),
+		redisCache: createRedisCache[apimodel.ImportAPIRedisData](client),
 	}
 	return cache
 

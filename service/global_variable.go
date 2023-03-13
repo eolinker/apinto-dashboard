@@ -28,8 +28,8 @@ type IGlobalVariableService interface {
 	GetInfo(ctx context.Context, namespaceID int, key string) ([]*model.GlobalVariableDetails, error)
 	Create(ctx context.Context, namespaceID, userID int, key, desc string) (int, error)
 	Delete(ctx context.Context, namespaceID, userID int, key string) error
-	getByKeys(ctx context.Context, namespaceId int, keys []string) ([]*model.GlobalVariable, error)
-	getById(ctx context.Context, namespaceId int) (*model.GlobalVariable, error)
+	GetByKeys(ctx context.Context, namespaceId int, keys []string) ([]*model.GlobalVariable, error)
+	GetById(ctx context.Context, namespaceId int) (*model.GlobalVariable, error)
 }
 
 func newGlobalVariableService() IGlobalVariableService {
@@ -46,7 +46,7 @@ func newGlobalVariableService() IGlobalVariableService {
 	return s
 }
 
-func (g *globalVariableService) getById(ctx context.Context, id int) (*model.GlobalVariable, error) {
+func (g *globalVariableService) GetById(ctx context.Context, id int) (*model.GlobalVariable, error) {
 	variable, err := g.globalVariableStore.Get(ctx, id)
 	if err != nil {
 		return nil, err
@@ -54,7 +54,7 @@ func (g *globalVariableService) getById(ctx context.Context, id int) (*model.Glo
 	return &model.GlobalVariable{Variables: variable}, nil
 }
 
-func (g *globalVariableService) getByKeys(ctx context.Context, namespaceId int, keys []string) ([]*model.GlobalVariable, error) {
+func (g *globalVariableService) GetByKeys(ctx context.Context, namespaceId int, keys []string) ([]*model.GlobalVariable, error) {
 
 	variables, err := g.globalVariableStore.GetGlobalVariableByKeys(ctx, namespaceId, keys)
 	if err != nil {

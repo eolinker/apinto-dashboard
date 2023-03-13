@@ -21,7 +21,7 @@ type BaseKindHandler[T any, K any] interface {
 }
 
 type BaseKindStore[T any, K any] struct {
-	*baseStore[K]
+	*BaseStore[K]
 	BaseKindHandler[T, K]
 }
 
@@ -35,13 +35,13 @@ func (k *BaseKindStore[T, K]) Get(ctx context.Context, id int) (*T, error) {
 		isTarget = ok
 	}
 	if isTarget {
-		vd, err := k.baseStore.FirstQuery(ctx, "`target` = ? and `kind` = ?", []interface{}{id, k.Kind()}, "")
+		vd, err := k.BaseStore.FirstQuery(ctx, "`target` = ? and `kind` = ?", []interface{}{id, k.Kind()}, "")
 		if err != nil {
 			return nil, err
 		}
 		return k.decode(vd), nil
 	}
-	vd, err := k.baseStore.Get(ctx, id)
+	vd, err := k.BaseStore.Get(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func (k *BaseKindStore[T, K]) Get(ctx context.Context, id int) (*T, error) {
 func (k *BaseKindStore[T, K]) Save(ctx context.Context, t *T) error {
 
 	encode := k.encode(t)
-	if err := k.baseStore.Save(ctx, encode); err != nil {
+	if err := k.BaseStore.Save(ctx, encode); err != nil {
 		return err
 	}
 	var e interface{} = encode
@@ -77,11 +77,11 @@ func (k *BaseKindStore[T, K]) Save(ctx context.Context, t *T) error {
 func (k *BaseKindStore[T, K]) Insert(ctx context.Context, ts ...*T) error {
 	vds := k.encodes(ts)
 
-	return k.baseStore.Insert(ctx, vds...)
+	return k.BaseStore.Insert(ctx, vds...)
 }
 
 func (k *BaseKindStore[T, K]) List(ctx context.Context, m map[string]interface{}) ([]*T, error) {
-	list, err := k.baseStore.List(ctx, m)
+	list, err := k.BaseStore.List(ctx, m)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +89,7 @@ func (k *BaseKindStore[T, K]) List(ctx context.Context, m map[string]interface{}
 }
 
 func (k *BaseKindStore[T, K]) ListQuery(ctx context.Context, sql string, args []interface{}, order string) ([]*T, error) {
-	list, err := k.baseStore.ListQuery(ctx, sql, args, order)
+	list, err := k.BaseStore.ListQuery(ctx, sql, args, order)
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +97,7 @@ func (k *BaseKindStore[T, K]) ListQuery(ctx context.Context, sql string, args []
 }
 
 func (k *BaseKindStore[T, K]) First(ctx context.Context, m map[string]interface{}) (*T, error) {
-	query, err := k.baseStore.First(ctx, m)
+	query, err := k.BaseStore.First(ctx, m)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +105,7 @@ func (k *BaseKindStore[T, K]) First(ctx context.Context, m map[string]interface{
 }
 
 func (k *BaseKindStore[T, K]) FirstQuery(ctx context.Context, sql string, args []interface{}, order string) (*T, error) {
-	query, err := k.baseStore.FirstQuery(ctx, sql, args, order)
+	query, err := k.BaseStore.FirstQuery(ctx, sql, args, order)
 	if err != nil {
 		return nil, err
 	}
@@ -113,7 +113,7 @@ func (k *BaseKindStore[T, K]) FirstQuery(ctx context.Context, sql string, args [
 }
 
 func (k *BaseKindStore[T, K]) ListPage(ctx context.Context, sql string, pageNum, pageSize int, args []interface{}, order string) ([]*T, int, error) {
-	list, i, err := k.baseStore.ListPage(ctx, sql, pageNum, pageSize, args, order)
+	list, i, err := k.BaseStore.ListPage(ctx, sql, pageNum, pageSize, args, order)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -121,20 +121,20 @@ func (k *BaseKindStore[T, K]) ListPage(ctx context.Context, sql string, pageNum,
 }
 
 func (k *BaseKindStore[T, K]) UpdateByUnique(ctx context.Context, t *T, fields []string) error {
-	return k.baseStore.UpdateByUnique(ctx, k.encode(t), fields)
+	return k.BaseStore.UpdateByUnique(ctx, k.encode(t), fields)
 }
 
 func (k *BaseKindStore[T, K]) UpdateWhere(ctx context.Context, t *T, m map[string]interface{}) (int, error) {
-	return k.baseStore.UpdateWhere(ctx, k.encode(t), m)
+	return k.BaseStore.UpdateWhere(ctx, k.encode(t), m)
 
 }
 
 func (k *BaseKindStore[T, K]) Update(ctx context.Context, t *T) (int, error) {
-	return k.baseStore.Update(ctx, k.encode(t))
+	return k.BaseStore.Update(ctx, k.encode(t))
 }
 
 func (k *BaseKindStore[T, K]) DB(ctx context.Context) *gorm.DB {
-	return k.baseStore.DB(ctx)
+	return k.BaseStore.DB(ctx)
 }
 
 func (k *BaseKindStore[T, K]) decode(i *K) *T {
@@ -164,7 +164,7 @@ func (k *BaseKindStore[T, K]) encodes(list []*T) []*K {
 func CreateBaseKindStore[T any, K any](t BaseKindHandler[T, K], db IDB) *BaseKindStore[T, K] {
 	k := &BaseKindStore[T, K]{
 		BaseKindHandler: t,
-		baseStore:       createStore[K](db),
+		BaseStore:       CreateStore[K](db),
 	}
 	return k
 }

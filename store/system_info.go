@@ -18,11 +18,11 @@ type ISystemInfoStore interface {
 }
 
 type systemInfoStore struct {
-	*baseStore[entry.SystemInfo]
+	*BaseStore[entry.SystemInfo]
 }
 
 func newSystemInfoStore(db IDB) ISystemInfoStore {
-	return &systemInfoStore{baseStore: createStore[entry.SystemInfo](db)}
+	return &systemInfoStore{BaseStore: CreateStore[entry.SystemInfo](db)}
 }
 
 func (s *systemInfoStore) GetSystemInfoByKey(ctx context.Context, key string) (*entry.SystemInfo, error) {

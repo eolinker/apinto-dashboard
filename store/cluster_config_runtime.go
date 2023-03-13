@@ -45,5 +45,5 @@ func (s *clusterConfigRuntimeHandler) Decode(r *entry.Runtime) *entry.ClusterCon
 
 func newClusterConfigRuntimeStore(db IDB) IClusterConfigRuntimeStore {
 	var runTimeHandler BaseKindHandler[entry.ClusterConfigRuntime, entry.Runtime] = new(clusterConfigRuntimeHandler)
-	return createRuntime[entry.ClusterConfigRuntime](runTimeHandler, db)
+	return CreateRuntime[entry.ClusterConfigRuntime](runTimeHandler, db)
 }

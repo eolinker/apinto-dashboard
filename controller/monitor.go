@@ -8,6 +8,10 @@ import (
 	"github.com/eolinker/apinto-dashboard/dto"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/model"
+	service2 "github.com/eolinker/apinto-dashboard/modules/api"
+	apimodel "github.com/eolinker/apinto-dashboard/modules/api/model"
+	"github.com/eolinker/apinto-dashboard/modules/upstream"
+	upstream_model "github.com/eolinker/apinto-dashboard/modules/upstream/model"
 	"github.com/eolinker/apinto-dashboard/service"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/gin-contrib/gzip"
@@ -20,10 +24,10 @@ import (
 type monitorController struct {
 	monitorService service.IMonitorService
 	monStatistics  service.IMonitorStatistics
-	apiService     service.IAPIService
+	apiService     service2.IAPIService
 	appService     service.IApplicationService
 	clusterService service.IClusterService
-	service        service.IService
+	service        upstream.IService
 }
 
 func RegisterMonitorRouter(router gin.IRoutes) {
@@ -37,11 +41,11 @@ func RegisterMonitorRouter(router gin.IRoutes) {
 
 	prefix := "/monitor"
 
-	router.GET("/monitor/partitions", genAccessHandler(access.MonPartitionView), m.getPartitionList)
-	router.GET("/monitor/partition", genAccessHandler(access.MonPartitionEdit), m.getPartitionInfo)
-	router.POST("/monitor/partition", genAccessHandler(access.MonPartitionEdit), logHandler(enum.LogOperateTypeCreate, enum.LogKindMonPartition), m.createPartition)
-	router.PUT("/monitor/partition", genAccessHandler(access.MonPartitionEdit), logHandler(enum.LogOperateTypeEdit, enum.LogKindMonPartition), m.editPartition)
-	router.DELETE("/monitor/partition", genAccessHandler(access.MonPartitionEdit), logHandler(enum.LogOperateTypeDelete, enum.LogKindMonPartition), m.delPartition)
+	router.GET("/monitor/partitions", GenAccessHandler(access.MonPartitionView), m.getPartitionList)
+	router.GET("/monitor/partition", GenAccessHandler(access.MonPartitionEdit), m.getPartitionInfo)
+	router.POST("/monitor/partition", GenAccessHandler(access.MonPartitionEdit), LogHandler(enum.LogOperateTypeCreate, enum.LogKindMonPartition), m.createPartition)
+	router.PUT("/monitor/partition", GenAccessHandler(access.MonPartitionEdit), LogHandler(enum.LogOperateTypeEdit, enum.LogKindMonPartition), m.editPartition)
+	router.DELETE("/monitor/partition", GenAccessHandler(access.MonPartitionEdit), LogHandler(enum.LogOperateTypeDelete, enum.LogKindMonPartition), m.delPartition)
 	//总览
 	router.POST(prefix+"/overview/summary", gzip.Gzip(gzip.DefaultCompression), m.overviewSummary)
 	router.POST(prefix+"/overview/invoke", gzip.Gzip(gzip.DefaultCompression), m.overviewInvoke)
@@ -59,7 +63,7 @@ func RegisterMonitorRouter(router gin.IRoutes) {
 }
 
 func (m *monitorController) getPartitionList(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	list, err := m.monitorService.PartitionList(ginCtx, namespaceId)
 	if err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("Get monitor partition list fail. err: %s", err)))
@@ -72,7 +76,7 @@ func (m *monitorController) getPartitionList(ginCtx *gin.Context) {
 }
 
 func (m *monitorController) getPartitionInfo(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	uuid := ginCtx.Query("uuid")
 
 	info, err := m.monitorService.PartitionInfo(ginCtx, namespaceId, uuid)
@@ -95,8 +99,8 @@ func (m *monitorController) getPartitionInfo(ginCtx *gin.Context) {
 }
 
 func (m *monitorController) createPartition(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
-	userId := getUserId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
+	userId := GetUserId(ginCtx)
 
 	inputProxy := new(dto.MonitorPartitionInfoProxy)
 	if err := ginCtx.BindJSON(inputProxy); err != nil {
@@ -123,8 +127,8 @@ func (m *monitorController) createPartition(ginCtx *gin.Context) {
 }
 
 func (m *monitorController) editPartition(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
-	userId := getUserId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
+	userId := GetUserId(ginCtx)
 	uuid := ginCtx.Query("uuid")
 
 	inputProxy := new(dto.MonitorPartitionInfoProxy)
@@ -152,7 +156,7 @@ func (m *monitorController) editPartition(ginCtx *gin.Context) {
 }
 
 func (m *monitorController) delPartition(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	uuid := ginCtx.Query("uuid")
 
 	err := m.monitorService.DelPartition(ginCtx, namespaceId, uuid)
@@ -166,7 +170,7 @@ func (m *monitorController) delPartition(ginCtx *gin.Context) {
 
 // 请求/转发统计
 func (m *monitorController) overviewSummary(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 
 	input := new(dto.MonSummaryInput)
 	if err := ginCtx.BindJSON(input); err != nil {
@@ -233,7 +237,7 @@ func (m *monitorController) overviewSummary(ginCtx *gin.Context) {
 
 // 调用量统计
 func (m *monitorController) overviewInvoke(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	input := new(dto.MonSummaryInput)
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
@@ -294,7 +298,7 @@ func (m *monitorController) overviewInvoke(ginCtx *gin.Context) {
 
 // 报文量统计
 func (m *monitorController) overviewMessage(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	input := new(dto.MonSummaryInput)
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
@@ -351,7 +355,7 @@ func (m *monitorController) overviewMessage(ginCtx *gin.Context) {
 // API/应用/上游调用量TOP10
 func (m *monitorController) overviewTop(ginCtx *gin.Context) {
 	input := new(dto.MonSummaryInput)
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -413,7 +417,7 @@ func (m *monitorController) overviewTop(ginCtx *gin.Context) {
 			apiUUIDS = append(apiUUIDS, key)
 		}
 		apiItems, _ := m.apiService.GetAPIInfoByUUIDS(ginCtx, namespaceId, apiUUIDS)
-		apiMaps := common.SliceToMap(apiItems, func(t *model.APIInfo) string {
+		apiMaps := common.SliceToMap(apiItems, func(t *apimodel.APIInfo) string {
 			return t.UUID
 		})
 		apiResults := make([]*dto.MonCommonStatisticsOutput, 0, len(apiList))
@@ -503,7 +507,7 @@ func (m *monitorController) overviewTop(ginCtx *gin.Context) {
 			serviceNames = append(serviceNames, key)
 		}
 		serviceItems, _ := m.service.GetServiceListByNames(ginCtx, namespaceId, serviceNames)
-		serviceMaps := common.SliceToMap(serviceItems, func(t *model.ServiceListItem) string {
+		serviceMaps := common.SliceToMap(serviceItems, func(t *upstream_model.ServiceListItem) string {
 			return t.Name
 		})
 
@@ -531,7 +535,7 @@ func (m *monitorController) overviewTop(ginCtx *gin.Context) {
 }
 
 func (m *monitorController) getStatistics(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	dataType := ginCtx.Param("dataType")
 	detailsType := ginCtx.Param("detailsType")
 
@@ -567,9 +571,9 @@ func (m *monitorController) getStatistics(ginCtx *gin.Context) {
 		return t.UUID
 	})
 
-	apiList := make([]*model.APIInfo, 0)
+	apiList := make([]*apimodel.APIInfo, 0)
 	appList := make([]*model.Application, 0)
-	serviceList := make([]*model.ServiceListItem, 0)
+	serviceList := make([]*upstream_model.ServiceListItem, 0)
 
 	callType := "apiOrApp"
 
@@ -590,7 +594,7 @@ func (m *monitorController) getStatistics(ginCtx *gin.Context) {
 				ginCtx.JSON(http.StatusOK, dto.NewErrorResult("query apis error = "+err.Error()))
 				return
 			}
-			appIds := common.SliceToSliceIds(apiInfoList, func(t *model.APIInfo) string {
+			appIds := common.SliceToSliceIds(apiInfoList, func(t *apimodel.APIInfo) string {
 				return t.UUID
 			})
 
@@ -720,7 +724,7 @@ func (m *monitorController) getStatistics(ginCtx *gin.Context) {
 
 	}
 
-	newApiList := make([]*model.APIInfo, 0)
+	newApiList := make([]*apimodel.APIInfo, 0)
 	if input.Path != "" {
 		for _, info := range apiList {
 			if info.RequestPathLabel == input.Path {
@@ -842,7 +846,7 @@ func (m *monitorController) getStatisticsDetails(ginCtx *gin.Context) {
 	dataType := ginCtx.Param("dataType")
 	detailsType := ginCtx.Param("detailsType")
 
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	resMap := make(map[string]interface{})
 
 	input := &dto.MonCommonInput{}

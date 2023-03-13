@@ -18,7 +18,7 @@ type IQuoteStore interface {
 }
 
 type quoteStore struct {
-	*baseStore[entry.Quote]
+	*BaseStore[entry.Quote]
 }
 
 func (q *quoteStore) DelBySource(ctx context.Context, source int, kind entry.QuoteKindType) error {
@@ -87,6 +87,6 @@ func (q *quoteStore) GetTargetQuote(ctx context.Context, target int, targetKind 
 }
 
 func newQuoteStore(db IDB) IQuoteStore {
-	quote := &quoteStore{baseStore: createStore[entry.Quote](db)}
+	quote := &quoteStore{BaseStore: CreateStore[entry.Quote](db)}
 	return quote
 }

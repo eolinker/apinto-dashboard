@@ -14,11 +14,11 @@ type IRoleStore interface {
 }
 
 type roleStore struct {
-	*baseStore[entry.Role]
+	*BaseStore[entry.Role]
 }
 
 func newRoleStore(db IDB) IRoleStore {
-	return &roleStore{baseStore: createStore[entry.Role](db)}
+	return &roleStore{BaseStore: CreateStore[entry.Role](db)}
 }
 
 func (r *roleStore) GetByUUID(ctx context.Context, uuid string) (*entry.Role, error) {

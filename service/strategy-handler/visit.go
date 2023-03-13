@@ -10,6 +10,8 @@ import (
 	"github.com/eolinker/apinto-dashboard/entry"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/model"
+	service2 "github.com/eolinker/apinto-dashboard/modules/api"
+	"github.com/eolinker/apinto-dashboard/modules/upstream"
 	"github.com/eolinker/apinto-dashboard/service"
 	"github.com/eolinker/eosc/common/bean"
 	"strings"
@@ -17,8 +19,8 @@ import (
 
 type visitHandler struct {
 	applicationService service.IApplicationService
-	apiService         service.IAPIService
-	service            service.IService
+	apiService         service2.IAPIService
+	service            upstream.IService
 	apintoDriverName   string
 }
 

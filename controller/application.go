@@ -22,27 +22,27 @@ func RegisterApplicationRouter(router gin.IRoutes) {
 	bean.Autowired(&c.applicationService)
 	bean.Autowired(&c.applicationAuthService)
 
-	router.GET("/applications", genAccessHandler(access.ApplicationView, access.ApplicationEdit), c.lists)
+	router.GET("/applications", GenAccessHandler(access.ApplicationView, access.ApplicationEdit), c.lists)
 	router.GET("/application/enum", c.lists)
-	router.POST("/application", genAccessHandler(access.ApplicationEdit), logHandler(enum.LogOperateTypeCreate, enum.LogKindApplication), c.createApp)
-	router.GET("/application", genAccessHandler(access.ApplicationView, access.ApplicationEdit), c.info)
-	router.PUT("/application", genAccessHandler(access.ApplicationEdit), logHandler(enum.LogOperateTypeEdit, enum.LogKindApplication), c.updateApp)
-	router.DELETE("/application", genAccessHandler(access.ApplicationEdit), logHandler(enum.LogOperateTypeDelete, enum.LogKindApplication), c.deleteApp)
-	router.GET("/application/onlines", genAccessHandler(access.ApplicationView, access.ApplicationEdit), c.onlines)
-	router.PUT("/application/online", genAccessHandler(access.ApplicationEdit), logHandler(enum.LogOperateTypePublish, enum.LogKindApplication), c.online)
-	router.PUT("/application/offline", genAccessHandler(access.ApplicationEdit), logHandler(enum.LogOperateTypePublish, enum.LogKindApplication), c.offline)
-	router.PUT("/application/enable", genAccessHandler(access.ApplicationEdit), logHandler(enum.LogOperateTypeEdit, enum.LogKindApplication), c.enable)
-	router.PUT("/application/disable", genAccessHandler(access.ApplicationEdit), logHandler(enum.LogOperateTypeEdit, enum.LogKindApplication), c.disable)
-	router.GET("/application/drivers", genAccessHandler(access.ApplicationView, access.ApplicationEdit), c.drivers)
-	router.GET("/application/auths", genAccessHandler(access.ApplicationView, access.ApplicationEdit), c.auths)
-	router.GET("/application/auth", genAccessHandler(access.ApplicationView, access.ApplicationEdit), c.getAuth)
-	router.POST("/application/auth", genAccessHandler(access.ApplicationEdit), c.createAuth)
-	router.PUT("/application/auth", genAccessHandler(access.ApplicationEdit), c.updateAuth)
-	router.DELETE("/application/auth", genAccessHandler(access.ApplicationEdit), c.delAuth)
+	router.POST("/application", GenAccessHandler(access.ApplicationEdit), LogHandler(enum.LogOperateTypeCreate, enum.LogKindApplication), c.createApp)
+	router.GET("/application", GenAccessHandler(access.ApplicationView, access.ApplicationEdit), c.info)
+	router.PUT("/application", GenAccessHandler(access.ApplicationEdit), LogHandler(enum.LogOperateTypeEdit, enum.LogKindApplication), c.updateApp)
+	router.DELETE("/application", GenAccessHandler(access.ApplicationEdit), LogHandler(enum.LogOperateTypeDelete, enum.LogKindApplication), c.deleteApp)
+	router.GET("/application/onlines", GenAccessHandler(access.ApplicationView, access.ApplicationEdit), c.onlines)
+	router.PUT("/application/online", GenAccessHandler(access.ApplicationEdit), LogHandler(enum.LogOperateTypePublish, enum.LogKindApplication), c.online)
+	router.PUT("/application/offline", GenAccessHandler(access.ApplicationEdit), LogHandler(enum.LogOperateTypePublish, enum.LogKindApplication), c.offline)
+	router.PUT("/application/enable", GenAccessHandler(access.ApplicationEdit), LogHandler(enum.LogOperateTypeEdit, enum.LogKindApplication), c.enable)
+	router.PUT("/application/disable", GenAccessHandler(access.ApplicationEdit), LogHandler(enum.LogOperateTypeEdit, enum.LogKindApplication), c.disable)
+	router.GET("/application/drivers", GenAccessHandler(access.ApplicationView, access.ApplicationEdit), c.drivers)
+	router.GET("/application/auths", GenAccessHandler(access.ApplicationView, access.ApplicationEdit), c.auths)
+	router.GET("/application/auth", GenAccessHandler(access.ApplicationView, access.ApplicationEdit), c.getAuth)
+	router.POST("/application/auth", GenAccessHandler(access.ApplicationEdit), c.createAuth)
+	router.PUT("/application/auth", GenAccessHandler(access.ApplicationEdit), c.updateAuth)
+	router.DELETE("/application/auth", GenAccessHandler(access.ApplicationEdit), c.delAuth)
 }
 
 func (a *applicationController) lists(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	pageNumStr := ginCtx.Query("page_num")
 	pageSizeStr := ginCtx.Query("page_size")
 	pageNum, _ := strconv.Atoi(pageNumStr)
@@ -55,7 +55,7 @@ func (a *applicationController) lists(ginCtx *gin.Context) {
 	}
 
 	name := ginCtx.Query("name")
-	userId := getUserId(ginCtx)
+	userId := GetUserId(ginCtx)
 	list, count, err := a.applicationService.AppList(ginCtx, namespaceId, userId, pageNum, pageSize, name)
 	if err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
@@ -81,7 +81,7 @@ func (a *applicationController) lists(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(data))
 }
 func (a *applicationController) enum(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	list, err := a.applicationService.AppListAll(ginCtx, namespaceId)
 	if err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
@@ -103,7 +103,7 @@ func (a *applicationController) enum(ginCtx *gin.Context) {
 }
 
 func (a *applicationController) info(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	id := ginCtx.Query("app_id")
 
 	info, err := a.applicationService.AppInfoDetails(ginCtx, namespaceId, id)
@@ -142,8 +142,8 @@ func (a *applicationController) info(ginCtx *gin.Context) {
 }
 
 func (a *applicationController) createApp(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
-	userId := getUserId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
+	userId := GetUserId(ginCtx)
 	input := new(dto.ApplicationInput)
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
@@ -163,8 +163,8 @@ func (a *applicationController) createApp(ginCtx *gin.Context) {
 }
 
 func (a *applicationController) updateApp(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
-	userId := getUserId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
+	userId := GetUserId(ginCtx)
 
 	input := new(dto.ApplicationInput)
 	if err := ginCtx.BindJSON(input); err != nil {
@@ -185,9 +185,9 @@ func (a *applicationController) updateApp(ginCtx *gin.Context) {
 }
 
 func (a *applicationController) deleteApp(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	id := ginCtx.Query("app_id")
-	userId := getUserId(ginCtx)
+	userId := GetUserId(ginCtx)
 	if err := a.applicationService.DelApp(ginCtx, namespaceId, userId, id); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -196,7 +196,7 @@ func (a *applicationController) deleteApp(ginCtx *gin.Context) {
 }
 
 func (a *applicationController) onlines(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	id := ginCtx.Query("app_id")
 	list, err := a.applicationService.OnlineList(ginCtx, namespaceId, id)
 	if err != nil {
@@ -225,8 +225,8 @@ func (a *applicationController) onlines(ginCtx *gin.Context) {
 }
 
 func (a *applicationController) online(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
-	userId := getUserId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
+	userId := GetUserId(ginCtx)
 	id := ginCtx.Query("app_id")
 	input := &dto.UpdateOnlineStatusInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
@@ -241,8 +241,8 @@ func (a *applicationController) online(ginCtx *gin.Context) {
 }
 
 func (a *applicationController) offline(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
-	userId := getUserId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
+	userId := GetUserId(ginCtx)
 	id := ginCtx.Query("app_id")
 	input := &dto.UpdateOnlineStatusInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
@@ -257,8 +257,8 @@ func (a *applicationController) offline(ginCtx *gin.Context) {
 }
 
 func (a *applicationController) enable(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
-	userId := getUserId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
+	userId := GetUserId(ginCtx)
 	id := ginCtx.Query("app_id")
 	input := &dto.UpdateOnlineStatusInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
@@ -273,8 +273,8 @@ func (a *applicationController) enable(ginCtx *gin.Context) {
 }
 
 func (a *applicationController) disable(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
-	userId := getUserId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
+	userId := GetUserId(ginCtx)
 	id := ginCtx.Query("app_id")
 	input := &dto.UpdateOnlineStatusInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
@@ -305,7 +305,7 @@ func (a *applicationController) drivers(ginCtx *gin.Context) {
 }
 
 func (a *applicationController) auths(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	appId := ginCtx.Query("app_id")
 	list, err := a.applicationAuthService.GetList(ginCtx, namespaceId, appId)
 	if err != nil {
@@ -337,9 +337,9 @@ func (a *applicationController) auths(ginCtx *gin.Context) {
 }
 
 func (a *applicationController) createAuth(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	appId := ginCtx.Query("app_id")
-	userId := getUserId(ginCtx)
+	userId := GetUserId(ginCtx)
 
 	input := &dto.ApplicationAuthInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
@@ -360,10 +360,10 @@ func (a *applicationController) createAuth(ginCtx *gin.Context) {
 }
 
 func (a *applicationController) updateAuth(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	appId := ginCtx.Query("app_id")
 	uuid := ginCtx.Query("uuid")
-	userId := getUserId(ginCtx)
+	userId := GetUserId(ginCtx)
 
 	input := &dto.ApplicationAuthInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
@@ -380,9 +380,9 @@ func (a *applicationController) updateAuth(ginCtx *gin.Context) {
 }
 
 func (a *applicationController) delAuth(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	uuid := ginCtx.Query("uuid")
-	userId := getUserId(ginCtx)
+	userId := GetUserId(ginCtx)
 
 	err := a.applicationAuthService.Delete(ginCtx, namespaceId, userId, uuid)
 	if err != nil {
@@ -394,7 +394,7 @@ func (a *applicationController) delAuth(ginCtx *gin.Context) {
 }
 
 func (a *applicationController) getAuth(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	appId := ginCtx.Query("app_id")
 	uuid := ginCtx.Query("uuid")
 

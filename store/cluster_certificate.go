@@ -15,11 +15,11 @@ type IClusterCertificateStore interface {
 }
 
 type clusterCertificateStore struct {
-	*baseStore[entry.ClusterCertificate]
+	*BaseStore[entry.ClusterCertificate]
 }
 
 func newClusterCertificateStore(db IDB) IClusterCertificateStore {
-	return &clusterCertificateStore{baseStore: createStore[entry.ClusterCertificate](db)}
+	return &clusterCertificateStore{BaseStore: CreateStore[entry.ClusterCertificate](db)}
 }
 
 func (c *clusterCertificateStore) QueryListByClusterId(ctx context.Context, clusterId int) ([]*entry.ClusterCertificate, error) {

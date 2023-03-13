@@ -16,11 +16,11 @@ type IClusterNodeStore interface {
 }
 
 type clusterNodeStore struct {
-	*baseStore[entry.ClusterNode]
+	*BaseStore[entry.ClusterNode]
 }
 
 func newClusterNodeStore(db IDB) IClusterNodeStore {
-	return &clusterNodeStore{baseStore: createStore[entry.ClusterNode](db)}
+	return &clusterNodeStore{BaseStore: CreateStore[entry.ClusterNode](db)}
 }
 
 func (c *clusterNodeStore) GetAllByClusterIds(ctx context.Context, clusterIds ...int) ([]*entry.ClusterNode, error) {

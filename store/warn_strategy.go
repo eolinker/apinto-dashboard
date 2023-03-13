@@ -16,11 +16,11 @@ type IWarnStrategyIStore interface {
 }
 
 type warnStrategyStore struct {
-	*baseStore[entry.WarnStrategy]
+	*BaseStore[entry.WarnStrategy]
 }
 
 func newWarnStrategyIStore(db IDB) IWarnStrategyIStore {
-	return &warnStrategyStore{baseStore: createStore[entry.WarnStrategy](db)}
+	return &warnStrategyStore{BaseStore: CreateStore[entry.WarnStrategy](db)}
 }
 
 func (w *warnStrategyStore) GetByUuid(ctx context.Context, uuid string) (*entry.WarnStrategy, error) {

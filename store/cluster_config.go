@@ -16,11 +16,11 @@ type IClusterConfigStore interface {
 }
 
 type clusterConfigStore struct {
-	*baseStore[entry.ClusterConfig]
+	*BaseStore[entry.ClusterConfig]
 }
 
 func newClusterConfigStore(db IDB) IClusterConfigStore {
-	return &clusterConfigStore{baseStore: createStore[entry.ClusterConfig](db)}
+	return &clusterConfigStore{BaseStore: CreateStore[entry.ClusterConfig](db)}
 }
 
 func (c *clusterConfigStore) GetConfigByTypeByCluster(ctx context.Context, clusterID int, configType string) (*entry.ClusterConfig, error) {

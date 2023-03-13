@@ -10,6 +10,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/dto"
 	"github.com/eolinker/apinto-dashboard/entry"
 	"github.com/eolinker/apinto-dashboard/model"
+	"github.com/eolinker/apinto-dashboard/modules/upstream"
 	"github.com/eolinker/apinto-dashboard/store"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
@@ -37,7 +38,7 @@ type IDiscoveryService interface {
 	GetDiscoveryEnum(ctx context.Context, namespaceID int) ([]*model.DiscoveryEnum, error)
 	GetDriversRender() []*driver_manager.DriverInfo
 	GetLatestDiscoveryVersion(ctx context.Context, discoveryID int) (*model.DiscoveryVersion, error)
-	isOnline(ctx context.Context, clusterId, discoveryId int) bool
+	IsOnline(ctx context.Context, clusterId, discoveryId int) bool
 
 	//通过服务名获取配置上游服务时所需要的discoveryDriver
 	GetServiceDiscoveryDriver(ctx context.Context, namespaceID int, discoveryName string) (int, string, driver.IServiceDriver, error)
@@ -60,7 +61,7 @@ type discoveryService struct {
 	globalVariableService IGlobalVariableService
 	clusterService        IClusterService
 	variableService       IClusterVariableService
-	service               IService
+	service               upstream.IService
 
 	lockService      IAsynLockService
 	discoveryManager driver_manager.IDiscoveryDriverManager
@@ -213,7 +214,7 @@ func (d *discoveryService) CreateDiscovery(ctx context.Context, namespaceID int,
 		}
 		//创建所有引用的环境变量
 		if len(variableList) > 0 {
-			variables, err := d.globalVariableService.getByKeys(ctx, namespaceID, variableList)
+			variables, err := d.globalVariableService.GetByKeys(ctx, namespaceID, variableList)
 			if err != nil {
 				return err
 			}
@@ -304,7 +305,7 @@ func (d *discoveryService) UpdateDiscovery(ctx context.Context, namespaceID int,
 			//更新引用， 获取新的引用变量ID
 			targetMaps := make(map[entry.QuoteTargetKindType][]int)
 			variableIDList := make([]int, 0)
-			variables, err := d.globalVariableService.getByKeys(ctx, namespaceID, variableList)
+			variables, err := d.globalVariableService.GetByKeys(ctx, namespaceID, variableList)
 			if err != nil {
 				return err
 			}
@@ -339,10 +340,10 @@ func (d *discoveryService) DeleteDiscovery(ctx context.Context, namespaceID, use
 		return err
 	}
 
-	if err = d.lockService.lock(lockNameDiscovery, discoveryInfo.Id); err != nil {
+	if err = d.lockService.Lock(LockNameDiscovery, discoveryInfo.Id); err != nil {
 		return err
 	}
-	defer d.lockService.unlock(lockNameDiscovery, discoveryInfo.Id)
+	defer d.lockService.Unlock(LockNameDiscovery, discoveryInfo.Id)
 
 	discoveryInfo, err = d.discoveryStore.GetByName(ctx, namespaceID, discoveryName)
 	if err != nil {
@@ -377,7 +378,7 @@ func (d *discoveryService) DeleteDiscovery(ctx context.Context, namespaceID, use
 			return err
 		}
 
-		d.lockService.deleteLock(lockNameDiscovery, discoveryInfo.Id)
+		d.lockService.DeleteLock(LockNameDiscovery, discoveryInfo.Id)
 		delMap := make(map[string]interface{})
 		delMap["`kind`"] = "discovery"
 		delMap["`target`"] = discoveryInfo.Id
@@ -399,7 +400,7 @@ func (d *discoveryService) DeleteDiscovery(ctx context.Context, namespaceID, use
 	if err != nil {
 		return err
 	}
-	d.lockService.deleteLock(lockNameDiscovery, discoveryInfo.Id)
+	d.lockService.DeleteLock(LockNameDiscovery, discoveryInfo.Id)
 	return nil
 }
 
@@ -487,10 +488,10 @@ func (d *discoveryService) OnlineDiscovery(ctx context.Context, namespaceId, ope
 		return nil, err
 	}
 
-	if err = d.lockService.lock(lockNameDiscovery, discoveryID); err != nil {
+	if err = d.lockService.Lock(LockNameDiscovery, discoveryID); err != nil {
 		return nil, err
 	}
-	defer d.lockService.unlock(lockNameDiscovery, discoveryID)
+	defer d.lockService.Unlock(LockNameDiscovery, discoveryID)
 
 	discoveryInfo, err = d.discoveryStore.GetByName(ctx, namespaceId, discoveryName)
 	if err != nil {
@@ -515,9 +516,9 @@ func (d *discoveryService) OnlineDiscovery(ctx context.Context, namespaceId, ope
 	variableIds := quoteMaps[entry.QuoteTargetKindTypeVariable]
 	if len(variableIds) > 0 {
 		//获取集群正在运行的环境变量版本
-		variablePublishVersion, err := d.variableService.getPublishVersion(ctx, cluster.Id)
+		variablePublishVersion, err := d.variableService.GetPublishVersion(ctx, cluster.Id)
 		if err != nil || variablePublishVersion == nil {
-			globalVariable, err := d.globalVariableService.getById(ctx, variableIds[0])
+			globalVariable, err := d.globalVariableService.GetById(ctx, variableIds[0])
 			if err != nil {
 				return nil, err
 			}
@@ -531,7 +532,7 @@ func (d *discoveryService) OnlineDiscovery(ctx context.Context, namespaceId, ope
 
 		for _, variableId := range variableIds {
 			if _, ok := toMap[variableId]; !ok {
-				globalVariable, err := d.globalVariableService.getById(ctx, variableId)
+				globalVariable, err := d.globalVariableService.GetById(ctx, variableId)
 				if err != nil {
 					return nil, err
 				}
@@ -667,10 +668,10 @@ func (d *discoveryService) OfflineDiscovery(ctx context.Context, namespaceId, op
 		return err
 	}
 
-	if err = d.lockService.lock(lockNameDiscovery, discoveryInfo.Id); err != nil {
+	if err = d.lockService.Lock(LockNameDiscovery, discoveryInfo.Id); err != nil {
 		return err
 	}
-	defer d.lockService.unlock(lockNameDiscovery, discoveryInfo.Id)
+	defer d.lockService.Unlock(LockNameDiscovery, discoveryInfo.Id)
 
 	discoveryInfo, err = d.discoveryStore.GetByName(ctx, namespaceId, discoveryName)
 	if err != nil {
@@ -880,7 +881,7 @@ func (d *discoveryService) isDiscoveryCanDelete(ctx context.Context, namespaceID
 
 }
 
-func (d *discoveryService) isOnline(ctx context.Context, clusterId, discoveryId int) bool {
+func (d *discoveryService) IsOnline(ctx context.Context, clusterId, discoveryId int) bool {
 	runtime, err := d.discoveryRuntimeStore.GetForCluster(ctx, discoveryId, clusterId)
 	if err != nil {
 		return false

@@ -53,5 +53,5 @@ func (s *clusterHistoryHandler) Decode(r *entry.History) *entry.ClusterHistory {
 
 func newClusterHistoryStore(db IDB) IClusterHistoryStore {
 	var historyHandler DecodeHistory[entry.ClusterHistory] = new(clusterHistoryHandler)
-	return createHistory(historyHandler, db, entry.HistoryKindCluster)
+	return CreateHistory(historyHandler, db, entry.HistoryKindCluster)
 }

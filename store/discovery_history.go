@@ -36,5 +36,5 @@ func (s *discoveryHistoryHandler) Decode(r *entry.History) *entry.DiscoveryHisto
 
 func newDiscoveryHistoryStore(db IDB) IDiscoveryHistoryStore {
 	var historyHandler DecodeHistory[entry.DiscoveryHistory] = new(discoveryHistoryHandler)
-	return createHistory(historyHandler, db, entry.HistoryKindDiscovery)
+	return CreateHistory(historyHandler, db, entry.HistoryKindDiscovery)
 }

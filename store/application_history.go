@@ -53,5 +53,5 @@ func (s *applicationHistoryHandler) Decode(r *entry.History) *entry.ApplicationH
 
 func newApplicationHistoryStore(db IDB) IApplicationHistoryStore {
 	var historyHandler DecodeHistory[entry.ApplicationHistory] = new(applicationHistoryHandler)
-	return createHistory[entry.ApplicationHistory](historyHandler, db, entry.HistoryKindApplication)
+	return CreateHistory[entry.ApplicationHistory](historyHandler, db, entry.HistoryKindApplication)
 }

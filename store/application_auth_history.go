@@ -36,5 +36,5 @@ func (s *applicationAuthHistoryHandler) Decode(r *entry.History) *entry.Applicat
 
 func newApplicationAuthHistoryStore(db IDB) IApplicationAuthHistoryStore {
 	var historyHandler DecodeHistory[entry.ApplicationAuthHistory] = new(applicationAuthHistoryHandler)
-	return createHistory(historyHandler, db, entry.HistoryKindApplicationAuth)
+	return CreateHistory(historyHandler, db, entry.HistoryKindApplicationAuth)
 }

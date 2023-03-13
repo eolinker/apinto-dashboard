@@ -17,11 +17,11 @@ type IStrategyStore interface {
 }
 
 type strategyApiStore struct {
-	*baseStore[entry.Strategy]
+	*BaseStore[entry.Strategy]
 }
 
 func newStrategyStore(db IDB) IStrategyStore {
-	return &strategyApiStore{baseStore: createStore[entry.Strategy](db)}
+	return &strategyApiStore{BaseStore: CreateStore[entry.Strategy](db)}
 }
 
 func (s *strategyApiStore) GetByUUID(ctx context.Context, uuid string) (*entry.Strategy, error) {

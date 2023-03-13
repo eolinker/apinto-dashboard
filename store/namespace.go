@@ -12,11 +12,11 @@ type INamespaceStore interface {
 }
 
 type namespaceStore struct {
-	*baseStore[entry.Namespace]
+	*BaseStore[entry.Namespace]
 }
 
 func newNamespaceStore(db IDB) INamespaceStore {
-	return &namespaceStore{baseStore: createStore[entry.Namespace](db)}
+	return &namespaceStore{BaseStore: CreateStore[entry.Namespace](db)}
 }
 
 func (n *namespaceStore) GetByName(ctx context.Context, name string) (*entry.Namespace, error) {

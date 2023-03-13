@@ -49,5 +49,5 @@ func (s *applicationAuthRuntimeHandler) Decode(r *entry.Runtime) *entry.Applicat
 
 func newApplicationAuthRuntimeStore(db IDB) IApplicationAuthRuntimeStore {
 	var runTimeHandler BaseKindHandler[entry.ApplicationAuthRuntime, entry.Runtime] = new(applicationAuthRuntimeHandler)
-	return createRuntime[entry.ApplicationAuthRuntime](runTimeHandler, db)
+	return CreateRuntime[entry.ApplicationAuthRuntime](runTimeHandler, db)
 }

@@ -31,7 +31,7 @@ func newStrategyController[T any, K any](strategyService service.IStrategyServic
 }
 
 func (s *strategyController[T, K]) list(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Query("cluster_name")
 
 	strategies, err := s.strategyService.GetList(ginCtx, namespaceId, clusterName)
@@ -63,7 +63,7 @@ func (s *strategyController[T, K]) list(ginCtx *gin.Context) {
 }
 
 func (s *strategyController[T, K]) get(ginCtx *gin.Context) {
-	namespaceID := getNamespaceId(ginCtx)
+	namespaceID := GetNamespaceId(ginCtx)
 	uuid := ginCtx.Query("uuid")
 	if uuid == "" {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("GetStrategyInfo fail. err: uuid can't be nil")))
@@ -93,7 +93,7 @@ func (s *strategyController[T, K]) get(ginCtx *gin.Context) {
 }
 
 func (s *strategyController[T, K]) create(ginCtx *gin.Context) {
-	namespaceID := getNamespaceId(ginCtx)
+	namespaceID := GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Query("cluster_name")
 	if clusterName == "" {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("CreateStrategy fail. err: clusterName can't be nil")))
@@ -106,7 +106,7 @@ func (s *strategyController[T, K]) create(ginCtx *gin.Context) {
 		return
 	}
 
-	operator := getUserId(ginCtx)
+	operator := GetUserId(ginCtx)
 
 	//校验参数
 	if err := s.strategyService.CheckInput(input); err != nil {
@@ -124,7 +124,7 @@ func (s *strategyController[T, K]) create(ginCtx *gin.Context) {
 }
 
 func (s *strategyController[T, K]) update(ginCtx *gin.Context) {
-	namespaceID := getNamespaceId(ginCtx)
+	namespaceID := GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Query("cluster_name")
 	if clusterName == "" {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("UpdateStrategy fail. err: clusterName can't be nil")))
@@ -143,7 +143,7 @@ func (s *strategyController[T, K]) update(ginCtx *gin.Context) {
 	}
 	input.Uuid = uuid
 
-	operator := getUserId(ginCtx)
+	operator := GetUserId(ginCtx)
 
 	//校验参数
 	if err := s.strategyService.CheckInput(input); err != nil {
@@ -161,7 +161,7 @@ func (s *strategyController[T, K]) update(ginCtx *gin.Context) {
 }
 
 func (s *strategyController[T, K]) del(ginCtx *gin.Context) {
-	namespaceID := getNamespaceId(ginCtx)
+	namespaceID := GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Query("cluster_name")
 	if clusterName == "" {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("DeleteStrategy fail. err: clusterName can't be nil")))
@@ -173,7 +173,7 @@ func (s *strategyController[T, K]) del(ginCtx *gin.Context) {
 		return
 	}
 
-	userID := getUserId(ginCtx)
+	userID := GetUserId(ginCtx)
 	err := s.strategyService.DeleteStrategy(ginCtx, namespaceID, userID, clusterName, uuid)
 	if err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("DeleteStrategy fail. err:%s", err.Error())))
@@ -184,7 +184,7 @@ func (s *strategyController[T, K]) del(ginCtx *gin.Context) {
 }
 
 func (s *strategyController[T, K]) restore(ginCtx *gin.Context) {
-	namespaceID := getNamespaceId(ginCtx)
+	namespaceID := GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Query("cluster_name")
 	if clusterName == "" {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("RestoreStrategy fail. err: clusterName can't be nil")))
@@ -196,7 +196,7 @@ func (s *strategyController[T, K]) restore(ginCtx *gin.Context) {
 		return
 	}
 
-	userID := getUserId(ginCtx)
+	userID := GetUserId(ginCtx)
 	err := s.strategyService.RestoreStrategy(ginCtx, namespaceID, userID, clusterName, uuid)
 	if err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("RestoreStrategy fail. err:%s", err.Error())))
@@ -207,7 +207,7 @@ func (s *strategyController[T, K]) restore(ginCtx *gin.Context) {
 }
 
 func (s *strategyController[T, K]) updateStop(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	uuid := ginCtx.Query("uuid")
 	clusterName := ginCtx.Query("cluster_name")
 
@@ -217,7 +217,7 @@ func (s *strategyController[T, K]) updateStop(ginCtx *gin.Context) {
 		return
 	}
 
-	userId := getUserId(ginCtx)
+	userId := GetUserId(ginCtx)
 	err := s.strategyService.UpdateStop(ginCtx, namespaceId, userId, uuid, clusterName, input.IsStop)
 	if err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
@@ -230,7 +230,7 @@ func (s *strategyController[T, K]) updateStop(ginCtx *gin.Context) {
 }
 
 func (s *strategyController[T, K]) toPublish(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Query("cluster_name")
 	list, err := s.strategyService.ToPublish(ginCtx, namespaceId, clusterName)
 	if err != nil {
@@ -262,7 +262,7 @@ func (s *strategyController[T, K]) toPublish(ginCtx *gin.Context) {
 }
 
 func (s *strategyController[T, K]) publish(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Query("cluster_name")
 
 	input := new(dto.StrategyPublish)
@@ -271,7 +271,7 @@ func (s *strategyController[T, K]) publish(ginCtx *gin.Context) {
 		return
 	}
 
-	userId := getUserId(ginCtx)
+	userId := GetUserId(ginCtx)
 	if err := s.strategyService.Publish(ginCtx, namespaceId, userId, clusterName, input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -281,7 +281,7 @@ func (s *strategyController[T, K]) publish(ginCtx *gin.Context) {
 }
 
 func (s *strategyController[T, K]) publishHistory(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Query("cluster_name")
 	pageNumStr := ginCtx.Query("page_num")
 	pageSizeStr := ginCtx.Query("page_size")
@@ -328,7 +328,7 @@ func (s *strategyController[T, K]) publishHistory(ginCtx *gin.Context) {
 }
 
 func (s *strategyController[T, K]) changePriority(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Query("cluster_name")
 
 	maps := common.Map[string, int]{}
@@ -362,7 +362,7 @@ func (s *strategyController[T, K]) changePriority(ginCtx *gin.Context) {
 		return
 	}
 
-	userId := getUserId(ginCtx)
+	userId := GetUserId(ginCtx)
 	if err := s.strategyService.ChangePriority(ginCtx, namespaceId, userId, clusterName, maps); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
