@@ -10,6 +10,8 @@ import (
 	"github.com/eolinker/apinto-dashboard/entry"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/model"
+	service2 "github.com/eolinker/apinto-dashboard/modules/api"
+	"github.com/eolinker/apinto-dashboard/modules/upstream"
 	"github.com/eolinker/apinto-dashboard/store"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
@@ -56,8 +58,8 @@ type strategyService[T any, K any] struct {
 	strategyHistory      store.IStrategyHistoryStore
 	lock                 IAsynLockService
 	applicationService   IApplicationService
-	apiService           IAPIService
-	service              IService
+	apiService           service2.IAPIService
+	service              upstream.IService
 	userInfoService      IUserInfoService
 
 	//strategyManager driver_manager.IStrategyDriverManager
@@ -299,11 +301,11 @@ func (s *strategyService[T, K]) CreateStrategy(ctx context.Context, namespaceId 
 		return err
 	}
 
-	err = s.lock.lock(lockNameStrategy, cluster.Id)
+	err = s.lock.Lock(LockNameStrategy, cluster.Id)
 	if err != nil {
 		return err
 	}
-	defer s.lock.unlock(lockNameStrategy, cluster.Id)
+	defer s.lock.Unlock(LockNameStrategy, cluster.Id)
 
 	strategyType := s.strategyHandler.GetType()
 
@@ -397,11 +399,11 @@ func (s *strategyService[T, K]) UpdateStrategy(ctx context.Context, namespaceId 
 		return err
 	}
 
-	err = s.lock.lock(lockNameStrategy, cluster.Id)
+	err = s.lock.Lock(LockNameStrategy, cluster.Id)
 	if err != nil {
 		return err
 	}
-	defer s.lock.unlock(lockNameStrategy, cluster.Id)
+	defer s.lock.Unlock(LockNameStrategy, cluster.Id)
 	strategyInfo, err := s.strategyStore.GetByUUID(ctx, input.Uuid)
 	if err != nil {
 		return err
@@ -504,11 +506,11 @@ func (s *strategyService[T, K]) DeleteStrategy(ctx context.Context, namespaceId,
 		return err
 	}
 
-	err = s.lock.lock(lockNameStrategy, cluster.Id)
+	err = s.lock.Lock(LockNameStrategy, cluster.Id)
 	if err != nil {
 		return err
 	}
-	defer s.lock.unlock(lockNameStrategy, cluster.Id)
+	defer s.lock.Unlock(LockNameStrategy, cluster.Id)
 
 	strategyInfo, err = s.strategyStore.GetByUUID(ctx, uuid)
 	if err != nil {
@@ -571,7 +573,7 @@ func (s *strategyService[T, K]) DeleteStrategy(ctx context.Context, namespaceId,
 		return err
 	}
 
-	s.lock.deleteLock(lockNameStrategy, cluster.Id)
+	s.lock.DeleteLock(LockNameStrategy, cluster.Id)
 	return nil
 }
 
@@ -586,11 +588,11 @@ func (s *strategyService[T, K]) RestoreStrategy(ctx context.Context, namespaceId
 		return err
 	}
 
-	err = s.lock.lock(lockNameStrategy, cluster.Id)
+	err = s.lock.Lock(LockNameStrategy, cluster.Id)
 	if err != nil {
 		return err
 	}
-	defer s.lock.unlock(lockNameStrategy, cluster.Id)
+	defer s.lock.Unlock(LockNameStrategy, cluster.Id)
 
 	strategyInfo, err = s.strategyStore.GetByUUID(ctx, uuid)
 	if err != nil {
@@ -803,10 +805,10 @@ func (s *strategyService[T, K]) Publish(ctx context.Context, namespaceId, operat
 		return err
 	}
 
-	if err = s.lock.lock(lockNameStrategy, clusterId); err != nil {
+	if err = s.lock.Lock(LockNameStrategy, clusterId); err != nil {
 		return err
 	}
-	defer s.lock.unlock(lockNameStrategy, clusterId)
+	defer s.lock.Unlock(LockNameStrategy, clusterId)
 
 	//查询上个版本发布的策略信息
 	runtime, publishMaps, err := s.getRuntimePublishMaps(ctx, cluster.Id)
@@ -964,10 +966,10 @@ func (s *strategyService[T, K]) ChangePriority(ctx context.Context, namespaceId,
 		return err
 	}
 
-	if err = s.lock.lock(lockNameStrategy, cluster.Id); err != nil {
+	if err = s.lock.Lock(LockNameStrategy, cluster.Id); err != nil {
 		return err
 	}
-	defer s.lock.unlock(lockNameStrategy, cluster.Id)
+	defer s.lock.Unlock(LockNameStrategy, cluster.Id)
 
 	strategyType := s.strategyHandler.GetType()
 

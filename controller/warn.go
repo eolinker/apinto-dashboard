@@ -9,6 +9,10 @@ import (
 	"github.com/eolinker/apinto-dashboard/dto"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/model"
+	service2 "github.com/eolinker/apinto-dashboard/modules/api"
+	apimodel "github.com/eolinker/apinto-dashboard/modules/api/model"
+	"github.com/eolinker/apinto-dashboard/modules/upstream"
+	upstream_model "github.com/eolinker/apinto-dashboard/modules/upstream/model"
 	"github.com/eolinker/apinto-dashboard/service"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/gin-gonic/gin"
@@ -25,8 +29,8 @@ type warnController struct {
 	warnHistoryService   service.IWarnHistoryService
 	warnStrategyService  service.IWarnStrategyService
 	monitorService       service.IMonitorService
-	apiService           service.IAPIService
-	service              service.IService
+	apiService           service2.IAPIService
+	service              upstream.IService
 }
 
 func RegisterWarnRouter(router gin.IRouter) {
@@ -41,29 +45,29 @@ func RegisterWarnRouter(router gin.IRouter) {
 	prefix := "/warn"
 
 	//webhook操作
-	router.DELETE(prefix+"/webhook", genAccessHandler(access.NoticeWebhookView, access.NoticeWebhookEdit), logHandler(enum.LogOperateTypeDelete, enum.LogKindNoticeWebhook), w.delWebhook)
-	router.POST(prefix+"/webhook", genAccessHandler(access.NoticeWebhookView, access.NoticeWebhookEdit), logHandler(enum.LogOperateTypeCreate, enum.LogKindNoticeWebhook), w.createWebhook)
-	router.PUT(prefix+"/webhook", genAccessHandler(access.NoticeWebhookView, access.NoticeWebhookEdit), logHandler(enum.LogOperateTypeEdit, enum.LogKindNoticeWebhook), w.updateWebhook)
-	router.GET(prefix+"/webhook", genAccessHandler(access.NoticeWebhookView, access.NoticeWebhookEdit), w.webhook)
-	router.GET(prefix+"/webhooks", genAccessHandler(access.NoticeWebhookView, access.NoticeWebhookEdit), w.webhooks)
+	router.DELETE(prefix+"/webhook", GenAccessHandler(access.NoticeWebhookView, access.NoticeWebhookEdit), LogHandler(enum.LogOperateTypeDelete, enum.LogKindNoticeWebhook), w.delWebhook)
+	router.POST(prefix+"/webhook", GenAccessHandler(access.NoticeWebhookView, access.NoticeWebhookEdit), LogHandler(enum.LogOperateTypeCreate, enum.LogKindNoticeWebhook), w.createWebhook)
+	router.PUT(prefix+"/webhook", GenAccessHandler(access.NoticeWebhookView, access.NoticeWebhookEdit), LogHandler(enum.LogOperateTypeEdit, enum.LogKindNoticeWebhook), w.updateWebhook)
+	router.GET(prefix+"/webhook", GenAccessHandler(access.NoticeWebhookView, access.NoticeWebhookEdit), w.webhook)
+	router.GET(prefix+"/webhooks", GenAccessHandler(access.NoticeWebhookView, access.NoticeWebhookEdit), w.webhooks)
 
 	//邮箱操作
-	router.POST(prefix+"/email", genAccessHandler(access.NoticeEmailView, access.NoticeEmailEdit), logHandler(enum.LogOperateTypeCreate, enum.LogKindNoticeEmail), w.createEmail)
-	router.PUT(prefix+"/email", genAccessHandler(access.NoticeEmailView, access.NoticeEmailEdit), logHandler(enum.LogOperateTypeEdit, enum.LogKindNoticeWebhook), w.updateEmail)
-	router.GET(prefix+"/email", genAccessHandler(access.NoticeEmailView, access.NoticeEmailEdit), w.getEmail)
+	router.POST(prefix+"/email", GenAccessHandler(access.NoticeEmailView, access.NoticeEmailEdit), LogHandler(enum.LogOperateTypeCreate, enum.LogKindNoticeEmail), w.createEmail)
+	router.PUT(prefix+"/email", GenAccessHandler(access.NoticeEmailView, access.NoticeEmailEdit), LogHandler(enum.LogOperateTypeEdit, enum.LogKindNoticeWebhook), w.updateEmail)
+	router.GET(prefix+"/email", GenAccessHandler(access.NoticeEmailView, access.NoticeEmailEdit), w.getEmail)
 
 	//告警历史
-	router.GET(prefix+"/history", genAccessHandler(access.MonPartitionView), w.warnHistory)
+	router.GET(prefix+"/history", GenAccessHandler(access.MonPartitionView), w.warnHistory)
 	//可选渠道列表
 	router.GET(prefix+"/channels", w.channels)
 
 	//告警策略
-	router.GET(prefix+"/strategys", genAccessHandler(access.MonPartitionView), w.strategys)
-	router.POST(prefix+"/strategy", genAccessHandler(access.MonPartitionView, access.MonPartitionEdit), logHandler(enum.LogOperateTypeCreate, enum.LogKindWarnStrategy), w.createStrategy)
-	router.PUT(prefix+"/strategy", genAccessHandler(access.MonPartitionView, access.MonPartitionEdit), logHandler(enum.LogOperateTypeEdit, enum.LogKindWarnStrategy), w.updateStrategy)
+	router.GET(prefix+"/strategys", GenAccessHandler(access.MonPartitionView), w.strategys)
+	router.POST(prefix+"/strategy", GenAccessHandler(access.MonPartitionView, access.MonPartitionEdit), LogHandler(enum.LogOperateTypeCreate, enum.LogKindWarnStrategy), w.createStrategy)
+	router.PUT(prefix+"/strategy", GenAccessHandler(access.MonPartitionView, access.MonPartitionEdit), LogHandler(enum.LogOperateTypeEdit, enum.LogKindWarnStrategy), w.updateStrategy)
 	router.GET(prefix+"/strategy", w.strategy)
-	router.PATCH(prefix+"/strategy", genAccessHandler(access.MonPartitionView, access.MonPartitionEdit), logHandler(enum.LogOperateTypeEdit, enum.LogKindWarnStrategy), w.updateStrategyStatus)
-	router.DELETE(prefix+"/strategy", genAccessHandler(access.MonPartitionView, access.MonPartitionEdit), logHandler(enum.LogOperateTypeDelete, enum.LogKindWarnStrategy), w.deleteStrategy)
+	router.PATCH(prefix+"/strategy", GenAccessHandler(access.MonPartitionView, access.MonPartitionEdit), LogHandler(enum.LogOperateTypeEdit, enum.LogKindWarnStrategy), w.updateStrategyStatus)
+	router.DELETE(prefix+"/strategy", GenAccessHandler(access.MonPartitionView, access.MonPartitionEdit), LogHandler(enum.LogOperateTypeDelete, enum.LogKindWarnStrategy), w.deleteStrategy)
 }
 
 // delWebhook 删除webhook
@@ -74,8 +78,8 @@ func (w *warnController) delWebhook(ginCtx *gin.Context) {
 		return
 	}
 
-	namespaceId := getNamespaceId(ginCtx)
-	userId := getUserId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
+	userId := GetUserId(ginCtx)
 
 	if err := w.noticeChannelService.DeleteNoticeChannel(ginCtx, namespaceId, userId, uid); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
@@ -87,7 +91,7 @@ func (w *warnController) delWebhook(ginCtx *gin.Context) {
 
 // webhook 获取单个webhook信息
 func (w *warnController) webhook(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	uid := ginCtx.Query("uuid")
 	if uid == "" {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult("uuid is null"))
@@ -128,7 +132,7 @@ func (w *warnController) webhook(ginCtx *gin.Context) {
 
 // webhook 获取webhook列表
 func (w *warnController) webhooks(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 
 	list, err := w.noticeChannelService.NoticeChannelList(ginCtx, namespaceId, 1)
 	if err != nil {
@@ -167,8 +171,8 @@ func (w *warnController) webhooks(ginCtx *gin.Context) {
 // createWebhook 新建webhook
 func (w *warnController) createWebhook(ginCtx *gin.Context) {
 
-	namespaceId := getNamespaceId(ginCtx)
-	userId := getUserId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
+	userId := GetUserId(ginCtx)
 
 	webhookInput := new(dto.WebhookInput)
 
@@ -213,8 +217,8 @@ func (w *warnController) createWebhook(ginCtx *gin.Context) {
 
 // updateWebhook 修改webhook
 func (w *warnController) updateWebhook(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
-	userId := getUserId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
+	userId := GetUserId(ginCtx)
 
 	webhookInput := new(dto.WebhookInput)
 
@@ -291,7 +295,7 @@ func checkWebhookParam(webhookInput *dto.WebhookInput) error {
 // getEmail 获取通知邮箱
 func (w *warnController) getEmail(ginCtx *gin.Context) {
 
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 
 	list, err := w.noticeChannelService.NoticeChannelList(ginCtx, namespaceId, 2)
 	if err != nil {
@@ -328,8 +332,8 @@ func (w *warnController) getEmail(ginCtx *gin.Context) {
 // createEmail 创建通知邮箱
 func (w *warnController) createEmail(ginCtx *gin.Context) {
 
-	namespaceId := getNamespaceId(ginCtx)
-	userId := getUserId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
+	userId := GetUserId(ginCtx)
 	emailInput := new(dto.EmailInput)
 
 	if err := ginCtx.BindJSON(emailInput); err != nil {
@@ -371,8 +375,8 @@ func (w *warnController) createEmail(ginCtx *gin.Context) {
 
 // updateEmail 修改通知邮箱
 func (w *warnController) updateEmail(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
-	userId := getUserId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
+	userId := GetUserId(ginCtx)
 	emailInput := new(dto.EmailInput)
 
 	if err := ginCtx.BindJSON(emailInput); err != nil {
@@ -428,7 +432,7 @@ func checkEmailParam(input *dto.EmailInput) error {
 
 // warnHistory 告警历史
 func (w *warnController) warnHistory(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 
 	partitionId := ginCtx.Query("partition_id")
 	partitionInfo, err := w.monitorService.PartitionInfo(ginCtx, namespaceId, partitionId)
@@ -493,7 +497,7 @@ func (w *warnController) warnHistory(ginCtx *gin.Context) {
 
 // channels 可选渠道列表
 func (w *warnController) channels(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 
 	list, err := w.noticeChannelService.NoticeChannelList(ginCtx, namespaceId, 0)
 	if err != nil {
@@ -518,7 +522,7 @@ func (w *warnController) channels(ginCtx *gin.Context) {
 
 // strategys 告警策略列表
 func (w *warnController) strategys(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	partitionId := ginCtx.Query("partition_id")
 	partitionInfo, err := w.monitorService.PartitionInfo(ginCtx, namespaceId, partitionId)
 	if err != nil {
@@ -573,7 +577,7 @@ func (w *warnController) strategys(ginCtx *gin.Context) {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
 	}
-	apiMaps := common.SliceToMap(apiList, func(t *model.APIInfo) string {
+	apiMaps := common.SliceToMap(apiList, func(t *apimodel.APIInfo) string {
 		return t.UUID
 	})
 
@@ -583,7 +587,7 @@ func (w *warnController) strategys(ginCtx *gin.Context) {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
 	}
-	serviceMaps := common.SliceToMap(serviceList, func(t *model.ServiceListItem) string {
+	serviceMaps := common.SliceToMap(serviceList, func(t *upstream_model.ServiceListItem) string {
 		return t.Name
 	})
 
@@ -687,7 +691,7 @@ func (w *warnController) strategys(ginCtx *gin.Context) {
 
 // strategy 获取单个告警策略
 func (w *warnController) strategy(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	uid := ginCtx.Query("uuid")
 	if uid == "" {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult("uuid is null"))
@@ -746,8 +750,8 @@ func (w *warnController) deleteStrategy(ginCtx *gin.Context) {
 
 // createStrategy 创建告警策略
 func (w *warnController) createStrategy(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
-	userId := getUserId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
+	userId := GetUserId(ginCtx)
 
 	strategy := &dto.WarnStrategyInput{}
 
@@ -782,8 +786,8 @@ func (w *warnController) createStrategy(ginCtx *gin.Context) {
 // updateStrategy 修改告警策略
 func (w *warnController) updateStrategy(ginCtx *gin.Context) {
 
-	namespaceId := getNamespaceId(ginCtx)
-	userId := getUserId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
+	userId := GetUserId(ginCtx)
 
 	strategy := &dto.WarnStrategyInput{}
 

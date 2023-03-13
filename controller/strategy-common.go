@@ -28,7 +28,7 @@ func RegisterStrategyCommonRouter(router gin.IRoutes) {
 }
 
 func (s *strategyCommonController) filterOptions(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 
 	options, err := s.strategyService.GetFilterOptions(ginCtx, namespaceId)
 	if err != nil {
@@ -53,7 +53,7 @@ func (s *strategyCommonController) filterOptions(ginCtx *gin.Context) {
 }
 
 func (s *strategyCommonController) filterRemote(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 
 	name := ginCtx.Param("name")
 	keyword := ginCtx.Query("keyword")

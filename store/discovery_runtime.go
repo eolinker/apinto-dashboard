@@ -47,6 +47,6 @@ func (s *discoveryRuntimeHandler) Decode(r *entry.Runtime) *entry.DiscoveryRunti
 
 func newDiscoveryRuntimeStore(db IDB) IDiscoveryRuntimeStore {
 	var runTimeHandler BaseKindHandler[entry.DiscoveryRuntime, entry.Runtime] = new(discoveryRuntimeHandler)
-	return createRuntime[entry.DiscoveryRuntime](runTimeHandler, db)
+	return CreateRuntime[entry.DiscoveryRuntime](runTimeHandler, db)
 
 }

@@ -5,7 +5,7 @@ import (
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/dto"
 	"github.com/eolinker/apinto-dashboard/entry"
-	"github.com/eolinker/apinto-dashboard/model"
+	apimodel "github.com/eolinker/apinto-dashboard/modules/api/model"
 )
 
 const (
@@ -60,7 +60,7 @@ type IAPIDriver interface {
 
 // IAPISyncFormatDriver 同步api所需的文件格式驱动
 type IAPISyncFormatDriver interface {
-	FormatAPI(data []byte, namespaceID, appID int, groupID, prefix, label string) ([]*model.APIInfo, error)
+	FormatAPI(data []byte, namespaceID, appID int, groupID, prefix, label string) ([]*apimodel.APIInfo, error)
 }
 
 type ICLConfigDriver interface {

@@ -21,18 +21,18 @@ func RegisterExternalApplicationRouter(router gin.IRoutes) {
 	e := &externalApplicationController{}
 	bean.Autowired(&e.extAppService)
 
-	router.GET("/external-apps", genAccessHandler(access.ExtAPPEdit, access.ExtAPPView), e.getList)
-	router.GET("/external-app", genAccessHandler(access.ExtAPPEdit, access.ExtAPPView), e.getInfo)
-	router.POST("/external-app", genAccessHandler(access.ExtAPPEdit), logHandler(enum.LogOperateTypeCreate, enum.LogKindExtAPP), e.create)
-	router.PUT("/external-app", genAccessHandler(access.ExtAPPEdit), logHandler(enum.LogOperateTypeEdit, enum.LogKindExtAPP), e.edit)
-	router.DELETE("/external-app", genAccessHandler(access.ExtAPPEdit), logHandler(enum.LogOperateTypeDelete, enum.LogKindExtAPP), e.delete)
-	router.PUT("/external-app/enable", genAccessHandler(access.ExtAPPEdit), e.enable)
-	router.PUT("/external-app/disable", genAccessHandler(access.ExtAPPEdit), e.disable)
-	router.PUT("/external-app/token", genAccessHandler(access.ExtAPPEdit), e.flushToken)
+	router.GET("/external-apps", GenAccessHandler(access.ExtAPPEdit, access.ExtAPPView), e.getList)
+	router.GET("/external-app", GenAccessHandler(access.ExtAPPEdit, access.ExtAPPView), e.getInfo)
+	router.POST("/external-app", GenAccessHandler(access.ExtAPPEdit), LogHandler(enum.LogOperateTypeCreate, enum.LogKindExtAPP), e.create)
+	router.PUT("/external-app", GenAccessHandler(access.ExtAPPEdit), LogHandler(enum.LogOperateTypeEdit, enum.LogKindExtAPP), e.edit)
+	router.DELETE("/external-app", GenAccessHandler(access.ExtAPPEdit), LogHandler(enum.LogOperateTypeDelete, enum.LogKindExtAPP), e.delete)
+	router.PUT("/external-app/enable", GenAccessHandler(access.ExtAPPEdit), e.enable)
+	router.PUT("/external-app/disable", GenAccessHandler(access.ExtAPPEdit), e.disable)
+	router.PUT("/external-app/token", GenAccessHandler(access.ExtAPPEdit), e.flushToken)
 }
 
 func (e *externalApplicationController) getList(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	list, err := e.extAppService.AppList(ginCtx, namespaceId)
 	if err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("Get external-app list fail. err: %s", err)))
@@ -45,7 +45,7 @@ func (e *externalApplicationController) getList(ginCtx *gin.Context) {
 }
 
 func (e *externalApplicationController) getInfo(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	uuid := ginCtx.Query("id")
 
 	info, err := e.extAppService.AppInfo(ginCtx, namespaceId, uuid)
@@ -66,8 +66,8 @@ func (e *externalApplicationController) getInfo(ginCtx *gin.Context) {
 }
 
 func (e *externalApplicationController) create(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
-	userId := getUserId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
+	userId := GetUserId(ginCtx)
 
 	input := new(dto.ExternalAppInfoInput)
 	if err := ginCtx.BindJSON(input); err != nil {
@@ -95,8 +95,8 @@ func (e *externalApplicationController) create(ginCtx *gin.Context) {
 }
 
 func (e *externalApplicationController) edit(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
-	userId := getUserId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
+	userId := GetUserId(ginCtx)
 	uuid := ginCtx.Query("id")
 
 	input := new(dto.ExternalAppInfoInput)
@@ -121,8 +121,8 @@ func (e *externalApplicationController) edit(ginCtx *gin.Context) {
 }
 
 func (e *externalApplicationController) delete(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
-	userId := getUserId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
+	userId := GetUserId(ginCtx)
 	uuid := ginCtx.Query("id")
 
 	err := e.extAppService.DelApp(ginCtx, namespaceId, userId, uuid)
@@ -135,8 +135,8 @@ func (e *externalApplicationController) delete(ginCtx *gin.Context) {
 }
 
 func (e *externalApplicationController) enable(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
-	userId := getUserId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
+	userId := GetUserId(ginCtx)
 	uuid := ginCtx.Query("id")
 
 	err := e.extAppService.Enable(ginCtx, namespaceId, userId, uuid)
@@ -149,8 +149,8 @@ func (e *externalApplicationController) enable(ginCtx *gin.Context) {
 }
 
 func (e *externalApplicationController) disable(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
-	userId := getUserId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
+	userId := GetUserId(ginCtx)
 	uuid := ginCtx.Query("id")
 
 	err := e.extAppService.Disable(ginCtx, namespaceId, userId, uuid)
@@ -163,8 +163,8 @@ func (e *externalApplicationController) disable(ginCtx *gin.Context) {
 }
 
 func (e *externalApplicationController) flushToken(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
-	userId := getUserId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
+	userId := GetUserId(ginCtx)
 	uuid := ginCtx.Query("id")
 
 	err := e.extAppService.FlushToken(ginCtx, namespaceId, userId, uuid)

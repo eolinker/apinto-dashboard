@@ -19,15 +19,15 @@ func RegisterClusterCertificateRouter(router gin.IRoutes) {
 	c := &clusterCertificateController{}
 	bean.Autowired(&c.clusterCertificateService)
 
-	router.POST("/cluster/:cluster_name/certificate", genAccessHandler(access.ClusterEdit), c.post)
-	router.PUT("/cluster/:cluster_name/certificate/:certificate_id", genAccessHandler(access.ClusterEdit), c.put)
-	router.DELETE("/cluster/:cluster_name/certificate/:certificate_id", genAccessHandler(access.ClusterEdit), c.del)
-	router.GET("/cluster/:cluster_name/certificates", genAccessHandler(access.ClusterView, access.ClusterEdit), c.gets)
+	router.POST("/cluster/:cluster_name/certificate", GenAccessHandler(access.ClusterEdit), c.post)
+	router.PUT("/cluster/:cluster_name/certificate/:certificate_id", GenAccessHandler(access.ClusterEdit), c.put)
+	router.DELETE("/cluster/:cluster_name/certificate/:certificate_id", GenAccessHandler(access.ClusterEdit), c.del)
+	router.GET("/cluster/:cluster_name/certificates", GenAccessHandler(access.ClusterView, access.ClusterEdit), c.gets)
 }
 
 // gets 获取证书列表
 func (c *clusterCertificateController) gets(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Param("cluster_name")
 
 	list, err := c.clusterCertificateService.QueryList(ginCtx, namespaceId, clusterName)
@@ -59,9 +59,9 @@ func (c *clusterCertificateController) gets(ginCtx *gin.Context) {
 
 // post 新增
 func (c *clusterCertificateController) post(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Param("cluster_name")
-	operator := getUserId(ginCtx)
+	operator := GetUserId(ginCtx)
 	input := &dto.ClusterCertificateInput{}
 	err := ginCtx.BindJSON(input)
 	if err != nil {
@@ -86,11 +86,11 @@ func (c *clusterCertificateController) post(ginCtx *gin.Context) {
 
 // put 修改
 func (c *clusterCertificateController) put(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Param("cluster_name")
 	certificateIdStr := ginCtx.Param("certificate_id")
 	certificateId, _ := strconv.Atoi(certificateIdStr)
-	operator := getUserId(ginCtx)
+	operator := GetUserId(ginCtx)
 	if certificateId <= 0 {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult("certificate_id is 0"))
 		return
@@ -120,7 +120,7 @@ func (c *clusterCertificateController) put(ginCtx *gin.Context) {
 
 // del 删除
 func (c *clusterCertificateController) del(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Param("cluster_name")
 	certificateIdStr := ginCtx.Param("certificate_id")
 	certificateId, _ := strconv.Atoi(certificateIdStr)

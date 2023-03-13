@@ -49,5 +49,5 @@ func NewStrategyRuntimeStore(db IDB, kind string) IStrategyRuntimeStore {
 	var runTimeHandler BaseKindHandler[entry.StrategyRuntime, entry.Runtime] = &strategyRuntimeHandler{
 		kind: kind,
 	}
-	return createRuntime[entry.StrategyRuntime](runTimeHandler, db)
+	return CreateRuntime[entry.StrategyRuntime](runTimeHandler, db)
 }

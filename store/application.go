@@ -17,7 +17,7 @@ type IApplicationStore interface {
 }
 
 type applicationStore struct {
-	*baseStore[entry.Application]
+	*BaseStore[entry.Application]
 }
 
 func (a *applicationStore) GetByIdStr(ctx context.Context, namespaceId int, idStr string) (*entry.Application, error) {
@@ -47,5 +47,5 @@ func (a *applicationStore) GetListByName(ctx context.Context, namespaceId int, n
 }
 
 func newApplicationStore(db IDB) IApplicationStore {
-	return &applicationStore{baseStore: createStore[entry.Application](db)}
+	return &applicationStore{BaseStore: CreateStore[entry.Application](db)}
 }

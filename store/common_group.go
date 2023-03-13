@@ -18,11 +18,11 @@ type ICommonGroupStore interface {
 }
 
 type commonGroupStore struct {
-	*baseStore[entry.CommonGroup]
+	*BaseStore[entry.CommonGroup]
 }
 
 func newCommonGroupStore(db IDB) ICommonGroupStore {
-	return &commonGroupStore{baseStore: createStore[entry.CommonGroup](db)}
+	return &commonGroupStore{BaseStore: CreateStore[entry.CommonGroup](db)}
 }
 
 func (c *commonGroupStore) GetMaxSort(ctx context.Context, namespaceId int, groupType string, tagId, parentId int) (int, error) {

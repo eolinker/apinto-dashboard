@@ -18,11 +18,11 @@ type IClusterStore interface {
 }
 
 type clusterStore struct {
-	*baseStore[entry.Cluster]
+	*BaseStore[entry.Cluster]
 }
 
 func newClusterStore(db IDB) IClusterStore {
-	return &clusterStore{baseStore: createStore[entry.Cluster](db)}
+	return &clusterStore{BaseStore: CreateStore[entry.Cluster](db)}
 }
 
 func (c *clusterStore) GetByNamespaceByName(ctx context.Context, namespaceId int, name string) (*entry.Cluster, error) {

@@ -10,6 +10,10 @@ import (
 	"github.com/eolinker/apinto-dashboard/dto"
 	"github.com/eolinker/apinto-dashboard/entry"
 	"github.com/eolinker/apinto-dashboard/model"
+	"github.com/eolinker/apinto-dashboard/modules/api"
+	apimodel "github.com/eolinker/apinto-dashboard/modules/api/model"
+	store2 "github.com/eolinker/apinto-dashboard/modules/api/store"
+	"github.com/eolinker/apinto-dashboard/modules/upstream"
 	"github.com/eolinker/apinto-dashboard/store"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/go-basic/uuid"
@@ -20,19 +24,19 @@ import (
 )
 
 type IAPIOpenAPIService interface {
-	SyncImport(ctx context.Context, namespaceID, appID int, data *dto.SyncImportData) ([]*model.ImportAPIListItem, error)
+	SyncImport(ctx context.Context, namespaceID, appID int, data *dto.SyncImportData) ([]*apimodel.ImportAPIListItem, error)
 	GetSyncImportInfo(ctx context.Context, namespaceID int) ([]*model.ApiOpenAPIGroups, []*model.ApiOpenAPIService, []string, error)
 }
 
 type apiOpenAPIService struct {
-	apiStore   store.IAPIStore
-	apiStat    store.IAPIStatStore
-	apiVersion store.IAPIVersionStore
+	apiStore   store2.IAPIStore
+	apiStat    store2.IAPIStatStore
+	apiVersion store2.IAPIVersionStore
 	quoteStore store.IQuoteStore
-	apiHistory store.IApiHistoryStore
+	apiHistory store2.IApiHistoryStore
 
-	apiService           IAPIService
-	service              IService
+	apiService           api.IAPIService
+	service              upstream.IService
 	commonGroup          ICommonGroupService
 	extAppService        IExternalApplicationService
 	apiSyncFormatManager driver_manager.IAPISyncFormatManager
@@ -56,7 +60,7 @@ func newAPIOpenAPIService() IAPIOpenAPIService {
 	return as
 }
 
-func (a *apiOpenAPIService) SyncImport(ctx context.Context, namespaceID, appID int, data *dto.SyncImportData) ([]*model.ImportAPIListItem, error) {
+func (a *apiOpenAPIService) SyncImport(ctx context.Context, namespaceID, appID int, data *dto.SyncImportData) ([]*apimodel.ImportAPIListItem, error) {
 	formatDriver := a.apiSyncFormatManager.GetDriver(data.Format)
 	if formatDriver == nil {
 		return nil, fmt.Errorf("format %s is illegal. ", data.Format)
@@ -104,15 +108,15 @@ func (a *apiOpenAPIService) SyncImport(ctx context.Context, namespaceID, appID i
 		return nil, err
 	}
 
-	apiMap := common.SliceToMapArray(allApi, func(t *model.APIVersionInfo) string {
+	apiMap := common.SliceToMapArray(allApi, func(t *apimodel.APIVersionInfo) string {
 		return t.Api.RequestPath
 	})
 
-	apiList := make([]*model.APIInfo, 0, len(importApis))
-	items := make([]*model.ImportAPIListItem, 0)
+	apiList := make([]*apimodel.APIInfo, 0, len(importApis))
+	items := make([]*apimodel.ImportAPIListItem, 0)
 	for _, importAPI := range importApis {
 		apiMethod := importAPI.Method[0]
-		item := &model.ImportAPIListItem{
+		item := &apimodel.ImportAPIListItem{
 			Name:   importAPI.Name,
 			Method: apiMethod,
 			Path:   importAPI.RequestPathLabel,

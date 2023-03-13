@@ -56,7 +56,7 @@ func (a *audit) Handler(operate int, kind string) gin.HandlerFunc {
 		}
 
 		end := time.Now()
-		namespaceId := getNamespaceId(ginCtx)
+		namespaceId := GetNamespaceId(ginCtx)
 		userId := ginCtx.GetInt(UserId)
 
 		//获取ip
@@ -100,6 +100,6 @@ func newController() *audit {
 	return c
 }
 
-func logHandler(operate int, kind string) gin.HandlerFunc {
+func LogHandler(operate int, kind string) gin.HandlerFunc {
 	return controller.Handler(operate, kind)
 }

@@ -50,5 +50,5 @@ func (s *roleAccessLogHandler) Decode(r *entry.History) *entry.RoleAccessLog {
 
 func newRoleAccessLogStore(db IDB) IRoleAccessLogStore {
 	var historyHandler DecodeHistory[entry.RoleAccessLog] = new(roleAccessLogHandler)
-	return createHistory(historyHandler, db, entry.HistoryKindRole)
+	return CreateHistory(historyHandler, db, entry.HistoryKindRole)
 }

@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	api2 "github.com/eolinker/apinto-dashboard/modules/api"
+	"github.com/eolinker/apinto-dashboard/modules/upstream"
 	"github.com/eolinker/eosc/common/bean"
 )
 
@@ -24,8 +26,8 @@ func newResetOnline() IResetOnlineService {
 	var clConfig IClusterConfigService
 	var variable IClusterVariableService
 	var discovery IDiscoveryService
-	var iService IService
-	var api IAPIService
+	var iService upstream.IService
+	var api api2.IAPIService
 	var application IApplicationService
 	var commonStrategy IStrategyCommonService
 

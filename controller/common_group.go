@@ -18,16 +18,16 @@ func RegisterCommonGroupRouter(router gin.IRoutes) {
 	c := &commonGroupController{}
 	bean.Autowired(&c.commonGroupService)
 	router.GET("/group/:group_type", c.groups)
-	router.POST("/group/:group_type", logHandler(enum.LogOperateTypeCreate, enum.LogKindCommonGroup), c.createGroup)
-	router.PUT("/group/:group_type/:uuid", logHandler(enum.LogOperateTypeEdit, enum.LogKindCommonGroup), c.updateGroup)
-	router.DELETE("/group/:group_type/:uuid", logHandler(enum.LogOperateTypeDelete, enum.LogKindCommonGroup), c.delGroup)
+	router.POST("/group/:group_type", LogHandler(enum.LogOperateTypeCreate, enum.LogKindCommonGroup), c.createGroup)
+	router.PUT("/group/:group_type/:uuid", LogHandler(enum.LogOperateTypeEdit, enum.LogKindCommonGroup), c.updateGroup)
+	router.DELETE("/group/:group_type/:uuid", LogHandler(enum.LogOperateTypeDelete, enum.LogKindCommonGroup), c.delGroup)
 	router.PUT("/groups/:group_type/sort", c.groupSort)
 }
 
 // groups 获取目录列表
 func (c *commonGroupController) groups(ginCtx *gin.Context) {
 
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	groupType := ginCtx.Param("group_type")
 	tagName := ginCtx.Query("tag_name")
 	uuid := ginCtx.Query("parent_uuid")
@@ -81,10 +81,10 @@ func (c *commonGroupController) subGroup(val *dto.CommonGroupOut, list []*model.
 
 // updateGroup 修改目录
 func (c *commonGroupController) updateGroup(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	groupType := ginCtx.Param("group_type")
 	uuid := ginCtx.Param("uuid")
-	operator := getUserId(ginCtx)
+	operator := GetUserId(ginCtx)
 	input := new(dto.CommonGroupInput)
 
 	if err := ginCtx.BindJSON(input); err != nil {
@@ -101,7 +101,7 @@ func (c *commonGroupController) updateGroup(ginCtx *gin.Context) {
 }
 
 func (c *commonGroupController) groupSort(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	groupType := ginCtx.Param("group_type")
 	tagName := ginCtx.Query("tag_name")
 
@@ -121,10 +121,10 @@ func (c *commonGroupController) groupSort(ginCtx *gin.Context) {
 
 // delGroup 删除目录
 func (c *commonGroupController) delGroup(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	groupType := ginCtx.Param("group_type")
 	uuid := ginCtx.Param("uuid")
-	operator := getUserId(ginCtx)
+	operator := GetUserId(ginCtx)
 
 	if err := c.commonGroupService.DeleteGroup(ginCtx, namespaceId, operator, groupType, uuid); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
@@ -136,10 +136,10 @@ func (c *commonGroupController) delGroup(ginCtx *gin.Context) {
 
 // createGroup 新建目录
 func (c *commonGroupController) createGroup(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	groupType := ginCtx.Param("group_type")
 	tagName := ginCtx.Query("tag_name")
-	operator := getUserId(ginCtx)
+	operator := GetUserId(ginCtx)
 	input := new(dto.CommonGroupInput)
 
 	if err := ginCtx.BindJSON(input); err != nil {

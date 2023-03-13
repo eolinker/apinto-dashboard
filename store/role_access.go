@@ -11,11 +11,11 @@ type IRoleAccessStore interface {
 }
 
 type roleAccessStore struct {
-	*baseStore[entry.RoleAccess]
+	*BaseStore[entry.RoleAccess]
 }
 
 func newRoleAccessStore(db IDB) IRoleAccessStore {
-	return &roleAccessStore{baseStore: createStore[entry.RoleAccess](db)}
+	return &roleAccessStore{BaseStore: CreateStore[entry.RoleAccess](db)}
 }
 
 func (r *roleAccessStore) GetByRoleID(ctx context.Context, roleID int) (*entry.RoleAccess, error) {

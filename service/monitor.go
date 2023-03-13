@@ -202,11 +202,11 @@ func (m *monitorService) UpdatePartition(ctx context.Context, namespaceId, userI
 		return nil, err
 	}
 
-	err = m.lockService.lock(lockNameMonPartition, partitionInfo.Id)
+	err = m.lockService.Lock(LockNameMonPartition, partitionInfo.Id)
 	if err != nil {
 		return nil, err
 	}
-	defer m.lockService.unlock(lockNameMonPartition, partitionInfo.Id)
+	defer m.lockService.Unlock(LockNameMonPartition, partitionInfo.Id)
 
 	partitionInfo, err = m.monitorStore.GetByUUID(ctx, namespaceId, uuid)
 	if err != nil {
@@ -275,11 +275,11 @@ func (m *monitorService) DelPartition(ctx context.Context, namespaceId int, uuid
 		return err
 	}
 
-	err = m.lockService.lock(lockNameMonPartition, partitionInfo.Id)
+	err = m.lockService.Lock(LockNameMonPartition, partitionInfo.Id)
 	if err != nil {
 		return err
 	}
-	defer m.lockService.unlock(lockNameMonPartition, partitionInfo.Id)
+	defer m.lockService.Unlock(LockNameMonPartition, partitionInfo.Id)
 
 	//编写日志操作对象信息
 	common.SetGinContextAuditObject(ctx, &model.LogObjectInfo{

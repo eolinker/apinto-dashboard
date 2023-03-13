@@ -12,11 +12,11 @@ type IApplicationAuthStore interface {
 }
 
 type applicationAuthStore struct {
-	*baseStore[entry.ApplicationAuth]
+	*BaseStore[entry.ApplicationAuth]
 }
 
 func newApplicationAuthStore(db IDB) IApplicationAuthStore {
-	return &applicationAuthStore{baseStore: createStore[entry.ApplicationAuth](db)}
+	return &applicationAuthStore{BaseStore: CreateStore[entry.ApplicationAuth](db)}
 }
 
 func (a *applicationAuthStore) GetByUUID(ctx context.Context, uuid string) (*entry.ApplicationAuth, error) {

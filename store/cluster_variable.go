@@ -20,11 +20,11 @@ type IClusterVariableStore interface {
 }
 
 type clusterVariableStore struct {
-	*baseStore[entry.ClusterVariable]
+	*BaseStore[entry.ClusterVariable]
 }
 
 func newClusterVariableStore(db IDB) IClusterVariableStore {
-	return &clusterVariableStore{baseStore: createStore[entry.ClusterVariable](db)}
+	return &clusterVariableStore{BaseStore: CreateStore[entry.ClusterVariable](db)}
 }
 
 func (e *clusterVariableStore) GetByClusterIds(ctx context.Context, clusterIds ...int) ([]*entry.ClusterVariable, error) {

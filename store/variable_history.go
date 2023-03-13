@@ -36,5 +36,5 @@ func (s *variableHistoryHandler) Decode(r *entry.History) *entry.VariableHistory
 
 func newVariableHistoryStore(db IDB) IVariableHistoryStore {
 	var historyHandler DecodeHistory[entry.VariableHistory] = new(variableHistoryHandler)
-	return createHistory(historyHandler, db, entry.HistoryKindVariableGlobal)
+	return CreateHistory(historyHandler, db, entry.HistoryKindVariableGlobal)
 }

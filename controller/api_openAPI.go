@@ -30,7 +30,7 @@ func RegisterApiOpenAPIRouter(router gin.IRoutes) {
 func (a *apiOpenAPIController) getImportInfo(ginCtx *gin.Context) {
 	//检测openAPI token
 	token := ginCtx.GetHeader("Authorization")
-	namespaceID := getNamespaceId(ginCtx)
+	namespaceID := GetNamespaceId(ginCtx)
 	_, err := a.extAPPService.CheckExtAPPToken(ginCtx, namespaceID, token)
 	if err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("GetAPIImportInfos fail. err:%s", err)))
@@ -53,7 +53,7 @@ func (a *apiOpenAPIController) getImportInfo(ginCtx *gin.Context) {
 func (a *apiOpenAPIController) syncAPI(ginCtx *gin.Context) {
 	//检测openAPI token 并获取相应外部应用的id
 	token := ginCtx.GetHeader("Authorization")
-	namespaceID := getNamespaceId(ginCtx)
+	namespaceID := GetNamespaceId(ginCtx)
 	appID, err := a.extAPPService.CheckExtAPPToken(ginCtx, namespaceID, token)
 	if err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("syncAPI fail. err:%s", err)))

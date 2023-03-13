@@ -36,5 +36,5 @@ func (s *strategyHistoryHandler) Decode(r *entry.History) *entry.StrategyHistory
 
 func newStrategyHistoryStore(db IDB) IStrategyHistoryStore {
 	var historyHandler DecodeHistory[entry.StrategyHistory] = new(strategyHistoryHandler)
-	return createHistory(historyHandler, db, entry.HistoryKindStrategy)
+	return CreateHistory(historyHandler, db, entry.HistoryKindStrategy)
 }

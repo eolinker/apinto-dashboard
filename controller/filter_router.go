@@ -64,7 +64,7 @@ func init() {
 	bean.Autowired(&authService)
 }
 
-func getNamespaceId(ginCtx *gin.Context) int {
+func GetNamespaceId(ginCtx *gin.Context) int {
 	i := ginCtx.GetInt(NamespaceId)
 	if i == 0 {
 		i = 1
@@ -72,7 +72,7 @@ func getNamespaceId(ginCtx *gin.Context) int {
 	return i
 }
 
-func loadNamespaceId(name string) int {
+func LoadNamespaceId(name string) int {
 	value, err := namespaceService.GetByName(name)
 	if err != nil {
 		log.Errorf("filterRouter-loadNamespaceId err=%s name=%s", err.Error(), name)
@@ -85,21 +85,21 @@ func MustNamespace(context *gin.Context) {
 
 	if namespaceValue := context.Query(namespace); namespaceValue != "" {
 		context.Set(namespace, namespaceValue)
-		context.Set(NamespaceId, loadNamespaceId(namespaceValue))
+		context.Set(NamespaceId, LoadNamespaceId(namespaceValue))
 		return
 	}
 	if namespaceValue := context.GetHeader(namespace); namespaceValue != "" {
 		context.Set(namespace, namespaceValue)
-		context.Set(NamespaceId, loadNamespaceId(namespaceValue))
+		context.Set(NamespaceId, LoadNamespaceId(namespaceValue))
 		return
 	}
 	if namespaceValue, _ := context.Cookie(namespace); namespaceValue != "" {
 		context.Set(namespace, namespaceValue)
-		context.Set(NamespaceId, loadNamespaceId(namespaceValue))
+		context.Set(NamespaceId, LoadNamespaceId(namespaceValue))
 		return
 	}
 	context.Set(namespace, DefaultNamespace)
-	context.Set(NamespaceId, loadNamespaceId(DefaultNamespace))
+	context.Set(NamespaceId, LoadNamespaceId(DefaultNamespace))
 	//context.JSON(http.StatusOK, dto.NewErrorResult("namespace NotFound"))
 	//context.Abort()
 
@@ -178,14 +178,14 @@ func VerifyToken(ginCtx *gin.Context) {
 	ginCtx.Set(UserId, userId)
 }
 
-func getUserId(ginCtx *gin.Context) int {
+func GetUserId(ginCtx *gin.Context) int {
 	return ginCtx.GetInt(UserId)
 }
 
-func genAccessHandler(acs ...access.Access) gin.HandlerFunc {
+func GenAccessHandler(acs ...access.Access) gin.HandlerFunc {
 
 	return func(ginCtx *gin.Context) {
-		userId := getUserId(ginCtx)
+		userId := GetUserId(ginCtx)
 
 		ctx := context.Background()
 

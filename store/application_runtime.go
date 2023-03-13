@@ -49,5 +49,5 @@ func (s *applicationRuntimeHandler) Decode(r *entry.Runtime) *entry.ApplicationR
 
 func newApplicationRuntimeStore(db IDB) IApplicationRuntimeStore {
 	var runTimeHandler BaseKindHandler[entry.ApplicationRuntime, entry.Runtime] = new(applicationRuntimeHandler)
-	return createRuntime[entry.ApplicationRuntime](runTimeHandler, db)
+	return CreateRuntime[entry.ApplicationRuntime](runTimeHandler, db)
 }

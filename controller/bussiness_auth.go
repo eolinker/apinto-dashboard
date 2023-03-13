@@ -23,11 +23,11 @@ func RegisterBussinessAuthRouter(router gin.IRouter) {
 	b := &bussinessAuthController{}
 	bean.Autowired(&b.bussinessAuthService)
 
-	router.GET("/_system/activation/info", genAccessHandler(access.AuthorizationView, access.AuthorizationEdit), b.acivationInfo)
+	router.GET("/_system/activation/info", GenAccessHandler(access.AuthorizationView, access.AuthorizationEdit), b.acivationInfo)
 	router.GET("/_system/run-info", b.getRunInfo)
 	router.GET("/_system/mac", b.getMac)
 	router.POST("/_system/activation", b.activation)
-	router.POST("/_system/reactivation", genAccessHandler(access.AuthorizationEdit), b.reactivation)
+	router.POST("/_system/reactivation", GenAccessHandler(access.AuthorizationEdit), b.reactivation)
 }
 
 func (b *bussinessAuthController) acivationInfo(ginCtx *gin.Context) {

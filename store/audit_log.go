@@ -16,11 +16,11 @@ type IAuditLogStore interface {
 }
 
 type auditLogStore struct {
-	*baseStore[entry.AuditLog]
+	*BaseStore[entry.AuditLog]
 }
 
 func newAuditLogStore(db IDB) IAuditLogStore {
-	return &auditLogStore{baseStore: createStore[entry.AuditLog](db)}
+	return &auditLogStore{BaseStore: CreateStore[entry.AuditLog](db)}
 }
 
 func (c *auditLogStore) GetLogsByCondition(ctx context.Context, namespaceID, operateType int, kind, keyword string, start, end int64, pageNum, pageSize int) ([]*entry.AuditLog, int, error) {

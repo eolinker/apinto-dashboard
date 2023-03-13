@@ -6,6 +6,8 @@ import (
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/model"
+	service2 "github.com/eolinker/apinto-dashboard/modules/api"
+	"github.com/eolinker/apinto-dashboard/modules/upstream"
 	"github.com/eolinker/eosc/common/bean"
 	"sort"
 )
@@ -20,8 +22,8 @@ type IStrategyCommonService interface {
 
 type strategyCommonService struct {
 	applicationService  IApplicationService
-	apiService          IAPIService
-	service             IService
+	apiService          service2.IAPIService
+	service             upstream.IService
 	resetOnlineServices []IResetOnlineService
 }
 

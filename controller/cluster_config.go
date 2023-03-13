@@ -18,14 +18,14 @@ func RegisterClusterConfigRouter(router gin.IRoutes) {
 	c := &clusterConfigController{}
 	bean.Autowired(&c.configService)
 
-	router.GET("/cluster/:cluster_name/configuration/:type", genAccessHandler(access.ClusterView, access.ClusterEdit), c.get)
-	router.PUT("/cluster/:cluster_name/configuration/:type", genAccessHandler(access.ClusterEdit), c.edit)
-	router.PUT("/cluster/:cluster_name/configuration/:type/enable", genAccessHandler(access.ClusterEdit), c.enable)
-	router.PUT("/cluster/:cluster_name/configuration/:type/disable", genAccessHandler(access.ClusterEdit), c.disable)
+	router.GET("/cluster/:cluster_name/configuration/:type", GenAccessHandler(access.ClusterView, access.ClusterEdit), c.get)
+	router.PUT("/cluster/:cluster_name/configuration/:type", GenAccessHandler(access.ClusterEdit), c.edit)
+	router.PUT("/cluster/:cluster_name/configuration/:type/enable", GenAccessHandler(access.ClusterEdit), c.enable)
+	router.PUT("/cluster/:cluster_name/configuration/:type/disable", GenAccessHandler(access.ClusterEdit), c.disable)
 }
 
 func (c *clusterConfigController) get(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Param("cluster_name")
 	configType := ginCtx.Param("type")
 
@@ -49,10 +49,10 @@ func (c *clusterConfigController) get(ginCtx *gin.Context) {
 }
 
 func (c *clusterConfigController) edit(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Param("cluster_name")
 	configType := ginCtx.Param("type")
-	operator := getUserId(ginCtx)
+	operator := GetUserId(ginCtx)
 
 	if !c.configService.IsConfigTypeExist(configType) {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("edit %s fail. err: %s doesn't exist. ", configType, configType)))
@@ -80,10 +80,10 @@ func (c *clusterConfigController) edit(ginCtx *gin.Context) {
 }
 
 func (c *clusterConfigController) enable(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Param("cluster_name")
 	configType := ginCtx.Param("type")
-	operator := getUserId(ginCtx)
+	operator := GetUserId(ginCtx)
 
 	if !c.configService.IsConfigTypeExist(configType) {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("enable %s fail. err: %s doesn't exist. ", configType, configType)))
@@ -100,10 +100,10 @@ func (c *clusterConfigController) enable(ginCtx *gin.Context) {
 }
 
 func (c *clusterConfigController) disable(ginCtx *gin.Context) {
-	namespaceId := getNamespaceId(ginCtx)
+	namespaceId := GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Param("cluster_name")
 	configType := ginCtx.Param("type")
-	operator := getUserId(ginCtx)
+	operator := GetUserId(ginCtx)
 
 	if !c.configService.IsConfigTypeExist(configType) {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("disable %s fail. err: %s doesn't exist. ", configType, configType)))

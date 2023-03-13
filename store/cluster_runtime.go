@@ -15,11 +15,11 @@ type IClusterRuntimeStore interface {
 }
 
 type clusterRuntimeStore struct {
-	*baseStore[entry.Runtime]
+	*BaseStore[entry.Runtime]
 }
 
 func newClusterRuntimeStore(db IDB) IClusterRuntimeStore {
-	return &clusterRuntimeStore{baseStore: createStore[entry.Runtime](db)}
+	return &clusterRuntimeStore{BaseStore: CreateStore[entry.Runtime](db)}
 }
 
 func (c *clusterRuntimeStore) DeleteByClusterID(ctx context.Context, clusterId int) error {
