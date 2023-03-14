@@ -17,7 +17,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/upstream"
 	upstream_model "github.com/eolinker/apinto-dashboard/modules/upstream/model"
 	upstream_store "github.com/eolinker/apinto-dashboard/modules/upstream/store"
-	"github.com/eolinker/apinto-dashboard/service/apinto-client"
 	"github.com/eolinker/apinto-dashboard/service/cluster-service"
 	"github.com/eolinker/apinto-dashboard/service/discovery-serivce"
 	"github.com/eolinker/apinto-dashboard/service/locker-service"
@@ -37,22 +36,22 @@ import (
 const LockNameService = "service"
 
 type service struct {
-	clusterService     cluster_service.IClusterService
-	apintoClient       apinto_client.IApintoClient
-	clusterNodeService cluster_service.IClusterNodeService
-	discoveryService   discovery_serivce.IDiscoveryService
-	namespaceService   namespace_service.INamespaceService
+	clusterService        cluster_service.IClusterService
+	apintoClient          cluster_service.IApintoClient
+	clusterNodeService    cluster_service.IClusterNodeService
+	discoveryService      discovery_serivce.IDiscoveryService
+	namespaceService      namespace_service.INamespaceService
 	globalVariableService variable_service.IGlobalVariableService
 	lockService           locker_service.IAsynLockService
 	variableService       variable_service.IClusterVariableService
-	apiService          api.IAPIService
-	userInfoService     service2.IUserInfoService
-	serviceRuntimeStore upstream_store.IServiceRuntimeStore
+	apiService            api.IAPIService
+	userInfoService       service2.IUserInfoService
+	serviceRuntimeStore   upstream_store.IServiceRuntimeStore
 	serviceStore          upstream_store.IServiceStore
 	serviceVersionStore   upstream_store.IServiceVersionStore
-	serviceStatStore upstream_store.IServiceStatStore
-	quoteStore       quote_store.IQuoteStore
-	historyStore     upstream_store.IServiceHistoryStore
+	serviceStatStore      upstream_store.IServiceStatStore
+	quoteStore            quote_store.IQuoteStore
+	historyStore          upstream_store.IServiceHistoryStore
 }
 
 func newServiceService() upstream.IService {

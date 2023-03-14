@@ -1,4 +1,4 @@
-package dto
+package bussiness_dto
 
 type SystemRunInfo struct {
 	Title       string `json:"title"`
