@@ -7,11 +7,10 @@ import (
 	"github.com/eolinker/apinto-dashboard/app/apserver/version"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/db_migrator"
-	"github.com/eolinker/apinto-dashboard/service/notice-service"
-	"github.com/eolinker/apinto-dashboard/service/user-service"
+	cluster_service "github.com/eolinker/apinto-dashboard/modules/cluster"
+	"github.com/eolinker/apinto-dashboard/modules/notice"
+	"github.com/eolinker/apinto-dashboard/modules/user"
 	"github.com/eolinker/apinto-dashboard/store"
-	"github.com/eolinker/apinto-dashboard/timer"
-	"github.com/eolinker/apinto-dashboard/user_center/client"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
 	"github.com/gin-gonic/gin"
@@ -40,7 +39,6 @@ func main() {
 
 func run() {
 
-	client.InitUserCenterClient(GetUserCenterUrl())
 	gin.SetMode(gin.ReleaseMode)
 	engine := gin.Default()
 
@@ -63,16 +61,13 @@ func run() {
 	//初始化通知渠道驱动管理器
 	initNoticeChannelDriver()
 
-	//定时任务
-	go timer.TaskTimer()
-
 	if err = engine.Run(fmt.Sprintf(":%d", GetPort())); err != nil {
 		panic(err)
 	}
 }
 
 func initNoticeChannelDriver() {
-	var noticeChannelService notice_service.INoticeChannelService
+	var noticeChannelService notice.INoticeChannelService
 	bean.Autowired(&noticeChannelService)
 	err := noticeChannelService.InitChannelDriver()
 	if err != nil {
@@ -81,7 +76,7 @@ func initNoticeChannelDriver() {
 }
 
 func initAdmin() {
-	var userInfoService user_service.IUserInfoService
+	var userInfoService user.IUserInfoService
 	bean.Autowired(&userInfoService)
 	err := userInfoService.CreateAdmin()
 	if err != nil {

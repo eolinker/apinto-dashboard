@@ -2,8 +2,8 @@ package upstream_store
 
 import (
 	"encoding/json"
-	"github.com/eolinker/apinto-dashboard/entry/history-entry"
-	"github.com/eolinker/apinto-dashboard/entry/upstream-entry"
+	"github.com/eolinker/apinto-dashboard/modules/base/history-entry"
+	"github.com/eolinker/apinto-dashboard/modules/upstream/upstream-entry"
 	"github.com/eolinker/apinto-dashboard/store"
 )
 

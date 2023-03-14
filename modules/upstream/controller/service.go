@@ -6,12 +6,12 @@ import (
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/dto"
-	"github.com/eolinker/apinto-dashboard/dto/online-dto"
-	"github.com/eolinker/apinto-dashboard/dto/service-dto"
 	"github.com/eolinker/apinto-dashboard/enum"
+	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
+	"github.com/eolinker/apinto-dashboard/modules/discovery"
+	"github.com/eolinker/apinto-dashboard/modules/online/online-dto"
 	"github.com/eolinker/apinto-dashboard/modules/upstream"
 	_ "github.com/eolinker/apinto-dashboard/modules/upstream/service"
-	"github.com/eolinker/apinto-dashboard/service/discovery-serivce"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -20,7 +20,7 @@ import (
 
 type serviceController struct {
 	service   upstream.IService
-	discovery discovery_serivce.IDiscoveryService
+	discovery discovery.IDiscoveryService
 }
 
 func RegisterServiceRouter(router gin.IRouter) {
@@ -49,7 +49,7 @@ func RegisterServiceRouter(router gin.IRouter) {
 
 // getList 获取服务信息列表
 func (s *serviceController) getList(ginCtx *gin.Context) {
-	namespaceID := controller.GetNamespaceId(ginCtx)
+	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
 	searchName := ginCtx.Query("name")
 	pageNumStr := ginCtx.Query("page_num")
 	pageSizeStr := ginCtx.Query("page_size")
@@ -68,10 +68,10 @@ func (s *serviceController) getList(ginCtx *gin.Context) {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("GetServiceList fail. err:%s", err.Error())))
 		return
 	}
-	services := make([]*service_dto.ServiceListItem, 0, len(listItems))
+	services := make([]*dto.ServiceListItem, 0, len(listItems))
 
 	for _, item := range listItems {
-		li := &service_dto.ServiceListItem{
+		li := &dto.ServiceListItem{
 			Name:        item.Name,
 			UUID:        item.UUID,
 			Scheme:      item.Scheme,
@@ -91,7 +91,7 @@ func (s *serviceController) getList(ginCtx *gin.Context) {
 
 // getInfo 获取服务信息
 func (s *serviceController) getInfo(ginCtx *gin.Context) {
-	namespaceID := controller.GetNamespaceId(ginCtx)
+	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
 	serviceName := ginCtx.Query("name")
 	if serviceName == "" {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("GetServiceInfo Info fail. err: serviceName can't be nil")))
@@ -111,28 +111,28 @@ func (s *serviceController) getInfo(ginCtx *gin.Context) {
 	}
 	conf := driver.FormatConfig([]byte(info.Config))
 
-	serivce := &service_dto.ServiceInfoProxy{
+	serivce := &dto.ServiceInfoProxy{
 		Name:          info.Name,
 		UUID:          info.UUID,
 		Desc:          info.Desc,
 		Scheme:        info.Scheme,
 		DiscoveryName: discoveryName,
-		Config:        service_dto.ServiceConfigProxy(conf),
+		Config:        dto.ServiceConfigProxy(conf),
 		Timeout:       info.Timeout,
 		Balance:       info.Balance,
 	}
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(&service_dto.ServiceInfoOutput{
+	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(&dto.ServiceInfoOutput{
 		Service: serivce,
-		Render:  service_dto.Render(driver.Render()),
+		Render:  dto.Render(driver.Render()),
 	}))
 }
 
 // create 新增服务
 func (s *serviceController) create(ginCtx *gin.Context) {
-	namespaceId := controller.GetNamespaceId(ginCtx)
+	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	operator := controller.GetUserId(ginCtx)
 
-	inputProxy := new(service_dto.ServiceInfoProxy)
+	inputProxy := new(dto.ServiceInfoProxy)
 	if err := ginCtx.BindJSON(inputProxy); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -157,7 +157,7 @@ func (s *serviceController) create(ginCtx *gin.Context) {
 	}
 	inputProxy.Config = newConf
 
-	input := &service_dto.ServiceInfo{
+	input := &dto.ServiceInfo{
 		Name:        inputProxy.Name,
 		UUID:        inputProxy.UUID,
 		Desc:        inputProxy.Desc,
@@ -181,7 +181,7 @@ func (s *serviceController) create(ginCtx *gin.Context) {
 
 // alter 修改服务信息
 func (s *serviceController) alter(ginCtx *gin.Context) {
-	namespaceId := controller.GetNamespaceId(ginCtx)
+	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	serviceName := ginCtx.Query("name")
 	if serviceName == "" {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("UpdateService Info fail. err: serviceName can't be nil")))
@@ -189,7 +189,7 @@ func (s *serviceController) alter(ginCtx *gin.Context) {
 	}
 	operator := controller.GetUserId(ginCtx)
 	backgroundCtx := ginCtx
-	inputProxy := new(service_dto.ServiceInfoProxy)
+	inputProxy := new(dto.ServiceInfoProxy)
 	if err := ginCtx.BindJSON(inputProxy); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -208,7 +208,7 @@ func (s *serviceController) alter(ginCtx *gin.Context) {
 	}
 	inputProxy.Config = newConf
 
-	input := &service_dto.ServiceInfo{
+	input := &dto.ServiceInfo{
 		Name:        serviceName,
 		UUID:        inputProxy.UUID, //TODO 应该用rest里的uuid
 		Desc:        inputProxy.Desc,
@@ -232,7 +232,7 @@ func (s *serviceController) alter(ginCtx *gin.Context) {
 
 // del 删除服务信息
 func (s *serviceController) del(ginCtx *gin.Context) {
-	namespaceId := controller.GetNamespaceId(ginCtx)
+	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	serviceName := ginCtx.Query("name")
 	if serviceName == "" {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("DeleteService Info fail. err: serviceName can't be nil")))
@@ -250,7 +250,7 @@ func (s *serviceController) del(ginCtx *gin.Context) {
 }
 
 func (s *serviceController) getEnum(ginCtx *gin.Context) {
-	namespaceId := controller.GetNamespaceId(ginCtx)
+	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	searchName := ginCtx.Query("name")
 
 	serviceList, err := s.service.GetServiceEnum(ginCtx, namespaceId, searchName)
@@ -266,7 +266,7 @@ func (s *serviceController) getEnum(ginCtx *gin.Context) {
 
 // online 上线
 func (s *serviceController) online(ginCtx *gin.Context) {
-	namespaceId := controller.GetNamespaceId(ginCtx)
+	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	serviceName := ginCtx.Param("service_name")
 	input := &online_dto.UpdateOnlineStatusInput{}
 	operator := controller.GetUserId(ginCtx)
@@ -296,7 +296,7 @@ func (s *serviceController) online(ginCtx *gin.Context) {
 
 // online 下线
 func (s *serviceController) offline(ginCtx *gin.Context) {
-	namespaceId := controller.GetNamespaceId(ginCtx)
+	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	serviceName := ginCtx.Param("service_name")
 	input := &online_dto.UpdateOnlineStatusInput{}
 	operator := controller.GetUserId(ginCtx)
@@ -315,7 +315,7 @@ func (s *serviceController) offline(ginCtx *gin.Context) {
 
 // getOnlineList 上线管理列表
 func (s *serviceController) getOnlineList(ginCtx *gin.Context) {
-	namespaceId := controller.GetNamespaceId(ginCtx)
+	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	serviceName := ginCtx.Param("service_name")
 
 	list, err := s.service.OnlineList(ginCtx, namespaceId, serviceName)
@@ -346,7 +346,7 @@ func (s *serviceController) getOnlineList(ginCtx *gin.Context) {
 
 //// getApi 获取api接口信息
 //func (s *serviceController) getApi(ginCtx *gin.Context) {
-//	_ = controller.GetNamespaceId(ginCtx)
+//	_ = namespace_controller.GetNamespaceId(ginCtx)
 //	_ = ginCtx.Param("service_name")
 //	uuid := ginCtx.Query("uuid")
 //	api, err := s.service.GetApi(ginCtx, uuid)
@@ -371,7 +371,7 @@ func (s *serviceController) getOnlineList(ginCtx *gin.Context) {
 //
 //// getApis 目录下下的api接口信息
 //func (s *serviceController) getApis(ginCtx *gin.Context) {
-//	namespaceId := controller.GetNamespaceId(ginCtx)
+//	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 //	serviceName := ginCtx.Param("service_name")
 //	directoryUuid := ginCtx.Param("group_uuid")
 //	apis, err := s.service.GetApiListByGroupUUID(ginCtx, namespaceId, serviceName, directoryUuid)
@@ -400,7 +400,7 @@ func (s *serviceController) getOnlineList(ginCtx *gin.Context) {
 //
 //// postApi 新增api接口
 //func (s *serviceController) postApi(ginCtx *gin.Context) {
-//	namespaceId := controller.GetNamespaceId(ginCtx)
+//	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 //	serviceName := ginCtx.Param("service_name")
 //	operator := controller.GetUserId(ginCtx)
 //	input := new(dto.ServiceApiInput)
@@ -417,7 +417,7 @@ func (s *serviceController) getOnlineList(ginCtx *gin.Context) {
 //
 //// putApi 修改api接口
 //func (s *serviceController) putApi(ginCtx *gin.Context) {
-//	namespaceId := controller.GetNamespaceId(ginCtx)
+//	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 //	serviceName := ginCtx.Param("service_name")
 //	uuid := ginCtx.Query("api_uuid")
 //	operator := controller.GetUserId(ginCtx)
@@ -436,7 +436,7 @@ func (s *serviceController) getOnlineList(ginCtx *gin.Context) {
 //
 //// delApi 删除api接口
 //func (s *serviceController) delApi(ginCtx *gin.Context) {
-//	namespaceId := controller.GetNamespaceId(ginCtx)
+//	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 //	serviceName := ginCtx.Param("service_name")
 //	input := new(dto.DeleteServiceApiInput)
 //	if err := ginCtx.BindJSON(input); err != nil {

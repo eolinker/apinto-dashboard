@@ -1,8 +1,8 @@
 package api_store
 
 import (
-	"github.com/eolinker/apinto-dashboard/entry/runtime-entry"
 	api_entry "github.com/eolinker/apinto-dashboard/modules/api/api-entry"
+	"github.com/eolinker/apinto-dashboard/modules/base/runtime-entry"
 	"github.com/eolinker/apinto-dashboard/store"
 )
 

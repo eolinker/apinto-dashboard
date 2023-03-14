@@ -6,7 +6,7 @@ package mock_service
 
 import (
 	context "context"
-	model "github.com/eolinker/apinto-dashboard/model/monitor-model"
+	model "github.com/eolinker/apinto-dashboard/modules/monitor/monitor-model"
 	reflect "reflect"
 	time "time"
 

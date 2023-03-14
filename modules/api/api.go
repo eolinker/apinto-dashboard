@@ -3,12 +3,12 @@ package api
 import (
 	"context"
 	"github.com/eolinker/apinto-dashboard/driver-manager/driver"
-	"github.com/eolinker/apinto-dashboard/model/frontend-model"
-	"github.com/eolinker/apinto-dashboard/model/group-model"
-	"github.com/eolinker/apinto-dashboard/model/openapi-model"
 	"github.com/eolinker/apinto-dashboard/modules/api/api-dto"
 	api_entry "github.com/eolinker/apinto-dashboard/modules/api/api-entry"
 	apimodel "github.com/eolinker/apinto-dashboard/modules/api/model"
+	"github.com/eolinker/apinto-dashboard/modules/base/frontend-model"
+	"github.com/eolinker/apinto-dashboard/modules/group/group-model"
+	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-model"
 )
 
 type IAPIService interface {
@@ -51,7 +51,7 @@ type IAPIService interface {
 	IsAPIOnline(ctx context.Context, clusterId, apiID int) bool
 	GetAPIDriver(driverName string) driver.IAPIDriver
 	GetAPINameByID(ctx context.Context, apiID int) (string, error)
-	GetAPIRemoteOptions(ctx context.Context, namespaceId, pageNum, pageSize int, keyword, groupUuid string) ([]*openapi_model.RemoteApis, int, error)
-	GetAPIRemoteByUUIDS(ctx context.Context, namespace int, uuids []string) ([]*openapi_model.RemoteApis, error)
+	GetAPIRemoteOptions(ctx context.Context, namespaceId, pageNum, pageSize int, keyword, groupUuid string) ([]*strategy_model.RemoteApis, int, error)
+	GetAPIRemoteByUUIDS(ctx context.Context, namespace int, uuids []string) ([]*strategy_model.RemoteApis, error)
 	ResetOnline(ctx context.Context, namespaceId, clusterId int)
 }

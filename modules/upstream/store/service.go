@@ -2,8 +2,7 @@ package upstream_store
 
 import (
 	"context"
-	"github.com/eolinker/apinto-dashboard/entry/page-entry"
-	"github.com/eolinker/apinto-dashboard/entry/upstream-entry"
+	"github.com/eolinker/apinto-dashboard/modules/upstream/upstream-entry"
 	"github.com/eolinker/apinto-dashboard/store"
 )
 
@@ -32,7 +31,7 @@ func (s *serviceStore) GetListPage(ctx context.Context, namespaceID int, searchN
 		db = db.Where("`name` like ?", "%"+searchName+"%")
 	}
 	if pageNum > 0 && pageSize > 0 {
-		err = db.Model(services).Count(&count).Order("`update_time` DESC").Limit(pageSize).Offset(page_entry.PageIndex(pageNum, pageSize)).Find(&services).Error
+		err = db.Model(services).Count(&count).Order("`update_time` DESC").Limit(pageSize).Offset(store.PageIndex(pageNum, pageSize)).Find(&services).Error
 	} else {
 		err = db.Model(services).Count(&count).Order("`update_time` DESC").Find(&services).Error
 	}

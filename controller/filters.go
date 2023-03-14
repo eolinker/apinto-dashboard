@@ -5,23 +5,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/eolinker/apinto-dashboard/access"
-	"github.com/eolinker/apinto-dashboard/cache"
-	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/dto"
-	"github.com/eolinker/apinto-dashboard/model/access-model"
-	"github.com/eolinker/apinto-dashboard/service/bussiness-service"
-	"github.com/eolinker/apinto-dashboard/service/user-service"
-	"github.com/eolinker/apinto-dashboard/user_center/client"
-	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
 	"github.com/gin-gonic/gin"
-	"github.com/go-redis/redis/v8"
+	"github.com/go-basic/uuid"
 	"io"
 	"net/http"
 	"runtime"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -40,98 +31,16 @@ type IFilterRouter interface {
 	VerifyToken(*gin.Context)
 }
 
-var (
-	authService      bussiness_service.IBussinessAuthService
-	sessionCache     cache.ISessionCache
-	userCenterClient client.IUserCenterClient
-
-	userInfoCache   cache.IUserInfoCache
-	roleAccessCache cache.IRoleAccessCache
-	userInfoService user_service.IUserInfoService
-)
-
-func init() {
-
-	bean.Autowired(&userInfoService)
-
-	bean.Autowired(&sessionCache)
-	bean.Autowired(&userCenterClient)
-	bean.Autowired(&userInfoCache)
-	bean.Autowired(&roleAccessCache)
-	bean.Autowired(&authService)
-}
-
-func VerifyAuth(ginCtx *gin.Context) {
-	ctx := context.Background()
-
-	valid, err := authService.CheckCertValid(ctx)
-	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewCertExceedError("授权错误:"+err.Error()))
-		ginCtx.Abort()
-		return
-	}
-	if !valid {
-		ginCtx.JSON(http.StatusOK, dto.NewCertExceedError("授权已过期"))
-		ginCtx.Abort()
-		return
-	}
-
-}
 func VerifyToken(ginCtx *gin.Context) {
-
-	ctx := context.Background()
 
 	session, _ := ginCtx.Cookie(Session)
 	if session == "" {
-		ginCtx.JSON(http.StatusOK, dto.NewLoginInvalidError(dto.CodeLoginInvalid, loginError.Error()))
-		ginCtx.Abort()
-		return
+		session = uuid.New()
+		ginCtx.SetCookie(Session, session, 0, "", "", false, true)
+
 	}
 
-	tokens, err := sessionCache.Get(ctx, sessionCache.Key(session))
-	if err == redis.Nil || tokens == nil {
-		ginCtx.JSON(http.StatusOK, dto.NewLoginInvalidError(dto.CodeLoginInvalid, loginError.Error()))
-		ginCtx.Abort()
-		return
-	}
-
-	token := tokens.Jwt
-	rToken := tokens.RJwt
-
-	//1.从ginCtx的header中拿到token，没拿到报错提醒用户重新登录
-	verifyToken, err := common.VerifyToken(token)
-	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewLoginInvalidError(dto.CodeLoginInvalid, loginError.Error()))
-		ginCtx.Abort()
-		return
-	}
-	//1.1拿到用户ID和过期时间 过期了重新登录
-	claims := verifyToken.Claims.(jwt.MapClaims)
-	if err = claims.Valid(); err != nil {
-		//续期token
-		refreshReq := &client.RefreshTokenReq{RJwt: rToken}
-		refreshToken, err := userCenterClient.RefreshToken(refreshReq)
-		if err != nil {
-			ginCtx.JSON(http.StatusOK, dto.NewLoginInvalidError(dto.CodeLoginInvalid, loginError.Error()))
-			ginCtx.Abort()
-			return
-		}
-		ginCtx.Writer.Header().Set(Authorization, refreshToken.Jwt)
-		ginCtx.Writer.Header().Set(RAuthorization, refreshToken.RJwt)
-
-		tokens.RJwt = refreshToken.RJwt
-		tokens.Jwt = refreshToken.Jwt
-		_ = sessionCache.Set(ctx, sessionCache.Key(session), tokens, time.Hour*24*7)
-
-		return
-	}
-
-	ginCtx.Writer.Header().Set(Authorization, token)
-	ginCtx.Writer.Header().Set(RAuthorization, rToken)
-
-	userId, _ := strconv.Atoi(claims[UserId].(string))
-
-	ginCtx.Set(UserId, userId)
+	ginCtx.Set(UserId, 1)
 }
 
 func GetUserId(ginCtx *gin.Context) int {
@@ -141,60 +50,7 @@ func GetUserId(ginCtx *gin.Context) int {
 func GenAccessHandler(acs ...access.Access) gin.HandlerFunc {
 
 	return func(ginCtx *gin.Context) {
-		userId := GetUserId(ginCtx)
-
-		ctx := context.Background()
-
-		var err error
-		userInfo, err := userInfoCache.Get(ctx, userInfoCache.Key(userId))
-		if err != nil {
-			if err == redis.Nil {
-				//若缓存没有，则查表，并存入缓存
-				user, err := userInfoService.GetUserInfo(context.Background(), userId)
-				if err != nil {
-					ginCtx.JSON(http.StatusOK, dto.NewNoAccessError(err.Error()))
-					ginCtx.Abort()
-				}
-				userInfo = user.UserInfo
-			} else {
-				ginCtx.JSON(http.StatusOK, dto.NewNoAccessError(err.Error()))
-				ginCtx.Abort()
-			}
-		}
-		roleIds := strings.Split(userInfo.RoleIds, ",")
-
-		for _, role := range roleIds {
-			roleAccess, err := roleAccessCache.Get(ctx, roleAccessCache.Key(role))
-			if err != nil {
-				if err == redis.Nil {
-					//若缓存没有，则查表，并存入缓存
-					accessIds, err := userInfoService.GetRoleAccessIds(context.Background(), role)
-					if err != nil {
-						ginCtx.JSON(http.StatusOK, dto.NewNoAccessError(err.Error()))
-						ginCtx.Abort()
-					}
-					accessList := make([]access.Access, 0, len(accessIds))
-					for _, accessId := range accessIds {
-						id, _ := strconv.Atoi(accessId)
-						accessList = append(accessList, access.Access(id))
-					}
-					roleAccess = access_model.CreateRoleAccess(accessList...)
-					err = roleAccessCache.Set(ctx, roleAccessCache.Key(role), roleAccess, time.Hour)
-					if err != nil {
-						ginCtx.JSON(http.StatusOK, dto.NewNoAccessError(err.Error()))
-						ginCtx.Abort()
-					}
-				} else {
-					ginCtx.JSON(http.StatusOK, dto.NewNoAccessError(err.Error()))
-					ginCtx.Abort()
-				}
-			}
-			if roleAccess.IsAccess(acs...) {
-				return
-			}
-		}
-		ginCtx.JSON(http.StatusOK, dto.NewNoAccessError("权限不足"))
-		ginCtx.Abort()
+		// todo 原实现不适合开源，这里埋点用于以后扩展
 	}
 }
 

@@ -2,7 +2,7 @@ package store
 
 import (
 	"context"
-	"github.com/eolinker/apinto-dashboard/entry/runtime-entry"
+	"github.com/eolinker/apinto-dashboard/modules/base/runtime-entry"
 )
 
 type BaseRuntimeStore[T any] interface {

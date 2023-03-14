@@ -6,32 +6,32 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/cache"
 	"github.com/eolinker/apinto-dashboard/common"
 	drivermanager "github.com/eolinker/apinto-dashboard/driver-manager"
 	"github.com/eolinker/apinto-dashboard/driver-manager/driver"
-	group_entry "github.com/eolinker/apinto-dashboard/entry/group-entry"
-	"github.com/eolinker/apinto-dashboard/entry/quote-entry"
 	"github.com/eolinker/apinto-dashboard/enum"
-	"github.com/eolinker/apinto-dashboard/model/audit-model"
-	"github.com/eolinker/apinto-dashboard/model/cluster-model"
-	"github.com/eolinker/apinto-dashboard/model/frontend-model"
-	"github.com/eolinker/apinto-dashboard/model/group-model"
-	"github.com/eolinker/apinto-dashboard/model/open-app-model"
-	"github.com/eolinker/apinto-dashboard/model/openapi-model"
 	apiservice "github.com/eolinker/apinto-dashboard/modules/api"
 	"github.com/eolinker/apinto-dashboard/modules/api/api-dto"
 	apientry "github.com/eolinker/apinto-dashboard/modules/api/api-entry"
 	apimodel "github.com/eolinker/apinto-dashboard/modules/api/model"
 	store2 "github.com/eolinker/apinto-dashboard/modules/api/store"
+	"github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
+	"github.com/eolinker/apinto-dashboard/modules/base/frontend-model"
+	"github.com/eolinker/apinto-dashboard/modules/base/locker-service"
+	"github.com/eolinker/apinto-dashboard/modules/base/quote-entry"
+	"github.com/eolinker/apinto-dashboard/modules/base/quote-store"
+	"github.com/eolinker/apinto-dashboard/modules/cluster"
+	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-model"
+	"github.com/eolinker/apinto-dashboard/modules/group"
+	"github.com/eolinker/apinto-dashboard/modules/group/group-entry"
+	"github.com/eolinker/apinto-dashboard/modules/group/group-model"
+	"github.com/eolinker/apinto-dashboard/modules/group/group-service"
+	"github.com/eolinker/apinto-dashboard/modules/namespace"
+	"github.com/eolinker/apinto-dashboard/modules/openapp"
+	"github.com/eolinker/apinto-dashboard/modules/openapp/open-app-model"
+	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-model"
 	"github.com/eolinker/apinto-dashboard/modules/upstream"
-	"github.com/eolinker/apinto-dashboard/service/cluster-service"
-	"github.com/eolinker/apinto-dashboard/service/group-service"
-	"github.com/eolinker/apinto-dashboard/service/locker-service"
-	"github.com/eolinker/apinto-dashboard/service/namespace-service"
-	"github.com/eolinker/apinto-dashboard/service/openapp-service"
-	"github.com/eolinker/apinto-dashboard/service/user-service"
-	"github.com/eolinker/apinto-dashboard/store/quote-store"
+	"github.com/eolinker/apinto-dashboard/modules/user"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
 	"github.com/gin-gonic/gin"
@@ -53,17 +53,17 @@ type apiService struct {
 	apiHistory store2.IApiHistoryStore
 
 	service          upstream.IService
-	commonGroup      group_service.ICommonGroupService
-	clusterService   cluster_service.IClusterService
-	namespaceService namespace_service.INamespaceService
-	apintoClient     cluster_service.IApintoClient
-	userInfoService  user_service.IUserInfoService
-	extAppService    openapp_service.IExternalApplicationService
+	commonGroup      group.ICommonGroupService
+	clusterService   cluster.IClusterService
+	namespaceService namespace.INamespaceService
+	apintoClient     cluster.IApintoClient
+	userInfoService  user.IUserInfoService
+	extAppService    openapp.IExternalApplicationService
 	apiManager       drivermanager.IAPIDriverManager
 
 	lockService    locker_service.IAsynLockService
-	importApiCache cache.IImportApiCache
-	batchApiCache  cache.IBatchOnlineApiTaskCache
+	importApiCache IImportApiCache
+	batchApiCache  IBatchOnlineApiTaskCache
 }
 
 func NewAPIService() apiservice.IAPIService {
@@ -751,10 +751,10 @@ func (a *apiService) BatchOnline(ctx context.Context, namespaceId int, operator 
 	//判断uuid和operator是一致的
 	key := a.batchApiCache.Key(onlineToken)
 	task, err := a.batchApiCache.Get(ctx, key)
+	//篡改审计日志的请求body
 	if err != nil {
 		return nil, err
 	}
-	//篡改审计日志的请求body
 	ginContext, ok := ctx.(*gin.Context)
 	if ok {
 		ginContext.Set("logBody", string(task.Data))
@@ -2090,7 +2090,7 @@ func (a *apiService) GetAPINameByID(ctx context.Context, apiID int) (string, err
 	return info.Name, nil
 }
 
-func (a *apiService) GetAPIRemoteOptions(ctx context.Context, namespaceID, pageNum, pageSize int, keyword, groupUuid string) ([]*openapi_model.RemoteApis, int, error) {
+func (a *apiService) GetAPIRemoteOptions(ctx context.Context, namespaceID, pageNum, pageSize int, keyword, groupUuid string) ([]*strategy_model.RemoteApis, int, error) {
 	groupList := make([]string, 0)
 	var err error
 	//获取传入的groupUUID下包括子分组的所有UUID
@@ -2112,7 +2112,7 @@ func (a *apiService) GetAPIRemoteOptions(ctx context.Context, namespaceID, pageN
 	if err != nil {
 		return nil, 0, err
 	}
-	apiList := make([]*openapi_model.RemoteApis, 0, len(apis))
+	apiList := make([]*strategy_model.RemoteApis, 0, len(apis))
 
 	groupUUIDMap := common.SliceToMap(groups, func(t *group_entry.CommonGroup) string {
 		return t.Uuid
@@ -2130,7 +2130,7 @@ func (a *apiService) GetAPIRemoteOptions(ctx context.Context, namespaceID, pageN
 
 		a.commonGroup.ParentGroupName(api.GroupUUID, groupUUIDMap, groupIdMap, parentGroupName)
 
-		item := &openapi_model.RemoteApis{
+		item := &strategy_model.RemoteApis{
 			Uuid: api.UUID,
 			Name: api.Name,
 			//Service:     version.ServiceName,
@@ -2144,7 +2144,7 @@ func (a *apiService) GetAPIRemoteOptions(ctx context.Context, namespaceID, pageN
 	return apiList, total, nil
 }
 
-func (a *apiService) GetAPIRemoteByUUIDS(ctx context.Context, namespace int, uuids []string) ([]*openapi_model.RemoteApis, error) {
+func (a *apiService) GetAPIRemoteByUUIDS(ctx context.Context, namespace int, uuids []string) ([]*strategy_model.RemoteApis, error) {
 
 	groups, err := a.commonGroup.GroupListAll(ctx, namespace, group_service.ApiName, group_service.ApiName)
 	if err != nil {
@@ -2173,14 +2173,14 @@ func (a *apiService) GetAPIRemoteByUUIDS(ctx context.Context, namespace int, uui
 		return nil, err
 	}
 
-	apiList := make([]*openapi_model.RemoteApis, 0, len(apis))
+	apiList := make([]*strategy_model.RemoteApis, 0, len(apis))
 	for _, api := range apis {
 		version := versionMap[api.Id]
 
 		parentGroupName := &[]string{}
 		a.commonGroup.ParentGroupName(api.GroupUUID, groupUUIDMap, groupIdMap, parentGroupName)
 
-		item := &openapi_model.RemoteApis{
+		item := &strategy_model.RemoteApis{
 			Uuid:        api.UUID,
 			Name:        api.Name,
 			Service:     version.ServiceName,

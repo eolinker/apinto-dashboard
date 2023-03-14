@@ -6,12 +6,12 @@ package mock
 
 import (
 	context "context"
-	"github.com/eolinker/apinto-dashboard/model/frontend-model"
-	"github.com/eolinker/apinto-dashboard/model/group-model"
-	model "github.com/eolinker/apinto-dashboard/model/openapi-model"
 	dto "github.com/eolinker/apinto-dashboard/modules/api/api-dto"
 	api_entry "github.com/eolinker/apinto-dashboard/modules/api/api-entry"
 	apimodel "github.com/eolinker/apinto-dashboard/modules/api/model"
+	"github.com/eolinker/apinto-dashboard/modules/base/frontend-model"
+	"github.com/eolinker/apinto-dashboard/modules/group/group-model"
+	model "github.com/eolinker/apinto-dashboard/modules/strategy/strategy-model"
 	reflect "reflect"
 
 	driver "github.com/eolinker/apinto-dashboard/driver-manager/driver"

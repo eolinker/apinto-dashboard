@@ -5,25 +5,25 @@ import (
 	"errors"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
-	"github.com/eolinker/apinto-dashboard/dto/service-dto"
-	"github.com/eolinker/apinto-dashboard/entry/quote-entry"
-	"github.com/eolinker/apinto-dashboard/entry/upstream-entry"
-	"github.com/eolinker/apinto-dashboard/entry/variable-entry"
-	"github.com/eolinker/apinto-dashboard/model/audit-model"
-	"github.com/eolinker/apinto-dashboard/model/cluster-model"
-	"github.com/eolinker/apinto-dashboard/model/frontend-model"
-	"github.com/eolinker/apinto-dashboard/model/openapi-model"
 	api "github.com/eolinker/apinto-dashboard/modules/api"
+	"github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
+	"github.com/eolinker/apinto-dashboard/modules/base/frontend-model"
+	"github.com/eolinker/apinto-dashboard/modules/base/locker-service"
+	"github.com/eolinker/apinto-dashboard/modules/base/quote-entry"
+	"github.com/eolinker/apinto-dashboard/modules/base/quote-store"
+	"github.com/eolinker/apinto-dashboard/modules/cluster"
+	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-model"
+	"github.com/eolinker/apinto-dashboard/modules/discovery"
+	"github.com/eolinker/apinto-dashboard/modules/namespace"
+	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-model"
 	"github.com/eolinker/apinto-dashboard/modules/upstream"
+	"github.com/eolinker/apinto-dashboard/modules/upstream/dto"
 	upstream_model "github.com/eolinker/apinto-dashboard/modules/upstream/model"
 	upstream_store "github.com/eolinker/apinto-dashboard/modules/upstream/store"
-	"github.com/eolinker/apinto-dashboard/service/cluster-service"
-	"github.com/eolinker/apinto-dashboard/service/discovery-serivce"
-	"github.com/eolinker/apinto-dashboard/service/locker-service"
-	"github.com/eolinker/apinto-dashboard/service/namespace-service"
-	service2 "github.com/eolinker/apinto-dashboard/service/user-service"
-	"github.com/eolinker/apinto-dashboard/service/variable-service"
-	"github.com/eolinker/apinto-dashboard/store/quote-store"
+	upstream_entry2 "github.com/eolinker/apinto-dashboard/modules/upstream/upstream-entry"
+	"github.com/eolinker/apinto-dashboard/modules/user"
+	"github.com/eolinker/apinto-dashboard/modules/variable"
+	"github.com/eolinker/apinto-dashboard/modules/variable/variable-entry"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
 	"github.com/go-basic/uuid"
@@ -36,16 +36,16 @@ import (
 const LockNameService = "service"
 
 type service struct {
-	clusterService        cluster_service.IClusterService
-	apintoClient          cluster_service.IApintoClient
-	clusterNodeService    cluster_service.IClusterNodeService
-	discoveryService      discovery_serivce.IDiscoveryService
-	namespaceService      namespace_service.INamespaceService
-	globalVariableService variable_service.IGlobalVariableService
+	clusterService        cluster.IClusterService
+	apintoClient          cluster.IApintoClient
+	clusterNodeService    cluster.IClusterNodeService
+	discoveryService      discovery.IDiscoveryService
+	namespaceService      namespace.INamespaceService
+	globalVariableService variable.IGlobalVariableService
 	lockService           locker_service.IAsynLockService
-	variableService       variable_service.IClusterVariableService
+	variableService       variable.IClusterVariableService
 	apiService            api.IAPIService
-	userInfoService       service2.IUserInfoService
+	userInfoService       user.IUserInfoService
 	serviceRuntimeStore   upstream_store.IServiceRuntimeStore
 	serviceStore          upstream_store.IServiceStore
 	serviceVersionStore   upstream_store.IServiceVersionStore
@@ -76,7 +76,7 @@ func newServiceService() upstream.IService {
 }
 
 func (s *service) GetServiceList(ctx context.Context, namespaceID int, searchName string, pageNum int, pageSize int) ([]*upstream_model.ServiceListItem, int, error) {
-	var sl []*upstream_entry.Service
+	var sl []*upstream_entry2.Service
 	sl, total, err := s.serviceStore.GetListPage(ctx, namespaceID, searchName, pageNum, pageSize)
 	if err != nil {
 		return nil, 0, err
@@ -203,7 +203,7 @@ func (s *service) GetServiceInfo(ctx context.Context, namespaceID int, serviceNa
 	return info, nil
 }
 
-func (s *service) CreateService(ctx context.Context, namespaceID, userId int, input *service_dto.ServiceInfo, variableList []string) (int, error) {
+func (s *service) CreateService(ctx context.Context, namespaceID, userId int, input *dto.ServiceInfo, variableList []string) (int, error) {
 	input.Name = strings.ToLower(input.Name)
 	//服务发现name查重
 	_, err := s.serviceStore.GetByName(ctx, namespaceID, input.Name)
@@ -220,7 +220,7 @@ func (s *service) CreateService(ctx context.Context, namespaceID, userId int, in
 	input.UUID = strings.ToLower(input.UUID)
 
 	t := time.Now()
-	serviceInfo := &upstream_entry.Service{
+	serviceInfo := &upstream_entry2.Service{
 		NamespaceId: namespaceID,
 		UUID:        input.UUID,
 		Name:        input.Name,
@@ -243,10 +243,10 @@ func (s *service) CreateService(ctx context.Context, namespaceID, userId int, in
 		}
 		serviceID = serviceInfo.Id
 		//添加版本信息
-		serviceVersionInfo := &upstream_entry.ServiceVersion{
+		serviceVersionInfo := &upstream_entry2.ServiceVersion{
 			ServiceId:   serviceInfo.Id,
 			NamespaceID: namespaceID,
-			ServiceVersionConfig: upstream_entry.ServiceVersionConfig{
+			ServiceVersionConfig: upstream_entry2.ServiceVersionConfig{
 				DiscoveryId: input.DiscoveryID,
 				DriverName:  input.DriverName,
 				Scheme:      input.Scheme,
@@ -263,7 +263,7 @@ func (s *service) CreateService(ctx context.Context, namespaceID, userId int, in
 			return err
 		}
 		//添加版本关联原表信息
-		if err := s.serviceStatStore.Save(txCtx, &upstream_entry.ServiceStat{
+		if err := s.serviceStatStore.Save(txCtx, &upstream_entry2.ServiceStat{
 			ServiceId: serviceInfo.Id,
 			VersionId: serviceVersionInfo.Id,
 		}); err != nil {
@@ -293,14 +293,14 @@ func (s *service) CreateService(ctx context.Context, namespaceID, userId int, in
 			}
 		}
 
-		return s.historyStore.HistoryAdd(txCtx, namespaceID, serviceInfo.Id, &upstream_entry.ServiceHistoryInfo{
+		return s.historyStore.HistoryAdd(txCtx, namespaceID, serviceInfo.Id, &upstream_entry2.ServiceHistoryInfo{
 			Service: *serviceInfo,
 			Config:  serviceVersionInfo.ServiceVersionConfig,
 		}, userId)
 	})
 }
 
-func (s *service) UpdateService(ctx context.Context, namespaceID, userId int, input *service_dto.ServiceInfo, variableList []string) error {
+func (s *service) UpdateService(ctx context.Context, namespaceID, userId int, input *dto.ServiceInfo, variableList []string) error {
 
 	serviceInfo, err := s.serviceStore.GetByName(ctx, namespaceID, input.Name)
 	if err != nil {
@@ -345,9 +345,9 @@ func (s *service) UpdateService(ctx context.Context, namespaceID, userId int, in
 		}
 		if isUpdateVersion {
 			//修改配置信息 并更新一个版本
-			serviceVersionInfo := &upstream_entry.ServiceVersion{
+			serviceVersionInfo := &upstream_entry2.ServiceVersion{
 				ServiceId: serviceInfo.Id,
-				ServiceVersionConfig: upstream_entry.ServiceVersionConfig{
+				ServiceVersionConfig: upstream_entry2.ServiceVersionConfig{
 					DiscoveryId: input.DiscoveryID,
 					DriverName:  input.DriverName,
 					Scheme:      input.Scheme,
@@ -364,7 +364,7 @@ func (s *service) UpdateService(ctx context.Context, namespaceID, userId int, in
 				return err
 			}
 			//添加版本关联原表信息
-			stat := &upstream_entry.ServiceStat{
+			stat := &upstream_entry2.ServiceStat{
 				ServiceId: serviceInfo.Id,
 				VersionId: serviceVersionInfo.Id,
 			}
@@ -372,10 +372,10 @@ func (s *service) UpdateService(ctx context.Context, namespaceID, userId int, in
 				return err
 			}
 
-			if err = s.historyStore.HistoryEdit(txCtx, namespaceID, serviceInfo.Id, &upstream_entry.ServiceHistoryInfo{
+			if err = s.historyStore.HistoryEdit(txCtx, namespaceID, serviceInfo.Id, &upstream_entry2.ServiceHistoryInfo{
 				Service: oldServiceInfo,
 				Config:  currentVersion.ServiceVersionConfig,
-			}, &upstream_entry.ServiceHistoryInfo{
+			}, &upstream_entry2.ServiceHistoryInfo{
 				Service: *serviceInfo,
 				Config:  serviceVersionInfo.ServiceVersionConfig,
 			}, userId); err != nil {
@@ -468,7 +468,7 @@ func (s *service) DeleteService(ctx context.Context, namespaceID, userId int, se
 			return err
 		}
 
-		if err = s.historyStore.HistoryDelete(txCtx, namespaceID, serviceInfo.Id, upstream_entry.ServiceHistoryInfo{
+		if err = s.historyStore.HistoryDelete(txCtx, namespaceID, serviceInfo.Id, upstream_entry2.ServiceHistoryInfo{
 			Service: *serviceInfo,
 			Config:  version.ServiceVersionConfig,
 		}, userId); err != nil {
@@ -520,7 +520,7 @@ func (s *service) OnlineList(ctx context.Context, namespaceId int, serviceName s
 	if err != nil {
 		return nil, err
 	}
-	runtimeMaps := common.SliceToMap(runtimes, func(t *upstream_entry.ServiceRuntime) int {
+	runtimeMaps := common.SliceToMap(runtimes, func(t *upstream_entry2.ServiceRuntime) int {
 		return t.ClusterId
 	})
 
@@ -530,7 +530,7 @@ func (s *service) OnlineList(ctx context.Context, namespaceId int, serviceName s
 		return nil, err
 	}
 
-	userIds := common.SliceToSliceIds(runtimes, func(t *upstream_entry.ServiceRuntime) int {
+	userIds := common.SliceToSliceIds(runtimes, func(t *upstream_entry2.ServiceRuntime) int {
 		return t.Operator
 	})
 
@@ -688,7 +688,7 @@ func (s *service) OnlineService(ctx context.Context, namespaceId, operator int, 
 	//判断是否是更新
 	isApintoUpdate := false
 	if runtime == nil {
-		runtime = &upstream_entry.ServiceRuntime{
+		runtime = &upstream_entry2.ServiceRuntime{
 			NamespaceId: namespaceId,
 			ServiceId:   serviceId,
 			ClusterId:   clusterId,
@@ -886,7 +886,7 @@ func (s *service) GetServiceIDByName(ctx context.Context, namespaceId int, servi
 	return info.Id, nil
 }
 
-func (s *service) GetLatestServiceVersion(ctx context.Context, serviceID int) (*upstream_entry.ServiceVersion, error) {
+func (s *service) GetLatestServiceVersion(ctx context.Context, serviceID int) (*upstream_entry2.ServiceVersion, error) {
 	stat, err := s.serviceStatStore.Get(ctx, serviceID)
 	if err != nil {
 		return nil, err
@@ -899,7 +899,7 @@ func (s *service) GetLatestServiceVersion(ctx context.Context, serviceID int) (*
 	return version, nil
 }
 
-func (s *service) GetServiceSchemaInfo(ctx context.Context, serviceID int) (*upstream_entry.Service, error) {
+func (s *service) GetServiceSchemaInfo(ctx context.Context, serviceID int) (*upstream_entry2.Service, error) {
 	return s.serviceStore.Get(ctx, serviceID)
 }
 
@@ -911,20 +911,20 @@ func (s *service) IsOnline(ctx context.Context, clusterId, serviceId int) bool {
 	return runtime.IsOnline
 }
 
-func (s *service) GetServiceRemoteOptions(ctx context.Context, namespaceID, pageNum, pageSize int, keyword string) ([]*openapi_model.RemoteServices, int, error) {
+func (s *service) GetServiceRemoteOptions(ctx context.Context, namespaceID, pageNum, pageSize int, keyword string) ([]*strategy_model.RemoteServices, int, error) {
 	sl, total, err := s.serviceStore.GetListPage(ctx, namespaceID, keyword, pageNum, pageSize)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	list := make([]*openapi_model.RemoteServices, 0, len(sl))
+	list := make([]*strategy_model.RemoteServices, 0, len(sl))
 	for _, item := range sl {
 		info, err := s.GetServiceInfo(ctx, namespaceID, item.Name)
 		if err != nil {
 			return nil, 0, err
 		}
 
-		li := &openapi_model.RemoteServices{
+		li := &strategy_model.RemoteServices{
 			Uuid:   item.Name, //TODO
 			Name:   item.Name,
 			Scheme: info.Scheme,
@@ -937,20 +937,20 @@ func (s *service) GetServiceRemoteOptions(ctx context.Context, namespaceID, page
 	return list, total, nil
 }
 
-func (s *service) GetServiceRemoteByNames(ctx context.Context, namespaceID int, names []string) ([]*openapi_model.RemoteServices, error) {
+func (s *service) GetServiceRemoteByNames(ctx context.Context, namespaceID int, names []string) ([]*strategy_model.RemoteServices, error) {
 	sl, err := s.serviceStore.GetByNames(ctx, namespaceID, names)
 	if err != nil {
 		return nil, err
 	}
 
-	list := make([]*openapi_model.RemoteServices, 0, len(sl))
+	list := make([]*strategy_model.RemoteServices, 0, len(sl))
 	for _, item := range sl {
 		info, err := s.GetServiceInfo(ctx, namespaceID, item.Name)
 		if err != nil {
 			return nil, err
 		}
 
-		li := &openapi_model.RemoteServices{
+		li := &strategy_model.RemoteServices{
 			Uuid:   item.Name, //TODO
 			Name:   item.Name,
 			Scheme: info.Scheme,
