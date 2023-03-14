@@ -6,7 +6,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
-	"github.com/eolinker/apinto-dashboard/dto"
 	"github.com/eolinker/apinto-dashboard/enum"
 	service "github.com/eolinker/apinto-dashboard/modules/api"
 	"github.com/eolinker/apinto-dashboard/modules/api/api-dto"
@@ -59,7 +58,7 @@ func (a *apiController) routerEnum(ginCtx *gin.Context) {
 
 	apiList, err := a.apiService.GetAPIListByServiceName(ginCtx, namespaceID, strings.Split(serviceNames, ","))
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 	apis := make([]*api_dto.APIEnum, 0, len(apiList))
@@ -74,7 +73,7 @@ func (a *apiController) routerEnum(ginCtx *gin.Context) {
 
 	data := make(map[string]interface{})
 	data["apis"] = apis
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(data))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
 
 func (a *apiController) groups(ginCtx *gin.Context) {
@@ -84,7 +83,7 @@ func (a *apiController) groups(ginCtx *gin.Context) {
 
 	root, apis, err := a.apiService.GetGroups(ginCtx, namespaceID, parentUUID, queryName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
@@ -128,7 +127,7 @@ func (a *apiController) groups(ginCtx *gin.Context) {
 	m := make(map[string]interface{})
 	m["root"] = resRoot
 	m["apis"] = resApis
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(m))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
 }
 
 func (a *apiController) subGroup(val *group_dto.CommonGroupOut, namespaceId int, list []*group_model.CommonGroup) {
@@ -194,7 +193,7 @@ func (a *apiController) routers(ginCtx *gin.Context) {
 
 	apiList, total, err := a.apiService.GetAPIList(ginCtx, namespaceID, groupUUID, searchName, searchSources, pageNum, pageSize)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("GetAPIList fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("GetAPIList fail. err:%s", err.Error())))
 		return
 	}
 	apis := make([]*api_dto.APIListItem, 0, len(apiList))
@@ -217,7 +216,7 @@ func (a *apiController) routers(ginCtx *gin.Context) {
 	data := make(map[string]interface{})
 	data["apis"] = apis
 	data["total"] = total
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(data))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
 
 // getInfo 获取注册中心配置信息
@@ -225,13 +224,13 @@ func (a *apiController) getInfo(ginCtx *gin.Context) {
 	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
 	apiUUID := ginCtx.Query("uuid")
 	if apiUUID == "" {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("GetApiInfo fail. err: uuid can't be nil")))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("GetApiInfo fail. err: uuid can't be nil")))
 		return
 	}
 
 	info, err := a.apiService.GetAPIVersionInfo(ginCtx, namespaceID, apiUUID)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("GetApiInfo fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("GetApiInfo fail. err:%s", err.Error())))
 		return
 	}
 
@@ -252,7 +251,7 @@ func (a *apiController) getInfo(ginCtx *gin.Context) {
 		Header:          info.Version.Header,
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(map[string]interface{}{"api": apiInfo}))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(map[string]interface{}{"api": apiInfo}))
 }
 
 // create 新建注册中心
@@ -262,7 +261,7 @@ func (a *apiController) create(ginCtx *gin.Context) {
 
 	input := new(api_dto.APIInfo)
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
@@ -272,21 +271,21 @@ func (a *apiController) create(ginCtx *gin.Context) {
 	//API管理器校验参数
 	driver := a.apiService.GetAPIDriver(input.Driver)
 	if driver == nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("CreateAPI fail. err: driver is invalid. ")))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("CreateAPI fail. err: driver is invalid. ")))
 		return
 	}
 	if err := driver.CheckInput(input); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("CreateAPI fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("CreateAPI fail. err:%s", err.Error())))
 		return
 	}
 
 	err := a.apiService.CreateAPI(ginCtx, namespaceId, userId, input)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("CreateAPI fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("CreateAPI fail. err:%s", err.Error())))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
 // alter 修改注册中心
@@ -295,13 +294,13 @@ func (a *apiController) update(ginCtx *gin.Context) {
 	userId := controller.GetUserId(ginCtx)
 	apiUUID := ginCtx.Query("uuid")
 	if apiUUID == "" {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("UpdateApi fail. err: uuid can't be nil")))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("UpdateApi fail. err: uuid can't be nil")))
 		return
 	}
 
 	input := new(api_dto.APIInfo)
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
@@ -311,22 +310,22 @@ func (a *apiController) update(ginCtx *gin.Context) {
 	//API管理器校验参数
 	driver := a.apiService.GetAPIDriver(input.Driver)
 	if driver == nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("UpdateAPI fail. err: driver is invalid. ")))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("UpdateAPI fail. err: driver is invalid. ")))
 		return
 	}
 	input.UUID = apiUUID
 	if err := driver.CheckInput(input); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("UpdateAPI fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("UpdateAPI fail. err:%s", err.Error())))
 		return
 	}
 
 	err := a.apiService.UpdateAPI(ginCtx, namespaceId, userId, input)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("UpdateApi fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("UpdateApi fail. err:%s", err.Error())))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
 // delete 删除注册中心
@@ -334,18 +333,18 @@ func (a *apiController) delete(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	apiUUID := ginCtx.Query("uuid")
 	if apiUUID == "" {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("DeleteApi fail. err: uuid can't be nil")))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("DeleteApi fail. err: uuid can't be nil")))
 		return
 	}
 
 	userId := controller.GetUserId(ginCtx)
 	err := a.apiService.DeleteAPI(ginCtx, namespaceId, userId, apiUUID)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("DeleteApi fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("DeleteApi fail. err:%s", err.Error())))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
 // batchOnline 批量上线
@@ -355,18 +354,18 @@ func (a *apiController) batchOnline(ginCtx *gin.Context) {
 
 	input := &api_dto.ApiBatchInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
 	if input.OnlineToken == "" {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult("online_token can't be nil. "))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("online_token can't be nil. "))
 		return
 	}
 
 	batchOnlineList, err := a.apiService.BatchOnline(ginCtx, namespaceId, userId, input.OnlineToken)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("BatchOnline Apis fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("BatchOnline Apis fail. err:%s", err.Error())))
 		return
 	}
 
@@ -386,7 +385,7 @@ func (a *apiController) batchOnline(ginCtx *gin.Context) {
 	data := make(map[string]interface{})
 	data["list"] = outputList
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(data))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
 
 // batchOnline 批量下线
@@ -396,18 +395,18 @@ func (a *apiController) batchOffline(ginCtx *gin.Context) {
 
 	input := &api_dto.ApiBatchInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
 	if len(input.ApiUUIDs) == 0 || len(input.ClusterNames) == 0 {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult("api_uuids or cluster_names can't be nil. "))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("api_uuids or cluster_names can't be nil. "))
 		return
 	}
 
 	batchOfflineList, err := a.apiService.BatchOffline(ginCtx, namespaceId, userId, input.ApiUUIDs, input.ClusterNames)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("BatchOffline Apis fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("BatchOffline Apis fail. err:%s", err.Error())))
 		return
 	}
 
@@ -427,7 +426,7 @@ func (a *apiController) batchOffline(ginCtx *gin.Context) {
 	data := make(map[string]interface{})
 	data["list"] = outputList
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(data))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
 
 // batchOnline 批量上线检测
@@ -437,18 +436,18 @@ func (a *apiController) batchOnlineCheck(ginCtx *gin.Context) {
 
 	input := &api_dto.ApiBatchInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
 	if len(input.ApiUUIDs) == 0 || len(input.ClusterNames) == 0 {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult("api_uuids or cluster_names can't be nil. "))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("api_uuids or cluster_names can't be nil. "))
 		return
 	}
 
 	batchOnlineList, onlineToken, err := a.apiService.BatchOnlineCheck(ginCtx, namespaceId, userId, input.ApiUUIDs, input.ClusterNames)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("BatchOffline Apis fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("BatchOffline Apis fail. err:%s", err.Error())))
 		return
 	}
 
@@ -472,7 +471,7 @@ func (a *apiController) batchOnlineCheck(ginCtx *gin.Context) {
 		data["online_token"] = onlineToken
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(data))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
 
 // online 上线
@@ -481,21 +480,21 @@ func (a *apiController) online(ginCtx *gin.Context) {
 	userId := controller.GetUserId(ginCtx)
 	apiUUID := ginCtx.Query("uuid")
 	if apiUUID == "" {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("uuid can't be nil")))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("uuid can't be nil")))
 		return
 	}
 	input := &online_dto.UpdateOnlineStatusInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
 	router, err := a.apiService.OnlineAPI(ginCtx, namespaceId, userId, apiUUID, input.ClusterName)
 	if err != nil && router == nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	} else if err == nil {
-		ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+		ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 		return
 	}
 
@@ -506,7 +505,7 @@ func (a *apiController) online(ginCtx *gin.Context) {
 
 	m := make(map[string]interface{})
 	m["router"] = router
-	ginCtx.JSON(http.StatusOK, dto.Result{
+	ginCtx.JSON(http.StatusOK, controller.Result{
 		Code: -1,
 		Data: m,
 		Msg:  msg,
@@ -520,20 +519,20 @@ func (a *apiController) offline(ginCtx *gin.Context) {
 	userId := controller.GetUserId(ginCtx)
 	apiUUID := ginCtx.Query("uuid")
 	if apiUUID == "" {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("uuid can't be nil")))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("uuid can't be nil")))
 		return
 	}
 	input := &online_dto.UpdateOnlineStatusInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
 	if err := a.apiService.OfflineAPI(ginCtx, namespaceId, userId, apiUUID, input.ClusterName); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
 // enableAPI 启用API
@@ -542,20 +541,20 @@ func (a *apiController) enableAPI(ginCtx *gin.Context) {
 	userId := controller.GetUserId(ginCtx)
 	apiUUID := ginCtx.Query("uuid")
 	if apiUUID == "" {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("uuid can't be nil")))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("uuid can't be nil")))
 		return
 	}
 	input := &online_dto.UpdateOnlineStatusInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
 	if err := a.apiService.EnableAPI(ginCtx, namespaceId, userId, apiUUID, input.ClusterName); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
 // disableAPI 禁用API
@@ -564,20 +563,20 @@ func (a *apiController) disableAPI(ginCtx *gin.Context) {
 	userId := controller.GetUserId(ginCtx)
 	apiUUID := ginCtx.Query("uuid")
 	if apiUUID == "" {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("uuid can't be nil")))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("uuid can't be nil")))
 		return
 	}
 	input := &online_dto.UpdateOnlineStatusInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
 	if err := a.apiService.DisableAPI(ginCtx, namespaceId, userId, apiUUID, input.ClusterName); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
 // getOnlineList 上线管理列表
@@ -585,13 +584,13 @@ func (a *apiController) getOnlineList(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	apiUUID := ginCtx.Query("uuid")
 	if apiUUID == "" {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("DeleteApi fail. err: uuid can't be nil")))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("DeleteApi fail. err: uuid can't be nil")))
 		return
 	}
 
 	list, err := a.apiService.OnlineList(ginCtx, namespaceId, apiUUID)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
@@ -613,7 +612,7 @@ func (a *apiController) getOnlineList(ginCtx *gin.Context) {
 
 	m := make(map[string]interface{})
 	m["clusters"] = resp
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(m))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
 }
 
 // getSourceList 获取来源列表
@@ -624,25 +623,25 @@ func (a *apiController) getSourceList(ginCtx *gin.Context) {
 	}
 	data := make(map[string]interface{})
 	data["list"] = items
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(data))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
 
 // getImportCheckList 获取导入Swagger后的检查列表
 func (a *apiController) getImportCheckList(ginCtx *gin.Context) {
 	fileInfo, err := ginCtx.FormFile("file")
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("import swagger get file fail. err: %s. ", err)))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("import swagger get file fail. err: %s. ", err)))
 		return
 	}
 	file, err := fileInfo.Open()
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("import swagger open file fail. err: %s. ", err)))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("import swagger open file fail. err: %s. ", err)))
 		return
 	}
 	fileData := make([]byte, fileInfo.Size)
 	_, err = file.Read(fileData)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("import swagger  read file fail. err: %s. ", err)))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("import swagger  read file fail. err: %s. ", err)))
 		return
 	}
 	defer file.Close()
@@ -652,12 +651,12 @@ func (a *apiController) getImportCheckList(ginCtx *gin.Context) {
 
 	groupID := ginCtx.PostForm("group")
 	if groupID == "" {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("import swagger fail. err: group can't be null. ")))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("import swagger fail. err: group can't be null. ")))
 		return
 	}
 	serviceName := ginCtx.PostForm("upstream")
 	if serviceName == "" {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("import swagger fail. err: upstream can't be null. ")))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("import swagger fail. err: upstream can't be null. ")))
 		return
 	}
 	requestPrefix := ginCtx.PostForm("request_prefix")
@@ -665,7 +664,7 @@ func (a *apiController) getImportCheckList(ginCtx *gin.Context) {
 	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
 	checkList, token, err := a.apiService.GetImportCheckList(ginCtx, namespaceID, fileData, groupID, serviceName, requestPrefix)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("import swagger fail. err: %s. ", err)))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("import swagger fail. err: %s. ", err)))
 		return
 	}
 
@@ -684,7 +683,7 @@ func (a *apiController) getImportCheckList(ginCtx *gin.Context) {
 	data := make(map[string]interface{})
 	data["apis"] = resList
 	data["token"] = token
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(data))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 
 }
 
@@ -695,15 +694,15 @@ func (a *apiController) importAPI(ginCtx *gin.Context) {
 
 	input := new(api_dto.ImportAPIInfos)
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
 	err := a.apiService.ImportAPI(ginCtx, namespaceID, userId, input)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("importAPI fail. err: %s. ", err)))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("importAPI fail. err: %s. ", err)))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }

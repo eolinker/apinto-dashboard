@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
-	"github.com/eolinker/apinto-dashboard/dto"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/strategy"
@@ -39,7 +38,7 @@ func (s *strategyController[T, K]) list(ginCtx *gin.Context) {
 
 	strategies, err := s.strategyService.GetList(ginCtx, namespaceId, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 	resList := make([]*strategy_dto.StrategyListOut, 0, len(strategies))
@@ -61,7 +60,7 @@ func (s *strategyController[T, K]) list(ginCtx *gin.Context) {
 
 	data := common.Map[string, interface{}]{}
 	data["strategies"] = resList
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(data))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 
 }
 
@@ -69,13 +68,13 @@ func (s *strategyController[T, K]) get(ginCtx *gin.Context) {
 	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
 	uuid := ginCtx.Query("uuid")
 	if uuid == "" {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("GetStrategyInfo fail. err: uuid can't be nil")))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("GetStrategyInfo fail. err: uuid can't be nil")))
 		return
 	}
 
 	info, extender, err := s.strategyService.GetInfo(ginCtx, namespaceID, uuid)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("GetStrategyInfo fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("GetStrategyInfo fail. err:%s", err.Error())))
 		return
 	}
 
@@ -92,20 +91,20 @@ func (s *strategyController[T, K]) get(ginCtx *gin.Context) {
 	data["strategy"] = strategy
 	data["extender"] = extender
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(data))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
 
 func (s *strategyController[T, K]) create(ginCtx *gin.Context) {
 	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Query("cluster_name")
 	if clusterName == "" {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("CreateStrategy fail. err: clusterName can't be nil")))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("CreateStrategy fail. err: clusterName can't be nil")))
 		return
 	}
 
 	input := new(strategy_dto.StrategyInfoInput[T])
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
@@ -113,35 +112,35 @@ func (s *strategyController[T, K]) create(ginCtx *gin.Context) {
 
 	//校验参数
 	if err := s.strategyService.CheckInput(input); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("CreateStrategy fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("CreateStrategy fail. err:%s", err.Error())))
 		return
 	}
 
 	err := s.strategyService.CreateStrategy(ginCtx, namespaceID, operator, clusterName, input)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("CreateAPI fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("CreateAPI fail. err:%s", err.Error())))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
 func (s *strategyController[T, K]) update(ginCtx *gin.Context) {
 	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Query("cluster_name")
 	if clusterName == "" {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("UpdateStrategy fail. err: clusterName can't be nil")))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("UpdateStrategy fail. err: clusterName can't be nil")))
 		return
 	}
 	uuid := ginCtx.Query("uuid")
 	if uuid == "" {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("UpdateStrategy fail. err: uuid can't be nil")))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("UpdateStrategy fail. err: uuid can't be nil")))
 		return
 	}
 
 	input := new(strategy_dto.StrategyInfoInput[T])
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 	input.Uuid = uuid
@@ -150,63 +149,63 @@ func (s *strategyController[T, K]) update(ginCtx *gin.Context) {
 
 	//校验参数
 	if err := s.strategyService.CheckInput(input); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("UpdateStrategy fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("UpdateStrategy fail. err:%s", err.Error())))
 		return
 	}
 
 	err := s.strategyService.UpdateStrategy(ginCtx, namespaceID, operator, clusterName, input)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("UpdateStrategy fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("UpdateStrategy fail. err:%s", err.Error())))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
 func (s *strategyController[T, K]) del(ginCtx *gin.Context) {
 	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Query("cluster_name")
 	if clusterName == "" {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("DeleteStrategy fail. err: clusterName can't be nil")))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("DeleteStrategy fail. err: clusterName can't be nil")))
 		return
 	}
 	uuid := ginCtx.Query("uuid")
 	if uuid == "" {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("DeleteStrategy fail. err: uuid can't be nil")))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("DeleteStrategy fail. err: uuid can't be nil")))
 		return
 	}
 
 	userID := controller.GetUserId(ginCtx)
 	err := s.strategyService.DeleteStrategy(ginCtx, namespaceID, userID, clusterName, uuid)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("DeleteStrategy fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("DeleteStrategy fail. err:%s", err.Error())))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
 func (s *strategyController[T, K]) restore(ginCtx *gin.Context) {
 	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Query("cluster_name")
 	if clusterName == "" {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("RestoreStrategy fail. err: clusterName can't be nil")))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("RestoreStrategy fail. err: clusterName can't be nil")))
 		return
 	}
 	uuid := ginCtx.Query("uuid")
 	if uuid == "" {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("RestoreStrategy fail. err: uuid can't be nil")))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("RestoreStrategy fail. err: uuid can't be nil")))
 		return
 	}
 
 	userID := controller.GetUserId(ginCtx)
 	err := s.strategyService.RestoreStrategy(ginCtx, namespaceID, userID, clusterName, uuid)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("RestoreStrategy fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("RestoreStrategy fail. err:%s", err.Error())))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
 func (s *strategyController[T, K]) updateStop(ginCtx *gin.Context) {
@@ -216,19 +215,19 @@ func (s *strategyController[T, K]) updateStop(ginCtx *gin.Context) {
 
 	input := new(strategy_dto.StrategyStatusInput)
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
 	userId := controller.GetUserId(ginCtx)
 	err := s.strategyService.UpdateStop(ginCtx, namespaceId, userId, uuid, clusterName, input.IsStop)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
 	data := common.Map[string, interface{}]{}
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(data))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 
 }
 
@@ -237,7 +236,7 @@ func (s *strategyController[T, K]) toPublish(ginCtx *gin.Context) {
 	clusterName := ginCtx.Query("cluster_name")
 	list, err := s.strategyService.ToPublish(ginCtx, namespaceId, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
@@ -261,7 +260,7 @@ func (s *strategyController[T, K]) toPublish(ginCtx *gin.Context) {
 	data["strategies"] = resList
 	data["version_name"] = time.Now().Format("20060102150405") + "-release"
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(data))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
 
 func (s *strategyController[T, K]) publish(ginCtx *gin.Context) {
@@ -270,17 +269,17 @@ func (s *strategyController[T, K]) publish(ginCtx *gin.Context) {
 
 	input := new(strategy_dto.StrategyPublish)
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
 	userId := controller.GetUserId(ginCtx)
 	if err := s.strategyService.Publish(ginCtx, namespaceId, userId, clusterName, input); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
 func (s *strategyController[T, K]) publishHistory(ginCtx *gin.Context) {
@@ -299,7 +298,7 @@ func (s *strategyController[T, K]) publishHistory(ginCtx *gin.Context) {
 	}
 	list, total, err := s.strategyService.PublishHistory(ginCtx, namespaceId, pageNum, pageSize, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
@@ -327,7 +326,7 @@ func (s *strategyController[T, K]) publishHistory(ginCtx *gin.Context) {
 	data := common.Map[string, interface{}]{}
 	data["historys"] = resList
 	data["total"] = total
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(data))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
 
 func (s *strategyController[T, K]) changePriority(ginCtx *gin.Context) {
@@ -337,39 +336,39 @@ func (s *strategyController[T, K]) changePriority(ginCtx *gin.Context) {
 	maps := common.Map[string, int]{}
 
 	if err := ginCtx.BindJSON(&maps); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
 	priorityMap := common.Map[int, int]{}
 	for _, priority := range maps {
 		if priority == 0 {
-			ginCtx.JSON(http.StatusOK, dto.NewErrorResult("优先级不可填空"))
+			ginCtx.JSON(http.StatusOK, controller.NewErrorResult("优先级不可填空"))
 			return
 		}
 		if priority > 999 {
-			ginCtx.JSON(http.StatusOK, dto.NewErrorResult("优先级不可超过999"))
+			ginCtx.JSON(http.StatusOK, controller.NewErrorResult("优先级不可超过999"))
 			return
 		}
 		priorityMap[priority] += 1
 	}
 	for _, v := range priorityMap {
 		if v > 1 {
-			ginCtx.JSON(http.StatusOK, dto.NewErrorResult("优先级不可重复"))
+			ginCtx.JSON(http.StatusOK, controller.NewErrorResult("优先级不可重复"))
 			return
 		}
 	}
 
 	if len(maps) == 0 {
-		ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+		ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 		return
 	}
 
 	userId := controller.GetUserId(ginCtx)
 	if err := s.strategyService.ChangePriority(ginCtx, namespaceId, userId, clusterName, maps); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }

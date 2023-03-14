@@ -3,7 +3,7 @@ package open_api_controller
 import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
-	"github.com/eolinker/apinto-dashboard/dto"
+	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/api/api-dto"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
@@ -37,13 +37,13 @@ func (a *apiOpenAPIController) getImportInfo(ginCtx *gin.Context) {
 	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
 	_, err := a.extAPPService.CheckExtAPPToken(ginCtx, namespaceID, token)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("GetAPIImportInfos fail. err:%s", err)))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("GetAPIImportInfos fail. err:%s", err)))
 		return
 	}
 
 	groups, services, formats, err := a.apiOpenAPIService.GetSyncImportInfo(ginCtx, namespaceID)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("GetAPIImportInfos fail. err:%s", err)))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("GetAPIImportInfos fail. err:%s", err)))
 		return
 	}
 
@@ -51,7 +51,7 @@ func (a *apiOpenAPIController) getImportInfo(ginCtx *gin.Context) {
 	data["groups"] = groups
 	data["upstreams"] = services
 	data["formats"] = formats
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(data))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
 
 func (a *apiOpenAPIController) syncAPI(ginCtx *gin.Context) {
@@ -60,7 +60,7 @@ func (a *apiOpenAPIController) syncAPI(ginCtx *gin.Context) {
 	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
 	appID, err := a.extAPPService.CheckExtAPPToken(ginCtx, namespaceID, token)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("syncAPI fail. err:%s", err)))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("syncAPI fail. err:%s", err)))
 		return
 	}
 
@@ -72,17 +72,17 @@ func (a *apiOpenAPIController) syncAPI(ginCtx *gin.Context) {
 	case "multipart/form-data":
 		fileInfo, err := ginCtx.FormFile("file")
 		if err != nil {
-			ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("syncAPI get file fail. err: %s. ", err)))
+			ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("syncAPI get file fail. err: %s. ", err)))
 			return
 		}
 		file, err := fileInfo.Open()
 		if err != nil {
-			ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("syncAPI open file fail. err: %s. ", err)))
+			ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("syncAPI open file fail. err: %s. ", err)))
 			return
 		}
 		fileData := make([]byte, fileInfo.Size)
 		if _, err = file.Read(fileData); err != nil {
-			ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("syncAPI  read file fail. err: %s. ", err)))
+			ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("syncAPI  read file fail. err: %s. ", err)))
 			return
 		}
 		defer file.Close()
@@ -98,7 +98,7 @@ func (a *apiOpenAPIController) syncAPI(ginCtx *gin.Context) {
 		if nodesForm != "" {
 			server, err := a.getServer(nodesForm)
 			if err != nil {
-				ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+				ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 				return
 			}
 			inputData.Server = server
@@ -110,7 +110,7 @@ func (a *apiOpenAPIController) syncAPI(ginCtx *gin.Context) {
 		if isBase64Encode {
 			content, err = common.Base64Decode(contentForm)
 			if err != nil {
-				ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("syncAPI decode content fail. err: %s. ", err)))
+				ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("syncAPI decode content fail. err: %s. ", err)))
 				return
 			}
 		}
@@ -126,14 +126,14 @@ func (a *apiOpenAPIController) syncAPI(ginCtx *gin.Context) {
 		if nodesForm != "" {
 			server, err := a.getServer(nodesForm)
 			if err != nil {
-				ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+				ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 				return
 			}
 			inputData.Server = server
 		}
 	case "application/json":
 		if err = ginCtx.BindJSON(inputData); err != nil {
-			ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+			ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 			return
 		}
 		//检查Server
@@ -142,34 +142,34 @@ func (a *apiOpenAPIController) syncAPI(ginCtx *gin.Context) {
 			schme := strings.ToUpper(server.Scheme)
 			server.Scheme = schme
 			if schme != "HTTP" && schme != "HTTPS" {
-				ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("syncAPI fail. err: server.scheme is illegal. ")))
+				ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("syncAPI fail. err: server.scheme is illegal. ")))
 				return
 			}
 			if len(server.Nodes) == 0 {
-				ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("syncAPI fail. err: server.nodes is null. ")))
+				ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("syncAPI fail. err: server.nodes is null. ")))
 				return
 			}
 			for _, node := range server.Nodes {
 				if !common.IsMatchDomainPort(node.Url) && !common.IsMatchIpPort(node.Url) {
-					ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("syncAPI fail. err: server.nodes.url %s is illegal. ", node.Url)))
+					ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("syncAPI fail. err: server.nodes.url %s is illegal. ", node.Url)))
 					return
 				}
 			}
 		}
 	default:
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("syncAPI fail. err: Content-Type illegal. ")))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("syncAPI fail. err: Content-Type illegal. ")))
 		return
 	}
 
 	//校验服务名是否合法
 	if err := common.IsMatchString(common.EnglishOrNumber_, inputData.ServiceName); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("syncAPI upstream 't is illegal. err: %s. ", err)))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("syncAPI upstream 't is illegal. err: %s. ", err)))
 		return
 	}
 
 	checkList, err := a.apiOpenAPIService.SyncImport(ginCtx, namespaceID, appID, inputData)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("syncAPI fail. err:%s", err)))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("syncAPI fail. err:%s", err)))
 		return
 	}
 
@@ -186,7 +186,7 @@ func (a *apiOpenAPIController) syncAPI(ginCtx *gin.Context) {
 	data := make(map[string]interface{})
 	data["apis"] = resultList
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(data))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
 
 // getServer 解析scheme://url weight;url weight

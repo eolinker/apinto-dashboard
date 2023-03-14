@@ -5,13 +5,13 @@ import (
 	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
-	"github.com/eolinker/apinto-dashboard/dto"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/discovery"
 	"github.com/eolinker/apinto-dashboard/modules/online/online-dto"
 	"github.com/eolinker/apinto-dashboard/modules/upstream"
 	_ "github.com/eolinker/apinto-dashboard/modules/upstream/service"
+	upstream_dto "github.com/eolinker/apinto-dashboard/modules/upstream/upstream-dto"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -65,13 +65,13 @@ func (s *serviceController) getList(ginCtx *gin.Context) {
 	backgroundCtx := ginCtx
 	listItems, total, err := s.service.GetServiceList(backgroundCtx, namespaceID, searchName, pageNum, pageSize)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("GetServiceList fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("GetServiceList fail. err:%s", err.Error())))
 		return
 	}
-	services := make([]*dto.ServiceListItem, 0, len(listItems))
+	services := make([]*upstream_dto.ServiceListItem, 0, len(listItems))
 
 	for _, item := range listItems {
-		li := &dto.ServiceListItem{
+		li := &upstream_dto.ServiceListItem{
 			Name:        item.Name,
 			UUID:        item.UUID,
 			Scheme:      item.Scheme,
@@ -86,7 +86,7 @@ func (s *serviceController) getList(ginCtx *gin.Context) {
 	data := common.Map[string, interface{}]{}
 	data["services"] = services
 	data["total"] = total
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(data))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
 
 // getInfo 获取服务信息
@@ -94,36 +94,36 @@ func (s *serviceController) getInfo(ginCtx *gin.Context) {
 	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
 	serviceName := ginCtx.Query("name")
 	if serviceName == "" {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("GetServiceInfo Info fail. err: serviceName can't be nil")))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("GetServiceInfo Info fail. err: serviceName can't be nil")))
 		return
 	}
 	backgroundCtx := ginCtx
 	info, err := s.service.GetServiceInfo(backgroundCtx, namespaceID, serviceName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("GetServiceInfo fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("GetServiceInfo fail. err:%s", err.Error())))
 		return
 	}
 
 	discoveryName, _, driver, err := s.discovery.GetServiceDiscoveryDriverByID(backgroundCtx, info.DiscoveryId)
 	if err != nil && driver == nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("GetServiceInfo fail. Get discovery driver fail. %s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("GetServiceInfo fail. Get discovery driver fail. %s", err.Error())))
 		return
 	}
 	conf := driver.FormatConfig([]byte(info.Config))
 
-	serivce := &dto.ServiceInfoProxy{
+	serivce := &upstream_dto.ServiceInfoProxy{
 		Name:          info.Name,
 		UUID:          info.UUID,
 		Desc:          info.Desc,
 		Scheme:        info.Scheme,
 		DiscoveryName: discoveryName,
-		Config:        dto.ServiceConfigProxy(conf),
+		Config:        upstream_dto.ServiceConfigProxy(conf),
 		Timeout:       info.Timeout,
 		Balance:       info.Balance,
 	}
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(&dto.ServiceInfoOutput{
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(&upstream_dto.ServiceInfoOutput{
 		Service: serivce,
-		Render:  dto.Render(driver.Render()),
+		Render:  upstream_dto.Render(driver.Render()),
 	}))
 }
 
@@ -132,32 +132,32 @@ func (s *serviceController) create(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	operator := controller.GetUserId(ginCtx)
 
-	inputProxy := new(dto.ServiceInfoProxy)
+	inputProxy := new(upstream_dto.ServiceInfoProxy)
 	if err := ginCtx.BindJSON(inputProxy); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
 	//校验服务名是否合法
 	if err := common.IsMatchString(common.EnglishOrNumber_, inputProxy.Name); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
 	backgroundCtx := ginCtx
 	discoveryID, driverName, driver, err := s.discovery.GetServiceDiscoveryDriver(backgroundCtx, namespaceId, inputProxy.DiscoveryName)
 	if err != nil && driver == nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("CreateService fail. Get discovery driver fail. %s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("CreateService fail. Get discovery driver fail. %s", err.Error())))
 		return
 	}
 	newConf, formatAddr, variableList, err := driver.CheckInput(inputProxy.Config)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("CreateService fail. Err: %s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("CreateService fail. Err: %s", err.Error())))
 		return
 	}
 	inputProxy.Config = newConf
 
-	input := &dto.ServiceInfo{
+	input := &upstream_dto.ServiceInfo{
 		Name:        inputProxy.Name,
 		UUID:        inputProxy.UUID,
 		Desc:        inputProxy.Desc,
@@ -172,11 +172,11 @@ func (s *serviceController) create(ginCtx *gin.Context) {
 
 	_, err = s.service.CreateService(backgroundCtx, namespaceId, operator, input, variableList)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("CreateService fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("CreateService fail. err:%s", err.Error())))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
 // alter 修改服务信息
@@ -184,31 +184,31 @@ func (s *serviceController) alter(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	serviceName := ginCtx.Query("name")
 	if serviceName == "" {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("UpdateService Info fail. err: serviceName can't be nil")))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("UpdateService Info fail. err: serviceName can't be nil")))
 		return
 	}
 	operator := controller.GetUserId(ginCtx)
 	backgroundCtx := ginCtx
-	inputProxy := new(dto.ServiceInfoProxy)
+	inputProxy := new(upstream_dto.ServiceInfoProxy)
 	if err := ginCtx.BindJSON(inputProxy); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
 	discoveryID, driverName, driver, err := s.discovery.GetServiceDiscoveryDriver(backgroundCtx, namespaceId, inputProxy.DiscoveryName)
 	if err != nil && driver == nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("UpdateService fail. Get discovery driver fail. %s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("UpdateService fail. Get discovery driver fail. %s", err.Error())))
 		return
 	}
 
 	newConf, formatAddr, variableList, err := driver.CheckInput(inputProxy.Config)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("UpdateService fail. Err: %s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("UpdateService fail. Err: %s", err.Error())))
 		return
 	}
 	inputProxy.Config = newConf
 
-	input := &dto.ServiceInfo{
+	input := &upstream_dto.ServiceInfo{
 		Name:        serviceName,
 		UUID:        inputProxy.UUID, //TODO 应该用rest里的uuid
 		Desc:        inputProxy.Desc,
@@ -223,11 +223,11 @@ func (s *serviceController) alter(ginCtx *gin.Context) {
 
 	err = s.service.UpdateService(backgroundCtx, namespaceId, operator, input, variableList)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("UpdateService fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("UpdateService fail. err:%s", err.Error())))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
 // del 删除服务信息
@@ -235,18 +235,18 @@ func (s *serviceController) del(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	serviceName := ginCtx.Query("name")
 	if serviceName == "" {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("DeleteService Info fail. err: serviceName can't be nil")))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("DeleteService Info fail. err: serviceName can't be nil")))
 		return
 	}
 	userId := controller.GetUserId(ginCtx)
 
 	err := s.service.DeleteService(ginCtx, namespaceId, userId, serviceName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("DeleteService fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("DeleteService fail. err:%s", err.Error())))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
 func (s *serviceController) getEnum(ginCtx *gin.Context) {
@@ -255,13 +255,13 @@ func (s *serviceController) getEnum(ginCtx *gin.Context) {
 
 	serviceList, err := s.service.GetServiceEnum(ginCtx, namespaceId, searchName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("GetServiceEnum fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("GetServiceEnum fail. err:%s", err.Error())))
 		return
 	}
 
 	data := make(map[string]interface{})
 	data["list"] = serviceList
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(data))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
 
 // online 上线
@@ -272,21 +272,21 @@ func (s *serviceController) online(ginCtx *gin.Context) {
 	operator := controller.GetUserId(ginCtx)
 
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 	router, err := s.service.OnlineService(ginCtx, namespaceId, operator, serviceName, input.ClusterName)
 	if err != nil && router == nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	} else if err == nil {
-		ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+		ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 		return
 	}
 
 	m := common.Map[string, interface{}]{}
 	m["router"] = router
-	ginCtx.JSON(http.StatusOK, dto.Result{
+	ginCtx.JSON(http.StatusOK, controller.Result{
 		Code: -1,
 		Data: m,
 		Msg:  err.Error(),
@@ -302,15 +302,15 @@ func (s *serviceController) offline(ginCtx *gin.Context) {
 	operator := controller.GetUserId(ginCtx)
 
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
 	if err := s.service.OfflineService(ginCtx, namespaceId, operator, serviceName, input.ClusterName); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
 // getOnlineList 上线管理列表
@@ -320,7 +320,7 @@ func (s *serviceController) getOnlineList(ginCtx *gin.Context) {
 
 	list, err := s.service.OnlineList(ginCtx, namespaceId, serviceName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
@@ -341,7 +341,7 @@ func (s *serviceController) getOnlineList(ginCtx *gin.Context) {
 
 	m := common.Map[string, interface{}]{}
 	m["clusters"] = resp
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(m))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
 }
 
 //// getApi 获取api接口信息

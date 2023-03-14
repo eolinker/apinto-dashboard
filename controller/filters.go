@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/access"
-	"github.com/eolinker/apinto-dashboard/dto"
 	"github.com/eolinker/eosc/log"
 	"github.com/gin-gonic/gin"
 	"github.com/go-basic/uuid"
@@ -71,7 +70,7 @@ func Recovery(c *gin.Context) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Errorf("panic %v", panicTrace(err))
-			c.JSON(http.StatusInternalServerError, dto.NewErrorResult("服务器内部错误"))
+			c.JSON(http.StatusInternalServerError, NewErrorResult("服务器内部错误"))
 		}
 	}()
 

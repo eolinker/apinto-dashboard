@@ -1,4 +1,4 @@
-package dto
+package upstream_dto
 
 type ServiceListItem struct {
 	Name        string `json:"name"`

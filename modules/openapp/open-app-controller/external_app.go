@@ -5,7 +5,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
-	"github.com/eolinker/apinto-dashboard/dto"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/openapp"
@@ -38,13 +37,13 @@ func (e *externalApplicationController) getList(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	list, err := e.extAppService.AppList(ginCtx, namespaceId)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("Get external-app list fail. err: %s", err)))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Get external-app list fail. err: %s", err)))
 		return
 	}
 
 	data := common.Map[string, interface{}]{}
 	data["apps"] = list
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(data))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
 
 func (e *externalApplicationController) getInfo(ginCtx *gin.Context) {
@@ -53,7 +52,7 @@ func (e *externalApplicationController) getInfo(ginCtx *gin.Context) {
 
 	info, err := e.extAppService.AppInfo(ginCtx, namespaceId, uuid)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("Get external-app info fail. err: %s", err)))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Get external-app info fail. err: %s", err)))
 		return
 	}
 
@@ -65,7 +64,7 @@ func (e *externalApplicationController) getInfo(ginCtx *gin.Context) {
 
 	data := common.Map[string, interface{}]{}
 	data["info"] = app
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(data))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
 
 func (e *externalApplicationController) create(ginCtx *gin.Context) {
@@ -74,27 +73,27 @@ func (e *externalApplicationController) create(ginCtx *gin.Context) {
 
 	input := new(open_app_dto.ExternalAppInfoInput)
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
 	if strings.TrimSpace(input.Name) == "" {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("Create external-app fail. err: name can't be null. ")))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Create external-app fail. err: name can't be null. ")))
 		return
 	}
 
 	if strings.TrimSpace(input.Id) == "" {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("Create external-app fail. err: id can't be null. ")))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Create external-app fail. err: id can't be null. ")))
 		return
 	}
 
 	err := e.extAppService.CreateApp(ginCtx, namespaceId, userId, input)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("Create external-app fail. err: %s", err)))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Create external-app fail. err: %s", err)))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
 func (e *externalApplicationController) edit(ginCtx *gin.Context) {
@@ -104,23 +103,23 @@ func (e *externalApplicationController) edit(ginCtx *gin.Context) {
 
 	input := new(open_app_dto.ExternalAppInfoInput)
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
 	if input.Name == "" {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("Edit external-app fail. err: name can't be null. ")))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Edit external-app fail. err: name can't be null. ")))
 		return
 	}
 
 	input.Id = uuid
 	err := e.extAppService.UpdateApp(ginCtx, namespaceId, userId, input)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("Edit external-app fail. err: %s", err)))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Edit external-app fail. err: %s", err)))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
 func (e *externalApplicationController) delete(ginCtx *gin.Context) {
@@ -130,11 +129,11 @@ func (e *externalApplicationController) delete(ginCtx *gin.Context) {
 
 	err := e.extAppService.DelApp(ginCtx, namespaceId, userId, uuid)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("Delete external-app fail. err: %s", err)))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Delete external-app fail. err: %s", err)))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
 func (e *externalApplicationController) enable(ginCtx *gin.Context) {
@@ -144,11 +143,11 @@ func (e *externalApplicationController) enable(ginCtx *gin.Context) {
 
 	err := e.extAppService.Enable(ginCtx, namespaceId, userId, uuid)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("Enable external-app fail. err: %s", err)))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Enable external-app fail. err: %s", err)))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
 func (e *externalApplicationController) disable(ginCtx *gin.Context) {
@@ -158,11 +157,11 @@ func (e *externalApplicationController) disable(ginCtx *gin.Context) {
 
 	err := e.extAppService.Disable(ginCtx, namespaceId, userId, uuid)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("Disable external-app fail. err: %s", err)))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Disable external-app fail. err: %s", err)))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
 func (e *externalApplicationController) flushToken(ginCtx *gin.Context) {
@@ -172,9 +171,9 @@ func (e *externalApplicationController) flushToken(ginCtx *gin.Context) {
 
 	err := e.extAppService.FlushToken(ginCtx, namespaceId, userId, uuid)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("Flush external-app token fail. err: %s", err)))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Flush external-app token fail. err: %s", err)))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }

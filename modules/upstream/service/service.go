@@ -17,9 +17,9 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/namespace"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-model"
 	"github.com/eolinker/apinto-dashboard/modules/upstream"
-	"github.com/eolinker/apinto-dashboard/modules/upstream/dto"
 	upstream_model "github.com/eolinker/apinto-dashboard/modules/upstream/model"
 	upstream_store "github.com/eolinker/apinto-dashboard/modules/upstream/store"
+	upstream_dto "github.com/eolinker/apinto-dashboard/modules/upstream/upstream-dto"
 	upstream_entry2 "github.com/eolinker/apinto-dashboard/modules/upstream/upstream-entry"
 	"github.com/eolinker/apinto-dashboard/modules/user"
 	"github.com/eolinker/apinto-dashboard/modules/variable"
@@ -203,7 +203,7 @@ func (s *service) GetServiceInfo(ctx context.Context, namespaceID int, serviceNa
 	return info, nil
 }
 
-func (s *service) CreateService(ctx context.Context, namespaceID, userId int, input *dto.ServiceInfo, variableList []string) (int, error) {
+func (s *service) CreateService(ctx context.Context, namespaceID, userId int, input *upstream_dto.ServiceInfo, variableList []string) (int, error) {
 	input.Name = strings.ToLower(input.Name)
 	//服务发现name查重
 	_, err := s.serviceStore.GetByName(ctx, namespaceID, input.Name)
@@ -300,7 +300,7 @@ func (s *service) CreateService(ctx context.Context, namespaceID, userId int, in
 	})
 }
 
-func (s *service) UpdateService(ctx context.Context, namespaceID, userId int, input *dto.ServiceInfo, variableList []string) error {
+func (s *service) UpdateService(ctx context.Context, namespaceID, userId int, input *upstream_dto.ServiceInfo, variableList []string) error {
 
 	serviceInfo, err := s.serviceStore.GetByName(ctx, namespaceID, input.Name)
 	if err != nil {

@@ -2,7 +2,6 @@ package group_controller
 
 import (
 	"github.com/eolinker/apinto-dashboard/controller"
-	"github.com/eolinker/apinto-dashboard/dto"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/group"
@@ -38,7 +37,7 @@ func (c *commonGroupController) groups(ginCtx *gin.Context) {
 
 	root, apis, err := c.commonGroupService.GroupList(ginCtx, namespaceId, groupType, tagName, uuid, queryName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 	resApis := make([]*group_dto.CommonGroupApi, 0, len(apis))
@@ -69,7 +68,7 @@ func (c *commonGroupController) groups(ginCtx *gin.Context) {
 	m := make(map[string]interface{})
 	m["root"] = resRoot
 	m["apis"] = resApis
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(m))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
 }
 func (c *commonGroupController) subGroup(val *group_dto.CommonGroupOut, list []*group_model.CommonGroup) {
 	if len(list) == 0 {
@@ -91,16 +90,16 @@ func (c *commonGroupController) updateGroup(ginCtx *gin.Context) {
 	input := new(group_dto.CommonGroupInput)
 
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
 	if err := c.commonGroupService.UpdateGroup(ginCtx, namespaceId, operator, groupType, input.Name, uuid); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
 func (c *commonGroupController) groupSort(ginCtx *gin.Context) {
@@ -110,16 +109,16 @@ func (c *commonGroupController) groupSort(ginCtx *gin.Context) {
 
 	input := &group_dto.CommGroupSortInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
 	if err := c.commonGroupService.GroupSort(ginCtx, namespaceId, groupType, tagName, input); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
 // delGroup 删除目录
@@ -130,11 +129,11 @@ func (c *commonGroupController) delGroup(ginCtx *gin.Context) {
 	operator := controller.GetUserId(ginCtx)
 
 	if err := c.commonGroupService.DeleteGroup(ginCtx, namespaceId, operator, groupType, uuid); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
 // createGroup 新建目录
@@ -146,14 +145,14 @@ func (c *commonGroupController) createGroup(ginCtx *gin.Context) {
 	input := new(group_dto.CommonGroupInput)
 
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
 	if err := c.commonGroupService.CreateGroup(ginCtx, namespaceId, operator, groupType, tagName, input.Name, input.UUID, input.ParentUUID); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }

@@ -2,7 +2,7 @@ package env_controller
 
 import (
 	"github.com/eolinker/apinto-dashboard/common"
-	"github.com/eolinker/apinto-dashboard/dto"
+	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/modules/base/env-model"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -34,5 +34,5 @@ func (e *enumController) getEnv(context *gin.Context) {
 	}
 	m := common.Map[string, interface{}]{}
 	m["envs"] = list
-	context.JSON(http.StatusOK, dto.NewSuccessResult(m))
+	context.JSON(http.StatusOK, controller.NewSuccessResult(m))
 }
