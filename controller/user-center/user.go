@@ -10,7 +10,8 @@ import (
 	"github.com/eolinker/apinto-dashboard/dto"
 	"github.com/eolinker/apinto-dashboard/dto/user-dto"
 	"github.com/eolinker/apinto-dashboard/model"
-	"github.com/eolinker/apinto-dashboard/service"
+	"github.com/eolinker/apinto-dashboard/service/user-service"
+	"github.com/eolinker/apinto-dashboard/user_center"
 	"github.com/eolinker/apinto-dashboard/user_center/client"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/gin-gonic/gin"
@@ -21,8 +22,8 @@ import (
 )
 
 var (
-	userCenterClient client.IUserCenterClient
-	userInfoService  service.IUserInfoService
+	userCenterClient user_center.IUserCenterClient
+	userInfoService  user_service.IUserInfoService
 	sessionCache     cache.ISessionCache
 	commonCache      cache.ICommonCache
 )

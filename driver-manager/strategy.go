@@ -5,10 +5,10 @@ package driver_manager
 //	List() []*StrategyDriverInfo
 //}
 
-type StrategyDriverInfo struct {
-	Name       string
-	ApintoName string
-}
+//type StrategyDriverInfo struct {
+//	Name       string
+//	ApintoName string
+//}
 
 //type strategyDriver struct {
 //	*driverManager[driver.IStrategyDriver]

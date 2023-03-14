@@ -7,9 +7,9 @@ package mock_service
 import (
 	context "context"
 	dto "github.com/eolinker/apinto-dashboard/dto/cluster-dto"
+	model "github.com/eolinker/apinto-dashboard/model/cluster-model"
 	reflect "reflect"
 
-	model "github.com/eolinker/apinto-dashboard/model"
 	gomock "github.com/golang/mock/gomock"
 )
 

@@ -5,9 +5,9 @@
 package mock_service
 
 import (
+	model "github.com/eolinker/apinto-dashboard/model/namespace-model"
 	reflect "reflect"
 
-	model "github.com/eolinker/apinto-dashboard/model"
 	gomock "github.com/golang/mock/gomock"
 )
 

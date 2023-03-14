@@ -9,13 +9,22 @@ import (
 	"github.com/eolinker/apinto-dashboard/entry/quote-entry"
 	"github.com/eolinker/apinto-dashboard/entry/upstream-entry"
 	"github.com/eolinker/apinto-dashboard/entry/variable-entry"
-	"github.com/eolinker/apinto-dashboard/model"
+	"github.com/eolinker/apinto-dashboard/model/audit-model"
+	"github.com/eolinker/apinto-dashboard/model/cluster-model"
+	"github.com/eolinker/apinto-dashboard/model/frontend-model"
+	"github.com/eolinker/apinto-dashboard/model/openapi-model"
 	api "github.com/eolinker/apinto-dashboard/modules/api"
 	"github.com/eolinker/apinto-dashboard/modules/upstream"
 	upstream_model "github.com/eolinker/apinto-dashboard/modules/upstream/model"
 	upstream_store "github.com/eolinker/apinto-dashboard/modules/upstream/store"
-	service2 "github.com/eolinker/apinto-dashboard/service"
-	"github.com/eolinker/apinto-dashboard/store"
+	"github.com/eolinker/apinto-dashboard/service/apinto-client"
+	"github.com/eolinker/apinto-dashboard/service/cluster-service"
+	"github.com/eolinker/apinto-dashboard/service/discovery-serivce"
+	"github.com/eolinker/apinto-dashboard/service/locker-service"
+	"github.com/eolinker/apinto-dashboard/service/namespace-service"
+	service2 "github.com/eolinker/apinto-dashboard/service/user-service"
+	"github.com/eolinker/apinto-dashboard/service/variable-service"
+	"github.com/eolinker/apinto-dashboard/store/quote-store"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
 	"github.com/go-basic/uuid"
@@ -28,22 +37,22 @@ import (
 const LockNameService = "service"
 
 type service struct {
-	clusterService        service2.IClusterService
-	apintoClient          service2.IApintoClient
-	clusterNodeService    service2.IClusterNodeService
-	discoveryService      service2.IDiscoveryService
-	namespaceService      service2.INamespaceService
-	globalVariableService service2.IGlobalVariableService
-	lockService           service2.IAsynLockService
-	variableService       service2.IClusterVariableService
-	apiService            api.IAPIService
-	userInfoService       service2.IUserInfoService
-	serviceRuntimeStore   upstream_store.IServiceRuntimeStore
+	clusterService     cluster_service.IClusterService
+	apintoClient       apinto_client.IApintoClient
+	clusterNodeService cluster_service.IClusterNodeService
+	discoveryService   discovery_serivce.IDiscoveryService
+	namespaceService   namespace_service.INamespaceService
+	globalVariableService variable_service.IGlobalVariableService
+	lockService           locker_service.IAsynLockService
+	variableService       variable_service.IClusterVariableService
+	apiService          api.IAPIService
+	userInfoService     service2.IUserInfoService
+	serviceRuntimeStore upstream_store.IServiceRuntimeStore
 	serviceStore          upstream_store.IServiceStore
 	serviceVersionStore   upstream_store.IServiceVersionStore
-	serviceStatStore      upstream_store.IServiceStatStore
-	quoteStore            store.IQuoteStore
-	historyStore          upstream_store.IServiceHistoryStore
+	serviceStatStore upstream_store.IServiceStatStore
+	quoteStore       quote_store.IQuoteStore
+	historyStore     upstream_store.IServiceHistoryStore
 }
 
 func newServiceService() upstream.IService {
@@ -223,7 +232,7 @@ func (s *service) CreateService(ctx context.Context, namespaceID, userId int, in
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &model.LogObjectInfo{
+	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: input.UUID,
 		Name: input.Name,
 	})
@@ -324,7 +333,7 @@ func (s *service) UpdateService(ctx context.Context, namespaceID, userId int, in
 	serviceInfo.UpdateTime = time.Now()
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &model.LogObjectInfo{
+	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: input.UUID,
 		Name: input.Name,
 	})
@@ -434,7 +443,7 @@ func (s *service) DeleteService(ctx context.Context, namespaceID, userId int, se
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &model.LogObjectInfo{
+	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: serviceInfo.UUID,
 		Name: serviceName,
 	})
@@ -503,7 +512,7 @@ func (s *service) OnlineList(ctx context.Context, namespaceId int, serviceName s
 	if err != nil {
 		return nil, err
 	}
-	clusterMaps := common.SliceToMap(clusters, func(t *model.Cluster) int {
+	clusterMaps := common.SliceToMap(clusters, func(t *cluster_model.Cluster) int {
 		return t.Id
 	})
 
@@ -562,7 +571,7 @@ func (s *service) OnlineList(ctx context.Context, namespaceId int, serviceName s
 }
 
 // OnlineService  上线服务
-func (s *service) OnlineService(ctx context.Context, namespaceId, operator int, serviceName, clusterName string) (*model.Router, error) {
+func (s *service) OnlineService(ctx context.Context, namespaceId, operator int, serviceName, clusterName string) (*frontend_model.Router, error) {
 	serviceInfo, err := s.serviceStore.GetByName(ctx, namespaceId, serviceName)
 	if err != nil {
 		return nil, err
@@ -603,8 +612,8 @@ func (s *service) OnlineService(ctx context.Context, namespaceId, operator int, 
 	var discoveryName = ""
 	var discoveryId = version.ServiceVersionConfig.DiscoveryId
 	if discoveryId == 0 { //表示静态服务发现
-		router := &model.Router{
-			Name:   model.RouterNameClusterVariable,
+		router := &frontend_model.Router{
+			Name:   frontend_model.RouterNameClusterVariable,
 			Params: make(map[string]string),
 		}
 		router.Params["cluster_name"] = clusterName
@@ -652,8 +661,8 @@ func (s *service) OnlineService(ctx context.Context, namespaceId, operator int, 
 			return nil, err
 		}
 		if !s.discoveryService.IsOnline(ctx, clusterId, discoveryId) {
-			router := &model.Router{
-				Name:   model.RouterNameDiscoveryOnline,
+			router := &frontend_model.Router{
+				Name:   frontend_model.RouterNameDiscoveryOnline,
 				Params: make(map[string]string),
 			}
 			router.Params["discovery_name"] = discoveryName
@@ -701,7 +710,7 @@ func (s *service) OnlineService(ctx context.Context, namespaceId, operator int, 
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &model.LogObjectInfo{
+	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:        serviceInfo.UUID,
 		Name:        serviceName,
 		ClusterId:   cluster.Id,
@@ -849,7 +858,7 @@ func (s *service) OfflineService(ctx context.Context, namespaceId, operator int,
 	runtime.Operator = operator
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &model.LogObjectInfo{
+	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:        serviceInfo.UUID,
 		Name:        serviceName,
 		ClusterId:   cluster.Id,
@@ -903,20 +912,20 @@ func (s *service) IsOnline(ctx context.Context, clusterId, serviceId int) bool {
 	return runtime.IsOnline
 }
 
-func (s *service) GetServiceRemoteOptions(ctx context.Context, namespaceID, pageNum, pageSize int, keyword string) ([]*model.RemoteServices, int, error) {
+func (s *service) GetServiceRemoteOptions(ctx context.Context, namespaceID, pageNum, pageSize int, keyword string) ([]*openapi_model.RemoteServices, int, error) {
 	sl, total, err := s.serviceStore.GetListPage(ctx, namespaceID, keyword, pageNum, pageSize)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	list := make([]*model.RemoteServices, 0, len(sl))
+	list := make([]*openapi_model.RemoteServices, 0, len(sl))
 	for _, item := range sl {
 		info, err := s.GetServiceInfo(ctx, namespaceID, item.Name)
 		if err != nil {
 			return nil, 0, err
 		}
 
-		li := &model.RemoteServices{
+		li := &openapi_model.RemoteServices{
 			Uuid:   item.Name, //TODO
 			Name:   item.Name,
 			Scheme: info.Scheme,
@@ -929,20 +938,20 @@ func (s *service) GetServiceRemoteOptions(ctx context.Context, namespaceID, page
 	return list, total, nil
 }
 
-func (s *service) GetServiceRemoteByNames(ctx context.Context, namespaceID int, names []string) ([]*model.RemoteServices, error) {
+func (s *service) GetServiceRemoteByNames(ctx context.Context, namespaceID int, names []string) ([]*openapi_model.RemoteServices, error) {
 	sl, err := s.serviceStore.GetByNames(ctx, namespaceID, names)
 	if err != nil {
 		return nil, err
 	}
 
-	list := make([]*model.RemoteServices, 0, len(sl))
+	list := make([]*openapi_model.RemoteServices, 0, len(sl))
 	for _, item := range sl {
 		info, err := s.GetServiceInfo(ctx, namespaceID, item.Name)
 		if err != nil {
 			return nil, err
 		}
 
-		li := &model.RemoteServices{
+		li := &openapi_model.RemoteServices{
 			Uuid:   item.Name, //TODO
 			Name:   item.Name,
 			Scheme: info.Scheme,

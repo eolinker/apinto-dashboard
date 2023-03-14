@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/dto"
 	"github.com/eolinker/apinto-dashboard/enum"
-	"github.com/eolinker/apinto-dashboard/service"
+	"github.com/eolinker/apinto-dashboard/service/audit-service"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
 	"github.com/gin-gonic/gin"
@@ -26,7 +26,7 @@ type IAudit interface {
 }
 
 type audit struct {
-	service service.IAuditLogService
+	service audit_service.IAuditLogService
 }
 
 func (a *audit) Handler(operate int, kind string) gin.HandlerFunc {

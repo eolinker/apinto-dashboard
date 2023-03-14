@@ -8,12 +8,19 @@ import (
 	"github.com/eolinker/apinto-dashboard/cache"
 	"github.com/eolinker/apinto-dashboard/common"
 	driver_manager "github.com/eolinker/apinto-dashboard/driver-manager"
-	"github.com/eolinker/apinto-dashboard/model"
+	"github.com/eolinker/apinto-dashboard/model/cluster-model"
+	"github.com/eolinker/apinto-dashboard/model/monitor-model"
+	"github.com/eolinker/apinto-dashboard/model/notice-model"
+	"github.com/eolinker/apinto-dashboard/model/user-model"
 	service2 "github.com/eolinker/apinto-dashboard/modules/api"
 	apimodel "github.com/eolinker/apinto-dashboard/modules/api/model"
 	"github.com/eolinker/apinto-dashboard/modules/upstream"
 	upstream_model "github.com/eolinker/apinto-dashboard/modules/upstream/model"
-	"github.com/eolinker/apinto-dashboard/service"
+	"github.com/eolinker/apinto-dashboard/service/cluster-service"
+	"github.com/eolinker/apinto-dashboard/service/monitor-service"
+	"github.com/eolinker/apinto-dashboard/service/namespace-service"
+	"github.com/eolinker/apinto-dashboard/service/notice-service"
+	"github.com/eolinker/apinto-dashboard/service/user-service"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
 	"github.com/go-basic/uuid"
@@ -30,17 +37,17 @@ type IMonitorWarn interface {
 }
 
 type monitorWarn struct {
-	warnStrategyService  service.IWarnStrategyService
-	monitorStatistics    service.IMonitorStatistics
-	namespaceService     service.INamespaceService
-	monitorService       service.IMonitorService
-	userService          service.IUserInfoService
-	clusterService       service.IClusterService
-	warnHistoryService   service.IWarnHistoryService
-	apiService           service2.IAPIService
+	warnStrategyService monitor_service.IWarnStrategyService
+	monitorStatistics   monitor_service.IMonitorStatistics
+	namespaceService  namespace_service.INamespaceService
+	monitorService monitor_service.IMonitorService
+	userService    user_service.IUserInfoService
+	clusterService cluster_service.IClusterService
+	warnHistoryService  monitor_service.IWarnHistoryService
+	apiService          service2.IAPIService
 	service              upstream.IService
 	commonCache          cache.ICommonCache
-	noticeChannelService service.INoticeChannelService
+	noticeChannelService notice_service.INoticeChannelService
 	noticeChannelDriver  driver_manager.INoticeChannelDriverManager
 }
 
@@ -79,7 +86,7 @@ func (mon *monitorWarn) monitorWarn() {
 		log.Errorf("monitorWarn-monitorWarn userService.userInfos error:%s", err.Error())
 		return
 	}
-	userMaps := common.SliceToMap(userInfos, func(t *model.UserInfo) int {
+	userMaps := common.SliceToMap(userInfos, func(t *user_model.UserInfo) int {
 		return t.Id
 	})
 
@@ -91,7 +98,7 @@ func (mon *monitorWarn) monitorWarn() {
 			return
 		}
 
-		group := common.SliceToMapArray(strategiesAll, func(t *model.WarnStrategy) string {
+		group := common.SliceToMapArray(strategiesAll, func(t *monitor_model.WarnStrategy) string {
 			return fmt.Sprintf("%s:%s:%s:%d", t.PartitionUUID, t.Dimension, t.Quota, t.Every)
 		})
 
@@ -109,7 +116,7 @@ func (mon *monitorWarn) monitorWarn() {
 
 }
 
-func (mon *monitorWarn) task(ctx context.Context, namespaceId int, key string, endTime time.Time, strategies []*model.WarnStrategy, userMaps map[int]*model.UserInfo, apiMaps map[string]*apimodel.APIInfo, serviceMaps map[string]*upstream_model.ServiceListItem, noticeChannelMaps map[string]*model.NoticeChannel) {
+func (mon *monitorWarn) task(ctx context.Context, namespaceId int, key string, endTime time.Time, strategies []*monitor_model.WarnStrategy, userMaps map[int]*user_model.UserInfo, apiMaps map[string]*apimodel.APIInfo, serviceMaps map[string]*upstream_model.ServiceListItem, noticeChannelMaps map[string]*notice_model.NoticeChannel) {
 
 	//key+时间戳
 	lockKey := fmt.Sprintf("%s_%d", key, endTime.Unix())
@@ -135,16 +142,16 @@ func (mon *monitorWarn) task(ctx context.Context, namespaceId int, key string, e
 	startTime := endTime.Add(-time.Minute * time.Duration(every))
 
 	groupStr := split[1]
-	if groupStr == model.DimensionTypePartition {
-		groupStr = model.DimensionTypeCluster
+	if groupStr == monitor_model.DimensionTypePartition {
+		groupStr = monitor_model.DimensionTypeCluster
 	}
 
-	if groupStr == model.DimensionTypeService {
+	if groupStr == monitor_model.DimensionTypeService {
 		groupStr = "upstream"
 	}
 
 	partitionUUID := split[0]
-	quotaType := model.QuotaType(split[2])
+	quotaType := monitor_model.QuotaType(split[2])
 
 	statistics, err := mon.monitorStatistics.WarnStatistics(ctx, namespaceId, partitionUUID, startTime, endTime, groupStr, quotaType, nil)
 	if err != nil {
@@ -180,19 +187,19 @@ func (mon *monitorWarn) task(ctx context.Context, namespaceId int, key string, e
 		values := mon.getRealTargetValues(apiMaps, serviceMaps, clusterNameMaps, strategy.Dimension, target.Rule, target.Values)
 
 		for _, rule := range strategy.WarnStrategyConfig.Rule {
-			warnList := make([]model.NoticeChannelWarn, 0)
+			warnList := make([]monitor_model.NoticeChannelWarn, 0)
 
-			if strategy.Dimension == model.DimensionTypePartition {
+			if strategy.Dimension == monitor_model.DimensionTypePartition {
 				//分区是把分区下的集群聚合查询
 				targetValue := 0.0
 				for _, value := range values {
 					targetValue += statistics[value]
 				}
 				switch strategy.Quota {
-				case model.QuotaTypeReqFailRate, model.QuotaTypeProxyFailRate:
+				case monitor_model.QuotaTypeReqFailRate, monitor_model.QuotaTypeProxyFailRate:
 					targetValue *= 100
 					targetValue = targetValue / float64(len(values))
-				case model.QuotaTypeAvgResp:
+				case monitor_model.QuotaTypeAvgResp:
 					targetValue = targetValue / float64(len(values))
 				}
 
@@ -208,7 +215,7 @@ func (mon *monitorWarn) task(ctx context.Context, namespaceId int, key string, e
 				for _, value := range values {
 					targetValue := statistics[value]
 					switch strategy.Quota {
-					case model.QuotaTypeReqFailRate, model.QuotaTypeProxyFailRate:
+					case monitor_model.QuotaTypeReqFailRate, monitor_model.QuotaTypeProxyFailRate:
 						targetValue *= 100
 					}
 
@@ -228,7 +235,7 @@ func (mon *monitorWarn) task(ctx context.Context, namespaceId int, key string, e
 				//不满足条件直接跳过
 				if !mon.isSendTo(ctx, endTime, strategy) {
 					//设置告警但未发送状态
-					mon.setWarnMinuteStatus(ctx, endTime, strategy, model.WarnStatusTrigger)
+					mon.setWarnMinuteStatus(ctx, endTime, strategy, monitor_model.WarnStatusTrigger)
 					//告警历史 插入告警历史
 					_ = mon.warnHistoryService.Create(ctx, namespaceId, strategy.PartitionId, historyInfo)
 					continue
@@ -236,13 +243,13 @@ func (mon *monitorWarn) task(ctx context.Context, namespaceId int, key string, e
 
 				//写入告警次数到缓存
 				mon.setWarnNum(ctx, endTime, strategy)
-				mon.setWarnMinuteStatus(ctx, endTime, strategy, model.WarnStatusSendTrigger)
+				mon.setWarnMinuteStatus(ctx, endTime, strategy, monitor_model.WarnStatusSendTrigger)
 
 				//发送失败的次数和需要发送的次数做对比
 				var sendFail = new(int64)
 
 				noticeErrGroup, _ := errgroup.WithContext(ctx)
-				sendMsgErrors := make([]*model.SendMsgError, 0)
+				sendMsgErrors := make([]*monitor_model.SendMsgError, 0)
 
 				for _, uid := range rule.ChannelUuids {
 					channelUuid := uid
@@ -254,7 +261,7 @@ func (mon *monitorWarn) task(ctx context.Context, namespaceId int, key string, e
 							return errors.New("渠道通知获取失败")
 						}
 						sendMsgErrorUuid := uuid.New()
-						sendMsgError := &model.SendMsgError{
+						sendMsgError := &monitor_model.SendMsgError{
 							UUID:              sendMsgErrorUuid,
 							NoticeChannelUUID: channelUuid,
 						}
@@ -314,7 +321,7 @@ func (mon *monitorWarn) task(ctx context.Context, namespaceId int, key string, e
 				_ = mon.warnHistoryService.Create(ctx, namespaceId, strategy.PartitionId, historyInfo)
 
 			} else {
-				mon.setWarnMinuteStatus(ctx, endTime, strategy, model.WarnStatusNotTrigger)
+				mon.setWarnMinuteStatus(ctx, endTime, strategy, monitor_model.WarnStatusNotTrigger)
 			}
 		}
 
@@ -323,7 +330,7 @@ func (mon *monitorWarn) task(ctx context.Context, namespaceId int, key string, e
 	return
 }
 
-func getWarnHistoryInfo(strategy *model.WarnStrategy, warnList []model.NoticeChannelWarn, t time.Time) *model.WarnHistoryInfo {
+func getWarnHistoryInfo(strategy *monitor_model.WarnStrategy, warnList []monitor_model.NoticeChannelWarn, t time.Time) *monitor_model.WarnHistoryInfo {
 	historyTargets := make([]string, 0)
 	contentMaps := make(map[string]string)
 	for _, warn := range warnList {
@@ -334,7 +341,7 @@ func getWarnHistoryInfo(strategy *model.WarnStrategy, warnList []model.NoticeCha
 	content, _ := json.Marshal(contentMaps)
 	content, _ = unescapeUnicode(content)
 
-	historyInfo := &model.WarnHistoryInfo{
+	historyInfo := &monitor_model.WarnHistoryInfo{
 		StrategyTitle: strategy.Title,
 		Dimension:     strategy.Dimension,
 		Quota:         string(strategy.Quota),
@@ -348,7 +355,7 @@ func getWarnHistoryInfo(strategy *model.WarnStrategy, warnList []model.NoticeCha
 
 // 告警计算 判断是否触发告警
 func (mon *monitorWarn) warnCount(ctx context.Context, namespaceId int, startTime, endTime time.Time, targetValue float64,
-	strategy *model.WarnStrategy, rule *model.WarnStrategyConfigRule, values []string, apiMaps map[string]*apimodel.APIInfo, clusterMaps map[string]*model.Cluster, statistics map[string]float64) []model.NoticeChannelWarn {
+	strategy *monitor_model.WarnStrategy, rule *monitor_model.WarnStrategyConfigRule, values []string, apiMaps map[string]*apimodel.APIInfo, clusterMaps map[string]*cluster_model.Cluster, statistics map[string]float64) []monitor_model.NoticeChannelWarn {
 	warnCount := 0
 
 	ratio := 0.0
@@ -369,7 +376,7 @@ func (mon *monitorWarn) warnCount(ctx context.Context, namespaceId int, startTim
 	if isQueryRing {
 		ratio, _ = mon.getCompare(ctx, namespaceId, values, startTime, endTime, strategy, true)
 		switch strategy.Quota {
-		case model.QuotaTypeReqFailRate, model.QuotaTypeProxyFailRate:
+		case monitor_model.QuotaTypeReqFailRate, monitor_model.QuotaTypeProxyFailRate:
 			ratio *= 100
 		}
 
@@ -377,12 +384,12 @@ func (mon *monitorWarn) warnCount(ctx context.Context, namespaceId int, startTim
 	if isQueryBasis {
 		yearBasis, _ = mon.getCompare(ctx, namespaceId, values, startTime, endTime, strategy, false)
 		switch strategy.Quota {
-		case model.QuotaTypeReqFailRate, model.QuotaTypeProxyFailRate:
+		case monitor_model.QuotaTypeReqFailRate, monitor_model.QuotaTypeProxyFailRate:
 			yearBasis *= 100
 		}
 	}
 
-	msgConditions := make([]*model.MsgCondition, 0)
+	msgConditions := make([]*monitor_model.MsgCondition, 0)
 	for _, condition := range rule.Condition {
 		realValue := 0.0
 		switch condition.Compare {
@@ -453,7 +460,7 @@ func (mon *monitorWarn) warnCount(ctx context.Context, namespaceId int, startTim
 				warnCount++
 			}
 		}
-		msgConditions = append(msgConditions, &model.MsgCondition{
+		msgConditions = append(msgConditions, &monitor_model.MsgCondition{
 			RealValue: realValue,
 			Compare:   condition.Compare,
 			Unit:      condition.Unit,
@@ -478,17 +485,17 @@ func (mon *monitorWarn) warnCount(ctx context.Context, namespaceId int, startTim
 
 	}
 
-	warnList := make([]model.NoticeChannelWarn, 0)
+	warnList := make([]monitor_model.NoticeChannelWarn, 0)
 	if warnCount == len(rule.Condition) {
 		url := ""
 		name := ""
 
-		if strategy.Dimension == model.DimensionTypeApi {
+		if strategy.Dimension == monitor_model.DimensionTypeApi {
 			if api, ok := apiMaps[values[0]]; ok {
 				url = api.RequestPathLabel
 				name = api.Name
 			}
-		} else if strategy.Dimension == model.DimensionTypePartition {
+		} else if strategy.Dimension == monitor_model.DimensionTypePartition {
 			clusters := make([]string, 0)
 			for _, value := range values {
 				if cluster, ok := clusterMaps[value]; ok {
@@ -496,7 +503,7 @@ func (mon *monitorWarn) warnCount(ctx context.Context, namespaceId int, startTim
 				}
 			}
 			name = strings.Join(clusters, ",")
-		} else if strategy.Dimension == model.DimensionTypeCluster {
+		} else if strategy.Dimension == monitor_model.DimensionTypeCluster {
 			if cluster, ok := clusterMaps[values[0]]; ok {
 				name = cluster.Name
 			} else {
@@ -507,7 +514,7 @@ func (mon *monitorWarn) warnCount(ctx context.Context, namespaceId int, startTim
 			name = values[0]
 		}
 
-		warnList = append(warnList, model.NoticeChannelWarn{
+		warnList = append(warnList, monitor_model.NoticeChannelWarn{
 			Url:       url,
 			Name:      name,
 			Every:     strategy.Every,
@@ -545,7 +552,7 @@ func getContinuityKey(uuid string, t time.Time) string {
 }
 
 // 是否需要发送告警消息
-func (mon *monitorWarn) isSendTo(ctx context.Context, t time.Time, strategy *model.WarnStrategy) bool {
+func (mon *monitorWarn) isSendTo(ctx context.Context, t time.Time, strategy *monitor_model.WarnStrategy) bool {
 	hourMax := strategy.WarnStrategyConfig.HourMax
 	if hourMax > 0 {
 		key := getHourMaxKey(strategy.Uuid, t)
@@ -591,10 +598,10 @@ func (mon *monitorWarn) isSendTo(ctx context.Context, t time.Time, strategy *mod
 		}
 
 		switch string(frontMinuteStatus) {
-		case model.WarnStatusNotTrigger:
+		case monitor_model.WarnStatusNotTrigger:
 			//没触发则表示当前分钟可以触发告警
 			return true
-		case model.WarnStatusTrigger:
+		case monitor_model.WarnStatusTrigger:
 			if continuity == 1 { //如果只配了1分钟 那么直接返回true 可以触发告警
 				return true
 			}
@@ -610,12 +617,12 @@ func (mon *monitorWarn) isSendTo(ctx context.Context, t time.Time, strategy *mod
 					log.Errorf("isSendTo-commonCache.Get err=%s", err.Error())
 					return false
 				}
-				if string(status) == model.WarnStatusNotTrigger || string(status) == model.WarnStatusSendTrigger {
+				if string(status) == monitor_model.WarnStatusNotTrigger || string(status) == monitor_model.WarnStatusSendTrigger {
 					return false
 				}
 
 			}
-		case model.WarnStatusSendTrigger:
+		case monitor_model.WarnStatusSendTrigger:
 			//已触发则表示当前分钟不可以再触发告警了
 			return false
 		}
@@ -625,7 +632,7 @@ func (mon *monitorWarn) isSendTo(ctx context.Context, t time.Time, strategy *mod
 	return true
 }
 
-func (mon *monitorWarn) setWarnNum(ctx context.Context, t time.Time, strategy *model.WarnStrategy) {
+func (mon *monitorWarn) setWarnNum(ctx context.Context, t time.Time, strategy *monitor_model.WarnStrategy) {
 	if strategy.WarnStrategyConfig.HourMax <= 0 {
 		return
 	}
@@ -637,7 +644,7 @@ func (mon *monitorWarn) setWarnNum(ctx context.Context, t time.Time, strategy *m
 
 }
 
-func (mon *monitorWarn) setWarnMinuteStatus(ctx context.Context, t time.Time, strategy *model.WarnStrategy, status string) {
+func (mon *monitorWarn) setWarnMinuteStatus(ctx context.Context, t time.Time, strategy *monitor_model.WarnStrategy, status string) {
 	if strategy.WarnStrategyConfig.Continuity <= 0 {
 		return
 	}
@@ -648,7 +655,7 @@ func (mon *monitorWarn) setWarnMinuteStatus(ctx context.Context, t time.Time, st
 }
 
 // 获取%比较数据 isRingRatio==true查询环比数据  否则查询同比数据
-func (mon *monitorWarn) getCompare(ctx context.Context, namespaceId int, values []string, startTime, endTime time.Time, strategy *model.WarnStrategy, isRingRatio bool) (float64, error) {
+func (mon *monitorWarn) getCompare(ctx context.Context, namespaceId int, values []string, startTime, endTime time.Time, strategy *monitor_model.WarnStrategy, isRingRatio bool) (float64, error) {
 
 	//环比取上个时间段的数据
 	if isRingRatio {
@@ -665,19 +672,19 @@ func (mon *monitorWarn) getCompare(ctx context.Context, namespaceId int, values 
 	maps, _ := mon.commonCache.HGetAll(ctx, redisKey)
 	if len(maps) == 0 { //重新查一次
 
-		wheres := make([]model.MonWhereItem, 0)
+		wheres := make([]monitor_model.MonWhereItem, 0)
 
 		group := strategy.Dimension
 		whereKey := strategy.Dimension
 		//分区查该分区下的集群 所有group为cluster
-		if strategy.Dimension == model.DimensionTypePartition {
-			group = model.DimensionTypeCluster
-			whereKey = model.DimensionTypeCluster
-		} else if strategy.Dimension == model.DimensionTypeService {
+		if strategy.Dimension == monitor_model.DimensionTypePartition {
+			group = monitor_model.DimensionTypeCluster
+			whereKey = monitor_model.DimensionTypeCluster
+		} else if strategy.Dimension == monitor_model.DimensionTypeService {
 			whereKey = "upstream"
 		}
 
-		wheres = append(wheres, model.MonWhereItem{
+		wheres = append(wheres, monitor_model.MonWhereItem{
 			Key:       whereKey,
 			Operation: "in",
 			Values:    values,
@@ -688,7 +695,7 @@ func (mon *monitorWarn) getCompare(ctx context.Context, namespaceId int, values 
 			return 0, err
 		}
 
-		if strategy.Dimension == model.DimensionTypePartition {
+		if strategy.Dimension == monitor_model.DimensionTypePartition {
 			targetValue := 0.0
 			count := 0
 			for _, value := range values {
@@ -699,7 +706,7 @@ func (mon *monitorWarn) getCompare(ctx context.Context, namespaceId int, values 
 
 			}
 			switch strategy.Quota {
-			case model.QuotaTypeReqFailRate, model.QuotaTypeProxyFailRate, model.QuotaTypeAvgResp:
+			case monitor_model.QuotaTypeReqFailRate, monitor_model.QuotaTypeProxyFailRate, monitor_model.QuotaTypeAvgResp:
 				targetValue = targetValue / float64(count)
 			}
 			return targetValue, nil
@@ -708,7 +715,7 @@ func (mon *monitorWarn) getCompare(ctx context.Context, namespaceId int, values 
 		return statistics[values[0]], nil
 	}
 
-	if strategy.Dimension == model.DimensionTypePartition {
+	if strategy.Dimension == monitor_model.DimensionTypePartition {
 		for _, value := range values {
 
 			count := 0
@@ -720,7 +727,7 @@ func (mon *monitorWarn) getCompare(ctx context.Context, namespaceId int, values 
 			}
 
 			switch strategy.Quota {
-			case model.QuotaTypeReqFailRate, model.QuotaTypeProxyFailRate, model.QuotaTypeAvgResp:
+			case monitor_model.QuotaTypeReqFailRate, monitor_model.QuotaTypeProxyFailRate, monitor_model.QuotaTypeAvgResp:
 				targetValue = targetValue / float64(count)
 			}
 			return targetValue, nil
@@ -735,7 +742,7 @@ func (mon *monitorWarn) getCompare(ctx context.Context, namespaceId int, values 
 	return 0, nil
 }
 
-func (mon *monitorWarn) getClustersByPartitionUuid(ctx context.Context, namespaceId int, partitionUuid string) (clusterNameMaps map[string]*model.Cluster, clusterUuidMaps map[string]*model.Cluster, err error) {
+func (mon *monitorWarn) getClustersByPartitionUuid(ctx context.Context, namespaceId int, partitionUuid string) (clusterNameMaps map[string]*cluster_model.Cluster, clusterUuidMaps map[string]*cluster_model.Cluster, err error) {
 	partitionInfo, err := mon.monitorService.PartitionInfo(ctx, namespaceId, partitionUuid)
 	if err != nil {
 		log.Errorf("monitorWarn-monitorService.PartitionInfo err=%s", err.Error())
@@ -748,18 +755,18 @@ func (mon *monitorWarn) getClustersByPartitionUuid(ctx context.Context, namespac
 		return nil, nil, err
 	}
 
-	clusterNameMaps = common.SliceToMap(clusters, func(t *model.Cluster) string {
+	clusterNameMaps = common.SliceToMap(clusters, func(t *cluster_model.Cluster) string {
 		return t.Name
 	})
 
-	clusterUuidMaps = common.SliceToMap(clusters, func(t *model.Cluster) string {
+	clusterUuidMaps = common.SliceToMap(clusters, func(t *cluster_model.Cluster) string {
 		return t.UUID
 	})
 
 	return
 }
 
-func (mon *monitorWarn) getSourceInfo(ctx context.Context, namespaceId int) (apiMaps map[string]*apimodel.APIInfo, serviceMaps map[string]*upstream_model.ServiceListItem, noticeChannelMap map[string]*model.NoticeChannel, err error) {
+func (mon *monitorWarn) getSourceInfo(ctx context.Context, namespaceId int) (apiMaps map[string]*apimodel.APIInfo, serviceMaps map[string]*upstream_model.ServiceListItem, noticeChannelMap map[string]*notice_model.NoticeChannel, err error) {
 	errGroup, _ := errgroup.WithContext(ctx)
 
 	errGroup.Go(func() error {
@@ -792,7 +799,7 @@ func (mon *monitorWarn) getSourceInfo(ctx context.Context, namespaceId int) (api
 			return err
 		}
 
-		noticeChannelMap = common.SliceToMap(channelList, func(t *model.NoticeChannel) string {
+		noticeChannelMap = common.SliceToMap(channelList, func(t *notice_model.NoticeChannel) string {
 			return t.Name
 		})
 
@@ -807,19 +814,19 @@ func (mon *monitorWarn) getSourceInfo(ctx context.Context, namespaceId int) (api
 }
 
 // 获取实际的告警目标
-func (mon *monitorWarn) getRealTargetValues(apiMaps map[string]*apimodel.APIInfo, serviceMaps map[string]*upstream_model.ServiceListItem, clusterMaps map[string]*model.Cluster, dimension, rule string, oldValues []string) []string {
+func (mon *monitorWarn) getRealTargetValues(apiMaps map[string]*apimodel.APIInfo, serviceMaps map[string]*upstream_model.ServiceListItem, clusterMaps map[string]*cluster_model.Cluster, dimension, rule string, oldValues []string) []string {
 	values := make([]string, 0)
 	switch dimension {
-	case model.DimensionTypeApi:
+	case monitor_model.DimensionTypeApi:
 		switch rule {
-		case model.RuleTypeUnlimited: //不限（查询所有的）
+		case monitor_model.RuleTypeUnlimited: //不限（查询所有的）
 			for uuid := range apiMaps {
 				values = append(values, uuid)
 			}
 			return values
-		case model.RuleTypeContain: //包含
+		case monitor_model.RuleTypeContain: //包含
 			return oldValues
-		case model.RuleTypeNotContain: //不包含
+		case monitor_model.RuleTypeNotContain: //不包含
 			tempMaps := common.CopyMaps(apiMaps)
 			for _, value := range oldValues {
 				if _, ok := tempMaps[value]; ok {
@@ -831,16 +838,16 @@ func (mon *monitorWarn) getRealTargetValues(apiMaps map[string]*apimodel.APIInfo
 			}
 			return values
 		}
-	case model.DimensionTypeService:
+	case monitor_model.DimensionTypeService:
 		switch rule {
-		case model.RuleTypeUnlimited: //不限（查询所有的）
+		case monitor_model.RuleTypeUnlimited: //不限（查询所有的）
 			for uuid := range serviceMaps {
 				values = append(values, uuid)
 			}
 			return values
-		case model.RuleTypeContain: //包含
+		case monitor_model.RuleTypeContain: //包含
 			return oldValues
-		case model.RuleTypeNotContain: //不包含
+		case monitor_model.RuleTypeNotContain: //不包含
 			tempMaps := common.CopyMaps(serviceMaps)
 			for _, value := range oldValues {
 				if _, ok := tempMaps[value]; ok {
@@ -852,14 +859,14 @@ func (mon *monitorWarn) getRealTargetValues(apiMaps map[string]*apimodel.APIInfo
 			}
 			return values
 		}
-	case model.DimensionTypeCluster:
+	case monitor_model.DimensionTypeCluster:
 		for _, value := range oldValues {
 			if cluster, ok := clusterMaps[value]; ok {
 				values = append(values, cluster.UUID)
 			}
 		}
 		return values
-	case model.DimensionTypePartition:
+	case monitor_model.DimensionTypePartition:
 		for _, cluster := range clusterMaps {
 			values = append(values, cluster.UUID)
 		}
@@ -868,7 +875,7 @@ func (mon *monitorWarn) getRealTargetValues(apiMaps map[string]*apimodel.APIInfo
 	return nil
 }
 
-func getContent(val model.NoticeChannelWarn, isHtml bool) string {
+func getContent(val monitor_model.NoticeChannelWarn, isHtml bool) string {
 	warnFrequency := fmt.Sprintf("%d分钟", val.Every)
 	if val.Every == 60 {
 		warnFrequency = "1小时"
@@ -888,8 +895,8 @@ func getContent(val model.NoticeChannelWarn, isHtml bool) string {
 		case "kb":
 			unitStr = "kb"
 		}
-		compare := model.CompareValue[condition.Compare]
-		quota := model.QuotaRuleMap[val.Quota]
+		compare := monitor_model.CompareValue[condition.Compare]
+		quota := monitor_model.QuotaRuleMap[val.Quota]
 		conditionValue := common.FloatToString(condition.Value)
 		realValue := common.FloatToString(condition.RealValue)
 		if i == 0 {
@@ -920,11 +927,11 @@ func getContent(val model.NoticeChannelWarn, isHtml bool) string {
 	return content
 }
 
-func formatWarnEmailMsg(title, dimension string, t time.Time, list []model.NoticeChannelWarn) string {
+func formatWarnEmailMsg(title, dimension string, t time.Time, list []monitor_model.NoticeChannelWarn) string {
 
 	thead := ``
 	tbody := ``
-	if dimension == model.DimensionTypeApi {
+	if dimension == monitor_model.DimensionTypeApi {
 		thead = fmt.Sprintf(`<thead>
           <tr>
             <th>告警策略名称</th>
@@ -954,9 +961,9 @@ func formatWarnEmailMsg(title, dimension string, t time.Time, list []model.Notic
         </tbody>`, tr)
 	} else {
 		dimensionVal := ""
-		if dimension == model.DimensionTypeService {
+		if dimension == monitor_model.DimensionTypeService {
 			dimensionVal = "上游"
-		} else if dimension == model.DimensionTypeCluster || dimension == model.DimensionTypePartition {
+		} else if dimension == monitor_model.DimensionTypeCluster || dimension == monitor_model.DimensionTypePartition {
 			dimensionVal = "集群"
 		}
 		thead = fmt.Sprintf(`<thead>
@@ -1098,11 +1105,11 @@ func formatWarnEmailMsg(title, dimension string, t time.Time, list []model.Notic
 	return html
 }
 
-func formatWarnWebhookMsg(title, _ string, t time.Time, list []model.NoticeChannelWarn) string {
-	webhookMsg := make([]model.MsgWebhook, 0)
+func formatWarnWebhookMsg(title, _ string, t time.Time, list []monitor_model.NoticeChannelWarn) string {
+	webhookMsg := make([]monitor_model.MsgWebhook, 0)
 	for _, warn := range list {
 
-		webhookMsg = append(webhookMsg, model.MsgWebhook{
+		webhookMsg = append(webhookMsg, monitor_model.MsgWebhook{
 			Title:   title,
 			Name:    warn.Name,
 			Url:     warn.Url,

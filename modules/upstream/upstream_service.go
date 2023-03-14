@@ -4,7 +4,8 @@ import (
 	"context"
 	"github.com/eolinker/apinto-dashboard/dto/service-dto"
 	"github.com/eolinker/apinto-dashboard/entry/upstream-entry"
-	"github.com/eolinker/apinto-dashboard/model"
+	"github.com/eolinker/apinto-dashboard/model/frontend-model"
+	"github.com/eolinker/apinto-dashboard/model/openapi-model"
 	upstream_model "github.com/eolinker/apinto-dashboard/modules/upstream/model"
 )
 
@@ -18,13 +19,13 @@ type IService interface {
 	DeleteService(ctx context.Context, namespaceID, userId int, serviceName string) error
 	GetServiceEnum(ctx context.Context, namespaceID int, searchName string) ([]string, error)
 	OnlineList(ctx context.Context, namespaceId int, serviceName string) ([]*upstream_model.ServiceOnline, error)
-	OnlineService(ctx context.Context, namespaceId, operator int, serviceName, clusterName string) (*model.Router, error)
+	OnlineService(ctx context.Context, namespaceId, operator int, serviceName, clusterName string) (*frontend_model.Router, error)
 	OfflineService(ctx context.Context, namespaceId, operator int, serviceName, clusterName string) error
 	GetServiceIDByName(ctx context.Context, namespaceId int, serviceName string) (int, error)
 	GetLatestServiceVersion(ctx context.Context, serviceID int) (*upstream_entry.ServiceVersion, error)
 	GetServiceSchemaInfo(ctx context.Context, serviceID int) (*upstream_entry.Service, error)
 	IsOnline(ctx context.Context, clusterId, serviceId int) bool
-	GetServiceRemoteOptions(ctx context.Context, namespaceID, pageNum, pageSize int, keyword string) ([]*model.RemoteServices, int, error)
-	GetServiceRemoteByNames(ctx context.Context, namespaceID int, uuids []string) ([]*model.RemoteServices, error)
+	GetServiceRemoteOptions(ctx context.Context, namespaceID, pageNum, pageSize int, keyword string) ([]*openapi_model.RemoteServices, int, error)
+	GetServiceRemoteByNames(ctx context.Context, namespaceID int, uuids []string) ([]*openapi_model.RemoteServices, error)
 	ResetOnline(ctx context.Context, namespaceId, clusterId int)
 }

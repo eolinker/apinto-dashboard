@@ -12,40 +12,44 @@ import (
 	"github.com/eolinker/apinto-dashboard/entry/user-entry"
 	"github.com/eolinker/apinto-dashboard/mocks/mock_cache"
 	"github.com/eolinker/apinto-dashboard/mocks/mock_service"
-	"github.com/eolinker/apinto-dashboard/model"
+	"github.com/eolinker/apinto-dashboard/model/cluster-model"
+	"github.com/eolinker/apinto-dashboard/model/monitor-model"
+	"github.com/eolinker/apinto-dashboard/model/namespace-model"
+	"github.com/eolinker/apinto-dashboard/model/notice-model"
+	"github.com/eolinker/apinto-dashboard/model/user-model"
 	"github.com/golang/mock/gomock"
 	"net/http"
 	"testing"
 	"time"
 )
 
-func warnStrategyAll(ctx context.Context, namespaceId, partitionId int, partitionUUID string, channelUuids, targetValues []string, userId []int) []*model.WarnStrategy {
+func warnStrategyAll(ctx context.Context, namespaceId, partitionId int, partitionUUID string, channelUuids, targetValues []string, userId []int) []*monitor_model.WarnStrategy {
 
-	warnStrategyConfigRule := make([]*model.WarnStrategyConfigRule, 0)
-	warnStrategyConfigRuleCondition := make([]*model.WarnStrategyConfigRuleCondition, 0)
+	warnStrategyConfigRule := make([]*monitor_model.WarnStrategyConfigRule, 0)
+	warnStrategyConfigRuleCondition := make([]*monitor_model.WarnStrategyConfigRuleCondition, 0)
 
-	warnStrategyConfigRuleCondition = append(warnStrategyConfigRuleCondition, &model.WarnStrategyConfigRuleCondition{
+	warnStrategyConfigRuleCondition = append(warnStrategyConfigRuleCondition, &monitor_model.WarnStrategyConfigRuleCondition{
 		Compare: ">",
 		Unit:    "%",
 		Value:   1.01,
 	})
 
-	warnStrategyConfigRule = append(warnStrategyConfigRule, &model.WarnStrategyConfigRule{
+	warnStrategyConfigRule = append(warnStrategyConfigRule, &monitor_model.WarnStrategyConfigRule{
 		ChannelUuids: channelUuids,
 		Condition:    warnStrategyConfigRuleCondition,
 	})
-	warnStrategies := make([]*model.WarnStrategy, 0)
-	warnStrategies = append(warnStrategies, &model.WarnStrategy{
+	warnStrategies := make([]*monitor_model.WarnStrategy, 0)
+	warnStrategies = append(warnStrategies, &monitor_model.WarnStrategy{
 		PartitionId: partitionId,
 		NamespaceId: namespaceId,
 		Uuid:        partitionUUID,
 		Title:       "partition告警策略1",
 		IsEnable:    true,
 		Dimension:   "partition",
-		Quota:       model.QuotaTypeReqFailRate,
+		Quota:       monitor_model.QuotaTypeReqFailRate,
 		Every:       3,
-		WarnStrategyConfig: &model.WarnStrategyConfig{
-			Target: model.WarnStrategyConfigTarget{
+		WarnStrategyConfig: &monitor_model.WarnStrategyConfig{
+			Target: monitor_model.WarnStrategyConfigTarget{
 				Rule: "unlimited",
 				//Values: targetValues,
 			},
@@ -88,8 +92,8 @@ func warnPartitionStatistics() map[string]float64 {
 	return m
 }
 
-func partitionInfo(clusterNames []string) *model.MonPartitionInfo {
-	return &model.MonPartitionInfo{
+func partitionInfo(clusterNames []string) *monitor_model.MonPartitionInfo {
+	return &monitor_model.MonPartitionInfo{
 		Id:           1,
 		Name:         "zzy",
 		SourceType:   "",
@@ -99,10 +103,10 @@ func partitionInfo(clusterNames []string) *model.MonPartitionInfo {
 	}
 }
 
-func userInfoAll(userId []int) []*model.UserInfo {
-	list := make([]*model.UserInfo, 0)
+func userInfoAll(userId []int) []*user_model.UserInfo {
+	list := make([]*user_model.UserInfo, 0)
 	for _, id := range userId {
-		list = append(list, &model.UserInfo{
+		list = append(list, &user_model.UserInfo{
 			UserInfo: &user_entry.UserInfo{
 				Id:           id,
 				Sex:          1,
@@ -116,10 +120,10 @@ func userInfoAll(userId []int) []*model.UserInfo {
 	return list
 }
 
-func getClustersNames(names []string) []*model.Cluster {
-	list := make([]*model.Cluster, 0)
+func getClustersNames(names []string) []*cluster_model.Cluster {
+	list := make([]*cluster_model.Cluster, 0)
 	for i, name := range names {
-		list = append(list, &model.Cluster{
+		list = append(list, &cluster_model.Cluster{
 			Cluster: &cluster_entry.Cluster{
 				Id:          i + 1,
 				NamespaceId: 1,
@@ -153,15 +157,15 @@ func getServiceList() []*upstream_model.ServiceListItem {
 	return nil
 }
 
-func getNoticeChannel(channelUuids []string) []*model.NoticeChannel {
-	list := make([]*model.NoticeChannel, 0)
+func getNoticeChannel(channelUuids []string) []*notice_model.NoticeChannel {
+	list := make([]*notice_model.NoticeChannel, 0)
 	for i, uuid := range channelUuids {
 
 		title := "email"
 		if i+1 == 1 {
 			title = "webhook"
 		}
-		list = append(list, &model.NoticeChannel{
+		list = append(list, &notice_model.NoticeChannel{
 			Id:    i + 1,
 			Name:  uuid,
 			Title: title,
@@ -197,11 +201,11 @@ func Test_newMonitorWarn(t *testing.T) {
 	startTime := endTime.Add(-time.Minute * time.Duration(3))
 
 	statisticsService := mock_service.NewMockIMonitorStatistics(ctl)
-	statisticsService.EXPECT().WarnStatistics(ctx, namespaceId, partitionUUID, startTime, endTime, "cluster", model.QuotaTypeReqFailRate, nil).Return(warnPartitionStatistics(), nil)
+	statisticsService.EXPECT().WarnStatistics(ctx, namespaceId, partitionUUID, startTime, endTime, "cluster", monitor_model.QuotaTypeReqFailRate, nil).Return(warnPartitionStatistics(), nil)
 
 	namespaceService := mock_service.NewMockINamespaceService(ctl)
-	namespaces := make([]*model.Namespace, 0)
-	namespaces = append(namespaces, &model.Namespace{Namespace: &namespace_entry.Namespace{
+	namespaces := make([]*namespace_model.Namespace, 0)
+	namespaces = append(namespaces, &namespace_model.Namespace{Namespace: &namespace_entry.Namespace{
 		Id:   1,
 		Name: "default",
 	}})
@@ -220,7 +224,7 @@ func Test_newMonitorWarn(t *testing.T) {
 
 	warnHistoryService := mock_service.NewMockIWarnHistoryService(ctl)
 
-	warnHistoryService.EXPECT().Create(ctx, namespaceId, partitionId, &model.WarnHistoryInfo{}).Return(nil)
+	warnHistoryService.EXPECT().Create(ctx, namespaceId, partitionId, &monitor_model.WarnHistoryInfo{}).Return(nil)
 
 	apiService := mock_service.NewMockIAPIService(ctl)
 	apiService.EXPECT().GetAPIInfoAll(ctx, namespaceId).Return(getApiList(apiIds), nil)

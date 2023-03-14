@@ -1,7 +1,7 @@
 package apimodel
 
 import (
-	"github.com/eolinker/apinto-dashboard/model"
+	"github.com/eolinker/apinto-dashboard/model/frontend-model"
 	api_entry "github.com/eolinker/apinto-dashboard/modules/api/api-entry"
 	"time"
 )
@@ -33,7 +33,7 @@ type BatchOnlineCheckListItem struct {
 	ClusterEnv  string
 	Status      bool
 	Result      string
-	Solution    *model.Router
+	Solution    *frontend_model.Router
 }
 
 type BatchListItem struct {
