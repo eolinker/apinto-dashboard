@@ -2,11 +2,10 @@ package upstream
 
 import (
 	"context"
-	"github.com/eolinker/apinto-dashboard/dto/service-dto"
-	"github.com/eolinker/apinto-dashboard/entry/upstream-entry"
-	"github.com/eolinker/apinto-dashboard/model/frontend-model"
-	"github.com/eolinker/apinto-dashboard/model/openapi-model"
+	"github.com/eolinker/apinto-dashboard/modules/base/frontend-model"
+	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-model"
 	upstream_model "github.com/eolinker/apinto-dashboard/modules/upstream/model"
+	upstream_entry2 "github.com/eolinker/apinto-dashboard/modules/upstream/upstream-entry"
 )
 
 type IService interface {
@@ -14,18 +13,18 @@ type IService interface {
 	GetServiceListByNames(ctx context.Context, namespaceID int, names []string) ([]*upstream_model.ServiceListItem, error)
 	GetServiceListAll(ctx context.Context, namespaceID int) ([]*upstream_model.ServiceListItem, error)
 	GetServiceInfo(ctx context.Context, namespaceID int, serviceName string) (*upstream_model.ServiceInfo, error)
-	CreateService(ctx context.Context, namespaceID, userId int, input *service_dto.ServiceInfo, variableList []string) (int, error)
-	UpdateService(ctx context.Context, namespaceID, userId int, input *service_dto.ServiceInfo, variableList []string) error
+	CreateService(ctx context.Context, namespaceID, userId int, input *dto.ServiceInfo, variableList []string) (int, error)
+	UpdateService(ctx context.Context, namespaceID, userId int, input *dto.ServiceInfo, variableList []string) error
 	DeleteService(ctx context.Context, namespaceID, userId int, serviceName string) error
 	GetServiceEnum(ctx context.Context, namespaceID int, searchName string) ([]string, error)
 	OnlineList(ctx context.Context, namespaceId int, serviceName string) ([]*upstream_model.ServiceOnline, error)
 	OnlineService(ctx context.Context, namespaceId, operator int, serviceName, clusterName string) (*frontend_model.Router, error)
 	OfflineService(ctx context.Context, namespaceId, operator int, serviceName, clusterName string) error
 	GetServiceIDByName(ctx context.Context, namespaceId int, serviceName string) (int, error)
-	GetLatestServiceVersion(ctx context.Context, serviceID int) (*upstream_entry.ServiceVersion, error)
-	GetServiceSchemaInfo(ctx context.Context, serviceID int) (*upstream_entry.Service, error)
+	GetLatestServiceVersion(ctx context.Context, serviceID int) (*upstream_entry2.ServiceVersion, error)
+	GetServiceSchemaInfo(ctx context.Context, serviceID int) (*upstream_entry2.Service, error)
 	IsOnline(ctx context.Context, clusterId, serviceId int) bool
-	GetServiceRemoteOptions(ctx context.Context, namespaceID, pageNum, pageSize int, keyword string) ([]*openapi_model.RemoteServices, int, error)
-	GetServiceRemoteByNames(ctx context.Context, namespaceID int, uuids []string) ([]*openapi_model.RemoteServices, error)
+	GetServiceRemoteOptions(ctx context.Context, namespaceID, pageNum, pageSize int, keyword string) ([]*strategy_model.RemoteServices, int, error)
+	GetServiceRemoteByNames(ctx context.Context, namespaceID int, uuids []string) ([]*strategy_model.RemoteServices, error)
 	ResetOnline(ctx context.Context, namespaceId, clusterId int)
 }

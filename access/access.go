@@ -113,8 +113,6 @@ func GetAllModulesConfig() []*ModuleItem {
 	return allModules
 }
 
-var ModuleMap = map[string]struct{}{}
-
 // getAccessItems 转化成前端所需要的权限列表
 func getAccessItems(modules []*AccessConfigItem, depth, parent int) ([]*GlobalAccess, []Access) {
 	items := make([]*GlobalAccess, len(modules))
@@ -126,7 +124,6 @@ func getAccessItems(modules []*AccessConfigItem, depth, parent int) ([]*GlobalAc
 			Module: module.Module,
 			Parent: parent,
 		}
-		ModuleMap[module.Module] = struct{}{}
 
 		moduleItem := &ModuleItem{
 			ID:         module.ID,

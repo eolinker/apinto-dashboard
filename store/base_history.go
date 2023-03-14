@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/eolinker/apinto-dashboard/common"
-	"github.com/eolinker/apinto-dashboard/entry/history-entry"
+	"github.com/eolinker/apinto-dashboard/modules/base/history-entry"
 	"time"
 )
 

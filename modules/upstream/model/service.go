@@ -1,7 +1,7 @@
 package upstream_model
 
 import (
-	"github.com/eolinker/apinto-dashboard/entry/upstream-entry"
+	"github.com/eolinker/apinto-dashboard/modules/upstream/upstream-entry"
 	"time"
 )
 

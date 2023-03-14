@@ -3,10 +3,10 @@ package driver
 import (
 	"errors"
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
-	"github.com/eolinker/apinto-dashboard/entry/cluster-entry"
 	"github.com/eolinker/apinto-dashboard/modules/api/api-dto"
 	api_entry "github.com/eolinker/apinto-dashboard/modules/api/api-entry"
 	apimodel "github.com/eolinker/apinto-dashboard/modules/api/model"
+	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-entry"
 )
 
 const (

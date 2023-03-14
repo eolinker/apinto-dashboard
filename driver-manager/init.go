@@ -33,15 +33,9 @@ func init() {
 	apiHttp := driver.CreateAPIHttp("http")
 	apiDriverManager.RegisterDriver(driver.DriverApiHTTP, apiHttp)
 
-	//strategyDriverManager := newStrategyDriverManager()
-	//traffic := driver.CreateTraffic("limiting")
-	//strategyDriverManager.registerDriver(enum.StrategyTraffic, traffic)
-
 	clConfigDriverManager := newCLConfigDriverManager()
 	redisDriver := driver.CreateRedis("redis")
-	influxv2Driver := driver.CreateInfluxV2("influxdbv2")
 	clConfigDriverManager.RegisterDriver(enum.CLConfigRedis, redisDriver)
-	clConfigDriverManager.RegisterDriver(enum.CLConfigInfluxV2, influxv2Driver)
 
 	//同步api文档格式管理器
 	apiSyncFormatManager := newAPISyncFormatManager()
@@ -50,20 +44,11 @@ func init() {
 	apiSyncFormatManager.RegisterDriver(openAPI3, openAPI3Driver)
 	apiSyncFormatManager.RegisterDriver(swagger2, openAPI2Driver)
 
-	//监控数据源管理器
-	monitorSources := newMonitorManager()
-	monInflux2 := driver.CreateMonitorInfluxV2(monitorInflux2)
-	monitorSources.RegisterDriver(monitorInflux2, monInflux2)
-
-	//渠道通知管理器
-	channelDriverManager := newNoticeChannelDriverManager()
-
 	bean.Injection(&discoveryDriverManager)
 	bean.Injection(&authDriverManager)
 	bean.Injection(&staticService)
 	bean.Injection(&apiDriverManager)
 	bean.Injection(&clConfigDriverManager)
 	bean.Injection(&apiSyncFormatManager)
-	bean.Injection(&monitorSources)
-	bean.Injection(&channelDriverManager)
+
 }

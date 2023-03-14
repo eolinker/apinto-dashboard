@@ -53,7 +53,7 @@ func (r *redisCache[T]) Delete(ctx context.Context, keys ...string) error {
 	return nil
 }
 
-func createRedisCache[T any](client *redis.ClusterClient) *redisCache[T] {
+func CreateRedisCache[T any](client *redis.ClusterClient) IRedisCache[T] {
 	return &redisCache[T]{
 		client:    client,
 		keyPrefix: "apinto-dashboard:",

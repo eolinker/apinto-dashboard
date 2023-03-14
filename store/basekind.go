@@ -2,8 +2,8 @@ package store
 
 import (
 	"context"
-	"github.com/eolinker/apinto-dashboard/entry/runtime-entry"
-	"github.com/eolinker/apinto-dashboard/entry/stat-entry"
+	"github.com/eolinker/apinto-dashboard/modules/base/runtime-entry"
+	"github.com/eolinker/apinto-dashboard/modules/base/stat-entry"
 	"gorm.io/gorm"
 )
 
