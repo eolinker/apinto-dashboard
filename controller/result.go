@@ -1,4 +1,4 @@
-package dto
+package controller
 
 const (
 	ordinaryCode            = -1 //常规错误(参数错误、sql错误、业务逻辑错误等)

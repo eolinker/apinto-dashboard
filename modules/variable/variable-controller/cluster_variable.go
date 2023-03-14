@@ -6,7 +6,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
-	"github.com/eolinker/apinto-dashboard/dto"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	cluster_dto2 "github.com/eolinker/apinto-dashboard/modules/cluster/cluster-dto"
@@ -48,7 +47,7 @@ func (c *clusterVariableController) gets(ginCtx *gin.Context) {
 
 	variables, err := c.clusterVariableService.GetList(ginCtx, namespaceID, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("Get ClusterlVariable List fail. err: %s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Get ClusterlVariable List fail. err: %s", err.Error())))
 		return
 	}
 	list := make([]*cluster_dto2.ClusterVariableItem, 0, len(variables))
@@ -68,7 +67,7 @@ func (c *clusterVariableController) gets(ginCtx *gin.Context) {
 		})
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(map[string]interface{}{"variables": list}))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(map[string]interface{}{"variables": list}))
 }
 
 // post 新建
@@ -79,18 +78,18 @@ func (c *clusterVariableController) post(ginCtx *gin.Context) {
 	item := &cluster_dto2.ClusterVariableItem{}
 
 	if err := ginCtx.BindJSON(item); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
 	userId := controller.GetUserId(ginCtx)
 
 	if err := c.clusterVariableService.Create(ginCtx, namespaceID, clusterName, userId, item.Key, item.Value, item.Desc); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("Create ClusterlVariable fail. err: %s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Create ClusterlVariable fail. err: %s", err.Error())))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
 // put 修改
@@ -98,7 +97,7 @@ func (c *clusterVariableController) put(ginCtx *gin.Context) {
 	clusterName := ginCtx.Param("cluster_name")
 	key := ginCtx.Query("key")
 	if key == "" {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("Alter ClusterVariable fail. err: key can't be nil. ")))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Alter ClusterVariable fail. err: key can't be nil. ")))
 		return
 	}
 
@@ -107,18 +106,18 @@ func (c *clusterVariableController) put(ginCtx *gin.Context) {
 	item := &cluster_dto2.ClusterVariableItem{}
 
 	if err := ginCtx.BindJSON(item); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
 	userId := controller.GetUserId(ginCtx)
 	err := c.clusterVariableService.Update(ginCtx, namespaceID, clusterName, userId, key, item.Value)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
 // del 删除
@@ -126,7 +125,7 @@ func (c *clusterVariableController) del(ginCtx *gin.Context) {
 	clusterName := ginCtx.Param("cluster_name")
 	key := ginCtx.Query("key")
 	if key == "" {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("Delete ClusterVariable fail. err: key can't be nil. ")))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Delete ClusterVariable fail. err: key can't be nil. ")))
 		return
 	}
 	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
@@ -134,11 +133,11 @@ func (c *clusterVariableController) del(ginCtx *gin.Context) {
 
 	err := c.clusterVariableService.Delete(ginCtx, namespaceID, clusterName, userId, key)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("Delete ClusterVariable fail. err: %s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Delete ClusterVariable fail. err: %s", err.Error())))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
 // updateHistory 变更历史
@@ -158,7 +157,7 @@ func (c *clusterVariableController) updateHistory(ginCtx *gin.Context) {
 
 	history, total, err := c.clusterVariableService.QueryHistory(ginCtx, namespaceId, pageNum, pageSize, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
@@ -181,7 +180,7 @@ func (c *clusterVariableController) updateHistory(ginCtx *gin.Context) {
 	m["historys"] = list
 	m["total"] = total
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(m))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
 }
 
 // syncConf 同步配置
@@ -191,20 +190,20 @@ func (c *clusterVariableController) syncConf(ginCtx *gin.Context) {
 
 	conf := new(cluster_dto2.SyncConf)
 	if err := ginCtx.BindJSON(conf); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
 	if len(conf.Clusters) == 0 || len(conf.Variables) == 0 {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult("clusters or variables is null"))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("clusters or variables is null"))
 		return
 	}
 	userId := controller.GetUserId(ginCtx)
 	if err := c.clusterVariableService.SyncConf(ginCtx, namespaceId, userId, clusterName, conf); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 
 }
 
@@ -216,7 +215,7 @@ func (c *clusterVariableController) toPublishs(ginCtx *gin.Context) {
 	background := ginCtx
 	list, err := c.clusterVariableService.ToPublishs(background, namespaceId, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
@@ -241,7 +240,7 @@ func (c *clusterVariableController) toPublishs(ginCtx *gin.Context) {
 
 	globalVariables, err := c.clusterVariableService.GetList(background, namespaceId, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
@@ -265,7 +264,7 @@ func (c *clusterVariableController) toPublishs(ginCtx *gin.Context) {
 
 	m["version_name"] = time.Now().Format("20060102150405") + "-release"
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(m))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
 
 }
 
@@ -276,18 +275,18 @@ func (c *clusterVariableController) publish(ginCtx *gin.Context) {
 
 	input := &cluster_dto2.VariablePublishInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 	if input.VersionName == "" || input.Source == "" {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult("parameter error"))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("parameter error"))
 		return
 	}
 	background := ginCtx
 
 	globalVariables, err := c.clusterVariableService.GetList(background, namespaceId, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
@@ -300,16 +299,16 @@ func (c *clusterVariableController) publish(ginCtx *gin.Context) {
 
 	if len(defectKeys) > 0 {
 		msg := fmt.Sprintf("key为%s的环境变量处于缺失状态不可发布", strings.Join(defectKeys, ","))
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(msg))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(msg))
 		return
 	}
 
 	userId := controller.GetUserId(ginCtx)
 	if err = c.clusterVariableService.Publish(background, namespaceId, userId, clusterName, input.VersionName, input.Desc, input.Source); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
 // publishHistory 发布历史
@@ -330,7 +329,7 @@ func (c *clusterVariableController) publishHistory(ginCtx *gin.Context) {
 
 	list, total, err := c.clusterVariableService.PublishHistory(ginCtx, namespaceId, pageNum, pageSize, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
@@ -359,7 +358,7 @@ func (c *clusterVariableController) publishHistory(ginCtx *gin.Context) {
 	m := common.Map[string, interface{}]{}
 	m["historys"] = historys
 	m["total"] = total
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(m))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
 
 }
 
@@ -368,7 +367,7 @@ func (c *clusterVariableController) getSyncConf(ginCtx *gin.Context) {
 	clusterName := ginCtx.Param("cluster_name")
 	conf, err := c.clusterVariableService.GetSyncConf(ginCtx, namespaceId, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 	syncConf := new(cluster_dto2.SyncConf)
@@ -391,5 +390,5 @@ func (c *clusterVariableController) getSyncConf(ginCtx *gin.Context) {
 	m := common.Map[string, interface{}]{}
 	m["info"] = syncConf
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(m))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
 }

@@ -2,7 +2,7 @@ package strategy_controller
 
 import (
 	"github.com/eolinker/apinto-dashboard/common"
-	"github.com/eolinker/apinto-dashboard/dto"
+	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/strategy"
@@ -34,7 +34,7 @@ func (s *strategyCommonController) filterOptions(ginCtx *gin.Context) {
 
 	options, err := s.strategyService.GetFilterOptions(ginCtx, namespaceId)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
@@ -51,7 +51,7 @@ func (s *strategyCommonController) filterOptions(ginCtx *gin.Context) {
 
 	data := common.Map[string, interface{}]{}
 	data["options"] = resList
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(data))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
 
 func (s *strategyCommonController) filterRemote(ginCtx *gin.Context) {
@@ -70,7 +70,7 @@ func (s *strategyCommonController) filterRemote(ginCtx *gin.Context) {
 
 	remote, count, err := s.strategyService.GetFilterRemote(ginCtx, namespaceId, name, keyword, groupUUID, pageNum, pageSize)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
@@ -83,14 +83,14 @@ func (s *strategyCommonController) filterRemote(ginCtx *gin.Context) {
 		Total:        count,
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(res))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(res))
 }
 
 func (s *strategyCommonController) metricsOptions(ginCtx *gin.Context) {
 
 	options, err := s.strategyService.GetMetricsOptions()
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
@@ -104,7 +104,7 @@ func (s *strategyCommonController) metricsOptions(ginCtx *gin.Context) {
 
 	data := common.Map[string, interface{}]{}
 	data["options"] = resList
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(data))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
 
 func (s *strategyCommonController) contentType(ginCtx *gin.Context) {
@@ -112,7 +112,7 @@ func (s *strategyCommonController) contentType(ginCtx *gin.Context) {
 	items := strategy_handler.GetContentTypeList()
 	data := common.Map[string, interface{}]{}
 	data["items"] = items
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(data))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
 
 func (s *strategyCommonController) charset(ginCtx *gin.Context) {
@@ -120,5 +120,5 @@ func (s *strategyCommonController) charset(ginCtx *gin.Context) {
 	items := enum.GetStrategyCharsetList()
 	data := common.Map[string, interface{}]{}
 	data["items"] = items
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(data))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
