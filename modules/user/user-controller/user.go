@@ -5,7 +5,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
-	"github.com/eolinker/apinto-dashboard/dto"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/user"
 	"github.com/eolinker/apinto-dashboard/modules/user/user-dto"
@@ -54,7 +53,7 @@ func (u *userController) getMyProfile(ginCtx *gin.Context) {
 
 	userInfo, err := u.userInfo.GetUserInfo(ginCtx, userId)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("getMyProfile fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("getMyProfile fail. err:%s", err.Error())))
 		return
 	}
 
@@ -83,7 +82,7 @@ func (u *userController) getMyProfile(ginCtx *gin.Context) {
 	m["profile"] = resUserInfo
 	m["describe"] = userInfo.Remark
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(m))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
 }
 
 func (u *userController) updateMyProfile(ginCtx *gin.Context) {
@@ -92,16 +91,16 @@ func (u *userController) updateMyProfile(ginCtx *gin.Context) {
 	req := &user_dto.UpdateMyProfileReq{}
 	err := ginCtx.BindJSON(req)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("updateMyProfile fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("updateMyProfile fail. err:%s", err.Error())))
 		return
 	}
 
 	if err = u.userInfo.UpdateMyProfile(ginCtx, userId, req); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("updateMyProfile fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("updateMyProfile fail. err:%s", err.Error())))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
 func (u *userController) updateMyPassword(ginCtx *gin.Context) {
@@ -110,16 +109,16 @@ func (u *userController) updateMyPassword(ginCtx *gin.Context) {
 	req := &user_dto.UpdateMyPasswordReq{}
 	err := ginCtx.BindJSON(req)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("updateMyPassword fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("updateMyPassword fail. err:%s", err.Error())))
 		return
 	}
 
 	if err = u.userInfo.UpdateMyPassword(ginCtx, userId, req); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("updateMyPassword fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("updateMyPassword fail. err:%s", err.Error())))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
 func (u *userController) getAllAccess(ginCtx *gin.Context) {
@@ -130,7 +129,7 @@ func (u *userController) getAllAccess(ginCtx *gin.Context) {
 	data["modules"] = getModules(globalAccess)
 	data["depth"] = depth
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(data))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 
 }
 
@@ -156,7 +155,7 @@ func (u *userController) getUserAccess(ginCtx *gin.Context) {
 
 	accessSet, err := u.userInfo.GetAccessInfo(ginCtx, userID)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("GetUserAccessList fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("GetUserAccessList fail. err:%s", err.Error())))
 		return
 	}
 	allModules := access.GetAllModulesConfig()
@@ -190,7 +189,7 @@ func (u *userController) getUserAccess(ginCtx *gin.Context) {
 	data := make(map[string]interface{})
 	data["modules"] = modules
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(data))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 
 }
 
@@ -198,7 +197,7 @@ func (u *userController) getRoleList(ginCtx *gin.Context) {
 	userID := controller.GetUserId(ginCtx)
 	roleList, totalUsers, err := u.userInfo.GetRoleList(ginCtx, userID)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("GetRoleList fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("GetRoleList fail. err:%s", err.Error())))
 		return
 	}
 	roles := make([]*user_dto.RoleListItem, 0, len(roleList))
@@ -216,19 +215,19 @@ func (u *userController) getRoleList(ginCtx *gin.Context) {
 	data := make(map[string]interface{})
 	data["roles"] = roles
 	data["total"] = totalUsers
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(data))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
 
 func (u *userController) getRoleInfo(ginCtx *gin.Context) {
 	roleID := ginCtx.Query("id")
 	if roleID == "" {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("GetRoleInfo fail. err: id can't be nil")))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("GetRoleInfo fail. err: id can't be nil")))
 		return
 	}
 
 	info, err := u.userInfo.GetRoleInfo(ginCtx, roleID)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("GetRoleInfo fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("GetRoleInfo fail. err:%s", err.Error())))
 		return
 	}
 	role := &user_dto.ProxyRoleInfo{
@@ -238,13 +237,13 @@ func (u *userController) getRoleInfo(ginCtx *gin.Context) {
 	}
 	data := make(map[string]interface{})
 	data["role"] = role
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(data))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
 
 func (u *userController) getRoleOptions(ginCtx *gin.Context) {
 	optionList, err := u.userInfo.GetRoleOptions(ginCtx)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("GetRoleOptions fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("GetRoleOptions fail. err:%s", err.Error())))
 		return
 	}
 	options := make([]*user_dto.RoleOptionItem, 0, len(optionList))
@@ -259,7 +258,7 @@ func (u *userController) getRoleOptions(ginCtx *gin.Context) {
 
 	data := make(map[string]interface{})
 	data["roles"] = options
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(data))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
 
 func (u *userController) createRole(ginCtx *gin.Context) {
@@ -267,23 +266,23 @@ func (u *userController) createRole(ginCtx *gin.Context) {
 
 	input := new(user_dto.ProxyRoleInfo)
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
 	//Check Input
 	if input.Title == "" {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("CreateRole fail. err: title can't be nil. ")))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("CreateRole fail. err: title can't be nil. ")))
 		return
 	}
 
 	err := u.userInfo.CreateRole(ginCtx, userID, input)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("CreateAPI fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("CreateAPI fail. err:%s", err.Error())))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
 func (u *userController) updateRole(ginCtx *gin.Context) {
@@ -291,78 +290,78 @@ func (u *userController) updateRole(ginCtx *gin.Context) {
 
 	roleID := ginCtx.Query("id")
 	if roleID == "" {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("UpdateRole fail. err: id can't be nil")))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("UpdateRole fail. err: id can't be nil")))
 		return
 	}
 
 	input := new(user_dto.ProxyRoleInfo)
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
 	//Check Input
 	if input.Title == "" {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("UpdateRole fail. err: title can't be nil. ")))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("UpdateRole fail. err: title can't be nil. ")))
 		return
 	}
 
 	err := u.userInfo.UpdateRole(ginCtx, userID, roleID, input)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("UpdateRole fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("UpdateRole fail. err:%s", err.Error())))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
 func (u *userController) deleteRole(ginCtx *gin.Context) {
 	userID := controller.GetUserId(ginCtx)
 	roleID := ginCtx.Query("id")
 	if roleID == "" {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("DeleteRole fail. err: id can't be nil")))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("DeleteRole fail. err: id can't be nil")))
 		return
 	}
 
 	err := u.userInfo.DeleteRole(ginCtx, userID, roleID)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("DeleteRole fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("DeleteRole fail. err:%s", err.Error())))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
 func (u *userController) roleBatchUpdate(ginCtx *gin.Context) {
 	input := new(user_dto.BatchUpdateRole)
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
 	err := u.userInfo.RoleBatchUpdate(ginCtx, input.Ids, input.RoleId)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("roleBatchUpdate fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("roleBatchUpdate fail. err:%s", err.Error())))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
 func (u *userController) roleBatchRemove(ginCtx *gin.Context) {
 	input := new(user_dto.BatchRemoveRole)
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
 	err := u.userInfo.RoleBatchRemove(ginCtx, input.Ids, input.RoleId)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("roleBatchRemove fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("roleBatchRemove fail. err:%s", err.Error())))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
 func (u *userController) delUser(ginCtx *gin.Context) {
@@ -370,22 +369,22 @@ func (u *userController) delUser(ginCtx *gin.Context) {
 
 	req := &user_dto.DelUserReq{}
 	if err := ginCtx.BindJSON(req); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("delUser fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("delUser fail. err:%s", err.Error())))
 		return
 	}
 
 	if len(req.UserIds) == 0 {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("delUser fail. err:%s", "参数错误")))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("delUser fail. err:%s", "参数错误")))
 		return
 	}
 
 	err := u.userInfo.DelUser(ginCtx, userID, req.UserIds)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("delUser fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("delUser fail. err:%s", err.Error())))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 
 }
 
@@ -394,7 +393,7 @@ func (u *userController) createUser(ginCtx *gin.Context) {
 
 	req := &user_dto.SaveUserReq{}
 	if err := ginCtx.BindJSON(req); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("createUser fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("createUser fail. err:%s", err.Error())))
 		return
 	}
 
@@ -403,11 +402,11 @@ func (u *userController) createUser(ginCtx *gin.Context) {
 	}
 
 	if err := u.userInfo.CreateUser(ginCtx, userID, req); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("createUser fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("createUser fail. err:%s", err.Error())))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 
 }
 
@@ -417,22 +416,22 @@ func (u *userController) patchUser(ginCtx *gin.Context) {
 
 	userId, err := strconv.Atoi(userIDStr)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("patchUser fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("patchUser fail. err:%s", err.Error())))
 		return
 	}
 
 	req := &user_dto.PatchUserReq{}
 	if err = ginCtx.BindJSON(req); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("patchUser fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("patchUser fail. err:%s", err.Error())))
 		return
 	}
 
 	if err = u.userInfo.PatchUser(ginCtx, operator, userId, req); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("patchUser fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("patchUser fail. err:%s", err.Error())))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 
 }
 
@@ -442,22 +441,22 @@ func (u *userController) updateUser(ginCtx *gin.Context) {
 	userIdStr := ginCtx.Query("id")
 	userId, err := strconv.Atoi(userIdStr)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("updateUser fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("updateUser fail. err:%s", err.Error())))
 		return
 	}
 
 	req := &user_dto.SaveUserReq{}
 	if err := ginCtx.BindJSON(req); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("updateUser fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("updateUser fail. err:%s", err.Error())))
 		return
 	}
 
 	if err = u.userInfo.UpdateUser(ginCtx, operator, userId, req); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("updateUser fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("updateUser fail. err:%s", err.Error())))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 
 }
 
@@ -468,7 +467,7 @@ func (u *userController) getUserList(ginCtx *gin.Context) {
 
 	userInfoList, err := u.userInfo.GetUserInfoList(ginCtx, roleId, keyword)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("getUserList fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("getUserList fail. err:%s", err.Error())))
 		return
 	}
 
@@ -503,14 +502,14 @@ func (u *userController) getUserList(ginCtx *gin.Context) {
 	m := make(map[string]interface{})
 	m["users"] = resList
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(m))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
 
 }
 
 func (u *userController) userEnum(ginCtx *gin.Context) {
 	infos, err := u.userInfo.GetUserInfoAll(ginCtx)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 	resList := make([]user_dto.UserInfo, 0, len(infos))
@@ -527,7 +526,7 @@ func (u *userController) userEnum(ginCtx *gin.Context) {
 	m := make(map[string]interface{})
 	m["users"] = resList
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(m))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
 }
 
 func (u *userController) getUser(ginCtx *gin.Context) {
@@ -535,13 +534,13 @@ func (u *userController) getUser(ginCtx *gin.Context) {
 	userIdStr := ginCtx.Query("id")
 	userId, err := strconv.Atoi(userIdStr)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("getUser fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("getUser fail. err:%s", err.Error())))
 		return
 	}
 
 	userInfo, err := u.userInfo.GetUserInfo(ginCtx, userId)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("getUser fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("getUser fail. err:%s", err.Error())))
 		return
 	}
 
@@ -570,7 +569,7 @@ func (u *userController) getUser(ginCtx *gin.Context) {
 	m["profile"] = resUserInfo
 	m["describe"] = userInfo.Remark
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(m))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
 
 }
 
@@ -581,16 +580,16 @@ func (u *userController) resetUserPwd(ginCtx *gin.Context) {
 	resetPasswordReq := new(user_dto.ResetPasswordReq)
 	err := ginCtx.BindJSON(resetPasswordReq)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("resetUserPwd fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("resetUserPwd fail. err:%s", err.Error())))
 		return
 	}
 
 	err = u.userInfo.ResetUserPwd(ginCtx, operator, resetPasswordReq.Id, resetPasswordReq.Password)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("resetUserPwd fail. err:%s", err.Error())))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("resetUserPwd fail. err:%s", err.Error())))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 
 }

@@ -4,7 +4,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
-	"github.com/eolinker/apinto-dashboard/dto"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/cluster"
 	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-dto"
@@ -35,14 +34,14 @@ func (c *clusterCertificateController) gets(ginCtx *gin.Context) {
 
 	list, err := c.clusterCertificateService.QueryList(ginCtx, namespaceId, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 	dtoList := make([]*cluster_dto.ClusterCertificateOut, 0, len(list))
 	for _, val := range list {
 		cert, err := common.ParseCert(val.Key, val.Pem)
 		if err != nil {
-			ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+			ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 			return
 		}
 		dtoList = append(dtoList, &cluster_dto.ClusterCertificateOut{
@@ -57,7 +56,7 @@ func (c *clusterCertificateController) gets(ginCtx *gin.Context) {
 	}
 	m := common.Map[string, interface{}]{}
 	m["certificates"] = dtoList
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(m))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
 }
 
 // post 新增
@@ -68,11 +67,11 @@ func (c *clusterCertificateController) post(ginCtx *gin.Context) {
 	input := &cluster_dto.ClusterCertificateInput{}
 	err := ginCtx.BindJSON(input)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 	if len(input.Key) == 0 || len(input.Pem) == 0 {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult("key or pem is null"))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("key or pem is null"))
 		return
 	}
 
@@ -80,10 +79,10 @@ func (c *clusterCertificateController) post(ginCtx *gin.Context) {
 	key, _ := common.Base64Decode(input.Key)
 
 	if err = c.clusterCertificateService.Insert(ginCtx, operator, namespaceId, clusterName, string(key), string(pem)); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 
 }
 
@@ -95,18 +94,18 @@ func (c *clusterCertificateController) put(ginCtx *gin.Context) {
 	certificateId, _ := strconv.Atoi(certificateIdStr)
 	operator := controller.GetUserId(ginCtx)
 	if certificateId <= 0 {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult("certificate_id is 0"))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("certificate_id is 0"))
 		return
 	}
 	input := &cluster_dto.ClusterCertificateInput{}
 	err := ginCtx.BindJSON(input)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
 
 	if len(input.Key) == 0 || len(input.Pem) == 0 {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult("key or pem is null"))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("key or pem is null"))
 		return
 	}
 
@@ -114,10 +113,10 @@ func (c *clusterCertificateController) put(ginCtx *gin.Context) {
 	key, _ := common.Base64Decode(input.Key)
 
 	if err = c.clusterCertificateService.Update(ginCtx, operator, namespaceId, certificateId, clusterName, string(key), string(pem)); err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 
 }
 
@@ -130,9 +129,9 @@ func (c *clusterCertificateController) del(ginCtx *gin.Context) {
 
 	err := c.clusterCertificateService.DeleteById(ginCtx, namespaceId, clusterName, certificateId)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 
 }

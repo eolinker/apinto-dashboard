@@ -1,5 +1,7 @@
 package discover_dto
 
+import upstream_dto "github.com/eolinker/apinto-dashboard/modules/upstream/upstream-dto"
+
 type DiscoveryListItem struct {
 	Name       string `json:"name"`
 	UUID       string `json:"uuid"`
@@ -33,17 +35,17 @@ type DiscoveryInfoProxy struct {
 }
 
 type DiscoveryEnum struct {
-	Name   string     `json:"name"`
-	Driver string     `json:"driver"`
-	Render dto.Render `json:"render"`
+	Name   string              `json:"name"`
+	Driver string              `json:"driver"`
+	Render upstream_dto.Render `json:"render"`
 }
 
 type DriversItem struct {
-	Name   string     `json:"name"`
-	Render dto.Render `json:"render"`
+	Name   string              `json:"name"`
+	Render upstream_dto.Render `json:"render"`
 }
 
 type DiscoveryInfoOutput struct {
 	Discovery *DiscoveryInfoProxy `json:"discovery"`
-	Render    dto.Render          `json:"render"`
+	Render    upstream_dto.Render `json:"render"`
 }

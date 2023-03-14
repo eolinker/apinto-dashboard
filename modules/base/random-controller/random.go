@@ -2,7 +2,7 @@ package random_controller
 
 import (
 	"github.com/eolinker/apinto-dashboard/common"
-	"github.com/eolinker/apinto-dashboard/dto"
+	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/modules/random"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/gin-gonic/gin"
@@ -28,5 +28,5 @@ func (r *randomController) get(ginCtx *gin.Context) {
 
 	m["id"] = strings.ToLower(randomStr)
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(m))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
 }

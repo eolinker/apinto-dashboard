@@ -5,6 +5,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/base/frontend-model"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-model"
 	upstream_model "github.com/eolinker/apinto-dashboard/modules/upstream/model"
+	upstream_dto "github.com/eolinker/apinto-dashboard/modules/upstream/upstream-dto"
 	upstream_entry2 "github.com/eolinker/apinto-dashboard/modules/upstream/upstream-entry"
 )
 
@@ -13,8 +14,8 @@ type IService interface {
 	GetServiceListByNames(ctx context.Context, namespaceID int, names []string) ([]*upstream_model.ServiceListItem, error)
 	GetServiceListAll(ctx context.Context, namespaceID int) ([]*upstream_model.ServiceListItem, error)
 	GetServiceInfo(ctx context.Context, namespaceID int, serviceName string) (*upstream_model.ServiceInfo, error)
-	CreateService(ctx context.Context, namespaceID, userId int, input *dto.ServiceInfo, variableList []string) (int, error)
-	UpdateService(ctx context.Context, namespaceID, userId int, input *dto.ServiceInfo, variableList []string) error
+	CreateService(ctx context.Context, namespaceID, userId int, input *upstream_dto.ServiceInfo, variableList []string) (int, error)
+	UpdateService(ctx context.Context, namespaceID, userId int, input *upstream_dto.ServiceInfo, variableList []string) error
 	DeleteService(ctx context.Context, namespaceID, userId int, serviceName string) error
 	GetServiceEnum(ctx context.Context, namespaceID int, searchName string) ([]string, error)
 	OnlineList(ctx context.Context, namespaceId int, serviceName string) ([]*upstream_model.ServiceOnline, error)

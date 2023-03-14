@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/dto"
 	"github.com/eolinker/apinto-dashboard/enum"
 	auditservice "github.com/eolinker/apinto-dashboard/modules/audit"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
@@ -38,7 +37,7 @@ func (a *audit) Handler(operate int, kind string) gin.HandlerFunc {
 		bodyReader.Close()
 		if err != nil {
 			log.Warn("read body :", err)
-			ginCtx.JSON(http.StatusOK, dto.NewNoAccessError("Invalid request body"))
+			ginCtx.JSON(http.StatusOK, NewNoAccessError("Invalid request body"))
 			return
 		}
 		ginCtx.Request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
@@ -81,7 +80,7 @@ func (a *audit) Handler(operate int, kind string) gin.HandlerFunc {
 		blw, ok := ginCtx.Writer.(*ResponseWriterWrapper)
 		if ok {
 			errBody := blw.Body.String()
-			result := new(dto.Result)
+			result := new(Result)
 			_ = json.Unmarshal([]byte(errBody), result)
 			if result.Code != 0 {
 				errInfo = result.Msg
