@@ -13,15 +13,26 @@ import (
 	group_entry "github.com/eolinker/apinto-dashboard/entry/group-entry"
 	"github.com/eolinker/apinto-dashboard/entry/quote-entry"
 	"github.com/eolinker/apinto-dashboard/enum"
-	"github.com/eolinker/apinto-dashboard/model"
+	"github.com/eolinker/apinto-dashboard/model/audit-model"
+	"github.com/eolinker/apinto-dashboard/model/cluster-model"
+	"github.com/eolinker/apinto-dashboard/model/frontend-model"
+	"github.com/eolinker/apinto-dashboard/model/group-model"
+	"github.com/eolinker/apinto-dashboard/model/open-app-model"
+	"github.com/eolinker/apinto-dashboard/model/openapi-model"
 	apiservice "github.com/eolinker/apinto-dashboard/modules/api"
 	"github.com/eolinker/apinto-dashboard/modules/api/api-dto"
 	apientry "github.com/eolinker/apinto-dashboard/modules/api/api-entry"
 	apimodel "github.com/eolinker/apinto-dashboard/modules/api/model"
 	store2 "github.com/eolinker/apinto-dashboard/modules/api/store"
 	"github.com/eolinker/apinto-dashboard/modules/upstream"
-	"github.com/eolinker/apinto-dashboard/service"
-	"github.com/eolinker/apinto-dashboard/store"
+	"github.com/eolinker/apinto-dashboard/service/apinto-client"
+	"github.com/eolinker/apinto-dashboard/service/cluster-service"
+	"github.com/eolinker/apinto-dashboard/service/group-service"
+	"github.com/eolinker/apinto-dashboard/service/locker-service"
+	"github.com/eolinker/apinto-dashboard/service/namespace-service"
+	"github.com/eolinker/apinto-dashboard/service/openapp-service"
+	"github.com/eolinker/apinto-dashboard/service/user-service"
+	"github.com/eolinker/apinto-dashboard/store/quote-store"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
 	"github.com/gin-gonic/gin"
@@ -39,19 +50,19 @@ type apiService struct {
 	apiStat    store2.IAPIStatStore
 	apiVersion store2.IAPIVersionStore
 	apiRuntime store2.IAPIRuntimeStore
-	quoteStore store.IQuoteStore
+	quoteStore quote_store.IQuoteStore
 	apiHistory store2.IApiHistoryStore
 
-	service          upstream.IService
-	commonGroup      service.ICommonGroupService
-	clusterService   service.IClusterService
-	namespaceService service.INamespaceService
-	apintoClient     service.IApintoClient
-	userInfoService  service.IUserInfoService
-	extAppService    service.IExternalApplicationService
-	apiManager       drivermanager.IAPIDriverManager
+	service        upstream.IService
+	commonGroup    group_service.ICommonGroupService
+	clusterService cluster_service.IClusterService
+	namespaceService namespace_service.INamespaceService
+	apintoClient    apinto_client.IApintoClient
+	userInfoService user_service.IUserInfoService
+	extAppService   openapp_service.IExternalApplicationService
+	apiManager      drivermanager.IAPIDriverManager
 
-	lockService    service.IAsynLockService
+	lockService    locker_service.IAsynLockService
 	importApiCache cache.IImportApiCache
 	batchApiCache  cache.IBatchOnlineApiTaskCache
 }
@@ -90,15 +101,15 @@ func (a *apiService) GetAPICountByGroupUUID(ctx context.Context, namespaceID int
 	return count
 }
 
-func (a *apiService) GetGroups(ctx context.Context, namespaceId int, parentUuid, queryName string) (*model.CommonGroupRoot, []*model.CommonGroupApi, error) {
-	groups, err := a.commonGroup.GroupListAll(ctx, namespaceId, service.ApiName, service.ApiName)
+func (a *apiService) GetGroups(ctx context.Context, namespaceId int, parentUuid, queryName string) (*group_model.CommonGroupRoot, []*group_model.CommonGroupApi, error) {
+	groups, err := a.commonGroup.GroupListAll(ctx, namespaceId, group_service.ApiName, group_service.ApiName)
 	if err != nil {
 		log.Errorf("GetGroups-commonGroup.GroupListAll namespaceId:%d,parentUuid:%s,queryName=%s, err=%s", namespaceId, parentUuid, queryName, err.Error())
 		return nil, nil, err
 	}
 
-	apis := make([]*model.CommonGroupApi, 0)
-	apisAll := make([]*model.CommonGroupApi, 0)
+	apis := make([]*group_model.CommonGroupApi, 0)
+	apisAll := make([]*group_model.CommonGroupApi, 0)
 	//查询API
 	//apisAll, err := a.GetAPIListByName(ctx, namespaceId, "")
 	//if err != nil {
@@ -115,7 +126,7 @@ func (a *apiService) GetGroups(ctx context.Context, namespaceId int, parentUuid,
 	}
 
 	//查询API的目录直至跟目录
-	groupUUIDS := common.SliceToSliceIds(apis, func(t *model.CommonGroupApi) string {
+	groupUUIDS := common.SliceToSliceIds(apis, func(t *group_model.CommonGroupApi) string {
 		return t.GroupUUID
 	})
 
@@ -141,7 +152,7 @@ func (a *apiService) GetGroups(ctx context.Context, namespaceId int, parentUuid,
 			//如果绝对相等，需要把改目录下的所有根目录也查询出来
 			if group.Name == queryName {
 				uuids := &[]string{}
-				a.commonGroup.SubGroupUUIDS(groupsParentIdMaps, &model.CommonGroup{
+				a.commonGroup.SubGroupUUIDS(groupsParentIdMaps, &group_model.CommonGroup{
 					Group: group,
 				}, uuids)
 				for _, s := range *uuids {
@@ -159,15 +170,15 @@ func (a *apiService) GetGroups(ctx context.Context, namespaceId int, parentUuid,
 
 	groupRoot := a.commonGroup.ToGroupRoot(ctx, namespaceId, parentUuid, groups, outMapUUID)
 
-	apiAllMaps := common.SliceToMapArray(apisAll, func(t *model.CommonGroupApi) string {
+	apiAllMaps := common.SliceToMapArray(apisAll, func(t *group_model.CommonGroupApi) string {
 		return t.GroupUUID
 	})
 
-	apiMaps := common.SliceToMap(apis, func(t *model.CommonGroupApi) string {
+	apiMaps := common.SliceToMap(apis, func(t *group_model.CommonGroupApi) string {
 		return t.GroupUUID
 	})
 
-	resApis := &[]*model.CommonGroupApi{}
+	resApis := &[]*group_model.CommonGroupApi{}
 	a.subGroup(groupRoot.CommonGroup, apiAllMaps, apiMaps, resApis)
 
 	*resApis = append(*resApis, apis...)
@@ -175,7 +186,7 @@ func (a *apiService) GetGroups(ctx context.Context, namespaceId int, parentUuid,
 	return groupRoot, *resApis, err
 }
 
-func (a *apiService) subGroup(list []*model.CommonGroup, apiAllMaps map[string][]*model.CommonGroupApi, apiMaps map[string]*model.CommonGroupApi, apis *[]*model.CommonGroupApi) {
+func (a *apiService) subGroup(list []*group_model.CommonGroup, apiAllMaps map[string][]*group_model.CommonGroupApi, apiMaps map[string]*group_model.CommonGroupApi, apis *[]*group_model.CommonGroupApi) {
 	if len(list) == 0 {
 		return
 	}
@@ -192,7 +203,7 @@ func (a *apiService) GetAPIList(ctx context.Context, namespaceID int, groupUUID,
 	var err error
 	//获取传入的groupUUID下包括子分组的所有UUID
 	if groupUUID != "" {
-		groupList, err = a.commonGroup.GroupUUIDS(ctx, namespaceID, service.ApiName, service.ApiName, groupUUID)
+		groupList, err = a.commonGroup.GroupUUIDS(ctx, namespaceID, group_service.ApiName, group_service.ApiName, groupUUID)
 		if err != nil {
 			return nil, 0, err
 		}
@@ -455,7 +466,7 @@ func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator in
 	input.UUID = strings.ToLower(input.UUID)
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &model.LogObjectInfo{
+	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: input.UUID,
 		Name: input.ApiName,
 	})
@@ -563,11 +574,11 @@ func (a *apiService) UpdateAPI(ctx context.Context, namespaceID int, operator in
 		return err
 	}
 
-	err = a.lockService.Lock(service.LockNameAPI, apiInfo.Id)
+	err = a.lockService.Lock(locker_service.LockNameAPI, apiInfo.Id)
 	if err != nil {
 		return err
 	}
-	defer a.lockService.Unlock(service.LockNameAPI, apiInfo.Id)
+	defer a.lockService.Unlock(locker_service.LockNameAPI, apiInfo.Id)
 
 	apiInfo, err = a.apiStore.GetByUUID(ctx, namespaceID, input.UUID)
 	if err != nil {
@@ -598,7 +609,7 @@ func (a *apiService) UpdateAPI(ctx context.Context, namespaceID int, operator in
 	apiInfo.Operator = operator
 	apiInfo.UpdateTime = t
 
-	common.SetGinContextAuditObject(ctx, &model.LogObjectInfo{
+	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: input.UUID,
 		Name: input.ApiName,
 	})
@@ -673,11 +684,11 @@ func (a *apiService) DeleteAPI(ctx context.Context, namespaceId, operator int, u
 		return err
 	}
 
-	err = a.lockService.Lock(service.LockNameAPI, apiInfo.Id)
+	err = a.lockService.Lock(locker_service.LockNameAPI, apiInfo.Id)
 	if err != nil {
 		return err
 	}
-	defer a.lockService.Unlock(service.LockNameAPI, apiInfo.Id)
+	defer a.lockService.Unlock(locker_service.LockNameAPI, apiInfo.Id)
 
 	apiInfo, err = a.apiStore.GetByUUID(ctx, namespaceId, uuid)
 	if err != nil {
@@ -699,7 +710,7 @@ func (a *apiService) DeleteAPI(ctx context.Context, namespaceId, operator int, u
 		Config: version.APIVersionConfig,
 	}
 
-	common.SetGinContextAuditObject(ctx, &model.LogObjectInfo{
+	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: uuid,
 		Name: apiInfo.Name,
 	})
@@ -733,7 +744,7 @@ func (a *apiService) DeleteAPI(ctx context.Context, namespaceId, operator int, u
 		return err
 	}
 
-	a.lockService.DeleteLock(service.LockNameAPI, apiInfo.Id)
+	a.lockService.DeleteLock(locker_service.LockNameAPI, apiInfo.Id)
 	return nil
 }
 
@@ -776,13 +787,13 @@ func (a *apiService) BatchOnline(ctx context.Context, namespaceId int, operator 
 		return nil
 	})
 
-	clusterList := make([]*model.Cluster, 0, len(conf.ClusterNames))
+	clusterList := make([]*cluster_model.Cluster, 0, len(conf.ClusterNames))
 	group.Go(func() error {
 		clusters, err := a.clusterService.QueryListByNamespaceId(ctx, namespaceId)
 		if err != nil {
 			return err
 		}
-		clusterMap := common.SliceToMap(clusters, func(t *model.Cluster) string {
+		clusterMap := common.SliceToMap(clusters, func(t *cluster_model.Cluster) string {
 			return t.Name
 		})
 		for _, clusterName := range conf.ClusterNames {
@@ -808,7 +819,7 @@ func (a *apiService) BatchOnline(ctx context.Context, namespaceId int, operator 
 	//逐个处理api上线
 	onlineList := make([]*apimodel.BatchListItem, 0, len(apiList)*len(clusterList))
 	for _, api := range apiList {
-		err = a.lockService.Lock(service.LockNameAPI, api.Id)
+		err = a.lockService.Lock(locker_service.LockNameAPI, api.Id)
 		if err != nil {
 			for _, cluster := range clusterList {
 				item := &apimodel.BatchListItem{
@@ -819,7 +830,7 @@ func (a *apiService) BatchOnline(ctx context.Context, namespaceId int, operator 
 				}
 				onlineList = append(onlineList, item)
 			}
-			a.lockService.Unlock(service.LockNameAPI, api.Id)
+			a.lockService.Unlock(locker_service.LockNameAPI, api.Id)
 			continue
 		}
 		//确保api没被删除
@@ -835,7 +846,7 @@ func (a *apiService) BatchOnline(ctx context.Context, namespaceId int, operator 
 				}
 				onlineList = append(onlineList, item)
 			}
-			a.lockService.Unlock(service.LockNameAPI, api.Id)
+			a.lockService.Unlock(locker_service.LockNameAPI, api.Id)
 			continue
 		}
 
@@ -951,7 +962,7 @@ func (a *apiService) BatchOnline(ctx context.Context, namespaceId int, operator 
 			onlineList = append(onlineList, item)
 		}
 
-		a.lockService.Unlock(service.LockNameAPI, api.Id)
+		a.lockService.Unlock(locker_service.LockNameAPI, api.Id)
 	}
 	//编写操作记录
 	logApiNameList := make([]string, 0, len(apiList))
@@ -963,7 +974,7 @@ func (a *apiService) BatchOnline(ctx context.Context, namespaceId int, operator 
 		logCLNameList = append(logCLNameList, cl.Name)
 	}
 
-	common.SetGinContextAuditObject(ctx, &model.LogObjectInfo{
+	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Name:        strings.Join(logApiNameList, ","),
 		ClusterName: strings.Join(logCLNameList, ","),
 		PublishType: 1,
@@ -992,13 +1003,13 @@ func (a *apiService) BatchOffline(ctx context.Context, namespaceId int, operator
 		return nil
 	})
 
-	clusterList := make([]*model.Cluster, 0, len(clusterNames))
+	clusterList := make([]*cluster_model.Cluster, 0, len(clusterNames))
 	group.Go(func() error {
 		clusters, err := a.clusterService.QueryListByNamespaceId(ctx, namespaceId)
 		if err != nil {
 			return err
 		}
-		clusterMap := common.SliceToMap(clusters, func(t *model.Cluster) string {
+		clusterMap := common.SliceToMap(clusters, func(t *cluster_model.Cluster) string {
 			return t.Name
 		})
 		for _, clusterName := range clusterNames {
@@ -1021,7 +1032,7 @@ func (a *apiService) BatchOffline(ctx context.Context, namespaceId int, operator
 	//逐个处理api下线，已经下线或者未上线的不进行操作
 	offlineList := make([]*apimodel.BatchListItem, 0, len(apiList)*len(clusterList))
 	for _, api := range apiList {
-		err := a.lockService.Lock(service.LockNameAPI, api.Id)
+		err := a.lockService.Lock(locker_service.LockNameAPI, api.Id)
 		if err != nil {
 			for _, cluster := range clusterList {
 				item := &apimodel.BatchListItem{
@@ -1032,12 +1043,12 @@ func (a *apiService) BatchOffline(ctx context.Context, namespaceId int, operator
 				}
 				offlineList = append(offlineList, item)
 			}
-			a.lockService.Unlock(service.LockNameAPI, api.Id)
+			a.lockService.Unlock(locker_service.LockNameAPI, api.Id)
 			continue
 		}
 		latestApi, err := a.apiStore.Get(ctx, api.Id)
 		if err != nil {
-			a.lockService.Unlock(service.LockNameAPI, api.Id)
+			a.lockService.Unlock(locker_service.LockNameAPI, api.Id)
 			return nil, err
 		}
 
@@ -1045,7 +1056,7 @@ func (a *apiService) BatchOffline(ctx context.Context, namespaceId int, operator
 			//获取当前的版本
 			runtime, err := a.apiRuntime.GetForCluster(ctx, api.Id, cluster.Id)
 			if err != nil && err != gorm.ErrRecordNotFound {
-				a.lockService.Unlock(service.LockNameAPI, api.Id)
+				a.lockService.Unlock(locker_service.LockNameAPI, api.Id)
 				return nil, err
 			}
 
@@ -1082,7 +1093,7 @@ func (a *apiService) BatchOffline(ctx context.Context, namespaceId int, operator
 			offlineList = append(offlineList, item)
 		}
 
-		a.lockService.Unlock(service.LockNameAPI, api.Id)
+		a.lockService.Unlock(locker_service.LockNameAPI, api.Id)
 	}
 	//编写操作记录
 	logApiNameList := make([]string, 0, len(apiList))
@@ -1094,7 +1105,7 @@ func (a *apiService) BatchOffline(ctx context.Context, namespaceId int, operator
 		logCLNameList = append(logCLNameList, cl.Name)
 	}
 
-	common.SetGinContextAuditObject(ctx, &model.LogObjectInfo{
+	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Name:        strings.Join(logApiNameList, ","),
 		ClusterName: strings.Join(logCLNameList, ","),
 		PublishType: 2,
@@ -1125,13 +1136,13 @@ func (a *apiService) BatchOnlineCheck(ctx context.Context, namespaceId int, oper
 
 	})
 
-	clusterList := make([]*model.Cluster, 0, len(clusterNames))
+	clusterList := make([]*cluster_model.Cluster, 0, len(clusterNames))
 	group.Go(func() error {
 		clusters, err := a.clusterService.QueryListByNamespaceId(ctx, namespaceId)
 		if err != nil {
 			return err
 		}
-		clusterMap := common.SliceToMap(clusters, func(t *model.Cluster) string {
+		clusterMap := common.SliceToMap(clusters, func(t *cluster_model.Cluster) string {
 			return t.Name
 		})
 		for _, clusterName := range clusterNames {
@@ -1173,14 +1184,14 @@ func (a *apiService) BatchOnlineCheck(ctx context.Context, namespaceId int, oper
 				ServiceName: version.ServiceName,
 				ClusterEnv:  fmt.Sprintf("%s%s", cluster.Name, cluster.Env),
 				Status:      true,
-				Solution:    &model.Router{},
+				Solution:    &frontend_model.Router{},
 			}
 
 			if isOnline := a.service.IsOnline(ctx, cluster.Id, version.ServiceID); !isOnline {
 				isAllOnline = false
 				item.Status = false
 				item.Result = fmt.Sprintf("%s未上线到%s", version.ServiceName, cluster.Name)
-				item.Solution.Name = model.RouterNameServiceOnline
+				item.Solution.Name = frontend_model.RouterNameServiceOnline
 				item.Solution.Params = map[string]string{"service_name": version.ServiceName}
 			}
 			checkList = append(checkList, item)
@@ -1223,7 +1234,7 @@ func (a *apiService) OnlineList(ctx context.Context, namespaceId int, uuid strin
 	if err != nil {
 		return nil, err
 	}
-	clusterMaps := common.SliceToMap(clusters, func(t *model.Cluster) int {
+	clusterMaps := common.SliceToMap(clusters, func(t *cluster_model.Cluster) int {
 		return t.Id
 	})
 
@@ -1288,17 +1299,17 @@ func (a *apiService) OnlineList(ctx context.Context, namespaceId int, uuid strin
 	return list, nil
 }
 
-func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, uuid, clusterName string) (*model.Router, error) {
+func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, uuid, clusterName string) (*frontend_model.Router, error) {
 	apiInfo, err := a.apiStore.GetByUUID(ctx, namespaceId, uuid)
 	if err != nil {
 		return nil, err
 	}
 
-	err = a.lockService.Lock(service.LockNameAPI, apiInfo.Id)
+	err = a.lockService.Lock(locker_service.LockNameAPI, apiInfo.Id)
 	if err != nil {
 		return nil, err
 	}
-	defer a.lockService.Unlock(service.LockNameAPI, apiInfo.Id)
+	defer a.lockService.Unlock(locker_service.LockNameAPI, apiInfo.Id)
 
 	apiInfo, err = a.apiStore.GetByUUID(ctx, namespaceId, uuid)
 	if err != nil {
@@ -1319,8 +1330,8 @@ func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, u
 		return nil, err
 	}
 
-	router := &model.Router{
-		Name:   model.RouterNameServiceOnline,
+	router := &frontend_model.Router{
+		Name:   frontend_model.RouterNameServiceOnline,
 		Params: make(map[string]string),
 	}
 	router.Params["service_name"] = latestVersion.ServiceName
@@ -1343,7 +1354,7 @@ func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, u
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &model.LogObjectInfo{
+	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:        uuid,
 		Name:        apiInfo.Name,
 		ClusterId:   cluster.Id,
@@ -1443,11 +1454,11 @@ func (a *apiService) OfflineAPI(ctx context.Context, namespaceId, operator int, 
 		return err
 	}
 
-	err = a.lockService.Lock(service.LockNameAPI, apiInfo.Id)
+	err = a.lockService.Lock(locker_service.LockNameAPI, apiInfo.Id)
 	if err != nil {
 		return err
 	}
-	defer a.lockService.Unlock(service.LockNameAPI, apiInfo.Id)
+	defer a.lockService.Unlock(locker_service.LockNameAPI, apiInfo.Id)
 
 	apiInfo, err = a.apiStore.GetByUUID(ctx, namespaceId, uuid)
 	if err != nil {
@@ -1473,7 +1484,7 @@ func (a *apiService) OfflineAPI(ctx context.Context, namespaceId, operator int, 
 	t := time.Now()
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &model.LogObjectInfo{
+	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:        uuid,
 		Name:        apiInfo.Name,
 		ClusterId:   cluster.Id,
@@ -1516,11 +1527,11 @@ func (a *apiService) EnableAPI(ctx context.Context, namespaceId, operator int, u
 		return err
 	}
 
-	err = a.lockService.Lock(service.LockNameAPI, apiInfo.Id)
+	err = a.lockService.Lock(locker_service.LockNameAPI, apiInfo.Id)
 	if err != nil {
 		return err
 	}
-	defer a.lockService.Unlock(service.LockNameAPI, apiInfo.Id)
+	defer a.lockService.Unlock(locker_service.LockNameAPI, apiInfo.Id)
 	apiInfo, err = a.apiStore.GetByUUID(ctx, namespaceId, uuid)
 	if err != nil {
 		return err
@@ -1540,7 +1551,7 @@ func (a *apiService) EnableAPI(ctx context.Context, namespaceId, operator int, u
 
 	t := time.Now()
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &model.LogObjectInfo{
+	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:          uuid,
 		Name:          apiInfo.Name,
 		ClusterId:     cluster.Id,
@@ -1579,11 +1590,11 @@ func (a *apiService) DisableAPI(ctx context.Context, namespaceId, operator int, 
 		return err
 	}
 
-	err = a.lockService.Lock(service.LockNameAPI, apiInfo.Id)
+	err = a.lockService.Lock(locker_service.LockNameAPI, apiInfo.Id)
 	if err != nil {
 		return err
 	}
-	defer a.lockService.Unlock(service.LockNameAPI, apiInfo.Id)
+	defer a.lockService.Unlock(locker_service.LockNameAPI, apiInfo.Id)
 	apiInfo, err = a.apiStore.GetByUUID(ctx, namespaceId, uuid)
 	if err != nil {
 		return err
@@ -1604,7 +1615,7 @@ func (a *apiService) DisableAPI(ctx context.Context, namespaceId, operator int, 
 	t := time.Now()
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &model.LogObjectInfo{
+	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:          uuid,
 		Name:          apiInfo.Name,
 		ClusterId:     cluster.Id,
@@ -1665,7 +1676,7 @@ func (a *apiService) GetSource(ctx context.Context) ([]*apimodel.SourceListItem,
 
 func (a *apiService) GetImportCheckList(ctx context.Context, namespaceId int, fileData []byte, groupID, serviceName, requestPrefix string) ([]*apimodel.ImportAPIListItem, string, error) {
 	//解析swagger3.0 TODO 写死解析3.0 等之后有其他格式再用driverManager，openAPI同步现在是用driverManager的
-	swaggerConfig := new(model.SwaggerConfig)
+	swaggerConfig := new(open_app_model.SwaggerConfig)
 	reader := bytes.NewReader(fileData)
 
 	if err := common.DecodeYAML(reader, swaggerConfig); err != nil {
@@ -1725,7 +1736,7 @@ func (a *apiService) GetImportCheckList(ctx context.Context, namespaceId int, fi
 		return nil, "", err
 	}
 
-	apiMap := common.SliceToMapArray(apiList, func(t *model.CommonGroupApi) string {
+	apiMap := common.SliceToMapArray(apiList, func(t *group_model.CommonGroupApi) string {
 		return t.Path
 	})
 
@@ -1843,7 +1854,7 @@ func (a *apiService) ImportAPI(ctx context.Context, namespaceId, operator int, i
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &model.LogObjectInfo{
+	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Name: strings.Join(logAPINames, ","),
 	})
 
@@ -1913,12 +1924,12 @@ func (a *apiService) ImportAPI(ctx context.Context, namespaceId, operator int, i
 	})
 }
 
-func (a *apiService) GetAPIListByName(ctx context.Context, namespaceId int, name string) ([]*model.CommonGroupApi, error) {
+func (a *apiService) GetAPIListByName(ctx context.Context, namespaceId int, name string) ([]*group_model.CommonGroupApi, error) {
 	apiList, err := a.apiStore.GetListByName(ctx, namespaceId, name)
 	if err != nil {
 		return nil, err
 	}
-	groupAPIs := make([]*model.CommonGroupApi, 0, len(apiList))
+	groupAPIs := make([]*group_model.CommonGroupApi, 0, len(apiList))
 
 	apiIds := make([]int, 0, len(apiList))
 	for _, api := range apiList {
@@ -1932,7 +1943,7 @@ func (a *apiService) GetAPIListByName(ctx context.Context, namespaceId int, name
 
 	for _, api := range apiList {
 		version := versionMap[api.Id]
-		groupApi := &model.CommonGroupApi{
+		groupApi := &group_model.CommonGroupApi{
 			Path:      api.RequestPath,
 			PathLabel: api.RequestPathLabel,
 			Name:      api.Name,
@@ -2080,19 +2091,19 @@ func (a *apiService) GetAPINameByID(ctx context.Context, apiID int) (string, err
 	return info.Name, nil
 }
 
-func (a *apiService) GetAPIRemoteOptions(ctx context.Context, namespaceID, pageNum, pageSize int, keyword, groupUuid string) ([]*model.RemoteApis, int, error) {
+func (a *apiService) GetAPIRemoteOptions(ctx context.Context, namespaceID, pageNum, pageSize int, keyword, groupUuid string) ([]*openapi_model.RemoteApis, int, error) {
 	groupList := make([]string, 0)
 	var err error
 	//获取传入的groupUUID下包括子分组的所有UUID
 	if groupUuid != "" {
-		groupList, err = a.commonGroup.GroupUUIDS(ctx, namespaceID, service.ApiName, service.ApiName, groupUuid)
+		groupList, err = a.commonGroup.GroupUUIDS(ctx, namespaceID, group_service.ApiName, group_service.ApiName, groupUuid)
 		if err != nil {
 			return nil, 0, err
 		}
 		groupList = append(groupList, groupUuid)
 	}
 
-	groups, err := a.commonGroup.GroupListAll(ctx, namespaceID, service.ApiName, service.ApiName)
+	groups, err := a.commonGroup.GroupListAll(ctx, namespaceID, group_service.ApiName, group_service.ApiName)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -2102,7 +2113,7 @@ func (a *apiService) GetAPIRemoteOptions(ctx context.Context, namespaceID, pageN
 	if err != nil {
 		return nil, 0, err
 	}
-	apiList := make([]*model.RemoteApis, 0, len(apis))
+	apiList := make([]*openapi_model.RemoteApis, 0, len(apis))
 
 	groupUUIDMap := common.SliceToMap(groups, func(t *group_entry.CommonGroup) string {
 		return t.Uuid
@@ -2120,7 +2131,7 @@ func (a *apiService) GetAPIRemoteOptions(ctx context.Context, namespaceID, pageN
 
 		a.commonGroup.ParentGroupName(api.GroupUUID, groupUUIDMap, groupIdMap, parentGroupName)
 
-		item := &model.RemoteApis{
+		item := &openapi_model.RemoteApis{
 			Uuid: api.UUID,
 			Name: api.Name,
 			//Service:     version.ServiceName,
@@ -2134,9 +2145,9 @@ func (a *apiService) GetAPIRemoteOptions(ctx context.Context, namespaceID, pageN
 	return apiList, total, nil
 }
 
-func (a *apiService) GetAPIRemoteByUUIDS(ctx context.Context, namespace int, uuids []string) ([]*model.RemoteApis, error) {
+func (a *apiService) GetAPIRemoteByUUIDS(ctx context.Context, namespace int, uuids []string) ([]*openapi_model.RemoteApis, error) {
 
-	groups, err := a.commonGroup.GroupListAll(ctx, namespace, service.ApiName, service.ApiName)
+	groups, err := a.commonGroup.GroupListAll(ctx, namespace, group_service.ApiName, group_service.ApiName)
 	if err != nil {
 		return nil, err
 	}
@@ -2163,14 +2174,14 @@ func (a *apiService) GetAPIRemoteByUUIDS(ctx context.Context, namespace int, uui
 		return nil, err
 	}
 
-	apiList := make([]*model.RemoteApis, 0, len(apis))
+	apiList := make([]*openapi_model.RemoteApis, 0, len(apis))
 	for _, api := range apis {
 		version := versionMap[api.Id]
 
 		parentGroupName := &[]string{}
 		a.commonGroup.ParentGroupName(api.GroupUUID, groupUUIDMap, groupIdMap, parentGroupName)
 
-		item := &model.RemoteApis{
+		item := &openapi_model.RemoteApis{
 			Uuid:        api.UUID,
 			Name:        api.Name,
 			Service:     version.ServiceName,

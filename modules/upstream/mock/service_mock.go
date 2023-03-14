@@ -8,10 +8,11 @@ import (
 	context "context"
 	dto "github.com/eolinker/apinto-dashboard/dto/service-dto"
 	"github.com/eolinker/apinto-dashboard/entry/upstream-entry"
+	"github.com/eolinker/apinto-dashboard/model/frontend-model"
+	model "github.com/eolinker/apinto-dashboard/model/openapi-model"
 	upstream_model "github.com/eolinker/apinto-dashboard/modules/upstream/model"
 	reflect "reflect"
 
-	model "github.com/eolinker/apinto-dashboard/model"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -263,10 +264,10 @@ func (mr *MockIServiceMockRecorder) OnlineList(ctx, namespaceId, serviceName int
 }
 
 // OnlineService mocks base method.
-func (m *MockIService) OnlineService(ctx context.Context, namespaceId, operator int, serviceName, clusterName string) (*model.Router, error) {
+func (m *MockIService) OnlineService(ctx context.Context, namespaceId, operator int, serviceName, clusterName string) (*frontend_model.Router, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "OnlineService", ctx, namespaceId, operator, serviceName, clusterName)
-	ret0, _ := ret[0].(*model.Router)
+	ret0, _ := ret[0].(*frontend_model.Router)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

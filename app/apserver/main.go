@@ -7,7 +7,9 @@ import (
 	"github.com/eolinker/apinto-dashboard/app/apserver/version"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/db_migrator"
-	"github.com/eolinker/apinto-dashboard/service"
+	"github.com/eolinker/apinto-dashboard/service/apinto-client"
+	"github.com/eolinker/apinto-dashboard/service/notice-service"
+	"github.com/eolinker/apinto-dashboard/service/user-service"
 	"github.com/eolinker/apinto-dashboard/store"
 	"github.com/eolinker/apinto-dashboard/timer"
 	"github.com/eolinker/apinto-dashboard/user_center/client"
@@ -71,7 +73,7 @@ func run() {
 }
 
 func initNoticeChannelDriver() {
-	var noticeChannelService service.INoticeChannelService
+	var noticeChannelService notice_service.INoticeChannelService
 	bean.Autowired(&noticeChannelService)
 	err := noticeChannelService.InitChannelDriver()
 	if err != nil {
@@ -80,7 +82,7 @@ func initNoticeChannelDriver() {
 }
 
 func initAdmin() {
-	var userInfoService service.IUserInfoService
+	var userInfoService user_service.IUserInfoService
 	bean.Autowired(&userInfoService)
 	err := userInfoService.CreateAdmin()
 	if err != nil {
@@ -107,7 +109,7 @@ func initDB() {
 }
 
 func initClustersPlugin() {
-	var clientService service.IApintoClient
+	var clientService apinto_client.IApintoClient
 	bean.Autowired(&clientService)
 
 	err := clientService.InitClustersGlobalPlugin(context.Background())

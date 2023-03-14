@@ -57,21 +57,21 @@ type txContextKey struct{}
 
 type BaseStore[T any] struct {
 	IDB
-	uniqueList []string
-	targetType *T
+	UniqueList []string
+	TargetType *T
 }
 
 func CreateStore[T any](db IDB) *BaseStore[T] {
 	b := &BaseStore[T]{
 		IDB:        db,
-		targetType: new(T),
+		TargetType: new(T),
 	}
 	modelType := reflect.TypeOf(new(T)).Elem()
 	for i := 0; i < modelType.NumField(); i++ {
 		if fieldStruct := modelType.Field(i); ast.IsExported(fieldStruct.Name) {
 			tagSetting := schema.ParseTagSetting(fieldStruct.Tag.Get("gorm"), ";")
 			if _, ok := tagSetting["DBUNIQUEINDEX"]; ok {
-				b.uniqueList = append(b.uniqueList, tagSetting["COLUMN"])
+				b.UniqueList = append(b.UniqueList, tagSetting["COLUMN"])
 			}
 		}
 	}
@@ -97,8 +97,8 @@ func (b *BaseStore[T]) Save(ctx context.Context, t *T) error {
 			return b.DB(ctx).Save(t).Error
 		}
 		//没查到主键ID的数据 看看有没有唯一索引 有唯一索引 用唯一索引更新所有字段
-		if len(b.uniqueList) > 0 {
-			return b.UpdateByUnique(ctx, t, b.uniqueList)
+		if len(b.UniqueList) > 0 {
+			return b.UpdateByUnique(ctx, t, b.UniqueList)
 		}
 	}
 	return b.Insert(ctx, t)
@@ -119,7 +119,7 @@ func (b *BaseStore[T]) UpdateByUnique(ctx context.Context, t *T, uniques []strin
 
 func (b *BaseStore[T]) Delete(ctx context.Context, id int) (int, error) {
 
-	result := b.DB(ctx).Delete(b.targetType, id)
+	result := b.DB(ctx).Delete(b.TargetType, id)
 
 	return int(result.RowsAffected), result.Error
 }
@@ -141,7 +141,7 @@ func (b *BaseStore[T]) DeleteWhere(ctx context.Context, m map[string]interface{}
 	if len(m) == 0 {
 		return 0, gorm.ErrMissingWhereClause
 	}
-	result := b.DB(ctx).Where(m).Delete(b.targetType)
+	result := b.DB(ctx).Where(m).Delete(b.TargetType)
 
 	return int(result.RowsAffected), result.Error
 }

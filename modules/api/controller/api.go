@@ -10,7 +10,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/dto/group-dto"
 	"github.com/eolinker/apinto-dashboard/dto/online-dto"
 	"github.com/eolinker/apinto-dashboard/enum"
-	"github.com/eolinker/apinto-dashboard/model"
+	"github.com/eolinker/apinto-dashboard/model/group-model"
 	service "github.com/eolinker/apinto-dashboard/modules/api"
 	"github.com/eolinker/apinto-dashboard/modules/api/api-dto"
 	_ "github.com/eolinker/apinto-dashboard/modules/api/service"
@@ -130,7 +130,7 @@ func (a *apiController) groups(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(m))
 }
 
-func (a *apiController) subGroup(val *group_dto.CommonGroupOut, namespaceId int, list []*model.CommonGroup) {
+func (a *apiController) subGroup(val *group_dto.CommonGroupOut, namespaceId int, list []*group_model.CommonGroup) {
 	if len(list) == 0 {
 		return
 	}

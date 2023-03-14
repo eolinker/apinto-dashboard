@@ -2,7 +2,7 @@ package api_dto
 
 import (
 	"github.com/eolinker/apinto-dashboard/enum"
-	"github.com/eolinker/apinto-dashboard/model"
+	"github.com/eolinker/apinto-dashboard/model/frontend-model"
 	api_entry "github.com/eolinker/apinto-dashboard/modules/api/api-entry"
 )
 
@@ -55,11 +55,11 @@ type ProxyHeader struct {
 }
 
 type ApiBatchOnlineCheckListItem struct {
-	ServiceName string        `json:"service"`
-	ClusterEnv  string        `json:"cluster"`
-	Status      bool          `json:"status"`
-	Result      string        `json:"result,omitempty"`
-	Solution    *model.Router `json:"solution,omitempty"`
+	ServiceName string                 `json:"service"`
+	ClusterEnv  string                 `json:"cluster"`
+	Status      bool                   `json:"status"`
+	Result      string                 `json:"result,omitempty"`
+	Solution    *frontend_model.Router `json:"solution,omitempty"`
 }
 
 type ApiBatchCheckListItem struct {
