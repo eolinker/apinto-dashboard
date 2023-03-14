@@ -1,13 +1,13 @@
 package model
 
 import (
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/strategy-entry"
 	"time"
 )
 
 type Strategy struct {
-	Strategy    *entry.Strategy
-	Version     *entry.StrategyVersion
+	Strategy    *strategy_entry.Strategy
+	Version     *strategy_entry.StrategyVersion
 	Filters     string
 	Conf        string
 	OperatorStr string
@@ -16,8 +16,8 @@ type Strategy struct {
 
 type StrategyToPublish[T any] struct {
 	Status          int //这里只能用int 不能用 enum.StrategyOnlineStatus json解析会保报错
-	Strategy        *entry.Strategy
-	StrategyVersion *entry.StrategyVersion
+	Strategy        *strategy_entry.Strategy
+	StrategyVersion *strategy_entry.StrategyVersion
 }
 
 type StrategyPublishHistory struct {
@@ -37,7 +37,7 @@ type StrategyPublishHistoryDetails struct {
 }
 
 type StrategyInfoOutput[T any] struct {
-	*entry.Strategy
+	*strategy_entry.Strategy
 	Filters []*FilterOutput
 	Config  *T
 }

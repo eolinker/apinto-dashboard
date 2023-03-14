@@ -1,7 +1,7 @@
 package api_store
 
 import (
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/runtime-entry"
 	api_entry "github.com/eolinker/apinto-dashboard/modules/api/api-entry"
 	"github.com/eolinker/apinto-dashboard/store"
 )
@@ -17,8 +17,8 @@ func (a *apiRuntimeHandler) Kind() string {
 	return "api"
 }
 
-func (a *apiRuntimeHandler) Encode(ar *api_entry.APIRuntime) *entry.Runtime {
-	return &entry.Runtime{
+func (a *apiRuntimeHandler) Encode(ar *api_entry.APIRuntime) *runtime_entry.Runtime {
+	return &runtime_entry.Runtime{
 		Id:          ar.Id,
 		Kind:        a.Kind(),
 		ClusterID:   ar.ClusterID,
@@ -34,7 +34,7 @@ func (a *apiRuntimeHandler) Encode(ar *api_entry.APIRuntime) *entry.Runtime {
 
 }
 
-func (a *apiRuntimeHandler) Decode(r *entry.Runtime) *api_entry.APIRuntime {
+func (a *apiRuntimeHandler) Decode(r *runtime_entry.Runtime) *api_entry.APIRuntime {
 	return &api_entry.APIRuntime{
 		Id:          r.Id,
 		NamespaceId: r.NamespaceID,
@@ -50,6 +50,6 @@ func (a *apiRuntimeHandler) Decode(r *entry.Runtime) *api_entry.APIRuntime {
 }
 
 func NewApiRuntimeStore(db store.IDB) IAPIRuntimeStore {
-	var runTimeHandler store.BaseKindHandler[api_entry.APIRuntime, entry.Runtime] = new(apiRuntimeHandler)
+	var runTimeHandler store.BaseKindHandler[api_entry.APIRuntime, runtime_entry.Runtime] = new(apiRuntimeHandler)
 	return store.CreateRuntime[api_entry.APIRuntime](runTimeHandler, db)
 }

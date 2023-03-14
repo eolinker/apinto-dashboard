@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
-	"github.com/eolinker/apinto-dashboard/dto"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/dto/open-app-dto"
+	"github.com/eolinker/apinto-dashboard/entry/open-app-entry"
 	"github.com/eolinker/apinto-dashboard/model"
 	"github.com/eolinker/apinto-dashboard/store"
 	"github.com/eolinker/eosc/common/bean"
@@ -19,8 +19,8 @@ var _ IExternalApplicationService = (*externalApplicationService)(nil)
 type IExternalApplicationService interface {
 	AppList(ctx context.Context, namespaceId int) ([]*model.ExtAppListItem, error)
 	AppInfo(ctx context.Context, namespaceId int, uuid string) (*model.ExternalAppInfo, error)
-	CreateApp(ctx context.Context, namespaceId, userId int, input *dto.ExternalAppInfoInput) error
-	UpdateApp(ctx context.Context, namespaceId, userId int, input *dto.ExternalAppInfoInput) error
+	CreateApp(ctx context.Context, namespaceId, userId int, input *open_app_dto.ExternalAppInfoInput) error
+	UpdateApp(ctx context.Context, namespaceId, userId int, input *open_app_dto.ExternalAppInfoInput) error
 	DelApp(ctx context.Context, namespaceId, userId int, uuid string) error
 	Enable(ctx context.Context, namespaceId, userId int, uuid string) error
 	Disable(ctx context.Context, namespaceId, userId int, uuid string) error
@@ -99,7 +99,7 @@ func (e *externalApplicationService) AppInfo(ctx context.Context, namespaceId in
 	return info, nil
 }
 
-func (e *externalApplicationService) CreateApp(ctx context.Context, namespaceId, userId int, input *dto.ExternalAppInfoInput) error {
+func (e *externalApplicationService) CreateApp(ctx context.Context, namespaceId, userId int, input *open_app_dto.ExternalAppInfoInput) error {
 	//外部应用id查重
 	_, err := e.externalAppStore.GetByUUID(ctx, namespaceId, input.Id)
 	if err != gorm.ErrRecordNotFound {
@@ -110,7 +110,7 @@ func (e *externalApplicationService) CreateApp(ctx context.Context, namespaceId,
 	}
 
 	t := time.Now()
-	appInfo := &entry.ExternalApplication{
+	appInfo := &open_app_entry.ExternalApplication{
 		UUID:       input.Id,
 		Namespace:  namespaceId,
 		Name:       input.Name,
@@ -135,7 +135,7 @@ func (e *externalApplicationService) CreateApp(ctx context.Context, namespaceId,
 	})
 }
 
-func (e *externalApplicationService) UpdateApp(ctx context.Context, namespaceId, userId int, input *dto.ExternalAppInfoInput) error {
+func (e *externalApplicationService) UpdateApp(ctx context.Context, namespaceId, userId int, input *open_app_dto.ExternalAppInfoInput) error {
 	appInfo, err := e.externalAppStore.GetByUUID(ctx, namespaceId, input.Id)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -160,7 +160,7 @@ func (e *externalApplicationService) UpdateApp(ctx context.Context, namespaceId,
 
 	t := time.Now()
 	//只更新name和desc
-	newInfo := &entry.ExternalApplication{
+	newInfo := &open_app_entry.ExternalApplication{
 		Id:         appInfo.Id,
 		Name:       input.Name,
 		Desc:       input.Desc,

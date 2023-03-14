@@ -2,11 +2,12 @@ package store
 
 import (
 	"encoding/json"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/variable-entry"
+	"github.com/eolinker/apinto-dashboard/entry/version-entry"
 )
 
 type IVariablePublishVersionStore interface {
-	IBaseStore[entry.VariablePublishVersion]
+	IBaseStore[variable_entry.VariablePublishVersion]
 }
 
 type variablePublishVersionHandler struct {
@@ -16,9 +17,9 @@ func (s *variablePublishVersionHandler) Kind() string {
 	return "publish_variable"
 }
 
-func (s *variablePublishVersionHandler) Encode(sv *entry.VariablePublishVersion) *entry.Version {
+func (s *variablePublishVersionHandler) Encode(sv *variable_entry.VariablePublishVersion) *version_entry.Version {
 
-	v := new(entry.Version)
+	v := new(version_entry.Version)
 	v.Id = sv.Id
 	v.Kind = s.Kind()
 	v.Target = sv.ClusterId
@@ -31,8 +32,8 @@ func (s *variablePublishVersionHandler) Encode(sv *entry.VariablePublishVersion)
 	return v
 }
 
-func (s *variablePublishVersionHandler) Decode(v *entry.Version) *entry.VariablePublishVersion {
-	sv := new(entry.VariablePublishVersion)
+func (s *variablePublishVersionHandler) Decode(v *version_entry.Version) *variable_entry.VariablePublishVersion {
+	sv := new(variable_entry.VariablePublishVersion)
 	sv.Id = v.Id
 	sv.ClusterId = v.Target
 	sv.Operator = v.Operator
@@ -44,6 +45,6 @@ func (s *variablePublishVersionHandler) Decode(v *entry.Version) *entry.Variable
 }
 
 func newVariablePublishVersionStore(db IDB) IVariablePublishVersionStore {
-	var h BaseKindHandler[entry.VariablePublishVersion, entry.Version] = &variablePublishVersionHandler{}
+	var h BaseKindHandler[variable_entry.VariablePublishVersion, version_entry.Version] = &variablePublishVersionHandler{}
 	return CreateBaseKindStore(h, db)
 }

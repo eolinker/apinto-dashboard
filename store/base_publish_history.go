@@ -2,7 +2,7 @@ package store
 
 import (
 	"context"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/publish-entry"
 )
 
 type BasePublishHistoryStore[T any] interface {
@@ -12,12 +12,12 @@ type BasePublishHistoryStore[T any] interface {
 }
 
 type BasePublishHistory[T any] struct {
-	*BaseKindStore[T, entry.PublishHistory]
+	*BaseKindStore[T, publish_entry.PublishHistory]
 }
 
-func createPublishHistory[T any](handler BaseKindHandler[T, entry.PublishHistory], db IDB) *BasePublishHistory[T] {
+func createPublishHistory[T any](handler BaseKindHandler[T, publish_entry.PublishHistory], db IDB) *BasePublishHistory[T] {
 	return &BasePublishHistory[T]{
-		BaseKindStore: CreateBaseKindStore[T, entry.PublishHistory](handler, db),
+		BaseKindStore: CreateBaseKindStore[T, publish_entry.PublishHistory](handler, db),
 	}
 }
 

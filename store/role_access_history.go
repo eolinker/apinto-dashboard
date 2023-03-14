@@ -2,11 +2,12 @@ package store
 
 import (
 	"encoding/json"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/history-entry"
+	"github.com/eolinker/apinto-dashboard/entry/role-entry"
 )
 
 type IRoleAccessLogStore interface {
-	BaseHistoryStore[entry.RoleAccessLog]
+	BaseHistoryStore[role_entry.RoleAccessLog]
 }
 
 type roleAccessLogHandler struct {
@@ -16,27 +17,27 @@ func (s *roleAccessLogHandler) Kind() string {
 	return "role_access"
 }
 
-func (s *roleAccessLogHandler) Encode(sr *entry.RoleAccessLog) *entry.History {
+func (s *roleAccessLogHandler) Encode(sr *role_entry.RoleAccessLog) *history_entry.History {
 	oldValue, _ := json.Marshal(sr.OldValue)
 	newValue, _ := json.Marshal(sr.NewValue)
-	log := &entry.History{
+	log := &history_entry.History{
 		Kind:     s.Kind(),
 		TargetID: sr.RoleID,
 		OldValue: string(oldValue),
 		NewValue: string(newValue),
-		OptType:  entry.OptType(sr.OptType),
+		OptType:  history_entry.OptType(sr.OptType),
 		Operator: sr.Operator,
 		OptTime:  sr.OptTime,
 	}
 	return log
 }
 
-func (s *roleAccessLogHandler) Decode(r *entry.History) *entry.RoleAccessLog {
-	oldValue := new(entry.AccessListLog)
+func (s *roleAccessLogHandler) Decode(r *history_entry.History) *role_entry.RoleAccessLog {
+	oldValue := new(role_entry.AccessListLog)
 	_ = json.Unmarshal([]byte(r.OldValue), oldValue)
-	newValue := new(entry.AccessListLog)
+	newValue := new(role_entry.AccessListLog)
 	_ = json.Unmarshal([]byte(r.NewValue), newValue)
-	history := &entry.RoleAccessLog{
+	history := &role_entry.RoleAccessLog{
 		Id:       r.Id,
 		Operator: r.Operator,
 		RoleID:   r.TargetID,
@@ -49,6 +50,6 @@ func (s *roleAccessLogHandler) Decode(r *entry.History) *entry.RoleAccessLog {
 }
 
 func newRoleAccessLogStore(db IDB) IRoleAccessLogStore {
-	var historyHandler DecodeHistory[entry.RoleAccessLog] = new(roleAccessLogHandler)
-	return CreateHistory(historyHandler, db, entry.HistoryKindRole)
+	var historyHandler DecodeHistory[role_entry.RoleAccessLog] = new(roleAccessLogHandler)
+	return CreateHistory(historyHandler, db, history_entry.HistoryKindRole)
 }

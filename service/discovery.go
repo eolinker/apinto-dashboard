@@ -7,8 +7,10 @@ import (
 	"github.com/eolinker/apinto-dashboard/common"
 	driver_manager "github.com/eolinker/apinto-dashboard/driver-manager"
 	"github.com/eolinker/apinto-dashboard/driver-manager/driver"
-	"github.com/eolinker/apinto-dashboard/dto"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/dto/discover-dto"
+	"github.com/eolinker/apinto-dashboard/entry/discovery-entry"
+	"github.com/eolinker/apinto-dashboard/entry/quote-entry"
+	"github.com/eolinker/apinto-dashboard/entry/variable-entry"
 	"github.com/eolinker/apinto-dashboard/model"
 	"github.com/eolinker/apinto-dashboard/modules/upstream"
 	"github.com/eolinker/apinto-dashboard/store"
@@ -24,8 +26,8 @@ import (
 type IDiscoveryService interface {
 	GetDiscoveryList(ctx context.Context, namespaceID int, searchName string) ([]*model.DiscoveryListItem, error)
 	GetDiscoveryVersionInfo(ctx context.Context, namespaceID int, discoveryName string) (*model.DiscoveryInfo, error)
-	CreateDiscovery(ctx context.Context, namespaceID int, userID int, input *dto.DiscoveryInfoProxy) error
-	UpdateDiscovery(ctx context.Context, namespaceID int, userID int, input *dto.DiscoveryInfoProxy) error
+	CreateDiscovery(ctx context.Context, namespaceID int, userID int, input *discover_dto.DiscoveryInfoProxy) error
+	UpdateDiscovery(ctx context.Context, namespaceID int, userID int, input *discover_dto.DiscoveryInfoProxy) error
 	DeleteDiscovery(ctx context.Context, namespaceId, userId int, discoveryName string) error
 
 	OnlineList(ctx context.Context, namespaceId int, discoveryName string) ([]*model.DiscoveryOnline, error)
@@ -142,7 +144,7 @@ func (d *discoveryService) GetDiscoveryVersionInfo(ctx context.Context, namespac
 	return info, nil
 }
 
-func (d *discoveryService) CreateDiscovery(ctx context.Context, namespaceID int, userID int, input *dto.DiscoveryInfoProxy) error {
+func (d *discoveryService) CreateDiscovery(ctx context.Context, namespaceID int, userID int, input *discover_dto.DiscoveryInfoProxy) error {
 	discoveryDriver := d.discoveryManager.GetDriver(input.Driver)
 	if discoveryDriver == nil {
 		return fmt.Errorf("Driver %s doesn't exit. ", input.Driver)
@@ -177,7 +179,7 @@ func (d *discoveryService) CreateDiscovery(ctx context.Context, namespaceID int,
 
 	return d.discoveryStore.Transaction(ctx, func(txCtx context.Context) error {
 		t := time.Now()
-		discoveryInfo := &entry.Discovery{
+		discoveryInfo := &discovery_entry.Discovery{
 			NamespaceId: namespaceID,
 			Name:        input.Name,
 			UUID:        input.UUID,
@@ -191,10 +193,10 @@ func (d *discoveryService) CreateDiscovery(ctx context.Context, namespaceID int,
 			return err
 		}
 		//添加版本信息
-		discoveryVersionInfo := &entry.DiscoveryVersion{
+		discoveryVersionInfo := &discovery_entry.DiscoveryVersion{
 			DiscoveryID: discoveryInfo.Id,
 			NamespaceID: namespaceID,
-			DiscoveryVersionConfig: entry.DiscoveryVersionConfig{
+			DiscoveryVersionConfig: discovery_entry.DiscoveryVersionConfig{
 				Config: input.Config.String(),
 			},
 			Operator:   userID,
@@ -204,7 +206,7 @@ func (d *discoveryService) CreateDiscovery(ctx context.Context, namespaceID int,
 		if err = d.discoveryVersionStore.Save(txCtx, discoveryVersionInfo); err != nil {
 			return err
 		}
-		stat := &entry.DiscoveryStat{
+		stat := &discovery_entry.DiscoveryStat{
 			DiscoveryID: discoveryInfo.Id,
 			VersionID:   discoveryVersionInfo.Id,
 		}
@@ -218,19 +220,19 @@ func (d *discoveryService) CreateDiscovery(ctx context.Context, namespaceID int,
 			if err != nil {
 				return err
 			}
-			quoteMap := make(map[entry.QuoteTargetKindType][]int)
+			quoteMap := make(map[quote_entry.QuoteTargetKindType][]int)
 			for _, variable := range variables {
-				quoteMap[entry.QuoteTargetKindTypeVariable] = append(quoteMap[entry.QuoteTargetKindTypeVariable], variable.Id)
+				quoteMap[quote_entry.QuoteTargetKindTypeVariable] = append(quoteMap[quote_entry.QuoteTargetKindTypeVariable], variable.Id)
 			}
 
-			if err = d.quoteStore.Set(txCtx, discoveryInfo.Id, entry.QuoteKindTypeDiscovery, quoteMap); err != nil {
+			if err = d.quoteStore.Set(txCtx, discoveryInfo.Id, quote_entry.QuoteKindTypeDiscovery, quoteMap); err != nil {
 				return err
 			}
 		}
 
-		return d.discoveryHistoryStore.HistoryAdd(txCtx, namespaceID, discoveryInfo.Id, &entry.DiscoveryHistoryInfo{
+		return d.discoveryHistoryStore.HistoryAdd(txCtx, namespaceID, discoveryInfo.Id, &discovery_entry.DiscoveryHistoryInfo{
 			Discovery: *discoveryInfo,
-			Config: entry.DiscoveryVersionConfig{
+			Config: discovery_entry.DiscoveryVersionConfig{
 				Config: input.Config.String(),
 			},
 		}, userID)
@@ -238,7 +240,7 @@ func (d *discoveryService) CreateDiscovery(ctx context.Context, namespaceID int,
 
 }
 
-func (d *discoveryService) UpdateDiscovery(ctx context.Context, namespaceID int, userID int, input *dto.DiscoveryInfoProxy) error {
+func (d *discoveryService) UpdateDiscovery(ctx context.Context, namespaceID int, userID int, input *discover_dto.DiscoveryInfoProxy) error {
 	discoveryInfo, err := d.discoveryStore.GetByName(ctx, namespaceID, input.Name)
 	if err != nil {
 		return err
@@ -281,10 +283,10 @@ func (d *discoveryService) UpdateDiscovery(ctx context.Context, namespaceID int,
 
 		//若配置更新了才往version插入新数据
 		if discoveryDriver.CheckConfIsChange([]byte(latestVersion.Config), input.Config) {
-			discoveryVersionInfo := &entry.DiscoveryVersion{
+			discoveryVersionInfo := &discovery_entry.DiscoveryVersion{
 				DiscoveryID: discoveryInfo.Id,
 				NamespaceID: namespaceID,
-				DiscoveryVersionConfig: entry.DiscoveryVersionConfig{
+				DiscoveryVersionConfig: discovery_entry.DiscoveryVersionConfig{
 					Config: input.Config.String(),
 				},
 				Operator:   userID,
@@ -294,7 +296,7 @@ func (d *discoveryService) UpdateDiscovery(ctx context.Context, namespaceID int,
 				return err
 			}
 			//添加版本关联原表信息
-			stat := &entry.DiscoveryStat{
+			stat := &discovery_entry.DiscoveryStat{
 				DiscoveryID: discoveryInfo.Id,
 				VersionID:   discoveryVersionInfo.Id,
 			}
@@ -303,7 +305,7 @@ func (d *discoveryService) UpdateDiscovery(ctx context.Context, namespaceID int,
 			}
 
 			//更新引用， 获取新的引用变量ID
-			targetMaps := make(map[entry.QuoteTargetKindType][]int)
+			targetMaps := make(map[quote_entry.QuoteTargetKindType][]int)
 			variableIDList := make([]int, 0)
 			variables, err := d.globalVariableService.GetByKeys(ctx, namespaceID, variableList)
 			if err != nil {
@@ -312,21 +314,21 @@ func (d *discoveryService) UpdateDiscovery(ctx context.Context, namespaceID int,
 			for _, variable := range variables {
 				variableIDList = append(variableIDList, variable.Id)
 			}
-			targetMaps[entry.QuoteTargetKindTypeVariable] = variableIDList
-			if err = d.quoteStore.Set(txCtx, discoveryInfo.Id, entry.QuoteKindTypeDiscovery, targetMaps); err != nil {
+			targetMaps[quote_entry.QuoteTargetKindTypeVariable] = variableIDList
+			if err = d.quoteStore.Set(txCtx, discoveryInfo.Id, quote_entry.QuoteKindTypeDiscovery, targetMaps); err != nil {
 				return err
 			}
 		}
 
 		//操作记录
-		return d.discoveryHistoryStore.HistoryEdit(txCtx, namespaceID, discoveryInfo.Id, &entry.DiscoveryHistoryInfo{
+		return d.discoveryHistoryStore.HistoryEdit(txCtx, namespaceID, discoveryInfo.Id, &discovery_entry.DiscoveryHistoryInfo{
 			Discovery: oldDiscovery,
-			Config: entry.DiscoveryVersionConfig{
+			Config: discovery_entry.DiscoveryVersionConfig{
 				Config: latestVersion.Config,
 			},
-		}, &entry.DiscoveryHistoryInfo{
+		}, &discovery_entry.DiscoveryHistoryInfo{
 			Discovery: *discoveryInfo,
-			Config: entry.DiscoveryVersionConfig{
+			Config: discovery_entry.DiscoveryVersionConfig{
 				Config: input.Config.String(),
 			},
 		}, userID)
@@ -371,9 +373,9 @@ func (d *discoveryService) DeleteDiscovery(ctx context.Context, namespaceID, use
 			return err
 		}
 
-		if err = d.discoveryHistoryStore.HistoryDelete(txCtx, namespaceID, discoveryInfo.Id, &entry.DiscoveryHistoryInfo{
+		if err = d.discoveryHistoryStore.HistoryDelete(txCtx, namespaceID, discoveryInfo.Id, &discovery_entry.DiscoveryHistoryInfo{
 			Discovery: *discoveryInfo,
-			Config:    entry.DiscoveryVersionConfig{Config: version.Config},
+			Config:    discovery_entry.DiscoveryVersionConfig{Config: version.Config},
 		}, userId); err != nil {
 			return err
 		}
@@ -395,7 +397,7 @@ func (d *discoveryService) DeleteDiscovery(ctx context.Context, namespaceID, use
 			return err
 		}
 
-		return d.quoteStore.DelBySource(txCtx, discoveryInfo.Id, entry.QuoteKindTypeDiscovery)
+		return d.quoteStore.DelBySource(txCtx, discoveryInfo.Id, quote_entry.QuoteKindTypeDiscovery)
 	})
 	if err != nil {
 		return err
@@ -424,7 +426,7 @@ func (d *discoveryService) OnlineList(ctx context.Context, namespaceId int, disc
 	if err != nil {
 		return nil, err
 	}
-	runtimeMaps := common.SliceToMap(runtimes, func(t *entry.DiscoveryRuntime) int {
+	runtimeMaps := common.SliceToMap(runtimes, func(t *discovery_entry.DiscoveryRuntime) int {
 		return t.ClusterId
 	})
 
@@ -435,7 +437,7 @@ func (d *discoveryService) OnlineList(ctx context.Context, namespaceId int, disc
 		return nil, err
 	}
 
-	userIds := common.SliceToSliceIds(runtimes, func(t *entry.DiscoveryRuntime) int {
+	userIds := common.SliceToSliceIds(runtimes, func(t *discovery_entry.DiscoveryRuntime) int {
 		return t.Operator
 	})
 
@@ -509,11 +511,11 @@ func (d *discoveryService) OnlineDiscovery(ctx context.Context, namespaceId, ope
 	}
 	router.Params["cluster_name"] = clusterName
 	//服务引用的环境变量
-	quoteMaps, err := d.quoteStore.GetSourceQuote(ctx, discoveryID, entry.QuoteKindTypeDiscovery)
+	quoteMaps, err := d.quoteStore.GetSourceQuote(ctx, discoveryID, quote_entry.QuoteKindTypeDiscovery)
 	if err != nil {
 		return nil, err
 	}
-	variableIds := quoteMaps[entry.QuoteTargetKindTypeVariable]
+	variableIds := quoteMaps[quote_entry.QuoteTargetKindTypeVariable]
 	if len(variableIds) > 0 {
 		//获取集群正在运行的环境变量版本
 		variablePublishVersion, err := d.variableService.GetPublishVersion(ctx, cluster.Id)
@@ -526,7 +528,7 @@ func (d *discoveryService) OnlineDiscovery(ctx context.Context, namespaceId, ope
 		}
 
 		//已发布的环境变量
-		toMap := common.SliceToMap(variablePublishVersion.ClusterVariable, func(t *entry.ClusterVariable) int {
+		toMap := common.SliceToMap(variablePublishVersion.ClusterVariable, func(t *variable_entry.ClusterVariable) int {
 			return t.VariableId
 		})
 
@@ -561,7 +563,7 @@ func (d *discoveryService) OnlineDiscovery(ctx context.Context, namespaceId, ope
 	//判断是否是更新
 	isApintoUpdate := false
 	if runtime == nil {
-		runtime = &entry.DiscoveryRuntime{
+		runtime = &discovery_entry.DiscoveryRuntime{
 			NamespaceId: namespaceId,
 			DiscoveryID: discoveryID,
 			ClusterId:   cluster.Id,
@@ -689,11 +691,11 @@ func (d *discoveryService) OfflineDiscovery(ctx context.Context, namespaceId, op
 	}
 
 	//下线前确定引用了此服务发现的上游服务均已下线
-	quoteSet, err := d.quoteStore.GetTargetQuote(ctx, discoveryInfo.Id, entry.QuoteTargetKindTypeDiscovery)
+	quoteSet, err := d.quoteStore.GetTargetQuote(ctx, discoveryInfo.Id, quote_entry.QuoteTargetKindTypeDiscovery)
 	if err != nil {
 		return err
 	}
-	serviceIds := quoteSet[entry.QuoteKindTypeService]
+	serviceIds := quoteSet[quote_entry.QuoteKindTypeService]
 	for _, serviceID := range serviceIds {
 		if d.service.IsOnline(ctx, cluster.Id, serviceID) {
 			info, err := d.service.GetServiceSchemaInfo(ctx, serviceID)
@@ -831,7 +833,7 @@ func (d *discoveryService) GetLatestDiscoveryVersion(ctx context.Context, discov
 		return nil, err
 	}
 
-	var version *entry.DiscoveryVersion
+	var version *discovery_entry.DiscoveryVersion
 
 	version, err = d.discoveryVersionStore.Get(ctx, stat.VersionID)
 	if err != nil {
@@ -855,11 +857,11 @@ func (d *discoveryService) GetServiceDiscoveryDriver(ctx context.Context, namesp
 }
 
 func (d *discoveryService) isDiscoveryCanDelete(ctx context.Context, namespaceID, discoveryID int) (bool, error) {
-	quotedSet, err := d.quoteStore.GetTargetQuote(ctx, discoveryID, entry.QuoteTargetKindTypeDiscovery)
+	quotedSet, err := d.quoteStore.GetTargetQuote(ctx, discoveryID, quote_entry.QuoteTargetKindTypeDiscovery)
 	if err != nil {
 		return false, err
 	}
-	for _, serviceID := range quotedSet[entry.QuoteKindTypeService] {
+	for _, serviceID := range quotedSet[quote_entry.QuoteKindTypeService] {
 		serviceInfo, err := d.service.GetServiceSchemaInfo(ctx, serviceID)
 		if err != nil {
 			return false, err

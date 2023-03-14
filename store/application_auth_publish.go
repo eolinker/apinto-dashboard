@@ -2,26 +2,26 @@ package store
 
 import (
 	"context"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/application-entry"
 )
 
 type IApplicationAuthPublishStore interface {
-	IBaseStore[entry.ApplicationAuthPublish]
-	Reset(ctx context.Context, clusterId, applicationId int, list []*entry.ApplicationAuthPublish) error
+	IBaseStore[application_entry.ApplicationAuthPublish]
+	Reset(ctx context.Context, clusterId, applicationId int, list []*application_entry.ApplicationAuthPublish) error
 	DeleteByClusterIdAppId(ctx context.Context, clusterId, applicationId int) error
-	GetList(ctx context.Context, clusterId, applicationId int) ([]*entry.ApplicationAuthPublish, error)
+	GetList(ctx context.Context, clusterId, applicationId int) ([]*application_entry.ApplicationAuthPublish, error)
 }
 
 type applicationAuthPublishStore struct {
-	*BaseStore[entry.ApplicationAuthPublish]
+	*BaseStore[application_entry.ApplicationAuthPublish]
 }
 
 func newApplicationAuthPublishStore(db IDB) IApplicationAuthPublishStore {
-	return &applicationAuthPublishStore{BaseStore: CreateStore[entry.ApplicationAuthPublish](db)}
+	return &applicationAuthPublishStore{BaseStore: CreateStore[application_entry.ApplicationAuthPublish](db)}
 }
 
 // Reset 外部保证事务
-func (a *applicationAuthPublishStore) Reset(ctx context.Context, clusterId, applicationId int, list []*entry.ApplicationAuthPublish) error {
+func (a *applicationAuthPublishStore) Reset(ctx context.Context, clusterId, applicationId int, list []*application_entry.ApplicationAuthPublish) error {
 	_, err := a.DeleteWhere(ctx, map[string]interface{}{"`cluster`": clusterId, "`application`": applicationId})
 	if err != nil {
 		return err
@@ -30,7 +30,7 @@ func (a *applicationAuthPublishStore) Reset(ctx context.Context, clusterId, appl
 }
 
 // GetList
-func (a *applicationAuthPublishStore) GetList(ctx context.Context, clusterId, applicationId int) ([]*entry.ApplicationAuthPublish, error) {
+func (a *applicationAuthPublishStore) GetList(ctx context.Context, clusterId, applicationId int) ([]*application_entry.ApplicationAuthPublish, error) {
 	return a.ListQuery(ctx, "`cluster` = ? and `application` = ?", []interface{}{clusterId, applicationId}, "")
 }
 

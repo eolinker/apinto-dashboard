@@ -7,8 +7,9 @@ import (
 	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/cache"
 	"github.com/eolinker/apinto-dashboard/common"
-	"github.com/eolinker/apinto-dashboard/dto"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/dto/user-dto"
+	"github.com/eolinker/apinto-dashboard/entry/role-entry"
+	"github.com/eolinker/apinto-dashboard/entry/user-entry"
 	"github.com/eolinker/apinto-dashboard/model"
 	"github.com/eolinker/apinto-dashboard/store"
 	"github.com/eolinker/apinto-dashboard/user_center/client"
@@ -31,16 +32,16 @@ var iv = []byte("1e42=7838a1vfc6n")
 
 type IUserInfoService interface {
 	GetUserInfo(ctx context.Context, userId int) (*model.UserInfo, error)
-	UpdateMyProfile(ctx context.Context, userId int, req *dto.UpdateMyProfileReq) error
-	UpdateMyPassword(ctx context.Context, userId int, req *dto.UpdateMyPasswordReq) error
+	UpdateMyProfile(ctx context.Context, userId int, req *user_dto.UpdateMyProfileReq) error
+	UpdateMyPassword(ctx context.Context, userId int, req *user_dto.UpdateMyPasswordReq) error
 	UpdateLoginTime(ctx context.Context, userId int)
 	GetUserInfoList(ctx context.Context, roleId, keyWord string) ([]*model.UserInfo, error)
 	GetUserInfoAll(ctx context.Context) ([]*model.UserInfo, error)
 	GetUserInfoMaps(ctx context.Context, userId ...int) (map[int]*model.UserInfo, error)
-	CreateUser(ctx context.Context, operator int, userInfo *dto.SaveUserReq) error
+	CreateUser(ctx context.Context, operator int, userInfo *user_dto.SaveUserReq) error
 	CheckUser(ctx context.Context, userId int) error
-	PatchUser(ctx context.Context, operator, userId int, req *dto.PatchUserReq) error
-	UpdateUser(ctx context.Context, operator, userId int, userInfo *dto.SaveUserReq) error
+	PatchUser(ctx context.Context, operator, userId int, req *user_dto.PatchUserReq) error
+	UpdateUser(ctx context.Context, operator, userId int, userInfo *user_dto.SaveUserReq) error
 	DelUser(ctx context.Context, operator int, userIds []int) error
 	ResetUserPwd(ctx context.Context, operator, userId int, pwd string) error
 
@@ -48,8 +49,8 @@ type IUserInfoService interface {
 	GetRoleList(ctx context.Context, userID int) ([]*model.RoleListItem, int, error)
 	GetRoleInfo(ctx context.Context, roleID string) (*model.RoleInfo, error)
 	GetRoleOptions(ctx context.Context) ([]*model.RoleOptionItem, error)
-	CreateRole(ctx context.Context, userID int, input *dto.ProxyRoleInfo) error
-	UpdateRole(ctx context.Context, userID int, roleUUID string, input *dto.ProxyRoleInfo) error
+	CreateRole(ctx context.Context, userID int, input *user_dto.ProxyRoleInfo) error
+	UpdateRole(ctx context.Context, userID int, roleUUID string, input *user_dto.ProxyRoleInfo) error
 	DeleteRole(ctx context.Context, userID int, roleUUID string) error
 	RoleBatchUpdate(ctx context.Context, userIds []int, roleUUID string) error
 	RoleBatchRemove(ctx context.Context, userIds []int, roleUUID string) error
@@ -128,7 +129,7 @@ func (u *userInfoService) CreateAdmin() error {
 				return errors.New("获取超管权限失败")
 			}
 
-			userInfo := &entry.UserInfo{
+			userInfo := &user_entry.UserInfo{
 				Id:         *userId,
 				UserName:   AdminName,
 				NickName:   AdminName,
@@ -143,7 +144,7 @@ func (u *userInfoService) CreateAdmin() error {
 				return err
 			}
 
-			userRole := &entry.UserRole{
+			userRole := &user_entry.UserRole{
 				UserID:     userInfo.Id,
 				RoleID:     adminRole.ID,
 				Module:     "/",
@@ -160,7 +161,7 @@ func (u *userInfoService) CreateAdmin() error {
 	return nil
 }
 
-func (u *userInfoService) UpdateMyPassword(ctx context.Context, userId int, req *dto.UpdateMyPasswordReq) error {
+func (u *userInfoService) UpdateMyPassword(ctx context.Context, userId int, req *user_dto.UpdateMyPasswordReq) error {
 	userInfoReq := &client.UserInfoReq{
 		Id: strconv.Itoa(userId),
 	}
@@ -208,7 +209,7 @@ func (u *userInfoService) UpdateLoginTime(ctx context.Context, userId int) {
 	}
 }
 
-func (u *userInfoService) UpdateMyProfile(ctx context.Context, userId int, req *dto.UpdateMyProfileReq) error {
+func (u *userInfoService) UpdateMyProfile(ctx context.Context, userId int, req *user_dto.UpdateMyProfileReq) error {
 	info, err := u.GetUserInfo(ctx, userId)
 	if err != nil {
 		return err
@@ -247,7 +248,7 @@ func (u *userInfoService) UpdateMyProfile(ctx context.Context, userId int, req *
 
 }
 
-func (u *userInfoService) PatchUser(ctx context.Context, operator, userId int, req *dto.PatchUserReq) error {
+func (u *userInfoService) PatchUser(ctx context.Context, operator, userId int, req *user_dto.PatchUserReq) error {
 	if len(req.Role) == 0 && req.Status == 0 {
 		return errors.New("参数错误")
 	}
@@ -293,7 +294,7 @@ func (u *userInfoService) PatchUser(ctx context.Context, operator, userId int, r
 			}
 
 			for _, role := range roles {
-				userRole := &entry.UserRole{
+				userRole := &user_entry.UserRole{
 					UserID:     userId,
 					RoleID:     role.ID,
 					CreateTime: t,
@@ -394,7 +395,7 @@ func (u *userInfoService) GetUserInfoList(ctx context.Context, roleUUID, keyword
 		return nil, err
 	}
 
-	userIds := common.SliceToSliceIds(infos, func(t *entry.UserInfo) int {
+	userIds := common.SliceToSliceIds(infos, func(t *user_entry.UserInfo) int {
 		return t.Operator
 	})
 
@@ -495,7 +496,7 @@ func (u *userInfoService) GetUserInfo(ctx context.Context, userID int) (*model.U
 	//读数据库
 	userInfo, err = u.userInfoStore.Get(ctx, userID)
 	if err == gorm.ErrRecordNotFound {
-		_ = u.userInfoCache.Set(ctx, key, &entry.UserInfo{}, time.Minute*30)
+		_ = u.userInfoCache.Set(ctx, key, &user_entry.UserInfo{}, time.Minute*30)
 		return nil, err
 	}
 	if err != nil {
@@ -518,7 +519,7 @@ func (u *userInfoService) GetUserInfoByUUID(ctx context.Context, userID string) 
 	return &model.UserInfo{UserInfo: userInfo}, nil
 }
 
-func (u *userInfoService) CreateUser(ctx context.Context, operator int, userInfo *dto.SaveUserReq) error {
+func (u *userInfoService) CreateUser(ctx context.Context, operator int, userInfo *user_dto.SaveUserReq) error {
 
 	roles, err := u.roleStore.GetByUUIDS(ctx, userInfo.RoleIds)
 	if err != nil {
@@ -556,7 +557,7 @@ func (u *userInfoService) CreateUser(ctx context.Context, operator int, userInfo
 	}
 
 	t := time.Now()
-	entryUserInfo := &entry.UserInfo{
+	entryUserInfo := &user_entry.UserInfo{
 		Id:           *userId,
 		Sex:          userInfo.Sex,
 		UserName:     userInfo.UserName,
@@ -585,10 +586,10 @@ func (u *userInfoService) CreateUser(ctx context.Context, operator int, userInfo
 			return err
 		}
 
-		userRoles := make([]*entry.UserRole, 0)
+		userRoles := make([]*user_entry.UserRole, 0)
 
 		for _, role := range roles {
-			userRole := &entry.UserRole{
+			userRole := &user_entry.UserRole{
 				UserID:     entryUserInfo.Id,
 				RoleID:     role.ID,
 				Module:     "/",
@@ -608,7 +609,7 @@ func (u *userInfoService) CreateUser(ctx context.Context, operator int, userInfo
 
 }
 
-func (u *userInfoService) UpdateUser(ctx context.Context, operator, userId int, userInfo *dto.SaveUserReq) error {
+func (u *userInfoService) UpdateUser(ctx context.Context, operator, userId int, userInfo *user_dto.SaveUserReq) error {
 
 	roles, err := u.roleStore.GetByUUIDS(ctx, userInfo.RoleIds)
 	if err != nil {
@@ -636,7 +637,7 @@ func (u *userInfoService) UpdateUser(ctx context.Context, operator, userId int, 
 	}
 
 	t := time.Now()
-	newUserInfo := &entry.UserInfo{
+	newUserInfo := &user_entry.UserInfo{
 		Id:           info.Id,
 		Sex:          userInfo.Sex,
 		UserName:     userInfo.UserName,
@@ -675,10 +676,10 @@ func (u *userInfoService) UpdateUser(ctx context.Context, operator, userId int, 
 				return err
 			}
 
-			userRoles := make([]*entry.UserRole, 0)
+			userRoles := make([]*user_entry.UserRole, 0)
 
 			for _, role := range roles {
-				userRole := &entry.UserRole{
+				userRole := &user_entry.UserRole{
 					UserID:     newUserInfo.Id,
 					RoleID:     role.ID,
 					Module:     "/",
@@ -850,7 +851,7 @@ func (u *userInfoService) GetRoleOptions(ctx context.Context) ([]*model.RoleOpti
 	return roleList, nil
 }
 
-func (u *userInfoService) CreateRole(ctx context.Context, operator int, input *dto.ProxyRoleInfo) error {
+func (u *userInfoService) CreateRole(ctx context.Context, operator int, input *user_dto.ProxyRoleInfo) error {
 	//判断title有没有重复
 	role, err := u.roleStore.GetByTitle(ctx, input.Title)
 	if err != nil && err != gorm.ErrRecordNotFound {
@@ -870,7 +871,7 @@ func (u *userInfoService) CreateRole(ctx context.Context, operator int, input *d
 
 	return u.roleStore.Transaction(ctx, func(txCtx context.Context) error {
 		t := time.Now()
-		roleInfo := &entry.Role{
+		roleInfo := &role_entry.Role{
 			Title:      input.Title,
 			Uuid:       roleUuid,
 			Desc:       input.Desc,
@@ -893,7 +894,7 @@ func (u *userInfoService) CreateRole(ctx context.Context, operator int, input *d
 			accessIDs = append(accessIDs, strconv.Itoa(int(id)))
 		}
 
-		roleAccess := &entry.RoleAccess{
+		roleAccess := &role_entry.RoleAccess{
 			RoleID:     roleInfo.ID,
 			AccessIDs:  strings.Join(accessIDs, ","),
 			CreateTime: t,
@@ -904,14 +905,14 @@ func (u *userInfoService) CreateRole(ctx context.Context, operator int, input *d
 			return err
 		}
 		//角色权限变更日志
-		return u.roleAccessLogStore.HistoryAdd(txCtx, 0, roleInfo.ID, &entry.AccessListLog{
+		return u.roleAccessLogStore.HistoryAdd(txCtx, 0, roleInfo.ID, &role_entry.AccessListLog{
 			AccessIds: accessIDs,
 			Module:    roleInfo.Module,
 		}, operator)
 	})
 }
 
-func (u *userInfoService) UpdateRole(ctx context.Context, userID int, roleUUID string, input *dto.ProxyRoleInfo) error {
+func (u *userInfoService) UpdateRole(ctx context.Context, userID int, roleUUID string, input *user_dto.ProxyRoleInfo) error {
 	//内置角色不可以修改
 	if access.IsBuildInRole(roleUUID) {
 		return errors.New("build-in role can't be updated. ")
@@ -984,10 +985,10 @@ func (u *userInfoService) UpdateRole(ctx context.Context, userID int, roleUUID s
 		}
 
 		//角色权限变更日志
-		return u.roleAccessLogStore.HistoryEdit(txCtx, 0, role.ID, &entry.AccessListLog{
+		return u.roleAccessLogStore.HistoryEdit(txCtx, 0, role.ID, &role_entry.AccessListLog{
 			AccessIds: oldAccessIDs,
 			Module:    role.Module,
-		}, &entry.AccessListLog{
+		}, &role_entry.AccessListLog{
 			AccessIds: accessIDs,
 			Module:    role.Module,
 		}, userID)
@@ -1068,7 +1069,7 @@ func (u *userInfoService) DeleteRole(ctx context.Context, userID int, roleUUID s
 		}
 
 		//角色权限变更日志
-		err = u.roleAccessLogStore.HistoryDelete(txCtx, 0, role.ID, &entry.AccessListLog{
+		err = u.roleAccessLogStore.HistoryDelete(txCtx, 0, role.ID, &role_entry.AccessListLog{
 			AccessIds: strings.Split(roleAccess.AccessIDs, "m"),
 			Module:    role.Module,
 		}, userID)
@@ -1098,7 +1099,7 @@ func (u *userInfoService) RoleBatchUpdate(ctx context.Context, userIds []int, ro
 	}
 
 	userIdsUpdateList := make([]int, 0, len(userIds))
-	userInfoUpdateList := make([]*entry.UserInfo, 0, len(userIds))
+	userInfoUpdateList := make([]*user_entry.UserInfo, 0, len(userIds))
 	err := u.roleStore.Transaction(ctx, func(txCtx context.Context) error {
 
 		t := time.Now()
@@ -1125,7 +1126,7 @@ func (u *userInfoService) RoleBatchUpdate(ctx context.Context, userIds []int, ro
 			if _, err = u.userRoleStore.DeleteWhere(txCtx, delMap); err != nil {
 				return err
 			}
-			userRole := &entry.UserRole{
+			userRole := &user_entry.UserRole{
 				UserID:     user.Id,
 				RoleID:     roleID,
 				Module:     "/",
@@ -1183,7 +1184,7 @@ func (u *userInfoService) RoleBatchRemove(ctx context.Context, userIds []int, ro
 	}
 
 	userIdsUpdateList := make([]int, 0, len(userIds))
-	userInfoUpdateList := make([]*entry.UserInfo, 0, len(userIds))
+	userInfoUpdateList := make([]*user_entry.UserInfo, 0, len(userIds))
 	err := u.roleStore.Transaction(ctx, func(txCtx context.Context) error {
 		t := time.Now()
 		for _, userID := range userIds {

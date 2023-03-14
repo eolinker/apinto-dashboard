@@ -1,11 +1,12 @@
 package store
 
 import (
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/application-entry"
+	"github.com/eolinker/apinto-dashboard/entry/runtime-entry"
 )
 
 type IApplicationAuthRuntimeStore interface {
-	BaseRuntimeStore[entry.ApplicationAuthRuntime]
+	BaseRuntimeStore[application_entry.ApplicationAuthRuntime]
 }
 
 type applicationAuthRuntimeHandler struct {
@@ -15,8 +16,8 @@ func (s *applicationAuthRuntimeHandler) Kind() string {
 	return "application_auth"
 }
 
-func (s *applicationAuthRuntimeHandler) Encode(sr *entry.ApplicationAuthRuntime) *entry.Runtime {
-	return &entry.Runtime{
+func (s *applicationAuthRuntimeHandler) Encode(sr *application_entry.ApplicationAuthRuntime) *runtime_entry.Runtime {
+	return &runtime_entry.Runtime{
 		Id:          sr.Id,
 		Kind:        s.Kind(),
 		ClusterID:   sr.ClusterId,
@@ -32,8 +33,8 @@ func (s *applicationAuthRuntimeHandler) Encode(sr *entry.ApplicationAuthRuntime)
 
 }
 
-func (s *applicationAuthRuntimeHandler) Decode(r *entry.Runtime) *entry.ApplicationAuthRuntime {
-	return &entry.ApplicationAuthRuntime{
+func (s *applicationAuthRuntimeHandler) Decode(r *runtime_entry.Runtime) *application_entry.ApplicationAuthRuntime {
+	return &application_entry.ApplicationAuthRuntime{
 		Id:                r.Id,
 		NamespaceId:       r.NamespaceID,
 		ClusterId:         r.ClusterID,
@@ -48,6 +49,6 @@ func (s *applicationAuthRuntimeHandler) Decode(r *entry.Runtime) *entry.Applicat
 }
 
 func newApplicationAuthRuntimeStore(db IDB) IApplicationAuthRuntimeStore {
-	var runTimeHandler BaseKindHandler[entry.ApplicationAuthRuntime, entry.Runtime] = new(applicationAuthRuntimeHandler)
-	return CreateRuntime[entry.ApplicationAuthRuntime](runTimeHandler, db)
+	var runTimeHandler BaseKindHandler[application_entry.ApplicationAuthRuntime, runtime_entry.Runtime] = new(applicationAuthRuntimeHandler)
+	return CreateRuntime[application_entry.ApplicationAuthRuntime](runTimeHandler, db)
 }

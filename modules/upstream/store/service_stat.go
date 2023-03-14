@@ -1,12 +1,13 @@
 package upstream_store
 
 import (
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/stat-entry"
+	"github.com/eolinker/apinto-dashboard/entry/upstream-entry"
 	"github.com/eolinker/apinto-dashboard/store"
 )
 
 type IServiceStatStore interface {
-	store.IBaseStore[entry.ServiceStat]
+	store.IBaseStore[upstream_entry.ServiceStat]
 }
 
 type ServiceStatKindHandler struct {
@@ -16,8 +17,8 @@ func (s *ServiceStatKindHandler) Kind() string {
 	return "service"
 }
 
-func (s *ServiceStatKindHandler) Encode(sv *entry.ServiceStat) *entry.Stat {
-	stat := new(entry.Stat)
+func (s *ServiceStatKindHandler) Encode(sv *upstream_entry.ServiceStat) *stat_entry.Stat {
+	stat := new(stat_entry.Stat)
 
 	stat.Tag = sv.ServiceId
 	stat.Kind = "service"
@@ -26,8 +27,8 @@ func (s *ServiceStatKindHandler) Encode(sv *entry.ServiceStat) *entry.Stat {
 	return stat
 }
 
-func (s *ServiceStatKindHandler) Decode(stat *entry.Stat) *entry.ServiceStat {
-	ss := new(entry.ServiceStat)
+func (s *ServiceStatKindHandler) Decode(stat *stat_entry.Stat) *upstream_entry.ServiceStat {
+	ss := new(upstream_entry.ServiceStat)
 
 	ss.ServiceId = stat.Tag
 	ss.VersionId = stat.Version
@@ -36,6 +37,6 @@ func (s *ServiceStatKindHandler) Decode(stat *entry.Stat) *entry.ServiceStat {
 }
 
 func newServiceStatStore(db store.IDB) IServiceStatStore {
-	var h store.BaseKindHandler[entry.ServiceStat, entry.Stat] = new(ServiceStatKindHandler)
+	var h store.BaseKindHandler[upstream_entry.ServiceStat, stat_entry.Stat] = new(ServiceStatKindHandler)
 	return store.CreateBaseKindStore(h, db)
 }

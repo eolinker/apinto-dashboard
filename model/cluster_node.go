@@ -1,9 +1,11 @@
 package model
 
-import "github.com/eolinker/apinto-dashboard/entry"
+import (
+	"github.com/eolinker/apinto-dashboard/entry/cluster-entry"
+)
 
 type ClusterNode struct {
-	*entry.ClusterNode
+	*cluster_entry.ClusterNode
 	AdminAddrs []string
 	Status     int //状态（1未运行,2运行中）
 }

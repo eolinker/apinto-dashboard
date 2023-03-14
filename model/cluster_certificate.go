@@ -1,11 +1,11 @@
 package model
 
 import (
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/cluster-entry"
 )
 
 type ClusterCertificate struct {
-	*entry.ClusterCertificate
+	*cluster_entry.ClusterCertificate
 	ClusterName  string
 	OperatorName string
 }

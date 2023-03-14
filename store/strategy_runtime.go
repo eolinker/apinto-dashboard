@@ -1,11 +1,14 @@
 package store
 
-import "github.com/eolinker/apinto-dashboard/entry"
+import (
+	"github.com/eolinker/apinto-dashboard/entry/runtime-entry"
+	"github.com/eolinker/apinto-dashboard/entry/strategy-entry"
+)
 
 //流量策略
 
 type IStrategyRuntimeStore interface {
-	BaseRuntimeStore[entry.StrategyRuntime]
+	BaseRuntimeStore[strategy_entry.StrategyRuntime]
 }
 
 type strategyRuntimeHandler struct {
@@ -16,8 +19,8 @@ func (s *strategyRuntimeHandler) Kind() string {
 	return s.kind
 }
 
-func (s *strategyRuntimeHandler) Encode(sr *entry.StrategyRuntime) *entry.Runtime {
-	return &entry.Runtime{
+func (s *strategyRuntimeHandler) Encode(sr *strategy_entry.StrategyRuntime) *runtime_entry.Runtime {
+	return &runtime_entry.Runtime{
 		Id:          sr.Id,
 		Kind:        s.Kind(),
 		ClusterID:   sr.ClusterId,
@@ -32,8 +35,8 @@ func (s *strategyRuntimeHandler) Encode(sr *entry.StrategyRuntime) *entry.Runtim
 
 }
 
-func (s *strategyRuntimeHandler) Decode(r *entry.Runtime) *entry.StrategyRuntime {
-	return &entry.StrategyRuntime{
+func (s *strategyRuntimeHandler) Decode(r *runtime_entry.Runtime) *strategy_entry.StrategyRuntime {
+	return &strategy_entry.StrategyRuntime{
 		Id:          r.Id,
 		NamespaceId: r.NamespaceID,
 		ClusterId:   r.ClusterID,
@@ -46,8 +49,8 @@ func (s *strategyRuntimeHandler) Decode(r *entry.Runtime) *entry.StrategyRuntime
 }
 
 func NewStrategyRuntimeStore(db IDB, kind string) IStrategyRuntimeStore {
-	var runTimeHandler BaseKindHandler[entry.StrategyRuntime, entry.Runtime] = &strategyRuntimeHandler{
+	var runTimeHandler BaseKindHandler[strategy_entry.StrategyRuntime, runtime_entry.Runtime] = &strategyRuntimeHandler{
 		kind: kind,
 	}
-	return CreateRuntime[entry.StrategyRuntime](runTimeHandler, db)
+	return CreateRuntime[strategy_entry.StrategyRuntime](runTimeHandler, db)
 }

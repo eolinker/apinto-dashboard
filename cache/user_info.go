@@ -2,17 +2,17 @@ package cache
 
 import (
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/user-entry"
 	"github.com/go-redis/redis/v8"
 )
 
 type IUserInfoCache interface {
-	IRedisCache[entry.UserInfo]
+	IRedisCache[user_entry.UserInfo]
 	Key(userId int) string
 }
 
 type userInfoCache struct {
-	*redisCache[entry.UserInfo]
+	*redisCache[user_entry.UserInfo]
 }
 
 func (userInfoCache) Key(userId int) string {
@@ -21,6 +21,6 @@ func (userInfoCache) Key(userId int) string {
 
 func newUserInfoCache(client *redis.ClusterClient) IUserInfoCache {
 	return &userInfoCache{
-		redisCache: createRedisCache[entry.UserInfo](client),
+		redisCache: createRedisCache[user_entry.UserInfo](client),
 	}
 }

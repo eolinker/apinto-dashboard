@@ -4,7 +4,8 @@ import (
 	"context"
 	"errors"
 	"github.com/eolinker/apinto-dashboard/common"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/quote-entry"
+	"github.com/eolinker/apinto-dashboard/entry/variable-entry"
 	"github.com/eolinker/apinto-dashboard/model"
 	"github.com/eolinker/apinto-dashboard/store"
 	"github.com/eolinker/eosc/common/bean"
@@ -73,7 +74,7 @@ func (g *globalVariableService) List(ctx context.Context, pageNum, pageSize, nam
 		return nil, 0, err
 	}
 
-	userIds := common.SliceToSliceIds(variables, func(t *entry.Variables) int {
+	userIds := common.SliceToSliceIds(variables, func(t *variable_entry.Variables) int {
 		return t.Operator
 	})
 
@@ -93,7 +94,7 @@ func (g *globalVariableService) List(ctx context.Context, pageNum, pageSize, nam
 		}
 
 		item.Status = 1 //空闲
-		count, err := g.quoteStore.Count(ctx, variable.Id, entry.QuoteTargetKindTypeVariable)
+		count, err := g.quoteStore.Count(ctx, variable.Id, quote_entry.QuoteTargetKindTypeVariable)
 		if err != nil {
 			return nil, 0, err
 		}
@@ -161,7 +162,7 @@ func (g *globalVariableService) getClusterVariableStatus(ctx context.Context, cl
 		return 0, err
 	}
 
-	var variableVersionEntry *entry.VariablePublishVersion
+	var variableVersionEntry *variable_entry.VariablePublishVersion
 	if runtime != nil {
 		variableVersionEntry, err = g.variablePublishVersionStore.Get(ctx, runtime.VersionId)
 		if err != nil && err != gorm.ErrRecordNotFound {
@@ -170,7 +171,7 @@ func (g *globalVariableService) getClusterVariableStatus(ctx context.Context, cl
 	}
 
 	//当前版本已发布的集群环境变量
-	versionClusterVariables := make([]*entry.ClusterVariable, 0)
+	versionClusterVariables := make([]*variable_entry.ClusterVariable, 0)
 	if variableVersionEntry != nil {
 		versionClusterVariables = variableVersionEntry.ClusterVariable
 	}
@@ -193,7 +194,7 @@ func (g *globalVariableService) Create(ctx context.Context, namespaceID, userID 
 		return 0, errors.New("this GlobalVariable key has already existed. ")
 	}
 	//在variables表中插入全局变量
-	variable := &entry.Variables{
+	variable := &variable_entry.Variables{
 		Namespace:  namespaceID,
 		Key:        key,
 		Desc:       desc,
@@ -223,7 +224,7 @@ func (g *globalVariableService) Delete(ctx context.Context, namespaceID, userID 
 		return errors.New("GlobalVariable Key is not exist. ")
 	}
 
-	count, err := g.quoteStore.Count(ctx, globalVariable.Id, entry.QuoteTargetKindTypeVariable)
+	count, err := g.quoteStore.Count(ctx, globalVariable.Id, quote_entry.QuoteTargetKindTypeVariable)
 	if err != nil {
 		return err
 	}
@@ -250,7 +251,7 @@ func (g *globalVariableService) Delete(ctx context.Context, namespaceID, userID 
 			}
 			//插入删除记录
 
-			if err = g.variableHistoryStore.HistoryDelete(txCtx, namespaceID, cVariable.Id, &entry.VariableValue{Key: key, Value: cVariable.Value}, userID); err != nil {
+			if err = g.variableHistoryStore.HistoryDelete(txCtx, namespaceID, cVariable.Id, &variable_entry.VariableValue{Key: key, Value: cVariable.Value}, userID); err != nil {
 				return err
 			}
 		}

@@ -2,11 +2,12 @@ package store
 
 import (
 	"encoding/json"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/strategy-entry"
+	"github.com/eolinker/apinto-dashboard/entry/version-entry"
 )
 
 type IStrategyPublishVersionStore interface {
-	IBaseStore[entry.StrategyPublishVersion]
+	IBaseStore[strategy_entry.StrategyPublishVersion]
 }
 
 type strategyPublishVersionHandler struct {
@@ -17,7 +18,7 @@ func (s *strategyPublishVersionHandler) Kind() string {
 	return s.kind
 }
 
-func (s *strategyPublishVersionHandler) Encode(sv *entry.StrategyPublishVersion) *entry.Version {
+func (s *strategyPublishVersionHandler) Encode(sv *strategy_entry.StrategyPublishVersion) *version_entry.Version {
 
 	for _, publish := range sv.Publish {
 		publish.Strategy.NamespaceId = 0
@@ -27,7 +28,7 @@ func (s *strategyPublishVersionHandler) Encode(sv *entry.StrategyPublishVersion)
 
 	bytes, _ := json.Marshal(sv.Publish)
 
-	v := new(entry.Version)
+	v := new(version_entry.Version)
 	v.Id = sv.Id
 	v.Kind = s.Kind()
 	v.Target = sv.ClusterId
@@ -39,21 +40,21 @@ func (s *strategyPublishVersionHandler) Encode(sv *entry.StrategyPublishVersion)
 	return v
 }
 
-func (s *strategyPublishVersionHandler) Decode(v *entry.Version) *entry.StrategyPublishVersion {
-	sv := new(entry.StrategyPublishVersion)
+func (s *strategyPublishVersionHandler) Decode(v *version_entry.Version) *strategy_entry.StrategyPublishVersion {
+	sv := new(strategy_entry.StrategyPublishVersion)
 	sv.Id = v.Id
 	sv.ClusterId = v.Target
 	sv.Operator = v.Operator
 	sv.NamespaceId = v.NamespaceID
 	sv.CreateTime = v.CreateTime
-	val := make([]*entry.StrategyPublishConfigInfo, 0)
+	val := make([]*strategy_entry.StrategyPublishConfigInfo, 0)
 	_ = json.Unmarshal(v.Data, &val)
 	sv.Publish = val
 	return sv
 }
 
 func NewStrategyPublishVersionStore(db IDB, kind string) IStrategyPublishVersionStore {
-	var h BaseKindHandler[entry.StrategyPublishVersion, entry.Version] = &strategyPublishVersionHandler{
+	var h BaseKindHandler[strategy_entry.StrategyPublishVersion, version_entry.Version] = &strategyPublishVersionHandler{
 		kind: kind,
 	}
 	return CreateBaseKindStore(h, db)

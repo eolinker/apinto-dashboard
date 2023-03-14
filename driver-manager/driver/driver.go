@@ -3,8 +3,9 @@ package driver
 import (
 	"errors"
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/cluster-entry"
 	"github.com/eolinker/apinto-dashboard/modules/api/api-dto"
+	api_entry "github.com/eolinker/apinto-dashboard/modules/api/api-entry"
 	apimodel "github.com/eolinker/apinto-dashboard/modules/api/model"
 )
 
@@ -66,7 +67,7 @@ type IAPISyncFormatDriver interface {
 type ICLConfigDriver interface {
 	CheckInput(config []byte) error
 	ToApinto(name string, config []byte) interface{}
-	FormatOut(operator string, config *entry.ClusterConfig) interface{}
+	FormatOut(operator string, config *cluster_entry.ClusterConfig) interface{}
 	InitConfig(config []byte) error
 }
 

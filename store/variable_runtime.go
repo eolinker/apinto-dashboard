@@ -1,11 +1,12 @@
 package store
 
 import (
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/runtime-entry"
+	"github.com/eolinker/apinto-dashboard/entry/variable-entry"
 )
 
 type IVariableRuntimeStore interface {
-	BaseRuntimeStore[entry.VariableRuntime]
+	BaseRuntimeStore[variable_entry.VariableRuntime]
 }
 
 type variableRuntimeHandler struct {
@@ -15,8 +16,8 @@ func (s *variableRuntimeHandler) Kind() string {
 	return "variable"
 }
 
-func (s *variableRuntimeHandler) Encode(sr *entry.VariableRuntime) *entry.Runtime {
-	return &entry.Runtime{
+func (s *variableRuntimeHandler) Encode(sr *variable_entry.VariableRuntime) *runtime_entry.Runtime {
+	return &runtime_entry.Runtime{
 		Id:          sr.Id,
 		Kind:        s.Kind(),
 		ClusterID:   sr.ClusterId,
@@ -31,8 +32,8 @@ func (s *variableRuntimeHandler) Encode(sr *entry.VariableRuntime) *entry.Runtim
 
 }
 
-func (s *variableRuntimeHandler) Decode(r *entry.Runtime) *entry.VariableRuntime {
-	return &entry.VariableRuntime{
+func (s *variableRuntimeHandler) Decode(r *runtime_entry.Runtime) *variable_entry.VariableRuntime {
+	return &variable_entry.VariableRuntime{
 		Id:          r.Id,
 		NamespaceId: r.NamespaceID,
 		ClusterId:   r.ClusterID,
@@ -45,6 +46,6 @@ func (s *variableRuntimeHandler) Decode(r *entry.Runtime) *entry.VariableRuntime
 }
 
 func newVariableRuntimeStore(db IDB) IVariableRuntimeStore {
-	var runTimeHandler BaseKindHandler[entry.VariableRuntime, entry.Runtime] = new(variableRuntimeHandler)
-	return CreateRuntime[entry.VariableRuntime](runTimeHandler, db)
+	var runTimeHandler BaseKindHandler[variable_entry.VariableRuntime, runtime_entry.Runtime] = new(variableRuntimeHandler)
+	return CreateRuntime[variable_entry.VariableRuntime](runTimeHandler, db)
 }

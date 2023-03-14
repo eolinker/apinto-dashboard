@@ -2,11 +2,12 @@ package store
 
 import (
 	"encoding/json"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/application-entry"
+	"github.com/eolinker/apinto-dashboard/entry/history-entry"
 )
 
 type IApplicationHistoryStore interface {
-	BaseHistoryStore[entry.ApplicationHistory]
+	BaseHistoryStore[application_entry.ApplicationHistory]
 }
 
 type applicationHistoryHandler struct {
@@ -33,12 +34,12 @@ func (s *applicationHistoryHandler) Kind() string {
 //	return history
 //}
 
-func (s *applicationHistoryHandler) Decode(r *entry.History) *entry.ApplicationHistory {
-	oldValue := new(entry.ApplicationHistoryInfo)
+func (s *applicationHistoryHandler) Decode(r *history_entry.History) *application_entry.ApplicationHistory {
+	oldValue := new(application_entry.ApplicationHistoryInfo)
 	_ = json.Unmarshal([]byte(r.OldValue), oldValue)
-	newValue := new(entry.ApplicationHistoryInfo)
+	newValue := new(application_entry.ApplicationHistoryInfo)
 	_ = json.Unmarshal([]byte(r.NewValue), newValue)
-	history := &entry.ApplicationHistory{
+	history := &application_entry.ApplicationHistory{
 		Id:            r.Id,
 		NamespaceId:   r.NamespaceID,
 		ApplicationId: r.TargetID,
@@ -52,6 +53,6 @@ func (s *applicationHistoryHandler) Decode(r *entry.History) *entry.ApplicationH
 }
 
 func newApplicationHistoryStore(db IDB) IApplicationHistoryStore {
-	var historyHandler DecodeHistory[entry.ApplicationHistory] = new(applicationHistoryHandler)
-	return CreateHistory[entry.ApplicationHistory](historyHandler, db, entry.HistoryKindApplication)
+	var historyHandler DecodeHistory[application_entry.ApplicationHistory] = new(applicationHistoryHandler)
+	return CreateHistory[application_entry.ApplicationHistory](historyHandler, db, history_entry.HistoryKindApplication)
 }

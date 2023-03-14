@@ -2,17 +2,17 @@ package cache
 
 import (
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/system-entry"
 	"github.com/go-redis/redis/v8"
 )
 
 type ISystemInfoCache interface {
-	IRedisCache[entry.SystemInfo]
+	IRedisCache[system_entry.SystemInfo]
 	Key(key string) string
 }
 
 type systemInfoCache struct {
-	*redisCache[entry.SystemInfo]
+	*redisCache[system_entry.SystemInfo]
 }
 
 func (systemInfoCache) Key(key string) string {
@@ -21,6 +21,6 @@ func (systemInfoCache) Key(key string) string {
 
 func newSystemInfoCache(client *redis.ClusterClient) ISystemInfoCache {
 	return &systemInfoCache{
-		redisCache: createRedisCache[entry.SystemInfo](client),
+		redisCache: createRedisCache[system_entry.SystemInfo](client),
 	}
 }

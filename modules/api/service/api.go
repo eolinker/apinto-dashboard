@@ -10,7 +10,8 @@ import (
 	"github.com/eolinker/apinto-dashboard/common"
 	drivermanager "github.com/eolinker/apinto-dashboard/driver-manager"
 	"github.com/eolinker/apinto-dashboard/driver-manager/driver"
-	"github.com/eolinker/apinto-dashboard/entry"
+	group_entry "github.com/eolinker/apinto-dashboard/entry/group-entry"
+	"github.com/eolinker/apinto-dashboard/entry/quote-entry"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/model"
 	apiservice "github.com/eolinker/apinto-dashboard/modules/api"
@@ -121,14 +122,14 @@ func (a *apiService) GetGroups(ctx context.Context, namespaceId int, parentUuid,
 	uuidMaps := common.SliceToMap(groupUUIDS, func(t string) string {
 		return t
 	})
-	groupsMaps := common.SliceToMap(groups, func(t *entry.CommonGroup) string {
+	groupsMaps := common.SliceToMap(groups, func(t *group_entry.CommonGroup) string {
 		return t.Uuid
 	})
-	groupsIdMaps := common.SliceToMap(groups, func(t *entry.CommonGroup) int {
+	groupsIdMaps := common.SliceToMap(groups, func(t *group_entry.CommonGroup) int {
 		return t.Id
 	})
 
-	groupsParentIdMaps := common.SliceToMapArray(groups, func(t *entry.CommonGroup) int {
+	groupsParentIdMaps := common.SliceToMapArray(groups, func(t *group_entry.CommonGroup) int {
 		return t.ParentId
 	})
 
@@ -536,10 +537,10 @@ func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator in
 		}
 
 		//quote更新所引用的服务
-		quoteMap := make(map[entry.QuoteTargetKindType][]int)
-		quoteMap[entry.QuoteTargetKindTypeService] = append(quoteMap[entry.QuoteTargetKindTypeService], serviceID)
+		quoteMap := make(map[quote_entry.QuoteTargetKindType][]int)
+		quoteMap[quote_entry.QuoteTargetKindTypeService] = append(quoteMap[quote_entry.QuoteTargetKindTypeService], serviceID)
 
-		return a.quoteStore.Set(txCtx, apiInfo.Id, entry.QuoteKindTypeAPI, quoteMap)
+		return a.quoteStore.Set(txCtx, apiInfo.Id, quote_entry.QuoteKindTypeAPI, quoteMap)
 	})
 
 }
@@ -648,9 +649,9 @@ func (a *apiService) UpdateAPI(ctx context.Context, namespaceID int, operator in
 			}
 
 			//quote更新所引用的服务
-			quoteMap := make(map[entry.QuoteTargetKindType][]int)
-			quoteMap[entry.QuoteTargetKindTypeService] = append(quoteMap[entry.QuoteTargetKindTypeService], serviceID)
-			if err = a.quoteStore.Set(txCtx, apiInfo.Id, entry.QuoteKindTypeAPI, quoteMap); err != nil {
+			quoteMap := make(map[quote_entry.QuoteTargetKindType][]int)
+			quoteMap[quote_entry.QuoteTargetKindTypeService] = append(quoteMap[quote_entry.QuoteTargetKindTypeService], serviceID)
+			if err = a.quoteStore.Set(txCtx, apiInfo.Id, quote_entry.QuoteKindTypeAPI, quoteMap); err != nil {
 				return err
 			}
 		}
@@ -726,7 +727,7 @@ func (a *apiService) DeleteAPI(ctx context.Context, namespaceId, operator int, u
 			return err
 		}
 
-		return a.quoteStore.DelBySource(txCtx, apiInfo.Id, entry.QuoteKindTypeAPI)
+		return a.quoteStore.DelBySource(txCtx, apiInfo.Id, quote_entry.QuoteKindTypeAPI)
 	})
 	if err != nil {
 		return err
@@ -1900,10 +1901,10 @@ func (a *apiService) ImportAPI(ctx context.Context, namespaceId, operator int, i
 			}
 
 			//quote更新所引用的服务
-			quoteMap := make(map[entry.QuoteTargetKindType][]int)
-			quoteMap[entry.QuoteTargetKindTypeService] = append(quoteMap[entry.QuoteTargetKindTypeService], serviceID)
+			quoteMap := make(map[quote_entry.QuoteTargetKindType][]int)
+			quoteMap[quote_entry.QuoteTargetKindTypeService] = append(quoteMap[quote_entry.QuoteTargetKindTypeService], serviceID)
 
-			if err = a.quoteStore.Set(txCtx, apiInfo.Id, entry.QuoteKindTypeAPI, quoteMap); err != nil {
+			if err = a.quoteStore.Set(txCtx, apiInfo.Id, quote_entry.QuoteKindTypeAPI, quoteMap); err != nil {
 				return err
 			}
 
@@ -1964,11 +1965,11 @@ func (a *apiService) GetAPIListByServiceName(ctx context.Context, namespaceId in
 		apiList := make([]*apientry.API, 0)
 
 		if target > 0 {
-			quote, err := a.quoteStore.GetTargetQuote(ctx, target, entry.QuoteTargetKindTypeService)
+			quote, err := a.quoteStore.GetTargetQuote(ctx, target, quote_entry.QuoteTargetKindTypeService)
 			if err != nil {
 				return nil, err
 			}
-			apiList, err = a.apiStore.GetByIds(ctx, namespaceId, quote[entry.QuoteKindTypeAPI])
+			apiList, err = a.apiStore.GetByIds(ctx, namespaceId, quote[quote_entry.QuoteKindTypeAPI])
 			if err != nil {
 				return nil, err
 			}
@@ -2103,10 +2104,10 @@ func (a *apiService) GetAPIRemoteOptions(ctx context.Context, namespaceID, pageN
 	}
 	apiList := make([]*model.RemoteApis, 0, len(apis))
 
-	groupUUIDMap := common.SliceToMap(groups, func(t *entry.CommonGroup) string {
+	groupUUIDMap := common.SliceToMap(groups, func(t *group_entry.CommonGroup) string {
 		return t.Uuid
 	})
-	groupIdMap := common.SliceToMap(groups, func(t *entry.CommonGroup) int {
+	groupIdMap := common.SliceToMap(groups, func(t *group_entry.CommonGroup) int {
 		return t.Id
 	})
 
@@ -2140,10 +2141,10 @@ func (a *apiService) GetAPIRemoteByUUIDS(ctx context.Context, namespace int, uui
 		return nil, err
 	}
 
-	groupUUIDMap := common.SliceToMap(groups, func(t *entry.CommonGroup) string {
+	groupUUIDMap := common.SliceToMap(groups, func(t *group_entry.CommonGroup) string {
 		return t.Uuid
 	})
-	groupIdMap := common.SliceToMap(groups, func(t *entry.CommonGroup) int {
+	groupIdMap := common.SliceToMap(groups, func(t *group_entry.CommonGroup) int {
 		return t.Id
 	})
 

@@ -2,12 +2,13 @@ package upstream_store
 
 import (
 	"encoding/json"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/history-entry"
+	"github.com/eolinker/apinto-dashboard/entry/upstream-entry"
 	"github.com/eolinker/apinto-dashboard/store"
 )
 
 type IServiceHistoryStore interface {
-	store.BaseHistoryStore[entry.ServiceHistory]
+	store.BaseHistoryStore[upstream_entry.ServiceHistory]
 }
 
 type serviceHistoryHandler struct {
@@ -17,12 +18,12 @@ func (s *serviceHistoryHandler) Kind() string {
 	return "service"
 }
 
-func (s *serviceHistoryHandler) Decode(r *entry.History) *entry.ServiceHistory {
-	oldValue := new(entry.ServiceHistoryInfo)
+func (s *serviceHistoryHandler) Decode(r *history_entry.History) *upstream_entry.ServiceHistory {
+	oldValue := new(upstream_entry.ServiceHistoryInfo)
 	_ = json.Unmarshal([]byte(r.OldValue), oldValue)
-	newValue := new(entry.ServiceHistoryInfo)
+	newValue := new(upstream_entry.ServiceHistoryInfo)
 	_ = json.Unmarshal([]byte(r.NewValue), newValue)
-	history := &entry.ServiceHistory{
+	history := &upstream_entry.ServiceHistory{
 		Id:          r.Id,
 		NamespaceId: r.NamespaceID,
 		ServiceId:   r.TargetID,
@@ -36,6 +37,6 @@ func (s *serviceHistoryHandler) Decode(r *entry.History) *entry.ServiceHistory {
 }
 
 func newServiceHistoryStore(db store.IDB) IServiceHistoryStore {
-	var historyHandler store.DecodeHistory[entry.ServiceHistory] = new(serviceHistoryHandler)
-	return store.CreateHistory(historyHandler, db, entry.HistoryKindService)
+	var historyHandler store.DecodeHistory[upstream_entry.ServiceHistory] = new(serviceHistoryHandler)
+	return store.CreateHistory(historyHandler, db, history_entry.HistoryKindService)
 }

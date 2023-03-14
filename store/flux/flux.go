@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/monitor-entry"
 	"github.com/eolinker/eosc/log"
 	"github.com/influxdata/influxdb-client-go/v2/api"
 	"strings"
@@ -12,12 +12,12 @@ import (
 )
 
 type IFluxQuery interface {
-	CommonStatistics(ctx context.Context, queryApi api.QueryAPI, start, end time.Time, bucket, groupBy, filters string, statisticsConf []*entry.StatisticsFilterConf, limit int) (map[string]*entry.FluxStatistics, error)
-	CommonProxyStatistics(ctx context.Context, queryApi api.QueryAPI, start, end time.Time, bucket, groupBy, filters string, statisticsConf []*entry.StatisticsFilterConf, limit int) (map[string]*entry.FluxStatistics, error)
+	CommonStatistics(ctx context.Context, queryApi api.QueryAPI, start, end time.Time, bucket, groupBy, filters string, statisticsConf []*monitor_entry.StatisticsFilterConf, limit int) (map[string]*monitor_entry.FluxStatistics, error)
+	CommonProxyStatistics(ctx context.Context, queryApi api.QueryAPI, start, end time.Time, bucket, groupBy, filters string, statisticsConf []*monitor_entry.StatisticsFilterConf, limit int) (map[string]*monitor_entry.FluxStatistics, error)
 	CommonTendency(ctx context.Context, queryApi api.QueryAPI, start, end time.Time, bucket, table, filters string, dataFields []string, every, windowOffset string) ([]time.Time, map[string][]int64, error)
 	// CommonQueryOnce 查询只返回一条结果
-	CommonQueryOnce(ctx context.Context, queryApi api.QueryAPI, start, end time.Time, bucket, filters string, fieldsConf *entry.StatisticsFilterConf) (map[string]interface{}, error)
-	CommonWarnStatistics(ctx context.Context, queryApi api.QueryAPI, start, end time.Time, bucket, groupBy, filters string, statisticsConf *entry.StatisticsFilterConf) (map[string]*entry.FluxWarnStatistics, error)
+	CommonQueryOnce(ctx context.Context, queryApi api.QueryAPI, start, end time.Time, bucket, filters string, fieldsConf *monitor_entry.StatisticsFilterConf) (map[string]interface{}, error)
+	CommonWarnStatistics(ctx context.Context, queryApi api.QueryAPI, start, end time.Time, bucket, groupBy, filters string, statisticsConf *monitor_entry.StatisticsFilterConf) (map[string]*monitor_entry.FluxWarnStatistics, error)
 }
 
 type fluxQuery struct {
@@ -28,7 +28,7 @@ func newFluxQuery() IFluxQuery {
 }
 
 // CommonStatistics flux查询统计
-func (f *fluxQuery) CommonStatistics(ctx context.Context, queryApi api.QueryAPI, start, end time.Time, bucket, groupBy, filters string, statisticsConf []*entry.StatisticsFilterConf, limit int) (map[string]*entry.FluxStatistics, error) {
+func (f *fluxQuery) CommonStatistics(ctx context.Context, queryApi api.QueryAPI, start, end time.Time, bucket, groupBy, filters string, statisticsConf []*monitor_entry.StatisticsFilterConf, limit int) (map[string]*monitor_entry.FluxStatistics, error) {
 	//拼装请求
 	query := f.assembleStatisticsFlux(start, end, bucket, groupBy, filters, statisticsConf, "total", limit)
 
@@ -49,7 +49,7 @@ func (f *fluxQuery) CommonStatistics(ctx context.Context, queryApi api.QueryAPI,
 	}
 	result.Close()
 
-	resultMap := make(map[string]*entry.FluxStatistics)
+	resultMap := make(map[string]*monitor_entry.FluxStatistics)
 	//拼装返回参数
 	for key, maps := range tempMap {
 		total := common.FmtIntFromInterface(maps["total"])
@@ -63,7 +63,7 @@ func (f *fluxQuery) CommonStatistics(ctx context.Context, queryApi api.QueryAPI,
 		maxRequest := common.FmtIntFromInterface(maps["request_max"])
 		minRequest := common.FmtIntFromInterface(maps["request_min"])
 
-		resultMap[key] = &entry.FluxStatistics{
+		resultMap[key] = &monitor_entry.FluxStatistics{
 			Total:        total,
 			Success:      success,
 			ProxyTotal:   pTotal,
@@ -81,7 +81,7 @@ func (f *fluxQuery) CommonStatistics(ctx context.Context, queryApi api.QueryAPI,
 }
 
 // CommonProxyStatistics flux查询统计(只查转发表)
-func (f *fluxQuery) CommonProxyStatistics(ctx context.Context, queryApi api.QueryAPI, start, end time.Time, bucket, groupBy, filters string, statisticsConf []*entry.StatisticsFilterConf, limit int) (map[string]*entry.FluxStatistics, error) {
+func (f *fluxQuery) CommonProxyStatistics(ctx context.Context, queryApi api.QueryAPI, start, end time.Time, bucket, groupBy, filters string, statisticsConf []*monitor_entry.StatisticsFilterConf, limit int) (map[string]*monitor_entry.FluxStatistics, error) {
 	//拼装请求
 	query := f.assembleStatisticsFlux(start, end, bucket, groupBy, filters, statisticsConf, "p_total", limit)
 
@@ -102,7 +102,7 @@ func (f *fluxQuery) CommonProxyStatistics(ctx context.Context, queryApi api.Quer
 	}
 	result.Close()
 
-	resultMap := make(map[string]*entry.FluxStatistics)
+	resultMap := make(map[string]*monitor_entry.FluxStatistics)
 	//拼装返回参数
 	for key, maps := range tempMap {
 		pTotal := common.FmtIntFromInterface(maps["p_total"])
@@ -114,7 +114,7 @@ func (f *fluxQuery) CommonProxyStatistics(ctx context.Context, queryApi api.Quer
 		maxRequest := common.FmtIntFromInterface(maps["p_request_max"])
 		minRequest := common.FmtIntFromInterface(maps["p_request_min"])
 
-		resultMap[key] = &entry.FluxStatistics{
+		resultMap[key] = &monitor_entry.FluxStatistics{
 			ProxyTotal:   pTotal,
 			ProxySuccess: pSuccess,
 			TotalTiming:  totalTiming,
@@ -164,7 +164,7 @@ func (f *fluxQuery) CommonTendency(ctx context.Context, queryApi api.QueryAPI, s
 	return dates, resultMap, nil
 }
 
-func (f *fluxQuery) CommonQueryOnce(ctx context.Context, queryApi api.QueryAPI, start, end time.Time, bucket, filters string, fieldsConf *entry.StatisticsFilterConf) (map[string]interface{}, error) {
+func (f *fluxQuery) CommonQueryOnce(ctx context.Context, queryApi api.QueryAPI, start, end time.Time, bucket, filters string, fieldsConf *monitor_entry.StatisticsFilterConf) (map[string]interface{}, error) {
 	query := f.getCircularMapFlux(start, end, bucket, filters, fieldsConf)
 
 	log.Info("flux sql=", query)
@@ -182,7 +182,7 @@ func (f *fluxQuery) CommonQueryOnce(ctx context.Context, queryApi api.QueryAPI, 
 }
 
 // CommonWarnStatistics flux查询统计(告警数据用)
-func (f *fluxQuery) CommonWarnStatistics(ctx context.Context, queryApi api.QueryAPI, start, end time.Time, bucket, groupBy, filters string, statisticsConf *entry.StatisticsFilterConf) (map[string]*entry.FluxWarnStatistics, error) {
+func (f *fluxQuery) CommonWarnStatistics(ctx context.Context, queryApi api.QueryAPI, start, end time.Time, bucket, groupBy, filters string, statisticsConf *monitor_entry.StatisticsFilterConf) (map[string]*monitor_entry.FluxWarnStatistics, error) {
 	//拼装请求
 	query := f.assembleWarnStatisticsFlux(start, end, bucket, groupBy, filters, statisticsConf)
 
@@ -203,7 +203,7 @@ func (f *fluxQuery) CommonWarnStatistics(ctx context.Context, queryApi api.Query
 	}
 	result.Close()
 
-	resultMap := make(map[string]*entry.FluxWarnStatistics)
+	resultMap := make(map[string]*monitor_entry.FluxWarnStatistics)
 
 	//拼装返回参数
 	for key, maps := range tempMap {
@@ -214,8 +214,8 @@ func (f *fluxQuery) CommonWarnStatistics(ctx context.Context, queryApi api.Query
 }
 
 // warnFormatFluxResults 格式化告警查询统计的返回数据
-func (f *fluxQuery) warnFormatFluxResults(results map[string]interface{}, fields []string) *entry.FluxWarnStatistics {
-	result := &entry.FluxWarnStatistics{}
+func (f *fluxQuery) warnFormatFluxResults(results map[string]interface{}, fields []string) *monitor_entry.FluxWarnStatistics {
+	result := &monitor_entry.FluxWarnStatistics{}
 	for _, field := range fields {
 		switch field {
 		case "total":
@@ -245,7 +245,7 @@ func (f *fluxQuery) warnFormatFluxResults(results map[string]interface{}, fields
 	return result
 }
 
-func (f *fluxQuery) assembleStatisticsFlux(start, end time.Time, bucket, groupBy, filters string, statisticsConf []*entry.StatisticsFilterConf, sortBy string, limit int) string {
+func (f *fluxQuery) assembleStatisticsFlux(start, end time.Time, bucket, groupBy, filters string, statisticsConf []*monitor_entry.StatisticsFilterConf, sortBy string, limit int) string {
 	limitStr := ""
 	if limit > 0 {
 		//按请求量降序
@@ -310,7 +310,7 @@ func (f *fluxQuery) assembleTendencyFieldCondition(fieldConditions []string) str
 }
 
 // 饼状图flux
-func (f *fluxQuery) getCircularMapFlux(start, end time.Time, bucket, filters string, fieldsConf *entry.StatisticsFilterConf) string {
+func (f *fluxQuery) getCircularMapFlux(start, end time.Time, bucket, filters string, fieldsConf *monitor_entry.StatisticsFilterConf) string {
 	fields := make([]string, 0, len(fieldsConf.Fields))
 	for _, field := range fieldsConf.Fields {
 		fields = append(fields, fmt.Sprintf(` r["_field"] == "%s" `, field))
@@ -328,7 +328,7 @@ from(bucket: "%s")
 }
 
 // assembleWarnStatisticsFlux 组装告警用的统计flux
-func (f *fluxQuery) assembleWarnStatisticsFlux(start, end time.Time, bucket, groupBy, filters string, statisticsConf *entry.StatisticsFilterConf) string {
+func (f *fluxQuery) assembleWarnStatisticsFlux(start, end time.Time, bucket, groupBy, filters string, statisticsConf *monitor_entry.StatisticsFilterConf) string {
 
 	//拼装过滤的_field
 	fields := make([]string, 0, len(statisticsConf.Fields))

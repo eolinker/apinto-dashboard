@@ -2,7 +2,8 @@ package store
 
 import (
 	"context"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/runtime-entry"
+	"github.com/eolinker/apinto-dashboard/entry/stat-entry"
 	"gorm.io/gorm"
 )
 
@@ -28,10 +29,10 @@ type BaseKindStore[T any, K any] struct {
 func (k *BaseKindStore[T, K]) Get(ctx context.Context, id int) (*T, error) {
 	var ii interface{} = new(K)
 	isTarget := false
-	if _, ok := ii.(*entry.Stat); ok {
+	if _, ok := ii.(*stat_entry.Stat); ok {
 		isTarget = ok
 	}
-	if _, ok := ii.(*entry.Runtime); ok {
+	if _, ok := ii.(*runtime_entry.Runtime); ok {
 		isTarget = ok
 	}
 	if isTarget {

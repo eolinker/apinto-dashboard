@@ -2,11 +2,12 @@ package store
 
 import (
 	"encoding/json"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/cluster-entry"
+	"github.com/eolinker/apinto-dashboard/entry/history-entry"
 )
 
 type IClusterHistoryStore interface {
-	BaseHistoryStore[entry.ClusterHistory]
+	BaseHistoryStore[cluster_entry.ClusterHistory]
 }
 
 type clusterHistoryHandler struct {
@@ -33,12 +34,12 @@ func (s *clusterHistoryHandler) Kind() string {
 //	return history
 //}
 
-func (s *clusterHistoryHandler) Decode(r *entry.History) *entry.ClusterHistory {
-	oldValue := new(entry.Cluster)
+func (s *clusterHistoryHandler) Decode(r *history_entry.History) *cluster_entry.ClusterHistory {
+	oldValue := new(cluster_entry.Cluster)
 	_ = json.Unmarshal([]byte(r.OldValue), oldValue)
-	newValue := new(entry.Cluster)
+	newValue := new(cluster_entry.Cluster)
 	_ = json.Unmarshal([]byte(r.NewValue), newValue)
-	history := &entry.ClusterHistory{
+	history := &cluster_entry.ClusterHistory{
 		Id:          r.Id,
 		NamespaceId: r.NamespaceID,
 		ClusterId:   r.TargetID,
@@ -52,6 +53,6 @@ func (s *clusterHistoryHandler) Decode(r *entry.History) *entry.ClusterHistory {
 }
 
 func newClusterHistoryStore(db IDB) IClusterHistoryStore {
-	var historyHandler DecodeHistory[entry.ClusterHistory] = new(clusterHistoryHandler)
-	return CreateHistory(historyHandler, db, entry.HistoryKindCluster)
+	var historyHandler DecodeHistory[cluster_entry.ClusterHistory] = new(clusterHistoryHandler)
+	return CreateHistory(historyHandler, db, history_entry.HistoryKindCluster)
 }

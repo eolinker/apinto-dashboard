@@ -7,6 +7,8 @@ import (
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/dto"
+	"github.com/eolinker/apinto-dashboard/dto/group-dto"
+	"github.com/eolinker/apinto-dashboard/dto/online-dto"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/model"
 	service "github.com/eolinker/apinto-dashboard/modules/api"
@@ -85,10 +87,10 @@ func (a *apiController) groups(ginCtx *gin.Context) {
 		return
 	}
 
-	resApis := make([]*dto.CommonGroupApi, 0, len(apis))
-	groups := make([]*dto.CommonGroupOut, 0, len(root.CommonGroup))
+	resApis := make([]*group_dto.CommonGroupApi, 0, len(apis))
+	groups := make([]*group_dto.CommonGroupOut, 0, len(root.CommonGroup))
 	for _, group := range root.CommonGroup {
-		value := &dto.CommonGroupOut{
+		value := &group_dto.CommonGroupOut{
 			UUID:     group.Group.Uuid,
 			Name:     group.Group.Name,
 			IsDelete: true,
@@ -109,7 +111,7 @@ func (a *apiController) groups(ginCtx *gin.Context) {
 	}
 
 	for _, api := range apis {
-		resApis = append(resApis, &dto.CommonGroupApi{
+		resApis = append(resApis, &group_dto.CommonGroupApi{
 			Name:      api.Name,
 			UUID:      api.UUID,
 			Methods:   api.Methods,
@@ -117,7 +119,7 @@ func (a *apiController) groups(ginCtx *gin.Context) {
 		})
 	}
 
-	resRoot := &dto.CommonGroupRootOut{
+	resRoot := &group_dto.CommonGroupRootOut{
 		UUID:   root.UUID,
 		Name:   root.Name,
 		Groups: groups,
@@ -128,12 +130,12 @@ func (a *apiController) groups(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(m))
 }
 
-func (a *apiController) subGroup(val *dto.CommonGroupOut, namespaceId int, list []*model.CommonGroup) {
+func (a *apiController) subGroup(val *group_dto.CommonGroupOut, namespaceId int, list []*model.CommonGroup) {
 	if len(list) == 0 {
 		return
 	}
 	for _, group := range list {
-		commonGroup := &dto.CommonGroupOut{UUID: group.Group.Uuid, Name: group.Group.Name, IsDelete: true}
+		commonGroup := &group_dto.CommonGroupOut{UUID: group.Group.Uuid, Name: group.Group.Name, IsDelete: true}
 
 		a.subGroup(commonGroup, namespaceId, group.Subgroup)
 		//若子分组中有不可以删除的分组，则该分组也不能删
@@ -481,7 +483,7 @@ func (a *apiController) online(ginCtx *gin.Context) {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("uuid can't be nil")))
 		return
 	}
-	input := &dto.UpdateOnlineStatusInput{}
+	input := &online_dto.UpdateOnlineStatusInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -520,7 +522,7 @@ func (a *apiController) offline(ginCtx *gin.Context) {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("uuid can't be nil")))
 		return
 	}
-	input := &dto.UpdateOnlineStatusInput{}
+	input := &online_dto.UpdateOnlineStatusInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -542,7 +544,7 @@ func (a *apiController) enableAPI(ginCtx *gin.Context) {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("uuid can't be nil")))
 		return
 	}
-	input := &dto.UpdateOnlineStatusInput{}
+	input := &online_dto.UpdateOnlineStatusInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -564,7 +566,7 @@ func (a *apiController) disableAPI(ginCtx *gin.Context) {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("uuid can't be nil")))
 		return
 	}
-	input := &dto.UpdateOnlineStatusInput{}
+	input := &online_dto.UpdateOnlineStatusInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -592,13 +594,13 @@ func (a *apiController) getOnlineList(ginCtx *gin.Context) {
 		return
 	}
 
-	resp := make([]*dto.OnlineOut, 0, len(list))
+	resp := make([]*online_dto.OnlineOut, 0, len(list))
 	for _, item := range list {
 		updateTime := ""
 		if !item.UpdateTime.IsZero() {
 			updateTime = common.TimeToStr(item.UpdateTime)
 		}
-		resp = append(resp, &dto.OnlineOut{
+		resp = append(resp, &online_dto.OnlineOut{
 			Name:       item.ClusterName,
 			Env:        item.ClusterEnv,
 			Status:     enum.OnlineStatus(item.Status),

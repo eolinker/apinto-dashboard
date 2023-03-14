@@ -2,7 +2,7 @@ package api_store
 
 import (
 	"encoding/json"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/history-entry"
 	api_entry "github.com/eolinker/apinto-dashboard/modules/api/api-entry"
 	"github.com/eolinker/apinto-dashboard/store"
 )
@@ -18,7 +18,7 @@ func (s *ApiHistoryHandler) Kind() string {
 	return "api"
 }
 
-func (s *ApiHistoryHandler) Decode(r *entry.History) *api_entry.ApiHistory {
+func (s *ApiHistoryHandler) Decode(r *history_entry.History) *api_entry.ApiHistory {
 	oldValue := new(api_entry.ApiHistoryInfo)
 	_ = json.Unmarshal([]byte(r.OldValue), oldValue)
 	newValue := new(api_entry.ApiHistoryInfo)
@@ -38,5 +38,5 @@ func (s *ApiHistoryHandler) Decode(r *entry.History) *api_entry.ApiHistory {
 
 func newApiHistoryStore(db store.IDB) IApiHistoryStore {
 	var historyHandler store.DecodeHistory[api_entry.ApiHistory] = new(ApiHistoryHandler)
-	return store.CreateHistory(historyHandler, db, entry.HistoryKindAPI)
+	return store.CreateHistory(historyHandler, db, history_entry.HistoryKindAPI)
 }

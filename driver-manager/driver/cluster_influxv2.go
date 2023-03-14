@@ -7,8 +7,8 @@ import (
 	"fmt"
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/common"
-	"github.com/eolinker/apinto-dashboard/dto"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/dto/cluster-dto"
+	"github.com/eolinker/apinto-dashboard/entry/cluster-entry"
 	"github.com/eolinker/apinto-dashboard/store/flux"
 	"github.com/eolinker/eosc/log"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
@@ -26,7 +26,7 @@ func CreateInfluxV2(apintoDriverName string) ICLConfigDriver {
 }
 
 func (c *clConfigInfluxV2) CheckInput(config []byte) error {
-	influxConf := new(dto.InfluxV2ConfigInput)
+	influxConf := new(cluster_dto.InfluxV2ConfigInput)
 	err := json.Unmarshal(config, influxConf)
 	if err != nil {
 		return err
@@ -62,7 +62,7 @@ array.from(rows: [{a :1}])
 }
 
 func (c *clConfigInfluxV2) ToApinto(name string, config []byte) interface{} {
-	influxConf := new(dto.InfluxV2ConfigInput)
+	influxConf := new(cluster_dto.InfluxV2ConfigInput)
 	_ = json.Unmarshal(config, influxConf)
 
 	return &v1.InfluxV2Output{
@@ -78,11 +78,11 @@ func (c *clConfigInfluxV2) ToApinto(name string, config []byte) interface{} {
 	}
 }
 
-func (c *clConfigInfluxV2) FormatOut(operator string, config *entry.ClusterConfig) interface{} {
-	influxConf := new(dto.InfluxV2ConfigInput)
+func (c *clConfigInfluxV2) FormatOut(operator string, config *cluster_entry.ClusterConfig) interface{} {
+	influxConf := new(cluster_dto.InfluxV2ConfigInput)
 	_ = json.Unmarshal(config.Data, influxConf)
 
-	return &dto.InfluxV2ConfigOutput{
+	return &cluster_dto.InfluxV2ConfigOutput{
 		Addr: influxConf.Addr,
 		Org:  influxConf.Org,
 		//Bucket:     influxConf.Bucket,
@@ -95,7 +95,7 @@ func (c *clConfigInfluxV2) FormatOut(operator string, config *entry.ClusterConfi
 }
 
 func (c *clConfigInfluxV2) InitConfig(config []byte) error {
-	influxConf := new(dto.InfluxV2ConfigInput)
+	influxConf := new(cluster_dto.InfluxV2ConfigInput)
 	_ = json.Unmarshal(config, influxConf)
 	client := influxdb2.NewClient(influxConf.Addr, influxConf.Token)
 

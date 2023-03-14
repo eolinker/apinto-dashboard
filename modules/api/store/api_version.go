@@ -3,7 +3,7 @@ package api_store
 import (
 	"context"
 	"encoding/json"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/version-entry"
 	api_entry "github.com/eolinker/apinto-dashboard/modules/api/api-entry"
 	"github.com/eolinker/apinto-dashboard/store"
 )
@@ -14,7 +14,7 @@ type IAPIVersionStore interface {
 }
 
 type apiVersionStore struct {
-	*store.BaseKindStore[api_entry.APIVersion, entry.Version]
+	*store.BaseKindStore[api_entry.APIVersion, version_entry.Version]
 }
 
 type apiVersionKindHandler struct {
@@ -24,9 +24,9 @@ func (s *apiVersionKindHandler) Kind() string {
 	return "api"
 }
 
-func (s *apiVersionKindHandler) Encode(av *api_entry.APIVersion) *entry.Version {
+func (s *apiVersionKindHandler) Encode(av *api_entry.APIVersion) *version_entry.Version {
 	data, _ := json.Marshal(av.APIVersionConfig)
-	v := &entry.Version{
+	v := &version_entry.Version{
 		Id:          av.Id,
 		Target:      av.ApiID,
 		NamespaceID: av.NamespaceID,
@@ -39,7 +39,7 @@ func (s *apiVersionKindHandler) Encode(av *api_entry.APIVersion) *entry.Version 
 	return v
 }
 
-func (s *apiVersionKindHandler) Decode(v *entry.Version) *api_entry.APIVersion {
+func (s *apiVersionKindHandler) Decode(v *version_entry.Version) *api_entry.APIVersion {
 	av := &api_entry.APIVersion{
 		Id:               v.Id,
 		ApiID:            v.Target,
@@ -54,10 +54,10 @@ func (s *apiVersionKindHandler) Decode(v *entry.Version) *api_entry.APIVersion {
 }
 
 func (s *apiVersionStore) GetAPIVersionByApiIds(ctx context.Context, ids []int) ([]*api_entry.APIVersion, error) {
-	versions := make([]*entry.Version, 0, len(ids))
+	versions := make([]*version_entry.Version, 0, len(ids))
 	results := make([]*api_entry.APIVersion, 0, len(ids))
 
-	err := s.DB(ctx).Model(&entry.Version{}).
+	err := s.DB(ctx).Model(&version_entry.Version{}).
 		Select(`version.*`).
 		Joins("right join stat on stat.version = version.id").
 		Where("stat.target in (?) and stat.kind = ?", ids, s.BaseKindStore.Kind()).
@@ -76,6 +76,6 @@ func (s *apiVersionStore) GetAPIVersionByApiIds(ctx context.Context, ids []int) 
 }
 
 func newAPIVersionStore(db store.IDB) IAPIVersionStore {
-	var h store.BaseKindHandler[api_entry.APIVersion, entry.Version] = new(apiVersionKindHandler)
+	var h store.BaseKindHandler[api_entry.APIVersion, version_entry.Version] = new(apiVersionKindHandler)
 	return &apiVersionStore{store.CreateBaseKindStore(h, db)}
 }

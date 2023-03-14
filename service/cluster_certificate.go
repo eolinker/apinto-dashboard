@@ -4,7 +4,7 @@ import (
 	"context"
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/common"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/cluster-entry"
 	"github.com/eolinker/apinto-dashboard/model"
 	"github.com/eolinker/apinto-dashboard/store"
 	"github.com/eolinker/eosc/common/bean"
@@ -54,7 +54,7 @@ func (c *clusterCertificateService) Insert(ctx context.Context, operator, namesp
 		return err
 	}
 
-	value := &entry.ClusterCertificate{
+	value := &cluster_entry.ClusterCertificate{
 		ClusterId:   clusterId,
 		NamespaceId: namespaceId,
 		Operator:    operator,
@@ -107,7 +107,7 @@ func (c *clusterCertificateService) Update(ctx context.Context, operator, namesp
 		return err
 	}
 
-	value := &entry.ClusterCertificate{
+	value := &cluster_entry.ClusterCertificate{
 		Id:          certificateId,
 		ClusterId:   clusterId,
 		NamespaceId: namespaceId,
@@ -146,7 +146,7 @@ func (c *clusterCertificateService) QueryList(ctx context.Context, namespaceId i
 		return nil, err
 	}
 
-	userIds := common.SliceToSliceIds(list, func(t *entry.ClusterCertificate) int {
+	userIds := common.SliceToSliceIds(list, func(t *cluster_entry.ClusterCertificate) int {
 		return t.Operator
 	})
 

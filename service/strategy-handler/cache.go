@@ -4,19 +4,19 @@ import (
 	"errors"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
-	"github.com/eolinker/apinto-dashboard/dto"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/dto/strategy-dto"
+	"github.com/eolinker/apinto-dashboard/entry/strategy-entry"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/service"
 	"strings"
 )
 
 type cacheHandler struct {
-	service.FormatHandler[entry.StrategyCacheConfig]
+	service.FormatHandler[strategy_entry.StrategyCacheConfig]
 	apintoDriverName string
 }
 
-func (t *cacheHandler) GetListLabel(conf *entry.StrategyCacheConfig) string {
+func (t *cacheHandler) GetListLabel(conf *strategy_entry.StrategyCacheConfig) string {
 	return fmt.Sprintf("%v秒", conf.ValidTime)
 }
 
@@ -33,7 +33,7 @@ func (t *cacheHandler) GetBatchSettingName() string {
 	return enum.StrategyCacheBatchName
 }
 
-func (t *cacheHandler) CheckInput(input *dto.StrategyInfoInput[entry.StrategyCacheConfig]) error {
+func (t *cacheHandler) CheckInput(input *strategy_dto.StrategyInfoInput[strategy_entry.StrategyCacheConfig]) error {
 	input.Uuid = strings.TrimSpace(input.Uuid)
 	if input.Uuid != "" {
 		err := common.IsMatchString(common.UUIDExp, input.Uuid)
@@ -62,11 +62,11 @@ func (t *cacheHandler) CheckInput(input *dto.StrategyInfoInput[entry.StrategyCac
 	return checkFilters(input.Filters)
 }
 
-func (t *cacheHandler) ToApintoConfig(conf entry.StrategyCacheConfig) interface{} {
+func (t *cacheHandler) ToApintoConfig(conf strategy_entry.StrategyCacheConfig) interface{} {
 	return conf.ValidTime
 }
 
-func NewStrategyCacheHandler(apintoDriverName string) service.IStrategyHandler[entry.StrategyCacheConfig, entry.StrategyCacheConfig] {
+func NewStrategyCacheHandler(apintoDriverName string) service.IStrategyHandler[strategy_entry.StrategyCacheConfig, strategy_entry.StrategyCacheConfig] {
 	return &cacheHandler{
 		apintoDriverName: apintoDriverName,
 	}

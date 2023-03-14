@@ -4,19 +4,19 @@ import (
 	"errors"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
-	"github.com/eolinker/apinto-dashboard/dto"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/dto/strategy-dto"
+	"github.com/eolinker/apinto-dashboard/entry/strategy-entry"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/service"
 	"strings"
 )
 
 type fuseHandler struct {
-	service.FormatHandler[entry.StrategyFuseConfig]
+	service.FormatHandler[strategy_entry.StrategyFuseConfig]
 	apintoDriverName string
 }
 
-func (t *fuseHandler) GetListLabel(conf *entry.StrategyFuseConfig) string {
+func (t *fuseHandler) GetListLabel(conf *strategy_entry.StrategyFuseConfig) string {
 	switch conf.Metric {
 	case enum.MetricsAPI:
 		return "API"
@@ -40,7 +40,7 @@ func (t *fuseHandler) GetBatchSettingName() string {
 	return enum.StrategyFuseBatchName
 }
 
-func (t *fuseHandler) CheckInput(input *dto.StrategyInfoInput[entry.StrategyFuseConfig]) error {
+func (t *fuseHandler) CheckInput(input *strategy_dto.StrategyInfoInput[strategy_entry.StrategyFuseConfig]) error {
 	input.Uuid = strings.TrimSpace(input.Uuid)
 	if input.Uuid != "" {
 		err := common.IsMatchString(common.UUIDExp, input.Uuid)
@@ -114,11 +114,11 @@ func (t *fuseHandler) CheckInput(input *dto.StrategyInfoInput[entry.StrategyFuse
 	return checkFilters(input.Filters)
 }
 
-func (t *fuseHandler) ToApintoConfig(conf entry.StrategyFuseConfig) interface{} {
+func (t *fuseHandler) ToApintoConfig(conf strategy_entry.StrategyFuseConfig) interface{} {
 	return conf
 }
 
-func NewStrategyFuseHandler(apintoDriverName string) service.IStrategyHandler[entry.StrategyFuseConfig, entry.StrategyFuseConfig] {
+func NewStrategyFuseHandler(apintoDriverName string) service.IStrategyHandler[strategy_entry.StrategyFuseConfig, strategy_entry.StrategyFuseConfig] {
 	return &fuseHandler{
 		apintoDriverName: apintoDriverName,
 	}

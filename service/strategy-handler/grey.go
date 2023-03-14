@@ -5,8 +5,8 @@ import (
 	"fmt"
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/common"
-	"github.com/eolinker/apinto-dashboard/dto"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/dto/strategy-dto"
+	"github.com/eolinker/apinto-dashboard/entry/strategy-entry"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/service"
 	"net/textproto"
@@ -14,11 +14,11 @@ import (
 )
 
 type greyHandler struct {
-	service.FormatHandler[entry.StrategyGreyConfig]
+	service.FormatHandler[strategy_entry.StrategyGreyConfig]
 	apintoDriverName string
 }
 
-func (t *greyHandler) GetListLabel(conf *entry.StrategyGreyConfig) string {
+func (t *greyHandler) GetListLabel(conf *strategy_entry.StrategyGreyConfig) string {
 	switch conf.Distribution {
 	case enum.GreyDistributionPercent:
 		return "按百分比"
@@ -42,7 +42,7 @@ func (t *greyHandler) GetBatchSettingName() string {
 	return enum.StrategyGreyBatchName
 }
 
-func (t *greyHandler) CheckInput(input *dto.StrategyInfoInput[entry.StrategyGreyConfig]) error {
+func (t *greyHandler) CheckInput(input *strategy_dto.StrategyInfoInput[strategy_entry.StrategyGreyConfig]) error {
 	input.Uuid = strings.TrimSpace(input.Uuid)
 	if input.Uuid != "" {
 		err := common.IsMatchString(common.UUIDExp, input.Uuid)
@@ -116,7 +116,7 @@ func (t *greyHandler) CheckInput(input *dto.StrategyInfoInput[entry.StrategyGrey
 	return checkFilters(input.Filters)
 }
 
-func (t *greyHandler) ToApintoConfig(conf entry.StrategyGreyConfig) interface{} {
+func (t *greyHandler) ToApintoConfig(conf strategy_entry.StrategyGreyConfig) interface{} {
 	rules := make([]v1.RouterRule, 0, len(conf.Match))
 
 	for _, m := range conf.Match {
@@ -169,7 +169,7 @@ func (t *greyHandler) ToApintoConfig(conf entry.StrategyGreyConfig) interface{} 
 	return apintoConf
 }
 
-func NewStrategyGreyHandler(apintoDriverName string) service.IStrategyHandler[entry.StrategyGreyConfig, entry.StrategyGreyConfig] {
+func NewStrategyGreyHandler(apintoDriverName string) service.IStrategyHandler[strategy_entry.StrategyGreyConfig, strategy_entry.StrategyGreyConfig] {
 	return &greyHandler{
 		apintoDriverName: apintoDriverName,
 	}

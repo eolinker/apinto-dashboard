@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/eolinker/apinto-dashboard/common"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/audit-entry"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/model"
 	"github.com/eolinker/apinto-dashboard/store"
@@ -163,7 +163,7 @@ func (a *auditLogService) GetLogDetail(ctx context.Context, logID int) ([]*model
 func (a *auditLogService) Log(namespace int, userId int, operate int, kind string, url, object, ip, userAgent, body, errInfo string, start, end time.Time) {
 	ctx := context.Background()
 	userInfo, _ := a.userInfoService.GetUserInfo(ctx, userId)
-	logInfo := &entry.AuditLog{
+	logInfo := &audit_entry.AuditLog{
 		NamespaceId: namespace,
 		UserID:      userId,
 		IP:          ip,
