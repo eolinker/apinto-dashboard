@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/dto"
 	"github.com/eolinker/apinto-dashboard/enum"
-	"github.com/eolinker/apinto-dashboard/service/audit-service"
+	auditservice "github.com/eolinker/apinto-dashboard/modules/audit"
+	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
 	"github.com/gin-gonic/gin"
@@ -26,7 +27,7 @@ type IAudit interface {
 }
 
 type audit struct {
-	service audit_service.IAuditLogService
+	service auditservice.IAuditLogService
 }
 
 func (a *audit) Handler(operate int, kind string) gin.HandlerFunc {
@@ -56,7 +57,7 @@ func (a *audit) Handler(operate int, kind string) gin.HandlerFunc {
 		}
 
 		end := time.Now()
-		namespaceId := GetNamespaceId(ginCtx)
+		namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 		userId := ginCtx.GetInt(UserId)
 
 		//获取ip

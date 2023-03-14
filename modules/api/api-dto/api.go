@@ -2,8 +2,8 @@ package api_dto
 
 import (
 	"github.com/eolinker/apinto-dashboard/enum"
-	"github.com/eolinker/apinto-dashboard/model/frontend-model"
 	api_entry "github.com/eolinker/apinto-dashboard/modules/api/api-entry"
+	"github.com/eolinker/apinto-dashboard/modules/base/frontend-model"
 )
 
 type APIListItem struct {

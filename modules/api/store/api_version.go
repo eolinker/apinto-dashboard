@@ -3,8 +3,8 @@ package api_store
 import (
 	"context"
 	"encoding/json"
-	"github.com/eolinker/apinto-dashboard/entry/version-entry"
 	api_entry "github.com/eolinker/apinto-dashboard/modules/api/api-entry"
+	"github.com/eolinker/apinto-dashboard/modules/base/version-entry"
 	"github.com/eolinker/apinto-dashboard/store"
 )
 

@@ -1,8 +1,8 @@
 package upstream_store
 
 import (
-	"github.com/eolinker/apinto-dashboard/entry/stat-entry"
-	"github.com/eolinker/apinto-dashboard/entry/upstream-entry"
+	"github.com/eolinker/apinto-dashboard/modules/base/stat-entry"
+	"github.com/eolinker/apinto-dashboard/modules/upstream/upstream-entry"
 	"github.com/eolinker/apinto-dashboard/store"
 )
 

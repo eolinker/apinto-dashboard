@@ -3,7 +3,6 @@ package api_store
 import (
 	"context"
 	"fmt"
-	oentry "github.com/eolinker/apinto-dashboard/entry/page-entry"
 	"github.com/eolinker/apinto-dashboard/modules/api/api-entry"
 	"github.com/eolinker/apinto-dashboard/store"
 	"strings"
@@ -52,7 +51,7 @@ func (a *apiStore) GetListPageByGroupIDs(ctx context.Context, namespaceID, pageN
 		db = db.Where("`name` like ?", "%"+searchName+"%")
 	}
 	if pageNum > 0 && pageSize > 0 {
-		err := db.Model(apis).Count(&count).Order("update_time DESC").Limit(pageSize).Offset(oentry.PageIndex(pageNum, pageSize)).Find(&apis).Error
+		err := db.Model(apis).Count(&count).Order("update_time DESC").Limit(pageSize).Offset(store.PageIndex(pageNum, pageSize)).Find(&apis).Error
 		if err != nil {
 			return nil, 0, err
 		}

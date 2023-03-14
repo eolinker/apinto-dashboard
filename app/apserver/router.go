@@ -3,23 +3,21 @@ package main
 import (
 	"github.com/eolinker/apinto-dashboard/app/apserver/version"
 	"github.com/eolinker/apinto-dashboard/controller"
-	"github.com/eolinker/apinto-dashboard/controller/application-controller"
-	"github.com/eolinker/apinto-dashboard/controller/audit-controller"
-	"github.com/eolinker/apinto-dashboard/controller/bussiness-controller"
-	"github.com/eolinker/apinto-dashboard/controller/cluster-controller"
-	"github.com/eolinker/apinto-dashboard/controller/common/namespace-controller"
-	"github.com/eolinker/apinto-dashboard/controller/discovery-controller"
-	"github.com/eolinker/apinto-dashboard/controller/env-controller"
-	"github.com/eolinker/apinto-dashboard/controller/frontend-controller"
-	"github.com/eolinker/apinto-dashboard/controller/group-controller"
-	"github.com/eolinker/apinto-dashboard/controller/monitor-controller"
-	"github.com/eolinker/apinto-dashboard/controller/open-api-controller"
-	"github.com/eolinker/apinto-dashboard/controller/open-app-controller"
-	"github.com/eolinker/apinto-dashboard/controller/random-controller"
-	"github.com/eolinker/apinto-dashboard/controller/strategy-controller"
-	user_center "github.com/eolinker/apinto-dashboard/controller/user-center"
-	"github.com/eolinker/apinto-dashboard/controller/user-controller"
-	"github.com/eolinker/apinto-dashboard/controller/variable-controller"
+	"github.com/eolinker/apinto-dashboard/modules/application/application-controller"
+	"github.com/eolinker/apinto-dashboard/modules/audit/audit-controller"
+	"github.com/eolinker/apinto-dashboard/modules/base/env-controller"
+	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
+	"github.com/eolinker/apinto-dashboard/modules/base/random-controller"
+	cluster_controller2 "github.com/eolinker/apinto-dashboard/modules/cluster/cluster-controller"
+	"github.com/eolinker/apinto-dashboard/modules/discovery/discovery-controller"
+	"github.com/eolinker/apinto-dashboard/modules/frontend/frontend-controller"
+	"github.com/eolinker/apinto-dashboard/modules/group/group-controller"
+	"github.com/eolinker/apinto-dashboard/modules/openapi/open-api-controller"
+	"github.com/eolinker/apinto-dashboard/modules/openapp/open-app-controller"
+	strategy_controller2 "github.com/eolinker/apinto-dashboard/modules/strategy/strategy-controller"
+	"github.com/eolinker/apinto-dashboard/modules/user/user-controller"
+	variable_controller2 "github.com/eolinker/apinto-dashboard/modules/variable/variable-controller"
+
 	"github.com/eolinker/apinto-dashboard/filter"
 	apiController "github.com/eolinker/apinto-dashboard/modules/api/controller"
 	upstream_controller "github.com/eolinker/apinto-dashboard/modules/upstream/controller"
@@ -37,16 +35,16 @@ func registerRouter(engine *gin.Engine) {
 	namespaceBuilder := filter.NewBuilder().Root("/api/").Exclude(mustNamespaceExclude...)
 	verifyTokenBuilder := filter.NewBuilder().Root("/api/", "/_system/").Exclude(verifyTokenExclude...)
 
-	engine.Use(controller.Logger, controller.Recovery, verifyTokenBuilder.Build(controller.VerifyToken, controller.VerifyAuth), namespaceBuilder.Build(namespace_controller.MustNamespace))
+	engine.Use(controller.Logger, controller.Recovery, verifyTokenBuilder.Build(controller.VerifyToken), namespaceBuilder.Build(namespace_controller.MustNamespace))
 
 	routes := engine.Group("/api")
-	user_center.RegisterUserCenterProxyRouter(engine)
-	cluster_controller.RegisterClusterRouter(routes)
-	cluster_controller.RegisterClusterCertificateRouter(routes)
-	variable_controller.RegisterClusterVariableRouter(routes)
-	cluster_controller.RegisterClusterNodeRouter(routes)
-	cluster_controller.RegisterClusterConfigRouter(routes)
-	variable_controller.RegisterVariablesRouter(routes)
+
+	cluster_controller2.RegisterClusterRouter(routes)
+	cluster_controller2.RegisterClusterCertificateRouter(routes)
+	variable_controller2.RegisterClusterVariableRouter(routes)
+	cluster_controller2.RegisterClusterNodeRouter(routes)
+	cluster_controller2.RegisterClusterConfigRouter(routes)
+	variable_controller2.RegisterVariablesRouter(routes)
 	upstream_controller.RegisterServiceRouter(routes)
 	discovery_controller.RegisterDiscoveryRouter(routes)
 	application_controller.RegisterApplicationRouter(routes)
@@ -55,22 +53,16 @@ func registerRouter(engine *gin.Engine) {
 	apiController.RegisterAPIRouter(routes)
 	random_controller.RegisterRandomRouter(routes)
 
-	strategy_controller.RegisterStrategyCommonRouter(routes)
-	strategy_controller.RegisterStrategyTrafficRouter(routes)
-	strategy_controller.RegisterStrategyCacheRouter(routes)
-	strategy_controller.RegisterStrategyGreyRouter(routes)
-	strategy_controller.RegisterStrategyVisitRouter(routes)
-	strategy_controller.RegisterStrategyFuseRouter(routes)
+	strategy_controller2.RegisterStrategyCommonRouter(routes)
+	strategy_controller2.RegisterStrategyTrafficRouter(routes)
+	strategy_controller2.RegisterStrategyCacheRouter(routes)
+	strategy_controller2.RegisterStrategyGreyRouter(routes)
+	strategy_controller2.RegisterStrategyVisitRouter(routes)
+	strategy_controller2.RegisterStrategyFuseRouter(routes)
 	audit_controller.RegisterAuditLogRouter(routes)
 	open_app_controller.RegisterExternalApplicationRouter(routes)
-	monitor_controller.RegisterMonitorRouter(routes)
 
 	user_controller.RegisterUserRouter(routes)
-
-	monitor_controller.RegisterWarnRouter(routes)
-
-	//注册商业授权路由
-	bussiness_controller.RegisterBussinessAuthRouter(engine)
 
 	frontend_controller.EmbedFrontend(engine)
 

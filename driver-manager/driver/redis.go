@@ -6,8 +6,8 @@ import (
 	"fmt"
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/common"
-	"github.com/eolinker/apinto-dashboard/dto/cluster-dto"
-	"github.com/eolinker/apinto-dashboard/entry/cluster-entry"
+	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-dto"
+	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-entry"
 	"strings"
 )
 

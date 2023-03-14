@@ -6,7 +6,7 @@ package mock_service
 
 import (
 	context "context"
-	"github.com/eolinker/apinto-dashboard/model/monitor-model"
+	monitor_model2 "github.com/eolinker/apinto-dashboard/modules/monitor/monitor-model"
 	reflect "reflect"
 	time "time"
 
@@ -37,11 +37,11 @@ func (m *MockIMonitorStatistics) EXPECT() *MockIMonitorStatisticsMockRecorder {
 }
 
 // CircularMap mocks base method.
-func (m *MockIMonitorStatistics) CircularMap(ctx context.Context, namespaceId int, partitionId string, start, end time.Time, wheres []monitor_model.MonWhereItem) (*monitor_model.CircularDate, *monitor_model.CircularDate, error) {
+func (m *MockIMonitorStatistics) CircularMap(ctx context.Context, namespaceId int, partitionId string, start, end time.Time, wheres []monitor_model2.MonWhereItem) (*monitor_model2.CircularDate, *monitor_model2.CircularDate, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CircularMap", ctx, namespaceId, partitionId, start, end, wheres)
-	ret0, _ := ret[0].(*monitor_model.CircularDate)
-	ret1, _ := ret[1].(*monitor_model.CircularDate)
+	ret0, _ := ret[0].(*monitor_model2.CircularDate)
+	ret1, _ := ret[1].(*monitor_model2.CircularDate)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
 }
@@ -53,10 +53,10 @@ func (mr *MockIMonitorStatisticsMockRecorder) CircularMap(ctx, namespaceId, part
 }
 
 // IPTrend mocks base method.
-func (m *MockIMonitorStatistics) IPTrend(ctx context.Context, namespaceId int, partitionId string, start, end time.Time, wheres []monitor_model.MonWhereItem) (*monitor_model.MonCallCountInfo, error) {
+func (m *MockIMonitorStatistics) IPTrend(ctx context.Context, namespaceId int, partitionId string, start, end time.Time, wheres []monitor_model2.MonWhereItem) (*monitor_model2.MonCallCountInfo, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IPTrend", ctx, namespaceId, partitionId, start, end, wheres)
-	ret0, _ := ret[0].(*monitor_model.MonCallCountInfo)
+	ret0, _ := ret[0].(*monitor_model2.MonCallCountInfo)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -68,10 +68,10 @@ func (mr *MockIMonitorStatisticsMockRecorder) IPTrend(ctx, namespaceId, partitio
 }
 
 // MessageTrend mocks base method.
-func (m *MockIMonitorStatistics) MessageTrend(ctx context.Context, namespaceId int, partitionId string, start, end time.Time, wheres []monitor_model.MonWhereItem) (*monitor_model.MessageTrend, string, error) {
+func (m *MockIMonitorStatistics) MessageTrend(ctx context.Context, namespaceId int, partitionId string, start, end time.Time, wheres []monitor_model2.MonWhereItem) (*monitor_model2.MessageTrend, string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "MessageTrend", ctx, namespaceId, partitionId, start, end, wheres)
-	ret0, _ := ret[0].(*monitor_model.MessageTrend)
+	ret0, _ := ret[0].(*monitor_model2.MessageTrend)
 	ret1, _ := ret[1].(error)
 	return ret0, "", ret1
 }
@@ -83,10 +83,10 @@ func (mr *MockIMonitorStatisticsMockRecorder) MessageTrend(ctx, namespaceId, par
 }
 
 // ProxyStatistics mocks base method.
-func (m *MockIMonitorStatistics) ProxyStatistics(ctx context.Context, namespaceId int, partitionId string, start, end time.Time, groupBy string, wheres []monitor_model.MonWhereItem, limit int) (map[string]monitor_model.MonCommonData, error) {
+func (m *MockIMonitorStatistics) ProxyStatistics(ctx context.Context, namespaceId int, partitionId string, start, end time.Time, groupBy string, wheres []monitor_model2.MonWhereItem, limit int) (map[string]monitor_model2.MonCommonData, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ProxyStatistics", ctx, namespaceId, partitionId, start, end, groupBy, wheres, limit)
-	ret0, _ := ret[0].(map[string]monitor_model.MonCommonData)
+	ret0, _ := ret[0].(map[string]monitor_model2.MonCommonData)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -98,10 +98,10 @@ func (mr *MockIMonitorStatisticsMockRecorder) ProxyStatistics(ctx, namespaceId, 
 }
 
 // ProxyTrend mocks base method.
-func (m *MockIMonitorStatistics) ProxyTrend(ctx context.Context, namespaceId int, partitionId string, start, end time.Time, wheres []monitor_model.MonWhereItem) (*monitor_model.MonCallCountInfo, string, error) {
+func (m *MockIMonitorStatistics) ProxyTrend(ctx context.Context, namespaceId int, partitionId string, start, end time.Time, wheres []monitor_model2.MonWhereItem) (*monitor_model2.MonCallCountInfo, string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ProxyTrend", ctx, namespaceId, partitionId, start, end, wheres)
-	ret0, _ := ret[0].(*monitor_model.MonCallCountInfo)
+	ret0, _ := ret[0].(*monitor_model2.MonCallCountInfo)
 	ret1, _ := ret[1].(error)
 	return ret0, "", ret1
 }
@@ -113,10 +113,10 @@ func (mr *MockIMonitorStatisticsMockRecorder) ProxyTrend(ctx, namespaceId, parti
 }
 
 // Statistics mocks base method.
-func (m *MockIMonitorStatistics) Statistics(ctx context.Context, namespaceId int, partitionId string, start, end time.Time, groupBy string, wheres []monitor_model.MonWhereItem, limit int) (map[string]monitor_model.MonCommonData, error) {
+func (m *MockIMonitorStatistics) Statistics(ctx context.Context, namespaceId int, partitionId string, start, end time.Time, groupBy string, wheres []monitor_model2.MonWhereItem, limit int) (map[string]monitor_model2.MonCommonData, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Statistics", ctx, namespaceId, partitionId, start, end, groupBy, wheres, limit)
-	ret0, _ := ret[0].(map[string]monitor_model.MonCommonData)
+	ret0, _ := ret[0].(map[string]monitor_model2.MonCommonData)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -128,10 +128,10 @@ func (mr *MockIMonitorStatisticsMockRecorder) Statistics(ctx, namespaceId, parti
 }
 
 // Trend mocks base method.
-func (m *MockIMonitorStatistics) Trend(ctx context.Context, namespaceId int, partitionId string, start, end time.Time, wheres []monitor_model.MonWhereItem) (*monitor_model.MonCallCountInfo, string, error) {
+func (m *MockIMonitorStatistics) Trend(ctx context.Context, namespaceId int, partitionId string, start, end time.Time, wheres []monitor_model2.MonWhereItem) (*monitor_model2.MonCallCountInfo, string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Trend", ctx, namespaceId, partitionId, start, end, wheres)
-	ret0, _ := ret[0].(*monitor_model.MonCallCountInfo)
+	ret0, _ := ret[0].(*monitor_model2.MonCallCountInfo)
 	ret1, _ := ret[1].(error)
 	return ret0, "", ret1
 }
@@ -143,7 +143,7 @@ func (mr *MockIMonitorStatisticsMockRecorder) Trend(ctx, namespaceId, partitionI
 }
 
 // WarnStatistics mocks base method.
-func (m *MockIMonitorStatistics) WarnStatistics(ctx context.Context, namespaceId int, partitionId string, start, end time.Time, group string, quotaType monitor_model.QuotaType, wheres []monitor_model.MonWhereItem) (map[string]float64, error) {
+func (m *MockIMonitorStatistics) WarnStatistics(ctx context.Context, namespaceId int, partitionId string, start, end time.Time, group string, quotaType monitor_model2.QuotaType, wheres []monitor_model2.MonWhereItem) (map[string]float64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "WarnStatistics", ctx, namespaceId, partitionId, start, end, group, quotaType, wheres)
 	ret0, _ := ret[0].(map[string]float64)

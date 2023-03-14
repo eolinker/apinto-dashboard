@@ -2,8 +2,8 @@ package api_store
 
 import (
 	"encoding/json"
-	"github.com/eolinker/apinto-dashboard/entry/history-entry"
 	api_entry "github.com/eolinker/apinto-dashboard/modules/api/api-entry"
+	"github.com/eolinker/apinto-dashboard/modules/base/history-entry"
 	"github.com/eolinker/apinto-dashboard/store"
 )
 
