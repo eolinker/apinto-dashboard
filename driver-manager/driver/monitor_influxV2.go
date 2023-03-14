@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
-	"github.com/eolinker/apinto-dashboard/model"
+	"github.com/eolinker/apinto-dashboard/model/monitor-model"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"strings"
 )
@@ -20,7 +20,7 @@ func CreateMonitorInfluxV2(sourceType string) IMonitorSourceDriver {
 }
 
 func (m monitorInfluxV2) CheckInput(config []byte) ([]byte, error) {
-	influxConf := new(model.MonitorInfluxV2Config)
+	influxConf := new(monitor_model.MonitorInfluxV2Config)
 	err := json.Unmarshal(config, influxConf)
 	if err != nil {
 		return nil, err

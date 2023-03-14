@@ -3,7 +3,23 @@ package main
 import (
 	"github.com/eolinker/apinto-dashboard/app/apserver/version"
 	"github.com/eolinker/apinto-dashboard/controller"
+	"github.com/eolinker/apinto-dashboard/controller/application-controller"
+	"github.com/eolinker/apinto-dashboard/controller/audit-controller"
+	"github.com/eolinker/apinto-dashboard/controller/bussiness-controller"
+	"github.com/eolinker/apinto-dashboard/controller/cluster-controller"
+	"github.com/eolinker/apinto-dashboard/controller/common/namespace-controller"
+	"github.com/eolinker/apinto-dashboard/controller/discovery-controller"
+	"github.com/eolinker/apinto-dashboard/controller/env-controller"
+	"github.com/eolinker/apinto-dashboard/controller/frontend-controller"
+	"github.com/eolinker/apinto-dashboard/controller/group-controller"
+	"github.com/eolinker/apinto-dashboard/controller/monitor-controller"
+	"github.com/eolinker/apinto-dashboard/controller/open-api-controller"
+	"github.com/eolinker/apinto-dashboard/controller/open-app-controller"
+	"github.com/eolinker/apinto-dashboard/controller/random-controller"
+	"github.com/eolinker/apinto-dashboard/controller/strategy-controller"
 	user_center "github.com/eolinker/apinto-dashboard/controller/user-center"
+	"github.com/eolinker/apinto-dashboard/controller/user-controller"
+	"github.com/eolinker/apinto-dashboard/controller/variable-controller"
 	"github.com/eolinker/apinto-dashboard/filter"
 	apiController "github.com/eolinker/apinto-dashboard/modules/api/controller"
 	upstream_controller "github.com/eolinker/apinto-dashboard/modules/upstream/controller"
@@ -21,45 +37,45 @@ func registerRouter(engine *gin.Engine) {
 	namespaceBuilder := filter.NewBuilder().Root("/api/").Exclude(mustNamespaceExclude...)
 	verifyTokenBuilder := filter.NewBuilder().Root("/api/", "/_system/").Exclude(verifyTokenExclude...)
 
-	engine.Use(controller.Logger, controller.Recovery, verifyTokenBuilder.Build(controller.VerifyToken, controller.VerifyAuth), namespaceBuilder.Build(controller.MustNamespace))
+	engine.Use(controller.Logger, controller.Recovery, verifyTokenBuilder.Build(controller.VerifyToken, controller.VerifyAuth), namespaceBuilder.Build(namespace_controller.MustNamespace))
 
 	routes := engine.Group("/api")
 	user_center.RegisterUserCenterProxyRouter(engine)
-	controller.RegisterClusterRouter(routes)
-	controller.RegisterClusterCertificateRouter(routes)
-	controller.RegisterClusterVariableRouter(routes)
-	controller.RegisterClusterNodeRouter(routes)
-	controller.RegisterClusterConfigRouter(routes)
-	controller.RegisterVariablesRouter(routes)
+	cluster_controller.RegisterClusterRouter(routes)
+	cluster_controller.RegisterClusterCertificateRouter(routes)
+	variable_controller.RegisterClusterVariableRouter(routes)
+	cluster_controller.RegisterClusterNodeRouter(routes)
+	cluster_controller.RegisterClusterConfigRouter(routes)
+	variable_controller.RegisterVariablesRouter(routes)
 	upstream_controller.RegisterServiceRouter(routes)
-	controller.RegisterDiscoveryRouter(routes)
-	controller.RegisterApplicationRouter(routes)
-	controller.RegisterCommonGroupRouter(routes)
-	controller.RegisterEnumRouter(routes)
+	discovery_controller.RegisterDiscoveryRouter(routes)
+	application_controller.RegisterApplicationRouter(routes)
+	group_controller.RegisterCommonGroupRouter(routes)
+	env_controller.RegisterEnumRouter(routes)
 	apiController.RegisterAPIRouter(routes)
-	controller.RegisterRandomRouter(routes)
+	random_controller.RegisterRandomRouter(routes)
 
-	controller.RegisterStrategyCommonRouter(routes)
-	controller.RegisterStrategyTrafficRouter(routes)
-	controller.RegisterStrategyCacheRouter(routes)
-	controller.RegisterStrategyGreyRouter(routes)
-	controller.RegisterStrategyVisitRouter(routes)
-	controller.RegisterStrategyFuseRouter(routes)
-	controller.RegisterAuditLogRouter(routes)
-	controller.RegisterExternalApplicationRouter(routes)
-	controller.RegisterMonitorRouter(routes)
+	strategy_controller.RegisterStrategyCommonRouter(routes)
+	strategy_controller.RegisterStrategyTrafficRouter(routes)
+	strategy_controller.RegisterStrategyCacheRouter(routes)
+	strategy_controller.RegisterStrategyGreyRouter(routes)
+	strategy_controller.RegisterStrategyVisitRouter(routes)
+	strategy_controller.RegisterStrategyFuseRouter(routes)
+	audit_controller.RegisterAuditLogRouter(routes)
+	open_app_controller.RegisterExternalApplicationRouter(routes)
+	monitor_controller.RegisterMonitorRouter(routes)
 
-	controller.RegisterUserRouter(routes)
+	user_controller.RegisterUserRouter(routes)
 
-	controller.RegisterWarnRouter(routes)
+	monitor_controller.RegisterWarnRouter(routes)
 
 	//注册商业授权路由
-	controller.RegisterBussinessAuthRouter(engine)
+	bussiness_controller.RegisterBussinessAuthRouter(engine)
 
-	controller.EmbedFrontend(engine)
+	frontend_controller.EmbedFrontend(engine)
 
 	openAPIRoutes := engine.Group("/api2")
-	controller.RegisterApiOpenAPIRouter(openAPIRoutes) //api管理导入的OpenAPI
+	open_api_controller.RegisterApiOpenAPIRouter(openAPIRoutes) //api管理导入的OpenAPI
 
 	engine.Handle(http.MethodGet, "/_system/profile", version.Handler)
 }

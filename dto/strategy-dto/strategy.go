@@ -2,7 +2,7 @@ package strategy_dto
 
 import (
 	"github.com/eolinker/apinto-dashboard/enum"
-	"github.com/eolinker/apinto-dashboard/model"
+	"github.com/eolinker/apinto-dashboard/model/openapi-model"
 )
 
 type StrategyListOut struct {
@@ -50,12 +50,12 @@ type FilterInput struct {
 }
 
 type StrategyInfoOutput[T any] struct {
-	Name     string                `json:"name"`
-	UUID     string                `json:"uuid"`
-	Desc     string                `json:"desc"`
-	Priority int                   `json:"priority"`
-	Filters  []*model.FilterOutput `json:"filters,omitempty"`
-	Config   *T                    `json:"config"`
+	Name     string                        `json:"name"`
+	UUID     string                        `json:"uuid"`
+	Desc     string                        `json:"desc"`
+	Priority int                           `json:"priority"`
+	Filters  []*openapi_model.FilterOutput `json:"filters,omitempty"`
+	Config   *T                            `json:"config"`
 }
 
 //type StrategyInfoOutput struct {
@@ -81,12 +81,12 @@ type MetricsOptionsItem struct {
 }
 
 type FilterRemoteOutput struct {
-	Target       string                      `json:"target"`
-	Titles       []*model.RemoteTitles       `json:"titles"`
-	Apis         []*model.RemoteApis         `json:"apis"`
-	Services     []*model.RemoteServices     `json:"services"`
-	Applications []*model.RemoteApplications `json:"applications"`
-	Total        int                         `json:"total"`
+	Target       string                              `json:"target"`
+	Titles       []*openapi_model.RemoteTitles       `json:"titles"`
+	Apis         []*openapi_model.RemoteApis         `json:"apis"`
+	Services     []*openapi_model.RemoteServices     `json:"services"`
+	Applications []*openapi_model.RemoteApplications `json:"applications"`
+	Total        int                                 `json:"total"`
 }
 
 type StrategyPublishHistory struct {

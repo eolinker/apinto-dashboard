@@ -7,10 +7,10 @@ package mock_service
 import (
 	context "context"
 	dto "github.com/eolinker/apinto-dashboard/dto/user-dto"
+	"github.com/eolinker/apinto-dashboard/model/user-model"
 	reflect "reflect"
 
 	access "github.com/eolinker/apinto-dashboard/access"
-	model "github.com/eolinker/apinto-dashboard/model"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -164,10 +164,10 @@ func (mr *MockIUserInfoServiceMockRecorder) GetRoleAccessIds(ctx, roleUUID inter
 }
 
 // GetRoleInfo mocks base method.
-func (m *MockIUserInfoService) GetRoleInfo(ctx context.Context, roleID string) (*model.RoleInfo, error) {
+func (m *MockIUserInfoService) GetRoleInfo(ctx context.Context, roleID string) (*user_model.RoleInfo, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetRoleInfo", ctx, roleID)
-	ret0, _ := ret[0].(*model.RoleInfo)
+	ret0, _ := ret[0].(*user_model.RoleInfo)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -179,10 +179,10 @@ func (mr *MockIUserInfoServiceMockRecorder) GetRoleInfo(ctx, roleID interface{})
 }
 
 // GetRoleList mocks base method.
-func (m *MockIUserInfoService) GetRoleList(ctx context.Context, userID int) ([]*model.RoleListItem, int, error) {
+func (m *MockIUserInfoService) GetRoleList(ctx context.Context, userID int) ([]*user_model.RoleListItem, int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetRoleList", ctx, userID)
-	ret0, _ := ret[0].([]*model.RoleListItem)
+	ret0, _ := ret[0].([]*user_model.RoleListItem)
 	ret1, _ := ret[1].(int)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
@@ -195,10 +195,10 @@ func (mr *MockIUserInfoServiceMockRecorder) GetRoleList(ctx, userID interface{})
 }
 
 // GetRoleOptions mocks base method.
-func (m *MockIUserInfoService) GetRoleOptions(ctx context.Context) ([]*model.RoleOptionItem, error) {
+func (m *MockIUserInfoService) GetRoleOptions(ctx context.Context) ([]*user_model.RoleOptionItem, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetRoleOptions", ctx)
-	ret0, _ := ret[0].([]*model.RoleOptionItem)
+	ret0, _ := ret[0].([]*user_model.RoleOptionItem)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -210,10 +210,10 @@ func (mr *MockIUserInfoServiceMockRecorder) GetRoleOptions(ctx interface{}) *gom
 }
 
 // GetUserInfo mocks base method.
-func (m *MockIUserInfoService) GetUserInfo(ctx context.Context, userId int) (*model.UserInfo, error) {
+func (m *MockIUserInfoService) GetUserInfo(ctx context.Context, userId int) (*user_model.UserInfo, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserInfo", ctx, userId)
-	ret0, _ := ret[0].(*model.UserInfo)
+	ret0, _ := ret[0].(*user_model.UserInfo)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -225,10 +225,10 @@ func (mr *MockIUserInfoServiceMockRecorder) GetUserInfo(ctx, userId interface{})
 }
 
 // GetUserInfoAll mocks base method.
-func (m *MockIUserInfoService) GetUserInfoAll(ctx context.Context) ([]*model.UserInfo, error) {
+func (m *MockIUserInfoService) GetUserInfoAll(ctx context.Context) ([]*user_model.UserInfo, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserInfoAll", ctx)
-	ret0, _ := ret[0].([]*model.UserInfo)
+	ret0, _ := ret[0].([]*user_model.UserInfo)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -240,10 +240,10 @@ func (mr *MockIUserInfoServiceMockRecorder) GetUserInfoAll(ctx interface{}) *gom
 }
 
 // GetUserInfoList mocks base method.
-func (m *MockIUserInfoService) GetUserInfoList(ctx context.Context, roleId, keyWord string) ([]*model.UserInfo, error) {
+func (m *MockIUserInfoService) GetUserInfoList(ctx context.Context, roleId, keyWord string) ([]*user_model.UserInfo, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserInfoList", ctx, roleId, keyWord)
-	ret0, _ := ret[0].([]*model.UserInfo)
+	ret0, _ := ret[0].([]*user_model.UserInfo)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -255,14 +255,14 @@ func (mr *MockIUserInfoServiceMockRecorder) GetUserInfoList(ctx, roleId, keyWord
 }
 
 // GetUserInfoMaps mocks base method.
-func (m *MockIUserInfoService) GetUserInfoMaps(ctx context.Context, userId ...int) (map[int]*model.UserInfo, error) {
+func (m *MockIUserInfoService) GetUserInfoMaps(ctx context.Context, userId ...int) (map[int]*user_model.UserInfo, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx}
 	for _, a := range userId {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "GetUserInfoMaps", varargs...)
-	ret0, _ := ret[0].(map[int]*model.UserInfo)
+	ret0, _ := ret[0].(map[int]*user_model.UserInfo)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

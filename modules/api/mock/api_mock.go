@@ -6,13 +6,15 @@ package mock
 
 import (
 	context "context"
+	"github.com/eolinker/apinto-dashboard/model/frontend-model"
+	"github.com/eolinker/apinto-dashboard/model/group-model"
+	model "github.com/eolinker/apinto-dashboard/model/openapi-model"
 	dto "github.com/eolinker/apinto-dashboard/modules/api/api-dto"
 	api_entry "github.com/eolinker/apinto-dashboard/modules/api/api-entry"
 	apimodel "github.com/eolinker/apinto-dashboard/modules/api/model"
 	reflect "reflect"
 
 	driver "github.com/eolinker/apinto-dashboard/driver-manager/driver"
-	model "github.com/eolinker/apinto-dashboard/model"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -246,10 +248,10 @@ func (mr *MockIAPIServiceMockRecorder) GetAPIList(ctx, namespaceID, groupUUID, s
 }
 
 // GetAPIListByName mocks base method.
-func (m *MockIAPIService) GetAPIListByName(ctx context.Context, namespaceId int, name string) ([]*model.CommonGroupApi, error) {
+func (m *MockIAPIService) GetAPIListByName(ctx context.Context, namespaceId int, name string) ([]*group_model.CommonGroupApi, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAPIListByName", ctx, namespaceId, name)
-	ret0, _ := ret[0].([]*model.CommonGroupApi)
+	ret0, _ := ret[0].([]*group_model.CommonGroupApi)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -367,11 +369,11 @@ func (mr *MockIAPIServiceMockRecorder) GetAPIVersionInfo(ctx, namespaceID, uuid 
 }
 
 // GetGroups mocks base method.
-func (m *MockIAPIService) GetGroups(ctx context.Context, namespaceId int, parentUuid, queryName string) (*model.CommonGroupRoot, []*model.CommonGroupApi, error) {
+func (m *MockIAPIService) GetGroups(ctx context.Context, namespaceId int, parentUuid, queryName string) (*group_model.CommonGroupRoot, []*group_model.CommonGroupApi, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetGroups", ctx, namespaceId, parentUuid, queryName)
-	ret0, _ := ret[0].(*model.CommonGroupRoot)
-	ret1, _ := ret[1].([]*model.CommonGroupApi)
+	ret0, _ := ret[0].(*group_model.CommonGroupRoot)
+	ret1, _ := ret[1].([]*group_model.CommonGroupApi)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
 }
@@ -471,10 +473,10 @@ func (mr *MockIAPIServiceMockRecorder) OfflineAPI(ctx, namespaceId, operator, uu
 }
 
 // OnlineAPI mocks base method.
-func (m *MockIAPIService) OnlineAPI(ctx context.Context, namespaceId, operator int, uuid, clusterName string) (*model.Router, error) {
+func (m *MockIAPIService) OnlineAPI(ctx context.Context, namespaceId, operator int, uuid, clusterName string) (*frontend_model.Router, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "OnlineAPI", ctx, namespaceId, operator, uuid, clusterName)
-	ret0, _ := ret[0].(*model.Router)
+	ret0, _ := ret[0].(*frontend_model.Router)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

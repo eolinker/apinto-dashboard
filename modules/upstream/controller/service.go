@@ -11,7 +11,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/upstream"
 	_ "github.com/eolinker/apinto-dashboard/modules/upstream/service"
-	"github.com/eolinker/apinto-dashboard/service"
+	"github.com/eolinker/apinto-dashboard/service/discovery-serivce"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -20,7 +20,7 @@ import (
 
 type serviceController struct {
 	service   upstream.IService
-	discovery service.IDiscoveryService
+	discovery discovery_serivce.IDiscoveryService
 }
 
 func RegisterServiceRouter(router gin.IRouter) {
