@@ -7,7 +7,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/app/apserver/version"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/db_migrator"
-	"github.com/eolinker/apinto-dashboard/service/apinto-client"
 	"github.com/eolinker/apinto-dashboard/service/notice-service"
 	"github.com/eolinker/apinto-dashboard/service/user-service"
 	"github.com/eolinker/apinto-dashboard/store"
@@ -109,7 +108,7 @@ func initDB() {
 }
 
 func initClustersPlugin() {
-	var clientService apinto_client.IApintoClient
+	var clientService cluster_service.IApintoClient
 	bean.Autowired(&clientService)
 
 	err := clientService.InitClustersGlobalPlugin(context.Background())

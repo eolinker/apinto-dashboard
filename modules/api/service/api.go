@@ -25,7 +25,6 @@ import (
 	apimodel "github.com/eolinker/apinto-dashboard/modules/api/model"
 	store2 "github.com/eolinker/apinto-dashboard/modules/api/store"
 	"github.com/eolinker/apinto-dashboard/modules/upstream"
-	"github.com/eolinker/apinto-dashboard/service/apinto-client"
 	"github.com/eolinker/apinto-dashboard/service/cluster-service"
 	"github.com/eolinker/apinto-dashboard/service/group-service"
 	"github.com/eolinker/apinto-dashboard/service/locker-service"
@@ -53,14 +52,14 @@ type apiService struct {
 	quoteStore quote_store.IQuoteStore
 	apiHistory store2.IApiHistoryStore
 
-	service        upstream.IService
-	commonGroup    group_service.ICommonGroupService
-	clusterService cluster_service.IClusterService
+	service          upstream.IService
+	commonGroup      group_service.ICommonGroupService
+	clusterService   cluster_service.IClusterService
 	namespaceService namespace_service.INamespaceService
-	apintoClient    apinto_client.IApintoClient
-	userInfoService user_service.IUserInfoService
-	extAppService   openapp_service.IExternalApplicationService
-	apiManager      drivermanager.IAPIDriverManager
+	apintoClient     cluster_service.IApintoClient
+	userInfoService  user_service.IUserInfoService
+	extAppService    openapp_service.IExternalApplicationService
+	apiManager       drivermanager.IAPIDriverManager
 
 	lockService    locker_service.IAsynLockService
 	importApiCache cache.IImportApiCache
