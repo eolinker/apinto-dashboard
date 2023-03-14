@@ -1,7 +1,7 @@
 package api_store
 
 import (
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/stat-entry"
 	api_entry "github.com/eolinker/apinto-dashboard/modules/api/api-entry"
 	"github.com/eolinker/apinto-dashboard/store"
 )
@@ -17,8 +17,8 @@ func (a *apiHandler) Kind() string {
 	return "api"
 }
 
-func (a *apiHandler) Encode(as *api_entry.APIStat) *entry.Stat {
-	stat := new(entry.Stat)
+func (a *apiHandler) Encode(as *api_entry.APIStat) *stat_entry.Stat {
+	stat := new(stat_entry.Stat)
 
 	stat.Tag = as.APIID
 	stat.Kind = a.Kind()
@@ -27,7 +27,7 @@ func (a *apiHandler) Encode(as *api_entry.APIStat) *entry.Stat {
 	return stat
 }
 
-func (a *apiHandler) Decode(stat *entry.Stat) *api_entry.APIStat {
+func (a *apiHandler) Decode(stat *stat_entry.Stat) *api_entry.APIStat {
 	ds := new(api_entry.APIStat)
 
 	ds.APIID = stat.Tag
@@ -37,6 +37,6 @@ func (a *apiHandler) Decode(stat *entry.Stat) *api_entry.APIStat {
 }
 
 func NewAPIStatStore(db store.IDB) IAPIStatStore {
-	var h store.BaseKindHandler[api_entry.APIStat, entry.Stat] = new(apiHandler)
+	var h store.BaseKindHandler[api_entry.APIStat, stat_entry.Stat] = new(apiHandler)
 	return store.CreateBaseKindStore(h, db)
 }

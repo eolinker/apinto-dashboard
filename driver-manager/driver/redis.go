@@ -6,8 +6,8 @@ import (
 	"fmt"
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/common"
-	"github.com/eolinker/apinto-dashboard/dto"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/dto/cluster-dto"
+	"github.com/eolinker/apinto-dashboard/entry/cluster-entry"
 	"strings"
 )
 
@@ -20,7 +20,7 @@ func CreateRedis(apintoDriverName string) ICLConfigDriver {
 }
 
 func (c *clConfigRedis) CheckInput(config []byte) error {
-	redisConf := new(dto.RedisConfigInput)
+	redisConf := new(cluster_dto.RedisConfigInput)
 	err := json.Unmarshal(config, redisConf)
 	if err != nil {
 		return err
@@ -39,7 +39,7 @@ func (c *clConfigRedis) CheckInput(config []byte) error {
 }
 
 func (c *clConfigRedis) ToApinto(name string, config []byte) interface{} {
-	redisConf := new(dto.RedisConfigInput)
+	redisConf := new(cluster_dto.RedisConfigInput)
 	_ = json.Unmarshal(config, redisConf)
 	return &v1.RedisOutput{
 		OutputConfig: v1.OutputConfig{
@@ -52,11 +52,11 @@ func (c *clConfigRedis) ToApinto(name string, config []byte) interface{} {
 	}
 }
 
-func (c *clConfigRedis) FormatOut(operator string, config *entry.ClusterConfig) interface{} {
-	redisConf := new(dto.RedisConfigInput)
+func (c *clConfigRedis) FormatOut(operator string, config *cluster_entry.ClusterConfig) interface{} {
+	redisConf := new(cluster_dto.RedisConfigInput)
 	_ = json.Unmarshal(config.Data, redisConf)
 
-	return &dto.RedisConfigOutput{
+	return &cluster_dto.RedisConfigOutput{
 		Addrs:      redisConf.Addrs,
 		Username:   redisConf.Username,
 		Password:   redisConf.Password,

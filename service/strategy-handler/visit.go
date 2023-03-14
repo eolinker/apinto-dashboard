@@ -6,8 +6,8 @@ import (
 	"fmt"
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/common"
-	"github.com/eolinker/apinto-dashboard/dto"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/dto/strategy-dto"
+	"github.com/eolinker/apinto-dashboard/entry/strategy-entry"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/model"
 	service2 "github.com/eolinker/apinto-dashboard/modules/api"
@@ -24,7 +24,7 @@ type visitHandler struct {
 	apintoDriverName   string
 }
 
-func (t *visitHandler) GetListLabel(conf *entry.StrategyVisitConfig) string {
+func (t *visitHandler) GetListLabel(conf *strategy_entry.StrategyVisitConfig) string {
 	switch conf.VisitRule {
 	case enum.VisitRuleAllow:
 		return "允许访问"
@@ -48,7 +48,7 @@ func (t *visitHandler) GetBatchSettingName() string {
 	return enum.StrategyVisitBatchName
 }
 
-func (t *visitHandler) CheckInput(input *dto.StrategyInfoInput[entry.StrategyVisitConfig]) error {
+func (t *visitHandler) CheckInput(input *strategy_dto.StrategyInfoInput[strategy_entry.StrategyVisitConfig]) error {
 	input.Uuid = strings.TrimSpace(input.Uuid)
 	if input.Uuid != "" {
 		err := common.IsMatchString(common.UUIDExp, input.Uuid)
@@ -101,7 +101,7 @@ func (t *visitHandler) CheckInput(input *dto.StrategyInfoInput[entry.StrategyVis
 	return checkFilters(input.Filters)
 }
 
-func (t *visitHandler) ToApintoConfig(conf entry.StrategyVisitConfig) interface{} {
+func (t *visitHandler) ToApintoConfig(conf strategy_entry.StrategyVisitConfig) interface{} {
 	influenceSphere := make(map[string][]string)
 
 	for _, filter := range conf.InfluenceSphere {
@@ -115,7 +115,7 @@ func (t *visitHandler) ToApintoConfig(conf entry.StrategyVisitConfig) interface{
 	}
 }
 
-func (t *visitHandler) FormatOut(ctx context.Context, namespaceID int, input *model.StrategyInfoOutput[entry.StrategyVisitConfig]) *model.StrategyInfoOutput[model.VisitInfoOutputConf] {
+func (t *visitHandler) FormatOut(ctx context.Context, namespaceID int, input *model.StrategyInfoOutput[strategy_entry.StrategyVisitConfig]) *model.StrategyInfoOutput[model.VisitInfoOutputConf] {
 	output := new(model.StrategyInfoOutput[model.VisitInfoOutputConf])
 	output.Strategy = input.Strategy
 	output.Filters = input.Filters
@@ -233,7 +233,7 @@ func (t *visitHandler) FormatOut(ctx context.Context, namespaceID int, input *mo
 	return output
 }
 
-func NewStrategyVisitHandler(apintoDriverName string) service.IStrategyHandler[entry.StrategyVisitConfig, model.VisitInfoOutputConf] {
+func NewStrategyVisitHandler(apintoDriverName string) service.IStrategyHandler[strategy_entry.StrategyVisitConfig, model.VisitInfoOutputConf] {
 	h := &visitHandler{
 		apintoDriverName: apintoDriverName,
 	}

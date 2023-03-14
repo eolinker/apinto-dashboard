@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/eolinker/apinto-dashboard/common"
-	"github.com/eolinker/apinto-dashboard/dto"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/dto/cluster-dto"
+	"github.com/eolinker/apinto-dashboard/entry/cluster-entry"
 	"github.com/eolinker/apinto-dashboard/model"
 	"github.com/eolinker/apinto-dashboard/store"
 	"github.com/eolinker/eosc/common/bean"
@@ -20,7 +20,7 @@ type IClusterService interface {
 	GetByNamespaceByName(ctx context.Context, namespaceId int, name string) (*model.Cluster, error)
 	GetByNamespaceId(ctx context.Context, namespaceId int) ([]*model.Cluster, error)
 	GetByNames(ctx context.Context, namespaceId int, names []string) ([]*model.Cluster, error)
-	Insert(ctx context.Context, namespaceId, userId int, clusterInput *dto.ClusterInput) error
+	Insert(ctx context.Context, namespaceId, userId int, clusterInput *cluster_dto.ClusterInput) error
 	QueryByNamespaceId(ctx context.Context, namespaceId int, clusterName string) (*model.Cluster, error)
 	QueryListByNamespaceId(ctx context.Context, namespaceId int) ([]*model.Cluster, error)
 	DeleteByNamespaceIdByName(ctx context.Context, namespaceId, userId int, name string) error
@@ -132,7 +132,7 @@ func (c *clusterService) GetByNames(ctx context.Context, namespaceId int, names 
 }
 
 // Insert 新增集群
-func (c *clusterService) Insert(ctx context.Context, namespaceId, userId int, clusterInput *dto.ClusterInput) error {
+func (c *clusterService) Insert(ctx context.Context, namespaceId, userId int, clusterInput *cluster_dto.ClusterInput) error {
 	clusterId, _ := c.CheckByNamespaceByName(ctx, namespaceId, clusterInput.Name)
 	if clusterId > 0 {
 		return errors.New("cluster already exists")
@@ -158,7 +158,7 @@ func (c *clusterService) Insert(ctx context.Context, namespaceId, userId int, cl
 	}
 
 	t := time.Now()
-	entryCluster := &entry.Cluster{
+	entryCluster := &cluster_entry.Cluster{
 		NamespaceId: namespaceId,
 		Name:        clusterInput.Name,
 		Desc:        clusterInput.Desc,
@@ -187,7 +187,7 @@ func (c *clusterService) Insert(ctx context.Context, namespaceId, userId int, cl
 		nodesAdminAddr := make([]string, 0, len(nodes))
 
 		for _, node := range nodes {
-			entryClusterNodes = append(entryClusterNodes, &model.ClusterNode{ClusterNode: &entry.ClusterNode{
+			entryClusterNodes = append(entryClusterNodes, &model.ClusterNode{ClusterNode: &cluster_entry.ClusterNode{
 				NamespaceId: namespaceId,
 				AdminAddr:   node.AdminAddr,
 				ServiceAddr: node.ServiceAddr,
@@ -327,7 +327,7 @@ func (c *clusterService) UpdateDesc(ctx context.Context, namespaceId, userId int
 		return err
 	}
 
-	cluster := &entry.Cluster{
+	cluster := &cluster_entry.Cluster{
 		Id:   clusterId,
 		Desc: desc,
 	}
@@ -352,7 +352,7 @@ func (c *clusterService) UpdateDesc(ctx context.Context, namespaceId, userId int
 }
 
 func (c *clusterService) UpdateAddr(ctx context.Context, userId, clusterId int, addr, uuid string) error {
-	cluster := &entry.Cluster{
+	cluster := &cluster_entry.Cluster{
 		Id:   clusterId,
 		Addr: addr,
 		UUID: uuid,

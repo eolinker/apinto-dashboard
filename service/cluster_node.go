@@ -7,7 +7,7 @@ import (
 	"fmt"
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/common"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/cluster-entry"
 	"github.com/eolinker/apinto-dashboard/model"
 	"github.com/eolinker/apinto-dashboard/store"
 	"github.com/eolinker/eosc/common/bean"
@@ -44,7 +44,7 @@ func newClusterNodeService() IClusterNodeService {
 }
 
 func (c *clusterNodeService) Insert(ctx context.Context, nodes []*model.ClusterNode) error {
-	entryNodes := make([]*entry.ClusterNode, 0, len(nodes))
+	entryNodes := make([]*cluster_entry.ClusterNode, 0, len(nodes))
 	for _, node := range nodes {
 		entryNodes = append(entryNodes, node.ClusterNode)
 	}
@@ -148,11 +148,11 @@ func (c *clusterNodeService) Reset(ctx context.Context, namespaceId, userId int,
 
 	err = c.clusterNodeStore.Transaction(ctx, func(txCtx context.Context) error {
 		t := time.Now()
-		entryClusterNodes := make([]*entry.ClusterNode, 0, len(nodes))
+		entryClusterNodes := make([]*cluster_entry.ClusterNode, 0, len(nodes))
 		nodesAdminAddr := make([]string, 0, len(nodes))
 
 		for _, node := range nodes {
-			entryClusterNodes = append(entryClusterNodes, &entry.ClusterNode{
+			entryClusterNodes = append(entryClusterNodes, &cluster_entry.ClusterNode{
 				ClusterId:   clusterId,
 				NamespaceId: namespaceId,
 				AdminAddr:   node.AdminAddr,
@@ -199,9 +199,9 @@ func (c *clusterNodeService) Update(ctx context.Context, namespaceId int, cluste
 	}
 
 	//由于节点名称是可能会变的，所以重新更新节点是把原来的全部删除，然后重新添加新的节点信息。
-	newClusterNodes := make([]*entry.ClusterNode, 0, len(nodes))
+	newClusterNodes := make([]*cluster_entry.ClusterNode, 0, len(nodes))
 	for _, node := range nodes {
-		newClusterNodes = append(newClusterNodes, &entry.ClusterNode{
+		newClusterNodes = append(newClusterNodes, &cluster_entry.ClusterNode{
 			ClusterId:   cluster.Id,
 			NamespaceId: namespaceId,
 			AdminAddr:   node.AdminAddr,
@@ -292,7 +292,7 @@ func (c *clusterNodeService) GetNodesByUrl(addr string) ([]*model.ClusterNode, e
 		adminAddr := strings.Join(node.Admin, ",")
 		serverAddr := strings.Join(node.Server, ",")
 		list = append(list, &model.ClusterNode{
-			ClusterNode: &entry.ClusterNode{
+			ClusterNode: &cluster_entry.ClusterNode{
 				Name:        node.Name,
 				AdminAddr:   adminAddr,
 				ServiceAddr: serverAddr,

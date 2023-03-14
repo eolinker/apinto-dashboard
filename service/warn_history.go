@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/monitor-entry"
 	"github.com/eolinker/apinto-dashboard/model"
 	"github.com/eolinker/apinto-dashboard/store"
 	"github.com/eolinker/eosc/common/bean"
@@ -28,9 +28,9 @@ func (w *warnHistoryService) Create(ctx context.Context, namespaceId int, partit
 	if len(infos) == 0 {
 		return nil
 	}
-	list := make([]*entry.WarnHistory, 0, len(infos))
+	list := make([]*monitor_entry.WarnHistory, 0, len(infos))
 	for _, info := range infos {
-		history := &entry.WarnHistory{
+		history := &monitor_entry.WarnHistory{
 			NamespaceID:   namespaceId,
 			PartitionId:   partitionId,
 			StrategyTitle: info.StrategyTitle,

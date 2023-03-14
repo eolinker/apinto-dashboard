@@ -7,7 +7,7 @@ import (
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/common"
 	driver_manager "github.com/eolinker/apinto-dashboard/driver-manager"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/cluster-entry"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/store"
 	"github.com/eolinker/eosc/common/bean"
@@ -24,7 +24,7 @@ type IClusterConfigService interface {
 
 	IsConfigTypeExist(configType string) bool
 	CheckInput(configType string, config []byte) error
-	formatOutput(configType string, operator string, config *entry.ClusterConfig) interface{}
+	formatOutput(configType string, operator string, config *cluster_entry.ClusterConfig) interface{}
 	toApinto(client v1.IClient, name, configType string, config []byte) error
 	offlineApinto(client v1.IClient, name, configType string) error
 	IResetOnlineService
@@ -86,7 +86,7 @@ func (c *clusterConfigService) Edit(ctx context.Context, namespaceId, operator i
 
 	t := time.Now()
 	if err == gorm.ErrRecordNotFound {
-		info = &entry.ClusterConfig{
+		info = &cluster_entry.ClusterConfig{
 			NamespaceId: namespaceId,
 			ClusterId:   cluster.Id,
 			Type:        configType,
@@ -120,7 +120,7 @@ func (c *clusterConfigService) Edit(ctx context.Context, namespaceId, operator i
 		}
 		//若runtime为空
 		if err == gorm.ErrRecordNotFound {
-			runtime = &entry.ClusterConfigRuntime{
+			runtime = &cluster_entry.ClusterConfigRuntime{
 				NamespaceId: namespaceId,
 				ConfigID:    info.Id,
 				ClusterId:   cluster.Id,
@@ -277,7 +277,7 @@ func (c *clusterConfigService) CheckInput(configType string, config []byte) erro
 	return driver.CheckInput(config)
 }
 
-func (c *clusterConfigService) formatOutput(configType string, operator string, config *entry.ClusterConfig) interface{} {
+func (c *clusterConfigService) formatOutput(configType string, operator string, config *cluster_entry.ClusterConfig) interface{} {
 	driver := c.clConfigManager.GetDriver(configType)
 	return driver.FormatOut(operator, config)
 }

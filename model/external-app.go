@@ -1,9 +1,11 @@
 package model
 
-import "github.com/eolinker/apinto-dashboard/entry"
+import (
+	"github.com/eolinker/apinto-dashboard/entry/open-app-entry"
+)
 
 type ExternalAppInfo struct {
-	*entry.ExternalApplication
+	*open_app_entry.ExternalApplication
 }
 
 type ExtAppListItem struct {

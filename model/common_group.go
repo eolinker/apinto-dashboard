@@ -1,6 +1,6 @@
 package model
 
-import "github.com/eolinker/apinto-dashboard/entry"
+import group_entry "github.com/eolinker/apinto-dashboard/entry/group-entry"
 
 type CommonGroupRoot struct {
 	UUID        string
@@ -9,7 +9,7 @@ type CommonGroupRoot struct {
 }
 
 type CommonGroup struct {
-	Group    *entry.CommonGroup
+	Group    *group_entry.CommonGroup
 	Subgroup []*CommonGroup
 }
 

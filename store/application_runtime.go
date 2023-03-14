@@ -1,11 +1,12 @@
 package store
 
 import (
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/application-entry"
+	"github.com/eolinker/apinto-dashboard/entry/runtime-entry"
 )
 
 type IApplicationRuntimeStore interface {
-	BaseRuntimeStore[entry.ApplicationRuntime]
+	BaseRuntimeStore[application_entry.ApplicationRuntime]
 }
 
 type applicationRuntimeHandler struct {
@@ -15,8 +16,8 @@ func (s *applicationRuntimeHandler) Kind() string {
 	return "application"
 }
 
-func (s *applicationRuntimeHandler) Encode(sr *entry.ApplicationRuntime) *entry.Runtime {
-	return &entry.Runtime{
+func (s *applicationRuntimeHandler) Encode(sr *application_entry.ApplicationRuntime) *runtime_entry.Runtime {
+	return &runtime_entry.Runtime{
 		Id:          sr.Id,
 		Kind:        s.Kind(),
 		ClusterID:   sr.ClusterId,
@@ -32,8 +33,8 @@ func (s *applicationRuntimeHandler) Encode(sr *entry.ApplicationRuntime) *entry.
 
 }
 
-func (s *applicationRuntimeHandler) Decode(r *entry.Runtime) *entry.ApplicationRuntime {
-	return &entry.ApplicationRuntime{
+func (s *applicationRuntimeHandler) Decode(r *runtime_entry.Runtime) *application_entry.ApplicationRuntime {
+	return &application_entry.ApplicationRuntime{
 		Id:            r.Id,
 		NamespaceId:   r.NamespaceID,
 		ClusterId:     r.ClusterID,
@@ -48,6 +49,6 @@ func (s *applicationRuntimeHandler) Decode(r *entry.Runtime) *entry.ApplicationR
 }
 
 func newApplicationRuntimeStore(db IDB) IApplicationRuntimeStore {
-	var runTimeHandler BaseKindHandler[entry.ApplicationRuntime, entry.Runtime] = new(applicationRuntimeHandler)
-	return CreateRuntime[entry.ApplicationRuntime](runTimeHandler, db)
+	var runTimeHandler BaseKindHandler[application_entry.ApplicationRuntime, runtime_entry.Runtime] = new(applicationRuntimeHandler)
+	return CreateRuntime[application_entry.ApplicationRuntime](runTimeHandler, db)
 }

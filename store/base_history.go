@@ -4,12 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/eolinker/apinto-dashboard/common"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/history-entry"
 	"time"
 )
 
 type BaseHistoryStore[T any] interface {
-	History(ctx context.Context, namespace, target int, OldValue, newValue interface{}, optType entry.OptType, Operator int) error
+	History(ctx context.Context, namespace, target int, OldValue, newValue interface{}, optType history_entry.OptType, Operator int) error
 	HistoryAdd(ctx context.Context, namespace, target int, newValue interface{}, Operator int) error
 	HistoryEdit(ctx context.Context, namespace, target int, OldValue, newValue interface{}, Operator int) error
 	HistoryDelete(ctx context.Context, namespace, target int, oldValue interface{}, Operator int) error
@@ -20,15 +20,15 @@ type BaseHistoryStore[T any] interface {
 	LatestOne(ctx context.Context, target int) (*T, error)
 }
 type DecodeHistory[T any] interface {
-	Decode(e *entry.History) *T
+	Decode(e *history_entry.History) *T
 }
 type BaseHistory[T any] struct {
-	kind    entry.HistoryKind
-	myStore *BaseStore[entry.History]
+	kind    history_entry.HistoryKind
+	myStore *BaseStore[history_entry.History]
 	decoder DecodeHistory[T]
 }
 
-func (b *BaseHistory[T]) History(ctx context.Context, namespace int, target int, OldValue, newValue interface{}, optType entry.OptType, operator int) error {
+func (b *BaseHistory[T]) History(ctx context.Context, namespace int, target int, OldValue, newValue interface{}, optType history_entry.OptType, operator int) error {
 
 	oldValueStr, err := encodeValue(OldValue)
 	if err != nil {
@@ -39,7 +39,7 @@ func (b *BaseHistory[T]) History(ctx context.Context, namespace int, target int,
 	if err != nil {
 		return err
 	}
-	history := &entry.History{
+	history := &history_entry.History{
 		Id:          0,
 		NamespaceID: namespace,
 		Kind:        b.kind,
@@ -53,14 +53,14 @@ func (b *BaseHistory[T]) History(ctx context.Context, namespace int, target int,
 	return b.myStore.Insert(ctx, history)
 }
 func (b *BaseHistory[T]) HistoryAdd(ctx context.Context, namespace, target int, newValue interface{}, Operator int) error {
-	return b.History(ctx, namespace, target, nil, newValue, entry.OptAdd, Operator)
+	return b.History(ctx, namespace, target, nil, newValue, history_entry.OptAdd, Operator)
 }
 func (b *BaseHistory[T]) HistoryEdit(ctx context.Context, namespace, target int, OldValue, newValue interface{}, Operator int) error {
-	return b.History(ctx, namespace, target, OldValue, newValue, entry.OptEdit, Operator)
+	return b.History(ctx, namespace, target, OldValue, newValue, history_entry.OptEdit, Operator)
 }
 
 func (b *BaseHistory[T]) HistoryDelete(ctx context.Context, namespace, target int, oldValue interface{}, Operator int) error {
-	return b.History(ctx, namespace, target, oldValue, nil, entry.OptDelete, Operator)
+	return b.History(ctx, namespace, target, oldValue, nil, history_entry.OptDelete, Operator)
 }
 func (b *BaseHistory[T]) List(ctx context.Context, namespace int, target ...int) ([]*T, error) {
 	query := map[string]interface{}{
@@ -120,14 +120,14 @@ func (b *BaseHistory[T]) LatestOperators(ctx context.Context, target ...int) (ma
 }
 
 func (b *BaseHistory[T]) Latest(ctx context.Context, target ...int) (map[int]*T, error) {
-	rs := make([]*entry.History, 0, len(target))
+	rs := make([]*history_entry.History, 0, len(target))
 
 	err := b.myStore.DB(ctx).Raw("SELECT * FROM `history` WHERE `id` IN( SELECT max(`id`) FROM history WHERE `kind` = ? AND `target` IN (?)   GROUP BY `target`)").Scan(&rs).Error
 	if err != nil {
 		return nil, err
 	}
 
-	rm := common.SliceToMap(rs, func(t *entry.History) int {
+	rm := common.SliceToMap(rs, func(t *history_entry.History) int {
 		return t.TargetID
 	})
 
@@ -146,10 +146,10 @@ func (b *BaseHistory[T]) LatestOne(ctx context.Context, target int) (*T, error) 
 	return b.decoder.Decode(first), nil
 }
 
-func CreateHistory[T any](decoder DecodeHistory[T], db IDB, kind entry.HistoryKind) BaseHistoryStore[T] {
+func CreateHistory[T any](decoder DecodeHistory[T], db IDB, kind history_entry.HistoryKind) BaseHistoryStore[T] {
 	return &BaseHistory[T]{
 		kind:    kind,
-		myStore: CreateStore[entry.History](db),
+		myStore: CreateStore[history_entry.History](db),
 		decoder: decoder,
 	}
 }

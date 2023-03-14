@@ -3,7 +3,7 @@ package api_store
 import (
 	"context"
 	"fmt"
-	oentry "github.com/eolinker/apinto-dashboard/entry"
+	oentry "github.com/eolinker/apinto-dashboard/entry/page-entry"
 	"github.com/eolinker/apinto-dashboard/modules/api/api-entry"
 	"github.com/eolinker/apinto-dashboard/store"
 	"strings"

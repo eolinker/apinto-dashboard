@@ -1,9 +1,12 @@
 package store
 
-import "github.com/eolinker/apinto-dashboard/entry"
+import (
+	"github.com/eolinker/apinto-dashboard/entry/cluster-entry"
+	"github.com/eolinker/apinto-dashboard/entry/runtime-entry"
+)
 
 type IClusterConfigRuntimeStore interface {
-	BaseRuntimeStore[entry.ClusterConfigRuntime]
+	BaseRuntimeStore[cluster_entry.ClusterConfigRuntime]
 }
 
 type clusterConfigRuntimeHandler struct {
@@ -13,8 +16,8 @@ func (s *clusterConfigRuntimeHandler) Kind() string {
 	return "cluster_config"
 }
 
-func (s *clusterConfigRuntimeHandler) Encode(cr *entry.ClusterConfigRuntime) *entry.Runtime {
-	return &entry.Runtime{
+func (s *clusterConfigRuntimeHandler) Encode(cr *cluster_entry.ClusterConfigRuntime) *runtime_entry.Runtime {
+	return &runtime_entry.Runtime{
 		Id:          cr.Id,
 		Kind:        s.Kind(),
 		ClusterID:   cr.ClusterId,
@@ -30,8 +33,8 @@ func (s *clusterConfigRuntimeHandler) Encode(cr *entry.ClusterConfigRuntime) *en
 
 }
 
-func (s *clusterConfigRuntimeHandler) Decode(r *entry.Runtime) *entry.ClusterConfigRuntime {
-	return &entry.ClusterConfigRuntime{
+func (s *clusterConfigRuntimeHandler) Decode(r *runtime_entry.Runtime) *cluster_entry.ClusterConfigRuntime {
+	return &cluster_entry.ClusterConfigRuntime{
 		Id:          r.Id,
 		NamespaceId: r.NamespaceID,
 		ConfigID:    r.TargetID,
@@ -44,6 +47,6 @@ func (s *clusterConfigRuntimeHandler) Decode(r *entry.Runtime) *entry.ClusterCon
 }
 
 func newClusterConfigRuntimeStore(db IDB) IClusterConfigRuntimeStore {
-	var runTimeHandler BaseKindHandler[entry.ClusterConfigRuntime, entry.Runtime] = new(clusterConfigRuntimeHandler)
-	return CreateRuntime[entry.ClusterConfigRuntime](runTimeHandler, db)
+	var runTimeHandler BaseKindHandler[cluster_entry.ClusterConfigRuntime, runtime_entry.Runtime] = new(clusterConfigRuntimeHandler)
+	return CreateRuntime[cluster_entry.ClusterConfigRuntime](runTimeHandler, db)
 }

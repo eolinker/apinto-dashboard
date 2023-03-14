@@ -4,6 +4,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/dto"
+	"github.com/eolinker/apinto-dashboard/dto/cluster-dto"
 	"github.com/eolinker/apinto-dashboard/service"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/gin-gonic/gin"
@@ -35,14 +36,14 @@ func (c *clusterCertificateController) gets(ginCtx *gin.Context) {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
 	}
-	dtoList := make([]*dto.ClusterCertificateOut, 0, len(list))
+	dtoList := make([]*cluster_dto.ClusterCertificateOut, 0, len(list))
 	for _, val := range list {
 		cert, err := common.ParseCert(val.Key, val.Pem)
 		if err != nil {
 			ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 			return
 		}
-		dtoList = append(dtoList, &dto.ClusterCertificateOut{
+		dtoList = append(dtoList, &cluster_dto.ClusterCertificateOut{
 			Id:           val.Id,
 			ClusterId:    val.ClusterId,
 			Name:         cert.Leaf.Subject.CommonName,
@@ -62,7 +63,7 @@ func (c *clusterCertificateController) post(ginCtx *gin.Context) {
 	namespaceId := GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Param("cluster_name")
 	operator := GetUserId(ginCtx)
-	input := &dto.ClusterCertificateInput{}
+	input := &cluster_dto.ClusterCertificateInput{}
 	err := ginCtx.BindJSON(input)
 	if err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
@@ -95,7 +96,7 @@ func (c *clusterCertificateController) put(ginCtx *gin.Context) {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult("certificate_id is 0"))
 		return
 	}
-	input := &dto.ClusterCertificateInput{}
+	input := &cluster_dto.ClusterCertificateInput{}
 	err := ginCtx.BindJSON(input)
 	if err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))

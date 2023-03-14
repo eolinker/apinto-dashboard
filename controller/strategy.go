@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/dto"
+	"github.com/eolinker/apinto-dashboard/dto/strategy-dto"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/service"
 	"github.com/gin-gonic/gin"
@@ -39,10 +40,10 @@ func (s *strategyController[T, K]) list(ginCtx *gin.Context) {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
 	}
-	resList := make([]*dto.StrategyListOut, 0, len(strategies))
+	resList := make([]*strategy_dto.StrategyListOut, 0, len(strategies))
 
 	for _, strategy := range strategies {
-		resList = append(resList, &dto.StrategyListOut{
+		resList = append(resList, &strategy_dto.StrategyListOut{
 			UUID:       strategy.Strategy.UUID,
 			Name:       strategy.Strategy.Name,
 			Priority:   strategy.Strategy.Priority,
@@ -76,7 +77,7 @@ func (s *strategyController[T, K]) get(ginCtx *gin.Context) {
 		return
 	}
 
-	strategy := &dto.StrategyInfoOutput[K]{
+	strategy := &strategy_dto.StrategyInfoOutput[K]{
 		Name:     info.Name,
 		UUID:     info.UUID,
 		Desc:     info.Desc,
@@ -100,7 +101,7 @@ func (s *strategyController[T, K]) create(ginCtx *gin.Context) {
 		return
 	}
 
-	input := new(dto.StrategyInfoInput[T])
+	input := new(strategy_dto.StrategyInfoInput[T])
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -136,7 +137,7 @@ func (s *strategyController[T, K]) update(ginCtx *gin.Context) {
 		return
 	}
 
-	input := new(dto.StrategyInfoInput[T])
+	input := new(strategy_dto.StrategyInfoInput[T])
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -211,7 +212,7 @@ func (s *strategyController[T, K]) updateStop(ginCtx *gin.Context) {
 	uuid := ginCtx.Query("uuid")
 	clusterName := ginCtx.Query("cluster_name")
 
-	input := new(dto.StrategyStatusInput)
+	input := new(strategy_dto.StrategyStatusInput)
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -238,10 +239,10 @@ func (s *strategyController[T, K]) toPublish(ginCtx *gin.Context) {
 		return
 	}
 
-	resList := make([]*dto.StrategyToPublishListOut, 0)
+	resList := make([]*strategy_dto.StrategyToPublishListOut, 0)
 
 	for _, publish := range list {
-		resList = append(resList, &dto.StrategyToPublishListOut{
+		resList = append(resList, &strategy_dto.StrategyToPublishListOut{
 			Name:     publish.Strategy.Name,
 			Priority: publish.Strategy.Priority,
 			Status:   enum.StrategyOnlineStatus(publish.Status),
@@ -265,7 +266,7 @@ func (s *strategyController[T, K]) publish(ginCtx *gin.Context) {
 	namespaceId := GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Query("cluster_name")
 
-	input := new(dto.StrategyPublish)
+	input := new(strategy_dto.StrategyPublish)
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -300,18 +301,18 @@ func (s *strategyController[T, K]) publishHistory(ginCtx *gin.Context) {
 		return
 	}
 
-	resList := make([]*dto.StrategyPublishHistory, 0, len(list))
+	resList := make([]*strategy_dto.StrategyPublishHistory, 0, len(list))
 	for _, history := range list {
-		details := make([]*dto.StrategyPublishHistoryDetails, 0)
+		details := make([]*strategy_dto.StrategyPublishHistoryDetails, 0)
 		for _, detail := range history.Details {
-			details = append(details, &dto.StrategyPublishHistoryDetails{
+			details = append(details, &strategy_dto.StrategyPublishHistoryDetails{
 				Name:       detail.Name,
 				Priority:   detail.Priority,
 				Status:     enum.StrategyOnlineStatus(detail.Status),
 				CreateTime: common.TimeToStr(detail.OptTime),
 			})
 		}
-		resList = append(resList, &dto.StrategyPublishHistory{
+		resList = append(resList, &strategy_dto.StrategyPublishHistory{
 			Id:         history.Id,
 			Name:       history.Name,
 			OptType:    history.OptType,

@@ -2,11 +2,12 @@ package store
 
 import (
 	"encoding/json"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/application-entry"
+	"github.com/eolinker/apinto-dashboard/entry/version-entry"
 )
 
 type IApplicationAuthVersionStore interface {
-	IBaseStore[entry.ApplicationAuthVersion]
+	IBaseStore[application_entry.ApplicationAuthVersion]
 }
 
 type applicationAuthVersionKindHandler struct {
@@ -16,9 +17,9 @@ func (s *applicationAuthVersionKindHandler) Kind() string {
 	return "application_auth"
 }
 
-func (s *applicationAuthVersionKindHandler) Encode(sv *entry.ApplicationAuthVersion) *entry.Version {
+func (s *applicationAuthVersionKindHandler) Encode(sv *application_entry.ApplicationAuthVersion) *version_entry.Version {
 
-	v := new(entry.Version)
+	v := new(version_entry.Version)
 	v.Id = sv.Id
 	v.Kind = s.Kind()
 	v.Target = sv.ApplicationAuthID
@@ -31,8 +32,8 @@ func (s *applicationAuthVersionKindHandler) Encode(sv *entry.ApplicationAuthVers
 	return v
 }
 
-func (s *applicationAuthVersionKindHandler) Decode(v *entry.Version) *entry.ApplicationAuthVersion {
-	sv := new(entry.ApplicationAuthVersion)
+func (s *applicationAuthVersionKindHandler) Decode(v *version_entry.Version) *application_entry.ApplicationAuthVersion {
+	sv := new(application_entry.ApplicationAuthVersion)
 	sv.Id = v.Id
 	sv.ApplicationAuthID = v.Target
 	sv.Operator = v.Operator
@@ -44,6 +45,6 @@ func (s *applicationAuthVersionKindHandler) Decode(v *entry.Version) *entry.Appl
 }
 
 func newApplicationAuthVersionStore(db IDB) IApplicationAuthVersionStore {
-	var h BaseKindHandler[entry.ApplicationAuthVersion, entry.Version] = new(applicationAuthVersionKindHandler)
+	var h BaseKindHandler[application_entry.ApplicationAuthVersion, version_entry.Version] = new(applicationAuthVersionKindHandler)
 	return CreateBaseKindStore(h, db)
 }

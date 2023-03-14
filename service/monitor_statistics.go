@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/monitor-entry"
 	"github.com/eolinker/apinto-dashboard/model"
 	"github.com/eolinker/apinto-dashboard/store/flux"
 	"github.com/eolinker/eosc/common/bean"
@@ -77,7 +77,7 @@ func (m *monitorStatistics) Statistics(ctx context.Context, namespaceId int, par
 	filters := m.formatFilter(wheres)
 	newStartTime, _, _, bucket := m.getTimeIntervelAndBucket(start, end)
 
-	statisticsConf := []*entry.StatisticsFilterConf{
+	statisticsConf := []*monitor_entry.StatisticsFilterConf{
 		{
 			Measurement: "request",
 			AggregateFn: "sum()",
@@ -166,7 +166,7 @@ func (m *monitorStatistics) ProxyStatistics(ctx context.Context, namespaceId int
 	filters := m.formatFilter(wheres)
 	newStartTime, _, _, bucket := m.getTimeIntervelAndBucket(start, end)
 
-	statisticsConf := []*entry.StatisticsFilterConf{
+	statisticsConf := []*monitor_entry.StatisticsFilterConf{
 		{
 			Measurement: "proxy",
 			AggregateFn: "sum()",
@@ -238,7 +238,7 @@ func (m *monitorStatistics) CircularMap(ctx context.Context, namespaceId int, pa
 	filters := m.formatFilter(wheres)
 	newStartTime, _, _, bucket := m.getTimeIntervelAndBucket(start, end)
 
-	requestFieldsConf := &entry.StatisticsFilterConf{
+	requestFieldsConf := &monitor_entry.StatisticsFilterConf{
 		Measurement: "request",
 		AggregateFn: "sum()",
 		Fields:      []string{"total", "success", "s4xx", "s5xx"},
@@ -249,7 +249,7 @@ func (m *monitorStatistics) CircularMap(ctx context.Context, namespaceId int, pa
 		return nil, nil, err
 	}
 
-	proxyFieldsConf := &entry.StatisticsFilterConf{
+	proxyFieldsConf := &monitor_entry.StatisticsFilterConf{
 		Measurement: "proxy",
 		AggregateFn: "sum()",
 		Fields:      []string{"p_total", "p_success", "p_s4xx", "p_s5xx"},
@@ -545,7 +545,7 @@ func (m *monitorStatistics) WarnStatistics(ctx context.Context, namespaceId int,
 	return m.calculateWarnStatistics(quotaType, results), nil
 }
 
-func (m *monitorStatistics) calculateWarnStatistics(quotaType model.QuotaType, data map[string]*entry.FluxWarnStatistics) map[string]float64 {
+func (m *monitorStatistics) calculateWarnStatistics(quotaType model.QuotaType, data map[string]*monitor_entry.FluxWarnStatistics) map[string]float64 {
 	results := make(map[string]float64)
 
 	switch quotaType {
@@ -662,8 +662,8 @@ func (m *monitorStatistics) formatFilter(wheres []model.MonWhereItem) string {
 }
 
 // getStatisticsFilterByQuota 根据quotaType获取flux脚本需要的统计过滤配置
-func (m *monitorStatistics) getStatisticsFilterByQuota(quotaType model.QuotaType) (*entry.StatisticsFilterConf, error) {
-	filterConf := &entry.StatisticsFilterConf{
+func (m *monitorStatistics) getStatisticsFilterByQuota(quotaType model.QuotaType) (*monitor_entry.StatisticsFilterConf, error) {
+	filterConf := &monitor_entry.StatisticsFilterConf{
 		Measurement: "request",
 		AggregateFn: "sum()",
 		Fields:      nil,

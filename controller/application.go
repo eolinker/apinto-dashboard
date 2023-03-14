@@ -4,6 +4,10 @@ import (
 	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/dto"
+	"github.com/eolinker/apinto-dashboard/dto/application-dto"
+	"github.com/eolinker/apinto-dashboard/dto/discover-dto"
+	"github.com/eolinker/apinto-dashboard/dto/online-dto"
+	"github.com/eolinker/apinto-dashboard/dto/service-dto"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/service"
 	"github.com/eolinker/eosc/common/bean"
@@ -62,10 +66,10 @@ func (a *applicationController) lists(ginCtx *gin.Context) {
 		return
 	}
 
-	resList := make([]*dto.ApplicationListOut, 0, len(list))
+	resList := make([]*application_dto.ApplicationListOut, 0, len(list))
 	for _, application := range list {
 
-		resList = append(resList, &dto.ApplicationListOut{
+		resList = append(resList, &application_dto.ApplicationListOut{
 			Name:       application.Name,
 			Id:         application.IdStr,
 			Desc:       application.Desc,
@@ -88,10 +92,10 @@ func (a *applicationController) enum(ginCtx *gin.Context) {
 		return
 	}
 
-	resList := make([]*dto.ApplicationEnum, 0, len(list))
+	resList := make([]*application_dto.ApplicationEnum, 0, len(list))
 	for _, application := range list {
 
-		resList = append(resList, &dto.ApplicationEnum{
+		resList = append(resList, &application_dto.ApplicationEnum{
 			Name: application.Name,
 			Id:   application.IdStr,
 		})
@@ -112,23 +116,23 @@ func (a *applicationController) info(ginCtx *gin.Context) {
 		return
 	}
 
-	customAttrList := make([]dto.ApplicationCustomAttr, 0, len(info.CustomAttr))
+	customAttrList := make([]application_dto.ApplicationCustomAttr, 0, len(info.CustomAttr))
 	for _, attr := range info.CustomAttr {
-		customAttrList = append(customAttrList, dto.ApplicationCustomAttr{
+		customAttrList = append(customAttrList, application_dto.ApplicationCustomAttr{
 			Key:   attr.Key,
 			Value: attr.Value,
 		})
 	}
-	extraParamList := make([]dto.ApplicationExtraParam, 0, len(info.ExtraParam))
+	extraParamList := make([]application_dto.ApplicationExtraParam, 0, len(info.ExtraParam))
 	for _, extra := range info.ExtraParam {
-		extraParamList = append(extraParamList, dto.ApplicationExtraParam{
+		extraParamList = append(extraParamList, application_dto.ApplicationExtraParam{
 			Key:      extra.Key,
 			Value:    extra.Value,
 			Conflict: extra.Conflict,
 			Position: extra.Position,
 		})
 	}
-	res := dto.ApplicationInfoOut{
+	res := application_dto.ApplicationInfoOut{
 		Name:           info.Name,
 		Id:             info.IdStr,
 		Desc:           info.Desc,
@@ -144,7 +148,7 @@ func (a *applicationController) info(ginCtx *gin.Context) {
 func (a *applicationController) createApp(ginCtx *gin.Context) {
 	namespaceId := GetNamespaceId(ginCtx)
 	userId := GetUserId(ginCtx)
-	input := new(dto.ApplicationInput)
+	input := new(application_dto.ApplicationInput)
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -166,7 +170,7 @@ func (a *applicationController) updateApp(ginCtx *gin.Context) {
 	namespaceId := GetNamespaceId(ginCtx)
 	userId := GetUserId(ginCtx)
 
-	input := new(dto.ApplicationInput)
+	input := new(application_dto.ApplicationInput)
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -203,13 +207,13 @@ func (a *applicationController) onlines(ginCtx *gin.Context) {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
 	}
-	resp := make([]*dto.OnlineOut, 0, len(list))
+	resp := make([]*online_dto.OnlineOut, 0, len(list))
 	for _, online := range list {
 		updateTime := ""
 		if !online.UpdateTime.IsZero() {
 			updateTime = common.TimeToStr(online.UpdateTime)
 		}
-		resp = append(resp, &dto.OnlineOut{
+		resp = append(resp, &online_dto.OnlineOut{
 			Name:       online.ClusterName,
 			Status:     enum.OnlineStatus(online.Status),
 			Disable:    online.Disable,
@@ -228,7 +232,7 @@ func (a *applicationController) online(ginCtx *gin.Context) {
 	namespaceId := GetNamespaceId(ginCtx)
 	userId := GetUserId(ginCtx)
 	id := ginCtx.Query("app_id")
-	input := &dto.UpdateOnlineStatusInput{}
+	input := &online_dto.UpdateOnlineStatusInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -244,7 +248,7 @@ func (a *applicationController) offline(ginCtx *gin.Context) {
 	namespaceId := GetNamespaceId(ginCtx)
 	userId := GetUserId(ginCtx)
 	id := ginCtx.Query("app_id")
-	input := &dto.UpdateOnlineStatusInput{}
+	input := &online_dto.UpdateOnlineStatusInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -260,7 +264,7 @@ func (a *applicationController) enable(ginCtx *gin.Context) {
 	namespaceId := GetNamespaceId(ginCtx)
 	userId := GetUserId(ginCtx)
 	id := ginCtx.Query("app_id")
-	input := &dto.UpdateOnlineStatusInput{}
+	input := &online_dto.UpdateOnlineStatusInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -276,7 +280,7 @@ func (a *applicationController) disable(ginCtx *gin.Context) {
 	namespaceId := GetNamespaceId(ginCtx)
 	userId := GetUserId(ginCtx)
 	id := ginCtx.Query("app_id")
-	input := &dto.UpdateOnlineStatusInput{}
+	input := &online_dto.UpdateOnlineStatusInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -291,11 +295,11 @@ func (a *applicationController) disable(ginCtx *gin.Context) {
 func (a *applicationController) drivers(ginCtx *gin.Context) {
 	driverList := a.applicationAuthService.GetDriversRender()
 
-	drivers := make([]*dto.DriversItem, 0, len(driverList))
+	drivers := make([]*discover_dto.DriversItem, 0, len(driverList))
 	for _, driver := range driverList {
-		d := &dto.DriversItem{
+		d := &discover_dto.DriversItem{
 			Name:   driver.Name,
-			Render: dto.Render(driver.Render),
+			Render: service_dto.Render(driver.Render),
 		}
 		drivers = append(drivers, d)
 	}
@@ -313,10 +317,10 @@ func (a *applicationController) auths(ginCtx *gin.Context) {
 		return
 	}
 
-	resList := make([]*dto.ApplicationAuthListOut, 0, len(list))
+	resList := make([]*application_dto.ApplicationAuthListOut, 0, len(list))
 
 	for _, auth := range list {
-		authInfo := &dto.ApplicationAuthListOut{
+		authInfo := &application_dto.ApplicationAuthListOut{
 			Uuid:          auth.Uuid,
 			Driver:        auth.Driver,
 			ParamPosition: auth.ParamPosition,
@@ -341,7 +345,7 @@ func (a *applicationController) createAuth(ginCtx *gin.Context) {
 	appId := ginCtx.Query("app_id")
 	userId := GetUserId(ginCtx)
 
-	input := &dto.ApplicationAuthInput{}
+	input := &application_dto.ApplicationAuthInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -365,7 +369,7 @@ func (a *applicationController) updateAuth(ginCtx *gin.Context) {
 	uuid := ginCtx.Query("uuid")
 	userId := GetUserId(ginCtx)
 
-	input := &dto.ApplicationAuthInput{}
+	input := &application_dto.ApplicationAuthInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -403,7 +407,7 @@ func (a *applicationController) getAuth(ginCtx *gin.Context) {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
 	}
-	resAuth := &dto.ApplicationAuthOut{
+	resAuth := &application_dto.ApplicationAuthOut{
 		Uuid:          auth.Uuid,
 		Driver:        auth.Driver,
 		ExpireTime:    auth.ExpireTime,
@@ -412,7 +416,7 @@ func (a *applicationController) getAuth(ginCtx *gin.Context) {
 		TokenName:     auth.TokenName,
 		UpdateTime:    common.TimeToStr(auth.UpdateTime),
 		IsTransparent: auth.IsTransparent,
-		Config:        dto.AuthConfigProxy(auth.Config),
+		Config:        application_dto.AuthConfigProxy(auth.Config),
 	}
 	data := common.Map[string, interface{}]{}
 	data["auth"] = resAuth

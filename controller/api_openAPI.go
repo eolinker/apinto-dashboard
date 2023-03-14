@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/dto"
+	"github.com/eolinker/apinto-dashboard/dto/openapi-dto"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/api/api-dto"
 	"github.com/eolinker/apinto-dashboard/service"
@@ -61,7 +62,7 @@ func (a *apiOpenAPIController) syncAPI(ginCtx *gin.Context) {
 		return
 	}
 
-	inputData := new(dto.SyncImportData)
+	inputData := new(openapi_dto.SyncImportData)
 	//组装同步信息
 	contentType := ginCtx.ContentType()
 
@@ -187,21 +188,21 @@ func (a *apiOpenAPIController) syncAPI(ginCtx *gin.Context) {
 }
 
 // getServer 解析scheme://url weight;url weight
-func (a *apiOpenAPIController) getServer(nodesForm string) (*dto.ImportServerInfo, error) {
+func (a *apiOpenAPIController) getServer(nodesForm string) (*openapi_dto.ImportServerInfo, error) {
 	nodes := strings.Split(nodesForm, ";")
 	schemeIdx := strings.Index(nodes[0], "://")
 	if schemeIdx < 0 {
 		return nil, fmt.Errorf("syncAPI decode nodes fail. err: nodes %s is illegal. ", nodesForm)
 	}
 
-	server := new(dto.ImportServerInfo)
+	server := new(openapi_dto.ImportServerInfo)
 	scheme := strings.ToUpper(nodes[0][:schemeIdx])
 	server.Scheme = scheme
 	if scheme != "HTTP" && scheme != "HTTPS" {
 		return nil, fmt.Errorf("syncAPI decode nodes fail. err: nodes %s is illegal. ", nodesForm)
 	}
 
-	upstreams := make([]*dto.ImportNodesInfo, 0, len(nodes))
+	upstreams := make([]*openapi_dto.ImportNodesInfo, 0, len(nodes))
 	nodeInfo, err := a.getNodeInfo(nodes[0][schemeIdx+3:])
 	if err != nil {
 		return nil, err
@@ -223,7 +224,7 @@ func (a *apiOpenAPIController) getServer(nodesForm string) (*dto.ImportServerInf
 	return server, nil
 }
 
-func (a *apiOpenAPIController) getNodeInfo(nodeStr string) (*dto.ImportNodesInfo, error) {
+func (a *apiOpenAPIController) getNodeInfo(nodeStr string) (*openapi_dto.ImportNodesInfo, error) {
 	idx := strings.Index(nodeStr, " ")
 	url := nodeStr[:idx]
 	weight, err := strconv.Atoi(nodeStr[idx+1:])
@@ -236,7 +237,7 @@ func (a *apiOpenAPIController) getNodeInfo(nodeStr string) (*dto.ImportNodesInfo
 		return nil, fmt.Errorf("syncAPI decode nodes fail. err: url %s is illegal. ", url)
 	}
 
-	return &dto.ImportNodesInfo{
+	return &openapi_dto.ImportNodesInfo{
 		Url:    url,
 		Weight: weight,
 	}, nil

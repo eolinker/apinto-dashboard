@@ -5,6 +5,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/dto"
+	"github.com/eolinker/apinto-dashboard/dto/open-app-dto"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/service"
 	"github.com/eolinker/eosc/common/bean"
@@ -54,7 +55,7 @@ func (e *externalApplicationController) getInfo(ginCtx *gin.Context) {
 		return
 	}
 
-	app := &dto.ExternalAppInfoOutput{
+	app := &open_app_dto.ExternalAppInfoOutput{
 		Name: info.Name,
 		Id:   info.UUID,
 		Desc: info.Desc,
@@ -69,7 +70,7 @@ func (e *externalApplicationController) create(ginCtx *gin.Context) {
 	namespaceId := GetNamespaceId(ginCtx)
 	userId := GetUserId(ginCtx)
 
-	input := new(dto.ExternalAppInfoInput)
+	input := new(open_app_dto.ExternalAppInfoInput)
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -99,7 +100,7 @@ func (e *externalApplicationController) edit(ginCtx *gin.Context) {
 	userId := GetUserId(ginCtx)
 	uuid := ginCtx.Query("id")
 
-	input := new(dto.ExternalAppInfoInput)
+	input := new(open_app_dto.ExternalAppInfoInput)
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return

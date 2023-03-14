@@ -6,8 +6,10 @@ import (
 	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/dto"
+	"github.com/eolinker/apinto-dashboard/dto/monitor-dto"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/model"
+	"github.com/eolinker/apinto-dashboard/model/application-model"
 	service2 "github.com/eolinker/apinto-dashboard/modules/api"
 	apimodel "github.com/eolinker/apinto-dashboard/modules/api/model"
 	"github.com/eolinker/apinto-dashboard/modules/upstream"
@@ -85,7 +87,7 @@ func (m *monitorController) getPartitionInfo(ginCtx *gin.Context) {
 		return
 	}
 
-	respInfo := &dto.MonitorPartitionInfoProxy{
+	respInfo := &monitor_dto.MonitorPartitionInfoProxy{
 		Name:         info.Name,
 		SourceType:   info.SourceType,
 		Config:       info.Config,
@@ -102,7 +104,7 @@ func (m *monitorController) createPartition(ginCtx *gin.Context) {
 	namespaceId := GetNamespaceId(ginCtx)
 	userId := GetUserId(ginCtx)
 
-	inputProxy := new(dto.MonitorPartitionInfoProxy)
+	inputProxy := new(monitor_dto.MonitorPartitionInfoProxy)
 	if err := ginCtx.BindJSON(inputProxy); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -131,7 +133,7 @@ func (m *monitorController) editPartition(ginCtx *gin.Context) {
 	userId := GetUserId(ginCtx)
 	uuid := ginCtx.Query("uuid")
 
-	inputProxy := new(dto.MonitorPartitionInfoProxy)
+	inputProxy := new(monitor_dto.MonitorPartitionInfoProxy)
 	if err := ginCtx.BindJSON(inputProxy); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -172,7 +174,7 @@ func (m *monitorController) delPartition(ginCtx *gin.Context) {
 func (m *monitorController) overviewSummary(ginCtx *gin.Context) {
 	namespaceId := GetNamespaceId(ginCtx)
 
-	input := new(dto.MonSummaryInput)
+	input := new(monitor_dto.MonSummaryInput)
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -217,14 +219,14 @@ func (m *monitorController) overviewSummary(ginCtx *gin.Context) {
 		return
 	}
 	resMap := make(map[string]interface{})
-	resMap["request_summary"] = dto.CircularDate{
+	resMap["request_summary"] = monitor_dto.CircularDate{
 		Total:     request.Total,
 		Success:   request.Success,
 		Fail:      request.Fail,
 		Status4Xx: request.Status4Xx,
 		Status5Xx: request.Status5Xx,
 	}
-	resMap["proxy_summary"] = dto.CircularDate{
+	resMap["proxy_summary"] = monitor_dto.CircularDate{
 		Total:     proxy.Total,
 		Success:   proxy.Success,
 		Fail:      proxy.Fail,
@@ -238,7 +240,7 @@ func (m *monitorController) overviewSummary(ginCtx *gin.Context) {
 // 调用量统计
 func (m *monitorController) overviewInvoke(ginCtx *gin.Context) {
 	namespaceId := GetNamespaceId(ginCtx)
-	input := new(dto.MonSummaryInput)
+	input := new(monitor_dto.MonSummaryInput)
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -299,7 +301,7 @@ func (m *monitorController) overviewInvoke(ginCtx *gin.Context) {
 // 报文量统计
 func (m *monitorController) overviewMessage(ginCtx *gin.Context) {
 	namespaceId := GetNamespaceId(ginCtx)
-	input := new(dto.MonSummaryInput)
+	input := new(monitor_dto.MonSummaryInput)
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -354,7 +356,7 @@ func (m *monitorController) overviewMessage(ginCtx *gin.Context) {
 
 // API/应用/上游调用量TOP10
 func (m *monitorController) overviewTop(ginCtx *gin.Context) {
-	input := new(dto.MonSummaryInput)
+	input := new(monitor_dto.MonSummaryInput)
 	namespaceId := GetNamespaceId(ginCtx)
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
@@ -420,9 +422,9 @@ func (m *monitorController) overviewTop(ginCtx *gin.Context) {
 		apiMaps := common.SliceToMap(apiItems, func(t *apimodel.APIInfo) string {
 			return t.UUID
 		})
-		apiResults := make([]*dto.MonCommonStatisticsOutput, 0, len(apiList))
+		apiResults := make([]*monitor_dto.MonCommonStatisticsOutput, 0, len(apiList))
 		for key, val := range apiList {
-			monCommonStatisticsOutput := &dto.MonCommonStatisticsOutput{
+			monCommonStatisticsOutput := &monitor_dto.MonCommonStatisticsOutput{
 				ApiId:         key,
 				MonCommonData: newMonCommonData(val),
 			}
@@ -462,13 +464,13 @@ func (m *monitorController) overviewTop(ginCtx *gin.Context) {
 			appUUIDs = append(appUUIDs, key)
 		}
 		appItems, _ := m.appService.AppListByUUIDS(ginCtx, namespaceId, appUUIDs)
-		appMaps := common.SliceToMap(appItems, func(t *model.Application) string {
+		appMaps := common.SliceToMap(appItems, func(t *application_model.Application) string {
 			return t.IdStr
 		})
 
-		appResults := make([]*dto.MonCommonStatisticsOutput, 0, len(appList))
+		appResults := make([]*monitor_dto.MonCommonStatisticsOutput, 0, len(appList))
 		for key, val := range appList {
-			monCommonStatisticsOutput := &dto.MonCommonStatisticsOutput{
+			monCommonStatisticsOutput := &monitor_dto.MonCommonStatisticsOutput{
 				AppId:         key,
 				MonCommonData: newMonCommonData(val),
 			}
@@ -511,9 +513,9 @@ func (m *monitorController) overviewTop(ginCtx *gin.Context) {
 			return t.Name
 		})
 
-		serviceResults := make([]*dto.MonCommonStatisticsOutput, 0, len(upstreamList))
+		serviceResults := make([]*monitor_dto.MonCommonStatisticsOutput, 0, len(upstreamList))
 		for key, val := range upstreamList {
-			monCommonStatisticsOutput := &dto.MonCommonStatisticsOutput{
+			monCommonStatisticsOutput := &monitor_dto.MonCommonStatisticsOutput{
 				ServiceName:   key,
 				MonCommonData: newMonCommonData(val),
 			}
@@ -539,10 +541,10 @@ func (m *monitorController) getStatistics(ginCtx *gin.Context) {
 	dataType := ginCtx.Param("dataType")
 	detailsType := ginCtx.Param("detailsType")
 
-	resList := make([]*dto.MonCommonStatisticsOutput, 0)
+	resList := make([]*monitor_dto.MonCommonStatisticsOutput, 0)
 	resMap := make(map[string]interface{})
 
-	input := &dto.MonCommonInput{}
+	input := &monitor_dto.MonCommonInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -572,7 +574,7 @@ func (m *monitorController) getStatistics(ginCtx *gin.Context) {
 	})
 
 	apiList := make([]*apimodel.APIInfo, 0)
-	appList := make([]*model.Application, 0)
+	appList := make([]*application_model.Application, 0)
 	serviceList := make([]*upstream_model.ServiceListItem, 0)
 
 	callType := "apiOrApp"
@@ -738,7 +740,7 @@ func (m *monitorController) getStatistics(ginCtx *gin.Context) {
 	switch groupBy {
 	case "api":
 		for _, info := range newApiList {
-			monCommonStatisticsOutput := &dto.MonCommonStatisticsOutput{
+			monCommonStatisticsOutput := &monitor_dto.MonCommonStatisticsOutput{
 				ApiId:   info.UUID,
 				ApiName: info.Name,
 				//ServiceName: info.ServiceName,
@@ -752,7 +754,7 @@ func (m *monitorController) getStatistics(ginCtx *gin.Context) {
 			resList = append(resList, monCommonStatisticsOutput)
 		}
 		for key, val := range maps {
-			monCommonStatisticsOutput := &dto.MonCommonStatisticsOutput{
+			monCommonStatisticsOutput := &monitor_dto.MonCommonStatisticsOutput{
 				ApiId:   key,
 				ApiName: "未知API-" + key,
 				IsRed:   true,
@@ -768,7 +770,7 @@ func (m *monitorController) getStatistics(ginCtx *gin.Context) {
 
 	case "app":
 		for _, info := range appList {
-			monCommonStatisticsOutput := &dto.MonCommonStatisticsOutput{
+			monCommonStatisticsOutput := &monitor_dto.MonCommonStatisticsOutput{
 				AppId:   info.IdStr,
 				AppName: info.Name,
 			}
@@ -779,7 +781,7 @@ func (m *monitorController) getStatistics(ginCtx *gin.Context) {
 			resList = append(resList, monCommonStatisticsOutput)
 		}
 		for key, val := range maps {
-			monCommonStatisticsOutput := &dto.MonCommonStatisticsOutput{
+			monCommonStatisticsOutput := &monitor_dto.MonCommonStatisticsOutput{
 				AppId:   key,
 				AppName: "未知应用-" + key,
 				IsRed:   true,
@@ -794,7 +796,7 @@ func (m *monitorController) getStatistics(ginCtx *gin.Context) {
 		}
 	case "upstream":
 		for _, info := range serviceList {
-			monCommonStatisticsOutput := &dto.MonCommonStatisticsOutput{
+			monCommonStatisticsOutput := &monitor_dto.MonCommonStatisticsOutput{
 				ServiceName: info.Name,
 			}
 			if val, ok := maps[info.Name]; ok {
@@ -804,7 +806,7 @@ func (m *monitorController) getStatistics(ginCtx *gin.Context) {
 			resList = append(resList, monCommonStatisticsOutput)
 		}
 		for _, val := range maps {
-			monCommonStatisticsOutput := &dto.MonCommonStatisticsOutput{
+			monCommonStatisticsOutput := &monitor_dto.MonCommonStatisticsOutput{
 				ServiceName: "未知服务",
 				IsRed:       true,
 			}
@@ -813,7 +815,7 @@ func (m *monitorController) getStatistics(ginCtx *gin.Context) {
 		}
 	case "path", "addr", "ip":
 		for key, val := range maps {
-			monCommonStatisticsOutput := &dto.MonCommonStatisticsOutput{}
+			monCommonStatisticsOutput := &monitor_dto.MonCommonStatisticsOutput{}
 			if groupBy == "path" {
 				monCommonStatisticsOutput.Path = key
 				monCommonStatisticsOutput.ProxyPath = key
@@ -849,7 +851,7 @@ func (m *monitorController) getStatisticsDetails(ginCtx *gin.Context) {
 	namespaceId := GetNamespaceId(ginCtx)
 	resMap := make(map[string]interface{})
 
-	input := &dto.MonCommonInput{}
+	input := &monitor_dto.MonCommonInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -921,7 +923,7 @@ func (m *monitorController) getStatisticsDetails(ginCtx *gin.Context) {
 		}
 	}
 
-	resValue := &dto.MonCallCountOutput{
+	resValue := &monitor_dto.MonCallCountOutput{
 		Date:         values.Date,
 		Status5XX:    values.Status5XX,
 		Status4XX:    values.Status4XX,
@@ -937,7 +939,7 @@ func (m *monitorController) getStatisticsDetails(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(resMap))
 }
 
-func (m *monitorController) getWheres(ginCtx *gin.Context, namespaceId int, input *dto.MonCommonInput, clusterIds []string) ([]model.MonWhereItem, error) {
+func (m *monitorController) getWheres(ginCtx *gin.Context, namespaceId int, input *monitor_dto.MonCommonInput, clusterIds []string) ([]model.MonWhereItem, error) {
 	wheres := make([]model.MonWhereItem, 0)
 
 	if input.Ip != "" {
@@ -1075,8 +1077,8 @@ func formatTimeByMinute(org int64) time.Time {
 	return time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), 0, 0, location)
 }
 
-func newMonCommonData(input model.MonCommonData) dto.MonCommonData {
-	return dto.MonCommonData{
+func newMonCommonData(input model.MonCommonData) monitor_dto.MonCommonData {
+	return monitor_dto.MonCommonData{
 		RequestTotal:   input.RequestTotal,
 		RequestSuccess: input.RequestSuccess,
 		RequestRate:    input.RequestRate,

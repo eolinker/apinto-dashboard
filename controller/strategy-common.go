@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/dto"
+	"github.com/eolinker/apinto-dashboard/dto/strategy-dto"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/service"
 	strategy_handler "github.com/eolinker/apinto-dashboard/service/strategy-handler"
@@ -36,9 +37,9 @@ func (s *strategyCommonController) filterOptions(ginCtx *gin.Context) {
 		return
 	}
 
-	resList := make([]*dto.FilterOptionsItem, 0)
+	resList := make([]*strategy_dto.FilterOptionsItem, 0)
 	for _, option := range options {
-		resList = append(resList, &dto.FilterOptionsItem{
+		resList = append(resList, &strategy_dto.FilterOptionsItem{
 			Name:    option.Name,
 			Title:   option.Title,
 			Type:    option.Type,
@@ -72,7 +73,7 @@ func (s *strategyCommonController) filterRemote(ginCtx *gin.Context) {
 		return
 	}
 
-	res := dto.FilterRemoteOutput{
+	res := strategy_dto.FilterRemoteOutput{
 		Target:       remote.Target,
 		Titles:       remote.Titles,
 		Apis:         remote.Apis,
@@ -92,9 +93,9 @@ func (s *strategyCommonController) metricsOptions(ginCtx *gin.Context) {
 		return
 	}
 
-	resList := make([]*dto.MetricsOptionsItem, 0)
+	resList := make([]*strategy_dto.MetricsOptionsItem, 0)
 	for _, option := range options {
-		resList = append(resList, &dto.MetricsOptionsItem{
+		resList = append(resList, &strategy_dto.MetricsOptionsItem{
 			Name:  option.Name,
 			Title: option.Title,
 		})

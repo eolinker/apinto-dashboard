@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
 	driver_manager "github.com/eolinker/apinto-dashboard/driver-manager"
-	"github.com/eolinker/apinto-dashboard/dto"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/dto/monitor-dto"
+	"github.com/eolinker/apinto-dashboard/entry/monitor-entry"
 	"github.com/eolinker/apinto-dashboard/model"
 	"github.com/eolinker/apinto-dashboard/store"
 	"github.com/eolinker/eosc/common/bean"
@@ -25,8 +25,8 @@ type IMonitorService interface {
 	PartitionList(ctx context.Context, namespaceId int) ([]*model.MonPartitionListItem, error)
 	PartitionInfo(ctx context.Context, namespaceId int, uuid string) (*model.MonPartitionInfo, error)
 	PartitionById(ctx context.Context, id int) (*model.MonPartitionListItem, error)
-	CreatePartition(ctx context.Context, namespaceId, userId int, input *dto.MonitorPartitionInfoProxy) (*model.MonPartitionListItem, error)
-	UpdatePartition(ctx context.Context, namespaceId, userId int, uuid string, input *dto.MonitorPartitionInfoProxy) (*model.MonPartitionListItem, error)
+	CreatePartition(ctx context.Context, namespaceId, userId int, input *monitor_dto.MonitorPartitionInfoProxy) (*model.MonPartitionListItem, error)
+	UpdatePartition(ctx context.Context, namespaceId, userId int, uuid string, input *monitor_dto.MonitorPartitionInfoProxy) (*model.MonPartitionListItem, error)
 	DelPartition(ctx context.Context, namespaceId int, uuid string) error
 
 	CheckInput(sourceType string, input []byte) ([]byte, error)
@@ -140,7 +140,7 @@ func (m *monitorService) GetInfluxDbConfig(ctx context.Context, namespaceId int,
 	return val, nil
 }
 
-func (m *monitorService) CreatePartition(ctx context.Context, namespaceId, userId int, input *dto.MonitorPartitionInfoProxy) (*model.MonPartitionListItem, error) {
+func (m *monitorService) CreatePartition(ctx context.Context, namespaceId, userId int, input *monitor_dto.MonitorPartitionInfoProxy) (*model.MonPartitionListItem, error) {
 	//分区名查重
 	partitions, err := m.monitorStore.GetByName(ctx, namespaceId, input.Name)
 	if err != nil {
@@ -163,7 +163,7 @@ func (m *monitorService) CreatePartition(ctx context.Context, namespaceId, userI
 	}
 
 	t := time.Now()
-	monitorInfo := &entry.MonitorPartition{
+	monitorInfo := &monitor_entry.MonitorPartition{
 		UUID:       uuid.New(),
 		Namespace:  namespaceId,
 		Name:       input.Name,
@@ -193,7 +193,7 @@ func (m *monitorService) CreatePartition(ctx context.Context, namespaceId, userI
 	})
 }
 
-func (m *monitorService) UpdatePartition(ctx context.Context, namespaceId, userId int, uuid string, input *dto.MonitorPartitionInfoProxy) (*model.MonPartitionListItem, error) {
+func (m *monitorService) UpdatePartition(ctx context.Context, namespaceId, userId int, uuid string, input *monitor_dto.MonitorPartitionInfoProxy) (*model.MonPartitionListItem, error) {
 	partitionInfo, err := m.monitorStore.GetByUUID(ctx, namespaceId, uuid)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {

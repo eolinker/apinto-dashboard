@@ -1,11 +1,12 @@
 package store
 
 import (
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/application-entry"
+	"github.com/eolinker/apinto-dashboard/entry/stat-entry"
 )
 
 type IApplicationAuthStatStore interface {
-	IBaseStore[entry.ApplicationAuthStat]
+	IBaseStore[application_entry.ApplicationAuthStat]
 }
 
 type applicationAuthStatKindHandler struct {
@@ -15,8 +16,8 @@ func (s *applicationAuthStatKindHandler) Kind() string {
 	return "application_auth"
 }
 
-func (s *applicationAuthStatKindHandler) Encode(sv *entry.ApplicationAuthStat) *entry.Stat {
-	stat := new(entry.Stat)
+func (s *applicationAuthStatKindHandler) Encode(sv *application_entry.ApplicationAuthStat) *stat_entry.Stat {
+	stat := new(stat_entry.Stat)
 
 	stat.Tag = sv.ApplicationAuthId
 	stat.Kind = s.Kind()
@@ -25,8 +26,8 @@ func (s *applicationAuthStatKindHandler) Encode(sv *entry.ApplicationAuthStat) *
 	return stat
 }
 
-func (s *applicationAuthStatKindHandler) Decode(stat *entry.Stat) *entry.ApplicationAuthStat {
-	ds := new(entry.ApplicationAuthStat)
+func (s *applicationAuthStatKindHandler) Decode(stat *stat_entry.Stat) *application_entry.ApplicationAuthStat {
+	ds := new(application_entry.ApplicationAuthStat)
 
 	ds.ApplicationAuthId = stat.Tag
 	ds.VersionID = stat.Version
@@ -35,6 +36,6 @@ func (s *applicationAuthStatKindHandler) Decode(stat *entry.Stat) *entry.Applica
 }
 
 func newApplicationAuthStatStore(db IDB) IApplicationAuthStatStore {
-	var h BaseKindHandler[entry.ApplicationAuthStat, entry.Stat] = new(applicationAuthStatKindHandler)
+	var h BaseKindHandler[application_entry.ApplicationAuthStat, stat_entry.Stat] = new(applicationAuthStatKindHandler)
 	return CreateBaseKindStore(h, db)
 }

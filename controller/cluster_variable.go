@@ -6,6 +6,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/dto"
+	"github.com/eolinker/apinto-dashboard/dto/cluster-dto"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/service"
 	"github.com/eolinker/eosc/common/bean"
@@ -48,14 +49,14 @@ func (c *clusterVariableController) gets(ginCtx *gin.Context) {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("Get ClusterlVariable List fail. err: %s", err.Error())))
 		return
 	}
-	list := make([]*dto.ClusterVariableItem, 0, len(variables))
+	list := make([]*cluster_dto.ClusterVariableItem, 0, len(variables))
 	for _, variable := range variables {
 
 		updateTime := ""
 		if !variable.UpdateTime.IsZero() {
 			updateTime = common.TimeToStr(variable.UpdateTime)
 		}
-		list = append(list, &dto.ClusterVariableItem{
+		list = append(list, &cluster_dto.ClusterVariableItem{
 			Key:        variable.Key,
 			Value:      variable.Value,
 			Publish:    enum.ClusterVariablePublish(variable.Publish),
@@ -73,7 +74,7 @@ func (c *clusterVariableController) post(ginCtx *gin.Context) {
 	clusterName := ginCtx.Param("cluster_name")
 	namespaceID := GetNamespaceId(ginCtx)
 
-	item := &dto.ClusterVariableItem{}
+	item := &cluster_dto.ClusterVariableItem{}
 
 	if err := ginCtx.BindJSON(item); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
@@ -101,7 +102,7 @@ func (c *clusterVariableController) put(ginCtx *gin.Context) {
 
 	namespaceID := GetNamespaceId(ginCtx)
 
-	item := &dto.ClusterVariableItem{}
+	item := &cluster_dto.ClusterVariableItem{}
 
 	if err := ginCtx.BindJSON(item); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
@@ -159,13 +160,13 @@ func (c *clusterVariableController) updateHistory(ginCtx *gin.Context) {
 		return
 	}
 
-	list := make([]*dto.ClusterHistoryOut, 0, len(history))
+	list := make([]*cluster_dto.ClusterHistoryOut, 0, len(history))
 	for _, val := range history {
 		key := val.OldValue.Key
 		if key == "" {
 			key = val.NewValue.Key
 		}
-		list = append(list, &dto.ClusterHistoryOut{
+		list = append(list, &cluster_dto.ClusterHistoryOut{
 			Key:        key,
 			OldValue:   val.OldValue.Value,
 			NewValue:   val.NewValue.Value,
@@ -186,7 +187,7 @@ func (c *clusterVariableController) syncConf(ginCtx *gin.Context) {
 	namespaceId := GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Param("cluster_name")
 
-	conf := new(dto.SyncConf)
+	conf := new(cluster_dto.SyncConf)
 	if err := ginCtx.BindJSON(conf); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -220,14 +221,14 @@ func (c *clusterVariableController) toPublishs(ginCtx *gin.Context) {
 	bytes, _ := json.Marshal(list)
 	source := common.Base64Encode(bytes)
 
-	toPublishOut := make([]*dto.VariableToPublishOut, 0, len(list))
+	toPublishOut := make([]*cluster_dto.VariableToPublishOut, 0, len(list))
 	isPublish := false
 	for _, publish := range list {
 		optType := enum.VariableOptType(publish.OptType)
 		if optType == enum.VariableOptTypeNew || optType == enum.VariableOptTypeModify || optType == enum.VariableOptTypeDelete {
 			isPublish = true
 		}
-		toPublishOut = append(toPublishOut, &dto.VariableToPublishOut{
+		toPublishOut = append(toPublishOut, &cluster_dto.VariableToPublishOut{
 			Key:             publish.Key,
 			FinishValue:     publish.FinishValue,
 			NoReleasedValue: publish.NoReleasedValue,
@@ -271,7 +272,7 @@ func (c *clusterVariableController) publish(ginCtx *gin.Context) {
 	namespaceId := GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Param("cluster_name")
 
-	input := &dto.VariablePublishInput{}
+	input := &cluster_dto.VariablePublishInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -331,11 +332,11 @@ func (c *clusterVariableController) publishHistory(ginCtx *gin.Context) {
 		return
 	}
 
-	historys := make([]*dto.VariablePublishOut, 0, len(list))
+	historys := make([]*cluster_dto.VariablePublishOut, 0, len(list))
 	for _, publish := range list {
-		details := make([]*dto.VariablePublishDetails, 0, len(publish.Details))
+		details := make([]*cluster_dto.VariablePublishDetails, 0, len(publish.Details))
 		for _, detail := range publish.Details {
-			details = append(details, &dto.VariablePublishDetails{
+			details = append(details, &cluster_dto.VariablePublishDetails{
 				Key:        detail.Key,
 				OldValue:   detail.OldValue,
 				NewValue:   detail.NewValue,
@@ -343,7 +344,7 @@ func (c *clusterVariableController) publishHistory(ginCtx *gin.Context) {
 				CreateTime: common.TimeToStr(detail.CreateTime),
 			})
 		}
-		historys = append(historys, &dto.VariablePublishOut{
+		historys = append(historys, &cluster_dto.VariablePublishOut{
 			Id:         publish.Id,
 			Name:       publish.Name,
 			OptType:    enum.PublishOptType(publish.OptType),
@@ -368,16 +369,16 @@ func (c *clusterVariableController) getSyncConf(ginCtx *gin.Context) {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
 	}
-	syncConf := new(dto.SyncConf)
+	syncConf := new(cluster_dto.SyncConf)
 	for _, cluster := range conf.Clusters {
-		syncConf.Clusters = append(syncConf.Clusters, &dto.ClusterInput{
+		syncConf.Clusters = append(syncConf.Clusters, &cluster_dto.ClusterInput{
 			Name: cluster.Name,
 			Env:  cluster.Env,
 			Id:   cluster.Id,
 		})
 	}
 	for _, variable := range conf.Variables {
-		syncConf.Variables = append(syncConf.Variables, &dto.ClusterVariableSyncConf{
+		syncConf.Variables = append(syncConf.Variables, &cluster_dto.ClusterVariableSyncConf{
 			Id:         variable.Id,
 			VariableId: variable.VariableId,
 			Key:        variable.Key,

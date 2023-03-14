@@ -2,11 +2,12 @@ package store
 
 import (
 	"encoding/json"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/application-entry"
+	"github.com/eolinker/apinto-dashboard/entry/version-entry"
 )
 
 type IApplicationVersionStore interface {
-	IBaseStore[entry.ApplicationVersion]
+	IBaseStore[application_entry.ApplicationVersion]
 }
 
 type applicationVersionKindHandler struct {
@@ -16,9 +17,9 @@ func (s *applicationVersionKindHandler) Kind() string {
 	return "application"
 }
 
-func (s *applicationVersionKindHandler) Encode(sv *entry.ApplicationVersion) *entry.Version {
+func (s *applicationVersionKindHandler) Encode(sv *application_entry.ApplicationVersion) *version_entry.Version {
 
-	v := new(entry.Version)
+	v := new(version_entry.Version)
 	v.Id = sv.Id
 	v.Kind = s.Kind()
 	v.Target = sv.ApplicationID
@@ -31,8 +32,8 @@ func (s *applicationVersionKindHandler) Encode(sv *entry.ApplicationVersion) *en
 	return v
 }
 
-func (s *applicationVersionKindHandler) Decode(v *entry.Version) *entry.ApplicationVersion {
-	sv := new(entry.ApplicationVersion)
+func (s *applicationVersionKindHandler) Decode(v *version_entry.Version) *application_entry.ApplicationVersion {
+	sv := new(application_entry.ApplicationVersion)
 	sv.Id = v.Id
 	sv.ApplicationID = v.Target
 	sv.Operator = v.Operator
@@ -44,6 +45,6 @@ func (s *applicationVersionKindHandler) Decode(v *entry.Version) *entry.Applicat
 }
 
 func newApplicationVersionStore(db IDB) IApplicationVersionStore {
-	var h BaseKindHandler[entry.ApplicationVersion, entry.Version] = new(applicationVersionKindHandler)
+	var h BaseKindHandler[application_entry.ApplicationVersion, version_entry.Version] = new(applicationVersionKindHandler)
 	return CreateBaseKindStore(h, db)
 }

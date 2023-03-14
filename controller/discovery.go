@@ -6,6 +6,9 @@ import (
 	"github.com/eolinker/apinto-dashboard/common"
 	discovery_driver "github.com/eolinker/apinto-dashboard/driver-manager/driver"
 	"github.com/eolinker/apinto-dashboard/dto"
+	"github.com/eolinker/apinto-dashboard/dto/discover-dto"
+	"github.com/eolinker/apinto-dashboard/dto/online-dto"
+	"github.com/eolinker/apinto-dashboard/dto/service-dto"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/service"
 	"github.com/eolinker/eosc/common/bean"
@@ -45,10 +48,10 @@ func (d *discoveryController) getList(ginCtx *gin.Context) {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("GetDiscoveryList fail. err:%s", err.Error())))
 		return
 	}
-	discoveries := make([]*dto.DiscoveryListItem, 0, len(listItem))
+	discoveries := make([]*discover_dto.DiscoveryListItem, 0, len(listItem))
 
 	for _, item := range listItem {
-		discovery := &dto.DiscoveryListItem{
+		discovery := &discover_dto.DiscoveryListItem{
 			Name:       item.Name,
 			UUID:       item.UUID,
 			Driver:     item.Driver,
@@ -79,17 +82,17 @@ func (d *discoveryController) getInfo(ginCtx *gin.Context) {
 		return
 	}
 
-	discovery := &dto.DiscoveryInfoProxy{
+	discovery := &discover_dto.DiscoveryInfoProxy{
 		Name:   info.Name,
 		UUID:   info.UUID,
 		Driver: info.Driver,
 		Desc:   info.Desc,
-		Config: dto.ConfigProxy(info.Config),
+		Config: discover_dto.ConfigProxy(info.Config),
 	}
 
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(&dto.DiscoveryInfoOutput{
+	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(&discover_dto.DiscoveryInfoOutput{
 		Discovery: discovery,
-		Render:    dto.Render(info.Render),
+		Render:    service_dto.Render(info.Render),
 	}))
 }
 
@@ -98,7 +101,7 @@ func (d *discoveryController) create(ginCtx *gin.Context) {
 	namespaceId := GetNamespaceId(ginCtx)
 	operator := GetUserId(ginCtx)
 
-	input := new(dto.DiscoveryInfoProxy)
+	input := new(discover_dto.DiscoveryInfoProxy)
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -136,7 +139,7 @@ func (d *discoveryController) update(ginCtx *gin.Context) {
 	}
 	operator := GetUserId(ginCtx)
 
-	input := new(dto.DiscoveryInfoProxy)
+	input := new(discover_dto.DiscoveryInfoProxy)
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -181,12 +184,12 @@ func (d *discoveryController) getEnum(ginCtx *gin.Context) {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("GetDiscoveryEnum fail. err:%s", err.Error())))
 		return
 	}
-	discoveries := make([]*dto.DiscoveryEnum, 0, len(enumList))
+	discoveries := make([]*discover_dto.DiscoveryEnum, 0, len(enumList))
 	for _, enum := range enumList {
-		discovery := &dto.DiscoveryEnum{
+		discovery := &discover_dto.DiscoveryEnum{
 			Name:   enum.Name,
 			Driver: enum.Driver,
-			Render: dto.Render(enum.Render),
+			Render: service_dto.Render(enum.Render),
 		}
 		discoveries = append(discoveries, discovery)
 	}
@@ -200,11 +203,11 @@ func (d *discoveryController) getEnum(ginCtx *gin.Context) {
 func (d *discoveryController) getDrivers(ginCtx *gin.Context) {
 	driverList := d.discoveryService.GetDriversRender()
 
-	drivers := make([]*dto.DriversItem, 0, len(driverList))
+	drivers := make([]*discover_dto.DriversItem, 0, len(driverList))
 	for _, driver := range driverList {
-		d := &dto.DriversItem{
+		d := &discover_dto.DriversItem{
 			Name:   driver.Name,
-			Render: dto.Render(driver.Render),
+			Render: service_dto.Render(driver.Render),
 		}
 		drivers = append(drivers, d)
 	}
@@ -218,7 +221,7 @@ func (d *discoveryController) getDrivers(ginCtx *gin.Context) {
 func (d *discoveryController) online(ginCtx *gin.Context) {
 	namespaceId := GetNamespaceId(ginCtx)
 	discoveryName := ginCtx.Param("discovery_name")
-	input := &dto.UpdateOnlineStatusInput{}
+	input := &online_dto.UpdateOnlineStatusInput{}
 	operator := GetUserId(ginCtx)
 
 	if err := ginCtx.BindJSON(input); err != nil {
@@ -253,7 +256,7 @@ func (d *discoveryController) online(ginCtx *gin.Context) {
 func (d *discoveryController) offline(ginCtx *gin.Context) {
 	namespaceId := GetNamespaceId(ginCtx)
 	discoveryName := ginCtx.Param("discovery_name")
-	input := &dto.UpdateOnlineStatusInput{}
+	input := &online_dto.UpdateOnlineStatusInput{}
 	operator := GetUserId(ginCtx)
 
 	if err := ginCtx.BindJSON(input); err != nil {
@@ -282,13 +285,13 @@ func (d *discoveryController) getOnlineList(ginCtx *gin.Context) {
 		return
 	}
 
-	resp := make([]*dto.OnlineOut, 0, len(list))
+	resp := make([]*online_dto.OnlineOut, 0, len(list))
 	for _, online := range list {
 		updateTime := ""
 		if !online.UpdateTime.IsZero() {
 			updateTime = common.TimeToStr(online.UpdateTime)
 		}
-		resp = append(resp, &dto.OnlineOut{
+		resp = append(resp, &online_dto.OnlineOut{
 			Name:       online.ClusterName,
 			Status:     enum.OnlineStatus(online.Status),
 			Env:        online.Env,

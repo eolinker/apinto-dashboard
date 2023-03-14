@@ -1,7 +1,7 @@
 package model
 
 import (
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/notice-entry"
 	"time"
 )
 
@@ -17,7 +17,7 @@ type NoticeChannel struct {
 	UpdateTime time.Time
 }
 
-type NoticeChannelVersion entry.NoticeChannelVersion
+type NoticeChannelVersion notice_entry.NoticeChannelVersion
 
 type NoticeChannelWebhook struct {
 	Desc          string            `json:"desc"`

@@ -5,8 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
-	"github.com/eolinker/apinto-dashboard/dto"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/dto/service-dto"
+	"github.com/eolinker/apinto-dashboard/entry/quote-entry"
+	"github.com/eolinker/apinto-dashboard/entry/upstream-entry"
+	"github.com/eolinker/apinto-dashboard/entry/variable-entry"
 	"github.com/eolinker/apinto-dashboard/model"
 	api "github.com/eolinker/apinto-dashboard/modules/api"
 	"github.com/eolinker/apinto-dashboard/modules/upstream"
@@ -66,7 +68,7 @@ func newServiceService() upstream.IService {
 }
 
 func (s *service) GetServiceList(ctx context.Context, namespaceID int, searchName string, pageNum int, pageSize int) ([]*upstream_model.ServiceListItem, int, error) {
-	var sl []*entry.Service
+	var sl []*upstream_entry.Service
 	sl, total, err := s.serviceStore.GetListPage(ctx, namespaceID, searchName, pageNum, pageSize)
 	if err != nil {
 		return nil, 0, err
@@ -144,12 +146,12 @@ func (s *service) GetServiceListByNames(ctx context.Context, namespaceID int, na
 }
 
 func (s *service) isDiscoveryCanDelete(ctx context.Context, namespaceID, serviceId int) (bool, error) {
-	quotedSet, err := s.quoteStore.GetTargetQuote(ctx, serviceId, entry.QuoteTargetKindTypeService)
+	quotedSet, err := s.quoteStore.GetTargetQuote(ctx, serviceId, quote_entry.QuoteTargetKindTypeService)
 	if err != nil {
 		return false, err
 	}
 
-	for _, apiID := range quotedSet[entry.QuoteKindTypeAPI] {
+	for _, apiID := range quotedSet[quote_entry.QuoteKindTypeAPI] {
 		name, err := s.apiService.GetAPINameByID(ctx, apiID)
 		if err != nil {
 			return false, err
@@ -193,7 +195,7 @@ func (s *service) GetServiceInfo(ctx context.Context, namespaceID int, serviceNa
 	return info, nil
 }
 
-func (s *service) CreateService(ctx context.Context, namespaceID, userId int, input *dto.ServiceInfo, variableList []string) (int, error) {
+func (s *service) CreateService(ctx context.Context, namespaceID, userId int, input *service_dto.ServiceInfo, variableList []string) (int, error) {
 	input.Name = strings.ToLower(input.Name)
 	//服务发现name查重
 	_, err := s.serviceStore.GetByName(ctx, namespaceID, input.Name)
@@ -210,7 +212,7 @@ func (s *service) CreateService(ctx context.Context, namespaceID, userId int, in
 	input.UUID = strings.ToLower(input.UUID)
 
 	t := time.Now()
-	serviceInfo := &entry.Service{
+	serviceInfo := &upstream_entry.Service{
 		NamespaceId: namespaceID,
 		UUID:        input.UUID,
 		Name:        input.Name,
@@ -233,10 +235,10 @@ func (s *service) CreateService(ctx context.Context, namespaceID, userId int, in
 		}
 		serviceID = serviceInfo.Id
 		//添加版本信息
-		serviceVersionInfo := &entry.ServiceVersion{
+		serviceVersionInfo := &upstream_entry.ServiceVersion{
 			ServiceId:   serviceInfo.Id,
 			NamespaceID: namespaceID,
-			ServiceVersionConfig: entry.ServiceVersionConfig{
+			ServiceVersionConfig: upstream_entry.ServiceVersionConfig{
 				DiscoveryId: input.DiscoveryID,
 				DriverName:  input.DriverName,
 				Scheme:      input.Scheme,
@@ -253,16 +255,16 @@ func (s *service) CreateService(ctx context.Context, namespaceID, userId int, in
 			return err
 		}
 		//添加版本关联原表信息
-		if err := s.serviceStatStore.Save(txCtx, &entry.ServiceStat{
+		if err := s.serviceStatStore.Save(txCtx, &upstream_entry.ServiceStat{
 			ServiceId: serviceInfo.Id,
 			VersionId: serviceVersionInfo.Id,
 		}); err != nil {
 			return err
 		}
 		//往引用表插入所引用服务发现
-		quoteMap := make(map[entry.QuoteTargetKindType][]int)
-		quoteMap[entry.QuoteTargetKindTypeDiscovery] = append(quoteMap[entry.QuoteTargetKindTypeDiscovery], input.DiscoveryID)
-		if err := s.quoteStore.Set(txCtx, serviceInfo.Id, entry.QuoteKindTypeService, quoteMap); err != nil {
+		quoteMap := make(map[quote_entry.QuoteTargetKindType][]int)
+		quoteMap[quote_entry.QuoteTargetKindTypeDiscovery] = append(quoteMap[quote_entry.QuoteTargetKindTypeDiscovery], input.DiscoveryID)
+		if err := s.quoteStore.Set(txCtx, serviceInfo.Id, quote_entry.QuoteKindTypeService, quoteMap); err != nil {
 			return err
 		}
 
@@ -272,25 +274,25 @@ func (s *service) CreateService(ctx context.Context, namespaceID, userId int, in
 			if err != nil {
 				return err
 			}
-			quoteMap = make(map[entry.QuoteTargetKindType][]int)
+			quoteMap = make(map[quote_entry.QuoteTargetKindType][]int)
 			for _, variable := range variables {
-				quoteMap[entry.QuoteTargetKindTypeVariable] = append(quoteMap[entry.QuoteTargetKindTypeVariable], variable.Id)
+				quoteMap[quote_entry.QuoteTargetKindTypeVariable] = append(quoteMap[quote_entry.QuoteTargetKindTypeVariable], variable.Id)
 			}
 
-			err = s.quoteStore.Set(txCtx, serviceInfo.Id, entry.QuoteKindTypeService, quoteMap)
+			err = s.quoteStore.Set(txCtx, serviceInfo.Id, quote_entry.QuoteKindTypeService, quoteMap)
 			if err != nil {
 				return err
 			}
 		}
 
-		return s.historyStore.HistoryAdd(txCtx, namespaceID, serviceInfo.Id, &entry.ServiceHistoryInfo{
+		return s.historyStore.HistoryAdd(txCtx, namespaceID, serviceInfo.Id, &upstream_entry.ServiceHistoryInfo{
 			Service: *serviceInfo,
 			Config:  serviceVersionInfo.ServiceVersionConfig,
 		}, userId)
 	})
 }
 
-func (s *service) UpdateService(ctx context.Context, namespaceID, userId int, input *dto.ServiceInfo, variableList []string) error {
+func (s *service) UpdateService(ctx context.Context, namespaceID, userId int, input *service_dto.ServiceInfo, variableList []string) error {
 
 	serviceInfo, err := s.serviceStore.GetByName(ctx, namespaceID, input.Name)
 	if err != nil {
@@ -335,9 +337,9 @@ func (s *service) UpdateService(ctx context.Context, namespaceID, userId int, in
 		}
 		if isUpdateVersion {
 			//修改配置信息 并更新一个版本
-			serviceVersionInfo := &entry.ServiceVersion{
+			serviceVersionInfo := &upstream_entry.ServiceVersion{
 				ServiceId: serviceInfo.Id,
-				ServiceVersionConfig: entry.ServiceVersionConfig{
+				ServiceVersionConfig: upstream_entry.ServiceVersionConfig{
 					DiscoveryId: input.DiscoveryID,
 					DriverName:  input.DriverName,
 					Scheme:      input.Scheme,
@@ -354,7 +356,7 @@ func (s *service) UpdateService(ctx context.Context, namespaceID, userId int, in
 				return err
 			}
 			//添加版本关联原表信息
-			stat := &entry.ServiceStat{
+			stat := &upstream_entry.ServiceStat{
 				ServiceId: serviceInfo.Id,
 				VersionId: serviceVersionInfo.Id,
 			}
@@ -362,10 +364,10 @@ func (s *service) UpdateService(ctx context.Context, namespaceID, userId int, in
 				return err
 			}
 
-			if err = s.historyStore.HistoryEdit(txCtx, namespaceID, serviceInfo.Id, &entry.ServiceHistoryInfo{
+			if err = s.historyStore.HistoryEdit(txCtx, namespaceID, serviceInfo.Id, &upstream_entry.ServiceHistoryInfo{
 				Service: oldServiceInfo,
 				Config:  currentVersion.ServiceVersionConfig,
-			}, &entry.ServiceHistoryInfo{
+			}, &upstream_entry.ServiceHistoryInfo{
 				Service: *serviceInfo,
 				Config:  serviceVersionInfo.ServiceVersionConfig,
 			}, userId); err != nil {
@@ -373,11 +375,11 @@ func (s *service) UpdateService(ctx context.Context, namespaceID, userId int, in
 			}
 		}
 
-		quoteMap := make(map[entry.QuoteTargetKindType][]int)
-		quoteMap[entry.QuoteTargetKindTypeDiscovery] = append(quoteMap[entry.QuoteTargetKindTypeDiscovery], input.DiscoveryID)
+		quoteMap := make(map[quote_entry.QuoteTargetKindType][]int)
+		quoteMap[quote_entry.QuoteTargetKindTypeDiscovery] = append(quoteMap[quote_entry.QuoteTargetKindTypeDiscovery], input.DiscoveryID)
 
 		//往引用表插入所引用服务发现
-		if err = s.quoteStore.Set(txCtx, serviceInfo.Id, entry.QuoteKindTypeService, quoteMap); err != nil {
+		if err = s.quoteStore.Set(txCtx, serviceInfo.Id, quote_entry.QuoteKindTypeService, quoteMap); err != nil {
 			return err
 		}
 
@@ -385,12 +387,12 @@ func (s *service) UpdateService(ctx context.Context, namespaceID, userId int, in
 		if len(variableList) > 0 {
 			variables, err := s.globalVariableService.GetByKeys(ctx, namespaceID, variableList)
 
-			quoteMap = make(map[entry.QuoteTargetKindType][]int)
+			quoteMap = make(map[quote_entry.QuoteTargetKindType][]int)
 			for _, variable := range variables {
-				quoteMap[entry.QuoteTargetKindTypeVariable] = append(quoteMap[entry.QuoteTargetKindTypeVariable], variable.Id)
+				quoteMap[quote_entry.QuoteTargetKindTypeVariable] = append(quoteMap[quote_entry.QuoteTargetKindTypeVariable], variable.Id)
 			}
 
-			if err = s.quoteStore.Set(txCtx, serviceInfo.Id, entry.QuoteKindTypeService, quoteMap); err != nil {
+			if err = s.quoteStore.Set(txCtx, serviceInfo.Id, quote_entry.QuoteKindTypeService, quoteMap); err != nil {
 				return err
 			}
 		}
@@ -458,14 +460,14 @@ func (s *service) DeleteService(ctx context.Context, namespaceID, userId int, se
 			return err
 		}
 
-		if err = s.historyStore.HistoryDelete(txCtx, namespaceID, serviceInfo.Id, entry.ServiceHistoryInfo{
+		if err = s.historyStore.HistoryDelete(txCtx, namespaceID, serviceInfo.Id, upstream_entry.ServiceHistoryInfo{
 			Service: *serviceInfo,
 			Config:  version.ServiceVersionConfig,
 		}, userId); err != nil {
 			return err
 		}
 
-		return s.quoteStore.DelBySource(txCtx, serviceInfo.Id, entry.QuoteKindTypeService)
+		return s.quoteStore.DelBySource(txCtx, serviceInfo.Id, quote_entry.QuoteKindTypeService)
 	})
 	if err != nil {
 		return err
@@ -510,7 +512,7 @@ func (s *service) OnlineList(ctx context.Context, namespaceId int, serviceName s
 	if err != nil {
 		return nil, err
 	}
-	runtimeMaps := common.SliceToMap(runtimes, func(t *entry.ServiceRuntime) int {
+	runtimeMaps := common.SliceToMap(runtimes, func(t *upstream_entry.ServiceRuntime) int {
 		return t.ClusterId
 	})
 
@@ -520,7 +522,7 @@ func (s *service) OnlineList(ctx context.Context, namespaceId int, serviceName s
 		return nil, err
 	}
 
-	userIds := common.SliceToSliceIds(runtimes, func(t *entry.ServiceRuntime) int {
+	userIds := common.SliceToSliceIds(runtimes, func(t *upstream_entry.ServiceRuntime) int {
 		return t.Operator
 	})
 
@@ -607,11 +609,11 @@ func (s *service) OnlineService(ctx context.Context, namespaceId, operator int, 
 		}
 		router.Params["cluster_name"] = clusterName
 		//服务引用的环境变量
-		quoteMaps, err := s.quoteStore.GetSourceQuote(ctx, serviceId, entry.QuoteKindTypeService)
+		quoteMaps, err := s.quoteStore.GetSourceQuote(ctx, serviceId, quote_entry.QuoteKindTypeService)
 		if err != nil && err != gorm.ErrRecordNotFound {
 			return nil, err
 		}
-		if variableIds, ok := quoteMaps[entry.QuoteTargetKindTypeVariable]; ok {
+		if variableIds, ok := quoteMaps[quote_entry.QuoteTargetKindTypeVariable]; ok {
 			//通用错误处理文档，当数据库找不到数据时返回
 			var errMsg error
 			globalVariable, err := s.globalVariableService.GetById(ctx, variableIds[0])
@@ -627,7 +629,7 @@ func (s *service) OnlineService(ctx context.Context, namespaceId, operator int, 
 			}
 
 			//已发布的环境变量
-			toMap := common.SliceToMap(variableVersion.ClusterVariable, func(t *entry.ClusterVariable) int {
+			toMap := common.SliceToMap(variableVersion.ClusterVariable, func(t *variable_entry.ClusterVariable) int {
 				return t.VariableId
 			})
 
@@ -678,7 +680,7 @@ func (s *service) OnlineService(ctx context.Context, namespaceId, operator int, 
 	//判断是否是更新
 	isApintoUpdate := false
 	if runtime == nil {
-		runtime = &entry.ServiceRuntime{
+		runtime = &upstream_entry.ServiceRuntime{
 			NamespaceId: namespaceId,
 			ServiceId:   serviceId,
 			ClusterId:   clusterId,
@@ -797,14 +799,14 @@ func (s *service) OfflineService(ctx context.Context, namespaceId, operator int,
 		return err
 	}
 
-	quote, err := s.quoteStore.GetTargetQuote(ctx, serviceInfo.Id, entry.QuoteTargetKindTypeService)
+	quote, err := s.quoteStore.GetTargetQuote(ctx, serviceInfo.Id, quote_entry.QuoteTargetKindTypeService)
 	if err != nil {
 		return err
 	}
 
 	for kindType, ids := range quote {
 		switch kindType {
-		case entry.QuoteKindTypeAPI:
+		case quote_entry.QuoteKindTypeAPI:
 			for _, apiId := range ids {
 				if s.apiService.IsAPIOnline(ctx, cluster.Id, apiId) {
 					name, err := s.apiService.GetAPINameByID(ctx, apiId)
@@ -876,7 +878,7 @@ func (s *service) GetServiceIDByName(ctx context.Context, namespaceId int, servi
 	return info.Id, nil
 }
 
-func (s *service) GetLatestServiceVersion(ctx context.Context, serviceID int) (*entry.ServiceVersion, error) {
+func (s *service) GetLatestServiceVersion(ctx context.Context, serviceID int) (*upstream_entry.ServiceVersion, error) {
 	stat, err := s.serviceStatStore.Get(ctx, serviceID)
 	if err != nil {
 		return nil, err
@@ -889,7 +891,7 @@ func (s *service) GetLatestServiceVersion(ctx context.Context, serviceID int) (*
 	return version, nil
 }
 
-func (s *service) GetServiceSchemaInfo(ctx context.Context, serviceID int) (*entry.Service, error) {
+func (s *service) GetServiceSchemaInfo(ctx context.Context, serviceID int) (*upstream_entry.Service, error) {
 	return s.serviceStore.Get(ctx, serviceID)
 }
 

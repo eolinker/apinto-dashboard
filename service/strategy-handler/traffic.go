@@ -4,19 +4,19 @@ import (
 	"errors"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
-	"github.com/eolinker/apinto-dashboard/dto"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/dto/strategy-dto"
+	"github.com/eolinker/apinto-dashboard/entry/strategy-entry"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/service"
 	"strings"
 )
 
 type trafficHandler struct {
-	service.FormatHandler[entry.StrategyTrafficLimitConfig]
+	service.FormatHandler[strategy_entry.StrategyTrafficLimitConfig]
 	apintoDriverName string
 }
 
-func (t *trafficHandler) GetListLabel(conf *entry.StrategyTrafficLimitConfig) string {
+func (t *trafficHandler) GetListLabel(conf *strategy_entry.StrategyTrafficLimitConfig) string {
 	limits := make([]string, 0)
 	for _, v := range conf.Metrics {
 		switch v {
@@ -48,7 +48,7 @@ func (t *trafficHandler) GetBatchSettingName() string {
 	return enum.StrategyTrafficBatchName
 }
 
-func (t *trafficHandler) CheckInput(input *dto.StrategyInfoInput[entry.StrategyTrafficLimitConfig]) error {
+func (t *trafficHandler) CheckInput(input *strategy_dto.StrategyInfoInput[strategy_entry.StrategyTrafficLimitConfig]) error {
 	input.Uuid = strings.TrimSpace(input.Uuid)
 	if input.Uuid != "" {
 		err := common.IsMatchString(common.UUIDExp, input.Uuid)
@@ -93,11 +93,11 @@ func (t *trafficHandler) CheckInput(input *dto.StrategyInfoInput[entry.StrategyT
 	return checkFilters(input.Filters)
 }
 
-func (t *trafficHandler) ToApintoConfig(conf entry.StrategyTrafficLimitConfig) interface{} {
+func (t *trafficHandler) ToApintoConfig(conf strategy_entry.StrategyTrafficLimitConfig) interface{} {
 	return conf
 }
 
-func NewStrategyTrafficHandler(apintoDriverName string) service.IStrategyHandler[entry.StrategyTrafficLimitConfig, entry.StrategyTrafficLimitConfig] {
+func NewStrategyTrafficHandler(apintoDriverName string) service.IStrategyHandler[strategy_entry.StrategyTrafficLimitConfig, strategy_entry.StrategyTrafficLimitConfig] {
 	return &trafficHandler{
 		apintoDriverName: apintoDriverName,
 	}

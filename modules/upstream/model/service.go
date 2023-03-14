@@ -1,7 +1,7 @@
 package upstream_model
 
 import (
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/upstream-entry"
 	"time"
 )
 
@@ -17,7 +17,7 @@ type ServiceListItem struct {
 }
 
 type ServiceInfo struct {
-	*entry.ServiceVersion
+	*upstream_entry.ServiceVersion
 	Name      string
 	Desc      string
 	ServiceId int

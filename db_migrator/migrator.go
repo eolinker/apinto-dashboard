@@ -3,7 +3,7 @@ package db_migrator
 import (
 	"errors"
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/flyway-entry"
 	"gorm.io/gorm"
 	"strings"
 	"time"
@@ -13,9 +13,9 @@ func InitSql(db *gorm.DB) {
 
 	ddlList, dmlList := GetSqlList()
 
-	hasTable := db.Migrator().HasTable(&entry.FlywaySchemaHistory{})
+	hasTable := db.Migrator().HasTable(&flyway_entry.FlywaySchemaHistory{})
 	if !hasTable {
-		err := db.Exec(entry.FlywaySchemaHistory{}.CreateTableSql()).Error
+		err := db.Exec(flyway_entry.FlywaySchemaHistory{}.CreateTableSql()).Error
 		if err != nil {
 			panic(err)
 		}
@@ -26,7 +26,7 @@ func InitSql(db *gorm.DB) {
 	isRollback := false
 
 	for _, info := range ddlList {
-		history := new(entry.FlywaySchemaHistory)
+		history := new(flyway_entry.FlywaySchemaHistory)
 		db.Where("`version_num` = ? and `type` = 'ddl'", info.VersionNum).First(history)
 		if history.Success {
 			continue
@@ -66,7 +66,7 @@ func InitSql(db *gorm.DB) {
 
 	for _, info := range dmlList {
 
-		history := new(entry.FlywaySchemaHistory)
+		history := new(flyway_entry.FlywaySchemaHistory)
 		db.Where("`version_num` = ? and `type` = 'dml'", info.VersionNum).First(history)
 
 		if history.Md5 != "" && history.Md5 != info.Md5 {

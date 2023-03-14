@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/eolinker/apinto-dashboard/dto"
+	"github.com/eolinker/apinto-dashboard/dto/group-dto"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/model"
 	"github.com/eolinker/apinto-dashboard/service"
@@ -38,10 +39,10 @@ func (c *commonGroupController) groups(ginCtx *gin.Context) {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
 	}
-	resApis := make([]*dto.CommonGroupApi, 0, len(apis))
-	groups := make([]*dto.CommonGroupOut, 0, len(root.CommonGroup))
+	resApis := make([]*group_dto.CommonGroupApi, 0, len(apis))
+	groups := make([]*group_dto.CommonGroupOut, 0, len(root.CommonGroup))
 	for _, group := range root.CommonGroup {
-		value := &dto.CommonGroupOut{
+		value := &group_dto.CommonGroupOut{
 			UUID: group.Group.Uuid,
 			Name: group.Group.Name,
 		}
@@ -50,7 +51,7 @@ func (c *commonGroupController) groups(ginCtx *gin.Context) {
 	}
 
 	for _, api := range apis {
-		resApis = append(resApis, &dto.CommonGroupApi{
+		resApis = append(resApis, &group_dto.CommonGroupApi{
 			Name:      api.Name,
 			UUID:      api.UUID,
 			Methods:   api.Methods,
@@ -58,7 +59,7 @@ func (c *commonGroupController) groups(ginCtx *gin.Context) {
 		})
 	}
 
-	resRoot := &dto.CommonGroupRootOut{
+	resRoot := &group_dto.CommonGroupRootOut{
 		UUID:   root.UUID,
 		Name:   root.Name,
 		Groups: groups,
@@ -68,12 +69,12 @@ func (c *commonGroupController) groups(ginCtx *gin.Context) {
 	m["apis"] = resApis
 	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(m))
 }
-func (c *commonGroupController) subGroup(val *dto.CommonGroupOut, list []*model.CommonGroup) {
+func (c *commonGroupController) subGroup(val *group_dto.CommonGroupOut, list []*model.CommonGroup) {
 	if len(list) == 0 {
 		return
 	}
 	for _, group := range list {
-		commonGroup := &dto.CommonGroupOut{UUID: group.Group.Uuid, Name: group.Group.Name}
+		commonGroup := &group_dto.CommonGroupOut{UUID: group.Group.Uuid, Name: group.Group.Name}
 		val.Children = append(val.Children, commonGroup)
 		c.subGroup(commonGroup, group.Subgroup)
 	}
@@ -85,7 +86,7 @@ func (c *commonGroupController) updateGroup(ginCtx *gin.Context) {
 	groupType := ginCtx.Param("group_type")
 	uuid := ginCtx.Param("uuid")
 	operator := GetUserId(ginCtx)
-	input := new(dto.CommonGroupInput)
+	input := new(group_dto.CommonGroupInput)
 
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
@@ -105,7 +106,7 @@ func (c *commonGroupController) groupSort(ginCtx *gin.Context) {
 	groupType := ginCtx.Param("group_type")
 	tagName := ginCtx.Query("tag_name")
 
-	input := &dto.CommGroupSortInput{}
+	input := &group_dto.CommGroupSortInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -140,7 +141,7 @@ func (c *commonGroupController) createGroup(ginCtx *gin.Context) {
 	groupType := ginCtx.Param("group_type")
 	tagName := ginCtx.Query("tag_name")
 	operator := GetUserId(ginCtx)
-	input := new(dto.CommonGroupInput)
+	input := new(group_dto.CommonGroupInput)
 
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))

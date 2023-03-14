@@ -2,11 +2,12 @@ package store
 
 import (
 	"encoding/json"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/notice-entry"
+	"github.com/eolinker/apinto-dashboard/entry/version-entry"
 )
 
 type INoticeChannelVersionStore interface {
-	IBaseStore[entry.NoticeChannelVersion]
+	IBaseStore[notice_entry.NoticeChannelVersion]
 }
 
 type noticeChannelVersionKindHandler struct {
@@ -16,9 +17,9 @@ func (s *noticeChannelVersionKindHandler) Kind() string {
 	return "notice_channel"
 }
 
-func (s *noticeChannelVersionKindHandler) Encode(dv *entry.NoticeChannelVersion) *entry.Version {
+func (s *noticeChannelVersionKindHandler) Encode(dv *notice_entry.NoticeChannelVersion) *version_entry.Version {
 
-	v := new(entry.Version)
+	v := new(version_entry.Version)
 	v.Id = dv.Id
 	v.Kind = s.Kind()
 	v.NamespaceID = dv.NamespaceID
@@ -31,8 +32,8 @@ func (s *noticeChannelVersionKindHandler) Encode(dv *entry.NoticeChannelVersion)
 	return v
 }
 
-func (s *noticeChannelVersionKindHandler) Decode(v *entry.Version) *entry.NoticeChannelVersion {
-	sv := new(entry.NoticeChannelVersion)
+func (s *noticeChannelVersionKindHandler) Decode(v *version_entry.Version) *notice_entry.NoticeChannelVersion {
+	sv := new(notice_entry.NoticeChannelVersion)
 	sv.Id = v.Id
 	sv.NoticeChannelID = v.Target
 	sv.Operator = v.Operator
@@ -44,6 +45,6 @@ func (s *noticeChannelVersionKindHandler) Decode(v *entry.Version) *entry.Notice
 }
 
 func newNoticeChannelVersionStore(db IDB) INoticeChannelVersionStore {
-	var h BaseKindHandler[entry.NoticeChannelVersion, entry.Version] = new(noticeChannelVersionKindHandler)
+	var h BaseKindHandler[notice_entry.NoticeChannelVersion, version_entry.Version] = new(noticeChannelVersionKindHandler)
 	return CreateBaseKindStore(h, db)
 }

@@ -15,7 +15,7 @@ import (
 	"fmt"
 	machine_code "github.com/eolinker/apinto-dashboard/app/apserver/machine-code"
 	"github.com/eolinker/apinto-dashboard/cache"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/system-entry"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/model"
 	"github.com/eolinker/apinto-dashboard/store"
@@ -96,7 +96,7 @@ func (b *bussinessAuthService) ActivateCert(ctx context.Context, certFile []byte
 
 	err = b.systemInfoStore.Transaction(ctx, func(txCtx context.Context) error {
 		//保存证书
-		cert := &entry.SystemInfo{
+		cert := &system_entry.SystemInfo{
 			Key:   enum.CertDBKey,
 			Value: certFile,
 		}
@@ -111,7 +111,7 @@ func (b *bussinessAuthService) ActivateCert(ctx context.Context, certFile []byte
 		}
 
 		//保存机器码
-		err = b.systemInfoStore.Save(txCtx, &entry.SystemInfo{
+		err = b.systemInfoStore.Save(txCtx, &system_entry.SystemInfo{
 			Key:   enum.MachineCodeDBKey,
 			Value: []byte(machineCode),
 		})
@@ -158,7 +158,7 @@ func (b *bussinessAuthService) ReActivateCert(ctx context.Context, certFile []by
 
 	err = b.systemInfoStore.Transaction(ctx, func(txCtx context.Context) error {
 		//保存证书
-		cert := &entry.SystemInfo{
+		cert := &system_entry.SystemInfo{
 			Key:   enum.CertDBKey,
 			Value: certFile,
 		}
@@ -174,7 +174,7 @@ func (b *bussinessAuthService) ReActivateCert(ctx context.Context, certFile []by
 		}
 
 		//保存机器码
-		err = b.systemInfoStore.Save(txCtx, &entry.SystemInfo{
+		err = b.systemInfoStore.Save(txCtx, &system_entry.SystemInfo{
 			Key:   enum.MachineCodeDBKey,
 			Value: []byte(machineCode),
 		})

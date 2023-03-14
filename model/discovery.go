@@ -1,7 +1,7 @@
 package model
 
 import (
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/discovery-entry"
 	"time"
 )
 
@@ -42,4 +42,4 @@ type DiscoveryOnline struct {
 	UpdateTime  time.Time
 }
 
-type DiscoveryVersion entry.DiscoveryVersion
+type DiscoveryVersion discovery_entry.DiscoveryVersion

@@ -1,9 +1,11 @@
 package model
 
-import "github.com/eolinker/apinto-dashboard/entry"
+import (
+	"github.com/eolinker/apinto-dashboard/entry/user-entry"
+)
 
 type UserInfo struct {
-	*entry.UserInfo
+	*user_entry.UserInfo
 	OperateEnable bool
 	Operator      string
 }

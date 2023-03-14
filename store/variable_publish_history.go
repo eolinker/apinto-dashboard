@@ -2,11 +2,12 @@ package store
 
 import (
 	"encoding/json"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/publish-entry"
+	"github.com/eolinker/apinto-dashboard/entry/variable-entry"
 )
 
 type IVariablePublishHistoryStore interface {
-	BasePublishHistoryStore[entry.VariablePublishHistory]
+	BasePublishHistoryStore[variable_entry.VariablePublishHistory]
 }
 
 type variablePublishHistoryHandler struct {
@@ -16,9 +17,9 @@ func (s *variablePublishHistoryHandler) Kind() string {
 	return "variable"
 }
 
-func (s *variablePublishHistoryHandler) Encode(sr *entry.VariablePublishHistory) *entry.PublishHistory {
+func (s *variablePublishHistoryHandler) Encode(sr *variable_entry.VariablePublishHistory) *publish_entry.PublishHistory {
 	val, _ := json.Marshal(sr.VariablePublishHistoryInfo)
-	history := &entry.PublishHistory{
+	history := &publish_entry.PublishHistory{
 		Id:          sr.Id,
 		Kind:        s.Kind(),
 		ClusterId:   sr.ClusterId,
@@ -35,10 +36,10 @@ func (s *variablePublishHistoryHandler) Encode(sr *entry.VariablePublishHistory)
 	return history
 }
 
-func (s *variablePublishHistoryHandler) Decode(r *entry.PublishHistory) *entry.VariablePublishHistory {
-	val := new(entry.VariablePublishHistoryInfo)
+func (s *variablePublishHistoryHandler) Decode(r *publish_entry.PublishHistory) *variable_entry.VariablePublishHistory {
+	val := new(variable_entry.VariablePublishHistoryInfo)
 	_ = json.Unmarshal([]byte(r.Data), val)
-	history := &entry.VariablePublishHistory{
+	history := &variable_entry.VariablePublishHistory{
 		Id:                         r.Id,
 		VersionName:                r.VersionName,
 		Desc:                       r.Desc,
@@ -54,6 +55,6 @@ func (s *variablePublishHistoryHandler) Decode(r *entry.PublishHistory) *entry.V
 }
 
 func newVariablePublishHistoryStore(db IDB) IVariablePublishHistoryStore {
-	var historyHandler BaseKindHandler[entry.VariablePublishHistory, entry.PublishHistory] = new(variablePublishHistoryHandler)
-	return createPublishHistory[entry.VariablePublishHistory](historyHandler, db)
+	var historyHandler BaseKindHandler[variable_entry.VariablePublishHistory, publish_entry.PublishHistory] = new(variablePublishHistoryHandler)
+	return createPublishHistory[variable_entry.VariablePublishHistory](historyHandler, db)
 }

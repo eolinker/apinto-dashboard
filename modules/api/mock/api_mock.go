@@ -7,11 +7,11 @@ package mock
 import (
 	context "context"
 	dto "github.com/eolinker/apinto-dashboard/modules/api/api-dto"
+	api_entry "github.com/eolinker/apinto-dashboard/modules/api/api-entry"
 	apimodel "github.com/eolinker/apinto-dashboard/modules/api/model"
 	reflect "reflect"
 
 	driver "github.com/eolinker/apinto-dashboard/driver-manager/driver"
-	entry "github.com/eolinker/apinto-dashboard/entry"
 	model "github.com/eolinker/apinto-dashboard/model"
 	gomock "github.com/golang/mock/gomock"
 )

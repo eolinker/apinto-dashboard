@@ -7,6 +7,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/dto"
+	"github.com/eolinker/apinto-dashboard/dto/monitor-dto"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/model"
 	service2 "github.com/eolinker/apinto-dashboard/modules/api"
@@ -111,7 +112,7 @@ func (w *warnController) webhook(ginCtx *gin.Context) {
 		return
 	}
 
-	webhookOutPut := &dto.WebhookOutput{
+	webhookOutPut := &monitor_dto.WebhookOutput{
 		Uuid:          channel.Name,
 		Title:         channel.Title,
 		Desc:          webhook.Desc,
@@ -140,7 +141,7 @@ func (w *warnController) webhooks(ginCtx *gin.Context) {
 		return
 	}
 
-	webhooks := make([]*dto.WebhooksOutput, 0, len(list))
+	webhooks := make([]*monitor_dto.WebhooksOutput, 0, len(list))
 	for _, channel := range list {
 
 		webhook := &model.NoticeChannelWebhook{}
@@ -149,7 +150,7 @@ func (w *warnController) webhooks(ginCtx *gin.Context) {
 			ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 			return
 		}
-		webhooks = append(webhooks, &dto.WebhooksOutput{
+		webhooks = append(webhooks, &monitor_dto.WebhooksOutput{
 			Uuid:        channel.Name,
 			Title:       channel.Title,
 			Url:         webhook.Url,
@@ -174,7 +175,7 @@ func (w *warnController) createWebhook(ginCtx *gin.Context) {
 	namespaceId := GetNamespaceId(ginCtx)
 	userId := GetUserId(ginCtx)
 
-	webhookInput := new(dto.WebhookInput)
+	webhookInput := new(monitor_dto.WebhookInput)
 
 	if err := ginCtx.BindJSON(webhookInput); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
@@ -220,7 +221,7 @@ func (w *warnController) updateWebhook(ginCtx *gin.Context) {
 	namespaceId := GetNamespaceId(ginCtx)
 	userId := GetUserId(ginCtx)
 
-	webhookInput := new(dto.WebhookInput)
+	webhookInput := new(monitor_dto.WebhookInput)
 
 	if err := ginCtx.BindJSON(webhookInput); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
@@ -266,7 +267,7 @@ func (w *warnController) updateWebhook(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
 }
 
-func checkWebhookParam(webhookInput *dto.WebhookInput) error {
+func checkWebhookParam(webhookInput *monitor_dto.WebhookInput) error {
 	if webhookInput.Url == "" {
 		return errors.New("url is null")
 	}
@@ -313,7 +314,7 @@ func (w *warnController) getEmail(ginCtx *gin.Context) {
 			return
 		}
 
-		emailInfo := &dto.EmailOutput{
+		emailInfo := &monitor_dto.EmailOutput{
 			Uuid:     list[0].Name,
 			SmtpUrl:  email.SmtpUrl,
 			SmtpPort: email.SmtpPort,
@@ -334,7 +335,7 @@ func (w *warnController) createEmail(ginCtx *gin.Context) {
 
 	namespaceId := GetNamespaceId(ginCtx)
 	userId := GetUserId(ginCtx)
-	emailInput := new(dto.EmailInput)
+	emailInput := new(monitor_dto.EmailInput)
 
 	if err := ginCtx.BindJSON(emailInput); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
@@ -377,7 +378,7 @@ func (w *warnController) createEmail(ginCtx *gin.Context) {
 func (w *warnController) updateEmail(ginCtx *gin.Context) {
 	namespaceId := GetNamespaceId(ginCtx)
 	userId := GetUserId(ginCtx)
-	emailInput := new(dto.EmailInput)
+	emailInput := new(monitor_dto.EmailInput)
 
 	if err := ginCtx.BindJSON(emailInput); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
@@ -420,7 +421,7 @@ func (w *warnController) updateEmail(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
 }
 
-func checkEmailParam(input *dto.EmailInput) error {
+func checkEmailParam(input *monitor_dto.EmailInput) error {
 	if input.SmtpUrl == "" {
 		return errors.New("smtp_url is null")
 	}
@@ -466,7 +467,7 @@ func (w *warnController) warnHistory(ginCtx *gin.Context) {
 		return
 	}
 
-	history := make([]*dto.WarnHistory, 0, len(list))
+	history := make([]*monitor_dto.WarnHistory, 0, len(list))
 	for _, info := range list {
 		target := ""
 		switch info.Dimension {
@@ -478,7 +479,7 @@ func (w *warnController) warnHistory(ginCtx *gin.Context) {
 			target = "API："
 
 		}
-		history = append(history, &dto.WarnHistory{
+		history = append(history, &monitor_dto.WarnHistory{
 			StrategyTitle: info.StrategyTitle,
 			WarnTarget:    target + info.Target,
 			WarnContent:   info.Content,
@@ -505,9 +506,9 @@ func (w *warnController) channels(ginCtx *gin.Context) {
 		return
 	}
 
-	channel := make([]*dto.NoticeChannel, 0, len(list))
+	channel := make([]*monitor_dto.NoticeChannel, 0, len(list))
 	for _, noticeChannel := range list {
-		channel = append(channel, &dto.NoticeChannel{
+		channel = append(channel, &monitor_dto.NoticeChannel{
 			Uuid:  noticeChannel.Name,
 			Title: noticeChannel.Title,
 			Type:  noticeChannel.Type,
@@ -591,7 +592,7 @@ func (w *warnController) strategys(ginCtx *gin.Context) {
 		return t.Name
 	})
 
-	strategyList := make([]*dto.WarnStrategyList, 0, len(listPage))
+	strategyList := make([]*monitor_dto.WarnStrategyList, 0, len(listPage))
 	for _, strategy := range listPage {
 
 		warnTarget := ""
@@ -668,7 +669,7 @@ func (w *warnController) strategys(ginCtx *gin.Context) {
 			warnFrequency = "1小时"
 		}
 
-		strategyList = append(strategyList, &dto.WarnStrategyList{
+		strategyList = append(strategyList, &monitor_dto.WarnStrategyList{
 			Uuid:          strategy.Uuid,
 			StrategyTitle: strategy.Title,
 			WarnDimension: strategyDimension,
@@ -712,7 +713,7 @@ func (w *warnController) strategy(ginCtx *gin.Context) {
 // updateStrategyStatus 修改告警策略启用状态
 func (w *warnController) updateStrategyStatus(ginCtx *gin.Context) {
 
-	strategy := &dto.WarnStrategyInput{}
+	strategy := &monitor_dto.WarnStrategyInput{}
 
 	if err := ginCtx.BindJSON(strategy); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
@@ -753,7 +754,7 @@ func (w *warnController) createStrategy(ginCtx *gin.Context) {
 	namespaceId := GetNamespaceId(ginCtx)
 	userId := GetUserId(ginCtx)
 
-	strategy := &dto.WarnStrategyInput{}
+	strategy := &monitor_dto.WarnStrategyInput{}
 
 	if err := ginCtx.BindJSON(strategy); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
@@ -789,7 +790,7 @@ func (w *warnController) updateStrategy(ginCtx *gin.Context) {
 	namespaceId := GetNamespaceId(ginCtx)
 	userId := GetUserId(ginCtx)
 
-	strategy := &dto.WarnStrategyInput{}
+	strategy := &monitor_dto.WarnStrategyInput{}
 
 	if err := ginCtx.BindJSON(strategy); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
@@ -817,7 +818,7 @@ func (w *warnController) updateStrategy(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(nil))
 }
 
-func checkWarnStrategyParam(input *dto.WarnStrategyInput) error {
+func checkWarnStrategyParam(input *monitor_dto.WarnStrategyInput) error {
 	if input.Title == "" {
 		return errors.New("标题不能为空")
 	}
@@ -854,34 +855,34 @@ func checkWarnStrategyParam(input *dto.WarnStrategyInput) error {
 	return nil
 }
 
-func modelWarnStrategyToDto(strategy *model.WarnStrategy) *dto.WarnStrategy {
+func modelWarnStrategyToDto(strategy *model.WarnStrategy) *monitor_dto.WarnStrategy {
 
-	rules := make([]*dto.WarnStrategyRule, 0, len(strategy.WarnStrategyConfig.Rule))
+	rules := make([]*monitor_dto.WarnStrategyRule, 0, len(strategy.WarnStrategyConfig.Rule))
 	for _, rule := range strategy.WarnStrategyConfig.Rule {
 
-		condition := make([]*dto.WarnStrategyRuleCondition, 0, len(rule.Condition))
+		condition := make([]*monitor_dto.WarnStrategyRuleCondition, 0, len(rule.Condition))
 
 		for _, ruleCondition := range rule.Condition {
 
-			condition = append(condition, &dto.WarnStrategyRuleCondition{
+			condition = append(condition, &monitor_dto.WarnStrategyRuleCondition{
 				Compare: ruleCondition.Compare,
 				Unit:    ruleCondition.Unit,
 				Value:   ruleCondition.Value,
 			})
 		}
 
-		rules = append(rules, &dto.WarnStrategyRule{
+		rules = append(rules, &monitor_dto.WarnStrategyRule{
 			ChannelUuids: rule.ChannelUuids,
 			Condition:    condition,
 		})
 	}
-	return &dto.WarnStrategy{
+	return &monitor_dto.WarnStrategy{
 		Uuid:      strategy.Uuid,
 		Title:     strategy.Title,
 		Desc:      strategy.Desc,
 		IsEnable:  strategy.IsEnable,
 		Dimension: strategy.Dimension,
-		Target: &dto.WarnStrategyTarget{
+		Target: &monitor_dto.WarnStrategyTarget{
 			Rule:   strategy.WarnStrategyConfig.Target.Rule,
 			Values: strategy.WarnStrategyConfig.Target.Values,
 		},
@@ -893,7 +894,7 @@ func modelWarnStrategyToDto(strategy *model.WarnStrategy) *dto.WarnStrategy {
 		Users:      strategy.WarnStrategyConfig.Users,
 	}
 }
-func dtoWarnStrategyToModel(strategy *dto.WarnStrategyInput, partitionId int) *model.WarnStrategy {
+func dtoWarnStrategyToModel(strategy *monitor_dto.WarnStrategyInput, partitionId int) *model.WarnStrategy {
 	rule := make([]*model.WarnStrategyConfigRule, 0, len(strategy.Rule))
 	for _, strategyRule := range strategy.Rule {
 		condition := make([]*model.WarnStrategyConfigRuleCondition, 0)
