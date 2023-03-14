@@ -1,7 +1,9 @@
 package model
 
-import "github.com/eolinker/apinto-dashboard/entry"
+import (
+	"github.com/eolinker/apinto-dashboard/entry/namespace-entry"
+)
 
 type Namespace struct {
-	*entry.Namespace
+	*namespace_entry.Namespace
 }

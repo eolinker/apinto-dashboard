@@ -6,11 +6,11 @@ package mock
 
 import (
 	context "context"
+	dto "github.com/eolinker/apinto-dashboard/dto/service-dto"
+	"github.com/eolinker/apinto-dashboard/entry/upstream-entry"
 	upstream_model "github.com/eolinker/apinto-dashboard/modules/upstream/model"
 	reflect "reflect"
 
-	dto "github.com/eolinker/apinto-dashboard/dto"
-	entry "github.com/eolinker/apinto-dashboard/entry"
 	model "github.com/eolinker/apinto-dashboard/model"
 	gomock "github.com/golang/mock/gomock"
 )
@@ -68,10 +68,10 @@ func (mr *MockIServiceMockRecorder) DeleteService(ctx, namespaceID, userId, serv
 }
 
 // GetLatestServiceVersion mocks base method.
-func (m *MockIService) GetLatestServiceVersion(ctx context.Context, serviceID int) (*entry.ServiceVersion, error) {
+func (m *MockIService) GetLatestServiceVersion(ctx context.Context, serviceID int) (*upstream_entry.ServiceVersion, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetLatestServiceVersion", ctx, serviceID)
-	ret0, _ := ret[0].(*entry.ServiceVersion)
+	ret0, _ := ret[0].(*upstream_entry.ServiceVersion)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -205,10 +205,10 @@ func (mr *MockIServiceMockRecorder) GetServiceRemoteOptions(ctx, namespaceID, pa
 }
 
 // GetServiceSchemaInfo mocks base method.
-func (m *MockIService) GetServiceSchemaInfo(ctx context.Context, serviceID int) (*entry.Service, error) {
+func (m *MockIService) GetServiceSchemaInfo(ctx context.Context, serviceID int) (*upstream_entry.Service, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetServiceSchemaInfo", ctx, serviceID)
-	ret0, _ := ret[0].(*entry.Service)
+	ret0, _ := ret[0].(*upstream_entry.Service)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

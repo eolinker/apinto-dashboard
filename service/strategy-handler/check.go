@@ -3,11 +3,11 @@ package strategy_handler
 import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
-	"github.com/eolinker/apinto-dashboard/dto"
+	"github.com/eolinker/apinto-dashboard/dto/strategy-dto"
 	"github.com/eolinker/apinto-dashboard/enum"
 )
 
-func checkFilters(fileters []*dto.FilterInput) error {
+func checkFilters(fileters []*strategy_dto.FilterInput) error {
 	filterNameSet := make(map[string]struct{})
 	for _, filter := range fileters {
 		switch filter.Name {

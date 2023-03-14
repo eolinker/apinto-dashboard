@@ -1,11 +1,12 @@
 package store
 
 import (
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/discovery-entry"
+	"github.com/eolinker/apinto-dashboard/entry/runtime-entry"
 )
 
 type IDiscoveryRuntimeStore interface {
-	BaseRuntimeStore[entry.DiscoveryRuntime]
+	BaseRuntimeStore[discovery_entry.DiscoveryRuntime]
 }
 
 type discoveryRuntimeHandler struct {
@@ -15,8 +16,8 @@ func (s *discoveryRuntimeHandler) Kind() string {
 	return "discovery"
 }
 
-func (s *discoveryRuntimeHandler) Encode(sr *entry.DiscoveryRuntime) *entry.Runtime {
-	return &entry.Runtime{
+func (s *discoveryRuntimeHandler) Encode(sr *discovery_entry.DiscoveryRuntime) *runtime_entry.Runtime {
+	return &runtime_entry.Runtime{
 		Id:          sr.Id,
 		Kind:        s.Kind(),
 		ClusterID:   sr.ClusterId,
@@ -31,8 +32,8 @@ func (s *discoveryRuntimeHandler) Encode(sr *entry.DiscoveryRuntime) *entry.Runt
 
 }
 
-func (s *discoveryRuntimeHandler) Decode(r *entry.Runtime) *entry.DiscoveryRuntime {
-	return &entry.DiscoveryRuntime{
+func (s *discoveryRuntimeHandler) Decode(r *runtime_entry.Runtime) *discovery_entry.DiscoveryRuntime {
+	return &discovery_entry.DiscoveryRuntime{
 		Id:          r.Id,
 		NamespaceId: r.NamespaceID,
 		DiscoveryID: r.TargetID,
@@ -46,7 +47,7 @@ func (s *discoveryRuntimeHandler) Decode(r *entry.Runtime) *entry.DiscoveryRunti
 }
 
 func newDiscoveryRuntimeStore(db IDB) IDiscoveryRuntimeStore {
-	var runTimeHandler BaseKindHandler[entry.DiscoveryRuntime, entry.Runtime] = new(discoveryRuntimeHandler)
-	return CreateRuntime[entry.DiscoveryRuntime](runTimeHandler, db)
+	var runTimeHandler BaseKindHandler[discovery_entry.DiscoveryRuntime, runtime_entry.Runtime] = new(discoveryRuntimeHandler)
+	return CreateRuntime[discovery_entry.DiscoveryRuntime](runTimeHandler, db)
 
 }

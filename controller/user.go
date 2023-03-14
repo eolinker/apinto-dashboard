@@ -5,6 +5,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/dto"
+	"github.com/eolinker/apinto-dashboard/dto/user-dto"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/service"
 	"github.com/eolinker/eosc/common/bean"
@@ -60,7 +61,7 @@ func (u *userController) getMyProfile(ginCtx *gin.Context) {
 	if userInfo.LastLoginTime != nil {
 		lastLogin = common.TimeToStr(*userInfo.LastLoginTime)
 	}
-	resUserInfo := dto.UserInfo{
+	resUserInfo := user_dto.UserInfo{
 		Id:           userInfo.Id,
 		Sex:          userInfo.Sex,
 		Avatar:       userInfo.Avatar,
@@ -87,7 +88,7 @@ func (u *userController) getMyProfile(ginCtx *gin.Context) {
 func (u *userController) updateMyProfile(ginCtx *gin.Context) {
 	userId := GetUserId(ginCtx)
 
-	req := &dto.UpdateMyProfileReq{}
+	req := &user_dto.UpdateMyProfileReq{}
 	err := ginCtx.BindJSON(req)
 	if err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("updateMyProfile fail. err:%s", err.Error())))
@@ -105,7 +106,7 @@ func (u *userController) updateMyProfile(ginCtx *gin.Context) {
 func (u *userController) updateMyPassword(ginCtx *gin.Context) {
 	userId := GetUserId(ginCtx)
 
-	req := &dto.UpdateMyPasswordReq{}
+	req := &user_dto.UpdateMyPasswordReq{}
 	err := ginCtx.BindJSON(req)
 	if err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("updateMyPassword fail. err:%s", err.Error())))
@@ -132,10 +133,10 @@ func (u *userController) getAllAccess(ginCtx *gin.Context) {
 
 }
 
-func getModules(modules []*access.GlobalAccess) []*dto.SystemModuleItem {
-	items := make([]*dto.SystemModuleItem, len(modules))
+func getModules(modules []*access.GlobalAccess) []*user_dto.SystemModuleItem {
+	items := make([]*user_dto.SystemModuleItem, len(modules))
 	for i, module := range modules {
-		item := &dto.SystemModuleItem{
+		item := &user_dto.SystemModuleItem{
 			ID:     module.ID,
 			Title:  module.Title,
 			Module: module.Module,
@@ -159,7 +160,7 @@ func (u *userController) getUserAccess(ginCtx *gin.Context) {
 	}
 	allModules := access.GetAllModulesConfig()
 
-	modules := make([]*dto.UserModuleItem, 0, len(accessSet))
+	modules := make([]*user_dto.UserModuleItem, 0, len(accessSet))
 	for _, module := range allModules {
 		for _, needId := range module.ModuleNeed {
 			if _, has := accessSet[needId]; has {
@@ -173,7 +174,7 @@ func (u *userController) getUserAccess(ginCtx *gin.Context) {
 						accessList = append(accessList, key)
 					}
 				}
-				modules = append(modules, &dto.UserModuleItem{
+				modules = append(modules, &user_dto.UserModuleItem{
 					Id:     module.ID,
 					Router: module.Router,
 					Title:  module.Title,
@@ -199,9 +200,9 @@ func (u *userController) getRoleList(ginCtx *gin.Context) {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("GetRoleList fail. err:%s", err.Error())))
 		return
 	}
-	roles := make([]*dto.RoleListItem, 0, len(roleList))
+	roles := make([]*user_dto.RoleListItem, 0, len(roleList))
 	for _, item := range roleList {
-		role := &dto.RoleListItem{
+		role := &user_dto.RoleListItem{
 			ID:             item.ID,
 			Title:          item.Title,
 			UserNum:        item.UserNum,
@@ -229,7 +230,7 @@ func (u *userController) getRoleInfo(ginCtx *gin.Context) {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("GetRoleInfo fail. err:%s", err.Error())))
 		return
 	}
-	role := &dto.ProxyRoleInfo{
+	role := &user_dto.ProxyRoleInfo{
 		Title:  info.Title,
 		Desc:   info.Desc,
 		Access: info.Access,
@@ -245,9 +246,9 @@ func (u *userController) getRoleOptions(ginCtx *gin.Context) {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("GetRoleOptions fail. err:%s", err.Error())))
 		return
 	}
-	options := make([]*dto.RoleOptionItem, 0, len(optionList))
+	options := make([]*user_dto.RoleOptionItem, 0, len(optionList))
 	for _, item := range optionList {
-		option := &dto.RoleOptionItem{
+		option := &user_dto.RoleOptionItem{
 			ID:             item.ID,
 			Title:          item.Title,
 			OperateDisable: item.OperateDisable,
@@ -263,7 +264,7 @@ func (u *userController) getRoleOptions(ginCtx *gin.Context) {
 func (u *userController) createRole(ginCtx *gin.Context) {
 	userID := GetUserId(ginCtx)
 
-	input := new(dto.ProxyRoleInfo)
+	input := new(user_dto.ProxyRoleInfo)
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -293,7 +294,7 @@ func (u *userController) updateRole(ginCtx *gin.Context) {
 		return
 	}
 
-	input := new(dto.ProxyRoleInfo)
+	input := new(user_dto.ProxyRoleInfo)
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -332,7 +333,7 @@ func (u *userController) deleteRole(ginCtx *gin.Context) {
 }
 
 func (u *userController) roleBatchUpdate(ginCtx *gin.Context) {
-	input := new(dto.BatchUpdateRole)
+	input := new(user_dto.BatchUpdateRole)
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -348,7 +349,7 @@ func (u *userController) roleBatchUpdate(ginCtx *gin.Context) {
 }
 
 func (u *userController) roleBatchRemove(ginCtx *gin.Context) {
-	input := new(dto.BatchRemoveRole)
+	input := new(user_dto.BatchRemoveRole)
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -366,7 +367,7 @@ func (u *userController) roleBatchRemove(ginCtx *gin.Context) {
 func (u *userController) delUser(ginCtx *gin.Context) {
 	userID := GetUserId(ginCtx)
 
-	req := &dto.DelUserReq{}
+	req := &user_dto.DelUserReq{}
 	if err := ginCtx.BindJSON(req); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("delUser fail. err:%s", err.Error())))
 		return
@@ -390,7 +391,7 @@ func (u *userController) delUser(ginCtx *gin.Context) {
 func (u *userController) createUser(ginCtx *gin.Context) {
 	userID := GetUserId(ginCtx)
 
-	req := &dto.SaveUserReq{}
+	req := &user_dto.SaveUserReq{}
 	if err := ginCtx.BindJSON(req); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("createUser fail. err:%s", err.Error())))
 		return
@@ -419,7 +420,7 @@ func (u *userController) patchUser(ginCtx *gin.Context) {
 		return
 	}
 
-	req := &dto.PatchUserReq{}
+	req := &user_dto.PatchUserReq{}
 	if err = ginCtx.BindJSON(req); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("patchUser fail. err:%s", err.Error())))
 		return
@@ -444,7 +445,7 @@ func (u *userController) updateUser(ginCtx *gin.Context) {
 		return
 	}
 
-	req := &dto.SaveUserReq{}
+	req := &user_dto.SaveUserReq{}
 	if err := ginCtx.BindJSON(req); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("updateUser fail. err:%s", err.Error())))
 		return
@@ -470,14 +471,14 @@ func (u *userController) getUserList(ginCtx *gin.Context) {
 		return
 	}
 
-	resList := make([]dto.UserInfo, 0, len(userInfoList))
+	resList := make([]user_dto.UserInfo, 0, len(userInfoList))
 
 	for _, userInfo := range userInfoList {
 		lastLogin := ""
 		if userInfo.LastLoginTime != nil {
 			lastLogin = common.TimeToStr(*userInfo.LastLoginTime)
 		}
-		resUserInfo := dto.UserInfo{
+		resUserInfo := user_dto.UserInfo{
 			Id:             userInfo.Id,
 			Sex:            userInfo.Sex,
 			Avatar:         userInfo.Avatar,
@@ -511,9 +512,9 @@ func (u *userController) userEnum(ginCtx *gin.Context) {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
 	}
-	resList := make([]dto.UserInfo, 0, len(infos))
+	resList := make([]user_dto.UserInfo, 0, len(infos))
 	for _, userInfo := range infos {
-		resUserInfo := dto.UserInfo{
+		resUserInfo := user_dto.UserInfo{
 			Id:       userInfo.Id,
 			Email:    userInfo.Email,
 			UserName: userInfo.UserName,
@@ -547,7 +548,7 @@ func (u *userController) getUser(ginCtx *gin.Context) {
 	if userInfo.LastLoginTime != nil {
 		lastLogin = common.TimeToStr(*userInfo.LastLoginTime)
 	}
-	resUserInfo := dto.UserInfo{
+	resUserInfo := user_dto.UserInfo{
 		Id:           userInfo.Id,
 		Sex:          userInfo.Sex,
 		Avatar:       userInfo.Avatar,
@@ -576,7 +577,7 @@ func (u *userController) resetUserPwd(ginCtx *gin.Context) {
 
 	operator := GetUserId(ginCtx)
 
-	resetPasswordReq := new(dto.ResetPasswordReq)
+	resetPasswordReq := new(user_dto.ResetPasswordReq)
 	err := ginCtx.BindJSON(resetPasswordReq)
 	if err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("resetUserPwd fail. err:%s", err.Error())))

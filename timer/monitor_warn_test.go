@@ -7,6 +7,9 @@ import (
 	driver_manager "github.com/eolinker/apinto-dashboard/driver-manager"
 	"github.com/eolinker/apinto-dashboard/driver-manager/driver"
 	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/cluster-entry"
+	"github.com/eolinker/apinto-dashboard/entry/namespace-entry"
+	"github.com/eolinker/apinto-dashboard/entry/user-entry"
 	"github.com/eolinker/apinto-dashboard/mocks/mock_cache"
 	"github.com/eolinker/apinto-dashboard/mocks/mock_service"
 	"github.com/eolinker/apinto-dashboard/model"
@@ -100,7 +103,7 @@ func userInfoAll(userId []int) []*model.UserInfo {
 	list := make([]*model.UserInfo, 0)
 	for _, id := range userId {
 		list = append(list, &model.UserInfo{
-			UserInfo: &entry.UserInfo{
+			UserInfo: &user_entry.UserInfo{
 				Id:           id,
 				Sex:          1,
 				UserName:     "zzy",
@@ -117,7 +120,7 @@ func getClustersNames(names []string) []*model.Cluster {
 	list := make([]*model.Cluster, 0)
 	for i, name := range names {
 		list = append(list, &model.Cluster{
-			Cluster: &entry.Cluster{
+			Cluster: &cluster_entry.Cluster{
 				Id:          i + 1,
 				NamespaceId: 1,
 				Name:        name,
@@ -198,7 +201,7 @@ func Test_newMonitorWarn(t *testing.T) {
 
 	namespaceService := mock_service.NewMockINamespaceService(ctl)
 	namespaces := make([]*model.Namespace, 0)
-	namespaces = append(namespaces, &model.Namespace{Namespace: &entry.Namespace{
+	namespaces = append(namespaces, &model.Namespace{Namespace: &namespace_entry.Namespace{
 		Id:   1,
 		Name: "default",
 	}})

@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
-	"github.com/eolinker/apinto-dashboard/dto"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/dto/group-dto"
+	"github.com/eolinker/apinto-dashboard/entry/group-entry"
 	"github.com/eolinker/apinto-dashboard/model"
 	api "github.com/eolinker/apinto-dashboard/modules/api"
 	"github.com/eolinker/apinto-dashboard/modules/upstream"
@@ -28,13 +28,13 @@ type ICommonGroupService interface {
 	UpdateGroup(ctx context.Context, namespaceId int, operator int, groupType, name, uuid string) error
 	DeleteGroup(ctx context.Context, namespaceId int, operator int, groupType, uuid string) error
 	GroupList(ctx context.Context, namespaceId int, groupType, tagName, parentUuid, queryName string) (*model.CommonGroupRoot, []*model.CommonGroupApi, error)
-	GroupListAll(ctx context.Context, namespaceId int, groupType, tagName string) ([]*entry.CommonGroup, error)
+	GroupListAll(ctx context.Context, namespaceId int, groupType, tagName string) ([]*group_entry.CommonGroup, error)
 	GroupUUIDS(ctx context.Context, namespaceId int, groupType, tagName, parentUuid string) ([]string, error)
-	GroupSort(ctx context.Context, namespaceId int, groupType, tagName string, input *dto.CommGroupSortInput) error
-	ToGroupRoot(ctx context.Context, namespaceId int, queryUUid string, groups []*entry.CommonGroup, uuidMaps map[string]string) *model.CommonGroupRoot
-	ParentGroupV2(parentUUID string, groupMaps map[string]*entry.CommonGroup, groupIdMaps map[int]*entry.CommonGroup, outMapUUID map[string]string)
-	ParentGroupName(uuid string, groupMaps map[string]*entry.CommonGroup, groupIdMaps map[int]*entry.CommonGroup, nameList *[]string)
-	SubGroupUUIDS(groups map[int][]*entry.CommonGroup, parentGroup *model.CommonGroup, list *[]string)
+	GroupSort(ctx context.Context, namespaceId int, groupType, tagName string, input *group_dto.CommGroupSortInput) error
+	ToGroupRoot(ctx context.Context, namespaceId int, queryUUid string, groups []*group_entry.CommonGroup, uuidMaps map[string]string) *model.CommonGroupRoot
+	ParentGroupV2(parentUUID string, groupMaps map[string]*group_entry.CommonGroup, groupIdMaps map[int]*group_entry.CommonGroup, outMapUUID map[string]string)
+	ParentGroupName(uuid string, groupMaps map[string]*group_entry.CommonGroup, groupIdMaps map[int]*group_entry.CommonGroup, nameList *[]string)
+	SubGroupUUIDS(groups map[int][]*group_entry.CommonGroup, parentGroup *model.CommonGroup, list *[]string)
 	IsGroupExist(ctx context.Context, uuid string) (bool, error)
 	CheckGroupNameReduplicated(ctx context.Context, groupName string, parentID int) (bool, error)
 }
@@ -53,7 +53,7 @@ func newCommonGroupService() ICommonGroupService {
 	return c
 }
 
-func (c *commonGroupService) GroupSort(ctx context.Context, namespaceId int, groupType, tagName string, input *dto.CommGroupSortInput) error {
+func (c *commonGroupService) GroupSort(ctx context.Context, namespaceId int, groupType, tagName string, input *group_dto.CommGroupSortInput) error {
 	//TODO 排序需要检查排序后分组名有无重复的情况
 
 	tagId := c.getTagId(ctx, namespaceId, groupType, tagName)
@@ -61,32 +61,32 @@ func (c *commonGroupService) GroupSort(ctx context.Context, namespaceId int, gro
 		return errors.New("params error")
 	}
 	var (
-		group *entry.CommonGroup
-		err   error
+		g   *group_entry.CommonGroup
+		err error
 	)
 
 	if input.Root != "" {
-		group, err = c.commonGroupStore.GetByUUID(ctx, input.Root)
+		g, err = c.commonGroupStore.GetByUUID(ctx, input.Root)
 		if err != nil {
 			return err
 		}
 	} else {
-		group = new(entry.CommonGroup)
+		g = new(group_entry.CommonGroup)
 	}
 
-	groups, err := c.commonGroupStore.GetByUUIDS(ctx, input.Items)
+	gs, err := c.commonGroupStore.GetByUUIDS(ctx, input.Items)
 	if err != nil {
 		return err
 	}
-	groupMaps := common.SliceToMap(groups, func(t *entry.CommonGroup) string {
+	gms := common.SliceToMap(gs, func(t *group_entry.CommonGroup) string {
 		return t.Uuid
 	})
 
-	list := make([]*entry.CommonGroup, 0)
+	list := make([]*group_entry.CommonGroup, 0)
 	for i, groupUUID := range input.Items {
-		if v, ok := groupMaps[groupUUID]; ok {
+		if v, ok := gms[groupUUID]; ok {
 			v.Sort = i + 1
-			v.ParentId = group.ParentId
+			v.ParentId = g.ParentId
 			list = append(list, v)
 		}
 	}
@@ -172,7 +172,7 @@ func (c *commonGroupService) UpdateGroup(ctx context.Context, namespaceId int, o
 	return c.commonGroupStore.Save(ctx, group)
 }
 
-func (c *commonGroupService) GroupListAll(ctx context.Context, namespaceId int, groupType, tagName string) ([]*entry.CommonGroup, error) {
+func (c *commonGroupService) GroupListAll(ctx context.Context, namespaceId int, groupType, tagName string) ([]*group_entry.CommonGroup, error) {
 
 	tagId := c.getTagId(ctx, namespaceId, groupType, tagName)
 	if tagId == -1 {
@@ -189,7 +189,7 @@ func (c *commonGroupService) GroupListAll(ctx context.Context, namespaceId int, 
 }
 
 // toGroupRoot uuidMaps为其他API关联的groupUUID以及直至顶级目录的groupUUID
-func (c *commonGroupService) ToGroupRoot(ctx context.Context, namespaceId int, queryUUid string, groups []*entry.CommonGroup, uuidMaps map[string]string) *model.CommonGroupRoot {
+func (c *commonGroupService) ToGroupRoot(ctx context.Context, namespaceId int, queryUUid string, groups []*group_entry.CommonGroup, uuidMaps map[string]string) *model.CommonGroupRoot {
 	parentList := make([]*model.CommonGroup, 0)
 	name := ""
 	for _, group := range groups {
@@ -214,7 +214,7 @@ func (c *commonGroupService) ToGroupRoot(ctx context.Context, namespaceId int, q
 		}
 	}
 
-	array := common.SliceToMapArray(groups, func(t *entry.CommonGroup) int {
+	array := common.SliceToMapArray(groups, func(t *group_entry.CommonGroup) int {
 		return t.ParentId
 	})
 
@@ -262,7 +262,7 @@ func (c *commonGroupService) GroupList(ctx context.Context, namespaceId int, gro
 		}
 	}
 
-	groups := make([]*entry.CommonGroup, 0)
+	groups := make([]*group_entry.CommonGroup, 0)
 
 	if queryName == "" {
 		//根据父级ID查询目录，如果parentId为0  查跟目录
@@ -275,7 +275,7 @@ func (c *commonGroupService) GroupList(ctx context.Context, namespaceId int, gro
 			return t.GroupUUID
 		})
 
-		groupsMaps := common.SliceToMap(groups, func(t *entry.CommonGroup) string {
+		groupsMaps := common.SliceToMap(groups, func(t *group_entry.CommonGroup) string {
 			return t.Uuid
 		})
 
@@ -337,9 +337,9 @@ func (c *commonGroupService) GroupList(ctx context.Context, namespaceId int, gro
 }
 
 // subGroup 递归查询子目录
-func (c *commonGroupService) subGroupV2(ctx context.Context, namespaceId int, groups map[int][]*entry.CommonGroup, uuidMaps map[string]string, parentGroup *model.CommonGroup) {
+func (c *commonGroupService) subGroupV2(ctx context.Context, namespaceId int, groups map[int][]*group_entry.CommonGroup, uuidMaps map[string]string, parentGroup *model.CommonGroup) {
 
-	newGroups := make([]*entry.CommonGroup, 0)
+	newGroups := make([]*group_entry.CommonGroup, 0)
 	if val, ok := groups[parentGroup.Group.Id]; ok {
 		newGroups = val
 	}
@@ -377,7 +377,7 @@ func (c *commonGroupService) subGroup(ctx context.Context, namespaceId int, grou
 }
 
 // parentGroup 递归查询跟目录
-func (c *commonGroupService) parentGroup(ctx context.Context, parentUUID string) (*entry.CommonGroup, error) {
+func (c *commonGroupService) parentGroup(ctx context.Context, parentUUID string) (*group_entry.CommonGroup, error) {
 	group, err := c.commonGroupStore.GetByUUID(ctx, parentUUID)
 	if err != nil {
 		return nil, err
@@ -392,7 +392,7 @@ func (c *commonGroupService) parentGroup(ctx context.Context, parentUUID string)
 	return group, nil
 }
 
-func (c *commonGroupService) ParentGroupV2(parentUUID string, groupMaps map[string]*entry.CommonGroup, groupIdMaps map[int]*entry.CommonGroup, outMapUUID map[string]string) {
+func (c *commonGroupService) ParentGroupV2(parentUUID string, groupMaps map[string]*group_entry.CommonGroup, groupIdMaps map[int]*group_entry.CommonGroup, outMapUUID map[string]string) {
 
 	if group, ok := groupMaps[parentUUID]; ok {
 		if group.ParentId > 0 {
@@ -405,8 +405,8 @@ func (c *commonGroupService) ParentGroupV2(parentUUID string, groupMaps map[stri
 	}
 }
 
-// 获取某个目录的名称直至顶级目录名称
-func (c *commonGroupService) ParentGroupName(uuid string, groupMaps map[string]*entry.CommonGroup, groupIdMaps map[int]*entry.CommonGroup, nameList *[]string) {
+// ParentGroupName 获取某个目录的名称直至顶级目录名称
+func (c *commonGroupService) ParentGroupName(uuid string, groupMaps map[string]*group_entry.CommonGroup, groupIdMaps map[int]*group_entry.CommonGroup, nameList *[]string) {
 
 	if group, ok := groupMaps[uuid]; ok {
 		if group.ParentId > 0 {
@@ -439,10 +439,10 @@ func (c *commonGroupService) ParentGroupName(uuid string, groupMaps map[string]*
 	}
 }
 
-// subGroup 递归查询子目录
-func (c *commonGroupService) SubGroupUUIDS(groups map[int][]*entry.CommonGroup, parentGroup *model.CommonGroup, list *[]string) {
+// SubGroupUUIDS subGroup 递归查询子目录
+func (c *commonGroupService) SubGroupUUIDS(groups map[int][]*group_entry.CommonGroup, parentGroup *model.CommonGroup, list *[]string) {
 
-	newGroups := make([]*entry.CommonGroup, 0)
+	newGroups := make([]*group_entry.CommonGroup, 0)
 	if val, ok := groups[parentGroup.Group.Id]; ok {
 		newGroups = val
 	}
@@ -465,7 +465,7 @@ func (c *commonGroupService) CreateGroup(ctx context.Context, namespaceId int, o
 	}
 	t := time.Now()
 	var err error
-	var parentServiceGroup *entry.CommonGroup
+	var parentServiceGroup *group_entry.CommonGroup
 	//查询父级的目录ID 没有查到表示是创建的根目录
 	if parentUuid != "" {
 		parentServiceGroup, err = c.commonGroupStore.GetByUUID(ctx, parentUuid)
@@ -496,7 +496,7 @@ func (c *commonGroupService) CreateGroup(ctx context.Context, namespaceId int, o
 	if err != nil {
 		return err
 	}
-	group := &entry.CommonGroup{
+	group := &group_entry.CommonGroup{
 		Uuid:        uuidStr,
 		NamespaceId: namespaceId,
 		TagID:       tagId,
@@ -574,7 +574,7 @@ func (c *commonGroupService) GroupUUIDS(ctx context.Context, namespaceId int, gr
 		}
 	}
 
-	groupMaps := common.SliceToMapArray(groups, func(t *entry.CommonGroup) int {
+	groupMaps := common.SliceToMapArray(groups, func(t *group_entry.CommonGroup) int {
 		return t.ParentId
 	})
 

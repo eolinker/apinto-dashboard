@@ -6,10 +6,11 @@ import (
 	"fmt"
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/common"
-	"github.com/eolinker/apinto-dashboard/dto"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/dto/application-dto"
+	"github.com/eolinker/apinto-dashboard/entry/application-entry"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/model"
+	"github.com/eolinker/apinto-dashboard/model/application-model"
 	"github.com/eolinker/apinto-dashboard/store"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
@@ -25,21 +26,21 @@ const anonymousIds = "anonymous"
 var _ IApplicationService = (*applicationService)(nil)
 
 type IApplicationService interface {
-	CreateApp(ctx context.Context, namespaceId, userId int, input *dto.ApplicationInput) error
-	UpdateApp(ctx context.Context, namespaceId, userId int, input *dto.ApplicationInput) error
+	CreateApp(ctx context.Context, namespaceId, userId int, input *application_dto.ApplicationInput) error
+	UpdateApp(ctx context.Context, namespaceId, userId int, input *application_dto.ApplicationInput) error
 	DelApp(ctx context.Context, namespaceId, userId int, id string) error
-	AppList(ctx context.Context, namespaceId, userId, pageNum, pageSize int, queryName string) ([]*model.Application, int, error)
-	AppListAll(ctx context.Context, namespaceId int) ([]*model.Application, error)
-	AppListFilter(ctx context.Context, namespaceId, pageNum, pageSize int, queryName string) ([]*model.Application, int, error)
-	AppListByUUIDS(ctx context.Context, namespaceId int, uuids []string) ([]*model.Application, error)
-	AppInfoDetails(ctx context.Context, namespaceId int, id string) (*model.Application, error)
-	AppInfo(ctx context.Context, namespaceId int, id string) (*model.Application, error)
+	AppList(ctx context.Context, namespaceId, userId, pageNum, pageSize int, queryName string) ([]*application_model.Application, int, error)
+	AppListAll(ctx context.Context, namespaceId int) ([]*application_model.Application, error)
+	AppListFilter(ctx context.Context, namespaceId, pageNum, pageSize int, queryName string) ([]*application_model.Application, int, error)
+	AppListByUUIDS(ctx context.Context, namespaceId int, uuids []string) ([]*application_model.Application, error)
+	AppInfoDetails(ctx context.Context, namespaceId int, id string) (*application_model.Application, error)
+	AppInfo(ctx context.Context, namespaceId int, id string) (*application_model.Application, error)
 	Online(ctx context.Context, namespaceId, userId int, id, clusterName string) error
 	Offline(ctx context.Context, namespaceId, userId int, id, clusterName string) error
 	Disable(ctx context.Context, namespaceId, userId int, id, clusterName string, disable bool) error
-	OnlineList(ctx context.Context, namespaceId int, id string) ([]*model.ApplicationOnline, error)
-	GetAppKeys(ctx context.Context, namespaceId int) ([]*model.ApplicationKeys, error)
-	getAppVersion(ctx context.Context, appId int) (*model.ApplicationVersion, error)
+	OnlineList(ctx context.Context, namespaceId int, id string) ([]*application_model.ApplicationOnline, error)
+	GetAppKeys(ctx context.Context, namespaceId int) ([]*application_model.ApplicationKeys, error)
+	getAppVersion(ctx context.Context, appId int) (*application_model.ApplicationVersion, error)
 	IResetOnlineService
 }
 
@@ -75,7 +76,7 @@ func newApplicationService() IApplicationService {
 	return app
 }
 
-func (a *applicationService) OnlineList(ctx context.Context, namespaceId int, id string) ([]*model.ApplicationOnline, error) {
+func (a *applicationService) OnlineList(ctx context.Context, namespaceId int, id string) ([]*application_model.ApplicationOnline, error) {
 	application, err := a.applicationStore.GetByIdStr(ctx, namespaceId, id)
 	if err != nil {
 		return nil, err
@@ -102,20 +103,20 @@ func (a *applicationService) OnlineList(ctx context.Context, namespaceId int, id
 		return nil, err
 	}
 
-	runtimeMaps := common.SliceToMap(runtimes, func(t *entry.ApplicationRuntime) int {
+	runtimeMaps := common.SliceToMap(runtimes, func(t *application_entry.ApplicationRuntime) int {
 		return t.ClusterId
 	})
 
-	userIds := common.SliceToSliceIds(runtimes, func(t *entry.ApplicationRuntime) int {
+	userIds := common.SliceToSliceIds(runtimes, func(t *application_entry.ApplicationRuntime) int {
 		return t.Operator
 	})
 
 	userInfoMaps, _ := a.userInfoService.GetUserInfoMaps(ctx, userIds...)
 
-	list := make([]*model.ApplicationOnline, 0, len(clusters))
+	list := make([]*application_model.ApplicationOnline, 0, len(clusters))
 	for _, cluster := range clusterMaps {
 
-		applicationOnline := &model.ApplicationOnline{
+		applicationOnline := &application_model.ApplicationOnline{
 			ClusterID:   cluster.Id,
 			ClusterName: cluster.Name,
 			Env:         cluster.Env,
@@ -225,7 +226,7 @@ func (a *applicationService) Online(ctx context.Context, namespaceId, userId int
 
 	t := time.Now()
 	if runtime == nil {
-		runtime = &entry.ApplicationRuntime{
+		runtime = &application_entry.ApplicationRuntime{
 			NamespaceId:   namespaceId,
 			ApplicationId: applicationId,
 			ClusterId:     clusterId,
@@ -440,7 +441,7 @@ func (a *applicationService) Disable(ctx context.Context, namespaceId, userId in
 	})
 }
 
-func (a *applicationService) CreateApp(ctx context.Context, namespaceId, userId int, input *dto.ApplicationInput) error {
+func (a *applicationService) CreateApp(ctx context.Context, namespaceId, userId int, input *application_dto.ApplicationInput) error {
 	input.Id = strings.ToLower(input.Id)
 	application, _ := a.applicationStore.GetByIdStr(ctx, namespaceId, input.Id)
 	if application != nil {
@@ -452,7 +453,7 @@ func (a *applicationService) CreateApp(ctx context.Context, namespaceId, userId 
 		return errors.New("应用名重复")
 	}
 
-	versionConfig := entry.ApplicationVersionConfig{
+	versionConfig := application_entry.ApplicationVersionConfig{
 		CustomAttrList: a.dtoAttrToEntryAttr(input.CustomAttrList),
 		ExtraParamList: a.dtoExtraToEntryExtra(input.ExtraParamList),
 		Apis:           input.Apis,
@@ -466,7 +467,7 @@ func (a *applicationService) CreateApp(ctx context.Context, namespaceId, userId 
 	})
 
 	return a.applicationStore.Transaction(ctx, func(txCtx context.Context) error {
-		application = &entry.Application{
+		application = &application_entry.Application{
 			NamespaceId: namespaceId,
 			IdStr:       input.Id,
 			Name:        input.Name,
@@ -480,14 +481,14 @@ func (a *applicationService) CreateApp(ctx context.Context, namespaceId, userId 
 			return err
 		}
 
-		if err := a.applicationHistoryStore.HistoryAdd(txCtx, namespaceId, application.Id, &entry.ApplicationHistoryInfo{
+		if err := a.applicationHistoryStore.HistoryAdd(txCtx, namespaceId, application.Id, &application_entry.ApplicationHistoryInfo{
 			Application:              *application,
 			ApplicationVersionConfig: versionConfig,
 		}, userId); err != nil {
 			return nil
 		}
 
-		applicationVersion := &entry.ApplicationVersion{
+		applicationVersion := &application_entry.ApplicationVersion{
 			ApplicationID:            application.Id,
 			NamespaceID:              namespaceId,
 			ApplicationVersionConfig: versionConfig,
@@ -498,7 +499,7 @@ func (a *applicationService) CreateApp(ctx context.Context, namespaceId, userId 
 		if err := a.applicationVersionStore.Save(txCtx, applicationVersion); err != nil {
 			return err
 		}
-		stat := &entry.ApplicationStat{
+		stat := &application_entry.ApplicationStat{
 			ApplicationID: applicationVersion.ApplicationID,
 			VersionID:     applicationVersion.Id,
 		}
@@ -508,7 +509,7 @@ func (a *applicationService) CreateApp(ctx context.Context, namespaceId, userId 
 
 }
 
-func (a *applicationService) UpdateApp(ctx context.Context, namespaceId, userId int, input *dto.ApplicationInput) error {
+func (a *applicationService) UpdateApp(ctx context.Context, namespaceId, userId int, input *application_dto.ApplicationInput) error {
 	application, _ := a.applicationStore.GetByName(ctx, namespaceId, input.Name)
 	if application != nil && application.IdStr != input.Id {
 		return errors.New("应用名重复")
@@ -581,13 +582,13 @@ func (a *applicationService) UpdateApp(ctx context.Context, namespaceId, userId 
 			return err
 		}
 
-		config := entry.ApplicationVersionConfig{
+		config := application_entry.ApplicationVersionConfig{
 			CustomAttrList: a.dtoAttrToEntryAttr(input.CustomAttrList),
 			ExtraParamList: a.dtoExtraToEntryExtra(input.ExtraParamList),
 			Apis:           input.Apis,
 		}
 
-		applicationVersion := &entry.ApplicationVersion{
+		applicationVersion := &application_entry.ApplicationVersion{
 			ApplicationID:            application.Id,
 			NamespaceID:              namespaceId,
 			ApplicationVersionConfig: config,
@@ -595,14 +596,14 @@ func (a *applicationService) UpdateApp(ctx context.Context, namespaceId, userId 
 			CreateTime:               t,
 		}
 
-		if err = a.applicationHistoryStore.HistoryEdit(txCtx, namespaceId, application.Id, &entry.ApplicationHistoryInfo{
+		if err = a.applicationHistoryStore.HistoryEdit(txCtx, namespaceId, application.Id, &application_entry.ApplicationHistoryInfo{
 			Application: oldApplication,
-			ApplicationVersionConfig: entry.ApplicationVersionConfig{
+			ApplicationVersionConfig: application_entry.ApplicationVersionConfig{
 				CustomAttrList: version.CustomAttrList,
 				ExtraParamList: version.ExtraParamList,
 				Apis:           version.Apis,
 			},
-		}, &entry.ApplicationHistoryInfo{
+		}, &application_entry.ApplicationHistoryInfo{
 			Application:              *application,
 			ApplicationVersionConfig: config,
 		}, userId); err != nil {
@@ -613,7 +614,7 @@ func (a *applicationService) UpdateApp(ctx context.Context, namespaceId, userId 
 			if err = a.applicationVersionStore.Save(txCtx, applicationVersion); err != nil {
 				return err
 			}
-			stat := &entry.ApplicationStat{
+			stat := &application_entry.ApplicationStat{
 				ApplicationID: applicationVersion.ApplicationID,
 				VersionID:     applicationVersion.Id,
 			}
@@ -662,9 +663,9 @@ func (a *applicationService) DelApp(ctx context.Context, namespaceId, userId int
 
 		//添加操作记录
 
-		if err = a.applicationHistoryStore.HistoryDelete(txCtx, namespaceId, application.Id, &entry.ApplicationHistoryInfo{
+		if err = a.applicationHistoryStore.HistoryDelete(txCtx, namespaceId, application.Id, &application_entry.ApplicationHistoryInfo{
 			Application: *application,
-			ApplicationVersionConfig: entry.ApplicationVersionConfig{
+			ApplicationVersionConfig: application_entry.ApplicationVersionConfig{
 				CustomAttrList: version.CustomAttrList,
 				ExtraParamList: version.ExtraParamList,
 			},
@@ -693,7 +694,7 @@ func (a *applicationService) DelApp(ctx context.Context, namespaceId, userId int
 	})
 }
 
-func (a *applicationService) AppList(ctx context.Context, namespaceId, userId, pageNum, pageSize int, queryName string) ([]*model.Application, int, error) {
+func (a *applicationService) AppList(ctx context.Context, namespaceId, userId, pageNum, pageSize int, queryName string) ([]*application_model.Application, int, error) {
 
 	anonymousApplication, err := a.applicationStore.GetByIdStr(ctx, namespaceId, anonymousIds)
 	if err != nil && err != gorm.ErrRecordNotFound {
@@ -703,7 +704,7 @@ func (a *applicationService) AppList(ctx context.Context, namespaceId, userId, p
 	//没有匿名应用创建一个
 	if anonymousApplication == nil {
 		t := time.Now()
-		entryApplication := &entry.Application{
+		entryApplication := &application_entry.Application{
 			NamespaceId: namespaceId,
 			IdStr:       anonymousIds,
 			Name:        "匿名应用",
@@ -716,10 +717,10 @@ func (a *applicationService) AppList(ctx context.Context, namespaceId, userId, p
 			if err = a.applicationStore.Save(txCtx, entryApplication); err != nil {
 				return err
 			}
-			version := &entry.ApplicationVersion{
+			version := &application_entry.ApplicationVersion{
 				ApplicationID:            entryApplication.Id,
 				NamespaceID:              namespaceId,
-				ApplicationVersionConfig: entry.ApplicationVersionConfig{},
+				ApplicationVersionConfig: application_entry.ApplicationVersionConfig{},
 				Operator:                 userId,
 				CreateTime:               t,
 			}
@@ -727,7 +728,7 @@ func (a *applicationService) AppList(ctx context.Context, namespaceId, userId, p
 			if err = a.applicationVersionStore.Save(txCtx, version); err != nil {
 				return err
 			}
-			return a.applicationStatStore.Save(txCtx, &entry.ApplicationStat{
+			return a.applicationStatStore.Save(txCtx, &application_entry.ApplicationStat{
 				ApplicationID: version.ApplicationID,
 				VersionID:     version.Id,
 			})
@@ -743,13 +744,13 @@ func (a *applicationService) AppList(ctx context.Context, namespaceId, userId, p
 		return nil, 0, err
 	}
 
-	applications := make([]*model.Application, 0, len(list))
+	applications := make([]*application_model.Application, 0, len(list))
 	clusters, err := a.clusterService.GetByNamespaceId(ctx, namespaceId)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	userIds := common.SliceToSliceIds(list, func(t *entry.Application) int {
+	userIds := common.SliceToSliceIds(list, func(t *application_entry.Application) int {
 		return t.Operator
 	})
 
@@ -762,7 +763,7 @@ func (a *applicationService) AppList(ctx context.Context, namespaceId, userId, p
 			operatorName = userInfo.NickName
 		}
 
-		val := &model.Application{Application: application, OperatorName: operatorName}
+		val := &application_model.Application{Application: application, OperatorName: operatorName}
 
 		isDelete := true
 		if val.IdStr == anonymousIds {
@@ -783,46 +784,46 @@ func (a *applicationService) AppList(ctx context.Context, namespaceId, userId, p
 	}
 
 	//对列表进行排序，匿名排第一位，其余按更新时间降序
-	sort.Sort(model.ApplicationList(applications))
+	sort.Sort(application_model.ApplicationList(applications))
 
 	return applications, count, nil
 }
-func (a *applicationService) AppListAll(ctx context.Context, namespaceId int) ([]*model.Application, error) {
+func (a *applicationService) AppListAll(ctx context.Context, namespaceId int) ([]*application_model.Application, error) {
 
 	list, err := a.applicationStore.GetList(ctx, namespaceId)
 	if err != nil {
 		return nil, err
 	}
 
-	applications := make([]*model.Application, 0, len(list))
+	applications := make([]*application_model.Application, 0, len(list))
 
 	for _, application := range list {
-		applications = append(applications, &model.Application{Application: application})
+		applications = append(applications, &application_model.Application{Application: application})
 	}
 
-	sort.Sort(model.ApplicationList(applications))
+	sort.Sort(application_model.ApplicationList(applications))
 
 	return applications, nil
 }
 
-func (a *applicationService) AppListFilter(ctx context.Context, namespaceId, pageNum, pageSize int, queryName string) ([]*model.Application, int, error) {
+func (a *applicationService) AppListFilter(ctx context.Context, namespaceId, pageNum, pageSize int, queryName string) ([]*application_model.Application, int, error) {
 
 	list, count, err := a.applicationStore.GetListPage(ctx, namespaceId, pageNum, pageSize, queryName)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	applications := make([]*model.Application, 0, len(list))
+	applications := make([]*application_model.Application, 0, len(list))
 
 	for _, application := range list {
-		val := &model.Application{Application: application}
+		val := &application_model.Application{Application: application}
 		applications = append(applications, val)
 	}
 
 	return applications, count, nil
 }
 
-func (a *applicationService) AppInfoDetails(ctx context.Context, namespaceId int, id string) (*model.Application, error) {
+func (a *applicationService) AppInfoDetails(ctx context.Context, namespaceId int, id string) (*application_model.Application, error) {
 	application, err := a.applicationStore.GetByIdStr(ctx, namespaceId, id)
 	if err != nil {
 		return nil, err
@@ -833,7 +834,7 @@ func (a *applicationService) AppInfoDetails(ctx context.Context, namespaceId int
 		return nil, err
 	}
 
-	res := &model.Application{
+	res := &application_model.Application{
 		Application:  application,
 		OperatorName: "",
 		CustomAttr:   a.entryAttrToModelAttr(version.CustomAttrList),
@@ -842,13 +843,13 @@ func (a *applicationService) AppInfoDetails(ctx context.Context, namespaceId int
 	return res, nil
 }
 
-func (a *applicationService) AppInfo(ctx context.Context, namespaceId int, id string) (*model.Application, error) {
+func (a *applicationService) AppInfo(ctx context.Context, namespaceId int, id string) (*application_model.Application, error) {
 	application, err := a.applicationStore.GetByIdStr(ctx, namespaceId, id)
 	if err != nil {
 		return nil, err
 	}
 
-	res := &model.Application{
+	res := &application_model.Application{
 		Application: application,
 	}
 	return res, nil
@@ -915,7 +916,7 @@ func (a *applicationService) ResetOnline(ctx context.Context, namespaceId, clust
 	}
 }
 
-func (a *applicationService) getAppVersion(ctx context.Context, appId int) (*model.ApplicationVersion, error) {
+func (a *applicationService) getAppVersion(ctx context.Context, appId int) (*application_model.ApplicationVersion, error) {
 	var err error
 
 	stat, err := a.applicationStatStore.Get(ctx, appId)
@@ -923,23 +924,23 @@ func (a *applicationService) getAppVersion(ctx context.Context, appId int) (*mod
 		return nil, err
 	}
 
-	var version *entry.ApplicationVersion
+	var version *application_entry.ApplicationVersion
 
 	version, err = a.applicationVersionStore.Get(ctx, stat.VersionID)
 	if err != nil {
 		return nil, err
 	}
 
-	return (*model.ApplicationVersion)(version), nil
+	return (*application_model.ApplicationVersion)(version), nil
 }
 
-func (a *applicationService) GetAppKeys(ctx context.Context, namespaceId int) ([]*model.ApplicationKeys, error) {
+func (a *applicationService) GetAppKeys(ctx context.Context, namespaceId int) ([]*application_model.ApplicationKeys, error) {
 	applications, err := a.applicationStore.GetList(ctx, namespaceId)
 	if err != nil {
 		return nil, err
 	}
 
-	list := make([]*model.ApplicationKeys, 0)
+	list := make([]*application_model.ApplicationKeys, 0)
 
 	keys := common.Map[string, []string]{}
 
@@ -966,7 +967,7 @@ func (a *applicationService) GetAppKeys(ctx context.Context, namespaceId int) ([
 		newValues = append(newValues, enum.FilterValuesALL)
 		newValues = append(newValues, v...)
 
-		list = append(list, &model.ApplicationKeys{
+		list = append(list, &application_model.ApplicationKeys{
 			Key:     k,
 			Values:  newValues,
 			KeyName: fmt.Sprintf("%s(应用)", k),
@@ -976,23 +977,23 @@ func (a *applicationService) GetAppKeys(ctx context.Context, namespaceId int) ([
 	return list, nil
 }
 
-func (a *applicationService) AppListByUUIDS(ctx context.Context, namespaceId int, uuids []string) ([]*model.Application, error) {
+func (a *applicationService) AppListByUUIDS(ctx context.Context, namespaceId int, uuids []string) ([]*application_model.Application, error) {
 	list, err := a.applicationStore.GetList(ctx, namespaceId, uuids...)
 	if err != nil {
 		return nil, err
 	}
 
-	applications := make([]*model.Application, 0, len(list))
+	applications := make([]*application_model.Application, 0, len(list))
 
 	for _, application := range list {
-		val := &model.Application{Application: application}
+		val := &application_model.Application{Application: application}
 		applications = append(applications, val)
 	}
 
 	return applications, nil
 }
 
-func (a *applicationService) getApplicationAdditional(extraHeader []entry.ApplicationExtraParam) []v1.ApplicationAdditional {
+func (a *applicationService) getApplicationAdditional(extraHeader []application_entry.ApplicationExtraParam) []v1.ApplicationAdditional {
 	additional := make([]v1.ApplicationAdditional, 0, len(extraHeader))
 	for _, val := range extraHeader {
 		position := "header"
@@ -1008,10 +1009,10 @@ func (a *applicationService) getApplicationAdditional(extraHeader []entry.Applic
 	return additional
 }
 
-func (a *applicationService) entryExtraToModelExtra(extraParamList []entry.ApplicationExtraParam) []model.ApplicationExtraParam {
-	extraParam := make([]model.ApplicationExtraParam, 0, len(extraParamList))
+func (a *applicationService) entryExtraToModelExtra(extraParamList []application_entry.ApplicationExtraParam) []application_model.ApplicationExtraParam {
+	extraParam := make([]application_model.ApplicationExtraParam, 0, len(extraParamList))
 	for _, param := range extraParamList {
-		extraParam = append(extraParam, model.ApplicationExtraParam{
+		extraParam = append(extraParam, application_model.ApplicationExtraParam{
 			Key:      param.Key,
 			Value:    param.Value,
 			Conflict: param.Conflict,
@@ -1021,10 +1022,10 @@ func (a *applicationService) entryExtraToModelExtra(extraParamList []entry.Appli
 	return extraParam
 }
 
-func (a *applicationService) entryAttrToModelAttr(attrs []entry.ApplicationCustomAttr) []model.ApplicationCustomAttr {
-	customAttr := make([]model.ApplicationCustomAttr, 0, len(attrs))
+func (a *applicationService) entryAttrToModelAttr(attrs []application_entry.ApplicationCustomAttr) []application_model.ApplicationCustomAttr {
+	customAttr := make([]application_model.ApplicationCustomAttr, 0, len(attrs))
 	for _, attr := range attrs {
-		customAttr = append(customAttr, model.ApplicationCustomAttr{
+		customAttr = append(customAttr, application_model.ApplicationCustomAttr{
 			Key:   attr.Key,
 			Value: attr.Value,
 		})
@@ -1032,10 +1033,10 @@ func (a *applicationService) entryAttrToModelAttr(attrs []entry.ApplicationCusto
 	return customAttr
 }
 
-func (a *applicationService) dtoExtraToEntryExtra(extraParamList []dto.ApplicationExtraParam) []entry.ApplicationExtraParam {
-	extraParam := make([]entry.ApplicationExtraParam, 0, len(extraParamList))
+func (a *applicationService) dtoExtraToEntryExtra(extraParamList []application_dto.ApplicationExtraParam) []application_entry.ApplicationExtraParam {
+	extraParam := make([]application_entry.ApplicationExtraParam, 0, len(extraParamList))
 	for _, param := range extraParamList {
-		extraParam = append(extraParam, entry.ApplicationExtraParam{
+		extraParam = append(extraParam, application_entry.ApplicationExtraParam{
 			Key:      param.Key,
 			Value:    param.Value,
 			Conflict: param.Conflict,
@@ -1045,10 +1046,10 @@ func (a *applicationService) dtoExtraToEntryExtra(extraParamList []dto.Applicati
 	return extraParam
 }
 
-func (a *applicationService) dtoAttrToEntryAttr(attrs []dto.ApplicationCustomAttr) []entry.ApplicationCustomAttr {
-	customAttr := make([]entry.ApplicationCustomAttr, 0, len(attrs))
+func (a *applicationService) dtoAttrToEntryAttr(attrs []application_dto.ApplicationCustomAttr) []application_entry.ApplicationCustomAttr {
+	customAttr := make([]application_entry.ApplicationCustomAttr, 0, len(attrs))
 	for _, attr := range attrs {
-		customAttr = append(customAttr, entry.ApplicationCustomAttr{
+		customAttr = append(customAttr, application_entry.ApplicationCustomAttr{
 			Key:   attr.Key,
 			Value: attr.Value,
 		})

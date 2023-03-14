@@ -2,11 +2,12 @@ package store
 
 import (
 	"encoding/json"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/history-entry"
+	"github.com/eolinker/apinto-dashboard/entry/strategy-entry"
 )
 
 type IStrategyHistoryStore interface {
-	BaseHistoryStore[entry.StrategyHistory]
+	BaseHistoryStore[strategy_entry.StrategyHistory]
 }
 
 type strategyHistoryHandler struct {
@@ -16,12 +17,12 @@ func (s *strategyHistoryHandler) Kind() string {
 	return "strategy"
 }
 
-func (s *strategyHistoryHandler) Decode(r *entry.History) *entry.StrategyHistory {
-	oldValue := new(entry.StrategyHistoryInfo)
+func (s *strategyHistoryHandler) Decode(r *history_entry.History) *strategy_entry.StrategyHistory {
+	oldValue := new(strategy_entry.StrategyHistoryInfo)
 	_ = json.Unmarshal([]byte(r.OldValue), oldValue)
-	newValue := new(entry.StrategyHistoryInfo)
+	newValue := new(strategy_entry.StrategyHistoryInfo)
 	_ = json.Unmarshal([]byte(r.NewValue), newValue)
-	history := &entry.StrategyHistory{
+	history := &strategy_entry.StrategyHistory{
 		Id:          r.Id,
 		NamespaceId: r.NamespaceID,
 		StrategyId:  r.TargetID,
@@ -35,6 +36,6 @@ func (s *strategyHistoryHandler) Decode(r *entry.History) *entry.StrategyHistory
 }
 
 func newStrategyHistoryStore(db IDB) IStrategyHistoryStore {
-	var historyHandler DecodeHistory[entry.StrategyHistory] = new(strategyHistoryHandler)
-	return CreateHistory(historyHandler, db, entry.HistoryKindStrategy)
+	var historyHandler DecodeHistory[strategy_entry.StrategyHistory] = new(strategyHistoryHandler)
+	return CreateHistory(historyHandler, db, history_entry.HistoryKindStrategy)
 }

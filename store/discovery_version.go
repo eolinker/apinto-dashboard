@@ -2,11 +2,12 @@ package store
 
 import (
 	"encoding/json"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/discovery-entry"
+	"github.com/eolinker/apinto-dashboard/entry/version-entry"
 )
 
 type IDiscoveryVersionStore interface {
-	IBaseStore[entry.DiscoveryVersion]
+	IBaseStore[discovery_entry.DiscoveryVersion]
 }
 
 type discoveryVersionKindHandler struct {
@@ -16,9 +17,9 @@ func (s *discoveryVersionKindHandler) Kind() string {
 	return "discovery"
 }
 
-func (s *discoveryVersionKindHandler) Encode(dv *entry.DiscoveryVersion) *entry.Version {
+func (s *discoveryVersionKindHandler) Encode(dv *discovery_entry.DiscoveryVersion) *version_entry.Version {
 
-	v := new(entry.Version)
+	v := new(version_entry.Version)
 	v.Id = dv.Id
 	v.Kind = s.Kind()
 	v.NamespaceID = dv.NamespaceID
@@ -31,8 +32,8 @@ func (s *discoveryVersionKindHandler) Encode(dv *entry.DiscoveryVersion) *entry.
 	return v
 }
 
-func (s *discoveryVersionKindHandler) Decode(v *entry.Version) *entry.DiscoveryVersion {
-	sv := new(entry.DiscoveryVersion)
+func (s *discoveryVersionKindHandler) Decode(v *version_entry.Version) *discovery_entry.DiscoveryVersion {
+	sv := new(discovery_entry.DiscoveryVersion)
 	sv.Id = v.Id
 	sv.DiscoveryID = v.Target
 	sv.Operator = v.Operator
@@ -44,6 +45,6 @@ func (s *discoveryVersionKindHandler) Decode(v *entry.Version) *entry.DiscoveryV
 }
 
 func newDiscoveryVersionStore(db IDB) IDiscoveryVersionStore {
-	var h BaseKindHandler[entry.DiscoveryVersion, entry.Version] = new(discoveryVersionKindHandler)
+	var h BaseKindHandler[discovery_entry.DiscoveryVersion, version_entry.Version] = new(discoveryVersionKindHandler)
 	return CreateBaseKindStore(h, db)
 }

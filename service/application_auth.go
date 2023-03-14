@@ -7,9 +7,9 @@ import (
 	"github.com/eolinker/apinto-dashboard/common"
 	driverInfo "github.com/eolinker/apinto-dashboard/driver-manager"
 	"github.com/eolinker/apinto-dashboard/driver-manager/driver"
-	"github.com/eolinker/apinto-dashboard/dto"
-	"github.com/eolinker/apinto-dashboard/entry"
-	"github.com/eolinker/apinto-dashboard/model"
+	"github.com/eolinker/apinto-dashboard/dto/application-dto"
+	"github.com/eolinker/apinto-dashboard/entry/application-entry"
+	"github.com/eolinker/apinto-dashboard/model/application-model"
 	"github.com/eolinker/apinto-dashboard/store"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/go-basic/uuid"
@@ -17,15 +17,15 @@ import (
 )
 
 type IApplicationAuthService interface {
-	GetList(ctx context.Context, namespaceId int, appId string) ([]*model.ApplicationAuth, error)
-	Create(ctx context.Context, namespaceId, userId int, appId string, input *dto.ApplicationAuthInput) error
-	Update(ctx context.Context, namespaceId, userId int, appId, uuid string, input *dto.ApplicationAuthInput) error
+	GetList(ctx context.Context, namespaceId int, appId string) ([]*application_model.ApplicationAuth, error)
+	Create(ctx context.Context, namespaceId, userId int, appId string, input *application_dto.ApplicationAuthInput) error
+	Update(ctx context.Context, namespaceId, userId int, appId, uuid string, input *application_dto.ApplicationAuthInput) error
 	Delete(ctx context.Context, namespaceId, userId int, uuid string) error
-	Info(ctx context.Context, namespaceId int, appId, uuid string) (*model.ApplicationAuth, error)
-	online(ctx context.Context, namespaceId, userId, clusterId, applicationId int) ([]*model.ApplicationAuth, error)
+	Info(ctx context.Context, namespaceId int, appId, uuid string) (*application_model.ApplicationAuth, error)
+	online(ctx context.Context, namespaceId, userId, clusterId, applicationId int) ([]*application_model.ApplicationAuth, error)
 	offline(ctx context.Context, clusterId, applicationId int) error
 	isUpdate(ctx context.Context, clusterId, applicationId int) (bool, error)
-	getListByApplicationId(ctx context.Context, applicationId int) ([]*model.ApplicationAuth, error)
+	getListByApplicationId(ctx context.Context, applicationId int) ([]*application_model.ApplicationAuth, error)
 	GetDriversRender() []*driverInfo.DriverInfo
 	GetDriver(driver string) driver.IAuthDriver
 }
@@ -63,7 +63,7 @@ func newApplicationAuth() IApplicationAuthService {
 	return auth
 }
 
-func (a *applicationAuthService) GetList(ctx context.Context, namespaceId int, appId string) ([]*model.ApplicationAuth, error) {
+func (a *applicationAuthService) GetList(ctx context.Context, namespaceId int, appId string) ([]*application_model.ApplicationAuth, error) {
 
 	applicationInfo, err := a.applicationService.AppInfo(ctx, namespaceId, appId)
 	if err != nil {
@@ -75,13 +75,13 @@ func (a *applicationAuthService) GetList(ctx context.Context, namespaceId int, a
 		return nil, err
 	}
 
-	userIds := common.SliceToSliceIds(list, func(t *entry.ApplicationAuth) int {
+	userIds := common.SliceToSliceIds(list, func(t *application_entry.ApplicationAuth) int {
 		return t.Operator
 	})
 
 	userInfoMaps, _ := a.userInfoService.GetUserInfoMaps(ctx, userIds...)
 
-	resList := make([]*model.ApplicationAuth, 0, len(list))
+	resList := make([]*application_model.ApplicationAuth, 0, len(list))
 	for _, auth := range list {
 
 		operatorName := ""
@@ -98,7 +98,7 @@ func (a *applicationAuthService) GetList(ctx context.Context, namespaceId int, a
 			return nil, err
 		}
 
-		authModel := &model.ApplicationAuth{
+		authModel := &application_model.ApplicationAuth{
 			ApplicationAuth: auth,
 			Operator:        operatorName,
 			Config:          version.Config,
@@ -114,7 +114,7 @@ func (a *applicationAuthService) GetList(ctx context.Context, namespaceId int, a
 	return resList, nil
 }
 
-func (a *applicationAuthService) Create(ctx context.Context, namespaceId, userId int, appId string, input *dto.ApplicationAuthInput) error {
+func (a *applicationAuthService) Create(ctx context.Context, namespaceId, userId int, appId string, input *application_dto.ApplicationAuthInput) error {
 	authDriver := a.driverManager.GetDriver(input.Driver)
 	if err := authDriver.CheckInput(input.Config); err != nil {
 		return err
@@ -134,7 +134,7 @@ func (a *applicationAuthService) Create(ctx context.Context, namespaceId, userId
 	}
 
 	t := time.Now()
-	applicationAuth := &entry.ApplicationAuth{
+	applicationAuth := &application_entry.ApplicationAuth{
 		Uuid:          uuid.New(),
 		Namespace:     namespaceId,
 		Application:   applicationInfo.Id,
@@ -153,18 +153,18 @@ func (a *applicationAuthService) Create(ctx context.Context, namespaceId, userId
 			return err
 		}
 
-		config := entry.ApplicationAuthVersionConfig{
+		config := application_entry.ApplicationAuthVersionConfig{
 			Config: string(input.Config),
 		}
 
-		if err = a.applicationAuthHistoryStore.HistoryAdd(txCtx, namespaceId, applicationAuth.Id, &entry.ApplicationAuthHistoryInfo{
+		if err = a.applicationAuthHistoryStore.HistoryAdd(txCtx, namespaceId, applicationAuth.Id, &application_entry.ApplicationAuthHistoryInfo{
 			Auth:   *applicationAuth,
 			Config: config,
 		}, userId); err != nil {
 			return err
 		}
 
-		applicationAuthVersion := &entry.ApplicationAuthVersion{
+		applicationAuthVersion := &application_entry.ApplicationAuthVersion{
 			ApplicationAuthID:            applicationAuth.Id,
 			NamespaceID:                  namespaceId,
 			ApplicationAuthVersionConfig: config,
@@ -176,7 +176,7 @@ func (a *applicationAuthService) Create(ctx context.Context, namespaceId, userId
 			return err
 		}
 
-		stat := &entry.ApplicationAuthStat{
+		stat := &application_entry.ApplicationAuthStat{
 			ApplicationAuthId: applicationAuthVersion.ApplicationAuthID,
 			VersionID:         applicationAuthVersion.Id,
 		}
@@ -186,7 +186,7 @@ func (a *applicationAuthService) Create(ctx context.Context, namespaceId, userId
 
 }
 
-func (a *applicationAuthService) Update(ctx context.Context, namespaceId, userId int, appId, uuidStr string, input *dto.ApplicationAuthInput) error {
+func (a *applicationAuthService) Update(ctx context.Context, namespaceId, userId int, appId, uuidStr string, input *application_dto.ApplicationAuthInput) error {
 	_, err := a.applicationService.AppInfo(ctx, namespaceId, appId)
 	if err != nil {
 		return err
@@ -244,12 +244,12 @@ func (a *applicationAuthService) Update(ctx context.Context, namespaceId, userId
 			return err
 		}
 
-		newConfig := entry.ApplicationAuthVersionConfig{
+		newConfig := application_entry.ApplicationAuthVersionConfig{
 			Config: string(input.Config),
 		}
 
 		if isUpdateVersion {
-			applicationAuthVersion := &entry.ApplicationAuthVersion{
+			applicationAuthVersion := &application_entry.ApplicationAuthVersion{
 				ApplicationAuthID:            auth.Id,
 				NamespaceID:                  namespaceId,
 				ApplicationAuthVersionConfig: newConfig,
@@ -261,7 +261,7 @@ func (a *applicationAuthService) Update(ctx context.Context, namespaceId, userId
 				return err
 			}
 
-			stat = &entry.ApplicationAuthStat{
+			stat = &application_entry.ApplicationAuthStat{
 				ApplicationAuthId: applicationAuthVersion.ApplicationAuthID,
 				VersionID:         applicationAuthVersion.Id,
 			}
@@ -269,17 +269,17 @@ func (a *applicationAuthService) Update(ctx context.Context, namespaceId, userId
 			return a.applicationAuthStatStore.Save(txCtx, stat)
 		}
 
-		return a.applicationAuthHistoryStore.HistoryEdit(txCtx, namespaceId, auth.Id, &entry.ApplicationAuthHistoryInfo{
+		return a.applicationAuthHistoryStore.HistoryEdit(txCtx, namespaceId, auth.Id, &application_entry.ApplicationAuthHistoryInfo{
 			Auth:   *auth,
 			Config: oldVersion.ApplicationAuthVersionConfig,
-		}, &entry.ApplicationAuthHistoryInfo{
+		}, &application_entry.ApplicationAuthHistoryInfo{
 			Auth:   *auth,
 			Config: newConfig,
 		}, userId)
 	})
 }
 
-func (a *applicationAuthService) Info(ctx context.Context, namespaceId int, appId, uuid string) (*model.ApplicationAuth, error) {
+func (a *applicationAuthService) Info(ctx context.Context, namespaceId int, appId, uuid string) (*application_model.ApplicationAuth, error) {
 	_, err := a.applicationService.AppInfo(ctx, namespaceId, appId)
 	if err != nil {
 		return nil, err
@@ -300,7 +300,7 @@ func (a *applicationAuthService) Info(ctx context.Context, namespaceId int, appI
 		return nil, err
 	}
 
-	resAuth := &model.ApplicationAuth{
+	resAuth := &application_model.ApplicationAuth{
 		ApplicationAuth: auth,
 		Operator:        "",
 		Config:          version.Config,
@@ -358,22 +358,22 @@ func (a *applicationAuthService) Delete(ctx context.Context, namespaceId, userId
 			}
 		}
 
-		return a.applicationAuthHistoryStore.HistoryDelete(txCtx, namespaceId, auth.Id, entry.ApplicationAuthHistoryInfo{
+		return a.applicationAuthHistoryStore.HistoryDelete(txCtx, namespaceId, auth.Id, application_entry.ApplicationAuthHistoryInfo{
 			Auth:   *auth,
 			Config: version.ApplicationAuthVersionConfig,
 		}, userId)
 	})
 }
 
-func (a *applicationAuthService) online(ctx context.Context, namespaceId, userId, clusterId, applicationId int) ([]*model.ApplicationAuth, error) {
+func (a *applicationAuthService) online(ctx context.Context, namespaceId, userId, clusterId, applicationId int) ([]*application_model.ApplicationAuth, error) {
 	applicationAuths, err := a.applicationAuthStore.GetListByApplication(ctx, applicationId)
 	if err != nil {
 		return nil, err
 	}
 	t := time.Now()
 
-	authPublishList := make([]*entry.ApplicationAuthPublish, 0)
-	list := make([]*model.ApplicationAuth, 0, len(applicationAuths))
+	authPublishList := make([]*application_entry.ApplicationAuthPublish, 0)
+	list := make([]*application_model.ApplicationAuth, 0, len(applicationAuths))
 	for _, auth := range applicationAuths {
 		//获取当前版本信息
 		stat, err := a.applicationAuthStatStore.Get(ctx, auth.Id)
@@ -385,11 +385,11 @@ func (a *applicationAuthService) online(ctx context.Context, namespaceId, userId
 			return nil, err
 		}
 
-		list = append(list, &model.ApplicationAuth{
+		list = append(list, &application_model.ApplicationAuth{
 			ApplicationAuth: auth,
 			Config:          version.Config,
 		})
-		runtime := &entry.ApplicationAuthRuntime{
+		runtime := &application_entry.ApplicationAuthRuntime{
 			ClusterId:         clusterId,
 			ApplicationAuthId: auth.Id,
 			NamespaceId:       namespaceId,
@@ -402,7 +402,7 @@ func (a *applicationAuthService) online(ctx context.Context, namespaceId, userId
 		if err = a.applicationAuthRuntimeStore.Save(ctx, runtime); err != nil {
 			return nil, err
 		}
-		authPublishList = append(authPublishList, &entry.ApplicationAuthPublish{
+		authPublishList = append(authPublishList, &application_entry.ApplicationAuthPublish{
 			NamespaceId:     namespaceId,
 			Cluster:         clusterId,
 			Application:     applicationId,
@@ -467,14 +467,14 @@ func (a *applicationAuthService) isUpdate(ctx context.Context, clusterId, applic
 	return false, nil
 }
 
-func (a *applicationAuthService) getListByApplicationId(ctx context.Context, applicationId int) ([]*model.ApplicationAuth, error) {
+func (a *applicationAuthService) getListByApplicationId(ctx context.Context, applicationId int) ([]*application_model.ApplicationAuth, error) {
 	list, err := a.applicationAuthStore.GetListByApplication(ctx, applicationId)
 	if err != nil {
 		return nil, err
 	}
-	resList := make([]*model.ApplicationAuth, 0, len(list))
+	resList := make([]*application_model.ApplicationAuth, 0, len(list))
 	for _, auth := range list {
-		authModel := &model.ApplicationAuth{
+		authModel := &application_model.ApplicationAuth{
 			ApplicationAuth: auth,
 		}
 		resList = append(resList, authModel)
@@ -486,20 +486,20 @@ func (a *applicationAuthService) GetDriversRender() []*driverInfo.DriverInfo {
 	return a.driverManager.List()
 }
 
-func (a *applicationAuthService) getAuthParamInfo(auth *model.ApplicationAuth) string {
+func (a *applicationAuthService) getAuthParamInfo(auth *application_model.ApplicationAuth) string {
 	return a.driverManager.GetDriver(auth.Driver).GetAuthListInfo([]byte(auth.Config))
 }
 
-func (a *applicationAuthService) getRuleInfo(auth *model.ApplicationAuth) string {
+func (a *applicationAuthService) getRuleInfo(auth *application_model.ApplicationAuth) string {
 	switch auth.Driver {
-	case model.AuthDriverBasic:
-		return fmt.Sprintf("%s-%s", model.AuthDriverBasic, "")
-	case model.AuthDriverApikey:
-		return fmt.Sprintf("%s-%s", model.AuthDriverApikey, "")
-	case model.AuthDriverAkSk:
-		return fmt.Sprintf("%s-%s", model.AuthDriverAkSk, "")
-	case model.AuthDriverJwt:
-		return fmt.Sprintf("%s-%s", model.AuthDriverJwt, "")
+	case application_model.AuthDriverBasic:
+		return fmt.Sprintf("%s-%s", application_model.AuthDriverBasic, "")
+	case application_model.AuthDriverApikey:
+		return fmt.Sprintf("%s-%s", application_model.AuthDriverApikey, "")
+	case application_model.AuthDriverAkSk:
+		return fmt.Sprintf("%s-%s", application_model.AuthDriverAkSk, "")
+	case application_model.AuthDriverJwt:
+		return fmt.Sprintf("%s-%s", application_model.AuthDriverJwt, "")
 	default:
 		return ""
 	}

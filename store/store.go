@@ -2,7 +2,7 @@ package store
 
 import (
 	"context"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/page-entry"
 	"go/ast"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -207,7 +207,7 @@ func (b *BaseStore[T]) ListPage(ctx context.Context, where string, pageNum, page
 		db = db.Order(order)
 	}
 	count := int64(0)
-	err := db.Model(list).Count(&count).Limit(pageSize).Offset(entry.PageIndex(pageNum, pageSize)).Find(&list).Error
+	err := db.Model(list).Count(&count).Limit(pageSize).Offset(page_entry.PageIndex(pageNum, pageSize)).Find(&list).Error
 	if err != nil {
 		return nil, 0, err
 	}

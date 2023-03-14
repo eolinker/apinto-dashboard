@@ -2,7 +2,7 @@ package store
 
 import (
 	"context"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/runtime-entry"
 )
 
 type BaseRuntimeStore[T any] interface {
@@ -14,7 +14,7 @@ type BaseRuntimeStore[T any] interface {
 }
 
 type BaseRuntime[T any] struct {
-	*BaseKindStore[T, entry.Runtime]
+	*BaseKindStore[T, runtime_entry.Runtime]
 }
 
 func (b *BaseRuntime[T]) GetByTarget(ctx context.Context, target int) ([]*T, error) {
@@ -48,8 +48,8 @@ func (b *BaseRuntime[T]) OnlineCount(ctx context.Context, target int) (int64, er
 	return count, nil
 }
 
-func CreateRuntime[T any](handler BaseKindHandler[T, entry.Runtime], db IDB) *BaseRuntime[T] {
+func CreateRuntime[T any](handler BaseKindHandler[T, runtime_entry.Runtime], db IDB) *BaseRuntime[T] {
 	return &BaseRuntime[T]{
-		BaseKindStore: CreateBaseKindStore[T, entry.Runtime](handler, db),
+		BaseKindStore: CreateBaseKindStore[T, runtime_entry.Runtime](handler, db),
 	}
 }

@@ -1,11 +1,12 @@
 package store
 
 import (
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/discovery-entry"
+	"github.com/eolinker/apinto-dashboard/entry/stat-entry"
 )
 
 type IDiscoveryStatStore interface {
-	IBaseStore[entry.DiscoveryStat]
+	IBaseStore[discovery_entry.DiscoveryStat]
 }
 
 type DiscoveryStatKindHandler struct {
@@ -15,8 +16,8 @@ func (s *DiscoveryStatKindHandler) Kind() string {
 	return "discovery"
 }
 
-func (s *DiscoveryStatKindHandler) Encode(sv *entry.DiscoveryStat) *entry.Stat {
-	stat := new(entry.Stat)
+func (s *DiscoveryStatKindHandler) Encode(sv *discovery_entry.DiscoveryStat) *stat_entry.Stat {
+	stat := new(stat_entry.Stat)
 
 	stat.Tag = sv.DiscoveryID
 	stat.Kind = s.Kind()
@@ -25,8 +26,8 @@ func (s *DiscoveryStatKindHandler) Encode(sv *entry.DiscoveryStat) *entry.Stat {
 	return stat
 }
 
-func (s *DiscoveryStatKindHandler) Decode(stat *entry.Stat) *entry.DiscoveryStat {
-	ds := new(entry.DiscoveryStat)
+func (s *DiscoveryStatKindHandler) Decode(stat *stat_entry.Stat) *discovery_entry.DiscoveryStat {
+	ds := new(discovery_entry.DiscoveryStat)
 
 	ds.DiscoveryID = stat.Tag
 	ds.VersionID = stat.Version
@@ -35,6 +36,6 @@ func (s *DiscoveryStatKindHandler) Decode(stat *entry.Stat) *entry.DiscoveryStat
 }
 
 func newDiscoveryStatStore(db IDB) IDiscoveryStatStore {
-	var h BaseKindHandler[entry.DiscoveryStat, entry.Stat] = new(DiscoveryStatKindHandler)
+	var h BaseKindHandler[discovery_entry.DiscoveryStat, stat_entry.Stat] = new(DiscoveryStatKindHandler)
 	return CreateBaseKindStore(h, db)
 }

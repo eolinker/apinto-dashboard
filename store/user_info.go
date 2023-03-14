@@ -2,16 +2,16 @@ package store
 
 import (
 	"context"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/user-entry"
 	"time"
 )
 
 type IUserInfoStore interface {
-	IBaseStore[entry.UserInfo]
-	GetByUUID(ctx context.Context, uuid string) (*entry.UserInfo, error)
-	GetByUserName(ctx context.Context, userName string) (*entry.UserInfo, error)
-	GetByRoleByKeyword(ctx context.Context, roleId int, keyword string) ([]*entry.UserInfo, error)
-	GetAll(ctx context.Context) ([]*entry.UserInfo, error)
+	IBaseStore[user_entry.UserInfo]
+	GetByUUID(ctx context.Context, uuid string) (*user_entry.UserInfo, error)
+	GetByUserName(ctx context.Context, userName string) (*user_entry.UserInfo, error)
+	GetByRoleByKeyword(ctx context.Context, roleId int, keyword string) ([]*user_entry.UserInfo, error)
+	GetAll(ctx context.Context) ([]*user_entry.UserInfo, error)
 	UpdateStatus(ctx context.Context, userId, status int) error
 	UpdateLoginTime(ctx context.Context, userId int, t time.Time) error
 	SoftDelete(ctx context.Context, operator int, userId ...int) error
@@ -19,22 +19,22 @@ type IUserInfoStore interface {
 }
 
 type userInfoStore struct {
-	*BaseStore[entry.UserInfo]
+	*BaseStore[user_entry.UserInfo]
 }
 
 func newUserInfoStore(db IDB) IUserInfoStore {
-	return &userInfoStore{BaseStore: CreateStore[entry.UserInfo](db)}
+	return &userInfoStore{BaseStore: CreateStore[user_entry.UserInfo](db)}
 }
 
-func (u *userInfoStore) GetByUUID(ctx context.Context, uuid string) (*entry.UserInfo, error) {
+func (u *userInfoStore) GetByUUID(ctx context.Context, uuid string) (*user_entry.UserInfo, error) {
 	return u.First(ctx, map[string]interface{}{"uuid": uuid})
 }
 
-func (u *userInfoStore) GetByUserName(ctx context.Context, userName string) (*entry.UserInfo, error) {
+func (u *userInfoStore) GetByUserName(ctx context.Context, userName string) (*user_entry.UserInfo, error) {
 	return u.First(ctx, map[string]interface{}{"user_name": userName, "is_delete": 0})
 }
 
-func (u *userInfoStore) GetByRoleByKeyword(ctx context.Context, roleId int, keyword string) ([]*entry.UserInfo, error) {
+func (u *userInfoStore) GetByRoleByKeyword(ctx context.Context, roleId int, keyword string) ([]*user_entry.UserInfo, error) {
 	db := u.DB(ctx).Where("is_delete = 0")
 
 	if roleId != 0 {
@@ -46,7 +46,7 @@ func (u *userInfoStore) GetByRoleByKeyword(ctx context.Context, roleId int, keyw
 		db = db.Where("`user_name` like ? or `nick_name` like ?", keyword, keyword)
 	}
 
-	list := make([]*entry.UserInfo, 0)
+	list := make([]*user_entry.UserInfo, 0)
 	err := db.Order("update_time desc").Find(&list).Error
 	if err != nil {
 		return nil, err
@@ -55,10 +55,10 @@ func (u *userInfoStore) GetByRoleByKeyword(ctx context.Context, roleId int, keyw
 	return list, nil
 }
 
-func (u *userInfoStore) GetAll(ctx context.Context) ([]*entry.UserInfo, error) {
+func (u *userInfoStore) GetAll(ctx context.Context) ([]*user_entry.UserInfo, error) {
 	db := u.DB(ctx).Where("is_delete = 0")
 
-	list := make([]*entry.UserInfo, 0)
+	list := make([]*user_entry.UserInfo, 0)
 	err := db.Order("update_time desc").Find(&list).Error
 	if err != nil {
 		return nil, err
@@ -68,19 +68,19 @@ func (u *userInfoStore) GetAll(ctx context.Context) ([]*entry.UserInfo, error) {
 }
 
 func (u *userInfoStore) UpdateStatus(ctx context.Context, userId, status int) error {
-	_, err := u.UpdateWhere(ctx, &entry.UserInfo{Id: userId}, map[string]interface{}{"status": status})
+	_, err := u.UpdateWhere(ctx, &user_entry.UserInfo{Id: userId}, map[string]interface{}{"status": status})
 	return err
 }
 
 func (u *userInfoStore) UpdateLoginTime(ctx context.Context, userId int, t time.Time) error {
-	_, err := u.UpdateWhere(ctx, &entry.UserInfo{Id: userId}, map[string]interface{}{"last_login_time": t})
+	_, err := u.UpdateWhere(ctx, &user_entry.UserInfo{Id: userId}, map[string]interface{}{"last_login_time": t})
 	return err
 }
 
 func (u *userInfoStore) SoftDelete(ctx context.Context, operator int, userIds ...int) error {
 
 	for _, id := range userIds {
-		_, err := u.UpdateWhere(ctx, &entry.UserInfo{Id: id}, map[string]interface{}{"is_delete": true, "operator": operator})
+		_, err := u.UpdateWhere(ctx, &user_entry.UserInfo{Id: id}, map[string]interface{}{"is_delete": true, "operator": operator})
 		if err != nil {
 			return err
 		}

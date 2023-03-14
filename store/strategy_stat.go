@@ -1,11 +1,12 @@
 package store
 
 import (
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/stat-entry"
+	"github.com/eolinker/apinto-dashboard/entry/strategy-entry"
 )
 
 type IStrategyStatStore interface {
-	IBaseStore[entry.StrategyStat]
+	IBaseStore[strategy_entry.StrategyStat]
 }
 
 type strategyStatKindHandler struct {
@@ -15,8 +16,8 @@ func (s *strategyStatKindHandler) Kind() string {
 	return "strategy"
 }
 
-func (s *strategyStatKindHandler) Encode(sv *entry.StrategyStat) *entry.Stat {
-	stat := new(entry.Stat)
+func (s *strategyStatKindHandler) Encode(sv *strategy_entry.StrategyStat) *stat_entry.Stat {
+	stat := new(stat_entry.Stat)
 
 	stat.Tag = sv.StrategyId
 	stat.Kind = s.Kind()
@@ -25,8 +26,8 @@ func (s *strategyStatKindHandler) Encode(sv *entry.StrategyStat) *entry.Stat {
 	return stat
 }
 
-func (s *strategyStatKindHandler) Decode(stat *entry.Stat) *entry.StrategyStat {
-	ds := new(entry.StrategyStat)
+func (s *strategyStatKindHandler) Decode(stat *stat_entry.Stat) *strategy_entry.StrategyStat {
+	ds := new(strategy_entry.StrategyStat)
 
 	ds.StrategyId = stat.Tag
 	ds.VersionId = stat.Version
@@ -35,6 +36,6 @@ func (s *strategyStatKindHandler) Decode(stat *entry.Stat) *entry.StrategyStat {
 }
 
 func newStrategyStatStore(db IDB) IStrategyStatStore {
-	var h BaseKindHandler[entry.StrategyStat, entry.Stat] = new(strategyStatKindHandler)
+	var h BaseKindHandler[strategy_entry.StrategyStat, stat_entry.Stat] = new(strategyStatKindHandler)
 	return CreateBaseKindStore(h, db)
 }

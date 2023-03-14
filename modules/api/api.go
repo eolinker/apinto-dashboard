@@ -5,6 +5,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/driver-manager/driver"
 	"github.com/eolinker/apinto-dashboard/model"
 	"github.com/eolinker/apinto-dashboard/modules/api/api-dto"
+	api_entry "github.com/eolinker/apinto-dashboard/modules/api/api-entry"
 	apimodel "github.com/eolinker/apinto-dashboard/modules/api/model"
 )
 

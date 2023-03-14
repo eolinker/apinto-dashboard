@@ -6,6 +6,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/dto"
+	"github.com/eolinker/apinto-dashboard/dto/cluster-dto"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/model"
 	"github.com/eolinker/apinto-dashboard/service"
@@ -44,9 +45,9 @@ func (c *clusterController) clusters(ginCtx *gin.Context) {
 		return
 	}
 
-	list := make([]*dto.ClusterOut, 0, len(clusters))
+	list := make([]*cluster_dto.ClusterOut, 0, len(clusters))
 	for _, cluster := range clusters {
-		list = append(list, &dto.ClusterOut{
+		list = append(list, &cluster_dto.ClusterOut{
 			Name:       cluster.Name,
 			Env:        cluster.Env,
 			Status:     enum.ClusterStatus(cluster.Status),
@@ -73,7 +74,7 @@ func (c *clusterController) clusterEnum(ginCtx *gin.Context) {
 		return
 	}
 
-	envCluster := make([]*dto.EnvCluster, 0)
+	envCluster := make([]*cluster_dto.EnvCluster, 0)
 	clusterMap := common.Map[string, []*model.Cluster]{}
 
 	for _, cluster := range clusters {
@@ -81,15 +82,15 @@ func (c *clusterController) clusterEnum(ginCtx *gin.Context) {
 	}
 
 	for env, clusters := range clusterMap {
-		clusterOuts := make([]*dto.ClusterOut, 0)
+		clusterOuts := make([]*cluster_dto.ClusterOut, 0)
 
 		for _, cluster := range clusters {
-			clusterOuts = append(clusterOuts, &dto.ClusterOut{
+			clusterOuts = append(clusterOuts, &cluster_dto.ClusterOut{
 				Name: cluster.Name,
 			})
 		}
 
-		envCluster = append(envCluster, &dto.EnvCluster{
+		envCluster = append(envCluster, &cluster_dto.EnvCluster{
 			Clusters: clusterOuts,
 			Name:     env,
 		})
@@ -120,7 +121,7 @@ func (c *clusterController) cluster(ginCtx *gin.Context) {
 	}
 
 	m := common.Map[string, interface{}]{}
-	m["cluster"] = &dto.ClusterOut{
+	m["cluster"] = &cluster_dto.ClusterOut{
 		Name:       cluster.Name,
 		Env:        cluster.Env,
 		Status:     enum.ClusterStatus(cluster.Status),
@@ -137,7 +138,7 @@ func (c *clusterController) create(ginCtx *gin.Context) {
 
 	namespaceId := GetNamespaceId(ginCtx)
 
-	input := &dto.ClusterInput{}
+	input := &cluster_dto.ClusterInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -188,7 +189,7 @@ func (c *clusterController) putDesc(ginCtx *gin.Context) {
 	namespaceId := GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Param("cluster_name")
 
-	clusterInput := &dto.ClusterInput{}
+	clusterInput := &cluster_dto.ClusterInput{}
 	err := ginCtx.BindJSON(clusterInput)
 	if err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
@@ -213,7 +214,7 @@ func (c *clusterController) test(context *gin.Context) {
 		context.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
 	}
-	list := make([]*dto.ClusterNode, 0, len(nodes))
+	list := make([]*cluster_dto.ClusterNode, 0, len(nodes))
 
 	isUpdate := false
 	for _, node := range nodes {
@@ -221,7 +222,7 @@ func (c *clusterController) test(context *gin.Context) {
 		if status == enum.ClusterNodeStatusRunning {
 			isUpdate = true
 		}
-		list = append(list, &dto.ClusterNode{
+		list = append(list, &cluster_dto.ClusterNode{
 			Name:        node.Name,
 			ServiceAddr: node.ServiceAddr,
 			AdminAddr:   node.AdminAddr,

@@ -8,6 +8,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/dto"
+	"github.com/eolinker/apinto-dashboard/dto/user-dto"
 	"github.com/eolinker/apinto-dashboard/model"
 	"github.com/eolinker/apinto-dashboard/service"
 	"github.com/eolinker/apinto-dashboard/user_center/client"
@@ -36,7 +37,7 @@ func RegisterUserCenterProxyRouter(router gin.IRouter) {
 	bean.Autowired(&commonCache)
 
 	router.POST("/sso/login", func(ginCtx *gin.Context) {
-		input := new(dto.UserLoginInput)
+		input := new(user_dto.UserLoginInput)
 		err := ginCtx.BindJSON(input)
 		if err != nil {
 			ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
@@ -126,7 +127,7 @@ func RegisterUserCenterProxyRouter(router gin.IRouter) {
 
 		ginCtx.SetCookie(controller.Session, cookieValue, 0, "", "", false, true)
 
-		resData := dto.UserLoginData{
+		resData := user_dto.UserLoginData{
 			Jwt:  response.Jwt,
 			RJWT: response.RJWT,
 			Type: response.Type,

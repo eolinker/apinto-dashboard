@@ -3,8 +3,8 @@ package driver
 import (
 	"bytes"
 	"github.com/eolinker/apinto-dashboard/common"
-	"github.com/eolinker/apinto-dashboard/entry"
 	"github.com/eolinker/apinto-dashboard/enum"
+	api_entry "github.com/eolinker/apinto-dashboard/modules/api/api-entry"
 	apimodel "github.com/eolinker/apinto-dashboard/modules/api/model"
 	"github.com/go-basic/uuid"
 	"net/url"
@@ -49,7 +49,7 @@ func (o *OpenAPI3) FormatAPI(data []byte, namespaceID, appID int, groupID, prefi
 				name = method + "-" + prefix + decodedPath
 			}
 			apiList = append(apiList, &apimodel.APIInfo{
-				API: &entry.API{
+				API: &api_entry.API{
 					NamespaceId: namespaceID,
 					UUID:        uuid.New(),
 					GroupUUID:   groupID,

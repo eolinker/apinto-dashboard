@@ -1,12 +1,13 @@
 package upstream_store
 
 import (
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/runtime-entry"
+	"github.com/eolinker/apinto-dashboard/entry/upstream-entry"
 	"github.com/eolinker/apinto-dashboard/store"
 )
 
 type IServiceRuntimeStore interface {
-	store.BaseRuntimeStore[entry.ServiceRuntime]
+	store.BaseRuntimeStore[upstream_entry.ServiceRuntime]
 }
 
 type serviceRuntimeHandler struct {
@@ -16,8 +17,8 @@ func (s *serviceRuntimeHandler) Kind() string {
 	return "service"
 }
 
-func (s *serviceRuntimeHandler) Encode(sr *entry.ServiceRuntime) *entry.Runtime {
-	return &entry.Runtime{
+func (s *serviceRuntimeHandler) Encode(sr *upstream_entry.ServiceRuntime) *runtime_entry.Runtime {
+	return &runtime_entry.Runtime{
 		Id:          sr.Id,
 		Kind:        s.Kind(),
 		ClusterID:   sr.ClusterId,
@@ -32,8 +33,8 @@ func (s *serviceRuntimeHandler) Encode(sr *entry.ServiceRuntime) *entry.Runtime 
 
 }
 
-func (s *serviceRuntimeHandler) Decode(r *entry.Runtime) *entry.ServiceRuntime {
-	return &entry.ServiceRuntime{
+func (s *serviceRuntimeHandler) Decode(r *runtime_entry.Runtime) *upstream_entry.ServiceRuntime {
+	return &upstream_entry.ServiceRuntime{
 		Id:          r.Id,
 		NamespaceId: r.NamespaceID,
 		ServiceId:   r.TargetID,
@@ -47,7 +48,7 @@ func (s *serviceRuntimeHandler) Decode(r *entry.Runtime) *entry.ServiceRuntime {
 }
 
 func newServiceRuntimeStore(db store.IDB) IServiceRuntimeStore {
-	var runTimeHandler store.BaseKindHandler[entry.ServiceRuntime, entry.Runtime] = new(serviceRuntimeHandler)
-	return store.CreateRuntime[entry.ServiceRuntime](runTimeHandler, db)
+	var runTimeHandler store.BaseKindHandler[upstream_entry.ServiceRuntime, runtime_entry.Runtime] = new(serviceRuntimeHandler)
+	return store.CreateRuntime[upstream_entry.ServiceRuntime](runTimeHandler, db)
 
 }

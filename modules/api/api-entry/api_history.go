@@ -1,7 +1,7 @@
 package api_entry
 
 import (
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/history-entry"
 	"time"
 )
 
@@ -11,7 +11,7 @@ type ApiHistory struct {
 	NamespaceId int
 	OldValue    ApiHistoryInfo
 	NewValue    ApiHistoryInfo
-	OptType     entry.OptType //1新增 2修改 3删除
+	OptType     history_entry.OptType //1新增 2修改 3删除
 	OptTime     time.Time
 	Operator    int
 }

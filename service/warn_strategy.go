@@ -6,7 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/monitor-entry"
+	"github.com/eolinker/apinto-dashboard/entry/quote-entry"
 	"github.com/eolinker/apinto-dashboard/model"
 	"github.com/eolinker/apinto-dashboard/store"
 	"github.com/eolinker/eosc/common/bean"
@@ -69,7 +70,7 @@ func (w *warnStrategyService) DeleteWarnStrategy(ctx context.Context, uuid strin
 			return err
 		}
 		//删除被绑定的渠道信息
-		return w.quoteStore.DelBySource(txCtx, warnStrategy.Id, entry.QuoteKindTypeWarnStrategy)
+		return w.quoteStore.DelBySource(txCtx, warnStrategy.Id, quote_entry.QuoteKindTypeWarnStrategy)
 	})
 }
 
@@ -85,7 +86,7 @@ func (w *warnStrategyService) DeleteWarnStrategyByPartitionId(ctx context.Contex
 			return err
 		}
 		//删除被绑定的渠道信息
-		if err = w.quoteStore.DelBySource(ctx, strategy.Id, entry.QuoteKindTypeWarnStrategy); err != nil {
+		if err = w.quoteStore.DelBySource(ctx, strategy.Id, quote_entry.QuoteKindTypeWarnStrategy); err != nil {
 			return err
 		}
 	}
@@ -140,7 +141,7 @@ func (w *warnStrategyService) WarnStrategyListPage(ctx context.Context, namespac
 		return nil, 0, err
 	}
 
-	userIds := common.SliceToSliceIds(list, func(t *entry.WarnStrategy) int {
+	userIds := common.SliceToSliceIds(list, func(t *monitor_entry.WarnStrategy) int {
 		return t.Operator
 	})
 
@@ -219,7 +220,7 @@ func (w *warnStrategyService) CreateWarnStrategy(ctx context.Context, namespaceI
 	t := time.Now()
 	config, _ := json.Marshal(input.WarnStrategyConfig)
 
-	strategy := &entry.WarnStrategy{
+	strategy := &monitor_entry.WarnStrategy{
 		NamespaceID: namespaceId,
 		PartitionId: input.PartitionId,
 		Title:       input.Title,
@@ -263,12 +264,12 @@ func (w *warnStrategyService) CreateWarnStrategy(ctx context.Context, namespaceI
 
 		if len(channels) > 0 {
 			//往引用表插入所引用的通知渠道
-			quoteMap := make(map[entry.QuoteTargetKindType][]int)
+			quoteMap := make(map[quote_entry.QuoteTargetKindType][]int)
 			for _, channel := range channels {
-				quoteMap[entry.QuoteTargetKindTypeNoticeChannel] = append(quoteMap[entry.QuoteTargetKindTypeNoticeChannel], channel.Id)
+				quoteMap[quote_entry.QuoteTargetKindTypeNoticeChannel] = append(quoteMap[quote_entry.QuoteTargetKindTypeNoticeChannel], channel.Id)
 			}
 
-			if err := w.quoteStore.Set(txCtx, strategy.Id, entry.QuoteKindTypeWarnStrategy, quoteMap); err != nil {
+			if err := w.quoteStore.Set(txCtx, strategy.Id, quote_entry.QuoteKindTypeWarnStrategy, quoteMap); err != nil {
 				return err
 			}
 		}
@@ -296,7 +297,7 @@ func (w *warnStrategyService) UpdateWarnStrategy(ctx context.Context, namespaceI
 	t := time.Now()
 	config, _ := json.Marshal(input.WarnStrategyConfig)
 
-	strategy := &entry.WarnStrategy{
+	strategy := &monitor_entry.WarnStrategy{
 		Id:          warnStrategy.Id,
 		NamespaceID: namespaceId,
 		PartitionId: warnStrategy.PartitionId,
@@ -340,12 +341,12 @@ func (w *warnStrategyService) UpdateWarnStrategy(ctx context.Context, namespaceI
 
 		if len(channels) > 0 {
 			//往引用表插入所引用的通知渠道
-			quoteMap := make(map[entry.QuoteTargetKindType][]int)
+			quoteMap := make(map[quote_entry.QuoteTargetKindType][]int)
 			for _, channel := range channels {
-				quoteMap[entry.QuoteTargetKindTypeNoticeChannel] = append(quoteMap[entry.QuoteTargetKindTypeNoticeChannel], channel.Id)
+				quoteMap[quote_entry.QuoteTargetKindTypeNoticeChannel] = append(quoteMap[quote_entry.QuoteTargetKindTypeNoticeChannel], channel.Id)
 			}
 
-			if err := w.quoteStore.Set(txCtx, strategy.Id, entry.QuoteKindTypeWarnStrategy, quoteMap); err != nil {
+			if err := w.quoteStore.Set(txCtx, strategy.Id, quote_entry.QuoteKindTypeWarnStrategy, quoteMap); err != nil {
 				return err
 			}
 		}

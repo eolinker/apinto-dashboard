@@ -6,6 +6,8 @@ import (
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/dto"
+	"github.com/eolinker/apinto-dashboard/dto/online-dto"
+	"github.com/eolinker/apinto-dashboard/dto/service-dto"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/upstream"
 	_ "github.com/eolinker/apinto-dashboard/modules/upstream/service"
@@ -66,10 +68,10 @@ func (s *serviceController) getList(ginCtx *gin.Context) {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(fmt.Sprintf("GetServiceList fail. err:%s", err.Error())))
 		return
 	}
-	services := make([]*dto.ServiceListItem, 0, len(listItems))
+	services := make([]*service_dto.ServiceListItem, 0, len(listItems))
 
 	for _, item := range listItems {
-		li := &dto.ServiceListItem{
+		li := &service_dto.ServiceListItem{
 			Name:        item.Name,
 			UUID:        item.UUID,
 			Scheme:      item.Scheme,
@@ -109,19 +111,19 @@ func (s *serviceController) getInfo(ginCtx *gin.Context) {
 	}
 	conf := driver.FormatConfig([]byte(info.Config))
 
-	serivce := &dto.ServiceInfoProxy{
+	serivce := &service_dto.ServiceInfoProxy{
 		Name:          info.Name,
 		UUID:          info.UUID,
 		Desc:          info.Desc,
 		Scheme:        info.Scheme,
 		DiscoveryName: discoveryName,
-		Config:        dto.ServiceConfigProxy(conf),
+		Config:        service_dto.ServiceConfigProxy(conf),
 		Timeout:       info.Timeout,
 		Balance:       info.Balance,
 	}
-	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(&dto.ServiceInfoOutput{
+	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(&service_dto.ServiceInfoOutput{
 		Service: serivce,
-		Render:  dto.Render(driver.Render()),
+		Render:  service_dto.Render(driver.Render()),
 	}))
 }
 
@@ -130,7 +132,7 @@ func (s *serviceController) create(ginCtx *gin.Context) {
 	namespaceId := controller.GetNamespaceId(ginCtx)
 	operator := controller.GetUserId(ginCtx)
 
-	inputProxy := new(dto.ServiceInfoProxy)
+	inputProxy := new(service_dto.ServiceInfoProxy)
 	if err := ginCtx.BindJSON(inputProxy); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -155,7 +157,7 @@ func (s *serviceController) create(ginCtx *gin.Context) {
 	}
 	inputProxy.Config = newConf
 
-	input := &dto.ServiceInfo{
+	input := &service_dto.ServiceInfo{
 		Name:        inputProxy.Name,
 		UUID:        inputProxy.UUID,
 		Desc:        inputProxy.Desc,
@@ -187,7 +189,7 @@ func (s *serviceController) alter(ginCtx *gin.Context) {
 	}
 	operator := controller.GetUserId(ginCtx)
 	backgroundCtx := ginCtx
-	inputProxy := new(dto.ServiceInfoProxy)
+	inputProxy := new(service_dto.ServiceInfoProxy)
 	if err := ginCtx.BindJSON(inputProxy); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
@@ -206,7 +208,7 @@ func (s *serviceController) alter(ginCtx *gin.Context) {
 	}
 	inputProxy.Config = newConf
 
-	input := &dto.ServiceInfo{
+	input := &service_dto.ServiceInfo{
 		Name:        serviceName,
 		UUID:        inputProxy.UUID, //TODO 应该用rest里的uuid
 		Desc:        inputProxy.Desc,
@@ -266,7 +268,7 @@ func (s *serviceController) getEnum(ginCtx *gin.Context) {
 func (s *serviceController) online(ginCtx *gin.Context) {
 	namespaceId := controller.GetNamespaceId(ginCtx)
 	serviceName := ginCtx.Param("service_name")
-	input := &dto.UpdateOnlineStatusInput{}
+	input := &online_dto.UpdateOnlineStatusInput{}
 	operator := controller.GetUserId(ginCtx)
 
 	if err := ginCtx.BindJSON(input); err != nil {
@@ -296,7 +298,7 @@ func (s *serviceController) online(ginCtx *gin.Context) {
 func (s *serviceController) offline(ginCtx *gin.Context) {
 	namespaceId := controller.GetNamespaceId(ginCtx)
 	serviceName := ginCtx.Param("service_name")
-	input := &dto.UpdateOnlineStatusInput{}
+	input := &online_dto.UpdateOnlineStatusInput{}
 	operator := controller.GetUserId(ginCtx)
 
 	if err := ginCtx.BindJSON(input); err != nil {
@@ -322,13 +324,13 @@ func (s *serviceController) getOnlineList(ginCtx *gin.Context) {
 		return
 	}
 
-	resp := make([]*dto.OnlineOut, 0, len(list))
+	resp := make([]*online_dto.OnlineOut, 0, len(list))
 	for _, online := range list {
 		updateTime := ""
 		if !online.UpdateTime.IsZero() {
 			updateTime = common.TimeToStr(online.UpdateTime)
 		}
-		resp = append(resp, &dto.OnlineOut{
+		resp = append(resp, &online_dto.OnlineOut{
 			Name:       online.ClusterName,
 			Status:     enum.OnlineStatus(online.Status),
 			Env:        online.Env,

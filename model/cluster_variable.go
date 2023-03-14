@@ -1,35 +1,36 @@
 package model
 
 import (
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/cluster-entry"
+	"github.com/eolinker/apinto-dashboard/entry/variable-entry"
 	"time"
 )
 
 type ClusterVariable struct {
-	*entry.ClusterVariable
+	*variable_entry.ClusterVariable
 }
 
 type ClustersVariables struct {
-	Clusters  []*entry.Cluster
-	Variables []*entry.ClusterVariable
+	Clusters  []*cluster_entry.Cluster
+	Variables []*variable_entry.ClusterVariable
 }
 
 type ClusterVariableListItem struct {
-	*entry.ClusterVariable
+	*variable_entry.ClusterVariable
 	Desc     string
 	Operator string
 	Publish  int //1.未发布 2.已发布 3.缺失
 }
 
 type ClusterVariableHistory struct {
-	*entry.VariableHistory
+	*variable_entry.VariableHistory
 }
 
 type VariableToPublish struct {
-	entry.VariableToPublish
+	variable_entry.VariableToPublish
 }
 
-type VariablePublishVersion entry.VariablePublishVersion
+type VariablePublishVersion variable_entry.VariablePublishVersion
 
 type VariablePublish struct {
 	Id         int

@@ -7,7 +7,8 @@ import (
 	"github.com/eolinker/apinto-dashboard/common"
 	driver_manager "github.com/eolinker/apinto-dashboard/driver-manager"
 	"github.com/eolinker/apinto-dashboard/driver-manager/driver"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/notice-entry"
+	"github.com/eolinker/apinto-dashboard/entry/quote-entry"
 	"github.com/eolinker/apinto-dashboard/model"
 	"github.com/eolinker/apinto-dashboard/store"
 	"github.com/eolinker/eosc/common/bean"
@@ -77,7 +78,7 @@ func (n *noticeChannelService) InitChannelDriver() error {
 func (n *noticeChannelService) CreateNoticeChannel(ctx context.Context, namespaceId, userID int, channel *model.NoticeChannel) error {
 
 	t := time.Now()
-	noticeChannel := &entry.NoticeChannel{
+	noticeChannel := &notice_entry.NoticeChannel{
 		NamespaceID: namespaceId,
 		Name:        channel.Name,
 		Title:       channel.Title,
@@ -120,10 +121,10 @@ func (n *noticeChannelService) CreateNoticeChannel(ctx context.Context, namespac
 			return err
 		}
 
-		noticeChannelVersion := &entry.NoticeChannelVersion{
+		noticeChannelVersion := &notice_entry.NoticeChannelVersion{
 			NoticeChannelID: noticeChannel.Id,
 			NamespaceID:     namespaceId,
-			NoticeChannelVersionConfig: entry.NoticeChannelVersionConfig{
+			NoticeChannelVersionConfig: notice_entry.NoticeChannelVersionConfig{
 				Config: channel.Config,
 			},
 			Operator:   userID,
@@ -134,7 +135,7 @@ func (n *noticeChannelService) CreateNoticeChannel(ctx context.Context, namespac
 			return err
 		}
 
-		noticeStat := &entry.NoticeChannelStat{
+		noticeStat := &notice_entry.NoticeChannelStat{
 			NoticeChannelID: noticeChannel.Id,
 			VersionID:       noticeChannelVersion.Id,
 		}
@@ -193,10 +194,10 @@ func (n *noticeChannelService) UpdateNoticeChannel(ctx context.Context, namespac
 			return err
 		}
 
-		noticeChannelVersion := &entry.NoticeChannelVersion{
+		noticeChannelVersion := &notice_entry.NoticeChannelVersion{
 			NoticeChannelID: noticeChannel.Id,
 			NamespaceID:     namespaceId,
-			NoticeChannelVersionConfig: entry.NoticeChannelVersionConfig{
+			NoticeChannelVersionConfig: notice_entry.NoticeChannelVersionConfig{
 				Config: channel.Config,
 			},
 			Operator:   userID,
@@ -207,7 +208,7 @@ func (n *noticeChannelService) UpdateNoticeChannel(ctx context.Context, namespac
 			return err
 		}
 
-		noticeStat := &entry.NoticeChannelStat{
+		noticeStat := &notice_entry.NoticeChannelStat{
 			NoticeChannelID: noticeChannel.Id,
 			VersionID:       noticeChannelVersion.Id,
 		}
@@ -269,7 +270,7 @@ func (n *noticeChannelService) NoticeChannelList(ctx context.Context, namespaceI
 		return nil, err
 	}
 
-	userIds := common.SliceToSliceIds(noticeChannels, func(t *entry.NoticeChannel) int {
+	userIds := common.SliceToSliceIds(noticeChannels, func(t *notice_entry.NoticeChannel) int {
 		return t.Operator
 	})
 
@@ -329,7 +330,7 @@ func (n *noticeChannelService) latestNoticeChannelVersion(ctx context.Context, n
 		return nil, err
 	}
 
-	var version *entry.NoticeChannelVersion
+	var version *notice_entry.NoticeChannelVersion
 
 	version, err = n.noticeChannelVersion.Get(ctx, stat.VersionID)
 	if err != nil {
@@ -340,6 +341,6 @@ func (n *noticeChannelService) latestNoticeChannelVersion(ctx context.Context, n
 }
 
 func (n *noticeChannelService) isDelete(ctx context.Context, noticeChannelId int) bool {
-	quote, _ := n.quoteStore.GetTargetQuote(ctx, noticeChannelId, entry.QuoteTargetKindTypeNoticeChannel)
+	quote, _ := n.quoteStore.GetTargetQuote(ctx, noticeChannelId, quote_entry.QuoteTargetKindTypeNoticeChannel)
 	return len(quote) == 0
 }

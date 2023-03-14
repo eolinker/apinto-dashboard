@@ -2,7 +2,7 @@ package store
 
 import (
 	"context"
-	"github.com/eolinker/apinto-dashboard/entry"
+	"github.com/eolinker/apinto-dashboard/entry/runtime-entry"
 )
 
 var (
@@ -10,16 +10,16 @@ var (
 )
 
 type IClusterRuntimeStore interface {
-	IBaseStore[entry.Runtime]
+	IBaseStore[runtime_entry.Runtime]
 	DeleteByClusterID(ctx context.Context, clusterId int) error
 }
 
 type clusterRuntimeStore struct {
-	*BaseStore[entry.Runtime]
+	*BaseStore[runtime_entry.Runtime]
 }
 
 func newClusterRuntimeStore(db IDB) IClusterRuntimeStore {
-	return &clusterRuntimeStore{BaseStore: CreateStore[entry.Runtime](db)}
+	return &clusterRuntimeStore{BaseStore: CreateStore[runtime_entry.Runtime](db)}
 }
 
 func (c *clusterRuntimeStore) DeleteByClusterID(ctx context.Context, clusterId int) error {

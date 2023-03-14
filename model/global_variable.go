@@ -1,19 +1,21 @@
 package model
 
-import "github.com/eolinker/apinto-dashboard/entry"
+import (
+	"github.com/eolinker/apinto-dashboard/entry/variable-entry"
+)
 
 type GlobalVariable struct {
-	*entry.Variables
+	*variable_entry.Variables
 }
 
 type GlobalVariableListItem struct {
-	*entry.Variables
+	*variable_entry.Variables
 	Status      int
 	OperatorStr string
 }
 
 type GlobalVariableDetails struct {
-	*entry.ClusterVariable
+	*variable_entry.ClusterVariable
 	Status      int
 	ClusterName string
 	Environment string

@@ -4,6 +4,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/dto"
+	"github.com/eolinker/apinto-dashboard/dto/cluster-dto"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/service"
 	"github.com/eolinker/eosc/common/bean"
@@ -35,9 +36,9 @@ func (c *clusterNodeController) nodes(ginCtx *gin.Context) {
 		return
 	}
 
-	list := make([]*dto.ClusterNode, 0, len(nodes))
+	list := make([]*cluster_dto.ClusterNode, 0, len(nodes))
 	for _, node := range nodes {
-		list = append(list, &dto.ClusterNode{
+		list = append(list, &cluster_dto.ClusterNode{
 			Name:        node.Name,
 			ServiceAddr: node.ServiceAddr,
 			AdminAddr:   node.AdminAddr,
@@ -57,7 +58,7 @@ func (c *clusterNodeController) reset(ginCtx *gin.Context) {
 	namespaceId := GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Param("cluster_name")
 
-	input := &dto.ClusterNodeInput{}
+	input := &cluster_dto.ClusterNodeInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
 		return
