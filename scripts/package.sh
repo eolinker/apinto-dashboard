@@ -48,7 +48,7 @@ echo "Completed building apinto enterprise frontend."
 echo "${VERSION}"
 echo "Step 2 - building apinto enterprise backend..."
 
-GOVERSION=$(go version) goreleaser release --skip-publish --rm-dist
+GOVERSION=$(go version) goreleaser release --skip-publish --skip-validate --rm-dist
 
 echo "Completed building apinto enterprise backend."
 

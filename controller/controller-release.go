@@ -1,17 +1,18 @@
 //go:build release
 
-package frontend_controller
+package controller
 
 import (
 	"embed"
 	_ "embed"
 	"fmt"
-	gzip "github.com/eolinker/apinto-dashboard/common/gzip-static"
-	"github.com/gin-gonic/gin"
 	"io/fs"
 	"net/http"
 	"strings"
 	"time"
+
+	gzip "github.com/eolinker/apinto-dashboard/common/gzip-static"
+	"github.com/gin-gonic/gin"
 )
 
 var (
