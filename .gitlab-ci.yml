@@ -53,13 +53,11 @@ deployer:
   rules:
     - if: $CI_COMMIT_BRANCH=="v2.0"
       variables:
-        DEPLOY_SERVER: root@172.18.166.219
         DEPLOY_DESC: "DEV 环境"
         VIEW_ADDR: http://172.18.166.219:8080/
   script:
-    - set -e
-    - scp $BUILD_DIR/${APP_PRE}_linux_amd64.tar.gz ${DEPLOY_SERVER}:${SAVE_DIR}
-    - ssh ${DEPLOY_SERVER} "cd ${SAVE_DIR};tar -zxvf ${APP_PRE}_linux_amd64.tar.gz;cd ${APP_PRE};./install.sh ${SAVE_DIR};./run.sh restart;cd ${SAVE_DIR};./clean.sh ${APP_PRE}"
+    - cp $BUILD_DIR/${APP_PRE}_linux_amd64.tar.gz ${SAVE_DIR}
+    - cd ${SAVE_DIR};tar -zxvf ${APP_PRE}_linux_amd64.tar.gz;cd ${APP_PRE};./install.sh ${SAVE_DIR};./run.sh restart;cd ${SAVE_DIR};./clean.sh ${APP_PRE}
     - |
       curl -X POST -H "Content-Type: application/json" \
       -d "{\"msg_type\":\"text\",\"content\":{\"text\":\"项目：apinto-dashboard\\n环境：${DEPLOY_DESC}\\n更新部署完成.\\n访问地址：${VIEW_ADDR}\"}}" \
