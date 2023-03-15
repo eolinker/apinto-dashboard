@@ -13,10 +13,8 @@ default:
     paths:
       - controller/dist/
       - ${BUILD_DIR}
-
 stages:
   - notice
-  - check
   - build
   - publish
 
@@ -36,7 +34,7 @@ feishu-informer: # 飞书回调
 frontend-builder: # 前端构建
   stage: build
   rules:
-    - if: ($CI_COMMIT_TITLE =~ /^frontend/ || $CI_MERGE_REQUEST_TITLE =~ /^frontend/) && ($CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "test") # 当前端提交后触发
+    - if: ($CI_COMMIT_TITLE =~ /^frontend/ || $CI_MERGE_REQUEST_TITLE =~ /^frontend/) && $CI_COMMIT_BRANCH == "v2.0" # 当前端提交后触发
   script:
     - sed -i '/replace github.com\/eolinker\/eosc => */d' go.mod
     - go mod tidy
@@ -45,7 +43,7 @@ frontend-builder: # 前端构建
 golang-builder:
   stage: build
   rules:
-    - if: ($CI_COMMIT_TITLE !~ /^frontend/ || $CI_MERGE_REQUEST_TITLE !~ /^frontend/) && ($CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "test") # 当后端提交后触发
+    - if: ($CI_COMMIT_TITLE !~ /^frontend/ || $CI_MERGE_REQUEST_TITLE !~ /^frontend/) && $CI_COMMIT_BRANCH == "v2.0" # 当后端提交后触发
   script:
     - sed -i '/replace github.com\/eolinker\/eosc => */d' go.mod
     - go mod tidy
@@ -67,4 +65,3 @@ deployer:
       -d "{\"msg_type\":\"text\",\"content\":{\"text\":\"项目：apinto-dashboard\\n环境：${DEPLOY_DESC}\\n更新部署完成.\\n访问地址：${VIEW_ADDR}\"}}" \
       https://open.feishu.cn/open-apis/bot/v2/hook/aaf65fe6-6523-4e3c-abfc-4772c7b30cf8
   when: on_success
-
