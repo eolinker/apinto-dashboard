@@ -1,0 +1,70 @@
+variables:
+  PATH: /usr/local/sonar-scanner/sonar-scanner-4.4.0.2170-linux/bin:/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/data/golang/go/bin/:/root/go/bin:/root/.nvm/versions/node/v16.12.0/bin
+  GOROOT: /data/golang/go
+  GOPROXY: https://goproxy.cn
+  SAVE_DIR: /opt/apinto-dashboard
+  VERSION: $CI_COMMIT_SHORT_SHA
+  APP: apserver
+  APP_PRE: ${APP}_${VERSION}
+  BUILD_DIR: apserver-build
+
+default:
+  cache:
+    paths:
+      - controller/dist/
+      - ${BUILD_DIR}
+
+stages:
+  - notice
+  - check
+  - build
+  - publish
+
+feishu-informer: # 飞书回调
+  stage: notice
+  variables:
+    DIFF_URL: "$CI_MERGE_REQUEST_PROJECT_URL/-/merge_requests/$CI_MERGE_REQUEST_IID/diffs"
+  rules:
+    - if: $CI_PIPELINE_SOURCE=="merge_request_event"
+  script:
+    - echo "merge request"
+    - |
+      curl -X POST -H "Content-Type: application/json" \
+      -d "{\"msg_type\":\"text\",\"content\":{\"text\":\"项目：${CI_PROJECT_NAME}\\n提交人：${GITLAB_USER_NAME}\\n提交信息：${CI_MERGE_REQUEST_TITLE}\\n合并分支信息：${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME} -> ${CI_MERGE_REQUEST_TARGET_BRANCH_NAME}\\n差异性地址：${DIFF_URL}\\n请及时review代码\"}}" \
+      https://open.feishu.cn/open-apis/bot/v2/hook/1c334752-2874-41a1-8f1b-3060f2d46b6c
+
+frontend-builder: # 前端构建
+  stage: build
+  rules:
+    - if: ($CI_COMMIT_TITLE =~ /^frontend/ || $CI_MERGE_REQUEST_TITLE =~ /^frontend/) && ($CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "test") # 当前端提交后触发
+  script:
+    - sed -i '/replace github.com\/eolinker\/eosc => */d' go.mod
+    - go mod tidy
+    - ./scripts/build.sh $BUILD_DIR all ${VERSION}
+
+golang-builder:
+  stage: build
+  rules:
+    - if: ($CI_COMMIT_TITLE !~ /^frontend/ || $CI_MERGE_REQUEST_TITLE !~ /^frontend/) && ($CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "test") # 当后端提交后触发
+  script:
+    - sed -i '/replace github.com\/eolinker\/eosc => */d' go.mod
+    - go mod tidy
+    - ./scripts/build.sh $BUILD_DIR backend ${VERSION}
+deployer:
+  stage: publish
+  rules:
+    - if: $CI_COMMIT_BRANCH=="v2.0"
+      variables:
+        DEPLOY_SERVER: root@172.18.166.219
+        DEPLOY_DESC: "DEV 环境"
+        VIEW_ADDR: http://172.18.166.219:8080/
+  script:
+    - set -e
+    - scp $BUILD_DIR/${APP_PRE}_linux_amd64.tar.gz ${DEPLOY_SERVER}:${SAVE_DIR}
+    - ssh ${DEPLOY_SERVER} "cd ${SAVE_DIR};tar -zxvf ${APP_PRE}_linux_amd64.tar.gz;cd ${APP_PRE};./install.sh ${SAVE_DIR};./run.sh restart;cd ${SAVE_DIR};./clean.sh ${APP_PRE}"
+    - |
+      curl -X POST -H "Content-Type: application/json" \
+      -d "{\"msg_type\":\"text\",\"content\":{\"text\":\"项目：apinto-dashboard\\n环境：${DEPLOY_DESC}\\n更新部署完成.\\n访问地址：${VIEW_ADDR}\"}}" \
+      https://open.feishu.cn/open-apis/bot/v2/hook/aaf65fe6-6523-4e3c-abfc-4772c7b30cf8
+  when: on_success
+
