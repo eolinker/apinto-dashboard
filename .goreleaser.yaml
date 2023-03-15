@@ -9,7 +9,7 @@ builds:
     goarch:
       - amd64
       - arm64
-      - "386"
+#      - "386"
     goarm:
       - "6"
     gomips:
@@ -19,7 +19,7 @@ builds:
     targets:
       - linux_arm64
       - linux_amd64
-      - linux_386
+#      - linux_386
       - darwin_arm64
       - darwin_amd64
     tags:
@@ -30,6 +30,8 @@ builds:
     binary: apserver
     builder: go
     gobinary: go
+    env:
+      - CGO_ENABLED=0
     ldflags:
       - -s -w
       - -X "github.com/eolinker/apinto-dashboard/app/apserver/version.Version={{.Version}}"

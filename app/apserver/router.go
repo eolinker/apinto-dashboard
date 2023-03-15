@@ -10,7 +10,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/base/random-controller"
 	cluster_controller2 "github.com/eolinker/apinto-dashboard/modules/cluster/cluster-controller"
 	"github.com/eolinker/apinto-dashboard/modules/discovery/discovery-controller"
-	"github.com/eolinker/apinto-dashboard/modules/frontend/frontend-controller"
 	"github.com/eolinker/apinto-dashboard/modules/group/group-controller"
 	"github.com/eolinker/apinto-dashboard/modules/openapi/open-api-controller"
 	"github.com/eolinker/apinto-dashboard/modules/openapp/open-app-controller"
@@ -18,11 +17,12 @@ import (
 	user_controller "github.com/eolinker/apinto-dashboard/modules/user/user-controller"
 	variable_controller2 "github.com/eolinker/apinto-dashboard/modules/variable/variable-controller"
 
+	"net/http"
+
 	"github.com/eolinker/apinto-dashboard/filter"
 	apiController "github.com/eolinker/apinto-dashboard/modules/api/controller"
 	upstream_controller "github.com/eolinker/apinto-dashboard/modules/upstream/controller"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 var mustNamespaceExclude = []string{"/api/random/:template/id", "/api/enum/envs", "/api/application/drivers",
@@ -64,7 +64,7 @@ func registerRouter(engine *gin.Engine) {
 
 	user_controller.RegisterUserRouter(routes)
 
-	frontend_controller.EmbedFrontend(engine)
+	controller.EmbedFrontend(engine)
 
 	openAPIRoutes := engine.Group("/api2")
 	open_api_controller.RegisterApiOpenAPIRouter(openAPIRoutes) //api管理导入的OpenAPI
