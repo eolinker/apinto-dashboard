@@ -18,11 +18,10 @@ var (
 )
 
 type Config struct {
-	Port          int            `yaml:"port"`
-	UserCenterUrl string         `yaml:"user_center_url"`
-	MysqlConfig   DBConfig       `yaml:"mysql"`
-	ErrorLog      ErrorLogConfig `yaml:"error_log"`
-	RedisConfig   RedisConfig    `yaml:"redis"`
+	Port        int            `yaml:"port"`
+	MysqlConfig DBConfig       `yaml:"mysql"`
+	ErrorLog    ErrorLogConfig `yaml:"error_log"`
+	RedisConfig RedisConfig    `yaml:"redis"`
 }
 
 type ErrorLogConfig struct {
@@ -63,10 +62,6 @@ func init() {
 
 func GetPort() int {
 	return systemConfig.Port
-}
-
-func GetUserCenterUrl() string {
-	return systemConfig.UserCenterUrl
 }
 
 func GetDBUserName() string {
