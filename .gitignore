@@ -58,3 +58,4 @@ deploy.gitlab-ci.yml
 /.pnpm-debug.log
 vender
 /out/
+*.gitlab-ci.yml
