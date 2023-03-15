@@ -51,7 +51,7 @@ linters:
     - usestdlibvars
     - wastedassign
 run:
-  go: 1.17
+  go: 1.19
   skip-dirs:
     - apinto-build
     - scripts

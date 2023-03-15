@@ -1,7 +1,7 @@
 //go:build !release
 // +build !release
 
-package frontend_controller
+package controller
 
 import "github.com/gin-gonic/gin"
 
