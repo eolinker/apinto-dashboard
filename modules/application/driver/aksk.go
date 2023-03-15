@@ -6,34 +6,38 @@ import (
 	"fmt"
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/enum"
+	"github.com/eolinker/apinto-dashboard/modules/application"
 	"strings"
 )
 
-type ApikeyConfig struct {
-	Apikey string            `json:"apikey"`
-	Label  map[string]string `json:"label"`
+type AkSkConfig struct {
+	Ak    string            `json:"ak"`
+	Sk    string            `json:"sk"`
+	Label map[string]string `json:"label"`
 }
 
-type Apikey struct {
+type AkSk struct {
 	apintoDriverName string
 }
 
-func (a *Apikey) GetAuthListInfo(config []byte) string {
+func (a *AkSk) GetAuthListInfo(config []byte) string {
 	authConfig := &AuthConfig{}
 	_ = json.Unmarshal(config, authConfig)
-	return authConfig.Apikey
+	return fmt.Sprintf("AK=%s,SK=%s", authConfig.Ak, authConfig.Sk)
 }
 
-func (a *Apikey) CheckInput(config []byte) error {
-	apikeyConfig := new(ApikeyConfig)
-	if err := json.Unmarshal(config, apikeyConfig); err != nil {
+func (a *AkSk) CheckInput(config []byte) error {
+
+	akSkConfig := new(AkSkConfig)
+
+	if err := json.Unmarshal(config, akSkConfig); err != nil {
 		return err
 	}
-	if apikeyConfig.Apikey == "" {
-		return errors.New("apikey is null")
+	if akSkConfig.Sk == "" || akSkConfig.Ak == "" {
+		return errors.New("ak or sk is null")
 	}
 
-	for key, _ := range apikeyConfig.Label {
+	for key, _ := range akSkConfig.Label {
 		if _, ok := enum.Keyword[strings.ToLower(key)]; ok {
 			return errors.New(fmt.Sprintf("标签信息中的%s为系统关键字", key))
 		}
@@ -42,29 +46,31 @@ func (a *Apikey) CheckInput(config []byte) error {
 	return nil
 }
 
-func (a *Apikey) ToApinto(expire int64, position string, tokenName string, config []byte, hideCredential bool) v1.ApplicationAuth {
+func (a *AkSk) ToApinto(expire int64, position string, tokenName string, config []byte, hideCredential bool) v1.ApplicationAuth {
 
-	apikeyConfig := new(ApikeyConfig)
+	akSkConfig := new(AkSkConfig)
 
-	_ = json.Unmarshal(config, apikeyConfig)
+	_ = json.Unmarshal(config, akSkConfig)
 
-	apikeyApintoConfig := &v1.ApplicationAuthApiKeyConfig{
-		Apikey: apikeyConfig.Apikey,
+	akSkApintoConfig := &v1.ApplicationAuthAkSkConfig{
+		Ak:     akSkConfig.Ak,
+		Sk:     akSkConfig.Sk,
 		Expire: expire,
 	}
 
 	users := make([]v1.ApplicationAuthUser, 0)
-	pattern := &v1.ApplicationAuthUserApiKeyPattern{
-		Apikey: apikeyConfig.Apikey,
+	pattern := &v1.ApplicationAuthUserAkSkPattern{
+		Ak: akSkConfig.Ak,
+		Sk: akSkConfig.Sk,
 	}
 	users = append(users, v1.ApplicationAuthUser{
 		Expire:         expire,
-		Labels:         apikeyConfig.Label,
+		Labels:         akSkConfig.Label,
 		Pattern:        pattern,
 		HideCredential: hideCredential,
 	})
 	auth := v1.ApplicationAuth{
-		Config:    apikeyApintoConfig,
+		Config:    akSkApintoConfig,
 		Type:      a.apintoDriverName,
 		Users:     users,
 		Position:  position,
@@ -74,20 +80,29 @@ func (a *Apikey) ToApinto(expire int64, position string, tokenName string, confi
 	return auth
 }
 
-func CreateApikey() IAuthDriver {
-	return &Apikey{apintoDriverName: "apikey"}
+func CreateAkSk() application.IAuthDriver {
+	return &AkSk{apintoDriverName: "ak/sk"}
 }
 
-func (a *Apikey) Render() string {
-	return apikeyConfigRender
+func (a *AkSk) Render() string {
+	return akSkConfigRender
 }
 
-var apikeyConfigRender = `{
+var akSkConfigRender = `{
 	"type": "object",
 	"properties": {
-		"apikey": {
+		"ak": {
 			"type": "string",
-			"title": "Apikey",
+			"title": "AK",
+			"x-component": "Input",
+			"x-component-props": {
+				"placeholder": "请输入"
+			},
+			"required": true
+		},
+		"sk": {
+			"type": "string",
+			"title": "SK",
 			"x-component": "Input",
 			"x-component-props": {
 				"placeholder": "请输入"
@@ -101,9 +116,7 @@ var apikeyConfigRender = `{
 			"items": {
 				"type": "void",
 				"x-component": "Space",
-				"x-component-props": {
-					"placeholder": "请输入"
-				},
+				"x-component-props": {},
 				"properties": {
 					"key": {
 						"type": "string",
@@ -111,7 +124,7 @@ var apikeyConfigRender = `{
 						"x-index": 0,
 						"x-component-props": {
 							"class": "w240",
-							"placeholder": "请输入"
+							"placeholder": "请输入key"
 						}
 					},
 					"value": {
@@ -120,7 +133,7 @@ var apikeyConfigRender = `{
 						"x-index": 1,
 						"x-component-props": {
 							"class": "w240 mg_button",
-							"placeholder": "请输入"
+							"placeholder": "请输入value"
 						}
 					},
 					"remove": {

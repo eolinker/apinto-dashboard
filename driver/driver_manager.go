@@ -1,4 +1,4 @@
-package driver_manager
+package driver
 
 import "sync"
 
@@ -11,29 +11,42 @@ type IDriverManager[T any] interface {
 	RegisterDriver(driverName string, driver T)
 	GetDriver(driverName string) T
 	DelDriver(driverName string)
+	Drivers() map[string]T
 }
 
-type driverManager[T any] struct {
+type DriverManager[T any] struct {
 	mutex   *sync.Mutex
 	drivers map[string]T
 }
 
-func (d *driverManager[T]) RegisterDriver(driverName string, t T) {
+func (d *DriverManager[T]) Drivers() map[string]T {
+	d.mutex.Lock()
+	defer d.mutex.Unlock()
+
+	ds := make(map[string]T, len(d.drivers))
+
+	for n, driver := range d.drivers {
+		ds[n] = driver
+	}
+	return ds
+}
+
+func (d *DriverManager[T]) RegisterDriver(driverName string, t T) {
 	d.mutex.Lock()
 	d.drivers[driverName] = t
 	d.mutex.Unlock()
 }
-func (d *driverManager[T]) GetDriver(driverName string) T {
+func (d *DriverManager[T]) GetDriver(driverName string) T {
 	return d.drivers[driverName]
 }
 
-func (d *driverManager[T]) DelDriver(driverName string) {
+func (d *DriverManager[T]) DelDriver(driverName string) {
 	d.mutex.Lock()
 	delete(d.drivers, driverName)
 	d.mutex.Unlock()
 }
-func createDriverManager[T any]() *driverManager[T] {
-	manager := &driverManager[T]{
+func CreateDriverManager[T any]() *DriverManager[T] {
+	manager := &DriverManager[T]{
 		mutex:   new(sync.Mutex),
 		drivers: make(map[string]T),
 	}

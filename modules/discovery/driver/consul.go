@@ -6,57 +6,59 @@ import (
 	"fmt"
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/common"
+	"github.com/eolinker/apinto-dashboard/modules/discovery"
+	"github.com/eolinker/apinto-dashboard/modules/upstream"
 	"reflect"
 	"strings"
 )
 
-type NacosConfig struct {
+type ConsulConfig struct {
 	UseVariable   bool            `json:"use_variable"`
 	AddrsVariable string          `json:"addrs_variable,omitempty"  switch:"is_variable === true"`
 	Addrs         []string        `json:"addrs,omitempty"  switch:"is_variable === false"`
 	Params        []*commonParams `json:"params"`
 }
 
-type Nacos struct {
+type Consul struct {
 	apintoDriverName string
-	enum             IServiceDriver
+	enum             upstream.IServiceDriver
 }
 
-func CreateNacos(apintoDriverName string) IDiscoveryDriver {
-	nacosEnum := createNacosEnum()
-	return &Nacos{enum: nacosEnum, apintoDriverName: apintoDriverName}
+func CreateConsul(apintoDriverName string) discovery.IDiscoveryDriver {
+	consulEnum := createConsulEnum()
+	return &Consul{enum: consulEnum, apintoDriverName: apintoDriverName}
 }
 
-func (n *Nacos) ToApinto(namespace, name, desc string, config []byte) *v1.DiscoveryConfig {
-	nacosConf := new(NacosConfig)
-	_ = json.Unmarshal(config, nacosConf)
+func (c *Consul) ToApinto(namespace, name, desc string, config []byte) *v1.DiscoveryConfig {
+	consulConf := new(ConsulConfig)
+	_ = json.Unmarshal(config, consulConf)
 
-	address := make([]string, 0, len(nacosConf.Addrs))
+	address := make([]string, 0, len(consulConf.Addrs))
 	params := make(map[string]string)
 
 	//处理地址
-	if nacosConf.UseVariable {
-		address = append(address, fmt.Sprintf("${%s@%s}", common.GetVariableKey(nacosConf.AddrsVariable), namespace))
+	if consulConf.UseVariable {
+		address = append(address, fmt.Sprintf("${%s@%s}", common.GetVariableKey(consulConf.AddrsVariable), namespace))
 	} else {
-		address = nacosConf.Addrs
+		address = consulConf.Addrs
 	}
 
 	//处理参数
-	for _, param := range nacosConf.Params {
+	for _, param := range consulConf.Params {
 		if common.IsMatchVariable(param.Value) {
 			params[param.Key] = fmt.Sprintf("${%s@%s}", common.GetVariableKey(param.Value), namespace)
 			continue
 		}
 		params[param.Key] = param.Value
 	}
-	apintoNacosConfig := &ApintoDiscoveryConfig{
+	apintoConsulConfig := &ApintoDiscoveryConfig{
 		Address: address,
 		Params:  params,
 	}
-	conf, _ := json.Marshal(apintoNacosConfig)
+	conf, _ := json.Marshal(apintoConsulConfig)
 	discoveryConfig := &v1.DiscoveryConfig{
 		Name:         name,
-		Driver:       n.apintoDriverName,
+		Driver:       c.apintoDriverName,
 		Description:  desc,
 		Config:       v1.JsonMarshalProxy(conf),
 		StaticHealth: nil,
@@ -65,23 +67,23 @@ func (n *Nacos) ToApinto(namespace, name, desc string, config []byte) *v1.Discov
 	return discoveryConfig
 }
 
-func (n *Nacos) Render() string {
-	return nacosConfigRender
+func (c *Consul) OptionsEnum() upstream.IServiceDriver {
+	return c.enum
 }
 
 // CheckInput 返回参数：地址概要，引用的变量列表，error
-func (n *Nacos) CheckInput(config []byte) ([]byte, string, []string, error) {
-	conf := new(NacosConfig)
+func (c *Consul) CheckInput(config []byte) ([]byte, string, []string, error) {
+	conf := new(ConsulConfig)
 	_ = json.Unmarshal(config, conf)
 	addrsFormatStr := ""
 	variableList := make([]string, 0)
 
 	if conf.UseVariable {
 		if !common.IsMatchVariable(conf.AddrsVariable) {
-			return nil, "", nil, ErrVariableIllegal
+			return nil, "", nil, discovery.ErrVariableIllegal
 		}
 		variableList = append(variableList, common.GetVariableKey(conf.AddrsVariable))
-		//返回地址概要是方便上游服务列表显示，若使用了环境变量，则将环境变量存入配置中，每次获取表时实时取。
+		//返回地址概要是方便上游服务列表显示，若使用了环境变量，则将环境变量存入配置地址概要中
 		addrsFormatStr = conf.AddrsVariable
 	} else {
 		//可以用正则检查地址配置
@@ -108,17 +110,9 @@ func (n *Nacos) CheckInput(config []byte) ([]byte, string, []string, error) {
 	return data, addrsFormatStr, variableList, nil
 }
 
-func (n *Nacos) CheckConfIsChange(old []byte, latest []byte) bool {
-	oldConf := new(NacosConfig)
-	newConf := new(NacosConfig)
-	_ = json.Unmarshal(old, oldConf)
-	_ = json.Unmarshal(latest, newConf)
-
-	return !reflect.DeepEqual(oldConf, newConf)
-}
-
 // FormatConfig 格式化返回的配置
-func (n *Nacos) FormatConfig(config []byte) []byte {
+func (c *Consul) FormatConfig(config []byte) []byte {
+
 	//以后可能对不同版本的配置进行转发
 
 	//解出配置，可以对空值赋予默认值
@@ -126,23 +120,32 @@ func (n *Nacos) FormatConfig(config []byte) []byte {
 	return config
 }
 
-func (n *Nacos) OptionsEnum() IServiceDriver {
-	return n.enum
+func (c *Consul) CheckConfIsChange(old []byte, latest []byte) bool {
+	oldConf := new(ConsulConfig)
+	newConf := new(ConsulConfig)
+	_ = json.Unmarshal(old, oldConf)
+	_ = json.Unmarshal(latest, newConf)
+
+	return !reflect.DeepEqual(oldConf, newConf)
 }
 
-type NacosEnumConf struct {
+func (c *Consul) Render() string {
+	return consulConfigRender
+}
+
+type ConsulEnumConf struct {
 	ServiceName string `json:"service_name"`
 }
 
-type NacosEnum struct {
+type ConsulEnum struct {
 }
 
-func createNacosEnum() *NacosEnum {
-	return &NacosEnum{}
+func createConsulEnum() *ConsulEnum {
+	return &ConsulEnum{}
 }
 
-func (c *NacosEnum) ToApinto(name, namespace, desc, scheme, balance, discoveryName, driverName string, timeout int, config []byte) *v1.ServiceConfig {
-	conf := new(NacosEnumConf)
+func (c *ConsulEnum) ToApinto(name, namespace, desc, scheme, balance, discoveryName, driverName string, timeout int, config []byte) *v1.ServiceConfig {
+	conf := new(ConsulEnumConf)
 	_ = json.Unmarshal(config, conf)
 
 	serviceConfig := &v1.ServiceConfig{
@@ -163,12 +166,12 @@ func (c *NacosEnum) ToApinto(name, namespace, desc, scheme, balance, discoveryNa
 	return serviceConfig
 }
 
-func (c *NacosEnum) Render() string {
+func (c *ConsulEnum) Render() string {
 	return commonDiscoveryEnumRender
 }
 
-func (c *NacosEnum) CheckInput(config []byte) ([]byte, string, []string, error) {
-	conf := new(NacosEnumConf)
+func (c *ConsulEnum) CheckInput(config []byte) ([]byte, string, []string, error) {
+	conf := new(ConsulEnumConf)
 	_ = json.Unmarshal(config, conf)
 	conf.ServiceName = strings.TrimSpace(conf.ServiceName)
 	if conf.ServiceName == "" {
@@ -180,7 +183,8 @@ func (c *NacosEnum) CheckInput(config []byte) ([]byte, string, []string, error) 
 	return data, format, nil, nil
 }
 
-func (c *NacosEnum) FormatConfig(config []byte) []byte {
+// FormatConfig 格式化返回的配置
+func (c *ConsulEnum) FormatConfig(config []byte) []byte {
 	//以后可能对不同版本的配置进行转发
 
 	//解出配置，可以对空值赋予默认值
@@ -188,14 +192,14 @@ func (c *NacosEnum) FormatConfig(config []byte) []byte {
 	return config
 }
 
-var nacosConfigRender = `{
+var consulConfigRender = `{
 	"type": "object",
 	"properties": {
 		"addrsList": {
 			"type": "object",
 			"x-component": "ArrayItems",
 			"x-decorator": "FormItem",
-			"title": "Nacos地址",
+			"title": "Consul地址",
 			"required": true,
 			"properties": {
 				"use_variable": {
@@ -229,7 +233,7 @@ var nacosConfigRender = `{
 									"x-component": "Input",
 									"x-component-props": {
 										"placeholder": "请输入环境变量",
-                       				    "extra":"参考格式${abc123},英文数字下划线任意一种，首字母必须为英文"
+                            			"extra":"参考格式${abc123},英文数字下划线任意一种，首字母必须为英文"
 									},
 									"pattern":"^\\${([a-zA-Z][a-zA-Z0-9_]*)}$",
 									"x-index": 0,
