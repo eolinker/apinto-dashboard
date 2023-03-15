@@ -9,7 +9,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/base/frontend-model"
 	model "github.com/eolinker/apinto-dashboard/modules/strategy/strategy-model"
 	upstream_model "github.com/eolinker/apinto-dashboard/modules/upstream/model"
-	dto "github.com/eolinker/apinto-dashboard/modules/upstream/service-dto"
+	dto "github.com/eolinker/apinto-dashboard/modules/upstream/upstream-dto"
 	upstream_entry2 "github.com/eolinker/apinto-dashboard/modules/upstream/upstream-entry"
 	reflect "reflect"
 

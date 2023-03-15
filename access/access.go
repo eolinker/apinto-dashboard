@@ -23,8 +23,6 @@ const (
 	ApiEdit
 	StrategyTrafficView
 	StrategyTrafficEdit
-	UserRoleView
-	UserRoleEdit
 	StrategyFuseView
 	StrategyFuseEdit
 	StrategyVisitView
@@ -34,16 +32,9 @@ const (
 	StrategyGreyView
 	StrategyGreyEdit
 	AuditLogView
-	AuthorizationView
-	AuthorizationEdit
 	ExtAPPView
 	ExtAPPEdit
-	MonPartitionView
-	MonPartitionEdit
-	NoticeEmailView
-	NoticeEmailEdit
-	NoticeWebhookView
-	NoticeWebhookEdit
+
 	lastId
 	unknown
 )

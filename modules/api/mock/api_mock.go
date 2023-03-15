@@ -6,6 +6,7 @@ package mock
 
 import (
 	context "context"
+	"github.com/eolinker/apinto-dashboard/modules/api"
 	dto "github.com/eolinker/apinto-dashboard/modules/api/api-dto"
 	api_entry "github.com/eolinker/apinto-dashboard/modules/api/api-entry"
 	apimodel "github.com/eolinker/apinto-dashboard/modules/api/model"
@@ -14,7 +15,6 @@ import (
 	model "github.com/eolinker/apinto-dashboard/modules/strategy/strategy-model"
 	reflect "reflect"
 
-	driver "github.com/eolinker/apinto-dashboard/driver-manager/driver"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -158,10 +158,10 @@ func (mr *MockIAPIServiceMockRecorder) GetAPICountByGroupUUID(ctx, namespaceID, 
 }
 
 // GetAPIDriver mocks base method.
-func (m *MockIAPIService) GetAPIDriver(driverName string) driver.IAPIDriver {
+func (m *MockIAPIService) GetAPIDriver(driverName string) api.IAPIDriver {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAPIDriver", driverName)
-	ret0, _ := ret[0].(driver.IAPIDriver)
+	ret0, _ := ret[0].(api.IAPIDriver)
 	return ret0
 }
 

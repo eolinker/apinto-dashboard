@@ -7,8 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
-	drivermanager "github.com/eolinker/apinto-dashboard/driver-manager"
-	"github.com/eolinker/apinto-dashboard/driver-manager/driver"
 	"github.com/eolinker/apinto-dashboard/enum"
 	apiservice "github.com/eolinker/apinto-dashboard/modules/api"
 	"github.com/eolinker/apinto-dashboard/modules/api/api-dto"
@@ -59,7 +57,7 @@ type apiService struct {
 	apintoClient     cluster.IApintoClient
 	userInfoService  user.IUserInfoService
 	extAppService    openapp.IExternalApplicationService
-	apiManager       drivermanager.IAPIDriverManager
+	apiManager       apiservice.IAPIDriverManager
 
 	lockService    locker_service.IAsynLockService
 	importApiCache IImportApiCache
@@ -2078,7 +2076,7 @@ func (a *apiService) isAPIVersionConfChange(latest apientry.APIVersionConfig, cu
 	return !reflect.DeepEqual(latest, current)
 }
 
-func (a *apiService) GetAPIDriver(driverName string) driver.IAPIDriver {
+func (a *apiService) GetAPIDriver(driverName string) apiservice.IAPIDriver {
 	return a.apiManager.GetDriver(driverName)
 }
 

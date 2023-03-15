@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/enum"
+	"github.com/eolinker/apinto-dashboard/modules/audit"
 	"github.com/eolinker/apinto-dashboard/modules/audit/audit-entry"
 	"github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-dashboard/modules/audit/audit-store"
@@ -21,7 +22,7 @@ type auditLogService struct {
 	userInfoService user.IUserInfoService
 }
 
-func newAuditLogService() IAuditLogService {
+func newAuditLogService() audit.IAuditLogService {
 	s := &auditLogService{}
 
 	bean.Autowired(&s.auditLogStore)

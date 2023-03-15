@@ -2,13 +2,14 @@ package online_service
 
 import (
 	"context"
-	api2 "github.com/eolinker/apinto-dashboard/modules/api"
+	apiService "github.com/eolinker/apinto-dashboard/modules/api"
 	"github.com/eolinker/apinto-dashboard/modules/application"
-	cluster_service "github.com/eolinker/apinto-dashboard/modules/cluster"
+	clusterService "github.com/eolinker/apinto-dashboard/modules/cluster"
 	"github.com/eolinker/apinto-dashboard/modules/discovery"
 	"github.com/eolinker/apinto-dashboard/modules/online"
 	"github.com/eolinker/apinto-dashboard/modules/strategy"
 	"github.com/eolinker/apinto-dashboard/modules/upstream"
+	"github.com/eolinker/apinto-dashboard/modules/variable"
 	"github.com/eolinker/eosc/common/bean"
 )
 
@@ -24,11 +25,11 @@ func (r *resetOnlineService) ResetOnline(ctx context.Context, namespaceId, clust
 
 func newResetOnline() online.IResetOnlineService {
 	online := &resetOnlineService{}
-	var clConfig cluster_service.IClusterConfigService
+	var clConfig clusterService.IClusterConfigService
 	var variable variable.IClusterVariableService
 	var discovery discovery.IDiscoveryService
 	var iService upstream.IService
-	var api api2.IAPIService
+	var api apiService.IAPIService
 	var application application.IApplicationService
 	var commonStrategy strategy.IStrategyCommonService
 

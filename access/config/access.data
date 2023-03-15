@@ -12,8 +12,6 @@ api_view 查看
 api_edit 编辑
 strategy_traffic_view 查看
 strategy_traffic_edit 编辑
-user_role_view 查看
-user_role_edit 编辑
 strategy_fuse_view 查看
 strategy_fuse_edit 编辑
 strategy_visit_view 查看
@@ -23,13 +21,5 @@ strategy_cache_edit 编辑
 strategy_grey_view 查看
 strategy_grey_edit 编辑
 audit_log_view 查看
-authorization_view 查看
-authorization_edit 编辑
 ext_app_view 查看
 ext_app_edit 编辑
-mon_partition_view 查看
-mon_partition_edit 编辑
-notice_email_view 查看
-notice_email_edit 编辑
-notice_webhook_view 查看
-notice_webhook_edit 编辑

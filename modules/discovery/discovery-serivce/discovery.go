@@ -5,8 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
-	driver_manager "github.com/eolinker/apinto-dashboard/driver-manager"
-	"github.com/eolinker/apinto-dashboard/driver-manager/driver"
+	driver_manager "github.com/eolinker/apinto-dashboard/driver"
 	"github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-dashboard/modules/base/frontend-model"
 	"github.com/eolinker/apinto-dashboard/modules/base/locker-service"
@@ -51,8 +50,8 @@ type discoveryService struct {
 	service               upstream.IService
 
 	lockService      locker_service.IAsynLockService
-	discoveryManager driver_manager.IDiscoveryDriverManager
-	staticDriver     driver.IServiceDriver
+	discoveryManager discovery.IDiscoveryDriverManager
+	staticDriver     upstream.IServiceDriver
 }
 
 func newDiscoveryService() discovery.IDiscoveryService {
@@ -752,7 +751,7 @@ func (d *discoveryService) GetDiscoveryInfoByID(ctx context.Context, discoveryID
 
 func (d *discoveryService) GetDiscoveryID(ctx context.Context, namespaceID int, discoveryName string) (int, error) {
 	//判断是静态服务发现则返回id 0
-	if discoveryName == driver.DriverStatic {
+	if discoveryName == DriverStatic {
 		return 0, nil
 	}
 
@@ -774,8 +773,8 @@ func (d *discoveryService) GetDiscoveryEnum(ctx context.Context, namespaceID int
 
 	//静态节点驱动
 	staticEnum := &discovery_model.DiscoveryEnum{
-		Name:   driver.DriverStatic,
-		Driver: driver.DriverStatic,
+		Name:   DriverStatic,
+		Driver: DriverStatic,
 		Render: d.staticDriver.Render(),
 	}
 	enums = append(enums, staticEnum)
@@ -799,10 +798,10 @@ func (d *discoveryService) GetDriversRender() []*driver_manager.DriverInfo {
 	return d.discoveryManager.List()
 }
 
-func (d *discoveryService) GetServiceDiscoveryDriverByID(ctx context.Context, discoveryID int) (string, string, driver.IServiceDriver, error) {
+func (d *discoveryService) GetServiceDiscoveryDriverByID(ctx context.Context, discoveryID int) (string, string, upstream.IServiceDriver, error) {
 	//判断是static 则返回静态驱动
 	if discoveryID == 0 {
-		return driver.DriverStatic, driver.DriverStatic, d.staticDriver, nil
+		return DriverStatic, DriverStatic, d.staticDriver, nil
 	}
 	discovery, err := d.discoveryStore.Get(ctx, discoveryID)
 	if err != nil {
@@ -828,10 +827,10 @@ func (d *discoveryService) GetLatestDiscoveryVersion(ctx context.Context, discov
 	return (*discovery_model.DiscoveryVersion)(version), nil
 }
 
-func (d *discoveryService) GetServiceDiscoveryDriver(ctx context.Context, namespaceID int, discoveryName string) (int, string, driver.IServiceDriver, error) {
+func (d *discoveryService) GetServiceDiscoveryDriver(ctx context.Context, namespaceID int, discoveryName string) (int, string, upstream.IServiceDriver, error) {
 	//判断是static 则返回静态驱动
-	if discoveryName == driver.DriverStatic {
-		return 0, driver.DriverStatic, d.staticDriver, nil
+	if discoveryName == DriverStatic {
+		return 0, DriverStatic, d.staticDriver, nil
 	}
 
 	discovery, err := d.discoveryStore.GetByName(ctx, namespaceID, discoveryName)
