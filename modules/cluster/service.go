@@ -3,6 +3,7 @@ package cluster
 import (
 	"context"
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
+	"github.com/eolinker/apinto-dashboard/driver"
 	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-dto"
 	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-entry"
 	cluster_model2 "github.com/eolinker/apinto-dashboard/modules/cluster/cluster-model"
@@ -59,4 +60,22 @@ type IClusterNodeService interface {
 	Insert(ctx context.Context, nodes []*cluster_model2.ClusterNode) error
 	GetNodesByUrl(addr string) ([]*cluster_model2.ClusterNode, error)
 	GetClusterInfo(addr string) (*v1.ClusterInfo, error)
+}
+
+// ICLConfigDriverManager 集群配置驱动管理器
+type ICLConfigDriverManager interface {
+	driver.IDriverManager[ICLConfigDriver]
+	List() []*driver.DriverInfo
+}
+
+const (
+	CLConfigRedis    = "redis"
+	CLConfigInfluxV2 = "influxdbv2"
+)
+
+type ICLConfigDriver interface {
+	CheckInput(config []byte) error
+	ToApinto(name string, config []byte) interface{}
+	FormatOut(operator string, config *cluster_entry.ClusterConfig) interface{}
+	InitConfig(config []byte) error
 }

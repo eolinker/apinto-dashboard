@@ -15,7 +15,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/openapi/open-api-controller"
 	"github.com/eolinker/apinto-dashboard/modules/openapp/open-app-controller"
 	strategy_controller2 "github.com/eolinker/apinto-dashboard/modules/strategy/strategy-controller"
-	"github.com/eolinker/apinto-dashboard/modules/user/user-controller"
+	user_controller "github.com/eolinker/apinto-dashboard/modules/user/user-controller"
 	variable_controller2 "github.com/eolinker/apinto-dashboard/modules/variable/variable-controller"
 
 	"github.com/eolinker/apinto-dashboard/filter"

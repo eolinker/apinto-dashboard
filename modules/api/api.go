@@ -2,7 +2,8 @@ package api
 
 import (
 	"context"
-	"github.com/eolinker/apinto-dashboard/driver-manager/driver"
+	"github.com/eolinker/apinto-dashboard/client/v1"
+	"github.com/eolinker/apinto-dashboard/driver"
 	"github.com/eolinker/apinto-dashboard/modules/api/api-dto"
 	api_entry "github.com/eolinker/apinto-dashboard/modules/api/api-entry"
 	apimodel "github.com/eolinker/apinto-dashboard/modules/api/model"
@@ -49,9 +50,23 @@ type IAPIService interface {
 	GetAPIListByServiceName(ctx context.Context, namespaceId int, serviceName []string) ([]*apimodel.APIInfo, error)
 	GetLatestAPIVersion(ctx context.Context, apiId int) (*api_entry.APIVersion, error)
 	IsAPIOnline(ctx context.Context, clusterId, apiID int) bool
-	GetAPIDriver(driverName string) driver.IAPIDriver
+	GetAPIDriver(driverName string) IAPIDriver
 	GetAPINameByID(ctx context.Context, apiID int) (string, error)
 	GetAPIRemoteOptions(ctx context.Context, namespaceId, pageNum, pageSize int, keyword, groupUuid string) ([]*strategy_model.RemoteApis, int, error)
 	GetAPIRemoteByUUIDS(ctx context.Context, namespace int, uuids []string) ([]*strategy_model.RemoteApis, error)
 	ResetOnline(ctx context.Context, namespaceId, clusterId int)
+}
+
+type IAPIDriverManager interface {
+	driver.IDriverManager[IAPIDriver]
+	List() []*APIDriverInfo
+}
+
+type APIDriverInfo struct {
+	Name string
+}
+
+type IAPIDriver interface {
+	CheckInput(input *api_dto.APIInfo) error
+	ToApinto(name, desc string, disable bool, method []string, requestPath, requestPathLabel, proxyPath, serviceName string, timeout, retry int, enableWebsocket bool, match []*api_entry.MatchConf, header []*api_entry.ProxyHeader) *v1.RouterConfig
 }

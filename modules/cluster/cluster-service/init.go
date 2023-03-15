@@ -1,9 +1,20 @@
 package cluster_service
 
-import "github.com/eolinker/eosc/common/bean"
+import (
+	"github.com/eolinker/apinto-dashboard/modules/cluster"
+	driver2 "github.com/eolinker/apinto-dashboard/modules/cluster/driver"
+	"github.com/eolinker/eosc/common/bean"
+)
 
 func init() {
-	cluster := newClusterService()
+
+	clConfigDriverManager := newCLConfigDriverManager()
+	redisDriver := driver2.CreateRedis("redis")
+	clConfigDriverManager.RegisterDriver(cluster.CLConfigRedis, redisDriver)
+
+	bean.Injection(&clConfigDriverManager)
+
+	iClusterService := newClusterService()
 	clusterCertificate := newClusterCertificateService()
 	clusterNode := newClusterNodeService()
 	clusterConfig := newClusterConfigService()
@@ -12,7 +23,7 @@ func init() {
 
 	bean.Injection(&apintoClient)
 
-	bean.Injection(&cluster)
+	bean.Injection(&iClusterService)
 	bean.Injection(&clusterCertificate)
 	bean.Injection(&clusterNode)
 	bean.Injection(&clusterConfig)

@@ -12,8 +12,6 @@ api_edit:
   - api_view
 strategy_traffic_edit:
   - strategy_traffic_view
-user_role_edit:
-  - user_role_view
 strategy_fuse_edit:
   - strategy_fuse_view
 strategy_visit_edit:
@@ -26,9 +24,4 @@ authorization_edit:
   - authorization_view
 ext_app_edit:
   - ext_app_view
-mon_partition_edit:
-  - mon_partition_view
-notice_email_edit:
-  - notice_email_view
-notice_webhook_edit:
-  - notice_webhook_view
+

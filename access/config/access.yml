@@ -1,13 +1,4 @@
 modules:
-  - id: 9
-    title: 监控告警
-    children:
-      - title: 分区管理
-        id: 901
-        module: monitor-alarm
-        access:
-          - mon_partition_view
-          - mon_partition_edit
   - id: 4
     title: API管理
     module: router
@@ -88,36 +79,12 @@ modules:
     module: audit-log
     access:
       - audit_log_view
-  - id: 8
-    title: 商业授权
-    module: auth-info
-    access:
-      - authorization_view
-      - authorization_edit
   - id: 6
     title: 系统管理
     children:
-      - title: 用户角色
-        id: 601
-        module: system/role/list
-        access:
-          - user_role_view
-          - user_role_edit
       - title: 外部应用
         id: 602
         module: system/ext-app
         access:
           - ext_app_view
           - ext_app_edit
-      - title: 邮箱设置
-        id: 603
-        module: system/email
-        access:
-          - notice_email_view
-          - notice_email_edit
-      - title: webhook管理
-        id: 604
-        module: system/webhook
-        access:
-          - notice_webhook_view
-          - notice_webhook_edit

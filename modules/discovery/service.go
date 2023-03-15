@@ -2,12 +2,12 @@ package discovery
 
 import (
 	"context"
-	driver_manager "github.com/eolinker/apinto-dashboard/driver-manager"
-	"github.com/eolinker/apinto-dashboard/driver-manager/driver"
+	driver_manager "github.com/eolinker/apinto-dashboard/driver"
 	"github.com/eolinker/apinto-dashboard/modules/base/frontend-model"
 	"github.com/eolinker/apinto-dashboard/modules/discovery/discover-dto"
 	"github.com/eolinker/apinto-dashboard/modules/discovery/discovery-model"
 	"github.com/eolinker/apinto-dashboard/modules/online"
+	"github.com/eolinker/apinto-dashboard/modules/upstream"
 )
 
 type IDiscoveryService interface {
@@ -30,7 +30,7 @@ type IDiscoveryService interface {
 	IsOnline(ctx context.Context, clusterId, discoveryId int) bool
 
 	//通过服务名获取配置上游服务时所需要的discoveryDriver
-	GetServiceDiscoveryDriver(ctx context.Context, namespaceID int, discoveryName string) (int, string, driver.IServiceDriver, error)
-	GetServiceDiscoveryDriverByID(ctx context.Context, discoveryID int) (string, string, driver.IServiceDriver, error)
+	GetServiceDiscoveryDriver(ctx context.Context, namespaceID int, discoveryName string) (int, string, upstream.IServiceDriver, error)
+	GetServiceDiscoveryDriverByID(ctx context.Context, discoveryID int) (string, string, upstream.IServiceDriver, error)
 	online.IResetOnlineService
 }

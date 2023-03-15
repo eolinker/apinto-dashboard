@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/eolinker/apinto-dashboard/common"
-	driver_manager "github.com/eolinker/apinto-dashboard/driver-manager"
-	"github.com/eolinker/apinto-dashboard/driver-manager/driver"
 	"github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-dashboard/modules/base/quote-entry"
 	"github.com/eolinker/apinto-dashboard/modules/base/quote-store"
@@ -23,7 +21,7 @@ type noticeChannelService struct {
 	noticeChannelStore   notice_store2.INoticeChannelStore
 	noticeChannelStat    notice_store2.INoticeChannelStatStore
 	noticeChannelVersion notice_store2.INoticeChannelVersionStore
-	noticeChannelDriver  driver_manager.INoticeChannelDriverManager
+	noticeChannelDriver  notice.INoticeChannelDriverManager
 	quoteStore           quote_store.IQuoteStore
 	userService          user.IUserInfoService
 }
@@ -51,7 +49,7 @@ func (n *noticeChannelService) InitChannelDriver() error {
 		if err != nil {
 			return err
 		}
-		var driverNoticeChannel driver.IDriverNoticeChannel
+		var driverNoticeChannel notice.IDriverNoticeChannel
 		if channel.Type == 2 {
 			email := new(notice_model.NoticeChannelEmail)
 			if err = json.Unmarshal([]byte(version.Config), email); err != nil {
@@ -83,7 +81,7 @@ func (n *noticeChannelService) CreateNoticeChannel(ctx context.Context, namespac
 		UpdateTime:  t,
 	}
 
-	var driverNoticeChannel driver.IDriverNoticeChannel
+	var driverNoticeChannel notice.IDriverNoticeChannel
 	//邮箱
 	if channel.Type == 2 {
 		channels, _ := n.noticeChannelStore.GetByType(ctx, namespaceId, channel.Type)
@@ -166,7 +164,7 @@ func (n *noticeChannelService) UpdateNoticeChannel(ctx context.Context, namespac
 	noticeChannel.Operator = userID
 	noticeChannel.UpdateTime = t
 
-	var driverNoticeChannel driver.IDriverNoticeChannel
+	var driverNoticeChannel notice.IDriverNoticeChannel
 	//邮箱
 	if channel.Type == 2 {
 		email := new(notice_model.NoticeChannelEmail)

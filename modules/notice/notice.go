@@ -13,3 +13,7 @@ type INoticeChannelService interface {
 	NoticeChannelByName(ctx context.Context, namespaceId int, name string) (*notice_model.NoticeChannel, error)
 	InitChannelDriver() error
 }
+
+type IDriverNoticeChannel interface {
+	SendTo(sends []string, title, msg string) error
+}

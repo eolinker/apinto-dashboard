@@ -5,8 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
-	driverInfo "github.com/eolinker/apinto-dashboard/driver-manager"
-	"github.com/eolinker/apinto-dashboard/driver-manager/driver"
+	driverInfo "github.com/eolinker/apinto-dashboard/driver"
 	"github.com/eolinker/apinto-dashboard/modules/application"
 	"github.com/eolinker/apinto-dashboard/modules/application/application-dto"
 	application_entry2 "github.com/eolinker/apinto-dashboard/modules/application/application-entry"
@@ -29,10 +28,10 @@ type applicationAuthService struct {
 	applicationService          application.IApplicationService
 	clusterService              cluster.IClusterService
 	userInfoService             user.IUserInfoService
-	driverManager               driverInfo.IAuthDriverManager
+	driverManager               application.IAuthDriverManager
 }
 
-func (a *applicationAuthService) GetDriver(driver string) driver.IAuthDriver {
+func (a *applicationAuthService) GetDriver(driver string) application.IAuthDriver {
 	return a.driverManager.GetDriver(driver)
 }
 
