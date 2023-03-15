@@ -6,6 +6,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/enum"
 	api_entry "github.com/eolinker/apinto-dashboard/modules/api/api-entry"
 	apimodel "github.com/eolinker/apinto-dashboard/modules/api/model"
+	"github.com/eolinker/apinto-dashboard/modules/openapi"
 	"github.com/go-basic/uuid"
 	"net/url"
 	"strings"
@@ -72,7 +73,7 @@ func (o *OpenAPI3) FormatAPI(data []byte, namespaceID, appID int, groupID, prefi
 	return apiList, nil
 }
 
-func CreateOpenAPI3(format string) IAPISyncFormatDriver {
+func CreateOpenAPI3(format string) openapi.IAPISyncFormatDriver {
 	return &OpenAPI3{format: format}
 }
 

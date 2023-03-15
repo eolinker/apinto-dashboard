@@ -6,57 +6,59 @@ import (
 	"fmt"
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/common"
+	"github.com/eolinker/apinto-dashboard/modules/discovery"
+	"github.com/eolinker/apinto-dashboard/modules/upstream"
 	"reflect"
 	"strings"
 )
 
-type EurekaConfig struct {
+type NacosConfig struct {
 	UseVariable   bool            `json:"use_variable"`
 	AddrsVariable string          `json:"addrs_variable,omitempty"  switch:"is_variable === true"`
 	Addrs         []string        `json:"addrs,omitempty"  switch:"is_variable === false"`
 	Params        []*commonParams `json:"params"`
 }
 
-type Eureka struct {
+type Nacos struct {
 	apintoDriverName string
-	enum             IServiceDriver
+	enum             upstream.IServiceDriver
 }
 
-func CreateEureka(apintoDriverName string) IDiscoveryDriver {
-	eurekaEnum := createEurekaEnum()
-	return &Eureka{enum: eurekaEnum, apintoDriverName: apintoDriverName}
+func CreateNacos(apintoDriverName string) discovery.IDiscoveryDriver {
+	nacosEnum := createNacosEnum()
+	return &Nacos{enum: nacosEnum, apintoDriverName: apintoDriverName}
 }
 
-func (e *Eureka) ToApinto(namespace, name, desc string, config []byte) *v1.DiscoveryConfig {
-	eurekaConf := new(EurekaConfig)
-	_ = json.Unmarshal(config, eurekaConf)
+func (n *Nacos) ToApinto(namespace, name, desc string, config []byte) *v1.DiscoveryConfig {
+	nacosConf := new(NacosConfig)
+	_ = json.Unmarshal(config, nacosConf)
 
-	address := make([]string, 0, len(eurekaConf.Addrs))
+	address := make([]string, 0, len(nacosConf.Addrs))
 	params := make(map[string]string)
 
 	//处理地址
-	if eurekaConf.UseVariable {
-		address = append(address, fmt.Sprintf("${%s@%s}", common.GetVariableKey(eurekaConf.AddrsVariable), namespace))
+	if nacosConf.UseVariable {
+		address = append(address, fmt.Sprintf("${%s@%s}", common.GetVariableKey(nacosConf.AddrsVariable), namespace))
 	} else {
-		address = eurekaConf.Addrs
+		address = nacosConf.Addrs
 	}
 
 	//处理参数
-	for _, param := range eurekaConf.Params {
+	for _, param := range nacosConf.Params {
 		if common.IsMatchVariable(param.Value) {
 			params[param.Key] = fmt.Sprintf("${%s@%s}", common.GetVariableKey(param.Value), namespace)
 			continue
 		}
 		params[param.Key] = param.Value
 	}
-	apintoEurekaConfig := &ApintoDiscoveryConfig{
+	apintoNacosConfig := &ApintoDiscoveryConfig{
 		Address: address,
 		Params:  params,
 	}
-	conf, _ := json.Marshal(apintoEurekaConfig)
+	conf, _ := json.Marshal(apintoNacosConfig)
 	discoveryConfig := &v1.DiscoveryConfig{
 		Name:         name,
-		Driver:       e.apintoDriverName,
+		Driver:       n.apintoDriverName,
 		Description:  desc,
 		Config:       v1.JsonMarshalProxy(conf),
 		StaticHealth: nil,
@@ -65,29 +67,20 @@ func (e *Eureka) ToApinto(namespace, name, desc string, config []byte) *v1.Disco
 	return discoveryConfig
 }
 
-func (e *Eureka) CheckConfIsChange(old []byte, latest []byte) bool {
-	oldConf := new(EurekaConfig)
-	newConf := new(EurekaConfig)
-	_ = json.Unmarshal(old, oldConf)
-	_ = json.Unmarshal(latest, newConf)
-
-	return !reflect.DeepEqual(oldConf, newConf)
-}
-
-func (e *Eureka) Render() string {
-	return eurekaConfigRender
+func (n *Nacos) Render() string {
+	return nacosConfigRender
 }
 
 // CheckInput 返回参数：地址概要，引用的变量列表，error
-func (e *Eureka) CheckInput(config []byte) ([]byte, string, []string, error) {
-	conf := new(EurekaConfig)
+func (n *Nacos) CheckInput(config []byte) ([]byte, string, []string, error) {
+	conf := new(NacosConfig)
 	_ = json.Unmarshal(config, conf)
 	addrsFormatStr := ""
 	variableList := make([]string, 0)
 
 	if conf.UseVariable {
 		if !common.IsMatchVariable(conf.AddrsVariable) {
-			return nil, "", nil, ErrVariableIllegal
+			return nil, "", nil, discovery.ErrVariableIllegal
 		}
 		variableList = append(variableList, common.GetVariableKey(conf.AddrsVariable))
 		//返回地址概要是方便上游服务列表显示，若使用了环境变量，则将环境变量存入配置中，每次获取表时实时取。
@@ -103,7 +96,6 @@ func (e *Eureka) CheckInput(config []byte) ([]byte, string, []string, error) {
 				return nil, "", nil, fmt.Errorf("addrs.addr can't be nil. ")
 			}
 		}
-
 		addrsFormatStr = strings.Join(conf.Addrs, ",")
 	}
 
@@ -118,8 +110,17 @@ func (e *Eureka) CheckInput(config []byte) ([]byte, string, []string, error) {
 	return data, addrsFormatStr, variableList, nil
 }
 
+func (n *Nacos) CheckConfIsChange(old []byte, latest []byte) bool {
+	oldConf := new(NacosConfig)
+	newConf := new(NacosConfig)
+	_ = json.Unmarshal(old, oldConf)
+	_ = json.Unmarshal(latest, newConf)
+
+	return !reflect.DeepEqual(oldConf, newConf)
+}
+
 // FormatConfig 格式化返回的配置
-func (e *Eureka) FormatConfig(config []byte) []byte {
+func (n *Nacos) FormatConfig(config []byte) []byte {
 	//以后可能对不同版本的配置进行转发
 
 	//解出配置，可以对空值赋予默认值
@@ -127,23 +128,23 @@ func (e *Eureka) FormatConfig(config []byte) []byte {
 	return config
 }
 
-func (e *Eureka) OptionsEnum() IServiceDriver {
-	return e.enum
+func (n *Nacos) OptionsEnum() upstream.IServiceDriver {
+	return n.enum
 }
 
-type EurekaEnumConf struct {
+type NacosEnumConf struct {
 	ServiceName string `json:"service_name"`
 }
 
-type EurekaEnum struct {
+type NacosEnum struct {
 }
 
-func createEurekaEnum() *EurekaEnum {
-	return &EurekaEnum{}
+func createNacosEnum() *NacosEnum {
+	return &NacosEnum{}
 }
 
-func (c *EurekaEnum) ToApinto(name, namespace, desc, scheme, balance, discoveryName, driverName string, timeout int, config []byte) *v1.ServiceConfig {
-	conf := new(EurekaEnumConf)
+func (c *NacosEnum) ToApinto(name, namespace, desc, scheme, balance, discoveryName, driverName string, timeout int, config []byte) *v1.ServiceConfig {
+	conf := new(NacosEnumConf)
 	_ = json.Unmarshal(config, conf)
 
 	serviceConfig := &v1.ServiceConfig{
@@ -164,12 +165,12 @@ func (c *EurekaEnum) ToApinto(name, namespace, desc, scheme, balance, discoveryN
 	return serviceConfig
 }
 
-func (c *EurekaEnum) Render() string {
+func (c *NacosEnum) Render() string {
 	return commonDiscoveryEnumRender
 }
 
-func (c *EurekaEnum) CheckInput(config []byte) ([]byte, string, []string, error) {
-	conf := new(EurekaEnumConf)
+func (c *NacosEnum) CheckInput(config []byte) ([]byte, string, []string, error) {
+	conf := new(NacosEnumConf)
 	_ = json.Unmarshal(config, conf)
 	conf.ServiceName = strings.TrimSpace(conf.ServiceName)
 	if conf.ServiceName == "" {
@@ -181,8 +182,7 @@ func (c *EurekaEnum) CheckInput(config []byte) ([]byte, string, []string, error)
 	return data, format, nil, nil
 }
 
-// FormatConfig 格式化返回的配置
-func (c *EurekaEnum) FormatConfig(config []byte) []byte {
+func (c *NacosEnum) FormatConfig(config []byte) []byte {
 	//以后可能对不同版本的配置进行转发
 
 	//解出配置，可以对空值赋予默认值
@@ -190,14 +190,14 @@ func (c *EurekaEnum) FormatConfig(config []byte) []byte {
 	return config
 }
 
-var eurekaConfigRender = `{
+var nacosConfigRender = `{
 	"type": "object",
 	"properties": {
 		"addrsList": {
 			"type": "object",
 			"x-component": "ArrayItems",
 			"x-decorator": "FormItem",
-			"title": "Eureka地址",
+			"title": "Nacos地址",
 			"required": true,
 			"properties": {
 				"use_variable": {
@@ -231,7 +231,7 @@ var eurekaConfigRender = `{
 									"x-component": "Input",
 									"x-component-props": {
 										"placeholder": "请输入环境变量",
-                          				"extra":"参考格式${abc123},英文数字下划线任意一种，首字母必须为英文"
+                       				    "extra":"参考格式${abc123},英文数字下划线任意一种，首字母必须为英文"
 									},
 									"pattern":"^\\${([a-zA-Z][a-zA-Z0-9_]*)}$",
 									"x-index": 0,

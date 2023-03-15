@@ -7,6 +7,7 @@ import (
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/enum"
+	"github.com/eolinker/apinto-dashboard/modules/application"
 	"strings"
 )
 
@@ -79,7 +80,7 @@ func (b *Basic) ToApinto(expire int64, position string, tokenName string, config
 	return auth
 }
 
-func CreateBasic() IAuthDriver {
+func CreateBasic() application.IAuthDriver {
 	return &Basic{apintoDriverName: "basic"}
 }
 

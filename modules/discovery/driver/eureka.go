@@ -6,57 +6,59 @@ import (
 	"fmt"
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/common"
+	"github.com/eolinker/apinto-dashboard/modules/discovery"
+	"github.com/eolinker/apinto-dashboard/modules/upstream"
 	"reflect"
 	"strings"
 )
 
-type ConsulConfig struct {
+type EurekaConfig struct {
 	UseVariable   bool            `json:"use_variable"`
 	AddrsVariable string          `json:"addrs_variable,omitempty"  switch:"is_variable === true"`
 	Addrs         []string        `json:"addrs,omitempty"  switch:"is_variable === false"`
 	Params        []*commonParams `json:"params"`
 }
 
-type Consul struct {
+type Eureka struct {
 	apintoDriverName string
-	enum             IServiceDriver
+	enum             upstream.IServiceDriver
 }
 
-func CreateConsul(apintoDriverName string) IDiscoveryDriver {
-	consulEnum := createConsulEnum()
-	return &Consul{enum: consulEnum, apintoDriverName: apintoDriverName}
+func CreateEureka(apintoDriverName string) discovery.IDiscoveryDriver {
+	eurekaEnum := createEurekaEnum()
+	return &Eureka{enum: eurekaEnum, apintoDriverName: apintoDriverName}
 }
 
-func (c *Consul) ToApinto(namespace, name, desc string, config []byte) *v1.DiscoveryConfig {
-	consulConf := new(ConsulConfig)
-	_ = json.Unmarshal(config, consulConf)
+func (e *Eureka) ToApinto(namespace, name, desc string, config []byte) *v1.DiscoveryConfig {
+	eurekaConf := new(EurekaConfig)
+	_ = json.Unmarshal(config, eurekaConf)
 
-	address := make([]string, 0, len(consulConf.Addrs))
+	address := make([]string, 0, len(eurekaConf.Addrs))
 	params := make(map[string]string)
 
 	//处理地址
-	if consulConf.UseVariable {
-		address = append(address, fmt.Sprintf("${%s@%s}", common.GetVariableKey(consulConf.AddrsVariable), namespace))
+	if eurekaConf.UseVariable {
+		address = append(address, fmt.Sprintf("${%s@%s}", common.GetVariableKey(eurekaConf.AddrsVariable), namespace))
 	} else {
-		address = consulConf.Addrs
+		address = eurekaConf.Addrs
 	}
 
 	//处理参数
-	for _, param := range consulConf.Params {
+	for _, param := range eurekaConf.Params {
 		if common.IsMatchVariable(param.Value) {
 			params[param.Key] = fmt.Sprintf("${%s@%s}", common.GetVariableKey(param.Value), namespace)
 			continue
 		}
 		params[param.Key] = param.Value
 	}
-	apintoConsulConfig := &ApintoDiscoveryConfig{
+	apintoEurekaConfig := &ApintoDiscoveryConfig{
 		Address: address,
 		Params:  params,
 	}
-	conf, _ := json.Marshal(apintoConsulConfig)
+	conf, _ := json.Marshal(apintoEurekaConfig)
 	discoveryConfig := &v1.DiscoveryConfig{
 		Name:         name,
-		Driver:       c.apintoDriverName,
+		Driver:       e.apintoDriverName,
 		Description:  desc,
 		Config:       v1.JsonMarshalProxy(conf),
 		StaticHealth: nil,
@@ -65,23 +67,32 @@ func (c *Consul) ToApinto(namespace, name, desc string, config []byte) *v1.Disco
 	return discoveryConfig
 }
 
-func (c *Consul) OptionsEnum() IServiceDriver {
-	return c.enum
+func (e *Eureka) CheckConfIsChange(old []byte, latest []byte) bool {
+	oldConf := new(EurekaConfig)
+	newConf := new(EurekaConfig)
+	_ = json.Unmarshal(old, oldConf)
+	_ = json.Unmarshal(latest, newConf)
+
+	return !reflect.DeepEqual(oldConf, newConf)
+}
+
+func (e *Eureka) Render() string {
+	return eurekaConfigRender
 }
 
 // CheckInput 返回参数：地址概要，引用的变量列表，error
-func (c *Consul) CheckInput(config []byte) ([]byte, string, []string, error) {
-	conf := new(ConsulConfig)
+func (e *Eureka) CheckInput(config []byte) ([]byte, string, []string, error) {
+	conf := new(EurekaConfig)
 	_ = json.Unmarshal(config, conf)
 	addrsFormatStr := ""
 	variableList := make([]string, 0)
 
 	if conf.UseVariable {
 		if !common.IsMatchVariable(conf.AddrsVariable) {
-			return nil, "", nil, ErrVariableIllegal
+			return nil, "", nil, discovery.ErrVariableIllegal
 		}
 		variableList = append(variableList, common.GetVariableKey(conf.AddrsVariable))
-		//返回地址概要是方便上游服务列表显示，若使用了环境变量，则将环境变量存入配置地址概要中
+		//返回地址概要是方便上游服务列表显示，若使用了环境变量，则将环境变量存入配置中，每次获取表时实时取。
 		addrsFormatStr = conf.AddrsVariable
 	} else {
 		//可以用正则检查地址配置
@@ -94,6 +105,7 @@ func (c *Consul) CheckInput(config []byte) ([]byte, string, []string, error) {
 				return nil, "", nil, fmt.Errorf("addrs.addr can't be nil. ")
 			}
 		}
+
 		addrsFormatStr = strings.Join(conf.Addrs, ",")
 	}
 
@@ -109,8 +121,7 @@ func (c *Consul) CheckInput(config []byte) ([]byte, string, []string, error) {
 }
 
 // FormatConfig 格式化返回的配置
-func (c *Consul) FormatConfig(config []byte) []byte {
-
+func (e *Eureka) FormatConfig(config []byte) []byte {
 	//以后可能对不同版本的配置进行转发
 
 	//解出配置，可以对空值赋予默认值
@@ -118,32 +129,23 @@ func (c *Consul) FormatConfig(config []byte) []byte {
 	return config
 }
 
-func (c *Consul) CheckConfIsChange(old []byte, latest []byte) bool {
-	oldConf := new(ConsulConfig)
-	newConf := new(ConsulConfig)
-	_ = json.Unmarshal(old, oldConf)
-	_ = json.Unmarshal(latest, newConf)
-
-	return !reflect.DeepEqual(oldConf, newConf)
+func (e *Eureka) OptionsEnum() upstream.IServiceDriver {
+	return e.enum
 }
 
-func (c *Consul) Render() string {
-	return consulConfigRender
-}
-
-type ConsulEnumConf struct {
+type EurekaEnumConf struct {
 	ServiceName string `json:"service_name"`
 }
 
-type ConsulEnum struct {
+type EurekaEnum struct {
 }
 
-func createConsulEnum() *ConsulEnum {
-	return &ConsulEnum{}
+func createEurekaEnum() *EurekaEnum {
+	return &EurekaEnum{}
 }
 
-func (c *ConsulEnum) ToApinto(name, namespace, desc, scheme, balance, discoveryName, driverName string, timeout int, config []byte) *v1.ServiceConfig {
-	conf := new(ConsulEnumConf)
+func (c *EurekaEnum) ToApinto(name, namespace, desc, scheme, balance, discoveryName, driverName string, timeout int, config []byte) *v1.ServiceConfig {
+	conf := new(EurekaEnumConf)
 	_ = json.Unmarshal(config, conf)
 
 	serviceConfig := &v1.ServiceConfig{
@@ -164,12 +166,12 @@ func (c *ConsulEnum) ToApinto(name, namespace, desc, scheme, balance, discoveryN
 	return serviceConfig
 }
 
-func (c *ConsulEnum) Render() string {
+func (c *EurekaEnum) Render() string {
 	return commonDiscoveryEnumRender
 }
 
-func (c *ConsulEnum) CheckInput(config []byte) ([]byte, string, []string, error) {
-	conf := new(ConsulEnumConf)
+func (c *EurekaEnum) CheckInput(config []byte) ([]byte, string, []string, error) {
+	conf := new(EurekaEnumConf)
 	_ = json.Unmarshal(config, conf)
 	conf.ServiceName = strings.TrimSpace(conf.ServiceName)
 	if conf.ServiceName == "" {
@@ -182,7 +184,7 @@ func (c *ConsulEnum) CheckInput(config []byte) ([]byte, string, []string, error)
 }
 
 // FormatConfig 格式化返回的配置
-func (c *ConsulEnum) FormatConfig(config []byte) []byte {
+func (c *EurekaEnum) FormatConfig(config []byte) []byte {
 	//以后可能对不同版本的配置进行转发
 
 	//解出配置，可以对空值赋予默认值
@@ -190,14 +192,14 @@ func (c *ConsulEnum) FormatConfig(config []byte) []byte {
 	return config
 }
 
-var consulConfigRender = `{
+var eurekaConfigRender = `{
 	"type": "object",
 	"properties": {
 		"addrsList": {
 			"type": "object",
 			"x-component": "ArrayItems",
 			"x-decorator": "FormItem",
-			"title": "Consul地址",
+			"title": "Eureka地址",
 			"required": true,
 			"properties": {
 				"use_variable": {
@@ -231,7 +233,7 @@ var consulConfigRender = `{
 									"x-component": "Input",
 									"x-component-props": {
 										"placeholder": "请输入环境变量",
-                            			"extra":"参考格式${abc123},英文数字下划线任意一种，首字母必须为英文"
+                          				"extra":"参考格式${abc123},英文数字下划线任意一种，首字母必须为英文"
 									},
 									"pattern":"^\\${([a-zA-Z][a-zA-Z0-9_]*)}$",
 									"x-index": 0,

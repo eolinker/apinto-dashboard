@@ -1,17 +1,5 @@
 package driver
 
-type AuthConfig struct {
-	AkSkConfig
-	JwtConfig
-	ApikeyConfig
-	BasicConfig
-}
-
-type ApintoDiscoveryConfig struct {
-	Address []string          `json:"address"`
-	Params  map[string]string `json:"params"`
-}
-
 type commonParams struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
@@ -33,3 +21,8 @@ var commonDiscoveryEnumRender = `{
 		}
 	}
 }`
+
+type ApintoDiscoveryConfig struct {
+	Address []string          `json:"address"`
+	Params  map[string]string `json:"params"`
+}

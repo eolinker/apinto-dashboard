@@ -6,6 +6,7 @@ import (
 	"fmt"
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/common"
+	"github.com/eolinker/apinto-dashboard/modules/cluster"
 	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-dto"
 	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-entry"
 	"strings"
@@ -15,7 +16,7 @@ type clConfigRedis struct {
 	apintoDriverName string
 }
 
-func CreateRedis(apintoDriverName string) ICLConfigDriver {
+func CreateRedis(apintoDriverName string) cluster.ICLConfigDriver {
 	return &clConfigRedis{apintoDriverName: apintoDriverName}
 }
 
