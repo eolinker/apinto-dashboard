@@ -6,37 +6,35 @@ import (
 	"fmt"
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/enum"
+	"github.com/eolinker/apinto-dashboard/modules/application"
 	"strings"
 )
 
-type AkSkConfig struct {
-	Ak    string            `json:"ak"`
-	Sk    string            `json:"sk"`
-	Label map[string]string `json:"label"`
+type ApikeyConfig struct {
+	Apikey string            `json:"apikey"`
+	Label  map[string]string `json:"label"`
 }
 
-type AkSk struct {
+type Apikey struct {
 	apintoDriverName string
 }
 
-func (a *AkSk) GetAuthListInfo(config []byte) string {
+func (a *Apikey) GetAuthListInfo(config []byte) string {
 	authConfig := &AuthConfig{}
 	_ = json.Unmarshal(config, authConfig)
-	return fmt.Sprintf("AK=%s,SK=%s", authConfig.Ak, authConfig.Sk)
+	return authConfig.Apikey
 }
 
-func (a *AkSk) CheckInput(config []byte) error {
-
-	akSkConfig := new(AkSkConfig)
-
-	if err := json.Unmarshal(config, akSkConfig); err != nil {
+func (a *Apikey) CheckInput(config []byte) error {
+	apikeyConfig := new(ApikeyConfig)
+	if err := json.Unmarshal(config, apikeyConfig); err != nil {
 		return err
 	}
-	if akSkConfig.Sk == "" || akSkConfig.Ak == "" {
-		return errors.New("ak or sk is null")
+	if apikeyConfig.Apikey == "" {
+		return errors.New("apikey is null")
 	}
 
-	for key, _ := range akSkConfig.Label {
+	for key, _ := range apikeyConfig.Label {
 		if _, ok := enum.Keyword[strings.ToLower(key)]; ok {
 			return errors.New(fmt.Sprintf("标签信息中的%s为系统关键字", key))
 		}
@@ -45,31 +43,29 @@ func (a *AkSk) CheckInput(config []byte) error {
 	return nil
 }
 
-func (a *AkSk) ToApinto(expire int64, position string, tokenName string, config []byte, hideCredential bool) v1.ApplicationAuth {
+func (a *Apikey) ToApinto(expire int64, position string, tokenName string, config []byte, hideCredential bool) v1.ApplicationAuth {
 
-	akSkConfig := new(AkSkConfig)
+	apikeyConfig := new(ApikeyConfig)
 
-	_ = json.Unmarshal(config, akSkConfig)
+	_ = json.Unmarshal(config, apikeyConfig)
 
-	akSkApintoConfig := &v1.ApplicationAuthAkSkConfig{
-		Ak:     akSkConfig.Ak,
-		Sk:     akSkConfig.Sk,
+	apikeyApintoConfig := &v1.ApplicationAuthApiKeyConfig{
+		Apikey: apikeyConfig.Apikey,
 		Expire: expire,
 	}
 
 	users := make([]v1.ApplicationAuthUser, 0)
-	pattern := &v1.ApplicationAuthUserAkSkPattern{
-		Ak: akSkConfig.Ak,
-		Sk: akSkConfig.Sk,
+	pattern := &v1.ApplicationAuthUserApiKeyPattern{
+		Apikey: apikeyConfig.Apikey,
 	}
 	users = append(users, v1.ApplicationAuthUser{
 		Expire:         expire,
-		Labels:         akSkConfig.Label,
+		Labels:         apikeyConfig.Label,
 		Pattern:        pattern,
 		HideCredential: hideCredential,
 	})
 	auth := v1.ApplicationAuth{
-		Config:    akSkApintoConfig,
+		Config:    apikeyApintoConfig,
 		Type:      a.apintoDriverName,
 		Users:     users,
 		Position:  position,
@@ -79,29 +75,20 @@ func (a *AkSk) ToApinto(expire int64, position string, tokenName string, config 
 	return auth
 }
 
-func CreateAkSk() IAuthDriver {
-	return &AkSk{apintoDriverName: "ak/sk"}
+func CreateApikey() application.IAuthDriver {
+	return &Apikey{apintoDriverName: "apikey"}
 }
 
-func (a *AkSk) Render() string {
-	return akSkConfigRender
+func (a *Apikey) Render() string {
+	return apikeyConfigRender
 }
 
-var akSkConfigRender = `{
+var apikeyConfigRender = `{
 	"type": "object",
 	"properties": {
-		"ak": {
+		"apikey": {
 			"type": "string",
-			"title": "AK",
-			"x-component": "Input",
-			"x-component-props": {
-				"placeholder": "请输入"
-			},
-			"required": true
-		},
-		"sk": {
-			"type": "string",
-			"title": "SK",
+			"title": "Apikey",
 			"x-component": "Input",
 			"x-component-props": {
 				"placeholder": "请输入"
@@ -115,7 +102,9 @@ var akSkConfigRender = `{
 			"items": {
 				"type": "void",
 				"x-component": "Space",
-				"x-component-props": {},
+				"x-component-props": {
+					"placeholder": "请输入"
+				},
 				"properties": {
 					"key": {
 						"type": "string",
@@ -123,7 +112,7 @@ var akSkConfigRender = `{
 						"x-index": 0,
 						"x-component-props": {
 							"class": "w240",
-							"placeholder": "请输入key"
+							"placeholder": "请输入"
 						}
 					},
 					"value": {
@@ -132,7 +121,7 @@ var akSkConfigRender = `{
 						"x-index": 1,
 						"x-component-props": {
 							"class": "w240 mg_button",
-							"placeholder": "请输入value"
+							"placeholder": "请输入"
 						}
 					},
 					"remove": {

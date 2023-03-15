@@ -6,6 +6,7 @@ import (
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/enum"
+	"github.com/eolinker/apinto-dashboard/modules/api"
 	"github.com/eolinker/apinto-dashboard/modules/api/api-dto"
 	api_entry "github.com/eolinker/apinto-dashboard/modules/api/api-entry"
 	"net/textproto"
@@ -278,6 +279,6 @@ func formatProxyPath(requestPath, proxyPath string) string {
 	return newProxyPath
 }
 
-func CreateAPIHttp(apintoDriverName string) IAPIDriver {
+func CreateAPIHttp(apintoDriverName string) api.IAPIDriver {
 	return &apiHTTP{apintoDriverName: apintoDriverName}
 }

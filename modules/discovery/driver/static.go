@@ -5,6 +5,8 @@ import (
 	"fmt"
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/common"
+	"github.com/eolinker/apinto-dashboard/modules/discovery"
+	"github.com/eolinker/apinto-dashboard/modules/upstream"
 	"strings"
 )
 
@@ -23,7 +25,7 @@ type StaticEnum struct {
 	apintoDriverName string
 }
 
-func CreateStaticEnum(apintoDriverName string) IServiceDriver {
+func CreateStaticEnum(apintoDriverName string) upstream.IServiceDriver {
 	return &StaticEnum{apintoDriverName: apintoDriverName}
 }
 
@@ -68,7 +70,7 @@ func (s *StaticEnum) CheckInput(config []byte) ([]byte, string, []string, error)
 
 	if conf.UseVariable {
 		if !common.IsMatchVariable(conf.AddrsVariable) {
-			return nil, "", nil, ErrVariableIllegal
+			return nil, "", nil, discovery.ErrVariableIllegal
 		}
 		variableList = append(variableList, common.GetVariableKey(conf.AddrsVariable))
 		//返回地址概要是方便上游服务列表显示，若使用了环境变量，则将环境变量存入配置地址概要中

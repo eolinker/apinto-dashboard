@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
+	"github.com/eolinker/apinto-dashboard/modules/application"
 	"strings"
 )
 
@@ -103,7 +104,7 @@ func (j *Jwt) ToApinto(expire int64, position string, tokenName string, config [
 	return auth
 }
 
-func CreateJwt() IAuthDriver {
+func CreateJwt() application.IAuthDriver {
 	return &Jwt{apintoDriverName: "jwt"}
 }
 
