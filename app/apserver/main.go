@@ -6,7 +6,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/app/apserver/version"
 	"github.com/eolinker/apinto-dashboard/db_migrator"
 	cluster_service "github.com/eolinker/apinto-dashboard/modules/cluster"
-	"github.com/eolinker/apinto-dashboard/modules/notice"
 	"github.com/eolinker/apinto-dashboard/store"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
@@ -54,19 +53,7 @@ func run() {
 	//初始化集群插件
 	initClustersPlugin()
 
-	//初始化通知渠道驱动管理器
-	initNoticeChannelDriver()
-
 	if err = engine.Run(fmt.Sprintf(":%d", GetPort())); err != nil {
-		panic(err)
-	}
-}
-
-func initNoticeChannelDriver() {
-	var noticeChannelService notice.INoticeChannelService
-	bean.Autowired(&noticeChannelService)
-	err := noticeChannelService.InitChannelDriver()
-	if err != nil {
 		panic(err)
 	}
 }
