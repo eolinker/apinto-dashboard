@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
-	driver_manager "github.com/eolinker/apinto-dashboard/driver-manager"
 	"github.com/eolinker/apinto-dashboard/modules/api"
 	api_entry "github.com/eolinker/apinto-dashboard/modules/api/api-entry"
 	apimodel "github.com/eolinker/apinto-dashboard/modules/api/model"
@@ -20,6 +19,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/openapi/openapi-model"
 	"github.com/eolinker/apinto-dashboard/modules/openapp"
 	"github.com/eolinker/apinto-dashboard/modules/upstream"
+	upstream_dto "github.com/eolinker/apinto-dashboard/modules/upstream/upstream-dto"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/go-basic/uuid"
 	"gorm.io/gorm"
@@ -39,7 +39,7 @@ type apiOpenAPIService struct {
 	service              upstream.IService
 	commonGroup          group.ICommonGroupService
 	extAppService        openapp.IExternalApplicationService
-	apiSyncFormatManager driver_manager.IAPISyncFormatManager
+	apiSyncFormatManager openapi.IAPISyncFormatManager
 }
 
 func newAPIOpenAPIService() openapi.IAPIOpenAPIService {
@@ -186,7 +186,7 @@ func (a *apiOpenAPIService) SyncImport(ctx context.Context, namespaceID, appID i
 			}
 			configData, _ := json.Marshal(config)
 
-			serviceID, err = a.service.CreateService(txCtx, namespaceID, 0, &dto.ServiceInfo{
+			serviceID, err = a.service.CreateService(txCtx, namespaceID, 0, &upstream_dto.ServiceInfo{
 				Name:        data.ServiceName,
 				UUID:        uuid.New(),
 				Desc:        "",

@@ -2,8 +2,8 @@ package application
 
 import (
 	"context"
-	driverInfo "github.com/eolinker/apinto-dashboard/driver-manager"
-	"github.com/eolinker/apinto-dashboard/driver-manager/driver"
+	"github.com/eolinker/apinto-dashboard/client/v1"
+	driverInfo "github.com/eolinker/apinto-dashboard/driver"
 	application_dto2 "github.com/eolinker/apinto-dashboard/modules/application/application-dto"
 	application_model2 "github.com/eolinker/apinto-dashboard/modules/application/application-model"
 	"github.com/eolinker/apinto-dashboard/modules/online"
@@ -39,5 +39,18 @@ type IApplicationAuthService interface {
 	IsUpdate(ctx context.Context, clusterId, applicationId int) (bool, error)
 	GetListByApplicationId(ctx context.Context, applicationId int) ([]*application_model2.ApplicationAuth, error)
 	GetDriversRender() []*driverInfo.DriverInfo
-	GetDriver(driver string) driver.IAuthDriver
+	GetDriver(driver string) IAuthDriver
+}
+
+type IAuthDriverManager interface {
+	driverInfo.IDriverManager[IAuthDriver]
+	List() []*driverInfo.DriverInfo
+}
+
+type IAuthDriver interface {
+	Render() string
+	CheckInput(config []byte) error
+	//GetAuthListInfo 获取健全列表展示需要用的参数信息
+	GetAuthListInfo(config []byte) string
+	ToApinto(expire int64, position string, tokenName string, config []byte, hideCredential bool) v1.ApplicationAuth
 }

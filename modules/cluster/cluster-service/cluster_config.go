@@ -6,8 +6,6 @@ import (
 	"fmt"
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/common"
-	driver_manager "github.com/eolinker/apinto-dashboard/driver-manager"
-	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/cluster"
 	cluster_entry2 "github.com/eolinker/apinto-dashboard/modules/cluster/cluster-entry"
 	cluster_store2 "github.com/eolinker/apinto-dashboard/modules/cluster/cluster-store"
@@ -24,7 +22,7 @@ type clusterConfigService struct {
 	clusterService  cluster.IClusterService
 	userInfoService user.IUserInfoService
 	apintoClient    cluster.IApintoClient
-	clConfigManager driver_manager.ICLConfigDriverManager
+	clConfigManager cluster.ICLConfigDriverManager
 }
 
 func newClusterConfigService() cluster.IClusterConfigService {
@@ -284,7 +282,7 @@ func (c *clusterConfigService) ToApinto(client v1.IClient, name, configType stri
 	apintoConfig := driver.ToApinto(name, config)
 
 	switch configType {
-	case enum.CLConfigRedis, enum.CLConfigInfluxV2:
+	case cluster.CLConfigRedis, cluster.CLConfigInfluxV2:
 		return client.ForOutput().Create(apintoConfig)
 	default:
 		return errors.New("configType doesn't exist. ")
@@ -293,7 +291,7 @@ func (c *clusterConfigService) ToApinto(client v1.IClient, name, configType stri
 
 func (c *clusterConfigService) OfflineApinto(client v1.IClient, name, configType string) error {
 	switch configType {
-	case enum.CLConfigRedis, enum.CLConfigInfluxV2:
+	case cluster.CLConfigRedis, cluster.CLConfigInfluxV2:
 		return common.CheckWorkerNotExist(client.ForOutput().Delete(name))
 	default:
 		return errors.New("configType doesn't exist. ")

@@ -10,12 +10,16 @@ import (
 //go:embed config/access.data
 var accessTitleData []byte
 var (
+	accessAll          []Access
 	accessTitles       map[Access]string
 	accessKeys         map[Access]string
 	accessParse        map[string]Access
 	ErrorAccessUnknown = errors.New("unknown")
 )
 
+func All() []Access {
+	return accessAll
+}
 func initData() {
 	lines := bytes.Split(accessTitleData, []byte("\n"))
 	l := len(lines)
@@ -28,6 +32,7 @@ func initData() {
 	accessParse = make(map[string]Access, l)
 	accessKeys = make(map[Access]string, l)
 	accessTitles = make(map[Access]string, l)
+	accessAll = make([]Access, l)
 	for i, line := range lines {
 		line = bytes.TrimSpace(line)
 		index := bytes.IndexByte(line, ' ')
@@ -37,7 +42,7 @@ func initData() {
 		key := string(bytes.TrimSpace(line[:index]))
 		title := string(bytes.TrimSpace(line[index:]))
 		ac := Access(i)
-
+		accessAll[i] = ac
 		if _, has := accessParse[key]; has {
 			panic("access key:" + key + "  duplicate")
 		}

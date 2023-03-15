@@ -3,19 +3,15 @@ package main
 import (
 	"context"
 	"fmt"
-	machine_code "github.com/eolinker/apinto-dashboard/app/apserver/machine-code"
 	"github.com/eolinker/apinto-dashboard/app/apserver/version"
-	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/db_migrator"
 	cluster_service "github.com/eolinker/apinto-dashboard/modules/cluster"
 	"github.com/eolinker/apinto-dashboard/modules/notice"
-	"github.com/eolinker/apinto-dashboard/modules/user"
 	"github.com/eolinker/apinto-dashboard/store"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
 	"github.com/gin-gonic/gin"
 	"github.com/urfave/cli/v2"
-	"gorm.io/gorm"
 	"os"
 )
 
@@ -53,7 +49,7 @@ func run() {
 	initDB()
 
 	//初始化超管账号 和清除超管缓存
-	initAdmin()
+	// todo 不适合开源，后续通过插件接入
 
 	//初始化集群插件
 	initClustersPlugin()
@@ -75,17 +71,6 @@ func initNoticeChannelDriver() {
 	}
 }
 
-func initAdmin() {
-	var userInfoService user.IUserInfoService
-	bean.Autowired(&userInfoService)
-	err := userInfoService.CreateAdmin()
-	if err != nil {
-		panic(err)
-	}
-
-	userInfoService.CleanAdminCache()
-}
-
 func initDB() {
 	var iDb store.IDB
 
@@ -96,10 +81,6 @@ func initDB() {
 
 	db_migrator.InitSql(db)
 
-	//计算获取加密后的机器码
-	machineCode := generateMachineCode(db)
-	//设置机器码
-	machine_code.SetMachineCode(machineCode)
 }
 
 func initClustersPlugin() {
@@ -110,18 +91,4 @@ func initClustersPlugin() {
 	if err != nil {
 		panic(err)
 	}
-}
-
-func generateMachineCode(db *gorm.DB) string {
-	sqlDb, _ := db.DB()
-	//获取数据库唯一UUID
-	var variableName, serverUUID string
-	row := sqlDb.QueryRow(`SHOW VARIABLES LIKE "server_uuid"`)
-	err := row.Scan(&variableName, &serverUUID)
-	if err != nil {
-		panic(err)
-	}
-	//加密机器码
-	machineCodeRaw := fmt.Sprintf("%s.%s.%s.%s.%s.%s", GetDBIp(), GetDBPort(), GetDBUserName(), GetDBPassword(), GetDbName(), serverUUID)
-	return common.Md5(fmt.Sprintf("%s%s", machine_code.Salt, machineCodeRaw))
 }

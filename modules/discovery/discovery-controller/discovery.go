@@ -5,7 +5,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
-	discovery_driver "github.com/eolinker/apinto-dashboard/driver-manager/driver"
+	"github.com/eolinker/apinto-dashboard/modules/discovery/discovery-serivce"
 	upstream_dto "github.com/eolinker/apinto-dashboard/modules/upstream/upstream-dto"
 
 	"github.com/eolinker/apinto-dashboard/enum"
@@ -117,7 +117,7 @@ func (d *discoveryController) create(ginCtx *gin.Context) {
 
 	input.Driver = strings.ToLower(input.Driver)
 
-	if input.Name == discovery_driver.DriverStatic {
+	if input.Name == discovery_serivce.DriverStatic {
 		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("discoveryName can't be static. "))
 		return
 	}
