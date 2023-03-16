@@ -21,9 +21,9 @@ func (i *importApiCache) Key(token string) string {
 }
 
 func newImportCache(client *redis.ClusterClient) IImportApiCache {
-	cache := &importApiCache{
+	cacheInfo := &importApiCache{
 		IRedisCache: cache.CreateRedisCache[apimodel.ImportAPIRedisData](client),
 	}
-	return cache
+	return cacheInfo
 
 }

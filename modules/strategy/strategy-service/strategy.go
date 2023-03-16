@@ -815,7 +815,7 @@ func (s *strategyService[T, K]) Publish(ctx context.Context, namespaceId, operat
 		publishMaps[publish.Strategy.Id] = &strategy_entry.StrategyPublishConfigInfo{
 			Strategy:        *publish.Strategy,
 			StrategyVersion: *publish.StrategyVersion,
-			Status:          int(publish.Status),
+			Status:          publish.Status,
 		}
 
 		strategyPublishHistoryInfo = append(strategyPublishHistoryInfo, publishMaps[publish.Strategy.Id])
