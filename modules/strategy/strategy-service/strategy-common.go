@@ -5,7 +5,7 @@ import (
 	"errors"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/enum"
-	service2 "github.com/eolinker/apinto-dashboard/modules/api"
+	"github.com/eolinker/apinto-dashboard/modules/api"
 	"github.com/eolinker/apinto-dashboard/modules/application"
 	"github.com/eolinker/apinto-dashboard/modules/online"
 	"github.com/eolinker/apinto-dashboard/modules/strategy"
@@ -17,7 +17,7 @@ import (
 
 type strategyCommonService struct {
 	applicationService  application.IApplicationService
-	apiService          service2.IAPIService
+	apiService          api.IAPIService
 	service             upstream.IService
 	resetOnlineServices []online.IResetOnlineService
 }
@@ -104,11 +104,11 @@ func (s *strategyCommonService) GetFilterRemote(ctx context.Context, namespaceId
 			return nil, 0, err
 		}
 
-		for _, application := range applications {
+		for _, applicationInfo := range applications {
 			result.Applications = append(result.Applications, &strategy_model.RemoteApplications{
-				Name: application.Name,
-				Uuid: application.IdStr,
-				Desc: application.Desc,
+				Name: applicationInfo.Name,
+				Uuid: applicationInfo.IdStr,
+				Desc: applicationInfo.Desc,
 			})
 		}
 		result.Titles = append(result.Titles, &strategy_model.RemoteTitles{
@@ -130,13 +130,13 @@ func (s *strategyCommonService) GetFilterRemote(ctx context.Context, namespaceId
 			return nil, 0, err
 		}
 
-		for _, api := range remoteApis {
+		for _, apiInfo := range remoteApis {
 			result.Apis = append(result.Apis, &strategy_model.RemoteApis{
-				Uuid:        api.Uuid,
-				Name:        api.Name,
-				Service:     api.Service,
-				Group:       api.Group,
-				RequestPath: api.RequestPath,
+				Uuid:        apiInfo.Uuid,
+				Name:        apiInfo.Name,
+				Service:     apiInfo.Service,
+				Group:       apiInfo.Group,
+				RequestPath: apiInfo.RequestPath,
 			})
 		}
 		result.Titles = append(result.Titles, &strategy_model.RemoteTitles{
