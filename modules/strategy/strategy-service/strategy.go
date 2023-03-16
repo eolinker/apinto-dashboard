@@ -7,16 +7,16 @@ import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/enum"
-	service2 "github.com/eolinker/apinto-dashboard/modules/api"
+	"github.com/eolinker/apinto-dashboard/modules/api"
 	"github.com/eolinker/apinto-dashboard/modules/application"
 	"github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-dashboard/modules/base/locker-service"
 	"github.com/eolinker/apinto-dashboard/modules/cluster"
 	"github.com/eolinker/apinto-dashboard/modules/strategy"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-dto"
-	strategy_entry2 "github.com/eolinker/apinto-dashboard/modules/strategy/strategy-entry"
+	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-entry"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-model"
-	strategy_store2 "github.com/eolinker/apinto-dashboard/modules/strategy/strategy-store"
+	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-store"
 	"github.com/eolinker/apinto-dashboard/modules/upstream"
 	"github.com/eolinker/apinto-dashboard/modules/user"
 	"github.com/eolinker/apinto-dashboard/store"
@@ -33,16 +33,16 @@ import (
 type strategyService[T any, K any] struct {
 	apintoClient         cluster.IApintoClient
 	clusterService       cluster.IClusterService
-	strategyStore        strategy_store2.IStrategyStore
-	strategyStatStore    strategy_store2.IStrategyStatStore
-	publishVersionStore  strategy_store2.IStrategyPublishVersionStore
-	publishHistoryStore  strategy_store2.IStrategyPublishHistoryStore
-	strategyVersionStore strategy_store2.IStrategyVersionStore
-	strategyRuntimeStore strategy_store2.IStrategyRuntimeStore
-	strategyHistory      strategy_store2.IStrategyHistoryStore
+	strategyStore        strategy_store.IStrategyStore
+	strategyStatStore    strategy_store.IStrategyStatStore
+	publishVersionStore  strategy_store.IStrategyPublishVersionStore
+	publishHistoryStore  strategy_store.IStrategyPublishHistoryStore
+	strategyVersionStore strategy_store.IStrategyVersionStore
+	strategyRuntimeStore strategy_store.IStrategyRuntimeStore
+	strategyHistory      strategy_store.IStrategyHistoryStore
 	lock                 locker_service.IAsynLockService
 	applicationService   application.IApplicationService
-	apiService           service2.IAPIService
+	apiService           api.IAPIService
 	service              upstream.IService
 	userInfoService      user.IUserInfoService
 
@@ -68,9 +68,9 @@ func NewStrategyService[T any, K any](handler strategy.IStrategyHandler[T, K], r
 	s.strategyHandler = handler
 	var db store.IDB
 	bean.Autowired(&db)
-	s.strategyRuntimeStore = strategy_store2.NewStrategyRuntimeStore(db, runtimeKind)
-	s.publishHistoryStore = strategy_store2.NewStrategyPublishHistoryStore(db, "p_h_"+runtimeKind)
-	s.publishVersionStore = strategy_store2.NewStrategyPublishVersionStore(db, "p_v_"+runtimeKind)
+	s.strategyRuntimeStore = strategy_store.NewStrategyRuntimeStore(db, runtimeKind)
+	s.publishHistoryStore = strategy_store.NewStrategyPublishHistoryStore(db, "p_h_"+runtimeKind)
+	s.publishVersionStore = strategy_store.NewStrategyPublishVersionStore(db, "p_v_"+runtimeKind)
 
 	var strategyCommon strategy.IStrategyCommonService
 	bean.Autowired(&strategyCommon)
@@ -81,49 +81,49 @@ func NewStrategyService[T any, K any](handler strategy.IStrategyHandler[T, K], r
 }
 
 func (s *strategyService[T, K]) GetList(ctx context.Context, namespaceId int, clusterName string) ([]*strategy_model.Strategy, error) {
-	cluster, err := s.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
+	clusterInfo, err := s.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
 	if err != nil {
 		return nil, err
 	}
 
 	strategyType := s.strategyHandler.GetType()
 
-	strategies, err := s.strategyStore.GetListByType(ctx, cluster.Id, strategyType)
+	strategies, err := s.strategyStore.GetListByType(ctx, clusterInfo.Id, strategyType)
 	if err != nil {
 		return nil, err
 	}
 
-	_, publishMaps, err := s.getRuntimePublishMaps(ctx, cluster.Id)
+	_, publishMaps, err := s.getRuntimePublishMaps(ctx, clusterInfo.Id)
 
-	userIds := common.SliceToSliceIds(strategies, func(t *strategy_entry2.Strategy) int {
+	userIds := common.SliceToSliceIds(strategies, func(t *strategy_entry.Strategy) int {
 		return t.Operator
 	})
 
 	userInfoMaps, _ := s.userInfoService.GetUserInfoMaps(ctx, userIds...)
 
 	resList := make([]*strategy_model.Strategy, 0, len(strategies))
-	for _, strategy := range strategies {
+	for _, strategyInfo := range strategies {
 
-		version, err := s.getLatestStrategyVersion(ctx, strategy.Id)
+		version, err := s.getLatestStrategyVersion(ctx, strategyInfo.Id)
 		if err != nil {
 			return nil, err
 		}
 
 		status := enum.StrategyOnlineStatusNOTGOONLINE //默认未上线
-		if publish, ok := publishMaps[strategy.Id]; ok {
+		if publish, ok := publishMaps[strategyInfo.Id]; ok {
 			status = enum.StrategyOnlineStatusGOONLINE //在发布记录中表示已上线
 			if publish.StrategyVersion.Id != version.Id {
 				status = enum.StrategyOnlineStatusTOUPDATE //有变更为待更新
 			}
-			if publish.StrategyVersion.IsStop != strategy.IsStop {
+			if publish.StrategyVersion.IsStop != strategyInfo.IsStop {
 				status = enum.StrategyOnlineStatusTOUPDATE
 			}
-			if publish.StrategyVersion.Priority != strategy.Priority {
+			if publish.StrategyVersion.Priority != strategyInfo.Priority {
 				status = enum.StrategyOnlineStatusTOUPDATE
 			}
 		}
 		//上线了 并且被删除了 为待删除状态
-		if status != enum.StrategyOnlineStatusNOTGOONLINE && strategy.IsDelete {
+		if status != enum.StrategyOnlineStatusNOTGOONLINE && strategyInfo.IsDelete {
 			status = enum.StrategyOnlineStatusTODELETE
 		}
 
@@ -133,12 +133,12 @@ func (s *strategyService[T, K]) GetList(ctx context.Context, namespaceId int, cl
 		}
 
 		operatorName := ""
-		if userInfo, ok := userInfoMaps[strategy.Operator]; ok {
+		if userInfo, ok := userInfoMaps[strategyInfo.Operator]; ok {
 			operatorName = userInfo.NickName
 		}
 
 		resList = append(resList, &strategy_model.Strategy{
-			Strategy:    strategy,
+			Strategy:    strategyInfo,
 			Version:     version,
 			Filters:     filters,
 			Conf:        s.strategyHandler.GetListLabel(s.decodeConfig(version.StrategyConfigInfo.Config)),
@@ -215,9 +215,9 @@ func (s *strategyService[T, K]) GetInfo(ctx context.Context, namespaceId int, uu
 					continue
 				}
 				labels := make([]string, len(apis))
-				for i, api := range apis {
-					extenderData.Api[api.Uuid] = api
-					labels[i] = api.Name
+				for i, apiInfo := range apis {
+					extenderData.Api[apiInfo.Uuid] = apiInfo
+					labels[i] = apiInfo.Name
 				}
 				filter.Label = strings.Join(labels, ",")
 			}
@@ -280,20 +280,19 @@ func (s *strategyService[T, K]) GetInfo(ctx context.Context, namespaceId int, uu
 }
 
 func (s *strategyService[T, K]) CreateStrategy(ctx context.Context, namespaceId int, operator int, clusterName string, input *strategy_dto.StrategyInfoInput[T]) error {
-	cluster, err := s.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
+	clusterInfo, err := s.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
 	if err != nil {
 		return err
 	}
 
-	err = s.lock.Lock(locker_service.LockNameStrategy, cluster.Id)
-	if err != nil {
+	if err = s.lock.Lock(locker_service.LockNameStrategy, clusterInfo.Id); err != nil {
 		return err
 	}
-	defer s.lock.Unlock(locker_service.LockNameStrategy, cluster.Id)
+	defer s.lock.Unlock(locker_service.LockNameStrategy, clusterInfo.Id)
 
 	strategyType := s.strategyHandler.GetType()
 
-	priority, err := s.checkPriorityReduplicative(ctx, cluster.Id, input.Priority, strategyType, "")
+	priority, err := s.checkPriorityReduplicative(ctx, clusterInfo.Id, input.Priority, strategyType, "")
 	if err != nil {
 		return err
 	}
@@ -306,16 +305,16 @@ func (s *strategyService[T, K]) CreateStrategy(ctx context.Context, namespaceId 
 	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:        input.Uuid,
 		Name:        input.Name,
-		ClusterId:   cluster.Id,
+		ClusterId:   clusterInfo.Id,
 		ClusterName: clusterName,
 	})
 
 	return s.strategyStore.Transaction(ctx, func(txCtx context.Context) error {
 		t := time.Now()
-		strategyInfo := &strategy_entry2.Strategy{
+		strategyInfo := &strategy_entry.Strategy{
 			UUID:        input.Uuid,
 			NamespaceId: namespaceId,
-			ClusterId:   cluster.Id,
+			ClusterId:   clusterInfo.Id,
 			Type:        strategyType,
 			Name:        input.Name,
 			Desc:        input.Desc,
@@ -329,11 +328,11 @@ func (s *strategyService[T, K]) CreateStrategy(ctx context.Context, namespaceId 
 		}
 
 		//添加版本信息
-		strategyVersionInfo := &strategy_entry2.StrategyVersion{
-			StrategyConfigInfo: strategy_entry2.StrategyConfigInfo{
+		strategyVersionInfo := &strategy_entry.StrategyVersion{
+			StrategyConfigInfo: strategy_entry.StrategyConfigInfo{
 				Priority:              input.Priority,
 				Type:                  strategyType,
-				StrategyVersionConfig: strategy_entry2.StrategyVersionConfig{},
+				StrategyVersionConfig: strategy_entry.StrategyVersionConfig{},
 			},
 			StrategyId:  strategyInfo.Id,
 			NamespaceId: namespaceId,
@@ -341,9 +340,9 @@ func (s *strategyService[T, K]) CreateStrategy(ctx context.Context, namespaceId 
 			CreateTime:  t,
 		}
 
-		filters := make([]strategy_entry2.StrategyFiltersConfig, 0, len(input.Filters))
+		filters := make([]strategy_entry.StrategyFiltersConfig, 0, len(input.Filters))
 		for _, f := range input.Filters {
-			filter := strategy_entry2.StrategyFiltersConfig{
+			filter := strategy_entry.StrategyFiltersConfig{
 				Name:   f.Name,
 				Values: f.Values,
 			}
@@ -351,7 +350,7 @@ func (s *strategyService[T, K]) CreateStrategy(ctx context.Context, namespaceId 
 		}
 		strategyVersionInfo.Filters = filters
 
-		strategyVersionInfo.StrategyVersionConfig = strategy_entry2.StrategyVersionConfig{
+		strategyVersionInfo.StrategyVersionConfig = strategy_entry.StrategyVersionConfig{
 			Config: s.encodeConfig(input.Config),
 		}
 
@@ -359,14 +358,14 @@ func (s *strategyService[T, K]) CreateStrategy(ctx context.Context, namespaceId 
 			return err
 		}
 
-		if err = s.strategyHistory.HistoryAdd(txCtx, namespaceId, strategyInfo.Id, &strategy_entry2.StrategyHistoryInfo{
+		if err = s.strategyHistory.HistoryAdd(txCtx, namespaceId, strategyInfo.Id, &strategy_entry.StrategyHistoryInfo{
 			Strategy: *strategyInfo,
 			Config:   strategyVersionInfo.StrategyConfigInfo,
 		}, operator); err != nil {
 			return err
 		}
 
-		stat := &strategy_entry2.StrategyStat{
+		stat := &strategy_entry.StrategyStat{
 			StrategyId: strategyInfo.Id,
 			VersionId:  strategyVersionInfo.Id,
 		}
@@ -378,16 +377,16 @@ func (s *strategyService[T, K]) CreateStrategy(ctx context.Context, namespaceId 
 
 func (s *strategyService[T, K]) UpdateStrategy(ctx context.Context, namespaceId int, operator int, clusterName string, input *strategy_dto.StrategyInfoInput[T]) error {
 
-	cluster, err := s.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
+	clusterInfo, err := s.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
 	if err != nil {
 		return err
 	}
 
-	err = s.lock.Lock(locker_service.LockNameStrategy, cluster.Id)
+	err = s.lock.Lock(locker_service.LockNameStrategy, clusterInfo.Id)
 	if err != nil {
 		return err
 	}
-	defer s.lock.Unlock(locker_service.LockNameStrategy, cluster.Id)
+	defer s.lock.Unlock(locker_service.LockNameStrategy, clusterInfo.Id)
 	strategyInfo, err := s.strategyStore.GetByUUID(ctx, input.Uuid)
 	if err != nil {
 		return err
@@ -395,7 +394,7 @@ func (s *strategyService[T, K]) UpdateStrategy(ctx context.Context, namespaceId 
 
 	strategyType := s.strategyHandler.GetType()
 
-	priority, err := s.checkPriorityReduplicative(ctx, cluster.Id, input.Priority, strategyType, strategyInfo.UUID)
+	priority, err := s.checkPriorityReduplicative(ctx, clusterInfo.Id, input.Priority, strategyType, strategyInfo.UUID)
 	if err != nil {
 		return err
 	}
@@ -418,7 +417,7 @@ func (s *strategyService[T, K]) UpdateStrategy(ctx context.Context, namespaceId 
 	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:        input.Uuid,
 		Name:        input.Name,
-		ClusterId:   cluster.Id,
+		ClusterId:   clusterInfo.Id,
 		ClusterName: clusterName,
 	})
 
@@ -428,8 +427,8 @@ func (s *strategyService[T, K]) UpdateStrategy(ctx context.Context, namespaceId 
 			return err
 		}
 
-		latestVersionConfig := &strategy_entry2.StrategyVersion{
-			StrategyConfigInfo: strategy_entry2.StrategyConfigInfo{
+		latestVersionConfig := &strategy_entry.StrategyVersion{
+			StrategyConfigInfo: strategy_entry.StrategyConfigInfo{
 				Priority: strategyInfo.Priority,
 				IsStop:   strategyInfo.IsStop,
 				Type:     strategyType,
@@ -440,16 +439,16 @@ func (s *strategyService[T, K]) UpdateStrategy(ctx context.Context, namespaceId 
 			CreateTime:  t,
 		}
 
-		filters := make([]strategy_entry2.StrategyFiltersConfig, 0, len(input.Filters))
+		filters := make([]strategy_entry.StrategyFiltersConfig, 0, len(input.Filters))
 		for _, f := range input.Filters {
-			filter := strategy_entry2.StrategyFiltersConfig{
+			filter := strategy_entry.StrategyFiltersConfig{
 				Name:   f.Name,
 				Values: f.Values,
 			}
 			filters = append(filters, filter)
 		}
 		latestVersionConfig.Filters = filters
-		latestVersionConfig.StrategyVersionConfig = strategy_entry2.StrategyVersionConfig{
+		latestVersionConfig.StrategyVersionConfig = strategy_entry.StrategyVersionConfig{
 			Config: s.encodeConfig(input.Config),
 		}
 
@@ -459,7 +458,7 @@ func (s *strategyService[T, K]) UpdateStrategy(ctx context.Context, namespaceId 
 				return err
 			}
 			//添加版本关联原表信息
-			stat := &strategy_entry2.StrategyStat{
+			stat := &strategy_entry.StrategyStat{
 				StrategyId: strategyInfo.Id,
 				VersionId:  latestVersionConfig.Id,
 			}
@@ -468,10 +467,10 @@ func (s *strategyService[T, K]) UpdateStrategy(ctx context.Context, namespaceId 
 			}
 		}
 
-		return s.strategyHistory.HistoryEdit(txCtx, namespaceId, strategyInfo.Id, &strategy_entry2.StrategyHistoryInfo{
+		return s.strategyHistory.HistoryEdit(txCtx, namespaceId, strategyInfo.Id, &strategy_entry.StrategyHistoryInfo{
 			Strategy: oldStrategyInfo,
 			Config:   currentVersion.StrategyConfigInfo,
-		}, &strategy_entry2.StrategyHistoryInfo{
+		}, &strategy_entry.StrategyHistoryInfo{
 			Strategy: *strategyInfo,
 			Config:   latestVersionConfig.StrategyConfigInfo,
 		}, operator)
@@ -480,7 +479,7 @@ func (s *strategyService[T, K]) UpdateStrategy(ctx context.Context, namespaceId 
 }
 
 func (s *strategyService[T, K]) DeleteStrategy(ctx context.Context, namespaceId, operator int, clusterName, uuid string) error {
-	cluster, err := s.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
+	clusterInfo, err := s.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
 	if err != nil {
 		return err
 	}
@@ -490,11 +489,11 @@ func (s *strategyService[T, K]) DeleteStrategy(ctx context.Context, namespaceId,
 		return err
 	}
 
-	err = s.lock.Lock(locker_service.LockNameStrategy, cluster.Id)
+	err = s.lock.Lock(locker_service.LockNameStrategy, clusterInfo.Id)
 	if err != nil {
 		return err
 	}
-	defer s.lock.Unlock(locker_service.LockNameStrategy, cluster.Id)
+	defer s.lock.Unlock(locker_service.LockNameStrategy, clusterInfo.Id)
 
 	strategyInfo, err = s.strategyStore.GetByUUID(ctx, uuid)
 	if err != nil {
@@ -516,7 +515,7 @@ func (s *strategyService[T, K]) DeleteStrategy(ctx context.Context, namespaceId,
 	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:        uuid,
 		Name:        strategyInfo.Name,
-		ClusterId:   cluster.Id,
+		ClusterId:   clusterInfo.Id,
 		ClusterName: clusterName,
 	})
 
@@ -548,7 +547,7 @@ func (s *strategyService[T, K]) DeleteStrategy(ctx context.Context, namespaceId,
 			return err
 		}
 
-		return s.strategyHistory.HistoryDelete(txCtx, namespaceId, strategyInfo.Id, &strategy_entry2.StrategyHistoryInfo{
+		return s.strategyHistory.HistoryDelete(txCtx, namespaceId, strategyInfo.Id, &strategy_entry.StrategyHistoryInfo{
 			Strategy: *strategyInfo,
 			Config:   version.StrategyConfigInfo,
 		}, operator)
@@ -557,12 +556,12 @@ func (s *strategyService[T, K]) DeleteStrategy(ctx context.Context, namespaceId,
 		return err
 	}
 
-	s.lock.DeleteLock(locker_service.LockNameStrategy, cluster.Id)
+	s.lock.DeleteLock(locker_service.LockNameStrategy, clusterInfo.Id)
 	return nil
 }
 
 func (s *strategyService[T, K]) RestoreStrategy(ctx context.Context, namespaceId, userID int, clusterName, uuid string) error {
-	cluster, err := s.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
+	clusterInfo, err := s.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
 	if err != nil {
 		return err
 	}
@@ -572,11 +571,11 @@ func (s *strategyService[T, K]) RestoreStrategy(ctx context.Context, namespaceId
 		return err
 	}
 
-	err = s.lock.Lock(locker_service.LockNameStrategy, cluster.Id)
+	err = s.lock.Lock(locker_service.LockNameStrategy, clusterInfo.Id)
 	if err != nil {
 		return err
 	}
-	defer s.lock.Unlock(locker_service.LockNameStrategy, cluster.Id)
+	defer s.lock.Unlock(locker_service.LockNameStrategy, clusterInfo.Id)
 
 	strategyInfo, err = s.strategyStore.GetByUUID(ctx, uuid)
 	if err != nil {
@@ -591,7 +590,7 @@ func (s *strategyService[T, K]) RestoreStrategy(ctx context.Context, namespaceId
 	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:        uuid,
 		Name:        strategyInfo.Name,
-		ClusterId:   cluster.Id,
+		ClusterId:   clusterInfo.Id,
 		ClusterName: clusterName,
 	})
 
@@ -611,15 +610,15 @@ func (s *strategyService[T, K]) ToPublish(ctx context.Context, namespaceId int, 
 	}
 
 	resList := make([]*strategy_model.StrategyToPublish[T], 0)
-	for _, strategy := range strategies {
+	for _, strategyInfo := range strategies {
 		//已上线的状态过滤掉
-		if strategy.Status == enum.StrategyOnlineStatusGOONLINE {
+		if strategyInfo.Status == enum.StrategyOnlineStatusGOONLINE {
 			continue
 		}
 		resList = append(resList, &strategy_model.StrategyToPublish[T]{
-			Status:          int(strategy.Status),
-			Strategy:        strategy.Strategy,
-			StrategyVersion: strategy.Version,
+			Status:          strategyInfo.Status,
+			Strategy:        strategyInfo.Strategy,
+			StrategyVersion: strategyInfo.Version,
 		})
 	}
 
@@ -630,12 +629,12 @@ func (s *strategyService[T, K]) ToPublish(ctx context.Context, namespaceId int, 
 }
 
 func (s *strategyService[T, K]) PublishHistory(ctx context.Context, namespaceId, pageNum, pageSize int, clusterName string) ([]*strategy_model.StrategyPublishHistory, int, error) {
-	cluster, err := s.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
+	clusterInfo, err := s.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
 	if err != nil {
 		return nil, 0, common.ClusterNotExist
 	}
 
-	list, count, err := s.publishHistoryStore.GetByClusterPage(ctx, pageNum, pageSize, cluster.Id)
+	list, count, err := s.publishHistoryStore.GetByClusterPage(ctx, pageNum, pageSize, clusterInfo.Id)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -668,33 +667,33 @@ func (s *strategyService[T, K]) PublishHistory(ctx context.Context, namespaceId,
 }
 
 func (s *strategyService[T, K]) UpdateStop(ctx context.Context, namespaceId, operator int, uuid, clusterName string, stop bool) error {
-	cluster, err := s.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
+	clusterInfo, err := s.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
 	if err != nil {
 		return err
 	}
 
-	strategy, err := s.strategyStore.GetByUUID(ctx, uuid)
+	strategyInfo, err := s.strategyStore.GetByUUID(ctx, uuid)
 	if err != nil {
 		return err
 	}
 
-	version, err := s.getLatestStrategyVersion(ctx, strategy.Id)
+	version, err := s.getLatestStrategyVersion(ctx, strategyInfo.Id)
 	if err != nil {
 		return err
 	}
 
-	oldValue := &strategy_entry2.StrategyHistoryInfo{
-		Strategy: *strategy,
+	oldValue := &strategy_entry.StrategyHistoryInfo{
+		Strategy: *strategyInfo,
 		Config:   version.StrategyConfigInfo,
 	}
 
 	t := time.Now()
-	strategy.UpdateTime = t
-	strategy.Operator = operator
-	strategy.IsStop = stop
+	strategyInfo.UpdateTime = t
+	strategyInfo.Operator = operator
+	strategyInfo.IsStop = stop
 
-	newValue := &strategy_entry2.StrategyHistoryInfo{
-		Strategy: *strategy,
+	newValue := &strategy_entry.StrategyHistoryInfo{
+		Strategy: *strategyInfo,
 		Config:   version.StrategyConfigInfo,
 	}
 
@@ -704,18 +703,18 @@ func (s *strategyService[T, K]) UpdateStop(ctx context.Context, namespaceId, ope
 	}
 	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:          uuid,
-		Name:          strategy.Name,
-		ClusterId:     cluster.Id,
+		Name:          strategyInfo.Name,
+		ClusterId:     clusterInfo.Id,
 		ClusterName:   clusterName,
 		EnableOperate: enableOperate,
 	})
 
 	return s.strategyStore.Transaction(ctx, func(txCtx context.Context) error {
 
-		if err = s.strategyHistory.HistoryEdit(txCtx, namespaceId, strategy.Id, oldValue, newValue, operator); err != nil {
+		if err = s.strategyHistory.HistoryEdit(txCtx, namespaceId, strategyInfo.Id, oldValue, newValue, operator); err != nil {
 			return err
 		}
-		return s.strategyStore.Save(txCtx, strategy)
+		return s.strategyStore.Save(txCtx, strategyInfo)
 
 	})
 
@@ -740,9 +739,8 @@ func (s *strategyService[T, K]) ResetOnline(ctx context.Context, _, clusterId in
 	strategyInfos := make([]interface{}, 0)
 
 	for _, publish := range publishMaps {
-		strategy := publish.Strategy
 		conf := s.decodeConfig(publish.StrategyVersion.StrategyConfigInfo.Config)
-		strategyInfo := s.toApinto(strategy.UUID, strategy.Desc, strategy.IsStop, strategy.Priority, publish.StrategyVersion.Filters, *conf)
+		strategyInfo := s.toApinto(publish.Strategy.UUID, publish.Strategy.Desc, publish.Strategy.IsStop, publish.Strategy.Priority, publish.StrategyVersion.Filters, *conf)
 		strategyInfos = append(strategyInfos, &strategyInfo)
 	}
 	if err = client.ForStrategy().Batch(s.strategyHandler.GetBatchSettingName(), strategyInfos); err != nil {
@@ -754,11 +752,11 @@ func (s *strategyService[T, K]) ResetOnline(ctx context.Context, _, clusterId in
 
 func (s *strategyService[T, K]) Publish(ctx context.Context, namespaceId, operator int, clusterName string, input *strategy_dto.StrategyPublish) error {
 
-	cluster, err := s.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
+	clusterInfo, err := s.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
 	if err != nil {
 		return err
 	}
-	clusterId := cluster.Id
+	clusterId := clusterInfo.Id
 
 	publishHistory, err := s.publishHistoryStore.GetByVersionName(ctx, input.VersionName, clusterId)
 	if err != nil && err != gorm.ErrRecordNotFound {
@@ -795,26 +793,26 @@ func (s *strategyService[T, K]) Publish(ctx context.Context, namespaceId, operat
 	defer s.lock.Unlock(locker_service.LockNameStrategy, clusterId)
 
 	//查询上个版本发布的策略信息
-	runtime, publishMaps, err := s.getRuntimePublishMaps(ctx, cluster.Id)
+	runtime, publishMaps, err := s.getRuntimePublishMaps(ctx, clusterInfo.Id)
 	if err != nil {
 		return err
 	}
 
-	strategyPublishHistoryInfo := make([]*strategy_entry2.StrategyPublishConfigInfo, 0)
+	strategyPublishHistoryInfo := make([]*strategy_entry.StrategyPublishConfigInfo, 0)
 	//需要物理删除的策略
 	deleteStrategyMaps := common.Map[int, *strategy_model.StrategyToPublish[T]]{}
 
 	for _, publish := range publishes {
 
-		strategy, err := s.strategyStore.Get(ctx, publish.Strategy.Id)
+		strategyInfo, err := s.strategyStore.Get(ctx, publish.Strategy.Id)
 		if err != nil && err == gorm.ErrRecordNotFound {
 			return errors.New("其他人修改数据导致数据错乱，请重新刷新页面")
 		}
 
-		publish.StrategyVersion.Priority = strategy.Priority
-		publish.StrategyVersion.IsStop = strategy.IsStop
+		publish.StrategyVersion.Priority = strategyInfo.Priority
+		publish.StrategyVersion.IsStop = strategyInfo.IsStop
 
-		publishMaps[publish.Strategy.Id] = &strategy_entry2.StrategyPublishConfigInfo{
+		publishMaps[publish.Strategy.Id] = &strategy_entry.StrategyPublishConfigInfo{
 			Strategy:        *publish.Strategy,
 			StrategyVersion: *publish.StrategyVersion,
 			Status:          int(publish.Status),
@@ -828,7 +826,7 @@ func (s *strategyService[T, K]) Publish(ctx context.Context, namespaceId, operat
 	}
 
 	//全量发布的数据
-	strategyVersionPublishConfig := make([]*strategy_entry2.StrategyPublishConfigInfo, 0)
+	strategyVersionPublishConfig := make([]*strategy_entry.StrategyPublishConfigInfo, 0)
 
 	for _, info := range publishMaps {
 		strategyVersionPublishConfig = append(strategyVersionPublishConfig, info)
@@ -839,7 +837,7 @@ func (s *strategyService[T, K]) Publish(ctx context.Context, namespaceId, operat
 
 	t := time.Now()
 	if runtime == nil { //整体发布
-		runtime = &strategy_entry2.StrategyRuntime{
+		runtime = &strategy_entry.StrategyRuntime{
 			ClusterId:   clusterId,
 			NamespaceId: namespaceId,
 			IsOnline:    true,
@@ -853,7 +851,7 @@ func (s *strategyService[T, K]) Publish(ctx context.Context, namespaceId, operat
 	}
 
 	//发布版本信息
-	publishVersion := &strategy_entry2.StrategyPublishVersion{
+	publishVersion := &strategy_entry.StrategyPublishVersion{
 		ClusterId:   clusterId,
 		NamespaceId: namespaceId,
 		Publish:     strategyVersionPublishConfig,
@@ -870,7 +868,7 @@ func (s *strategyService[T, K]) Publish(ctx context.Context, namespaceId, operat
 	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:        strings.Join(publishUUIDS, ","),
 		Name:        strings.Join(publishNames, ","),
-		ClusterId:   cluster.Id,
+		ClusterId:   clusterInfo.Id,
 		ClusterName: clusterName,
 	})
 
@@ -887,7 +885,7 @@ func (s *strategyService[T, K]) Publish(ctx context.Context, namespaceId, operat
 		}
 
 		//发布记录
-		publishHistory = &strategy_entry2.StrategyPublishHistory{
+		publishHistory = &strategy_entry.StrategyPublishHistory{
 			VersionName: input.VersionName,
 			ClusterId:   clusterId,
 			NamespaceId: namespaceId,
@@ -922,7 +920,7 @@ func (s *strategyService[T, K]) Publish(ctx context.Context, namespaceId, operat
 
 			//删除策略操作记录
 
-			if err = s.strategyHistory.HistoryDelete(txCtx, namespaceId, strategyId, &strategy_entry2.StrategyHistoryInfo{
+			if err = s.strategyHistory.HistoryDelete(txCtx, namespaceId, strategyId, &strategy_entry.StrategyHistoryInfo{
 				Strategy: *info.Strategy,
 				Config:   info.StrategyVersion.StrategyConfigInfo,
 			}, operator); err != nil {
@@ -932,9 +930,8 @@ func (s *strategyService[T, K]) Publish(ctx context.Context, namespaceId, operat
 
 		strategyInfos := make([]interface{}, 0)
 		for _, publish := range publishVersion.Publish {
-			strategy := publish.Strategy
 			conf := s.decodeConfig(publish.StrategyVersion.StrategyConfigInfo.Config)
-			strategyInfo := s.toApinto(strategy.UUID, strategy.Desc, strategy.IsStop, strategy.Priority, publish.StrategyVersion.Filters, *conf)
+			strategyInfo := s.toApinto(publish.Strategy.UUID, publish.Strategy.Desc, publish.Strategy.IsStop, publish.Strategy.Priority, publish.StrategyVersion.Filters, *conf)
 			strategyInfos = append(strategyInfos, &strategyInfo)
 		}
 
@@ -945,46 +942,46 @@ func (s *strategyService[T, K]) Publish(ctx context.Context, namespaceId, operat
 
 func (s *strategyService[T, K]) ChangePriority(ctx context.Context, namespaceId, userId int, clusterName string, maps map[string]int) error {
 
-	cluster, err := s.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
+	clusterInfo, err := s.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
 	if err != nil {
 		return err
 	}
 
-	if err = s.lock.Lock(locker_service.LockNameStrategy, cluster.Id); err != nil {
+	if err = s.lock.Lock(locker_service.LockNameStrategy, clusterInfo.Id); err != nil {
 		return err
 	}
-	defer s.lock.Unlock(locker_service.LockNameStrategy, cluster.Id)
+	defer s.lock.Unlock(locker_service.LockNameStrategy, clusterInfo.Id)
 
 	strategyType := s.strategyHandler.GetType()
 
-	strategies, err := s.strategyStore.GetListByType(ctx, cluster.Id, strategyType)
+	strategies, err := s.strategyStore.GetListByType(ctx, clusterInfo.Id, strategyType)
 	if err != nil {
 		return err
 	}
 
-	strategyMaps := common.SliceToMap(strategies, func(t *strategy_entry2.Strategy) string {
+	strategyMaps := common.SliceToMap(strategies, func(t *strategy_entry.Strategy) string {
 		return t.UUID
 	})
 
-	historyList := make([]*strategy_entry2.StrategyHistory, 0)
+	historyList := make([]*strategy_entry.StrategyHistory, 0)
 	for key, priority := range maps {
 
-		if strategy, ok := strategyMaps[key]; ok && strategy.Priority != priority {
-			oldStrategy := *strategy
-			strategy.Priority = priority
-			version, err := s.getLatestStrategyVersion(ctx, strategy.Id)
+		if strategyInfo, ok := strategyMaps[key]; ok && strategyInfo.Priority != priority {
+			oldStrategy := *strategyInfo
+			strategyInfo.Priority = priority
+			version, err := s.getLatestStrategyVersion(ctx, strategyInfo.Id)
 			if err != nil {
 				return err
 			}
 
-			history := &strategy_entry2.StrategyHistory{
+			history := &strategy_entry.StrategyHistory{
 
-				OldValue: strategy_entry2.StrategyHistoryInfo{
+				OldValue: strategy_entry.StrategyHistoryInfo{
 					Strategy: oldStrategy,
 					Config:   version.StrategyConfigInfo,
 				},
-				NewValue: strategy_entry2.StrategyHistoryInfo{
-					Strategy: *strategy,
+				NewValue: strategy_entry.StrategyHistoryInfo{
+					Strategy: *strategyInfo,
 					Config:   version.StrategyConfigInfo,
 				},
 			}
@@ -1014,8 +1011,8 @@ func (s *strategyService[T, K]) ChangePriority(ctx context.Context, namespaceId,
 }
 
 // getRuntimePublishMaps 获取当前集群已经发布的策略信息
-func (s *strategyService[T, K]) getRuntimePublishMaps(ctx context.Context, clusterId int) (*strategy_entry2.StrategyRuntime, map[int]*strategy_entry2.StrategyPublishConfigInfo, error) {
-	var runtime *strategy_entry2.StrategyRuntime
+func (s *strategyService[T, K]) getRuntimePublishMaps(ctx context.Context, clusterId int) (*strategy_entry.StrategyRuntime, map[int]*strategy_entry.StrategyPublishConfigInfo, error) {
+	var runtime *strategy_entry.StrategyRuntime
 	var err error
 
 	runtime, err = s.strategyRuntimeStore.GetForCluster(ctx, clusterId, clusterId)
@@ -1024,13 +1021,13 @@ func (s *strategyService[T, K]) getRuntimePublishMaps(ctx context.Context, clust
 	}
 
 	//查询当前发布的版本
-	publishMaps := common.Map[int, *strategy_entry2.StrategyPublishConfigInfo]{}
+	publishMaps := common.Map[int, *strategy_entry.StrategyPublishConfigInfo]{}
 	if runtime != nil {
 		publishVersion, err := s.publishVersionStore.Get(ctx, runtime.VersionId)
 		if err != nil {
 			return nil, nil, err
 		}
-		publishMaps = common.SliceToMap(publishVersion.Publish, func(t *strategy_entry2.StrategyPublishConfigInfo) int {
+		publishMaps = common.SliceToMap(publishVersion.Publish, func(t *strategy_entry.StrategyPublishConfigInfo) int {
 			return t.Strategy.Id
 		})
 	}
@@ -1038,7 +1035,7 @@ func (s *strategyService[T, K]) getRuntimePublishMaps(ctx context.Context, clust
 	return runtime, publishMaps, nil
 }
 
-func (s *strategyService[T, K]) getLatestStrategyVersion(ctx context.Context, strategyID int) (*strategy_entry2.StrategyVersion, error) {
+func (s *strategyService[T, K]) getLatestStrategyVersion(ctx context.Context, strategyID int) (*strategy_entry.StrategyVersion, error) {
 	stat, err := s.strategyStatStore.Get(ctx, strategyID)
 	if err != nil {
 		return nil, err
@@ -1057,18 +1054,18 @@ func (s *strategyService[T, K]) checkPriorityReduplicative(ctx context.Context, 
 		return maxPriority + 1, nil
 	}
 
-	strategy, err := s.strategyStore.GetByPriority(ctx, clusterID, priority, strategyType)
+	strategyInfo, err := s.strategyStore.GetByPriority(ctx, clusterID, priority, strategyType)
 	if err != nil {
 		return 0, err
 	}
-	if strategy != nil && strategy.Id > 0 && strategy.UUID != uuid {
+	if strategyInfo != nil && strategyInfo.Id > 0 && strategyInfo.UUID != uuid {
 		return 0, errors.New("priority is reduplicative. ")
 	}
 
 	return priority, nil
 }
 
-func (s *strategyService[T, K]) isStrategyVersionConfChange(latest *strategy_entry2.StrategyVersion, current *strategy_entry2.StrategyVersion) bool {
+func (s *strategyService[T, K]) isStrategyVersionConfChange(latest *strategy_entry.StrategyVersion, current *strategy_entry.StrategyVersion) bool {
 	if latest.Priority != current.Priority {
 		return true
 	}
@@ -1080,7 +1077,7 @@ func (s *strategyService[T, K]) isStrategyVersionConfChange(latest *strategy_ent
 	return !reflect.DeepEqual(latest.StrategyVersionConfig, current.StrategyVersionConfig)
 }
 
-func (s *strategyService[T, K]) getFiltersStr(ctx context.Context, namespaceId int, version *strategy_entry2.StrategyVersion) (string, error) {
+func (s *strategyService[T, K]) getFiltersStr(ctx context.Context, namespaceId int, version *strategy_entry.StrategyVersion) (string, error) {
 	//filters := ""
 	filterList := make([]string, 0)
 	for _, filter := range version.Filters {
@@ -1096,11 +1093,11 @@ func (s *strategyService[T, K]) getFiltersStr(ctx context.Context, namespaceId i
 						return "", err
 					}
 					filters := "[应用："
-					for i, application := range applications {
+					for i, applicationInfo := range applications {
 						if i == len(applications)-1 {
-							filters += application.Name + "]"
+							filters += applicationInfo.Name + "]"
 						} else {
-							filters += application.Name + ","
+							filters += applicationInfo.Name + ","
 						}
 					}
 					filterList = append(filterList, filters)
@@ -1117,11 +1114,11 @@ func (s *strategyService[T, K]) getFiltersStr(ctx context.Context, namespaceId i
 						return "", err
 					}
 					filters := "[API："
-					for i, api := range apis {
+					for i, apiInfo := range apis {
 						if i == len(apis)-1 {
-							filters += api.Name + "]"
+							filters += apiInfo.Name + "]"
 						} else {
-							filters += api.Name + ","
+							filters += apiInfo.Name + ","
 						}
 					}
 					filterList = append(filterList, filters)
@@ -1198,7 +1195,7 @@ func (s *strategyService[T, K]) CheckInput(input *strategy_dto.StrategyInfoInput
 	return s.strategyHandler.CheckInput(input)
 }
 
-func (s *strategyService[T, K]) toApinto(name, desc string, isStop bool, priority int, filters []strategy_entry2.StrategyFiltersConfig, conf T) map[string]interface{} {
+func (s *strategyService[T, K]) toApinto(name, desc string, isStop bool, priority int, filters []strategy_entry.StrategyFiltersConfig, conf T) map[string]interface{} {
 	limitingFilters := make(map[string][]string)
 
 	for _, filter := range filters {
