@@ -10,22 +10,22 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/cluster"
 	"github.com/eolinker/apinto-dashboard/modules/user"
 	"github.com/eolinker/apinto-dashboard/modules/variable"
-	variable_entry2 "github.com/eolinker/apinto-dashboard/modules/variable/variable-entry"
+	"github.com/eolinker/apinto-dashboard/modules/variable/variable-entry"
 	"github.com/eolinker/apinto-dashboard/modules/variable/variable-model"
-	variable_store2 "github.com/eolinker/apinto-dashboard/modules/variable/variable-store"
+	"github.com/eolinker/apinto-dashboard/modules/variable/variable-store"
 	"github.com/eolinker/eosc/common/bean"
 	"gorm.io/gorm"
 	"time"
 )
 
 type globalVariableService struct {
-	globalVariableStore         variable_store2.IGlobalVariableStore
-	clusterVariableStore        variable_store2.IClusterVariableStore
+	globalVariableStore         variable_store.IGlobalVariableStore
+	clusterVariableStore        variable_store.IClusterVariableStore
 	clusterService              cluster.IClusterService
 	userInfoService             user.IUserInfoService
-	variableRuntimeStore        variable_store2.IVariableRuntimeStore
-	variablePublishVersionStore variable_store2.IVariablePublishVersionStore
-	variableHistoryStore        variable_store2.IVariableHistoryStore
+	variableRuntimeStore        variable_store.IVariableRuntimeStore
+	variablePublishVersionStore variable_store.IVariablePublishVersionStore
+	variableHistoryStore        variable_store.IVariableHistoryStore
 	quoteStore                  quote_store.IQuoteStore
 }
 
@@ -44,11 +44,11 @@ func newGlobalVariableService() variable.IGlobalVariableService {
 }
 
 func (g *globalVariableService) GetById(ctx context.Context, id int) (*variable_model.GlobalVariable, error) {
-	variable, err := g.globalVariableStore.Get(ctx, id)
+	variableInfo, err := g.globalVariableStore.Get(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	return &variable_model.GlobalVariable{Variables: variable}, nil
+	return &variable_model.GlobalVariable{Variables: variableInfo}, nil
 }
 
 func (g *globalVariableService) GetByKeys(ctx context.Context, namespaceId int, keys []string) ([]*variable_model.GlobalVariable, error) {
@@ -58,8 +58,8 @@ func (g *globalVariableService) GetByKeys(ctx context.Context, namespaceId int, 
 		return nil, err
 	}
 	list := make([]*variable_model.GlobalVariable, 0, len(variables))
-	for _, variable := range variables {
-		list = append(list, &variable_model.GlobalVariable{Variables: variable})
+	for _, variableInfo := range variables {
+		list = append(list, &variable_model.GlobalVariable{Variables: variableInfo})
 	}
 	return list, nil
 }
@@ -70,27 +70,27 @@ func (g *globalVariableService) List(ctx context.Context, pageNum, pageSize, nam
 		return nil, 0, err
 	}
 
-	userIds := common.SliceToSliceIds(variables, func(t *variable_entry2.Variables) int {
+	userIds := common.SliceToSliceIds(variables, func(t *variable_entry.Variables) int {
 		return t.Operator
 	})
 
 	userInfoMaps, _ := g.userInfoService.GetUserInfoMaps(ctx, userIds...)
 
 	variableList := make([]*variable_model.GlobalVariableListItem, 0, len(variables))
-	for _, variable := range variables {
+	for _, variableInfo := range variables {
 
 		operatorName := ""
-		if userInfo, ok := userInfoMaps[variable.Operator]; ok {
+		if userInfo, ok := userInfoMaps[variableInfo.Operator]; ok {
 			operatorName = userInfo.NickName
 		}
 
 		item := &variable_model.GlobalVariableListItem{
-			Variables:   variable,
+			Variables:   variableInfo,
 			OperatorStr: operatorName,
 		}
 
 		item.Status = 1 //空闲
-		count, err := g.quoteStore.Count(ctx, variable.Id, quote_entry.QuoteTargetKindTypeVariable)
+		count, err := g.quoteStore.Count(ctx, variableInfo.Id, quote_entry.QuoteTargetKindTypeVariable)
 		if err != nil {
 			return nil, 0, err
 		}
@@ -158,7 +158,7 @@ func (g *globalVariableService) getClusterVariableStatus(ctx context.Context, cl
 		return 0, err
 	}
 
-	var variableVersionEntry *variable_entry2.VariablePublishVersion
+	var variableVersionEntry *variable_entry.VariablePublishVersion
 	if runtime != nil {
 		variableVersionEntry, err = g.variablePublishVersionStore.Get(ctx, runtime.VersionId)
 		if err != nil && err != gorm.ErrRecordNotFound {
@@ -167,7 +167,7 @@ func (g *globalVariableService) getClusterVariableStatus(ctx context.Context, cl
 	}
 
 	//当前版本已发布的集群环境变量
-	versionClusterVariables := make([]*variable_entry2.ClusterVariable, 0)
+	versionClusterVariables := make([]*variable_entry.ClusterVariable, 0)
 	if variableVersionEntry != nil {
 		versionClusterVariables = variableVersionEntry.ClusterVariable
 	}
@@ -190,7 +190,7 @@ func (g *globalVariableService) Create(ctx context.Context, namespaceID, userID 
 		return 0, errors.New("this GlobalVariable key has already existed. ")
 	}
 	//在variables表中插入全局变量
-	variable := &variable_entry2.Variables{
+	variableInfo := &variable_entry.Variables{
 		Namespace:  namespaceID,
 		Key:        key,
 		Desc:       desc,
@@ -203,10 +203,10 @@ func (g *globalVariableService) Create(ctx context.Context, namespaceID, userID 
 		Name: key,
 	})
 
-	if err = g.globalVariableStore.Insert(ctx, variable); err != nil {
+	if err = g.globalVariableStore.Insert(ctx, variableInfo); err != nil {
 		return 0, err
 	}
-	return variable.Id, err
+	return variableInfo.Id, err
 }
 
 func (g *globalVariableService) Delete(ctx context.Context, namespaceID, userID int, key string) error {
@@ -247,7 +247,7 @@ func (g *globalVariableService) Delete(ctx context.Context, namespaceID, userID 
 			}
 			//插入删除记录
 
-			if err = g.variableHistoryStore.HistoryDelete(txCtx, namespaceID, cVariable.Id, &variable_entry2.VariableValue{Key: key, Value: cVariable.Value}, userID); err != nil {
+			if err = g.variableHistoryStore.HistoryDelete(txCtx, namespaceID, cVariable.Id, &variable_entry.VariableValue{Key: key, Value: cVariable.Value}, userID); err != nil {
 				return err
 			}
 		}

@@ -3,12 +3,12 @@ package strategy_store
 import (
 	"encoding/json"
 	"github.com/eolinker/apinto-dashboard/modules/base/publish-entry"
-	strategy_entry2 "github.com/eolinker/apinto-dashboard/modules/strategy/strategy-entry"
+	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-entry"
 	"github.com/eolinker/apinto-dashboard/store"
 )
 
 type IStrategyPublishHistoryStore interface {
-	store.BasePublishHistoryStore[strategy_entry2.StrategyPublishHistory]
+	store.BasePublishHistoryStore[strategy_entry.StrategyPublishHistory]
 }
 
 type strategyPublishHistoryHandler struct {
@@ -19,7 +19,7 @@ func (s *strategyPublishHistoryHandler) Kind() string {
 	return s.kind
 }
 
-func (s *strategyPublishHistoryHandler) Encode(sr *strategy_entry2.StrategyPublishHistory) *publish_entry.PublishHistory {
+func (s *strategyPublishHistoryHandler) Encode(sr *strategy_entry.StrategyPublishHistory) *publish_entry.PublishHistory {
 	for _, publish := range sr.Publish {
 		publish.Strategy.NamespaceId = 0
 		publish.Strategy.ClusterId = 0
@@ -43,10 +43,10 @@ func (s *strategyPublishHistoryHandler) Encode(sr *strategy_entry2.StrategyPubli
 	return history
 }
 
-func (s *strategyPublishHistoryHandler) Decode(r *publish_entry.PublishHistory) *strategy_entry2.StrategyPublishHistory {
-	val := make([]*strategy_entry2.StrategyPublishConfigInfo, 0)
+func (s *strategyPublishHistoryHandler) Decode(r *publish_entry.PublishHistory) *strategy_entry.StrategyPublishHistory {
+	val := make([]*strategy_entry.StrategyPublishConfigInfo, 0)
 	_ = json.Unmarshal([]byte(r.Data), &val)
-	history := &strategy_entry2.StrategyPublishHistory{
+	history := &strategy_entry.StrategyPublishHistory{
 		Id:          r.Id,
 		VersionName: r.VersionName,
 		Desc:        r.Desc,
@@ -62,8 +62,8 @@ func (s *strategyPublishHistoryHandler) Decode(r *publish_entry.PublishHistory) 
 }
 
 func NewStrategyPublishHistoryStore(db store.IDB, kind string) IStrategyPublishHistoryStore {
-	var historyHandler store.BaseKindHandler[strategy_entry2.StrategyPublishHistory, publish_entry.PublishHistory] = &strategyPublishHistoryHandler{
+	var historyHandler store.BaseKindHandler[strategy_entry.StrategyPublishHistory, publish_entry.PublishHistory] = &strategyPublishHistoryHandler{
 		kind: kind,
 	}
-	return store.CreatePublishHistory[strategy_entry2.StrategyPublishHistory](historyHandler, db)
+	return store.CreatePublishHistory[strategy_entry.StrategyPublishHistory](historyHandler, db)
 }

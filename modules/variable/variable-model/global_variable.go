@@ -1,21 +1,21 @@
 package variable_model
 
 import (
-	variable_entry2 "github.com/eolinker/apinto-dashboard/modules/variable/variable-entry"
+	"github.com/eolinker/apinto-dashboard/modules/variable/variable-entry"
 )
 
 type GlobalVariable struct {
-	*variable_entry2.Variables
+	*variable_entry.Variables
 }
 
 type GlobalVariableListItem struct {
-	*variable_entry2.Variables
+	*variable_entry.Variables
 	Status      int
 	OperatorStr string
 }
 
 type GlobalVariableDetails struct {
-	*variable_entry2.ClusterVariable
+	*variable_entry.ClusterVariable
 	Status      int
 	ClusterName string
 	Environment string

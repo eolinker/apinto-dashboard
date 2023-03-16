@@ -22,21 +22,21 @@ func newNamespaceService() namespace.INamespaceService {
 
 func (n *namespaceService) GetByName(name string) (*namespace_model.Namespace, error) {
 
-	namespace, err := n.namespaceStore.GetByName(context.TODO(), name)
+	namespaceInfo, err := n.namespaceStore.GetByName(context.TODO(), name)
 	if err != nil {
 		return nil, err
 	}
 
-	return &namespace_model.Namespace{Namespace: namespace}, nil
+	return &namespace_model.Namespace{Namespace: namespaceInfo}, nil
 }
 
 func (n *namespaceService) GetById(id int) (*namespace_model.Namespace, error) {
 
-	namespace, err := n.namespaceStore.Get(context.TODO(), id)
+	namespaceInfo, err := n.namespaceStore.Get(context.TODO(), id)
 	if err != nil {
 		return nil, err
 	}
-	return &namespace_model.Namespace{Namespace: namespace}, nil
+	return &namespace_model.Namespace{Namespace: namespaceInfo}, nil
 }
 
 func (n *namespaceService) GetAll() ([]*namespace_model.Namespace, error) {
@@ -47,9 +47,9 @@ func (n *namespaceService) GetAll() ([]*namespace_model.Namespace, error) {
 
 	result := make([]*namespace_model.Namespace, 0, len(list))
 
-	for _, namespace := range list {
+	for _, namespaceInfo := range list {
 
-		result = append(result, &namespace_model.Namespace{Namespace: namespace})
+		result = append(result, &namespace_model.Namespace{Namespace: namespaceInfo})
 	}
 
 	return result, nil

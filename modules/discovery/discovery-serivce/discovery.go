@@ -15,9 +15,9 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-model"
 	"github.com/eolinker/apinto-dashboard/modules/discovery"
 	"github.com/eolinker/apinto-dashboard/modules/discovery/discover-dto"
-	discovery_entry2 "github.com/eolinker/apinto-dashboard/modules/discovery/discovery-entry"
+	"github.com/eolinker/apinto-dashboard/modules/discovery/discovery-entry"
 	"github.com/eolinker/apinto-dashboard/modules/discovery/discovery-model"
-	discovery_store2 "github.com/eolinker/apinto-dashboard/modules/discovery/discovery-store"
+	"github.com/eolinker/apinto-dashboard/modules/discovery/discovery-store"
 	"github.com/eolinker/apinto-dashboard/modules/namespace"
 	"github.com/eolinker/apinto-dashboard/modules/upstream"
 	"github.com/eolinker/apinto-dashboard/modules/user"
@@ -33,11 +33,11 @@ import (
 )
 
 type discoveryService struct {
-	discoveryStore        discovery_store2.IDiscoveryStore
-	discoveryHistoryStore discovery_store2.IDiscoveryHistoryStore
-	discoveryStatStore    discovery_store2.IDiscoveryStatStore
-	discoveryVersionStore discovery_store2.IDiscoveryVersionStore
-	discoveryRuntimeStore discovery_store2.IDiscoveryRuntimeStore
+	discoveryStore        discovery_store.IDiscoveryStore
+	discoveryHistoryStore discovery_store.IDiscoveryHistoryStore
+	discoveryStatStore    discovery_store.IDiscoveryStatStore
+	discoveryVersionStore discovery_store.IDiscoveryVersionStore
+	discoveryRuntimeStore discovery_store.IDiscoveryRuntimeStore
 	quoteStore            quote_store.IQuoteStore
 
 	clusterNodeService    cluster.IClusterNodeService
@@ -85,17 +85,17 @@ func (d *discoveryService) GetDiscoveryList(ctx context.Context, namespaceID int
 	}
 
 	list := make([]*discovery_model.DiscoveryListItem, 0, len(dl))
-	for _, discovery := range dl {
+	for _, discoveryInfo := range dl {
 		item := &discovery_model.DiscoveryListItem{
-			Name:       discovery.Name,
-			UUID:       discovery.UUID,
-			Driver:     discovery.Driver,
-			Desc:       discovery.Desc,
-			UpdateTime: discovery.UpdateTime,
+			Name:       discoveryInfo.Name,
+			UUID:       discoveryInfo.UUID,
+			Driver:     discoveryInfo.Driver,
+			Desc:       discoveryInfo.Desc,
+			UpdateTime: discoveryInfo.UpdateTime,
 			IsDelete:   false,
 		}
 
-		isDelete, _ := d.isDiscoveryCanDelete(ctx, namespaceID, discovery.Id)
+		isDelete, _ := d.isDiscoveryCanDelete(ctx, namespaceID, discoveryInfo.Id)
 
 		item.IsDelete = isDelete
 		list = append(list, item)
@@ -105,32 +105,32 @@ func (d *discoveryService) GetDiscoveryList(ctx context.Context, namespaceID int
 }
 
 func (d *discoveryService) GetDiscoveryVersionInfo(ctx context.Context, namespaceID int, discoveryName string) (*discovery_model.DiscoveryInfo, error) {
-	discovery, err := d.discoveryStore.GetByName(ctx, namespaceID, discoveryName)
+	discoveryInfo, err := d.discoveryStore.GetByName(ctx, namespaceID, discoveryName)
 	if err != nil {
 		return nil, err
 	}
-	version, err := d.GetLatestDiscoveryVersion(ctx, discovery.Id)
+	version, err := d.GetLatestDiscoveryVersion(ctx, discoveryInfo.Id)
 	if err != nil {
 		return nil, err
 	}
 
-	discoveryDriver := d.discoveryManager.GetDriver(discovery.Driver)
+	discoveryDriverInfo := d.discoveryManager.GetDriver(discoveryInfo.Driver)
 
 	info := &discovery_model.DiscoveryInfo{
 		Name:   discoveryName,
-		UUID:   discovery.UUID,
-		Driver: discovery.Driver,
-		Desc:   discovery.Desc,
-		Config: discoveryDriver.FormatConfig([]byte(version.Config)),
-		Render: discoveryDriver.Render(),
+		UUID:   discoveryInfo.UUID,
+		Driver: discoveryInfo.Driver,
+		Desc:   discoveryInfo.Desc,
+		Config: discoveryDriverInfo.FormatConfig([]byte(version.Config)),
+		Render: discoveryDriverInfo.Render(),
 	}
 
 	return info, nil
 }
 
 func (d *discoveryService) CreateDiscovery(ctx context.Context, namespaceID int, userID int, input *discover_dto.DiscoveryInfoProxy) error {
-	discoveryDriver := d.discoveryManager.GetDriver(input.Driver)
-	if discoveryDriver == nil {
+	discoveryDriverInfo := d.discoveryManager.GetDriver(input.Driver)
+	if discoveryDriverInfo == nil {
 		return fmt.Errorf("Driver %s doesn't exit. ", input.Driver)
 	}
 
@@ -143,7 +143,7 @@ func (d *discoveryService) CreateDiscovery(ctx context.Context, namespaceID int,
 		return err
 	}
 
-	newConf, _, variableList, err := discoveryDriver.CheckInput(input.Config)
+	newConf, _, variableList, err := discoveryDriverInfo.CheckInput(input.Config)
 	if err != nil {
 		return err
 	}
@@ -163,7 +163,7 @@ func (d *discoveryService) CreateDiscovery(ctx context.Context, namespaceID int,
 
 	return d.discoveryStore.Transaction(ctx, func(txCtx context.Context) error {
 		t := time.Now()
-		discoveryInfo := &discovery_entry2.Discovery{
+		discoveryInfo := &discovery_entry.Discovery{
 			NamespaceId: namespaceID,
 			Name:        input.Name,
 			UUID:        input.UUID,
@@ -177,10 +177,10 @@ func (d *discoveryService) CreateDiscovery(ctx context.Context, namespaceID int,
 			return err
 		}
 		//添加版本信息
-		discoveryVersionInfo := &discovery_entry2.DiscoveryVersion{
+		discoveryVersionInfo := &discovery_entry.DiscoveryVersion{
 			DiscoveryID: discoveryInfo.Id,
 			NamespaceID: namespaceID,
-			DiscoveryVersionConfig: discovery_entry2.DiscoveryVersionConfig{
+			DiscoveryVersionConfig: discovery_entry.DiscoveryVersionConfig{
 				Config: input.Config.String(),
 			},
 			Operator:   userID,
@@ -190,7 +190,7 @@ func (d *discoveryService) CreateDiscovery(ctx context.Context, namespaceID int,
 		if err = d.discoveryVersionStore.Save(txCtx, discoveryVersionInfo); err != nil {
 			return err
 		}
-		stat := &discovery_entry2.DiscoveryStat{
+		stat := &discovery_entry.DiscoveryStat{
 			DiscoveryID: discoveryInfo.Id,
 			VersionID:   discoveryVersionInfo.Id,
 		}
@@ -205,8 +205,8 @@ func (d *discoveryService) CreateDiscovery(ctx context.Context, namespaceID int,
 				return err
 			}
 			quoteMap := make(map[quote_entry.QuoteTargetKindType][]int)
-			for _, variable := range variables {
-				quoteMap[quote_entry.QuoteTargetKindTypeVariable] = append(quoteMap[quote_entry.QuoteTargetKindTypeVariable], variable.Id)
+			for _, variableInfo := range variables {
+				quoteMap[quote_entry.QuoteTargetKindTypeVariable] = append(quoteMap[quote_entry.QuoteTargetKindTypeVariable], variableInfo.Id)
 			}
 
 			if err = d.quoteStore.Set(txCtx, discoveryInfo.Id, quote_entry.QuoteKindTypeDiscovery, quoteMap); err != nil {
@@ -214,9 +214,9 @@ func (d *discoveryService) CreateDiscovery(ctx context.Context, namespaceID int,
 			}
 		}
 
-		return d.discoveryHistoryStore.HistoryAdd(txCtx, namespaceID, discoveryInfo.Id, &discovery_entry2.DiscoveryHistoryInfo{
+		return d.discoveryHistoryStore.HistoryAdd(txCtx, namespaceID, discoveryInfo.Id, &discovery_entry.DiscoveryHistoryInfo{
 			Discovery: *discoveryInfo,
-			Config: discovery_entry2.DiscoveryVersionConfig{
+			Config: discovery_entry.DiscoveryVersionConfig{
 				Config: input.Config.String(),
 			},
 		}, userID)
@@ -267,10 +267,10 @@ func (d *discoveryService) UpdateDiscovery(ctx context.Context, namespaceID int,
 
 		//若配置更新了才往version插入新数据
 		if discoveryDriver.CheckConfIsChange([]byte(latestVersion.Config), input.Config) {
-			discoveryVersionInfo := &discovery_entry2.DiscoveryVersion{
+			discoveryVersionInfo := &discovery_entry.DiscoveryVersion{
 				DiscoveryID: discoveryInfo.Id,
 				NamespaceID: namespaceID,
-				DiscoveryVersionConfig: discovery_entry2.DiscoveryVersionConfig{
+				DiscoveryVersionConfig: discovery_entry.DiscoveryVersionConfig{
 					Config: input.Config.String(),
 				},
 				Operator:   userID,
@@ -280,7 +280,7 @@ func (d *discoveryService) UpdateDiscovery(ctx context.Context, namespaceID int,
 				return err
 			}
 			//添加版本关联原表信息
-			stat := &discovery_entry2.DiscoveryStat{
+			stat := &discovery_entry.DiscoveryStat{
 				DiscoveryID: discoveryInfo.Id,
 				VersionID:   discoveryVersionInfo.Id,
 			}
@@ -295,8 +295,8 @@ func (d *discoveryService) UpdateDiscovery(ctx context.Context, namespaceID int,
 			if err != nil {
 				return err
 			}
-			for _, variable := range variables {
-				variableIDList = append(variableIDList, variable.Id)
+			for _, variableInfo := range variables {
+				variableIDList = append(variableIDList, variableInfo.Id)
 			}
 			targetMaps[quote_entry.QuoteTargetKindTypeVariable] = variableIDList
 			if err = d.quoteStore.Set(txCtx, discoveryInfo.Id, quote_entry.QuoteKindTypeDiscovery, targetMaps); err != nil {
@@ -305,14 +305,14 @@ func (d *discoveryService) UpdateDiscovery(ctx context.Context, namespaceID int,
 		}
 
 		//操作记录
-		return d.discoveryHistoryStore.HistoryEdit(txCtx, namespaceID, discoveryInfo.Id, &discovery_entry2.DiscoveryHistoryInfo{
+		return d.discoveryHistoryStore.HistoryEdit(txCtx, namespaceID, discoveryInfo.Id, &discovery_entry.DiscoveryHistoryInfo{
 			Discovery: oldDiscovery,
-			Config: discovery_entry2.DiscoveryVersionConfig{
+			Config: discovery_entry.DiscoveryVersionConfig{
 				Config: latestVersion.Config,
 			},
-		}, &discovery_entry2.DiscoveryHistoryInfo{
+		}, &discovery_entry.DiscoveryHistoryInfo{
 			Discovery: *discoveryInfo,
-			Config: discovery_entry2.DiscoveryVersionConfig{
+			Config: discovery_entry.DiscoveryVersionConfig{
 				Config: input.Config.String(),
 			},
 		}, userID)
@@ -357,9 +357,9 @@ func (d *discoveryService) DeleteDiscovery(ctx context.Context, namespaceID, use
 			return err
 		}
 
-		if err = d.discoveryHistoryStore.HistoryDelete(txCtx, namespaceID, discoveryInfo.Id, &discovery_entry2.DiscoveryHistoryInfo{
+		if err = d.discoveryHistoryStore.HistoryDelete(txCtx, namespaceID, discoveryInfo.Id, &discovery_entry.DiscoveryHistoryInfo{
 			Discovery: *discoveryInfo,
-			Config:    discovery_entry2.DiscoveryVersionConfig{Config: version.Config},
+			Config:    discovery_entry.DiscoveryVersionConfig{Config: version.Config},
 		}, userId); err != nil {
 			return err
 		}
@@ -410,7 +410,7 @@ func (d *discoveryService) OnlineList(ctx context.Context, namespaceId int, disc
 	if err != nil {
 		return nil, err
 	}
-	runtimeMaps := common.SliceToMap(runtimes, func(t *discovery_entry2.DiscoveryRuntime) int {
+	runtimeMaps := common.SliceToMap(runtimes, func(t *discovery_entry.DiscoveryRuntime) int {
 		return t.ClusterId
 	})
 
@@ -421,19 +421,19 @@ func (d *discoveryService) OnlineList(ctx context.Context, namespaceId int, disc
 		return nil, err
 	}
 
-	userIds := common.SliceToSliceIds(runtimes, func(t *discovery_entry2.DiscoveryRuntime) int {
+	userIds := common.SliceToSliceIds(runtimes, func(t *discovery_entry.DiscoveryRuntime) int {
 		return t.Operator
 	})
 
 	userInfoMaps, _ := d.userInfoService.GetUserInfoMaps(ctx, userIds...)
 
-	for _, cluster := range clusterMaps {
+	for _, clusterInfo := range clusterMaps {
 		discoveryOnline := &discovery_model.DiscoveryOnline{
-			ClusterName: cluster.Name,
-			Env:         cluster.Env,
+			ClusterName: clusterInfo.Name,
+			Env:         clusterInfo.Env,
 			Status:      1, //默认为未上线状态
 		}
-		if runtime, ok := runtimeMaps[cluster.Id]; ok {
+		if runtime, ok := runtimeMaps[clusterInfo.Id]; ok {
 			discoveryOnline.UpdateTime = runtime.UpdateTime
 			if runtime.IsOnline {
 				discoveryOnline.Status = 3
@@ -469,7 +469,7 @@ func (d *discoveryService) OnlineDiscovery(ctx context.Context, namespaceId, ope
 	t := time.Now()
 
 	//获取当前集群信息
-	cluster, err := d.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
+	clusterInfo, err := d.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
 	if err != nil {
 		return nil, err
 	}
@@ -502,7 +502,7 @@ func (d *discoveryService) OnlineDiscovery(ctx context.Context, namespaceId, ope
 	variableIds := quoteMaps[quote_entry.QuoteTargetKindTypeVariable]
 	if len(variableIds) > 0 {
 		//获取集群正在运行的环境变量版本
-		variablePublishVersion, err := d.variableService.GetPublishVersion(ctx, cluster.Id)
+		variablePublishVersion, err := d.variableService.GetPublishVersion(ctx, clusterInfo.Id)
 		if err != nil || variablePublishVersion == nil {
 			globalVariable, err := d.globalVariableService.GetById(ctx, variableIds[0])
 			if err != nil {
@@ -528,18 +528,18 @@ func (d *discoveryService) OnlineDiscovery(ctx context.Context, namespaceId, ope
 	}
 
 	//获取apinto client
-	client, err := d.apintoClient.GetClient(ctx, cluster.Id)
+	client, err := d.apintoClient.GetClient(ctx, clusterInfo.Id)
 	if err != nil {
 		return nil, err
 	}
 
 	//获取当前运行的版本
-	runtime, err := d.discoveryRuntimeStore.GetForCluster(ctx, discoveryID, cluster.Id)
+	runtime, err := d.discoveryRuntimeStore.GetForCluster(ctx, discoveryID, clusterInfo.Id)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}
 
-	namespace, err := d.namespaceService.GetById(namespaceId)
+	namespaceInfo, err := d.namespaceService.GetById(namespaceId)
 	if err != nil {
 		return nil, err
 	}
@@ -547,10 +547,10 @@ func (d *discoveryService) OnlineDiscovery(ctx context.Context, namespaceId, ope
 	//判断是否是更新
 	isApintoUpdate := false
 	if runtime == nil {
-		runtime = &discovery_entry2.DiscoveryRuntime{
+		runtime = &discovery_entry.DiscoveryRuntime{
 			NamespaceId: namespaceId,
 			DiscoveryID: discoveryID,
-			ClusterId:   cluster.Id,
+			ClusterId:   clusterInfo.Id,
 			VersionID:   latestVersion.Id,
 			IsOnline:    true,
 			Operator:    operator,
@@ -571,7 +571,7 @@ func (d *discoveryService) OnlineDiscovery(ctx context.Context, namespaceId, ope
 	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:        discoveryInfo.UUID,
 		Name:        discoveryName,
-		ClusterId:   cluster.Id,
+		ClusterId:   clusterInfo.Id,
 		ClusterName: clusterName,
 		PublishType: 1,
 	})
@@ -581,7 +581,7 @@ func (d *discoveryService) OnlineDiscovery(ctx context.Context, namespaceId, ope
 
 		driverManager := d.discoveryManager.GetDriver(discoveryInfo.Driver)
 
-		discoveryConfig := driverManager.ToApinto(namespace.Name, strings.ToLower(discoveryInfo.Name), discoveryInfo.Desc, []byte(latestVersion.Config))
+		discoveryConfig := driverManager.ToApinto(namespaceInfo.Name, strings.ToLower(discoveryInfo.Name), discoveryInfo.Desc, []byte(latestVersion.Config))
 
 		if err = d.discoveryRuntimeStore.Save(txCtx, runtime); err != nil {
 			return err
@@ -609,7 +609,7 @@ func (d *discoveryService) ResetOnline(ctx context.Context, namespaceId, cluster
 		return
 	}
 
-	namespace, err := d.namespaceService.GetById(namespaceId)
+	namespaceInfo, err := d.namespaceService.GetById(namespaceId)
 	if err != nil {
 		log.Errorf("discoveryService-ResetOnline-getNamespace clusterId=%d err=%s", clusterId, err.Error())
 		return
@@ -633,7 +633,7 @@ func (d *discoveryService) ResetOnline(ctx context.Context, namespaceId, cluster
 		}
 		driverManager := d.discoveryManager.GetDriver(discoveryInfo.Driver)
 
-		discoveryConfig := driverManager.ToApinto(namespace.Name, strings.ToLower(discoveryInfo.Name), discoveryInfo.Desc, []byte(version.Config))
+		discoveryConfig := driverManager.ToApinto(namespaceInfo.Name, strings.ToLower(discoveryInfo.Name), discoveryInfo.Desc, []byte(version.Config))
 
 		if err = client.ForDiscovery().Create(*discoveryConfig); err != nil {
 			log.Errorf("discoveryService-ResetOnline-apinto clusterId=%d discoveryConfig=%v err=%s", clusterId, discoveryConfig, err.Error())
@@ -649,7 +649,7 @@ func (d *discoveryService) OfflineDiscovery(ctx context.Context, namespaceId, op
 	}
 
 	//获取当前集群信息
-	cluster, err := d.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
+	clusterInfo, err := d.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
 	if err != nil {
 		return err
 	}
@@ -665,7 +665,7 @@ func (d *discoveryService) OfflineDiscovery(ctx context.Context, namespaceId, op
 	}
 
 	//获取当前的版本
-	runtime, err := d.discoveryRuntimeStore.GetForCluster(ctx, discoveryInfo.Id, cluster.Id)
+	runtime, err := d.discoveryRuntimeStore.GetForCluster(ctx, discoveryInfo.Id, clusterInfo.Id)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return err
 	}
@@ -681,7 +681,7 @@ func (d *discoveryService) OfflineDiscovery(ctx context.Context, namespaceId, op
 	}
 	serviceIds := quoteSet[quote_entry.QuoteKindTypeService]
 	for _, serviceID := range serviceIds {
-		if d.service.IsOnline(ctx, cluster.Id, serviceID) {
+		if d.service.IsOnline(ctx, clusterInfo.Id, serviceID) {
 			info, err := d.service.GetServiceSchemaInfo(ctx, serviceID)
 			if err != nil {
 				return err
@@ -696,7 +696,7 @@ func (d *discoveryService) OfflineDiscovery(ctx context.Context, namespaceId, op
 	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:        discoveryInfo.UUID,
 		Name:        discoveryName,
-		ClusterId:   cluster.Id,
+		ClusterId:   clusterInfo.Id,
 		ClusterName: clusterName,
 		PublishType: 2,
 	})
@@ -715,7 +715,7 @@ func (d *discoveryService) OfflineDiscovery(ctx context.Context, namespaceId, op
 		}
 
 		//发布到apinto
-		client, err := d.apintoClient.GetClient(ctx, cluster.Id)
+		client, err := d.apintoClient.GetClient(ctx, clusterInfo.Id)
 		if err != nil {
 			return err
 		}
@@ -732,17 +732,17 @@ func (d *discoveryService) GetDiscoveryName(ctx context.Context, discoveryID int
 	return info.Name, nil
 }
 func (d *discoveryService) GetDiscoveryInfoByID(ctx context.Context, discoveryID int) (*discovery_model.DiscoveryListItem, error) {
-	discovery, err := d.discoveryStore.Get(ctx, discoveryID)
+	discoveryInfo, err := d.discoveryStore.Get(ctx, discoveryID)
 	if err != nil {
 		return nil, err
 	}
 
 	info := &discovery_model.DiscoveryListItem{
-		Name:       discovery.Name,
-		UUID:       discovery.UUID,
-		Driver:     discovery.Driver,
-		Desc:       discovery.Desc,
-		UpdateTime: discovery.UpdateTime,
+		Name:       discoveryInfo.Name,
+		UUID:       discoveryInfo.UUID,
+		Driver:     discoveryInfo.Driver,
+		Desc:       discoveryInfo.Desc,
+		UpdateTime: discoveryInfo.UpdateTime,
 		IsDelete:   false,
 	}
 
@@ -779,15 +779,15 @@ func (d *discoveryService) GetDiscoveryEnum(ctx context.Context, namespaceID int
 	}
 	enums = append(enums, staticEnum)
 
-	for _, discovery := range list {
-		discoveryDriver := d.discoveryManager.GetDriver(discovery.Driver)
-		if discoveryDriver == nil {
+	for _, discoveryInfo := range list {
+		discoveryDriverInfo := d.discoveryManager.GetDriver(discoveryInfo.Driver)
+		if discoveryDriverInfo == nil {
 			continue
 		}
 		enum := &discovery_model.DiscoveryEnum{
-			Name:   discovery.Name,
-			Driver: discovery.Driver,
-			Render: discoveryDriver.OptionsEnum().Render(),
+			Name:   discoveryInfo.Name,
+			Driver: discoveryInfo.Driver,
+			Render: discoveryDriverInfo.OptionsEnum().Render(),
 		}
 		enums = append(enums, enum)
 	}
@@ -803,11 +803,11 @@ func (d *discoveryService) GetServiceDiscoveryDriverByID(ctx context.Context, di
 	if discoveryID == 0 {
 		return DriverStatic, DriverStatic, d.staticDriver, nil
 	}
-	discovery, err := d.discoveryStore.Get(ctx, discoveryID)
+	discoveryInfo, err := d.discoveryStore.Get(ctx, discoveryID)
 	if err != nil {
 		return "", "", nil, err
 	}
-	return discovery.Name, discovery.Driver, d.discoveryManager.GetDriver(discovery.Driver).OptionsEnum(), nil
+	return discoveryInfo.Name, discoveryInfo.Driver, d.discoveryManager.GetDriver(discoveryInfo.Driver).OptionsEnum(), nil
 }
 
 func (d *discoveryService) GetLatestDiscoveryVersion(ctx context.Context, discoveryID int) (*discovery_model.DiscoveryVersion, error) {
@@ -817,7 +817,7 @@ func (d *discoveryService) GetLatestDiscoveryVersion(ctx context.Context, discov
 		return nil, err
 	}
 
-	var version *discovery_entry2.DiscoveryVersion
+	var version *discovery_entry.DiscoveryVersion
 
 	version, err = d.discoveryVersionStore.Get(ctx, stat.VersionID)
 	if err != nil {
@@ -833,11 +833,11 @@ func (d *discoveryService) GetServiceDiscoveryDriver(ctx context.Context, namesp
 		return 0, DriverStatic, d.staticDriver, nil
 	}
 
-	discovery, err := d.discoveryStore.GetByName(ctx, namespaceID, discoveryName)
+	discoveryInfo, err := d.discoveryStore.GetByName(ctx, namespaceID, discoveryName)
 	if err != nil {
 		return 0, "", nil, err
 	}
-	return discovery.Id, discovery.Driver, d.discoveryManager.GetDriver(discovery.Driver).OptionsEnum(), nil
+	return discoveryInfo.Id, discoveryInfo.Driver, d.discoveryManager.GetDriver(discoveryInfo.Driver).OptionsEnum(), nil
 }
 
 func (d *discoveryService) isDiscoveryCanDelete(ctx context.Context, namespaceID, discoveryID int) (bool, error) {
@@ -857,10 +857,10 @@ func (d *discoveryService) isDiscoveryCanDelete(ctx context.Context, namespaceID
 	if err != nil {
 		return false, err
 	}
-	for _, cluster := range clusters {
-		runtime, _ := d.discoveryRuntimeStore.GetForCluster(ctx, discoveryID, cluster.Id)
+	for _, clusterInfo := range clusters {
+		runtime, _ := d.discoveryRuntimeStore.GetForCluster(ctx, discoveryID, clusterInfo.Id)
 		if runtime != nil && runtime.IsOnline {
-			return false, fmt.Errorf("Discovery is online in cluster %s. ", cluster.Name)
+			return false, fmt.Errorf("Discovery is online in cluster %s. ", clusterInfo.Name)
 		}
 	}
 	return true, nil

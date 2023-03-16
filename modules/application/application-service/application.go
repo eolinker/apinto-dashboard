@@ -11,7 +11,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/application/application-dto"
 	"github.com/eolinker/apinto-dashboard/modules/application/application-entry"
 	"github.com/eolinker/apinto-dashboard/modules/application/application-model"
-	application_store2 "github.com/eolinker/apinto-dashboard/modules/application/application-store"
+	"github.com/eolinker/apinto-dashboard/modules/application/application-store"
 	"github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-dashboard/modules/base/locker-service"
 	"github.com/eolinker/apinto-dashboard/modules/cluster"
@@ -32,12 +32,12 @@ const anonymousIds = "anonymous"
 var _ application.IApplicationService = (*applicationService)(nil)
 
 type applicationService struct {
-	applicationStore            application_store2.IApplicationStore
-	applicationRuntimeStore     application_store2.IApplicationRuntimeStore
-	applicationAuthRuntimeStore application_store2.IApplicationAuthRuntimeStore
-	applicationVersionStore     application_store2.IApplicationVersionStore
-	applicationStatStore        application_store2.IApplicationStatStore
-	applicationHistoryStore     application_store2.IApplicationHistoryStore
+	applicationStore            application_store.IApplicationStore
+	applicationRuntimeStore     application_store.IApplicationRuntimeStore
+	applicationAuthRuntimeStore application_store.IApplicationAuthRuntimeStore
+	applicationVersionStore     application_store.IApplicationVersionStore
+	applicationStatStore        application_store.IApplicationStatStore
+	applicationHistoryStore     application_store.IApplicationHistoryStore
 	clusterService              cluster.IClusterService
 	applicationAuthService      application.IApplicationAuthService
 	randomService               random.IRandomService
@@ -800,8 +800,8 @@ func (a *applicationService) AppListFilter(ctx context.Context, namespaceId, pag
 
 	applications := make([]*application_model.Application, 0, len(list))
 
-	for _, application := range list {
-		val := &application_model.Application{Application: application}
+	for _, applicationInfo := range list {
+		val := &application_model.Application{Application: applicationInfo}
 		applications = append(applications, val)
 	}
 
