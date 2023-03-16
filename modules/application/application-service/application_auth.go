@@ -8,9 +8,9 @@ import (
 	driverInfo "github.com/eolinker/apinto-dashboard/driver"
 	"github.com/eolinker/apinto-dashboard/modules/application"
 	"github.com/eolinker/apinto-dashboard/modules/application/application-dto"
-	application_entry2 "github.com/eolinker/apinto-dashboard/modules/application/application-entry"
+	"github.com/eolinker/apinto-dashboard/modules/application/application-entry"
 	"github.com/eolinker/apinto-dashboard/modules/application/application-model"
-	application_store2 "github.com/eolinker/apinto-dashboard/modules/application/application-store"
+	"github.com/eolinker/apinto-dashboard/modules/application/application-store"
 	"github.com/eolinker/apinto-dashboard/modules/cluster"
 	"github.com/eolinker/apinto-dashboard/modules/user"
 	"github.com/eolinker/eosc/common/bean"
@@ -19,12 +19,12 @@ import (
 )
 
 type applicationAuthService struct {
-	applicationAuthStore        application_store2.IApplicationAuthStore
-	applicationAuthVersionStore application_store2.IApplicationAuthVersionStore
-	applicationAuthStatStore    application_store2.IApplicationAuthStatStore
-	applicationAuthRuntimeStore application_store2.IApplicationAuthRuntimeStore
-	applicationAuthPublishStore application_store2.IApplicationAuthPublishStore
-	applicationAuthHistoryStore application_store2.IApplicationAuthHistoryStore
+	applicationAuthStore        application_store.IApplicationAuthStore
+	applicationAuthVersionStore application_store.IApplicationAuthVersionStore
+	applicationAuthStatStore    application_store.IApplicationAuthStatStore
+	applicationAuthRuntimeStore application_store.IApplicationAuthRuntimeStore
+	applicationAuthPublishStore application_store.IApplicationAuthPublishStore
+	applicationAuthHistoryStore application_store.IApplicationAuthHistoryStore
 	applicationService          application.IApplicationService
 	clusterService              cluster.IClusterService
 	userInfoService             user.IUserInfoService
@@ -63,7 +63,7 @@ func (a *applicationAuthService) GetList(ctx context.Context, namespaceId int, a
 		return nil, err
 	}
 
-	userIds := common.SliceToSliceIds(list, func(t *application_entry2.ApplicationAuth) int {
+	userIds := common.SliceToSliceIds(list, func(t *application_entry.ApplicationAuth) int {
 		return t.Operator
 	})
 
@@ -122,7 +122,7 @@ func (a *applicationAuthService) Create(ctx context.Context, namespaceId, userId
 	}
 
 	t := time.Now()
-	applicationAuth := &application_entry2.ApplicationAuth{
+	applicationAuth := &application_entry.ApplicationAuth{
 		Uuid:          uuid.New(),
 		Namespace:     namespaceId,
 		Application:   applicationInfo.Id,
@@ -141,18 +141,18 @@ func (a *applicationAuthService) Create(ctx context.Context, namespaceId, userId
 			return err
 		}
 
-		config := application_entry2.ApplicationAuthVersionConfig{
+		config := application_entry.ApplicationAuthVersionConfig{
 			Config: string(input.Config),
 		}
 
-		if err = a.applicationAuthHistoryStore.HistoryAdd(txCtx, namespaceId, applicationAuth.Id, &application_entry2.ApplicationAuthHistoryInfo{
+		if err = a.applicationAuthHistoryStore.HistoryAdd(txCtx, namespaceId, applicationAuth.Id, &application_entry.ApplicationAuthHistoryInfo{
 			Auth:   *applicationAuth,
 			Config: config,
 		}, userId); err != nil {
 			return err
 		}
 
-		applicationAuthVersion := &application_entry2.ApplicationAuthVersion{
+		applicationAuthVersion := &application_entry.ApplicationAuthVersion{
 			ApplicationAuthID:            applicationAuth.Id,
 			NamespaceID:                  namespaceId,
 			ApplicationAuthVersionConfig: config,
@@ -164,7 +164,7 @@ func (a *applicationAuthService) Create(ctx context.Context, namespaceId, userId
 			return err
 		}
 
-		stat := &application_entry2.ApplicationAuthStat{
+		stat := &application_entry.ApplicationAuthStat{
 			ApplicationAuthId: applicationAuthVersion.ApplicationAuthID,
 			VersionID:         applicationAuthVersion.Id,
 		}
@@ -232,12 +232,12 @@ func (a *applicationAuthService) Update(ctx context.Context, namespaceId, userId
 			return err
 		}
 
-		newConfig := application_entry2.ApplicationAuthVersionConfig{
+		newConfig := application_entry.ApplicationAuthVersionConfig{
 			Config: string(input.Config),
 		}
 
 		if isUpdateVersion {
-			applicationAuthVersion := &application_entry2.ApplicationAuthVersion{
+			applicationAuthVersion := &application_entry.ApplicationAuthVersion{
 				ApplicationAuthID:            auth.Id,
 				NamespaceID:                  namespaceId,
 				ApplicationAuthVersionConfig: newConfig,
@@ -249,7 +249,7 @@ func (a *applicationAuthService) Update(ctx context.Context, namespaceId, userId
 				return err
 			}
 
-			stat = &application_entry2.ApplicationAuthStat{
+			stat = &application_entry.ApplicationAuthStat{
 				ApplicationAuthId: applicationAuthVersion.ApplicationAuthID,
 				VersionID:         applicationAuthVersion.Id,
 			}
@@ -257,10 +257,10 @@ func (a *applicationAuthService) Update(ctx context.Context, namespaceId, userId
 			return a.applicationAuthStatStore.Save(txCtx, stat)
 		}
 
-		return a.applicationAuthHistoryStore.HistoryEdit(txCtx, namespaceId, auth.Id, &application_entry2.ApplicationAuthHistoryInfo{
+		return a.applicationAuthHistoryStore.HistoryEdit(txCtx, namespaceId, auth.Id, &application_entry.ApplicationAuthHistoryInfo{
 			Auth:   *auth,
 			Config: oldVersion.ApplicationAuthVersionConfig,
-		}, &application_entry2.ApplicationAuthHistoryInfo{
+		}, &application_entry.ApplicationAuthHistoryInfo{
 			Auth:   *auth,
 			Config: newConfig,
 		}, userId)
@@ -335,18 +335,18 @@ func (a *applicationAuthService) Delete(ctx context.Context, namespaceId, userId
 			return err
 		}
 
-		for _, cluster := range clusters {
-			delMap["`cluster`"] = cluster.Id
+		for _, clusterInfo := range clusters {
+			delMap["`cluster`"] = clusterInfo.Id
 			if _, err = a.applicationAuthRuntimeStore.DeleteWhere(txCtx, delMap); err != nil {
 				return err
 			}
 
-			if err = a.applicationAuthPublishStore.DeleteByClusterIdAppId(txCtx, cluster.Id, auth.Application); err != nil {
+			if err = a.applicationAuthPublishStore.DeleteByClusterIdAppId(txCtx, clusterInfo.Id, auth.Application); err != nil {
 				return err
 			}
 		}
 
-		return a.applicationAuthHistoryStore.HistoryDelete(txCtx, namespaceId, auth.Id, application_entry2.ApplicationAuthHistoryInfo{
+		return a.applicationAuthHistoryStore.HistoryDelete(txCtx, namespaceId, auth.Id, application_entry.ApplicationAuthHistoryInfo{
 			Auth:   *auth,
 			Config: version.ApplicationAuthVersionConfig,
 		}, userId)
@@ -360,7 +360,7 @@ func (a *applicationAuthService) Online(ctx context.Context, namespaceId, userId
 	}
 	t := time.Now()
 
-	authPublishList := make([]*application_entry2.ApplicationAuthPublish, 0)
+	authPublishList := make([]*application_entry.ApplicationAuthPublish, 0)
 	list := make([]*application_model.ApplicationAuth, 0, len(applicationAuths))
 	for _, auth := range applicationAuths {
 		//获取当前版本信息
@@ -377,7 +377,7 @@ func (a *applicationAuthService) Online(ctx context.Context, namespaceId, userId
 			ApplicationAuth: auth,
 			Config:          version.Config,
 		})
-		runtime := &application_entry2.ApplicationAuthRuntime{
+		runtime := &application_entry.ApplicationAuthRuntime{
 			ClusterId:         clusterId,
 			ApplicationAuthId: auth.Id,
 			NamespaceId:       namespaceId,
@@ -390,7 +390,7 @@ func (a *applicationAuthService) Online(ctx context.Context, namespaceId, userId
 		if err = a.applicationAuthRuntimeStore.Save(ctx, runtime); err != nil {
 			return nil, err
 		}
-		authPublishList = append(authPublishList, &application_entry2.ApplicationAuthPublish{
+		authPublishList = append(authPublishList, &application_entry.ApplicationAuthPublish{
 			NamespaceId:     namespaceId,
 			Cluster:         clusterId,
 			Application:     applicationId,

@@ -10,14 +10,14 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/base/history-entry"
 	"github.com/eolinker/apinto-dashboard/modules/base/locker-service"
 	"github.com/eolinker/apinto-dashboard/modules/cluster"
-	cluster_dto2 "github.com/eolinker/apinto-dashboard/modules/cluster/cluster-dto"
+	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-dto"
 	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-entry"
 	"github.com/eolinker/apinto-dashboard/modules/namespace"
 	"github.com/eolinker/apinto-dashboard/modules/user"
 	"github.com/eolinker/apinto-dashboard/modules/variable"
-	variable_entry2 "github.com/eolinker/apinto-dashboard/modules/variable/variable-entry"
+	"github.com/eolinker/apinto-dashboard/modules/variable/variable-entry"
 	"github.com/eolinker/apinto-dashboard/modules/variable/variable-model"
-	variable_store2 "github.com/eolinker/apinto-dashboard/modules/variable/variable-store"
+	"github.com/eolinker/apinto-dashboard/modules/variable/variable-store"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
 	"gorm.io/gorm"
@@ -31,12 +31,12 @@ type clusterVariableService struct {
 	clusterNodeService          cluster.IClusterNodeService
 	namespaceService            namespace.INamespaceService
 	apintoClient                cluster.IApintoClient
-	globalVariableStore         variable_store2.IGlobalVariableStore
-	variableHistoryStore        variable_store2.IVariableHistoryStore
-	variablePublishVersionStore variable_store2.IVariablePublishVersionStore
-	variableRuntimeStore        variable_store2.IVariableRuntimeStore
-	variablePublishHistoryStore variable_store2.IVariablePublishHistoryStore
-	clusterVariableStore        variable_store2.IClusterVariableStore
+	globalVariableStore         variable_store.IGlobalVariableStore
+	variableHistoryStore        variable_store.IVariableHistoryStore
+	variablePublishVersionStore variable_store.IVariablePublishVersionStore
+	variableRuntimeStore        variable_store.IVariableRuntimeStore
+	variablePublishHistoryStore variable_store.IVariablePublishHistoryStore
+	clusterVariableStore        variable_store.IClusterVariableStore
 	lockService                 locker_service.IAsynLockService
 	userInfoService             user.IUserInfoService
 }
@@ -61,7 +61,7 @@ func newClusterVariableService() variable.IClusterVariableService {
 }
 
 func (c *clusterVariableService) GetList(ctx context.Context, namespaceID int, clusterName string) ([]*variable_model.ClusterVariableListItem, error) {
-	cluster, err := c.clusterService.GetByNamespaceByName(ctx, namespaceID, clusterName)
+	clusterInfo, err := c.clusterService.GetByNamespaceByName(ctx, namespaceID, clusterName)
 	if err != nil {
 		return nil, err
 	}
@@ -75,35 +75,35 @@ func (c *clusterVariableService) GetList(ctx context.Context, namespaceID int, c
 	}
 
 	//获取该集群下所有环境变量
-	clusterVariables, err := c.clusterVariableStore.GetByClusterIds(ctx, cluster.Id)
+	clusterVariables, err := c.clusterVariableStore.GetByClusterIds(ctx, clusterInfo.Id)
 	if err != nil {
 		return nil, err
 	}
 
-	clusterVariablesMap := common.SliceToMap(clusterVariables, func(t *variable_entry2.ClusterVariable) int {
+	clusterVariablesMap := common.SliceToMap(clusterVariables, func(t *variable_entry.ClusterVariable) int {
 		return t.VariableId
 	})
 
 	//获取该集群当前版本的已发布环境变量
-	variablePublishVersionEntry, err := c.GetPublishVersion(ctx, cluster.Id)
+	variablePublishVersionEntry, err := c.GetPublishVersion(ctx, clusterInfo.Id)
 	if err != nil {
 		return nil, err
 	}
 
 	//当前版本已发布的集群环境变量
-	versionClusterVariables := make([]*variable_entry2.ClusterVariable, 0)
+	versionClusterVariables := make([]*variable_entry.ClusterVariable, 0)
 	if variablePublishVersionEntry != nil {
 		versionClusterVariables = variablePublishVersionEntry.ClusterVariable
 	}
-	versionClusterVariablesMap := common.SliceToMap(versionClusterVariables, func(t *variable_entry2.ClusterVariable) string {
+	versionClusterVariablesMap := common.SliceToMap(versionClusterVariables, func(t *variable_entry.ClusterVariable) string {
 		return t.Key
 	})
 
-	userIds := common.SliceToSliceIds(globalVariables, func(t *variable_entry2.Variables) int {
+	userIds := common.SliceToSliceIds(globalVariables, func(t *variable_entry.Variables) int {
 		return t.Operator
 	})
 
-	userIds = append(userIds, common.SliceToSliceIds(clusterVariables, func(t *variable_entry2.ClusterVariable) int {
+	userIds = append(userIds, common.SliceToSliceIds(clusterVariables, func(t *variable_entry.ClusterVariable) int {
 		return t.Operator
 	})...)
 
@@ -136,12 +136,12 @@ func (c *clusterVariableService) GetList(ctx context.Context, namespaceID int, c
 				}
 				item.Operator = operatorName
 			} else {
-				item.ClusterVariable = &variable_entry2.ClusterVariable{Key: gVariable.Key}
+				item.ClusterVariable = &variable_entry.ClusterVariable{Key: gVariable.Key}
 				item.Publish = 3
 			}
 
 		} else {
-			item.ClusterVariable = &variable_entry2.ClusterVariable{Key: gVariable.Key}
+			item.ClusterVariable = &variable_entry.ClusterVariable{Key: gVariable.Key}
 			item.Publish = 3 //缺失
 		}
 
@@ -177,15 +177,15 @@ func (c *clusterVariableService) GetList(ctx context.Context, namespaceID int, c
 
 func (c *clusterVariableService) Create(ctx context.Context, namespaceID int, clusterName string, userID int, key, value, desc string) error {
 	//验证clusterName存在，并返回clusterID
-	cluster, err := c.clusterService.GetByNamespaceByName(ctx, namespaceID, clusterName)
+	clusterInfo, err := c.clusterService.GetByNamespaceByName(ctx, namespaceID, clusterName)
 	if err != nil {
 		return err
 	}
 
-	if err = c.lockService.Lock(locker_service.LockNameVariable, cluster.Id); err != nil {
+	if err = c.lockService.Lock(locker_service.LockNameVariable, clusterInfo.Id); err != nil {
 		return err
 	}
-	defer c.lockService.Unlock(locker_service.LockNameVariable, cluster.Id)
+	defer c.lockService.Unlock(locker_service.LockNameVariable, clusterInfo.Id)
 
 	//验证新增的集群环境变量和当前工作空间的环境变量没有冲突
 	globalVariable, err := c.globalVariableStore.GetGlobalVariableIDByKey(ctx, namespaceID, key)
@@ -199,7 +199,7 @@ func (c *clusterVariableService) Create(ctx context.Context, namespaceID int, cl
 	t := time.Now()
 
 	//新增全局环境变量，并返回variable_id
-	variable := &variable_entry2.Variables{
+	variableInfo := &variable_entry.Variables{
 		Namespace:  namespaceID,
 		Key:        key,
 		Desc:       desc,
@@ -210,19 +210,19 @@ func (c *clusterVariableService) Create(ctx context.Context, namespaceID int, cl
 
 	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Name:        key,
-		ClusterId:   cluster.Id,
+		ClusterId:   clusterInfo.Id,
 		ClusterName: clusterName,
 	})
 
 	return c.globalVariableStore.Transaction(ctx, func(txCtx context.Context) error {
 
-		if err = c.globalVariableStore.Insert(txCtx, variable); err != nil {
+		if err = c.globalVariableStore.Insert(txCtx, variableInfo); err != nil {
 			return err
 		}
 		//在variable_cluster表插入集群环境变量
-		clusterVariable := &variable_entry2.ClusterVariable{
-			ClusterId:   cluster.Id,
-			VariableId:  variable.Id,
+		clusterVariable := &variable_entry.ClusterVariable{
+			ClusterId:   clusterInfo.Id,
+			VariableId:  variableInfo.Id,
 			NamespaceId: namespaceID,
 			Key:         key,
 			Value:       value,
@@ -235,13 +235,13 @@ func (c *clusterVariableService) Create(ctx context.Context, namespaceID int, cl
 			return err
 		}
 
-		return c.variableHistoryStore.HistoryAdd(txCtx, namespaceID, clusterVariable.Id, &variable_entry2.VariableValue{Key: key, Value: value}, userID)
+		return c.variableHistoryStore.HistoryAdd(txCtx, namespaceID, clusterVariable.Id, &variable_entry.VariableValue{Key: key, Value: value}, userID)
 	})
 }
 
 func (c *clusterVariableService) Update(ctx context.Context, namespaceID int, clusterName string, userID int, key, value string) error {
 	//验证clusterName合法性
-	cluster, err := c.clusterService.GetByNamespaceByName(ctx, namespaceID, clusterName)
+	clusterInfo, err := c.clusterService.GetByNamespaceByName(ctx, namespaceID, clusterName)
 	if err != nil {
 		return common.ClusterNotExist
 	}
@@ -256,12 +256,12 @@ func (c *clusterVariableService) Update(ctx context.Context, namespaceID int, cl
 		return errors.New("globalVariable key is not exist. ")
 	}
 
-	if err = c.lockService.Lock(locker_service.LockNameVariable, cluster.Id); err != nil {
+	if err = c.lockService.Lock(locker_service.LockNameVariable, clusterInfo.Id); err != nil {
 		return err
 	}
-	defer c.lockService.Unlock(locker_service.LockNameVariable, cluster.Id)
+	defer c.lockService.Unlock(locker_service.LockNameVariable, clusterInfo.Id)
 
-	clusterVariable, err := c.clusterVariableStore.GetClusterVariableByClusterIDByGlobalID(ctx, cluster.Id, globalVariable.Id)
+	clusterVariable, err := c.clusterVariableStore.GetClusterVariableByClusterIDByGlobalID(ctx, clusterInfo.Id, globalVariable.Id)
 	if err != nil {
 		return err
 	}
@@ -270,7 +270,7 @@ func (c *clusterVariableService) Update(ctx context.Context, namespaceID int, cl
 		return errors.New("新值和旧值一样，无需保存")
 	}
 
-	oldValue := &variable_entry2.VariableValue{Key: key}
+	oldValue := &variable_entry.VariableValue{Key: key}
 	if clusterVariable != nil {
 		oldValue.Value = clusterVariable.Value
 	}
@@ -278,8 +278,8 @@ func (c *clusterVariableService) Update(ctx context.Context, namespaceID int, cl
 	t := time.Now()
 	// 若该环境变量为空，则新建
 	if clusterVariable == nil {
-		clusterVariable = &variable_entry2.ClusterVariable{
-			ClusterId:   cluster.Id,
+		clusterVariable = &variable_entry.ClusterVariable{
+			ClusterId:   clusterInfo.Id,
 			VariableId:  globalVariable.Id,
 			NamespaceId: namespaceID,
 			Status:      0,
@@ -298,7 +298,7 @@ func (c *clusterVariableService) Update(ctx context.Context, namespaceID int, cl
 
 	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Name:        key,
-		ClusterId:   cluster.Id,
+		ClusterId:   clusterInfo.Id,
 		ClusterName: clusterName,
 	})
 
@@ -308,14 +308,14 @@ func (c *clusterVariableService) Update(ctx context.Context, namespaceID int, cl
 			return err
 		}
 
-		return c.variableHistoryStore.HistoryEdit(txCtx, namespaceID, clusterVariable.Id, oldValue, &variable_entry2.VariableValue{Key: key, Value: value}, userID)
+		return c.variableHistoryStore.HistoryEdit(txCtx, namespaceID, clusterVariable.Id, oldValue, &variable_entry.VariableValue{Key: key, Value: value}, userID)
 	})
 
 }
 
 func (c *clusterVariableService) Delete(ctx context.Context, namespaceID int, clusterName string, userID int, key string) error {
 	//验证clusterName合法性
-	cluster, err := c.clusterService.GetByNamespaceByName(ctx, namespaceID, clusterName)
+	clusterInfo, err := c.clusterService.GetByNamespaceByName(ctx, namespaceID, clusterName)
 	if err != nil {
 		return err
 	}
@@ -329,13 +329,13 @@ func (c *clusterVariableService) Delete(ctx context.Context, namespaceID int, cl
 		return errors.New("globalVariable Key is not exist. ")
 	}
 
-	if err = c.lockService.Lock(locker_service.LockNameVariable, cluster.Id); err != nil {
+	if err = c.lockService.Lock(locker_service.LockNameVariable, clusterInfo.Id); err != nil {
 		return err
 	}
-	defer c.lockService.Unlock(locker_service.LockNameVariable, cluster.Id)
+	defer c.lockService.Unlock(locker_service.LockNameVariable, clusterInfo.Id)
 
 	//检查variable_cluster表中是否有该集群环境变量，没有则直接返回
-	clusterVariable, err := c.clusterVariableStore.GetClusterVariableByClusterIDByGlobalID(ctx, cluster.Id, globalVariable.Id)
+	clusterVariable, err := c.clusterVariableStore.GetClusterVariableByClusterIDByGlobalID(ctx, clusterInfo.Id, globalVariable.Id)
 	if err != nil {
 		return err
 	}
@@ -346,7 +346,7 @@ func (c *clusterVariableService) Delete(ctx context.Context, namespaceID int, cl
 
 	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Name:        key,
-		ClusterId:   cluster.Id,
+		ClusterId:   clusterInfo.Id,
 		ClusterName: clusterName,
 	})
 
@@ -356,7 +356,7 @@ func (c *clusterVariableService) Delete(ctx context.Context, namespaceID int, cl
 			return err
 		}
 
-		return c.variableHistoryStore.HistoryDelete(txCtx, namespaceID, clusterVariable.Id, &variable_entry2.VariableValue{Key: key, Value: clusterVariable.Value}, userID)
+		return c.variableHistoryStore.HistoryDelete(txCtx, namespaceID, clusterVariable.Id, &variable_entry.VariableValue{Key: key, Value: clusterVariable.Value}, userID)
 	})
 
 }
@@ -375,7 +375,7 @@ func (c *clusterVariableService) DeleteAll(ctx context.Context, namespaceID int,
 			return err
 		}
 
-		if err = c.variableHistoryStore.HistoryDelete(ctx, namespaceID, clusterVariable.Id, &variable_entry2.VariableValue{Key: clusterVariable.Key, Value: clusterVariable.Value}, userID); err != nil {
+		if err = c.variableHistoryStore.HistoryDelete(ctx, namespaceID, clusterVariable.Id, &variable_entry.VariableValue{Key: clusterVariable.Key, Value: clusterVariable.Value}, userID); err != nil {
 			return err
 		}
 	}
@@ -384,14 +384,14 @@ func (c *clusterVariableService) DeleteAll(ctx context.Context, namespaceID int,
 }
 
 // SyncConf 同步配置
-func (c *clusterVariableService) SyncConf(ctx context.Context, namespaceId, userId int, clusterName string, conf *cluster_dto2.SyncConf) error {
+func (c *clusterVariableService) SyncConf(ctx context.Context, namespaceId, userId int, clusterName string, conf *cluster_dto.SyncConf) error {
 	_, err := c.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
 	if err != nil {
 		return common.ClusterNotExist
 	}
 
 	//查询被同步的集群ID
-	clusterIds := common.SliceToSliceIds(conf.Clusters, func(t *cluster_dto2.ClusterInput) int {
+	clusterIds := common.SliceToSliceIds(conf.Clusters, func(t *cluster_dto.ClusterInput) int {
 		return t.Id
 	})
 
@@ -401,38 +401,38 @@ func (c *clusterVariableService) SyncConf(ctx context.Context, namespaceId, user
 		return err
 	}
 
-	variableMap := common.SliceToMap(variables, func(t *variable_entry2.ClusterVariable) string {
+	variableMap := common.SliceToMap(variables, func(t *variable_entry.ClusterVariable) string {
 		return fmt.Sprintf("%d_%s", t.VariableId, t.Key)
 	})
 
-	clusterVariableList := make([]*variable_entry2.ClusterVariable, 0)
-	variableHistoryList := make([]*variable_entry2.VariableHistory, 0)
+	clusterVariableList := make([]*variable_entry.ClusterVariable, 0)
+	variableHistoryList := make([]*variable_entry.VariableHistory, 0)
 
 	t := time.Now()
-	for _, cluster := range conf.Clusters {
-		for _, variable := range conf.Variables {
-			clusterVariableList = append(clusterVariableList, &variable_entry2.ClusterVariable{
-				ClusterId:   cluster.Id,
-				VariableId:  variable.VariableId,
+	for _, clusterInfo := range conf.Clusters {
+		for _, variableInfo := range conf.Variables {
+			clusterVariableList = append(clusterVariableList, &variable_entry.ClusterVariable{
+				ClusterId:   clusterInfo.Id,
+				VariableId:  variableInfo.VariableId,
 				NamespaceId: namespaceId,
-				Key:         variable.Key,
-				Value:       variable.Value,
+				Key:         variableInfo.Key,
+				Value:       variableInfo.Value,
 				Operator:    userId,
 				CreateTime:  t,
 				UpdateTime:  t,
 			})
 			optType := history_entry.OptAdd //默认新增
 			oldValue := ""
-			if v, ok := variableMap[fmt.Sprintf("%d_%s", variable.VariableId, variable.Key)]; ok {
+			if v, ok := variableMap[fmt.Sprintf("%d_%s", variableInfo.VariableId, variableInfo.Key)]; ok {
 				//修改
 				optType = history_entry.OptEdit
 				oldValue = v.Value
 			}
-			variableHistoryList = append(variableHistoryList, &variable_entry2.VariableHistory{
+			variableHistoryList = append(variableHistoryList, &variable_entry.VariableHistory{
 
-				VariableId: variable.VariableId,
-				OldValue:   variable_entry2.VariableValue{Key: variable.Key, Value: oldValue},
-				NewValue:   variable_entry2.VariableValue{Key: variable.Key, Value: variable.Value},
+				VariableId: variableInfo.VariableId,
+				OldValue:   variable_entry.VariableValue{Key: variableInfo.Key, Value: oldValue},
+				NewValue:   variable_entry.VariableValue{Key: variableInfo.Key, Value: variableInfo.Value},
 				OptType:    optType,
 			})
 		}
@@ -456,17 +456,17 @@ func (c *clusterVariableService) SyncConf(ctx context.Context, namespaceId, user
 
 // QueryHistory 环境变量的变更记录查询
 func (c *clusterVariableService) QueryHistory(ctx context.Context, namespaceId, pageNum, pageSize int, clusterName string) ([]*variable_model.ClusterVariableHistory, int, error) {
-	cluster, err := c.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
+	clusterInfo, err := c.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
 	if err != nil {
 		return nil, 0, common.ClusterNotExist
 	}
 
-	variables, err := c.clusterVariableStore.GetByClusterIds(ctx, cluster.Id, cluster.Id)
+	variables, err := c.clusterVariableStore.GetByClusterIds(ctx, clusterInfo.Id, clusterInfo.Id)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	ids := common.SliceToSliceIds(variables, func(t *variable_entry2.ClusterVariable) int {
+	ids := common.SliceToSliceIds(variables, func(t *variable_entry.ClusterVariable) int {
 		return t.Id
 	})
 
@@ -485,26 +485,26 @@ func (c *clusterVariableService) QueryHistory(ctx context.Context, namespaceId, 
 
 // ToPublishs 待发布的环境变量
 func (c *clusterVariableService) ToPublishs(ctx context.Context, namespaceId int, clusterName string) ([]*variable_model.VariableToPublish, error) {
-	cluster, err := c.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
+	clusterInfo, err := c.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
 	if err != nil {
 		return nil, common.ClusterNotExist
 	}
 
 	//查询现在数据库中的环境变量
-	currentClusterVariables, err := c.clusterVariableStore.GetByClusterIds(ctx, cluster.Id)
+	currentClusterVariables, err := c.clusterVariableStore.GetByClusterIds(ctx, clusterInfo.Id)
 	if err != nil {
 		return nil, err
 	}
 
-	newClusterVariables := make([]*variable_entry2.ClusterVariable, 0)
-	for _, variable := range currentClusterVariables {
-		if variable.Status == 0 {
-			newClusterVariables = append(newClusterVariables, variable)
+	newClusterVariables := make([]*variable_entry.ClusterVariable, 0)
+	for _, variableInfo := range currentClusterVariables {
+		if variableInfo.Status == 0 {
+			newClusterVariables = append(newClusterVariables, variableInfo)
 		}
 	}
 
 	//查询当前版本下的环境变量
-	clusterRuntime, err := c.variableRuntimeStore.GetForCluster(ctx, cluster.Id, cluster.Id)
+	clusterRuntime, err := c.variableRuntimeStore.GetForCluster(ctx, clusterInfo.Id, clusterInfo.Id)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}
@@ -513,7 +513,7 @@ func (c *clusterVariableService) ToPublishs(ctx context.Context, namespaceId int
 	respList := make([]*variable_model.VariableToPublish, 0)
 	if clusterRuntime == nil {
 		for _, value := range newClusterVariables {
-			entryVariable := variable_entry2.VariableToPublish{
+			entryVariable := variable_entry.VariableToPublish{
 				Key:             value.Key,
 				VariableId:      value.VariableId,
 				NoReleasedValue: value.Value,
@@ -533,14 +533,14 @@ func (c *clusterVariableService) ToPublishs(ctx context.Context, namespaceId int
 	clusterVariable := version.ClusterVariable
 
 	//差异化对比
-	versionClusterVariableMap := common.SliceToMap(clusterVariable, func(t *variable_entry2.ClusterVariable) string {
+	versionClusterVariableMap := common.SliceToMap(clusterVariable, func(t *variable_entry.ClusterVariable) string {
 		return t.Key
 	})
 
 	addList, updateList, delList := common.DiffContrast(clusterVariable, newClusterVariables)
 
 	for _, val := range addList {
-		entryVariable := variable_entry2.VariableToPublish{
+		entryVariable := variable_entry.VariableToPublish{
 			VariableId:      val.VariableId,
 			Key:             val.Key,
 			NoReleasedValue: val.Value,
@@ -551,11 +551,11 @@ func (c *clusterVariableService) ToPublishs(ctx context.Context, namespaceId int
 	}
 	for _, val := range updateList {
 		finishValue := ""
-		if variable, ok := versionClusterVariableMap[val.Key]; ok {
-			finishValue = variable.Value
+		if variableInfo, ok := versionClusterVariableMap[val.Key]; ok {
+			finishValue = variableInfo.Value
 		}
 
-		entryVariable := variable_entry2.VariableToPublish{
+		entryVariable := variable_entry.VariableToPublish{
 			VariableId:      val.VariableId,
 			Key:             val.Key,
 			NoReleasedValue: val.Value,
@@ -571,7 +571,7 @@ func (c *clusterVariableService) ToPublishs(ctx context.Context, namespaceId int
 		if cVariable, ok := versionClusterVariableMap[val.Key]; ok {
 			finishValue = cVariable.Value
 		}
-		entryVariable := variable_entry2.VariableToPublish{
+		entryVariable := variable_entry.VariableToPublish{
 			VariableId:  val.VariableId,
 			Key:         val.Key,
 			FinishValue: finishValue,
@@ -593,23 +593,25 @@ func (c *clusterVariableService) ToPublishs(ctx context.Context, namespaceId int
 func (c *clusterVariableService) Publish(ctx context.Context, namespaceId, userId int, clusterName, versionName, desc, source string) error {
 	t := time.Now()
 
-	namespace, err := c.namespaceService.GetById(namespaceId)
+	namespaceInfo, err := c.namespaceService.GetById(namespaceId)
 	if err != nil {
 		return err
 	}
 
-	cluster, err := c.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
+	clusterInfo, err := c.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
 	if err != nil {
 		return err
 	}
 
-	if err = c.lockService.Lock(locker_service.LockNameVariable, cluster.Id); err != nil {
+	clusterId := clusterInfo.Id
+
+	if err = c.lockService.Lock(locker_service.LockNameVariable, clusterId); err != nil {
 		return err
 	}
-	defer c.lockService.Unlock(locker_service.LockNameVariable, cluster.Id)
+	defer c.lockService.Unlock(locker_service.LockNameVariable, clusterId)
 
 	//查询版本名称是否重复
-	publishHistory, err := c.variablePublishHistoryStore.GetByVersionName(ctx, versionName, cluster.Id)
+	publishHistory, err := c.variablePublishHistoryStore.GetByVersionName(ctx, versionName, clusterInfo.Id)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return err
 	}
@@ -623,7 +625,7 @@ func (c *clusterVariableService) Publish(ctx context.Context, namespaceId, userI
 		return err
 	}
 
-	publishes := make([]*variable_entry2.VariableToPublish, 0)
+	publishes := make([]*variable_entry.VariableToPublish, 0)
 
 	if err = json.Unmarshal(bytes, &publishes); err != nil {
 		return err
@@ -634,17 +636,17 @@ func (c *clusterVariableService) Publish(ctx context.Context, namespaceId, userI
 	}
 
 	//获取集群当前运行的版本
-	currentVersion, err := c.GetPublishVersion(ctx, cluster.Id)
+	currentVersion, err := c.GetPublishVersion(ctx, clusterId)
 	if err != nil {
 		return err
 	}
 
-	newClusterVariables := make([]*variable_entry2.ClusterVariable, 0)
-	insertClusterVariables := make([]*variable_entry2.ClusterVariable, 0)
+	newClusterVariables := make([]*variable_entry.ClusterVariable, 0)
+	insertClusterVariables := make([]*variable_entry.ClusterVariable, 0)
 
 	for _, publish := range publishes {
-		newClusterVariables = append(newClusterVariables, &variable_entry2.ClusterVariable{
-			ClusterId:   cluster.Id,
+		newClusterVariables = append(newClusterVariables, &variable_entry.ClusterVariable{
+			ClusterId:   clusterId,
 			VariableId:  publish.VariableId,
 			NamespaceId: namespaceId,
 			Key:         publish.Key,
@@ -656,14 +658,14 @@ func (c *clusterVariableService) Publish(ctx context.Context, namespaceId, userI
 	if currentVersion != nil && currentVersion.Id > 0 {
 		currentVersionClusterVariables := currentVersion.ClusterVariable
 
-		currentVersionClusterVariablesMaps := common.SliceToMap(currentVersionClusterVariables, func(t *variable_entry2.ClusterVariable) string {
+		currentVersionClusterVariablesMaps := common.SliceToMap(currentVersionClusterVariables, func(t *variable_entry.ClusterVariable) string {
 			return t.Key
 		})
 
 		for _, publish := range publishes {
 			if publish.OptType == 1 { //新增 直接追加
-				currentVersionClusterVariablesMaps[publish.Key] = &variable_entry2.ClusterVariable{
-					ClusterId:   cluster.Id,
+				currentVersionClusterVariablesMaps[publish.Key] = &variable_entry.ClusterVariable{
+					ClusterId:   clusterId,
 					VariableId:  publish.VariableId,
 					NamespaceId: namespaceId,
 					Key:         publish.Key,
@@ -677,8 +679,8 @@ func (c *clusterVariableService) Publish(ctx context.Context, namespaceId, userI
 				delete(currentVersionClusterVariablesMaps, publish.Key)
 			}
 		}
-		for _, variable := range currentVersionClusterVariablesMaps {
-			insertClusterVariables = append(insertClusterVariables, variable)
+		for _, variableInfo := range currentVersionClusterVariablesMaps {
+			insertClusterVariables = append(insertClusterVariables, variableInfo)
 		}
 
 	} else {
@@ -686,12 +688,12 @@ func (c *clusterVariableService) Publish(ctx context.Context, namespaceId, userI
 		insertClusterVariables = newClusterVariables
 	}
 
-	variablePublishVersionConfig := variable_entry2.VariablePublishVersionConfig{
+	variablePublishVersionConfig := variable_entry.VariablePublishVersionConfig{
 		ClusterVariable: insertClusterVariables,
 	}
 
-	newVersion := &variable_entry2.VariablePublishVersion{
-		ClusterId:                    cluster.Id,
+	newVersion := &variable_entry.VariablePublishVersion{
+		ClusterId:                    clusterId,
 		NamespaceId:                  namespaceId,
 		Desc:                         desc,
 		VariablePublishVersionConfig: variablePublishVersionConfig,
@@ -700,14 +702,14 @@ func (c *clusterVariableService) Publish(ctx context.Context, namespaceId, userI
 	}
 
 	names := make([]string, 0)
-	for _, variable := range variablePublishVersionConfig.ClusterVariable {
+	for _, variableInfo := range variablePublishVersionConfig.ClusterVariable {
 
-		names = append(names, variable.Key)
+		names = append(names, variableInfo.Key)
 	}
 
 	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Name:        strings.Join(names, ","),
-		ClusterId:   cluster.Id,
+		ClusterId:   clusterId,
 		ClusterName: clusterName,
 	})
 
@@ -716,9 +718,9 @@ func (c *clusterVariableService) Publish(ctx context.Context, namespaceId, userI
 			return err
 		}
 		//当前集群运行的版本
-		variableRuntime := &variable_entry2.VariableRuntime{
+		variableRuntime := &variable_entry.VariableRuntime{
 			VersionId:   newVersion.Id,
-			ClusterId:   cluster.Id,
+			ClusterId:   clusterId,
 			NamespaceId: namespaceId,
 			Operator:    userId,
 			IsOnline:    true,
@@ -726,13 +728,13 @@ func (c *clusterVariableService) Publish(ctx context.Context, namespaceId, userI
 			UpdateTime:  t,
 		}
 
-		history := &variable_entry2.VariablePublishHistory{
+		history := &variable_entry.VariablePublishHistory{
 			VersionName: versionName,
-			ClusterId:   cluster.Id,
+			ClusterId:   clusterId,
 			NamespaceId: namespaceId,
 			Desc:        desc,
 			VersionId:   newVersion.Id,
-			VariablePublishHistoryInfo: variable_entry2.VariablePublishHistoryInfo{
+			VariablePublishHistoryInfo: variable_entry.VariablePublishHistoryInfo{
 				VariableToPublish: publishes,
 			},
 			OptType:  1,
@@ -746,17 +748,17 @@ func (c *clusterVariableService) Publish(ctx context.Context, namespaceId, userI
 		if err = c.variableRuntimeStore.Save(txCtx, variableRuntime); err != nil {
 			return err
 		}
-		client, err := c.apintoClient.GetClient(ctx, cluster.Id)
+		client, err := c.apintoClient.GetClient(ctx, clusterId)
 		if err != nil {
 			return err
 		}
 
 		variableMaps := make(map[string]string)
-		for _, variable := range insertClusterVariables {
-			variableMaps[variable.Key] = variable.Value
+		for _, variableInfo := range insertClusterVariables {
+			variableMaps[variableInfo.Key] = variableInfo.Value
 		}
 
-		return client.ForVariable().Publish(namespace.Name, variableMaps)
+		return client.ForVariable().Publish(namespaceInfo.Name, variableMaps)
 	})
 }
 
@@ -779,34 +781,34 @@ func (c *clusterVariableService) ResetOnline(ctx context.Context, namespaceId, c
 		}
 
 		variableMaps := make(map[string]string)
-		for _, variable := range version.ClusterVariable {
-			variableMaps[variable.Key] = variable.Value
+		for _, variableInfo := range version.ClusterVariable {
+			variableMaps[variableInfo.Key] = variableInfo.Value
 		}
 
-		namespace, err := c.namespaceService.GetById(namespaceId)
+		namespaceInfo, err := c.namespaceService.GetById(namespaceId)
 		if err != nil {
 			return
 		}
 
-		client.ForVariable().Publish(namespace.Name, variableMaps)
+		_ = client.ForVariable().Publish(namespaceInfo.Name, variableMaps)
 
 	}
 }
 
 func (c *clusterVariableService) PublishHistory(ctx context.Context, namespaceId, pageNum, pageSize int, clusterName string) ([]*variable_model.VariablePublish, int, error) {
-	cluster, err := c.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
+	clusterInfo, err := c.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
 	if err != nil {
 		return nil, 0, common.ClusterNotExist
 	}
 
-	list, count, err := c.variablePublishHistoryStore.GetByClusterPage(ctx, pageNum, pageSize, cluster.Id)
+	list, count, err := c.variablePublishHistoryStore.GetByClusterPage(ctx, pageNum, pageSize, clusterInfo.Id)
 	if err != nil {
 		return nil, 0, err
 	}
 
 	resp := make([]*variable_model.VariablePublish, 0, len(list))
 
-	userIds := common.SliceToSliceIds(list, func(t *variable_entry2.VariablePublishHistory) int {
+	userIds := common.SliceToSliceIds(list, func(t *variable_entry.VariablePublishHistory) int {
 		return t.Operator
 	})
 
@@ -852,7 +854,7 @@ func (c *clusterVariableService) GetPublishVersion(ctx context.Context, clusterI
 		return nil, err
 	}
 
-	var currentVersion *variable_entry2.VariablePublishVersion
+	var currentVersion *variable_entry.VariablePublishVersion
 	if currentRuntime != nil {
 		//获取当前集群运行版本的详细信息
 		currentVersion, err = c.variablePublishVersionStore.Get(ctx, currentRuntime.VersionId)
@@ -865,7 +867,7 @@ func (c *clusterVariableService) GetPublishVersion(ctx context.Context, clusterI
 }
 
 func (c *clusterVariableService) GetSyncConf(ctx context.Context, namespaceId int, clusterName string) (*variable_model.ClustersVariables, error) {
-	cluster, err := c.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
+	clusterInfo, err := c.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
 	if err != nil {
 		return nil, common.ClusterNotExist
 	}
@@ -875,7 +877,7 @@ func (c *clusterVariableService) GetSyncConf(ctx context.Context, namespaceId in
 		return nil, err
 	}
 
-	variables, err := c.clusterVariableStore.GetByClusterIds(ctx, cluster.Id)
+	variables, err := c.clusterVariableStore.GetByClusterIds(ctx, clusterInfo.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -883,7 +885,7 @@ func (c *clusterVariableService) GetSyncConf(ctx context.Context, namespaceId in
 	newCluster := make([]*cluster_entry.Cluster, 0)
 	for _, val := range clusters {
 		//过滤自己的集群信息
-		if val.Id == cluster.Id {
+		if val.Id == clusterInfo.Id {
 			continue
 		}
 		newCluster = append(newCluster, val.Cluster)

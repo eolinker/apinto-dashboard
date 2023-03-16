@@ -141,16 +141,16 @@ func (a *apiService) GetGroups(ctx context.Context, namespaceId int, parentUuid,
 		return t.ParentId
 	})
 
-	for _, group := range groups {
+	for _, groupInfo := range groups {
 		//模糊搜索
-		if strings.Count(strings.ToUpper(group.Name), strings.ToUpper(queryName)) > 0 {
+		if strings.Count(strings.ToUpper(groupInfo.Name), strings.ToUpper(queryName)) > 0 {
 
-			uuidMaps[group.Uuid] = group.Uuid
+			uuidMaps[groupInfo.Uuid] = groupInfo.Uuid
 			//如果绝对相等，需要把改目录下的所有根目录也查询出来
-			if group.Name == queryName {
+			if groupInfo.Name == queryName {
 				uuids := &[]string{}
 				a.commonGroup.SubGroupUUIDS(groupsParentIdMaps, &group_model.CommonGroup{
-					Group: group,
+					Group: groupInfo,
 				}, uuids)
 				for _, s := range *uuids {
 					uuidMaps[s] = s
@@ -187,11 +187,11 @@ func (a *apiService) subGroup(list []*group_model.CommonGroup, apiAllMaps map[st
 	if len(list) == 0 {
 		return
 	}
-	for _, group := range list {
-		if _, ok := apiMaps[group.Group.Uuid]; !ok {
-			*apis = append(*apis, apiAllMaps[group.Group.Uuid]...)
+	for _, groupInfo := range list {
+		if _, ok := apiMaps[groupInfo.Group.Uuid]; !ok {
+			*apis = append(*apis, apiAllMaps[groupInfo.Group.Uuid]...)
 		}
-		a.subGroup(group.Subgroup, apiAllMaps, apiMaps, apis)
+		a.subGroup(groupInfo.Subgroup, apiAllMaps, apiMaps, apis)
 	}
 }
 
@@ -768,8 +768,8 @@ func (a *apiService) BatchOnline(ctx context.Context, namespaceId int, operator 
 
 	apiList := make([]*apientry.API, 0, len(conf.ApiUUIDs))
 
-	group, _ := errgroup.WithContext(ctx)
-	group.Go(func() error {
+	errorGroup, _ := errgroup.WithContext(ctx)
+	errorGroup.Go(func() error {
 		//确认所有apiUUID，clusterName均存在
 		for _, uid := range conf.ApiUUIDs {
 			api, err := a.apiStore.GetByUUID(ctx, namespaceId, uid)
@@ -785,7 +785,7 @@ func (a *apiService) BatchOnline(ctx context.Context, namespaceId int, operator 
 	})
 
 	clusterList := make([]*cluster_model.Cluster, 0, len(conf.ClusterNames))
-	group.Go(func() error {
+	errorGroup.Go(func() error {
 		clusters, err := a.clusterService.QueryListByNamespaceId(ctx, namespaceId)
 		if err != nil {
 			return err
@@ -794,11 +794,11 @@ func (a *apiService) BatchOnline(ctx context.Context, namespaceId int, operator 
 			return t.Name
 		})
 		for _, clusterName := range conf.ClusterNames {
-			if cluster, ok := clusterMap[clusterName]; ok {
-				if cluster.Status == 2 || cluster.Status == 3 {
+			if clusterInfo, ok := clusterMap[clusterName]; ok {
+				if clusterInfo.Status == 2 || clusterInfo.Status == 3 {
 					return fmt.Errorf("cluster status is abnormal. cluster_name:%s", clusterName)
 				}
-				clusterList = append(clusterList, cluster)
+				clusterList = append(clusterList, clusterInfo)
 			} else {
 				return fmt.Errorf("cluster doesn't exist. cluster_name:%s", clusterName)
 			}
@@ -807,7 +807,7 @@ func (a *apiService) BatchOnline(ctx context.Context, namespaceId int, operator 
 		return nil
 	})
 
-	if err = group.Wait(); err != nil {
+	if err = errorGroup.Wait(); err != nil {
 		return nil, err
 	}
 
@@ -818,10 +818,10 @@ func (a *apiService) BatchOnline(ctx context.Context, namespaceId int, operator 
 	for _, api := range apiList {
 		err = a.lockService.Lock(locker_service.LockNameAPI, api.Id)
 		if err != nil {
-			for _, cluster := range clusterList {
+			for _, clusterInfo := range clusterList {
 				item := &apimodel.BatchListItem{
 					APIName:    api.Name,
-					ClusterEnv: fmt.Sprintf("%s_%s", cluster.Name, cluster.Env),
+					ClusterEnv: fmt.Sprintf("%s_%s", clusterInfo.Name, clusterInfo.Env),
 					Status:     false,
 					Result:     err.Error(),
 				}
@@ -834,10 +834,10 @@ func (a *apiService) BatchOnline(ctx context.Context, namespaceId int, operator 
 		_, err = a.apiStore.Get(ctx, api.Id)
 		if err != nil {
 			//API被删除
-			for _, cluster := range clusterList {
+			for _, clusterInfo := range clusterList {
 				item := &apimodel.BatchListItem{
 					APIName:    api.Name,
-					ClusterEnv: fmt.Sprintf("%s_%s", cluster.Name, cluster.Env),
+					ClusterEnv: fmt.Sprintf("%s_%s", clusterInfo.Name, clusterInfo.Env),
 					Status:     false,
 					Result:     err.Error(),
 				}
@@ -847,16 +847,16 @@ func (a *apiService) BatchOnline(ctx context.Context, namespaceId int, operator 
 			continue
 		}
 
-		for _, cluster := range clusterList {
+		for _, clusterInfo := range clusterList {
 			item := &apimodel.BatchListItem{
 				APIName:    api.Name,
-				ClusterEnv: fmt.Sprintf("%s_%s", cluster.Name, cluster.Env),
+				ClusterEnv: fmt.Sprintf("%s_%s", clusterInfo.Name, clusterInfo.Env),
 				Status:     true,
 				Result:     "",
 			}
 
 			//获取当前的版本
-			runtime, err := a.apiRuntime.GetForCluster(ctx, api.Id, cluster.Id)
+			runtime, err := a.apiRuntime.GetForCluster(ctx, api.Id, clusterInfo.Id)
 			if err != nil && err != gorm.ErrRecordNotFound {
 				item.Status = false
 				item.Result = err.Error()
@@ -870,9 +870,9 @@ func (a *apiService) BatchOnline(ctx context.Context, namespaceId int, operator 
 					return err
 				}
 				//判断上游服务有没有上线
-				if !a.service.IsOnline(ctx, cluster.Id, latest.ServiceID) {
+				if !a.service.IsOnline(ctx, clusterInfo.Id, latest.ServiceID) {
 					item.Status = false
-					item.Result = fmt.Sprintf("绑定的%s未上线到%s", latest.ServiceName, cluster.Name)
+					item.Result = fmt.Sprintf("绑定的%s未上线到%s", latest.ServiceName, clusterInfo.Name)
 					return nil
 				}
 
@@ -889,7 +889,7 @@ func (a *apiService) BatchOnline(ctx context.Context, namespaceId int, operator 
 				}
 
 				//发布到apinto
-				client, err := a.apintoClient.GetClient(ctx, cluster.Id)
+				client, err := a.apintoClient.GetClient(ctx, clusterInfo.Id)
 				if err != nil {
 					item.Status = false
 					item.Result = fmt.Sprintf("连接集群失败, err: %s", err.Error())
@@ -897,15 +897,15 @@ func (a *apiService) BatchOnline(ctx context.Context, namespaceId int, operator 
 				}
 
 				//封装router配置
-				apiDriver := a.GetAPIDriver(latest.Driver)
-				routerConfig := apiDriver.ToApinto(api.UUID, api.Desc, false, latest.Method, latest.RequestPath, latest.RequestPathLabel, latest.ProxyPath, strings.ToLower(latest.ServiceName), latest.Timeout, latest.Retry, latest.EnableWebsocket, latest.Match, latest.Header)
+				apiDriverInfo := a.GetAPIDriver(latest.Driver)
+				routerConfig := apiDriverInfo.ToApinto(api.UUID, api.Desc, false, latest.Method, latest.RequestPath, latest.RequestPathLabel, latest.ProxyPath, strings.ToLower(latest.ServiceName), latest.Timeout, latest.Retry, latest.EnableWebsocket, latest.Match, latest.Header)
 
 				//未上线
 				if runtime == nil {
 					runtime = &apientry.APIRuntime{
 						NamespaceId: namespaceId,
 						ApiID:       api.Id,
-						ClusterID:   cluster.Id,
+						ClusterID:   clusterInfo.Id,
 						VersionID:   latest.Id,
 						IsOnline:    true,
 						Disable:     false,
@@ -982,10 +982,10 @@ func (a *apiService) BatchOnline(ctx context.Context, namespaceId int, operator 
 
 func (a *apiService) BatchOffline(ctx context.Context, namespaceId int, operator int, apiUUIDs, clusterNames []string) ([]*apimodel.BatchListItem, error) {
 
-	group, _ := errgroup.WithContext(ctx)
+	errorGroup, _ := errgroup.WithContext(ctx)
 
 	apiList := make([]*apientry.API, 0, len(apiUUIDs))
-	group.Go(func() error {
+	errorGroup.Go(func() error {
 		//确认所有apiUUID，clusterName均存在
 		for _, uid := range apiUUIDs {
 			api, err := a.apiStore.GetByUUID(ctx, namespaceId, uid)
@@ -1001,7 +1001,7 @@ func (a *apiService) BatchOffline(ctx context.Context, namespaceId int, operator
 	})
 
 	clusterList := make([]*cluster_model.Cluster, 0, len(clusterNames))
-	group.Go(func() error {
+	errorGroup.Go(func() error {
 		clusters, err := a.clusterService.QueryListByNamespaceId(ctx, namespaceId)
 		if err != nil {
 			return err
@@ -1010,11 +1010,11 @@ func (a *apiService) BatchOffline(ctx context.Context, namespaceId int, operator
 			return t.Name
 		})
 		for _, clusterName := range clusterNames {
-			if cluster, ok := clusterMap[clusterName]; ok {
-				if cluster.Status == 2 || cluster.Status == 3 {
+			if clusterInfo, ok := clusterMap[clusterName]; ok {
+				if clusterInfo.Status == 2 || clusterInfo.Status == 3 {
 					return fmt.Errorf("cluster status is abnormal. cluster_name:%s", clusterName)
 				}
-				clusterList = append(clusterList, cluster)
+				clusterList = append(clusterList, clusterInfo)
 			} else {
 				return fmt.Errorf("cluster doesn't exist. cluster_name:%s", clusterName)
 			}
@@ -1022,7 +1022,7 @@ func (a *apiService) BatchOffline(ctx context.Context, namespaceId int, operator
 		return nil
 	})
 
-	if err := group.Wait(); err != nil {
+	if err := errorGroup.Wait(); err != nil {
 		return nil, err
 	}
 
@@ -1031,10 +1031,10 @@ func (a *apiService) BatchOffline(ctx context.Context, namespaceId int, operator
 	for _, api := range apiList {
 		err := a.lockService.Lock(locker_service.LockNameAPI, api.Id)
 		if err != nil {
-			for _, cluster := range clusterList {
+			for _, clusterInfo := range clusterList {
 				item := &apimodel.BatchListItem{
 					APIName:    api.Name,
-					ClusterEnv: fmt.Sprintf("%s_%s", cluster.Name, cluster.Env),
+					ClusterEnv: fmt.Sprintf("%s_%s", clusterInfo.Name, clusterInfo.Env),
 					Status:     false,
 					Result:     err.Error(),
 				}
@@ -1049,9 +1049,9 @@ func (a *apiService) BatchOffline(ctx context.Context, namespaceId int, operator
 			return nil, err
 		}
 
-		for _, cluster := range clusterList {
+		for _, clusterInfo := range clusterList {
 			//获取当前的版本
-			runtime, err := a.apiRuntime.GetForCluster(ctx, api.Id, cluster.Id)
+			runtime, err := a.apiRuntime.GetForCluster(ctx, api.Id, clusterInfo.Id)
 			if err != nil && err != gorm.ErrRecordNotFound {
 				a.lockService.Unlock(locker_service.LockNameAPI, api.Id)
 				return nil, err
@@ -1059,7 +1059,7 @@ func (a *apiService) BatchOffline(ctx context.Context, namespaceId int, operator
 
 			item := &apimodel.BatchListItem{
 				APIName:    latestApi.Name,
-				ClusterEnv: fmt.Sprintf("%s_%s", cluster.Name, cluster.Env),
+				ClusterEnv: fmt.Sprintf("%s_%s", clusterInfo.Name, clusterInfo.Env),
 				Status:     true,
 				Result:     "",
 			}
@@ -1075,7 +1075,7 @@ func (a *apiService) BatchOffline(ctx context.Context, namespaceId int, operator
 					}
 
 					//发布到apinto
-					client, err := a.apintoClient.GetClient(ctx, cluster.Id)
+					client, err := a.apintoClient.GetClient(ctx, clusterInfo.Id)
 					if err != nil {
 						return err
 					}
@@ -1116,8 +1116,8 @@ func (a *apiService) BatchOnlineCheck(ctx context.Context, namespaceId int, oper
 	apiList := make([]*apientry.API, 0, len(apiUUIDs))
 	apiIds := make([]int, 0, len(apiUUIDs))
 
-	group, _ := errgroup.WithContext(ctx)
-	group.Go(func() error {
+	errorGroup, _ := errgroup.WithContext(ctx)
+	errorGroup.Go(func() error {
 		for _, uid := range apiUUIDs {
 			api, err := a.apiStore.GetByUUID(ctx, namespaceId, uid)
 			if err != nil {
@@ -1134,7 +1134,7 @@ func (a *apiService) BatchOnlineCheck(ctx context.Context, namespaceId int, oper
 	})
 
 	clusterList := make([]*cluster_model.Cluster, 0, len(clusterNames))
-	group.Go(func() error {
+	errorGroup.Go(func() error {
 		clusters, err := a.clusterService.QueryListByNamespaceId(ctx, namespaceId)
 		if err != nil {
 			return err
@@ -1143,11 +1143,11 @@ func (a *apiService) BatchOnlineCheck(ctx context.Context, namespaceId int, oper
 			return t.Name
 		})
 		for _, clusterName := range clusterNames {
-			if cluster, ok := clusterMap[clusterName]; ok {
-				if cluster.Status == 2 || cluster.Status == 3 {
+			if clusterInfo, ok := clusterMap[clusterName]; ok {
+				if clusterInfo.Status == 2 || clusterInfo.Status == 3 {
 					return fmt.Errorf("cluster status is abnormal. cluster_name:%s", clusterName)
 				}
-				clusterList = append(clusterList, cluster)
+				clusterList = append(clusterList, clusterInfo)
 			} else {
 				return fmt.Errorf("cluster doesn't exist. cluster_name:%s", clusterName)
 			}
@@ -1155,7 +1155,7 @@ func (a *apiService) BatchOnlineCheck(ctx context.Context, namespaceId int, oper
 		return nil
 	})
 
-	if err := group.Wait(); err != nil {
+	if err := errorGroup.Wait(); err != nil {
 		return nil, "", err
 	}
 
@@ -1176,18 +1176,18 @@ func (a *apiService) BatchOnlineCheck(ctx context.Context, namespaceId int, oper
 		}
 		checkSet[version.ServiceID] = struct{}{}
 
-		for _, cluster := range clusterList {
+		for _, clusterInfo := range clusterList {
 			item := &apimodel.BatchOnlineCheckListItem{
 				ServiceName: version.ServiceName,
-				ClusterEnv:  fmt.Sprintf("%s%s", cluster.Name, cluster.Env),
+				ClusterEnv:  fmt.Sprintf("%s%s", clusterInfo.Name, clusterInfo.Env),
 				Status:      true,
 				Solution:    &frontend_model.Router{},
 			}
 
-			if isOnline := a.service.IsOnline(ctx, cluster.Id, version.ServiceID); !isOnline {
+			if isOnline := a.service.IsOnline(ctx, clusterInfo.Id, version.ServiceID); !isOnline {
 				isAllOnline = false
 				item.Status = false
-				item.Result = fmt.Sprintf("%s未上线到%s", version.ServiceName, cluster.Name)
+				item.Result = fmt.Sprintf("%s未上线到%s", version.ServiceName, clusterInfo.Name)
 				item.Solution.Name = frontend_model.RouterNameServiceOnline
 				item.Solution.Params = map[string]string{"service_name": version.ServiceName}
 			}
@@ -1261,13 +1261,13 @@ func (a *apiService) OnlineList(ctx context.Context, namespaceId int, uuid strin
 		return nil, err
 	}
 
-	for _, cluster := range clusterMaps {
+	for _, clusterInfo := range clusterMaps {
 		apiOnline := &apimodel.APIOnlineListItem{
-			ClusterName: cluster.Name,
-			ClusterEnv:  cluster.Env,
+			ClusterName: clusterInfo.Name,
+			ClusterEnv:  clusterInfo.Env,
 			Status:      1, //默认为未上线状态
 		}
-		if runtime, ok := runtimeMaps[cluster.Id]; ok {
+		if runtime, ok := runtimeMaps[clusterInfo.Id]; ok {
 
 			operator := ""
 			if userInfo, uOk := userInfoMaps[runtime.Operator]; uOk {
@@ -1317,7 +1317,7 @@ func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, u
 	t := time.Now()
 
 	//获取当前集群信息
-	cluster, err := a.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
+	clusterInfo, err := a.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
 	if err != nil {
 		return nil, err
 	}
@@ -1334,18 +1334,18 @@ func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, u
 	router.Params["service_name"] = latestVersion.ServiceName
 
 	//判断上游服务有没有上线
-	if !a.service.IsOnline(ctx, cluster.Id, latestVersion.ServiceID) {
+	if !a.service.IsOnline(ctx, clusterInfo.Id, latestVersion.ServiceID) {
 		return router, errors.New(fmt.Sprintf("绑定的%s未上线到%s", latestVersion.ServiceName, clusterName))
 	}
 
 	//获取当前运行的版本
-	runtime, err := a.apiRuntime.GetForCluster(ctx, apiID, cluster.Id)
+	runtime, err := a.apiRuntime.GetForCluster(ctx, apiID, clusterInfo.Id)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}
 
 	//发布到apinto
-	client, err := a.apintoClient.GetClient(ctx, cluster.Id)
+	client, err := a.apintoClient.GetClient(ctx, clusterInfo.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -1354,7 +1354,7 @@ func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, u
 	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:        uuid,
 		Name:        apiInfo.Name,
-		ClusterId:   cluster.Id,
+		ClusterId:   clusterInfo.Id,
 		ClusterName: clusterName,
 		PublishType: 1,
 	})
@@ -1362,13 +1362,13 @@ func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, u
 	//事务
 	err = a.apiStore.Transaction(ctx, func(txCtx context.Context) error {
 
-		apiDriver := a.GetAPIDriver(latestVersion.Driver)
-		routerConfig := apiDriver.ToApinto(apiInfo.UUID, apiInfo.Desc, false, latestVersion.Method, latestVersion.RequestPath, latestVersion.RequestPathLabel, latestVersion.ProxyPath, strings.ToLower(latestVersion.ServiceName), latestVersion.Timeout, latestVersion.Retry, latestVersion.EnableWebsocket, latestVersion.Match, latestVersion.Header)
+		apiDriverInfo := a.GetAPIDriver(latestVersion.Driver)
+		routerConfig := apiDriverInfo.ToApinto(apiInfo.UUID, apiInfo.Desc, false, latestVersion.Method, latestVersion.RequestPath, latestVersion.RequestPathLabel, latestVersion.ProxyPath, strings.ToLower(latestVersion.ServiceName), latestVersion.Timeout, latestVersion.Retry, latestVersion.EnableWebsocket, latestVersion.Match, latestVersion.Header)
 		if runtime == nil {
 			runtime = &apientry.APIRuntime{
 				NamespaceId: namespaceId,
 				ApiID:       apiID,
-				ClusterID:   cluster.Id,
+				ClusterID:   clusterInfo.Id,
 				VersionID:   latestVersion.Id,
 				IsOnline:    true,
 				Disable:     false,
@@ -1408,7 +1408,7 @@ func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, u
 	return nil, err
 }
 
-func (a *apiService) ResetOnline(ctx context.Context, namespaceId, clusterId int) {
+func (a *apiService) ResetOnline(ctx context.Context, _, clusterId int) {
 	runtimes, err := a.apiRuntime.GetByCluster(ctx, clusterId)
 	if err != nil {
 		log.Errorf("apiService-ResetOnline-getRuntimes clusterId=%d,err=%d", clusterId, err.Error())
@@ -1463,13 +1463,13 @@ func (a *apiService) OfflineAPI(ctx context.Context, namespaceId, operator int, 
 	}
 
 	//获取当前集群信息
-	cluster, err := a.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
+	clusterInfo, err := a.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
 	if err != nil {
 		return err
 	}
 
 	//获取当前的版本
-	runtime, err := a.apiRuntime.GetForCluster(ctx, apiInfo.Id, cluster.Id)
+	runtime, err := a.apiRuntime.GetForCluster(ctx, apiInfo.Id, clusterInfo.Id)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return err
 	}
@@ -1484,7 +1484,7 @@ func (a *apiService) OfflineAPI(ctx context.Context, namespaceId, operator int, 
 	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:        uuid,
 		Name:        apiInfo.Name,
-		ClusterId:   cluster.Id,
+		ClusterId:   clusterInfo.Id,
 		ClusterName: clusterName,
 		PublishType: 2,
 	})
@@ -1503,7 +1503,7 @@ func (a *apiService) OfflineAPI(ctx context.Context, namespaceId, operator int, 
 		}
 
 		//发布到apinto
-		client, err := a.apintoClient.GetClient(ctx, cluster.Id)
+		client, err := a.apintoClient.GetClient(ctx, clusterInfo.Id)
 		if err != nil {
 			return err
 		}
@@ -1519,7 +1519,7 @@ func (a *apiService) EnableAPI(ctx context.Context, namespaceId, operator int, u
 	}
 
 	//获取当前集群信息
-	cluster, err := a.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
+	clusterInfo, err := a.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
 	if err != nil {
 		return err
 	}
@@ -1534,7 +1534,7 @@ func (a *apiService) EnableAPI(ctx context.Context, namespaceId, operator int, u
 		return err
 	}
 	//获取当前版本
-	runtime, err := a.apiRuntime.GetForCluster(ctx, apiInfo.Id, cluster.Id)
+	runtime, err := a.apiRuntime.GetForCluster(ctx, apiInfo.Id, clusterInfo.Id)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return err
 	}
@@ -1551,7 +1551,7 @@ func (a *apiService) EnableAPI(ctx context.Context, namespaceId, operator int, u
 	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:          uuid,
 		Name:          apiInfo.Name,
-		ClusterId:     cluster.Id,
+		ClusterId:     clusterInfo.Id,
 		ClusterName:   clusterName,
 		EnableOperate: 1,
 	})
@@ -1567,7 +1567,7 @@ func (a *apiService) EnableAPI(ctx context.Context, namespaceId, operator int, u
 		}
 
 		//发布到apinto
-		client, err := a.apintoClient.GetClient(ctx, cluster.Id)
+		client, err := a.apintoClient.GetClient(ctx, clusterInfo.Id)
 		if err != nil {
 			return err
 		}
@@ -1582,7 +1582,7 @@ func (a *apiService) DisableAPI(ctx context.Context, namespaceId, operator int, 
 	}
 
 	//获取当前集群信息
-	cluster, err := a.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
+	clusterInfo, err := a.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
 	if err != nil {
 		return err
 	}
@@ -1597,7 +1597,7 @@ func (a *apiService) DisableAPI(ctx context.Context, namespaceId, operator int, 
 		return err
 	}
 	//获取当前版本
-	runtime, err := a.apiRuntime.GetForCluster(ctx, apiInfo.Id, cluster.Id)
+	runtime, err := a.apiRuntime.GetForCluster(ctx, apiInfo.Id, clusterInfo.Id)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return err
 	}
@@ -1615,7 +1615,7 @@ func (a *apiService) DisableAPI(ctx context.Context, namespaceId, operator int, 
 	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:          uuid,
 		Name:          apiInfo.Name,
-		ClusterId:     cluster.Id,
+		ClusterId:     clusterInfo.Id,
 		ClusterName:   clusterName,
 		EnableOperate: 2,
 	})
@@ -1631,7 +1631,7 @@ func (a *apiService) DisableAPI(ctx context.Context, namespaceId, operator int, 
 		}
 
 		//发布到apinto
-		client, err := a.apintoClient.GetClient(ctx, cluster.Id)
+		client, err := a.apintoClient.GetClient(ctx, clusterInfo.Id)
 		if err != nil {
 			return err
 		}

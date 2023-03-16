@@ -7,7 +7,7 @@ import (
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/enum"
-	service2 "github.com/eolinker/apinto-dashboard/modules/api"
+	"github.com/eolinker/apinto-dashboard/modules/api"
 	"github.com/eolinker/apinto-dashboard/modules/application"
 	"github.com/eolinker/apinto-dashboard/modules/strategy"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-dto"
@@ -20,7 +20,7 @@ import (
 
 type visitHandler struct {
 	applicationService application.IApplicationService
-	apiService         service2.IAPIService
+	apiService         api.IAPIService
 	service            upstream.IService
 	apintoDriverName   string
 }
@@ -176,9 +176,9 @@ func (t *visitHandler) FormatOut(ctx context.Context, namespaceID int, input *st
 					continue
 				}
 				labels := make([]string, len(apis))
-				for i, api := range apis {
-					extenderData.Api[api.Uuid] = api
-					labels[i] = api.Name
+				for i, apiInfo := range apis {
+					extenderData.Api[apiInfo.Uuid] = apiInfo
+					labels[i] = apiInfo.Name
 				}
 				filter.Label = strings.Join(labels, ",")
 			}

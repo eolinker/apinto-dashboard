@@ -11,7 +11,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/online/online-dto"
 	"github.com/eolinker/apinto-dashboard/modules/upstream"
 	_ "github.com/eolinker/apinto-dashboard/modules/upstream/service"
-	upstream_dto "github.com/eolinker/apinto-dashboard/modules/upstream/upstream-dto"
+	"github.com/eolinker/apinto-dashboard/modules/upstream/upstream-dto"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/gin-gonic/gin"
 	"net/http"
