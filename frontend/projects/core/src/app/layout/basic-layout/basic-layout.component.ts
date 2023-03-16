@@ -2,24 +2,20 @@
 /* eslint-disable dot-notation */
 /* eslint-disable no-useless-constructor */
 /*
- * @Author: maggieyyy im.ymj@hotmail.com
+ * @Author:
  * @Date: 2022-07-12 00:19:11
- * @LastEditors: MengjieYang yangmengjie@eolink.com
+ * @LastEditors:
  * @LastEditTime: 2022-07-29 02:56:25
  * @FilePath: /apinto/src/app/basic-layout/basic-layout.component.ts
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
+import { Component, OnInit } from '@angular/core'
 import { Router } from '@angular/router'
 import { EoNgBreadcrumbOptions } from 'eo-ng-breadcrumb'
-import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { MenuOptions } from 'eo-ng-menu'
-import { NzModalRef, NzModalService } from 'ng-zorro-antd/modal'
+import { NzModalRef } from 'ng-zorro-antd/modal'
 import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
 import { Subscription } from 'rxjs'
-import { MODAL_SMALL_SIZE } from '../../constant/app.config'
-import { ApiService } from '../../service/api.service'
-import { AuthInfoDetailComponent } from '../auth/info/detail/detail.component'
 
 @Component({
   selector: 'basic-layout',
@@ -44,11 +40,8 @@ export class BasicLayoutComponent implements OnInit {
   private subscription4: Subscription = new Subscription()
 
   constructor (
-              private message: EoNgFeedbackMessageService,
               private router: Router,
-              private api:ApiService,
-              private appConfigService: AppConfigService,
-              private modalService: NzModalService
+              private appConfigService: AppConfigService
   ) {
     this.subscription1 = this.appConfigService.repFlashBreadcrumb().subscribe((data:any) => {
       this.breadcrumbOptions = data
@@ -91,35 +84,6 @@ export class BasicLayoutComponent implements OnInit {
     })
   }
 
-  getAuthInfo () {
-    if (this.appConfigService.getUserAuthAccess()) {
-      this.api.authGet('activation/info').subscribe((resp:{code:number, data:{infos:Array<{key:string, value:string}>, title:string}, msg:string}) => {
-        if (resp.code === 0) {
-          this.authInfo = resp.data
-        } else {
-          this.message.error(resp.msg || '获取授权信息失败，请重试')
-        }
-      })
-    }
-  }
-
-  openAuthDialog () {
-    this.modalRef = this.modalService.create({
-      nzWrapClassName: 'auth-modal-header',
-      nzTitle: `${this.authInfo.title}授权`,
-      nzContent: AuthInfoDetailComponent,
-      nzComponentParams: { eoInfos: this.authInfo.infos, updateAuth: this.updateAuth },
-      nzClosable: true,
-      nzFooter: null,
-      nzWidth: MODAL_SMALL_SIZE
-    })
-  }
-
-  updateAuth = () => {
-    this.modalRef?.close()
-    this.router.navigate(['/', 'auth-update'])
-  }
-
   getAccess () {
     if (this.appConfigService.getUserAccess()) {
       this.showEmpty = true
@@ -137,7 +101,6 @@ export class BasicLayoutComponent implements OnInit {
         }, 0)
       }
     }
-    this.getAuthInfo()
   }
 
   // 根据路由选中并打开对应menu

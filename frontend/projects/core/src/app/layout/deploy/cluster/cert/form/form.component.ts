@@ -22,7 +22,7 @@ import { Buffer } from 'buffer'
       font-family:"Helvetica Neue", "Helvetica", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", "WenQuanYi Micro Hei", "Arial", sans-serif;
       white-space: nowrap;
       text-align: center;
-      border-radius: var(--DEFAULT_BORDER_RADIUS);
+      border-radius: var(--border-radius);
       padding: 7px 8px !important;
       height: 32px;
       line-height: 14px;
@@ -34,9 +34,9 @@ import { Buffer } from 'buffer'
     label.ant-btn:not(.ant-btn-disabled):hover,
     label.ant-btn:not(.ant-btn-disabled):active
      {
-      border: 1px solid var(--MAIN_THEME_BG) !important;
+      border: 1px solid var(--primary-color) !important;
       background-color: #fff !important;
-      color: var(--MAIN_THEME_BG) !important;
+      color: var(--primary-color) !important;
     }
 
     label.ant-btn span{

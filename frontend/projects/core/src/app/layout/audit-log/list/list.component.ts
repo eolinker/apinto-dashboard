@@ -39,7 +39,7 @@ interface logsData{
     nz-range-picker,
     .group-search-large eo-ng-input-group{
       width:254px !important;
-    border-radius: var(--DEFAULT_BORDER_RADIUS);
+    border-radius: var(--border-radius);
       min-height:32px;
     }
 
