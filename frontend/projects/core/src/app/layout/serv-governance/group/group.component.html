@@ -1,5 +1,6 @@
 <div
   class="flex flex-nowrap justify-start overflow-y-hidden max-h-[calc(100vh_-_50px)]"
+  *ngIf="nodesList.length > 0; else emptyTpl"
 >
   <div>
     <div
@@ -35,4 +36,11 @@
   <div>
     <router-outlet></router-outlet>
   </div>
+</div>
+<div
+  class="flex flex-nowrap justify-start overflow-y-hidden max-h-[calc(100vh_-_50px)]"
+>
+  <ng-template #emptyTpl class="w-[100%]">
+    <eo-ng-empty nzMainTitle="暂无数据" nzInputImage="simple"></eo-ng-empty>
+  </ng-template>
 </div>

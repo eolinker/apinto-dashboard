@@ -17,11 +17,87 @@
   </div>
 
   <div class="form-row">
-    <label class="label" for="name"
+    <label class="h-[32px] block" for="name"
       ><span class="required-symbol">*</span>属性值：</label
     >
     <!-- 穿梭框 -->
-    <section *ngIf="filterType == 'remote'" class="form-input transfer-section">
+    <section
+      style="border: 1px solid var(--border-color); border-bottom: none"
+      *ngIf="filterType == 'remote'"
+      class="w-full transfer-section"
+    >
+      <!-- search -->
+      <p class="flex items.center mt-[12px] text-[16px] font-bold px-btnbase">
+        {{
+          '已选择' + remoteSelectList.length + '项' + filterForm.title + '数据'
+        }}
+      </p>
+      <div
+        *ngIf="filterForm.name !== 'api'"
+        class="flex items-center justify-between py-btnybase px-btnbase"
+      >
+        <div></div>
+        <eo-ng-search-input-group
+          class="w-[224px]"
+          [eoNoWidth]="true"
+          [eoInputVal]="searchWord"
+          (eoClick)="searchWord = ''; searchRemoteList()"
+        >
+          <input
+            type="text"
+            eo-ng-input
+            placeholder="请输入"
+            [(ngModel)]="searchWord"
+            (keyup.enter)="searchRemoteList()"
+          />
+        </eo-ng-search-input-group>
+      </div>
+      <div
+        class="flex mt-[12px] mb-[16px] items-center justify-between px-btnbase"
+        *ngIf="filterForm.name === 'api'"
+      >
+        <div></div>
+        <div>
+          <eo-ng-cascader
+            class="w-[126px] mr-btnbase"
+            nzChangeOnSelect
+            name="header"
+            required
+            [(ngModel)]="searchGroup"
+            (ngModelChange)="getSearchRemoteList()"
+            [nzDisabled]="nzDisabled"
+            [nzOptions]="apiGroupList"
+            nzLabelProperty="name"
+            nzValueProperty="uuid"
+            nzPlaceHolder="目录筛选"
+          >
+          </eo-ng-cascader>
+          <eo-ng-search-input-group
+            class="w-[224px] inline-block"
+            [eoNoWidth]="true"
+            [eoInputVal]="searchWord"
+            (eoClick)="searchWord = ''; getSearchRemoteList()"
+          >
+            <input
+              type="text"
+              eo-ng-input
+              placeholder="请输入"
+              [(ngModel)]="searchWord"
+              (keyup.enter)="getSearchRemoteList()"
+            />
+          </eo-ng-search-input-group>
+        </div>
+      </div>
+      <eo-ng-apinto-table
+        [nzTbody]="filterTbody"
+        [nzThead]="filterThead"
+        [(nzData)]="remoteList"
+        [nzNoScroll]="true"
+        [nzTrClick]="clickItem"
+        [nzScrollY]="316"
+      ></eo-ng-apinto-table>
+    </section>
+    <!-- <section *ngIf="filterType == 'remote'" class="form-input transfer-section">
       <eo-ng-transfer
         [nzDataSource]="remoteList"
         [nzShowSearch]="filterForm.name === 'api' ? false : true"
@@ -102,7 +178,7 @@
           </nz-table>
         </ng-template>
       </eo-ng-transfer>
-    </section>
+    </section> -->
 
     <!-- API路径(输入框) -->
     <section
@@ -167,7 +243,7 @@
   </div>
 </div>
 
-<ng-template #apiMenuTpl let-option="option" let-direction="direction">
+<!-- <ng-template #apiMenuTpl let-option="option" let-direction="direction">
   <div
     class="flex mt-[12px] mb-[16px]"
     *ngIf="direction === 'left'; else blankTpl"
@@ -202,4 +278,4 @@
     </eo-ng-search-input-group>
   </div>
   <ng-template #blankTpl><div class="h-[60px]"></div></ng-template>
-</ng-template>
+</ng-template> -->

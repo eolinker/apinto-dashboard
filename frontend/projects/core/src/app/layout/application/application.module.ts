@@ -28,7 +28,6 @@ import { NzLayoutModule } from 'ng-zorro-antd/layout'
 import { NzModalModule } from 'ng-zorro-antd/modal'
 import { NzTableModule } from 'ng-zorro-antd/table'
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
-import { EoNgApintoUserModule } from 'projects/eo-ng-apinto-user/src/public-api'
 import { ComponentModule } from '../../component/component.module'
 import { EoNgTransferModule } from '../../component/transfer/transfer.module'
 import { ApplicationAuthenticationComponent } from './authentication/authentication.component'
@@ -75,7 +74,6 @@ import { ApplicationAuthenticationFormComponent } from './authentication/form/fo
     NzAvatarModule,
     EoNgButtonModule,
     EoNgTransferModule,
-    EoNgApintoUserModule,
     NzFormModule,
     ReactiveFormsModule,
     NzLayoutModule,

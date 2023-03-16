@@ -178,11 +178,10 @@ export class GreyCreateComponent implements OnInit {
     })
 
     this.appConfigService.reqFlashBreadcrumb([
-      { title: '灰度策略', routerLink: 'serv-governance/grey/group/list' },
+      { title: '灰度策略', routerLink: 'serv-governance/grey' },
       { title: '新建灰度策略' }
     ])
   }
-
 
   ngOnInit (): void {
     this.clusterName = this.baseInfo.allParamsInfo.clusterName
@@ -196,6 +195,7 @@ export class GreyCreateComponent implements OnInit {
       this.createStrategyForm.uuid = this.strategyUuid
     }
   }
+
   drawerTipShowFn = () => {
     return !this.filterNamesSet.has('api') && !this.filterNamesSet.has('service')
   }
@@ -214,7 +214,7 @@ export class GreyCreateComponent implements OnInit {
             this.appConfigService.reqFlashBreadcrumb([
               {
                 title: '灰度策略',
-                routerLink: 'serv-governance/grey/group'
+                routerLink: 'serv-governance/grey'
               },
               { title: resp.data.strategy!.name }
             ])
@@ -299,7 +299,10 @@ export class GreyCreateComponent implements OnInit {
       for (const index in this.filterShowList) {
         this.createStrategyForm.filters.push({
           name: this.filterShowList[index].name,
-          values: this.filterShowList[index].values
+          values:
+            this.filterShowList[index].name === 'ip'
+              ? this.filterShowList[index].values[0].split(/[\n]/).filter(value => { return !!value })
+              : this.filterShowList[index].values
         })
       }
 

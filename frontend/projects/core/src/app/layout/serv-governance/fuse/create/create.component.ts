@@ -142,11 +142,10 @@ export class FuseCreateComponent implements OnInit {
     })
 
     this.appConfigService.reqFlashBreadcrumb([
-      { title: '熔断策略', routerLink: 'serv-governance/fuse/group/list' },
+      { title: '熔断策略', routerLink: 'serv-governance/fuse' },
       { title: '新建熔断策略' }
     ])
   }
-
 
   ngOnInit (): void {
     this.clusterName = this.baseInfo.allParamsInfo.clusterName
@@ -175,7 +174,7 @@ export class FuseCreateComponent implements OnInit {
             this.appConfigService.reqFlashBreadcrumb([
               {
                 title: '熔断策略',
-                routerLink: 'serv-governance/fuse/group/list'
+                routerLink: 'serv-governance/fuse'
               },
               { title: resp.data.strategy!.name }
             ])
@@ -304,7 +303,10 @@ export class FuseCreateComponent implements OnInit {
       for (const index in this.filterShowList) {
         this.createStrategyForm.filters.push({
           name: this.filterShowList[index].name,
-          values: this.filterShowList[index].values
+          values:
+            this.filterShowList[index].name === 'ip'
+              ? this.filterShowList[index].values[0].split(/[\n]/).filter(value => { return !!value })
+              : this.filterShowList[index].values
         })
       }
 

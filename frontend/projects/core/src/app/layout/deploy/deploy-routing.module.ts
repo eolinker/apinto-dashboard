@@ -4,7 +4,6 @@ import { DeployClusterCertComponent } from './cluster/cert/cert.component'
 import { DeployClusterComponent } from './cluster/cluster.component'
 import { DeployClusterContentComponent } from './cluster/content/content.component'
 import { DeployClusterCreateComponent } from './cluster/create/create.component'
-import { DeployClusterConfComponent } from './cluster/conf/conf.component'
 import { DeployClusterEnvironmentComponent } from './cluster/environment/environment.component'
 import { DeployClusterListComponent } from './cluster/list/list.component'
 import { DeployClusterNodesComponent } from './cluster/nodes/nodes.component'
@@ -50,10 +49,6 @@ const routes: Routes = [{
             {
               path: 'nodes',
               component: DeployClusterNodesComponent
-            },
-            {
-              path: 'conf',
-              component: DeployClusterConfComponent
             }
           ]
         }]

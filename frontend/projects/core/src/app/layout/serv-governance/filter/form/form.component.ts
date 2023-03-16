@@ -4,7 +4,6 @@
 import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core'
 import { Router } from '@angular/router'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
-import { TransferItem, TransferChange } from 'ng-zorro-antd/transfer'
 import { ApiService } from '../../../../service/api.service'
 
 export interface FilterForm {
@@ -30,7 +29,7 @@ export interface FilterForm {
         min-height: 68px;
       }
       .form-input {
-        width: 1000px !important;
+        width: 860px !important;
       }
     `
   ]
@@ -122,8 +121,8 @@ export class FilterFormComponent implements OnInit {
   @Input() editFilter: any = null // 正在编辑的配置
 
   filterTypeMap: Map<string, any> = new Map() // 筛选条件值与类型的映射
-  remoteList: TransferItem[] = []
-
+  remoteList: any[] = []
+  remoteDisplayList:any[] = [] // 展现在表格中的数据
   remoteCheckList: string[] = [] // 用户已选择的选项
 
   filterNamesList: Array<{ label: string; value: string }> = []
@@ -156,6 +155,9 @@ export class FilterFormComponent implements OnInit {
   strategyType: string = ''
 
   nzDisabled: boolean = false
+
+  originDataLength:number = 0 // 未经筛选的数据列表长度
+  originRemoteList:any[] = [] // 未经筛选的数据列表
   constructor (
     private message: EoNgFeedbackMessageService,
     private router: Router,
@@ -221,30 +223,20 @@ export class FilterFormComponent implements OnInit {
   // 获取搜索远程类型的选项，参数为搜索的属性类型
   getRemoteList (name: string): void {
     this.api
-      .get('strategy/filter-remote/' + name, {
-        keyword: this.searchWord || '',
-        group_uuid: this.searchGroup || ''
-      })
+      .get('strategy/filter-remote/' + name)
       .subscribe((resp: any) => {
         if (resp.code === 0) {
           this.remoteList = []
           this.remoteSelectList = []
           this.remoteSelectNameList = []
           for (const index in resp.data[resp.data.target]) {
-            resp.data[resp.data.target][index].key =
-              resp.data[resp.data.target][index].uuid
-            resp.data[resp.data.target][index].checked = false
-            resp.data[resp.data.target][index].title =
-              resp.data[resp.data.target][index].name
-            resp.data[resp.data.target][index].direction =
+            resp.data[resp.data.target][index].checked =
               this.editFilter && this.filterForm.name === this.editFilter.name
-                ? !!this.editFilter.values?.includes(
+                ? !!(!!this.editFilter.values?.includes(
                     resp.data[resp.data.target][index].uuid
-                  ) || this.editFilter.values[0] === 'ALL'
-                    ? 'right'
-                    : 'left'
-                : 'left'
-            if (resp.data[resp.data.target][index].direction === 'right') {
+                  ) || this.editFilter.values[0] === 'ALL')
+                : false
+            if (resp.data[resp.data.target][index].checked) {
               this.remoteSelectList.push(
                 resp.data[resp.data.target][index].uuid
               )
@@ -254,15 +246,22 @@ export class FilterFormComponent implements OnInit {
             }
             this.remoteList.push(resp.data[resp.data.target][index])
           }
+          this.originRemoteList = [...this.remoteList]
           this.filterTbody = [
             {
               key: 'checked',
-              type: 'checkbox'
+              type: 'checkbox',
+              click: () => {
+                this.getNewRemotesStatus()
+              }
             }
           ]
           this.filterThead = [
             {
-              type: 'checkbox'
+              type: 'checkbox',
+              click: () => {
+                this.getNewRemotesStatus()
+              }
             }
           ]
           for (const index in resp.data.titles) {
@@ -271,10 +270,37 @@ export class FilterFormComponent implements OnInit {
           }
           this.filterTypeMap.get(this.filterForm.name).total = resp.data.total
           this.filterForm.total = resp.data.total
+          this.originDataLength = resp.data.total
         } else {
           this.message.error(resp.msg || '获取数据失败!')
         }
       })
+  }
+
+  clickItem = (item:any) => {
+    item.checked = !item.checked
+    item.data.checked = !item.data.checked
+    this.getNewRemotesStatus()
+  }
+
+  getNewRemotesStatus () {
+    setTimeout(() => {
+      for (const item of this.remoteList) {
+        if (item.checked) {
+          if (this._remoteSelectList.indexOf(item.uuid) === -1) {
+            this._remoteSelectList.push(item.uuid)
+            this._remoteSelectNameList.push(item.name)
+          }
+        } else {
+          if (this._remoteSelectList.indexOf(item.uuid) !== -1) {
+            this._remoteSelectList.splice(this._remoteSelectList.indexOf(item.uuid), 1)
+            this._remoteSelectNameList.splice(this._remoteSelectNameList.indexOf(item.name), 1)
+          }
+        }
+      }
+      this.remoteSelectListChange.emit(this._remoteSelectList)
+      this.remoteSelectNameListChange.emit(this._remoteSelectNameList)
+    })
   }
 
   // 获取API目录列表参数
@@ -295,7 +321,7 @@ export class FilterFormComponent implements OnInit {
   }
 
   // 搜索特定的远程类型数据
-  getSearchRemoteList (direction:string): void {
+  getSearchRemoteList (): void {
     this.api
       .get('strategy/filter-remote/' + this.filterForm.name, {
         keyword: this.searchWord || '',
@@ -306,25 +332,31 @@ export class FilterFormComponent implements OnInit {
       })
       .subscribe((resp: any) => {
         if (resp.code === 0) {
-          const showItemUuidArr:Array<string> = []
-          if (resp.data[resp.data.target]) {
-            for (const item of resp.data[resp.data.target]) {
-              showItemUuidArr.push(item.uuid)
-            }
-          }
-          for (const row of this.remoteList) {
-            row.hide = row.direction === direction &&
-                         row['uuid'] &&
-                          (showItemUuidArr.length === 0 ||
-                           showItemUuidArr.indexOf(row['uuid']) === -1)
-          }
-          this.remoteList = [...this.remoteList]
-
-          this.filterForm.total = resp.data.total
+          // const showItemUuidArr:Array<string> = []
+          // if (resp.data[resp.data.target]) {
+          //   for (const item of resp.data[resp.data.target]) {
+          //     showItemUuidArr.push(item.uuid)
+          //   }
+          // }
+          // for (const row of this.remoteList) {
+          //   row.hide = row.direction === direction &&
+          //                row['uuid'] &&
+          //                 (showItemUuidArr.length === 0 ||
+          //                  showItemUuidArr.indexOf(row['uuid']) === -1)
+          // }
+          this.remoteList = resp.data[resp.data.target]
+          // this.filterForm.total = resp.data.total
         } else {
           this.message.error(resp.msg || '筛选失败!')
         }
       })
+  }
+
+  // 搜索远程数据（不调接口
+  searchRemoteList () {
+    this.remoteList = this.originRemoteList.filter((item:any) => {
+      return item.name.includes(this.searchWord)
+    })
   }
 
   changeFilterType (value: any) {
@@ -369,29 +401,6 @@ export class FilterFormComponent implements OnInit {
         this.getRemoteList(value)
         break
       }
-    }
-  }
-
-  // 穿梭框内,点击穿梭按钮后,根据数据穿梭方向,增加或减少remoteSelectList,remoteSelectNameList
-  change (ret: TransferChange): void {
-    if (ret.list.length > 0) {
-      const listKeys = ret.list.map((l) => l['key'])
-      const hasOwnKey = (e: TransferItem): boolean => e.hasOwnProperty('key')
-      this.remoteList = this.remoteList.map((e) => {
-        if (listKeys.includes(e['key']) && hasOwnKey(e)) {
-          if (ret.to === 'left') {
-            delete e.hide
-            const deleteIndex = this.remoteSelectList.indexOf(e['uuid'])
-            this.remoteSelectList.splice(deleteIndex, 1)
-            this.remoteSelectNameList.splice(deleteIndex, 1)
-          } else if (ret.to === 'right') {
-            e.hide = false
-            this.remoteSelectList.push(e['uuid'])
-            this.remoteSelectNameList.push(e['name'])
-          }
-        }
-        return e
-      })
     }
   }
 
@@ -446,7 +455,7 @@ export class FilterFormComponent implements OnInit {
     }
   }
 
-  $asTransferItems = (data: unknown): TransferItem[] => data as TransferItem[]
+  // $asTransferItems = (data: unknown): TransferItem[] => data as TransferItem[]
 
   transferHeader (header: any) {
     for (const index in header) {
