@@ -732,10 +732,6 @@ func (a *applicationService) AppList(ctx context.Context, namespaceId, userId, p
 	}
 
 	applications := make([]*application_model.Application, 0, len(list))
-	clusters, err := a.clusterService.GetByNamespaceId(ctx, namespaceId)
-	if err != nil {
-		return nil, 0, err
-	}
 
 	userIds := common.SliceToSliceIds(list, func(t *application_entry.Application) int {
 		return t.Operator
@@ -743,26 +739,37 @@ func (a *applicationService) AppList(ctx context.Context, namespaceId, userId, p
 
 	userInfoMaps, _ := a.userInfoService.GetUserInfoMaps(ctx, userIds...)
 
-	for _, application := range list {
+	for _, applicationInfo := range list {
 
 		operatorName := ""
-		if userInfo, ok := userInfoMaps[application.Operator]; ok {
+		if userInfo, ok := userInfoMaps[applicationInfo.Operator]; ok {
 			operatorName = userInfo.NickName
 		}
 
-		val := &application_model.Application{Application: application, OperatorName: operatorName}
+		val := &application_model.Application{Application: applicationInfo, OperatorName: operatorName}
 
 		isDelete := true
 		if val.IdStr == anonymousIds {
 			isDelete = false
 		} else {
-			for _, cluster := range clusters {
-				runtime, _ := a.applicationRuntimeStore.GetForCluster(ctx, application.Id, cluster.Id)
+			runtimes, err := a.applicationRuntimeStore.GetByTarget(ctx, applicationInfo.Id)
+			if err != nil {
+				return nil, 0, err
+			}
+			for _, runtime := range runtimes {
 				if runtime != nil && runtime.IsOnline {
 					isDelete = false
 					break
 				}
 			}
+			//for _, cluster := range clusters {
+			//
+			//	runtime, _ := a.applicationRuntimeStore.GetForCluster(ctx, applicationInfo.Id, cluster.Id)
+			//	if runtime != nil && runtime.IsOnline {
+			//		isDelete = false
+			//		break
+			//	}
+			//}
 		}
 
 		val.IsDelete = isDelete
