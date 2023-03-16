@@ -4,11 +4,11 @@ import (
 	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
-	upstream_dto "github.com/eolinker/apinto-dashboard/modules/upstream/upstream-dto"
+	"github.com/eolinker/apinto-dashboard/modules/upstream/upstream-dto"
 
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/application"
-	application_dto2 "github.com/eolinker/apinto-dashboard/modules/application/application-dto"
+	"github.com/eolinker/apinto-dashboard/modules/application/application-dto"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/discovery/discover-dto"
 	"github.com/eolinker/apinto-dashboard/modules/online/online-dto"
@@ -68,16 +68,16 @@ func (a *applicationController) lists(ginCtx *gin.Context) {
 		return
 	}
 
-	resList := make([]*application_dto2.ApplicationListOut, 0, len(list))
-	for _, application := range list {
+	resList := make([]*application_dto.ApplicationListOut, 0, len(list))
+	for _, applicationInfo := range list {
 
-		resList = append(resList, &application_dto2.ApplicationListOut{
-			Name:       application.Name,
-			Id:         application.IdStr,
-			Desc:       application.Desc,
-			Operator:   application.OperatorName,
-			IsDelete:   application.IsDelete,
-			UpdateTime: common.TimeToStr(application.UpdateTime),
+		resList = append(resList, &application_dto.ApplicationListOut{
+			Name:       applicationInfo.Name,
+			Id:         applicationInfo.IdStr,
+			Desc:       applicationInfo.Desc,
+			Operator:   applicationInfo.OperatorName,
+			IsDelete:   applicationInfo.IsDelete,
+			UpdateTime: common.TimeToStr(applicationInfo.UpdateTime),
 		})
 	}
 
@@ -94,12 +94,12 @@ func (a *applicationController) enum(ginCtx *gin.Context) {
 		return
 	}
 
-	resList := make([]*application_dto2.ApplicationEnum, 0, len(list))
-	for _, application := range list {
+	resList := make([]*application_dto.ApplicationEnum, 0, len(list))
+	for _, applicationInfo := range list {
 
-		resList = append(resList, &application_dto2.ApplicationEnum{
-			Name: application.Name,
-			Id:   application.IdStr,
+		resList = append(resList, &application_dto.ApplicationEnum{
+			Name: applicationInfo.Name,
+			Id:   applicationInfo.IdStr,
 		})
 	}
 
@@ -118,23 +118,23 @@ func (a *applicationController) info(ginCtx *gin.Context) {
 		return
 	}
 
-	customAttrList := make([]application_dto2.ApplicationCustomAttr, 0, len(info.CustomAttr))
+	customAttrList := make([]application_dto.ApplicationCustomAttr, 0, len(info.CustomAttr))
 	for _, attr := range info.CustomAttr {
-		customAttrList = append(customAttrList, application_dto2.ApplicationCustomAttr{
+		customAttrList = append(customAttrList, application_dto.ApplicationCustomAttr{
 			Key:   attr.Key,
 			Value: attr.Value,
 		})
 	}
-	extraParamList := make([]application_dto2.ApplicationExtraParam, 0, len(info.ExtraParam))
+	extraParamList := make([]application_dto.ApplicationExtraParam, 0, len(info.ExtraParam))
 	for _, extra := range info.ExtraParam {
-		extraParamList = append(extraParamList, application_dto2.ApplicationExtraParam{
+		extraParamList = append(extraParamList, application_dto.ApplicationExtraParam{
 			Key:      extra.Key,
 			Value:    extra.Value,
 			Conflict: extra.Conflict,
 			Position: extra.Position,
 		})
 	}
-	res := application_dto2.ApplicationInfoOut{
+	res := application_dto.ApplicationInfoOut{
 		Name:           info.Name,
 		Id:             info.IdStr,
 		Desc:           info.Desc,
@@ -150,7 +150,7 @@ func (a *applicationController) info(ginCtx *gin.Context) {
 func (a *applicationController) createApp(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	userId := controller.GetUserId(ginCtx)
-	input := new(application_dto2.ApplicationInput)
+	input := new(application_dto.ApplicationInput)
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
@@ -172,7 +172,7 @@ func (a *applicationController) updateApp(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	userId := controller.GetUserId(ginCtx)
 
-	input := new(application_dto2.ApplicationInput)
+	input := new(application_dto.ApplicationInput)
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
@@ -319,10 +319,10 @@ func (a *applicationController) auths(ginCtx *gin.Context) {
 		return
 	}
 
-	resList := make([]*application_dto2.ApplicationAuthListOut, 0, len(list))
+	resList := make([]*application_dto.ApplicationAuthListOut, 0, len(list))
 
 	for _, auth := range list {
-		authInfo := &application_dto2.ApplicationAuthListOut{
+		authInfo := &application_dto.ApplicationAuthListOut{
 			Uuid:          auth.Uuid,
 			Driver:        auth.Driver,
 			ParamPosition: auth.ParamPosition,
@@ -347,7 +347,7 @@ func (a *applicationController) createAuth(ginCtx *gin.Context) {
 	appId := ginCtx.Query("app_id")
 	userId := controller.GetUserId(ginCtx)
 
-	input := &application_dto2.ApplicationAuthInput{}
+	input := &application_dto.ApplicationAuthInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
@@ -371,7 +371,7 @@ func (a *applicationController) updateAuth(ginCtx *gin.Context) {
 	uuid := ginCtx.Query("uuid")
 	userId := controller.GetUserId(ginCtx)
 
-	input := &application_dto2.ApplicationAuthInput{}
+	input := &application_dto.ApplicationAuthInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
@@ -409,7 +409,7 @@ func (a *applicationController) getAuth(ginCtx *gin.Context) {
 		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
-	resAuth := &application_dto2.ApplicationAuthOut{
+	resAuth := &application_dto.ApplicationAuthOut{
 		Uuid:          auth.Uuid,
 		Driver:        auth.Driver,
 		ExpireTime:    auth.ExpireTime,
@@ -418,7 +418,7 @@ func (a *applicationController) getAuth(ginCtx *gin.Context) {
 		TokenName:     auth.TokenName,
 		UpdateTime:    common.TimeToStr(auth.UpdateTime),
 		IsTransparent: auth.IsTransparent,
-		Config:        application_dto2.AuthConfigProxy(auth.Config),
+		Config:        application_dto.AuthConfigProxy(auth.Config),
 	}
 	data := common.Map[string, interface{}]{}
 	data["auth"] = resAuth
