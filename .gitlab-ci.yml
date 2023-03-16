@@ -62,6 +62,11 @@ deployer:
   when: on_success
 success:
   stage: webhook
+  rules:
+    - if: $CI_COMMIT_BRANCH=="V2.0"
+      variables:
+        DEPLOY_DESC: "DEV 环境"
+        VIEW_ADDR: http://172.18.166.219:8080/
   script:
     - |
       curl -X POST -H "Content-Type: application/json" \
@@ -70,6 +75,10 @@ success:
   when: on_success
 failure:
   stage: webhook
+  rules:
+    - if: $CI_COMMIT_BRANCH=="V2.0"
+      variables:
+        DEPLOY_DESC: "DEV 环境"
   script:
     - |
       curl -X POST -H "Content-Type: application/json" \
