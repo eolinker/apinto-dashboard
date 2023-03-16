@@ -82,19 +82,12 @@ func (s *service) GetServiceList(ctx context.Context, namespaceID int, searchNam
 		return nil, 0, err
 	}
 
-	//clusters, err := s.clusterService.GetByNamespaceId(ctx, namespaceID)
-	//if err != nil {
-	//	return nil, 0, err
-	//}
-
 	list := make([]*upstream_model.ServiceListItem, 0, len(sl))
 	for _, item := range sl {
-		info, err := s.GetServiceInfo(ctx, namespaceID, item.Name)
+		info, err := s.GetLatestServiceVersion(ctx, item.Id)
 		if err != nil {
 			return nil, 0, err
 		}
-
-		canDelete, _ := s.isDiscoveryCanDelete(ctx, namespaceID, item.Id)
 
 		li := &upstream_model.ServiceListItem{
 			Name:        item.Name,
@@ -104,7 +97,7 @@ func (s *service) GetServiceList(ctx context.Context, namespaceID int, searchNam
 			DriverName:  info.DriverName,
 			Config:      info.FormatAddr,
 			UpdateTime:  item.UpdateTime,
-			IsDelete:    canDelete,
+			IsDelete:    s.isDelete(ctx, item.Id),
 		}
 
 		list = append(list, li)
@@ -153,6 +146,27 @@ func (s *service) GetServiceListByNames(ctx context.Context, namespaceID int, na
 	return list, nil
 }
 
+func (s *service) isDelete(ctx context.Context, serviceId int) bool {
+	quotedSet, err := s.quoteStore.GetTargetQuote(ctx, serviceId, quote_entry.QuoteTargetKindTypeService)
+	if err != nil {
+		return false
+	}
+	//有API绑定了上游服务
+	if len(quotedSet[quote_entry.QuoteKindTypeAPI]) > 0 {
+		return false
+	}
+
+	//在某个集群上线
+	runtimes, _ := s.serviceRuntimeStore.GetByTarget(ctx, serviceId)
+	for _, runtime := range runtimes {
+		if runtime != nil && runtime.IsOnline {
+			return false
+		}
+	}
+
+	return true
+}
+
 func (s *service) isDiscoveryCanDelete(ctx context.Context, namespaceID, serviceId int) (bool, error) {
 	quotedSet, err := s.quoteStore.GetTargetQuote(ctx, serviceId, quote_entry.QuoteTargetKindTypeService)
 	if err != nil {
@@ -171,10 +185,10 @@ func (s *service) isDiscoveryCanDelete(ctx context.Context, namespaceID, service
 	if err != nil {
 		return false, err
 	}
-	for _, cluster := range clusters {
-		runtime, _ := s.serviceRuntimeStore.GetForCluster(ctx, serviceId, cluster.Id)
+	for _, clusterInfo := range clusters {
+		runtime, _ := s.serviceRuntimeStore.GetForCluster(ctx, serviceId, clusterInfo.Id)
 		if runtime != nil && runtime.IsOnline {
-			return false, fmt.Errorf("service is online in cluster %s. ", cluster.Name)
+			return false, fmt.Errorf("service is online in cluster %s. ", clusterInfo.Name)
 		}
 	}
 	return true, nil
@@ -283,8 +297,8 @@ func (s *service) CreateService(ctx context.Context, namespaceID, userId int, in
 				return err
 			}
 			quoteMap = make(map[quote_entry.QuoteTargetKindType][]int)
-			for _, variable := range variables {
-				quoteMap[quote_entry.QuoteTargetKindTypeVariable] = append(quoteMap[quote_entry.QuoteTargetKindTypeVariable], variable.Id)
+			for _, variableInfo := range variables {
+				quoteMap[quote_entry.QuoteTargetKindTypeVariable] = append(quoteMap[quote_entry.QuoteTargetKindTypeVariable], variableInfo.Id)
 			}
 
 			err = s.quoteStore.Set(txCtx, serviceInfo.Id, quote_entry.QuoteKindTypeService, quoteMap)
@@ -396,8 +410,8 @@ func (s *service) UpdateService(ctx context.Context, namespaceID, userId int, in
 			variables, err := s.globalVariableService.GetByKeys(ctx, namespaceID, variableList)
 
 			quoteMap = make(map[quote_entry.QuoteTargetKindType][]int)
-			for _, variable := range variables {
-				quoteMap[quote_entry.QuoteTargetKindTypeVariable] = append(quoteMap[quote_entry.QuoteTargetKindTypeVariable], variable.Id)
+			for _, variableInfo := range variables {
+				quoteMap[quote_entry.QuoteTargetKindTypeVariable] = append(quoteMap[quote_entry.QuoteTargetKindTypeVariable], variableInfo.Id)
 			}
 
 			if err = s.quoteStore.Set(txCtx, serviceInfo.Id, quote_entry.QuoteKindTypeService, quoteMap); err != nil {
@@ -537,14 +551,14 @@ func (s *service) OnlineList(ctx context.Context, namespaceId int, serviceName s
 	userInfoMaps, _ := s.userInfoService.GetUserInfoMaps(ctx, userIds...)
 
 	list := make([]*upstream_model.ServiceOnline, 0, len(clusters))
-	for _, cluster := range clusterMaps {
+	for _, clusterInfo := range clusterMaps {
 		serviceOnline := &upstream_model.ServiceOnline{
-			ClusterID:   cluster.Id,
-			ClusterName: cluster.Name,
-			Env:         cluster.Env,
+			ClusterID:   clusterInfo.Id,
+			ClusterName: clusterInfo.Name,
+			Env:         clusterInfo.Env,
 			Status:      1, //默认为未上线状态
 		}
-		if runtime, ok := runtimeMaps[cluster.Id]; ok {
+		if runtime, ok := runtimeMaps[clusterInfo.Id]; ok {
 			if runtime.IsOnline {
 				serviceOnline.Status = 3
 			} else {
@@ -580,11 +594,11 @@ func (s *service) OnlineService(ctx context.Context, namespaceId, operator int, 
 	t := time.Now()
 
 	//获取当前集群信息
-	cluster, err := s.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
+	clusterInfo, err := s.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
 	if err != nil {
 		return nil, err
 	}
-	clusterId := cluster.Id
+	clusterId := clusterInfo.Id
 
 	if err = s.lockService.Lock(LockNameService, serviceInfo.Id); err != nil {
 		return nil, err
@@ -597,7 +611,7 @@ func (s *service) OnlineService(ctx context.Context, namespaceId, operator int, 
 		return nil, err
 	}
 
-	namespace, err := s.namespaceService.GetById(namespaceId)
+	namespaceInfo, err := s.namespaceService.GetById(namespaceId)
 	if err != nil {
 		return nil, err
 	}
@@ -631,7 +645,7 @@ func (s *service) OnlineService(ctx context.Context, namespaceId, operator int, 
 			errMsg = errors.New(fmt.Sprintf("${%s}未上线到{%s}，上线/更新失败", globalVariable.Key, clusterName))
 
 			//获取集群正在运行的环境变量版本
-			variableVersion, err := s.variableService.GetPublishVersion(ctx, cluster.Id)
+			variableVersion, err := s.variableService.GetPublishVersion(ctx, clusterInfo.Id)
 			if err != nil || variableVersion == nil {
 				return router, errMsg
 			}
@@ -712,7 +726,7 @@ func (s *service) OnlineService(ctx context.Context, namespaceId, operator int, 
 	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:        serviceInfo.UUID,
 		Name:        serviceName,
-		ClusterId:   cluster.Id,
+		ClusterId:   clusterId,
 		ClusterName: clusterName,
 		PublishType: 1,
 	})
@@ -724,7 +738,7 @@ func (s *service) OnlineService(ctx context.Context, namespaceId, operator int, 
 		}
 
 		config := version.ServiceVersionConfig
-		serviceConfig := driverInfo.ToApinto(strings.ToLower(serviceInfo.Name), namespace.Name, serviceInfo.Desc, config.Scheme, config.Balance, strings.ToLower(discoveryName), "http", config.Timeout, []byte(config.Config))
+		serviceConfig := driverInfo.ToApinto(strings.ToLower(serviceInfo.Name), namespaceInfo.Name, serviceInfo.Desc, config.Scheme, config.Balance, strings.ToLower(discoveryName), "http", config.Timeout, []byte(config.Config))
 		if isApintoUpdate {
 			return client.ForService().Update(strings.ToLower(serviceInfo.Name), *serviceConfig)
 		}
@@ -744,7 +758,7 @@ func (s *service) ResetOnline(ctx context.Context, namespaceId, clusterId int) {
 		log.Errorf("service-ResetOnline-getClient clusterId=%d err=%s", clusterId, err.Error())
 		return
 	}
-	namespace, err := s.namespaceService.GetById(namespaceId)
+	namespaceInfo, err := s.namespaceService.GetById(namespaceId)
 	if err != nil {
 		return
 	}
@@ -783,7 +797,7 @@ func (s *service) ResetOnline(ctx context.Context, namespaceId, clusterId int) {
 		}
 
 		versionConfig := version.ServiceVersionConfig
-		serviceConfig := driverInfo.ToApinto(strings.ToLower(serviceInfo.Name), namespace.Name, serviceInfo.Desc, versionConfig.Scheme, versionConfig.Balance, strings.ToLower(discoveryName), "http", versionConfig.Timeout, []byte(versionConfig.Config))
+		serviceConfig := driverInfo.ToApinto(strings.ToLower(serviceInfo.Name), namespaceInfo.Name, serviceInfo.Desc, versionConfig.Scheme, versionConfig.Balance, strings.ToLower(discoveryName), "http", versionConfig.Timeout, []byte(versionConfig.Config))
 		if err = client.ForService().Create(*serviceConfig); err != nil {
 			log.Errorf("service-ResetOnline-apintoCreate serviceConfig=%v clusterId=%d err=%s", serviceConfig, clusterId, err.Error())
 			continue
@@ -802,7 +816,7 @@ func (s *service) OfflineService(ctx context.Context, namespaceId, operator int,
 	serviceId := serviceInfo.Id
 
 	//获取当前集群信息
-	cluster, err := s.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
+	clusterInfo, err := s.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
 	if err != nil {
 		return err
 	}
@@ -816,7 +830,7 @@ func (s *service) OfflineService(ctx context.Context, namespaceId, operator int,
 		switch kindType {
 		case quote_entry.QuoteKindTypeAPI:
 			for _, apiId := range ids {
-				if s.apiService.IsAPIOnline(ctx, cluster.Id, apiId) {
+				if s.apiService.IsAPIOnline(ctx, clusterInfo.Id, apiId) {
 					name, err := s.apiService.GetAPINameByID(ctx, apiId)
 					if err != nil {
 						return err
@@ -839,7 +853,7 @@ func (s *service) OfflineService(ctx context.Context, namespaceId, operator int,
 	}
 
 	//获取当前的版本
-	runtime, err := s.serviceRuntimeStore.GetForCluster(ctx, serviceId, cluster.Id)
+	runtime, err := s.serviceRuntimeStore.GetForCluster(ctx, serviceId, clusterInfo.Id)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return err
 	}
@@ -860,7 +874,7 @@ func (s *service) OfflineService(ctx context.Context, namespaceId, operator int,
 	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:        serviceInfo.UUID,
 		Name:        serviceName,
-		ClusterId:   cluster.Id,
+		ClusterId:   clusterInfo.Id,
 		ClusterName: clusterName,
 		PublishType: 2,
 	})
@@ -869,7 +883,7 @@ func (s *service) OfflineService(ctx context.Context, namespaceId, operator int,
 		if err = s.serviceRuntimeStore.Save(txCtx, runtime); err != nil {
 			return err
 		}
-		client, err := s.apintoClient.GetClient(ctx, cluster.Id)
+		client, err := s.apintoClient.GetClient(ctx, clusterInfo.Id)
 		if err != nil {
 			return err
 		}
