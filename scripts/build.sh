@@ -41,7 +41,7 @@ if [[ "$BUILD_MODE" == "all" || ! -d "controller/dist" ]];then
       pnpm --dir ./frontend i && pnpm --dir ./frontend build
   elif command -v yarn > /dev/null
   then
-      echo "cd frontend && yarn install --registry http://172.18.65.55:4873/ --legacy-peer-deps "
+      echo "cd frontend && yarn install --registry https://registry.npmmirror.com --legacy-peer-deps "
       cd frontend && yarn install --registry https://registry.npmmirror.com --legacy-peer-deps
       echo "yarn build"
       yarn build
