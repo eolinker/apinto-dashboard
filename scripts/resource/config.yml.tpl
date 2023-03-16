@@ -1,5 +1,4 @@
 port: 服务监听的端口号
-user_center_url: "用户中心API接口地址"
 mysql:
   user_name: "数据库用户名"
   password: "数据库密码"
