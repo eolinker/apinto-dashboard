@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, Output, TemplateRef, ViewChild } from '
 import { Router } from '@angular/router'
 import { EoNgFeedbackModalService } from 'eo-ng-feedback'
 import { NzModalRef } from 'ng-zorro-antd/modal'
-import { MODAL_LARGE_SIZE, MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
+import { MODAL_NORMAL_SIZE, MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
 import { FilterShowData } from '../footer/footer.component'
 import { FilterForm } from '../form/form.component'
 
@@ -163,7 +163,7 @@ export class FilterTableComponent {
 
     this.drawerFilterRef = this.modalService.create({
       nzTitle: type === 'addFilter' ? '配置' + this.drawerTitle : '编辑' + this.drawerTitle,
-      nzWidth: MODAL_LARGE_SIZE,
+      nzWidth: MODAL_NORMAL_SIZE,
       nzContent: this.filterContentTpl,
       nzFooter: this.filterFooterTpl,
       nzComponentParams: { data: data },

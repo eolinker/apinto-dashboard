@@ -1,7 +1,7 @@
 /*
- * @Author: maggieyyy im.ymj@hotmail.com
+ * @Author:
  * @Date: 2022-07-11 23:20:14
- * @LastEditors: MengjieYang yangmengjie@eolink.com
+ * @LastEditors:
  * @LastEditTime: 2022-09-20 22:01:32
  * @FilePath: /apinto/src/app/app.module.ts
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
@@ -31,12 +31,9 @@ import { EoNgDatePickerModule } from 'eo-ng-date-picker'
 import { EoNgSwitchModule } from 'eo-ng-switch'
 import { EoNgButtonModule } from 'eo-ng-button'
 import { EoNgTransferModule } from '../component/transfer/transfer.module'
-import { EoNgApintoUserModule } from 'projects/eo-ng-apinto-user/src/public-api'
 import { EoNgCopyModule } from 'eo-ng-copy'
 import { EoNgUploadModule } from 'eo-ng-upload'
 import { LoginComponent } from './login/login.component'
-import { LogoComponent } from './login/logo/logo.component'
-import { PasswordComponent } from './login/password/password.component'
 import { NzFormModule } from 'ng-zorro-antd/form'
 import { NzLayoutModule } from 'ng-zorro-antd/layout'
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
@@ -44,24 +41,14 @@ import { NzCheckboxModule } from 'ng-zorro-antd/checkbox'
 import { NzGridModule } from 'ng-zorro-antd/grid'
 import { NzModalModule } from 'ng-zorro-antd/modal'
 import { NzHighlightModule } from 'ng-zorro-antd/core/highlight'
-import { AuthActivationComponent } from './auth/activation/activation.component'
-import { AuthInfoComponent } from './auth/info/info.component'
-import { AuthUpdateComponent } from './auth/update/update.component'
 import { DirectiveModule } from '../directive/directive.module'
 import { NzUploadModule } from 'ng-zorro-antd/upload'
 import { EoNgEmptyModule } from 'eo-ng-empty'
-import { AuthInfoDetailComponent } from './auth/info/detail/detail.component'
 
 @NgModule({
   declarations: [
     BasicLayoutComponent,
-    LoginComponent,
-    LogoComponent,
-    PasswordComponent,
-    AuthActivationComponent,
-    AuthInfoComponent,
-    AuthUpdateComponent,
-    AuthInfoDetailComponent
+    LoginComponent
   ],
   imports: [
     AppRoutingModule,
@@ -88,7 +75,6 @@ import { AuthInfoDetailComponent } from './auth/info/detail/detail.component'
     NzAvatarModule,
     EoNgButtonModule,
     EoNgTransferModule,
-    EoNgApintoUserModule,
     NzFormModule,
     ReactiveFormsModule,
     NzLayoutModule,
