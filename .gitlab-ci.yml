@@ -17,6 +17,7 @@ stages:
   - notice
   - build
   - publish
+  - webhook
 
 feishu-informer: # 飞书回调
   stage: notice
@@ -34,7 +35,7 @@ feishu-informer: # 飞书回调
 frontend-builder: # 前端构建
   stage: build
   rules:
-    - if: ($CI_COMMIT_TITLE =~ /^frontend/ || $CI_MERGE_REQUEST_TITLE =~ /^frontend/) && $CI_COMMIT_BRANCH == "v2.0" # 当前端提交后触发
+    - if: ($CI_COMMIT_TITLE =~ /^frontend/ || $CI_MERGE_REQUEST_TITLE =~ /^frontend/) && $CI_COMMIT_BRANCH == "V2.0" # 当前端提交后触发
   script:
     - sed -i '/replace github.com\/eolinker\/eosc => */d' go.mod
     - go mod tidy
@@ -43,7 +44,7 @@ frontend-builder: # 前端构建
 golang-builder:
   stage: build
   rules:
-    - if: ($CI_COMMIT_TITLE !~ /^frontend/ || $CI_MERGE_REQUEST_TITLE !~ /^frontend/) && $CI_COMMIT_BRANCH == "v2.0" # 当后端提交后触发
+    - if: ($CI_COMMIT_TITLE !~ /^frontend/ || $CI_MERGE_REQUEST_TITLE !~ /^frontend/) && $CI_COMMIT_BRANCH == "V2.0" # 当后端提交后触发
   script:
     - sed -i '/replace github.com\/eolinker\/eosc => */d' go.mod
     - go mod tidy
@@ -51,15 +52,36 @@ golang-builder:
 deployer:
   stage: publish
   rules:
-    - if: $CI_COMMIT_BRANCH=="v2.0"
+    - if: $CI_COMMIT_BRANCH=="V2.0"
       variables:
         DEPLOY_DESC: "DEV 环境"
         VIEW_ADDR: http://172.18.166.219:8080/
   script:
     - cp $BUILD_DIR/${APP_PRE}_linux_amd64.tar.gz ${SAVE_DIR}
     - cd ${SAVE_DIR};tar -zxvf ${APP_PRE}_linux_amd64.tar.gz;cd ${APP_PRE};./install.sh ${SAVE_DIR};./run.sh restart;cd ${SAVE_DIR};./clean.sh ${APP_PRE}
+  when: on_success
+success:
+  stage: webhook
+  rules:
+    - if: $CI_COMMIT_BRANCH=="V2.0"
+      variables:
+        DEPLOY_DESC: "DEV 环境"
+        VIEW_ADDR: http://172.18.166.219:8080/
+  script:
     - |
       curl -X POST -H "Content-Type: application/json" \
       -d "{\"msg_type\":\"text\",\"content\":{\"text\":\"项目：apinto-dashboard\\n环境：${DEPLOY_DESC}\\n更新部署完成.\\n访问地址：${VIEW_ADDR}\"}}" \
-      https://open.feishu.cn/open-apis/bot/v2/hook/aaf65fe6-6523-4e3c-abfc-4772c7b30cf8
+      https://open.feishu.cn/open-apis/bot/v2/hook/c3672932-4dfa-4989-8023-0128bae59338
   when: on_success
+failure:
+  stage: webhook
+  rules:
+    - if: $CI_COMMIT_BRANCH=="V2.0"
+      variables:
+        DEPLOY_DESC: "DEV 环境"
+  script:
+    - |
+      curl -X POST -H "Content-Type: application/json" \
+      -d "{\"msg_type\":\"text\",\"content\":{\"text\":\"项目：apinto-dashboard\\n环境：${DEPLOY_DESC}\\n更新部署失败，请及时到gitlab上查看\\n\"}}" \
+      https://open.feishu.cn/open-apis/bot/v2/hook/c3672932-4dfa-4989-8023-0128bae59338
+  when: on_failure
