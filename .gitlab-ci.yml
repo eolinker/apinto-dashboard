@@ -17,6 +17,7 @@ stages:
   - notice
   - build
   - publish
+  - webhook
 
 feishu-informer: # 飞书回调
   stage: notice
@@ -58,8 +59,20 @@ deployer:
   script:
     - cp $BUILD_DIR/${APP_PRE}_linux_amd64.tar.gz ${SAVE_DIR}
     - cd ${SAVE_DIR};tar -zxvf ${APP_PRE}_linux_amd64.tar.gz;cd ${APP_PRE};./install.sh ${SAVE_DIR};./run.sh restart;cd ${SAVE_DIR};./clean.sh ${APP_PRE}
+  when: on_success
+success:
+  stage: webhook
+  script:
     - |
       curl -X POST -H "Content-Type: application/json" \
       -d "{\"msg_type\":\"text\",\"content\":{\"text\":\"项目：apinto-dashboard\\n环境：${DEPLOY_DESC}\\n更新部署完成.\\n访问地址：${VIEW_ADDR}\"}}" \
-      https://open.feishu.cn/open-apis/bot/v2/hook/a93ee63b-011c-4f5d-b37d-1e1e307c5a2c
+      https://open.feishu.cn/open-apis/bot/v2/hook/c3672932-4dfa-4989-8023-0128bae59338
   when: on_success
+failure:
+  stage: webhook
+  script:
+    - |
+      curl -X POST -H "Content-Type: application/json" \
+      -d "{\"msg_type\":\"text\",\"content\":{\"text\":\"项目：apinto-dashboard\\n环境：${DEPLOY_DESC}\\n更新部署失败，请及时到gitlab上查看\\n\"}}" \
+      https://open.feishu.cn/open-apis/bot/v2/hook/c3672932-4dfa-4989-8023-0128bae59338
+  when: on_failure
