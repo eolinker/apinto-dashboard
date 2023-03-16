@@ -101,16 +101,16 @@ func (a *applicationService) OnlineList(ctx context.Context, namespaceId int, id
 	userInfoMaps, _ := a.userInfoService.GetUserInfoMaps(ctx, userIds...)
 
 	list := make([]*application_model.ApplicationOnline, 0, len(clusters))
-	for _, cluster := range clusterMaps {
+	for _, clusterInfo := range clusterMaps {
 
 		applicationOnline := &application_model.ApplicationOnline{
-			ClusterID:   cluster.Id,
-			ClusterName: cluster.Name,
-			Env:         cluster.Env,
+			ClusterID:   clusterInfo.Id,
+			ClusterName: clusterInfo.Name,
+			Env:         clusterInfo.Env,
 			Status:      1, //默认为未上线状态
 		}
 
-		if runtime, ok := runtimeMaps[cluster.Id]; ok {
+		if runtime, ok := runtimeMaps[clusterInfo.Id]; ok {
 			applicationOnline.Disable = runtime.Disable
 			if runtime.IsOnline {
 				applicationOnline.Status = 3
@@ -134,7 +134,7 @@ func (a *applicationService) OnlineList(ctx context.Context, namespaceId int, id
 				}
 
 				if applicationOnline.Status == 3 {
-					isUpdate, err := a.applicationAuthService.IsUpdate(ctx, cluster.Id, currentVersion.ApplicationID)
+					isUpdate, err := a.applicationAuthService.IsUpdate(ctx, clusterInfo.Id, currentVersion.ApplicationID)
 					if err != nil {
 						return nil, err
 					}
@@ -159,14 +159,14 @@ func (a *applicationService) OnlineList(ctx context.Context, namespaceId int, id
 }
 
 func (a *applicationService) Online(ctx context.Context, namespaceId, userId int, id, clusterName string) error {
-	application, err := a.applicationStore.GetByIdStr(ctx, namespaceId, id)
+	applicationInfo, err := a.applicationStore.GetByIdStr(ctx, namespaceId, id)
 	if err != nil {
 		return err
 	}
 	//除了匿名应用以外，其他应用需要配置鉴权信息才可上线
 	anonymous := true
-	if application.IdStr != anonymousIds {
-		auths, err := a.applicationAuthService.GetListByApplicationId(ctx, application.Id)
+	if applicationInfo.IdStr != anonymousIds {
+		auths, err := a.applicationAuthService.GetListByApplicationId(ctx, applicationInfo.Id)
 		if err != nil {
 			return err
 		}
@@ -176,13 +176,13 @@ func (a *applicationService) Online(ctx context.Context, namespaceId, userId int
 		anonymous = false
 	}
 	//获取当前集群信息
-	cluster, err := a.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
+	clusterInfo, err := a.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
 	if err != nil {
 		return err
 	}
 
-	applicationId := application.Id
-	clusterId := cluster.Id
+	applicationId := applicationInfo.Id
+	clusterId := clusterInfo.Id
 
 	client, err := a.apintoClient.GetClient(ctx, clusterId)
 	if err != nil {
@@ -195,13 +195,13 @@ func (a *applicationService) Online(ctx context.Context, namespaceId, userId int
 	defer a.lockService.Unlock(locker_service.LockNameApplication, applicationId)
 
 	//拿到锁后需要重新获取下信息
-	application, err = a.applicationStore.GetByIdStr(ctx, namespaceId, id)
+	applicationInfo, err = a.applicationStore.GetByIdStr(ctx, namespaceId, id)
 	if err != nil {
 		return err
 	}
 
 	//获取当前应用的版本
-	lastVersion, err := a.GetAppVersion(ctx, application.Id)
+	lastVersion, err := a.GetAppVersion(ctx, applicationInfo.Id)
 	if err != nil {
 		return err
 	}
@@ -236,8 +236,8 @@ func (a *applicationService) Online(ctx context.Context, namespaceId, userId int
 	//编写日志操作对象信息
 	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:        id,
-		Name:        application.Name,
-		ClusterId:   cluster.Id,
+		Name:        applicationInfo.Name,
+		ClusterId:   clusterInfo.Id,
 		ClusterName: clusterName,
 		PublishType: 1,
 	})
@@ -265,37 +265,37 @@ func (a *applicationService) Online(ctx context.Context, namespaceId, userId int
 			labels[attr.Key] = attr.Value
 		}
 		appConfig := &v1.ApplicationConfig{
-			Name:        application.IdStr,
+			Name:        applicationInfo.IdStr,
 			Driver:      "app",
 			Auth:        auths,
 			Disable:     runtime.Disable,
-			Description: application.Desc,
+			Description: applicationInfo.Desc,
 			Labels:      labels,
 			Additional:  a.getApplicationAdditional(lastVersion.ExtraParamList),
 			Anonymous:   anonymous,
 		}
 
 		if runtime.Id > 0 {
-			return client.ForApp().Update(application.IdStr, *appConfig)
+			return client.ForApp().Update(applicationInfo.IdStr, *appConfig)
 		}
 		return client.ForApp().Create(*appConfig)
 	})
 }
 
 func (a *applicationService) Offline(ctx context.Context, namespaceId, userId int, id, clusterName string) error {
-	application, err := a.applicationStore.GetByIdStr(ctx, namespaceId, id)
+	applicationInfo, err := a.applicationStore.GetByIdStr(ctx, namespaceId, id)
 	if err != nil {
 		return err
 	}
 
 	//获取当前集群信息
-	cluster, err := a.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
+	clusterInfo, err := a.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
 	if err != nil {
 		return err
 	}
 
-	applicationId := application.Id
-	clusterId := cluster.Id
+	applicationId := applicationInfo.Id
+	clusterId := clusterInfo.Id
 
 	client, err := a.apintoClient.GetClient(ctx, clusterId)
 	if err != nil {
@@ -308,7 +308,7 @@ func (a *applicationService) Offline(ctx context.Context, namespaceId, userId in
 	defer a.lockService.Unlock(locker_service.LockNameApplication, applicationId)
 
 	//拿到锁后需要重新获取下信息
-	application, err = a.applicationStore.GetByIdStr(ctx, namespaceId, id)
+	applicationInfo, err = a.applicationStore.GetByIdStr(ctx, namespaceId, id)
 	if err != nil {
 		return err
 	}
@@ -332,8 +332,8 @@ func (a *applicationService) Offline(ctx context.Context, namespaceId, userId in
 	//编写日志操作对象信息
 	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:        id,
-		Name:        application.Name,
-		ClusterId:   cluster.Id,
+		Name:        applicationInfo.Name,
+		ClusterId:   clusterInfo.Id,
 		ClusterName: clusterName,
 		PublishType: 2,
 	})
@@ -348,24 +348,24 @@ func (a *applicationService) Offline(ctx context.Context, namespaceId, userId in
 			return err
 		}
 
-		return common.CheckWorkerNotExist(client.ForApp().Delete(application.IdStr))
+		return common.CheckWorkerNotExist(client.ForApp().Delete(applicationInfo.IdStr))
 	})
 }
 
 func (a *applicationService) Disable(ctx context.Context, namespaceId, userId int, id, clusterName string, disable bool) error {
-	application, err := a.applicationStore.GetByIdStr(ctx, namespaceId, id)
+	applicationInfo, err := a.applicationStore.GetByIdStr(ctx, namespaceId, id)
 	if err != nil {
 		return err
 	}
 
 	//获取当前集群信息
-	cluster, err := a.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
+	clusterInfo, err := a.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
 	if err != nil {
 		return err
 	}
 
-	applicationId := application.Id
-	clusterId := cluster.Id
+	applicationId := applicationInfo.Id
+	clusterId := clusterInfo.Id
 
 	client, err := a.apintoClient.GetClient(ctx, clusterId)
 	if err != nil {
@@ -378,7 +378,7 @@ func (a *applicationService) Disable(ctx context.Context, namespaceId, userId in
 	defer a.lockService.Unlock(locker_service.LockNameApplication, applicationId)
 
 	//拿到锁后需要重新获取下信息
-	application, err = a.applicationStore.GetByIdStr(ctx, namespaceId, id)
+	applicationInfo, err = a.applicationStore.GetByIdStr(ctx, namespaceId, id)
 	if err != nil {
 		return err
 	}
@@ -409,8 +409,8 @@ func (a *applicationService) Disable(ctx context.Context, namespaceId, userId in
 
 	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:          id,
-		Name:          application.Name,
-		ClusterId:     cluster.Id,
+		Name:          applicationInfo.Name,
+		ClusterId:     clusterInfo.Id,
 		ClusterName:   clusterName,
 		EnableOperate: enableOperate,
 	})
@@ -420,7 +420,7 @@ func (a *applicationService) Disable(ctx context.Context, namespaceId, userId in
 			return err
 		}
 		if runtime.IsOnline { //在线状态需要把禁用状态更新到apinto
-			if err = client.ForApp().Patch(application.IdStr, map[string]interface{}{"disable": disable}); err != nil {
+			if err = client.ForApp().Patch(applicationInfo.IdStr, map[string]interface{}{"disable": disable}); err != nil {
 				return err
 			}
 		}
@@ -430,13 +430,13 @@ func (a *applicationService) Disable(ctx context.Context, namespaceId, userId in
 
 func (a *applicationService) CreateApp(ctx context.Context, namespaceId, userId int, input *application_dto.ApplicationInput) error {
 	input.Id = strings.ToLower(input.Id)
-	application, _ := a.applicationStore.GetByIdStr(ctx, namespaceId, input.Id)
-	if application != nil {
+	applicationInfo, _ := a.applicationStore.GetByIdStr(ctx, namespaceId, input.Id)
+	if applicationInfo != nil {
 		return errors.New("应用ID重复")
 	}
 
-	application, _ = a.applicationStore.GetByName(ctx, namespaceId, input.Name)
-	if application != nil {
+	applicationInfo, _ = a.applicationStore.GetByName(ctx, namespaceId, input.Name)
+	if applicationInfo != nil {
 		return errors.New("应用名重复")
 	}
 
@@ -454,7 +454,7 @@ func (a *applicationService) CreateApp(ctx context.Context, namespaceId, userId 
 	})
 
 	return a.applicationStore.Transaction(ctx, func(txCtx context.Context) error {
-		application = &application_entry.Application{
+		applicationInfo = &application_entry.Application{
 			NamespaceId: namespaceId,
 			IdStr:       input.Id,
 			Name:        input.Name,
@@ -464,19 +464,19 @@ func (a *applicationService) CreateApp(ctx context.Context, namespaceId, userId 
 			UpdateTime:  t,
 		}
 
-		if err := a.applicationStore.Save(txCtx, application); err != nil {
+		if err := a.applicationStore.Save(txCtx, applicationInfo); err != nil {
 			return err
 		}
 
-		if err := a.applicationHistoryStore.HistoryAdd(txCtx, namespaceId, application.Id, &application_entry.ApplicationHistoryInfo{
-			Application:              *application,
+		if err := a.applicationHistoryStore.HistoryAdd(txCtx, namespaceId, applicationInfo.Id, &application_entry.ApplicationHistoryInfo{
+			Application:              *applicationInfo,
 			ApplicationVersionConfig: versionConfig,
 		}, userId); err != nil {
 			return nil
 		}
 
 		applicationVersion := &application_entry.ApplicationVersion{
-			ApplicationID:            application.Id,
+			ApplicationID:            applicationInfo.Id,
 			NamespaceID:              namespaceId,
 			ApplicationVersionConfig: versionConfig,
 			Operator:                 userId,
@@ -497,22 +497,22 @@ func (a *applicationService) CreateApp(ctx context.Context, namespaceId, userId 
 }
 
 func (a *applicationService) UpdateApp(ctx context.Context, namespaceId, userId int, input *application_dto.ApplicationInput) error {
-	application, _ := a.applicationStore.GetByName(ctx, namespaceId, input.Name)
-	if application != nil && application.IdStr != input.Id {
+	applicationInfo, _ := a.applicationStore.GetByName(ctx, namespaceId, input.Name)
+	if applicationInfo != nil && applicationInfo.IdStr != input.Id {
 		return errors.New("应用名重复")
 	}
 
-	application, err := a.applicationStore.GetByIdStr(ctx, namespaceId, input.Id)
+	applicationInfo, err := a.applicationStore.GetByIdStr(ctx, namespaceId, input.Id)
 	if err != nil {
 		return err
 	}
 
-	if application.IdStr == anonymousIds && input.Name != "匿名应用" {
+	if applicationInfo.IdStr == anonymousIds && input.Name != "匿名应用" {
 		return errors.New("不能更改匿名应用的应用名")
 	}
 
 	//获取应用当前版本
-	version, err := a.GetAppVersion(ctx, application.Id)
+	version, err := a.GetAppVersion(ctx, applicationInfo.Id)
 	if err != nil {
 		return err
 	}
@@ -551,7 +551,7 @@ func (a *applicationService) UpdateApp(ctx context.Context, namespaceId, userId 
 	t := time.Now()
 	//添加操作记录
 
-	oldApplication := *application
+	oldApplication := *applicationInfo
 
 	//编写日志操作对象信息
 	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
@@ -560,12 +560,12 @@ func (a *applicationService) UpdateApp(ctx context.Context, namespaceId, userId 
 	})
 
 	return a.applicationStore.Transaction(ctx, func(txCtx context.Context) error {
-		application.UpdateTime = t
-		application.Operator = userId
-		application.Desc = input.Desc
-		application.Name = input.Name
+		applicationInfo.UpdateTime = t
+		applicationInfo.Operator = userId
+		applicationInfo.Desc = input.Desc
+		applicationInfo.Name = input.Name
 
-		if err = a.applicationStore.Save(txCtx, application); err != nil {
+		if err = a.applicationStore.Save(txCtx, applicationInfo); err != nil {
 			return err
 		}
 
@@ -576,14 +576,14 @@ func (a *applicationService) UpdateApp(ctx context.Context, namespaceId, userId 
 		}
 
 		applicationVersion := &application_entry.ApplicationVersion{
-			ApplicationID:            application.Id,
+			ApplicationID:            applicationInfo.Id,
 			NamespaceID:              namespaceId,
 			ApplicationVersionConfig: config,
 			Operator:                 userId,
 			CreateTime:               t,
 		}
 
-		if err = a.applicationHistoryStore.HistoryEdit(txCtx, namespaceId, application.Id, &application_entry.ApplicationHistoryInfo{
+		if err = a.applicationHistoryStore.HistoryEdit(txCtx, namespaceId, applicationInfo.Id, &application_entry.ApplicationHistoryInfo{
 			Application: oldApplication,
 			ApplicationVersionConfig: application_entry.ApplicationVersionConfig{
 				CustomAttrList: version.CustomAttrList,
@@ -591,7 +591,7 @@ func (a *applicationService) UpdateApp(ctx context.Context, namespaceId, userId 
 				Apis:           version.Apis,
 			},
 		}, &application_entry.ApplicationHistoryInfo{
-			Application:              *application,
+			Application:              *applicationInfo,
 			ApplicationVersionConfig: config,
 		}, userId); err != nil {
 			return nil
@@ -612,11 +612,11 @@ func (a *applicationService) UpdateApp(ctx context.Context, namespaceId, userId 
 }
 
 func (a *applicationService) DelApp(ctx context.Context, namespaceId, userId int, id string) error {
-	application, err := a.applicationStore.GetByIdStr(ctx, namespaceId, id)
+	applicationInfo, err := a.applicationStore.GetByIdStr(ctx, namespaceId, id)
 	if err != nil {
 		return err
 	}
-	if application.IdStr == anonymousIds {
+	if applicationInfo.IdStr == anonymousIds {
 		return errors.New("匿名应用不能删除")
 	}
 
@@ -624,15 +624,19 @@ func (a *applicationService) DelApp(ctx context.Context, namespaceId, userId int
 	if err != nil {
 		return err
 	}
-	for _, cluster := range clusters {
-		runtime, _ := a.applicationRuntimeStore.GetForCluster(ctx, application.Id, cluster.Id)
+
+	runtimes, err := a.applicationRuntimeStore.GetByTarget(ctx, applicationInfo.Id)
+	if err != nil {
+		return err
+	}
+	for _, runtime := range runtimes {
 		if runtime != nil && runtime.IsOnline {
 			return errors.New("应用已上线不可删除")
 		}
 	}
 
 	//获取应用当前版本信息
-	version, err := a.GetAppVersion(ctx, application.Id)
+	version, err := a.GetAppVersion(ctx, applicationInfo.Id)
 	if err != nil {
 		return err
 	}
@@ -640,18 +644,18 @@ func (a *applicationService) DelApp(ctx context.Context, namespaceId, userId int
 	//编写日志操作对象信息
 	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: id,
-		Name: application.Name,
+		Name: applicationInfo.Name,
 	})
 
 	return a.applicationStore.Transaction(ctx, func(txCtx context.Context) error {
-		if _, err = a.applicationStore.Delete(txCtx, application.Id); err != nil {
+		if _, err = a.applicationStore.Delete(txCtx, applicationInfo.Id); err != nil {
 			return err
 		}
 
 		//添加操作记录
 
-		if err = a.applicationHistoryStore.HistoryDelete(txCtx, namespaceId, application.Id, &application_entry.ApplicationHistoryInfo{
-			Application: *application,
+		if err = a.applicationHistoryStore.HistoryDelete(txCtx, namespaceId, applicationInfo.Id, &application_entry.ApplicationHistoryInfo{
+			Application: *applicationInfo,
 			ApplicationVersionConfig: application_entry.ApplicationVersionConfig{
 				CustomAttrList: version.CustomAttrList,
 				ExtraParamList: version.ExtraParamList,
@@ -662,7 +666,7 @@ func (a *applicationService) DelApp(ctx context.Context, namespaceId, userId int
 
 		delMap := make(map[string]interface{})
 		delMap["`kind`"] = "application"
-		delMap["`target`"] = application.Id
+		delMap["`target`"] = applicationInfo.Id
 
 		if _, err = a.applicationStatStore.DeleteWhere(txCtx, delMap); err != nil {
 			return err
@@ -670,8 +674,8 @@ func (a *applicationService) DelApp(ctx context.Context, namespaceId, userId int
 		if _, err = a.applicationVersionStore.DeleteWhere(txCtx, delMap); err != nil {
 			return err
 		}
-		for _, cluster := range clusters {
-			delMap["`cluster`"] = cluster.Id
+		for _, clusterInfo := range clusters {
+			delMap["`cluster`"] = clusterInfo.Id
 			if _, err = a.applicationRuntimeStore.DeleteWhere(txCtx, delMap); err != nil {
 				return err
 			}
@@ -762,14 +766,6 @@ func (a *applicationService) AppList(ctx context.Context, namespaceId, userId, p
 					break
 				}
 			}
-			//for _, cluster := range clusters {
-			//
-			//	runtime, _ := a.applicationRuntimeStore.GetForCluster(ctx, applicationInfo.Id, cluster.Id)
-			//	if runtime != nil && runtime.IsOnline {
-			//		isDelete = false
-			//		break
-			//	}
-			//}
 		}
 
 		val.IsDelete = isDelete
@@ -791,8 +787,8 @@ func (a *applicationService) AppListAll(ctx context.Context, namespaceId int) ([
 
 	applications := make([]*application_model.Application, 0, len(list))
 
-	for _, application := range list {
-		applications = append(applications, &application_model.Application{Application: application})
+	for _, applicationInfo := range list {
+		applications = append(applications, &application_model.Application{Application: applicationInfo})
 	}
 
 	sort.Sort(application_model.ApplicationList(applications))
@@ -818,18 +814,18 @@ func (a *applicationService) AppListFilter(ctx context.Context, namespaceId, pag
 }
 
 func (a *applicationService) AppInfoDetails(ctx context.Context, namespaceId int, id string) (*application_model.Application, error) {
-	application, err := a.applicationStore.GetByIdStr(ctx, namespaceId, id)
+	applicationInfo, err := a.applicationStore.GetByIdStr(ctx, namespaceId, id)
 	if err != nil {
 		return nil, err
 	}
 
-	version, err := a.GetAppVersion(ctx, application.Id)
+	version, err := a.GetAppVersion(ctx, applicationInfo.Id)
 	if err != nil {
 		return nil, err
 	}
 
 	res := &application_model.Application{
-		Application:  application,
+		Application:  applicationInfo,
 		OperatorName: "",
 		CustomAttr:   a.entryAttrToModelAttr(version.CustomAttrList),
 		ExtraParam:   a.entryExtraToModelExtra(version.ExtraParamList),
@@ -838,13 +834,13 @@ func (a *applicationService) AppInfoDetails(ctx context.Context, namespaceId int
 }
 
 func (a *applicationService) AppInfo(ctx context.Context, namespaceId int, id string) (*application_model.Application, error) {
-	application, err := a.applicationStore.GetByIdStr(ctx, namespaceId, id)
+	applicationInfo, err := a.applicationStore.GetByIdStr(ctx, namespaceId, id)
 	if err != nil {
 		return nil, err
 	}
 
 	res := &application_model.Application{
-		Application: application,
+		Application: applicationInfo,
 	}
 	return res, nil
 }
@@ -867,7 +863,7 @@ func (a *applicationService) ResetOnline(ctx context.Context, namespaceId, clust
 			continue
 		}
 
-		application, err := a.applicationStore.Get(ctx, runtime.ApplicationId)
+		applicationInfo, err := a.applicationStore.Get(ctx, runtime.ApplicationId)
 		if err != nil {
 			log.Errorf("applicationService-ResetOnline-getApplication appId=%d,clusterId=%d, err=%s", runtime.ApplicationId, clusterId, err.Error())
 			continue
@@ -880,9 +876,9 @@ func (a *applicationService) ResetOnline(ctx context.Context, namespaceId, clust
 		}
 
 		//上线鉴权信息
-		authList, err := a.applicationAuthService.GetList(ctx, namespaceId, application.IdStr)
+		authList, err := a.applicationAuthService.GetList(ctx, namespaceId, applicationInfo.IdStr)
 		if err != nil {
-			log.Errorf("applicationService-ResetOnline-getAuthList appIds=%s, err=%s", application.IdStr, err.Error())
+			log.Errorf("applicationService-ResetOnline-getAuthList appIds=%s, err=%s", applicationInfo.IdStr, err.Error())
 			continue
 		}
 		auths := make([]v1.ApplicationAuth, 0)
@@ -896,11 +892,11 @@ func (a *applicationService) ResetOnline(ctx context.Context, namespaceId, clust
 		}
 
 		appConfig := &v1.ApplicationConfig{
-			Name:        application.IdStr,
+			Name:        applicationInfo.IdStr,
 			Driver:      "app",
 			Auth:        auths,
 			Labels:      labels,
-			Description: application.Desc,
+			Description: applicationInfo.Desc,
 			Additional:  a.getApplicationAdditional(version.ExtraParamList),
 		}
 		if err = client.ForApp().Create(*appConfig); err != nil {
@@ -938,9 +934,9 @@ func (a *applicationService) GetAppKeys(ctx context.Context, namespaceId int) ([
 
 	keys := common.Map[string, []string]{}
 
-	for _, application := range applications {
+	for _, applicationInfo := range applications {
 
-		version, err := a.GetAppVersion(ctx, application.Id)
+		version, err := a.GetAppVersion(ctx, applicationInfo.Id)
 		if err != nil {
 			return nil, err
 		}
@@ -979,8 +975,8 @@ func (a *applicationService) AppListByUUIDS(ctx context.Context, namespaceId int
 
 	applications := make([]*application_model.Application, 0, len(list))
 
-	for _, application := range list {
-		val := &application_model.Application{Application: application}
+	for _, applicationInfo := range list {
+		val := &application_model.Application{Application: applicationInfo}
 		applications = append(applications, val)
 	}
 
