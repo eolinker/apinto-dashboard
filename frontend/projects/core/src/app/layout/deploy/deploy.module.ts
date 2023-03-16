@@ -34,14 +34,12 @@ import { NzLayoutModule } from 'ng-zorro-antd/layout'
 import { NzModalModule } from 'ng-zorro-antd/modal'
 import { NzTableModule } from 'ng-zorro-antd/table'
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
-import { EoNgApintoUserModule } from 'projects/eo-ng-apinto-user/src/public-api'
 import { ComponentModule } from '../../component/component.module'
 import { EoNgTransferModule } from '../../component/transfer/transfer.module'
 import { DirectiveModule } from '../../directive/directive.module'
 import { DeployEnvironmentCreateComponent } from './environment/create/create.component'
 import { DeployEnvironmentListComponent } from './environment/list/list.component'
 import { DeployEnvironmentComponent } from './environment/environment.component'
-import { DeployClusterConfComponent } from './cluster/conf/conf.component'
 import { EoNgApintoTableModule } from 'projects/eo-ng-apinto-table/src/public-api'
 import { EoNgCollapseModule } from 'eo-ng-collapse'
 import { EoNgCopyModule } from 'eo-ng-copy'
@@ -66,7 +64,6 @@ import { DeployEnvironmentDetailComponent } from './environment/detail/detail.co
     DeployClusterCreateComponent,
     DeployEnvironmentCreateComponent,
     DeployEnvironmentComponent,
-    DeployClusterConfComponent,
     DeployClusterCertFormComponent,
     DeployClusterEnvironmentConfigFormComponent,
     DeployClusterEnvironmentConfigUpdateComponent,
@@ -99,7 +96,6 @@ import { DeployEnvironmentDetailComponent } from './environment/detail/detail.co
     NzAvatarModule,
     EoNgButtonModule,
     EoNgTransferModule,
-    EoNgApintoUserModule,
     NzFormModule,
     ReactiveFormsModule,
     NzLayoutModule,

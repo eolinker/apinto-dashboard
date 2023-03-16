@@ -1,7 +1,7 @@
 /*
- * @Author: maggieyyy im.ymj@hotmail.com
+ * @Author:  
  * @Date: 2022-07-11 23:20:14
- * @LastEditors: maggieyyy im.ymj@hotmail.com
+ * @LastEditors:  
  * @LastEditTime: 2022-07-12 00:15:53
  * @FilePath: /apinto/src/app/app.module.ts
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
@@ -23,16 +23,12 @@ import { EoNgFeedbackDrawerModule } from 'eo-ng-feedback'
 import { EoNgLayoutModule } from 'eo-ng-layout'
 import { EoNgMenuModule } from 'eo-ng-menu'
 import { EoNgTableModule } from 'eo-ng-table'
-import { EoNgApintoUserModule, API_SERVICE_ADAPTER, APP_CONFIG_ADAPTER, APP_SERVICE_ADAPTER, BASEINFO_SERVICE_ADAPTER } from 'projects/eo-ng-apinto-user/src/public-api'
-import { AppConfig } from './constant/app.config'
-import { AppConfigService } from './service/app-config.service'
 import { NzConfig, NZ_CONFIG } from 'ng-zorro-antd/core/config'
 import { registerLocaleData } from '@angular/common'
 import zh from '@angular/common/locales/en-GB'
 import { NgxEchartsModule } from 'ngx-echarts'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { ChangeWordColorPipe } from './pipe/change-word-color.pipe'
-import { BaseInfoService } from './service/base-info.service'
 
 registerLocaleData(zh)
 const ngZorroConfig: NzConfig = {
@@ -57,7 +53,6 @@ const ngZorroConfig: NzConfig = {
     LayoutModule,
     ComponentModule,
     NzTransferModule,
-    EoNgApintoUserModule,
     AppRoutingModule,
     NgxEchartsModule.forRoot({
       echarts: () => import('echarts')
@@ -66,11 +61,7 @@ const ngZorroConfig: NzConfig = {
   ],
   providers: [ApiService,
     { provide: API_URL, useValue: environment.urlPrefix },
-    { provide: API_SERVICE_ADAPTER, useExisting: ApiService },
-    { provide: APP_CONFIG_ADAPTER, useValue: AppConfig },
     { provide: NZ_CONFIG, useValue: ngZorroConfig },
-    { provide: APP_SERVICE_ADAPTER, useExisting: AppConfigService },
-    { provide: BASEINFO_SERVICE_ADAPTER, useExisting: BaseInfoService },
     httpInterceptorProviders],
   bootstrap: [AppComponent]
 })

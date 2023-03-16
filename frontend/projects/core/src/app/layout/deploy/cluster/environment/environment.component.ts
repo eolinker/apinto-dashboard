@@ -1,9 +1,9 @@
 /* eslint-disable camelcase */
 /* eslint-disable dot-notation */
 /*
- * @Author: MengjieYang yangmengjie@eolink.com
+ * @Author:
  * @Date: 2022-07-20 22:34:58
- * @LastEditors: MengjieYang yangmengjie@eolink.com
+ * @LastEditors:
  * @LastEditTime: 2022-08-30 23:21:12
  * @FilePath: /apinto/src/app/layout/deploy/deploy-cluster-environment/deploy-cluster-environment.component.ts
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
@@ -12,12 +12,11 @@ import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
 import { Router } from '@angular/router'
 import { EoNgFeedbackModalService, EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { NzModalRef } from 'ng-zorro-antd/modal'
-import { MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
+import { MODAL_NORMAL_SIZE, MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
 import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { ApiService } from 'projects/core/src/app/service/api.service'
 import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
 import { BaseInfoService } from 'projects/core/src/app/service/base-info.service'
-import { MODAL_NORMAL_SIZE } from 'projects/eo-ng-apinto-user/src/public-api'
 import { DeployClusterEnvironmentConfigFormComponent } from './config/form/form.component'
 import { DeployClusterEnvironmentConfigUpdateComponent } from './config/update/update.component'
 import { DeployClusterEnvironmentHistoryChangeComponent } from './history/change/change.component'

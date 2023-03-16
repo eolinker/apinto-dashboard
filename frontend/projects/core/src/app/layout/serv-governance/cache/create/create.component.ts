@@ -105,7 +105,7 @@ export class CacheCreateComponent implements OnInit {
       validTime: [null, [Validators.required]]
     })
     this.appConfigService.reqFlashBreadcrumb([
-      { title: '缓存策略', routerLink: 'serv-governance/cache/group/list' },
+      { title: '缓存策略', routerLink: 'serv-governance/cache' },
       { title: '新建缓存策略' }
     ])
   }
@@ -137,7 +137,7 @@ export class CacheCreateComponent implements OnInit {
             this.appConfigService.reqFlashBreadcrumb([
               {
                 title: '缓存策略',
-                routerLink: 'serv-governance/cache/group/list'
+                routerLink: 'serv-governance/cache'
               },
               { title: resp.data.strategy!.name }
             ])
@@ -183,7 +183,10 @@ export class CacheCreateComponent implements OnInit {
       for (const index in this.filterShowList) {
         this.createStrategyForm.filters.push({
           name: this.filterShowList[index].name,
-          values: this.filterShowList[index].values
+          values:
+            this.filterShowList[index].name === 'ip'
+              ? this.filterShowList[index].values[0].split(/[\n]/).filter(value => { return !!value })
+              : this.filterShowList[index].values
         })
       }
 
