@@ -6,7 +6,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/modules/discovery/discovery-serivce"
-	upstream_dto "github.com/eolinker/apinto-dashboard/modules/upstream/upstream-dto"
+	"github.com/eolinker/apinto-dashboard/modules/upstream/upstream-dto"
 
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
@@ -53,7 +53,7 @@ func (d *discoveryController) getList(ginCtx *gin.Context) {
 	discoveries := make([]*discover_dto.DiscoveryListItem, 0, len(listItem))
 
 	for _, item := range listItem {
-		discovery := &discover_dto.DiscoveryListItem{
+		discoveryInfo := &discover_dto.DiscoveryListItem{
 			Name:       item.Name,
 			UUID:       item.UUID,
 			Driver:     item.Driver,
@@ -62,7 +62,7 @@ func (d *discoveryController) getList(ginCtx *gin.Context) {
 			IsDelete:   item.IsDelete,
 		}
 
-		discoveries = append(discoveries, discovery)
+		discoveries = append(discoveries, discoveryInfo)
 	}
 
 	data := common.Map[string, interface{}]{}
@@ -84,7 +84,7 @@ func (d *discoveryController) getInfo(ginCtx *gin.Context) {
 		return
 	}
 
-	discovery := &discover_dto.DiscoveryInfoProxy{
+	discoveryInfo := &discover_dto.DiscoveryInfoProxy{
 		Name:   info.Name,
 		UUID:   info.UUID,
 		Driver: info.Driver,
@@ -93,7 +93,7 @@ func (d *discoveryController) getInfo(ginCtx *gin.Context) {
 	}
 
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(&discover_dto.DiscoveryInfoOutput{
-		Discovery: discovery,
+		Discovery: discoveryInfo,
 		Render:    upstream_dto.Render(info.Render),
 	}))
 }
@@ -187,13 +187,13 @@ func (d *discoveryController) getEnum(ginCtx *gin.Context) {
 		return
 	}
 	discoveries := make([]*discover_dto.DiscoveryEnum, 0, len(enumList))
-	for _, enum := range enumList {
-		discovery := &discover_dto.DiscoveryEnum{
-			Name:   enum.Name,
-			Driver: enum.Driver,
-			Render: upstream_dto.Render(enum.Render),
+	for _, enumInfo := range enumList {
+		discoveryInfo := &discover_dto.DiscoveryEnum{
+			Name:   enumInfo.Name,
+			Driver: enumInfo.Driver,
+			Render: upstream_dto.Render(enumInfo.Render),
 		}
-		discoveries = append(discoveries, discovery)
+		discoveries = append(discoveries, discoveryInfo)
 	}
 
 	data := common.Map[string, interface{}]{}

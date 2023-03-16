@@ -24,23 +24,23 @@ func (r *resetOnlineService) ResetOnline(ctx context.Context, namespaceId, clust
 }
 
 func newResetOnline() online.IResetOnlineService {
-	online := &resetOnlineService{}
+	onlineService := &resetOnlineService{}
 	var clConfig clusterService.IClusterConfigService
-	var variable variable.IClusterVariableService
-	var discovery discovery.IDiscoveryService
+	var variableService variable.IClusterVariableService
+	var discoveryService discovery.IDiscoveryService
 	var iService upstream.IService
 	var api apiService.IAPIService
-	var application application.IApplicationService
+	var applicationService application.IApplicationService
 	var commonStrategy strategy.IStrategyCommonService
 
 	bean.Autowired(&clConfig)
-	bean.Autowired(&variable)
+	bean.Autowired(&variableService)
 	bean.Autowired(&api)
 	bean.Autowired(&iService)
-	bean.Autowired(&discovery)
-	bean.Autowired(&application)
+	bean.Autowired(&discoveryService)
+	bean.Autowired(&applicationService)
 	//bean.Autowired(&strategy)
 	bean.Autowired(&commonStrategy)
-	online.list = append(online.list, clConfig, variable, discovery, iService, api, application, commonStrategy)
-	return online
+	onlineService.list = append(onlineService.list, clConfig, variableService, discoveryService, iService, api, applicationService, commonStrategy)
+	return onlineService
 }

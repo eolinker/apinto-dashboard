@@ -1,6 +1,6 @@
 package discover_dto
 
-import upstream_dto "github.com/eolinker/apinto-dashboard/modules/upstream/upstream-dto"
+import "github.com/eolinker/apinto-dashboard/modules/upstream/upstream-dto"
 
 type DiscoveryListItem struct {
 	Name       string `json:"name"`
