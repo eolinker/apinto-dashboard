@@ -7,7 +7,6 @@ variables:
   APP: apserver
   APP_PRE: ${APP}_${VERSION}
   BUILD_DIR: apserver-build
-
 default:
   cache:
     paths:
@@ -18,7 +17,6 @@ stages:
   - build
   - publish
   - webhook
-
 feishu-informer: # 飞书回调
   stage: notice
   variables:
@@ -70,7 +68,7 @@ success:
   script:
     - |
       curl -X POST -H "Content-Type: application/json" \
-      -d "{\"msg_type\":\"text\",\"content\":{\"text\":\"项目：apinto-dashboard\\n环境：${DEPLOY_DESC}\\n更新部署完成.\\n访问地址：${VIEW_ADDR}\"}}" \
+      -d "{\"msg_type\":\"text\",\"content\":{\"text\":\"最近一次提交：${CI_COMMIT_TITLE}\\n提交人：${GITLAB_USER_NAME}\\n项目：apinto-dashboard\\n环境：${DEPLOY_DESC}\\n更新部署完成.\\n访问地址：${VIEW_ADDR}\\n工作流地址：${CI_PIPELINE_URL}\"}}" \
       https://open.feishu.cn/open-apis/bot/v2/hook/c3672932-4dfa-4989-8023-0128bae59338
   when: on_success
 failure:
@@ -82,6 +80,6 @@ failure:
   script:
     - |
       curl -X POST -H "Content-Type: application/json" \
-      -d "{\"msg_type\":\"text\",\"content\":{\"text\":\"项目：apinto-dashboard\\n环境：${DEPLOY_DESC}\\n更新部署失败，请及时到gitlab上查看\\n\"}}" \
+      -d "{\"msg_type\":\"text\",\"content\":{\"text\":\"最近一次提交：${CI_COMMIT_TITLE}\\n提交人：${GITLAB_USER_NAME}\\n项目：apinto-dashboard\\n环境：${DEPLOY_DESC}\\n更新部署失败，请及时到gitlab上查看\\n工作流地址：${CI_PIPELINE_URL}\"}}" \
       https://open.feishu.cn/open-apis/bot/v2/hook/c3672932-4dfa-4989-8023-0128bae59338
   when: on_failure
