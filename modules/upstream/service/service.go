@@ -157,14 +157,8 @@ func (s *service) isDelete(ctx context.Context, serviceId int) bool {
 	}
 
 	//在某个集群上线
-	runtimes, _ := s.serviceRuntimeStore.GetByTarget(ctx, serviceId)
-	for _, runtime := range runtimes {
-		if runtime != nil && runtime.IsOnline {
-			return false
-		}
-	}
-
-	return true
+	onlineCount, _ := s.serviceRuntimeStore.OnlineCount(ctx, serviceId)
+	return onlineCount == 0
 }
 
 func (s *service) isDiscoveryCanDelete(ctx context.Context, namespaceID, serviceId int) (bool, error) {
