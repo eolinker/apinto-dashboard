@@ -756,16 +756,11 @@ func (a *applicationService) AppList(ctx context.Context, namespaceId, userId, p
 		if val.IdStr == anonymousIds {
 			isDelete = false
 		} else {
-			runtimes, err := a.applicationRuntimeStore.GetByTarget(ctx, applicationInfo.Id)
+			onlineCount, err := a.applicationRuntimeStore.OnlineCount(ctx, applicationInfo.Id)
 			if err != nil {
 				return nil, 0, err
 			}
-			for _, runtime := range runtimes {
-				if runtime != nil && runtime.IsOnline {
-					isDelete = false
-					break
-				}
-			}
+			isDelete = onlineCount == 0
 		}
 
 		val.IsDelete = isDelete
