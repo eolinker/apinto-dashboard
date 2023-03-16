@@ -61,5 +61,5 @@ deployer:
     - |
       curl -X POST -H "Content-Type: application/json" \
       -d "{\"msg_type\":\"text\",\"content\":{\"text\":\"项目：apinto-dashboard\\n环境：${DEPLOY_DESC}\\n更新部署完成.\\n访问地址：${VIEW_ADDR}\"}}" \
-      https://open.feishu.cn/open-apis/bot/v2/hook/aaf65fe6-6523-4e3c-abfc-4772c7b30cf8
+      https://open.feishu.cn/open-apis/bot/v2/hook/a93ee63b-011c-4f5d-b37d-1e1e307c5a2c
   when: on_success
