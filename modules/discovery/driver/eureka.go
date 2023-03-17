@@ -55,12 +55,11 @@ func (e *Eureka) ToApinto(namespace, name, desc string, config []byte) *v1.Disco
 		Address: address,
 		Params:  params,
 	}
-	conf, _ := json.Marshal(apintoEurekaConfig)
 	discoveryConfig := &v1.DiscoveryConfig{
 		Name:         name,
 		Driver:       e.apintoDriverName,
 		Description:  desc,
-		Config:       v1.JsonMarshalProxy(conf),
+		Config:       apintoEurekaConfig,
 		StaticHealth: nil,
 	}
 

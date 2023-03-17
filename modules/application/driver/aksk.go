@@ -81,7 +81,7 @@ func (a *AkSk) ToApinto(expire int64, position string, tokenName string, config 
 }
 
 func CreateAkSk() application.IAuthDriver {
-	return &AkSk{apintoDriverName: "ak/sk"}
+	return &AkSk{apintoDriverName: "aksk"}
 }
 
 func (a *AkSk) Render() string {
