@@ -13,6 +13,8 @@ import (
 	_ "github.com/eolinker/apinto-dashboard/modules/online/online-service"
 	_ "github.com/eolinker/apinto-dashboard/modules/openapi/openapi-service"
 	_ "github.com/eolinker/apinto-dashboard/modules/openapp/openapp-service"
+	_ "github.com/eolinker/apinto-dashboard/modules/plugin/plugin-service"
+	_ "github.com/eolinker/apinto-dashboard/modules/plugin_template/plugin-template-service"
 	_ "github.com/eolinker/apinto-dashboard/modules/random/random-service"
 	_ "github.com/eolinker/apinto-dashboard/modules/strategy/strategy-service"
 	_ "github.com/eolinker/apinto-dashboard/modules/upstream/service"
