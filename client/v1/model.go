@@ -89,10 +89,10 @@ type JwtCredentials struct {
 
 type DiscoveryConfig struct {
 	//Scheme      string      `json:"scheme"`
-	Name        string           `json:"name"`
-	Driver      string           `json:"driver"`
-	Description string           `json:"description"`
-	Config      JsonMarshalProxy `json:"config"` //StaticConfig ConsulConfig EurekaConfig NacosConfig
+	Name        string      `json:"name"`
+	Driver      string      `json:"driver"`
+	Description string      `json:"description"`
+	Config      interface{} `json:"config"` //StaticConfig ConsulConfig EurekaConfig NacosConfig
 	*StaticHealth
 }
 
