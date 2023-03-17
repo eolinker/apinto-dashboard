@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core'
-import { FormGroup, UntypedFormBuilder, Validators } from '@angular/forms'
+import { AbstractControl, FormGroup, UntypedFormBuilder, Validators } from '@angular/forms'
 import { SelectOption } from 'eo-ng-select'
 import { defaultAutoTips } from '../../../constant/conf'
 import { setFormValue } from '../../../constant/form'
@@ -21,7 +21,7 @@ export class ApiManagementProxyComponent implements OnInit {
   constructor (private fb: UntypedFormBuilder) {
     this.validateProxyHeaderForm = this.fb.group({
       key: ['', [Validators.required]],
-      value: ['', [Validators.required]],
+      value: [''],
       opt_type: ['', [Validators.required]]
     })
   }
@@ -34,5 +34,32 @@ export class ApiManagementProxyComponent implements OnInit {
 
   disabledEdit (value:any) {
     this.nzDisabled = value
+  }
+
+  valueValidator = (control:AbstractControl) => {
+    // eslint-disable-next-line dot-notation
+    if (this.validateProxyHeaderForm.controls['opt_type']?.value === 'DELETE') {
+      return null
+    } else {
+      if (!control.value) {
+        return { error: true, required: true }
+      }
+    }
+
+    return null
+  }
+
+  changeValidator () {
+    this.validateProxyHeaderForm.patchValue({
+      key: '', value: ''
+    })
+    // eslint-disable-next-line dot-notation
+    if (this.validateProxyHeaderForm.controls['opt_type'].value !== 'DELETE') {
+      // eslint-disable-next-line dot-notation
+      this.validateProxyHeaderForm.controls['value'].setValidators([Validators.required])
+    } else {
+    // eslint-disable-next-line dot-notation
+      this.validateProxyHeaderForm.controls['value'].setValidators([])
+    }
   }
 }
