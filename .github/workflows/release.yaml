@@ -17,7 +17,10 @@ jobs:
           node-version: '16'
       - name: Yarn install
         run: |
-          cd frontend && yarn install --registry https://registry.npmmirror.com --legacy-peer-deps && ls ../controller/
+          cd frontend && yarn install --registry https://registry.npmmirror.com --legacy-peer-deps
+          ls -l ./ 
+          ls -l ../controller/
+          ls -l ../
       - name: print files
         run: |
           pwd
