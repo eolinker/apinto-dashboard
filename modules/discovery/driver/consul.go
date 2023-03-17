@@ -55,12 +55,11 @@ func (c *Consul) ToApinto(namespace, name, desc string, config []byte) *v1.Disco
 		Address: address,
 		Params:  params,
 	}
-	conf, _ := json.Marshal(apintoConsulConfig)
 	discoveryConfig := &v1.DiscoveryConfig{
 		Name:         name,
 		Driver:       c.apintoDriverName,
 		Description:  desc,
-		Config:       v1.JsonMarshalProxy(conf),
+		Config:       apintoConsulConfig,
 		StaticHealth: nil,
 	}
 
