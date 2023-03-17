@@ -185,7 +185,7 @@ export class CacheCreateComponent implements OnInit {
           name: this.filterShowList[index].name,
           values:
             this.filterShowList[index].name === 'ip'
-              ? this.filterShowList[index].values[0].split(/[\n]/).filter(value => { return !!value })
+              ? [...this.filterShowList[index].values[0].split(/[\n]/).filter(value => { return !!value }), ...this.filterShowList[index].values.slice(1)]
               : this.filterShowList[index].values
         })
       }
