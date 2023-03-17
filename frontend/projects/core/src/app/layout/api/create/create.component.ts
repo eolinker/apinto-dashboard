@@ -513,7 +513,13 @@ export class ApiCreateComponent implements OnInit {
 
   // 保存转发上游请求头数据时，如果是新建数据，直接加入tableList，如果是编辑数据，需要删除原先同key的数据再保存
   saveProxyHeader(proxyRef: ApiManagementProxyComponent): void {
-    if (proxyRef.validateProxyHeaderForm.valid) {
+    let proxyValid:boolean = false
+    if (proxyRef.validateProxyHeaderForm.controls['opt_type'].value === 'DELETE') {
+      proxyValid = !!proxyRef.validateProxyHeaderForm.controls['key'].value
+    } else {
+      proxyValid = proxyRef.validateProxyHeaderForm.valid
+    }
+    if (proxyValid) {
       if (this.proxyEdit) {
         for (const index in this.createApiForm.proxy_header) {
           if (
