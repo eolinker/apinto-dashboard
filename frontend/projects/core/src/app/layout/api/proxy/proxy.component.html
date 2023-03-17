@@ -18,6 +18,7 @@
         eoNgUserAccess="router"
         (disabledEdit)="disabledEdit($event)"
         [nzDisabled]="nzDisabled"
+        (ngModelChange)="changeValidator()"
       ></eo-ng-select>
     </nz-form-control>
   </nz-form-item>
