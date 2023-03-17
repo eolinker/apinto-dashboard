@@ -1,0 +1,266 @@
+<form
+  nz-form
+  [nzNoColon]="true"
+  [nzAutoTips]="autoTips"
+  [formGroup]="validateForm"
+  autocomplete="off"
+  class="authDrawer"
+>
+  <nz-form-item class="form-row">
+    <label class="label">
+      <span
+        eoNgFeedbackTooltip
+        nzTooltipTitle="转发时默认将鉴权信息透传到上游"
+        nzTooltipPlacement="top"
+        [nzTooltipVisible]="false"
+        nzTooltipTrigger="hover"
+        ><span class="required-symbol">*</span>隐藏鉴权信息：
+      </span></label
+    >
+    <nz-form-control class="">
+      <eo-ng-switch
+        name="transparent"
+        formControlName="is_transparent"
+        nzCheckedChildren="开"
+        nzUnCheckedChildren="关"
+        [nzDisabled]="nzDisabled"
+      ></eo-ng-switch>
+    </nz-form-control>
+  </nz-form-item>
+
+  <nz-form-item class="form-row">
+    <label class="label"
+      ><span class="required-symbol">*</span>鉴权类型：</label
+    >
+    <nz-form-control>
+      <eo-ng-select
+        class="w-INPUT_NORMAL"
+        name="driver"
+        required
+        formControlName="driver"
+        (ngModelChange)="changeBasedata()"
+        [nzOptions]="driverList"
+        [nzDisabled]="nzDisabled"
+      ></eo-ng-select>
+    </nz-form-control>
+  </nz-form-item>
+
+  <nz-form-item class="form-row">
+    <label class="label"
+      ><span class="required-symbol">*</span>参数位置：</label
+    >
+    <nz-form-control class="form-input">
+      <eo-ng-input-group [nzCompact]="true">
+        <eo-ng-select
+          class="form-input"
+          name="position"
+          required
+          formControlName="position"
+          [nzOptions]="positionList"
+          eoNgUserAccess="application"
+          [nzDisabled]="nzDisabled"
+          (disabledEdit)="disabledEdit($event)"
+        ></eo-ng-select>
+        <nz-form-control>
+          <input
+            type="text"
+            eo-ng-input
+            name="token_name"
+            formControlName="token_name"
+            class="w206"
+            placeholder="请输入TokenName"
+            required
+            eoNgUserAccess="application"
+          />
+        </nz-form-control>
+      </eo-ng-input-group>
+    </nz-form-control>
+  </nz-form-item>
+
+  <nz-form-item
+    class="form-row mb-0"
+    *ngIf="validateForm.controls['driver'].value !== 'jwt'; else jwtTemplateRef"
+  >
+    <nz-form-control>
+      <dynamic-component
+        ngDefaultControl
+        name="dynamic"
+        id="dynamic"
+        [(apiData)]="createAuthForm"
+        (apiDataChange)="getDataFromDynamicComponent($event)"
+        [baseData]="baseData"
+        [nzDisabled]="nzDisabled"
+        [startValidate]="startValidateDynamic"
+      ></dynamic-component>
+    </nz-form-control>
+  </nz-form-item>
+
+  <ng-template #jwtTemplateRef>
+    <nz-form-item class="">
+      <label class="label" for="iss"
+        ><span class="required-symbol">*</span>Iss：</label
+      >
+      <nz-form-control class="form-input">
+        <input
+          type="text"
+          eo-ng-input
+          name="iss"
+          formControlName="iss"
+          class="w-INPUT_NORMAL"
+          placeholder="请输入Iss"
+          required
+          eoNgUserAccess="application"
+        />
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item class="form-row">
+      <label class="label" for="algorithm">
+        <span class="required-symbol">*</span>签名算法：</label
+      >
+      <nz-form-control class="form-input">
+        <eo-ng-select
+          class="w-INPUT_NORMAL"
+          name="algorithm"
+          required
+          formControlName="algorithm"
+          [nzOptions]="listOfAlgorithm"
+          eoNgUserAccess="application"
+          [nzDisabled]="nzDisabled"
+          (disabledEdit)="disabledEdit($event)"
+        ></eo-ng-select>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item
+      class="form-row"
+      *ngIf="validateForm.controls['algorithm'].value.includes('HS')"
+    >
+      <label class="label" for="secret">
+        <span class="required-symbol">*</span>Secret：</label
+      >
+      <nz-form-control class="form-input">
+        <input
+          class="w-INPUT_NORMAL"
+          type="text"
+          eo-ng-input
+          name="secret"
+          formControlName="secret"
+          placeholder="请输入Secret"
+          required
+          eoNgUserAccess="application"
+        />
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item
+      class="form-row"
+      *ngIf="!validateForm.controls['algorithm'].value.includes('HS')"
+    >
+      <label class="label" for="public_key">
+        <span class="required-symbol">*</span>RSA公钥：</label
+      >
+      <nz-form-control class="form-input">
+        <input
+          class="w-INPUT_NORMAL"
+          type="text"
+          eo-ng-input
+          name="iss"
+          formControlName="public_key"
+          placeholder="请输入RSA公钥"
+          required
+          eoNgUserAccess="application"
+        />
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item class="form-row">
+      <label class="label" for="user">用户名：</label>
+      <nz-form-control class="form-input">
+        <input
+          type="text"
+          eo-ng-input
+          name="iss"
+          class="w-INPUT_NORMAL"
+          formControlName="user"
+          placeholder="请输入用户名"
+          eoNgUserAccess="application"
+        />
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item class="form-row">
+      <label class="label" for="user_path"> 用户名JsonPath：</label>
+      <nz-form-control class="form-input">
+        <input
+          type="text"
+          eo-ng-input
+          name="user_path"
+          formControlName="user_path"
+          class="w-INPUT_NORMAL"
+          placeholder="请输入用户名JsonPath"
+          eoNgUserAccess="application"
+        />
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item class="form-row">
+      <label class="label" for="claims_to_verify">校验字段：</label>
+      <nz-form-control [nzSpan]="5">
+        <eo-ng-select
+          class="w-INPUT_NORMAL"
+          name="claims_to_verify"
+          formControlName="claims_to_verify"
+          [nzOptions]="listOfVerify"
+          eoNgUserAccess="application"
+          [nzDisabled]="nzDisabled"
+          (disabledEdit)="disabledEdit($event)"
+          nzPlaceHolder="请选择校验字段"
+          nzMode="multiple"
+          [nzAllowClear]="true"
+        ></eo-ng-select>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item
+      class="form-row"
+      *ngIf="validateForm.controls['algorithm'].value.includes('HS')"
+    >
+      <label class="label" for="signature_is_base64">是否Base64加密：</label>
+
+      <nz-form-control>
+        <eo-ng-switch
+          name="signature_is_base64"
+          formControlName="signature_is_base64"
+          [nzDisabled]="nzDisabled"
+        ></eo-ng-switch>
+      </nz-form-control>
+    </nz-form-item>
+  </ng-template>
+
+  <nz-form-item
+    class="form-row"
+    [ngClass]="{ 'mb-0': validateForm.controls['driver'].value !== 'jwt' }"
+  >
+    <label class="label" for="driver">过期时间：</label>
+    <nz-form-control class="form-input" nzErrorTip="过期时间不得早于当前时间">
+      <nz-date-picker
+        class="w-INPUT_NORMAL"
+        [nzDisabledDate]="disabledDate"
+        [nzAllowClear]="true"
+        name="expire_time"
+        formControlName="expire_time_date"
+        [nzDisabled]="nzDisabled"
+      ></nz-date-picker>
+    </nz-form-control>
+  </nz-form-item>
+
+  <div *ngIf="validateForm.controls['driver'].value === 'jwt'">
+    <nz-form-item class="form-row w-[200px] mb-0">
+      <label class="label" for="driver">标签信息：</label>
+      <nz-form-control>
+        <eo-ng-apinto-table
+          class="arrayItem label"
+          [nzTbody]="labelHeaderTableBody"
+          [nzData]="labelHeaderList"
+          eoNgUserAccess="application"
+          [nzNoScroll]="true"
+        >
+        </eo-ng-apinto-table>
+      </nz-form-control>
+    </nz-form-item>
+  </div>
+</form>

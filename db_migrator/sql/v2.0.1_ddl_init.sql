@@ -1,0 +1,1 @@
+ALTER TABLE `cluster` ADD COLUMN `uuid` varchar(255) NULL AFTER `addr`;

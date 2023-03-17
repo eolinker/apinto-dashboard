@@ -1,0 +1,59 @@
+<!--
+ * @Author:  
+ * @Date: 2022-08-09 23:06:58
+ * @LastEditors:  
+ * @LastEditTime: 2022-08-09 23:15:48
+ * @FilePath: /apinto/src/app/component/editable-env-table/editable-env-table.component.html
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+-->
+<div class="">
+  <div
+    class="drawer-list-header pl-btnbase pr-btnrbase pb-btnybase flex flex-nowrap items-center justify-between"
+    style="padding-top: 0px; padding-bottom: var(--LAYOUT_PADDING)"
+  >
+    <div>
+      <button
+        eo-ng-button
+        class="ant-btn-primary ant-btn"
+        (click)="addEnvRow()"
+      >
+        添加变量
+      </button>
+    </div>
+    <div class="group-search-large">
+      <eo-ng-search-input-group
+        [eoInputVal]="envNameForSear"
+        (eoClick)="envNameForSear = ''; getEnvlist(envNameForSear)"
+      >
+        <input
+          type="text"
+          eo-ng-input
+          placeholder="搜索key"
+          [(ngModel)]="envNameForSear"
+          (keyup.enter)="getEnvlist(envNameForSear)"
+      /></eo-ng-search-input-group>
+    </div>
+  </div>
+  <div>
+    <div class="drawer-list-content table-with-pagination">
+      <eo-ng-apinto-table
+        class="drawer-table"
+        [nzTbody]="environmentTableBody"
+        [nzThead]="environmentTableHeadName"
+        [nzData]="environmentList"
+        [nzTrClick]="chooseEnv"
+        [nzNoScroll]="true"
+        [nzMaxOperatorButton]="2"
+        [nzShowPagination]="true"
+        [nzFrontPagination]="false"
+        [nzTotal]="variablePage.total"
+        [(nzPageIndex)]="variablePage.page_num"
+        [(nzPageSize)]="variablePage.page_size"
+        [nzPageSizeOptions]="pageSizeOptions"
+        (nzPageIndexChange)="getEnvlist()"
+        (nzPageSizeChange)="getEnvlist()"
+      >
+      </eo-ng-apinto-table>
+    </div>
+  </div>
+</div>

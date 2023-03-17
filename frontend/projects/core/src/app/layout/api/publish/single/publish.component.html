@@ -1,0 +1,30 @@
+<!--
+ * @Author:  
+ * @Date: 2022-08-23 17:43:39
+ * @LastEditors:  
+ * @LastEditTime: 2022-09-20 21:59:02
+ * @FilePath: /apinto/src/app/layout/api/api-publish/api-publish.component.html
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+-->
+<div class="">
+  <div class="list-content tab-list">
+    <eo-ng-apinto-table
+      class=""
+      [nzTbody]="clustersTableBody"
+      [nzThead]="clustersTableHeadName"
+      [nzData]="clustersList"
+      [nzMaxOperatorButton]="3"
+      [nzNoScroll]="true"
+      eoNgUserAccess="router"
+      (disabledEdit)="disabledEdit($event)"
+    >
+    </eo-ng-apinto-table>
+  </div>
+</div>
+<ng-template #clusterStatusTpl let-item="item">
+  <eo-ng-table-status [status]="item.status"></eo-ng-table-status>
+</ng-template>
+
+<ng-template #disabledStatusTpl let-item="item">
+  <eo-ng-table-disabled [disable]="item.disable"></eo-ng-table-disabled>
+</ng-template>

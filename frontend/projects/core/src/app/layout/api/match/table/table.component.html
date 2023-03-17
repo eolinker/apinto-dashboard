@@ -1,0 +1,45 @@
+<div>
+  <button
+    type="button"
+    [disabled]="nzDisabled"
+    eo-ng-button
+    (click)="openDrawer('match')"
+  >
+    添加配置
+  </button>
+</div>
+<div *ngIf="matchList.length > 0" class="mt-btnybase" style="width: 524px">
+  <eo-ng-apinto-table
+    [nzTbody]="matchTableBody"
+    [nzThead]="matchTableHeadName"
+    [nzData]="matchList"
+    [nzTrClick]="matchTableClick"
+    [nzMaxOperatorButton]="2"
+    [nzNoScroll]="true"
+  >
+  </eo-ng-apinto-table>
+</div>
+
+<ng-template #positionTranslateTpl let-item="item">
+  <ng-container [ngSwitch]="item.position">
+    <span *ngSwitchCase="'header'">HTTP请求头</span>
+    <span *ngSwitchCase="'query'">请求参数</span>
+    <span *ngSwitchCase="'cookie'">Cookie</span>
+  </ng-container>
+</ng-template>
+
+<ng-template #matchTypeTranslateTpl let-item="item">
+  <ng-container [ngSwitch]="item.match_type">
+    <span *ngSwitchCase="'EQUAL'">全等匹配</span>
+    <span *ngSwitchCase="'PREFIX'">前缀匹配</span>
+    <span *ngSwitchCase="'SUFFIX'">后缀匹配</span>
+    <span *ngSwitchCase="'SUBSTR'">字串匹配</span>
+    <span *ngSwitchCase="'UNEQUAL'">非等匹配</span>
+    <span *ngSwitchCase="'NULL'">空值匹配</span>
+    <span *ngSwitchCase="'EXIST'">存在匹配</span>
+    <span *ngSwitchCase="'UNEXIST'">不存在匹配</span>
+    <span *ngSwitchCase="'REGEXP'">区分大小写的正则匹配</span>
+    <span *ngSwitchCase="'REGEXPG'">不区分大小写的正则匹配</span>
+    <span *ngSwitchCase="'ANY'">任意匹配</span>
+  </ng-container>
+</ng-template>
