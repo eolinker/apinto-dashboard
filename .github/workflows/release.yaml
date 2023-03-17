@@ -20,7 +20,7 @@ jobs:
           cd frontend && yarn install --registry https://registry.npmmirror.com --legacy-peer-deps
       - name: print files
         run: |
-          ls -l controller/dist
+          pwd
           ls -l ./
           ls -l dist
       - name: upload frontend release
