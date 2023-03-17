@@ -27,7 +27,6 @@ export class DeployClusterContentComponent implements OnInit {
   @ViewChild('tab1', { read: TemplateRef, static: true }) tab1: TemplateRef<TabTemplateContext> | string = '环境变量'
   @ViewChild('tab2', { read: TemplateRef, static: true }) tab2: TemplateRef<TabTemplateContext> | string = '证书管理'
   @ViewChild('tab3', { read: TemplateRef, static: true }) tab3: TemplateRef<TabTemplateContext> | string = '网关节点'
-  @ViewChild('tab4', { read: TemplateRef, static: true }) tab4: TemplateRef<TabTemplateContext> | string = '配置管理'
   clusterName:string=''
   clusterDesc:string=''
   _clusterDesc:string=''
@@ -63,11 +62,6 @@ export class DeployClusterContentComponent implements OnInit {
       {
         title: this.tab3,
         routerLink: 'nodes',
-        queryParamsHandling: 'merge'
-      },
-      {
-        title: this.tab4,
-        routerLink: 'conf',
         queryParamsHandling: 'merge'
       }
     ]
