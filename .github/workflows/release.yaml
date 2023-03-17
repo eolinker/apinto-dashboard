@@ -17,7 +17,12 @@ jobs:
           node-version: '16'
       - name: Yarn install
         run: |
-          cd frontend && yarn install --registry https://registry.npmmirror.com --legacy-peer-deps && cd ..
+          cd frontend && yarn install --registry https://registry.npmmirror.com --legacy-peer-deps
+      - name: print files
+        run: |
+          ls -l controller/dist
+          ls -l ./
+          ls -l dist
       - name: upload frontend release
         uses: actions/upload-artifact@v2
         with:
