@@ -10,7 +10,6 @@ import (
 	_ "github.com/eolinker/apinto-dashboard/modules/group/group-service"
 	_ "github.com/eolinker/apinto-dashboard/modules/namespace/namespace-service"
 	_ "github.com/eolinker/apinto-dashboard/modules/notice/notice-service"
-	_ "github.com/eolinker/apinto-dashboard/modules/online/online-service"
 	_ "github.com/eolinker/apinto-dashboard/modules/openapi/openapi-service"
 	_ "github.com/eolinker/apinto-dashboard/modules/openapp/openapp-service"
 	_ "github.com/eolinker/apinto-dashboard/modules/random/random-service"
@@ -18,4 +17,7 @@ import (
 	_ "github.com/eolinker/apinto-dashboard/modules/upstream/service"
 	_ "github.com/eolinker/apinto-dashboard/modules/user/user-service"
 	_ "github.com/eolinker/apinto-dashboard/modules/variable/variable-service"
+
+	//online-service必须放到最后导入
+	_ "github.com/eolinker/apinto-dashboard/modules/online/online-service"
 )
