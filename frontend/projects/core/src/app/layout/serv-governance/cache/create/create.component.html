@@ -1,0 +1,127 @@
+<div class="mt-formtop">
+  <form
+    nz-form
+    [nzNoColon]="true"
+    [nzAutoTips]="autoTips"
+    [formGroup]="validateForm"
+    autocomplete="off"
+  >
+    <nz-form-item>
+      <nz-form-label [nzSpan]="7" nzRequired>策略名称：</nz-form-label>
+      <nz-form-control [nzSpan]="12" [nzErrorTip]="nameErrorTpl">
+        <input
+          type="text"
+          eo-ng-input
+          name="name"
+          class="w-INPUT_NORMAL"
+          formControlName="name"
+          placeholder="请输入首字母为英文，英文数字下划线任意一种组合"
+          required
+          eoNgUserAccess="serv-governance/cache"
+          (disabledEdit)="disabledEdit($event)"
+        />
+        <ng-template #nameErrorTpl let-control>
+          <ng-container *ngIf="control.hasError('required')"
+            >必填项</ng-container
+          >
+          <ng-container *ngIf="control.hasError('pattern')"
+            >请输入首字母为英文，英文数字下划线任意一种组合</ng-container
+          >
+        </ng-template>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="7">描述：</nz-form-label>
+      <nz-form-control [nzSpan]="12">
+        <textarea
+          name="desc"
+          eo-ng-input
+          class="w-INPUT_NORMAL"
+          formControlName="desc"
+          placeholder="请输入"
+          eoNgUserAccess="serv-governance/cache"
+        ></textarea>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="7">
+        <span
+          eoNgFeedbackTooltip
+          nzTooltipTitle="提交时自动分配优先级最低值+1 ，1代表优先级最高，依次可排到999"
+          nzTooltipPlacement="left"
+          [nzTooltipVisible]="false"
+          nzTooltipTrigger="hover"
+          >优先级：</span
+        ></nz-form-label
+      >
+      <nz-form-control
+        [nzSpan]="12"
+        nzErrorTip="优先级范围需在1-999之间，且为整数"
+      >
+        <input
+          eo-ng-input
+          class="w-INPUT_NORMAL"
+          name="priority"
+          placeholder="请输入"
+          formControlName="priority"
+          [nzStatus]="validatePriority ? '' : 'error'"
+          eoNgUserAccess="serv-governance/cache"
+        />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="7">
+        <span
+          eoNgFeedbackTooltip
+          nzTooltipTitle="根据单个条件或多个条件组合，筛选出符合条件的请求，作为访问策略将要处理的流量池"
+          nzTooltipPlacement="left"
+          [nzTooltipVisible]="false"
+          nzTooltipTrigger="hover"
+          >筛选流量：</span
+        >
+      </nz-form-label>
+      <nz-form-control [nzSpan]="12">
+        <eo-ng-filter-table
+          [(filterShowList)]="filterShowList"
+          [filterNamesSet]="filterNamesSet"
+          filterTableTip="注意：默认按GET请求方式的接口的完整路径作为唯一KEY进行缓存"
+        ></eo-ng-filter-table>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item class="mb-0">
+      <nz-form-label [nzSpan]="7" nzRequired>缓存有效时间：</nz-form-label>
+      <nz-form-control [nzSpan]="12" nzExtra="单位：s，最小值：1">
+        <input
+          type="number"
+          eo-ng-input
+          class="w-INPUT_NORMAL"
+          formControlName="validTime"
+          placeholder="请输入有效时间"
+          required
+          eoNgUserAccess="serv-governance/cache"
+        />
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+
+  <nz-form-item class="mb-0 sticky bg-white bottom-0 py-mbase">
+    <nz-form-control [nzOffset]="7" [nzSpan]="18">
+      <button
+        class="ant-btn-primary"
+        eoNgUserAccess="serv-governance/cache"
+        type="submit"
+        eo-ng-button
+        (click)="saveStrategy()"
+      >
+        {{ editPage ? '提交' : '保存' }}
+      </button>
+      <button eo-ng-button class="ml-btnybase" (click)="backToList()">
+        取消
+      </button>
+    </nz-form-control>
+  </nz-form-item>
+</div>
