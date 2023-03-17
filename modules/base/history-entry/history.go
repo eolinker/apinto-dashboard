@@ -21,6 +21,9 @@ const (
 	HistoryKindVariable        HistoryKind = "variable"
 	HistoryKindVariableGlobal  HistoryKind = "variable_global"
 	HistoryKindRole            HistoryKind = "role"
+	HistoryKindPluginTemplate  HistoryKind = "plugin_template"
+	HistoryKindPlugin          HistoryKind = "plugin"
+	HistoryKindClusterPlugin   HistoryKind = "cluster_plugin"
 )
 
 // History 变更记录表

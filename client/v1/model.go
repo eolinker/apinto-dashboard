@@ -219,6 +219,7 @@ type GlobalPlugin struct {
 	InitConfig interface{} `json:"init_config,omitempty"`
 	Name       string      `json:"name"`   //名称
 	Status     string      `json:"status"` //enable,disable,global
+	Rely       string      `json:"rely"`   //依赖哪个插件
 }
 
 type PluginAuthConfig struct {
@@ -541,4 +542,45 @@ type CertConfig struct {
 	Key    string `json:"key"`
 	Pem    string `json:"pem"`
 	Driver string `json:"driver"`
+}
+
+type ExtenderListItem struct {
+	Group   string `json:"group"`
+	Project string `json:"project"`
+	Name    string `json:"name"`
+	Version string `json:"version"`
+	Id      string `json:"id"`
+}
+
+type Render []byte
+
+func (r *Render) UnmarshalJSON(b []byte) error {
+	*r = b
+	return nil
+}
+
+type ExtenderInfo struct {
+	Group   string `json:"group"`
+	Project string `json:"project"`
+	Name    string `json:"name"`
+	Version string `json:"version"`
+	Render  Render `json:"render"`
+}
+
+type PluginTemplateConfig struct {
+	Plugins     map[string]*Plugin `json:"plugins,omitempty"` //插件
+	Name        string             `json:"name"`
+	Driver      string             `json:"driver"`
+	Description string             `json:"description"`
+}
+
+type PluginTemplateInfo struct {
+	Create      string             `json:"create"`
+	Description string             `json:"description"`
+	Driver      string             `json:"driver"`
+	Id          string             `json:"id"`
+	Name        string             `json:"name"`
+	Plugins     map[string]*Plugin `json:"plugins,omitempty"` //插件
+	Profession  string             `json:"profession"`
+	Update      string             `json:"update"`
 }
