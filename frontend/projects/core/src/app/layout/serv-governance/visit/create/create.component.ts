@@ -199,7 +199,7 @@ export class VisitCreateComponent implements OnInit {
           name: this.filterShowList[index].name,
           values:
           this.filterShowList[index].name === 'ip'
-            ? this.filterShowList[index].values[0].split(/[\n]/).filter(value => { return !!value })
+            ? [...this.filterShowList[index].values[0].split(/[\n]/).filter(value => { return !!value }), ...this.filterShowList[index].values.slice(1)]
             : this.filterShowList[index].values
         })
       }
@@ -209,7 +209,7 @@ export class VisitCreateComponent implements OnInit {
         this.createStrategyForm.config.influence_sphere.push({
           name: this.influenceShowList[index].name,
           values: this.influenceShowList[index].name === 'ip'
-            ? this.influenceShowList[index].values[0].split(/[\n]/).filter(value => { return !!value })
+            ? [...this.influenceShowList[index].values[0].split(/[\n]/).filter(value => { return !!value }), ...this.influenceShowList[index].values.slice(1)]
             : this.influenceShowList[index].values
         })
       }
