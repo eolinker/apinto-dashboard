@@ -18,9 +18,7 @@ jobs:
       - name: Yarn install
         run: |
           cd frontend && yarn install --registry https://registry.npmmirror.com --legacy-peer-deps
-          ls -l ./ 
-          ls -l ../controller/
-          ls -l ../
+          yarn build
       - name: print files
         run: |
           pwd
