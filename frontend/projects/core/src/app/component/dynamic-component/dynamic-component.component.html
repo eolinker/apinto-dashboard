@@ -1,0 +1,932 @@
+<!--
+ * @Author:  
+ * @Date: 2022-08-02 22:18:06
+ * @LastEditors:  
+ * @LastEditTime: 2022-08-11 23:37:32
+ * @FilePath: /apinto/projects/test-app/src/app/array-items/array-items.component.html
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+-->
+
+<div class="form-row">
+  <ng-container *ngFor="let object of itemList; let indexT = index">
+    <section *ngIf="checkShow(object)" class="dynamic_inline_block">
+      <label class="label"
+        ><span *ngIf="object.required" class="required-symbol">*</span
+        >{{ object.title }}：</label
+      >
+
+      <section class="dynamic_block form-input">
+        <ng-container *ngIf="!object.properties">
+          <ng-container
+            *ngIf="checkShow(object)"
+            [ngTemplateOutlet]="itemTpl"
+            [ngTemplateOutletContext]="{
+              property: object,
+              items: object.items
+            }"
+          ></ng-container>
+        </ng-container>
+        <ng-container
+          *ngFor="let property of object.properties; let index = index"
+        >
+          <ng-container
+            *ngIf="checkShow(property)"
+            [ngTemplateOutlet]="itemTpl"
+            [ngTemplateOutletContext]="{
+              property: property,
+              parent: object,
+              items: object.items,
+              index: index
+            }"
+          ></ng-container>
+        </ng-container>
+
+        <ng-template
+          #itemTpl
+          let-property="property"
+          let-items="items"
+          let-parent="parent"
+          let-index="index"
+        >
+          <div
+            [ngClass]="{
+              'error-input':
+                (property.required &&
+                  (!property.default || property.default?.length === 0) &&
+                  startValidate) ||
+                (property.default &&
+                  property.pattern &&
+                  !valid(property.default, property.pattern))
+            }"
+          >
+            <nz-space
+              *ngIf="
+                property['x-component'] === 'Space' && property.cdkDropList
+              "
+              [ngClass]="property['x-component-props']?.class"
+              (cdkDropListDropped)="drop($event)"
+              cdkDropList
+            >
+              <section cdkDrag>
+                <ng-container *ngFor="let propertychild of property.properties">
+                  <ng-container
+                    *ngIf="checkShow(propertychild)"
+                    [ngTemplateOutlet]="itemTemplateNoLoop"
+                    [ngTemplateOutletContext]="{
+                      property: propertychild,
+                      parent: property,
+                      items: property.items || items,
+                      index: index
+                    }"
+                  ></ng-container>
+                </ng-container>
+              </section>
+            </nz-space>
+
+            <nz-space
+              *ngIf="
+                property['x-component'] === 'Space' && !property.cdkDropList
+              "
+              [ngClass]="property['x-component-props']?.class"
+            >
+              <ng-container *ngFor="let propertychild of property.properties">
+                <ng-container
+                  *ngIf="checkShow(propertychild)"
+                  [ngTemplateOutlet]="itemTemplateNoLoop"
+                  [ngTemplateOutletContext]="{
+                    property: propertychild,
+                    parent: property,
+                    items: property.items || items,
+                    index: index
+                  }"
+                ></ng-container>
+              </ng-container>
+            </nz-space>
+
+            <nz-date-picker
+              *ngIf="property['x-component'] === 'DatePicker'"
+              [ngStyle]="property['x-component-props']?.style"
+              [ngClass]="property['x-component-props']?.class"
+              [nzMode]="property['x-component-props']?.picker || 'date'"
+              [(ngModel)]="property.default"
+              (ngModelChange)="flushData()"
+              [nzDisabled]="nzDisabled"
+            ></nz-date-picker>
+
+            <nz-range-picker
+              *ngIf="property['x-component'] === 'DatePicker.RangePicker'"
+              [ngStyle]="property['x-component-props']?.style"
+              [ngClass]="property['x-component-props']?.class"
+              [nzMode]="property['x-component-props']?.picker || 'date'"
+              [nzShowTime]="property['x-component-props']?.showTime"
+              [(ngModel)]="property.default"
+              (ngModelChange)="flushData()"
+              [nzDisabled]="nzDisabled"
+            ></nz-range-picker>
+
+            <eo-ng-select
+              *ngIf="property['x-component'] === 'Select'"
+              [ngClass]="property['x-component-props']?.class"
+              [ngStyle]="property['x-component-props']?.style"
+              [(ngModel)]="property.default"
+              (ngModelChange)="flushData()"
+              nzAllowClear
+              [nzPlaceHolder]="property['x-component-props']?.placeholder"
+              [nzOptions]="property.enum"
+              [nzDisabled]="nzDisabled"
+            ></eo-ng-select>
+
+            <label
+              eo-ng-checkbox
+              *ngIf="property['x-component'] === 'Checkbox'"
+              [ngClass]="property['x-component-props']?.class"
+              [ngStyle]="property['x-component-props']?.style"
+              [(ngModel)]="property.default"
+              (ngModelChange)="flushData()"
+              [nzDisabled]="nzDisabled"
+              >{{ property.title }}</label
+            >
+
+            <eo-ng-checkbox-group
+              *ngIf="property['x-component'] === 'Checkbox.Group'"
+              [ngClass]="property['x-component-props']?.class"
+              [ngStyle]="property['x-component-props']?.style"
+              [(ngModel)]="property.enum"
+              (ngModelChange)="flushData()"
+              [nzDisabled]="nzDisabled"
+            ></eo-ng-checkbox-group>
+
+            <a
+              *ngIf="
+                property['x-component'] === 'A.Opendrawer' &&
+                property['x-component-props'].click !== 'params'
+              "
+              class="array_item_addition"
+              [ngClass]="property['x-component-props']?.class"
+              [ngStyle]="property['x-component-props']?.style"
+              (click)="openDrawer(parent)"
+              >引用环境变量</a
+            >
+
+            <a
+              *ngIf="
+                property['x-component'] === 'A.Opendrawer' &&
+                property['x-component-props'].click === 'params'
+              "
+              class="array_item_addition"
+              [ngClass]="property['x-component-props']?.class"
+              [ngStyle]="property['x-component-props']?.style"
+              (click)="openDrawer(parent)"
+              >或引用环境变量</a
+            >
+
+            <span
+              nzTheme="outline"
+              *ngIf="property['x-component'] === 'ArrayItems.SortHandle'"
+              cdkDragHandle
+            >
+              <svg class="iconpark-icon"><use href="#list"></use></svg
+            ></span>
+            <input
+              *ngIf="property['x-component'] === 'Input'"
+              eo-ng-input
+              [type]="property.type"
+              class="ng-dirty"
+              [disabled]="
+                property.readOnly || property['x-read-only'] || nzDisabled
+              "
+              [attr.required]="property.required"
+              [attr.min]="property.minimum"
+              [attr.max]="property.maximum"
+              [attr.minLength]="property.minLength"
+              [attr.maxLength]="property.maxLength"
+              [ngClass]="property['x-component-props']?.class"
+              [ngStyle]="property['x-component-props']?.style"
+              [nzStatus]="
+                (property.required &&
+                  (!property.default || property.default?.length === 0) &&
+                  startValidate) ||
+                (property.default &&
+                  property.pattern &&
+                  !valid(property.default, property.pattern))
+                  ? 'error'
+                  : ''
+              "
+              [placeholder]="
+                property['x-component-props']?.extra ||
+                property['x-component-props']?.placeholder ||
+                ''
+              "
+              [(ngModel)]="property.default"
+              (ngModelChange)="flushData()"
+            />
+            <textarea
+              *ngIf="property['x-component'] === 'Input.textarea'"
+              nz-input
+              [ngStyle]="property['x-component-props'].style"
+              [placeholder]="
+                property['x-component-props']?.extra ||
+                property['x-component-props']?.placeholder ||
+                ''
+              "
+              [(ngModel)]="property.default"
+              (ngModelChange)="flushData()"
+              [disabled]="nzDisabled"
+            ></textarea>
+
+            <ng-container
+              *ngIf="
+                (!property['x-component'] && property.properties) ||
+                (property['x-component'] == 'ArrayItems' &&
+                  property.properties &&
+                  !property.items)
+              "
+            >
+              <ng-container *ngFor="let propertychild of property.properties">
+                <ng-container
+                  *ngIf="checkShow(propertychild)"
+                  [ngTemplateOutlet]="itemTpl"
+                  [ngTemplateOutletContext]="{
+                    property: propertychild,
+                    parent: property,
+                    items: property.items || items,
+                    index: index
+                  }"
+                ></ng-container>
+              </ng-container>
+            </ng-container>
+
+            <ng-container
+              *ngIf="
+                property['x-component'] == 'ArrayItems' &&
+                property.properties &&
+                property.items
+              "
+            >
+              <div class="ArrayItems">
+                <ng-container
+                  *ngFor="
+                    let propertychild of property.properties;
+                    let index = index
+                  "
+                  [ngTemplateOutlet]="itemTemplateInArrayItems"
+                  [ngTemplateOutletContext]="{
+                    property: propertychild,
+                    parent: property,
+                    items: property.items,
+                    index: index
+                  }"
+                ></ng-container>
+              </div>
+            </ng-container>
+
+            <button
+              *ngIf="property['x-component'] === 'Editable.Popover'"
+              nz-popconfirm
+              [nzPopconfirmTitle]="popconfirmTpl"
+              nz-button
+            >
+              {{ property.title }}
+            </button>
+            <ng-template #popconfirmTpl>
+              <ng-container *ngFor="let propertychild of property.properties">
+                <ng-container
+                  *ngIf="checkShow(propertychild)"
+                  [ngTemplateOutlet]="itemTpl"
+                  [ngTemplateOutletContext]="{
+                    property: propertychild,
+                    parent: property,
+                    items: property.items || items,
+                    index: index
+                  }"
+                ></ng-container>
+              </ng-container>
+            </ng-template>
+
+            <a
+              [ngClass]="property['x-component-props']?.class"
+              *ngIf="property['x-component'] === 'ArrayItems.Addition'"
+              class="array_item_addition ml-[10px] ant-btn-text anticon"
+              nz-button
+              (click)="addNewProperies(object, parent, items)"
+              ><span
+                ><svg class="iconpark-icon">
+                  <use href="#add-circle"></use></svg></span
+            ></a>
+            <div
+              *ngIf="
+                !property.properties ||
+                property['x-component-props']?.extra ||
+                property.pattern
+              "
+              class="ant-form-item-with-help"
+            >
+              <div
+                *ngIf="
+                  property.required &&
+                  (!property.default || property.default?.length === 0) &&
+                  startValidate
+                "
+                class="ant-form-item-explain"
+              >
+                <div
+                  role="alert"
+                  class="ant-form-item-explain-error"
+                  [ngClass]="property['x-component-props']?.class"
+                >
+                  必填项
+                </div>
+              </div>
+
+              <div
+                *ngIf="
+                  property.default &&
+                  property.pattern &&
+                  !valid(property.default, property.pattern)
+                "
+                class="ant-form-item-explain"
+              >
+                <div
+                  role="alert"
+                  class="ant-form-item-explain-error"
+                  [ngClass]="property['x-component-props']?.class"
+                >
+                  {{ property['x-component-props']?.extra }}
+                </div>
+              </div>
+
+              <div class="margin-dynamic-row"></div>
+            </div>
+          </div>
+        </ng-template>
+
+        <ng-template
+          #itemTemplateInArrayItems
+          let-property="property"
+          let-parent="parent"
+          let-items="items"
+          let-index="index"
+        >
+          <div
+            [ngClass]="{
+              'error-input':
+                (property.required &&
+                  (!property.default || property.default?.length === 0) &&
+                  startValidate) ||
+                (property.default &&
+                  property.pattern &&
+                  !valid(property.default, property.pattern))
+            }"
+          >
+            <label
+              *ngIf="
+                property.title &&
+                property['x-component'] !== 'ArrayItems.Addition' &&
+                property['x-component'] !== 'Editable.Popover' &&
+                property['x-component'] !== 'Checkbox' &&
+                property['x-component'] !== 'A.Opendrawer'
+              "
+              >{{ property.title }}：</label
+            >
+            <nz-space
+              *ngIf="
+                property['x-component'] === 'Space' && property.cdkDropList
+              "
+              [ngClass]="property['x-component-props']?.class"
+              (cdkDropListDropped)="drop($event)"
+              cdkDropList
+            >
+              <ng-container *ngIf="checkShow(property)">
+                <section cdkDrag>
+                  <ng-container
+                    *ngFor="let propertychild of property.properties"
+                  >
+                    <ng-container
+                      *ngIf="checkShow(propertychild)"
+                      [ngTemplateOutlet]="itemTemplateNoLoop"
+                      [ngTemplateOutletContext]="{
+                        property: propertychild,
+                        parent: property,
+                        items: property.items || items,
+                        index: index
+                      }"
+                    ></ng-container>
+                  </ng-container>
+                </section>
+              </ng-container>
+            </nz-space>
+
+            <nz-space
+              *ngIf="
+                property['x-component'] === 'Space' &&
+                !property.cdkDropList &&
+                (!property['x-reactions'] ||
+                  (property['x-reactions'] &&
+                    ((property['x-reactions'].otherwise &&
+                      !seachForDeps(property['x-reactions'].dependencies[0])) ||
+                      (property['x-reactions'].fulfill &&
+                        seachForDeps(
+                          property['x-reactions'].dependencies[0]
+                        )))))
+              "
+              [ngClass]="property['x-component-props']?.class"
+            >
+              <ng-container *ngFor="let propertychild of property.properties">
+                <ng-container
+                  *ngIf="checkShow(propertychild)"
+                  [ngTemplateOutlet]="itemTemplateNoLoop"
+                  [ngTemplateOutletContext]="{
+                    property: propertychild,
+                    parent: property,
+                    items: property.items || items,
+                    index: index
+                  }"
+                ></ng-container>
+              </ng-container>
+            </nz-space>
+
+            <nz-date-picker
+              *ngIf="property['x-component'] === 'DatePicker'"
+              [ngStyle]="property['x-component-props']?.style"
+              [ngClass]="property['x-component-props']?.class"
+              [nzMode]="property['x-component-props']?.picker || 'date'"
+              [(ngModel)]="property.default"
+              (ngModelChange)="flushData()"
+              [nzDisabled]="nzDisabled"
+            ></nz-date-picker>
+
+            <nz-range-picker
+              *ngIf="property['x-component'] === 'DatePicker.RangePicker'"
+              [nzMode]="property['x-component-props']?.picker || 'date'"
+              [ngClass]="property['x-component-props']?.class"
+              [ngStyle]="property['x-component-props']?.style"
+              [nzShowTime]="property['x-component-props']?.showTime"
+              [(ngModel)]="property.default"
+              (ngModelChange)="flushData()"
+              [nzDisabled]="nzDisabled"
+            ></nz-range-picker>
+
+            <eo-ng-select
+              *ngIf="property['x-component'] === 'Select'"
+              [ngClass]="property['x-component-props']?.class"
+              [ngStyle]="property['x-component-props']?.style"
+              [(ngModel)]="property.default"
+              (ngModelChange)="flushData()"
+              nzAllowClear
+              [nzPlaceHolder]="property['x-component-props']?.placeholder"
+              [nzOptions]="property.enum"
+              [nzDisabled]="nzDisabled"
+            ></eo-ng-select>
+
+            <label
+              eo-ng-checkbox
+              *ngIf="property['x-component'] === 'Checkbox'"
+              [ngClass]="property['x-component-props']?.class"
+              [ngStyle]="property['x-component-props']?.style"
+              [(ngModel)]="property.default"
+              (ngModelChange)="flushData()"
+              [nzDisabled]="nzDisabled"
+              >{{ property.title }}</label
+            >
+
+            <eo-ng-checkbox-group
+              *ngIf="property['x-component'] === 'Checkbox.Group'"
+              [ngClass]="property['x-component-props']?.class"
+              [ngStyle]="property['x-component-props']?.style"
+              [(ngModel)]="property.enum"
+              (ngModelChange)="flushData()"
+              [nzDisabled]="nzDisabled"
+            ></eo-ng-checkbox-group>
+
+            <a
+              *ngIf="
+                property['x-component'] === 'A.Opendrawer' &&
+                property['x-component-props'].click !== 'params'
+              "
+              class="array_item_addition"
+              [ngClass]="property['x-component-props']?.class"
+              [ngStyle]="property['x-component-props']?.style"
+              (click)="openDrawer(parent)"
+              >引用环境变量</a
+            >
+            <a
+              *ngIf="
+                property['x-component'] === 'A.Opendrawer' &&
+                property['x-component-props'].click === 'params'
+              "
+              class="array_item_addition"
+              [ngClass]="property['x-component-props']?.class"
+              [ngStyle]="property['x-component-props']?.style"
+              (click)="openDrawer(parent)"
+              >或引用环境变量</a
+            >
+            <span
+              [ngClass]="property['x-component-props']?.class"
+              nzTheme="outline"
+              *ngIf="property['x-component'] === 'ArrayItems.SortHandle'"
+              cdkDragHandle
+              ><svg class="iconpark-icon"><use href="#list"></use></svg
+            ></span>
+            <input
+              *ngIf="property['x-component'] === 'Input'"
+              eo-ng-input
+              class="ng-dirty"
+              [type]="property.type"
+              [disabled]="
+                property.readOnly || property['x-read-only'] || nzDisabled
+              "
+              [attr.required]="property.required"
+              [attr.min]="property.minimum"
+              [attr.max]="property.maximum"
+              [attr.minLength]="property.minLength"
+              [attr.maxLength]="property.maxLength"
+              [ngClass]="property['x-component-props']?.class"
+              [ngStyle]="property['x-component-props']?.style"
+              [nzStatus]="
+                (property.required &&
+                  (!property.default || property.default?.length === 0) &&
+                  startValidate) ||
+                (property.default &&
+                  property.pattern &&
+                  !valid(property.default, property.pattern))
+                  ? 'error'
+                  : ''
+              "
+              [placeholder]="
+                property['x-component-props']?.extra ||
+                property['x-component-props']?.placeholder ||
+                ''
+              "
+              [(ngModel)]="property.default"
+              (ngModelChange)="flushData()"
+            />
+            <textarea
+              *ngIf="property['x-component'] === 'Input.textarea'"
+              eo-ng-input
+              [ngClass]="property['x-component-props']?.class"
+              [ngStyle]="property['x-component-props'].style"
+              [placeholder]="
+                property['x-component-props']?.extra ||
+                property['x-component-props']?.placeholder ||
+                ''
+              "
+              [(ngModel)]="property.default"
+              (ngModelChange)="flushData()"
+              [disabled]="nzDisabled"
+            ></textarea>
+
+            <ng-container
+              *ngIf="
+                (!property['x-component'] && property.properties) ||
+                (property['x-component'] == 'ArrayItems' && property.properties)
+              "
+            >
+              <ng-container
+                *ngFor="let propertychild of property.properties"
+                [ngTemplateOutlet]="itemTemplateNoLoop"
+                [ngTemplateOutletContext]="{
+                  property: propertychild,
+                  parent: property,
+                  items: property.items || items,
+                  index: index
+                }"
+              ></ng-container>
+            </ng-container>
+
+            <button
+              [ngStyle]="property['x-component-props']?.style"
+              [ngClass]="property['x-component-props']?.class"
+              *ngIf="property['x-component'] === 'Editable.Popover'"
+              nz-popconfirm
+              [nzPopconfirmTitle]="popconfirmTpl"
+              nz-button
+            >
+              {{ property.title }}
+            </button>
+            <ng-template #popconfirmTpl>
+              <ng-container *ngFor="let propertychild of property.properties">
+                <ng-container
+                  *ngIf="checkShow(propertychild)"
+                  [ngTemplateOutlet]="itemTpl"
+                  [ngTemplateOutletContext]="{
+                    property: propertychild,
+                    parent: property,
+                    items: property.items || items,
+                    index: index
+                  }"
+                ></ng-container>
+              </ng-container>
+            </ng-template>
+
+            <a
+              *ngIf="property['x-component'] === 'ArrayItems.Addition'"
+              [ngClass]="property['x-component-props']?.class"
+              class="array_item_addition ml-[10px] ant-btn-text anticon"
+              (click)="addNewProperies(object, parent, items)"
+              ><span
+                ><svg class="iconpark-icon">
+                  <use href="#add-circle"></use></svg></span
+            ></a>
+
+            <div
+              *ngIf="!property.properties"
+              class="ant-form-item-with-help"
+              [ngClass]="{
+                explain:
+                  property.required &&
+                  (!property.default || property.default?.length === 0) &&
+                  startValidate
+              }"
+            >
+              <div
+                *ngIf="
+                  property.required &&
+                  (!property.default || property.default?.length === 0) &&
+                  startValidate
+                "
+                class="ant-form-item-explain"
+              >
+                <div
+                  role="alert"
+                  class="ant-form-item-explain-error"
+                  [ngClass]="property['x-component-props']?.class"
+                >
+                  必填项
+                </div>
+              </div>
+              <div
+                *ngIf="
+                  property.default &&
+                  property.pattern &&
+                  !valid(property.default, property.pattern)
+                "
+                class="ant-form-item-explain"
+              >
+                <div
+                  role="alert"
+                  class="ant-form-item-explain-error"
+                  [ngClass]="property['x-component-props']?.class"
+                >
+                  {{ property['x-component-props']?.extra }}
+                </div>
+              </div>
+              <div class="margin-dynamic-row"></div>
+            </div>
+          </div>
+        </ng-template>
+
+        <ng-template
+          #itemTemplateNoLoop
+          let-property="property"
+          let-parent="parent"
+          let-items="items"
+          let-index="index"
+        >
+          <div
+            class="no-loop"
+            [ngClass]="{
+              'error-input':
+                (property.required &&
+                  (!property.default || property.default?.length === 0) &&
+                  startValidate) ||
+                (property.default &&
+                  property.pattern &&
+                  !valid(property.default, property.pattern))
+            }"
+          >
+            <label
+              *ngIf="
+                property.title &&
+                property['x-component'] !== 'ArrayItems.Addition' &&
+                property['x-component'] !== 'Editable.Popover' &&
+                property['x-component'] !== 'Checkbox' &&
+                property['x-component'] !== 'A.Opendrawer'
+              "
+              [ngClass]="property['x-component-props']?.class"
+              >{{ property.title }}：</label
+            >
+
+            <nz-date-picker
+              *ngIf="property['x-component'] === 'DatePicker'"
+              [nzMode]="property['x-component-props']?.picker || 'date'"
+              [ngClass]="property['x-component-props']?.class"
+              [ngStyle]="property['x-component-props']?.style"
+              [(ngModel)]="property.default"
+              (ngModelChange)="flushData()"
+              [nzDisabled]="nzDisabled"
+            ></nz-date-picker>
+
+            <nz-range-picker
+              *ngIf="property['x-component'] === 'DatePicker.RangePicker'"
+              [nzMode]="property['x-component-props']?.picker || 'date'"
+              [nzShowTime]="property['x-component-props']?.showTime"
+              [ngClass]="property['x-component-props']?.class"
+              [ngStyle]="property['x-component-props']?.style"
+              [(ngModel)]="property.default"
+              (ngModelChange)="flushData()"
+              [nzDisabled]="nzDisabled"
+            ></nz-range-picker>
+
+            <eo-ng-select
+              *ngIf="property['x-component'] === 'Select'"
+              [ngClass]="property['x-component-props']?.class"
+              [ngStyle]="property['x-component-props']?.style"
+              [(ngModel)]="property.default"
+              (ngModelChange)="flushData()"
+              nzAllowClear
+              [nzPlaceHolder]="property['x-component-props']?.placeholder"
+              [nzOptions]="property.enum"
+              [nzDisabled]="nzDisabled"
+            ></eo-ng-select>
+
+            <a
+              *ngIf="
+                property['x-component'] === 'A.Opendrawer' &&
+                property['x-component-props'].click !== 'params'
+              "
+              class="array_item_addition"
+              [ngClass]="property['x-component-props']?.class"
+              [ngStyle]="property['x-component-props']?.style"
+              (click)="openDrawer(parent)"
+              >引用环境变量</a
+            >
+
+            <a
+              *ngIf="
+                property['x-component'] === 'A.Opendrawer' &&
+                property['x-component-props'].click === 'params'
+              "
+              class="array_item_addition"
+              [ngClass]="property['x-component-props']?.class"
+              [ngStyle]="property['x-component-props']?.style"
+              (click)="openDrawer(parent)"
+              >或引用环境变量</a
+            >
+
+            <label
+              eo-ng-checkbox
+              *ngIf="property['x-component'] === 'Checkbox'"
+              [ngClass]="property['x-component-props']?.class"
+              [ngStyle]="property['x-component-props']?.style"
+              [(ngModel)]="property.default"
+              (ngModelChange)="flushData()"
+              [nzDisabled]="nzDisabled"
+              >{{ property.title }}</label
+            >
+
+            <eo-ng-checkbox-group
+              *ngIf="property['x-component'] === 'Checkbox.Group'"
+              [ngClass]="property['x-component-props']?.class"
+              [ngStyle]="property['x-component-props']?.style"
+              [(ngModel)]="property.enum"
+              (ngModelChange)="flushData()"
+              [nzDisabled]="nzDisabled"
+            ></eo-ng-checkbox-group>
+
+            <span
+              [ngClass]="property['x-component-props']?.class"
+              nzTheme="outline"
+              *ngIf="property['x-component'] === 'ArrayItems.SortHandle'"
+              cdkDragHandle
+            >
+              <svg class="iconpark-icon"><use href="#list"></use></svg
+            ></span>
+            <input
+              *ngIf="property['x-component'] === 'Input'"
+              eo-ng-input
+              class="ng-dirty"
+              [name]="parent.name + property.name"
+              [id]="parent.name + property.name"
+              [disabled]="
+                property.readOnly || property['x-read-only'] || nzDisabled
+              "
+              [attr.required]="property.required"
+              [attr.min]="property.minimum"
+              [attr.max]="property.maximum"
+              [attr.pattern]="property.pattern"
+              [attr.minlength]="property.minLength"
+              [attr.maxlength]="property.maxLength"
+              [ngClass]="property['x-component-props']?.class"
+              [ngStyle]="property['x-component-props']?.style"
+              [nzStatus]="
+                (property.required &&
+                  (!property.default || property.default?.length === 0) &&
+                  startValidate) ||
+                (property.default &&
+                  property.pattern &&
+                  !valid(property.default, property.pattern))
+                  ? 'error'
+                  : ''
+              "
+              [placeholder]="
+                property['x-component-props']?.extra ||
+                property['x-component-props']?.placeholder ||
+                ''
+              "
+              [(ngModel)]="property.default"
+              (ngModelChange)="flushData()"
+              [type]="property.type"
+            />
+            <textarea
+              *ngIf="property['x-component'] === 'Input.textarea'"
+              eo-ng-input
+              [ngClass]="property['x-component-props']?.class"
+              [attr.required]="property.required"
+              [ngStyle]="property['x-component-props'].style"
+              [placeholder]="
+                property['x-component-props']?.extra ||
+                property['x-component-props']?.placeholder ||
+                ''
+              "
+              [(ngModel)]="property.default"
+              (ngModelChange)="flushData()"
+              [disabled]="nzDisabled"
+            ></textarea>
+
+            <a
+              class="array_item_addition ant-btn-text anticon"
+              [ngClass]="property['x-component-props']?.class"
+              nzTheme="outline"
+              *ngIf="property['x-component'] === 'ArrayItems.Remove'"
+              (click)="remove(object, index)"
+              ><span
+                ><svg class="iconpark-icon">
+                  <use href="#reduce-one"></use></svg></span
+            ></a>
+
+            <button
+              *ngIf="property['x-component'] === 'Editable.Popover'"
+              nz-popconfirm
+              [nzPopconfirmTitle]="popconfirmTpl"
+              nz-button
+            >
+              {{ property.title }}
+            </button>
+            <ng-template #popconfirmTpl>
+              <ng-container
+                *ngFor="let propertychild of property.properties"
+                [ngTemplateOutlet]="itemTemplateNoLoop"
+                [ngTemplateOutletContext]="{
+                  property: propertychild,
+                  parent: property,
+                  items: property.items || items,
+                  index: index
+                }"
+              ></ng-container>
+            </ng-template>
+
+            <a
+              *ngIf="property['x-component'] === 'ArrayItems.Addition'"
+              [ngClass]="property['x-component-props']?.class"
+              class="array_item_addition ml-[10px] ant-btn-text anticon"
+              (click)="addNewProperies(object, parent, items)"
+              ><span
+                ><svg class="iconpark-icon">
+                  <use href="#add-circle"></use></svg></span
+            ></a>
+
+            <div class="ant-form-item-with-help">
+              <div
+                *ngIf="
+                  property.required &&
+                  (!property.default || property.default?.length === 0) &&
+                  startValidate
+                "
+                class="ant-form-item-explain"
+              >
+                <div
+                  role="alert"
+                  class="ant-form-item-explain-error"
+                  [ngClass]="property['x-component-props']?.class"
+                >
+                  必填项
+                </div>
+              </div>
+              <div
+                *ngIf="
+                  property.default &&
+                  property.pattern &&
+                  !valid(property.default, property.pattern)
+                "
+                class="ant-form-item-explain"
+              >
+                <div
+                  role="alert"
+                  class="ant-form-item-explain-error"
+                  [ngClass]="property['x-component-props']?.class"
+                >
+                  {{ property['x-component-props']?.extra }}
+                </div>
+              </div>
+              <div class="margin-dynamic-row"></div>
+            </div>
+          </div>
+        </ng-template>
+      </section>
+    </section>
+  </ng-container>
+</div>
+
+<ng-template #environmentTpl>
+  <editable-env-table (eoChooseEnv)="chooseEnv($event)"></editable-env-table>
+</ng-template>

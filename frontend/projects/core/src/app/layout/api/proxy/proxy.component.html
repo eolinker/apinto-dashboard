@@ -1,0 +1,59 @@
+<form
+  nz-form
+  [nzNoColon]="true"
+  [nzAutoTips]="autoTips"
+  [formGroup]="validateProxyHeaderForm"
+  autocomplete="off"
+>
+  <nz-form-item>
+    <nz-form-label [nzSpan]="6" nzRequired>操作类型：</nz-form-label>
+    <nz-form-control [nzSpan]="13">
+      <eo-ng-select
+        name="opt_type"
+        required
+        class="w-INPUT_NORMAL"
+        formControlName="opt_type"
+        [nzOptions]="listOfOptTypes"
+        nzPlaceHolder="请选择"
+        eoNgUserAccess="router"
+        (disabledEdit)="disabledEdit($event)"
+        [nzDisabled]="nzDisabled"
+        (ngModelChange)="changeValidator()"
+      ></eo-ng-select>
+    </nz-form-control>
+  </nz-form-item>
+
+  <nz-form-item>
+    <nz-form-label [nzSpan]="6" nzRequired>参数名：</nz-form-label>
+    <nz-form-control [nzSpan]="13">
+      <input
+        eo-ng-input
+        name="key"
+        class="w-INPUT_NORMAL"
+        required
+        placeholder="请输入"
+        formControlName="key"
+        nzPlaceHolder="请选择"
+        eoNgUserAccess="router"
+      />
+    </nz-form-control>
+  </nz-form-item>
+
+ 
+  <nz-form-item
+    *ngIf="validateProxyHeaderForm.controls['opt_type'].value !== 'DELETE'"
+  >
+    <nz-form-label [nzSpan]="6" nzRequired>参数值：</nz-form-label>
+    <nz-form-control [nzSpan]="13">
+      <input
+        eo-ng-input
+        name="value"
+        class="w-INPUT_NORMAL"
+        required
+        placeholder="请输入"
+        formControlName="value"
+        eoNgUserAccess="router"
+      />
+    </nz-form-control>
+  </nz-form-item>
+</form>
