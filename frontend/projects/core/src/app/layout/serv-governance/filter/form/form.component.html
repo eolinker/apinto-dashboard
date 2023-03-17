@@ -1,0 +1,281 @@
+<div class="flow-drawer">
+  <div class="form-row mb-mbase">
+    <label class="label" for="name"
+      ><span class="required-symbol">*</span>属性名称：</label
+    >
+    <section class="form-input transfer-section">
+      <eo-ng-select
+        class="w-INPUT_NORMAL"
+        name="name"
+        [(ngModel)]="filterForm.name"
+        (ngModelChange)="changeFilterType($event)"
+        [nzOptions]="filterNamesList"
+        (disabledEdit)="disabledEdit($event)"
+        [nzDisabled]="nzDisabled"
+      ></eo-ng-select>
+    </section>
+  </div>
+
+  <div class="form-row">
+    <label class="h-[32px] block" for="name"
+      ><span class="required-symbol">*</span>属性值：</label
+    >
+    <!-- 穿梭框 -->
+    <section
+      style="border: 1px solid var(--border-color); border-bottom: none"
+      *ngIf="filterType == 'remote'"
+      class="w-full transfer-section"
+    >
+      <!-- search -->
+      <p class="flex items.center mt-[12px] text-[16px] font-bold px-btnbase">
+        {{
+          '已选择' + remoteSelectList.length + '项' + filterForm.title + '数据'
+        }}
+      </p>
+      <div
+        *ngIf="filterForm.name !== 'api'"
+        class="flex items-center justify-between py-btnybase px-btnbase"
+      >
+        <div></div>
+        <eo-ng-search-input-group
+          class="w-[224px]"
+          [eoNoWidth]="true"
+          [eoInputVal]="searchWord"
+          (eoClick)="searchWord = ''; searchRemoteList()"
+        >
+          <input
+            type="text"
+            eo-ng-input
+            placeholder="请输入"
+            [(ngModel)]="searchWord"
+            (keyup.enter)="searchRemoteList()"
+          />
+        </eo-ng-search-input-group>
+      </div>
+      <div
+        class="flex mt-[12px] mb-[16px] items-center justify-between px-btnbase"
+        *ngIf="filterForm.name === 'api'"
+      >
+        <div></div>
+        <div>
+          <eo-ng-cascader
+            class="w-[126px] mr-btnbase"
+            nzChangeOnSelect
+            name="header"
+            required
+            [(ngModel)]="searchGroup"
+            (ngModelChange)="getSearchRemoteList()"
+            [nzDisabled]="nzDisabled"
+            [nzOptions]="apiGroupList"
+            nzLabelProperty="name"
+            nzValueProperty="uuid"
+            nzPlaceHolder="目录筛选"
+          >
+          </eo-ng-cascader>
+          <eo-ng-search-input-group
+            class="w-[224px] inline-block"
+            [eoNoWidth]="true"
+            [eoInputVal]="searchWord"
+            (eoClick)="searchWord = ''; getSearchRemoteList()"
+          >
+            <input
+              type="text"
+              eo-ng-input
+              placeholder="请输入"
+              [(ngModel)]="searchWord"
+              (keyup.enter)="getSearchRemoteList()"
+            />
+          </eo-ng-search-input-group>
+        </div>
+      </div>
+      <eo-ng-apinto-table
+        [nzTbody]="filterTbody"
+        [nzThead]="filterThead"
+        [(nzData)]="remoteList"
+        [nzNoScroll]="true"
+        [nzTrClick]="clickItem"
+        [nzScrollY]="316"
+      ></eo-ng-apinto-table>
+    </section>
+    <!-- <section *ngIf="filterType == 'remote'" class="form-input transfer-section">
+      <eo-ng-transfer
+        [nzDataSource]="remoteList"
+        [nzShowSearch]="filterForm.name === 'api' ? false : true"
+        [nzShowSelectAll]="false"
+        [nzTargetKeys]="remoteSelectList"
+        [nzRenderList]="[renderListTpl, renderListTpl]"
+        [nzRenderTopList]="
+          filterForm.name === 'api' ? [apiMenuTpl, apiMenuTpl] : null
+        "
+        [nzRenderTitleList]="[
+          '可选' + filterForm.title + '数据',
+          '已选' + filterForm.title + '数据'
+        ]"
+        (nzChange)="change($event)"
+      >
+        <ng-template
+          #renderListTpl
+          let-items
+          let-direction="direction"
+          let-stat="stat"
+          let-disabled="disabled"
+          let-onItemSelectAll="onItemSelectAll"
+          let-onItemSelect="onItemSelect"
+        >
+          <nz-table
+            #t
+            [nzData]="$asTransferItems(items)"
+            [nzShowPagination]="false"
+            [nzFrontPagination]="false"
+            [nzScroll]="{ y: '356px' }"
+          >
+            <thead>
+              <tr>
+                <ng-container *ngFor="let item of this.filterThead">
+                  <th
+                    [id]="item.title"
+                    nzWidth="50px"
+                    *ngIf="item.type === 'checkbox'"
+                    [nzDisabled]="disabled"
+                    [nzChecked]="stat.checkAll"
+                    [nzIndeterminate]="stat.checkHalf"
+                    (nzCheckedChange)="onItemSelectAll($event)"
+                    eoNgUserAccess="{{ 'serv-governance/' + strategyType }}"
+                  ></th>
+                  <th [id]="item.title" *ngIf="item.type !== 'checkbox'">
+                    {{ item.title }}
+                  </th>
+                </ng-container>
+              </tr>
+            </thead>
+            <tbody>
+              <ng-template nz-virtual-scroll let-data let-index="index">
+                <tr (click)="onItemSelect(data)">
+                  <ng-container *ngFor="let item of this.filterTbody">
+                    <td
+                      *ngIf="item.key === 'checked'"
+                      wzWidth="50px"
+                      [nzChecked]="!!data.checked"
+                      [nzDisabled]="disabled || data.disabled"
+                      (nzCheckedChange)="onItemSelect(data)"
+                      eoNgUserAccess="{{ 'serv-governance/' + strategyType }}"
+                    ></td>
+                    <td *ngIf="item.key !== 'checked'">
+                      <span
+                        class="ellipsis-td"
+                        eoNgFeedbackTooltip
+                        [nzTooltipTitle]="data[item.key?.toString() || '']"
+                        nzTooltipPlacement="top"
+                        [nzTooltipVisible]="false"
+                        nzTooltipTrigger="hover"
+                        >{{ data[item.key?.toString() || ''] }}</span
+                      >
+                    </td>
+                  </ng-container>
+                </tr>
+              </ng-template>
+            </tbody>
+          </nz-table>
+        </ng-template>
+      </eo-ng-transfer>
+    </section> -->
+
+    <!-- API路径(输入框) -->
+    <section
+      *ngIf="filterType == 'pattern' && filterForm.name !== 'ip'"
+      class="form-input transfer-section"
+    >
+      <input
+        eo-ng-input
+        class="w-INPUT_NORMAL"
+        placeholder="请输入API路径"
+        [(ngModel)]="filterForm.values[0]"
+        (ngModelChange)="checkPattern()"
+        [nzStatus]="filterForm.patternIsPass ? '' : 'error'"
+        eoNgUserAccess="{{ 'serv-governance/' + strategyType }}"
+      />
+      <p *ngIf="!filterForm.patternIsPass" class="tips" style="color: 'red'">
+        请正确输入路径，如/usr/*或*/usr/*
+      </p>
+    </section>
+
+    <!-- IP(输入框) -->
+    <section
+      *ngIf="filterType === 'pattern' && filterForm.name === 'ip'"
+      class="form-input transfer-section"
+    >
+      <textarea
+        eo-ng-input
+        class="w-INPUT_NORMAL"
+        [ngStyle]="{ height: ipArray.length * 23 + 'px' }"
+        [ngClass]="{ 'ant-input-status-error': !filterForm.patternIsPass }"
+        placeholder="请输入IP地址或CIDR范围，每条以换行分割"
+        [(ngModel)]="filterForm.values[0]"
+        (ngModelChange)="checkPattern()"
+        eoNgUserAccess="{{ 'serv-governance/' + strategyType }}"
+      ></textarea>
+      <p *ngIf="!filterForm.patternIsPass" class="tips" style="color: 'red'">
+        输入的IP或CIDR不符合格式
+      </p>
+    </section>
+
+    <!-- 一组多选框 -->
+    <section
+      *ngIf="filterType == 'static'"
+      class="flow_checkbox form-input transfer-section"
+    >
+      <label
+        *ngIf="filterForm.showAll"
+        eo-ng-checkbox
+        name="allChecked"
+        [(ngModel)]="filterForm.allChecked"
+        (ngModelChange)="updateAllChecked()"
+        eoNgUserAccess="{{ 'serv-governance/' + strategyType }}"
+      >
+        ALL
+      </label>
+      <eo-ng-checkbox-group
+        [(ngModel)]="staticsList"
+        (ngModelChange)="updateSingleChecked()"
+        eoNgUserAccess="{{ 'serv-governance/' + strategyType }}"
+      ></eo-ng-checkbox-group>
+    </section>
+  </div>
+</div>
+
+<!-- <ng-template #apiMenuTpl let-option="option" let-direction="direction">
+  <div
+    class="flex mt-[12px] mb-[16px]"
+    *ngIf="direction === 'left'; else blankTpl"
+  >
+    <eo-ng-cascader
+      class="w-[126px] mr-btnbase"
+      nzChangeOnSelect
+      name="header"
+      required
+      [(ngModel)]="searchGroup"
+      (ngModelChange)="getSearchRemoteList(direction)"
+      [nzDisabled]="nzDisabled"
+      [nzOptions]="apiGroupList"
+      nzLabelProperty="name"
+      nzValueProperty="uuid"
+      nzPlaceHolder="目录筛选"
+    >
+    </eo-ng-cascader>
+    <eo-ng-search-input-group
+      class="w-[224px] mr-[16px]"
+      [eoNoWidth]="true"
+      [eoInputVal]="searchWord"
+      (eoClick)="searchWord = ''; getSearchRemoteList(direction)"
+    >
+      <input
+        type="text"
+        eo-ng-input
+        placeholder="请输入"
+        [(ngModel)]="searchWord"
+        (keyup.enter)="getSearchRemoteList(direction)"
+      />
+    </eo-ng-search-input-group>
+  </div>
+  <ng-template #blankTpl><div class="h-[60px]"></div></ng-template>
+</ng-template> -->

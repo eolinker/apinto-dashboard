@@ -1,0 +1,298 @@
+<div class="mt-formtop">
+  <form
+    nz-form
+    [nzNoColon]="true"
+    [nzAutoTips]="autoTips"
+    [formGroup]="validateForm"
+    autocomplete="off"
+  >
+    <nz-form-item>
+      <nz-form-label [nzSpan]="6" nzRequired>策略名称：</nz-form-label>
+      <nz-form-control [nzSpan]="13" [nzErrorTip]="nameErrorTpl">
+        <input
+          type="text"
+          eo-ng-input
+          class="w-INPUT_NORMAL"
+          name="name"
+          formControlName="name"
+          placeholder="请输入首字母为英文，英文数字下划线任意一种组合"
+          required
+          eoNgUserAccess="serv-governance/grey"
+          (disabledEdit)="disabledEdit($event)"
+        />
+        <ng-template #nameErrorTpl let-control>
+          <ng-container *ngIf="control.hasError('required')"
+            >必填项</ng-container
+          >
+          <ng-container *ngIf="control.hasError('pattern')"
+            >请输入首字母为英文，英文数字下划线任意一种组合</ng-container
+          >
+        </ng-template>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="6">描述：</nz-form-label>
+      <nz-form-control [nzSpan]="13">
+        <textarea
+          name="desc"
+          class="w-INPUT_NORMAL"
+          eo-ng-input
+          formControlName="desc"
+          placeholder="请输入"
+          eoNgUserAccess="serv-governance/grey"
+        ></textarea>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="6">
+        <span
+          eoNgFeedbackTooltip
+          nzTooltipTitle="提交时自动分配优先级最低值+1 ，1代表优先级最高，依次可排到999"
+          nzTooltipPlacement="left"
+          [nzTooltipVisible]="false"
+          nzTooltipTrigger="hover"
+          >优先级：</span
+        ></nz-form-label
+      >
+      <nz-form-control
+        [nzSpan]="13"
+        nzErrorTip="优先级范围需在1-999之间，且为整数"
+      >
+        <input
+          eo-ng-input
+          name="priority"
+          class="w-INPUT_NORMAL"
+          placeholder="请输入"
+          formControlName="priority"
+          eoNgUserAccess="serv-governance/grey"
+        />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="6">
+        <span
+          eoNgFeedbackTooltip
+          nzTooltipTitle="强烈建议添加上游或API条件，用于灰度到指定节点"
+          nzTooltipPlacement="left"
+          [nzTooltipVisible]="false"
+          nzTooltipTrigger="hover"
+          >筛选流量：</span
+        >
+      </nz-form-label>
+      <nz-form-control [nzSpan]="13">
+        <eo-ng-filter-table
+          [(filterShowList)]="filterShowList"
+          [filterNamesSet]="filterNamesSet"
+          [filterTableTipShowFn]="drawerTipShowFn"
+          filterTableTip="注意：强烈建议添加上游或API条件，用于灰度到指定节点"
+        ></eo-ng-filter-table>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item class="mb-0">
+      <nz-form-label [nzSpan]="6" nzRequired>灰度规则：</nz-form-label>
+      <section class="limit-bg">
+        <nz-form-control [nzSpan]="19">
+          <div>
+            <nz-form-item>
+              <label class="label" style="width: 138px"
+                ><span class="required-symbol">*</span>会话保持规则：</label
+              >
+              <nz-form-control>
+                <eo-ng-switch
+                  formControlName="keepSession"
+                  eoNgUserAccess="serv-governance/grey"
+                  nzCheckedChildren="是"
+                  nzUnCheckedChildren="否"
+                  [nzDisabled]="nzDisabled"
+                ></eo-ng-switch>
+              </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item [ngClass]="{ 'no-margin-bottom': showNodesValid }">
+              <label class="label" style="width: 138px"
+                ><span class="required-symbol">*</span>灰度节点：</label
+              >
+              <nz-form-control>
+                <div>
+                  <eo-ng-apinto-table
+                    class="arrayItem grey-nodes"
+                    [nzTbody]="nodesTableBody"
+                    [nzData]="nodesList"
+                    [nzNoScroll]="true"
+                  >
+                  </eo-ng-apinto-table>
+                </div>
+                <div *ngIf="showNodesValid" class="ant-form-item-with-help">
+                  <div class="ant-form-item-explain">
+                    <div role="alert" class="ant-form-item-explain-error">
+                      必填项
+                    </div>
+                  </div>
+                </div>
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <label class="label" style="width: 138px"
+                ><span class="required-symbol">*</span>流量分配方式：</label
+              >
+              <nz-form-control>
+                <eo-ng-radio-group
+                  formControlName="distribution"
+                  [nzOptions]="distributionOptions"
+                  [nzDisabled]="nzDisabled"
+                ></eo-ng-radio-group>
+              </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item
+              *ngIf="validateForm.controls['distribution'].value === 'match'"
+            >
+              <label class="label" style="width: 138px"
+                ><span
+                  eoNgFeedbackTooltip
+                  nzTooltipTitle="匹配应用请求中的请求头参数、cookie、请求参数"
+                  nzTooltipPlacement="left"
+                  [nzTooltipVisible]="false"
+                  nzTooltipTrigger="hover"
+                  >高级匹配：
+                </span>
+              </label>
+              <nz-form-control>
+                <eo-ng-match-table
+                  [(matchList)]="createStrategyForm.config.match!"
+                  [nzDisabled]="nzDisabled"
+                ></eo-ng-match-table>
+              </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item
+              *ngIf="validateForm.controls['distribution'].value === 'percent'"
+            >
+              <label class="label" style="width: 138px"
+                ><span class="required-symbol">*</span>
+
+                <span
+                  eoNgFeedbackTooltip
+                  nzTooltipTitle="筛选的流量，按照设置的百分比转发到灰度节点，其余的流量转发到正常上游"
+                  nzTooltipPlacement="left"
+                  [nzTooltipVisible]="false"
+                  nzTooltipTrigger="hover"
+                  >灰度节点流量占比：</span
+                >
+              </label>
+              <nz-form-control class="">
+                <div
+                  class="flex flex-nowrap items-center justify-between w-[410px]"
+                >
+                  <nz-slider
+                    [nzMin]="0"
+                    [nzMax]="100"
+                    formControlName="percent1"
+                    (nzOnAfterChange)="changePercent($event, 'percent1')"
+                    [nzDisabled]="nzDisabled"
+                  ></nz-slider>
+                  <eo-ng-input-group
+                    class="mg-input-left-s"
+                    style="width: 80px"
+                    nzSuffix="%"
+                  >
+                    <input
+                      [nzBorderless]="true"
+                      type="number"
+                      eo-ng-input
+                      required
+                      placeholder="请输入"
+                      eoNgUserAccess="serv-governance/grey"
+                      formControlName="percent1"
+                      (nzBlur)="
+                        changePercent(
+                          validateForm.controls['percent1'].value,
+                          'percent1'
+                        )
+                      "
+                      (keyup.enter)="
+                        changePercent(
+                          validateForm.controls['percent1'].value,
+                          'percent1'
+                        )
+                      "
+                    />
+                  </eo-ng-input-group>
+                </div>
+              </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item
+              *ngIf="validateForm.controls['distribution'].value === 'percent'"
+            >
+              <label class="label" style="width: 138px"
+                ><span class="required-symbol">*</span>上游节点流量占比：</label
+              >
+              <nz-form-control>
+                <div
+                  class="flex flex-nowrap items-center justify-between w-[410px]"
+                >
+                  <nz-slider
+                    [nzMin]="0"
+                    [nzMax]="100"
+                    formControlName="percent2"
+                    (nzOnAfterChange)="changePercent($event, 'percent2')"
+                    [nzDisabled]="nzDisabled"
+                  ></nz-slider>
+                  <eo-ng-input-group
+                    class="mg-input-left-s"
+                    style="width: 80px"
+                    nzSuffix="%"
+                  >
+                    <input
+                      [nzBorderless]="true"
+                      type="number"
+                      eo-ng-input
+                      required
+                      placeholder="请输入"
+                      eoNgUserAccess="serv-governance/grey"
+                      formControlName="percent2"
+                      (nzBlur)="
+                        changePercent(
+                          validateForm.controls['percent2'].value,
+                          'percent2'
+                        )
+                      "
+                      (keyup.enter)="
+                        changePercent(
+                          validateForm.controls['percent2'].value,
+                          'percent2'
+                        )
+                      "
+                    />
+                  </eo-ng-input-group>
+                </div>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </nz-form-control>
+      </section>
+    </nz-form-item>
+  </form>
+
+  <nz-form-item class="mb-0 sticky bg-white bottom-0 py-mbase">
+    <nz-form-control [nzOffset]="6" [nzSpan]="18">
+      <button
+        class="ant-btn-primary"
+        eoNgUserAccess="serv-governance/grey"
+        type="submit"
+        eo-ng-button
+        (click)="saveStrategy()"
+      >
+        {{ editPage ? '提交' : '保存' }}
+      </button>
+      <button eo-ng-button class="ml-btnybase" (click)="backToList()">
+        取消
+      </button>
+    </nz-form-control>
+  </nz-form-item>
+</div>

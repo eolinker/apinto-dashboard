@@ -1,0 +1,40 @@
+<!--
+ * @Author:  
+ * @Date: 2022-08-24 00:37:49
+ * @LastEditors:  
+ * @LastEditTime: 2022-08-24 00:43:11
+ * @FilePath: /apinto/src/app/layout/application/application-content/application-content.component.html
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+-->
+<div class="content-tabs-fixed">
+  <eo-ng-tabs
+    [nzLinkRouter]="true"
+    [(nzSelectedIndex)]="selectedIndex"
+    [nzOptions]="tabOptions"
+  ></eo-ng-tabs>
+
+  <ng-template #tab1Tpl>
+    <span>上线管理</span>
+  </ng-template>
+
+  <ng-template #tab2Tpl>
+    <span>应用信息</span>
+  </ng-template>
+
+  <ng-template #tab3Tpl>
+    <span *ngIf="appId !== 'anonymous'">鉴权管理</span>
+    <div
+      eoNgFeedbackTooltip
+      *ngIf="appId === 'anonymous'"
+      eoNgFeedbackTooltip
+      nzTooltipPlacement="bottom"
+      nzTooltipTrigger="hover"
+      nzTooltipTitle="匿名应用不开放鉴权管理"
+    >
+      鉴权管理
+    </div>
+  </ng-template>
+</div>
+<div class="inside-content-fixed-top-51">
+  <router-outlet></router-outlet>
+</div>

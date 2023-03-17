@@ -1,0 +1,22 @@
+<span class="ant-input-prefix">
+  <span
+    ><svg class="iconpark-icon"><use href="#search"></use></svg
+  ></span>
+</span>
+<input
+  [(ngModel)]="value"
+  (ngModelChange)="_handle()"
+  [disabled]="disabled"
+  [placeholder]="placeholder"
+  class="ant-input w-[224px]"
+  [ngClass]="{ 'ant-input-disabled': disabled }"
+/>
+<span
+  *ngIf="value && value.length > 0"
+  class="ant-input-suffix"
+  (click)="_clear()"
+>
+  <span class="ant-input-clear-icon">
+    <svg class="iconpark-icon"><use href="#close-small"></use></svg>
+  </span>
+</span>

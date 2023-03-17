@@ -1,0 +1,27 @@
+cluster_edit:
+  - cluster_view
+variable_edit:
+  - variable_view
+service_edit:
+  - service_view
+discovery_edit:
+  - discovery_view
+application_edit:
+  - application_view
+api_edit:
+  - api_view
+strategy_traffic_edit:
+  - strategy_traffic_view
+strategy_fuse_edit:
+  - strategy_fuse_view
+strategy_visit_edit:
+  - strategy_visit_view
+strategy_cache_edit:
+  - strategy_cache_view
+strategy_grey_edit:
+  - strategy_grey_view
+authorization_edit:
+  - authorization_view
+ext_app_edit:
+  - ext_app_view
+

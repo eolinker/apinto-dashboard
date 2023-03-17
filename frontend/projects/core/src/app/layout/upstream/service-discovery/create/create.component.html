@@ -1,0 +1,107 @@
+<!--
+ * @Author:  
+ * @Date: 2022-08-09 23:06:58
+ * @LastEditors:  
+ * @LastEditTime: 2022-09-28 00:19:14
+ * @FilePath: /apinto/src/app/layout/upstream/service-discovery-create/service-discovery-create.component.html
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+-->
+<div class="mt-formtop">
+  <form
+    nz-form
+    [nzNoColon]="true"
+    [nzAutoTips]="autoTips"
+    [formGroup]="validateForm"
+    autocomplete="off"
+  >
+    <nz-form-item>
+      <nz-form-label [nzSpan]="5" nzRequired>注册中心：</nz-form-label>
+      <nz-form-control [nzSpan]="14" [nzErrorTip]="nameErrorTpl">
+        <input
+          name="name"
+          class="w-INPUT_NORMAL"
+          required
+          eo-ng-input
+          formControlName="name"
+          placeholder="英文数字下划线任意一种，首字母必须为英文"
+          eoNgUserAccess="upstream/serv-discovery"
+        />
+        <ng-template #nameErrorTpl let-control>
+          <ng-container *ngIf="control.hasError('pattern')"
+            >英文数字下划线任意一种，首字母必须为英文</ng-container
+          >
+          <ng-container *ngIf="control.hasError('required')"
+            >必填项</ng-container
+          ></ng-template
+        >
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="5">描述：</nz-form-label>
+      <nz-form-control [nzSpan]="14">
+        <textarea
+          class="w-INPUT_NORMAL"
+          name="desc"
+          rows="3"
+          eo-ng-input
+          formControlName="desc"
+          placeholder="请输入"
+          eoNgUserAccess="upstream/serv-discovery"
+        ></textarea>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="5" nzRequired>服务类型：</nz-form-label>
+      <nz-form-control [nzSpan]="14">
+        <eo-ng-select
+          class="w-INPUT_NORMAL"
+          name="driver"
+          required
+          formControlName="driver"
+          (ngModelChange)="changeBasedata()"
+          [nzOptions]="driverList"
+          eoNgUserAccess="upstream/serv-discovery"
+          [nzDisabled]="nzDisabled"
+          (disabledEdit)="disabledEdit($event)"
+        ></eo-ng-select>
+      </nz-form-control>
+    </nz-form-item>
+
+    <!--动态渲染-->
+    <nz-form-item class="mb-0">
+      <nz-form-label [nzSpan]="5" nzRequired>配置信息：</nz-form-label>
+      <nz-form-control [nzSpan]="14">
+        <dynamic-component
+          class="form-input dynamic_area pb-[8px]"
+          ngDefaultControl
+          name="dynamic"
+          id="dynamic"
+          [(apiData)]="createServiceForm"
+          (apiDataChange)="getDataFromDynamicComponent($event)"
+          [baseData]="baseData"
+          [nzDisabled]="nzDisabled"
+          [startValidate]="startValidateDynamic"
+        ></dynamic-component>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item class="mb-0 sticky bg-white bottom-0 py-mbase">
+      <nz-form-control [nzOffset]="5" [nzSpan]="14">
+        <button
+          class="ant-btn-primary"
+          type="submit"
+          eo-ng-button
+          (click)="saveService()"
+          eoNgUserAccess="upstream/serv-discovery"
+        >
+          {{ editPage ? '提交' : '保存' }}
+        </button>
+        <button eo-ng-button class="ml-btnybase" (click)="backToList()">
+          取消
+        </button>
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+</div>

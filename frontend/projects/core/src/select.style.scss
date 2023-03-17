@@ -1,0 +1,38 @@
+eo-ng-system {
+  td {
+    eo-ng-select.ant-select,
+    eo-ng-select-top-control.ant-select-selector {
+      width: 100% !important;
+    }
+  }
+}
+td {
+  eo-ng-select.ant-select,
+  eo-ng-select-top-control.ant-select-selector {
+    width: auto !important;
+  }
+
+  .ant-select-selector {
+    width: auto !important;
+    min-width: none;
+  }
+
+  .ant-select-arrow,
+  .ant-select-clear {
+    right: 1px !important;
+  }
+}
+
+eo-ng-select.limit-select .ant-select-selection-search {
+  display: inline-block;
+}
+
+.ant-pagination-options {
+  .ant-select,
+  nz-select-top-control.ant-select-selector {
+    width: auto !important;
+  }
+}
+.ant-select-multiple .ant-select-selection-search {
+  margin-inline-start: 2px;
+}
