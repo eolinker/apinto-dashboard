@@ -1,0 +1,90 @@
+modules:
+  - id: 4
+    title: API管理
+    module: router
+    access:
+      - api_view
+      - api_edit
+  - id: 3
+    title: 应用管理
+    module: application
+    access:
+      - application_view
+      - application_edit
+  - id: 2
+    title: 上游服务
+    children:
+      - id: 201
+        title: 上游管理
+        module: upstream/upstream
+        access:
+          - service_view
+          - service_edit
+      - id: 202
+        title: 服务发现
+        module: upstream/serv-discovery
+        access:
+          - discovery_view
+          - discovery_edit
+  - id: 1
+    title: 基础设施
+    children:
+      - id: 101
+        title: 网关集群
+        module: deploy/cluster
+        access:
+          - cluster_view
+          - cluster_edit
+      - id: 102
+        title: 环境变量
+        module: deploy/env
+        access:
+          - variable_view
+          - variable_edit
+  - id: 5
+    title: 服务治理
+    children:
+    - id: 501
+      title: 流量策略
+      module: serv-governance/traffic/group/list
+      access:
+        - strategy_traffic_view
+        - strategy_traffic_edit
+    - id: 502
+      title: 熔断策略
+      module: serv-governance/fuse/group/list
+      access:
+        - strategy_fuse_view
+        - strategy_fuse_edit
+    - id: 503
+      title: 访问策略
+      module: serv-governance/visit/group/list
+      access:
+        - strategy_visit_view
+        - strategy_visit_edit
+    - id: 504
+      title: 缓存策略
+      module: serv-governance/cache/group/list
+      access:
+        - strategy_cache_view
+        - strategy_cache_edit
+    - id: 505
+      title: 灰度策略
+      module: serv-governance/grey/group/list
+      access:
+        - strategy_grey_view
+        - strategy_grey_edit
+  - id: 7
+    title: 审计日志
+    module: audit-log
+    access:
+      - audit_log_view
+  - id: 6
+    title: 系统管理
+    children:
+      - title: 外部应用
+        id: 602
+        module: system/ext-app
+        access:
+          - ext_app_view
+          - ext_app_edit
