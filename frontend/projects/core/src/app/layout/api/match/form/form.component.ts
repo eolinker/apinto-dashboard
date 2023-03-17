@@ -38,7 +38,7 @@ export class MatchFormComponent implements OnInit {
     { label: '全等匹配', value: 'EQUAL' },
     { label: '前缀匹配', value: 'PREFIX' },
     { label: '后缀匹配', value: 'SUFFIX' },
-    { label: '字串匹配', value: 'SUBSTR' },
+    { label: '子串匹配', value: 'SUBSTR' },
     { label: '非等匹配', value: 'UNEQUAL' },
     { label: '空值匹配', value: 'NULL' },
     { label: '存在匹配', value: 'EXIST' },
