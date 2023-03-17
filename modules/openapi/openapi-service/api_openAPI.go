@@ -252,10 +252,8 @@ func (a *apiOpenAPIService) SyncImport(ctx context.Context, namespaceID, appID i
 			}
 
 			//quote更新所引用的服务
-			quoteMap := make(map[quote_entry.QuoteTargetKindType][]int)
-			quoteMap[quote_entry.QuoteTargetKindTypeService] = append(quoteMap[quote_entry.QuoteTargetKindTypeService], serviceID)
 
-			if err = a.quoteStore.Set(txCtx, apiInfo.Id, quote_entry.QuoteKindTypeAPI, quoteMap); err != nil {
+			if err = a.quoteStore.Set(txCtx, apiInfo.Id, quote_entry.QuoteKindTypeAPI, quote_entry.QuoteTargetKindTypeService, serviceID); err != nil {
 				return err
 			}
 
