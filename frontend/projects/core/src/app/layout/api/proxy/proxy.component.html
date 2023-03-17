@@ -38,7 +38,10 @@
     </nz-form-control>
   </nz-form-item>
 
-  <nz-form-item>
+ 
+  <nz-form-item
+    *ngIf="validateProxyHeaderForm.controls['opt_type'].value !== 'DELETE'"
+  >
     <nz-form-label [nzSpan]="6" nzRequired>参数值：</nz-form-label>
     <nz-form-control [nzSpan]="13">
       <input
