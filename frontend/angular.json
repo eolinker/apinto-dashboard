@@ -41,6 +41,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
+            "deployUrl": "/frontend/",
             "outputPath": "../controller/dist",
             "index": "projects/core/src/index.html",
             "main": "projects/core/src/main.ts",

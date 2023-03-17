@@ -16,7 +16,7 @@
 `yarn config set registry https://registry.npm.taobao.org`  将安装源切换为淘宝镜像源，会快一些
 
 ## 安装依赖
-`yarn install --registry http://172.18.65.55:4873/ --legacy-peer-deps`
+`yarn install --legacy-peer-deps`
 
 ## 打包
 `yarn build`
