@@ -548,7 +548,7 @@ func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator in
 		quoteMap := make(map[quote_entry.QuoteTargetKindType][]int)
 		quoteMap[quote_entry.QuoteTargetKindTypeService] = append(quoteMap[quote_entry.QuoteTargetKindTypeService], serviceID)
 
-		return a.quoteStore.Set(txCtx, apiInfo.Id, quote_entry.QuoteKindTypeAPI, quoteMap)
+		return a.quoteStore.Set(txCtx, apiInfo.Id, quote_entry.QuoteKindTypeAPI, quote_entry.QuoteTargetKindTypeService, serviceID)
 	})
 
 }
@@ -657,9 +657,7 @@ func (a *apiService) UpdateAPI(ctx context.Context, namespaceID int, operator in
 			}
 
 			//quote更新所引用的服务
-			quoteMap := make(map[quote_entry.QuoteTargetKindType][]int)
-			quoteMap[quote_entry.QuoteTargetKindTypeService] = append(quoteMap[quote_entry.QuoteTargetKindTypeService], serviceID)
-			if err = a.quoteStore.Set(txCtx, apiInfo.Id, quote_entry.QuoteKindTypeAPI, quoteMap); err != nil {
+			if err = a.quoteStore.Set(txCtx, apiInfo.Id, quote_entry.QuoteKindTypeAPI, quote_entry.QuoteTargetKindTypeService, serviceID); err != nil {
 				return err
 			}
 		}
@@ -1909,10 +1907,8 @@ func (a *apiService) ImportAPI(ctx context.Context, namespaceId, operator int, i
 			}
 
 			//quote更新所引用的服务
-			quoteMap := make(map[quote_entry.QuoteTargetKindType][]int)
-			quoteMap[quote_entry.QuoteTargetKindTypeService] = append(quoteMap[quote_entry.QuoteTargetKindTypeService], serviceID)
 
-			if err = a.quoteStore.Set(txCtx, apiInfo.Id, quote_entry.QuoteKindTypeAPI, quoteMap); err != nil {
+			if err = a.quoteStore.Set(txCtx, apiInfo.Id, quote_entry.QuoteKindTypeAPI, quote_entry.QuoteTargetKindTypeService, serviceID); err != nil {
 				return err
 			}
 
