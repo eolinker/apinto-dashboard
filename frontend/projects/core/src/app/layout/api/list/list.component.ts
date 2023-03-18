@@ -204,7 +204,12 @@ export class ApiManagementListComponent implements OnInit {
   getApisData () {
     this.api.get('routers', { group_uuid: (this.apisForm.group_uuid || this.groupUuid), search_name: this.apiNameForSear, source_ids: this.apisForm.source_ids.join(','), page_num: this.apisForm.page_num, page_size: this.apisForm.page_size }).subscribe((resp:any) => {
       if (resp.code === 0) {
-        this.apisForm.apis = resp.data.apis
+        this.apisForm.apis = this.apisSet.size > 0
+          ? resp.data.apis.map((item:any) => {
+            item.checked = this.apisSet.has(item.uuid)
+            return item
+          })
+          : resp.data.apis
         this.apisForm.group_uuid = this.apisForm.group_uuid || this.groupUuid
         this.apisForm.total = resp.data.total || this.apisForm.total
         this.apisForm.page_num = resp.data.page_num || this.apisForm.page_num
@@ -277,6 +282,7 @@ export class ApiManagementListComponent implements OnInit {
     this.api.delete('router', { uuid: items.uuid }).subscribe((resp:any) => {
       if (resp.code === 0) {
         this.message.success(resp.msg || '删除成功!', { nzDuration: 1000 })
+        this.apisSet.delete(items.uuid)
         this.getApisData()
       } else {
         this.message.error(resp.msg || '删除失败!')
