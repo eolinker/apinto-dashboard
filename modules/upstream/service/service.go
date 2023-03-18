@@ -24,6 +24,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/user"
 	"github.com/eolinker/apinto-dashboard/modules/variable"
 	"github.com/eolinker/apinto-dashboard/modules/variable/variable-entry"
+	variable_model "github.com/eolinker/apinto-dashboard/modules/variable/variable-model"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
 	"github.com/go-basic/uuid"
@@ -278,9 +279,7 @@ func (s *service) CreateService(ctx context.Context, namespaceID, userId int, in
 			return err
 		}
 		//往引用表插入所引用服务发现
-		quoteMap := make(map[quote_entry.QuoteTargetKindType][]int)
-		quoteMap[quote_entry.QuoteTargetKindTypeDiscovery] = append(quoteMap[quote_entry.QuoteTargetKindTypeDiscovery], input.DiscoveryID)
-		if err := s.quoteStore.Set(txCtx, serviceInfo.Id, quote_entry.QuoteKindTypeService, quoteMap); err != nil {
+		if err := s.quoteStore.Set(txCtx, serviceInfo.Id, quote_entry.QuoteKindTypeService, quote_entry.QuoteTargetKindTypeDiscovery, input.DiscoveryID); err != nil {
 			return err
 		}
 
@@ -290,12 +289,11 @@ func (s *service) CreateService(ctx context.Context, namespaceID, userId int, in
 			if err != nil {
 				return err
 			}
-			quoteMap = make(map[quote_entry.QuoteTargetKindType][]int)
-			for _, variableInfo := range variables {
-				quoteMap[quote_entry.QuoteTargetKindTypeVariable] = append(quoteMap[quote_entry.QuoteTargetKindTypeVariable], variableInfo.Id)
-			}
+			variableIds := common.SliceToSliceIds(variables, func(t *variable_model.GlobalVariable) int {
+				return t.Id
+			})
 
-			err = s.quoteStore.Set(txCtx, serviceInfo.Id, quote_entry.QuoteKindTypeService, quoteMap)
+			err = s.quoteStore.Set(txCtx, serviceInfo.Id, quote_entry.QuoteKindTypeService, quote_entry.QuoteTargetKindTypeVariable, variableIds...)
 			if err != nil {
 				return err
 			}
@@ -391,11 +389,8 @@ func (s *service) UpdateService(ctx context.Context, namespaceID, userId int, in
 			}
 		}
 
-		quoteMap := make(map[quote_entry.QuoteTargetKindType][]int)
-		quoteMap[quote_entry.QuoteTargetKindTypeDiscovery] = append(quoteMap[quote_entry.QuoteTargetKindTypeDiscovery], input.DiscoveryID)
-
 		//往引用表插入所引用服务发现
-		if err = s.quoteStore.Set(txCtx, serviceInfo.Id, quote_entry.QuoteKindTypeService, quoteMap); err != nil {
+		if err = s.quoteStore.Set(txCtx, serviceInfo.Id, quote_entry.QuoteKindTypeService, quote_entry.QuoteTargetKindTypeDiscovery, input.DiscoveryID); err != nil {
 			return err
 		}
 
@@ -403,12 +398,11 @@ func (s *service) UpdateService(ctx context.Context, namespaceID, userId int, in
 		if len(variableList) > 0 {
 			variables, err := s.globalVariableService.GetByKeys(ctx, namespaceID, variableList)
 
-			quoteMap = make(map[quote_entry.QuoteTargetKindType][]int)
-			for _, variableInfo := range variables {
-				quoteMap[quote_entry.QuoteTargetKindTypeVariable] = append(quoteMap[quote_entry.QuoteTargetKindTypeVariable], variableInfo.Id)
-			}
+			variableIds := common.SliceToSliceIds(variables, func(t *variable_model.GlobalVariable) int {
+				return t.Id
+			})
 
-			if err = s.quoteStore.Set(txCtx, serviceInfo.Id, quote_entry.QuoteKindTypeService, quoteMap); err != nil {
+			if err = s.quoteStore.Set(txCtx, serviceInfo.Id, quote_entry.QuoteKindTypeService, quote_entry.QuoteTargetKindTypeVariable, variableIds...); err != nil {
 				return err
 			}
 		}
