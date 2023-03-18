@@ -75,8 +75,7 @@
               "node_modules/eo-ng-table/styles.scss",
               "node_modules/eo-ng-tabs/styles.scss",
               "node_modules/eo-ng-tree/styles.scss",
-              "projects/core/src/styles.scss",
-              "projects/eo-ng-apinto-user/src/styles.scss"
+              "projects/core/src/styles.scss"
             ],
             "scripts": []
           },

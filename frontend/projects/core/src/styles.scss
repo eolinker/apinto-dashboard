@@ -7,82 +7,113 @@
 @import './layout.style.scss';
 @import './form.style.scss';
 /* You can add global styles to this file, and also import other style files */
+
+:root {
+  --layout-header-height: 50px;
+  --layout-footer-height: 30px;
+
+  --btn-icon-margin: 5px;
+  --button-height: 32px;
+  --tabs-height: 43px;
+  --tree-item-height: 30px;
+  --collapse-header-height: 46px;
+
+  --table-font-size: 14px;
+  --table-row-height: 40px;
+  --table-item-padding: 4px;
+
+  --layout-sidebar-width: 90px;
+  --layout-sidebar-item-height: auto;
+  --icon-size: 16px;
+  --button-icon-margin: 5px;
+
+  --modal-mask-background-color: 0px 10px 15px 15px;
+  --border-radius: 4px;
+  --padding: 15px 20px;
+  --padding-x: 20px;
+  --padding-y: 15px;
+
+  --margin: 20px;
+
+  --menu-item-border-width: 3px;
+
+  --text-secondary-color: #999;
+  --empty-simple-ellipse-background-color: #dce0e6;
+  --empty-simple-border-color: #666666;
+  --empty-simple-box-background-color: #dce0e6;
+}
+
 :root {
   //###主题相关颜色###
-  --MAIN_THEME_COLOR: var(--MAIN_THEME_BG);
-  --MAIN_TEXT: #333333;
-  --HOVER_BG: #f2f2f2;
-  --MASK: rgba(0, 0, 0, 0.35);
+  --text-color: #333333;
+  --item-hover-background-color: #f2f2f2;
+  --modal-mask-background-color: rgba(0, 0, 0, 0.35);
   // 选择器主题背景色
-  --MAIN_BG: #fff;
-  // 选择器主题背景浅色（选项悬浮用）
-  --MAIN_LIGHT_BG: #f0b6db;
+  --background-color: #fff;
   // 选择器禁用背景色
-  --MAIN_DISABLED_BG: #f6f6f7;
+  --disabled-background-color: #f6f6f7;
   // 选择器禁用边框色
-  --MAIN_DISABLED_BORDER: #dedede;
-  --MAIN_DISABLED_TEXT: #bbbbbb;
-  --DIVIDER: #f3f3f3;
+  --disabled-border-color: #dedede;
+  --disabled-text-color: #bbbbbb;
+  --divider-color: #f3f3f3;
   // 按钮
   //次要按钮
-  --BTN_SEC_TEXT: #000000;
-  --BTN_SEC_TEXT_HOVER: #000000;
-  --BTN_SEC_BG: #ffffff;
-  --BTN_SEC_BG_HOVER: #ffffff;
-  // 按钮文字颜色
-  --BTN_TEXT: #ffffff;
+  --button-default-text-color: #000000;
+  --button-default-hover-text-color: #000000;
+  --button-default-background-color: #ffffff;
+  --button-default-hover-background-color: #ffffff;
 
   // 红色按钮文字颜色
-  --BTN_TEXT_RED: var(--RED_NORMAL);
+  --button-danger-text-color: var(--danger-color);
 
   // 蓝色按钮文字颜色
-  --BTN_TEXT_BLUE: var(--BLUE_NORMAL);
+  --button-primary-text-color_BLUE: var(--info-color);
 
   // *主要操作(PRIMARY)
   // 按钮内文字和图标的颜色
-  --BTN_PRIMARY_TEXT: #ffffff;
+  --button-primary-text-color: #ffffff;
   // 按钮内文字和图标hover的颜色
-  --BTN_PRIMARY_TEXT_HOVER: #ffffff;
+  --button-primary-hover-text-color: #ffffff;
   // 按钮背景色
-  --BTN_PRIMARY_BG: var(--MAIN_THEME_BG);
+  --button-primary-background-color: var(--primary-color);
   // 按钮hover背景色
-  --BTN_PRIMARY_BG_HOVER: #3067b8;
+  --button-primary-hover-background-color: #3067b8;
   // “更多”按钮背景色
   --BTN_PRIMARY_MORE_BG: #2196f3;
   // “更多”按钮hover背景色
   --BTN_PRIMARY_MORE_BG_HOVER: #03a9f4;
 
   // 按钮边框颜色
-  --BTN_PRIMARY_BORDER: transparent;
+  --button-primary-border-color: transparent;
 
   // 按钮边框hover颜色
-  --BTN_PRIMARY_BORDER_HOVER: transparent;
+  --button-primary-hover-border-color: transparent;
 
   // 轻量级操作(LIGHT)，比如纯文字、图标、列表的操作
   // 按钮内文字和图标的颜色
-  --BTN_LIGHT_TEXT: var(--BLUE_NORMAL);
+  --BTN_LIGHT_TEXT: var(--info-color);
 
   // 按钮内文字和图标hover的颜色
   --BTN_LIGHT_TEXT_HOVER: var(--BLUE_LIGHT);
 
   // 按钮背景色
-  --BTN_LIGHT_BG: var(--MAIN_THEME_COLOR);
+  --primary-color: var(--primary-color);
 
   // 按钮hover背景色
-  --BTN_LIGHT_BG_HOVER: var(--HOVER_BG);
+  --primary-hover-color: var(--item-hover-background-color);
 
   // 按钮边框颜色
-  --BTN_LIGHT_BORDER: var(--MAIN_THEME_COLOR);
+  --BTN_LIGHT_BORDER: var(--primary-color);
 
   // 按钮边框hover颜色
-  --BTN_LIGHT_BORDER_HOVER: var(--MAIN_THEME_COLOR);
-  --RED_NORMAL: red;
+  --BTN_LIGHT_BORDER_HOVER: var(--primary-color);
+  --danger-color: red;
 
-  --DISABLE_BG: #f3f3f3;
+  --disabled-background-color: #f3f3f3;
   --ACTIVE_BG: #f3f3f3;
-  --MAIN_TEXT: #333333;
+  --text-color: #333333;
   --SEC_TEXT: #888888;
-  --DISABLE_TEXT: #cccccc;
+  --disabled-text-color: #cccccc;
 
   --BTN_FONT_SIZE: 14px;
   --BTN_LIGHT_HEIGHT: 22px;
@@ -92,32 +123,32 @@
   --NORMAL_FONT_SIZE: 14px;
   --TITLE_FONT_SIZE: 16px;
 
-  --MODAL_SHADOW: 0px 10px 15px 15px;
+  --modal-mask-background-color: 0px 10px 15px 15px;
   --MAIN_BOX_SHADOW: 0px 1px 6px 0px rgba(217, 217, 217, 50);
 
   //抽屉弹窗、全局弹窗、浮窗提示
-  --MODAL_SHADOW: 0px 10px 15px 15px;
+  --modal-mask-background-color: 0px 10px 15px 15px;
 
   //边角
-  --DEFAULT_BORDER_RADIUS: 4px;
+  --border-radius: 4px;
   --MODAL_BORDER_RADIUS: 5px;
   --LABEL_BORDER-RADIUS: 4px;
-  --BORDER: #e8e8e8;
+  --border-color: #e8e8e8;
   --collapse-border-color: #e8e8e8;
-  --border-radius: 3px;
+  --border-radius: 4px;
   //导航底部线条粗细
-  --NAV_BOTTOM: 3px;
-  --NAVBAR_BTN_BG: #f2f2f2;
-  --NAVBAR_BTN_BG_HOVER: rgba(0, 0, 0, 0.05);
-  --PADDING: 20px;
-  --PADDING_X: 20px;
-  --PADDING_Y: 15px;
+  --menu-item-border-width: 3px;
+  --item-active-background-color: #f2f2f2;
+  --item-active-background-color_HOVER: rgba(0, 0, 0, 0.05);
+  --padding: 20px;
+  --padding_X: 20px;
+  --padding_Y: 15px;
 
-  --PADDING_BTN: 10px;
-  --PADDING_BTN_X: 10px;
-  --PADDING_BTN_Y: 10px;
+  --padding_BTN: 10px;
+  --padding_BTN_X: 10px;
+  --padding_BTN_Y: 10px;
 
-  --MARGIN: 20px;
+  --margin: 20px;
 
   --MAIN_THEME_BUTTON_COLOR: #2878ff;
   --BTN_MARGIN_TOP: 12px; // 位于顶部的按钮间距
@@ -138,20 +169,168 @@
   --INPUT_MARGIN_TOP: 12px;
   --PAGINATION_MARGIN_TOP: 16px;
   --BTN_CANCLE_BG: #f3f3f3;
-  --BTN_TEXT: #d9d9d9;
   --TITLE_TEXT: #666666;
   --TIP_TEXT_COLOR: #bbbbbb;
   --BTN_DISABLED_BG: #f8f8fa;
-  --MAIN_THEME_BG: #22549d;
+  --primary-color: #22549d;
   --LABEL_COLOR: #5a5a5a;
   --PRIMARY_BUTTON_DISABLED_BG: #22549d33;
-  --SCROLL_BAR_BG: rgba(0, 0, 0, 0.05);
-  --ICONPARK_SIZE: 16px;
+  --scrollbar-thumb-background-color_BG: rgba(0, 0, 0, 0.05);
+  --icon-size: 16px;
 
-  --MR_ICON: 5px;
-  --BAR_BG_COLOR: #fafafa;
+  --button-icon-margin: 5px;
+  --bar-background-color: #fafafa;
 
   --FORM_SPAN: 20px;
+
+  --select-border-color: var(--border-color);
+  --select-background-color: var(--background-color);
+
+  --button-border-color: var(--border-color);
+  --button-shadow-color: #d9d9d9;
+  --button-text-text-color: var(--text-color);
+  --button-text-hover-text-color: var(--text-color);
+  --button-text-hover-background-color: hsl(0, 0%, 95.1%);
+  --button-primary-border-color: rgba(0, 0, 0, 0.07);
+  --button-primary-active-border-color: #3067b8;
+  --button-primary-active-background-color: #3067b8;
+  --button-primary-shadow-color: #d9d9d9;
+  --button-default-border-color: var(--border-color);
+  --button-default-hover-border-color: rgba(0, 0, 0, 0.07);
+  --button-default-hover-background-color: hsl(0, 0%, 95.1%);
+  --button-default-active-border-color: rgba(0, 0, 0, 0.07);
+  --button-default-active-background-color: hsl(0, 0%, 95.1%);
+  --button-default-shadow-color: #d9d9d9;
+  --button-danger-text-color: #ff3c32;
+  --button-danger-border-color: #ff3c32;
+  --button-danger-background-color: #fff;
+  --button-danger-hover-text-color: rgba(255, 60, 50, 0.8);
+  --button-danger-hover-border-color: #ff3c32;
+  --button-danger-hover-background-color: #fff;
+  --button-danger-active-border-color: #ff3c32;
+  --button-danger-active-background-color: #fff;
+  --button-danger-shadow-color: #d9d9d9;
+  --tabs-badge-color: var(--primary-color);
+  --tabs-active-badge-color: #7371fc;
+  --tabs-background-color: var(--background-color);
+  --tabs-text-color: var(--text-color);
+  --tabs-active-color: var(--primary-color);
+  --tabs-active-text-color: var(--text-color);
+  --tabs-card-text-color: var(--text-color);
+  --tabs-card-background-color: #fafafa;
+  --tabs-card-item-background-color: var(--background-color);
+  --tabs-card-item-active-color: var(--primary-color);
+  --tabs-card-item-active-text-color: var(--text-color);
+  --tabs-card-item-active-background-color: var(--background-color);
+  --table-text-color: var(--text-color);
+  --table-border-color: rgba(0, 0, 0, 0.07);
+  --table-background-color: var(--background-color);
+  --table-header-text-color: #999;
+  --table-header-background-color: #fafafa;
+  --table-row-hover-background-color: hsl(0, 0%, 95.1%);
+  --table-footer-background-color: var(--background-color);
+  --table-footer-text-color: var(--text-color);
+  --tree-header-background-color: var(--background-color);
+  --tree-text-color: var(--text-color);
+  --tree-background-color: var(--background-color);
+  --tree-selected-text-color: var(--text-color);
+  --tree-selected-background-color: hsl(0, 0%, 95.1%);
+  --tree-hover-text-color: var(--text-color);
+  --tree-hover-background-color: hsl(0, 0%, 95.1%);
+  --dropdown-menu-background-color: var(--background-color);
+  --dropdown-item-text-color: var(--text-color);
+  --dropdown-item-hover-text-color: var(--text-color);
+  --dropdown-item-hover-background-color: hsl(0, 0%, 95.1%);
+  --menu-background-color: var(--background-color);
+  --menu-item-text-color: var(--text-color);
+  --menu-item-group-title-text-color: #999;
+  --menu-item-active-background-color: rgba(51, 51, 51, 0.1);
+  --menu-item-active-color: var(--primary-color);
+  --menu-item-active-text-color: var(--text-color);
+  --menu-inline-submenu-background-color: #fafafa;
+  --select-text-color: var(--text-color);
+  --select-border-color: rgba(0, 0, 0, 0.07);
+  --select-hover-border-color: var(--primary-color);
+  --select-active-border-color: var(--primary-color);
+  --select-background-color: var(--background-color);
+  --select-dropdown-text-color: var(--text-color);
+  --select-dropdown-background-color: var(--background-color);
+  --select-item-selected-text-color: var(--text-color);
+  --select-item-selected-background-color: hsl(0, 0%, 95.1%);
+  --input-text-color: var(--text-color);
+  --input-background-color: var(--background-color);
+  --input-icon-color: rgba(0, 0, 0, 0.25);
+  --input-border-color: rgba(0, 0, 0, 0.07);
+  --input-hover-border-color: var(--primary-color);
+  --input-active-border-color: var(--primary-color);
+  --input-placeholder-color: #bbbbbb;
+  --modal-header-background-color: var(--background-color);
+  --modal-header-text-color: var(--text-color);
+  --modal-body-background-color: var(--background-color);
+  --modal-body-text-color: var(--text-color);
+  --modal-footer-background-color: var(--background-color);
+  --modal-footer-text-color: var(--text-color);
+  --modal-mask-background-color: rgba(0, 0, 0, 0.35);
+  --pagination-item-background-color: var(--background-color);
+  --pagination-item-active-background-color: var(--background-color);
+  --pagination-button-background-color: var(--background-color);
+  --toast-success-text-color: #2ca641;
+  --toast-success-icon-color: #2ca641;
+  --toast-success-background-color: rgba(44, 166, 65, 0.1);
+  --toast-warning-icon-color: #ed6a0c;
+  --toast-warning-text-color: #ed6a0c;
+  --toast-warning-background-color: rgba(237, 106, 12, 0.1);
+  --toast-info-text-color: #2878ff;
+  --toast-info-icon-color: #2878ff;
+  --toast-info-background-color: rgba(40, 120, 255, 0.1);
+  --toast-error-text-color: #ff3c32;
+  --toast-error-icon-color: #ff3c32;
+  --toast-error-background-color: rgba(255, 60, 50, 0.1);
+  --alert-default-text-color: var(--text-color);
+  --alert-default-icon-color: var(--text-color);
+  --alert-default-background-color: rgba(149, 149, 149, 0.1);
+  --alert-success-text-color: #2ca641;
+  --alert-success-icon-color: #2ca641;
+  --alert-success-background-color: rgba(44, 166, 65, 0.1);
+  --alert-info-text-color: #2878ff;
+  --alert-info-icon-color: #2878ff;
+  --alert-info-background-color: rgba(40, 120, 255, 0.1);
+  --alert-error-text-color: #ff3c32;
+  --alert-error-icon-color: #ff3c32;
+  --alert-error-background-color: rgba(255, 60, 50, 0.1);
+  --alert-warning-text-color: #ed6a0c;
+  --alert-warning-icon-color: #ed6a0c;
+  --alert-warning-background-color: rgba(237, 106, 12, 0.1);
+  --checkbox-text-color: var(--text-color);
+  --checkbox-border-color: rgba(0, 0, 0, 0.07);
+  --checkbox-background-color: var(--background-color);
+  --checkbox-checked-background-color: var(--primary-color);
+  --checkbox-inner-color: var(--background-color);
+  --checkbox-checked-border-color: var(--primary-color);
+  --checkbox-checked-text-color: var(--text-color);
+  --radio-text-color: var(--text-color);
+  --radio-border-color: rgba(0, 0, 0, 0.07);
+  --radio-background-color: var(--background-color);
+  --radio-checked-text-color: var(--text-color);
+  --radio-checked-border-color: var(--primary-color);
+  --radio-checked-background-color: var(--primary-color);
+  --switch-active-color: var(--primary-color);
+  --switch-background-color: var(--background-color);
+  --switch-text-color: #fff;
+  --switch-card-border-color: rgba(0, 0, 0, 0.07);
+  --switch-card-background-color: var(--background-color);
+  --switch-card-text-color: var(--text-color);
+  --collapse-header-background-color: #fafafa;
+  --collapse-border-color: rgba(0, 0, 0, 0.07);
+  --collapse-content-background-color: var(--background-color);
+  --popover-background-color: rgba(0, 0, 0, 0.75);
+  --popover-text-color: #fff;
+  --progress-default-color: #2878ff;
+  --progress-success-color: #52c41a;
+  --progress-exception-color: #ff3c32;
+  --system-border-color: rgba(0, 0, 0, 0.07);
+
+  --button-height: 32px;
 }
 
 address,
@@ -172,11 +351,11 @@ span {
 }
 
 a {
-  color: var(--MAIN_THEME_BG);
+  color: var(--primary-color);
 }
 a:hover,
 a:active {
-  color: var(--BTN_PRIMARY_BG_HOVER);
+  color: var(--button-primary-background-color_HOVER);
 }
 
 label {
@@ -190,17 +369,17 @@ label {
   padding-right: 20px;
 }
 .iconpark-icon {
-  height: var(--ICONPARK_SIZE);
-  // min-width: var(--ICONPARK_SIZE);
+  height: var(--icon-size);
+  // min-width: var(--icon-size);
   vertical-align: middle;
-  width: var(--ICONPARK_SIZE);
+  width: var(--icon-size);
 }
 
 .icon-Apinto {
   line-height: 50px;
   height: 50px;
   width: 32px;
-  color: var(--MAIN_THEME_BG);
+  color: var(--primary-color);
 }
 
 .logo-title {
@@ -336,27 +515,27 @@ eo-ng-upstream {
 }
 
 .green-bg {
-  color: var(--BTN_TEXT);
-  background-color: var(--MAIN_THEME_BG);
+  color: var(--button-primary-text-color);
+  background-color: var(--primary-color);
   padding: 0 10px;
   border: 1px solid rgb(184, 182, 182);
 }
 .grey-bg {
-  color: var(--BTN_TEXT);
+  color: var(--button-primary-text-color);
   background-color: grey;
   border: 1px solid rgb(184, 182, 182);
   padding: 0 10px;
 }
 
 .red-bg {
-  color: var(--BTN_TEXT);
+  color: var(--button-primary-text-color);
   background-color: red;
   padding: 0 10px;
   border: 1px solid rgb(184, 182, 182);
 }
 
 .detected-symbol {
-  color: var(--MAIN_THEME_BG);
+  color: var(--primary-color);
 }
 
 // .block {
@@ -422,11 +601,11 @@ eo-ng-upstream {
 
 .dynamic_area {
   display: inline-block;
-  background-color: var(--BAR_BG_COLOR);
+  background-color: var(--bar-background-color);
   width: auto !important;
   padding: 20px;
   height: auto;
-  border-radius: var(--DEFAULT_BORDER_RADIUS);
+  border-radius: var(--border-radius);
 
   .form-row {
     min-width: 686px;
@@ -465,8 +644,7 @@ eo-ng-upstream {
 .drawer-list-content {
   margin-top: 0px;
 }
-
-.f-row-js-ac {
+f .f-row-js-ac {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -475,9 +653,9 @@ eo-ng-upstream {
 .eo-ng-dropdown-container {
   min-width: 100px;
   line-height: 20px;
-  border-radius: var(--DEFAULT_BORDER_RADIUS);
-  background-color: var(--MAIN_BG);
-  color: var(--MAIN_TEXT);
+  border-radius: var(--border-radius);
+  background-color: var(--background-color);
+  color: var(--text-color);
   box-shadow: var(--MAIN_BOX_SHADOW);
 }
 
@@ -549,7 +727,7 @@ eo-ng-api-management-list {
 }
 
 .ant-transfer-list {
-  border-color: var(--BORDER);
+  border-color: var(--border-color);
 }
 
 .flow-drawer {
@@ -569,10 +747,6 @@ eo-ng-api-management-list {
     input.ant-input {
       height: 20px !important;
     }
-  }
-
-  ::-webkit-scrollbar {
-    display: none;
   }
 }
 
@@ -603,7 +777,7 @@ eo-ng-flow-control-group {
 }
 
 .ant-tree .ant-tree-node-content-wrapper {
-  color: var(--MAIN_TEXT);
+  color: var(--text-color);
 }
 
 eo-ng-api-management {
@@ -640,11 +814,11 @@ eo-ng-tree-default:not(.ant-select-tree) {
       width: auto;
       height: 28px !important;
       line-height: 28px !important;
-      color: var(--MAIN_TEXT);
+      color: var(--text-color);
     }
     button:hover {
       background-color: rgba(0, 0, 0, 0.1) !important;
-      color: var(--MAIN_TEXT);
+      color: var(--text-color);
     }
   }
   .custom-node {
@@ -705,7 +879,7 @@ eo-ng-tree-default:not(.ant-select-tree) {
 .ant-dropdown-menu-submenu-title.ant-dropdown-menu-item-active,
 .ant-dropdown-menu-submenu-title.ant-dropdown-menu-submenu-title-active,
 .ant-dropdown-menu-submenu-title:not(.ant-dropdown-menu-item-disabled):hover {
-  background-color: var(--HOVER_BG);
+  background-color: var(--item-hover-background-color);
 }
 
 eo-ng-select {
@@ -719,7 +893,7 @@ eo-ng-select.ant-select:not(.ant-select-customize-input):not(
     .ant-select-disabled
   ):focus
   .ant-select-selector {
-  border-color: var(--MAIN_THEME_BG) !important;
+  border-color: var(--primary-color) !important;
 }
 
 eo-ng-select.ant-select-disabled.ant-select:not(.ant-select-customize-input)
@@ -728,11 +902,11 @@ eo-ng-select.ant-select-disabled.ant-select:not(.ant-select-customize-input)
     .ant-select-customize-input
   ):hover
   .ant-select-selector {
-  border-color: var(--BORDER) !important;
+  border-color: var(--border-color) !important;
 }
 
 eo-ng-select.ant-select.ant-select-disable:hover .ant-select-selector {
-  border-color: var(--BORDER) !important;
+  border-color: var(--border-color) !important;
 }
 
 .form-input .ant-cascader input {
@@ -787,8 +961,8 @@ nz-slider {
   width: 174px !important;
 }
 .dynamic_area section.dynamic_inline_block:last-child {
-  border-color: var(--BORDER);
-  color: var(--BORDER);
+  border-color: var(--border-color);
+  color: var(--border-color);
 }
 
 .my-2 {
@@ -812,12 +986,12 @@ nz-slider {
 .group-title:not(.non-click):hover,
 .group-title:not(.non-click):focus,
 .group-title-selected {
-  background-color: var(--HOVER_BG);
+  background-color: var(--item-hover-background-color);
 }
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--SCROLL_BAR_BG);
+  scrollbar-color: var(--scrollbar-thumb-background-color_BG);
 }
 
 ::-webkit-scrollbar {
@@ -826,11 +1000,11 @@ nz-slider {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--SCROLL_BAR_BG);
+  background: var(--scrollbar-thumb-background-color_BG);
   border-radius: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--SCROLL_BAR_BG);
+  background: var(--scrollbar-thumb-background-color_BG);
 }
 
 .ant-drawer-right .ant-drawer-content-wrapper {
@@ -923,7 +1097,7 @@ a.array_item_addition {
   padding: 0px 2px;
   line-height: 32px;
   height: 32px;
-  border-radius: var(--DEFAULT_BORDER_RADIUS);
+  border-radius: var(--border-radius);
 }
 a.array_item_addition.ml-btnbase {
   margin-left: 8px !important;
@@ -1020,7 +1194,7 @@ a.array_item_addition.ml-btnbase {
 }
 
 span.highlight {
-  color: var(--MAIN_THEME_BG);
+  color: var(--primary-color);
 }
 
 .ant-pagination.mini .ant-pagination-item:not(.ant-pagination-item-active),
@@ -1068,10 +1242,10 @@ input::placeholder {
 }
 eo-ng-service-governance {
   .limit-bg {
-    background-color: var(--BAR_BG_COLOR);
+    background-color: var(--bar-background-color);
     padding: 20px;
     padding-bottom: 4px;
-    border-radius: var(--DEFAULT_BORDER_RADIUS);
+    border-radius: var(--border-radius);
     .form-input {
       width: 360px !important;
     }
@@ -1091,14 +1265,14 @@ eo-ng-service-governance {
   }
 
   .ant-input-affix-wrapper:has(input[disabled]) {
-    color: var(--MAIN_DISABLED_TEXT);
-    background-color: var(--MAIN_DISABLED_BG);
+    color: var(--disabled-text-color);
+    background-color: var(--disabled-background-color);
     cursor: not-allowed;
     opacity: 1;
   }
 
   .ant-input-affix-wrapper:has(input[disabled]):hover {
-    border: 1px solid var(--BORDER);
+    border: 1px solid var(--border-color);
   }
 }
 
@@ -1127,13 +1301,6 @@ eo-ng-service-governance {
 eo-ng-audit-log-list {
   .ant-picker-suffix {
     display: none;
-  }
-}
-
-eo-ng-apinto-user-avatar {
-  .iconfont {
-    font-size: 32px;
-    color: #dadadb;
   }
 }
 
@@ -1170,7 +1337,7 @@ eo-ng-apinto-user-avatar {
 
 .activation-block {
   width: 760px;
-  background: var(--BAR_BG_COLOR);
+  background: var(--bar-background-color);
   margin: auto;
   margin-top: 10vh;
   padding: 54px 0 54px 0;
@@ -1263,7 +1430,7 @@ eo-ng-apinto-user-avatar {
 
     label.ant-btn-primary {
       padding: 5px 12px;
-      border-radius: var(--DEFAULT_BORDER_RADIUS);
+      border-radius: var(--border-radius);
     }
   }
 }
@@ -1295,15 +1462,15 @@ nz-upload.ant-btn-primary {
   > :first-child
   .ant-select
   .ant-select-selector {
-  border-top-left-radius: var(--DEFAULT_BORDER_RADIUS) !important;
-  border-bottom-left-radius: var(--DEFAULT_BORDER_RADIUS) !important;
+  border-top-left-radius: var(--border-radius) !important;
+  border-bottom-left-radius: var(--border-radius) !important;
 }
 
 .ant-input-group.ant-input-group-compact > :last-child {
   .ant-select .ant-select-selector,
   input.ant-input {
-    border-top-right-radius: var(--DEFAULT_BORDER_RADIUS) !important;
-    border-bottom-right-radius: var(--DEFAULT_BORDER_RADIUS) !important;
+    border-top-right-radius: var(--border-radius) !important;
+    border-bottom-right-radius: var(--border-radius) !important;
   }
 }
 
@@ -1329,7 +1496,7 @@ nz-upload.ant-btn-primary {
     }
 
     .ant-tabs-tab-active {
-      border-top: 2px solid var(--MAIN_THEME_BG) !important;
+      border-top: 2px solid var(--primary-color) !important;
     }
   }
 }

@@ -107,12 +107,10 @@ export class ApiBatchPublishComponent implements OnInit {
       btns: [{
         title: '解决方案',
         click: (item:any) => {
-          let routerS:string = '/' + item.data.solution.name + '?'
-          if (Object.keys(item.data.solution.params).length > 0) {
-            for (const index in Object.keys(item.data.solution.params)) {
-              routerS = routerS + Object.keys(item.data.solution.params)[index] + '=' + item.data.solution.params[Object.keys(item.data.solution.params)[index]] + '&'
-            }
-          }
+          let routerS:string = '/' + item.data.solution.name
+          const routerSArr:Array<string> = routerS.split('/')
+          routerSArr.splice(-1, 0, item.data.solution.params.service_name) // 写法不太灵活，可能需要后端调整接口
+          routerS = routerSArr.join('/')
           window.open(routerS, '')
         },
         type: 'text'

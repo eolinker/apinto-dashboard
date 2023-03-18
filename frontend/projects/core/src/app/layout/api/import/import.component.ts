@@ -74,7 +74,7 @@ export class ApiImportComponent {
       key: 'id',
       styleFn: (item:any) => {
         if (item.disabled) {
-          return 'color:var(--MAIN_DISABLED_TEXT)'
+          return 'color:var(--disabled-text-color)'
         }
         return ''
       }
@@ -93,7 +93,7 @@ export class ApiImportComponent {
       key: 'method',
       styleFn: (item:any) => {
         if (item.disabled) {
-          return 'color:var(--MAIN_DISABLED_TEXT)'
+          return 'color:var(--disabled-text-color)'
         }
         return ''
       }
@@ -102,7 +102,7 @@ export class ApiImportComponent {
       key: 'path',
       styleFn: (item:any) => {
         if (item.disabled) {
-          return 'color:var(--MAIN_DISABLED_TEXT)'
+          return 'color:var(--disabled-text-color)'
         }
         return ''
       }
@@ -111,7 +111,7 @@ export class ApiImportComponent {
       key: 'desc',
       styleFn: (item:any) => {
         if (item.disabled) {
-          return 'color:var(--MAIN_DISABLED_TEXT)'
+          return 'color:var(--disabled-text-color)'
         }
         return ''
       }
@@ -120,7 +120,7 @@ export class ApiImportComponent {
       key: 'statusString',
       styleFn: (item:any) => {
         if (item.disabled) {
-          return 'color:var(--MAIN_DISABLED_TEXT)'
+          return 'color:var(--disabled-text-color)'
         }
         return ''
       }

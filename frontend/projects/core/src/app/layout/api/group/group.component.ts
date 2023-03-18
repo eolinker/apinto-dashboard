@@ -39,7 +39,7 @@ spreed-content
       .iconpark-icon{
         height:30px !important;
         width:30px !important;
-        color: var(--MAIN_BG);
+        color: var(--background-color);
       }
     }
 

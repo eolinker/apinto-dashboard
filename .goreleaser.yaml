@@ -9,7 +9,6 @@ builds:
     goarch:
       - amd64
       - arm64
-#      - "386"
     goarm:
       - "6"
     gomips:
@@ -19,7 +18,6 @@ builds:
     targets:
       - linux_arm64
       - linux_amd64
-#      - linux_386
       - darwin_arm64
       - darwin_amd64
     tags:

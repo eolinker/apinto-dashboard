@@ -22,8 +22,8 @@ nz-table-inner-default {
     color: var(--TITLE_TEXT);
     font-weight: 400;
     border: none;
-    border-top: 1px solid var(--BORDER);
-    border-bottom: 1px solid var(--BORDER);
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
     white-space: nowrap;
   }
 }
@@ -78,13 +78,13 @@ table tr th.ant-table-selection-column {
     border-right: none !important;
 
     input {
-      border: 1px solid var(--BORDER);
+      border: 1px solid var(--border-color);
       background-color: #fff;
     }
     input:hover,
     input:focus,
     input:active {
-      border: 1px solid var(--MAIN_THEME_BG) !important;
+      border: 1px solid var(--primary-color) !important;
     }
 
     .ant-input[disabled],
@@ -92,7 +92,7 @@ table tr th.ant-table-selection-column {
     .ant-input[disabled]:active,
     .ant-input[disabled]:focus {
       border: 1px solid #d9d9d9;
-      background-color: var(--MAIN_DISABLED_BG) !important;
+      background-color: var(--disabled-background-color) !important;
     }
 
     .ant-input-status-error:not(.ant-input-disabled):not(
@@ -117,7 +117,7 @@ table tr th.ant-table-selection-column {
   eo-ng-table
     eo-ng-select.ant-select-disabled.ant-select:not(.ant-select-customize-input)
     .ant-select-selector {
-    border-color: var(--BORDER);
+    border-color: var(--border-color);
   }
 }
 
@@ -182,7 +182,7 @@ label.table-label {
 
 .ant-table-row-expand-icon:focus,
 .ant-table-row-expand-icon:hover {
-  color: var(--MAIN_THEME_BG);
+  color: var(--primary-color);
 }
 
 .arrayItem .ant-table table {
