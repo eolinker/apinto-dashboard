@@ -40,7 +40,7 @@ import { Component, Input } from '@angular/core'
         'Microsoft YaHei', 'Noto Sans CJK SC', 'WenQuanYi Micro Hei', 'Arial',
         sans-serif;
       display: inline-block;
-      border-radius: var(--DEFAULT_BORDER_RADIUS);
+      border-radius: var(--border-radius);
       height: 20px !important;
       line-height: 12px !important;
       text-align: center;

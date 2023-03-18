@@ -82,7 +82,7 @@ import { ApiService } from 'projects/core/src/app/service/api.service'
   styles: [
     `
     .detect_value_bg {
-      background-color: var(--BAR_BG_COLOR);;
+      background-color: var(--bar-background-color);;
       padding-left: var(--LAYOUT_PADDING);
       word-break:break-all;
     }`

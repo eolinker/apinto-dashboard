@@ -55,12 +55,11 @@ func (n *Nacos) ToApinto(namespace, name, desc string, config []byte) *v1.Discov
 		Address: address,
 		Params:  params,
 	}
-	conf, _ := json.Marshal(apintoNacosConfig)
 	discoveryConfig := &v1.DiscoveryConfig{
 		Name:         name,
 		Driver:       n.apintoDriverName,
 		Description:  desc,
-		Config:       v1.JsonMarshalProxy(conf),
+		Config:       apintoNacosConfig,
 		StaticHealth: nil,
 	}
 

@@ -106,7 +106,6 @@ export class TrafficCreateComponent implements OnInit {
   showMetricsError: boolean = false
   nzDisabled: boolean = false
 
-
   responseHeaderList: Array<{
     key: string
     value: string
@@ -146,7 +145,7 @@ export class TrafficCreateComponent implements OnInit {
     })
 
     this.appConfigService.reqFlashBreadcrumb([
-      { title: '流量策略', routerLink: 'serv-governance/traffic/group' },
+      { title: '流量策略', routerLink: 'serv-governance/traffic' },
       { title: '新建流量策略' }
     ])
   }
@@ -165,7 +164,6 @@ export class TrafficCreateComponent implements OnInit {
     }
   }
 
-
   // 当页面是编辑策略页时,需要根据集群名和策略uuid获取策略信息
   getStrategyMessage () {
     this.api
@@ -180,7 +178,7 @@ export class TrafficCreateComponent implements OnInit {
             this.appConfigService.reqFlashBreadcrumb([
               {
                 title: '流量策略',
-                routerLink: 'serv-governance/traffic/group/list'
+                routerLink: 'serv-governance/traffic'
               },
               { title: resp.data.strategy!.name }
             ])
@@ -284,7 +282,7 @@ export class TrafficCreateComponent implements OnInit {
           name: this.filterShowList[index].name,
           values:
             this.filterShowList[index].name === 'ip'
-              ? this.filterShowList[index].values[0].split(/[\n]/)
+              ? [...this.filterShowList[index].values[0].split(/[\n]/).filter(value => { return !!value }), ...this.filterShowList[index].values.slice(1)]
               : this.filterShowList[index].values
         })
       }

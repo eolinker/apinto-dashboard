@@ -110,11 +110,10 @@ export class VisitCreateComponent implements OnInit {
       continue: [false, [Validators.required]]
     })
     this.appConfigService.reqFlashBreadcrumb([
-      { title: '访问策略', routerLink: 'serv-governance/visit/group/list' },
+      { title: '访问策略', routerLink: 'serv-governance/visit' },
       { title: '新建访问策略' }
     ])
   }
-
 
   ngOnInit (): void {
     this.clusterName = this.baseInfo.allParamsInfo.clusterName
@@ -143,7 +142,7 @@ export class VisitCreateComponent implements OnInit {
             this.appConfigService.reqFlashBreadcrumb([
               {
                 title: '访问策略',
-                routerLink: 'serv-governance/visit/group/list'
+                routerLink: 'serv-governance/visit'
               },
               { title: resp.data.strategy!.name }
             ])
@@ -198,7 +197,10 @@ export class VisitCreateComponent implements OnInit {
       for (const index in this.filterShowList) {
         this.createStrategyForm.filters.push({
           name: this.filterShowList[index].name,
-          values: this.filterShowList[index].values
+          values:
+          this.filterShowList[index].name === 'ip'
+            ? [...this.filterShowList[index].values[0].split(/[\n]/).filter(value => { return !!value }), ...this.filterShowList[index].values.slice(1)]
+            : this.filterShowList[index].values
         })
       }
 
@@ -206,7 +208,9 @@ export class VisitCreateComponent implements OnInit {
       for (const index in this.influenceShowList) {
         this.createStrategyForm.config.influence_sphere.push({
           name: this.influenceShowList[index].name,
-          values: this.influenceShowList[index].values
+          values: this.influenceShowList[index].name === 'ip'
+            ? [...this.influenceShowList[index].values[0].split(/[\n]/).filter(value => { return !!value }), ...this.influenceShowList[index].values.slice(1)]
+            : this.influenceShowList[index].values
         })
       }
 
