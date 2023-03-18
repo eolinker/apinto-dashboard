@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
+
 	"github.com/eolinker/apinto-dashboard/app/apserver/version"
 	"github.com/eolinker/apinto-dashboard/db_migrator"
 	cluster_service "github.com/eolinker/apinto-dashboard/modules/cluster"
@@ -11,14 +13,13 @@ import (
 	"github.com/eolinker/eosc/log"
 	"github.com/gin-gonic/gin"
 	"github.com/urfave/cli/v2"
-	"os"
 )
 
 func main() {
 	app := &cli.App{
 		Name:     "apserver",
 		HelpName: "apserver",
-		Usage:    "apinto dashboard enterprise",
+		Usage:    "apinto dashboard",
 
 		Version:     version.Version,
 		Description: "",

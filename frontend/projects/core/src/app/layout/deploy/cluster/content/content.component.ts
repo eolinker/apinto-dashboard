@@ -1,9 +1,9 @@
 /* eslint-disable camelcase */
 /* eslint-disable dot-notation */
 /*
- * @Author: MengjieYang yangmengjie@eolink.com
+ * @Author:
  * @Date: 2022-07-20 22:34:58
- * @LastEditors: MengjieYang yangmengjie@eolink.com
+ * @LastEditors:
  * @LastEditTime: 2022-08-08 00:28:56
  * @FilePath: /apinto/src/app/layout/deploy/deploy-cluster-content/deploy-cluster-content.component.ts
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
@@ -27,7 +27,6 @@ export class DeployClusterContentComponent implements OnInit {
   @ViewChild('tab1', { read: TemplateRef, static: true }) tab1: TemplateRef<TabTemplateContext> | string = '环境变量'
   @ViewChild('tab2', { read: TemplateRef, static: true }) tab2: TemplateRef<TabTemplateContext> | string = '证书管理'
   @ViewChild('tab3', { read: TemplateRef, static: true }) tab3: TemplateRef<TabTemplateContext> | string = '网关节点'
-  @ViewChild('tab4', { read: TemplateRef, static: true }) tab4: TemplateRef<TabTemplateContext> | string = '配置管理'
   clusterName:string=''
   clusterDesc:string=''
   _clusterDesc:string=''
@@ -63,11 +62,6 @@ export class DeployClusterContentComponent implements OnInit {
       {
         title: this.tab3,
         routerLink: 'nodes',
-        queryParamsHandling: 'merge'
-      },
-      {
-        title: this.tab4,
-        routerLink: 'conf',
         queryParamsHandling: 'merge'
       }
     ]

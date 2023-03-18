@@ -29,10 +29,10 @@ fi
 
 # Step 1 - Build the frontend release version into the backend/server/dist folder
 # Step 2 - Build the monolithic app by building backend release version together with the backend/server/dist (leveraing embed introduced in Golang 1.19).
-echo "Start building apinto enterprise monolithic ${VERSION}..."
+echo "Start building apinto dashboard monolithic ${VERSION}..."
 
 echo ""
-echo "Step 1 - building apinto enterprise frontend..."
+echo "Step 1 - building apinto dashboard frontend..."
 
 if [[ "$BUILD_MODE" == "all" || ! -d "controller/dist" ]];then
   echo "begin frontend building..."
@@ -41,8 +41,8 @@ if [[ "$BUILD_MODE" == "all" || ! -d "controller/dist" ]];then
       pnpm --dir ./frontend i && pnpm --dir ./frontend build
   elif command -v yarn > /dev/null
   then
-      echo "cd frontend && yarn install --registry http://172.18.65.55:4873/ --legacy-peer-deps "
-      cd frontend && yarn install --registry http://172.18.65.55:4873/ --legacy-peer-deps
+      echo "cd frontend && yarn install --registry https://registry.npmmirror.com --legacy-peer-deps "
+      cd frontend && yarn install --registry https://registry.npmmirror.com --legacy-peer-deps
       echo "yarn build"
       yarn build
       cd ../
@@ -53,10 +53,10 @@ else
   echo "skip frontend building..."
 fi
 
-echo "Completed building apinto enterprise frontend."
+echo "Completed building apinto dashboard frontend."
 
 echo "${VERSION}"
-echo "Step 2 - building apinto enterprise backend..."
+echo "Step 2 - building apinto dashboard backend..."
 
 flags="-X 'github.com/eolinker/apinto-dashboard/app/apserver/version.Version=${VERSION}'
 -X 'github.com/eolinker/apinto-dashboard/app/apserver/version.goversion=$(go version)'
@@ -66,7 +66,7 @@ flags="-X 'github.com/eolinker/apinto-dashboard/app/apserver/version.Version=${V
 
 
 # -ldflags="-w -s" means omit DWARF symbol table and the symbol table and debug information
-go build --tags "release,mysql" -ldflags "-w -s $flags" -o ${OUTPUT_BINARY} ./app/apserver
+CGO_ENABLED=0 go build --tags "release,mysql" -ldflags "-w -s $flags" -o ${OUTPUT_BINARY} ./app/apserver
 
 mkdir -p apserver_${VERSION}
 #cp ./scripts/resource/config.yml.tpl ${OUTPUT_DIR}/config.yml
@@ -76,7 +76,7 @@ cp ${OUTPUT_BINARY} ./apserver_${VERSION}
 cp ./scripts/resource/install.sh ./apserver_${VERSION}
 cp ./scripts/resource/run.sh ./apserver_${VERSION}
 
-echo "Completed building apinto enterprise backend."
+echo "Completed building apinto dashboard backend."
 
 echo ""
 echo "Step 3 - printing version..."
@@ -92,5 +92,5 @@ rm -rf apserver_${VERSION}_linux_amd64.tar.gz
 echo "apserver_${VERSION}_linux_amd64.tar.gz 完成"
 
 echo ""
-echo "${GREEN}Completed building apinto enterprise monolithic ${VERSION} at ${OUTPUT_BINARY}.${NC}"
+echo "${GREEN}Completed building apinto dashboard monolithic ${VERSION} at ${OUTPUT_BINARY}.${NC}"
 

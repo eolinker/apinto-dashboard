@@ -33,7 +33,7 @@ feishu-informer: # 飞书回调
 frontend-builder: # 前端构建
   stage: build
   rules:
-    - if: ($CI_COMMIT_TITLE =~ /^frontend/ || $CI_MERGE_REQUEST_TITLE =~ /^frontend/) && $CI_COMMIT_BRANCH == "V2.0" # 当前端提交后触发
+    - if: $CI_COMMIT_TITLE =~ /^frontend/ && $CI_COMMIT_BRANCH == "V2.0" # 当前端提交后触发
   script:
     - sed -i '/replace github.com\/eolinker\/eosc => */d' go.mod
     - go mod tidy
@@ -42,7 +42,7 @@ frontend-builder: # 前端构建
 golang-builder:
   stage: build
   rules:
-    - if: ($CI_COMMIT_TITLE !~ /^frontend/ || $CI_MERGE_REQUEST_TITLE !~ /^frontend/) && $CI_COMMIT_BRANCH == "V2.0" # 当后端提交后触发
+    - if: $CI_COMMIT_TITLE !~ /^frontend/ && $CI_COMMIT_BRANCH == "V2.0" # 当后端提交后触发
   script:
     - sed -i '/replace github.com\/eolinker\/eosc => */d' go.mod
     - go mod tidy

@@ -39,7 +39,7 @@ eo-ng-breadcrumb span {
 }
 
 eo-ng-breadcrumb nz-breadcrumb-item:last-child span:first-child a {
-  color: var(--MAIN_THEME_BG) !important;
+  color: var(--primary-color) !important;
   font-weight: 500;
   font-size: 14px;
 }
@@ -65,7 +65,7 @@ eo-ng-login .ant-layout-sider-children {
 .ant-layout {
   background: #fff;
   height: 100%;
-  color: var(--MAIN_TEXT);
+  color: var(--text-color);
 }
 .ant-layout.ant-layout-has-sider > .ant-layout,
 .ant-layout.ant-layout-has-sider > .ant-layout-content {
@@ -125,7 +125,7 @@ eo-ng-login .ant-layout-sider-children {
 }
 
 eo-ng-inline-menu .ant-menu-inline .ant-menu-item::after {
-  border-right: var(--NAV_BOTTOM) solid transparent;
+  border-right: var(--menu-item-border-width) solid transparent;
 }
 
 eo-ng-tabs {
@@ -136,19 +136,19 @@ eo-ng-tabs {
   }
   .ant-tabs-tab-active a[nz-tab-link] {
     padding: 0;
-    border-radius: var(--DEFAULT_BORDER_RADIUS);
-    color: var(--MAIN_THEME_BG) !important;
+    border-radius: var(--border-radius);
+    color: var(--primary-color) !important;
   }
   .ant-tabs-nav-wrap {
     padding-left: var(--LAYOUT_MARGIN);
   }
   a[nz-tab-link] {
-    border-radius: var(--DEFAULT_BORDER_RADIUS);
-    color: var(--MAIN_TEXT) !important;
+    border-radius: var(--border-radius);
+    color: var(--text-color) !important;
   }
 
   .ant-tabs-ink-bar {
-    background: var(--MAIN_THEME_BG) !important;
+    background: var(--primary-color) !important;
   }
 
   .ant-tabs-tab + .ant-tabs-tab {
@@ -160,10 +160,10 @@ eo-ng-tabs {
   }
 
   .ant-tabs-tab.ant-tabs-tab-disabled {
-    color: var(--MAIN_DISABLED_TEXT) !important;
+    color: var(--disabled-text-color) !important;
     .ant-tabs-tab-btn:focus,
     .ant-tabs-tab-btn:active {
-      color: var(--MAIN_DISABLED_TEXT) !important;
+      color: var(--disabled-text-color) !important;
     }
   }
 }
@@ -197,10 +197,10 @@ eo-ng-layout {
 
 .inside-content-fixed-top-51 {
   position: fixed;
-  top: 93px;
+  top: 94px;
   width: calc(100% - 195px);
   min-width: 1170px;
-  height: calc(100vh - 93px);
+  height: calc(100vh - 94px);
   overflow: auto;
 }
 .ant-menu-inline .ant-menu-item:not(:last-child),
@@ -211,7 +211,7 @@ eo-ng-layout {
 }
 
 .ant-menu-submenu-selected {
-  color: var(--MAIN_TEXT);
+  color: var(--text-color);
 }
 
 .list-content-no-top {

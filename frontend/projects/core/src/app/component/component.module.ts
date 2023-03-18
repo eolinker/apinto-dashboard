@@ -1,7 +1,7 @@
 /*
- * @Author: MengjieYang yangmengjie@eolink.com
+ * @Author:  
  * @Date: 2022-08-09 23:06:58
- * @LastEditors: MengjieYang yangmengjie@eolink.com
+ * @LastEditors:  
  * @LastEditTime: 2022-08-23 16:45:46
  * @FilePath: /apinto/src/app/component/component.module.ts
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
@@ -36,7 +36,6 @@ import { DirectiveModule } from '../directive/directive.module'
 import { EoNgApintoTableModule } from 'projects/eo-ng-apinto-table/src/public-api'
 import { TableDisabledStatusTdComponent, TableStatusTdComponent } from './table-status-td/table-status-td.component'
 import { EoNgSearchInputGroupComponent } from './eo-ng-search-input-group/eo-ng-search-input-group.component'
-import { MonitorConditionalQueryComponent } from './monitor-conditional-query/monitor-conditional-query.component'
 import { ApiMethodTagComponent } from './api-method-tag/api-method-tag.component'
 import { CopyAddrListComponent } from './copy-addr-list/copy-addr-list.component'
 import { EoNgCopyModule } from 'eo-ng-copy'
@@ -47,7 +46,6 @@ import { EoNgCopyModule } from 'eo-ng-copy'
     TableStatusTdComponent,
     TableDisabledStatusTdComponent,
     EoNgSearchInputGroupComponent,
-    MonitorConditionalQueryComponent,
     ApiMethodTagComponent,
     CopyAddrListComponent
   ],
@@ -87,7 +85,6 @@ import { EoNgCopyModule } from 'eo-ng-copy'
     TableStatusTdComponent,
     TableDisabledStatusTdComponent,
     EoNgSearchInputGroupComponent,
-    MonitorConditionalQueryComponent,
     ApiMethodTagComponent,
     CopyAddrListComponent
   ]
