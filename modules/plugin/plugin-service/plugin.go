@@ -5,12 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
-	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
+	"github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-dashboard/modules/base/locker-service"
 	"github.com/eolinker/apinto-dashboard/modules/cluster"
-	cluster_model "github.com/eolinker/apinto-dashboard/modules/cluster/cluster-model"
+	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-model"
 	"github.com/eolinker/apinto-dashboard/modules/plugin"
-	plugin_entry "github.com/eolinker/apinto-dashboard/modules/plugin/plugin-entry"
+	"github.com/eolinker/apinto-dashboard/modules/plugin/plugin-entry"
 	"github.com/eolinker/apinto-dashboard/modules/plugin/plugin-model"
 	"github.com/eolinker/apinto-dashboard/modules/plugin/plugin-store"
 	"github.com/eolinker/apinto-dashboard/modules/user"
@@ -29,7 +29,7 @@ type pluginService struct {
 	clusterService       cluster.IClusterService
 	lockService          locker_service.IAsynLockService
 	apintoClient         cluster.IApintoClient
-	clusterPluginService IClusterPluginService
+	clusterPluginService plugin.IClusterPluginService
 }
 
 func newPluginService() plugin.IPluginService {
@@ -204,9 +204,9 @@ func (p *pluginService) Create(ctx context.Context, namespaceId, operator int, i
 	}
 	defer p.lockService.Unlock(locker_service.LockNamePluginNamespace, namespaceId)
 
-	plugin, _ := p.pluginStore.GetByName(ctx, namespaceId, input.Name)
+	pluginInfo, _ := p.pluginStore.GetByName(ctx, namespaceId, input.Name)
 
-	if plugin != nil && plugin.Name == input.Name {
+	if pluginInfo != nil && pluginInfo.Name == input.Name {
 		return errors.New("插件名称重复")
 	}
 
@@ -246,7 +246,7 @@ func (p *pluginService) Create(ctx context.Context, namespaceId, operator int, i
 		return err
 	}
 
-	plugin = &plugin_entry.Plugin{
+	pluginInfo = &plugin_entry.Plugin{
 		NamespaceId: namespaceId,
 		Name:        input.Name,
 		Extended:    input.Extended,
@@ -261,13 +261,13 @@ func (p *pluginService) Create(ctx context.Context, namespaceId, operator int, i
 	}
 
 	return p.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
-		if err = p.pluginStore.Save(txCtx, plugin); err != nil {
+		if err = p.pluginStore.Save(txCtx, pluginInfo); err != nil {
 			return err
 		}
 
 		//添加修改记录
-		if err = p.pluginHistoryStore.HistoryAdd(txCtx, namespaceId, plugin.Id, &plugin_entry.PluginHistoryInfo{
-			Plugin: *plugin,
+		if err = p.pluginHistoryStore.HistoryAdd(txCtx, namespaceId, pluginInfo.Id, &plugin_entry.PluginHistoryInfo{
+			Plugin: *pluginInfo,
 		}, operator); err != nil {
 			return err
 		}

@@ -62,6 +62,7 @@ func registerRouter(engine *gin.Engine) {
 	strategy_controller2.RegisterStrategyVisitRouter(routes)
 	strategy_controller2.RegisterStrategyFuseRouter(routes)
 	plugin_controller.RegisterPluginRouter(routes)
+	plugin_controller.RegisterPluginClusterRouter(routes)
 	plugin_template_controller.RegisterPluginTemplateRouter(routes)
 	audit_controller.RegisterAuditLogRouter(routes)
 	open_app_controller.RegisterExternalApplicationRouter(routes)
