@@ -19,7 +19,6 @@ import (
 	_ "github.com/eolinker/apinto-dashboard/modules/upstream/service"
 	_ "github.com/eolinker/apinto-dashboard/modules/user/user-service"
 	_ "github.com/eolinker/apinto-dashboard/modules/variable/variable-service"
-
 	//online-service必须放到最后导入
 	_ "github.com/eolinker/apinto-dashboard/modules/online/online-service"
 )
