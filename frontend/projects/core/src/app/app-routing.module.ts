@@ -1,7 +1,7 @@
 /*
- * @Author: maggieyyy im.ymj@hotmail.com
+ * @Author:
  * @Date: 2022-07-11 23:20:14
- * @LastEditors: MengjieYang yangmengjie@eolink.com
+ * @LastEditors:
  * @LastEditTime: 2022-09-20 23:14:26
  * @FilePath: /apinto/src/app/app-routing.module.ts
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
@@ -13,14 +13,8 @@ import { AuthGuardService } from './service/auth-guard.service'
 import { LoginComponent } from './layout/login/login.component'
 import { BasicLayoutComponent } from './layout/basic-layout/basic-layout.component'
 import { CustomPreloadingStrategy } from './custom-preloading-strategy'
-import { AuthActivationComponent } from './layout/auth/activation/activation.component'
-import { AuthInfoComponent } from './layout/auth/info/info.component'
-import { AuthUpdateComponent } from './layout/auth/update/update.component'
+import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 const routes: Routes = [
-  {
-    path: 'auth',
-    component: AuthActivationComponent
-  },
   {
     path: 'login',
     component: LoginComponent
@@ -29,18 +23,6 @@ const routes: Routes = [
     path: '',
     component: BasicLayoutComponent,
     children: [
-      {
-        path: 'auth-info',
-        component: AuthInfoComponent,
-        data: {
-          id: '8'
-        }
-      },
-
-      {
-        path: 'auth-update',
-        component: AuthUpdateComponent
-      },
       {
         path: 'deploy',
         data: {
@@ -91,13 +73,6 @@ const routes: Routes = [
           id: '7'
         },
         loadChildren: () => import('./layout/audit-log/audit-log.module').then(m => m.AuditLogModule)
-      },
-      {
-        path: 'monitor-alarm',
-        data: {
-          id: '9'
-        },
-        loadChildren: () => import('./layout/monitor-alarm/monitor-alarm.module').then(m => m.MonitorAlarmModule)
       }
     ]
   }
@@ -107,6 +82,6 @@ const routes: Routes = [
 @NgModule({
   imports: [RouterModule.forRoot(routes, { preloadingStrategy: CustomPreloadingStrategy })],
   exports: [RouterModule],
-  providers: [AuthGuardService, RedirectPageService, CustomPreloadingStrategy]
+  providers: [AuthGuardService, RedirectPageService, CustomPreloadingStrategy, EoNgFeedbackMessageService]
 })
 export class AppRoutingModule { }

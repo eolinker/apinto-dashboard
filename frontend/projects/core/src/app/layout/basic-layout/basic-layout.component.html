@@ -1,7 +1,7 @@
 <!--
- * @Author: MengjieYang yangmengjie@eolink.com
+ * @Author:  
  * @Date: 2022-07-20 00:02:55
- * @LastEditors: MengjieYang yangmengjie@eolink.com
+ * @LastEditors:  
  * @LastEditTime: 2022-07-29 02:44:37
  * @FilePath: /apinto/src/app/layout/basic-layout/basic-layout.component.html
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
@@ -10,13 +10,10 @@
 <eo-ng-layout>
   <eo-ng-header>
     <div class="logo">
-      <img src="../../../assets/apinto.svg" alt="apinto" />
+      <img class="h-[32px]" src="../../../assets/apinto.svg" alt="apinto" />
     </div>
     <div class="flex h-[49px] items-center justify-between">
       <eo-ng-breadcrumb [nzOptions]="breadcrumbOptions"></eo-ng-breadcrumb>
-      <eo-ng-apinto-user-avatar
-        class="avatar mg-top-right"
-      ></eo-ng-apinto-user-avatar>
     </div>
   </eo-ng-header>
   <eo-ng-layout class="total-content">
@@ -30,13 +27,6 @@
         [nzOptions]="sideMenuOptions"
       ></eo-ng-inline-menu>
       <div class="auth-box">
-        <a
-          *ngIf="authInfo.title"
-          eoNgUserAccess="auth-info"
-          [viewAccess]="true"
-          (click)="openAuthDialog()"
-          >{{ authInfo.title }}授权</a
-        >
         <p>版权所有 © 银云信息技术</p>
       </div>
     </eo-ng-sider>
@@ -45,24 +35,7 @@
       [ngClass]="{ 'border-transparent': !showSideLine }"
     >
       <eo-ng-content>
-        <ng-container *ngIf="!showEmpty; else emptyRef">
-          <router-outlet></router-outlet>
-        </ng-container>
-        <ng-template #emptyRef>
-          <eo-ng-empty
-            class="no-access-empty"
-            nzInputImage="../../../assets/no-access.svg
-            "
-            [nzNotFoundContent]="emptyTipRef"
-          >
-          </eo-ng-empty>
-          <ng-template #emptyTipRef>
-            <div class="mt-formtop">
-              <p class="leading-[22px] text-MAIN_TEXT">暂无功能授权</p>
-              <p class="mt-btnbase leading-[22px] text-red-400">请联系管理员</p>
-            </div>
-          </ng-template>
-        </ng-template>
+        <router-outlet></router-outlet>
       </eo-ng-content>
     </eo-ng-layout>
   </eo-ng-layout>

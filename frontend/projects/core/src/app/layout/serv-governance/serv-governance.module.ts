@@ -31,7 +31,6 @@ import { NzGridModule } from 'ng-zorro-antd/grid'
 import { NzLayoutModule } from 'ng-zorro-antd/layout'
 import { NzModalModule } from 'ng-zorro-antd/modal'
 import { NzTableModule } from 'ng-zorro-antd/table'
-import { EoNgApintoUserModule } from 'projects/eo-ng-apinto-user/src/public-api'
 import { ComponentModule } from '../../component/component.module'
 import { EoNgTransferModule } from '../../component/transfer/transfer.module'
 import { DirectiveModule } from '../../directive/directive.module'
@@ -59,6 +58,7 @@ import { FilterFormComponent } from './filter/form/form.component'
 import { FilterTableComponent } from './filter/table/table.component'
 import { EoNgApintoTableModule } from 'projects/eo-ng-apinto-table/src/public-api'
 import { ServiceGovernancePublishComponent } from './publish/publish.component'
+import { EoNgEmptyModule } from 'eo-ng-empty'
 @NgModule({
   declarations: [
     ServiceGovernanceComponent,
@@ -108,7 +108,6 @@ import { ServiceGovernancePublishComponent } from './publish/publish.component'
     NzAvatarModule,
     EoNgButtonModule,
     EoNgTransferModule,
-    EoNgApintoUserModule,
     NzFormModule,
     ReactiveFormsModule,
     NzLayoutModule,
@@ -123,7 +122,8 @@ import { ServiceGovernancePublishComponent } from './publish/publish.component'
     NzSliderModule,
     NzInputNumberModule,
     ApiModule,
-    EoNgApintoTableModule
+    EoNgApintoTableModule,
+    EoNgEmptyModule
   ]
 })
 export class ServGovernanceModule { }

@@ -34,8 +34,6 @@ import (
 	"time"
 )
 
-const LockNameService = "service"
-
 type service struct {
 	clusterService        cluster.IClusterService
 	apintoClient          cluster.IApintoClient
@@ -417,10 +415,10 @@ func (s *service) DeleteService(ctx context.Context, namespaceID, userId int, se
 		return err
 	}
 
-	if err = s.lockService.Lock(LockNameService, serviceInfo.Id); err != nil {
+	if err = s.lockService.Lock(locker_service.LockNameService, serviceInfo.Id); err != nil {
 		return err
 	}
-	defer s.lockService.Unlock(LockNameService, serviceInfo.Id)
+	defer s.lockService.Unlock(locker_service.LockNameService, serviceInfo.Id)
 	serviceInfo, err = s.serviceStore.GetByName(ctx, namespaceID, serviceName)
 	if err != nil {
 		return err
@@ -482,7 +480,7 @@ func (s *service) DeleteService(ctx context.Context, namespaceID, userId int, se
 	if err != nil {
 		return err
 	}
-	s.lockService.DeleteLock(LockNameService, serviceInfo.Id)
+	s.lockService.DeleteLock(locker_service.LockNameService, serviceInfo.Id)
 	return nil
 }
 
@@ -588,10 +586,10 @@ func (s *service) OnlineService(ctx context.Context, namespaceId, operator int, 
 	}
 	clusterId := clusterInfo.Id
 
-	if err = s.lockService.Lock(LockNameService, serviceInfo.Id); err != nil {
+	if err = s.lockService.Lock(locker_service.LockNameService, serviceInfo.Id); err != nil {
 		return nil, err
 	}
-	defer s.lockService.Unlock(LockNameService, serviceInfo.Id)
+	defer s.lockService.Unlock(locker_service.LockNameService, serviceInfo.Id)
 
 	//拿到锁后需要重新获取下信息
 	serviceInfo, err = s.serviceStore.GetByName(ctx, namespaceId, serviceName)
@@ -829,10 +827,10 @@ func (s *service) OfflineService(ctx context.Context, namespaceId, operator int,
 		}
 	}
 
-	if err = s.lockService.Lock(LockNameService, serviceInfo.Id); err != nil {
+	if err = s.lockService.Lock(locker_service.LockNameService, serviceInfo.Id); err != nil {
 		return err
 	}
-	defer s.lockService.Unlock(LockNameService, serviceInfo.Id)
+	defer s.lockService.Unlock(locker_service.LockNameService, serviceInfo.Id)
 
 	//拿到锁后需要重新获取下信息
 	serviceInfo, err = s.serviceStore.GetByName(ctx, namespaceId, serviceName)
