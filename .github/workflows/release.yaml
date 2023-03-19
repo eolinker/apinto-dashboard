@@ -9,6 +9,9 @@ jobs:
     name:   frontend-builder
     runs-on: ubuntu-latest
     steps:
+      - name: SetOutput
+        id: vars
+        run: echo "tag=${GITHUB_REF#refs/*/v}" >> $GITHUB_OUTPUT
       - name: Checkout  #Checkout代码
         uses: actions/checkout@v3
       - name: Set up Node
@@ -37,7 +40,7 @@ jobs:
       - name: SetOutput #处理Tag字符串并存进outputs
         id: vars
         run: |
-          echo "tag=${{ steps.vars.outputs.tag }}" >> $GITHUB_OUTPUT
+          echo "tag=${GITHUB_REF#refs/*/v}" >> $GITHUB_OUTPUT
       - name: Checkout  #Checkout代码
         uses: actions/checkout@v3
       - name: download frontend release
@@ -75,10 +78,11 @@ jobs:
     name: docker-push
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
       - name: SetOutput
         id: vars
-        run: echo "tag=${{ steps.vars.outputs.tag }}" >> $GITHUB_OUTPUT
+        run: echo "tag=${GITHUB_REF#refs/*/v}" >> $GITHUB_OUTPUT
+      - uses: actions/checkout@v3
+
       - name: Login Docker   #登录docker
         uses: docker/login-action@v1
         with:
