@@ -76,13 +76,14 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
-      - name: build
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/apinto-dashboard:${GITHUB_REF#refs/*/v} scripts/
       - name: download release
         uses: actions/download-artifact@v2
         with:
           name: apinto-dashboard-release
           path: scripts/apinto-dashboard.tar.gz
+      - name: build
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/apinto-dashboard:${GITHUB_REF#refs/*/v} scripts/
+
       - name: push image
         run: |
           docker push ${{ secrets.DOCKER_USERNAME }}/apinto-dashboard:${GITHUB_REF#refs/*/v}
