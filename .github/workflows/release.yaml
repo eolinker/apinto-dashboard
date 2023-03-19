@@ -64,7 +64,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: apinto-dashboard-release
-          path: apinto-build/apserver_${GITHUB_REF#refs/*/v}_linux_amd64.tar.gz
+          path: apinto-build/apserver_v${GITHUB_REF#refs/*/v}_linux_amd64.tar.gz
   docker-push:
     needs: [release]
     name: docker-push
