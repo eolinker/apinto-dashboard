@@ -27,7 +27,6 @@ do
 echo -e "    - $s" >> config.yml
 done
 echo -e "port: 8080" >> config.yml
-echo -e "user_center_url: ${USER_CENTER_URL}" >> config.yml
 echo -e "error_log:" >> config.yml
 echo -e "  dir: ${ERROR_DIR}" >> config.yml
 echo -e "  file_name: ${ERROR_FILE_NAME}" >> config.yml
