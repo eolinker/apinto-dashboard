@@ -16,9 +16,9 @@ VOLUME /var/lib/apinto-dashboard
 
 RUN mkdir "apinto-dashboard"
 
-COPY apinto-dashboard.tar.gz /apinto-dashboard
+COPY apserver_v${Version}_linux_amd64.tar.gz /apinto-dashboard
 
-RUN cd /apinto-dashboard && ls -l && ln -sfT apserver_v${Version} apserver
+RUN cd /apinto-dashboard && tar -zxvf apserver_v${Version}_linux_amd64.tar.gz && rm -rf apserver_v${Version}_linux_amd64.tar.gz && ln -sfT apserver_v${Version} apserver
 
 WORKDIR /apinto-dashboard/apserver
 
