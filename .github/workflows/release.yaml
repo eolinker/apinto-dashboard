@@ -94,7 +94,7 @@ jobs:
           name: apinto-dashboard-release
           path: scripts/apinto-dashboard.tar.gz
       - name: build
-        run: cd scripts && docker build -t ${{ secrets.DOCKER_USERNAME }}/apinto-dashboard:${{ steps.vars.outputs.tag }} ./
+        run: cd scripts && docker build --build-arg Version=${{ steps.vars.outputs.tag }} -t ${{ secrets.DOCKER_USERNAME }}/apinto-dashboard:${{ steps.vars.outputs.tag }} ./
 
       - name: push image
         run: |

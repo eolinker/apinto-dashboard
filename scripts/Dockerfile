@@ -18,7 +18,7 @@ RUN mkdir "apinto-dashboard"
 
 COPY apinto-dashboard.tar.gz /apinto-dashboard
 
-RUN cd /apinto-dashboard && tar -zxvf apinto-dashboard.tar.gz && rm -rf apinto-dashboard.tar.gz && ln -sfT apserver_v${Version} apserver
+RUN cd /apinto-dashboard && ls -l && ln -sfT apserver_v${Version} apserver
 
 WORKDIR /apinto-dashboard/apserver
 
