@@ -6,6 +6,9 @@
 Apinto Dashboad主版本应与 Apinto主版本一起使用。
 最新发布的Apinto Dashboad版本是2.0.0，可与Apinto0.12.4以上版本兼容。
 
+## Demo 
+体验地址：[demo-dashboard.apinto.com](https://demo-dashboard.apinto.com/)
+
 **什么是Apinto Dashboad V2.0.0**
 
 Apinto Dashboard V2.0.0 是一个可视化控制台项目，基于开源网关 Apinto，并满足企业级 API 网关需求场景。通过 Dashboard，可以管理集群、上游、应用和 API 等模块，并以集群维度管理各个模块的生命周期。该项目具有出色的用户操作体验，配置流程简短，上手难度低。
