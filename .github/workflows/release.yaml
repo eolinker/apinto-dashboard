@@ -92,7 +92,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: apinto-dashboard-release
-          path: scripts/apinto-dashboard.tar.gz
+          path: scripts/apserver_v${{ steps.vars.outputs.tag }}_linux_amd64.tar.gz
       - name: build
         run: cd scripts && docker build --build-arg Version=${{ steps.vars.outputs.tag }} -t ${{ secrets.DOCKER_USERNAME }}/apinto-dashboard:${{ steps.vars.outputs.tag }} ./
 
