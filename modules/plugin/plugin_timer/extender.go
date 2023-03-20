@@ -5,14 +5,14 @@ import (
 	"errors"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/cache"
-	v1 "github.com/eolinker/apinto-dashboard/client/v1"
-	"github.com/eolinker/apinto-dashboard/client/v1/initialize/plugin"
+	"github.com/eolinker/apinto-dashboard/client/v1"
+	globalPlugin "github.com/eolinker/apinto-dashboard/client/v1/initialize/plugin"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/modules/cluster"
 	"github.com/eolinker/apinto-dashboard/modules/namespace"
-	plugin2 "github.com/eolinker/apinto-dashboard/modules/plugin"
-	plugin_model "github.com/eolinker/apinto-dashboard/modules/plugin/plugin-model"
-	plugin_service "github.com/eolinker/apinto-dashboard/modules/plugin/plugin-service"
+	"github.com/eolinker/apinto-dashboard/modules/plugin"
+	"github.com/eolinker/apinto-dashboard/modules/plugin/plugin-model"
+	"github.com/eolinker/apinto-dashboard/modules/plugin/plugin-service"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
 	"time"
@@ -25,7 +25,7 @@ type IExtender interface {
 }
 
 type extender struct {
-	pluginService    plugin2.IPluginService
+	pluginService    plugin.IPluginService
 	apintoClient     cluster.IApintoClient
 	commonCache      cache.ICommonCache
 	extenderCache    plugin_service.IExtenderCache
@@ -37,15 +37,23 @@ func newExtender() IExtender {
 	ex := &extender{}
 	bean.Autowired(&ex.pluginService)
 	bean.Autowired(&ex.apintoClient)
-	bean.Autowired(&ex.commonCache)
+
 	bean.Autowired(&ex.clusterService)
 	bean.Autowired(&ex.extenderCache)
 	bean.Autowired(&ex.namespaceService)
-
+	bean.Autowired(&ex.commonCache)
 	return ex
 }
 
 func (e *extender) UpdateExtender() {
+
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Println("panic", common.PanicTrace(err))
+			return
+		}
+	}()
+
 	ctx := context.TODO()
 	//key+时间戳
 	lockKey := fmt.Sprintf("updateExtender_%d", time.Now().Unix())
@@ -65,7 +73,7 @@ func (e *extender) UpdateExtender() {
 		return
 	}
 	//内置插件
-	globalPlugins := plugin.GetGlobalPluginConf()
+	globalPlugins := globalPlugin.GetGlobalPluginConf()
 
 	for _, namespaceInfo := range namespaces {
 
@@ -91,12 +99,12 @@ func (e *extender) builtPlugin(ctx context.Context, namespaceId int, globalPlugi
 		})
 		//如果有已经插件,去重后把新增的内置插件添加到最后
 		sort := plugins[len(plugins)-1].Sort
-		for _, globalPlugin := range globalPlugins {
-			if _, ok := pluginMaps[globalPlugin.Id]; !ok {
+		for _, globalPluginInfo := range globalPlugins {
+			if _, ok := pluginMaps[globalPluginInfo.Id]; !ok {
 				pluginBuilt = append(pluginBuilt, &plugin_model.PluginBuilt{
-					Extended: globalPlugin.Id,
-					Name:     globalPlugin.Name,
-					Rely:     globalPlugin.Rely,
+					Extended: globalPluginInfo.Id,
+					Name:     globalPluginInfo.Name,
+					Rely:     globalPluginInfo.Rely,
 					Sort:     sort + 1,
 				})
 				sort++
@@ -105,11 +113,11 @@ func (e *extender) builtPlugin(ctx context.Context, namespaceId int, globalPlugi
 
 	} else {
 
-		for i, globalPlugin := range globalPlugins {
+		for i, globalPluginInfo := range globalPlugins {
 			pluginBuilt = append(pluginBuilt, &plugin_model.PluginBuilt{
-				Extended: globalPlugin.Id,
-				Name:     globalPlugin.Name,
-				Rely:     globalPlugin.Rely,
+				Extended: globalPluginInfo.Id,
+				Name:     globalPluginInfo.Name,
+				Rely:     globalPluginInfo.Rely,
 				Sort:     i + 1,
 			})
 		}
