@@ -8,9 +8,7 @@ Apinto Dashboad主版本应与 Apinto主版本一起使用。
 
 **什么是Apinto Dashboad V2.0.0**
 
-Apinto Dashboard 是基于开源网关 Apinto并符合企业级API网关需求场景的可视化控制台项目。
-通过Dashboard 可以管理集群、上游、应用以及API等模块，并以集群维度管理各个模块的生命周期。
-具有优秀的用户操作体验，配置流程简短，上手难度低。内置了丰富的插件，用户可根据业务需求动态灵活地配置策略。
+Apinto Dashboard V2.0.0 是一个可视化控制台项目，基于开源网关 Apinto，并满足企业级 API 网关需求场景。通过 Dashboard，可以管理集群、上游、应用和 API 等模块，并以集群维度管理各个模块的生命周期。该项目具有出色的用户操作体验，配置流程简短，上手难度低。
 
 Apinto Dashboard与Apinto交互流程如下图所示：
 ![](http://data.eolinker.com/course/QSgDqEKb311ec59fb0052436e0d3bdbacdc2b984b71cc25.png)
@@ -32,7 +30,8 @@ API管理：支持业务域分组，管理所有后端系统提供的API及其�
 系统管理：配置邮箱，配置告警模板等。
 
 ## 迭代计划
-![](http://data.eolinker.com/course/gydll750fcfc7874b12137c49566f71a586dc093887aa93.png)
+![image](https://user-images.githubusercontent.com/18322454/226301033-c270f690-4c50-4841-b919-a2f2655d9ed7.png)
+
 如果您是个人开发者，可基于API网关相关的业务场景开发有价值的网关插件或企业级插件，并且愿意分享给Apinto，您将会成为Apinto的杰出贡献者或得到一定的收益。
 如果您是企业，可基于Apinto网关开发企业级插件，成为Apinto的合作伙伴。
 
