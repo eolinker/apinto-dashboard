@@ -6,6 +6,7 @@ import (
 	plugin2 "github.com/eolinker/apinto-dashboard/client/v1/initialize/plugin"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
+	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/plugin"
 	"github.com/eolinker/apinto-dashboard/modules/plugin/plugin-dto"
@@ -29,13 +30,13 @@ func RegisterPluginRouter(router gin.IRoutes) {
 	router.GET("/plugins", controller.GenAccessHandler(access.PluginView, access.PluginEdit), p.plugins)
 	router.GET("/plugin", controller.GenAccessHandler(access.PluginView, access.PluginEdit), p.plugin)
 
-	router.POST("/plugin", controller.GenAccessHandler(access.PluginEdit), p.createPlugin)
-	router.PUT("/plugin", controller.GenAccessHandler(access.PluginEdit), p.updatePlugin)
-	router.DELETE("/plugin", controller.GenAccessHandler(access.PluginEdit), p.delPlugin)
+	router.POST("/plugin", controller.GenAccessHandler(access.PluginEdit), controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindGlobalPlugin), p.createPlugin)
+	router.PUT("/plugin", controller.GenAccessHandler(access.PluginEdit), controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindGlobalPlugin), p.updatePlugin)
+	router.DELETE("/plugin", controller.GenAccessHandler(access.PluginEdit), controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindGlobalPlugin), p.delPlugin)
 
 	router.GET("/plugin/extendeds", p.pluginExtendeds)
 	router.GET("/plugins/render", p.pluginRender)
-	router.PUT("/plugin/sort", controller.GenAccessHandler(access.PluginEdit), p.pluginSort)
+	router.PUT("/plugin/sort", controller.GenAccessHandler(access.PluginEdit), controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindGlobalPlugin), p.pluginSort)
 	router.GET("/plugin/enum", p.pluginEnum)
 }
 

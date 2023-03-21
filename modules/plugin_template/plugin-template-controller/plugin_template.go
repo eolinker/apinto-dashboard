@@ -28,15 +28,15 @@ func RegisterPluginTemplateRouter(router gin.IRoutes) {
 	router.GET("/plugin/templates", controller.GenAccessHandler(access.PluginTemplateView, access.PluginTemplateEdit), p.templates)
 	router.GET("/plugin/template/enum", p.templateEnum)
 
-	router.POST("/plugin/template", controller.GenAccessHandler(access.PluginTemplateEdit), p.createTemplate)
-	router.PUT("/plugin/template", controller.GenAccessHandler(access.PluginTemplateEdit), p.updateTemplate)
-	router.DELETE("/plugin/template", controller.GenAccessHandler(access.PluginTemplateEdit), p.delTemplate)
+	router.POST("/plugin/template", controller.GenAccessHandler(access.PluginTemplateEdit), controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindPluginTemplate), p.createTemplate)
+	router.PUT("/plugin/template", controller.GenAccessHandler(access.PluginTemplateEdit), controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindPluginTemplate), p.updateTemplate)
+	router.DELETE("/plugin/template", controller.GenAccessHandler(access.PluginTemplateEdit), controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindPluginTemplate), p.delTemplate)
 
 	router.GET("/plugin/template", controller.GenAccessHandler(access.PluginTemplateView, access.PluginTemplateEdit), p.template)
 
 	router.GET("/plugin/template/onlines", controller.GenAccessHandler(access.PluginTemplateView, access.PluginTemplateEdit), p.onlines)
-	router.PUT("/plugin/template/online", controller.GenAccessHandler(access.PluginTemplateEdit), p.online)
-	router.PUT("/plugin/template/offline", controller.GenAccessHandler(access.PluginTemplateEdit), p.offline)
+	router.PUT("/plugin/template/online", controller.GenAccessHandler(access.PluginTemplateEdit), controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindPluginTemplate), p.online)
+	router.PUT("/plugin/template/offline", controller.GenAccessHandler(access.PluginTemplateEdit), controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindPluginTemplate), p.offline)
 }
 
 // 插件模板列表
