@@ -374,6 +374,12 @@ func (p *pluginTemplateService) Delete(ctx context.Context, namespaceId, operato
 		return err
 	}
 
+	//编写日志操作对象信息
+	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+		Uuid: uuid,
+		Name: pluginTemplate.Name,
+	})
+
 	return p.pluginTemplateStore.Transaction(ctx, func(txCtx context.Context) error {
 		if _, err = p.pluginTemplateStore.Delete(txCtx, pluginTemplate.Id); err != nil {
 			return err
