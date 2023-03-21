@@ -88,6 +88,7 @@ func NewAPIService() apiservice.IAPIService {
 	bean.Autowired(&as.lockService)
 	bean.Autowired(&as.importApiCache)
 	bean.Autowired(&as.batchApiCache)
+	bean.Autowired(&as.pluginTemplateService)
 
 	return as
 }

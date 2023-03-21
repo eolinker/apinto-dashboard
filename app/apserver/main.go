@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/eolinker/apinto-dashboard/modules/plugin/plugin_timer"
 	"os"
 
 	"github.com/eolinker/apinto-dashboard/app/apserver/version"
@@ -29,7 +30,7 @@ func main() {
 			return nil
 		},
 	}
-	app.Run(os.Args)
+	_ = app.Run(os.Args)
 }
 
 func run() {
@@ -39,15 +40,15 @@ func run() {
 
 	registerRouter(engine)
 
+	//初始化数据库表 sql操作
+	initDB()
+
 	err := bean.Check()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	//初始化数据库表 sql操作
-	initDB()
-
-	//初始化超管账号 和清除超管缓存
+	go plugin_timer.ExtenderTimer()
 	// todo 不适合开源，后续通过插件接入
 
 	if err = engine.Run(fmt.Sprintf(":%d", GetPort())); err != nil {
