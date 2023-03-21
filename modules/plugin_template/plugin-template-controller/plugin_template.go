@@ -2,6 +2,7 @@ package plugin_template_controller
 
 import (
 	"fmt"
+	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/enum"
@@ -24,18 +25,18 @@ func RegisterPluginTemplateRouter(router gin.IRoutes) {
 	p := &pluginTemplateController{}
 	bean.Autowired(&p.pluginTemplateService)
 
-	router.GET("/plugin/templates", p.templates)
+	router.GET("/plugin/templates", controller.GenAccessHandler(access.PluginTemplateView, access.PluginTemplateEdit), p.templates)
 	router.GET("/plugin/template/enum", p.templateEnum)
 
-	router.POST("/plugin/template", p.createTemplate)
-	router.PUT("/plugin/template", p.updateTemplate)
-	router.DELETE("/plugin/template", p.delTemplate)
+	router.POST("/plugin/template", controller.GenAccessHandler(access.PluginTemplateEdit), p.createTemplate)
+	router.PUT("/plugin/template", controller.GenAccessHandler(access.PluginTemplateEdit), p.updateTemplate)
+	router.DELETE("/plugin/template", controller.GenAccessHandler(access.PluginTemplateEdit), p.delTemplate)
 
-	router.GET("/plugin/template", p.template)
+	router.GET("/plugin/template", controller.GenAccessHandler(access.PluginTemplateView, access.PluginTemplateEdit), p.template)
 
-	router.GET("/plugin/template/onlines", p.onlines)
-	router.PUT("/plugin/template/online", p.online)
-	router.PUT("/plugin/template/offline", p.offline)
+	router.GET("/plugin/template/onlines", controller.GenAccessHandler(access.PluginTemplateView, access.PluginTemplateEdit), p.onlines)
+	router.PUT("/plugin/template/online", controller.GenAccessHandler(access.PluginTemplateEdit), p.online)
+	router.PUT("/plugin/template/offline", controller.GenAccessHandler(access.PluginTemplateEdit), p.offline)
 }
 
 // 插件模板列表
