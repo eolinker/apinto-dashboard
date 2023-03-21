@@ -3,6 +3,7 @@ package plugin_controller
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/enum"
@@ -25,14 +26,14 @@ func RegisterPluginClusterRouter(router gin.IRoutes) {
 
 	p := &pluginClusterController{}
 	bean.Autowired(&p.clusterPluginService)
-	router.GET("/cluster/:cluster_name/plugins", p.plugins)
-	router.GET("/cluster/:cluster_name/pluginInfo", p.getPlugin)
-	router.POST("/cluster/:cluster_name/pluginInfo", p.editPlugin)
+	router.GET("/cluster/:cluster_name/plugins", controller.GenAccessHandler(access.PluginView, access.PluginEdit), p.plugins)
+	router.GET("/cluster/:cluster_name/pluginInfo", controller.GenAccessHandler(access.PluginView, access.PluginEdit), p.getPlugin)
+	router.POST("/cluster/:cluster_name/pluginInfo", controller.GenAccessHandler(access.PluginEdit), p.editPlugin)
 
-	router.POST("/cluster/:cluster_name/pluginInfo/publish", p.publish)
-	router.GET("/cluster/:cluster_name/pluginInfo/to-publish", p.toPublish)
-	router.GET("/cluster/:cluster_name/pluginInfo/publish-history", p.publishHistory)
-	router.GET("/cluster/:cluster_name/pluginInfo/update-history", p.updateHistory)
+	router.POST("/cluster/:cluster_name/pluginInfo/publish", controller.GenAccessHandler(access.PluginEdit), p.publish)
+	router.GET("/cluster/:cluster_name/pluginInfo/to-publish", controller.GenAccessHandler(access.PluginView, access.PluginEdit), p.toPublish)
+	router.GET("/cluster/:cluster_name/pluginInfo/publish-history", controller.GenAccessHandler(access.PluginView, access.PluginEdit), p.publishHistory)
+	router.GET("/cluster/:cluster_name/pluginInfo/update-history", controller.GenAccessHandler(access.PluginView, access.PluginEdit), p.updateHistory)
 }
 
 // 插件列表

@@ -1,6 +1,7 @@
 package plugin_controller
 
 import (
+	"github.com/eolinker/apinto-dashboard/access"
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	plugin2 "github.com/eolinker/apinto-dashboard/client/v1/initialize/plugin"
 	"github.com/eolinker/apinto-dashboard/common"
@@ -25,16 +26,16 @@ func RegisterPluginRouter(router gin.IRoutes) {
 	bean.Autowired(&p.pluginService)
 	bean.Autowired(&p.extenderCache)
 
-	router.GET("/plugins", p.plugins)
-	router.GET("/plugin", p.plugin)
+	router.GET("/plugins", controller.GenAccessHandler(access.PluginView, access.PluginEdit), p.plugins)
+	router.GET("/plugin", controller.GenAccessHandler(access.PluginView, access.PluginEdit), p.plugin)
 
-	router.POST("/plugin", p.createPlugin)
-	router.PUT("/plugin", p.updatePlugin)
-	router.DELETE("/plugin", p.delPlugin)
+	router.POST("/plugin", controller.GenAccessHandler(access.PluginEdit), p.createPlugin)
+	router.PUT("/plugin", controller.GenAccessHandler(access.PluginEdit), p.updatePlugin)
+	router.DELETE("/plugin", controller.GenAccessHandler(access.PluginEdit), p.delPlugin)
 
 	router.GET("/plugin/extendeds", p.pluginExtendeds)
 	router.GET("/plugins/render", p.pluginRender)
-	router.PUT("/plugin/sort", p.pluginSort)
+	router.PUT("/plugin/sort", controller.GenAccessHandler(access.PluginEdit), p.pluginSort)
 	router.GET("/plugin/enum", p.pluginEnum)
 }
 
