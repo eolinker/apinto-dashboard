@@ -340,6 +340,10 @@ func (p *pluginService) Delete(ctx context.Context, namespaceId, operator int, n
 		return err
 	}
 
+	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+		Name: name,
+	})
+	
 	return p.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
 		if _, err = p.pluginStore.Delete(txCtx, pluginInfo.Id); err != nil {
 			return err
