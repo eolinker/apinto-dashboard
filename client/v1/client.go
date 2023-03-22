@@ -23,7 +23,9 @@ type IClient interface {
 	ForInfluxV2Output() IProfession[InfluxV2Output, WorkerInfo]
 	ForApp() IProfession[ApplicationConfig, WorkerInfo]
 	ForGlobalPlugin() IPlugin[GlobalPlugin]
+	ForPluginTemplate() IProfession[PluginTemplateConfig, PluginTemplateInfo]
 	ForRouter() IProfession[RouterConfig, RouterInfo]
+	ForExtender() IExtender
 	ForCert() ICert
 	ForVariable() IVariable
 	ForStrategy() IStrategy
@@ -34,6 +36,7 @@ type IClient interface {
 type Client struct {
 	adminAddrs     []string
 	discovery      IProfession[DiscoveryConfig, WorkerInfo]
+	pluginTemplate IProfession[PluginTemplateConfig, PluginTemplateInfo]
 	auth           IProfession[AuthConfig, WorkerInfo]
 	output         IProfession[any, WorkerInfo]
 	redisOutput    IProfession[RedisOutput, WorkerInfo]
@@ -45,6 +48,7 @@ type Client struct {
 	plugin         IPlugin[GlobalPlugin]
 	variable       IVariable
 	strategy       IStrategy
+	extender       IExtender
 }
 
 func (c *Client) addrs() []string {
@@ -88,14 +92,24 @@ func (c *Client) init() {
 	c.influxV2Output = newIProfession[InfluxV2Output, WorkerInfo](c, "output")
 	c.service = newIProfession[ServiceConfig, WorkerInfo](c, "service")
 	c.router = newIProfession[RouterConfig, RouterInfo](c, "router")
+	c.pluginTemplate = newIProfession[PluginTemplateConfig, PluginTemplateInfo](c, "template")
 	c.cert = newCert(c)
 	c.app = newIProfession[ApplicationConfig, WorkerInfo](c, "app")
 	c.plugin = newIPlugin[GlobalPlugin](c)
 	c.strategy = newIStrategy(c)
 	c.variable = newIVariable(c, "variable")
+	c.extender = newIExtender(c)
 }
 func (c *Client) ForDiscovery() IProfession[DiscoveryConfig, WorkerInfo] {
 	return c.discovery
+}
+
+func (c *Client) ForPluginTemplate() IProfession[PluginTemplateConfig, PluginTemplateInfo] {
+	return c.pluginTemplate
+}
+
+func (c *Client) ForExtender() IExtender {
+	return c.extender
 }
 
 func (c *Client) ForApp() IProfession[ApplicationConfig, WorkerInfo] {

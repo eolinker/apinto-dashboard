@@ -13,8 +13,6 @@ import (
 type IApintoClient interface {
 	GetClient(ctx context.Context, clusterId int) (v1.IClient, error)
 	SetClient(namespace, clusterId int)
-	InitClustersGlobalPlugin(ctx context.Context) error
-	InitGlobalPlugin(clusterAddr string, nodesAdminAddr []string) error
 }
 type IClusterCertificateService interface {
 	Insert(ctx context.Context, operator, namespaceId int, clusterName, key, pem string) error

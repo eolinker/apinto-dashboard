@@ -11,10 +11,10 @@ type GlobalVariableListItem struct {
 }
 
 type GlobalVariableDetailsItem struct {
-	ClusterName string                      `json:"cluster_name"`
-	Environment string                      `json:"environment"`
-	Value       string                      `json:"value"`
-	Status      enum.ClusterVariablePublish `json:"publish_status"`
+	ClusterName string           `json:"cluster_name"`
+	Environment string           `json:"environment"`
+	Value       string           `json:"value"`
+	Status      enum.PublishType `json:"publish_status"`
 }
 
 type GlobalVariableInput struct {

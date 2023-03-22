@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	v1 "github.com/eolinker/apinto-dashboard/client/v1"
+	"github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/modules/cluster"
-	cluster_entry2 "github.com/eolinker/apinto-dashboard/modules/cluster/cluster-entry"
-	cluster_store2 "github.com/eolinker/apinto-dashboard/modules/cluster/cluster-store"
+	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-entry"
+	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-store"
 	"github.com/eolinker/apinto-dashboard/modules/user"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
@@ -17,8 +17,8 @@ import (
 )
 
 type clusterConfigService struct {
-	configStore     cluster_store2.IClusterConfigStore
-	runtimeStore    cluster_store2.IClusterConfigRuntimeStore
+	configStore     cluster_store.IClusterConfigStore
+	runtimeStore    cluster_store.IClusterConfigRuntimeStore
 	clusterService  cluster.IClusterService
 	userInfoService user.IUserInfoService
 	apintoClient    cluster.IApintoClient
@@ -39,11 +39,11 @@ func newClusterConfigService() cluster.IClusterConfigService {
 
 func (c *clusterConfigService) Get(ctx context.Context, namespaceId int, clusterName, configType string) (interface{}, error) {
 	//获取当前集群信息
-	cluster, err := c.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
+	clusterInfo, err := c.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
 	if err != nil {
 		return nil, err
 	}
-	info, err := c.configStore.GetConfigByTypeByCluster(ctx, cluster.Id, configType)
+	info, err := c.configStore.GetConfigByTypeByCluster(ctx, clusterInfo.Id, configType)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, nil
@@ -60,21 +60,21 @@ func (c *clusterConfigService) Get(ctx context.Context, namespaceId int, cluster
 
 func (c *clusterConfigService) Edit(ctx context.Context, namespaceId, operator int, clusterName, configType string, config []byte) error {
 	//获取当前集群信息
-	cluster, err := c.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
+	clusterInfo, err := c.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
 	if err != nil {
 		return err
 	}
 
-	info, err := c.configStore.GetConfigByTypeByCluster(ctx, cluster.Id, configType)
+	info, err := c.configStore.GetConfigByTypeByCluster(ctx, clusterInfo.Id, configType)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return err
 	}
 
 	t := time.Now()
 	if err == gorm.ErrRecordNotFound {
-		info = &cluster_entry2.ClusterConfig{
+		info = &cluster_entry.ClusterConfig{
 			NamespaceId: namespaceId,
-			ClusterId:   cluster.Id,
+			ClusterId:   clusterInfo.Id,
 			Type:        configType,
 			IsEnable:    true, //新建默认是启用状态
 			Data:        config,
@@ -89,7 +89,7 @@ func (c *clusterConfigService) Edit(ctx context.Context, namespaceId, operator i
 	}
 
 	//获取apinto client
-	client, err := c.apintoClient.GetClient(ctx, cluster.Id)
+	client, err := c.apintoClient.GetClient(ctx, clusterInfo.Id)
 	if err != nil {
 		return err
 	}
@@ -100,16 +100,16 @@ func (c *clusterConfigService) Edit(ctx context.Context, namespaceId, operator i
 			return err
 		}
 		//获取当前运行的版本
-		runtime, err := c.runtimeStore.GetForCluster(ctx, info.Id, cluster.Id)
+		runtime, err := c.runtimeStore.GetForCluster(ctx, info.Id, clusterInfo.Id)
 		if err != nil && err != gorm.ErrRecordNotFound {
 			return err
 		}
 		//若runtime为空
 		if err == gorm.ErrRecordNotFound {
-			runtime = &cluster_entry2.ClusterConfigRuntime{
+			runtime = &cluster_entry.ClusterConfigRuntime{
 				NamespaceId: namespaceId,
 				ConfigID:    info.Id,
-				ClusterId:   cluster.Id,
+				ClusterId:   clusterInfo.Id,
 				IsOnline:    info.IsEnable,
 				Operator:    operator,
 				CreateTime:  t,
@@ -126,25 +126,23 @@ func (c *clusterConfigService) Edit(ctx context.Context, namespaceId, operator i
 		}
 
 		//初始化配置
-		err = c.initConfig(configType, config)
-		if err != nil {
+		if err = c.initConfig(configType, config); err != nil {
 			return err
 		}
 
 		//启用状态则直接发布，非启用状态则先发布temp，再删除
 		if info.IsEnable {
-			err = c.ToApinto(client, configType, configType, config)
-			if err != nil {
+			if err = c.ToApinto(client, configType, configType, config); err != nil {
 				return err
 			}
 		} else {
 			tempName := fmt.Sprintf("%s_temp", configType)
-			err = c.ToApinto(client, tempName, configType, config)
-			if err != nil {
+
+			if err = c.ToApinto(client, tempName, configType, config); err != nil {
 				return err
 			}
-			err = c.OfflineApinto(client, tempName, configType)
-			if err != nil {
+
+			if err = c.OfflineApinto(client, tempName, configType); err != nil {
 				return fmt.Errorf("offline %s from Apinto fail. err: %s", tempName, err)
 			}
 		}
@@ -155,11 +153,11 @@ func (c *clusterConfigService) Edit(ctx context.Context, namespaceId, operator i
 
 func (c *clusterConfigService) Enable(ctx context.Context, namespaceId, operator int, clusterName, configType string) error {
 	//获取当前集群信息
-	cluster, err := c.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
+	clusterInfo, err := c.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
 	if err != nil {
 		return err
 	}
-	info, err := c.configStore.GetConfigByTypeByCluster(ctx, cluster.Id, configType)
+	info, err := c.configStore.GetConfigByTypeByCluster(ctx, clusterInfo.Id, configType)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return fmt.Errorf("%s config doesn't exist. ", configType)
@@ -168,13 +166,13 @@ func (c *clusterConfigService) Enable(ctx context.Context, namespaceId, operator
 	}
 
 	//获取apinto client
-	client, err := c.apintoClient.GetClient(ctx, cluster.Id)
+	client, err := c.apintoClient.GetClient(ctx, clusterInfo.Id)
 	if err != nil {
 		return err
 	}
 
 	//获取当前运行的版本
-	runtime, err := c.runtimeStore.GetForCluster(ctx, info.Id, cluster.Id)
+	runtime, err := c.runtimeStore.GetForCluster(ctx, info.Id, clusterInfo.Id)
 	if err != nil {
 		return err
 	}
@@ -205,11 +203,11 @@ func (c *clusterConfigService) Enable(ctx context.Context, namespaceId, operator
 func (c *clusterConfigService) Disable(ctx context.Context, namespaceId, operator int, clusterName, configType string) error {
 
 	//获取当前集群信息
-	cluster, err := c.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
+	clusterInfo, err := c.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
 	if err != nil {
 		return err
 	}
-	info, err := c.configStore.GetConfigByTypeByCluster(ctx, cluster.Id, configType)
+	info, err := c.configStore.GetConfigByTypeByCluster(ctx, clusterInfo.Id, configType)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return fmt.Errorf("%s config doesn't exist. ", configType)
@@ -218,13 +216,13 @@ func (c *clusterConfigService) Disable(ctx context.Context, namespaceId, operato
 	}
 
 	//获取apinto client
-	client, err := c.apintoClient.GetClient(ctx, cluster.Id)
+	client, err := c.apintoClient.GetClient(ctx, clusterInfo.Id)
 	if err != nil {
 		return err
 	}
 
 	//获取当前运行的版本
-	runtime, err := c.runtimeStore.GetForCluster(ctx, info.Id, cluster.Id)
+	runtime, err := c.runtimeStore.GetForCluster(ctx, info.Id, clusterInfo.Id)
 	if err != nil {
 		return err
 	}
@@ -263,7 +261,7 @@ func (c *clusterConfigService) CheckInput(configType string, config []byte) erro
 	return driver.CheckInput(config)
 }
 
-func (c *clusterConfigService) FormatOutput(configType string, operator string, config *cluster_entry2.ClusterConfig) interface{} {
+func (c *clusterConfigService) FormatOutput(configType string, operator string, config *cluster_entry.ClusterConfig) interface{} {
 	driver := c.clConfigManager.GetDriver(configType)
 	return driver.FormatOut(operator, config)
 }
@@ -298,7 +296,7 @@ func (c *clusterConfigService) OfflineApinto(client v1.IClient, name, configType
 	}
 }
 
-func (c *clusterConfigService) ResetOnline(ctx context.Context, namespaceId, clusterId int) {
+func (c *clusterConfigService) ResetOnline(ctx context.Context, _, clusterId int) {
 	//获取apinto client
 	client, err := c.apintoClient.GetClient(ctx, clusterId)
 	if err != nil {

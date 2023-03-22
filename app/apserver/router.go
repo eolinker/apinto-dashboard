@@ -13,6 +13,8 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/group/group-controller"
 	"github.com/eolinker/apinto-dashboard/modules/openapi/open-api-controller"
 	"github.com/eolinker/apinto-dashboard/modules/openapp/open-app-controller"
+	plugin_controller "github.com/eolinker/apinto-dashboard/modules/plugin/plugin-controller"
+	plugin_template_controller "github.com/eolinker/apinto-dashboard/modules/plugin_template/plugin-template-controller"
 	strategy_controller2 "github.com/eolinker/apinto-dashboard/modules/strategy/strategy-controller"
 	user_controller "github.com/eolinker/apinto-dashboard/modules/user/user-controller"
 	variable_controller2 "github.com/eolinker/apinto-dashboard/modules/variable/variable-controller"
@@ -59,6 +61,9 @@ func registerRouter(engine *gin.Engine) {
 	strategy_controller2.RegisterStrategyGreyRouter(routes)
 	strategy_controller2.RegisterStrategyVisitRouter(routes)
 	strategy_controller2.RegisterStrategyFuseRouter(routes)
+	plugin_controller.RegisterPluginRouter(routes)
+	plugin_controller.RegisterPluginClusterRouter(routes)
+	plugin_template_controller.RegisterPluginTemplateRouter(routes)
 	audit_controller.RegisterAuditLogRouter(routes)
 	open_app_controller.RegisterExternalApplicationRouter(routes)
 
