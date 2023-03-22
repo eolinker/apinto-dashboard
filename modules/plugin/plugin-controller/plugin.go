@@ -28,6 +28,7 @@ func RegisterPluginRouter(router gin.IRoutes) {
 	bean.Autowired(&p.extenderCache)
 
 	router.GET("/plugins", controller.GenAccessHandler(access.PluginView, access.PluginEdit), p.plugins)
+	router.GET("/basic/info/plugins", controller.GenAccessHandler(access.PluginView, access.PluginEdit), p.basicInfoPlugins)
 	router.GET("/plugin", controller.GenAccessHandler(access.PluginView, access.PluginEdit), p.plugin)
 
 	router.POST("/plugin", controller.GenAccessHandler(access.PluginEdit), controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindGlobalPlugin), p.createPlugin)
@@ -94,6 +95,30 @@ func (p *pluginController) plugins(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
 
+// 只有基本信息的插件列表
+func (p *pluginController) basicInfoPlugins(ginCtx *gin.Context) {
+	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
+	list, err := p.pluginService.GetBasicInfoList(ginCtx, namespaceId)
+	if err != nil {
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		return
+	}
+
+	resultList := make([]plugin_dto.PluginListItem, 0, len(list))
+
+	for _, pluginInfo := range list {
+		resultList = append(resultList, plugin_dto.PluginListItem{
+			Name:     pluginInfo.Name,
+			Extended: pluginInfo.Extended,
+			Desc:     pluginInfo.Desc,
+		})
+	}
+
+	data := common.Map[string, interface{}]{}
+	data["plugins"] = resultList
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
+}
+
 // 新增插件
 func (p *pluginController) createPlugin(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
@@ -114,7 +139,7 @@ func (p *pluginController) createPlugin(ginCtx *gin.Context) {
 	pluginInfo := &plugin_model.PluginInput{
 		Name:     input.Name,
 		Extended: input.Extended,
-		RelyName: input.RelyName,
+		RelyName: input.Rely,
 		Desc:     input.Desc,
 	}
 
@@ -146,7 +171,7 @@ func (p *pluginController) updatePlugin(ginCtx *gin.Context) {
 	pluginInfo := &plugin_model.PluginInput{
 		Name:     input.Name,
 		Extended: input.Extended,
-		RelyName: input.RelyName,
+		RelyName: input.Rely,
 		Desc:     input.Desc,
 	}
 
