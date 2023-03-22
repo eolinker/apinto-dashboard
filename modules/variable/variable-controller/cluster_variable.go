@@ -60,7 +60,7 @@ func (c *clusterVariableController) gets(ginCtx *gin.Context) {
 		list = append(list, &cluster_dto.ClusterVariableItem{
 			Key:        variableInfo.Key,
 			Value:      variableInfo.Value,
-			Publish:    enum.ClusterVariablePublish(variableInfo.Publish),
+			Publish:    enum.PublishType(variableInfo.Publish),
 			Desc:       variableInfo.Desc,
 			Operator:   variableInfo.Operator,
 			UpdateTime: updateTime,
@@ -172,7 +172,7 @@ func (c *clusterVariableController) updateHistory(ginCtx *gin.Context) {
 			OldValue:   val.OldValue.Value,
 			NewValue:   val.NewValue.Value,
 			CreateTime: common.TimeToStr(val.OptTime),
-			OptType:    enum.VariableOptType(val.OptType),
+			OptType:    enum.ChangeOptType(val.OptType),
 		})
 	}
 
@@ -223,12 +223,9 @@ func (c *clusterVariableController) toPublishs(ginCtx *gin.Context) {
 	source := common.Base64Encode(bytes)
 
 	toPublishOut := make([]*cluster_dto.VariableToPublishOut, 0, len(list))
-	isPublish := false
+	isPublish := true
 	for _, publish := range list {
-		optType := enum.VariableOptType(publish.OptType)
-		if optType == enum.VariableOptTypeNew || optType == enum.VariableOptTypeModify || optType == enum.VariableOptTypeDelete {
-			isPublish = true
-		}
+		optType := enum.ChangeOptType(publish.OptType)
 		toPublishOut = append(toPublishOut, &cluster_dto.VariableToPublishOut{
 			Key:             publish.Key,
 			FinishValue:     publish.FinishValue,
@@ -341,7 +338,7 @@ func (c *clusterVariableController) publishHistory(ginCtx *gin.Context) {
 				Key:        detail.Key,
 				OldValue:   detail.OldValue,
 				NewValue:   detail.NewValue,
-				OptType:    enum.VariableOptType(detail.OptType),
+				OptType:    enum.ChangeOptType(detail.OptType),
 				CreateTime: common.TimeToStr(detail.CreateTime),
 			})
 		}
