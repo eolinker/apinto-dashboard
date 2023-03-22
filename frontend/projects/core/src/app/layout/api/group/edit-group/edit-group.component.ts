@@ -18,6 +18,28 @@ import { v4 as uuidv4 } from 'uuid'
     [nzAutoTips]="autoTips"
     autocomplete="off"
   >
+
+  <nz-form-item>
+      <nz-form-label [nzSpan]="6" nzFor="groupName">分组ID：</nz-form-label>
+      <nz-form-control [nzSpan]="15">
+      <span
+      class="overflow-ellipsis inline-block overflow-hidden align-middle"
+      >{{ uuid }}
+    </span>
+    <button
+      eo-copy
+      eo-ng-button
+      nzType="primary"
+      nzGhost
+      class="deploy-node-copy-btn ant-btn-text border-transparent h-[22px]"
+      [copyText]="uuid"
+      (copyCallback)="copyCallback()"
+    >
+      <svg class="iconpark-icon"><use href="#copy"></use></svg>
+    </button>
+      </nz-form-control>
+      </nz-form-item>
+
     <nz-form-item class="mb-0">
       <nz-form-label [nzSpan]="6" nzFor="groupName">分组名称：</nz-form-label>
       <nz-form-control [nzSpan]="15">
@@ -94,4 +116,8 @@ export class ApiManagementEditGroupComponent implements OnInit {
       }
     })
   }
+
+  copyCallback = () => {
+    this.message.success('复制成功', { nzDuration: 1000 })
+  };
 }
