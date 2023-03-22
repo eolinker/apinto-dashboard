@@ -18,6 +18,12 @@ jobs:
       - name: Yarn install
         run: |
           cd frontend && yarn install --registry https://registry.npmmirror.com --legacy-peer-deps
+          yarn build
+      - name: print files
+        run: |
+          pwd
+          ls -l ./
+          ls -l controller/
       - name: upload frontend release
         uses: actions/upload-artifact@v2
         with:
@@ -58,7 +64,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: apinto-dashboard-release
-          path: apinto-build/apserver_${{ steps.vars.outputs.tag }}_linux_amd64.tar.gz
+          path: apinto-build/apserver_${GITHUB_REF#refs/*/v}_linux_amd64.tar.gz
   docker-push:
     needs: [release]
     name: docker-push
@@ -71,7 +77,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: build
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/apinto-dashboard:${{ steps.vars.outputs.tag }} scripts/
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/apinto-dashboard:${GITHUB_REF#refs/*/v} scripts/
       - name: download release
         uses: actions/download-artifact@v2
         with:
@@ -79,6 +85,6 @@ jobs:
           path: scripts/apinto-dashboard.tar.gz
       - name: push image
         run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/apinto-dashboard:${{ steps.vars.outputs.tag }}
-          docker tag ${{ secrets.DOCKER_USERNAME }}/apinto-dashboard:${{ steps.vars.outputs.tag }} ${{ secrets.DOCKER_USERNAME }}/apinto-dashboard:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/apinto-dashboard:${GITHUB_REF#refs/*/v}
+          docker tag ${{ secrets.DOCKER_USERNAME }}/apinto-dashboard:${GITHUB_REF#refs/*/v} ${{ secrets.DOCKER_USERNAME }}/apinto-dashboard:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/apinto-dashboard:latest
