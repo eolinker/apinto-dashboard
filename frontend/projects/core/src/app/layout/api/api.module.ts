@@ -46,6 +46,7 @@ import { ApiBatchPublishComponent } from './publish/batch/publish.component'
 import { ApiPublishComponent } from './publish/single/publish.component'
 import { ApiManagementProxyComponent } from './proxy/proxy.component'
 import { ApiManagementEditGroupComponent } from './group/edit-group/edit-group.component'
+import { EoNgCopyModule } from 'eo-ng-copy'
 
 @NgModule({
   declarations: [
@@ -98,7 +99,8 @@ import { ApiManagementEditGroupComponent } from './group/edit-group/edit-group.c
     DirectiveModule,
     EoNgApintoTableModule,
     NzUploadModule,
-    NzDropDownModule
+    NzDropDownModule,
+    EoNgCopyModule
   ],
   exports: [
     MatchTableComponent,
