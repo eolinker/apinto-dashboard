@@ -157,13 +157,7 @@ func (c *clusterNodeService) Reset(ctx context.Context, namespaceId, userId int,
 			return err
 		}
 
-		err = c.clusterService.UpdateAddr(txCtx, userId, clusterId, clusterAddr, clusterInfo.Cluster)
-		if err != nil {
-			return err
-		}
-
-		//初始化集群全局插件
-		return c.apintoClient.InitGlobalPlugin(clusterAddr, nodesAdminAddr)
+		return c.clusterService.UpdateAddr(txCtx, userId, clusterId, clusterAddr, clusterInfo.Cluster)
 	})
 	if err != nil {
 		return err
@@ -174,18 +168,18 @@ func (c *clusterNodeService) Reset(ctx context.Context, namespaceId, userId int,
 
 // Update 更新节点信息
 func (c *clusterNodeService) Update(ctx context.Context, namespaceId int, clusterName string) error {
-	cluster, err := c.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
+	clusterInfo, err := c.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
 	if err != nil {
 		return err
 	}
 
 	t := time.Now()
-	nodes, err := c.GetNodesByUrl(cluster.Addr)
+	nodes, err := c.GetNodesByUrl(clusterInfo.Addr)
 	if err != nil {
 		return err
 	}
 	//节点重复对比
-	if err = c.NodeRepeatContrast(ctx, namespaceId, cluster.Id, nodes); err != nil {
+	if err = c.NodeRepeatContrast(ctx, namespaceId, clusterInfo.Id, nodes); err != nil {
 		return err
 	}
 
@@ -193,7 +187,7 @@ func (c *clusterNodeService) Update(ctx context.Context, namespaceId int, cluste
 	newClusterNodes := make([]*cluster_entry.ClusterNode, 0, len(nodes))
 	for _, node := range nodes {
 		newClusterNodes = append(newClusterNodes, &cluster_entry.ClusterNode{
-			ClusterId:   cluster.Id,
+			ClusterId:   clusterInfo.Id,
 			NamespaceId: namespaceId,
 			AdminAddr:   node.AdminAddr,
 			ServiceAddr: node.ServiceAddr,
@@ -203,7 +197,7 @@ func (c *clusterNodeService) Update(ctx context.Context, namespaceId int, cluste
 	}
 
 	err = c.clusterNodeStore.Transaction(ctx, func(txCtx context.Context) error {
-		if err = c.clusterNodeStore.UpdateNodes(txCtx, cluster.Id, newClusterNodes); err != nil {
+		if err = c.clusterNodeStore.UpdateNodes(txCtx, clusterInfo.Id, newClusterNodes); err != nil {
 			return err
 		}
 
@@ -212,11 +206,11 @@ func (c *clusterNodeService) Update(ctx context.Context, namespaceId int, cluste
 	if err != nil {
 		return err
 	}
-	c.apintoClient.SetClient(namespaceId, cluster.Id)
+	c.apintoClient.SetClient(namespaceId, clusterInfo.Id)
 	return nil
 }
 
-// nodeRepeatContrast 节点重复对比
+// NodeRepeatContrast  节点重复对比
 func (c *clusterNodeService) NodeRepeatContrast(ctx context.Context, namespaceId, clusterId int, newList []*cluster_model2.ClusterNode) error {
 	clusters, err := c.clusterService.GetByNamespaceId(ctx, namespaceId)
 	if err != nil {
@@ -228,11 +222,11 @@ func (c *clusterNodeService) NodeRepeatContrast(ctx context.Context, namespaceId
 	})
 	//工作空间下任何一个节点名称和这次添加的有重复,不可保存
 	clusterIds := make([]int, 0)
-	for _, cluster := range clusters {
-		if clusterId == cluster.Id { //过滤本身的
+	for _, clusterInfo := range clusters {
+		if clusterId == clusterInfo.Id { //过滤本身的
 			continue
 		}
-		clusterIds = append(clusterIds, cluster.Id)
+		clusterIds = append(clusterIds, clusterInfo.Id)
 	}
 
 	clusterNodes, err := c.QueryByClusterIds(ctx, clusterIds...)
@@ -248,8 +242,8 @@ func (c *clusterNodeService) NodeRepeatContrast(ctx context.Context, namespaceId
 
 	for _, node := range clusterNodes {
 		if _, ok := mapNode[node.Name]; ok {
-			if cluster, clusterOk := clustersMap[node.ClusterId]; clusterOk {
-				return errors.New(fmt.Sprintf("%s集群已有这个节点信息", cluster.Name))
+			if clusterInfo, clusterOk := clustersMap[node.ClusterId]; clusterOk {
+				return errors.New(fmt.Sprintf("%s集群已有这个节点信息", clusterInfo.Name))
 			}
 			return errors.New(fmt.Sprintf("%s集群已有这个节点信息", node.Name))
 		}
