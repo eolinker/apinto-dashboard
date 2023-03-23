@@ -24,4 +24,5 @@ authorization_edit:
   - authorization_view
 ext_app_edit:
   - ext_app_view
-
+mon_partition_edit:
+  - mon_partition_view
