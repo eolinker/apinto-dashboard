@@ -107,14 +107,23 @@ export class ApiManagementEditGroupComponent implements OnInit {
 
   // 编辑分组
   editGroup (groupUuid:string) {
-    this.api.put('group/api/' + groupUuid, { name: this.validateApiGroupForm.controls['groupName'].value }).subscribe((resp:any) => {
-      if (resp.code === 0) {
-        this.message.success(resp.msg || '修改成功', { nzDuration: 1000 })
-        this.closeModal && this.closeModal()
-      } else {
-        this.message.error(resp.msg || '修改失败!')
-      }
-    })
+    if (this.validateApiGroupForm.valid) {
+      this.api.put('group/api/' + groupUuid, { name: this.validateApiGroupForm.controls['groupName'].value }).subscribe((resp:any) => {
+        if (resp.code === 0) {
+          this.message.success(resp.msg || '修改成功', { nzDuration: 1000 })
+          this.closeModal && this.closeModal()
+        } else {
+          this.message.error(resp.msg || '修改失败!')
+        }
+      })
+    } else {
+      Object.values(this.validateApiGroupForm.controls).forEach(control => {
+        if (control.invalid) {
+          control.markAsDirty()
+          control.updateValueAndValidity({ onlySelf: true })
+        }
+      })
+    }
   }
 
   copyCallback = () => {
