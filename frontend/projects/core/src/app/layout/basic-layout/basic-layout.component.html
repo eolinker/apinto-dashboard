@@ -10,7 +10,13 @@
 <eo-ng-layout>
   <eo-ng-header>
     <div class="logo">
-      <img class="h-[32px]" src="../../../assets/apinto.svg" alt="apinto" />
+      <img class="h-[26px]" src="../../../assets/apinto.svg" alt="apinto" />
+      <a (click)="goToGithub()" class="flex item-center ml-[6px]"
+        ><img
+          src="https://img.shields.io/github/stars/eolinker/apinto?style=social"
+          alt=""
+        />
+      </a>
     </div>
     <div class="flex h-[49px] items-center justify-between">
       <eo-ng-breadcrumb [nzOptions]="breadcrumbOptions"></eo-ng-breadcrumb>
