@@ -35,6 +35,7 @@ import (
 	"github.com/eolinker/eosc/log"
 	"github.com/gin-gonic/gin"
 	"github.com/go-basic/uuid"
+	"golang.org/x/exp/slices"
 	"golang.org/x/sync/errgroup"
 	"gorm.io/gorm"
 	"reflect"
@@ -1986,14 +1987,11 @@ func (a *apiService) GetImportCheckList(ctx context.Context, namespaceId int, fi
 
 		if apis, ok := apiMap[common.ReplaceRestfulPath(item.Path, enum.RestfulLabel)]; ok {
 			for _, groupApi := range apis {
-				for _, method := range groupApi.Methods {
-					if method == item.Method {
-						item.Status = 2
-						break
-					}
+				if slices.Contains(groupApi.Methods, item.Method) {
+					item.Status = 2
+					break
 				}
 			}
-
 		}
 	}
 
@@ -2060,26 +2058,64 @@ func (a *apiService) ImportAPI(ctx context.Context, namespaceId, operator int, i
 	if err != nil {
 		return err
 	}
+	//判断目录是否存在
+	isExist, err := a.commonGroup.IsGroupExist(ctx, apiData.GroupID)
+	if err != nil {
+		return err
+	}
+	if !isExist {
+		return errors.New("分组不存在,请重新导入")
+	}
 
+	//判断服务是否存在
 	serviceID, err := a.service.GetServiceIDByName(ctx, namespaceId, apiData.ServiceName)
 	if err != nil {
 		return err
 	}
 
-	maps := common.SliceToMap(apiData.Apis, func(t *apimodel.ImportAPIRedisDataItem) int {
+	importApiMaps := common.SliceToMap(apiData.Apis, func(t *apimodel.ImportAPIRedisDataItem) int {
 		return t.ID
+	})
+
+	//获取现存所有API
+	existedApiList, err := a.GetAPIListByName(ctx, namespaceId, "")
+	if err != nil {
+		return err
+	}
+
+	existedApiMaps := common.SliceToMapArray(existedApiList, func(t *group_model.CommonGroupApi) string {
+		return t.Path
 	})
 
 	createApis := make([]*apimodel.APIInfo, 0, len(input.Apis))
 	logAPINames := make([]string, 0, len(input.Apis))
 	for _, api := range input.Apis {
-		if v, ok := maps[api.Id]; ok {
+		if v, ok := importApiMaps[api.Id]; ok {
 			if api.Name != "" {
 				v.Api.Name = api.Name
 			}
 			// TODO 现在只能修改apiName， 请求路径和描述以后可能要改
-			createApis = append(createApis, v.Api)
-			logAPINames = append(logAPINames, v.Api.Name)
+
+			//检查api是否有冲突
+			isReduplicated := false
+			if rApis, ok := existedApiMaps[v.Api.RequestPath]; ok {
+			A:
+				for _, rApi := range rApis {
+					for _, method := range v.Api.Method {
+						if slices.Contains(rApi.Methods, method) {
+							isReduplicated = true
+							break A
+						}
+					}
+
+				}
+			}
+			if isReduplicated {
+				log.Errorf("import api %s fail. api is reduplicated. path:%s. method:%s. ", v.Api.Name, v.Api.RequestPathLabel, v.Api.Method)
+			} else {
+				createApis = append(createApis, v.Api)
+				logAPINames = append(logAPINames, v.Api.Name)
+			}
 		} else {
 			return errors.New(fmt.Sprintf("序号为%d的数据不存在", api.Id))
 		}
@@ -2144,7 +2180,6 @@ func (a *apiService) ImportAPI(ctx context.Context, namespaceId, operator int, i
 			}
 
 			//quote更新所引用的服务
-
 			if err = a.quoteStore.Set(txCtx, apiInfo.Id, quote_entry.QuoteKindTypeAPI, quote_entry.QuoteTargetKindTypeService, serviceID); err != nil {
 				return err
 			}
