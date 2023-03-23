@@ -34,7 +34,8 @@ const (
 	AuditLogView
 	ExtAPPView
 	ExtAPPEdit
-
+	MonPartitionView
+	MonPartitionEdit
 	lastId
 	unknown
 )

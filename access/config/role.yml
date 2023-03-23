@@ -31,3 +31,5 @@
     - audit_log_view
     - ext_app_view
     - ext_app_edit
+    - mon_partition_view
+    - mon_partition_edit
