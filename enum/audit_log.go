@@ -120,8 +120,8 @@ var (
 		LogKindPluginTemplate:  "插件模板",
 	}
 	logKindOrder = []LogKind{LogKindAPI, LogKindService, LogKindDiscovery, LogKindApplication, LogKindCluster, LogKindGlobalVariable, LogKindClusterVariable,
-		LogKindStrategyTraffic, LogKindStrategyFuse, LogKindStrategyVisit, LogKindStrategyCache, LogKindStrategyGrey, LogKindUser, LogKindRole,
-		LogKindAPIGroup, LogKindExtAPP, LogKindMonPartition, LogKindNoticeEmail, LogKindNoticeWebhook, LogKindWarnStrategy, LogKindGlobalPlugin, LogKindClusterPlugin, LogKindPluginTemplate}
+		LogKindStrategyTraffic, LogKindStrategyFuse, LogKindStrategyVisit, LogKindStrategyCache, LogKindStrategyGrey,
+		LogKindAPIGroup, LogKindExtAPP}
 	logKindList []LogKindsItem
 )
 
