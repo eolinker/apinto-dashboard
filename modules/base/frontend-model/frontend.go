@@ -6,7 +6,7 @@ var (
 	RouterNameClusterVariable RouterName = "deploy/cluster/content"          //cluster_name
 	RouterNameDiscoveryOnline RouterName = "upstream/serv-discovery/content" //discovery_name
 	RouterNameServiceOnline   RouterName = "upstream/upstream/content/publish"
-	RouterNameTemplateOnline  RouterName = "template/template/content/publish"
+	RouterNameTemplateOnline  RouterName = "router/plugin/content"
 )
 
 type Router struct {
