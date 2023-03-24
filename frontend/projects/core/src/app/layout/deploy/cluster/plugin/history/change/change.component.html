@@ -1,0 +1,19 @@
+<div class="drawer-list-content drawer-table pb-[4px]" style="margin-top: 0px">
+  <eo-ng-apinto-table
+    class="drawer-table"
+    [nzTbody]="operateRecordTableBody"
+    [nzThead]="operateRecordTabelHeadName"
+    [(nzData)]="operateRecordsData.historys"
+    [nzNoScroll]="true"
+    nzTableLayout="fixed"
+    [nzShowPagination]="true"
+    [nzFrontPagination]="false"
+    [nzTotal]="operateRecordsPage.total"
+    [(nzPageIndex)]="operateRecordsPage.pageNum"
+    [(nzPageSize)]="operateRecordsPage.pageSize"
+    [nzPageSizeOptions]="pageSizeOptions"
+    (nzPageIndexChange)="getOperateRecords()"
+    (nzPageSizeChange)="getOperateRecords()"
+  >
+  </eo-ng-apinto-table>
+</div>

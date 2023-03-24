@@ -41,7 +41,7 @@ export class ServiceDiscoveryPublishComponent implements OnInit {
     { key: 'env' },
     { key: 'status' },
     { key: 'operator' },
-    { key: 'update_time' },
+    { key: 'updateTime' },
     {
       type: 'btn',
       right: true,
@@ -107,7 +107,6 @@ export class ServiceDiscoveryPublishComponent implements OnInit {
     }
   ]
 
-
   constructor (
     private baseInfo:BaseInfoService,
      private message: EoNgFeedbackMessageService,
@@ -131,7 +130,6 @@ export class ServiceDiscoveryPublishComponent implements OnInit {
     this.clustersTableBody[2].title = this.clusterStatusTpl
   }
 
-
   getClustersData () {
     this.api.get('discovery/' + this.serviceName + '/onlines').subscribe(resp => {
       if (resp.code === 0) {
@@ -146,7 +144,7 @@ export class ServiceDiscoveryPublishComponent implements OnInit {
   updateOrOnline (item:any, type:string) {
     this.solutionRouter = ''
     this.solutionParam = {}
-    this.api.put('discovery/' + this.serviceName + '/online', { cluster_name: (item.name || '') }).subscribe(resp => {
+    this.api.put('discovery/' + this.serviceName + '/online', { clusterName: (item.name || '') }).subscribe(resp => {
       if (resp.code === 0) {
         this.message.success(resp.msg || (type + '成功'), { nzDuration: 1000 })
         this.getClustersData()
@@ -184,7 +182,7 @@ export class ServiceDiscoveryPublishComponent implements OnInit {
     this.solutionRouter = ''
     this.solutionParam = {}
 
-    this.api.put('discovery/' + this.serviceName + '/offline', { cluster_name: item.name || '' }).subscribe(resp => {
+    this.api.put('discovery/' + this.serviceName + '/offline', { clusterName: item.name || '' }).subscribe(resp => {
       if (resp.code === 0) {
         this.getClustersData()
         this.message.success(resp.msg || '下线成功', { nzDuration: 1000 })

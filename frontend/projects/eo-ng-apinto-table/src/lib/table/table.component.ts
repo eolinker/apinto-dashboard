@@ -1,12 +1,14 @@
 /* eslint-disable dot-notation */
-import { Component, ElementRef, EventEmitter, HostListener, Input, NgZone, OnInit, Output, SimpleChanges, TemplateRef, ViewChild } from '@angular/core'
+import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, NgZone, Output, SimpleChanges, TemplateRef, ViewChild, ChangeDetectorRef } from '@angular/core'
 import { NzTableLayout } from 'ng-zorro-antd/table'
 import { EoNgTableComponent } from 'eo-ng-table'
 import { Router } from '@angular/router'
-
 @Component({
   selector: 'eo-ng-apinto-table',
-  templateUrl: './table.component.html'
+  templateUrl: './table.component.html',
+  styles: [
+    ''
+  ]
 })
 export class TableComponent extends EoNgTableComponent implements OnInit {
   @ViewChild('theadTpl', { read: TemplateRef, static: true }) theadTpl: TemplateRef<any> | undefined
@@ -20,11 +22,12 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
   @Input() nzTableTheadConfig:Array<any> = []
   @Input() nzMonitorDT:boolean = false
   @Output() nzChangeTableConfigChange:EventEmitter<{value:any, item:any}> = new EventEmitter()
+
   scrHeight:any;
   scrWidth:any;
-
-  constructor (ngZone:NgZone, private el:ElementRef, private router:Router) {
-    super(ngZone)
+  tableScrollCdk:any
+  constructor (ngZone:NgZone, cdr:ChangeDetectorRef, private el:ElementRef, private router:Router) {
+    super(ngZone, cdr)
   }
 
   @HostListener('window:resize', ['$event'])
@@ -36,32 +39,9 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
 
   override ngOnInit (): void {
     super.ngOnInit()
-    for (const index in this.nzThead) {
-      if (this.nzThead[index].title === '操作') {
-        this.nzThead[index].right = true
-        this.nzThead[index].width = (this.nzMaxOperatorButton && !this.nzThead[index].width) ? (this.nzMaxOperatorButton > 3 ? this.nzMaxOperatorButton * 26 + 10 + 10 : 3 * 26 + 20) : (this.nzThead[index].width > 50 ? this.nzThead[index].width : 50)
-        this.nzThead[index].resizeable = false
-      } else if (index === (this.nzThead.length - 1).toString()) {
-        this.nzThead[index].resizeable = false
-      }
 
-      if (this.nzThead[index].title !== '操作' && (this.nzThead[index].required || this.nzThead[index].tooltip)) {
-        this.nzThead[index].titleString = this.nzThead[index].title
-        this.nzThead[index].title = this.theadTpl
-      }
-    }
-
-    for (const body of this.nzTbody) {
-      if (!body.title && !body.type) {
-        body.title = this.tbodyTpl
-      }
-      if (body?.type === 'btn') {
-        for (const btn of body.btns) {
-          btn.icon = this.getIconName(btn.title)
-        }
-      }
-    }
-
+    this.getThead()
+    this.getTbody()
     !this.nzNoScroll && !this.nzScroll.x && this.calculateScroll()
     this.scrHeight = window.innerHeight
     setTimeout(() => {
@@ -73,6 +53,41 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
     super.ngOnChanges(change)
     if (change['nzData'] || change['nzScrollY']) {
       this.getSrollY()
+    }
+    if (change['nzTbody']) {
+      this.getTbody()
+    }
+    if (change['nzThead']) {
+      this.getThead()
+    }
+  }
+
+  getThead () {
+    for (const index in this.nzThead) {
+      if (this.nzThead[index].title === '操作') {
+        this.nzThead[index].right = true
+        this.nzThead[index].width = (this.nzMaxOperatorButton && !this.nzThead[index].width) ? (this.nzMaxOperatorButton > 3 ? this.nzMaxOperatorButton * 26 + 10 + 10 : 3 * 26 + 20) : (this.nzThead[index].width > 50 ? this.nzThead[index].width : 50)
+        this.nzThead[index].resizeable = false
+      } else if (index === (this.nzThead.length - 1).toString()) {
+        this.nzThead[index].resizeable = false
+      }
+
+      if (this.nzThead[index].title !== '操作' && (this.nzThead[index].required || this.nzThead[index].tooltip)) {
+        this.nzThead[index].title = this.theadTpl
+      }
+    }
+  }
+
+  getTbody (): void {
+    for (const body of this.nzTbody) {
+      if (!body.title && !body.type) {
+        body.title = this.tbodyTpl
+      }
+      if (body?.type === 'btn') {
+        for (const btn of body.btns) {
+          btn.icon = this.getIconName(btn.title)
+        }
+      }
     }
   }
 
@@ -177,7 +192,7 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
         const monitorTabsHeight = document.getElementsByClassName('monitor-total-content').length > 0 ? 42 : 0 // 监控分区内tabs高度
         const monitorTabsPieHeight = document.getElementsByClassName('eo-ng-monitor-detail-pie').length > 0 ? (document.getElementsByClassName('eo-ng-monitor-detail-pie')[0]?.getBoundingClientRect().height + 32 + 32 + 20 + 10) : 0 // 监控分区内详情页面饼图及tabs高度
         // 表格在弹窗内，需要减去弹窗标题高度53，弹窗顶部100px，弹窗内部上下padding20*2， 表头高度； 否则减去表格顶部间隙12px，底部间隙20px，表头高度
-        scrollY = this.el.nativeElement.classList.contains('drawer-table') ? (this.scrHeight > 660 ? 660 - drawerHeaderHeight - drawerFooterHeight - drawerPagationHeight - 40 - 40 - 20 - 63 - drawerButtonAreaHeight : 660 - drawerHeaderHeight - drawerFooterHeight - drawerPagationHeight - 40 - 40 - 20 - 63 - 69 - 150) : (this.scrHeight - navTop - headerHeight - footerHeight - pagationHeight - clusterDescHeight - monitorTabsHeight - monitorTabsPieHeight - 20 - 6 - 40 - 1 + 8)
+        scrollY = this.el.nativeElement.classList.contains('drawer-table') ? (this.scrHeight > 660 ? 660 - drawerHeaderHeight - drawerFooterHeight - drawerPagationHeight - 40 - 40 - 20 - 63 - drawerButtonAreaHeight : 660 - drawerHeaderHeight - drawerFooterHeight - drawerPagationHeight - 40 - 40 - 20 - 63 - 69 - 150) : (this.scrHeight - navTop - headerHeight - footerHeight - pagationHeight - clusterDescHeight - monitorTabsHeight - monitorTabsPieHeight - 20 - 6 - 40 - 1 + 10)
       }
     }
 
@@ -187,6 +202,7 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
 
     if (this.nzData !== undefined && scrollY < this.nzData.length * 40) {
       this.nzScroll = { x: this.nzScroll.x, y: scrollY > 50 ? scrollY + 'px' : '50px' }
+      this.tableScrollCdk.ngOnInit()
     } else {
       this.nzScroll = { x: this.nzScroll.x, y: undefined }
     }
@@ -196,5 +212,10 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
     if (index === length - 1) {
       e?.stopPropagation()
     }
+  }
+
+  handlerScrollView ($event:any) {
+    this.tableScrollCdk = $event
+    this.getScrollViewPort.emit($event)
   }
 }

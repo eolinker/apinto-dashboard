@@ -92,25 +92,25 @@ export class DynamicComponentComponent implements OnInit {
       return true
     } else {
       if (items['x-reactions'].otherwise) {
-        if (items['name'] !== 'secret' && items['name'] !== 'public_key') {
+        if (items['name'] !== 'secret' && items['name'] !== 'publicKey') {
           return !this.seachForDeps(items['x-reactions'].dependencies[0])
         } else if (items['name'] === 'secret') {
           const temres = this.seachForDeps(items['x-reactions'].dependencies[0])
           const tesresstring:string = (typeof temres === 'boolean') ? '' : temres
           return !tesresstring?.includes('HS')
-        } else if (items['name'] === 'public_key') {
+        } else if (items['name'] === 'publicKey') {
           const temres = this.seachForDeps(items['x-reactions'].dependencies[0])
           const tesresstring:string = (typeof temres === 'boolean') ? '' : temres
           return !(tesresstring?.includes('RS') || tesresstring?.includes('ES'))
         }
       } else {
-        if (items['name'] !== 'secret' && items['name'] !== 'public_key') {
+        if (items['name'] !== 'secret' && items['name'] !== 'publicKey') {
           return !!this.seachForDeps(items['x-reactions'].dependencies[0])
         } else if (items['name'] === 'secret') {
           const temres = this.seachForDeps(items['x-reactions'].dependencies[0])
           const tesresstring:string = (typeof temres === 'boolean') ? '' : temres
           return tesresstring?.includes('HS')
-        } else if (items['name'] === 'public_key') {
+        } else if (items['name'] === 'publicKey') {
           const temres = this.seachForDeps(items['x-reactions'].dependencies[0])
           const tesresstring:string = (typeof temres === 'boolean') ? '' : temres
           return tesresstring?.includes('RS') || tesresstring?.includes('ES')
@@ -453,7 +453,7 @@ export class DynamicComponentComponent implements OnInit {
 
   chooseEnv = (item:any) => {
     if (!item?.data?.editing) {
-      // this.createUpstreamForm.config.static_conf[0].addr = '${' + item.key + '}'
+      // this.createUpstreamForm.config.staticConf[0].addr = '${' + item.key + '}'
       // this.itemList[0].properties[1].properties[0].properties[0].default = '${' + item.data.key + '}'
       this.fillEnv(this.propertyWaitForChoose.properties, item.data.key)
       this.changeDetectorRef.markForCheck()

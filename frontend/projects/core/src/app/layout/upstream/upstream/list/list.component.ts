@@ -43,9 +43,9 @@ export class UpstreamListComponent implements OnInit {
   upstreamsTableBody: Array<any> =[
     { key: 'name' },
     { key: 'scheme' },
-    { key: 'service_type' },
+    { key: 'serviceType' },
     { key: 'config' },
-    { key: 'update_time' },
+    { key: 'updateTime' },
     {
       type: 'btn',
       right: true,
@@ -59,7 +59,7 @@ export class UpstreamListComponent implements OnInit {
         {
           title: '删除',
           disabledFn: (data:any, item:any) => {
-            return this.nzDisabled || !item.data.is_delete
+            return this.nzDisabled || !item.data.isDelete
           },
           click: (item:any) => {
             this.delete(item.data)
@@ -73,13 +73,13 @@ export class UpstreamListComponent implements OnInit {
     this.getUpstreamsList()
   }
 
-  page_size:number = 20
-  page_num :number= 1
+  pageSize:number = 20
+  pageNum :number= 1
   total:number = 0
 
   // 刷新列表，除了初始化组件以外，每次调用该方法时都需要出现刷新成功的消息提示，所以有个可选参数initFlag, 为true时不提示
   getUpstreamsList () {
-    this.api.get('services', { name: this.upstreamNameForSear, page_size: this.page_size, page_num: this.page_num }).subscribe(resp => {
+    this.api.get('services', { name: this.upstreamNameForSear, pageSize: this.pageSize, pageNum: this.pageNum }).subscribe(resp => {
       if (resp.code === 0) {
         this.upstreamsList = resp.data.services
         this.total = resp.data.total
