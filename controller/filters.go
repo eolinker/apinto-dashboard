@@ -4,14 +4,13 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"fmt"
 	"github.com/eolinker/apinto-dashboard/access"
+	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/eosc/log"
 	"github.com/gin-gonic/gin"
 	"github.com/go-basic/uuid"
 	"io"
 	"net/http"
-	"runtime"
 	"strings"
 	"time"
 )
@@ -53,23 +52,10 @@ func GenAccessHandler(acs ...access.Access) gin.HandlerFunc {
 	}
 }
 
-func panicTrace(err interface{}) string {
-	buf := new(bytes.Buffer)
-	_, _ = fmt.Fprintf(buf, "%v\n", err)
-	for i := 1; ; i++ {
-		pc, file, line, ok := runtime.Caller(i)
-		if !ok {
-			break
-		}
-		_, _ = fmt.Fprintf(buf, "%s:%d (0x%x)\n", file, line, pc)
-	}
-	return buf.String()
-}
-
 func Recovery(c *gin.Context) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Errorf("panic %v", panicTrace(err))
+			log.Errorf("panic %v", common.PanicTrace(err))
 			c.JSON(http.StatusInternalServerError, NewErrorResult("服务器内部错误"))
 		}
 	}()

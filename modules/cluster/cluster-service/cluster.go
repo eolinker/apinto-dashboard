@@ -43,9 +43,9 @@ func (c *clusterService) GetAllCluster(ctx context.Context) ([]*cluster_model2.C
 		return nil, err
 	}
 	list := make([]*cluster_model2.Cluster, 0, len(clusters))
-	for _, cluster := range clusters {
+	for _, clusterInfo := range clusters {
 		item := &cluster_model2.Cluster{
-			Cluster: cluster,
+			Cluster: clusterInfo,
 		}
 		list = append(list, item)
 	}
@@ -55,34 +55,34 @@ func (c *clusterService) GetAllCluster(ctx context.Context) ([]*cluster_model2.C
 
 // CheckByNamespaceByName 检测集群是否存在 通过namespace和name检测
 func (c *clusterService) CheckByNamespaceByName(ctx context.Context, namespaceId int, name string) (int, error) {
-	cluster, err := c.clusterStore.GetByNamespaceByName(ctx, namespaceId, name)
+	clusterInfo, err := c.clusterStore.GetByNamespaceByName(ctx, namespaceId, name)
 	if err != nil {
 		return 0, common.ClusterNotExist
 	}
-	return cluster.Id, nil
+	return clusterInfo.Id, nil
 }
 
 // GetByNamespaceByName 检测集群是否存在 通过namespace和name检测
 func (c *clusterService) GetByNamespaceByName(ctx context.Context, namespaceId int, name string) (*cluster_model2.Cluster, error) {
-	cluster, err := c.clusterStore.GetByNamespaceByName(ctx, namespaceId, name)
+	clusterInfo, err := c.clusterStore.GetByNamespaceByName(ctx, namespaceId, name)
 	if err != nil {
 		return nil, common.ClusterNotExist
 	}
 
 	//TODO 获取集群状态
 
-	return &cluster_model2.Cluster{Cluster: cluster}, nil
+	return &cluster_model2.Cluster{Cluster: clusterInfo}, nil
 }
 
 // GetByClusterId 根据集群ID获取集群信息
 func (c *clusterService) GetByClusterId(ctx context.Context, clusterId int) (*cluster_model2.Cluster, error) {
-	cluster, err := c.clusterStore.Get(ctx, clusterId)
+	clusterInfo, err := c.clusterStore.Get(ctx, clusterId)
 	if err != nil {
 		return nil, errors.New("cluster does not exist")
 	}
 
 	value := &cluster_model2.Cluster{
-		Cluster: cluster,
+		Cluster: clusterInfo,
 	}
 	return value, nil
 }
@@ -93,9 +93,9 @@ func (c *clusterService) GetByNamespaceId(ctx context.Context, namespaceId int) 
 		return nil, err
 	}
 	list := make([]*cluster_model2.Cluster, 0, len(clusters))
-	for _, cluster := range clusters {
+	for _, clusterInfo := range clusters {
 		value := &cluster_model2.Cluster{
-			Cluster: cluster,
+			Cluster: clusterInfo,
 		}
 		list = append(list, value)
 	}
@@ -109,9 +109,9 @@ func (c *clusterService) GetByNames(ctx context.Context, namespaceId int, names 
 		return nil, err
 	}
 	list := make([]*cluster_model2.Cluster, 0, len(clusters))
-	for _, cluster := range clusters {
+	for _, clusterInfo := range clusters {
 		value := &cluster_model2.Cluster{
-			Cluster: cluster,
+			Cluster: clusterInfo,
 		}
 		list = append(list, value)
 	}
@@ -189,18 +189,7 @@ func (c *clusterService) Insert(ctx context.Context, namespaceId, userId int, cl
 			node.ClusterId = entryCluster.Id
 		}
 
-		err = c.clusterNodeService.Insert(txCtx, entryClusterNodes)
-		if err != nil {
-			return err
-		}
-
-		//初始化集群全局插件
-		err2 := c.apintoClientService.InitGlobalPlugin(entryCluster.Addr, nodesAdminAddr)
-		if err2 != nil {
-			return err2
-		}
-
-		return nil
+		return c.clusterNodeService.Insert(txCtx, entryClusterNodes)
 	})
 }
 
@@ -224,9 +213,9 @@ func (c *clusterService) QueryListByNamespaceId(ctx context.Context, namespaceId
 	}
 
 	list := make([]*cluster_model2.Cluster, 0, len(clusters))
-	for _, cluster := range clusters {
+	for _, clusterInfo := range clusters {
 		status := 1
-		clusterNodes, _, _ := c.clusterNodeService.QueryList(ctx, namespaceId, cluster.Name)
+		clusterNodes, _, _ := c.clusterNodeService.QueryList(ctx, namespaceId, clusterInfo.Name)
 		if len(clusterNodes) == 0 {
 			status = 3 //异常
 		} else {
@@ -249,17 +238,17 @@ func (c *clusterService) QueryListByNamespaceId(ctx context.Context, namespaceId
 		}
 
 		//兼容旧版本数据
-		if cluster.UUID == "" {
+		if clusterInfo.UUID == "" {
 			go func() {
-				info, _ := c.clusterNodeService.GetClusterInfo(cluster.Addr)
+				info, _ := c.clusterNodeService.GetClusterInfo(clusterInfo.Addr)
 				if info != nil {
-					_ = c.UpdateAddr(ctx, 0, cluster.Id, cluster.Addr, cluster.UUID)
+					_ = c.UpdateAddr(ctx, 0, clusterInfo.Id, clusterInfo.Addr, clusterInfo.UUID)
 				}
 			}()
 		}
 
 		list = append(list, &cluster_model2.Cluster{
-			Cluster: cluster,
+			Cluster: clusterInfo,
 			Status:  status,
 		})
 	}
@@ -273,7 +262,7 @@ func (c *clusterService) DeleteByNamespaceIdByName(ctx context.Context, namespac
 	if err != nil {
 		return err
 	}
-	cluster, err := c.clusterStore.Get(ctx, clusterId)
+	clusterInfo, err := c.clusterStore.Get(ctx, clusterId)
 	if err != nil {
 		return err
 	}
@@ -294,7 +283,7 @@ func (c *clusterService) DeleteByNamespaceIdByName(ctx context.Context, namespac
 		}
 
 		//新增删除历史
-		if err = c.clusterHistoryStore.HistoryDelete(txCtx, namespaceId, clusterId, *cluster, userId); err != nil {
+		if err = c.clusterHistoryStore.HistoryDelete(txCtx, namespaceId, clusterId, *clusterInfo, userId); err != nil {
 			return err
 		}
 
@@ -315,7 +304,7 @@ func (c *clusterService) UpdateDesc(ctx context.Context, namespaceId, userId int
 		return err
 	}
 
-	cluster := &cluster_entry2.Cluster{
+	clusterInfo := &cluster_entry2.Cluster{
 		Id:   clusterId,
 		Desc: desc,
 	}
@@ -330,17 +319,17 @@ func (c *clusterService) UpdateDesc(ctx context.Context, namespaceId, userId int
 	})
 
 	return c.clusterStore.Transaction(ctx, func(txCtx context.Context) error {
-		_, err = c.clusterStore.Update(txCtx, cluster)
+		_, err = c.clusterStore.Update(txCtx, clusterInfo)
 		if err != nil {
 			return err
 		}
 
-		return c.clusterHistoryStore.HistoryEdit(txCtx, namespaceId, clusterId, oldCluster, cluster, userId)
+		return c.clusterHistoryStore.HistoryEdit(txCtx, namespaceId, clusterId, oldCluster, clusterInfo, userId)
 	})
 }
 
 func (c *clusterService) UpdateAddr(ctx context.Context, userId, clusterId int, addr, uuid string) error {
-	cluster := &cluster_entry2.Cluster{
+	clusterInfo := &cluster_entry2.Cluster{
 		Id:   clusterId,
 		Addr: addr,
 		UUID: uuid,
@@ -350,12 +339,12 @@ func (c *clusterService) UpdateAddr(ctx context.Context, userId, clusterId int, 
 		return err
 	}
 	return c.clusterStore.Transaction(ctx, func(txCtx context.Context) error {
-		_, err = c.clusterStore.Update(txCtx, cluster)
+		_, err = c.clusterStore.Update(txCtx, clusterInfo)
 		if err != nil {
 			return err
 		}
 
-		return c.clusterHistoryStore.HistoryEdit(txCtx, oldCluster.NamespaceId, cluster.Id, oldCluster, cluster, userId)
+		return c.clusterHistoryStore.HistoryEdit(txCtx, oldCluster.NamespaceId, clusterInfo.Id, oldCluster, clusterInfo, userId)
 	})
 
 }
