@@ -29,3 +29,7 @@ plugin_template_view 查看
 plugin_template_edit 编辑
 mon_partition_view 查看
 mon_partition_edit 编辑
+notice_email_view 查看
+notice_email_edit 编辑
+notice_webhook_view 查看
+notice_webhook_edit 编辑
