@@ -264,6 +264,12 @@ func (c *clusterPluginService) EditPlugin(ctx context.Context, namespaceID int, 
 		return errors.New("Can't Edit Inner Plugin. ")
 	}
 
+	pluginCfgStr, _ := json.Marshal(config)
+	//检测JsonSchema格式是否正确
+	if !common.JsonSchemaValid(globalPlugin.Schema, string(pluginCfgStr)) {
+		return errors.New("插件配置格式错误")
+	}
+
 	if err = c.lockService.Lock(locker_service.LockNameClusterPlugin, clusterInfo.Id); err != nil {
 		return err
 	}
