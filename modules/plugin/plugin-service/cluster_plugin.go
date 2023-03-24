@@ -264,9 +264,9 @@ func (c *clusterPluginService) EditPlugin(ctx context.Context, namespaceID int, 
 		return errors.New("Can't Edit Inner Plugin. ")
 	}
 
-	pluginCfgStr, _ := json.Marshal(config)
+	pluginConfig, _ := json.Marshal(config)
 	//检测JsonSchema格式是否正确
-	if !common.JsonSchemaValid(globalPlugin.Schema, string(pluginCfgStr)) {
+	if !common.JsonSchemaValid(globalPlugin.Schema, string(pluginConfig)) {
 		return errors.New("插件配置格式错误")
 	}
 
@@ -284,7 +284,7 @@ func (c *clusterPluginService) EditPlugin(ctx context.Context, namespaceID int, 
 	t := time.Now()
 	//判断变更历史是新增还是修改
 	isAddHistory := false
-	pluginConfig, _ := json.Marshal(config)
+
 	// 若该集群插件为空，则新建
 	if clusterPlugin == nil {
 		isAddHistory = true
