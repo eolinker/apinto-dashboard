@@ -3,16 +3,16 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/modules/plugin/plugin_timer"
-	"os"
-
 	"github.com/eolinker/apinto-dashboard/app/apserver/version"
 	"github.com/eolinker/apinto-dashboard/db_migrator"
+	"github.com/eolinker/apinto-dashboard/modules/plugin/plugin_timer"
+	"github.com/eolinker/apinto-dashboard/modules/warn/warn-timer"
 	"github.com/eolinker/apinto-dashboard/store"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
 	"github.com/gin-gonic/gin"
 	"github.com/urfave/cli/v2"
+	"os"
 )
 
 func main() {
@@ -49,6 +49,9 @@ func run() {
 	}
 
 	go plugin_timer.ExtenderTimer()
+	// todo 不适合开源，后续通过插件接入
+
+	go warn_timer.WarnTimer()
 	// todo 不适合开源，后续通过插件接入
 
 	if err = engine.Run(fmt.Sprintf(":%d", GetPort())); err != nil {
