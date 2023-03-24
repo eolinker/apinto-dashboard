@@ -34,8 +34,8 @@ export class ServiceDiscoveryCreateComponent implements OnInit {
     desc: string
     driver: string
     config: {
-      use_variable: boolean
-      addrs_variable: string
+      useVariable: boolean
+      addrsVariable: string
       addrs: Array<any>
       params: Array<{ key: string; value: string }>
     }
@@ -44,8 +44,8 @@ export class ServiceDiscoveryCreateComponent implements OnInit {
     desc: '',
     driver: 'nacos',
     config: {
-      use_variable: false,
-      addrs_variable: '',
+      useVariable: false,
+      addrsVariable: '',
       addrs: [],
       params: [{ key: '', value: '' }]
     }
@@ -70,7 +70,7 @@ export class ServiceDiscoveryCreateComponent implements OnInit {
   environmentList: Array<any> = []
 
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
-  
+
   validateForm: FormGroup = new FormGroup({})
   showDynamicTips: boolean = false
 
@@ -148,7 +148,7 @@ export class ServiceDiscoveryCreateComponent implements OnInit {
           this.createServiceForm.config.params = [{ key: '', value: '' }]
         }
         this.createServiceForm.config.addrs = this.createServiceForm.config.addrs ? this.createServiceForm.config.addrs : []
-        this.createServiceForm.config.addrs_variable = this.createServiceForm.config.addrs_variable ? this.createServiceForm.config.addrs_variable : ''
+        this.createServiceForm.config.addrsVariable = this.createServiceForm.config.addrsVariable ? this.createServiceForm.config.addrsVariable : ''
         this.getDriverList()
       } else {
         this.message.error(resp.msg || '获取数据失败!')
@@ -159,7 +159,7 @@ export class ServiceDiscoveryCreateComponent implements OnInit {
   getDataFromDynamicComponent (value: any) {
     if (value) {
       // 地址选用环境变量
-      if (!value.config.use_variable) {
+      if (!value.config.useVariable) {
         if (value.config.addrs.length === 0) {
           this.canBeSave = false
           return
@@ -178,7 +178,7 @@ export class ServiceDiscoveryCreateComponent implements OnInit {
       }
 
       // 地址不选用环境变量
-      if (value.config.use_variable && !value.config.addrs_variable) {
+      if (value.config.useVariable && !value.config.addrsVariable) {
         this.canBeSave = false
         return
       }
@@ -210,17 +210,17 @@ export class ServiceDiscoveryCreateComponent implements OnInit {
         this.createServiceForm.config.params = []
       }
       this.createServiceForm.config.addrs =
-      (this.createServiceForm.config.addrs === null || this.createServiceForm.config.use_variable)
+      (this.createServiceForm.config.addrs === null || this.createServiceForm.config.useVariable)
         ? []
         : Array.from(new Set(this.createServiceForm.config.addrs))
-      this.createServiceForm.config.addrs_variable =
-      (this.createServiceForm.config.addrs_variable === null || !this.createServiceForm.config.use_variable)
+      this.createServiceForm.config.addrsVariable =
+      (this.createServiceForm.config.addrsVariable === null || !this.createServiceForm.config.useVariable)
         ? ''
-        : this.createServiceForm.config.addrs_variable
-      this.createServiceForm.config.use_variable =
-        this.createServiceForm.config.use_variable === null
+        : this.createServiceForm.config.addrsVariable
+      this.createServiceForm.config.useVariable =
+        this.createServiceForm.config.useVariable === null
           ? false
-          : this.createServiceForm.config.use_variable
+          : this.createServiceForm.config.useVariable
       if (!this.editPage) {
         this.api
           .post('discovery', {

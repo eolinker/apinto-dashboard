@@ -1,7 +1,7 @@
 /*
- * @Author:
+ * @Author: MengjieYang yangmengjie@eolink.com
  * @Date: 2022-07-28 22:12:29
- * @LastEditors:
+ * @LastEditors: MengjieYang yangmengjie@eolink.com
  * @LastEditTime: 2022-09-20 23:17:19
  * @FilePath: /apinto/src/app/constant/app.config.ts
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
@@ -52,6 +52,7 @@ export const AppConfig: any = {
     },
     {
       title: 'API管理',
+      icon: 'APIjiekou-7mme3dcg',
       routerLink: 'router',
       matchRouter: true,
       matchRouterExact: false,
@@ -59,9 +60,30 @@ export const AppConfig: any = {
       id: 4,
       menu: true,
       level: 1,
-      view: 'api_view',
-      edit: 'api_edit',
-      icon: 'APIjiekou-7mme3dcg'
+      children: [
+        {
+          title: 'API列表',
+          routerLink: 'router/api',
+          menuIndex: 0,
+          id: 401,
+          level: 1,
+          matchRouter: true,
+          matchRouterExact: false,
+          view: 'api_view',
+          edit: 'api_edit'
+        },
+        {
+          title: '插件模板',
+          routerLink: 'router/plugin',
+          menuIndex: 0,
+          id: 402,
+          level: 1,
+          matchRouter: true,
+          matchRouterExact: false,
+          view: 'plugin_template_view',
+          edit: 'plugin_template_edit'
+        }
+      ]
     },
     {
       title: '应用管理',
@@ -106,6 +128,17 @@ export const AppConfig: any = {
           matchRouterExact: false,
           view: 'variable_view',
           edit: 'variable_edit'
+        },
+        {
+          title: '插件管理',
+          routerLink: 'deploy/plugin',
+          menuIndex: 0,
+          id: 103,
+          level: 1,
+          matchRouter: true,
+          matchRouterExact: false,
+          view: 'plugin_view',
+          edit: 'plugin_edit'
         }
       ]
     },

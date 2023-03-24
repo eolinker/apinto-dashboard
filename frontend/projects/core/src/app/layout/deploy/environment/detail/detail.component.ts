@@ -35,7 +35,7 @@ export class DeployEnvironmentDetailComponent implements OnInit {
   envKey:string = ''
   globalEnvDetailList: Array<{
     // eslint-disable-next-line camelcase
-    cluster_name: string
+    clusterName: string
     environment: string
     value: string
     // eslint-disable-next-line camelcase
@@ -50,7 +50,7 @@ export class DeployEnvironmentDetailComponent implements OnInit {
   ]
 
   globalEnvDetailTableBody: Array<any> = [
-    { key: 'cluster_name' },
+    { key: 'clusterName' },
     { key: 'environment' },
     { key: 'value' },
     { key: 'publish_status' }

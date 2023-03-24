@@ -1,10 +1,9 @@
 /* eslint-disable no-useless-constructor */
 /* eslint-disable dot-notation */
-/* eslint-disable camelcase */
 /*
- * @Author:
+ * @Author: MengjieYang yangmengjie@eolink.com
  * @Date: 2022-10-27 17:39:12
- * @LastEditors:
+ * @LastEditors: MengjieYang yangmengjie@eolink.com
  * @LastEditTime: 2022-10-28 00:15:51
  * @FilePath: /projects/core/src/app/layout/serv-governance/response-form/response-form.component.ts
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
@@ -12,8 +11,12 @@
 import { Component, Input, OnInit, Output, EventEmitter, SimpleChanges } from '@angular/core'
 import { FormGroup, UntypedFormBuilder, Validators } from '@angular/forms'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
+import { SelectOption } from 'eo-ng-select'
+import { TBODY_TYPE } from 'eo-ng-table'
 import { defaultAutoTips } from '../../../constant/conf'
+import { ArrayItemData } from '../../../constant/type'
 import { ApiService } from '../../../service/api.service'
+import { responseHeaderTableBody } from '../types/conf'
 
 @Component({
   selector: 'eo-ng-response-form',
@@ -29,11 +32,9 @@ export class ResponseFormComponent implements OnInit {
 
 set responseForm (val:FormGroup) {
   this._responseForm = val
+  this.responseFormChange.emit(val)
 }
 
-@Output() responseFormChange:EventEmitter<any> = new EventEmitter()
-
-@Input() disabled: boolean = false
 @Input()
 get responseHeaderList () {
   return this._responseHeaderList
@@ -44,15 +45,10 @@ set responseHeaderList (val) {
   this._responseHeaderList = val
 }
 
-@Output() responseHeaderListChange:EventEmitter<any> = new EventEmitter()
-
-private _responseHeaderList: Array<{
-  key: string
-  value: string
-  [key: string]: any
-}> = [{ key: '', value: '' }]
-
 @Input() editPage:boolean = false
+@Input() disabled: boolean = false
+@Output() responseFormChange:EventEmitter<FormGroup> = new EventEmitter()
+@Output() responseHeaderListChange:EventEmitter<ArrayItemData[]> = new EventEmitter()
 
 _responseForm:FormGroup = this.responseForm
 contentTypeList: Array<{ label: string; value: string; [key: string]: any }> =
@@ -64,65 +60,11 @@ _contentTypeList: Array<{
   [key: string]: any
 }> = []
 
-charsetList: Array<{ label: string; value: string; [key: string]: any }> = []
+charsetList: SelectOption[]= []
 contentTypeMap: Map<string, string> = new Map()
+private _responseHeaderList: ArrayItemData[] = [{ key: '', value: '' }]
 
-responseHeaderTableBody: Array<any> = [
-  {
-    key: 'key',
-    type: 'input',
-    placeholder: '请输入Key',
-    disabledFn: () => {
-      return this.disabled
-    }
-  },
-  {
-    key: 'value',
-    type: 'input',
-    placeholder: '请输入Value',
-    disabledFn: () => {
-      return this.disabled
-    }
-  },
-  {
-    type: 'btn',
-    showFn: (item: any) => {
-      return item === this._responseHeaderList[0]
-    },
-    btns: [
-      {
-        title: '添加',
-        action: 'add',
-        disabledFn: () => {
-          return this.disabled
-        }
-      }
-    ]
-  },
-  {
-    type: 'btn',
-    showFn: (item: any) => {
-      return item !== this._responseHeaderList[0]
-    },
-    btns: [
-      {
-        title: '添加',
-        action: 'add',
-        disabledFn: () => {
-          return this.disabled
-        }
-      },
-      {
-        title: '减少',
-        action: 'delete',
-        disabledFn: () => {
-          return this.disabled
-        }
-      }
-    ]
-  }
-]
-
+responseHeaderTableBody: TBODY_TYPE[] = [...responseHeaderTableBody]
 autoTips: Record<string, Record<string, string>> = defaultAutoTips
 
 constructor (
@@ -130,8 +72,8 @@ constructor (
   private api: ApiService,
   private fb: UntypedFormBuilder) {
   this._responseForm = this.fb.group({
-    status_code: [200, [Validators.required, Validators.pattern(/^[1-9]{1}\d{2}$/)]],
-    content_type: ['application/json', [Validators.required]],
+    statusCode: [200, [Validators.required, Validators.pattern(/^[1-9]{1}\d{2}$/)]],
+    contentType: ['application/json', [Validators.required]],
     charset: ['UTF-8', [Validators.required]],
     header: [],
     body: []
@@ -141,6 +83,31 @@ constructor (
 ngOnInit (): void {
   this.getContentTypeList()
   this.getCharsetList()
+  this.initTable()
+}
+
+initTable ():void {
+  this.responseHeaderTableBody[0].disabledFn = () => {
+    return this.disabled
+  }
+  this.responseHeaderTableBody[1].disabledFn = () => {
+    return this.disabled
+  }
+  this.responseHeaderTableBody[2].showFn = (item: any) => {
+    return item === this._responseHeaderList[0]
+  }
+  this.responseHeaderTableBody[2].btns[0].disabledFn = () => {
+    return this.disabled
+  }
+  this.responseHeaderTableBody[3].showFn = (item: any) => {
+    return item !== this._responseHeaderList[0]
+  }
+  this.responseHeaderTableBody[3].btns[0].disabledFn = () => {
+    return this.disabled
+  }
+  this.responseHeaderTableBody[3].btns[1].disabledFn = () => {
+    return this.disabled
+  }
 }
 
 ngOnChanges (changes:SimpleChanges): void {
@@ -155,7 +122,7 @@ getContentTypeList () {
     .subscribe(
       (resp: {
         code: number
-        data: { items: Array<{ content_type: string; body: string }> }
+        data: { items: Array<{ contentType: string; body: string }> }
         msg: string
       }) => {
         if (resp.code === 0) {
@@ -164,22 +131,22 @@ getContentTypeList () {
           this.contentTypeList = []
           for (const index in resp.data.items) {
             this._contentTypeList.push({
-              label: resp.data.items[index].content_type,
-              value: resp.data.items[index].content_type
+              label: resp.data.items[index].contentType,
+              value: resp.data.items[index].contentType
             })
             this.contentTypeList.push({
-              label: resp.data.items[index].content_type,
-              value: resp.data.items[index].content_type
+              label: resp.data.items[index].contentType,
+              value: resp.data.items[index].contentType
             })
             this.contentTypeMap.set(
-              resp.data.items[index].content_type,
+              resp.data.items[index].contentType,
               resp.data.items[index].body
             )
           }
           if (!this.editPage) {
             const body: string =
               this.contentTypeMap
-                .get(this._responseForm.controls['content_type'].value)
+                .get(this._responseForm.controls['contentType'].value)
                 ?.toString() || ''
             this._responseForm.controls['body'].setValue(body)
           }
@@ -214,7 +181,7 @@ getCharsetList () {
     )
 }
 
-changeContentType (value: any) {
+changeContentType (value: string) {
   this.contentTypeList = [...this._contentTypeList]
   if (value) {
     for (const index in this._contentTypeList) {

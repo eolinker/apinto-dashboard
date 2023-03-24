@@ -1,7 +1,7 @@
 <!--
- * @Author:  
+ * @Author: MengjieYang yangmengjie@eolink.com
  * @Date: 2022-07-28 22:12:29
- * @LastEditors:  
+ * @LastEditors: MengjieYang yangmengjie@eolink.com
  * @LastEditTime: 2022-07-29 01:36:57
  * @FilePath: /apinto/src/app/layout/deploy/deploy-cluster-nodes/deploy-cluster-nodes.component.html
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
@@ -15,7 +15,7 @@
       eo-ng-button
       class="ant-btn-primary"
       (click)="updateNodes()"
-      [disabled]="!nodesForms.is_update || nzDisabled"
+      [disabled]="!nodesForms.isUpdate || nzDisabled"
     >
       更新配置
     </button>
@@ -53,13 +53,13 @@
 <ng-template #adminAddrTpl let-item="item">
   <eo-ng-copy-addr-list
     [addrItem]="item"
-    keyName="admin_addr"
+    keyName="adminAddr"
   ></eo-ng-copy-addr-list>
 </ng-template>
 
 <ng-template #serviceAddrTpl let-item="item">
   <eo-ng-copy-addr-list
     [addrItem]="item"
-    keyName="service_addr"
+    keyName="serviceAddr"
   ></eo-ng-copy-addr-list>
 </ng-template>

@@ -1,8 +1,8 @@
 /* eslint-disable dot-notation */
 /*
- * @Author:
+ * @Author: MengjieYang yangmengjie@eolink.com
  * @Date: 2022-07-20 22:34:58
- * @LastEditors:
+ * @LastEditors: MengjieYang yangmengjie@eolink.com
  * @LastEditTime: 2022-09-28 00:20:26
  * @FilePath: /apinto/src/app/layout/deploy/deploy-cluster-list/deploy-cluster-list.component.ts
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
@@ -22,10 +22,13 @@ import {
   EoNgFeedbackModalService,
   EoNgFeedbackMessageService
 } from 'eo-ng-feedback'
+import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
 import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { ApiService } from 'projects/core/src/app/service/api.service'
 import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { DeployService } from '../../deploy.service'
+import { ClustersThead } from '../types/conf'
 
 @Component({
   selector: 'eo-ng-deploy-cluster-list',
@@ -45,40 +48,8 @@ export class DeployClusterListComponent implements OnInit {
     | undefined
 
   clustersList: Array<object> = []
-  clustersTableHeadName: Array<object> = [
-    { title: '集群名称' },
-    { title: '环境' },
-    { title: '状态' },
-    {
-      title: '操作',
-      right: true
-    }
-  ]
-
-  clustersTableBody: Array<any> = [
-    { key: 'name' },
-    { key: 'env' },
-    { key: 'status' },
-    {
-      type: 'btn',
-      right: true,
-      btns: [
-        {
-          title: '查看',
-          click: (item: any) => {
-            this.router.navigate(['/', 'deploy', 'cluster', 'content', item.data.name])
-          }
-        },
-        {
-          title: '删除',
-          disabledFn: () => { return this.nzDisabled },
-          click: (item:any) => {
-            this.delete(item.data)
-          }
-        }
-      ]
-    }
-  ]
+  clustersTableHeadName:THEAD_TYPE[] = [...ClustersThead]
+  clustersTableBody: TBODY_TYPE[] = [...this.service.createClusterTbody(this)]
 
   environmentList: Array<{ label: string; value: any }> = []
 
@@ -91,8 +62,9 @@ export class DeployClusterListComponent implements OnInit {
     private message: EoNgFeedbackMessageService,
     private modalService: EoNgFeedbackModalService,
     private api: ApiService,
-    private router: Router,
-    private appConfigService: AppConfigService
+    public router: Router,
+    private appConfigService: AppConfigService,
+    private service:DeployService
   ) {
     this.appConfigService.reqFlashBreadcrumb([{ title: '网关集群', routerLink: 'deploy/cluster' }])
   }
@@ -135,7 +107,7 @@ export class DeployClusterListComponent implements OnInit {
 
   deleteCluster (item: any) {
     this.api
-      .delete('cluster', { cluster_name: item.name })
+      .delete('cluster', { clusterName: item.name })
       .subscribe((resp) => {
         if (resp.code === 0) {
           this.message.success(resp.msg || '删除成功', { nzDuration: 1000 })

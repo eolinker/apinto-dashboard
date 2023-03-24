@@ -2,22 +2,15 @@
 /* eslint-disable camelcase */
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
 import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feedback'
+import { SelectOption } from 'eo-ng-select'
+import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { NzModalRef } from 'ng-zorro-antd/modal'
 import { MODAL_NORMAL_SIZE } from '../../../constant/app.config'
-import { Operator } from '../../../constant/type'
 import { ApiService } from '../../../service/api.service'
 import { AppConfigService } from '../../../service/app-config.service'
 import { AuditLogDetailComponent } from '../detail/detail.component'
-
-interface logsData{
-  id:number,
-  operator:Operator,
-  operate_type: string,
-  kind:string,
-  time:string
-  ip:string,
-  [k:string]:any
-}
+import { auditLogsTableBody, auditLogsTableHeadName, auditQueryStatusTypeList } from '../types/conf'
+import { AuditLogDetail, AuditLogsData } from '../types/types'
 
 @Component({
   selector: 'eo-ng-audit-log-list',
@@ -49,81 +42,27 @@ interface logsData{
 export class AuditLogListComponent implements OnInit {
   @ViewChild('auditLogFormTpl', { read: TemplateRef, static: true }) auditLogFormTpl: TemplateRef<any> | undefined
 
-  searchData:{keyword:string, operate_type:string, kind:string, start:Date|null, end:Date|null, page_size:number, page_num:number, total:number, [key:string]:any} = {
+  logsList:AuditLogsData[] = []
+  logsTableHeadName: THEAD_TYPE[] = [...auditLogsTableHeadName]
+  logsTableBody: TBODY_TYPE[] =[...auditLogsTableBody]
+  auditLogDetail:AuditLogDetail[]= []
+  date:Array<Date> = [];
+  listOfType:SelectOption[] = [...auditQueryStatusTypeList]
+  listOfKind:SelectOption[] = []
+  drawerRef: NzModalRef | undefined
+  searchData:{keyword:string, operateType:string, kind:string, start:Date|null, end:Date|null, pageSize:number, pageNum:number, total:number, [key:string]:any} = {
     keyword: '',
-    operate_type: '',
+    operateType: '',
     kind: '',
     start: null,
     end: null,
-    page_size: 20,
-    page_num: 1,
+    pageSize: 20,
+    pageNum: 1,
     total: 0
   }
 
-  logsList:logsData[] = []
-  logsTableHeadName: Array<object> = [
-    {
-      title: '用户名',
-      resizeable: true
-    },
-    {
-      title: '操作类型',
-      resizeable: true
-    },
-    {
-      title: '操作对象',
-      resizeable: true
-    },
-    {
-      title: '操作时间',
-      resizeable: true
-    },
-    {
-      title: '操作IP',
-      resizeable: true
-    },
-    {
-      title: '操作',
-      right: true
-    }
-  ]
-
-  logsTableBody: Array<any> =[
-    { key: 'username' },
-    { key: 'operate_type' },
-    { key: 'kind' },
-    { key: 'time' },
-    { key: 'ip' },
-    {
-      type: 'btn',
-      right: true,
-      btns: [
-        {
-          title: '查看',
-          click: (item:any) => {
-            this.getLogDetail(item.data)
-          }
-        }
-      ]
-    }
-  ]
-
-  auditLogDetail:Array<{attr:string, value:string}> = []
-
-  date:Array<any> = [];
-
-  listOfType:Array<{label:string, value:string}> = [
-    { label: '新建', value: 'create' },
-    { label: '编辑', value: 'edit' },
-    { label: '删除', value: 'delete' },
-    { label: '发布', value: 'publish' }
-  ]
-
-  listOfKind:Array<{label:string, value:string, [k:string]:any}> = []
-
-  drawerRef: NzModalRef | undefined
-
-  constructor (private message: EoNgFeedbackMessageService,
+  constructor (
+    private message: EoNgFeedbackMessageService,
      private api:ApiService,
      private modalService: EoNgFeedbackModalService,
      private appConfigService:AppConfigService) {
@@ -131,12 +70,15 @@ export class AuditLogListComponent implements OnInit {
   }
 
   ngOnInit (): void {
+    this.logsTableBody[5].btns[0].click = (item:any) => {
+      this.openDrawer(item.data.id)
+    }
     this.getLogList()
     this.getTargetList()
   }
 
   getLogList ():void {
-    const { start, end, kind, operate_type, ...body } = this.searchData
+    const { start, end, kind, operateType, ...body } = this.searchData
     if (start) {
       body['start'] = Math.floor(start.getTime() / 1000)
     }
@@ -146,60 +88,44 @@ export class AuditLogListComponent implements OnInit {
       body['end'] = Math.floor(new Date().getTime() / 1000)
     }
     body['kind'] = kind || ''
-    body['operate_type'] = operate_type || ''
+    body['operateType'] = operateType || ''
 
-    this.api.get('audit-logs', body).subscribe((resp:{code:number, data:{items:logsData[], total:number}, msg:string}) => {
-      if (resp.code === 0) {
-        for (const index in resp.data.items) {
-          resp.data.items[index]['username'] = resp.data.items[index].operator.username
-          resp.data.items[index].operate_type = this.changeToChinese(resp.data.items[index].operate_type)
+    this.api.get('audit-logs', body)
+      .subscribe((resp:{code:number, data:{items:AuditLogsData[], total:number}, msg:string}) => {
+        if (resp.code === 0) {
+          for (const index in resp.data.items) {
+            resp.data.items[index]['username'] = resp.data.items[index].operator.username
+            resp.data.items[index].operateType = this.changeToChinese(resp.data.items[index].operateType)
+          }
+          this.logsList = resp.data.items
+          this.searchData.total = resp.data.total
+        } else {
+          this.message.error(resp.msg || '获取列表数据失败！')
         }
-        this.logsList = resp.data.items
-        this.searchData.total = resp.data.total
-      } else {
-        this.message.error(resp.msg || '获取列表数据失败！')
-      }
-    })
+      })
   }
 
   getTargetList ():void {
-    this.api.get('audit-log/kinds').subscribe((resp:{code:number, data:{items:Array<any>}, msg:string}) => {
-      if (resp.code === 0) {
-        for (const index in resp.data.items) {
-          resp.data.items[index]['label'] = resp.data.items[index].title
-          resp.data.items[index]['value'] = resp.data.items[index].name
-        }
-        this.listOfKind = resp.data.items as Array<{label:string, value:string, [k:string]:any}>
-      } else {
-        this.message.error(resp.msg || '获取操作对象数据失败！')
-      }
-    })
-  }
-
-  // 接口返回成功才打开弹窗
-  getLogDetail (item:any):void {
-    this.api.get('audit-log', { log_id: item.id }).subscribe((resp:{code:number, data:{args:Array<{attr:string, value:string}>}, msg:string}) => {
-      if (resp.code === 0) {
-        this.auditLogDetail = resp.data.args
-        for (const index in this.auditLogDetail) {
-          if (this.auditLogDetail[index].attr === '请求内容') {
-            this.auditLogDetail[index].value = JSON.stringify(JSON.parse(this.auditLogDetail[index].value), null, 4)
+    this.api.get('audit-log/kinds')
+      .subscribe((resp:{code:number, data:{items:Array<{title:string, name:string}>}, msg:string}) => {
+        if (resp.code === 0) {
+          this.listOfKind = []
+          for (const index in resp.data.items) {
+            this.listOfKind.push({ label: resp.data.items[index].title, value: resp.data.items[index].name })
           }
+        } else {
+          this.message.error(resp.msg || '获取操作对象数据失败！')
         }
-        this.openDrawer()
-      } else {
-        this.message.error(resp.msg || '获取日志详情失败！')
-      }
-    })
+      })
   }
 
-  openDrawer ():void {
+  openDrawer (auditLogId:string):void {
     this.drawerRef = this.modalService.create({
       nzTitle: '日志详情',
       nzWidth: MODAL_NORMAL_SIZE,
       nzContent: AuditLogDetailComponent,
       nzComponentParams: {
-        auditLogDetail: this.auditLogDetail
+        auditLogId: auditLogId
       },
       nzWrapClassName: 'audit-log-drawer',
       nzOkText: null
@@ -210,19 +136,19 @@ export class AuditLogListComponent implements OnInit {
   clearSearch ():void {
     this.searchData = {
       keyword: '',
-      operate_type: '',
+      operateType: '',
       kind: '',
       start: null,
       end: null,
-      page_size: 20,
-      page_num: 1,
+      pageSize: 20,
+      pageNum: 1,
       total: 0
     }
     this.date = []
   }
 
   logsTableClick = (item:any) => {
-    this.getLogDetail(item.data)
+    this.openDrawer(item.data.id)
   }
 
   onDateRangeChange (result: Date[]): void {

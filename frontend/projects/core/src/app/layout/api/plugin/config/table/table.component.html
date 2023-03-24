@@ -1,0 +1,34 @@
+<div>
+  <button
+    type="button"
+    [disabled]="nzDisabled"
+    eo-ng-button
+    (click)="openDrawer()"
+  >
+    添加插件
+  </button>
+</div>
+<div
+  *ngIf="configList && configList.length > 0"
+  class="mt-btnybase"
+  style="width: 524px"
+>
+  <eo-ng-apinto-table
+    [nzTbody]="configTableBody"
+    [nzThead]="configTableHeadName"
+    [nzData]="configList"
+    (nzDataChange)="configListChange.emit()"
+    [nzTrClick]="configTableClick"
+    [nzMaxOperatorButton]="2"
+    [nzNoScroll]="true"
+  >
+  </eo-ng-apinto-table>
+</div>
+
+<ng-template #switchTpl let-item="item">
+  <eo-ng-switch
+    [(ngModel)]="!item.disable"
+    (click)="$event.stopPropagation()"
+    [nzDisabled]="nzDisabled"
+  ></eo-ng-switch>
+</ng-template>

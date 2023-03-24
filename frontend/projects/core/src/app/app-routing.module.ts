@@ -1,7 +1,7 @@
 /*
- * @Author:
+ * @Author: maggieyyy im.ymj@hotmail.com
  * @Date: 2022-07-11 23:20:14
- * @LastEditors:
+ * @LastEditors: MengjieYang yangmengjie@eolink.com
  * @LastEditTime: 2022-09-20 23:14:26
  * @FilePath: /apinto/src/app/app-routing.module.ts
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
@@ -10,15 +10,10 @@ import { NgModule } from '@angular/core'
 import { RouterModule, Routes } from '@angular/router'
 import { RedirectPageService } from './service/redirect-page.service'
 import { AuthGuardService } from './service/auth-guard.service'
-import { LoginComponent } from './layout/login/login.component'
 import { BasicLayoutComponent } from './layout/basic-layout/basic-layout.component'
 import { CustomPreloadingStrategy } from './custom-preloading-strategy'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 const routes: Routes = [
-  {
-    path: 'login',
-    component: LoginComponent
-  },
   {
     path: '',
     component: BasicLayoutComponent,
