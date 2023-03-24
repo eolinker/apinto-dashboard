@@ -12,7 +12,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/api/api-dto"
 	apientry "github.com/eolinker/apinto-dashboard/modules/api/api-entry"
 	apimodel "github.com/eolinker/apinto-dashboard/modules/api/model"
-	store2 "github.com/eolinker/apinto-dashboard/modules/api/store"
+	apiStore "github.com/eolinker/apinto-dashboard/modules/api/store"
 	"github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-dashboard/modules/base/frontend-model"
 	"github.com/eolinker/apinto-dashboard/modules/base/locker-service"
@@ -27,6 +27,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/namespace"
 	"github.com/eolinker/apinto-dashboard/modules/openapp"
 	"github.com/eolinker/apinto-dashboard/modules/openapp/open-app-model"
+	"github.com/eolinker/apinto-dashboard/modules/plugin_template"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-model"
 	"github.com/eolinker/apinto-dashboard/modules/upstream"
 	"github.com/eolinker/apinto-dashboard/modules/user"
@@ -43,12 +44,12 @@ import (
 )
 
 type apiService struct {
-	apiStore   store2.IAPIStore
-	apiStat    store2.IAPIStatStore
-	apiVersion store2.IAPIVersionStore
-	apiRuntime store2.IAPIRuntimeStore
+	apiStore   apiStore.IAPIStore
+	apiStat    apiStore.IAPIStatStore
+	apiVersion apiStore.IAPIVersionStore
+	apiRuntime apiStore.IAPIRuntimeStore
 	quoteStore quote_store.IQuoteStore
-	apiHistory store2.IApiHistoryStore
+	apiHistory apiStore.IApiHistoryStore
 
 	service          upstream.IService
 	commonGroup      group.ICommonGroupService
@@ -58,6 +59,8 @@ type apiService struct {
 	userInfoService  user.IUserInfoService
 	extAppService    openapp.IExternalApplicationService
 	apiManager       apiservice.IAPIDriverManager
+
+	pluginTemplateService plugin_template.IPluginTemplateService
 
 	lockService    locker_service.IAsynLockService
 	importApiCache IImportApiCache
@@ -85,6 +88,7 @@ func NewAPIService() apiservice.IAPIService {
 	bean.Autowired(&as.lockService)
 	bean.Autowired(&as.importApiCache)
 	bean.Autowired(&as.batchApiCache)
+	bean.Autowired(&as.pluginTemplateService)
 
 	return as
 }
@@ -476,6 +480,20 @@ func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator in
 		return fmt.Errorf("group doesn't. group_uuid:%s ", input.GroupUUID)
 	}
 
+	serviceID, err := a.service.GetServiceIDByName(ctx, namespaceID, input.ServiceName)
+	if err != nil {
+		return err
+	}
+
+	var templateID int
+	if input.TemplateUUID != "" {
+		templateInfo, err := a.pluginTemplateService.GetByUUID(ctx, namespaceID, input.TemplateUUID)
+		if err != nil {
+			return err
+		}
+		templateID = templateInfo.Id
+	}
+
 	return a.apiStore.Transaction(ctx, func(txCtx context.Context) error {
 		t := time.Now()
 		apiInfo := &apientry.API{
@@ -497,10 +515,6 @@ func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator in
 			return err
 		}
 
-		serviceID, err := a.service.GetServiceIDByName(txCtx, namespaceID, input.ServiceName)
-		if err != nil {
-			return err
-		}
 		//添加版本信息
 		apiVersionInfo := &apientry.APIVersion{
 			ApiID:       apiInfo.Id,
@@ -511,6 +525,8 @@ func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator in
 				RequestPathLabel: input.RequestPathLabel,
 				ServiceID:        serviceID,
 				ServiceName:      input.ServiceName,
+				TemplateID:       templateID,
+				TemplateUUID:     input.TemplateUUID,
 				Method:           input.Method,
 				ProxyPath:        input.ProxyPath,
 				Timeout:          input.Timeout,
@@ -544,11 +560,17 @@ func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator in
 			return err
 		}
 
-		//quote更新所引用的服务
-		quoteMap := make(map[quote_entry.QuoteTargetKindType][]int)
-		quoteMap[quote_entry.QuoteTargetKindTypeService] = append(quoteMap[quote_entry.QuoteTargetKindTypeService], serviceID)
+		//更新所引用的插件模板
+		if templateID != 0 {
+			err = a.quoteStore.Set(txCtx, apiInfo.Id, quote_entry.QuoteKindTypeAPI, quote_entry.QuoteTargetKindTypePluginTemplate, templateID)
+			if err != nil {
+				return err
+			}
+		}
 
-		return a.quoteStore.Set(txCtx, apiInfo.Id, quote_entry.QuoteKindTypeAPI, quoteMap)
+		//quote更新所引用的服务
+
+		return a.quoteStore.Set(txCtx, apiInfo.Id, quote_entry.QuoteKindTypeAPI, quote_entry.QuoteTargetKindTypeService, serviceID)
 	})
 
 }
@@ -580,6 +602,20 @@ func (a *apiService) UpdateAPI(ctx context.Context, namespaceID int, operator in
 	apiInfo, err = a.apiStore.GetByUUID(ctx, namespaceID, input.UUID)
 	if err != nil {
 		return err
+	}
+
+	serviceID, err := a.service.GetServiceIDByName(ctx, namespaceID, input.ServiceName)
+	if err != nil {
+		return err
+	}
+
+	var templateID int
+	if input.TemplateUUID != "" {
+		templateInfo, err := a.pluginTemplateService.GetByUUID(ctx, namespaceID, input.TemplateUUID)
+		if err != nil {
+			return err
+		}
+		templateID = templateInfo.Id
 	}
 
 	stat, err := a.apiStat.Get(ctx, apiInfo.Id)
@@ -616,10 +652,6 @@ func (a *apiService) UpdateAPI(ctx context.Context, namespaceID int, operator in
 		if _, err = a.apiStore.Update(txCtx, apiInfo); err != nil {
 			return err
 		}
-		serviceID, err := a.service.GetServiceIDByName(txCtx, namespaceID, input.ServiceName)
-		if err != nil {
-			return err
-		}
 
 		latestVersionConfig := apientry.APIVersionConfig{
 			Driver:           input.Driver,
@@ -627,6 +659,8 @@ func (a *apiService) UpdateAPI(ctx context.Context, namespaceID int, operator in
 			RequestPathLabel: input.RequestPathLabel,
 			ServiceID:        serviceID,
 			ServiceName:      input.ServiceName,
+			TemplateID:       templateID,
+			TemplateUUID:     input.TemplateUUID,
 			Method:           input.Method,
 			ProxyPath:        input.ProxyPath,
 			Timeout:          input.Timeout,
@@ -656,10 +690,23 @@ func (a *apiService) UpdateAPI(ctx context.Context, namespaceID int, operator in
 				return err
 			}
 
+			//更新所引用的插件模板
+			if currentVersion.TemplateID != templateID {
+				if templateID != 0 {
+					err = a.quoteStore.Set(txCtx, apiInfo.Id, quote_entry.QuoteKindTypeAPI, quote_entry.QuoteTargetKindTypePluginTemplate, templateID)
+					if err != nil {
+						return err
+					}
+				} else {
+					err = a.quoteStore.DelSourceTarget(txCtx, apiInfo.Id, quote_entry.QuoteKindTypeAPI, quote_entry.QuoteTargetKindTypePluginTemplate)
+					if err != nil {
+						return err
+					}
+				}
+			}
+
 			//quote更新所引用的服务
-			quoteMap := make(map[quote_entry.QuoteTargetKindType][]int)
-			quoteMap[quote_entry.QuoteTargetKindTypeService] = append(quoteMap[quote_entry.QuoteTargetKindTypeService], serviceID)
-			if err = a.quoteStore.Set(txCtx, apiInfo.Id, quote_entry.QuoteKindTypeAPI, quoteMap); err != nil {
+			if err = a.quoteStore.Set(txCtx, apiInfo.Id, quote_entry.QuoteKindTypeAPI, quote_entry.QuoteTargetKindTypeService, serviceID); err != nil {
 				return err
 			}
 		}
@@ -1262,13 +1309,13 @@ func (a *apiService) BatchOnlineCheck(ctx context.Context, namespaceId int, oper
 	apiList := make([]*apientry.API, 0, len(apiUUIDs))
 	apiIds := make([]int, 0, len(apiUUIDs))
 
-	errorGroup, _ := errgroup.WithContext(ctx)
-	errorGroup.Go(func() error {
+	groupInfo, _ := errgroup.WithContext(ctx)
+	groupInfo.Go(func() error {
 		for _, uid := range apiUUIDs {
 			api, err := a.apiStore.GetByUUID(ctx, namespaceId, uid)
 			if err != nil {
 				if err == gorm.ErrRecordNotFound {
-					return fmt.Errorf("apiService doesn't exist. uuid:%s", uid)
+					return fmt.Errorf("api doesn't exist. uuid:%s", uid)
 				}
 				return err
 			}
@@ -1280,7 +1327,7 @@ func (a *apiService) BatchOnlineCheck(ctx context.Context, namespaceId int, oper
 	})
 
 	clusterList := make([]*cluster_model.Cluster, 0, len(clusterNames))
-	errorGroup.Go(func() error {
+	groupInfo.Go(func() error {
 		clusters, err := a.clusterService.QueryListByNamespaceId(ctx, namespaceId)
 		if err != nil {
 			return err
@@ -1301,12 +1348,13 @@ func (a *apiService) BatchOnlineCheck(ctx context.Context, namespaceId int, oper
 		return nil
 	})
 
-	if err := errorGroup.Wait(); err != nil {
+	if err := groupInfo.Wait(); err != nil {
 		return nil, "", err
 	}
 
 	isAllOnline := true
-	checkSet := make(map[int]struct{}) //serviceId集合，用于对检查列表的去重
+	checkServiceMap := make(map[int]string)     //serviceId集合，用于对检查列表的去重
+	checkTemplateMap := make(map[string]string) //插件模板ID集合，用于对检查列表的去重
 	checkList := make([]*apimodel.BatchOnlineCheckListItem, 0, len(apiList)*len(clusterList))
 
 	versionMap, err := a.getAPIVersions(ctx, apiIds)
@@ -1314,28 +1362,58 @@ func (a *apiService) BatchOnlineCheck(ctx context.Context, namespaceId int, oper
 		return nil, "", err
 	}
 
-	//确认每个api对应的cluster所配置的serviceID的上线情况
+	//确认每个api对应的cluster所配置的serviceID和模板的上线情况
 	for _, api := range apiList {
 		version := versionMap[api.Id]
-		if _, has := checkSet[version.ServiceID]; has {
-			continue
+		if _, has := checkServiceMap[version.ServiceID]; !has {
+			checkServiceMap[version.ServiceID] = version.ServiceName
 		}
-		checkSet[version.ServiceID] = struct{}{}
+		if _, has := checkTemplateMap[version.TemplateUUID]; !has && version.TemplateUUID != "" {
+			templateInfo, err := a.pluginTemplateService.GetBasicInfoByUUID(ctx, version.TemplateUUID)
+			if err != nil {
+				return nil, "", err
+			}
+			checkTemplateMap[version.TemplateUUID] = templateInfo.Name
+		}
+	}
 
+	for serviceID, serName := range checkServiceMap {
 		for _, clusterInfo := range clusterList {
 			item := &apimodel.BatchOnlineCheckListItem{
-				ServiceName: version.ServiceName,
-				ClusterEnv:  fmt.Sprintf("%s%s", clusterInfo.Name, clusterInfo.Env),
-				Status:      true,
-				Solution:    &frontend_model.Router{},
+				ServiceTemplate: serName,
+				ClusterEnv:      fmt.Sprintf("%s%s", clusterInfo.Name, clusterInfo.Env),
+				Status:          true,
+				Solution:        &frontend_model.Router{},
 			}
 
-			if isOnline := a.service.IsOnline(ctx, clusterInfo.Id, version.ServiceID); !isOnline {
+			if isOnline := a.service.IsOnline(ctx, clusterInfo.Id, serviceID); !isOnline {
 				isAllOnline = false
 				item.Status = false
-				item.Result = fmt.Sprintf("%s未上线到%s", version.ServiceName, clusterInfo.Name)
+				item.Result = fmt.Sprintf("%s未上线到%s", serName, clusterInfo.Name)
 				item.Solution.Name = frontend_model.RouterNameServiceOnline
-				item.Solution.Params = map[string]string{"service_name": version.ServiceName}
+				item.Solution.Params = map[string]string{"cluster_name": clusterInfo.Name, "service_name": serName}
+			}
+			checkList = append(checkList, item)
+		}
+	}
+	for templateUuid, templateName := range checkTemplateMap {
+		for _, clusterInfo := range clusterList {
+			item := &apimodel.BatchOnlineCheckListItem{
+				ServiceTemplate: templateName,
+				ClusterEnv:      fmt.Sprintf("%s%s", clusterInfo.Name, clusterInfo.Env),
+				Status:          true,
+				Solution:        &frontend_model.Router{},
+			}
+			isOnline, err := a.pluginTemplateService.IsOnline(ctx, clusterInfo.Id, templateUuid)
+			if err != nil {
+				return nil, "", err
+			}
+			if !isOnline {
+				isAllOnline = false
+				item.Status = false
+				item.Result = fmt.Sprintf("%s未上线到%s", templateName, clusterInfo.Name)
+				item.Solution.Name = frontend_model.RouterNameTemplateOnline
+				item.Solution.Params = map[string]string{"cluster_name": clusterInfo.Name, "template_uuid": templateUuid}
 			}
 			checkList = append(checkList, item)
 		}
@@ -1473,15 +1551,26 @@ func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, u
 		return nil, err
 	}
 
-	router := &frontend_model.Router{
-		Name:   frontend_model.RouterNameServiceOnline,
-		Params: make(map[string]string),
-	}
-	router.Params["service_name"] = latestVersion.ServiceName
-
 	//判断上游服务有没有上线
 	if !a.service.IsOnline(ctx, clusterInfo.Id, latestVersion.ServiceID) {
-		return router, errors.New(fmt.Sprintf("绑定的%s未上线到%s", latestVersion.ServiceName, clusterName))
+		return &frontend_model.Router{
+			Name:   frontend_model.RouterNameServiceOnline,
+			Params: map[string]string{"service_name": latestVersion.ServiceName},
+		}, errors.New(fmt.Sprintf("绑定的%s未上线到%s", latestVersion.ServiceName, clusterName))
+	}
+
+	//判断插件模板有没有上线
+	if latestVersion.TemplateID != 0 {
+		isTemplateOnline, err := a.pluginTemplateService.IsOnline(ctx, clusterInfo.Id, latestVersion.TemplateUUID)
+		if err != nil {
+			return nil, err
+		}
+		if !isTemplateOnline {
+			return &frontend_model.Router{
+				Name:   frontend_model.RouterNameTemplateOnline,
+				Params: map[string]string{"template_uuid": latestVersion.TemplateUUID},
+			}, errors.New(fmt.Sprintf("绑定的插件模板未上线到%s", clusterName))
+		}
 	}
 
 	//获取当前运行的版本
@@ -2055,10 +2144,8 @@ func (a *apiService) ImportAPI(ctx context.Context, namespaceId, operator int, i
 			}
 
 			//quote更新所引用的服务
-			quoteMap := make(map[quote_entry.QuoteTargetKindType][]int)
-			quoteMap[quote_entry.QuoteTargetKindTypeService] = append(quoteMap[quote_entry.QuoteTargetKindTypeService], serviceID)
 
-			if err = a.quoteStore.Set(txCtx, apiInfo.Id, quote_entry.QuoteKindTypeAPI, quoteMap); err != nil {
+			if err = a.quoteStore.Set(txCtx, apiInfo.Id, quote_entry.QuoteKindTypeAPI, quote_entry.QuoteTargetKindTypeService, serviceID); err != nil {
 				return err
 			}
 

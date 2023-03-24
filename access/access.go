@@ -34,6 +34,10 @@ const (
 	AuditLogView
 	ExtAPPView
 	ExtAPPEdit
+	PluginView
+	PluginEdit
+	PluginTemplateView
+	PluginTemplateEdit
 	MonPartitionView
 	MonPartitionEdit
 	lastId

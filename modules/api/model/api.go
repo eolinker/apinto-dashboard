@@ -29,11 +29,11 @@ type APIVersionInfo struct {
 }
 
 type BatchOnlineCheckListItem struct {
-	ServiceName string
-	ClusterEnv  string
-	Status      bool
-	Result      string
-	Solution    *frontend_model.Router
+	ServiceTemplate string
+	ClusterEnv      string
+	Status          bool
+	Result          string
+	Solution        *frontend_model.Router
 }
 
 type BatchListItem struct {

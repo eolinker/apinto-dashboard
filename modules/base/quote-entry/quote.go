@@ -3,19 +3,22 @@ package quote_entry
 type QuoteKindType string
 
 var (
-	QuoteKindTypeService      QuoteKindType = "service"
-	QuoteKindTypeDiscovery    QuoteKindType = "discovery"
-	QuoteKindTypeAPI          QuoteKindType = "api"
-	QuoteKindTypeWarnStrategy QuoteKindType = "warn_strategy"
+	QuoteKindTypeService        QuoteKindType = "service"
+	QuoteKindTypeDiscovery      QuoteKindType = "discovery"
+	QuoteKindTypeAPI            QuoteKindType = "api"
+	QuoteKindTypeWarnStrategy   QuoteKindType = "warn_strategy"
+	QuoteKindTypePluginTemplate QuoteKindType = "plugin_template"
 )
 
 type QuoteTargetKindType string
 
 var (
-	QuoteTargetKindTypeVariable      QuoteTargetKindType = "variable"
-	QuoteTargetKindTypeDiscovery     QuoteTargetKindType = "discovery"
-	QuoteTargetKindTypeService       QuoteTargetKindType = "service"
-	QuoteTargetKindTypeNoticeChannel QuoteTargetKindType = "notice_channel"
+	QuoteTargetKindTypeVariable       QuoteTargetKindType = "variable"
+	QuoteTargetKindTypeDiscovery      QuoteTargetKindType = "discovery"
+	QuoteTargetKindTypeService        QuoteTargetKindType = "service"
+	QuoteTargetKindTypeNoticeChannel  QuoteTargetKindType = "notice_channel"
+	QuoteTargetKindTypePluginTemplate QuoteTargetKindType = "plugin_template"
+	QuoteTargetKindTypePlugin         QuoteTargetKindType = "plugin"
 )
 
 // Quote 引用表
