@@ -29,6 +29,8 @@ export class ApiPluginConfigFormComponent implements OnInit {
   nzDisabled:boolean = false
   code:string = ''
   showValid:boolean = false
+  dataType = ['string', 'boolean', 'number']
+  jsonKey = ['eo:type', 'dependencies', 'skill', 'switch', 'label', 'ui:sort', 'properties', 'type'] // json schema自定义的关键字
   constructor (private fb: UntypedFormBuilder, private api:ApiService, private message:EoNgFeedbackMessageService) {
   }
 
@@ -37,9 +39,37 @@ export class ApiPluginConfigFormComponent implements OnInit {
       name: [this.data?.name || '', [Validators.required]]
     })
     if (this.data) {
-      this.code = this.data.config
+      this.code = JSON.stringify(this.handleJsonSchema2Json(JSON.parse(this.data.config)))
     }
     this.getPluginList()
+  }
+
+  handleJsonSchema2Json (data:any) {
+    const obj:{[k:string]:any} = {}
+    for (const key in data.properties) {
+      const param = data.properties[key]
+      const type = param.type
+      if (!this.jsonKey.includes(key)) {
+        obj[key] = {}
+        if (this.dataType.includes(type)) {
+          obj[key] = param.default || ''
+        } else if (type === 'array') {
+          const items = param.items
+          if (this.dataType.includes(items.type)) {
+            obj[key] = [items.default]
+          } else {
+            obj[key] = [this.handleJsonSchema2Json(items)]
+          }
+        } else if (type === 'object') {
+          obj[key] = this.handleJsonSchema2Json(param)
+        } else if (type === 'number') {
+          obj[key] = 0
+        } else if (type === 'boolean') {
+          obj[key] = false
+        }
+      }
+    }
+    return obj
   }
 
   disabledEdit (value:any) {
@@ -112,11 +142,8 @@ export class ApiPluginConfigFormComponent implements OnInit {
         return plugin.name === this.validateConfigForm.controls['name'].value
       })[0].config
     })
-    console.log(this.pluginsList.filter((plugin) => {
+    this.code = JSON.stringify(this.handleJsonSchema2Json(JSON.parse(this.pluginsList.filter((plugin) => {
       return plugin.name === this.validateConfigForm.controls['name'].value
-    })[0].config)
-    this.code = this.pluginsList.filter((plugin) => {
-      return plugin.name === this.validateConfigForm.controls['name'].value
-    })[0].config
+    })[0].config)))
   }
 }
