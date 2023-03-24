@@ -40,6 +40,10 @@ const (
 	PluginTemplateEdit
 	MonPartitionView
 	MonPartitionEdit
+	NoticeEmailView
+	NoticeEmailEdit
+	NoticeWebhookView
+	NoticeWebhookEdit
 	lastId
 	unknown
 )
