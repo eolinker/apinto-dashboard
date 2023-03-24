@@ -1380,10 +1380,10 @@ func (a *apiService) BatchOnlineCheck(ctx context.Context, namespaceId int, oper
 	for serviceID, serName := range checkServiceMap {
 		for _, clusterInfo := range clusterList {
 			item := &apimodel.BatchOnlineCheckListItem{
-				ServiceName: serName,
-				ClusterEnv:  fmt.Sprintf("%s%s", clusterInfo.Name, clusterInfo.Env),
-				Status:      true,
-				Solution:    &frontend_model.Router{},
+				ServiceTemplate: serName,
+				ClusterEnv:      fmt.Sprintf("%s%s", clusterInfo.Name, clusterInfo.Env),
+				Status:          true,
+				Solution:        &frontend_model.Router{},
 			}
 
 			if isOnline := a.service.IsOnline(ctx, clusterInfo.Id, serviceID); !isOnline {
@@ -1391,7 +1391,7 @@ func (a *apiService) BatchOnlineCheck(ctx context.Context, namespaceId int, oper
 				item.Status = false
 				item.Result = fmt.Sprintf("%s未上线到%s", serName, clusterInfo.Name)
 				item.Solution.Name = frontend_model.RouterNameServiceOnline
-				item.Solution.Params = map[string]string{"service_name": serName}
+				item.Solution.Params = map[string]string{"cluster_name": clusterInfo.Name, "service_name": serName}
 			}
 			checkList = append(checkList, item)
 		}
@@ -1399,10 +1399,10 @@ func (a *apiService) BatchOnlineCheck(ctx context.Context, namespaceId int, oper
 	for templateUuid, templateName := range checkTemplateMap {
 		for _, clusterInfo := range clusterList {
 			item := &apimodel.BatchOnlineCheckListItem{
-				ServiceName: templateName,
-				ClusterEnv:  fmt.Sprintf("%s%s", clusterInfo.Name, clusterInfo.Env),
-				Status:      true,
-				Solution:    &frontend_model.Router{},
+				ServiceTemplate: templateName,
+				ClusterEnv:      fmt.Sprintf("%s%s", clusterInfo.Name, clusterInfo.Env),
+				Status:          true,
+				Solution:        &frontend_model.Router{},
 			}
 			isOnline, err := a.pluginTemplateService.IsOnline(ctx, clusterInfo.Id, templateUuid)
 			if err != nil {
@@ -1413,7 +1413,7 @@ func (a *apiService) BatchOnlineCheck(ctx context.Context, namespaceId int, oper
 				item.Status = false
 				item.Result = fmt.Sprintf("%s未上线到%s", templateName, clusterInfo.Name)
 				item.Solution.Name = frontend_model.RouterNameTemplateOnline
-				item.Solution.Params = map[string]string{"template_name": templateName}
+				item.Solution.Params = map[string]string{"cluster_name": clusterInfo.Name, "template_uuid": templateUuid}
 			}
 			checkList = append(checkList, item)
 		}
@@ -1551,15 +1551,12 @@ func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, u
 		return nil, err
 	}
 
-	router := &frontend_model.Router{
-		Name:   frontend_model.RouterNameServiceOnline,
-		Params: make(map[string]string),
-	}
-	router.Params["service_name"] = latestVersion.ServiceName
-
 	//判断上游服务有没有上线
 	if !a.service.IsOnline(ctx, clusterInfo.Id, latestVersion.ServiceID) {
-		return router, errors.New(fmt.Sprintf("绑定的%s未上线到%s", latestVersion.ServiceName, clusterName))
+		return &frontend_model.Router{
+			Name:   frontend_model.RouterNameServiceOnline,
+			Params: map[string]string{"service_name": latestVersion.ServiceName},
+		}, errors.New(fmt.Sprintf("绑定的%s未上线到%s", latestVersion.ServiceName, clusterName))
 	}
 
 	//判断插件模板有没有上线
@@ -1569,7 +1566,10 @@ func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, u
 			return nil, err
 		}
 		if !isTemplateOnline {
-			return router, errors.New(fmt.Sprintf("绑定的插件模板未上线到%s", clusterName))
+			return &frontend_model.Router{
+				Name:   frontend_model.RouterNameTemplateOnline,
+				Params: map[string]string{"template_uuid": latestVersion.TemplateUUID},
+			}, errors.New(fmt.Sprintf("绑定的插件模板未上线到%s", clusterName))
 		}
 	}
 
