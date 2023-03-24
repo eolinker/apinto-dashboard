@@ -5,7 +5,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/driver"
 	"github.com/eolinker/apinto-dashboard/modules/monitor/model"
 	"github.com/eolinker/apinto-dashboard/modules/monitor/monitor-dto"
-	warn_model "github.com/eolinker/apinto-dashboard/modules/warn/model"
+	"github.com/eolinker/apinto-dashboard/modules/warn/warn-model"
 	"time"
 )
 
