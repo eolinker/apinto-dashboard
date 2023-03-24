@@ -27,13 +27,13 @@ func RegisterPluginClusterRouter(router gin.IRoutes) {
 	p := &pluginClusterController{}
 	bean.Autowired(&p.clusterPluginService)
 	router.GET("/cluster/:cluster_name/plugins", controller.GenAccessHandler(access.PluginView, access.PluginEdit), p.plugins)
-	router.GET("/cluster/:cluster_name/pluginInfo", controller.GenAccessHandler(access.PluginView, access.PluginEdit), p.getPlugin)
-	router.POST("/cluster/:cluster_name/pluginInfo", controller.GenAccessHandler(access.PluginEdit), controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindClusterPlugin), p.editPlugin)
+	router.GET("/cluster/:cluster_name/plugin", controller.GenAccessHandler(access.PluginView, access.PluginEdit), p.getPlugin)
+	router.POST("/cluster/:cluster_name/plugin", controller.GenAccessHandler(access.PluginEdit), controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindClusterPlugin), p.editPlugin)
 
-	router.POST("/cluster/:cluster_name/pluginInfo/publish", controller.GenAccessHandler(access.PluginEdit), controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindClusterPlugin), p.publish)
-	router.GET("/cluster/:cluster_name/pluginInfo/to-publish", controller.GenAccessHandler(access.PluginView, access.PluginEdit), p.toPublish)
-	router.GET("/cluster/:cluster_name/pluginInfo/publish-history", controller.GenAccessHandler(access.PluginView, access.PluginEdit), p.publishHistory)
-	router.GET("/cluster/:cluster_name/pluginInfo/update-history", controller.GenAccessHandler(access.PluginView, access.PluginEdit), p.updateHistory)
+	router.POST("/cluster/:cluster_name/plugin/publish", controller.GenAccessHandler(access.PluginEdit), controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindClusterPlugin), p.publish)
+	router.GET("/cluster/:cluster_name/plugin/to-publish", controller.GenAccessHandler(access.PluginView, access.PluginEdit), p.toPublish)
+	router.GET("/cluster/:cluster_name/plugin/publish-history", controller.GenAccessHandler(access.PluginView, access.PluginEdit), p.publishHistory)
+	router.GET("/cluster/:cluster_name/plugin/update-history", controller.GenAccessHandler(access.PluginView, access.PluginEdit), p.updateHistory)
 }
 
 // 插件列表
