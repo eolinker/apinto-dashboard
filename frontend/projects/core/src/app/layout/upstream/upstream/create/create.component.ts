@@ -29,26 +29,26 @@ export class UpstreamCreateComponent implements OnInit {
     desc: string
     scheme: string
     balance: string
-    discovery_name: string
+    discoveryName: string
     timeout: number
     config: {
-      service_name: string
-      use_variable: boolean
-      addrs_variable: string
-      static_conf: Array<{ weight: number | null; addr: string }>
+      serviceName: string
+      useVariable: boolean
+      addrsVariable: string
+      staticConf: Array<{ weight: number | null; addr: string }>
     }
   } = {
     name: '',
     desc: '',
     scheme: 'HTTP',
     balance: 'round-robin',
-    discovery_name: 'static',
+    discoveryName: 'static',
     timeout: 100,
     config: {
-      addrs_variable: '',
-      use_variable: false,
-      service_name: '',
-      static_conf: [
+      addrsVariable: '',
+      useVariable: false,
+      serviceName: '',
+      staticConf: [
         {
           weight: null,
           addr: ''
@@ -72,7 +72,6 @@ export class UpstreamCreateComponent implements OnInit {
 
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
 
-
   startValidateDynamic:boolean = false
   validateForm: FormGroup = new FormGroup({})
   nzDisabled:boolean = false // 权限控制
@@ -88,7 +87,7 @@ export class UpstreamCreateComponent implements OnInit {
       desc: [''],
       scheme: ['HTTP', [Validators.required]],
       balance: ['round-robin', [Validators.required]],
-      discovery_name: ['static', [Validators.required]],
+      discoveryName: ['static', [Validators.required]],
       timeout: [100, [Validators.required]]
     })
     this.appConfigService.reqFlashBreadcrumb([{ title: '上游管理', routerLink: 'upstream/upstream' }, { title: '创建上游' }])
@@ -124,7 +123,7 @@ export class UpstreamCreateComponent implements OnInit {
           }
           if (
             resp.data.discoveries[index].name ===
-            this.validateForm.controls['discovery_name'].value
+            this.validateForm.controls['discoveryName'].value
           ) {
             this.baseData = resp.data.discoveries[index].render
           }
@@ -138,7 +137,7 @@ export class UpstreamCreateComponent implements OnInit {
 
   changeBasedata () {
     this.discoveryList.forEach((ele: any) => {
-      if (this.validateForm.controls['discovery_name'].value === ele.value) {
+      if (this.validateForm.controls['discoveryName'].value === ele.value) {
         this.baseData = ele.render
       }
     })
@@ -157,31 +156,31 @@ export class UpstreamCreateComponent implements OnInit {
         this.validateForm.controls['balance']!.setValue(
           resp.data.service.balance
         )
-        this.validateForm.controls['discovery_name']!.setValue(
-          resp.data.service.discovery_name
+        this.validateForm.controls['discoveryName']!.setValue(
+          resp.data.service.discoveryName
         )
         this.validateForm.controls['timeout']!.setValue(
           resp.data.service.timeout
         )
         this.validateForm.controls['name']!.disable()
         this.createUpstreamForm = resp.data.service
-        this.createUpstreamForm.config.service_name = this.createUpstreamForm
-          .config.service_name
-          ? this.createUpstreamForm.config.service_name
+        this.createUpstreamForm.config.serviceName = this.createUpstreamForm
+          .config.serviceName
+          ? this.createUpstreamForm.config.serviceName
           : ''
-        this.createUpstreamForm.config.use_variable = this.createUpstreamForm
-          .config.use_variable
-          ? this.createUpstreamForm.config.use_variable
+        this.createUpstreamForm.config.useVariable = this.createUpstreamForm
+          .config.useVariable
+          ? this.createUpstreamForm.config.useVariable
           : false
-        this.createUpstreamForm.config.addrs_variable = this.createUpstreamForm
-          .config.addrs_variable
-          ? this.createUpstreamForm.config.addrs_variable
+        this.createUpstreamForm.config.addrsVariable = this.createUpstreamForm
+          .config.addrsVariable
+          ? this.createUpstreamForm.config.addrsVariable
           : ''
         if (
-          !this.createUpstreamForm.config.static_conf ||
-          this.createUpstreamForm.config.static_conf.length === 0
+          !this.createUpstreamForm.config.staticConf ||
+          this.createUpstreamForm.config.staticConf.length === 0
         ) {
-          this.createUpstreamForm.config.static_conf = [
+          this.createUpstreamForm.config.staticConf = [
             { addr: '', weight: null }
           ]
         }
@@ -197,21 +196,21 @@ export class UpstreamCreateComponent implements OnInit {
   // 动态渲染的组件内每次改变值时，都会调用该方法，以供判断表单是否可以提交
   getDataFromDynamicComponent (value: any) {
     // 静态节点
-    if (value && this.validateForm.controls['discovery_name'].value === 'static') {
+    if (value && this.validateForm.controls['discoveryName'].value === 'static') {
       // 地址选用环境变量
-      if (value.config.use_variable && !value.config.addrs_variable) {
+      if (value.config.useVariable && !value.config.addrsVariable) {
         this.canBeSave = false
         return
       }
       // 地址不选用环境变量
-      if (!value.config.use_variable) {
+      if (!value.config.useVariable) {
         let flag = false
-        for (const index in value.config.static_conf) {
+        for (const index in value.config.staticConf) {
           if (
-            value.config.static_conf[index].addr &&
-            value.config.static_conf[index].addr !== '' &&
-            value.config.static_conf[index].weight > 0 &&
-            value.config.static_conf[index].weight < 1000
+            value.config.staticConf[index].addr &&
+            value.config.staticConf[index].addr !== '' &&
+            value.config.staticConf[index].weight > 0 &&
+            value.config.staticConf[index].weight < 1000
           ) {
             flag = true
           }
@@ -221,7 +220,7 @@ export class UpstreamCreateComponent implements OnInit {
           return
         }
       }
-    } else if (!value.config.service_name) {
+    } else if (!value.config.serviceName) {
       // 动态节点
       this.canBeSave = false
       return
@@ -240,31 +239,31 @@ export class UpstreamCreateComponent implements OnInit {
     this.startValidateDynamic = true
     this.showDynamicTips = !this.canBeSave
     if ((this.validateForm.valid || this.checkValidForm()) && this.canBeSave) {
-      this.createUpstreamForm.config.use_variable =
-        this.createUpstreamForm.config.use_variable !== null
-          ? this.createUpstreamForm.config.use_variable
+      this.createUpstreamForm.config.useVariable =
+        this.createUpstreamForm.config.useVariable !== null
+          ? this.createUpstreamForm.config.useVariable
           : false
-      this.createUpstreamForm.config.addrs_variable =
-        this.createUpstreamForm.config.addrs_variable !== null
-          ? this.createUpstreamForm.config.addrs_variable
+      this.createUpstreamForm.config.addrsVariable =
+        this.createUpstreamForm.config.addrsVariable !== null
+          ? this.createUpstreamForm.config.addrsVariable
           : ''
-      this.createUpstreamForm.config.service_name =
-        this.createUpstreamForm.config.service_name !== null
-          ? this.createUpstreamForm.config.service_name
+      this.createUpstreamForm.config.serviceName =
+        this.createUpstreamForm.config.serviceName !== null
+          ? this.createUpstreamForm.config.serviceName
           : ''
-      this.createUpstreamForm.config.use_variable =
-        this.createUpstreamForm.config.use_variable !== null
-          ? this.createUpstreamForm.config.use_variable
+      this.createUpstreamForm.config.useVariable =
+        this.createUpstreamForm.config.useVariable !== null
+          ? this.createUpstreamForm.config.useVariable
           : false
-      if (this.createUpstreamForm.config.static_conf.length > 0) {
-        for (const index in this.createUpstreamForm.config.static_conf) {
-          this.createUpstreamForm.config.static_conf[index].weight = Number(
-            this.createUpstreamForm.config.static_conf[index].weight
+      if (this.createUpstreamForm.config.staticConf.length > 0) {
+        for (const index in this.createUpstreamForm.config.staticConf) {
+          this.createUpstreamForm.config.staticConf[index].weight = Number(
+            this.createUpstreamForm.config.staticConf[index].weight
           )
-          this.createUpstreamForm.config.static_conf[index].addr =
-            this.createUpstreamForm.config.static_conf[index].addr === null
+          this.createUpstreamForm.config.staticConf[index].addr =
+            this.createUpstreamForm.config.staticConf[index].addr === null
               ? ''
-              : this.createUpstreamForm.config.static_conf[index].addr
+              : this.createUpstreamForm.config.staticConf[index].addr
         }
       }
       this.createUpstreamForm.timeout = Number(this.createUpstreamForm.timeout)

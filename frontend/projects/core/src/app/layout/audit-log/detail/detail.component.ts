@@ -1,4 +1,9 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, Input, OnInit, TemplateRef, ViewChild } from '@angular/core'
+import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
+import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
+import { ApiService } from '../../../service/api.service'
+import { auditLogDetailTableBody, auditLogDetailTableHeadName } from '../types/conf'
+import { AuditLogDetail } from '../types/types'
 
 @Component({
   selector: 'eo-ng-audit-log-detail',
@@ -13,35 +18,53 @@ import { Component, OnInit } from '@angular/core'
       >
       </eo-ng-apinto-table>
     </div>
+    <ng-template #detailTdTpl let-item="item">
+    <span
+    class="default-tpl-td-span whitespace-pre-line break-all break-words"
+    eoNgFeedbackTooltip
+    [nzTooltipTitle]="item.value"
+    [nzTooltipVisible]="false"
+    [nzTooltipTrigger]="'hover'"
+    [ngClass]="{'break-all':item.attr === '请求内容' ,'whitespace-pre-line':item.attr === '请求内容','break-words':item.attr === '请求内容'}"
+    >{{ item.value}}
+  </span>
+    </ng-template>
   `,
   styles: [
   ]
 })
 export class AuditLogDetailComponent implements OnInit {
-  auditLogDetail:Array<{attr:string, value:string}> = []
-  auditLogDetailTableHeadName: Array<object> = [
-    {
-      title: '属性',
-      resizeable: true
-    },
-    { title: '配置' }
-  ]
+  @ViewChild('detailTdTpl') detailTdTpl:TemplateRef<any>|undefined
+  @Input() auditLogId:string = ''
+  auditLogDetail:AuditLogDetail[] = []
+  auditLogDetailTableHeadName: THEAD_TYPE[] = [...auditLogDetailTableHeadName]
+  auditLogDetailTableBody: TBODY_TYPE[] =[...auditLogDetailTableBody]
 
-  auditLogDetailTableBody: Array<any> =[
-    { key: 'attr' },
-    {
-      key: 'value',
-      styleFn: (item:any) => {
-        if (item.attr === '请求内容') {
-          return 'white-space: pre-line;word-wrap:break-word; word-break:break-all'
-        } else {
-          return 'white-space: unset;word-wrap:break-word; word-break:break-all'
-        }
-      },
-      ellipsis: false
-    }
-  ]
+  constructor (private message: EoNgFeedbackMessageService,
+    private api:ApiService) {}
 
   ngOnInit (): void {
+    this.getLogDetail()
+  }
+
+  ngAfterViewInit ():void {
+    this.auditLogDetailTableBody[1].title = this.detailTdTpl
+  }
+
+  // 接口返回成功才打开弹窗
+  getLogDetail ():void {
+    this.api.get('audit-log', { logId: this.auditLogId })
+      .subscribe((resp:{code:number, data:{args:AuditLogDetail[]}, msg:string}) => {
+        if (resp.code === 0) {
+          this.auditLogDetail = resp.data.args
+          for (const index in this.auditLogDetail) {
+            if (this.auditLogDetail[index].attr === '请求内容') {
+              this.auditLogDetail[index].value = JSON.stringify(JSON.parse(this.auditLogDetail[index].value), null, 4)
+            }
+          }
+        } else {
+          this.message.error(resp.msg || '获取日志详情失败！')
+        }
+      })
   }
 }

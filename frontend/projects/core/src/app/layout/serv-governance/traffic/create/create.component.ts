@@ -1,18 +1,10 @@
-/* eslint-disable camelcase */
-/* eslint-disable no-array-constructor */
-/* eslint-disable no-prototype-builtins */
 /* eslint-disable dot-notation */
-/* eslint-disable no-useless-constructor */
 import {
   Component,
   Input,
-  OnInit,
-  Output,
-  EventEmitter,
-  TemplateRef,
-  ViewChild
+  OnInit
 } from '@angular/core'
-import { ActivatedRoute, Router } from '@angular/router'
+import { Router } from '@angular/router'
 import {
   EoNgFeedbackMessageService
 } from 'eo-ng-feedback'
@@ -23,38 +15,13 @@ import {
   UntypedFormBuilder,
   Validators
 } from '@angular/forms'
-import { FilterShowData } from '../../filter/footer/footer.component'
 import { EoNgMyValidators } from 'projects/core/src/app/constant/eo-ng-validator'
 import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { BaseInfoService } from 'projects/core/src/app/service/base-info.service'
-
-interface TrafficStrategyData {
-  name: string
-  uuid?: string
-  desc?: string
-  priority?: number | null
-  filters: Array<{
-    name: string
-    values: Array<string>
-    type?: string
-    label?: string
-    title?: string
-    [key: string]: any
-  }>
-  config: {
-    metrics: Array<any>
-    query: { second: number; minute: number; hour: number }
-    traffic: { second: number; minute: number; hour: number }
-    response: {
-      status_code: number
-      content_type: string
-      charset: string
-      header: Array<{ key: string; value: string }>
-      body: string
-    }
-  }
-  [key: string]: any
-}
+import { FilterShowData, TrafficStrategyData } from '../../types/types'
+import { SelectOption } from 'eo-ng-select'
+import { setFormValue } from 'projects/core/src/app/constant/form'
+import { EmptyHttpResponse } from 'projects/core/src/app/constant/type'
 
 @Component({
   selector: 'eo-ng-traffic-create',
@@ -62,45 +29,14 @@ interface TrafficStrategyData {
   styles: ['']
 })
 export class TrafficCreateComponent implements OnInit {
-  @ViewChild('checkbox', { read: TemplateRef, static: true }) checkbox:
-    | TemplateRef<any>
-    | undefined
-
   @Input() editPage: boolean = false
   @Input() clusterName: string = ''
   @Input() strategyUuid: string = ''
-  @Input() fromList: boolean = false
-  @Output() changeToList: EventEmitter<any> = new EventEmitter()
 
   filterNamesSet: Set<string> = new Set() // 用户已选择的筛选条件放入set中,在显示筛选条件的选择器里需要过去set中存在的值
-
-  validatePriority: boolean = true
-
   filterShowList: FilterShowData[] = [] // 展示在前端页面的筛选条件表格,包含uuid和对应选项名称,实际提交时只需要uuid
-
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
-
-  metricsList: Array<{ label: string; value: string; disable?: boolean }> = []
-
-  createStrategyForm: TrafficStrategyData = {
-    name: '',
-    desc: '',
-    priority: null,
-    filters: [],
-    config: {
-      metrics: [],
-      query: { second: 0, minute: 0, hour: 0 },
-      traffic: { second: 0, minute: 0, hour: 0 },
-      response: {
-        status_code: 500,
-        content_type: 'application/json',
-        charset: 'UTF-8',
-        header: [{ key: '', value: '' }],
-        body: ''
-      }
-    }
-  }
-
+  metricsList: SelectOption[] = []
   validateForm: FormGroup = new FormGroup({})
   responseForm: FormGroup = new FormGroup({})
   showMetricsError: boolean = false
@@ -112,11 +48,29 @@ export class TrafficCreateComponent implements OnInit {
     [key: string]: any
   }> = [{ key: '', value: '' }]
 
+  createStrategyForm: TrafficStrategyData = {
+    name: '',
+    desc: '',
+    priority: null,
+    filters: [],
+    config: {
+      metrics: [],
+      query: { second: 0, minute: 0, hour: 0 },
+      traffic: { second: 0, minute: 0, hour: 0 },
+      response: {
+        statusCode: 500,
+        contentType: 'application/json',
+        charset: 'UTF-8',
+        header: [{ key: '', value: '' }],
+        body: ''
+      }
+    }
+  }
+
   constructor (
     private baseInfo:BaseInfoService,
     private message: EoNgFeedbackMessageService,
     private api: ApiService,
-    private activateInfo: ActivatedRoute,
     private fb: UntypedFormBuilder,
     private router:Router,
     private appConfigService: AppConfigService
@@ -137,15 +91,15 @@ export class TrafficCreateComponent implements OnInit {
     })
 
     this.responseForm = this.fb.group({
-      status_code: [200, [Validators.required, Validators.pattern(/^[1-9]{1}\d{2}$/)]],
-      content_type: ['application/json', [Validators.required]],
+      statusCode: [200, [Validators.required, Validators.pattern(/^[1-9]{1}\d{2}$/)]],
+      contentType: ['application/json', [Validators.required]],
       charset: ['UTF-8', [Validators.required]],
       header: [],
       body: ['']
     })
 
     this.appConfigService.reqFlashBreadcrumb([
-      { title: '流量策略', routerLink: 'serv-governance/traffic' },
+      { title: '流量策略', routerLink: 'serv-governance' },
       { title: '新建流量策略' }
     ])
   }
@@ -182,49 +136,27 @@ export class TrafficCreateComponent implements OnInit {
               },
               { title: resp.data.strategy!.name }
             ])
-            this.validateForm.controls['name'].setValue(resp.data.strategy!.name)
             this.createStrategyForm = resp.data.strategy!
             this.createStrategyForm.uuid = resp.data.strategy!.uuid
             this.createStrategyForm.filters = resp.data.strategy!.filters || []
-            this.createStrategyForm.config.metrics =
-              resp.data.strategy!.config.metrics || []
-
-            this.validateForm.controls['desc'].setValue(resp.data.strategy!.desc)
-            this.validateForm.controls['priority'].setValue(
-              resp.data.strategy!.priority
-            )
-            this.validateForm.controls['limitQuerySecond'].setValue(
-              resp.data.strategy!.config.query?.second || 0
-            )
-            this.validateForm.controls['limitQueryMinute'].setValue(
-              resp.data.strategy!.config.query?.minute || 0
-            )
-            this.validateForm.controls['limitQueryHour'].setValue(
-              resp.data.strategy!.config.query?.hour || 0
-            )
-
-            this.validateForm.controls['limitTrafficSecond'].setValue(
-              resp.data.strategy!.config.traffic?.second || 0
-            )
-            this.validateForm.controls['limitTrafficMinute'].setValue(
-              resp.data.strategy!.config.traffic?.minute || 0
-            )
-            this.validateForm.controls['limitTrafficHour'].setValue(
-              resp.data.strategy!.config.traffic?.hour || 0
-            )
-
+            this.createStrategyForm.config.metrics = resp.data.strategy!.config.metrics || []
+            setFormValue(this.validateForm, {
+              name: resp.data.strategy!.name,
+              desc: resp.data.strategy!.desc,
+              priority: resp.data.strategy!.priority,
+              limitQuerySecond: resp.data.strategy!.config.query?.second || 0,
+              limitQueryMinute: resp.data.strategy!.config.query?.minute || 0,
+              limitQueryHour: resp.data.strategy!.config.query?.hour || 0,
+              limitTrafficSecond: resp.data.strategy!.config.traffic?.second || 0,
+              limitTrafficMinute: resp.data.strategy!.config.traffic?.minute || 0,
+              limitTrafficHour: resp.data.strategy!.config.traffic?.hour || 0
+            })
             for (const index in resp.data.strategy!.filters) {
               this.filterNamesSet.add(resp.data.strategy!.filters[index].name)
             }
             if (resp.data.strategy!.filters) {
               this.filterShowList = [
-                ...(resp.data.strategy!.filters as Array<{
-                  title: string
-                  name: string
-                  label: string
-                  values: Array<string>
-                  [key: string]: any
-                }>)
+                ...(resp.data.strategy!.filters as FilterShowData[])
               ]
             }
             this.responseHeaderList = resp.data.strategy!.config.response
@@ -233,10 +165,13 @@ export class TrafficCreateComponent implements OnInit {
                 .header
               : [{ key: '', value: '' }]
 
-            this.responseForm.controls['status_code'].setValue(resp.data.strategy!.config.response.status_code || 200)
-            this.responseForm.controls['content_type'].setValue(resp.data.strategy!.config.response.content_type || 'application/json')
-            this.responseForm.controls['charset'].setValue(resp.data.strategy!.config.response.charset || 'UTF-8')
-            this.responseForm.controls['body'].setValue(resp.data.strategy!.config.response.body || '')
+            setFormValue(this.responseForm, {
+              statusCode: resp.data.strategy!.config.response.statusCode || 200,
+              contentType: resp.data.strategy!.config.response.contentType || 'application/json',
+              charset: resp.data.strategy!.config.response.charset || 'UTF-8',
+              body: resp.data.strategy!.config.response.body || ''
+
+            })
           } else {
             this.message.error(resp.msg || '获取数据失败!')
           }
@@ -251,7 +186,7 @@ export class TrafficCreateComponent implements OnInit {
 
   // 获取限流维度的可选选项
   getMetricsList () {
-    this.api.get('strategy/metrics-options').subscribe((resp: any) => {
+    this.api.get('strategy/metrics-options').subscribe((resp: {code:number, data:{options:Array<{name:string, title:string}>}, msg:string}) => {
       if (resp.code === 0) {
         this.metricsList = []
         for (const index in resp.data.options) {
@@ -281,14 +216,14 @@ export class TrafficCreateComponent implements OnInit {
         this.createStrategyForm.filters.push({
           name: this.filterShowList[index].name,
           values:
-            this.filterShowList[index].name === 'ip'
-              ? [...this.filterShowList[index].values[0].split(/[\n]/).filter(value => { return !!value }), ...this.filterShowList[index].values.slice(1)]
-              : this.filterShowList[index].values
+          this.filterShowList[index].name === 'ip'
+            ? [...this.filterShowList[index].values[0].split(/[\n]/).filter(value => { return !!value }), ...this.filterShowList[index].values.slice(1)]
+            : this.filterShowList[index].values
         })
       }
 
       this.createStrategyForm.config.response.header =
-        this.responseHeaderList.filter((item: any) => {
+        this.responseHeaderList.filter((item: {key:string, value:string}) => {
           return item.key && item.value
         })
 
@@ -311,13 +246,13 @@ export class TrafficCreateComponent implements OnInit {
             hour: Number(this.validateForm.controls['limitTrafficHour'].value)
           },
           response: {
-            status_code: this.responseForm.controls['status_code']
+            statusCode: this.responseForm.controls['statusCode']
               .value
               ? Number(
-                this.responseForm.controls['status_code'].value
+                this.responseForm.controls['statusCode'].value
               )
               : 0,
-            content_type: this.responseForm.controls['content_type'].value || '',
+            contentType: this.responseForm.controls['contentType'].value || '',
             charset: this.responseForm.controls['charset'].value || '',
             header: this.createStrategyForm.config.response.header,
             body: this.responseForm.controls['body'].value || ''
@@ -331,8 +266,8 @@ export class TrafficCreateComponent implements OnInit {
 
       if (!this.editPage) {
         this.api
-          .post('strategy/traffic', data, { cluster_name: this.clusterName })
-          .subscribe((resp: any) => {
+          .post('strategy/traffic', data, { clusterName: this.clusterName })
+          .subscribe((resp: EmptyHttpResponse) => {
             if (resp.code === 0) {
               this.message.success(resp.msg || '创建成功!', { nzDuration: 1000 })
               this.backToList()
@@ -343,10 +278,10 @@ export class TrafficCreateComponent implements OnInit {
       } else {
         this.api
           .put('strategy/traffic', data, {
-            cluster_name: this.clusterName,
+            clusterName: this.clusterName,
             uuid: this.strategyUuid
           })
-          .subscribe((resp: any) => {
+          .subscribe((resp: EmptyHttpResponse) => {
             if (resp.code === 0) {
               this.message.success(resp.msg || '修改成功!', { nzDuration: 1000 })
               this.backToList()
@@ -365,14 +300,14 @@ export class TrafficCreateComponent implements OnInit {
     }
   }
 
-  // 返回列表页，当fromList为true时，该页面左侧有分组
+  // 返回列表页
   backToList () {
     this.router.navigate(['/', 'serv-governance', 'traffic', 'group', 'list', this.clusterName])
   }
 
   // 限流维度的选择需要保持顺序
   checkMetricOrder () {
-    const temMetrics: Array<any> = [...this.createStrategyForm.config.metrics]
+    const temMetrics: Array<string> = [...this.createStrategyForm.config.metrics]
     this.createStrategyForm.config.metrics = []
     for (const index in this.metricsList) {
       if (temMetrics.indexOf(this.metricsList[index].value) !== -1) {

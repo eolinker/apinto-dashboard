@@ -3,9 +3,11 @@ import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
 import { FormGroup, UntypedFormBuilder, Validators } from '@angular/forms'
 import { Router } from '@angular/router'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
+import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { ApiService } from 'projects/core/src/app/service/api.service'
 import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { DeployClusterNodeTbody, DeployClusterNodeThead } from '../types/conf'
 
 @Component({
   selector: 'eo-ng-cluster-create',
@@ -25,27 +27,8 @@ export class DeployClusterCreateComponent implements OnInit {
   environmentList: Array<{ label: string; value: any }> = []
   nodesList: Array<object> = []
 
-  nodesTableHeadName: Array<object> = [
-    {
-      title: '名称'
-    },
-    {
-      title: '管理地址'
-    },
-    {
-      title: '服务地址'
-    },
-    {
-      title: '状态'
-    }
-  ]
-
-  nodesTableBody: Array<any> = [
-    { key: 'name', ellipsis: true },
-    { key: 'admin_addr', ellipsis: true },
-    { key: 'service_addr', ellipsis: true },
-    { key: 'status' }
-  ]
+  nodesTableHeadName: THEAD_TYPE[] = [...DeployClusterNodeThead]
+  nodesTableBody: TBODY_TYPE[] = [...DeployClusterNodeTbody]
 
   nodesTableShow = false
   clusterCanBeCreated: boolean = false
@@ -103,12 +86,12 @@ export class DeployClusterCreateComponent implements OnInit {
       this.testFlag = true
       this.api
         .get('cluster-test', {
-          cluster_addr: this.validateForm.controls['clusterAddr'].value
+          clusterAddr: this.validateForm.controls['clusterAddr'].value
         })
         .subscribe((resp) => {
           if (resp.code === 0) {
             this.nodesList = resp.data.nodes
-            this.clusterCanBeCreated = resp.data.is_update
+            this.clusterCanBeCreated = resp.data.isUpdate
             this.source = resp.data.source
             if (this.nodesList.length > 0) {
               this.nodesTableShow = true

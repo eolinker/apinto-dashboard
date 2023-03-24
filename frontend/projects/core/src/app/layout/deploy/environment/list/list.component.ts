@@ -3,9 +3,9 @@
 /* eslint-disable camelcase */
 /* eslint-disable dot-notation */
 /*
- * @Author:
+ * @Author: MengjieYang yangmengjie@eolink.com
  * @Date: 2022-07-20 22:34:58
- * @LastEditors:
+ * @LastEditors: MengjieYang yangmengjie@eolink.com
  * @LastEditTime: 2022-11-02 23:51:33
  * @FilePath: /apinto/src/app/layout/deploy/deploy-environment/deploy-environment.component.ts
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
@@ -50,7 +50,7 @@ export class DeployEnvironmentListComponent {
       usage: number
       description: string
       operator: string
-      create_time: string
+      createTime: string
     }>
     total: number
   } = {
@@ -76,7 +76,7 @@ export class DeployEnvironmentListComponent {
     { key: 'key' },
     { key: 'description' },
     { key: 'operator' },
-    { key: 'create_time' },
+    { key: 'createTime' },
     { key: 'status' },
     {
       type: 'btn',
@@ -111,9 +111,9 @@ export class DeployEnvironmentListComponent {
   searchForm: { key: string; status: string } = { key: '', status: '' }
 
   // 环境变量分页参数
-  variablePage: { page_num: number; page_size: number; total: number } = {
-    page_num: 1,
-    page_size: 20,
+  variablePage: { pageNum: number; pageSize: number; total: number } = {
+    pageNum: 1,
+    pageSize: 20,
     total: 0
   }
 
@@ -159,8 +159,8 @@ export class DeployEnvironmentListComponent {
   getVariables () {
     this.api
       .get('variables', {
-        page_num: this.variablePage.page_num,
-        page_size: this.variablePage.page_size,
+        pageNum: this.variablePage.pageNum,
+        pageSize: this.variablePage.pageSize,
         key: this.searchForm?.key || '',
         status: this.searchForm?.status || ''
       })

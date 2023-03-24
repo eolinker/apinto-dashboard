@@ -1,8 +1,10 @@
 import { Component, Input, OnInit, TemplateRef } from '@angular/core'
 import { FormGroup, UntypedFormBuilder, Validators } from '@angular/forms'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
+import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { ApiService } from 'projects/core/src/app/service/api.service'
+import { DeployClusterPublishTbody, DeployClusterPublishThead } from '../../types/conf'
 
 @Component({
   selector: 'eo-ng-deploy-cluster-environment-publish',
@@ -24,7 +26,7 @@ import { ApiService } from 'projects/core/src/app/service/api.service'
           class="w-INPUT_NORMAL"
           eo-ng-input
           eoNgUserAccess="deploy/cluster"
-          formControlName="version_name"
+          formControlName="versionName"
           placeholder="请输入"
         />
       </nz-form-control>
@@ -48,7 +50,7 @@ import { ApiService } from 'projects/core/src/app/service/api.service'
         >环境变量列表：</label
       >
       <nz-form-control
-        [nzValidateStatus]="publishData.is_publish ? '' : 'error'"
+        [nzValidateStatus]="publishData.isPublish ? '' : 'error'"
         [nzErrorTip]="unpublishMsgTpl"
       >
         <div style="width: 100%">
@@ -63,7 +65,7 @@ import { ApiService } from 'projects/core/src/app/service/api.service'
         </div>
         <ng-template #unpublishMsgTpl>
         <div class="drawer-list-footer">
-        {{unpublish_msg}}
+        {{unpublishMsg}}
         </div>
         </ng-template>
       </nz-form-control>
@@ -80,40 +82,27 @@ export class DeployClusterEnvironmentPublishComponent implements OnInit {
   validatePublishForm:FormGroup = new FormGroup({})
   clusterName:string=''
   // eslint-disable-next-line camelcase
-  public unpublish_msg:string = ''
+  public unpublishMsg:string = ''
   nzDisabled:boolean = false
   publishSource:string = ''
   // eslint-disable-next-line camelcase
-  publishData:{source:string, variables:Array<{key:string, finish_value:string, no_released_value:string, create_time:string, opt_type:string}>, is_publish:boolean, version_name:string}=
+  publishData:{source:string, variables:Array<{key:string, finishValue:string, noReleasedValue:string, createTime:string, optType:string}>, isPublish:boolean, versionName:string}=
       {
         source: '',
         variables: [],
-        is_publish: false,
-        version_name: ''
+        isPublish: false,
+        versionName: ''
       }
 
-  publishTabelHeadName: Array<object> = [
-    { title: 'KEY', resizeable: true },
-    { title: '发布的值', resizeable: true },
-    { title: '未发布的值', resizeable: true },
-    { title: '类型', resizeable: true },
-    { title: '操作时间' }
-  ]
-
-  publishTableBody: Array<any> =[
-    { key: 'key' },
-    { key: 'finish_value' },
-    { key: 'no_released_value' },
-    { key: 'opt_type' },
-    { key: 'create_time' }
-  ]
+  publishTabelHeadName: THEAD_TYPE[] = [...DeployClusterPublishThead]
+  publishTableBody: TBODY_TYPE[] =[...DeployClusterPublishTbody]
 
   constructor (
     private message: EoNgFeedbackMessageService,
     private api:ApiService,
     private fb: UntypedFormBuilder) {
     this.validatePublishForm = this.fb.group({
-      version_name: ['', [Validators.required]],
+      versionName: ['', [Validators.required]],
       desc: ['']
     })
   }
@@ -136,14 +125,14 @@ export class DeployClusterEnvironmentPublishComponent implements OnInit {
         this.publishData = resp.data
         this.publishData.variables = this.publishData.variables || []
         // eslint-disable-next-line dot-notation
-        this.validatePublishForm.controls['version_name'].setValue(resp.data.version_name)
+        this.validatePublishForm.controls['versionName'].setValue(resp.data.versionName)
         this.publishSource = resp.data.source
-        this.unpublish_msg = resp.data.unpublish_msg
-        if (!this.publishData.is_publish && !this.unpublish_msg) {
+        this.unpublishMsg = resp.data.unpublishMsg
+        if (!this.publishData.isPublish && !this.unpublishMsg) {
           if (this.publishData.variables.length === 0) {
-            this.unpublish_msg = '无环境变量可发布'
+            this.unpublishMsg = '无环境变量可发布'
           } else {
-            this.unpublish_msg = '当前环境变量不可发布'
+            this.unpublishMsg = '当前环境变量不可发布'
           }
         }
       } else {
@@ -155,9 +144,9 @@ export class DeployClusterEnvironmentPublishComponent implements OnInit {
   save (type:string):boolean {
     switch (type) {
       case 'publish':
-        if (this.validatePublishForm.valid && this.publishData.is_publish) {
+        if (this.validatePublishForm.valid && this.publishData.isPublish) {
           this.api.post('cluster/' + this.clusterName + '/variable/publish', {
-            version_name: this.validatePublishForm.value.version_name,
+            versionName: this.validatePublishForm.value.versionName,
             desc: this.validatePublishForm.value.desc,
             source: this.publishSource
           }).subscribe((resp: { code: number; msg: any }) => {

@@ -1,34 +1,16 @@
 /* eslint-disable dot-notation */
-/* eslint-disable camelcase */
-import { Component, EventEmitter, Input, OnInit, Output, TemplateRef, ViewChild } from '@angular/core'
+import { Component, Input, OnInit } from '@angular/core'
 import { FormGroup, UntypedFormBuilder, Validators } from '@angular/forms'
-import { ActivatedRoute, Router } from '@angular/router'
+import { Router } from '@angular/router'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
-import { NzDrawerRef } from 'ng-zorro-antd/drawer'
 import { ApiService } from 'projects/core/src/app/service/api.service'
 import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
-import { FilterShowData } from '../../filter/footer/footer.component'
 import { EoNgMyValidators } from 'projects/core/src/app/constant/eo-ng-validator'
 import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { BaseInfoService } from 'projects/core/src/app/service/base-info.service'
-
-interface CacheStrategyData {
-  name: string
-  uuid?: string
-  desc?: string
-  priority?: number | null
-  filters: Array<{
-    name: string
-    values: Array<string>
-    type?: string
-    label?: string
-    title?: string
-  }>
-  config: {
-    valid_time: number
-  }
-  [key: string]: any
-}
+import { CacheStrategyData, FilterShowData } from '../../types/types'
+import { setFormValue } from 'projects/core/src/app/constant/form'
+import { EmptyHttpResponse } from 'projects/core/src/app/constant/type'
 
 @Component({
   selector: 'eo-ng-cache-create',
@@ -37,60 +19,30 @@ interface CacheStrategyData {
   ]
 })
 export class CacheCreateComponent implements OnInit {
-  @ViewChild('filterContentRef', { read: TemplateRef, static: true })
-  filterContentRef: TemplateRef<any> | undefined
-
-  @ViewChild('filterFooterRef', { read: TemplateRef, static: true })
-  filterFooterRef: TemplateRef<any> | undefined
-
-  @ViewChild('filterTableLabel', { read: TemplateRef, static: true })
-  filterTableLabel: TemplateRef<any> | undefined
-
   @Input() editPage: boolean = false
   @Input() clusterName: string = ''
   @Input() strategyUuid: string = ''
-  @Input() fromList: boolean = false
-  @Output() changeToList: EventEmitter<any> = new EventEmitter()
 
   filterNamesSet: Set<string> = new Set() // 用户已选择的筛选条件放入set中,在显示筛选条件的选择器里需要过去set中存在的值
-  filterType: string = '' // 筛选条件类型, 当type=pattern,显示输入框, static显示一组勾选框, remote显示穿梭框
-  remoteSelectList: string[] = [] // 穿梭框内被勾选的选项uuid
-  remoteSelectNameList: string[] = [] // 穿梭框内被勾选的选项name
-
   validatePriority: boolean = true
-  staticsList: Array<any> = []
-
-  drawerFilterRef: NzDrawerRef | undefined
-  editFilter: any = null // 正在编辑的配置
   filterShowList: FilterShowData[] = [] // 展示在前端页面的筛选条件表格,包含uuid和对应选项名称,实际提交时只需要uuid
-
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
-
-  objDiffers: any = null
-
-  visitRuleList: Array<{ label: string; value: string; disable?: boolean }> = [
-    { label: '允许', value: 'allow' },
-    { label: '拒绝', value: 'refuse' }
-  ]
-
+  nzDisabled: boolean = false
+  validateForm: FormGroup = new FormGroup({})
   createStrategyForm: CacheStrategyData = {
     name: '',
     desc: '',
     priority: null,
     filters: [],
     config: {
-      valid_time: 0
+      validTime: 0
     }
   }
-
-  validateForm: FormGroup = new FormGroup({})
-  nzDisabled: boolean = false
 
   constructor (
     private baseInfo:BaseInfoService,
     private message: EoNgFeedbackMessageService,
     private api: ApiService,
-    private activateInfo: ActivatedRoute,
     private router:Router,
     private fb: UntypedFormBuilder,
     private appConfigService: AppConfigService
@@ -141,18 +93,14 @@ export class CacheCreateComponent implements OnInit {
               },
               { title: resp.data.strategy!.name }
             ])
-            this.validateForm.controls['name'].setValue(
-              resp.data.strategy!.name
-            )
-            this.validateForm.controls['desc'].setValue(
-              resp.data.strategy!.desc
-            )
-            this.validateForm.controls['priority'].setValue(
-              resp.data.strategy!.priority || null
-            )
-            this.validateForm.controls['validTime'].setValue(
-              resp.data.strategy!.config.valid_time || 1
-            )
+
+            setFormValue(this.validateForm, {
+              name: resp.data.strategy!.name,
+              desc: resp.data.strategy!.desc,
+              priority: resp.data.strategy!.priority || null,
+              validTime: resp.data.strategy!.config.validTime || 1
+            })
+
             this.createStrategyForm = resp.data.strategy!
             this.createStrategyForm.filters =
               this.createStrategyForm.filters || []
@@ -183,10 +131,10 @@ export class CacheCreateComponent implements OnInit {
       for (const index in this.filterShowList) {
         this.createStrategyForm.filters.push({
           name: this.filterShowList[index].name,
-          values:
-            this.filterShowList[index].name === 'ip'
-              ? [...this.filterShowList[index].values[0].split(/[\n]/).filter(value => { return !!value }), ...this.filterShowList[index].values.slice(1)]
-              : this.filterShowList[index].values
+          values: this.filterShowList[index].name === 'ip'
+            ? [...this.filterShowList[index].values[0].split(/[\n]/).filter(value => { return !!value }), ...this.filterShowList[index].values.slice(1)]
+            : this.filterShowList[index].values
+
         })
       }
 
@@ -197,14 +145,14 @@ export class CacheCreateComponent implements OnInit {
         priority: Number(this.validateForm.controls['priority'].value) || 0,
         filters: this.createStrategyForm.filters,
         config: {
-          valid_time: this.validateForm.controls['validTime'].value
+          validTime: this.validateForm.controls['validTime'].value
         }
       }
 
       if (!this.editPage) {
         this.api
-          .post('strategy/cache', data, { cluster_name: this.clusterName })
-          .subscribe((resp: any) => {
+          .post('strategy/cache', data, { clusterName: this.clusterName })
+          .subscribe((resp: EmptyHttpResponse) => {
             if (resp.code === 0) {
               this.message.success(resp.msg || '创建成功!', { nzDuration: 1000 })
               this.backToList()
@@ -215,10 +163,10 @@ export class CacheCreateComponent implements OnInit {
       } else {
         this.api
           .put('strategy/cache', data, {
-            cluster_name: this.clusterName,
+            clusterName: this.clusterName,
             uuid: this.strategyUuid
           })
-          .subscribe((resp: any) => {
+          .subscribe((resp: EmptyHttpResponse) => {
             if (resp.code === 0) {
               this.message.success(resp.msg || '修改成功!', { nzDuration: 1000 })
               this.backToList()
@@ -237,7 +185,7 @@ export class CacheCreateComponent implements OnInit {
     }
   }
 
-  // 返回列表页，当fromList为true时，该页面左侧有分组
+  // 返回列表页
   backToList () {
     this.router.navigate(['/', 'serv-governance', 'cache', 'group', 'list', this.clusterName])
   }

@@ -1,0 +1,99 @@
+<!--
+ * @Author: MengjieYang yangmengjie@eolink.com
+ * @Date: 2022-08-26 23:24:11
+ * @LastEditors: MengjieYang yangmengjie@eolink.com
+ * @LastEditTime: 2022-09-04 22:03:31
+ * @FilePath: /apinto/src/app/layout/api/api-management-list/api-management-list.component.html
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+-->
+<div class="">
+  <div
+    class="list-header pl-btnbase pr-btnrbase py-btnybase flex flex-nowrap items-center justify-between"
+  >
+    <div>
+      <button
+        eo-ng-button
+        class="ant-btn-primary"
+        eoNgUserAccess="router/api"
+        (disabledEdit)="disabledEdit($event)"
+        (click)="addApi()"
+      >
+        新建API
+      </button>
+      <eo-ng-api-import (flashList)="getApisData()"></eo-ng-api-import>
+      <eo-ng-api-batch-publish
+        [(apisSet)]="apisSet"
+        (flashList)="getApisData()"
+      ></eo-ng-api-batch-publish>
+    </div>
+    <eo-ng-search-input-group
+      [eoInputVal]="apiNameForSear"
+      (eoClick)="apiNameForSear = ''; getApisData()"
+    >
+      <input
+        type="text"
+        eo-ng-input
+        placeholder="搜索API名称"
+        [(ngModel)]="apiNameForSear"
+        (keyup.enter)="getApisData()"
+      />
+    </eo-ng-search-input-group>
+  </div>
+  <div class="list-content pb-[4px]">
+    <eo-ng-apinto-table
+      class=""
+      [nzTbody]="apisTableBody"
+      [nzThead]="apisTableHeadName"
+      [nzData]="apisForm.apis"
+      [nzTrClick]="apisTableClick"
+      [nzMaxOperatorButton]="3"
+      (nzFilterChange)="apisFilterChange($event)"
+      [nzShowPagination]="true"
+      [nzFrontPagination]="false"
+      [nzTotal]="apisForm.total"
+      [(nzPageIndex)]="apisForm.pageNum"
+      [(nzPageSize)]="apisForm.pageSize"
+      (nzPageIndexChange)="getApisData()"
+      (nzPageSizeChange)="getApisData()"
+    >
+    </eo-ng-apinto-table>
+  </div>
+</div>
+
+<ng-template #methodTpl let-item="item">
+  <div *ngIf="item.method.length < 3">
+    <ng-container *ngFor="let methodItem of item.method">
+      <eo-ng-api-method-tag [methodItem]="methodItem"></eo-ng-api-method-tag>
+    </ng-container>
+    <eo-ng-api-method-tag
+      *ngIf="!item.method || item.method.length === 0"
+      methodItem="ALL"
+    ></eo-ng-api-method-tag>
+  </div>
+
+  <span
+    eoNgFeedbackTooltip
+    *ngIf="item.method.length >= 3"
+    nzTooltipPlacement="top"
+    [nzTooltipTrigger]="'hover'"
+    [nzTooltipTitle]="methodLongTpl"
+    nzTooltipColor="#fff"
+    nzTooltipOverlayClassName="method-tooltip"
+  >
+    <ng-container *ngFor="let methodItem of item.method; let index = index">
+      <ng-container *ngIf="index < 2">
+        <eo-ng-api-method-tag [methodItem]="methodItem"></eo-ng-api-method-tag>
+      </ng-container>
+    </ng-container>
+    ...
+  </span>
+
+  <ng-template #methodLongTpl>
+    <ng-container *ngFor="let methodItem of item.method">
+      <eo-ng-api-method-tag
+        [methodItem]="methodItem"
+        [inner]="true"
+      ></eo-ng-api-method-tag>
+    </ng-container>
+  </ng-template>
+</ng-template>

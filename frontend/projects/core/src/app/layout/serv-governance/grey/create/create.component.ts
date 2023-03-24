@@ -1,37 +1,18 @@
 /* eslint-disable dot-notation */
-/* eslint-disable camelcase */
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core'
+import { Component, Input, OnInit } from '@angular/core'
 import { FormGroup, UntypedFormBuilder, Validators } from '@angular/forms'
-import { ActivatedRoute, Router } from '@angular/router'
+import { Router } from '@angular/router'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { ApiService } from 'projects/core/src/app/service/api.service'
 import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
 import { EoNgMyValidators } from 'projects/core/src/app/constant/eo-ng-validator'
-import { FilterShowData } from '../../filter/footer/footer.component'
 import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { BaseInfoService } from 'projects/core/src/app/service/base-info.service'
-
-interface GreyStrategyData {
-  name: string
-  uuid?: string
-  desc?: string
-  priority?: number | null
-  filters: Array<{
-    name: string
-    values: Array<string>
-    type?: string
-    label?: string
-    title?: string
-  }>
-  config: {
-    keep_session:boolean,
-    nodes:Array<string>,
-    distribution:string,
-    percent?:number,
-    match?:Array<{position:string, match_type:string, key:string, pattern?:string}>
-  }
-  [key: string]: any
-}
+import { FilterShowData, GreyStrategyData } from '../../types/types'
+import { RadioOption } from 'eo-ng-radio'
+import { distributionOptions, nodesTableBody } from '../../types/conf'
+import { setFormValue } from 'projects/core/src/app/constant/form'
+import { EmptyHttpResponse } from 'projects/core/src/app/constant/type'
 
 @Component({
   selector: 'eo-ng-grey-create',
@@ -55,8 +36,6 @@ interface GreyStrategyData {
       vertical-align:middle;
       width:80px;
     }
-
-
     `
   ]
 })
@@ -65,17 +44,11 @@ export class GreyCreateComponent implements OnInit {
   @Input() clusterName: string = ''
   @Input() strategyUuid: string = ''
   @Input() fromList: boolean = false
-  @Output() changeToList: EventEmitter<any> = new EventEmitter()
 
   filterNamesSet: Set<string> = new Set() // 用户已选择的筛选条件放入set中,在显示筛选条件的选择器里需要过去set中存在的值
   filterShowList:FilterShowData[] = [] // 展示在前端页面的筛选条件表格,包含uuid和对应选项名称,实际提交时只需要uuid
-
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
-
-  distributionOptions: Array<{ label: string; value: string; disable?: boolean }> = [
-    { label: '按百分比', value: 'percent' },
-    { label: '按规则', value: 'match' }
-  ]
+  distributionOptions: RadioOption[] = [...distributionOptions]
 
   createStrategyForm: GreyStrategyData = {
     name: '',
@@ -83,7 +56,7 @@ export class GreyCreateComponent implements OnInit {
     priority: null,
     filters: [],
     config: {
-      keep_session: false,
+      keepSession: false,
       nodes: [],
       distribution: 'percent',
       match: []
@@ -92,64 +65,7 @@ export class GreyCreateComponent implements OnInit {
 
   nodesList:Array<{node:string, [key:string]:any}> = [{ node: '' }]
 
-  nodesTableBody: Array<any> = [
-    {
-      key: 'node',
-      type: 'input',
-      placeholder: '请输入主机名或IP：端口',
-      check: (item:any) => {
-        if (!/^((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3}:[0-9]+$/.test(item)) {
-          return false
-        }
-        return true
-      },
-      change: () => {
-        this.showNodesValid = false
-      },
-      checkMode: 'change',
-      errorTip: '请输入主机名或IP：端口',
-      disabledFn: () => {
-        return this.nzDisabled
-      }
-    },
-    {
-      type: 'btn',
-      showFn: (item:any) => {
-        return item === this.nodesList[0]
-      },
-      btns: [
-        {
-          title: '添加',
-          action: 'add',
-          disabledFn: () => {
-            return this.nzDisabled
-          }
-        }
-      ]
-    },
-    {
-      type: 'btn',
-      showFn: (item:any) => {
-        return item !== this.nodesList[0]
-      },
-      btns: [
-        {
-          title: '添加',
-          action: 'add',
-          disabledFn: () => {
-            return this.nzDisabled
-          }
-        },
-        {
-          title: '减少',
-          action: 'delete',
-          disabledFn: () => {
-            return this.nzDisabled
-          }
-        }
-      ]
-    }
-  ]
+  nodesTableBody: Array<any> = [...nodesTableBody]
 
   validateForm: FormGroup = new FormGroup({})
   nzDisabled: boolean = false
@@ -159,7 +75,6 @@ export class GreyCreateComponent implements OnInit {
     private baseInfo:BaseInfoService,
     private message: EoNgFeedbackMessageService,
     private api: ApiService,
-    private activateInfo: ActivatedRoute,
     private fb: UntypedFormBuilder,
     private appConfigService: AppConfigService,
     private router:Router
@@ -188,6 +103,37 @@ export class GreyCreateComponent implements OnInit {
     if (this.editPage) {
       this.getStrategyMessage()
     }
+    this.initTable()
+  }
+
+  initTable () {
+    this.nodesTableBody[0].check = (item:any) => {
+      if (!/^((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3}:[0-9]+$/.test(item)) {
+        return false
+      }
+      return true
+    }
+    this.nodesTableBody[0].change = () => {
+      this.showNodesValid = false
+    }
+    this.nodesTableBody[0].disabledFn = () => {
+      return this.nzDisabled
+    }
+    this.nodesTableBody[1].showFn = (item:any) => {
+      return item === this.nodesList[0]
+    }
+    this.nodesTableBody[1].btns[0].disabledFn = () => {
+      return this.nzDisabled
+    }
+    this.nodesTableBody[2].showFn = (item:any) => {
+      return item !== this.nodesList[0]
+    }
+    this.nodesTableBody[2].btns[0].disabledFn = () => {
+      return this.nzDisabled
+    }
+    this.nodesTableBody[2].btns[1].disabledFn = () => {
+      return this.nzDisabled
+    }
   }
 
   ngOnChanges (): void {
@@ -214,25 +160,19 @@ export class GreyCreateComponent implements OnInit {
             this.appConfigService.reqFlashBreadcrumb([
               {
                 title: '灰度策略',
-                routerLink: 'serv-governance/grey'
+                routerLink: 'serv-governance'
               },
               { title: resp.data.strategy!.name }
             ])
-            this.validateForm.controls['name'].setValue(
-              resp.data.strategy!.name
-            )
-            this.validateForm.controls['desc'].setValue(
-              resp.data.strategy!.desc
-            )
-            this.validateForm.controls['priority'].setValue(
-              resp.data.strategy!.priority || null
-            )
-            this.validateForm.controls['keepSession'].setValue(
-              resp.data.strategy!.config.keep_session || false
-            )
-            this.validateForm.controls['distribution'].setValue(
-              resp.data.strategy!.config.distribution || 'percent'
-            )
+
+            setFormValue(this.validateForm, {
+              name: resp.data.strategy!.name,
+              desc: resp.data.strategy!.desc,
+              priority: resp.data.strategy!.priority || null,
+              keepSession: resp.data.strategy!.config.keepSession || false,
+              distribution: resp.data.strategy!.config.distribution || 'percent'
+            })
+
             if (resp.data.strategy!.config.distribution === 'percent') {
               this.validateForm.controls['percent1'].setValue(
               resp.data.strategy!.config.percent! / 100 || 1
@@ -243,11 +183,9 @@ export class GreyCreateComponent implements OnInit {
               )
             }
             this.createStrategyForm = resp.data.strategy!
-            this.createStrategyForm.filters =
-              this.createStrategyForm.filters || []
-
-            this.createStrategyForm.config.match =
-                this.createStrategyForm.config.match || []
+            this.createStrategyForm.filters = this.createStrategyForm.filters || []
+            this.createStrategyForm.config.match = this.createStrategyForm.config.match || []
+            this.nodesList = []
 
             for (const index in resp.data.strategy!.filters) {
               this.filterNamesSet.add(resp.data.strategy!.filters[index].name)
@@ -256,11 +194,9 @@ export class GreyCreateComponent implements OnInit {
               this.filterShowList = [...resp.data.strategy!.filters]
             }
 
-            this.nodesList = []
             for (const index in resp.data.strategy?.config.nodes) {
               this.nodesList.push({ node: resp.data.strategy?.config.nodes[index as any] || '' })
             }
-
             this.nodesList = this.nodesList.length > 0 ? this.nodesList : [{ node: '' }]
           } else {
             this.message.error(resp.msg || '获取数据失败!')
@@ -299,10 +235,10 @@ export class GreyCreateComponent implements OnInit {
       for (const index in this.filterShowList) {
         this.createStrategyForm.filters.push({
           name: this.filterShowList[index].name,
-          values:
-            this.filterShowList[index].name === 'ip'
-              ? [...this.filterShowList[index].values[0].split(/[\n]/).filter(value => { return !!value }), ...this.filterShowList[index].values.slice(1)]
-              : this.filterShowList[index].values
+          values: this.filterShowList[index].name === 'ip'
+            ? [...this.filterShowList[index].values[0].split(/[\n]/).filter(value => { return !!value }), ...this.filterShowList[index].values.slice(1)]
+            : this.filterShowList[index].values
+
         })
       }
 
@@ -318,7 +254,7 @@ export class GreyCreateComponent implements OnInit {
         priority: Number(this.validateForm.controls['priority'].value),
         filters: this.createStrategyForm.filters || [],
         config: {
-          keep_session: this.validateForm.controls['keepSession'].value || false,
+          keepSession: this.validateForm.controls['keepSession'].value || false,
           nodes: this.createStrategyForm.config.nodes,
           distribution: this.validateForm.controls['distribution'].value,
           percent: Number(this.validateForm.controls['percent1'].value) * 100 || 0,
@@ -330,8 +266,8 @@ export class GreyCreateComponent implements OnInit {
       if (!this.validateForm.controls['priority'].value) { delete data.priority }
       if (!this.editPage) {
         this.api
-          .post('strategy/grey', data, { cluster_name: this.clusterName })
-          .subscribe((resp: any) => {
+          .post('strategy/grey', data, { clusterName: this.clusterName })
+          .subscribe((resp: EmptyHttpResponse) => {
             if (resp.code === 0) {
               this.message.success(resp.msg || '创建成功!', { nzDuration: 1000 })
               this.backToList()
@@ -342,10 +278,10 @@ export class GreyCreateComponent implements OnInit {
       } else {
         this.api
           .put('strategy/grey', data, {
-            cluster_name: this.clusterName,
+            clusterName: this.clusterName,
             uuid: this.strategyUuid
           })
-          .subscribe((resp: any) => {
+          .subscribe((resp: EmptyHttpResponse) => {
             if (resp.code === 0) {
               this.message.success(resp.msg || '修改成功!', { nzDuration: 1000 })
               this.backToList()

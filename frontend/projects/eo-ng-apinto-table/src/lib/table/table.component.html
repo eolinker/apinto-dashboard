@@ -58,6 +58,10 @@
   (nzPageSizeChange)="nzPageSizeChange?.emit($event)"
   (nzDataChange)="nzDataChange?.emit($event)"
   [nzTrBottomTmp]="nzTrBottomTmp"
+  [nzDraggable]="nzDraggable"
+  [nzDragCheck]="nzDragCheck"
+  (nzDragEnd)="nzDragEnd?.emit($event)"
+  (getScrollViewPort)="handlerScrollView($event)"
 >
 </eo-ng-table>
 <ng-template #totalTpl let-total>共 {{ nzTotal }} 条</ng-template>
@@ -73,6 +77,7 @@
     ><span class="default-title-th-span">{{ item.titleString }}</span>
   </span>
 </ng-template>
+
 <ng-template #tbodyTpl let-item="item" let-rowItem="rowItem">
   <span
     class="default-tpl-td-span"
@@ -84,6 +89,7 @@
     [nzTooltipTitleContext]="{ rowItem: rowItem, item: item }"
     [nzTooltipVisible]="rowItem.tooltipVisibel || false"
     [nzTooltipTrigger]="rowItem.tooltipTrigger || 'hover'"
+    [nzTooltipOverlayClassName]="rowItem.json ? 'tooltip-json' : ''"
     >{{ rowItem.keyPrefix }}{{ item[rowItem.key] }}{{ rowItem.keySuffix }}
   </span>
 </ng-template>
