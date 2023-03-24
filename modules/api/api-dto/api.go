@@ -56,11 +56,11 @@ type ProxyHeader struct {
 }
 
 type ApiBatchOnlineCheckListItem struct {
-	ServiceName string                 `json:"service"`
-	ClusterEnv  string                 `json:"cluster"`
-	Status      bool                   `json:"status"`
-	Result      string                 `json:"result,omitempty"`
-	Solution    *frontend_model.Router `json:"solution,omitempty"`
+	ServiceTemplate string                 `json:"service_template"`
+	ClusterEnv      string                 `json:"cluster"`
+	Status          bool                   `json:"status"`
+	Result          string                 `json:"result,omitempty"`
+	Solution        *frontend_model.Router `json:"solution,omitempty"`
 }
 
 type ApiBatchCheckListItem struct {
