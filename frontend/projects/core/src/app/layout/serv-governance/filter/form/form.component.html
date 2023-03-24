@@ -24,7 +24,7 @@
     <section
       style="border: 1px solid var(--border-color); border-bottom: none"
       *ngIf="filterType == 'remote'"
-      class="w-full transfer-section"
+      class="w-full transfer-section rounded-DEFAULT"
     >
       <!-- search -->
       <p class="flex items.center mt-[12px] text-[16px] font-bold px-btnbase">
@@ -97,88 +97,6 @@
         [nzScrollY]="316"
       ></eo-ng-apinto-table>
     </section>
-    <!-- <section *ngIf="filterType == 'remote'" class="form-input transfer-section">
-      <eo-ng-transfer
-        [nzDataSource]="remoteList"
-        [nzShowSearch]="filterForm.name === 'api' ? false : true"
-        [nzShowSelectAll]="false"
-        [nzTargetKeys]="remoteSelectList"
-        [nzRenderList]="[renderListTpl, renderListTpl]"
-        [nzRenderTopList]="
-          filterForm.name === 'api' ? [apiMenuTpl, apiMenuTpl] : null
-        "
-        [nzRenderTitleList]="[
-          '可选' + filterForm.title + '数据',
-          '已选' + filterForm.title + '数据'
-        ]"
-        (nzChange)="change($event)"
-      >
-        <ng-template
-          #renderListTpl
-          let-items
-          let-direction="direction"
-          let-stat="stat"
-          let-disabled="disabled"
-          let-onItemSelectAll="onItemSelectAll"
-          let-onItemSelect="onItemSelect"
-        >
-          <nz-table
-            #t
-            [nzData]="$asTransferItems(items)"
-            [nzShowPagination]="false"
-            [nzFrontPagination]="false"
-            [nzScroll]="{ y: '356px' }"
-          >
-            <thead>
-              <tr>
-                <ng-container *ngFor="let item of this.filterThead">
-                  <th
-                    [id]="item.title"
-                    nzWidth="50px"
-                    *ngIf="item.type === 'checkbox'"
-                    [nzDisabled]="disabled"
-                    [nzChecked]="stat.checkAll"
-                    [nzIndeterminate]="stat.checkHalf"
-                    (nzCheckedChange)="onItemSelectAll($event)"
-                    eoNgUserAccess="{{ 'serv-governance/' + strategyType }}"
-                  ></th>
-                  <th [id]="item.title" *ngIf="item.type !== 'checkbox'">
-                    {{ item.title }}
-                  </th>
-                </ng-container>
-              </tr>
-            </thead>
-            <tbody>
-              <ng-template nz-virtual-scroll let-data let-index="index">
-                <tr (click)="onItemSelect(data)">
-                  <ng-container *ngFor="let item of this.filterTbody">
-                    <td
-                      *ngIf="item.key === 'checked'"
-                      wzWidth="50px"
-                      [nzChecked]="!!data.checked"
-                      [nzDisabled]="disabled || data.disabled"
-                      (nzCheckedChange)="onItemSelect(data)"
-                      eoNgUserAccess="{{ 'serv-governance/' + strategyType }}"
-                    ></td>
-                    <td *ngIf="item.key !== 'checked'">
-                      <span
-                        class="ellipsis-td"
-                        eoNgFeedbackTooltip
-                        [nzTooltipTitle]="data[item.key?.toString() || '']"
-                        nzTooltipPlacement="top"
-                        [nzTooltipVisible]="false"
-                        nzTooltipTrigger="hover"
-                        >{{ data[item.key?.toString() || ''] }}</span
-                      >
-                    </td>
-                  </ng-container>
-                </tr>
-              </ng-template>
-            </tbody>
-          </nz-table>
-        </ng-template>
-      </eo-ng-transfer>
-    </section> -->
 
     <!-- API路径(输入框) -->
     <section
@@ -242,40 +160,3 @@
     </section>
   </div>
 </div>
-
-<!-- <ng-template #apiMenuTpl let-option="option" let-direction="direction">
-  <div
-    class="flex mt-[12px] mb-[16px]"
-    *ngIf="direction === 'left'; else blankTpl"
-  >
-    <eo-ng-cascader
-      class="w-[126px] mr-btnbase"
-      nzChangeOnSelect
-      name="header"
-      required
-      [(ngModel)]="searchGroup"
-      (ngModelChange)="getSearchRemoteList(direction)"
-      [nzDisabled]="nzDisabled"
-      [nzOptions]="apiGroupList"
-      nzLabelProperty="name"
-      nzValueProperty="uuid"
-      nzPlaceHolder="目录筛选"
-    >
-    </eo-ng-cascader>
-    <eo-ng-search-input-group
-      class="w-[224px] mr-[16px]"
-      [eoNoWidth]="true"
-      [eoInputVal]="searchWord"
-      (eoClick)="searchWord = ''; getSearchRemoteList(direction)"
-    >
-      <input
-        type="text"
-        eo-ng-input
-        placeholder="请输入"
-        [(ngModel)]="searchWord"
-        (keyup.enter)="getSearchRemoteList(direction)"
-      />
-    </eo-ng-search-input-group>
-  </div>
-  <ng-template #blankTpl><div class="h-[60px]"></div></ng-template>
-</ng-template> -->

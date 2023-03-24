@@ -2,9 +2,9 @@
 /* eslint-disable dot-notation */
 /* eslint-disable no-useless-constructor */
 /*
- * @Author:
+ * @Author: maggieyyy im.ymj@hotmail.com
  * @Date: 2022-07-12 00:19:11
- * @LastEditors:
+ * @LastEditors: MengjieYang yangmengjie@eolink.com
  * @LastEditTime: 2022-07-29 02:56:25
  * @FilePath: /apinto/src/app/basic-layout/basic-layout.component.ts
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
@@ -12,10 +12,12 @@
 import { Component, OnInit } from '@angular/core'
 import { Router } from '@angular/router'
 import { EoNgBreadcrumbOptions } from 'eo-ng-breadcrumb'
+import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { MenuOptions } from 'eo-ng-menu'
 import { NzModalRef } from 'ng-zorro-antd/modal'
 import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
 import { Subscription } from 'rxjs'
+import { ApiService } from '../../service/api.service'
 
 @Component({
   selector: 'basic-layout',
@@ -40,7 +42,9 @@ export class BasicLayoutComponent implements OnInit {
   private subscription4: Subscription = new Subscription()
 
   constructor (
+              private message: EoNgFeedbackMessageService,
               private router: Router,
+              private api:ApiService,
               private appConfigService: AppConfigService
   ) {
     this.subscription1 = this.appConfigService.repFlashBreadcrumb().subscribe((data:any) => {
@@ -73,15 +77,21 @@ export class BasicLayoutComponent implements OnInit {
   }
 
   getSideMenu () {
-    this.subscription4 = this.appConfigService.getMenuList().subscribe((res) => {
-      this.sideMenuOptions = [...res]
-      for (const index in this.sideMenuOptions) {
-        this.sideMenuOptions[index].openChange = (value:any) => {
-          this.openHandler(value.id)
+    this.subscription4 = this.appConfigService.getMenuList()
+      .subscribe((res:MenuOptions[]) => {
+        this.sideMenuOptions = [...res]
+        for (const index in this.sideMenuOptions) {
+          this.sideMenuOptions[index].openChange = (value:MenuOptions) => {
+            this.openHandler(value['id'])
+          }
         }
-      }
-      this.getAccess()
-    })
+        this.getAccess()
+      })
+  }
+
+  updateAuth = () => {
+    this.modalRef?.close()
+    this.router.navigate(['/', 'auth-update'])
   }
 
   getAccess () {
@@ -128,5 +138,9 @@ export class BasicLayoutComponent implements OnInit {
       }
       this.openMap[this.sideMenuOptions[index]['title'] as string] = !!this.sideMenuOptions[index].open
     }
+  }
+
+  goToGithub () {
+    window.open('https://github.com/eolinker/apinto')
   }
 }

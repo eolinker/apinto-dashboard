@@ -44,7 +44,7 @@ export class UpstreamPublishComponent implements OnInit {
     { key: 'env' },
     { key: 'status' },
     { key: 'operator' },
-    { key: 'update_time' },
+    { key: 'updateTime' },
     {
       type: 'btn',
       right: true,
@@ -151,7 +151,7 @@ export class UpstreamPublishComponent implements OnInit {
     this.solutionRouter = ''
     this.solutionParam = {}
 
-    this.api.put('service/' + this.serviceName + '/online', { cluster_name: item.name || '' }).subscribe((resp:any) => {
+    this.api.put('service/' + this.serviceName + '/online', { clusterName: item.name || '' }).subscribe((resp:any) => {
       if (resp.code === 0) {
         this.message.success(resp.msg || (type + '成功'), { nzDuration: 1000 })
         this.getClustersData()
@@ -182,7 +182,7 @@ export class UpstreamPublishComponent implements OnInit {
     this.solutionRouter = ''
     this.solutionParam = {}
 
-    this.api.put('service/' + this.serviceName + '/offline', { cluster_name: item.name || '' }).subscribe((resp:any) => {
+    this.api.put('service/' + this.serviceName + '/offline', { clusterName: item.name || '' }).subscribe((resp:any) => {
       if (resp.code === 0) {
         this.message.success(resp.msg || '下线成功!', { nzDuration: 1000 })
         this.getClustersData()

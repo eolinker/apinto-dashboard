@@ -40,10 +40,10 @@
 </div>
 <ng-template #switchTpl let-item="item">
   <eo-ng-switch
-    [(ngModel)]="!item.is_stop"
+    [(ngModel)]="!item.isStop"
     [nzControl]="true"
     eoNgUserAccess="{{ 'serv-governance/' + strategyType }}"
-    (click)="stopStrategy($event, item, !item.is_stop)"
+    (click)="stopStrategy($event, item, !item.isStop)"
     [nzDisabled]="nzDisabled"
   ></eo-ng-switch>
 </ng-template>

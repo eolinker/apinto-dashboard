@@ -1,0 +1,39 @@
+<form
+  class="deploy-drawer"
+  nz-form
+  [nzNoColon]="true"
+  [nzAutoTips]="autoTips"
+  [formGroup]="validateConfigForm"
+>
+  <nz-form-item>
+    <nz-form-label [nzSpan]="6">插件名称：</nz-form-label>
+    <nz-form-control [nzSpan]="13">
+      <span>{{ validateConfigForm.controls['name'].value }}</span>
+    </nz-form-control>
+  </nz-form-item>
+
+  <nz-form-item>
+    <nz-form-label [nzSpan]="6" nzRequired>状态：</nz-form-label>
+    <nz-form-control [nzSpan]="13">
+      <eo-ng-select
+        class="w-INPUT_NORMAL"
+        formControlName="status"
+        [nzOptions]="statusList"
+        [nzDisabled]="nzDisabled"
+      ></eo-ng-select>
+    </nz-form-control>
+  </nz-form-item>
+
+  <nz-form-item class="mb-0">
+    <nz-form-label [nzSpan]="6" nzRequired>插件配置：</nz-form-label>
+    <nz-form-control [nzSpan]="13">
+      <eo-ng-codebox
+        style="display: block"
+        mode="typescript"
+        [oprBtns]="['format', 'reset', 'copy', 'search', 'replace']"
+        name="config"
+        formControlName="config"
+      ></eo-ng-codebox>
+    </nz-form-control>
+  </nz-form-item>
+</form>

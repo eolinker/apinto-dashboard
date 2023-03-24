@@ -55,7 +55,7 @@
 
 <ng-template #switchTpl let-item="item">
   <eo-ng-switch
-    [(ngModel)]="item.status_boolean"
+    [(ngModel)]="item.statusBoolean"
     [nzControl]="true"
     eoNgUserAccess="system/ext-app"
     (click)="disabledApp(item, $event)"

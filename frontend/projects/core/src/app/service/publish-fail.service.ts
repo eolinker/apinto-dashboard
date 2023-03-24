@@ -11,7 +11,7 @@ export class PublishFailService {
   constructor (
     private modalService:EoNgFeedbackModalService) { }
 
-  openModal (msg:string, type:string, routerName:string, routerParam:string) {
+  openModal (msg:string, type:string, routerName:string, routerParam:{[k:string]:any}, footer?:any) {
     this.modalService.create({
       nzTitle: '提示',
       nzIconType: 'exclamation-circle',
@@ -26,7 +26,18 @@ export class PublishFailService {
     })
   }
 
-  viewSolution (solutionRouter:string, solutionParam:any) {
+  openFooterModal (msg:string, type:string, footer?:any) {
+    return this.modalService.create({
+      nzTitle: '提示',
+      nzIconType: 'exclamation-circle',
+      nzContent: `${msg}，当前${type}未能上线，请点击跳转至相关链接。`,
+      nzClosable: true,
+      nzWidth: MODAL_SMALL_SIZE,
+      nzFooter: footer
+    })
+  }
+
+  viewSolution (solutionRouter:string, solutionParam:{[k:string]:any}) {
     const routerS:string = '/' + solutionRouter
     const routerArr:Array<string> = routerS.split('/')
     const contentIndex:number = routerArr.indexOf('content') + 1

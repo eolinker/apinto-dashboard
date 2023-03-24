@@ -107,9 +107,9 @@ export class EditableEnvTableComponent implements OnInit {
   environmentList:Array<any> = []
 
   // 环境变量分页参数
-  variablePage:{page_num:number, page_size:number, total:number}={
-    page_num: 1,
-    page_size: 15,
+  variablePage:{pageNum:number, pageSize:number, total:number}={
+    pageNum: 1,
+    pageSize: 15,
     total: 0
   }
 
@@ -126,7 +126,7 @@ export class EditableEnvTableComponent implements OnInit {
   }
 
   getEnvlist (key?:string) {
-    this.api.get('variables', { page_num: this.variablePage.page_num, page_size: this.variablePage.page_size, key: key || '' }).subscribe(resp => {
+    this.api.get('variables', { pageNum: this.variablePage.pageNum, pageSize: this.variablePage.pageSize, key: key || '' }).subscribe(resp => {
       if (resp.code === 0) {
         resp.data.variables.forEach((element:any) => {
           element.disabled = true

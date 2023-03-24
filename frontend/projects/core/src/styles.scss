@@ -7,7 +7,6 @@
 @import './layout.style.scss';
 @import './form.style.scss';
 /* You can add global styles to this file, and also import other style files */
-
 :root {
   --layout-header-height: 50px;
   --layout-footer-height: 30px;
@@ -644,7 +643,8 @@ eo-ng-upstream {
 .drawer-list-content {
   margin-top: 0px;
 }
-f .f-row-js-ac {
+
+.f-row-js-ac {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -783,12 +783,6 @@ eo-ng-flow-control-group {
 eo-ng-api-management {
   .ant-tree .ant-tree-node-content-wrapper {
     padding-left: 26px;
-  }
-}
-eo-ng-apinto-roles-group {
-  .ant-tree .ant-tree-node-content-wrapper {
-    margin-left: 6px;
-    min-width: 0px;
   }
 }
 
@@ -1304,6 +1298,13 @@ eo-ng-audit-log-list {
   }
 }
 
+eo-ng-apinto-user-avatar {
+  .iconfont {
+    font-size: 32px;
+    color: #dadadb;
+  }
+}
+
 .divide_line_ldcc {
   border-right: 1px solid #e8e8e8;
   right: 0;
@@ -1333,6 +1334,12 @@ eo-ng-audit-log-list {
   .ant-tooltip-inner {
     background-color: rgb(255, 60, 50);
   }
+}
+
+.ant-tooltip.tooltip-json {
+  white-space: pre-line;
+  word-break: break-all;
+  overflow-wrap: break-word;
 }
 
 .activation-block {
@@ -1445,7 +1452,7 @@ nz-upload.ant-btn-primary {
 
 .import-drawer-wrap {
   eo-ng-table input.ant-input {
-    background-color: transparent;
+    // background-color: transparent;
   }
 }
 
