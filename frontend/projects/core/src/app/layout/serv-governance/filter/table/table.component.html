@@ -9,14 +9,14 @@
   </button>
 </div>
 <div
-  *ngIf="filterShowList.length > 0 && filterShowList != []"
+  *ngIf="_filterShowList.length > 0 && _filterShowList !== []"
   class="mt-btnybase"
   style="width: 524px"
 >
   <eo-ng-apinto-table
     [nzTbody]="filterTableBody"
     [nzThead]="filterTableHeadName"
-    [nzData]="filterShowList"
+    [nzData]="_filterShowList"
     [nzTrClick]="filterTableClick"
     eoNgUserAccess="{{ 'serv-governance/' + strategyType }}"
     (disabledEdit)="disabledEdit($event)"

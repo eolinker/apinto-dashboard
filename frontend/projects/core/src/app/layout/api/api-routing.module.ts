@@ -1,11 +1,18 @@
 import { NgModule } from '@angular/core'
 import { RouterModule, Routes } from '@angular/router'
-import { ApiContentComponent } from './content/content.component'
-import { ApiCreateComponent } from './create/create.component'
-import { ApiManagementComponent } from './group/group.component'
-import { ApiManagementListComponent } from './list/list.component'
-import { ApiMessageComponent } from './message/message.component'
-import { ApiPublishComponent } from './publish/single/publish.component'
+import { ApiListComponent } from './api-list/api-list.component'
+import { ApiContentComponent } from './api-list/content/content.component'
+import { ApiCreateComponent } from './api-list/create/create.component'
+import { ApiManagementComponent } from './api-list/group/group.component'
+import { ApiManagementListComponent } from './api-list/list/list.component'
+import { ApiMessageComponent } from './api-list/message/message.component'
+import { ApiPublishComponent } from './api-list/publish/single/publish.component'
+import { ApiPluginTemplateContentComponent } from './plugin/content/content.component'
+import { ApiPluginTemplateCreateComponent } from './plugin/create/create.component'
+import { ApiPluginTemplateListComponent } from './plugin/list/list.component'
+import { ApiPluginTemplateMessageComponent } from './plugin/message/message.component'
+import { ApiPluginTemplateComponent } from './plugin/plugin.component'
+import { ApiPluginTemplatePublishComponent } from './plugin/publish/publish.component'
 import { RouterComponent } from './router/router.component'
 
 const routes: Routes = [{
@@ -14,16 +21,34 @@ const routes: Routes = [{
   data: { id: '4' },
   children: [
     {
-      path: 'group',
-      component: ApiManagementComponent,
+      path: 'api',
+      component: ApiListComponent,
       children: [
         {
-          path: 'list',
-          component: ApiManagementListComponent,
-          children: [{
-            path: ':apiGroupId',
-            component: ApiManagementListComponent
-          }]
+          path: 'group',
+          component: ApiManagementComponent,
+          children: [
+            {
+              path: 'list',
+              component: ApiManagementListComponent,
+              children: [{
+                path: ':apiGroupId',
+                component: ApiManagementListComponent
+              }]
+            },
+            {
+              path: 'create',
+              component: ApiCreateComponent,
+              children: [{
+                path: ':apiGroupId',
+                component: ApiCreateComponent
+              }]
+            },
+            {
+              path: 'message/:apiId',
+              component: ApiMessageComponent
+            }
+          ]
         },
         {
           path: 'create',
@@ -34,33 +59,50 @@ const routes: Routes = [{
           }]
         },
         {
-          path: 'message/:apiId',
-          component: ApiMessageComponent
+          path: 'content/:apiId',
+          component: ApiContentComponent,
+          children: [
+            {
+              path: '',
+              component: ApiMessageComponent
+            },
+            {
+              path: 'publish',
+              component: ApiPublishComponent
+            }
+          ]
         }
       ]
     },
     {
-      path: 'create',
-      component: ApiCreateComponent,
-      children: [{
-        path: ':apiGroupId',
-        component: ApiCreateComponent
-      }]
-    },
-    {
-      path: 'content/:apiId',
-      component: ApiContentComponent,
+      path: 'plugin',
+      component: ApiPluginTemplateComponent,
       children: [
         {
           path: '',
-          component: ApiMessageComponent
+          component: ApiPluginTemplateListComponent
         },
         {
-          path: 'publish',
-          component: ApiPublishComponent
+          path: 'create',
+          component: ApiPluginTemplateCreateComponent
+        },
+        {
+          path: 'content/:pluginTemplateId',
+          component: ApiPluginTemplateContentComponent,
+          children: [
+            {
+              path: '',
+              component: ApiPluginTemplatePublishComponent
+            },
+            {
+              path: 'message',
+              component: ApiPluginTemplateMessageComponent
+            }
+          ]
         }
       ]
     }
+
   ]
 }]
 

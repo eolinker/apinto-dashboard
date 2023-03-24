@@ -1,7 +1,7 @@
 <!--
- * @Author:  
+ * @Author: MengjieYang yangmengjie@eolink.com
  * @Date: 2022-09-26 21:27:30
- * @LastEditors:  
+ * @LastEditors: MengjieYang yangmengjie@eolink.com
  * @LastEditTime: 2022-09-27 23:00:47
  * @FilePath: /apinto/projects/core/src/app/layout/deploy/environment/environment.component.html
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
@@ -55,8 +55,8 @@
       [nzShowPagination]="true"
       [nzFrontPagination]="false"
       [nzTotal]="variablePage.total"
-      [(nzPageIndex)]="variablePage.page_num"
-      [(nzPageSize)]="variablePage.page_size"
+      [(nzPageIndex)]="variablePage.pageNum"
+      [(nzPageSize)]="variablePage.pageSize"
       (nzPageIndexChange)="getVariables()"
       (nzPageSizeChange)="getVariables()"
     >

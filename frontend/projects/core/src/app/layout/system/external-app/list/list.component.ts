@@ -67,7 +67,7 @@ export class ExternalAppListComponent implements OnInit {
       key: 'operator'
     },
     {
-      key: 'update_time'
+      key: 'updateTime'
     },
     {
       type: 'btn',
@@ -122,11 +122,11 @@ export class ExternalAppListComponent implements OnInit {
   }
 
   getAppsData ():void {
-    this.api.get('external-apps').subscribe((resp:{code:number, data:{apps:Array<{id:string, name:string, token:string, tags:string, status:number, operator:string, update_time:string}>}, msg:string}) => {
+    this.api.get('external-apps').subscribe((resp:{code:number, data:{apps:Array<{id:string, name:string, token:string, tags:string, status:number, operator:string, updateTime:string}>}, msg:string}) => {
       if (resp.code === 0) {
         this.appsList = resp.data.apps
         for (const index in this.appsList) {
-          this.appsList[index].status_boolean = this.appsList[index].status === 2 // 禁用
+          this.appsList[index].statusBoolean = this.appsList[index].status === 2 // 禁用
         }
       } else {
         this.message.error(resp.msg || '获取API列表数据失败！')
@@ -160,7 +160,7 @@ export class ExternalAppListComponent implements OnInit {
   disabledApp (item:any, e:Event) {
     e.stopPropagation()
     let url = ''
-    if (!item.status_boolean) {
+    if (!item.statusBoolean) {
       url = 'external-app/disable'
     } else {
       url = 'external-app/enable'
@@ -168,7 +168,7 @@ export class ExternalAppListComponent implements OnInit {
 
     this.api.put(url, null, { id: item.id }).subscribe((resp:{code:number, data:{}, msg:string}) => {
       if (resp.code === 0) {
-        item.status_boolean = !item.status_boolean
+        item.statusBoolean = !item.statusBoolean
         this.message.success(resp.msg || ((url.split('/')[1] === 'disable' ? '禁用' : '启用') + '成功！'))
         this.getAppsData()
       } else {

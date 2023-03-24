@@ -1,0 +1,79 @@
+<div class="mt-formtop">
+  <form
+    nz-form
+    [nzNoColon]="true"
+    [nzAutoTips]="autoTips"
+    [formGroup]="validateForm"
+    autocomplete="off"
+  >
+    <nz-form-item>
+      <nz-form-label [nzSpan]="7" nzRequired>模板名称：</nz-form-label>
+
+      <nz-form-control [nzSpan]="12" [nzErrorTip]="nameErrorTpl">
+        <input
+          class="w-INPUT_NORMAL"
+          eo-ng-input
+          formControlName="name"
+          placeholder="英文数字下划线组合，首字母必须为英文"
+          eoNgUserAccess="router/plugin"
+        />
+
+        <ng-template #nameErrorTpl let-control>
+          <ng-container *ngIf="control.hasError('pattern')"
+            >英文数字下划线任意一种，首字母必须为英文</ng-container
+          >
+          <ng-container *ngIf="control.hasError('required')"
+            >必填项</ng-container
+          ></ng-template
+        >
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="7">描述：</nz-form-label>
+      <nz-form-control [nzSpan]="12">
+        <textarea
+          class="w-INPUT_NORMAL"
+          name="desc"
+          rows="6"
+          eo-ng-input
+          formControlName="desc"
+          placeholder="请输入"
+          eoNgUserAccess="router/plugin"
+        ></textarea>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item class="mb-0">
+      <nz-form-label [nzSpan]="7" nzRequired>插件配置： </nz-form-label>
+      <nz-form-control
+        [nzSpan]="12"
+        [nzValidateStatus]="pluginConfigError ? 'error' : ''"
+        nzErrorTip="必填项"
+      >
+        <eo-ng-router-plugin-config-table
+          [(configList)]="configList"
+          (configListChange)="handlerConfigListChange()"
+          [nzDisabled]="nzDisabled"
+        ></eo-ng-router-plugin-config-table>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item class="mb-0 sticky bg-white bottom-0 py-mbase z-50">
+      <nz-form-control [nzOffset]="7" [nzSpan]="12">
+        <button
+          eoNgUserAccess="router/plugin"
+          class="ant-btn-primary"
+          type="submit"
+          eo-ng-button
+          (click)="savePluginTemplate()"
+        >
+          {{ editPage ? '提交' : '保存' }}
+        </button>
+        <button eo-ng-button class="ml-btnybase" (click)="backToList()">
+          取消
+        </button>
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+</div>

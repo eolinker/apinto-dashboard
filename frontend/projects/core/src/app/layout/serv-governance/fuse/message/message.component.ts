@@ -17,7 +17,6 @@ import { BaseInfoService } from 'projects/core/src/app/service/base-info.service
   ]
 })
 export class FuseMessageComponent implements OnInit {
-  readonly nowUrl:string = this.router.routerState.snapshot.url
   @Input() strategyUuid:string = ''
   @Input() clusterName:string = ''
 
@@ -30,5 +29,4 @@ export class FuseMessageComponent implements OnInit {
       this.router.navigate(['/'])
     }
   }
-
 }

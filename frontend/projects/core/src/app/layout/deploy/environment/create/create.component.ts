@@ -22,7 +22,7 @@ export class DeployEnvironmentCreateComponent implements OnInit {
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
 
   globalEnvDetailList: Array<{
-    cluster_name: string
+    clusterName: string
     environment: string
     value: string
     publish_status: string

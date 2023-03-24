@@ -64,6 +64,7 @@
               "node_modules/eo-ng-button/styles.scss",
               "node_modules/eo-ng-cascader/styles.scss",
               "node_modules/eo-ng-checkbox/styles.scss",
+              "node_modules/eo-ng-codebox/lib/codebox.component.scss",
               "node_modules/eo-ng-collapse/lib/eo-ng-collapse.component.scss",
               "node_modules/eo-ng-date-picker/styles.scss",
               "node_modules/eo-ng-feedback/styles.scss",

@@ -20,12 +20,14 @@ export interface RouteParams {
   // API管理
   apiGroupId:string
   apiId:string
+  pluginTemplateId:string
 
   // 应用管理
   appId:string
 
   // 基础设施
   clusterName:string
+  pluginName:string // 插件管理中的插件名
 
   // 上游管理
   discoveryName:string

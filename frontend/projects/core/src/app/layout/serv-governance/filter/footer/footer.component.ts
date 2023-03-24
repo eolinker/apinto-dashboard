@@ -1,14 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core'
 import { Router } from '@angular/router'
-import { FilterForm } from '../form/form.component'
-
-export interface FilterShowData{
-  title?: string
-  name: string
-  label?: string
-  values: Array<string>
-  [key: string]: any
-}
+import { CheckBoxOptionInterface } from 'eo-ng-checkbox'
+import { FilterForm, FilterShowData } from '../../types/types'
 
 @Component({
   selector: 'eo-ng-filter-footer',
@@ -18,17 +11,42 @@ export interface FilterShowData{
 })
 export class FilterFooterComponent {
   @Input() // 双向绑定filterForm
-  get filterForm () {
-    return this._filterForm
-  }
+  get filterForm () { return this._filterForm }
 
   set filterForm (val) {
     this._filterForm = val
     this.filterFormChange.emit(this._filterForm)
   }
 
-  @Output() filterFormChange = new EventEmitter()
+  @Input()
+  get filterShowList () { return this._filterShowList }
 
+  set filterShowList (val) {
+    this._filterShowList = val
+    this.filterShowListChange.emit(this._filterShowList)
+  }
+
+  @Input()
+  get filterNamesSet () { return this._filterNamesSet }
+
+  set filterNamesSet (val) {
+    this._filterNamesSet = val
+    this.filterNamesSetChange.emit(this._filterNamesSet)
+  }
+
+  @Input() remoteSelectNameList: string[] = [] // 穿梭框内被勾选的选项name
+  @Input() remoteSelectList: string[] = [] // 穿梭框内被勾选的选项uuid
+  @Input() staticsList: CheckBoxOptionInterface[]= []
+  @Input() editFilter?: FilterForm // 正在编辑的配置
+  @Input() filterType: string = '' // 筛选条件类型, 当type=pattern,显示输入框, static显示一组勾选框, remote显示穿梭框
+  @Output() filterFormChange:EventEmitter<FilterForm> = new EventEmitter()
+  @Output() filterShowListChange:EventEmitter<FilterShowData [] > = new EventEmitter()
+  @Output() filterNamesSetChange:EventEmitter<Set<string> > = new EventEmitter()
+  @Output() drawerClose:EventEmitter<boolean> = new EventEmitter()
+
+  strategyType:string = '' // 策略类型
+  _filterNamesSet: Set<string> = new Set() // 穿梭框内被勾选的选项uuid
+  _filterShowList: FilterShowData [] = []
   _filterForm: FilterForm = {
     name: '',
     title: '',
@@ -43,41 +61,6 @@ export class FilterFooterComponent {
     patternIsPass: true
   }
 
-  @Input()
-  get filterShowList () {
-    return this._filterShowList
-  }
-
-  set filterShowList (val) {
-    this._filterShowList = val
-    this.filterShowListChange.emit(this._filterShowList)
-  }
-
-  @Output() filterShowListChange = new EventEmitter()
-
-  _filterShowList: FilterShowData [] = []
-
-  @Input()
-  get filterNamesSet () {
-    return this._filterNamesSet
-  }
-
-  set filterNamesSet (val) {
-    this._filterNamesSet = val
-    this.filterNamesSetChange.emit(this._filterNamesSet)
-  }
-
-  @Output() filterNamesSetChange = new EventEmitter()
-
-  _filterNamesSet: Set<string> = new Set() // 穿梭框内被勾选的选项uuid
-
-  @Input() remoteSelectNameList: string[] = [] // 穿梭框内被勾选的选项name
-  @Input() remoteSelectList: string[] = [] // 穿梭框内被勾选的选项uuid
-  @Input() staticsList: Array<any> = []
-  @Input() editFilter?: FilterForm // 正在编辑的配置
-  @Input() filterType: string = '' // 筛选条件类型, 当type=pattern,显示输入框, static显示一组勾选框, remote显示穿梭框
-  @Output() drawerClose:EventEmitter<boolean> = new EventEmitter()
-  strategyType:string = '' // 策略类型
   constructor (private router:Router) {
     this.strategyType = this.router.url.split('/')[2]
   }
@@ -117,7 +100,7 @@ export class FilterFooterComponent {
         break
     }
     if (this.editFilter) {
-      this.filterShowList = this.filterShowList.filter((item: any) => {
+      this.filterShowList = this.filterShowList.filter((item: FilterShowData) => {
         return item.name !== this.editFilter!.name
       })
       this.filterShowList = [
