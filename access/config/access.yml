@@ -10,10 +10,19 @@ modules:
           - mon_partition_edit
   - id: 4
     title: API管理
-    module: router
-    access:
-      - api_view
-      - api_edit
+    children:
+      - id: 401
+        title: API列表
+        module: router/router
+        access:
+          - api_view
+          - api_edit
+      - id: 402
+        title: 插件模板
+        module: router/plugin
+        access:
+          - plugin_template_view
+          - plugin_template_edit
   - id: 3
     title: 应用管理
     module: application
@@ -50,6 +59,12 @@ modules:
         access:
           - variable_view
           - variable_edit
+      - id: 103
+        title: 插件管理
+        module: deploy/plugin
+        access:
+          - plugin_view
+          - plugin_edit
   - id: 5
     title: 服务治理
     children:
