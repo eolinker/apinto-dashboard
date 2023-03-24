@@ -3,9 +3,9 @@
 /* eslint-disable camelcase */
 /* eslint-disable dot-notation */
 /*
- * @Author: MengjieYang yangmengjie@eolink.com
+ * @Author:
  * @Date: 2022-07-20 22:34:58
- * @LastEditors: MengjieYang yangmengjie@eolink.com
+ * @LastEditors:
  * @LastEditTime: 2022-11-02 23:51:33
  * @FilePath: /apinto/src/app/layout/deploy/deploy-environment/deploy-environment.component.ts
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE

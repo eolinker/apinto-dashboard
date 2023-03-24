@@ -100,7 +100,7 @@ export class DeployPluginListComponent implements OnInit {
     oldArr.splice(preIndex, 1)
     oldArr.splice(currentIndex, 0, preItem.data.name)
     return this.api
-      .put('plugin', { uuids: oldArr })
+      .put('plugin/sort', { names: oldArr })
       .subscribe((resp:EmptyHttpResponse) => {
         if (resp.code === 0) {
           this.message.success(resp.msg || '删除成功', { nzDuration: 1000 })
