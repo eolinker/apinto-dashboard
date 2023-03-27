@@ -17,7 +17,7 @@
     [nzTbody]="configTableBody"
     [nzThead]="configTableHeadName"
     [nzData]="configList"
-    (nzDataChange)="configListChange.emit()"
+    (nzDataChange)="configListChange.emit(configList)"
     [nzTrClick]="configTableClick"
     [nzMaxOperatorButton]="2"
     [nzNoScroll]="true"
@@ -27,7 +27,8 @@
 
 <ng-template #switchTpl let-item="item">
   <eo-ng-switch
-    [(ngModel)]="!item.disable"
+    [(ngModel)]="item.disable"
+    (ngModelChange)="this.configListChange.emit(this.configList)"
     (click)="$event.stopPropagation()"
     [nzDisabled]="nzDisabled"
   ></eo-ng-switch>
