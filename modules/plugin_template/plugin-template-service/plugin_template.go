@@ -177,8 +177,8 @@ func (p *pluginTemplateService) Create(ctx context.Context, namespaceId, operato
 
 		bytes, _ := json.Marshal(pluginInfo.Config)
 		//检测JsonSchema格式是否正确
-		if !common.JsonSchemaValid(modelPlugin.Schema, string(bytes)) {
-			return errors.New(fmt.Sprintf("插件名为%s的config配置格式错误", modelPlugin.Name))
+		if err = common.JsonSchemaValid(modelPlugin.Schema, string(bytes)); err != nil {
+			return errors.New(fmt.Sprintf("插件名为%s的config配置格式错误 err=%s", modelPlugin.Name, err.Error()))
 		}
 
 		plugins = append(plugins, modelPlugin)
@@ -272,10 +272,9 @@ func (p *pluginTemplateService) Update(ctx context.Context, namespaceId, operato
 
 		bytes, _ := json.Marshal(pluginInfo.Config)
 		//检测JsonSchema格式是否正确
-		if !common.JsonSchemaValid(modelPlugin.Schema, string(bytes)) {
-			return errors.New(fmt.Sprintf("插件名为%s的config配置格式错误", modelPlugin.Name))
+		if err = common.JsonSchemaValid(modelPlugin.Schema, string(bytes)); err != nil {
+			return errors.New(fmt.Sprintf("插件名为%s的config配置格式错误 err=%s", modelPlugin.Name, err.Error()))
 		}
-
 	}
 
 	pluginTemplate, err := p.pluginTemplateStore.GetByUUID(ctx, input.UUID)
