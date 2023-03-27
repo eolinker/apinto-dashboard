@@ -343,7 +343,7 @@ func (p *pluginService) Delete(ctx context.Context, namespaceId, operator int, n
 	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Name: name,
 	})
-	
+
 	return p.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
 		if _, err = p.pluginStore.Delete(txCtx, pluginInfo.Id); err != nil {
 			return err
@@ -366,6 +366,13 @@ func (p *pluginService) GetByName(ctx context.Context, namespaceId int, name str
 
 	result := &plugin_model.Plugin{
 		Plugin: pluginInfo,
+	}
+	if result.Rely > 0 {
+		relyPlugin, err := p.pluginStore.Get(ctx, result.Rely)
+		if err != nil {
+			return nil, err
+		}
+		result.RelyName = relyPlugin.Name
 	}
 	return result, nil
 }
