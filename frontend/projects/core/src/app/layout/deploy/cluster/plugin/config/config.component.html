@@ -23,17 +23,23 @@
       ></eo-ng-select>
     </nz-form-control>
   </nz-form-item>
-
-  <nz-form-item class="mb-0">
-    <nz-form-label [nzSpan]="6" nzRequired>插件配置：</nz-form-label>
-    <nz-form-control [nzSpan]="13">
-      <eo-ng-codebox
-        style="display: block"
-        mode="typescript"
-        [oprBtns]="['format', 'reset', 'copy', 'search', 'replace']"
-        name="config"
-        formControlName="config"
-      ></eo-ng-codebox>
-    </nz-form-control>
-  </nz-form-item>
 </form>
+<nz-form-item class="mb-0">
+  <nz-form-label [nzNoColon]="true" [nzSpan]="6" nzRequired
+    >插件配置：</nz-form-label
+  >
+  <nz-form-control
+    [nzSpan]="13"
+    [nzValidateStatus]="pluginConfigError ? 'error' : ''"
+    nzErrorTip="必填项"
+  >
+    <eo-ng-codebox
+      style="display: block"
+      mode="json"
+      [oprBtns]="['format', 'reset', 'copy', 'search', 'replace']"
+      name="config"
+      [(code)]="config"
+      (codeChange)="handlerConfigChange()"
+    ></eo-ng-codebox>
+  </nz-form-control>
+</nz-form-item>

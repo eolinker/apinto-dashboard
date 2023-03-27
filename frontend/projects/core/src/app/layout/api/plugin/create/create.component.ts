@@ -9,6 +9,7 @@ import { setFormValue } from 'projects/core/src/app/constant/form'
 import { ApiService } from 'projects/core/src/app/service/api.service'
 import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
 import { BaseInfoService } from 'projects/core/src/app/service/base-info.service'
+import { EoNgJsonService } from 'projects/core/src/app/service/eo-ng-json.service'
 import { PluginTemplateConfigItem, PluginTemplateData } from '../../types/types'
 
 @Component({
@@ -33,7 +34,8 @@ export class ApiPluginTemplateCreateComponent implements OnInit {
     private api:ApiService,
     private appConfigService:AppConfigService,
     private fb: UntypedFormBuilder,
-    private router: Router
+    private router: Router,
+    private jsonService:EoNgJsonService
   ) {
     this.appConfigService.reqFlashBreadcrumb([
       { title: '插件模板', routerLink: 'router/plugin' },
@@ -69,7 +71,10 @@ export class ApiPluginTemplateCreateComponent implements OnInit {
     this.api.get('plugin/template', { uuid: this.uuid }).subscribe((resp:{code:number, data:{template:PluginTemplateData}, msg:string}) => {
       if (resp.code === 0) {
         setFormValue(this.validateForm, resp.data.template)
-        this.configList = resp.data.template.plugins
+        this.configList = resp.data.template.plugins.map((plugin) => {
+          plugin.config = JSON.stringify(this.jsonService.handleJsonSchema2Json(JSON.parse(plugin.config)))
+          return plugin
+        })
       } else {
         this.message.error(resp.msg || '获取数据失败!')
       }
