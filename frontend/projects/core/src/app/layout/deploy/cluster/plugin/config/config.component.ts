@@ -5,6 +5,7 @@ import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { SelectOption } from 'eo-ng-select'
 import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { ApiService } from 'projects/core/src/app/service/api.service'
+import { EoNgJsonService } from 'projects/core/src/app/service/eo-ng-json.service'
 import { DeployClusterPluginStatusOptions } from '../../types/conf'
 import { ClusterPluginConfig } from '../../types/types'
 
@@ -20,27 +21,57 @@ export class DeployClusterPluginConfigFormComponent implements OnInit {
   clusterName:string = ''
   statusList:SelectOption[] = [...DeployClusterPluginStatusOptions]
   nzDisabled:boolean = false
+  renderList:Array<{name:string, config:string}> = []
+  config:string = ''
+  pluginConfigError:boolean = false
+  startValidate:boolean = false
   @Input() editData?:ClusterPluginConfig
   constructor (
           private message: EoNgFeedbackMessageService,
           private api:ApiService,
+          private jsonService:EoNgJsonService,
           private fb: UntypedFormBuilder) {
   }
 
   ngOnInit (): void {
     this.validateConfigForm = this.fb.group({
       name: [this.editData?.name || ''],
-      status: [this.editData?.status || ''],
-      config: [this.editData?.config || {}]
+      status: [this.editData?.status || '']
+    })
+    this.config = this.editData?.config || ''
+    this.getPluginConfigRender()
+  }
+
+  getPluginConfigRender () {
+    this.api.get('plugins/render').subscribe(resp => {
+      if (resp.code === 0) {
+        this.renderList = resp.data.plugins
+        if (!this.editData?.config || this.editData?.config === 'null') {
+          const config = JSON.stringify(this.jsonService.handleJsonSchema2Json(JSON.parse(this.renderList.filter((config) => {
+            return config.name === this.validateConfigForm.controls['name'].value
+          })[0].config)))
+          this.config = config
+        }
+      } else {
+        this.message.error(resp.msg || '获取配置信息失败!')
+      }
     })
   }
 
+  handlerConfigChange () {
+    if (this.startValidate) {
+      this.pluginConfigError = !this.config
+    }
+  }
+
   save () {
-    if (this.validateConfigForm.valid) {
+    this.startValidate = true
+    this.pluginConfigError = !this.config
+    if (this.validateConfigForm.valid && !this.pluginConfigError) {
       this.api.post('cluster/' + this.clusterName + '/plugin', {
         name: this.validateConfigForm.value.name || '',
         status: this.validateConfigForm.value.status || '',
-        config: this.validateConfigForm.value.config || ''
+        config: this.config || ''
       }).subscribe(resp => {
         if (resp.code === 0) {
           this.message.success(resp.msg || '添加成功', { nzDuration: 1000 })
