@@ -278,7 +278,7 @@ export const apiImportCheckResultTableBody:TBODY_TYPE[] = [
 
 export const apiBatchOnlineVerifyTableHeadName :THEAD_TYPE[] = [
   {
-    title: '上游服务名称'
+    title: '上游名称/插件模板'
   },
   { title: '集群名称' },
   { title: '状态' },
@@ -292,7 +292,7 @@ export const apiBatchOnlineVerifyTableHeadName :THEAD_TYPE[] = [
 
 export const apiBatchOnlineVerifyTableBody :TBODY_TYPE[] = [
   {
-    key: 'service',
+    key: 'serviceTemplate',
     styleFn: (item:any) => {
       if (!item.status) {
         return 'color:#ff3b30'
