@@ -29,7 +29,7 @@ func (q *quoteStore) DelBySource(ctx context.Context, source int, kind quote_ent
 }
 
 func (q *quoteStore) DelSourceTarget(ctx context.Context, source int, kind quote_entry.QuoteKindType, targetKind quote_entry.QuoteTargetKindType) error {
-	return q.DB(ctx).Delete(q.TargetType, "`source` = ? and `kind` = ? `target_kind` = ?", source, kind, targetKind).Error
+	return q.DB(ctx).Delete(q.TargetType, "`source` = ? and `kind` = ? and `target_kind` = ?", source, kind, targetKind).Error
 }
 
 func (q *quoteStore) DelByTarget(ctx context.Context, target int, kind quote_entry.QuoteTargetKindType) error {
