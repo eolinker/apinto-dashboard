@@ -30,6 +30,7 @@ import { v4 as uuidv4 } from 'uuid'
       eo-copy
       eo-ng-button
       nzType="primary"
+      type="button"
       nzGhost
       class="deploy-node-copy-btn ant-btn-text border-transparent h-[22px]"
       [copyText]="uuid"
