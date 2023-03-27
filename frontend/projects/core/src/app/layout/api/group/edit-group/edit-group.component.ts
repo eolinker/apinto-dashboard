@@ -19,7 +19,7 @@ import { v4 as uuidv4 } from 'uuid'
     autocomplete="off"
   >
 
-  <nz-form-item>
+  <nz-form-item *ngIf="showUuid">
       <nz-form-label [nzSpan]="6" nzFor="groupName">分组ID：</nz-form-label>
       <nz-form-control [nzSpan]="15">
       <span
@@ -30,6 +30,7 @@ import { v4 as uuidv4 } from 'uuid'
       eo-copy
       eo-ng-button
       nzType="primary"
+      type="button"
       nzGhost
       class="deploy-node-copy-btn ant-btn-text border-transparent h-[22px]"
       [copyText]="uuid"
@@ -65,6 +66,7 @@ export class ApiManagementEditGroupComponent implements OnInit {
   @Input() uuid:string = ''
   @Input() groupName:string = ''
   @Input() closeModal?:(value?:any)=>void
+  @Input() showUuid:boolean = false
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
   validateApiGroupForm:FormGroup = new FormGroup({})
   constructor (private message: EoNgFeedbackMessageService,
