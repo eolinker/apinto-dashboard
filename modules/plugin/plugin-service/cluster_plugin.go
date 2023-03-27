@@ -269,8 +269,8 @@ func (c *clusterPluginService) EditPlugin(ctx context.Context, namespaceID int, 
 
 	pluginConfig, _ := json.Marshal(config)
 	//检测JsonSchema格式是否正确
-	if !common.JsonSchemaValid(globalPlugin.Schema, string(pluginConfig)) {
-		return errors.New("插件配置格式错误")
+	if err = common.JsonSchemaValid(globalPlugin.Schema, string(pluginConfig)); err != nil {
+		return errors.New(fmt.Sprintf("插件配置格式错误 err=%s", err.Error()))
 	}
 
 	if err = c.lockService.Lock(locker_service.LockNameClusterPlugin, clusterInfo.Id); err != nil {
