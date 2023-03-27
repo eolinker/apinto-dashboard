@@ -57,7 +57,7 @@ func (p *pluginController) plugin(ginCtx *gin.Context) {
 		Name:     pluginInfo.Name,
 		Extended: pluginInfo.Extended,
 		Desc:     pluginInfo.Desc,
-		Rely:     pluginInfo.Rely,
+		Rely:     pluginInfo.RelyName,
 	}
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }

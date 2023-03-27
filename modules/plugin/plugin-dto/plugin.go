@@ -15,7 +15,7 @@ type PluginItem struct {
 	Name     string `json:"name"`
 	Extended string `json:"extended"`
 	Desc     string `json:"desc"`
-	Rely     int    `json:"rely"`
+	Rely     string `json:"rely"`
 }
 
 type PluginInput struct {
