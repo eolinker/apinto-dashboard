@@ -24,7 +24,7 @@ type PluginTemplateVersion plugin_template_entry.PluginTemplateVersion
 
 type PluginInfo struct {
 	Name    string
-	Config  string
+	Config  interface{}
 	Disable bool
 }
 

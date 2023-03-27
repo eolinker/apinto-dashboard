@@ -18,9 +18,9 @@ type PluginTemplateInput struct {
 }
 
 type PluginInfo struct {
-	Name    string `json:"name"`
-	Config  string `json:"config"`
-	Disable bool   `json:"disable"`
+	Name    string      `json:"name"`
+	Config  interface{} `json:"config"`
+	Disable bool        `json:"disable"`
 }
 
 type PluginTemplateOutput struct {
