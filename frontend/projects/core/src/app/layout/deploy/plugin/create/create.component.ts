@@ -145,13 +145,23 @@ export class DeployPluginCreateComponent implements OnInit {
         rely: this.validateForm.controls['rely'].value || '',
         desc: this.validateForm.controls['desc'].value || ''
       }
-      this.api.post('plugin', params).subscribe((resp) => {
-        if (resp.code === 0) {
-          this.router.navigate(['/', 'deploy', 'plugin'])
-        } else {
-          this.message.error(resp.msg || '新建集群失败！')
-        }
-      })
+      if (!this.editPage) {
+        this.api.post('plugin', params).subscribe((resp) => {
+          if (resp.code === 0) {
+            this.router.navigate(['/', 'deploy', 'plugin'])
+          } else {
+            this.message.error(resp.msg || '操作失败！')
+          }
+        })
+      } else {
+        this.api.put('plugin', { name: this.validateForm.controls['name'].value || '', desc: this.validateForm.controls['desc'].value || '' }).subscribe((resp) => {
+          if (resp.code === 0) {
+            this.router.navigate(['/', 'deploy', 'plugin'])
+          } else {
+            this.message.error(resp.msg || '操作失败！')
+          }
+        })
+      }
     } else {
       Object.values(this.validateForm.controls).forEach((control) => {
         if (control.invalid) {
