@@ -96,13 +96,7 @@
 
               <eo-ng-dropdown-menu #menu="nzDropdownMenu">
                 <ul nz-menu>
-                  <li
-                    nz-menu-item
-                    *ngIf="!firstLevelMap.has(origin.uuid)"
-                    (click)="addApi(origin.uuid)"
-                  >
-                    添加 API
-                  </li>
+                  <li nz-menu-item (click)="addApi(origin.uuid)">添加 API</li>
                   <li nz-menu-item (click)="addGroupModal(origin.uuid)">
                     添加子分组
                   </li>
