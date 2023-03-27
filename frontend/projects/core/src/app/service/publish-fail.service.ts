@@ -15,7 +15,7 @@ export class PublishFailService {
     this.modalService.create({
       nzTitle: '提示',
       nzIconType: 'exclamation-circle',
-      nzContent: `${msg}，当前${type}未能上线，请点击跳转至相关链接。`,
+      nzContent: `${msg}，请点击跳转至相关链接。`,
       nzClosable: true,
       nzCancelText: '取消',
       nzWidth: MODAL_SMALL_SIZE,
@@ -30,7 +30,7 @@ export class PublishFailService {
     return this.modalService.create({
       nzTitle: '提示',
       nzIconType: 'exclamation-circle',
-      nzContent: `${msg}，当前${type}未能上线，请点击跳转至相关链接。`,
+      nzContent: `${msg}，请点击跳转至相关链接。`,
       nzClosable: true,
       nzWidth: MODAL_SMALL_SIZE,
       nzFooter: footer

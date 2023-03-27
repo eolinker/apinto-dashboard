@@ -214,11 +214,11 @@
         <eo-ng-select
           class="w-INPUT_LARGE"
           name="templateUuid"
-          required
           formControlName="templateUuid"
           [nzOptions]="pluginTemplateList"
           nzPlaceHolder="请选择"
           [nzDisabled]="nzDisabled"
+          [nzAllowClear]="true"
         ></eo-ng-select>
       </nz-form-control>
     </nz-form-item>
