@@ -80,6 +80,6 @@ export class DeployClusterPluginHistoryPublishComponent implements OnInit {
   }
 
   getStatusString (status:'GLOBAL'|'DISABLE'|'ENABLE') {
-    return this.statusList.filter((item:SelectOption) => { return item.value === status })[0].label
+    return this.statusList.filter((item:SelectOption) => { return item.value === status })[0]?.label || '无'
   }
 }

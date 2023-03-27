@@ -42,7 +42,7 @@ export type PluginPublishStatus = 'GLOBAL'|'DISABLE'|'ENABLE'
 export type ClusterPluginConfig = {
   name:string
   status:PluginPublishStatus
-  config:object
+  config: string
 }
 
 export type ClusterPluginPublishData = {
@@ -61,6 +61,8 @@ export type ClusterPluginPublishData = {
   nowSort:number,
   finishValue?:string
   noReleasedValue?:string
+  finishValueTooltip?:string
+  noReleasedValueTooltip?:string
 }
 
 export type ClusterEnvChangeHistoryItem = {

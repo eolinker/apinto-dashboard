@@ -83,11 +83,11 @@
     class="default-tpl-td-span"
     eoNgFeedbackTooltip
     [nzTooltipTitle]="
-      rowItem.tooltip ||
+      item[rowItem.key + 'Tooltip'] ||
       (rowItem.keyPrefix || '') + item[rowItem.key] + (rowItem.keySuffix || '')
     "
     [nzTooltipTitleContext]="{ rowItem: rowItem, item: item }"
-    [nzTooltipVisible]="rowItem.tooltipVisibel || false"
+    [nzTooltipVisible]="rowItem.tooltipVisible || false"
     [nzTooltipTrigger]="rowItem.tooltipTrigger || 'hover'"
     [nzTooltipOverlayClassName]="rowItem.json ? 'tooltip-json' : ''"
     >{{ rowItem.keyPrefix }}{{ item[rowItem.key] }}{{ rowItem.keySuffix }}
