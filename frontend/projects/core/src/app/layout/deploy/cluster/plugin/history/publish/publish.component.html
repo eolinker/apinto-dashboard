@@ -21,10 +21,7 @@
 <ng-template #nzTrBottomTmp let-item="item" let-apis="apis" let-index="index">
   <tr *ngIf="item.data.isExpand">
     <td style="border-right: none; background-color: #e8e8e8"></td>
-    <td
-      colspan="3"
-      style="background-color: pink; border: none; padding: 0; margin-top: -2px"
-    >
+    <td colspan="3" style="border: none; padding: 0; margin-top: -2px">
       <div style="width: 100%">
         <eo-ng-apinto-table
           class="floatR innerTable"
@@ -51,7 +48,7 @@
       '状态：' +
       getStatusString(item.oldConfig.status) +
       '，配置信息：' +
-      item.oldConfig.config
+      (item.oldConfig.config || 'null')
     "
     [nzTooltipVisible]="false"
     [nzTooltipTrigger]="'hover'"
@@ -60,7 +57,7 @@
       '状态：' +
         getStatusString(item.oldConfig.status) +
         '，配置信息：' +
-        item.oldConfig.config
+        (item.oldConfig.config || 'null')
     }}
   </span>
 </ng-template>
@@ -72,7 +69,7 @@
       '状态：' +
       getStatusString(item.newConfig.status) +
       '，配置信息：' +
-      item.newConfig.config
+      (item.newConfig.config || 'null')
     "
     [nzTooltipVisible]="false"
     [nzTooltipTrigger]="'hover'"
@@ -81,7 +78,7 @@
       '状态：' +
         getStatusString(item.newConfig.status) +
         '，配置信息：' +
-        item.newConfig.config
+        (item.newConfig.config || 'null')
     }}
   </span></ng-template
 >

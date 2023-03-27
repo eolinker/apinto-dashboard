@@ -126,8 +126,11 @@ export class DeployClusterPluginPublishComponent implements OnInit {
       if (resp.code === 0) {
         this.publishData = resp.data
         this.publishData.plugins = resp.data.plugins?.map((item) => {
-          item.finishValue = `插件顺序：${item.releasedSort}，状态：${this.getStatusString(item.releasedConfig.status)}，配置：${item.releasedConfig.config}`
-          item.noReleasedValue = `插件顺序：${item.nowSort}，状态：${this.getStatusString(item.noReleasedConfig.status)}，配置：${item.noReleasedConfig.config}`
+          item.finishValue = `插件顺序：${item.releasedSort}，状态：${this.getStatusString(item.releasedConfig.status)}，配置：${item.releasedConfig.config || 'null'}`
+          item.finishValueTooltip = item.finishValue.replace(/(，)/g, '，\n')
+          item.noReleasedValue = `插件顺序：${item.nowSort}，状态：${this.getStatusString(item.noReleasedConfig.status)}，配置：${item.noReleasedConfig.config || 'null'}`
+          item.noReleasedValueTooltip = item.noReleasedValue.replace(/(，)/g, '，\n')
+
           return item
         }) || []
         // eslint-disable-next-line dot-notation
@@ -147,7 +150,10 @@ export class DeployClusterPluginPublishComponent implements OnInit {
     })
   }
 
-  getStatusString (status:'GLOBAL'|'DISABLE'|'ENABLE') {
+  getStatusString (status:'GLOBAL'|'DISABLE'|'ENABLE'|'') {
+    if (!status) {
+      return '无'
+    }
     return this.statusList.filter((item:SelectOption) => { return item.value === status })[0].label
   }
 
