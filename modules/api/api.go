@@ -17,6 +17,7 @@ type IAPIService interface {
 	GetAPICountByGroupUUID(ctx context.Context, namespaceID int, groupUUID string) int64
 	GetAPIVersionInfo(ctx context.Context, namespaceID int, uuid string) (*apimodel.APIVersionInfo, error)
 	GetAPIInfo(ctx context.Context, namespaceID int, uuid string) (*apimodel.APIInfo, error)
+	GetAPIInfoById(ctx context.Context, id int) (*apimodel.APIInfo, error)
 	GetAPIInfoByGroupUUID(ctx context.Context, namespaceID int, groupUUID string) ([]*apimodel.APIInfo, error)
 	GetAPIInfoByUUIDS(ctx context.Context, namespaceID int, uuids []string) ([]*apimodel.APIInfo, error)
 	GetAPIInfoByPath(ctx context.Context, namespaceID int, path string) ([]*apimodel.APIInfo, error)
