@@ -44,14 +44,14 @@ export class DeployPluginCreateComponent implements OnInit {
   }
 
   ngOnInit (): void {
-    this.getExtendsList()
-    this.getRelysList()
     if (this.editPage) {
       this.getPluginMessage()
       this.validateForm.controls['name'].disable()
       this.validateForm.controls['rely'].disable()
       this.validateForm.controls['extended'].disable()
     }
+    this.getExtendsList()
+    this.getRelysList()
   }
 
   disabledEdit (value: any) {
@@ -103,12 +103,18 @@ export class DeployPluginCreateComponent implements OnInit {
             value: name
           })
         )
-        this.validateForm
-          .controls['extended']
-          .setValue(this.extendsList[0]?.value)
-        this.validateForm.controls['extended'].updateValueAndValidity({
-          onlySelf: true
-        })
+        if (!this.editPage) {
+          this.validateForm
+            .controls['extended']
+            .setValue(this.extendsList[0]?.value)
+        } else {
+          this.extendsList = [
+            ...this.extendsList,
+            {
+              label: this.validateForm.controls['extended'].value,
+              value: this.validateForm.controls['extended'].value
+            }]
+        }
       } else {
         this.message.error(resp.msg || '获取列表数据失败！')
       }
@@ -124,12 +130,6 @@ export class DeployPluginCreateComponent implements OnInit {
             value: plugins.name
           })
         )
-        this.validateForm
-          .controls['rely']
-          .setValue(this.relysList[0]?.value)
-        this.validateForm.controls['rely'].updateValueAndValidity({
-          onlySelf: true
-        })
       } else {
         this.message.error(resp.msg || '获取列表数据失败！')
       }

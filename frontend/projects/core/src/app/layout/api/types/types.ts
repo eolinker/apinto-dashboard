@@ -76,6 +76,7 @@ export type PluginTemplateConfigItem = {
     name:string
     config:string
     disable:boolean
+    eoKey?:string
 }
 
 export type PluginTemplateData = {
