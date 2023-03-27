@@ -148,15 +148,7 @@ export class ApiCreateComponent implements OnInit {
     this.api.get('router', { uuid: this.apiUuid }).subscribe((resp) => {
       if (resp.code === 0) {
         setFormValue(this.validateForm, resp.data.api)
-        // this.validateForm.controls['groupUuid'].setValue(resp.data.api.groupUuid)
-        // this.validateForm.controls['name'].setValue(resp.data.api.name)
-        // this.validateForm.controls['desc'].setValue(resp.data.api.desc)
         this.validateForm.controls['requestPath'].setValue(resp.data.api.requestPath.slice(1))
-        // this.validateForm.controls['service'].setValue(resp.data.api.service)
-        // this.validateForm.controls['proxyPath'].setValue(resp.data.api.proxyPath.slice(1))
-        // this.validateForm.controls['timeout'].setValue(resp.data.api.timeout)
-        // this.validateForm.controls['retry'].setValue(resp.data.api.retry)
-        // this.validateForm.controls['enableWebsocket'].setValue(resp.data.api.enableWebsocket)
         this.createApiForm = resp.data.api
         if (
           !this.createApiForm.method ||
@@ -190,15 +182,12 @@ export class ApiCreateComponent implements OnInit {
         const tempList:ApiGroupsData[] = []
         for (const index in resp.data.root.groups) {
           this.firstLevelList.push(resp.data.root.groups[index].uuid)
-          if (!resp.data.root.groups[index].children || resp.data.root.groups[index].children.length === 0) {
-            resp.data.root.groups[index]['disabled'] = true
-          } else {
-            resp.data.root.groups[index]['selectable'] = false
-            tempList.push(resp.data.root.groups[index])
-          }
+
+          resp.data.root.groups[index]['selectable'] = false
+          tempList.push(resp.data.root.groups[index])
         }
         this.headerList = this.transferHeader(tempList)
-        if (this.groupUuid && this.firstLevelList.indexOf(this.groupUuid) === -1) {
+        if (this.groupUuid) {
           this.validateForm.controls['groupUuid'].setValue(this.baseInfo.allParamsInfo.apiGroupId)
         }
       } else {
@@ -415,11 +404,6 @@ export class ApiCreateComponent implements OnInit {
         }
       })
     }
-  }
-
-  validate = (option: any): boolean => {
-    const uuid = option.uuid as string
-    return this.firstLevelList.indexOf(uuid) === -1
   }
 
   showCheckboxGroupValid: boolean = false
