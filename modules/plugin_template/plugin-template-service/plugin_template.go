@@ -762,7 +762,11 @@ func (p *pluginTemplateService) Offline(ctx context.Context, namespaceId, operat
 	for _, apiId := range apiIds {
 		//判断API有没有下线
 		if p.apiService.IsAPIOnline(ctx, clusterInfo.Id, apiId) {
-			return errors.New(fmt.Sprintf("插件模板"))
+			apiInfo, err := p.apiService.GetAPIInfoById(ctx, apiId)
+			if err != nil {
+				return err
+			}
+			return errors.New(fmt.Sprintf("名称为%s的API引用了该插件模板，不可下线", apiInfo.Name))
 		}
 	}
 
