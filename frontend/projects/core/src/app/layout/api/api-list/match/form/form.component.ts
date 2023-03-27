@@ -41,7 +41,7 @@ export class MatchFormComponent implements OnInit {
   constructor (private fb: UntypedFormBuilder, private router:Router) {
     switch (this.router.url.split('/')[1]) {
       case 'router':
-        this.accessUrl = 'router'
+        this.accessUrl = 'router/api'
         break
       case 'serv-governance':
         this.accessUrl = 'serv-governance/grey'
