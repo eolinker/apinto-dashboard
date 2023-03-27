@@ -160,7 +160,10 @@ func (c *clusterPluginService) GetList(ctx context.Context, namespaceID int, clu
 			item.NowSort = nowSort
 			//若为内置插件
 			if gPlugin.Type == 1 {
-				innerPlugin := innerPluginsMap[gPlugin.Name]
+				innerPlugin, ok := innerPluginsMap[gPlugin.Name]
+				if !ok {
+					return nil, errors.New(fmt.Sprintf("找不到名称为%s的内置插件,当前已有内置插件列表为", gPlugin.Name))
+				}
 				item.ClusterPlugin = &plugin_entry.ClusterPlugin{PluginName: gPlugin.Name, Status: innerPlugin.Status, Config: innerPlugin.Config}
 				item.ReleasedSort = 0
 				item.IsBuiltIn = true
