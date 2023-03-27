@@ -175,8 +175,9 @@ func (p *pluginTemplateService) Create(ctx context.Context, namespaceId, operato
 			return err
 		}
 
+		bytes, _ := json.Marshal(pluginInfo.Config)
 		//检测JsonSchema格式是否正确
-		if !common.JsonSchemaValid(modelPlugin.Schema, pluginInfo.Config) {
+		if !common.JsonSchemaValid(modelPlugin.Schema, string(bytes)) {
 			return errors.New(fmt.Sprintf("插件名为%s的config配置格式错误", modelPlugin.Name))
 		}
 
@@ -206,9 +207,10 @@ func (p *pluginTemplateService) Create(ctx context.Context, namespaceId, operato
 
 		newPlugins := make([]*plugin_template_entry.PluginTemplateVersionConfigDetail, 0, len(input.Plugins))
 		for _, pluginInfo := range input.Plugins {
+			bytes, _ := json.Marshal(pluginInfo.Config)
 			newPlugins = append(newPlugins, &plugin_template_entry.PluginTemplateVersionConfigDetail{
 				Name:    pluginInfo.Name,
-				Config:  pluginInfo.Config,
+				Config:  string(bytes),
 				Disable: pluginInfo.Disable,
 			})
 		}
@@ -260,13 +262,20 @@ func (p *pluginTemplateService) Update(ctx context.Context, namespaceId, operato
 
 	plugins := make([]*plugin_model.Plugin, 0, len(input.Plugins))
 	for _, pluginInfo := range input.Plugins {
-		pluginInfo1, err := p.pluginService.GetByName(ctx, namespaceId, pluginInfo.Name)
+		modelPlugin, err := p.pluginService.GetByName(ctx, namespaceId, pluginInfo.Name)
 		if err == gorm.ErrRecordNotFound {
 			return errors.New(fmt.Sprintf("插件名为%s的插件不存在", pluginInfo.Name))
 		} else if err != nil {
 			return err
 		}
-		plugins = append(plugins, pluginInfo1)
+		plugins = append(plugins, modelPlugin)
+
+		bytes, _ := json.Marshal(pluginInfo.Config)
+		//检测JsonSchema格式是否正确
+		if !common.JsonSchemaValid(modelPlugin.Schema, string(bytes)) {
+			return errors.New(fmt.Sprintf("插件名为%s的config配置格式错误", modelPlugin.Name))
+		}
+
 	}
 
 	pluginTemplate, err := p.pluginTemplateStore.GetByUUID(ctx, input.UUID)
@@ -302,9 +311,11 @@ func (p *pluginTemplateService) Update(ctx context.Context, namespaceId, operato
 
 		newPlugins := make([]*plugin_template_entry.PluginTemplateVersionConfigDetail, 0, len(input.Plugins))
 		for _, pluginInfo := range input.Plugins {
+			bytes, _ := json.Marshal(pluginInfo.Config)
+
 			newPlugins = append(newPlugins, &plugin_template_entry.PluginTemplateVersionConfigDetail{
 				Name:    pluginInfo.Name,
-				Config:  pluginInfo.Config,
+				Config:  string(bytes),
 				Disable: pluginInfo.Disable,
 			})
 		}
