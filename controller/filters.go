@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/eosc/log"
@@ -56,6 +57,7 @@ func Recovery(c *gin.Context) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Errorf("panic %v", common.PanicTrace(err))
+			fmt.Println(common.PanicTrace(err))
 			c.JSON(http.StatusInternalServerError, NewErrorResult("服务器内部错误"))
 		}
 	}()
