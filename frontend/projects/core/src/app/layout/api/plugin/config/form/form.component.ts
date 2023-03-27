@@ -38,7 +38,11 @@ export class ApiPluginConfigFormComponent implements OnInit {
       name: [this.data?.name || '', [Validators.required]]
     })
     if (this.data) {
-      this.code = JSON.stringify(this.jsonService.handleJsonSchema2Json(JSON.parse(this.data.config)))
+      try {
+        this.code = JSON.stringify(this.jsonService.handleJsonSchema2Json(JSON.parse(this.data.config))) === '{}' ? this.data.config : this.data.config
+      } catch {
+        this.code = this.data.config
+      }
     }
     this.getPluginList()
   }
@@ -57,6 +61,7 @@ export class ApiPluginConfigFormComponent implements OnInit {
         }) as (SelectOption & {name:string, config:string})[]
         if (!this.editData) {
           this.validateConfigForm.controls['name'].setValue(this.pluginsList[0].value)
+          this.changePluginChange()
         }
       } else {
         this.message.error(resp.msg || '获取列表数据失败!')

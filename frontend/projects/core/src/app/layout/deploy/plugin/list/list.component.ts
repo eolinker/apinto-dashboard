@@ -6,6 +6,8 @@ import { MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
 import { EmptyHttpResponse } from 'projects/core/src/app/constant/type'
 import { ApiService } from 'projects/core/src/app/service/api.service'
 import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { MODAL_SMALL_SIZE } from 'projects/eo-ng-apinto-user/src/public-api'
+import { of } from 'rxjs'
 import { DeployService } from '../../deploy.service'
 import { PluginsTableHeadName } from '../types/conf'
 import { PluginItem } from '../types/types'
@@ -99,14 +101,20 @@ export class DeployPluginListComponent implements OnInit {
 
     oldArr.splice(preIndex, 1)
     oldArr.splice(currentIndex, 0, preItem.data.name)
-    return this.api
+    return this.getDragCheck(oldArr)
+  }
+
+  getDragCheck (oldArr:any) {
+    this.api
       .put('plugin/sort', { names: oldArr })
       .subscribe((resp:EmptyHttpResponse) => {
         if (resp.code === 0) {
           this.message.success(resp.msg || '删除成功', { nzDuration: 1000 })
           this.getPluginsData()
+          return of(true)
         } else {
           this.message.error(resp.msg || '删除失败!')
+          return of(true)
         }
       })
   }
