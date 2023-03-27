@@ -5,6 +5,7 @@ import "github.com/eolinker/apinto-dashboard/modules/plugin/plugin-entry"
 type Plugin struct {
 	*plugin_entry.Plugin
 	OperatorStr string
+	RelyName    string
 	IsDelete    bool
 	IsBuilt     bool //是否内置
 }
