@@ -271,6 +271,15 @@ func (a *apiService) GetAPIInfo(ctx context.Context, namespaceID int, uuid strin
 	return &apimodel.APIInfo{API: api}, nil
 }
 
+func (a *apiService) GetAPIInfoById(ctx context.Context, id int) (*apimodel.APIInfo, error) {
+	api, err := a.apiStore.Get(ctx, id)
+	if err != nil {
+		log.Errorf("GetAPIInfo-apiStore.GetByUUID id:%s,err=%s", id, err.Error())
+		return nil, err
+	}
+	return &apimodel.APIInfo{API: api}, nil
+}
+
 func (a *apiService) GetAPIInfoByGroupUUID(ctx context.Context, namespaceID int, groupUUID string) ([]*apimodel.APIInfo, error) {
 	apis, err := a.apiStore.GetListByGroupID(ctx, namespaceID, groupUUID)
 	if err != nil {
