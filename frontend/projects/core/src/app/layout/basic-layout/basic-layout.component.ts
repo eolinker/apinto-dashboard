@@ -129,4 +129,8 @@ export class BasicLayoutComponent implements OnInit {
       this.openMap[this.sideMenuOptions[index]['title'] as string] = !!this.sideMenuOptions[index].open
     }
   }
+
+  goToGithub () {
+    window.open('https://github.com/eolinker/apinto')
+  }
 }
