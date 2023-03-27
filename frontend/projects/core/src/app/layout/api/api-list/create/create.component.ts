@@ -29,6 +29,7 @@ import { BaseInfoService } from 'projects/core/src/app/service/base-info.service
 import { methodList, proxyHeaderTableHeadName, proxyHeaderTableBody } from '../../types/conf'
 import { APINotFormGroupData } from '../../types/types'
 import { MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
+import { cloneDeep } from 'lodash'
 
 @Component({
   selector: 'eo-ng-api-create',
@@ -60,7 +61,7 @@ export class ApiCreateComponent implements OnInit {
   headerList:NzTreeNodeOptions[]= []
   firstLevelList:Array<string> = []
   serviceList:SelectOption[]= []
-  methodList:CheckBoxOptionInterface[]= [...methodList]
+  methodList:CheckBoxOptionInterface[]= [...cloneDeep(methodList)]
   allChecked:boolean = false
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
   proxyHeaderTableHeadName:Array<object> = [...proxyHeaderTableHeadName]
