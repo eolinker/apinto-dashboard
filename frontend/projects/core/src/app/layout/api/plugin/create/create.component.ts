@@ -49,7 +49,7 @@ export class ApiPluginTemplateCreateComponent implements OnInit {
   }
 
   ngOnInit (): void {
-    if (this.baseInfo.allParamsInfo.apiId) {
+    if (this.baseInfo.allParamsInfo.pluginTemplateId) {
       this.appConfigService.reqFlashBreadcrumb([
         { title: '插件模板', routerLink: 'router/plugin' },
         { title: '编辑模板' }
@@ -72,7 +72,8 @@ export class ApiPluginTemplateCreateComponent implements OnInit {
       if (resp.code === 0) {
         setFormValue(this.validateForm, resp.data.template)
         this.configList = resp.data.template.plugins.map((plugin) => {
-          plugin.config = JSON.stringify(this.jsonService.handleJsonSchema2Json(JSON.parse(plugin.config)))
+          plugin.disable = !plugin.disable
+          plugin.config = JSON.stringify(this.jsonService.handleJsonSchema2Json(JSON.parse(plugin.config))) === '{}' ? plugin.config : JSON.stringify(this.jsonService.handleJsonSchema2Json(JSON.parse(plugin.config)))
           return plugin
         })
       } else {
@@ -97,12 +98,16 @@ export class ApiPluginTemplateCreateComponent implements OnInit {
       this.pluginConfigError = true
     }
     if (this.validateForm.valid && !this.pluginConfigError) {
+      const pluginListApi: PluginTemplateConfigItem[] = [] // 提交接口时转换disable
+      for (const plugin of this.configList) {
+        pluginListApi.push({ ...plugin, disable: !plugin.disable })
+      }
       if (this.editPage) {
         this.api.put('plugin/template', {
           uuid: this.uuid,
           name: this.validateForm.controls['name'].value,
           desc: this.validateForm.controls['desc'].value,
-          plugins: this.configList
+          plugins: pluginListApi
         }).subscribe(resp => {
           if (resp.code === 0) {
             this.backToList()
@@ -116,7 +121,7 @@ export class ApiPluginTemplateCreateComponent implements OnInit {
           ...this.validateForm.value,
           uuid: this.uuid,
           name: this.validateForm.controls['name'].value,
-          plugins: this.configList
+          plugins: pluginListApi
         }).subscribe(resp => {
           if (resp.code === 0) {
             this.message.success(resp.msg || '添加成功！', { nzDuration: 1000 })

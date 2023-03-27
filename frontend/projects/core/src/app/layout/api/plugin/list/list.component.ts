@@ -63,7 +63,7 @@ export class ApiPluginTemplateListComponent implements OnInit {
       nzWidth: MODAL_SMALL_SIZE,
       nzOkDanger: true,
       nzOnOk: () => {
-        this.deletePluginTemplate(item)
+        this.deletePluginTemplate(item.data)
       }
     })
   }
