@@ -74,8 +74,6 @@ export class DeployEnvironmentDetailComponent implements OnInit {
     this.api.get('variable', { key: this.envKey || '' }).subscribe((resp) => {
       if (resp.code === 0) {
         this.globalEnvDetailList = resp.data.variables
-      } else {
-        this.message.error(resp.msg || '获取列表数据失败！')
       }
     })
   }

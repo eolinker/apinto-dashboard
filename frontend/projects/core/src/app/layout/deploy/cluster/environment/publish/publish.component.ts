@@ -135,9 +135,7 @@ export class DeployClusterEnvironmentPublishComponent implements OnInit {
             this.unpublishMsg = '当前环境变量不可发布'
           }
         }
-      } else {
-        this.message.error(resp.msg || '获取列表数据失败!')
-      }
+      } 
     })
   }
 
@@ -155,7 +153,6 @@ export class DeployClusterEnvironmentPublishComponent implements OnInit {
               this.closeModal(true)
               return true
             } else {
-              this.message.error(resp.msg || '发布失败!')
               return false
             }
           })

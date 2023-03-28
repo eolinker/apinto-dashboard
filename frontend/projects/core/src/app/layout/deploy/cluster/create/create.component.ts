@@ -75,8 +75,6 @@ export class DeployClusterCreateComponent implements OnInit {
         this.validateForm.controls['envValue'].updateValueAndValidity({
           onlySelf: true
         })
-      } else {
-        this.message.error(resp.msg || '获取列表数据失败！')
       }
     })
   }
@@ -105,7 +103,6 @@ export class DeployClusterCreateComponent implements OnInit {
           } else {
             this.validateForm.controls['clusterAddr'].markAsDirty()
             this.validateForm.controls['clusterAddr'].updateValueAndValidity({ onlySelf: true })
-            this.message.error(resp.msg || '操作失败！')
           }
         })
     } else {
@@ -140,8 +137,6 @@ export class DeployClusterCreateComponent implements OnInit {
       this.api.post('cluster', params).subscribe((resp) => {
         if (resp.code === 0) {
           this.router.navigate(['/', 'deploy', 'cluster', 'content', this.validateForm.controls['clusterName'].value])
-        } else {
-          this.message.error(resp.msg || '新建集群失败！')
         }
       })
     } else {

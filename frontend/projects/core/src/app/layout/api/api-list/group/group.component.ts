@@ -99,9 +99,7 @@ export class ApiManagementComponent implements OnInit {
             this.groupScrollToBottom()
           }
         })
-      } else {
-        this.message.error(resp.msg || '获取列表数据失败!')
-      }
+      } 
     })
   }
 
@@ -228,9 +226,7 @@ export class ApiManagementComponent implements OnInit {
       if (resp.code === 0) {
         this.message.success(resp.msg || '删除成功', { nzDuration: 1000 })
         this.closeModal()
-      } else {
-        this.message.error(resp.msg || '删除失败!')
-      }
+      } 
     })
   }
 

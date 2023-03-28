@@ -131,8 +131,6 @@ export class ApplicationCreateComponent implements OnInit {
             this.createApplicationForm?.extraParamList?.length > 0
               ? this.createApplicationForm.extraParamList
               : [{ key: '', value: '', disabled: false }]
-        } else {
-          this.message.error(resp.msg || '获取数据失败!')
         }
       })
   }
@@ -142,8 +140,6 @@ export class ApplicationCreateComponent implements OnInit {
       .subscribe((resp: {code:number, data:RandomId, msg:string}) => {
         if (resp.code === 0) {
           this.validateForm.controls['id'].setValue(resp.data.id)
-        } else {
-          this.message.error(resp.msg || '获取应用ID失败!')
         }
       })
   }
@@ -229,8 +225,6 @@ export class ApplicationCreateComponent implements OnInit {
             if (resp.code === 0) {
               this.message.success(resp.msg || '添加成功', { nzDuration: 1000 })
               this.backToList()
-            } else {
-              this.message.error(resp.msg || '添加失败!')
             }
           })
       } else {
@@ -243,8 +237,6 @@ export class ApplicationCreateComponent implements OnInit {
             if (resp.code === 0) {
               this.message.success(resp.msg || '修改成功', { nzDuration: 1000 })
               this.backToList()
-            } else {
-              this.message.error(resp.msg || '修改失败!')
             }
           })
       }

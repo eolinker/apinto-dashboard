@@ -140,9 +140,7 @@ export class ApiManagementListComponent implements OnInit {
         this.apisForm.total = resp.data.total || this.apisForm.total
         this.apisForm.pageNum = resp.data.pageNum || this.apisForm.pageNum
         this.apisForm.pageSize = resp.data.pageSize || this.apisForm.pageSize
-      } else {
-        this.message.error(resp.msg || '获取API列表数据失败！')
-      }
+      } 
     })
   }
 
@@ -154,9 +152,7 @@ export class ApiManagementListComponent implements OnInit {
           this.sourcesList.push({ text: resp.data.list[index].title, value: resp.data.list[index].id })
           this.apisTableHeadName[5].filterOpts = this.sourcesList
         }
-      } else {
-        this.message.error(resp.msg || '获取来源列表数据失败！')
-      }
+      } 
     })
   }
 
@@ -210,8 +206,6 @@ export class ApiManagementListComponent implements OnInit {
         this.message.success(resp.msg || '删除成功!', { nzDuration: 1000 })
         this.apisSet.delete(items.uuid)
         this.getApisData()
-      } else {
-        this.message.error(resp.msg || '删除失败!')
       }
     })
   }

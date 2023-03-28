@@ -1,4 +1,4 @@
-import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
+import { THEAD_TYPE } from 'eo-ng-table'
 import { EO_TBODY_TYPE, EO_THEAD_TYPE } from 'projects/eo-ng-apinto-table/src/public-api'
 
 export const deployCertsTableHeadName: THEAD_TYPE[] = [
@@ -12,8 +12,11 @@ export const deployCertsTableHeadName: THEAD_TYPE[] = [
   }
 ]
 
-export const deployCertsTableBody: TBODY_TYPE[] = [
-  { key: 'name' },
+export const deployCertsTableBody: EO_TBODY_TYPE[] = [
+  {
+    key: 'name',
+    copy: true
+  },
   { key: 'validTime' },
   { key: 'operator' },
   { key: 'updateTime' },
@@ -164,8 +167,12 @@ export const DeployClusterNodeThead:THEAD_TYPE[] = [
   }
 ]
 
-export const DeployClusterNodeTbody:TBODY_TYPE[] = [
-  { key: 'name', ellipsis: true },
+export const DeployClusterNodeTbody:EO_TBODY_TYPE[] = [
+  {
+    key: 'name',
+    ellipsis: true,
+    copy: true
+  },
   { key: 'adminAddr', ellipsis: true },
   { key: 'serviceAddr', ellipsis: true },
   { key: 'status' }
@@ -179,10 +186,19 @@ export const DeployClusterOperateRecordThead:THEAD_TYPE[] = [
   { title: '操作时间' }
 ]
 
-export const DeployClusterOperateRecordTbody:TBODY_TYPE[] = [
-  { key: 'key' },
-  { key: 'oldValue' },
-  { key: 'newValue' },
+export const DeployClusterOperateRecordTbody:EO_TBODY_TYPE[] = [
+  {
+    key: 'key',
+    copy: true
+  },
+  {
+    key: 'oldValue',
+    copy: true
+  },
+  {
+    key: 'newValue',
+    copy: true
+  },
   { key: 'optType' },
   { key: 'createTime' }
 ]
@@ -194,11 +210,14 @@ export const DeployClusterPublishRecordThead:THEAD_TYPE[] = [
   { title: '发布时间' }
 ]
 
-export const DeployClusterPublishRecordTbody:TBODY_TYPE[] = [
+export const DeployClusterPublishRecordTbody:EO_TBODY_TYPE[] = [
   {
     key: ''
   },
-  { key: 'name' },
+  {
+    key: 'name',
+    copy: true
+  },
   { key: 'operator' },
   { key: 'createTime' }
 ]
@@ -211,10 +230,16 @@ export const DeployClusterPublishThead:THEAD_TYPE[] = [
   { title: '操作时间' }
 ]
 
-export const DeployClusterPublishTbody:TBODY_TYPE[] = [
+export const DeployClusterPublishTbody:EO_TBODY_TYPE[] = [
   { key: 'key' },
-  { key: 'finishValue' },
-  { key: 'noReleasedValue' },
+  {
+    key: 'finishValue',
+    copy: true
+  },
+  {
+    key: 'noReleasedValue',
+    copy: true
+  },
   { key: 'optType' },
   { key: 'createTime' }
 ]
@@ -272,11 +297,13 @@ export const DeployClusterPluginPublishTbody:EO_TBODY_TYPE[] = [
   { key: 'name' },
   {
     key: 'finishValue',
-    json: true
+    json: true,
+    copy: true
   },
   {
     key: 'noReleasedValue',
-    json: true
+    json: true,
+    copy: true
   },
   { key: 'optType' },
   { key: 'createTime' }
@@ -294,11 +321,13 @@ export const DeployClusterPluginChangeHistoryTbody:EO_TBODY_TYPE[] = [
   { key: 'name' },
   {
     key: 'oldValue',
-    json: true
+    json: true,
+    copy: true
   },
   {
     key: 'newValue',
-    json: true
+    json: true,
+    copy: true
   },
   { key: 'optType' },
   { key: 'createTime' }

@@ -172,8 +172,6 @@ export class TrafficCreateComponent implements OnInit {
               body: resp.data.strategy!.config.response.body || ''
 
             })
-          } else {
-            this.message.error(resp.msg || '获取数据失败!')
           }
         }
       )
@@ -195,8 +193,6 @@ export class TrafficCreateComponent implements OnInit {
             value: resp.data.options[index].name
           })
         }
-      } else {
-        this.message.error(resp.msg || '获取数据失败!')
       }
     })
   }
@@ -271,8 +267,6 @@ export class TrafficCreateComponent implements OnInit {
             if (resp.code === 0) {
               this.message.success(resp.msg || '创建成功!', { nzDuration: 1000 })
               this.backToList()
-            } else {
-              this.message.error(resp.msg || '创建失败!')
             }
           })
       } else {
@@ -285,8 +279,6 @@ export class TrafficCreateComponent implements OnInit {
             if (resp.code === 0) {
               this.message.success(resp.msg || '修改成功!', { nzDuration: 1000 })
               this.backToList()
-            } else {
-              this.message.error(resp.msg || '修改失败!')
             }
           })
       }

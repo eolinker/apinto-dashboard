@@ -1,17 +1,16 @@
 import { Injectable } from '@angular/core'
-import { TBODY_TYPE } from 'eo-ng-table'
+import { EO_TBODY_TYPE } from 'projects/eo-ng-apinto-table/src/public-api'
 import { ApiPluginTemplateListComponent } from './plugin/list/list.component'
 
 @Injectable({
   providedIn: 'root'
 })
 export class RouterService {
-  constructor () { }
-
-  createPluginTemplateTbody (context:ApiPluginTemplateListComponent):TBODY_TYPE[] {
+  createPluginTemplateTbody (context:ApiPluginTemplateListComponent):EO_TBODY_TYPE[] {
     return [
       {
-        key: 'name'
+        key: 'name',
+        copy: true
       },
       {
         key: 'desc'

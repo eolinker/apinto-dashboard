@@ -116,8 +116,6 @@ export class ApplicationAuthenticationComponent implements OnInit {
           if (resp.code === 0) {
             this.message.success(resp.msg || '删除成功!', { nzDuration: 1000 })
             this.getAuthsData()
-          } else {
-            this.message.error(resp.msg || '删除失败!')
           }
         })
       }
@@ -141,8 +139,6 @@ export class ApplicationAuthenticationComponent implements OnInit {
           resp.data.auths[index].expireTimeString = resp.data.auths[index].expireTime === 0 ? '永不过期' : this.getDateInList(resp.data.auths[index].expireTime)
         }
         this.authenticationList = resp.data.auths
-      } else {
-        this.message.error(resp.msg || '获取数据失败!')
       }
     })
   }

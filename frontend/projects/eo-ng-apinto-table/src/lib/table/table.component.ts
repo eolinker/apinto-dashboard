@@ -3,11 +3,17 @@ import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, NgZon
 import { NzTableLayout } from 'ng-zorro-antd/table'
 import { EoNgTableComponent } from 'eo-ng-table'
 import { Router } from '@angular/router'
+import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 @Component({
   selector: 'eo-ng-apinto-table',
   templateUrl: './table.component.html',
   styles: [
-    ''
+    `
+    :host ::ng-deep{
+      .ant-table-tbody > tr:hover .opacity-0{
+        opacity:1 !important;
+      }
+    }`
   ]
 })
 export class TableComponent extends EoNgTableComponent implements OnInit {
@@ -26,7 +32,7 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
   scrHeight:any;
   scrWidth:any;
   tableScrollCdk:any
-  constructor (ngZone:NgZone, cdr:ChangeDetectorRef, private el:ElementRef, private router:Router) {
+  constructor (ngZone:NgZone, cdr:ChangeDetectorRef, private message: EoNgFeedbackMessageService, private el:ElementRef, private router:Router) {
     super(ngZone, cdr)
   }
 
@@ -162,6 +168,10 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
     return ''
   }
 
+  transferToJson (str:string) {
+    return str.replace(/(,)/g, ',\n').replace(/(，)/g, '，\n')
+  }
+
   calculateScroll () {
     this.nzScroll.x = '100%'
   }
@@ -217,5 +227,11 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
   handlerScrollView ($event:any) {
     this.tableScrollCdk = $event
     this.getScrollViewPort.emit($event)
+  }
+
+  copyCallback () {
+    this.message.success('复制成功', {
+      nzDuration: 1000
+    })
   }
 }

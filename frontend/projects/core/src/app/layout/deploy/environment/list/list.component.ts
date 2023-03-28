@@ -168,8 +168,6 @@ export class DeployEnvironmentListComponent {
         if (resp.code === 0) {
           this.globalEnvForms = resp.data
           this.variablePage.total = resp.data.total
-        } else {
-          this.message.error(resp.msg || '获取列表数据失败！')
         }
       })
   }
@@ -183,8 +181,6 @@ export class DeployEnvironmentListComponent {
       if (resp.code === 0) {
         this.message.success(resp.msg || '删除成功', { nzDuration: 1000 })
         this.getVariables()
-      } else {
-        this.message.error(resp.msg || '删除失败！')
       }
     })
   }

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { TBODY_TYPE } from 'eo-ng-table'
+import { EO_TBODY_TYPE } from 'projects/eo-ng-apinto-table/src/public-api'
 import { DeployClusterEnvironmentConfigUpdateComponent } from './cluster/environment/config/update/update.component'
 import { DeployClusterEnvironmentComponent } from './cluster/environment/environment.component'
 import { DeployClusterListComponent } from './cluster/list/list.component'
@@ -10,14 +10,19 @@ import { DeployPluginListComponent } from './plugin/list/list.component'
   providedIn: 'root'
 })
 export class DeployService {
-  createPluginsTbody = (context:DeployPluginListComponent):TBODY_TYPE[] => {
+  createPluginsTbody = (context:DeployPluginListComponent):EO_TBODY_TYPE[] => {
     return [
       {
         type: 'sort'
       },
       { title: context.pluginName },
-      { key: 'extended' },
-      { key: 'desc' },
+      {
+        key: 'extended',
+        copy: true
+      },
+      {
+        key: 'desc'
+      },
       { key: 'updateTime' },
       {
         type: 'btn',
@@ -66,9 +71,13 @@ export class DeployService {
           context.getClusterCheckedList()
         }
       },
-      { key: 'name' },
       {
-        key: 'env'
+        key: 'name',
+        copy: true
+      },
+      {
+        key: 'env',
+        copy: true
       }
     ]
   }
@@ -81,8 +90,16 @@ export class DeployService {
           context.getVarCheckedList()
         }
       },
-      { title: 'KEY', resizeable: true },
-      { title: 'VALUE', resizeable: true },
+      {
+        title: 'KEY',
+        resizeable: true,
+        copy: true
+      },
+      {
+        title: 'VALUE',
+        resizeable: true,
+        copy: true
+      },
       { title: '更新时间' }
     ]
   }
@@ -105,10 +122,12 @@ export class DeployService {
   createClusterEnvConfigTbody (context:DeployClusterEnvironmentComponent) {
     return [
       {
-        key: 'key'
+        key: 'key',
+        copy: true
       },
       {
-        key: 'value'
+        key: 'value',
+        copy: true
       },
       {
         key: 'desc'
@@ -172,7 +191,10 @@ export class DeployService {
 
   createClusterTbody (context:DeployClusterListComponent) {
     return [
-      { key: 'name' },
+      {
+        key: 'name',
+        copy: true
+      },
       { key: 'env' },
       { key: 'status' },
       {
@@ -200,17 +222,20 @@ export class DeployService {
   createPluginTbody (context:DeployClusterPluginComponent) {
     return [
       {
-        key: 'name'
+        key: 'name',
+        copy: true
       },
       {
-        key: 'publish'
+        key: 'publish',
+        copy: true
       },
       {
         key: 'status'
       },
       {
         key: 'config',
-        json: true
+        json: true,
+        copy: true
       },
       {
         key: 'updateTime'
@@ -222,7 +247,7 @@ export class DeployService {
           {
             title: '配置',
             disabledFn: (item:any) => {
-              return item.publish === 'PUBLISHED' || context.nzDisabled
+              return (item.publish === 'PUBLISHED' && item.isBuiltin) || context.nzDisabled
             },
             click: (item:any) => {
               context.openDrawer('editConfig', item.data)

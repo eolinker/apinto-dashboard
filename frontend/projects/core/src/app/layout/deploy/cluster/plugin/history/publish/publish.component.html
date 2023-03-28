@@ -45,13 +45,16 @@
   <span
     eoNgFeedbackTooltip
     [nzTooltipTitle]="
-      '状态：' +
-      getStatusString(item.oldConfig.status) +
-      '，配置信息：' +
-      (item.oldConfig.config || 'null')
+      transferToJson(
+        '状态：' +
+          getStatusString(item.oldConfig.status) +
+          '，配置信息：' +
+          (item.oldConfig.config || 'null')
+      )
     "
     [nzTooltipVisible]="false"
     [nzTooltipTrigger]="'hover'"
+    nzTooltipOverlayClassName="tooltip-json"
   >
     {{
       '状态：' +
@@ -66,13 +69,16 @@
   <span
     eoNgFeedbackTooltip
     [nzTooltipTitle]="
-      '状态：' +
-      getStatusString(item.newConfig.status) +
-      '，配置信息：' +
-      (item.newConfig.config || 'null')
+      transferToJson(
+        '状态：' +
+          getStatusString(item.newConfig.status) +
+          '，配置信息：' +
+          (item.newConfig.config || 'null')
+      )
     "
     [nzTooltipVisible]="false"
     [nzTooltipTrigger]="'hover'"
+    nzTooltipOverlayClassName="tooltip-json"
   >
     {{
       '状态：' +

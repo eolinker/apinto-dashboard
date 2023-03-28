@@ -3,9 +3,11 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
 import { Router } from '@angular/router'
 import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feedback'
+import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
 import { ApiService } from 'projects/core/src/app/service/api.service'
 import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { ExternalAppListTableBody, ExternalAppListTableHeadName } from '../../types/conf'
 
 @Component({
   selector: 'eo-ng-external-app-list',
@@ -17,88 +19,8 @@ export class ExternalAppListComponent implements OnInit {
   @ViewChild('switchTpl', { read: TemplateRef, static: true }) switchTpl: TemplateRef<any> | undefined
   @ViewChild('copyTokenTpl', { read: TemplateRef, static: true }) copyTokenTpl: TemplateRef<any> | undefined
   nzDisabled:boolean = false
-  appsTableHeadName:Array<any> = [
-    {
-      title: '应用名称'
-    },
-    {
-      title: '应用ID'
-    },
-    {
-      title: '鉴权Token'
-    },
-    {
-      title: '关联标签'
-    },
-    {
-      title: '禁用状态',
-      width: 84
-    },
-    {
-      title: '更新者'
-    },
-    {
-      title: '更新时间',
-      showSort: true
-    },
-    {
-      title: '操作',
-      right: true
-    }
-  ]
-
-  appsTableBody:Array<any> = [
-    {
-      key: 'name'
-    },
-    {
-      key: 'id'
-    },
-    {
-      key: 'token'
-    },
-    {
-      key: 'tags'
-    },
-    {
-      key: 'status'
-    },
-    {
-      key: 'operator'
-    },
-    {
-      key: 'updateTime'
-    },
-    {
-      type: 'btn',
-      right: true,
-      btns: [{
-        title: '更新鉴权Token',
-        disabledFn: () => { return this.nzDisabled },
-        click: (item:any) => {
-          this.updateToken(item.data)
-        }
-      },
-      {
-        title: '复制Token'
-      },
-      {
-        title: '查看',
-        click: (item:any) => {
-          this.getAppMessage(item.data)
-        }
-      },
-      {
-        title: '删除',
-        disabledFn: () => { return this.nzDisabled },
-        click: (item:any) => {
-          this.deleteAppModal(item.data)
-        }
-      }
-      ]
-    }
-  ]
-
+  appsTableHeadName:THEAD_TYPE[] = [...ExternalAppListTableHeadName]
+  appsTableBody:TBODY_TYPE[] = [...ExternalAppListTableBody]
   appsList:Array<any> = []
 
   constructor (private router:Router, private message: EoNgFeedbackMessageService, private modalService:EoNgFeedbackModalService, private api:ApiService,
@@ -114,7 +36,18 @@ export class ExternalAppListComponent implements OnInit {
 
   ngAfterViewInit ():void {
     this.appsTableBody[4].title = this.switchTpl
+    this.appsTableBody[7].btns[0].disabledFn = () => { return this.nzDisabled }
+    this.appsTableBody[7].btns[0].click = (item:any) => {
+      this.updateToken(item.data)
+    }
     this.appsTableBody[7].btns[1].type = this.copyTokenTpl
+    this.appsTableBody[7].btns[2].click = (item:any) => {
+      this.getAppMessage(item.data)
+    }
+    this.appsTableBody[7].btns[3].disabledFn = () => { return this.nzDisabled }
+    this.appsTableBody[7].btns[3].click = (item:any) => {
+      this.deleteAppModal(item.data)
+    }
   }
 
   disabledEdit (value:any) {
@@ -128,8 +61,6 @@ export class ExternalAppListComponent implements OnInit {
         for (const index in this.appsList) {
           this.appsList[index].statusBoolean = this.appsList[index].status === 2 // 禁用
         }
-      } else {
-        this.message.error(resp.msg || '获取API列表数据失败！')
       }
     })
   }
@@ -147,8 +78,6 @@ export class ExternalAppListComponent implements OnInit {
       if (resp.code === 0) {
         this.message.success(resp.msg || '刷新鉴权Token成功！')
         this.getAppsData()
-      } else {
-        this.message.error(resp.msg || '刷新鉴权Token失败，请重试！')
       }
     })
   }
@@ -171,8 +100,6 @@ export class ExternalAppListComponent implements OnInit {
         item.statusBoolean = !item.statusBoolean
         this.message.success(resp.msg || ((url.split('/')[1] === 'disable' ? '禁用' : '启用') + '成功！'))
         this.getAppsData()
-      } else {
-        this.message.error(resp.msg || ((url.split('/')[1] === 'disable' ? '禁用' : '启用') + '失败！'))
       }
     })
   }
@@ -198,8 +125,6 @@ export class ExternalAppListComponent implements OnInit {
       if (resp.code === 0) {
         this.message.success(resp.msg || '删除成功!')
         this.getAppsData()
-      } else {
-        this.message.error(resp.msg || '删除失败!')
       }
     })
   }

@@ -110,8 +110,6 @@ export class DeployClusterEnvironmentConfigUpdateComponent implements OnInit {
       if (resp.code === 0) {
         this.clustersList = resp.data.info.clusters
         this.updateConfigsList = resp.data.info.variables
-      } else {
-        this.message.error(resp.msg || '获取列表数据失败!')
       }
     })
   }
@@ -143,8 +141,6 @@ export class DeployClusterEnvironmentConfigUpdateComponent implements OnInit {
         if (resp.code === 0) {
           this.message.success(resp.msg || '同步成功', { nzDuration: 1000 })
           this.closeModal && this.closeModal()
-        } else {
-          this.message.error(resp.msg || '同步失败!')
         }
       })
     }

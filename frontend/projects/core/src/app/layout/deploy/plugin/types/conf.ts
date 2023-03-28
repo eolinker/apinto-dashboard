@@ -1,4 +1,4 @@
-import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
+import { THEAD_TYPE } from 'eo-ng-table'
 
 export const PluginsTableHeadName: THEAD_TYPE[] = [
   {

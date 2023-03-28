@@ -27,12 +27,9 @@ export class ErrorInterceptor implements HttpInterceptor {
       tap((event:any) => {
         // this.hideLoader()
         if (event instanceof HttpResponse) {
-          this.checkAccess(event.body.code, event)
-          // if (request.url.includes('monitor') || request.url.includes('router') || request.url.includes('warn') ||
-          //  request.url.includes('user/enum') || request.url.includes('strategy') || request.url.includes('strategies')) {
+          this.checkAccess(event.body.code, event, request.method)
           event.body.data = this.camel(event.body.data)
         }
-        // }
       }
       )
     )
@@ -53,7 +50,7 @@ export class ErrorInterceptor implements HttpInterceptor {
   }
 
   // 根据后端返回的code判断是否要提示无权限弹窗或跳转路由
-  checkAccess (code:number, responseBody:any) {
+  checkAccess (code:number, responseBody:any, requestMethod:string) {
     switch (code) {
       case -2:
         this.modalService.closeAll()
@@ -70,7 +67,7 @@ export class ErrorInterceptor implements HttpInterceptor {
         }, 1000)
         break
       default:
-        if (responseBody.url.includes('warn/') && code !== 0) {
+        if (!(responseBody.url.includes('sso/login/check')) && !(requestMethod === 'PUT' && responseBody.url.split('?')[0].split('/')[responseBody.url.split('?')[0].split('/').length - 1] === 'online') && code !== 0) {
           this.message.error(responseBody.body.msg || '操作失败！')
         }
     }

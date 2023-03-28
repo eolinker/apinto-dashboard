@@ -1,5 +1,5 @@
 import { SelectOption } from 'eo-ng-select'
-import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
+import { THEAD_TYPE } from 'eo-ng-table'
 import { NzCheckBoxOptionInterface } from 'ng-zorro-antd/checkbox'
 import { EO_TBODY_TYPE } from 'projects/eo-ng-apinto-table/src/public-api'
 
@@ -51,12 +51,24 @@ export const matchHeaderTableHeadName:THEAD_TYPE[] = [
   }
 ]
 
-export const matchHeaderTableBody:TBODY_TYPE[] = [
+export const matchHeaderTableBody:EO_TBODY_TYPE[] = [
 
-  { key: 'position' },
-  { key: 'key' },
-  { key: 'matchType' },
-  { key: 'pattern' },
+  {
+    key: 'position',
+    copy: true
+  },
+  {
+    key: 'key',
+    copy: true
+  },
+  {
+    key: 'matchType',
+    copy: true
+  },
+  {
+    key: 'pattern',
+    copy: true
+  },
   {
     type: 'btn',
     right: true,
@@ -85,10 +97,19 @@ export const proxyHeaderTableHeadName:THEAD_TYPE[] = [
   }
 ]
 
-export const proxyHeaderTableBody:TBODY_TYPE[] = [
-  { key: 'optType' },
-  { key: 'key' },
-  { key: 'value' },
+export const proxyHeaderTableBody:EO_TBODY_TYPE[] = [
+  {
+    key: 'optType',
+    copy: true
+  },
+  {
+    key: 'key',
+    copy: true
+  },
+  {
+    key: 'value',
+    copy: true
+  },
   {
     type: 'btn',
     right: true,
@@ -149,25 +170,30 @@ export const apisTableHeadName:THEAD_TYPE[] = [
   }
 ]
 
-export const apisTableBody:TBODY_TYPE[] = [
+export const apisTableBody:EO_TBODY_TYPE[] = [
   {
     key: 'checked',
     type: 'checkbox'
   },
   {
-    key: 'name'
+    key: 'name',
+    copy: true
   },
   {
-    key: 'method'
+    key: 'method',
+    copy: true
   },
   {
-    key: 'service'
+    key: 'service',
+    copy: true
   },
   {
-    key: 'requestPath'
+    key: 'requestPath',
+    copy: true
   },
   {
-    key: 'source'
+    key: 'source',
+    copy: true
   },
   {
     key: 'updateTime'
@@ -218,7 +244,7 @@ export const apiImportCheckResultTableHeadName:THEAD_TYPE[] = [
     resizeable: false
   }]
 
-export const apiImportCheckResultTableBody:TBODY_TYPE[] = [
+export const apiImportCheckResultTableBody:EO_TBODY_TYPE[] = [
   {
     key: 'checked',
     type: 'checkbox'
@@ -230,7 +256,8 @@ export const apiImportCheckResultTableBody:TBODY_TYPE[] = [
         return 'color:var(--disabled-text-color)'
       }
       return ''
-    }
+    },
+    copy: true
   },
   {
     key: 'name',
@@ -246,7 +273,8 @@ export const apiImportCheckResultTableBody:TBODY_TYPE[] = [
         return 'color:var(--disabled-text-color)'
       }
       return ''
-    }
+    },
+    copy: true
   },
   {
     key: 'path',
@@ -255,7 +283,8 @@ export const apiImportCheckResultTableBody:TBODY_TYPE[] = [
         return 'color:var(--disabled-text-color)'
       }
       return ''
-    }
+    },
+    copy: true
   },
   {
     key: 'desc',
@@ -264,7 +293,8 @@ export const apiImportCheckResultTableBody:TBODY_TYPE[] = [
         return 'color:var(--disabled-text-color)'
       }
       return ''
-    }
+    },
+    copy: true
   },
   {
     key: 'statusString',
@@ -290,7 +320,7 @@ export const apiBatchOnlineVerifyTableHeadName :THEAD_TYPE[] = [
   }
 ]
 
-export const apiBatchOnlineVerifyTableBody :TBODY_TYPE[] = [
+export const apiBatchOnlineVerifyTableBody :EO_TBODY_TYPE[] = [
   {
     key: 'serviceTemplate',
     styleFn: (item:any) => {
@@ -298,7 +328,8 @@ export const apiBatchOnlineVerifyTableBody :TBODY_TYPE[] = [
         return 'color:#ff3b30'
       }
       return ''
-    }
+    },
+    copy: true
   },
   {
     key: 'cluster',
@@ -307,7 +338,8 @@ export const apiBatchOnlineVerifyTableBody :TBODY_TYPE[] = [
         return 'color:#ff3b30'
       }
       return ''
-    }
+    },
+    copy: true
   },
   {
     key: 'statusString',
@@ -325,7 +357,8 @@ export const apiBatchOnlineVerifyTableBody :TBODY_TYPE[] = [
         return 'color:#ff3b30'
       }
       return ''
-    }
+    },
+    copy: true
   },
   {
     type: 'btn',
@@ -368,7 +401,7 @@ export const apiBatchPublishResultTableHeadName:THEAD_TYPE[] = [
   { title: '失败原因' }
 ]
 
-export const apiBatchPublishResultTableBody:TBODY_TYPE[] = [
+export const apiBatchPublishResultTableBody:EO_TBODY_TYPE[] = [
   {
     key: 'api',
     styleFn: (item:any) => {
@@ -376,7 +409,8 @@ export const apiBatchPublishResultTableBody:TBODY_TYPE[] = [
         return 'color:#ff3b30'
       }
       return ''
-    }
+    },
+    copy: true
   },
   {
     key: 'cluster',
@@ -385,7 +419,8 @@ export const apiBatchPublishResultTableBody:TBODY_TYPE[] = [
         return 'color:#ff3b30'
       }
       return ''
-    }
+    },
+    copy: true
   },
   {
     key: 'statusString',
@@ -403,7 +438,8 @@ export const apiBatchPublishResultTableBody:TBODY_TYPE[] = [
         return 'color:#ff3b30'
       }
       return ''
-    }
+    },
+    copy: true
   }
 ]
 
@@ -423,11 +459,15 @@ export const PluginTemplateConfigThead:THEAD_TYPE[] = [
 ]
 
 export const PluginTemplateConfigTbody:EO_TBODY_TYPE[] = [
-  { key: 'name' },
+  {
+    key: 'name',
+    copy: true
+  },
   { key: 'disable' },
   {
     key: 'config',
-    json: true
+    json: true,
+    copy: true
   },
   {
     type: 'btn',
@@ -455,9 +495,15 @@ export const PluginTemplatePublishThead:THEAD_TYPE[] = [
   }
 ]
 
-export const PluginTemplatePublishTbody:TBODY_TYPE[] = [
-  { key: 'name' },
-  { key: 'env' },
+export const PluginTemplatePublishTbody:EO_TBODY_TYPE[] = [
+  {
+    key: 'name',
+    copy: true
+  },
+  {
+    key: 'env',
+    copy: true
+  },
   { key: 'status' },
   { key: 'operator' },
   { key: 'updateTime' },

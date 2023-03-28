@@ -74,8 +74,6 @@ export class DeployClusterPluginComponent implements OnInit {
     this.api.get('cluster/' + this.clusterName + '/plugins').subscribe((resp:{code:number, data:{plugins:ClusterPluginItem[]}, msg:string}) => {
       if (resp.code === 0) {
         this.pluginsList = resp.data.plugins
-      } else {
-        this.message.error(resp.msg || '获取列表数据失败!')
       }
     })
   }
@@ -104,8 +102,6 @@ export class DeployClusterPluginComponent implements OnInit {
       if (resp.code === 0) {
         this.message.success(resp.msg || '删除成功', { nzDuration: 1000 })
         this.getPluginsList()
-      } else {
-        this.message.error(resp.msg || '删除失败!')
       }
     })
   }
@@ -176,5 +172,11 @@ export class DeployClusterPluginComponent implements OnInit {
   closeModal = (fresh?:boolean) => {
     fresh && this.getPluginsList()
     this.drawerRef?.close()
+  }
+
+  copyCallback () {
+    this.message.success('复制成功', {
+      nzDuration: 1000
+    })
   }
 }

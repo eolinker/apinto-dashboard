@@ -98,8 +98,6 @@ export class DeployClusterCertFormComponent implements OnInit {
             .subscribe((resp:EmptyHttpResponse) => {
               if (resp.code === 0) {
                 this.closeModal && this.closeModal()
-              } else {
-                this.message.error(resp.msg || '添加证书失败！')
               }
             })
           break
@@ -108,8 +106,6 @@ export class DeployClusterCertFormComponent implements OnInit {
             .subscribe((resp:EmptyHttpResponse) => {
               if (resp.code === 0) {
                 this.closeModal && this.closeModal()
-              } else {
-                this.message.error(resp.msg || '修改证书失败！')
               }
             })
       }
