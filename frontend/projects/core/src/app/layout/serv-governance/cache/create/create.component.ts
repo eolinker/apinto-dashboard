@@ -111,8 +111,6 @@ export class CacheCreateComponent implements OnInit {
             if (resp.data.strategy!.filters) {
               this.filterShowList = [...resp.data.strategy!.filters]
             }
-          } else {
-            this.message.error(resp.msg || '获取数据失败!')
           }
         }
       )
@@ -156,8 +154,6 @@ export class CacheCreateComponent implements OnInit {
             if (resp.code === 0) {
               this.message.success(resp.msg || '创建成功!', { nzDuration: 1000 })
               this.backToList()
-            } else {
-              this.message.error(resp.msg || '创建失败!')
             }
           })
       } else {
@@ -170,8 +166,6 @@ export class CacheCreateComponent implements OnInit {
             if (resp.code === 0) {
               this.message.success(resp.msg || '修改成功!', { nzDuration: 1000 })
               this.backToList()
-            } else {
-              this.message.error(resp.msg || '修改失败!')
             }
           })
       }

@@ -120,8 +120,6 @@ export class VisitCreateComponent implements OnInit {
             if (resp.data.strategy!.filters) {
               this.influenceShowList = [...resp.data.strategy!.config.influenceSphere]
             }
-          } else {
-            this.message.error(resp.msg || '获取数据失败!')
           }
         }
       )
@@ -176,8 +174,6 @@ export class VisitCreateComponent implements OnInit {
             if (resp.code === 0) {
               this.message.success(resp.msg || '创建成功!', { nzDuration: 1000 })
               this.backToList()
-            } else {
-              this.message.error(resp.msg || '创建失败!')
             }
           })
       } else {
@@ -190,8 +186,6 @@ export class VisitCreateComponent implements OnInit {
             if (resp.code === 0) {
               this.message.success(resp.msg || '修改成功!', { nzDuration: 1000 })
               this.backToList()
-            } else {
-              this.message.error(resp.msg || '修改失败!')
             }
           })
       }

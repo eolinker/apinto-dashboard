@@ -55,8 +55,6 @@ export class GroupComponent implements OnInit {
         this.nodesList = []
         this.nodesList = this.nodesTransfer(resp.data.envs)
         this.getGroupItemSelected()
-      } else {
-        this.message.error(resp.msg || '获取数据失败!')
       }
     })
   }

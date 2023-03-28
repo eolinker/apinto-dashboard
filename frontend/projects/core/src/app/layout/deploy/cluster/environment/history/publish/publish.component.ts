@@ -110,8 +110,6 @@ export class DeployClusterEnvironmentHistoryPublishComponent implements OnInit {
           history.isExpand = false
         }
         this.publishRecordsPage.total = resp.data.total
-      } else {
-        this.message.error(resp.msg || '获取列表数据失败!')
       }
     })
   }

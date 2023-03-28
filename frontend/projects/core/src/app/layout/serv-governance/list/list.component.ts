@@ -270,8 +270,6 @@ export class ListComponent implements OnInit {
               this.priorityMap.set(this.strategiesList[index].priority, [this.strategiesList[index]])
               this.priorityOldMap.set(this.strategiesList[index].uuid, this.strategiesList[index].priority)
             }
-          } else {
-            this.message.error(resp.msg || '获取数据失败!')
           }
         })
     }
@@ -296,9 +294,7 @@ export class ListComponent implements OnInit {
           item.isStop = isStop
           this.message.success((isStop ? '停用' : '启用') + '策略成功', { nzDuration: 1000 })
           this.getStrategiesList()
-        } else {
-          this.message.error(resp.msg || ((isStop ? '停用' : '启用') + '策略失败!'))
-        }
+        } 
       })
   }
 
@@ -309,8 +305,6 @@ export class ListComponent implements OnInit {
         if (resp.code === 0) {
           this.message.success(resp.msg || '删除策略成功!', { nzDuration: 1000 })
           this.getStrategiesList()
-        } else {
-          this.message.error(resp.msg || '删除策略失败!')
         }
       })
   }
@@ -323,8 +317,6 @@ export class ListComponent implements OnInit {
         if (resp.code === 0) {
           this.getStrategiesList()
           this.message.success(resp.msg || '恢复策略成功!', { nzDuration: 1000 })
-        } else {
-          this.message.error(resp.msg || '恢复策略失败!')
         }
       })
   }

@@ -80,8 +80,6 @@ export class DeployClusterCertComponent implements OnInit {
       .subscribe((resp:{code:number, data:{certificates:DeployCertListData[]}, msg:string}) => {
         if (resp.code === 0) {
           this.certsList = resp.data.certificates
-        } else {
-          this.message.error(resp.msg || '获取列表数据失败!')
         }
       })
   }
@@ -112,8 +110,6 @@ export class DeployClusterCertComponent implements OnInit {
         if (resp.code === 0) {
           this.getCertsList()
           this.message.success(resp.msg || '删除成功!', { nzDuration: 1000 })
-        } else {
-          this.message.error(resp.msg || '删除证书失败!')
         }
       })
   }

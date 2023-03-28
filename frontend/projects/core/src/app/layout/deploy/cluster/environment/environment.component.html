@@ -68,21 +68,36 @@
 </div>
 
 <ng-template #operatorStatusTpl let-item="item">
-  <span
-    eoNgFeedbackTooltip
-    [nzTooltipTitle]="item.key"
-    nzTooltipPlacement="top"
-    [nzTooltipVisible]="false"
-    nzTooltipTrigger="hover"
-  >
-    {{ item.key }}</span
-  >
+  <div class="leading-[22px] flex items-center">
+    <span
+      class="mr-[8px]"
+      eoNgFeedbackTooltip
+      [nzTooltipTitle]="item.key"
+      nzTooltipPlacement="top"
+      [nzTooltipVisible]="false"
+      nzTooltipTrigger="hover"
+    >
+      {{ item.key }}</span
+    >
 
-  <ng-container [ngSwitch]="item.publish">
-    <label class="green-bg ml10" *ngSwitchCase="'NEW'">新</label>
-    <label class="grey-bg ml10" *ngSwitchCase="'MODIFY'">改</label>
-    <label class="red-bg ml10" *ngSwitchCase="'DELETE'">删</label>
-  </ng-container>
+    <ng-container [ngSwitch]="item.publish">
+      <label class="green-bg ml10" *ngSwitchCase="'NEW'">新</label>
+      <label class="grey-bg ml10" *ngSwitchCase="'MODIFY'">改</label>
+      <label class="red-bg ml10" *ngSwitchCase="'DELETE'">删</label>
+    </ng-container>
+    <span
+      class="h-[20px] leading-[22px] text-[12px] opacity-0 cursor-pointer inline-flex items-center"
+      eo-copy
+      nzType="primary"
+      [copyText]="item.key"
+      (copyCallback)="copyCallback()"
+      (click)="$event.stopPropagation()"
+    >
+      <svg class="iconpark-icon">
+        <use href="#copy"></use>
+      </svg>
+    </span>
+  </div>
 </ng-template>
 
 <ng-template #publishStatusTpl let-item="item">

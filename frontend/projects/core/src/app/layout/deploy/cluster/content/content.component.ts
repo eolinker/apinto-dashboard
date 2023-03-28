@@ -83,8 +83,6 @@ export class DeployClusterContentComponent implements OnInit {
       if (resp.code === 0) {
         this.clusterDesc = resp.data.cluster.desc
         this._clusterDesc = resp.data.cluster.desc
-      } else {
-        this.message.error(resp.msg || '获取列表数据失败！')
       }
     })
   }
@@ -94,7 +92,6 @@ export class DeployClusterContentComponent implements OnInit {
       if (resp.code === 0) {
         this.clusterDesc = this._clusterDesc
       } else {
-        this.message.error(resp.msg || '修改失败！')
         this._clusterDesc = this.clusterDesc
       }
     })

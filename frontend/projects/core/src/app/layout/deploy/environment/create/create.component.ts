@@ -63,8 +63,6 @@ export class DeployEnvironmentCreateComponent implements OnInit {
           if (resp.code === 0) {
             this.message.success(resp.msg || '新增环境变量成功！', { nzDuration: 1000 })
             this.router.navigate(['/', 'deploy', 'env'])
-          } else {
-            this.message.error(resp.msg || '新增环境变量失败！')
           }
         })
     } else {

@@ -99,8 +99,6 @@ export class AuditLogListComponent implements OnInit {
           }
           this.logsList = resp.data.items
           this.searchData.total = resp.data.total
-        } else {
-          this.message.error(resp.msg || '获取列表数据失败！')
         }
       })
   }
@@ -113,8 +111,6 @@ export class AuditLogListComponent implements OnInit {
           for (const index in resp.data.items) {
             this.listOfKind.push({ label: resp.data.items[index].title, value: resp.data.items[index].name })
           }
-        } else {
-          this.message.error(resp.msg || '获取操作对象数据失败！')
         }
       })
   }

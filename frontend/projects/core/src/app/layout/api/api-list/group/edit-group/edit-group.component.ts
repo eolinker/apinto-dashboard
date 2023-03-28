@@ -94,8 +94,6 @@ export class ApiManagementEditGroupComponent implements OnInit {
           this.message.success(resp.msg || '添加成功', { nzDuration: 1000 })
           this.router.navigate(['/', 'router', 'api', 'group', 'list', uuid])
           this.closeModal && this.closeModal()
-        } else {
-          this.message.error(resp.msg || '添加失败!')
         }
       })
     } else {
@@ -115,8 +113,6 @@ export class ApiManagementEditGroupComponent implements OnInit {
         if (resp.code === 0) {
           this.message.success(resp.msg || '修改成功', { nzDuration: 1000 })
           this.closeModal && this.closeModal()
-        } else {
-          this.message.error(resp.msg || '修改失败!')
         }
       })
     } else {

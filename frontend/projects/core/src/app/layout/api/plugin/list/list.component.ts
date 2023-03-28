@@ -44,8 +44,6 @@ export class ApiPluginTemplateListComponent implements OnInit {
     this.api.get('plugin/templates').subscribe((resp:{code:number, data:{templates:PluginTemplateItem[]}, msg:string}) => {
       if (resp.code === 0) {
         this.pluginsList = resp.data.templates
-      } else {
-        this.message.error(resp.msg || '获取列表数据失败!')
       }
     })
   }
@@ -75,8 +73,6 @@ export class ApiPluginTemplateListComponent implements OnInit {
         if (resp.code === 0) {
           this.message.success(resp.msg || '删除成功', { nzDuration: 1000 })
           this.getPluginsData()
-        } else {
-          this.message.error(resp.msg || '删除失败!')
         }
       })
   }

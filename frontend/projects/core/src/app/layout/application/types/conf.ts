@@ -36,10 +36,19 @@ export const applicationsTableHeadName: THEAD_TYPE[] = [
   }
 ]
 
-export const applicationsTableBody: Array<any> = [
-  { key: 'name' },
-  { key: 'id' },
-  { key: 'desc' },
+export const applicationsTableBody: EO_TBODY_TYPE[] = [
+  {
+    key: 'name',
+    copy: true
+  },
+  {
+    key: 'id',
+    copy: true
+  },
+  {
+    key: 'desc',
+    copy: true
+  },
   { key: 'operator' },
   { key: 'updateTime' },
   {
@@ -108,12 +117,27 @@ export const authenticationTableHeadName:THEAD_TYPE[] = [
   }
 ]
 
-export const authenticationTableBody:TBODY_TYPE[] = [
-  { key: 'driver' },
-  { key: 'paramPosition' },
-  { key: 'paramName' },
-  { key: 'paramInfo' },
-  { key: 'expireTimeString' },
+export const authenticationTableBody:EO_TBODY_TYPE[] = [
+  {
+    key: 'driver',
+    copy: true
+  },
+  {
+    key: 'paramPosition',
+    copy: true
+  },
+  {
+    key: 'paramName',
+    copy: true
+  },
+  {
+    key: 'paramInfo',
+    copy: true
+  },
+  {
+    key: 'expireTimeString',
+    copy: true
+  },
   { key: 'isTransparent' },
   { key: 'operator' },
   { key: 'updateTime' },

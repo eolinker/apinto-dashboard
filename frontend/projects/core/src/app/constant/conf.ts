@@ -1,4 +1,5 @@
-import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
+import { THEAD_TYPE } from 'eo-ng-table'
+import { EO_TBODY_TYPE } from 'projects/eo-ng-apinto-table/src/public-api'
 
 export const defaultAutoTips: Record<string, Record<string, string>> = {
   'zh-cn': {
@@ -38,9 +39,15 @@ export const PublishTableHeadName:THEAD_TYPE[] = [
   }
 ]
 
-export const CommonPublishTableBody:TBODY_TYPE[] = [
-  { key: 'name' },
-  { key: 'env' },
+export const CommonPublishTableBody:EO_TBODY_TYPE[] = [
+  {
+    key: 'name',
+    copy: true
+  },
+  {
+    key: 'env',
+    copy: true
+  },
   { key: 'status' },
   { key: 'disable' },
   { key: 'operator' },
@@ -143,10 +150,16 @@ export const CommonPublishTableBody:TBODY_TYPE[] = [
   }
 ]
 
-export const PublishTableBody:TBODY_TYPE[] = [
+export const PublishTableBody:EO_TBODY_TYPE[] = [
 
-  { key: 'name' },
-  { key: 'env' },
+  {
+    key: 'name',
+    copy: true
+  },
+  {
+    key: 'env',
+    copy: true
+  },
   { key: 'status' },
   { key: 'operator' },
   { key: 'updateTime' },

@@ -66,8 +66,6 @@ export class DeployClusterNodesComponent implements OnInit {
     this.api.get('cluster/' + this.clusterName + '/nodes').subscribe(resp => {
       if (resp.code === 0) {
         this.nodesForms = resp.data
-      } else {
-        this.message.error(resp.msg || '获取列表数据失败！', { nzDuration: 1000 })
       }
     })
   }
@@ -83,8 +81,6 @@ export class DeployClusterNodesComponent implements OnInit {
       if (resp.code === 0) {
         this.message.success(resp.msg || '操作成功！', { nzDuration: 1000 })
         this.getNodeslist()
-      } else {
-        this.message.error(resp.msg || '操作失败！')
       }
     })
   }

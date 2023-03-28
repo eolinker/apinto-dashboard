@@ -130,8 +130,6 @@ export class ServiceGovernancePublishComponent implements OnInit {
               this.strategyUnpublishMsg = '当前无可发布策略'
             }
           }
-        } else {
-          this.message.error(resp.msg || '获取数据失败!')
         }
       })
   }
@@ -144,8 +142,6 @@ export class ServiceGovernancePublishComponent implements OnInit {
           if (resp.code === 0) {
             this.message.success(resp.msg || '发布策略成功!', { nzDuration: 1000 })
             this.closeModal && this.closeModal()
-          } else {
-            this.message.error(resp.msg || '发布策略失败!')
           }
         })
     } else {

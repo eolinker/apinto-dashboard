@@ -53,22 +53,6 @@ export class ServiceDiscoveryCreateComponent implements OnInit {
 
   driverList: Array<{ label: string; value: string; render: any }> = []
 
-  environmentTableHeadName: Array<object> = [
-    { title: 'KEY' },
-    { title: '描述' }
-  ]
-
-  environmentTableBody: Array<any> = [
-    {
-      key: 'key'
-    },
-    {
-      key: 'description'
-    }
-  ]
-
-  environmentList: Array<any> = []
-
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
 
   validateForm: FormGroup = new FormGroup({})
@@ -118,8 +102,6 @@ export class ServiceDiscoveryCreateComponent implements OnInit {
           }
         })
         this.driverList = [...this.driverList]
-      } else {
-        this.message.error(resp.msg || '获取列表数据失败!')
       }
     })
   }
@@ -150,8 +132,6 @@ export class ServiceDiscoveryCreateComponent implements OnInit {
         this.createServiceForm.config.addrs = this.createServiceForm.config.addrs ? this.createServiceForm.config.addrs : []
         this.createServiceForm.config.addrsVariable = this.createServiceForm.config.addrsVariable ? this.createServiceForm.config.addrsVariable : ''
         this.getDriverList()
-      } else {
-        this.message.error(resp.msg || '获取数据失败!')
       }
     })
   }
@@ -231,8 +211,6 @@ export class ServiceDiscoveryCreateComponent implements OnInit {
             if (resp.code === 0) {
               this.message.success(resp.msg || '新建服务成功', { nzDuration: 1000 })
               this.backToList()
-            } else {
-              this.message.error(resp.msg || '新建服务失败!')
             }
           })
       } else {
@@ -251,8 +229,6 @@ export class ServiceDiscoveryCreateComponent implements OnInit {
             if (resp.code === 0) {
               this.message.success(resp.msg || '修改服务成功', { nzDuration: 1000 })
               this.backToList()
-            } else {
-              this.message.error(resp.msg || '修改服务失败!')
             }
           })
       }
