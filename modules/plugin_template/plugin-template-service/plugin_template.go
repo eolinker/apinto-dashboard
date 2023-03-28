@@ -636,10 +636,10 @@ func (p *pluginTemplateService) Online(ctx context.Context, namespaceId, operato
 	}
 
 	router := &frontend_model.Router{
-		Name:   frontend_model.RouterNameServiceOnline,
+		Name:   frontend_model.RouterNameClusterPlugin,
 		Params: make(map[string]string),
 	}
-	router.Params["plugin_template_name"] = pluginTemplate.Name
+	router.Params["cluster_name"] = clusterInfo.Name
 
 	for _, pluginInfo := range latestVersion.Plugins {
 		isOnline, err := p.clusterPluginService.IsOnlineByName(ctx, namespaceId, clusterName, pluginInfo.Name)
