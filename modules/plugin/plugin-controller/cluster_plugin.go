@@ -278,7 +278,7 @@ func (p *pluginClusterController) toPublish(ginCtx *gin.Context) {
 	}
 
 	if len(defectPlugins) > 0 {
-		m["unpublished_msg"] = fmt.Sprintf("插件名为%s的环境变量处于缺失状态不可发布", strings.Join(defectPlugins, ","))
+		m["unpublished_msg"] = fmt.Sprintf("插件名为%s的插件处于缺失状态不可发布", strings.Join(defectPlugins, ","))
 	}
 
 	m["plugins"] = toPublishItems
@@ -320,7 +320,7 @@ func (p *pluginClusterController) publish(ginCtx *gin.Context) {
 	}
 
 	if len(defectPlugins) > 0 {
-		msg := fmt.Sprintf("插件名为%s的环境变量处于缺失状态不可发布", strings.Join(defectPlugins, ","))
+		msg := fmt.Sprintf("插件名为%s的插件处于缺失状态不可发布", strings.Join(defectPlugins, ","))
 		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(msg))
 		return
 	}
