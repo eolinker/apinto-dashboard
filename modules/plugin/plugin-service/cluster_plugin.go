@@ -95,7 +95,7 @@ func (c *clusterPluginService) GetList(ctx context.Context, namespaceID int, clu
 
 	var releasedPluginsMap = map[string]*plugin_entry.CluPluginPublishConfig{}
 	if currentVersion != nil && currentVersion.ClusterPluginPublishVersion != nil {
-		//当前版本已发布的集群环境变量
+		//当前版本已发布的集群插件
 		releasedPluginsMap = common.SliceToMap(currentVersion.PublishedPluginsList, func(t *plugin_entry.CluPluginPublishConfig) string {
 			return t.ClusterPlugin.PluginName
 		})
