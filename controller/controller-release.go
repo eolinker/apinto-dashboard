@@ -34,12 +34,12 @@ func getFileSystem(dir string) http.FileSystem {
 	if err != nil {
 		panic(err)
 	}
-
 	return http.FS(fs)
 }
 func EmbedFrontend(r *gin.Engine) {
 
 	r.Group("/assets", addExpires, gzip.Gzip(gzip.DefaultCompression)).StaticFS("/", getFileSystem("dist/assets"))
+	r.Group("/ace-builds", addExpires, gzip.Gzip(gzip.DefaultCompression)).StaticFS("/", getFileSystem("dist/ace-builds"))
 	r.Group("/frontend", addExpires, gzip.Gzip(gzip.DefaultCompression)).StaticFS("/", getFileSystem("dist"))
 
 	r.GET("/favicon.ico", addExpires, func(ginCtx *gin.Context) {
