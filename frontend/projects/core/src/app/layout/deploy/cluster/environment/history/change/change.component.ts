@@ -69,8 +69,6 @@ export class DeployClusterEnvironmentHistoryChangeComponent implements OnInit {
       if (resp.code === 0) {
         this.operateRecordsData = resp.data
         this.operateRecordsPage.total = resp.data.total
-      } else {
-        this.message.error(resp.msg || '获取列表数据失败!')
       }
     })
   }

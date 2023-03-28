@@ -1,6 +1,7 @@
 import { RadioOption } from 'eo-ng-radio'
 import { SelectOption } from 'eo-ng-select'
 import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
+import { EO_TBODY_TYPE } from 'projects/eo-ng-apinto-table/src/public-api'
 
 export const filterTableHeadName:THEAD_TYPE[] = [
   {
@@ -15,9 +16,15 @@ export const filterTableHeadName:THEAD_TYPE[] = [
   }
 ]
 
-export const filterTableBody:TBODY_TYPE[] = [
-  { key: 'title' },
-  { key: 'label' },
+export const filterTableBody:EO_TBODY_TYPE[] = [
+  {
+    key: 'title',
+    copy: true
+  },
+  {
+    key: 'label',
+    copy: true
+  },
   {
     type: 'btn',
     right: true,
@@ -115,8 +122,11 @@ export const strategiesTableHeadName:THEAD_TYPE[] = [
     right: true
   }]
 
-export const strategiesTableBody:TBODY_TYPE[] = [
-  { key: 'name' },
+export const strategiesTableBody:EO_TBODY_TYPE[] = [
+  {
+    key: 'name',
+    copy: true
+  },
   { key: 'priority' },
   { key: 'status' },
   { key: 'isStop' },
@@ -171,9 +181,15 @@ export const publishTableHeadName:THEAD_TYPE[] = [
   }
 ]
 
-export const publishTableBody:TBODY_TYPE[] = [
-  { key: 'name' },
-  { key: 'priority' },
+export const publishTableBody:EO_TBODY_TYPE[] = [
+  {
+    key: 'name',
+    copy: true
+  },
+  {
+    key: 'priority',
+    copy: true
+  },
   { key: 'status' },
   { key: 'optTime' }]
 

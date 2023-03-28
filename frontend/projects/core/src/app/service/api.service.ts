@@ -123,9 +123,7 @@ export class ApiService {
     if (params && params['query']) {
       params['query'] = JSON.stringify(params['query'])
     }
-    if (this.getUnderline(url)) {
-      params = this.underline(params)
-    }
+    params = this.underline(params)
 
     for (const index in params) {
       if (typeof params[index] === 'string') {
@@ -164,10 +162,8 @@ export class ApiService {
 
     if (params) { params['namespace'] = 'default' } else { params = { namespace: 'default' } }
 
-    if (this.getUnderline(url)) {
-      body = !(body instanceof FormData) ? this.underline(body) : body
-      params = this.underline(params)
-    }
+    body = !(body instanceof FormData) ? this.underline(body) : body
+    params = this.underline(params)
 
     return this.http.post(this.urlPrefix + 'api/' + url, body, {
       params: params,
@@ -192,10 +188,8 @@ export class ApiService {
     }
     if (params) { params['namespace'] = 'default' } else { params = { namespace: 'default' } }
 
-    if (this.getUnderline(url)) {
-      body = this.underline(body)
-      params = this.underline(params)
-    }
+    body = this.underline(body)
+    params = this.underline(params)
 
     return this.http.put(this.urlPrefix + 'api/' + url, body, {
       params: params,
@@ -215,9 +209,7 @@ export class ApiService {
 
     if (params) { params['namespace'] = 'default' } else { params = { namespace: 'default' } }
 
-    if (this.getUnderline(url)) {
-      params = this.underline(params)
-    }
+    params = this.underline(params)
     return this.http.delete(this.urlPrefix + 'api/' + url, { params: params })
       .pipe(
         catchError(this.handleError)
@@ -238,10 +230,8 @@ export class ApiService {
     }
     if (params) { params['namespace'] = 'default' } else { params = { namespace: 'default' } }
 
-    if (this.getUnderline(url)) {
-      body = this.underline(body)
-      params = this.underline(params)
-    }
+    body = this.underline(body)
+    params = this.underline(params)
 
     return this.http.patch(this.urlPrefix + 'api/' + url, body, {
       params: params,
@@ -250,12 +240,6 @@ export class ApiService {
       .pipe(
         catchError(this.handleError)
       )
-  }
-
-  getUnderline (url:string):boolean {
-    // return url.includes('warn') || url.includes('monitor') || url.includes('router') || url.includes('user/enum') ||
-    //  url.includes('strategy') || url.includes('strategies')
-    return true
   }
 
   handleError = (error: HttpErrorResponse) => {

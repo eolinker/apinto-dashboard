@@ -99,8 +99,6 @@ export class ApplicationPublishComponent implements OnInit {
       .subscribe((resp:{code:number, data:{clusters:PublishManagementData[]}, msg:string}) => {
         if (resp.code === 0) {
           this.clustersList = resp.data.clusters
-        } else {
-          this.message.error(resp.msg || '刷新列表失败!')
         }
       })
   }
@@ -120,8 +118,6 @@ export class ApplicationPublishComponent implements OnInit {
           this.solutionParam = resp.data?.router?.params ? resp.data.router.params : {}
           if (this.solutionRouter) {
             this.publishFailModal.openModal(resp.msg, '应用', this.solutionRouter, this.solutionParam)
-          } else {
-            this.message.error(resp.msg || (type + '失败'))
           }
         }
       })
@@ -133,8 +129,6 @@ export class ApplicationPublishComponent implements OnInit {
         if (resp.code === 0) {
           this.message.success(resp.msg || '下线成功', { nzDuration: 1000 })
           this.getClustersData()
-        } else {
-          this.message.error(resp.msg || '下线失败')
         }
       })
   }
@@ -145,8 +139,6 @@ export class ApplicationPublishComponent implements OnInit {
         if (resp.code === 0) {
           this.message.success(resp.msg || '启用成功', { nzDuration: 1000 })
           this.getClustersData()
-        } else {
-          this.message.error(resp.msg || '启用失败')
         }
       })
   }
@@ -157,8 +149,6 @@ export class ApplicationPublishComponent implements OnInit {
         if (resp.code === 0) {
           this.message.success(resp.msg || '停用成功', { nzDuration: 1000 })
           this.getClustersData()
-        } else {
-          this.message.error(resp.msg || '停用失败')
         }
       })
   }

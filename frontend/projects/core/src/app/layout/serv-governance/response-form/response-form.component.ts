@@ -150,8 +150,6 @@ getContentTypeList () {
                 ?.toString() || ''
             this._responseForm.controls['body'].setValue(body)
           }
-        } else {
-          this.message.error(resp.msg || '获取数据失败!')
         }
       }
     )
@@ -174,8 +172,6 @@ getCharsetList () {
               value: resp.data.items[index]
             })
           }
-        } else {
-          this.message.error(resp.msg || '获取数据失败!')
         }
       }
     )

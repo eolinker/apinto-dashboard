@@ -109,18 +109,6 @@ export class ApplicationAuthenticationFormComponent implements OnInit {
     this.api.get('application/auth', { appId: this.appId, uuid: this.authId }).subscribe((resp:any) => {
       if (resp.code === 0) {
         this.createAuthForm = resp.data.auth
-        // this.validateForm.controls['driver'].setValue(resp.data.auth.driver)
-        // this.validateForm.controls['isTransparent'].setValue(resp.data.auth.isTransparent)
-        // this.validateForm.controls['position'].setValue(resp.data.auth.position)
-        // this.validateForm.controls['tokenName'].setValue(resp.data.auth.tokenName)
-        // this.validateForm.controls['iss'].setValue(resp.data.auth.config?.iss || '')
-        // this.validateForm.controls['algorithm'].setValue(resp.data.auth.config?.algorithm || 'HS256')
-        // this.validateForm.controls['secret'].setValue(resp.data.auth.config?.secret || '')
-        // this.validateForm.controls['publicKey'].setValue(resp.data.auth.config?.publicKey || '')
-        // this.validateForm.controls['user'].setValue(resp.data.auth.config?.user || '')
-        // this.validateForm.controls['userPath'].setValue(resp.data.auth.config?.userPath || '')
-        // this.validateForm.controls['claimsToVerify'].setValue(resp.data.auth.config?.claimsToVerify || [])
-        // this.validateForm.controls['signatureIsBase64'].setValue(resp.data.auth.config?.signatureIsBase64 || false)
         setFormValue(this.validateForm, {
           ...resp.data.auth,
           algorithm: 'HS256',
@@ -155,8 +143,6 @@ export class ApplicationAuthenticationFormComponent implements OnInit {
         this.createAuthForm.config.algorithm = this.createAuthForm.config?.algorithm ? this.createAuthForm.config.algorithm : 'HS256'
         this.createAuthForm.config.secret = this.createAuthForm.config?.secret ? this.createAuthForm.config.secret : ''
         this.createAuthForm.config.publicKey = this.createAuthForm.config?.publicKey ? this.createAuthForm.config.publicKey : ''
-      } else {
-        this.message.error(resp.msg || '获取数据失败!')
       }
     })
   }
@@ -171,8 +157,6 @@ export class ApplicationAuthenticationFormComponent implements OnInit {
             this.baseData = resp.data.drivers[index].render
           }
         }
-      } else {
-        this.message.error(resp.msg || '获取列表数据失败!')
       }
     })
   }
@@ -329,7 +313,6 @@ export class ApplicationAuthenticationFormComponent implements OnInit {
               this.message.success(resp.msg || '修改鉴权成功', { nzDuration: 1000 })
               this.closeModal && this.closeModal(true)
             } else {
-              this.message.error(resp.msg || '修改鉴权失败!')
               this.closeModal && this.closeModal()
             }
           })
@@ -340,7 +323,6 @@ export class ApplicationAuthenticationFormComponent implements OnInit {
               this.message.success(resp.msg || '新增鉴权成功', { nzDuration: 1000 })
               this.closeModal && this.closeModal(true)
             } else {
-              this.message.error(resp.msg || '新增鉴权失败!')
               this.closeModal && this.closeModal()
             }
           })

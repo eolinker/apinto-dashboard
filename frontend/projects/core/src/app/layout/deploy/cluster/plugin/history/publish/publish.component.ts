@@ -65,8 +65,6 @@ export class DeployClusterPluginHistoryPublishComponent implements OnInit {
           }
           this.publishRecordsData.historys = resp.data.histories
           this.publishRecordsData.total = resp.data.total
-        } else {
-          this.message.error(resp.msg || '获取列表数据失败!')
         }
       })
   }
@@ -81,5 +79,9 @@ export class DeployClusterPluginHistoryPublishComponent implements OnInit {
 
   getStatusString (status:'GLOBAL'|'DISABLE'|'ENABLE') {
     return this.statusList.filter((item:SelectOption) => { return item.value === status })[0]?.label || '无'
+  }
+
+  transferToJson (str:string) {
+    return str.replace(/(,)/g, ',\n').replace(/(，)/g, '，\n')
   }
 }

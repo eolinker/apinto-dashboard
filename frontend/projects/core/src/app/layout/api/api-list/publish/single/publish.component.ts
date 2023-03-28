@@ -109,9 +109,7 @@ export class ApiPublishComponent implements OnInit {
       .subscribe((resp:{code:number, data:{clusters:PublishManagementData[]}, msg:string}) => {
         if (resp.code === 0) {
           this.clustersList = resp.data.clusters
-        } else {
-          this.message.error(resp.msg || '获取列表数据失败!')
-        }
+        } 
       })
   }
 
@@ -156,8 +154,6 @@ export class ApiPublishComponent implements OnInit {
                 disabled: !resp.data.router.params.serviceName
               }
             ])
-          } else {
-            this.message.error(resp.msg || (type + '失败'))
           }
         }
       })
@@ -175,7 +171,6 @@ export class ApiPublishComponent implements OnInit {
           this.getClustersData()
         } else {
           this.type = '下线'
-          this.message.error(resp.msg || '下线失败')
         }
       })
   }
@@ -186,8 +181,6 @@ export class ApiPublishComponent implements OnInit {
         if (resp.code === 0) {
           this.message.success(resp.msg || '启用成功', { nzDuration: 1000 })
           this.getClustersData()
-        } else {
-          this.message.error(resp.msg || '启用失败')
         }
       })
   }
@@ -198,8 +191,6 @@ export class ApiPublishComponent implements OnInit {
         if (resp.code === 0) {
           this.message.success(resp.msg || '禁用成功', { nzDuration: 1000 })
           this.getClustersData()
-        } else {
-          this.message.error(resp.msg || '禁用失败')
         }
       })
   }

@@ -81,8 +81,6 @@ export class DeployClusterListComponent implements OnInit {
     this.api.get('clusters').subscribe((resp) => {
       if (resp.code === 0) {
         this.clustersList = resp.data.clusters
-      } else {
-        this.message.error(resp.msg || '获取列表数据失败!')
       }
     })
   }
@@ -112,8 +110,6 @@ export class DeployClusterListComponent implements OnInit {
         if (resp.code === 0) {
           this.message.success(resp.msg || '删除成功', { nzDuration: 1000 })
           this.getClustersData()
-        } else {
-          this.message.error(resp.msg || '删除失败!')
         }
       })
   }

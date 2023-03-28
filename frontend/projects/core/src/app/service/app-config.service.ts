@@ -183,8 +183,6 @@ export class AppConfigService {
           observer.next(this.menuList)
           this.reqFlashMenu()
           this.reqUpdateRightList()
-        } else {
-          this.message.error(resp.msg || '获得用户权限列表失败!')
         }
       })
     })

@@ -5,6 +5,7 @@ export interface EO_TBODY_TYPE extends TBODY_TYPE{
     check?:Function
     tooltip?:string | TemplateRef<any>
     json?:boolean
+    copy?:boolean
 }
 
 export interface EO_THEAD_TYPE extends THEAD_TYPE{

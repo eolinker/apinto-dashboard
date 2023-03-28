@@ -63,8 +63,6 @@ export class ApiPluginConfigFormComponent implements OnInit {
           this.validateConfigForm.controls['name'].setValue(this.pluginsList[0].value)
           this.changePluginChange()
         }
-      } else {
-        this.message.error(resp.msg || '获取列表数据失败!')
       }
     })
   }
@@ -96,7 +94,7 @@ export class ApiPluginConfigFormComponent implements OnInit {
           }
         }
       }
-      this.configList = [{ name: this.validateConfigForm.controls['name'].value, config: this.code, disable: this.data?.disable || false }, ...(this.configList?.length > 0 ? this.configList : [])]
+      this.configList = [{ name: this.validateConfigForm.controls['name'].value, config: this.code, disable: this.data?.disable !== false }, ...(this.configList?.length > 0 ? this.configList : [])]
       this.closeDrawer()
     } else {
       Object.values(this.validateConfigForm.controls).forEach(control => {

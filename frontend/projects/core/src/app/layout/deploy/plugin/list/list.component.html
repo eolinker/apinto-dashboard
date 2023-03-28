@@ -28,15 +28,30 @@
 </div>
 
 <ng-template #pluginName let-item="item">
-  <span
-    eoNgFeedbackTooltip
-    [nzTooltipTitle]="item.name"
-    [nzTooltipVisible]="false"
-    [nzTooltipTrigger]="'hover'"
-    (click)="pluginTableClick(item)"
-    >{{ item.name }}</span
-  >
-  <ng-container *ngIf="item.isBuilt">
-    <span class="text-theme">&nbsp;内置</span>
-  </ng-container>
+  <div class="leading-[22px] flex items-center">
+    <span
+      class="mr-[8px]"
+      eoNgFeedbackTooltip
+      [nzTooltipTitle]="item.name"
+      [nzTooltipVisible]="false"
+      [nzTooltipTrigger]="'hover'"
+      (click)="pluginTableClick(item)"
+      >{{ item.name }}</span
+    >
+    <ng-container *ngIf="item.isBuilt">
+      <span class="text-theme mr-[8px]">&nbsp;内置</span>
+    </ng-container>
+    <span
+      class="h-[20px] leading-[22px] text-[12px] opacity-0 cursor-pointer inline-flex items-center"
+      eo-copy
+      nzType="primary"
+      [copyText]="item.name"
+      (copyCallback)="copyCallback()"
+      (click)="$event.stopPropagation()"
+    >
+      <svg class="iconpark-icon">
+        <use href="#copy"></use>
+      </svg>
+    </span>
+  </div>
 </ng-template>

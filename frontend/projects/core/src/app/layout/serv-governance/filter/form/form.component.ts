@@ -180,8 +180,6 @@ export class FilterFormComponent implements OnInit {
             }
           }
           this.changeFilterType(this.filterForm.name)
-        } else {
-          this.message.error(resp.msg || '获取数据失败!')
         }
       })
   }
@@ -241,8 +239,6 @@ export class FilterFormComponent implements OnInit {
           this.filterTypeMap.get(this.filterForm.name).total = resp.data.total
           this.filterForm.total = resp.data.total
           this.originDataLength = resp.data.total
-        } else {
-          this.message.error(resp.msg || '获取数据失败!')
         }
       })
   }
@@ -280,8 +276,6 @@ export class FilterFormComponent implements OnInit {
         this.apiGroupList = []
         this.apiGroupList = resp.data.root.groups
         this.apiGroupList = this.transferHeader(this.apiGroupList)
-      } else {
-        this.message.error(resp.msg || '获取数据失败!')
       }
     })
   }
@@ -303,8 +297,6 @@ export class FilterFormComponent implements OnInit {
       .subscribe((resp: {code:number, data:FilterRemoteOption, msg:string}) => {
         if (resp.code === 0) {
           this.remoteList = resp.data[resp.data.target]
-        } else {
-          this.message.error(resp.msg || '筛选失败!')
         }
       })
   }
