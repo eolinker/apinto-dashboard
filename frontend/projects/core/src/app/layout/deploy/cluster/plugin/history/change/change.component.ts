@@ -57,13 +57,14 @@ export class DeployClusterPluginHistoryChangeComponent implements OnInit {
             history.newValue = `状态：${this.getStatusString(history.newConfig.status)}，配置信息：${history.newConfig.config}`
             return history
           })
-        } else {
-          this.message.error(resp.msg || '获取列表数据失败!')
         }
       })
   }
 
   getStatusString (status:'GLOBAL'|'DISABLE'|'ENABLE') {
-    return this.statusList.filter((item:SelectOption) => { return item.value === status })[0].label
+    if (!status) {
+      return '无'
+    }
+    return this.statusList.filter((item:SelectOption) => { return item.value === status })[0]?.label
   }
 }

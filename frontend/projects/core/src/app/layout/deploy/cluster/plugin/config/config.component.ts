@@ -52,8 +52,6 @@ export class DeployClusterPluginConfigFormComponent implements OnInit {
           })[0].config)))
           this.config = config
         }
-      } else {
-        this.message.error(resp.msg || '获取配置信息失败!')
       }
     })
   }
@@ -71,13 +69,11 @@ export class DeployClusterPluginConfigFormComponent implements OnInit {
       this.api.post('cluster/' + this.clusterName + '/plugin', {
         name: this.validateConfigForm.value.name || '',
         status: this.validateConfigForm.value.status || '',
-        config: this.config || ''
+        config: JSON.parse(this.config || 'null')
       }).subscribe(resp => {
         if (resp.code === 0) {
           this.message.success(resp.msg || '添加成功', { nzDuration: 1000 })
           this.closeModal(true)
-        } else {
-          this.message.error(resp.msg || '添加失败!')
         }
       })
     } else {

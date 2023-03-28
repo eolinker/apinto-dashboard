@@ -133,8 +133,6 @@ export class EditableEnvTableComponent implements OnInit {
         })
         this.environmentList = resp.data.variables
         this.variablePage.total = resp.data.total
-      } else {
-        this.message.error(resp.msg || '获取列表数据失败!')
       }
     })
   }
@@ -155,8 +153,6 @@ export class EditableEnvTableComponent implements OnInit {
       if (resp.code === 0) {
         this.message.success(resp.msg || '添加成功！', { nzDuration: 1000 })
         this.getEnvlist()
-      } else {
-        this.message.error(resp.msg || '添加失败!')
       }
     })
   }

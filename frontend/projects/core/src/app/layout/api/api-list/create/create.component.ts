@@ -169,9 +169,7 @@ export class ApiCreateComponent implements OnInit {
           this.initCheckbox()
         }
         this.getHeaderList()
-      } else {
-        this.message.error(resp.msg || '获取数据失败!')
-      }
+      } 
     })
   }
 
@@ -190,8 +188,6 @@ export class ApiCreateComponent implements OnInit {
         if (this.groupUuid) {
           this.validateForm.controls['groupUuid'].setValue(this.baseInfo.allParamsInfo.apiGroupId)
         }
-      } else {
-        this.message.error(resp.msg || '获取列表数据失败!')
       }
     })
   }
@@ -230,9 +226,7 @@ export class ApiCreateComponent implements OnInit {
         for (const item of resp.data.list) {
           this.serviceList = [...this.serviceList, { label: item, value: item }]
         }
-      } else {
-        this.message.error(resp.msg || '获取列表数据失败!')
-      }
+      } 
     })
   }
 
@@ -243,9 +237,7 @@ export class ApiCreateComponent implements OnInit {
           const data = { label: item.name, value: item.uuid }
           return data
         })
-      } else {
-        this.message.error(resp.msg || '获取列表数据失败!')
-      }
+      } 
     })
   }
 
@@ -373,9 +365,7 @@ export class ApiCreateComponent implements OnInit {
           if (resp.code === 0) {
             this.backToList()
             this.message.success(resp.msg || '修改成功！', { nzDuration: 1000 })
-          } else {
-            this.message.error(resp.msg || '修改失败!')
-          }
+          } 
         })
       } else {
         this.api.post('router', {
@@ -391,9 +381,7 @@ export class ApiCreateComponent implements OnInit {
           if (resp.code === 0) {
             this.message.success(resp.msg || '添加成功！', { nzDuration: 1000 })
             this.backToList()
-          } else {
-            this.message.error(resp.msg || '添加失败!')
-          }
+          } 
         })
       }
     } else {

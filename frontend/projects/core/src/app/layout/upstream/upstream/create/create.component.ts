@@ -5,9 +5,11 @@ import { Component, Input, OnInit, TemplateRef, ViewChild } from '@angular/core'
 import { FormGroup, UntypedFormBuilder, Validators } from '@angular/forms'
 import { Router } from '@angular/router'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
+import { SelectOption } from 'eo-ng-select'
 import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { ApiService } from 'projects/core/src/app/service/api.service'
 import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { UpstreamBalanceList, UpstreamSchemeList } from '../types/conf'
 
 @Component({
   selector: 'eo-ng-upstream-create',
@@ -57,19 +59,10 @@ export class UpstreamCreateComponent implements OnInit {
     }
   }
 
-  schemeList: Array<{ label: string; value: string }> = [
-    { label: 'HTTP', value: 'HTTP' },
-    { label: 'HTTPS', value: 'HTTPS' }
-  ]
-
-  balanceList: Array<{ label: string; value: string }> = [
-    { label: 'round-robin', value: 'round-robin' }
-  ]
-
+  schemeList: SelectOption[] = [...UpstreamSchemeList]
+  balanceList: SelectOption[] = [...UpstreamBalanceList]
   discoveryList: Array<{ label: string; value: string; render: any }> = []
-
   useEnvVar: boolean = false
-
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
 
   startValidateDynamic:boolean = false
@@ -129,8 +122,6 @@ export class UpstreamCreateComponent implements OnInit {
           }
         }
         this.discoveryList = [...this.discoveryList]
-      } else {
-        this.message.error(resp.msg || '获取数据失败!')
       }
     })
   }
@@ -185,8 +176,6 @@ export class UpstreamCreateComponent implements OnInit {
           ]
         }
         this.getDiscovery()
-      } else {
-        this.message.error(resp.msg || '获取数据失败!')
       }
     })
   }
@@ -277,8 +266,6 @@ export class UpstreamCreateComponent implements OnInit {
             if (resp.code === 0) {
               this.message.success(resp.msg || '新建服务成功!', { nzDuration: 1000 })
               this.backToList()
-            } else {
-              this.message.error(resp.msg || '新建服务失败!')
             }
           })
       } else {
@@ -298,8 +285,6 @@ export class UpstreamCreateComponent implements OnInit {
             if (resp.code === 0) {
               this.message.success(resp.msg || '修改服务成功!', { nzDuration: 1000 })
               this.backToList()
-            } else {
-              this.message.error(resp.msg || '修改服务失败!')
             }
           })
       }

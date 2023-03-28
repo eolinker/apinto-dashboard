@@ -71,8 +71,6 @@ export class ApiBatchPublishComponent implements OnInit {
           }
         }
         this.openDrawer(type)
-      } else {
-        this.message.error(resp.msg || '获取列表数据失败!')
       }
     })
   }
@@ -204,8 +202,6 @@ export class ApiBatchPublishComponent implements OnInit {
             this.onlineResultList[index].statusString = this.onlineResultList[index].status ? '成功' : '失败'
           }
           this.onlineToken = resp.data.onlineToken
-        } else {
-          this.message.error(resp.msg || '获取列表数据失败!')
         }
       })
   }
@@ -226,7 +222,6 @@ export class ApiBatchPublishComponent implements OnInit {
           this.apisSet = new Set()
           this.flashList.emit(true)
         } else {
-          this.message.error(resp.msg || '批量上线失败!')
           this.apisOperatorResult('online-res')
           this.resultList = resp.data.list
         }
@@ -243,9 +238,7 @@ export class ApiBatchPublishComponent implements OnInit {
         if (resp.code === 0) {
           this.flashList.emit(true)
           this.apisSet = new Set()
-        } else {
-          this.message.error(resp.msg || '批量下线失败!')
-        }
+        } 
         this.resultList = resp.data.list
         for (const index in this.resultList) {
           this.resultList[index].statusString = this.resultList[index].status ? '成功' : '失败'

@@ -76,8 +76,6 @@ export class ApiPluginTemplateCreateComponent implements OnInit {
           plugin.config = JSON.stringify(this.jsonService.handleJsonSchema2Json(JSON.parse(plugin.config))) === '{}' ? plugin.config : JSON.stringify(this.jsonService.handleJsonSchema2Json(JSON.parse(plugin.config)))
           return plugin
         })
-      } else {
-        this.message.error(resp.msg || '获取数据失败!')
       }
     })
   }
@@ -100,7 +98,7 @@ export class ApiPluginTemplateCreateComponent implements OnInit {
     if (this.validateForm.valid && !this.pluginConfigError) {
       const pluginListApi: PluginTemplateConfigItem[] = [] // 提交接口时转换disable
       for (const plugin of this.configList) {
-        pluginListApi.push({ ...plugin, disable: !plugin.disable })
+        pluginListApi.push({ ...plugin, disable: !plugin.disable, config: JSON.parse(plugin.config || 'null') })
       }
       if (this.editPage) {
         this.api.put('plugin/template', {
@@ -112,8 +110,6 @@ export class ApiPluginTemplateCreateComponent implements OnInit {
           if (resp.code === 0) {
             this.backToList()
             this.message.success(resp.msg || '修改成功！', { nzDuration: 1000 })
-          } else {
-            this.message.error(resp.msg || '修改失败!')
           }
         })
       } else {
@@ -126,8 +122,6 @@ export class ApiPluginTemplateCreateComponent implements OnInit {
           if (resp.code === 0) {
             this.message.success(resp.msg || '添加成功！', { nzDuration: 1000 })
             this.backToList()
-          } else {
-            this.message.error(resp.msg || '添加失败!')
           }
         })
       }

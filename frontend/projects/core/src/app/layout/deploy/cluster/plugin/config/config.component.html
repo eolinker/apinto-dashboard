@@ -35,11 +35,12 @@
   >
     <eo-ng-codebox
       style="display: block"
-      mode="json"
+      mode="typescript"
       [oprBtns]="['format', 'reset', 'copy', 'search', 'replace']"
       name="config"
       [(code)]="config"
       (codeChange)="handlerConfigChange()"
+      [autoFormat]="true"
     ></eo-ng-codebox>
   </nz-form-control>
 </nz-form-item>

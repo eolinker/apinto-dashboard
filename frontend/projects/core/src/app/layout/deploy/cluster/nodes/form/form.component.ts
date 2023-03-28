@@ -140,7 +140,6 @@ export class DeployClusterNodesFormComponent implements OnInit {
         } else {
           this.validateResetNodeForm.controls['clusterAddr'].markAsDirty()
           this.validateResetNodeForm.controls['clusterAddr'].updateValueAndValidity({ onlySelf: true })
-          this.message.error(resp.msg || '获取列表数据失败！', { nzDuration: 1000 })
         }
       })
     } else {
@@ -159,7 +158,6 @@ export class DeployClusterNodesFormComponent implements OnInit {
           this.message.success(resp.msg || '重置成功!', { nzDuration: 1000 })
           return true
         } else {
-          this.message.error(resp.msg || '重置失败!')
           return false
         }
       })

@@ -198,8 +198,6 @@ export class GreyCreateComponent implements OnInit {
               this.nodesList.push({ node: resp.data.strategy?.config.nodes[index as any] || '' })
             }
             this.nodesList = this.nodesList.length > 0 ? this.nodesList : [{ node: '' }]
-          } else {
-            this.message.error(resp.msg || '获取数据失败!')
           }
         }
       )
@@ -271,8 +269,6 @@ export class GreyCreateComponent implements OnInit {
             if (resp.code === 0) {
               this.message.success(resp.msg || '创建成功!', { nzDuration: 1000 })
               this.backToList()
-            } else {
-              this.message.error(resp.msg || '创建失败!')
             }
           })
       } else {
@@ -285,8 +281,6 @@ export class GreyCreateComponent implements OnInit {
             if (resp.code === 0) {
               this.message.success(resp.msg || '修改成功!', { nzDuration: 1000 })
               this.backToList()
-            } else {
-              this.message.error(resp.msg || '修改失败!')
             }
           })
       }

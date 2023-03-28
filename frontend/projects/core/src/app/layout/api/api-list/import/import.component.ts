@@ -119,9 +119,7 @@ export class ApiImportComponent implements OnInit {
           }
         }
         this.groupList = this.transferHeader(tempList)
-      } else {
-        this.message.error(resp.msg || '获取列表数据失败!')
-      }
+      } 
     })
   }
 
@@ -147,8 +145,6 @@ export class ApiImportComponent implements OnInit {
         for (const item of resp.data.list) {
           this.upstreamList = [...this.upstreamList, { label: item, value: item }]
         }
-      } else {
-        this.message.error(resp.msg || '获取列表数据失败!')
       }
     })
   }
@@ -205,8 +201,6 @@ export class ApiImportComponent implements OnInit {
           }
           this.resultList = resp.data.apis
           this.token = resp.data.token
-        } else {
-          this.message.error(resp.msg || '查重失败，请重试！')
         }
       })
     } else {
@@ -265,7 +259,6 @@ export class ApiImportComponent implements OnInit {
         this.flashList.emit()
         return true
       } else {
-        this.message.error(resp.msg || 'API导入失败，请重试！')
         return false
       }
     })

@@ -8,6 +8,7 @@ import { Subscription } from 'rxjs'
 import { MODAL_NORMAL_SIZE } from '../../constant/app.config'
 import { NzModalRef } from 'ng-zorro-antd/modal'
 import { EditableEnvTableComponent } from '../editable-env-table/editable-env-table.component'
+import { ApiService } from '../../service/api.service'
 
 @Component({
   selector: 'dynamic-component',
@@ -58,7 +59,8 @@ export class DynamicComponentComponent implements OnInit {
 
   constructor (
     private modalService:EoNgFeedbackModalService,
-     private changeDetectorRef:ChangeDetectorRef) { }
+     private changeDetectorRef:ChangeDetectorRef,
+     private api:ApiService) { }
 
   ngOnInit (): void {
   }
@@ -246,7 +248,7 @@ export class DynamicComponentComponent implements OnInit {
   seachForDepsDeep (itemList:any, itemName:string):any {
     if (itemList.properties) {
       for (let i = 0; i < itemList.properties.length; i++) {
-        if (itemList.properties[i].name === itemName) {
+        if (itemList.properties[i].name === itemName || itemList.properties[i].name === itemName.replace(/_([a-z])/g, (p, m) => m.toUpperCase())) {
           return itemList.properties[i].default
         } else if (itemList.properties[i].properties) {
           return this.seachForDepsDeep(itemList.properties[i], itemName)
@@ -254,7 +256,7 @@ export class DynamicComponentComponent implements OnInit {
       }
       return false
     } else {
-      if (itemList.name === itemName) {
+      if (itemList.name === itemName || itemList.name === itemName.replace(/_([a-z])/g, (p, m) => m.toUpperCase())) {
         return itemList.default
       }
     }
@@ -465,7 +467,7 @@ export class DynamicComponentComponent implements OnInit {
 
   fillEnv = (properties:any, key:string) => {
     for (let i = 0; i < properties.length; i++) {
-      if (properties[i].name === 'value' || properties[i].name === 'addrs_variable') {
+      if (properties[i].name === 'value' || properties[i].name === 'addrsVariable') {
         properties[i].default = '${' + key + '}'
       } else if (properties.properties) {
         this.fillEnv(properties, key)

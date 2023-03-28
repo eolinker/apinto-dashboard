@@ -70,8 +70,6 @@ export class ApplicationManagementListComponent implements OnInit {
           this.applicationsForm.applications = resp.data.applications
           this.applicationsForm.total = resp.data.total
           this.applicationName = this.applicationNameForSear
-        } else {
-          this.message.error(resp.msg || '刷新列表失败!')
         }
       })
   }
@@ -100,8 +98,6 @@ export class ApplicationManagementListComponent implements OnInit {
       if (resp.code === 0) {
         this.getApplicationsList()
         this.message.success(resp.msg || '删除成功', { nzDuration: 1000 })
-      } else {
-        this.message.error(resp.msg || '删除失败!')
       }
     })
   }
