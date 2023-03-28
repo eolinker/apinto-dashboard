@@ -192,7 +192,7 @@ func (c *clusterPluginService) GetList(ctx context.Context, namespaceID int, clu
 				if clusterPlugin == nil {
 					item.Status = 1
 					item.ChangeState = 1
-					item.Publish = 3
+					item.Publish = 1
 					list = append(list, item)
 					continue
 				}
