@@ -4,9 +4,7 @@ import { Injectable } from '@angular/core'
   providedIn: 'root'
 })
 export class EoNgJsonService {
-  constructor () { }
-
-  dataType = ['string', 'boolean', 'number']
+  dataType = ['string', 'boolean', 'number', 'integer']
   jsonKey = ['eo:type', 'dependencies', 'skill', 'switch', 'label', 'ui:sort', 'properties', 'type'] // json schema自定义的关键字
 
   handleJsonSchema2Json (data:any) {
@@ -16,21 +14,26 @@ export class EoNgJsonService {
       const type = param.type
       if (!this.jsonKey.includes(key)) {
         obj[key] = {}
-        if (this.dataType.includes(type)) {
+        if (!this.dataType.includes(type) && type !== 'object' && type !== 'array') {
           obj[key] = param.default || ''
         } else if (type === 'array') {
           const items = param.items
           if (this.dataType.includes(items.type)) {
-            obj[key] = [items.default || items.type === 'string' ? '' : (items.type === 'number' ? 0 : (items.type === 'boolean' ? false : null))]
+            obj[key] = [items.default || (
+              items.type === 'string'
+                ? ((items.required !== false && items?.enum?.length > 0) ? items.enum[0] : '')
+                : (items.type === 'number' ? ((items.required !== false && items.enum.length > 0) ? items.enum[0] : 0) : (items.type === 'boolean' ? ((items.required !== false && items.enum.length > 0) ? items.enum[0] : false) : null)))]
           } else {
             obj[key] = [this.handleJsonSchema2Json(items)]
           }
         } else if (type === 'object') {
           obj[key] = this.handleJsonSchema2Json(param)
-        } else if (type === 'number') {
-          obj[key] = 0
+        } else if (type === 'number' || type === 'integer') {
+          obj[key] = ((param.required !== false && param?.enum?.length > 0) ? param.enum[0] : 0)
         } else if (type === 'boolean') {
-          obj[key] = false
+          obj[key] = ((param.required !== false && param?.enum?.length > 0) ? param.enum[0] : false)
+        } else if (type === 'string') {
+          obj[key] = ((param.required !== false && param?.enum?.length > 0) ? param.enum[0] : '')
         }
       }
     }

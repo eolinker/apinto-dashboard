@@ -135,7 +135,6 @@ export class DeployClusterEnvironmentConfigFormComponent implements OnInit {
             this.closeModal(true)
             return true
           } else {
-            this.message.error(resp.msg || '操作失败!')
             return false
           }
         })
@@ -149,8 +148,6 @@ export class DeployClusterEnvironmentConfigFormComponent implements OnInit {
           if (resp.code === 0) {
             this.message.success(resp.msg || '添加成功', { nzDuration: 1000 })
             this.closeModal(true)
-          } else {
-            this.message.error(resp.msg || '添加失败!')
           }
         })
       }

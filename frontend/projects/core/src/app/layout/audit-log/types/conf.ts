@@ -1,5 +1,6 @@
 import { SelectOption } from 'eo-ng-select'
-import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
+import { THEAD_TYPE } from 'eo-ng-table'
+import { EO_TBODY_TYPE } from 'projects/eo-ng-apinto-table/src/public-api'
 
 export const auditQueryStatusTypeList:SelectOption[] = [
   { label: '新建', value: 'create' },
@@ -34,12 +35,24 @@ export const auditLogsTableHeadName: THEAD_TYPE[] = [
   }
 ]
 
-export const auditLogsTableBody: TBODY_TYPE[] = [
-  { key: 'username' },
-  { key: 'operateType' },
-  { key: 'kind' },
+export const auditLogsTableBody: EO_TBODY_TYPE[] = [
+  {
+    key: 'username',
+    copy: true
+  },
+  {
+    key: 'operateType',
+    copy: true
+  },
+  {
+    key: 'kind',
+    copy: true
+  },
   { key: 'time' },
-  { key: 'ip' },
+  {
+    key: 'ip',
+    copy: true
+  },
   {
     type: 'btn',
     right: true,
@@ -59,17 +72,22 @@ export const auditLogDetailTableHeadName: THEAD_TYPE[] = [
   { title: '配置' }
 ]
 
-export const auditLogDetailTableBody: TBODY_TYPE[] = [
-  { key: 'attr' },
+export const auditLogDetailTableBody: EO_TBODY_TYPE[] = [
+  {
+    key: 'attr',
+    copy: true
+  },
   {
     key: 'value',
     styleFn: (item:any) => {
       if (item.attr === '请求内容') {
-        return 'white-space: pre-line;word-wrap:break-word; word-break:break-all'
+        return 'white-space: pre-wrap;word-wrap:break-word; word-break:break-all'
       } else {
         return 'white-space: unset;word-wrap:break-word; word-break:break-all'
       }
     },
-    ellipsis: false
+    ellipsis: false,
+    copy: true,
+    json: true
   }
 ]

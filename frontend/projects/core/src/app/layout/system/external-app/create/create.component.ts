@@ -66,8 +66,6 @@ export class ExternalAppCreateComponent implements OnInit {
             resp.data.info.desc
           )
           this.validateForm.controls['id'].disable()
-        } else {
-          this.message.error(resp.msg || '获取数据失败!')
         }
       })
   }
@@ -76,8 +74,6 @@ export class ExternalAppCreateComponent implements OnInit {
     this.api.get('random/external-app/id').subscribe((resp: any) => {
       if (resp.code === 0) {
         this.validateForm.controls['id'].setValue(resp.data.id)
-      } else {
-        this.message.error(resp.msg || '获取应用ID失败!')
       }
     })
   }
@@ -98,8 +94,6 @@ export class ExternalAppCreateComponent implements OnInit {
             if (resp.code === 0) {
               this.message.success(resp.msg || '添加成功')
               this.backToList()
-            } else {
-              this.message.error(resp.msg || '添加失败!')
             }
           })
       } else {
@@ -111,8 +105,6 @@ export class ExternalAppCreateComponent implements OnInit {
             if (resp.code === 0) {
               this.message.success(resp.msg || '修改成功')
               this.backToList()
-            } else {
-              this.message.error(resp.msg || '修改失败!')
             }
           })
       }

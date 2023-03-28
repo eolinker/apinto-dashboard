@@ -127,9 +127,7 @@ export class DeployClusterPluginPublishComponent implements OnInit {
         this.publishData = resp.data
         this.publishData.plugins = resp.data.plugins?.map((item) => {
           item.finishValue = `插件顺序：${item.releasedSort}，状态：${this.getStatusString(item.releasedConfig.status)}，配置：${item.releasedConfig.config || 'null'}`
-          item.finishValueTooltip = item.finishValue.replace(/(，)/g, '，\n')
           item.noReleasedValue = `插件顺序：${item.nowSort}，状态：${this.getStatusString(item.noReleasedConfig.status)}，配置：${item.noReleasedConfig.config || 'null'}`
-          item.noReleasedValueTooltip = item.noReleasedValue.replace(/(，)/g, '，\n')
 
           return item
         }) || []
@@ -144,8 +142,6 @@ export class DeployClusterPluginPublishComponent implements OnInit {
             this.unpublishMsg = '当前插件不可发布'
           }
         }
-      } else {
-        this.message.error(resp.msg || '获取列表数据失败!')
       }
     })
   }
@@ -169,7 +165,6 @@ export class DeployClusterPluginPublishComponent implements OnInit {
           this.closeModal(true)
           return true
         } else {
-          this.message.error(resp.msg || '发布失败!')
           return false
         }
       })

@@ -48,8 +48,6 @@ export class DeployPluginListComponent implements OnInit {
     this.api.get('plugins').subscribe((resp:{code:number, data:{plugins:PluginItem[]}, msg:string}) => {
       if (resp.code === 0) {
         this.pluginsList = resp.data.plugins
-      } else {
-        this.message.error(resp.msg || '获取列表数据失败!')
       }
     })
   }
@@ -79,8 +77,6 @@ export class DeployPluginListComponent implements OnInit {
         if (resp.code === 0) {
           this.message.success(resp.msg || '删除成功', { nzDuration: 1000 })
           this.getPluginsData()
-        } else {
-          this.message.error(resp.msg || '删除失败!')
         }
       })
   }
@@ -112,7 +108,6 @@ export class DeployPluginListComponent implements OnInit {
           this.getPluginsData()
           return of(true)
         } else {
-          this.message.error(resp.msg || '删除失败!')
           return of(true)
         }
       })
@@ -124,5 +119,11 @@ export class DeployPluginListComponent implements OnInit {
 
   addPlugin (): void {
     this.router.navigate(['/', 'deploy', 'plugin', 'create'])
+  }
+
+  copyCallback () {
+    this.message.success('复制成功', {
+      nzDuration: 1000
+    })
   }
 }

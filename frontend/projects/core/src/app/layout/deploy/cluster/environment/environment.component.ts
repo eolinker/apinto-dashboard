@@ -91,8 +91,6 @@ export class DeployClusterEnvironmentComponent implements OnInit {
     this.api.get('cluster/' + this.clusterName + '/variables').subscribe(resp => {
       if (resp.code === 0) {
         this.configsList = resp.data.variables
-      } else {
-        this.message.error(resp.msg || '获取列表数据失败!')
       }
     })
   }
@@ -121,8 +119,6 @@ export class DeployClusterEnvironmentComponent implements OnInit {
       if (resp.code === 0) {
         this.message.success(resp.msg || '删除成功', { nzDuration: 1000 })
         this.getConfigsList()
-      } else {
-        this.message.error(resp.msg || '删除失败!')
       }
     })
   }
@@ -219,5 +215,11 @@ export class DeployClusterEnvironmentComponent implements OnInit {
   closeModal = (fresh?:boolean) => {
     fresh && this.getConfigsList()
     this.drawerRef?.close()
+  }
+
+  copyCallback () {
+    this.message.success('复制成功', {
+      nzDuration: 1000
+    })
   }
 }

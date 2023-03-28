@@ -82,8 +82,6 @@ export class ApiPluginTemplatePublishComponent implements OnInit {
     this.api.get('plugin/template/onlines', { uuid: this.uuid }).subscribe((resp: { code: number; data: { clusters: object[] }; msg: any }) => {
       if (resp.code === 0) {
         this.clustersList = resp.data.clusters
-      } else {
-        this.message.error(resp.msg || '获取数据失败!')
       }
     })
   }
@@ -127,13 +125,8 @@ export class ApiPluginTemplatePublishComponent implements OnInit {
         this.message.success(resp.msg || '下线成功!', { nzDuration: 1000 })
         this.getClustersData()
       } else {
-        if (this.errorMessageId) {
-          this.message.remove(this.errorMessageId)
-          this.errorMessageId = ''
-        }
         this.type = '下线'
         this.failmsg = resp.msg
-        this.message.error(resp.msg)
       }
     })
   }

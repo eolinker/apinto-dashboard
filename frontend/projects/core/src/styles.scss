@@ -341,12 +341,19 @@ ul {
   margin-bottom: 0em !important;
 }
 
-div,
-a,
-span {
-  font-family: 'Helvetica Neue', 'Helvetica', 'PingFang SC', 'Hiragino Sans GB',
-    'Microsoft YaHei', 'Noto Sans CJK SC', 'WenQuanYi Micro Hei', 'Arial',
-    sans-serif;
+// div,
+// a,
+// span {
+//   font-family: 'Helvetica Neue', 'Helvetica', 'PingFang SC', 'Hiragino Sans GB',
+//     'Microsoft YaHei', 'Noto Sans CJK SC', 'WenQuanYi Micro Hei', sans-serif;
+// }
+
+.ace_text-layer,
+.ace_content,
+.ace_editor,
+.ace_line {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro',
+    monospace !important;
 }
 
 a {
@@ -354,7 +361,7 @@ a {
 }
 a:hover,
 a:active {
-  color: var(--button-primary-background-color_HOVER);
+  color: var(--button-primary-hover-background-color);
 }
 
 label {
@@ -1225,6 +1232,11 @@ input::placeholder {
   .ant-tooltip-arrow-content {
     --antd-arrow-background-color: linear-gradient(to right bottom, #fff, #fff);
   }
+  .ant-tooltip-arrow-content::before {
+    background: linear-gradient(to right bottom, #fff, #fff);
+    background-repeat: no-repeat;
+    background-position: -10px -10px;
+  }
 }
 
 .ant-input-suffix {
@@ -1336,8 +1348,8 @@ eo-ng-apinto-user-avatar {
   }
 }
 
-.ant-tooltip.tooltip-json {
-  white-space: pre-line;
+.ant-tooltip.tooltip-json .ant-tooltip-inner {
+  white-space: pre-wrap;
   word-break: break-all;
   overflow-wrap: break-word;
 }

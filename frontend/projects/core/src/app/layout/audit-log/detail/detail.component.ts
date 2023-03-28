@@ -19,15 +19,30 @@ import { AuditLogDetail } from '../types/types'
       </eo-ng-apinto-table>
     </div>
     <ng-template #detailTdTpl let-item="item">
+    <div class="leading-[22px] flex items-center">
     <span
-    class="default-tpl-td-span whitespace-pre-line break-all break-words"
+    class=" mr-[8px] default-tpl-td-span whitespace-pre-wrap break-all break-words"
     eoNgFeedbackTooltip
     [nzTooltipTitle]="item.value"
     [nzTooltipVisible]="false"
     [nzTooltipTrigger]="'hover'"
-    [ngClass]="{'break-all':item.attr === '请求内容' ,'whitespace-pre-line':item.attr === '请求内容','break-words':item.attr === '请求内容'}"
+    [nzTooltipOverlayClassName]="item.attr === '请求内容' ? 'tooltip-json' : ''"
+    [ngClass]="{'break-all':item.attr === '请求内容' ,'whitespace-pre-wrap':item.attr === '请求内容','break-words':item.attr === '请求内容'}"
     >{{ item.value}}
   </span>
+    <span
+      class="h-[20px] leading-[22px] text-[12px] opacity-0 cursor-pointer inline-flex items-center"
+      eo-copy
+      nzType="primary"
+      [copyText]="item.value"
+      (copyCallback)="copyCallback()"
+      (click)="$event.stopPropagation()"
+    >
+      <svg class="iconpark-icon">
+        <use href="#copy"></use>
+      </svg>
+    </span>
+  </div>
     </ng-template>
   `,
   styles: [
@@ -62,9 +77,13 @@ export class AuditLogDetailComponent implements OnInit {
               this.auditLogDetail[index].value = JSON.stringify(JSON.parse(this.auditLogDetail[index].value), null, 4)
             }
           }
-        } else {
-          this.message.error(resp.msg || '获取日志详情失败！')
         }
       })
+  }
+
+  copyCallback () {
+    this.message.success('复制成功', {
+      nzDuration: 1000
+    })
   }
 }

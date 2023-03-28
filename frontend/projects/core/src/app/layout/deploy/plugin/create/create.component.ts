@@ -87,9 +87,7 @@ export class DeployPluginCreateComponent implements OnInit {
               extended: resp.data.plugin!.extended,
               desc: resp.data.plugin!.desc || ''
             })
-          } else {
-            this.message.error(resp.msg || '获取数据失败!')
-          }
+          } 
         }
       )
   }
@@ -115,8 +113,6 @@ export class DeployPluginCreateComponent implements OnInit {
               value: this.validateForm.controls['extended'].value
             }]
         }
-      } else {
-        this.message.error(resp.msg || '获取列表数据失败！')
       }
     })
   }
@@ -130,9 +126,7 @@ export class DeployPluginCreateComponent implements OnInit {
             value: plugins.name
           })
         )
-      } else {
-        this.message.error(resp.msg || '获取列表数据失败！')
-      }
+      } 
     })
   }
 
@@ -149,17 +143,13 @@ export class DeployPluginCreateComponent implements OnInit {
         this.api.post('plugin', params).subscribe((resp) => {
           if (resp.code === 0) {
             this.router.navigate(['/', 'deploy', 'plugin'])
-          } else {
-            this.message.error(resp.msg || '操作失败！')
           }
         })
       } else {
         this.api.put('plugin', { name: this.validateForm.controls['name'].value || '', desc: this.validateForm.controls['desc'].value || '' }).subscribe((resp) => {
           if (resp.code === 0) {
             this.router.navigate(['/', 'deploy', 'plugin'])
-          } else {
-            this.message.error(resp.msg || '操作失败！')
-          }
+          } 
         })
       }
     } else {
