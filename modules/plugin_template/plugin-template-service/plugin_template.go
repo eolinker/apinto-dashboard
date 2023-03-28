@@ -462,6 +462,16 @@ func (p *pluginTemplateService) GetBasicInfoByUUID(ctx context.Context, uuid str
 	}, nil
 }
 
+func (p *pluginTemplateService) GetBasicInfoByID(ctx context.Context, id int) (*plugin_template_model.PluginTemplateBasicInfo, error) {
+	pluginTemplate, err := p.pluginTemplateStore.Get(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return &plugin_template_model.PluginTemplateBasicInfo{
+		PluginTemplate: pluginTemplate,
+	}, nil
+}
+
 func (p *pluginTemplateService) getPluginTemplateVersion(ctx context.Context, pluginTemplateId int) (*plugin_template_model.PluginTemplateVersion, error) {
 	var err error
 
