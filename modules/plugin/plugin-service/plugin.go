@@ -5,14 +5,18 @@ import (
 	"errors"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
+	"github.com/eolinker/apinto-dashboard/modules/api"
 	"github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-dashboard/modules/base/locker-service"
+	quote_entry "github.com/eolinker/apinto-dashboard/modules/base/quote-entry"
+	quote_store "github.com/eolinker/apinto-dashboard/modules/base/quote-store"
 	"github.com/eolinker/apinto-dashboard/modules/cluster"
 	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-model"
 	"github.com/eolinker/apinto-dashboard/modules/plugin"
 	"github.com/eolinker/apinto-dashboard/modules/plugin/plugin-entry"
 	"github.com/eolinker/apinto-dashboard/modules/plugin/plugin-model"
 	"github.com/eolinker/apinto-dashboard/modules/plugin/plugin-store"
+	"github.com/eolinker/apinto-dashboard/modules/plugin_template"
 	"github.com/eolinker/apinto-dashboard/modules/user"
 	"github.com/eolinker/eosc/common/bean"
 	"sort"
@@ -22,26 +26,31 @@ import (
 
 type pluginService struct {
 	pluginStore        plugin_store.IPluginStore
+	quoteStore         quote_store.IQuoteStore
 	pluginHistoryStore plugin_store.IPluginHistoryStore
 	extenderCache      IExtenderCache
 
-	userInfoService      user.IUserInfoService
-	clusterService       cluster.IClusterService
-	lockService          locker_service.IAsynLockService
-	apintoClient         cluster.IApintoClient
-	clusterPluginService plugin.IClusterPluginService
+	userInfoService       user.IUserInfoService
+	apiService            api.IAPIService
+	pluginTemplateService plugin_template.IPluginTemplateService
+	clusterService        cluster.IClusterService
+	lockService           locker_service.IAsynLockService
+	apintoClient          cluster.IApintoClient
+	clusterPluginService  plugin.IClusterPluginService
 }
 
 func newPluginService() plugin.IPluginService {
 	n := &pluginService{}
 	bean.Autowired(&n.pluginStore)
 	bean.Autowired(&n.pluginHistoryStore)
+	bean.Autowired(&n.quoteStore)
 	bean.Autowired(&n.extenderCache)
 	bean.Autowired(&n.userInfoService)
 	bean.Autowired(&n.clusterService)
 	bean.Autowired(&n.lockService)
 	bean.Autowired(&n.apintoClient)
 	bean.Autowired(&n.clusterPluginService)
+	bean.Autowired(&n.pluginTemplateService)
 	return n
 }
 
@@ -96,6 +105,28 @@ func (p *pluginService) isDelete(ctx context.Context, namespaceId int, clusters 
 	//依赖的插件不可删除
 	if _, ok := relyPlugin[plugin.Id]; ok {
 		return false, errors.New("依赖插件不可删除")
+	}
+
+	quote, _ := p.quoteStore.GetTargetQuote(ctx, plugin.Id, quote_entry.QuoteTargetKindTypePlugin)
+	for kindType, ids := range quote {
+		switch kindType {
+		case quote_entry.QuoteKindTypePluginTemplate:
+			if len(ids) > 0 {
+				pluginTemplateInfo, _ := p.pluginTemplateService.GetBasicInfoByID(ctx, ids[0])
+				if pluginTemplateInfo != nil {
+					return false, errors.New(fmt.Sprintf("该插件已被名为%s的模板引用，不可删除", pluginTemplateInfo.Name))
+				}
+			}
+			return false, errors.New("未知引用，不可删除")
+		case quote_entry.QuoteKindTypeAPI:
+			if len(ids) > 0 {
+				apiInfo, _ := p.apiService.GetAPIInfoById(ctx, ids[0])
+				if apiInfo != nil {
+					return false, errors.New(fmt.Sprintf("该插件已被名为%s的API引用，不可删除", apiInfo.Name))
+				}
+			}
+			return false, errors.New("未知引用，不可删除")
+		}
 	}
 
 	clusterNames := make([]string, 0)
