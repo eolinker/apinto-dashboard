@@ -247,7 +247,7 @@ export class DeployService {
           {
             title: '配置',
             disabledFn: (item:any) => {
-              return (item.publish === 'PUBLISHED' && item.isBuiltin) || context.nzDisabled
+              return (item.isBuiltin) || context.nzDisabled
             },
             click: (item:any) => {
               context.openDrawer('editConfig', item.data)
