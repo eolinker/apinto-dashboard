@@ -123,6 +123,7 @@ func (mon *monitorWarn) task(ctx context.Context, namespaceId int, key string, e
 		log.Warnf("lockKey=%s error=%s", lockKey, err.Error())
 		return
 	}
+	//因为key是由时间戳组成，所以不需要释放锁
 	//defer mon.unlock(ctx, lockKey)
 
 	//拿到维度、指标和周期获取指标值
@@ -138,6 +139,7 @@ func (mon *monitorWarn) task(ctx context.Context, namespaceId int, key string, e
 		return
 
 	}
+	// 开始时间为当前时间的前一分钟+统计的时间粒度
 	startTime := endTime.Add(-time.Minute * time.Duration(every))
 
 	groupStr := split[1]
