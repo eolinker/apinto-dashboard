@@ -2,7 +2,7 @@
 /* eslint-disable dot-notation */
 import { Component, Input, OnInit } from '@angular/core'
 import { FormGroup, UntypedFormBuilder, Validators } from '@angular/forms'
-import { Router, ActivatedRoute } from '@angular/router'
+import { Router } from '@angular/router'
 import {
   EoNgFeedbackMessageService
 } from 'eo-ng-feedback'
@@ -20,12 +20,13 @@ export class DeployEnvironmentCreateComponent implements OnInit {
   validateForm: FormGroup = new FormGroup({})
   VariableName: string = ''
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
+  submitButtonLoading:boolean = false
 
   globalEnvDetailList: Array<{
     clusterName: string
     environment: string
     value: string
-    publish_status: string
+    publishStatus: string
   }> = []
 
   constructor (
@@ -33,7 +34,6 @@ export class DeployEnvironmentCreateComponent implements OnInit {
     private api: ApiService,
     private fb: UntypedFormBuilder,
     private router: Router,
-    private activateInfo: ActivatedRoute,
     private appConfigService: AppConfigService
   ) {
     this.validateForm = this.fb.group({
@@ -54,12 +54,14 @@ export class DeployEnvironmentCreateComponent implements OnInit {
 
   save () {
     if (this.validateForm.valid) {
+      this.submitButtonLoading = true
       this.api
         .post('variable', {
           key: this.validateForm.controls['key'].value,
           desc: this.validateForm.controls['desc'].value || ''
         })
         .subscribe((resp) => {
+          this.submitButtonLoading = false
           if (resp.code === 0) {
             this.message.success(resp.msg || '新增环境变量成功！', { nzDuration: 1000 })
             this.router.navigate(['/', 'deploy', 'env'])

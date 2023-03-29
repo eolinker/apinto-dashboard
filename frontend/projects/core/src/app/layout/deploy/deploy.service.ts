@@ -76,8 +76,7 @@ export class DeployService {
         copy: true
       },
       {
-        key: 'env',
-        copy: true
+        key: 'env'
       }
     ]
   }
@@ -226,8 +225,7 @@ export class DeployService {
         copy: true
       },
       {
-        key: 'publish',
-        copy: true
+        key: 'publish'
       },
       {
         key: 'status'

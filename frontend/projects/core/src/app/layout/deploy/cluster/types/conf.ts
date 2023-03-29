@@ -170,11 +170,18 @@ export const DeployClusterNodeThead:THEAD_TYPE[] = [
 export const DeployClusterNodeTbody:EO_TBODY_TYPE[] = [
   {
     key: 'name',
-    ellipsis: true,
     copy: true
   },
-  { key: 'adminAddr', ellipsis: true },
-  { key: 'serviceAddr', ellipsis: true },
+  {
+    key: 'adminAddr',
+    json: true,
+    copy: true
+  },
+  {
+    key: 'serviceAddr',
+    json: true,
+    copy: true
+  },
   { key: 'status' }
 ]
 

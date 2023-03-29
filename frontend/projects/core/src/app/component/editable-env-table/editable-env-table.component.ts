@@ -12,6 +12,7 @@ import { ApiService } from 'projects/core/src/app/service/api.service'
 })
 export class EditableEnvTableComponent implements OnInit {
   @Output() eoChooseEnv = new EventEmitter()
+  envTableLoading:boolean = true
   envNameForSear:string = ''
   environmentTableHeadName: Array<object> = [
     { title: 'KEY' },
@@ -127,6 +128,7 @@ export class EditableEnvTableComponent implements OnInit {
 
   getEnvlist (key?:string) {
     this.api.get('variables', { pageNum: this.variablePage.pageNum, pageSize: this.variablePage.pageSize, key: key || '' }).subscribe(resp => {
+      this.envTableLoading = false
       if (resp.code === 0) {
         resp.data.variables.forEach((element:any) => {
           element.disabled = true

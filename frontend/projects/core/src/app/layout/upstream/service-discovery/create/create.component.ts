@@ -54,6 +54,7 @@ export class ServiceDiscoveryCreateComponent implements OnInit {
   driverList: Array<{ label: string; value: string; render: any }> = []
 
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
+  submitButtonLoading:boolean = false
 
   validateForm: FormGroup = new FormGroup({})
   showDynamicTips: boolean = false
@@ -201,6 +202,7 @@ export class ServiceDiscoveryCreateComponent implements OnInit {
         this.createServiceForm.config.useVariable === null
           ? false
           : this.createServiceForm.config.useVariable
+      this.submitButtonLoading = true
       if (!this.editPage) {
         this.api
           .post('discovery', {
@@ -208,6 +210,7 @@ export class ServiceDiscoveryCreateComponent implements OnInit {
             config: this.createServiceForm.config
           })
           .subscribe((resp) => {
+            this.submitButtonLoading = false
             if (resp.code === 0) {
               this.message.success(resp.msg || '新建服务成功', { nzDuration: 1000 })
               this.backToList()
@@ -226,6 +229,7 @@ export class ServiceDiscoveryCreateComponent implements OnInit {
             }
           )
           .subscribe((resp) => {
+            this.submitButtonLoading = false
             if (resp.code === 0) {
               this.message.success(resp.msg || '修改服务成功', { nzDuration: 1000 })
               this.backToList()

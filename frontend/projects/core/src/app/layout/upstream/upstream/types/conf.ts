@@ -20,12 +20,10 @@ export const UpstreamListTableBody: EO_TBODY_TYPE[] = [
     copy: true
   },
   {
-    key: 'scheme',
-    copy: true
+    key: 'scheme'
   },
   {
-    key: 'serviceType',
-    copy: true
+    key: 'serviceType'
   },
   {
     key: 'config',
@@ -72,8 +70,7 @@ export const ServicesTablebody:EO_TBODY_TYPE[] = [
     copy: true
   },
   {
-    key: 'driver',
-    copy: true
+    key: 'driver'
   },
   {
     key: 'desc'

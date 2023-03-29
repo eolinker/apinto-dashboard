@@ -16,11 +16,14 @@ import {
   EoNgFeedbackModalService,
   EoNgFeedbackMessageService
 } from 'eo-ng-feedback'
+import { THEAD_TYPE } from 'eo-ng-table'
 import { NzModalRef } from 'ng-zorro-antd/modal'
 import { MODAL_NORMAL_SIZE, MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
 import { ApiService } from 'projects/core/src/app/service/api.service'
 import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { EO_TBODY_TYPE } from 'projects/eo-ng-apinto-table/src/public-api'
 import { DeployEnvironmentDetailComponent } from '../detail/detail.component'
+import { DeployGlobalEnvTableBody, DeployGlobalEnvTableHeadName } from '../types/conf'
 
 @Component({
   selector: 'eo-ng-deploy-environment-list',
@@ -60,46 +63,8 @@ export class DeployEnvironmentListComponent {
 
   nzDisabled: boolean = false
 
-  globalEnvTableHeadName: Array<any> = [
-    { title: 'KEY' },
-    { title: '描述' },
-    { title: '创建者' },
-    { title: '创建时间' },
-    { title: '状态' },
-    {
-      title: '操作',
-      right: true
-    }
-  ]
-
-  globalEnvTableBody: Array<any> = [
-    { key: 'key' },
-    { key: 'description' },
-    { key: 'operator' },
-    { key: 'createTime' },
-    { key: 'status' },
-    {
-      type: 'btn',
-      right: true,
-      btns: [
-        {
-          title: '查看',
-          click: (item: any) => {
-            this.openDrawer(item.data)
-          }
-        },
-        {
-          title: '删除',
-          disabledFn: (data:any, item:any) => {
-            return this.nzDisabled || item.data.status === 'IN_USE'
-          },
-          click: (item: any) => {
-            this.deleteModal(item.data)
-          }
-        }
-      ]
-    }
-  ]
+  globalEnvTableHeadName: THEAD_TYPE[] = [...DeployGlobalEnvTableHeadName]
+  globalEnvTableBody: EO_TBODY_TYPE[] = [...DeployGlobalEnvTableBody]
 
   editConfigDrawerRef: NzModalRef | undefined
 
@@ -135,6 +100,15 @@ export class DeployEnvironmentListComponent {
 
   ngAfterViewInit () {
     this.globalEnvTableBody[4].title = this.variableStatusTpl
+    this.globalEnvTableBody[5].btns[0].click = (item: any) => {
+      this.openDrawer(item.data)
+    }
+    this.globalEnvTableBody[5].btns[1].click = (item: any) => {
+      this.deleteModal(item.data)
+    }
+    this.globalEnvTableBody[5].btns[1].disabledFn = (data:any, item:any) => {
+      return this.nzDisabled || item.data.status === 'IN_USE'
+    }
   }
 
   disabledEdit (value: any) {

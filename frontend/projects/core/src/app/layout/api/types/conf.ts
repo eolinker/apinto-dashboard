@@ -54,20 +54,16 @@ export const matchHeaderTableHeadName:THEAD_TYPE[] = [
 export const matchHeaderTableBody:EO_TBODY_TYPE[] = [
 
   {
-    key: 'position',
-    copy: true
+    key: 'position'
   },
   {
-    key: 'key',
-    copy: true
+    key: 'key'
   },
   {
-    key: 'matchType',
-    copy: true
+    key: 'matchType'
   },
   {
-    key: 'pattern',
-    copy: true
+    key: 'pattern'
   },
   {
     type: 'btn',
@@ -99,16 +95,13 @@ export const proxyHeaderTableHeadName:THEAD_TYPE[] = [
 
 export const proxyHeaderTableBody:EO_TBODY_TYPE[] = [
   {
-    key: 'optType',
-    copy: true
+    key: 'optType'
   },
   {
-    key: 'key',
-    copy: true
+    key: 'key'
   },
   {
-    key: 'value',
-    copy: true
+    key: 'value'
   },
   {
     type: 'btn',
@@ -180,20 +173,17 @@ export const apisTableBody:EO_TBODY_TYPE[] = [
     copy: true
   },
   {
-    key: 'method',
-    copy: true
+    key: 'method'
   },
   {
-    key: 'service',
-    copy: true
+    key: 'service'
   },
   {
     key: 'requestPath',
     copy: true
   },
   {
-    key: 'source',
-    copy: true
+    key: 'source'
   },
   {
     key: 'updateTime'
@@ -256,8 +246,7 @@ export const apiImportCheckResultTableBody:EO_TBODY_TYPE[] = [
         return 'color:var(--disabled-text-color)'
       }
       return ''
-    },
-    copy: true
+    }
   },
   {
     key: 'name',
@@ -273,8 +262,7 @@ export const apiImportCheckResultTableBody:EO_TBODY_TYPE[] = [
         return 'color:var(--disabled-text-color)'
       }
       return ''
-    },
-    copy: true
+    }
   },
   {
     key: 'path',
@@ -293,8 +281,7 @@ export const apiImportCheckResultTableBody:EO_TBODY_TYPE[] = [
         return 'color:var(--disabled-text-color)'
       }
       return ''
-    },
-    copy: true
+    }
   },
   {
     key: 'statusString',
@@ -357,8 +344,7 @@ export const apiBatchOnlineVerifyTableBody :EO_TBODY_TYPE[] = [
         return 'color:#ff3b30'
       }
       return ''
-    },
-    copy: true
+    }
   },
   {
     type: 'btn',
@@ -438,8 +424,7 @@ export const apiBatchPublishResultTableBody:EO_TBODY_TYPE[] = [
         return 'color:#ff3b30'
       }
       return ''
-    },
-    copy: true
+    }
   }
 ]
 
@@ -501,8 +486,7 @@ export const PluginTemplatePublishTbody:EO_TBODY_TYPE[] = [
     copy: true
   },
   {
-    key: 'env',
-    copy: true
+    key: 'env'
   },
   { key: 'status' },
   { key: 'operator' },
