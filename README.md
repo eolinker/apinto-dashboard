@@ -15,7 +15,7 @@ Apinto Dashboad主版本应与 Apinto主版本一起使用。
 Apinto Dashboard V2.0.0 是一个可视化控制台项目，基于开源网关 Apinto，并满足企业级 API 网关需求场景。通过 Dashboard，可以管理集群、上游、应用和 API 等模块，并以集群维度管理各个模块的生命周期。该项目具有出色的用户操作体验，配置流程简短，上手难度低。
 
 Apinto Dashboard与Apinto交互流程如下图所示：
-<img width="1664" alt="img_v2_9852992b-7925-4aae-ab1c-1ed4eb6db20g" src="https://user-images.githubusercontent.com/18322454/226785132-9329b499-6d9c-4769-9bf0-4780606c62cf.png">
+<img width="1664" alt="img_v2_22590d84-f8a4-4d3a-9c67-b481ecfdf1fg" src="https://user-images.githubusercontent.com/18322454/228448391-160153ff-86b8-494c-9a1d-00afb34876a1.png">
 
 
 集群管理：管理各个环境的集群，给集群配置证书、配置并发布该集群下的环境变量、监控并管理集群下各个网关节点、配置管理等。
