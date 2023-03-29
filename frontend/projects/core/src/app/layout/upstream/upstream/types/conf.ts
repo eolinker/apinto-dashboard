@@ -50,7 +50,8 @@ export const UpstreamSchemeList:SelectOption[] = [
 ]
 
 export const UpstreamBalanceList:SelectOption[] = [
-  { label: 'round-robin', value: 'round-robin' }
+  { label: 'round-robin', value: 'round-robin' },
+  { label: 'ip-hash', value: 'ip-hash' }
 ]
 
 export const ServicesTableHeadName:THEAD_TYPE[] = [
