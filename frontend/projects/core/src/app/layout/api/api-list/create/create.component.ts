@@ -78,7 +78,7 @@ export class ApiCreateComponent implements OnInit {
   }
 
   pluginTemplateList:SelectOption[] = []
-
+  submitButtonLoading:boolean = false
   constructor (private message: EoNgFeedbackMessageService,
     private baseInfo:BaseInfoService,
     private api:ApiService,
@@ -169,7 +169,7 @@ export class ApiCreateComponent implements OnInit {
           this.initCheckbox()
         }
         this.getHeaderList()
-      } 
+      }
     })
   }
 
@@ -180,8 +180,6 @@ export class ApiCreateComponent implements OnInit {
         const tempList:ApiGroupsData[] = []
         for (const index in resp.data.root.groups) {
           this.firstLevelList.push(resp.data.root.groups[index].uuid)
-
-          resp.data.root.groups[index]['selectable'] = false
           tempList.push(resp.data.root.groups[index])
         }
         this.headerList = this.transferHeader(tempList)
@@ -226,7 +224,7 @@ export class ApiCreateComponent implements OnInit {
         for (const item of resp.data.list) {
           this.serviceList = [...this.serviceList, { label: item, value: item }]
         }
-      } 
+      }
     })
   }
 
@@ -237,7 +235,7 @@ export class ApiCreateComponent implements OnInit {
           const data = { label: item.name, value: item.uuid }
           return data
         })
-      } 
+      }
     })
   }
 
@@ -345,6 +343,7 @@ export class ApiCreateComponent implements OnInit {
       if (this.allChecked) {
         this.createApiForm.method = []
       }
+      this.submitButtonLoading = true
       if (this.editPage) {
         this.api.put('router', {
           name: this.validateForm.controls['name'].value,
@@ -362,10 +361,11 @@ export class ApiCreateComponent implements OnInit {
           proxyHeader: this.createApiForm.proxyHeader,
           match: this.createApiForm.match
         }, { uuid: this.apiUuid }).subscribe(resp => {
+          this.submitButtonLoading = false
           if (resp.code === 0) {
             this.backToList()
             this.message.success(resp.msg || '修改成功！', { nzDuration: 1000 })
-          } 
+          }
         })
       } else {
         this.api.post('router', {
@@ -378,10 +378,11 @@ export class ApiCreateComponent implements OnInit {
           requestPath: '/' + this.validateForm.controls['requestPath'].value,
           proxyPath: '/' + this.validateForm.controls['proxyPath'].value
         }).subscribe(resp => {
+          this.submitButtonLoading = false
           if (resp.code === 0) {
             this.message.success(resp.msg || '添加成功！', { nzDuration: 1000 })
             this.backToList()
-          } 
+          }
         })
       }
     } else {

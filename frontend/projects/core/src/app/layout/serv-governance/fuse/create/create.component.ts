@@ -39,7 +39,7 @@ export class FuseCreateComponent implements OnInit {
   filterShowList: FilterShowData[] = [] // 展示在前端页面的筛选条件表格,包含uuid和对应选项名称,实际提交时只需要uuid
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
   metricsList:SelectOption[]= [...metricsList]
-
+  submitButtonLoading:boolean = false
   createStrategyForm: FuseStrategyData = {
     name: '',
     desc: '',
@@ -312,11 +312,13 @@ export class FuseCreateComponent implements OnInit {
           }
         }
       }
+      this.submitButtonLoading = true
 
       if (!this.editPage) {
         this.api
           .post('strategy/fuse', data, { clusterName: this.clusterName })
           .subscribe((resp: EmptyHttpResponse) => {
+            this.submitButtonLoading = false
             if (resp.code === 0) {
               this.message.success(resp.msg || '创建成功!', { nzDuration: 1000 })
               this.backToList()
@@ -329,6 +331,7 @@ export class FuseCreateComponent implements OnInit {
             uuid: this.strategyUuid
           })
           .subscribe((resp: EmptyHttpResponse) => {
+            this.submitButtonLoading = false
             if (resp.code === 0) {
               this.message.success(resp.msg || '修改成功!', { nzDuration: 1000 })
               this.backToList()

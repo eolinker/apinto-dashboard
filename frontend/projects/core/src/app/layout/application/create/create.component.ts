@@ -30,6 +30,7 @@ export class ApplicationCreateComponent implements OnInit {
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
   customAttrTableBody: EO_TBODY_TYPE[] = [...customAttrTableBody]
   extraHeaderTableBody:EO_TBODY_TYPE[]= [...extraHeaderTableBody]
+  submitButtonLoading:boolean = false
 
   createApplicationForm: {
     customAttrList: ArrayItemData[]
@@ -215,6 +216,7 @@ export class ApplicationCreateComponent implements OnInit {
         }
       )
 
+      this.submitButtonLoading = true
       if (!this.editPage) {
         this.api
           .post('application', {
@@ -222,6 +224,7 @@ export class ApplicationCreateComponent implements OnInit {
             ...this.validateForm.value
           })
           .subscribe((resp: EmptyHttpResponse) => {
+            this.submitButtonLoading = false
             if (resp.code === 0) {
               this.message.success(resp.msg || '添加成功', { nzDuration: 1000 })
               this.backToList()
@@ -234,6 +237,7 @@ export class ApplicationCreateComponent implements OnInit {
             ...this.validateForm.value
           })
           .subscribe((resp: EmptyHttpResponse) => {
+            this.submitButtonLoading = false
             if (resp.code === 0) {
               this.message.success(resp.msg || '修改成功', { nzDuration: 1000 })
               this.backToList()

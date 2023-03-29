@@ -287,6 +287,7 @@
         type="submit"
         eo-ng-button
         (click)="saveStrategy()"
+        [nzLoading]="submitButtonLoading"
       >
         {{ editPage ? '提交' : '保存' }}
       </button>
