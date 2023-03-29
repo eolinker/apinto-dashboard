@@ -22,8 +22,7 @@ export const filterTableBody:EO_TBODY_TYPE[] = [
     copy: true
   },
   {
-    key: 'label',
-    copy: true
+    key: 'label'
   },
   {
     type: 'btn',
@@ -187,8 +186,7 @@ export const publishTableBody:EO_TBODY_TYPE[] = [
     copy: true
   },
   {
-    key: 'priority',
-    copy: true
+    key: 'priority'
   },
   { key: 'status' },
   { key: 'optTime' }]

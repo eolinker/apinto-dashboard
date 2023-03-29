@@ -64,6 +64,7 @@ export class UpstreamCreateComponent implements OnInit {
   discoveryList: Array<{ label: string; value: string; render: any }> = []
   useEnvVar: boolean = false
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
+  submitButtonLoading:boolean = false
 
   startValidateDynamic:boolean = false
   validateForm: FormGroup = new FormGroup({})
@@ -256,6 +257,7 @@ export class UpstreamCreateComponent implements OnInit {
         }
       }
       this.createUpstreamForm.timeout = Number(this.createUpstreamForm.timeout)
+      this.submitButtonLoading = true
       if (!this.editPage) {
         this.api
           .post('service', {
@@ -263,6 +265,7 @@ export class UpstreamCreateComponent implements OnInit {
             config: this.createUpstreamForm.config
           })
           .subscribe((resp) => {
+            this.submitButtonLoading = false
             if (resp.code === 0) {
               this.message.success(resp.msg || '新建服务成功!', { nzDuration: 1000 })
               this.backToList()
@@ -282,6 +285,7 @@ export class UpstreamCreateComponent implements OnInit {
             }
           )
           .subscribe((resp) => {
+            this.submitButtonLoading = false
             if (resp.code === 0) {
               this.message.success(resp.msg || '修改服务成功!', { nzDuration: 1000 })
               this.backToList()

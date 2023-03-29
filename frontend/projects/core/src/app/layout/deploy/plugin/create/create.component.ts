@@ -2,7 +2,6 @@
 import { Component, Input, OnInit } from '@angular/core'
 import { FormGroup, UntypedFormBuilder, Validators } from '@angular/forms'
 import { Router } from '@angular/router'
-import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { SelectOption } from 'eo-ng-select'
 import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { setFormValue } from 'projects/core/src/app/constant/form'
@@ -27,8 +26,8 @@ export class DeployPluginCreateComponent implements OnInit {
   clusterCanBeCreated: boolean = false
   testFlag:boolean = false
   testPassAddr:string = '' // 通过测试的集群地址
+  submitButtonLoading:boolean = false
   constructor (
-    private message: EoNgFeedbackMessageService,
     private api: ApiService,
     private router: Router,
     private fb: UntypedFormBuilder,
@@ -49,8 +48,9 @@ export class DeployPluginCreateComponent implements OnInit {
       this.validateForm.controls['name'].disable()
       this.validateForm.controls['rely'].disable()
       this.validateForm.controls['extended'].disable()
+    } else {
+      this.getExtendsList()
     }
-    this.getExtendsList()
     this.getRelysList()
   }
 
@@ -87,7 +87,8 @@ export class DeployPluginCreateComponent implements OnInit {
               extended: resp.data.plugin!.extended,
               desc: resp.data.plugin!.desc || ''
             })
-          } 
+            this.getExtendsList()
+          }
         }
       )
   }
@@ -126,7 +127,7 @@ export class DeployPluginCreateComponent implements OnInit {
             value: plugins.name
           })
         )
-      } 
+      }
     })
   }
 
@@ -139,17 +140,20 @@ export class DeployPluginCreateComponent implements OnInit {
         rely: this.validateForm.controls['rely'].value || '',
         desc: this.validateForm.controls['desc'].value || ''
       }
+      this.submitButtonLoading = true
       if (!this.editPage) {
         this.api.post('plugin', params).subscribe((resp) => {
+          this.submitButtonLoading = false
           if (resp.code === 0) {
             this.router.navigate(['/', 'deploy', 'plugin'])
           }
         })
       } else {
         this.api.put('plugin', { name: this.validateForm.controls['name'].value || '', desc: this.validateForm.controls['desc'].value || '' }).subscribe((resp) => {
+          this.submitButtonLoading = false
           if (resp.code === 0) {
             this.router.navigate(['/', 'deploy', 'plugin'])
-          } 
+          }
         })
       }
     } else {

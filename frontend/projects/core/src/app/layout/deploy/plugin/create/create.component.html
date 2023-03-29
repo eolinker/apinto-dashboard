@@ -86,6 +86,7 @@
         type="submit"
         eo-ng-button
         (click)="savePlugin()"
+        [nzLoading]="submitButtonLoading"
       >
         {{ editPage ? '提交' : '保存' }}
       </button>

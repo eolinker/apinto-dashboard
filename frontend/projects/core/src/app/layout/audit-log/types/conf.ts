@@ -41,12 +41,10 @@ export const auditLogsTableBody: EO_TBODY_TYPE[] = [
     copy: true
   },
   {
-    key: 'operateType',
-    copy: true
+    key: 'operateType'
   },
   {
-    key: 'kind',
-    copy: true
+    key: 'kind'
   },
   { key: 'time' },
   {

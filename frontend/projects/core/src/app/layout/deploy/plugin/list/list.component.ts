@@ -114,7 +114,7 @@ export class DeployPluginListComponent implements OnInit {
   }
 
   pluginTableClick= (item:any) => {
-    this.router.navigate(['/', 'deploy', 'plugin', 'message', item.name])
+    this.router.navigate(['/', 'deploy', 'plugin', 'message', item.data.name])
   }
 
   addPlugin (): void {

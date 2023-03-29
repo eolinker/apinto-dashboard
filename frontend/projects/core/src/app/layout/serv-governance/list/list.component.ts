@@ -24,7 +24,6 @@ import { StrategyListData } from '../types/types'
     height:38px;
     min-width:auto !important;
     padding:0 16px !important;
-    background-color:transparent;
     text-align: center;
   }`
   ]
@@ -294,7 +293,7 @@ export class ListComponent implements OnInit {
           item.isStop = isStop
           this.message.success((isStop ? '停用' : '启用') + '策略成功', { nzDuration: 1000 })
           this.getStrategiesList()
-        } 
+        }
       })
   }
 
