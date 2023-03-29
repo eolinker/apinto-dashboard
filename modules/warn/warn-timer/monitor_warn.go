@@ -96,6 +96,7 @@ func (mon *monitorWarn) monitorWarn() {
 			return
 		}
 
+		//以分区ID+统计粒度+指标+统计时间为分组生成策略
 		group := common.SliceToMapArray(strategiesAll, func(t *warn_model.WarnStrategy) string {
 			return fmt.Sprintf("%s:%s:%s:%d", t.PartitionUUID, t.Dimension, t.Quota, t.Every)
 		})
@@ -141,16 +142,19 @@ func (mon *monitorWarn) task(ctx context.Context, namespaceId int, key string, e
 
 	groupStr := split[1]
 	if groupStr == warn_model.DimensionTypePartition {
+		//维度为分区是查询该分区下集群的聚合数据
 		groupStr = warn_model.DimensionTypeCluster
 	}
 
 	if groupStr == warn_model.DimensionTypeService {
+		//apinto上游对应的字符串为upstream
 		groupStr = "upstream"
 	}
 
 	partitionUUID := split[0]
 	quotaType := warn_model.QuotaType(split[2])
 
+	//查询监控数据
 	statistics, err := mon.monitorStatistics.WarnStatistics(ctx, namespaceId, partitionUUID, startTime, endTime, groupStr, quotaType, nil)
 	if err != nil {
 		log.Errorf("monitorWarn-WarnStatistics error:%s", err.Error())
@@ -167,6 +171,7 @@ func (mon *monitorWarn) task(ctx context.Context, namespaceId int, key string, e
 
 	for _, strategy := range strategies {
 
+		//获取用户的邮箱和通知渠道ID
 		userEmailStr := make([]string, 0)
 		noticeUserId := make([]string, 0)
 		for _, userId := range strategy.WarnStrategyConfig.Users {
@@ -182,6 +187,7 @@ func (mon *monitorWarn) task(ctx context.Context, namespaceId int, key string, e
 		}
 
 		target := strategy.WarnStrategyConfig.Target
+		//获取实际的告警目录
 		values := mon.getRealTargetValues(apiMaps, serviceMaps, clusterNameMaps, strategy.Dimension, target.Rule, target.Values)
 
 		for _, rule := range strategy.WarnStrategyConfig.Rule {
@@ -195,9 +201,11 @@ func (mon *monitorWarn) task(ctx context.Context, namespaceId int, key string, e
 				}
 				switch strategy.Quota {
 				case warn_model.QuotaTypeReqFailRate, warn_model.QuotaTypeProxyFailRate:
+					//请求失败率和转发失败率计算,因是计算的该分区下集群的聚合数据，所以需要求平均数
 					targetValue *= 100
 					targetValue = targetValue / float64(len(values))
 				case warn_model.QuotaTypeAvgResp:
+					//平均响应时间计算
 					targetValue = targetValue / float64(len(values))
 				}
 
@@ -214,6 +222,7 @@ func (mon *monitorWarn) task(ctx context.Context, namespaceId int, key string, e
 					targetValue := statistics[value]
 					switch strategy.Quota {
 					case warn_model.QuotaTypeReqFailRate, warn_model.QuotaTypeProxyFailRate:
+						//请求失败率和转发失败率计算
 						targetValue *= 100
 					}
 
@@ -227,10 +236,11 @@ func (mon *monitorWarn) task(ctx context.Context, namespaceId int, key string, e
 				}
 			}
 
+			//warnList > 0 说明触发告警策略了
 			if len(warnList) > 0 {
 
 				historyInfo := getWarnHistoryInfo(strategy, warnList, endTime)
-				//不满足条件直接跳过
+				//是否需要发送告警消息，不需要直接跳过
 				if !mon.isSendTo(ctx, endTime, strategy) {
 					//设置告警但未发送状态
 					mon.setWarnMinuteStatus(ctx, endTime, strategy, warn_model.WarnStatusTrigger)
@@ -252,6 +262,7 @@ func (mon *monitorWarn) task(ctx context.Context, namespaceId int, key string, e
 				for _, uid := range rule.ChannelUuids {
 					channelUuid := uid
 
+					//利用协程快速发送通知消息
 					noticeErrGroup.Go(func() error {
 						noticeChannelDriver := mon.noticeChannelDriver.GetDriver(channelUuid)
 						if noticeChannelDriver == nil {
@@ -331,9 +342,9 @@ func (mon *monitorWarn) task(ctx context.Context, namespaceId int, key string, e
 func getWarnHistoryInfo(strategy *warn_model.WarnStrategy, warnList []warn_model.NoticeChannelWarn, t time.Time) *warn_model.WarnHistoryInfo {
 	historyTargets := make([]string, 0)
 	contentMaps := make(map[string]string)
-	for _, warn := range warnList {
-		contentMaps[warn.Name] = getContent(warn, false)
-		historyTargets = append(historyTargets, warn.Name)
+	for _, warnInfo := range warnList {
+		contentMaps[warnInfo.Name] = getContent(warnInfo, false)
+		historyTargets = append(historyTargets, warnInfo.Name)
 	}
 
 	content, _ := json.Marshal(contentMaps)
@@ -371,6 +382,7 @@ func (mon *monitorWarn) warnCount(ctx context.Context, namespaceId int, startTim
 	}
 	log.DebugF("monitorWarn-warnCount targetValue=%v strategy=%v values=%v statistics=%v", targetValue, strategy, values, statistics)
 
+	//查询同比或环比的数据
 	if isQueryRing {
 		ratio, _ = mon.getCompare(ctx, namespaceId, values, startTime, endTime, strategy, true)
 		switch strategy.Quota {
@@ -489,21 +501,21 @@ func (mon *monitorWarn) warnCount(ctx context.Context, namespaceId int, startTim
 		name := ""
 
 		if strategy.Dimension == warn_model.DimensionTypeApi {
-			if api, ok := apiMaps[values[0]]; ok {
-				url = api.RequestPathLabel
-				name = api.Name
+			if apiInfo, ok := apiMaps[values[0]]; ok {
+				url = apiInfo.RequestPathLabel
+				name = apiInfo.Name
 			}
 		} else if strategy.Dimension == warn_model.DimensionTypePartition {
 			clusters := make([]string, 0)
 			for _, value := range values {
-				if cluster, ok := clusterMaps[value]; ok {
-					clusters = append(clusters, cluster.Name)
+				if clusterInfo, ok := clusterMaps[value]; ok {
+					clusters = append(clusters, clusterInfo.Name)
 				}
 			}
 			name = strings.Join(clusters, ",")
 		} else if strategy.Dimension == warn_model.DimensionTypeCluster {
-			if cluster, ok := clusterMaps[values[0]]; ok {
-				name = cluster.Name
+			if clusterInfo, ok := clusterMaps[values[0]]; ok {
+				name = clusterInfo.Name
 			} else {
 				name = "未知集群名"
 			}
@@ -818,8 +830,8 @@ func (mon *monitorWarn) getRealTargetValues(apiMaps map[string]*api_model.APIInf
 	case warn_model.DimensionTypeApi:
 		switch rule {
 		case warn_model.RuleTypeUnlimited: //不限（查询所有的）
-			for uuid := range apiMaps {
-				values = append(values, uuid)
+			for uid := range apiMaps {
+				values = append(values, uid)
 			}
 			return values
 		case warn_model.RuleTypeContain: //包含
@@ -831,16 +843,16 @@ func (mon *monitorWarn) getRealTargetValues(apiMaps map[string]*api_model.APIInf
 					delete(tempMaps, value)
 				}
 			}
-			for uuid := range tempMaps {
-				values = append(values, uuid)
+			for uid := range tempMaps {
+				values = append(values, uid)
 			}
 			return values
 		}
 	case warn_model.DimensionTypeService:
 		switch rule {
 		case warn_model.RuleTypeUnlimited: //不限（查询所有的）
-			for uuid := range serviceMaps {
-				values = append(values, uuid)
+			for uid := range serviceMaps {
+				values = append(values, uid)
 			}
 			return values
 		case warn_model.RuleTypeContain: //包含
@@ -859,20 +871,21 @@ func (mon *monitorWarn) getRealTargetValues(apiMaps map[string]*api_model.APIInf
 		}
 	case warn_model.DimensionTypeCluster:
 		for _, value := range oldValues {
-			if cluster, ok := clusterMaps[value]; ok {
-				values = append(values, cluster.UUID)
+			if clusterInfo, ok := clusterMaps[value]; ok {
+				values = append(values, clusterInfo.UUID)
 			}
 		}
 		return values
 	case warn_model.DimensionTypePartition:
-		for _, cluster := range clusterMaps {
-			values = append(values, cluster.UUID)
+		for _, clusterInfo := range clusterMaps {
+			values = append(values, clusterInfo.UUID)
 		}
 		return values
 	}
 	return nil
 }
 
+// 格式化告警信息成字符串
 func getContent(val warn_model.NoticeChannelWarn, isHtml bool) string {
 	warnFrequency := fmt.Sprintf("%d分钟", val.Every)
 	if val.Every == 60 {
@@ -1105,13 +1118,13 @@ func formatWarnEmailMsg(title, dimension string, t time.Time, list []warn_model.
 
 func formatWarnWebhookMsg(title, _ string, t time.Time, list []warn_model.NoticeChannelWarn) string {
 	webhookMsg := make([]warn_model.MsgWebhook, 0)
-	for _, warn := range list {
+	for _, warnInfo := range list {
 
 		webhookMsg = append(webhookMsg, warn_model.MsgWebhook{
 			Title:   title,
-			Name:    warn.Name,
-			Url:     warn.Url,
-			Content: getContent(warn, false),
+			Name:    warnInfo.Name,
+			Url:     warnInfo.Url,
+			Content: getContent(warnInfo, false),
 			Time:    common.TimeToStr(t),
 		})
 	}
