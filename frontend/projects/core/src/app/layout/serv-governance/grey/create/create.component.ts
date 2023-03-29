@@ -108,8 +108,10 @@ export class GreyCreateComponent implements OnInit {
   }
 
   initTable () {
+    
     this.nodesTableBody[0].check = (item:any) => {
-      if (!/^((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3}:[0-9]+$/.test(item)) {
+      if (!/^((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3}:[0-9]+$/.test(item) &&
+      !/^[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\.?(:[0-9]+)?$/.test(item)) {
         return false
       }
       return true
