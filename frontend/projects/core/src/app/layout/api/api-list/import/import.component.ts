@@ -46,6 +46,7 @@ export class ApiImportComponent implements OnInit {
 
   validateForm:FormGroup = new FormGroup({})
   nzDisabled:boolean = false
+  checkButtonLoading:boolean = false
   constructor (
     private modalService:EoNgFeedbackModalService,
     private message: EoNgFeedbackMessageService,
@@ -113,13 +114,10 @@ export class ApiImportComponent implements OnInit {
         this.groupList = []
         const tempList:ApiGroupsData[] = []
         for (const index in resp.data.root.groups) {
-          if (resp.data.root.groups[index].children && resp.data.root.groups[index].children.length > 0) {
-            resp.data.root.groups[index]['selectable'] = false
-            tempList.push(resp.data.root.groups[index])
-          }
+          tempList.push(resp.data.root.groups[index])
         }
         this.groupList = this.transferHeader(tempList)
-      } 
+      }
     })
   }
 
@@ -176,7 +174,9 @@ export class ApiImportComponent implements OnInit {
       formData.append('group', this.validateForm.controls['group'].value)
       formData.append('upstream', this.validateForm.controls['upstream'].value)
       formData.append('request_prefix', this.validateForm.controls['requestPrefix'].value)
+      this.checkButtonLoading = true
       this.api.post('router/import', formData).subscribe((resp:{code:number, data:{apis:Array<{id:number, name:string, method:string, path:string, desc:string, status:string, [key:string]:any}>, token:string}, msg:string}) => {
+        this.checkButtonLoading = false
         if (resp.code === 0) {
           this.importFormPage = false
           const validArray = resp.data.apis.filter((value) => {

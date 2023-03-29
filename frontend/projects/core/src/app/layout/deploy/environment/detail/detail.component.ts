@@ -1,6 +1,8 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
-import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
+import { THEAD_TYPE } from 'eo-ng-table'
 import { ApiService } from 'projects/core/src/app/service/api.service'
+import { EO_TBODY_TYPE } from 'projects/eo-ng-apinto-table/src/public-api'
+import { DeployGlobalEnvDetailTableHeadName, DeployGlobalEnvDetailTableBody } from '../types/conf'
 
 @Component({
   selector: 'eo-ng-deploy-environment-detail',
@@ -18,7 +20,7 @@ import { ApiService } from 'projects/core/src/app/service/api.service'
 
 
   <ng-template #variableDetailStatusTpl let-item="item">
-  <ng-container [ngSwitch]="item.publish_status">
+  <ng-container [ngSwitch]="item.publishStatus">
     <span *ngSwitchCase="'UNPUBLISHED'" class="red-bold">未发布</span>
     <span *ngSwitchCase="'PUBLISHED'" class="green-bold">已发布</span>
     <span *ngSwitchCase="'DEFECT'" class="grey-bold">缺失</span>
@@ -34,30 +36,16 @@ export class DeployEnvironmentDetailComponent implements OnInit {
 
   envKey:string = ''
   globalEnvDetailList: Array<{
-    // eslint-disable-next-line camelcase
     clusterName: string
     environment: string
     value: string
-    // eslint-disable-next-line camelcase
-    publish_status: string
+    publishStatus: string
   }> = []
 
-  globalEnvDetailTableHeadName: Array<any> = [
-    { title: '集群' },
-    { title: '环境' },
-    { title: 'VALUE' },
-    { title: '状态' }
-  ]
-
-  globalEnvDetailTableBody: Array<any> = [
-    { key: 'clusterName' },
-    { key: 'environment' },
-    { key: 'value' },
-    { key: 'publish_status' }
-  ]
+  globalEnvDetailTableHeadName: THEAD_TYPE[] = [...DeployGlobalEnvDetailTableHeadName]
+  globalEnvDetailTableBody: EO_TBODY_TYPE[] = [...DeployGlobalEnvDetailTableBody]
 
   constructor (
-    private message: EoNgFeedbackMessageService,
     private api: ApiService
   ) {
   }

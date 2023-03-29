@@ -95,6 +95,7 @@
           eo-ng-button
           (click)="saveService()"
           eoNgUserAccess="upstream/serv-discovery"
+          [nzLoading]="submitButtonLoading"
         >
           {{ editPage ? '提交' : '保存' }}
         </button>

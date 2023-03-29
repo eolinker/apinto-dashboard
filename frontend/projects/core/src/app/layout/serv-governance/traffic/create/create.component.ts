@@ -41,6 +41,7 @@ export class TrafficCreateComponent implements OnInit {
   responseForm: FormGroup = new FormGroup({})
   showMetricsError: boolean = false
   nzDisabled: boolean = false
+  submitButtonLoading:boolean = false
 
   responseHeaderList: Array<{
     key: string
@@ -259,11 +260,13 @@ export class TrafficCreateComponent implements OnInit {
       if (!data.priority) {
         delete data.priority
       }
+      this.submitButtonLoading = true
 
       if (!this.editPage) {
         this.api
           .post('strategy/traffic', data, { clusterName: this.clusterName })
           .subscribe((resp: EmptyHttpResponse) => {
+            this.submitButtonLoading = false
             if (resp.code === 0) {
               this.message.success(resp.msg || '创建成功!', { nzDuration: 1000 })
               this.backToList()
@@ -276,6 +279,7 @@ export class TrafficCreateComponent implements OnInit {
             uuid: this.strategyUuid
           })
           .subscribe((resp: EmptyHttpResponse) => {
+            this.submitButtonLoading = false
             if (resp.code === 0) {
               this.message.success(resp.msg || '修改成功!', { nzDuration: 1000 })
               this.backToList()

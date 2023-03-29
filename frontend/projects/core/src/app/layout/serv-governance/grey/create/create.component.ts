@@ -49,6 +49,7 @@ export class GreyCreateComponent implements OnInit {
   filterShowList:FilterShowData[] = [] // 展示在前端页面的筛选条件表格,包含uuid和对应选项名称,实际提交时只需要uuid
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
   distributionOptions: RadioOption[] = [...distributionOptions]
+  submitButtonLoading:boolean = false
 
   createStrategyForm: GreyStrategyData = {
     name: '',
@@ -262,10 +263,12 @@ export class GreyCreateComponent implements OnInit {
 
       this.validateForm.controls['distribution'].value === 'percent' ? delete data.config.match : delete data.config.percent
       if (!this.validateForm.controls['priority'].value) { delete data.priority }
+      this.submitButtonLoading = true
       if (!this.editPage) {
         this.api
           .post('strategy/grey', data, { clusterName: this.clusterName })
           .subscribe((resp: EmptyHttpResponse) => {
+            this.submitButtonLoading = false
             if (resp.code === 0) {
               this.message.success(resp.msg || '创建成功!', { nzDuration: 1000 })
               this.backToList()
@@ -278,6 +281,7 @@ export class GreyCreateComponent implements OnInit {
             uuid: this.strategyUuid
           })
           .subscribe((resp: EmptyHttpResponse) => {
+            this.submitButtonLoading = false
             if (resp.code === 0) {
               this.message.success(resp.msg || '修改成功!', { nzDuration: 1000 })
               this.backToList()

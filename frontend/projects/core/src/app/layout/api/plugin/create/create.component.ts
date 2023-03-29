@@ -29,6 +29,7 @@ export class ApiPluginTemplateCreateComponent implements OnInit {
   configList: PluginTemplateConfigItem[] = []
   pluginConfigError:boolean = false
   startValid:boolean = false
+  submitButtonLoading:boolean = false
   constructor (private message: EoNgFeedbackMessageService,
     private baseInfo:BaseInfoService,
     private api:ApiService,
@@ -100,6 +101,7 @@ export class ApiPluginTemplateCreateComponent implements OnInit {
       for (const plugin of this.configList) {
         pluginListApi.push({ ...plugin, disable: !plugin.disable, config: JSON.parse(plugin.config || 'null') })
       }
+      this.submitButtonLoading = true
       if (this.editPage) {
         this.api.put('plugin/template', {
           uuid: this.uuid,
@@ -107,6 +109,7 @@ export class ApiPluginTemplateCreateComponent implements OnInit {
           desc: this.validateForm.controls['desc'].value,
           plugins: pluginListApi
         }).subscribe(resp => {
+          this.submitButtonLoading = false
           if (resp.code === 0) {
             this.backToList()
             this.message.success(resp.msg || '修改成功！', { nzDuration: 1000 })
@@ -119,6 +122,7 @@ export class ApiPluginTemplateCreateComponent implements OnInit {
           name: this.validateForm.controls['name'].value,
           plugins: pluginListApi
         }).subscribe(resp => {
+          this.submitButtonLoading = false
           if (resp.code === 0) {
             this.message.success(resp.msg || '添加成功！', { nzDuration: 1000 })
             this.backToList()

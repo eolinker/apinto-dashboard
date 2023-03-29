@@ -43,7 +43,7 @@ export class FilterFooterComponent {
   @Output() filterShowListChange:EventEmitter<FilterShowData [] > = new EventEmitter()
   @Output() filterNamesSetChange:EventEmitter<Set<string> > = new EventEmitter()
   @Output() drawerClose:EventEmitter<boolean> = new EventEmitter()
-
+  submitButtonLoading:boolean = false
   strategyType:string = '' // 策略类型
   _filterNamesSet: Set<string> = new Set() // 穿梭框内被勾选的选项uuid
   _filterShowList: FilterShowData [] = []

@@ -29,7 +29,8 @@ export class DeployClusterCreateComponent implements OnInit {
 
   nodesTableHeadName: THEAD_TYPE[] = [...DeployClusterNodeThead]
   nodesTableBody: TBODY_TYPE[] = [...DeployClusterNodeTbody]
-
+  submitButtonLoading:boolean = false
+  testButtonLoading:boolean = false
   nodesTableShow = false
   clusterCanBeCreated: boolean = false
   testFlag:boolean = false
@@ -82,11 +83,13 @@ export class DeployClusterCreateComponent implements OnInit {
   testCluster (): void {
     if (this.validateForm.controls['clusterAddr'].value && (/(\w+):\/\/([a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\.?)(:\d+)/.test(this.validateForm.controls['clusterAddr'].value) || /(\w+):\/\/(((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3})(:\d*)/.test(this.validateForm.controls['clusterAddr'].value))) {
       this.testFlag = true
+      this.testButtonLoading = true
       this.api
         .get('cluster-test', {
           clusterAddr: this.validateForm.controls['clusterAddr'].value
         })
         .subscribe((resp) => {
+          this.testButtonLoading = false
           if (resp.code === 0) {
             this.nodesList = resp.data.nodes
             this.clusterCanBeCreated = resp.data.isUpdate
@@ -134,7 +137,9 @@ export class DeployClusterCreateComponent implements OnInit {
         source: this.source || '',
         env: this.validateForm.controls['envValue'].value
       }
+      this.submitButtonLoading = true
       this.api.post('cluster', params).subscribe((resp) => {
+        this.submitButtonLoading = false
         if (resp.code === 0) {
           this.router.navigate(['/', 'deploy', 'cluster', 'content', this.validateForm.controls['clusterName'].value])
         }
