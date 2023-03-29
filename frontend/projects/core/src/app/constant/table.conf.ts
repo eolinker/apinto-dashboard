@@ -19,20 +19,16 @@ export const monitorAlarmStrategyTableBody:EO_TBODY_TYPE[] = [
     copy: true
   },
   {
-    key: 'warnDimension',
-    copy: true
+    key: 'warnDimension'
   },
   {
-    key: 'warnTarget',
-    copy: true
+    key: 'warnTarget'
   },
   {
-    key: 'warnRule',
-    copy: true
+    key: 'warnRule'
   },
   {
-    key: 'warnFrequency',
-    copy: true
+    key: 'warnFrequency'
   },
   { key: 'isEnable' },
   { key: 'operator' },
@@ -75,12 +71,10 @@ export const monitorAlarmHistoryTableBody:EO_TBODY_TYPE[] = [
     copy: true
   },
   {
-    key: 'warnTarget',
-    copy: true
+    key: 'warnTarget'
   },
   {
-    key: 'warnContent',
-    copy: true
+    key: 'warnContent'
   },
   { key: 'status' },
   { key: 'createTime' }
@@ -101,16 +95,13 @@ export const webhooksTableBody:EO_TBODY_TYPE[] = [
     copy: true
   },
   {
-    key: 'url',
-    copy: true
+    key: 'url'
   },
   {
-    key: 'method',
-    copy: true
+    key: 'method'
   },
   {
-    key: 'contentType',
-    copy: true
+    key: 'contentType'
   },
   { key: 'operator' },
   { key: 'updateTime' }

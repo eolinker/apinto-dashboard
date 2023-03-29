@@ -76,6 +76,7 @@
               type="button"
               class="ant-btn-primary ml-btnybase"
               (click)="testCluster()"
+              [nzLoading]="testButtonLoading"
             >
               测试
             </button>
@@ -117,7 +118,12 @@
         *ngIf="nodesTableShow"
       >
         <nz-form-control [nzOffset]="7">
-          <button class="ant-btn-primary" eo-ng-button (click)="saveCluster()">
+          <button
+            class="ant-btn-primary"
+            eo-ng-button
+            [nzLoading]="submitButtonLoading"
+            (click)="saveCluster()"
+          >
             保存
           </button>
           <button eo-ng-button class="ml-btnybase" (click)="cancel()">

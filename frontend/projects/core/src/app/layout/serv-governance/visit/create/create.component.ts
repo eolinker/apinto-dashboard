@@ -45,6 +45,8 @@ export class VisitCreateComponent implements OnInit {
     }
   }
 
+  submitButtonLoading:boolean = false
+
   constructor (
     private baseInfo:BaseInfoService,
     private message: EoNgFeedbackMessageService,
@@ -166,11 +168,12 @@ export class VisitCreateComponent implements OnInit {
           continue: this.validateForm.controls['continue'].value || false
         }
       }
-
+      this.submitButtonLoading = true
       if (!this.editPage) {
         this.api
           .post('strategy/visit', data, { clusterName: this.clusterName })
           .subscribe((resp: EmptyHttpResponse) => {
+            this.submitButtonLoading = false
             if (resp.code === 0) {
               this.message.success(resp.msg || '创建成功!', { nzDuration: 1000 })
               this.backToList()
@@ -183,6 +186,7 @@ export class VisitCreateComponent implements OnInit {
             uuid: this.strategyUuid
           })
           .subscribe((resp: EmptyHttpResponse) => {
+            this.submitButtonLoading = false
             if (resp.code === 0) {
               this.message.success(resp.msg || '修改成功!', { nzDuration: 1000 })
               this.backToList()

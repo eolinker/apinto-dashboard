@@ -45,8 +45,7 @@ export const CommonPublishTableBody:EO_TBODY_TYPE[] = [
     copy: true
   },
   {
-    key: 'env',
-    copy: true
+    key: 'env'
   },
   { key: 'status' },
   { key: 'disable' },
@@ -157,8 +156,7 @@ export const PublishTableBody:EO_TBODY_TYPE[] = [
     copy: true
   },
   {
-    key: 'env',
-    copy: true
+    key: 'env'
   },
   { key: 'status' },
   { key: 'operator' },

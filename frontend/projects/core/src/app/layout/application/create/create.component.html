@@ -95,6 +95,7 @@
           eo-ng-button
           eoNgUserAccess="application"
           (click)="saveApplication()"
+          [nzLoading]="submitButtonLoading"
         >
           {{ editPage ? '提交' : '保存' }}
         </button>

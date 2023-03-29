@@ -46,8 +46,7 @@ export const applicationsTableBody: EO_TBODY_TYPE[] = [
     copy: true
   },
   {
-    key: 'desc',
-    copy: true
+    key: 'desc'
   },
   { key: 'operator' },
   { key: 'updateTime' },
@@ -123,20 +122,17 @@ export const authenticationTableBody:EO_TBODY_TYPE[] = [
     copy: true
   },
   {
-    key: 'paramPosition',
-    copy: true
+    key: 'paramPosition'
   },
   {
-    key: 'paramName',
-    copy: true
+    key: 'paramName'
   },
   {
     key: 'paramInfo',
     copy: true
   },
   {
-    key: 'expireTimeString',
-    copy: true
+    key: 'expireTimeString'
   },
   { key: 'isTransparent' },
   { key: 'operator' },

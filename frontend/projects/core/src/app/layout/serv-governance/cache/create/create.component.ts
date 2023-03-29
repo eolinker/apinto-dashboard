@@ -29,6 +29,7 @@ export class CacheCreateComponent implements OnInit {
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
   nzDisabled: boolean = false
   validateForm: FormGroup = new FormGroup({})
+  submitButtonLoading:boolean = false
   createStrategyForm: CacheStrategyData = {
     name: '',
     desc: '',
@@ -146,11 +147,12 @@ export class CacheCreateComponent implements OnInit {
           validTime: this.validateForm.controls['validTime'].value
         }
       }
-
+      this.submitButtonLoading = true
       if (!this.editPage) {
         this.api
           .post('strategy/cache', data, { clusterName: this.clusterName })
           .subscribe((resp: EmptyHttpResponse) => {
+            this.submitButtonLoading = false
             if (resp.code === 0) {
               this.message.success(resp.msg || '创建成功!', { nzDuration: 1000 })
               this.backToList()
@@ -163,6 +165,7 @@ export class CacheCreateComponent implements OnInit {
             uuid: this.strategyUuid
           })
           .subscribe((resp: EmptyHttpResponse) => {
+            this.submitButtonLoading = false
             if (resp.code === 0) {
               this.message.success(resp.msg || '修改成功!', { nzDuration: 1000 })
               this.backToList()
