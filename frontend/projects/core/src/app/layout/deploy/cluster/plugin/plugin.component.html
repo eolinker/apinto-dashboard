@@ -44,7 +44,6 @@
 <ng-template #operatorStatusTpl let-item="item">
   <div class="leading-[22px] flex items-center">
     <span
-      class="mr-[8px]"
       eoNgFeedbackTooltip
       [nzTooltipTitle]="item.name"
       nzTooltipPlacement="top"
@@ -55,9 +54,9 @@
     >
 
     <ng-container [ngSwitch]="item.changeStatus">
-      <label class="green-bg ml10 mr-[8px]" *ngSwitchCase="'NEW'">新</label>
-      <label class="grey-bg ml10 mr-[8px]" *ngSwitchCase="'MODIFY'">改</label>
-      <label class="red-bg ml10 mr-[8px]" *ngSwitchCase="'DELETE'">删</label>
+      <span class="status-new-icon" *ngSwitchCase="'NEW'">新</span>
+      <span class="status-change-icon" *ngSwitchCase="'MODIFY'">改</span>
+      <span class="status-delete-icon" *ngSwitchCase="'DELETE'">删</span>
     </ng-container>
 
     <span

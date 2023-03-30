@@ -49,7 +49,7 @@
         '状态：' +
           getStatusString(item.oldConfig.status) +
           '，配置信息：' +
-          (item.oldConfig.config || 'null')
+          item.oldConfig.config
       )
     "
     [nzTooltipVisible]="false"
@@ -60,7 +60,7 @@
       '状态：' +
         getStatusString(item.oldConfig.status) +
         '，配置信息：' +
-        (item.oldConfig.config || 'null')
+        item.oldConfig.config
     }}
   </span>
 </ng-template>
@@ -73,7 +73,7 @@
         '状态：' +
           getStatusString(item.newConfig.status) +
           '，配置信息：' +
-          (item.newConfig.config || 'null')
+          item.newConfig.config
       )
     "
     [nzTooltipVisible]="false"
@@ -84,7 +84,7 @@
       '状态：' +
         getStatusString(item.newConfig.status) +
         '，配置信息：' +
-        (item.newConfig.config || 'null')
+        item.newConfig.config
     }}
   </span></ng-template
 >
