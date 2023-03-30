@@ -146,7 +146,7 @@ func (c *clusterPluginService) GetList(ctx context.Context, namespaceID int, clu
 				}
 			} else {
 				item.Publish = 1     //未发布
-				item.ChangeState = 1 //新增
+				item.ChangeState = 2 //修改
 				item.ReleasedSort = 0
 				item.NowSort = nowSort
 			}
@@ -184,35 +184,11 @@ func (c *clusterPluginService) GetList(ctx context.Context, namespaceID int, clu
 					item.ChangeState = 1
 				}
 			} else {
-				clusterPlugin := clusterPluginsMap[gPlugin.Name]
-				item.ClusterPlugin = &plugin_entry.ClusterPlugin{PluginName: gPlugin.Name}
-				item.Publish = 1
-
 				//当前集群插件中没有，则是刚新增的插件
-				if clusterPlugin == nil {
-					item.Status = 1
-					item.ChangeState = 1
-					item.Publish = 3
-					list = append(list, item)
-					continue
-				}
-
-				//若该插件已发布过
-				if released, has := releasedPluginsMap[gPlugin.Name]; has {
-					if clusterPlugin.Status == released.ClusterPlugin.Status && clusterPlugin.Config == released.ClusterPlugin.Config && released.Sort == nowSort {
-						item.Publish = 2     //已发布
-						item.ChangeState = 0 //无变更
-						item.ReleasedSort = nowSort
-						item.NowSort = nowSort
-					} else {
-						item.Publish = 1     //未发布
-						item.ChangeState = 2 //修改
-						item.ReleasedSort = released.Sort
-						item.NowSort = nowSort
-					}
-				} else {
-					item.ChangeState = 1
-				}
+				item.ClusterPlugin = &plugin_entry.ClusterPlugin{PluginName: gPlugin.Name}
+				item.Status = 1
+				item.ChangeState = 1 //新增
+				item.Publish = 3
 			}
 		}
 		list = append(list, item)
@@ -935,8 +911,12 @@ func getToSendPlugins(toPublish []*plugin_entry.CluPluginPublishConfig) ([]*v1.G
 func getInnerPlugins() []*plugin_model.InnerPlugin {
 	globalPlugins := global_plugin.GetGlobalPluginConf()
 	innerPlugins := make([]*plugin_model.InnerPlugin, 0, len(globalPlugins))
+
 	for _, pluginInfo := range globalPlugins {
-		conf, _ := json.Marshal(pluginInfo.Config)
+		var conf []byte
+		if pluginInfo.Config != nil {
+			conf, _ = json.Marshal(pluginInfo.Config)
+		}
 		status := 0
 		switch strings.ToUpper(pluginInfo.Status) {
 		case enum.PluginStateNameDisable:
