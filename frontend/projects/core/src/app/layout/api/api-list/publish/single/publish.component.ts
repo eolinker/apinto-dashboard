@@ -154,6 +154,8 @@ export class ApiPublishComponent implements OnInit {
                 disabled: !resp.data.router.params.serviceName
               }
             ])
+          } else {
+            this.message.error(resp.msg || '操作失败')
           }
         }
       })
