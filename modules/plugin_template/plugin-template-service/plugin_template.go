@@ -101,6 +101,10 @@ func (p *pluginTemplateService) GetList(ctx context.Context, namespaceId int) ([
 		resultList = append(resultList, pluginTemplate)
 	}
 
+	sort.Slice(resultList, func(i, j int) bool {
+		return resultList[i].UpdateTime.After(resultList[j].UpdateTime)
+	})
+
 	return resultList, nil
 }
 
