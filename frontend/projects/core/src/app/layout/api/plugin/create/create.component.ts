@@ -74,7 +74,11 @@ export class ApiPluginTemplateCreateComponent implements OnInit {
         setFormValue(this.validateForm, resp.data.template)
         this.configList = resp.data.template.plugins.map((plugin) => {
           plugin.disable = !plugin.disable
-          plugin.config = JSON.stringify(this.jsonService.handleJsonSchema2Json(JSON.parse(plugin.config))) === '{}' ? plugin.config : JSON.stringify(this.jsonService.handleJsonSchema2Json(JSON.parse(plugin.config)))
+          try {
+            plugin.config = JSON.stringify(this.jsonService.handleJsonSchema2Json(JSON.parse(plugin.config))) === '{}' ? plugin.config : JSON.stringify(this.jsonService.handleJsonSchema2Json(JSON.parse(plugin.config)))
+          } catch {
+            plugin.config = JSON.stringify(plugin.config)
+          }
           return plugin
         })
       }
@@ -99,7 +103,14 @@ export class ApiPluginTemplateCreateComponent implements OnInit {
     if (this.validateForm.valid && !this.pluginConfigError) {
       const pluginListApi: PluginTemplateConfigItem[] = [] // 提交接口时转换disable
       for (const plugin of this.configList) {
-        pluginListApi.push({ ...plugin, disable: !plugin.disable, config: JSON.parse(plugin.config || 'null') })
+        let configJson = ''
+        try {
+          configJson = JSON.parse(plugin.config || '{}')
+        } catch {
+          console.warn('JSON 数据解析失败')
+          configJson = plugin.config || '{}'
+        }
+        pluginListApi.push({ ...plugin, disable: !plugin.disable, config: configJson })
       }
       this.submitButtonLoading = true
       if (this.editPage) {

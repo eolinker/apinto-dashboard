@@ -36,6 +36,8 @@
       (codeChange)="codeChange()"
       [autoFormat]="true"
     ></eo-ng-codebox>
-    <div *ngIf="showValid" class="red">必填项</div>
+    <div *ngIf="showValid" class="red">
+      {{ code ? 'JSON格式有误' : '必填项' }}
+    </div>
   </div>
 </div>
