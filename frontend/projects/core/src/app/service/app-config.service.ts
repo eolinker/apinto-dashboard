@@ -147,7 +147,8 @@ export class AppConfigService {
                   children: childTemp,
                   icon: originMenuList[indexMenu].icon
                 }
-                this.menuMap.set(tempMenu['id'], tempMenu)
+                // @ts-ignore
+                this.menuMap.set(tempMenu['id']!, tempMenu)
                 this.viewRightsRouterList.push(originMenuList[indexMenu].routerLink)
               }
             } else if (moduleAccess?.length) {
@@ -162,6 +163,7 @@ export class AppConfigService {
                   menu: originMenuList[indexMenu].menu,
                   icon: originMenuList[indexMenu].icon
                 }
+                // @ts-ignore
                 this.menuMap.set(tempMenu['id'], tempMenu)
                 this.viewRightsRouterList.push(originMenuList[indexMenu].routerLink)
                 if (this.firstModulesId === originMenuList[indexMenu].id) {
