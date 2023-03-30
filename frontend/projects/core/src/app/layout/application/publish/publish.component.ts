@@ -71,22 +71,22 @@ export class ApplicationPublishComponent implements OnInit {
     this.clustersTableBody[8].btns[1].click = (item:any) => { this.disable(item.data) }
 
     // 状态:已上线&禁用 - 可操作:下线,启用
-    this.clustersTableBody[8].btns[0].disabledFn = () => { return this.nzDisabled }
-    this.clustersTableBody[8].btns[0].click = (item:any) => { this.offline(item.data) }
-    this.clustersTableBody[8].btns[1].disabledFn = () => { return this.nzDisabled }
-    this.clustersTableBody[8].btns[1].click = (item:any) => { this.enable(item.data) }
+    this.clustersTableBody[9].btns[0].disabledFn = () => { return this.nzDisabled }
+    this.clustersTableBody[9].btns[0].click = (item:any) => { this.offline(item.data) }
+    this.clustersTableBody[9].btns[1].disabledFn = () => { return this.nzDisabled }
+    this.clustersTableBody[9].btns[1].click = (item:any) => { this.enable(item.data) }
 
     // 状态:已下线&启用 - 可操作:上线,禁用
-    this.clustersTableBody[9].btns[0].disabledFn = () => { return this.nzDisabled }
-    this.clustersTableBody[9].btns[0].click = (item:any) => { this.updateOrOnline(item.data, '上线') }
-    this.clustersTableBody[9].btns[1].disabledFn = () => { return this.nzDisabled }
-    this.clustersTableBody[9].btns[1].click = (item:any) => { this.disable(item.data) }
-
-    // 状态:已下线&禁用 - 可操作:上线,启用
     this.clustersTableBody[10].btns[0].disabledFn = () => { return this.nzDisabled }
     this.clustersTableBody[10].btns[0].click = (item:any) => { this.updateOrOnline(item.data, '上线') }
     this.clustersTableBody[10].btns[1].disabledFn = () => { return this.nzDisabled }
-    this.clustersTableBody[10].btns[1].click = (item:any) => { this.enable(item.data) }
+    this.clustersTableBody[10].btns[1].click = (item:any) => { this.disable(item.data) }
+
+    // 状态:已下线&禁用 - 可操作:上线,启用
+    this.clustersTableBody[11].btns[0].disabledFn = () => { return this.nzDisabled }
+    this.clustersTableBody[11].btns[0].click = (item:any) => { this.updateOrOnline(item.data, '上线') }
+    this.clustersTableBody[11].btns[1].disabledFn = () => { return this.nzDisabled }
+    this.clustersTableBody[11].btns[1].click = (item:any) => { this.enable(item.data) }
   }
 
   ngAfterViewInit () {
