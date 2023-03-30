@@ -82,7 +82,7 @@ export class BasicLayoutComponent implements OnInit {
         this.sideMenuOptions = [...res]
         for (const index in this.sideMenuOptions) {
           this.sideMenuOptions[index].openChange = (value:MenuOptions) => {
-            this.openHandler(value['id'])
+            this.openHandler(value['id']!)
           }
         }
         this.getAccess()
@@ -119,7 +119,7 @@ export class BasicLayoutComponent implements OnInit {
       for (const index in this.sideMenuOptions) {
         if (router.split('/')[1] === this.sideMenuOptions[index]['router']?.split('/')[0]) {
           if (this.sideMenuOptions[index].children?.length) {
-            this.openHandler(this.sideMenuOptions[index]['id'])
+            this.openHandler(this.sideMenuOptions[index]['id']!)
           }
           break
         }
