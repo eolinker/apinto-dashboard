@@ -529,6 +529,7 @@ func (c *clusterPluginService) ToPublishes(ctx context.Context, namespaceId int,
 			Rely:             pluginInfo.Rely,
 			Extended:         pluginInfo.Extended,
 			PluginName:       pluginInfo.ClusterPlugin.PluginName,
+			ReleasedConfig:   plugin_entry.PluginToPublishConfig{},
 			NoReleasedConfig: plugin_entry.PluginToPublishConfig{Status: pluginInfo.ClusterPlugin.Status, Config: pluginInfo.ClusterPlugin.Config},
 			CreateTime:       pluginInfo.ClusterPlugin.CreateTime,
 			ReleasedSort:     0,
@@ -568,14 +569,15 @@ func (c *clusterPluginService) ToPublishes(ctx context.Context, namespaceId int,
 		}
 
 		entryPlugin := &plugin_entry.PluginToPublish{
-			PluginName:     pluginInfo.ClusterPlugin.PluginName,
-			ReleasedConfig: releasedValue,
-			Extended:       pluginInfo.Extended,
-			Rely:           pluginInfo.Rely,
-			ReleasedSort:   releasedSort,
-			NowSort:        0,
-			CreateTime:     pluginInfo.ClusterPlugin.CreateTime,
-			OptType:        3,
+			PluginName:       pluginInfo.ClusterPlugin.PluginName,
+			Extended:         pluginInfo.Extended,
+			Rely:             pluginInfo.Rely,
+			ReleasedConfig:   releasedValue,
+			NoReleasedConfig: plugin_entry.PluginToPublishConfig{},
+			ReleasedSort:     releasedSort,
+			NowSort:          0,
+			CreateTime:       pluginInfo.ClusterPlugin.CreateTime,
+			OptType:          3,
 		}
 
 		respList = append(respList, &plugin_model.ClusterPluginToPublish{PluginToPublish: entryPlugin})
@@ -623,6 +625,22 @@ func (c *clusterPluginService) Publish(ctx context.Context, namespaceId, userId 
 	}
 	if len(publishes) == 0 {
 		return errors.New("没有变化无需发布")
+	}
+
+	//获取全局插件
+	globalPlugins, err := c.pluginService.GetBasicInfoList(ctx, namespaceId)
+	if err != nil {
+		return err
+	}
+	globalPluginsMap := common.SliceToMap(globalPlugins, func(t *plugin_model.PluginBasic) string {
+		return t.Name
+	})
+	for _, p := range publishes {
+		gp := globalPluginsMap[p.PluginName]
+		//校验要发布的配置的JsonSchema格式是否正确
+		if err = common.JsonSchemaValid(gp.Schema, p.NoReleasedConfig.Config); err != nil {
+			return errors.New(fmt.Sprintf("插件%s配置格式错误 err=%s", p.PluginName, err.Error()))
+		}
 	}
 
 	//获取集群当前运行的版本
