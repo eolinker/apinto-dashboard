@@ -59,7 +59,7 @@ func (a *apiHTTP) CheckInput(input *api_dto.APIInfo) error {
 
 	var err error
 	//格式化,并且校验请求路径
-	input.RequestPath = "/" + strings.Trim(strings.TrimSpace(input.RequestPath), "/")
+	input.RequestPath = "/" + strings.TrimPrefix(strings.TrimSpace(input.RequestPath), "/")
 	if input.RequestPath == "/" {
 		return errors.New("request_path can't be / . ")
 	}
@@ -76,7 +76,7 @@ func (a *apiHTTP) CheckInput(input *api_dto.APIInfo) error {
 	}
 
 	//格式化转发路径, 并校验转发路径， 若转发路径出现restful参数，则必须对得上请求路径出现过得restful参数
-	input.ProxyPath = "/" + strings.Trim(strings.TrimSpace(input.ProxyPath), "/")
+	input.ProxyPath = "/" + strings.TrimPrefix(strings.TrimSpace(input.ProxyPath), "/")
 	if input.ProxyPath, err = common.CheckAndFormatPath(input.ProxyPath); err != nil {
 		return errors.New("proxy_path is illegal. ")
 	}
