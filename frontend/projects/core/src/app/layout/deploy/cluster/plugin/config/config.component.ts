@@ -25,6 +25,7 @@ export class DeployClusterPluginConfigFormComponent implements OnInit {
   config:string = ''
   pluginConfigError:boolean = false
   startValidate:boolean = false
+  pluginConfigFormaError:boolean = false
   @Input() editData?:ClusterPluginConfig
   constructor (
           private message: EoNgFeedbackMessageService,
@@ -47,10 +48,18 @@ export class DeployClusterPluginConfigFormComponent implements OnInit {
       if (resp.code === 0) {
         this.renderList = resp.data.plugins
         if (!this.editData?.config || this.editData?.config === 'null') {
-          const config = JSON.stringify(this.jsonService.handleJsonSchema2Json(JSON.parse(this.renderList.filter((config) => {
-            return config.name === this.validateConfigForm.controls['name'].value
-          })[0].config)))
-          this.config = config
+          let configJson = ''
+          try {
+            configJson = JSON.stringify(this.jsonService.handleJsonSchema2Json(JSON.parse(this.renderList.filter((config) => {
+              return config.name === this.validateConfigForm.controls['name'].value
+            })[0].config)))
+          } catch {
+            console.warn('JSON数据解析失败')
+            configJson = this.renderList.filter((config) => {
+              return config.name === this.validateConfigForm.controls['name'].value
+            })[0].config
+          }
+          this.config = configJson
         }
       }
     })
@@ -59,6 +68,7 @@ export class DeployClusterPluginConfigFormComponent implements OnInit {
   handlerConfigChange () {
     if (this.startValidate) {
       this.pluginConfigError = !this.config
+      this.pluginConfigFormaError = false
     }
   }
 
@@ -66,10 +76,19 @@ export class DeployClusterPluginConfigFormComponent implements OnInit {
     this.startValidate = true
     this.pluginConfigError = !this.config
     if (this.validateConfigForm.valid && !this.pluginConfigError) {
+      let configJson = ''
+      try {
+        configJson = JSON.parse(this.config || '{}')
+      } catch {
+        configJson = this.config
+        this.pluginConfigError = true
+        this.pluginConfigFormaError = true
+        return
+      }
       this.api.post('cluster/' + this.clusterName + '/plugin', {
         name: this.validateConfigForm.value.name || '',
         status: this.validateConfigForm.value.status || '',
-        config: JSON.parse(this.config || 'null')
+        config: configJson
       }).subscribe(resp => {
         if (resp.code === 0) {
           this.message.success(resp.msg || '添加成功', { nzDuration: 1000 })
