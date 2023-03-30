@@ -118,6 +118,8 @@ export class ApplicationPublishComponent implements OnInit {
           this.solutionParam = resp.data?.router?.params ? resp.data.router.params : {}
           if (this.solutionRouter) {
             this.publishFailModal.openModal(resp.msg, '应用', this.solutionRouter, this.solutionParam)
+          } else {
+            this.message.error(resp.msg || '操作失败')
           }
         }
       })

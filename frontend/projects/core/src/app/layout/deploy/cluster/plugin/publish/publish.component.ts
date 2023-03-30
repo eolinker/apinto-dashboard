@@ -126,8 +126,8 @@ export class DeployClusterPluginPublishComponent implements OnInit {
       if (resp.code === 0) {
         this.publishData = resp.data
         this.publishData.plugins = resp.data.plugins?.map((item) => {
-          item.finishValue = `插件顺序：${item.releasedSort}，状态：${this.getStatusString(item.releasedConfig.status)}，配置：${item.releasedConfig.config || 'null'}`
-          item.noReleasedValue = `插件顺序：${item.nowSort}，状态：${this.getStatusString(item.noReleasedConfig.status)}，配置：${item.noReleasedConfig.config || 'null'}`
+          item.finishValue = `插件顺序：${item.releasedSort}，状态：${this.getStatusString(item.releasedConfig.status)}，配置：${item.releasedConfig.config}`
+          item.noReleasedValue = `插件顺序：${item.nowSort}，状态：${this.getStatusString(item.noReleasedConfig.status)}，配置：${item.noReleasedConfig.config}`
 
           return item
         }) || []
