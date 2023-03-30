@@ -76,6 +76,13 @@ export class ApiPluginConfigFormComponent implements OnInit {
       this.showValid = true
       return
     }
+
+    try {
+      JSON.parse(this.code)
+    } catch {
+      this.showValid = true
+      return
+    }
     if (this.validateConfigForm.valid) {
       if (!this.data) {
         if (this.configHeaderSet.has(this.validateConfigForm.controls['name'].value)) {
@@ -116,8 +123,18 @@ export class ApiPluginConfigFormComponent implements OnInit {
         return plugin.name === this.validateConfigForm.controls['name'].value
       })[0].config
     })
-    this.code = JSON.stringify(this.jsonService.handleJsonSchema2Json(JSON.parse(this.pluginsList.filter((plugin) => {
-      return plugin.name === this.validateConfigForm.controls['name'].value
-    })[0].config)))
+    let configJson = ''
+    try {
+      configJson = JSON.parse(this.pluginsList.filter((plugin) => {
+        return plugin.name === this.validateConfigForm.controls['name'].value
+      })[0].config)
+      this.code = JSON.stringify(this.jsonService.handleJsonSchema2Json(configJson))
+    } catch {
+      console.warn('返回配置无法解析为json对象')
+      configJson = this.pluginsList.filter((plugin) => {
+        return plugin.name === this.validateConfigForm.controls['name'].value
+      })[0].config
+      this.code = JSON.stringify(configJson)
+    }
   }
 }

@@ -31,7 +31,7 @@
   <nz-form-control
     [nzSpan]="13"
     [nzValidateStatus]="pluginConfigError ? 'error' : ''"
-    nzErrorTip="必填项"
+    [nzErrorTip]="pluginConfigFormaError ? 'JSON格式有误' : '必填项'"
   >
     <eo-ng-codebox
       style="display: block"
