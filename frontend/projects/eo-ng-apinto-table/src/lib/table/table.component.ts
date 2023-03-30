@@ -169,7 +169,7 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
   }
 
   transferToJson (str:string) {
-    return str.replace(/(,)/g, ',\n').replace(/(，)/g, '，\n')
+    return str.replace(/(,\n)/g, ',').replace(/(,\n)/g, ',').replace(/(,)/g, ',\n').replace(/(，)/g, '，\n')
   }
 
   calculateScroll () {
