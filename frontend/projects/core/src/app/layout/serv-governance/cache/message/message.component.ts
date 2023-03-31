@@ -1,6 +1,5 @@
-/* eslint-disable dot-notation */
 import { Component, Input, OnInit } from '@angular/core'
-import { Router, ActivatedRoute } from '@angular/router'
+import { Router } from '@angular/router'
 import { ApiService } from 'projects/core/src/app/service/api.service'
 import { BaseInfoService } from 'projects/core/src/app/service/base-info.service'
 
@@ -17,13 +16,12 @@ import { BaseInfoService } from 'projects/core/src/app/service/base-info.service
   ]
 })
 export class CacheMessageComponent implements OnInit {
-  readonly nowUrl:string = this.router.routerState.snapshot.url
   @Input() strategyUuid:string = ''
   @Input() clusterName:string = ''
 
-  constructor (public api:ApiService,
+  constructor (
     private baseInfo:BaseInfoService,
-     private router:Router, private activateInfo:ActivatedRoute) {
+     private router:Router) {
   }
 
   ngOnInit (): void {
@@ -32,5 +30,4 @@ export class CacheMessageComponent implements OnInit {
       this.router.navigate(['/'])
     }
   }
-
 }

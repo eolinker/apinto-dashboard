@@ -122,8 +122,8 @@
               <nz-form-control
                 [nzValidateStatus]="showFuseStatusCodeError ? 'error' : ''"
                 [nzErrorTip]="
-                  createStrategyForm.config.fuse_condition.status_codes
-                    .length === 0
+                  createStrategyForm.config.fuseCondition.statusCodes.length ===
+                  0
                     ? '必填项'
                     : '状态码为不超过3位数的纯数字'
                 "
@@ -131,7 +131,7 @@
                 <eo-ng-select
                   class="w-INPUT_NORMAL"
                   [(ngModel)]="
-                    createStrategyForm.config.fuse_condition.status_codes
+                    createStrategyForm.config.fuseCondition.statusCodes
                   "
                   [nzOpen]="false"
                   (ngModelChange)="checkStatusCode('fuse')"
@@ -230,7 +230,7 @@
               <nz-form-control
                 [nzValidateStatus]="showRecoverStatusCodeError ? 'error' : ''"
                 [nzErrorTip]="
-                  createStrategyForm.config.recover_condition.status_codes
+                  createStrategyForm.config.recoverCondition.statusCodes
                     .length === 0
                     ? '必填项'
                     : '状态码为不超过3位数的纯数字'
@@ -239,7 +239,7 @@
                 <eo-ng-select
                   class="w-INPUT_NORMAL"
                   [(ngModel)]="
-                    createStrategyForm.config.recover_condition.status_codes
+                    createStrategyForm.config.recoverCondition.statusCodes
                   "
                   (ngModelChange)="checkStatusCode('recover')"
                   nzMode="tags"
@@ -299,7 +299,7 @@
     </nz-form-item>
   </form>
 
-  <nz-form-item class="mb-0 sticky bg-white bottom-0 py-mbase">
+  <nz-form-item class="mb-0 sticky bg-white bottom-0 py-mbase z-50">
     <nz-form-control [nzOffset]="6" [nzSpan]="18">
       <button
         class="ant-btn-primary"
@@ -307,6 +307,7 @@
         type="submit"
         eo-ng-button
         (click)="saveStrategy()"
+        [nzLoading]="submitButtonLoading"
       >
         {{ editPage ? '提交' : '保存' }}
       </button>

@@ -1,10 +1,10 @@
 /* eslint-disable dot-notation */
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
-import { Router, ActivatedRoute } from '@angular/router'
+import { Router } from '@angular/router'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { EoNgTreeDefaultComponent } from 'eo-ng-tree'
 import { NzTreeNodeOptions, NzTreeNode } from 'ng-zorro-antd/tree'
-import { } from 'rxjs'
+import { ClusterEnum } from '../../../constant/type'
 import { ApiService } from '../../../service/api.service'
 import { AppConfigService } from '../../../service/app-config.service'
 import { BaseInfoService } from '../../../service/base-info.service'
@@ -12,25 +12,20 @@ import { BaseInfoService } from '../../../service/base-info.service'
 @Component({
   selector: 'eo-ng-flow-control-group',
   templateUrl: './group.component.html',
-  styles: ['']
+  styles: [
+    `
+  `]
 })
 export class GroupComponent implements OnInit {
   @ViewChild('addGroupRef', { read: TemplateRef, static: true }) addGroupRef:
     | TemplateRef<any>
     | string = ''
 
-  @ViewChild('eoNgTreeDefault')
-  eoNgTreeDefault!: EoNgTreeDefaultComponent
+  @ViewChild('eoNgTreeDefault') eoNgTreeDefault!: EoNgTreeDefaultComponent
 
   public nodesList: NzTreeNodeOptions[] = []
-  public apiNodesList: Array<any> = []
-  showList: boolean = true // 右侧是否展示列表
-  showApiPage: boolean = false // 右侧是否展示api页面
   groupUuid: string = '' // 供右侧list页面用
-  strategyUuid: string = '' // 供右侧策略详情页用
-  editPage: boolean = false // 右侧策略详情是否是编辑页
   activatedNode: NzTreeNode | null = null
-  groupName: string = ''
   clusterName: string = ''
   clusterKey: string = ''
   strategyType: string = ''
@@ -38,7 +33,6 @@ export class GroupComponent implements OnInit {
     private baseInfo:BaseInfoService,
     private message: EoNgFeedbackMessageService,
     private api: ApiService,
-    private activateInfo: ActivatedRoute,
     private router: Router,
     private appConfigService:AppConfigService
   ) {
@@ -56,13 +50,11 @@ export class GroupComponent implements OnInit {
 
   // 获取分组列表, 将api返回的数据通过nodesTransfer转化为分组组件需要的参数格式
   getGroupList () {
-    this.api.get('cluster/enum').subscribe((resp: any) => {
+    this.api.get('cluster/enum').subscribe((resp: {code:number, data:{ envs:ClusterEnum[]}, msg:string}) => {
       if (resp.code === 0) {
         this.nodesList = []
         this.nodesList = this.nodesTransfer(resp.data.envs)
         this.getGroupItemSelected()
-      } else {
-        this.message.error(resp.msg || '获取数据失败!')
       }
     })
   }
@@ -150,8 +142,6 @@ export class GroupComponent implements OnInit {
       this.clusterKey = data.keys[0]
       this.clusterName = data.node.origin.name
       this.activatedNode = data.node!
-      this.showList = true
-      this.showApiPage = false
       this.router.navigate(
         ['/', 'serv-governance', this.strategyType, 'group', 'list', data.node.origin.name]
       )

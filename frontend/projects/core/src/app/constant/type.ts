@@ -6,7 +6,7 @@ export interface EmptyHttpResponse{
 
 /* eslint-disable camelcase */
 export interface Operator{
-    user_id:number,
+    userId:number,
     username:string,
     nickname:string,
     avatar:string
@@ -19,11 +19,19 @@ export interface UserListData{
   email:string
 }
 
+// 创建/修改目录
+export interface GroupData{
+  name:string
+  uuid:string
+  parentUuid:string
+  tagName?:string
+}
+
 export interface ApiGroupsData{
   uuid:string
   name:string
   children:ApiGroupsData[]
-  is_delete:boolean
+  isDelete:boolean
   [key:string]:any
 }
 
@@ -32,7 +40,7 @@ export interface ApiGroup{
   apis:Array<{
     method:Array<string>
     name:string
-    group_uuid:string
+    groupUuid:string
     uuid:string
   }>
   root:{
@@ -43,13 +51,23 @@ export interface ApiGroup{
   }
 }
 
+// 集群列表
+export interface ClustersData{
+  env: string,
+  status: 'NORMAL'|'PARTIALLY_NORMAL'|'ABNORMAL',
+  desc: string,
+  name: string,
+  createTime: string,
+  updateTime: string
+}
+
 // 获取远程类型的选项（用在服务治理-筛选条件和监控告警-选择api和上游 -api
 export interface RemoteApiData{
   uuid: string,
   name: string,
   service: string,
   group: string,
-  request_path: string,
+  requestPath: string,
   [key:string]:any
 }
 
@@ -84,4 +102,30 @@ export interface RemoteData{
       total: number,
       title?:string,
       [key:string]:any
+}
+
+// 上线管理列表
+export interface PublishManagementData{
+  name:string
+  env:string
+  status:'GOONLINE'|'OFFLINE'|'NOTGOONLINE'|'TOUPDATE'
+  disable:boolean
+  operator:string
+  updateTime:string
+}
+
+// 集群列表接口
+export interface ClusterEnum{
+  clusters:Array<{name:string}>
+  name:string
+}
+
+export interface ArrayItemData{
+  key:string
+  value:string
+  [k:string]:any
+}
+
+export interface RandomId{
+  id:string
 }

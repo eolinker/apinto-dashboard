@@ -6,6 +6,7 @@ import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { ApiService } from 'projects/core/src/app/service/api.service'
 import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
 import { Buffer } from 'buffer'
+import { EmptyHttpResponse } from 'projects/core/src/app/constant/type'
 
 @Component({
   selector: 'eo-ng-deploy-cluster-cert-form',
@@ -93,22 +94,20 @@ export class DeployClusterCertFormComponent implements OnInit {
     if (this.validateForm.valid) {
       switch (usage) {
         case 'addCert':
-          this.api.post('cluster/' + this.clusterName + '/certificate', { key: this.encode(this.validateForm.controls['key'].value), pem: this.encode(this.validateForm.controls['pem'].value) || '' }).subscribe(resp => {
-            if (resp.code === 0) {
-              this.closeModal && this.closeModal()
-            } else {
-              this.message.error(resp.msg || '添加证书失败！')
-            }
-          })
+          this.api.post('cluster/' + this.clusterName + '/certificate', { key: this.encode(this.validateForm.controls['key'].value), pem: this.encode(this.validateForm.controls['pem'].value) || '' })
+            .subscribe((resp:EmptyHttpResponse) => {
+              if (resp.code === 0) {
+                this.closeModal && this.closeModal()
+              }
+            })
           break
         case 'editCert':
-          this.api.put('cluster/' + this.clusterName + '/certificate/' + this.certId, { key: this.encode(this.validateForm.controls['key'].value), pem: this.encode(this.validateForm.controls['pem'].value) || '' }).subscribe(resp => {
-            if (resp.code === 0) {
-              this.closeModal && this.closeModal()
-            } else {
-              this.message.error(resp.msg || '修改证书失败！')
-            }
-          })
+          this.api.put('cluster/' + this.clusterName + '/certificate/' + this.certId, { key: this.encode(this.validateForm.controls['key'].value), pem: this.encode(this.validateForm.controls['pem'].value) || '' })
+            .subscribe((resp:EmptyHttpResponse) => {
+              if (resp.code === 0) {
+                this.closeModal && this.closeModal()
+              }
+            })
       }
     } else {
       Object.values(this.validateForm.controls).forEach(control => {

@@ -1,10 +1,13 @@
-import { Component, EventEmitter, Input, Output, TemplateRef, ViewChild } from '@angular/core'
+import { Component, EventEmitter, Input, OnInit, Output, TemplateRef, ViewChild } from '@angular/core'
 import { Router } from '@angular/router'
+import { CheckBoxOptionInterface } from 'eo-ng-checkbox'
 import { EoNgFeedbackModalService } from 'eo-ng-feedback'
+import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { NzModalRef } from 'ng-zorro-antd/modal'
-import { MODAL_NORMAL_SIZE, MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
-import { FilterShowData } from '../footer/footer.component'
-import { FilterForm } from '../form/form.component'
+import { MODAL_NORMAL_SIZE } from 'projects/core/src/app/constant/app.config'
+import { filterTableHeadName } from '../../types/conf'
+import { FilterForm, FilterShowData } from '../../types/types'
+import { ServGovernanceFilterService } from '../serv-governance-filter.service'
 
 @Component({
   selector: 'eo-ng-filter-table',
@@ -12,16 +15,13 @@ import { FilterForm } from '../form/form.component'
   styles: [
   ]
 })
-export class FilterTableComponent {
+export class FilterTableComponent implements OnInit {
   @ViewChild('filterContentTpl', { read: TemplateRef, static: true })
   filterContentTpl: TemplateRef<any> | undefined
 
   @ViewChild('filterFooterTpl', { read: TemplateRef, static: true })
   filterFooterTpl: TemplateRef<any> | undefined
 
-  @Input() nzDisabled:boolean = false
-  @Input() filterTableTip:string = ''
-  @Input() drawerTitle:string = '筛选条件'
   @Input()
   get filterShowList () {
     return this._filterShowList
@@ -31,10 +31,6 @@ export class FilterTableComponent {
     this._filterShowList = val
     this.filterShowListChange.emit(this._filterShowList)
   }
-
-  @Output() filterShowListChange = new EventEmitter()
-
-  _filterShowList: FilterShowData [] = []
 
   @Input()
   get filterNamesSet () {
@@ -46,19 +42,22 @@ export class FilterTableComponent {
     this.filterNameSetChange.emit(this._filterNameSet)
   }
 
+  @Input() filterTableTipShowFn?:Function
+  @Input() nzDisabled:boolean = false
+  @Input() filterTableTip:string = ''
+  @Input() drawerTitle:string = '筛选条件'
+  @Output() filterShowListChange = new EventEmitter()
   @Output() filterNameSetChange = new EventEmitter()
 
+  _filterShowList: FilterShowData [] = []
   _filterNameSet: Set<string> = new Set()
-
-  @Input() filterTableTipShowFn?:Function
-
   strategyType: string = ''
   remoteSelectList: string [] = []
   remoteSelectNameList: string [] = []
   filterType: string = '' // 筛选条件类型, 当type=pattern,显示输入框, static显示一组勾选框, remote显示穿梭框
   drawerFilterRef: NzModalRef | undefined
-  editFilter: any = null // 正在编辑的配置
-  staticsList: Array<any> = []
+  editFilter: FilterForm|undefined // 正在编辑的配置
+  staticsList:CheckBoxOptionInterface[] = []
 
   filterForm: FilterForm = {
     name: '',
@@ -74,88 +73,44 @@ export class FilterTableComponent {
     patternIsPass: true
   }
 
-  filterTableHeadName: Array<any> = [
-    {
-      title: '属性名称'
-    },
-    {
-      title: '属性值'
-    },
-    {
-      title: '操作',
-      right: true
-    }
-  ]
+  filterTableHeadName: THEAD_TYPE[]= [...filterTableHeadName]
+  filterTableBody:TBODY_TYPE[] = []
 
-  filterTableBody: Array<any> = [
-    { key: 'title' },
-    { key: 'label' },
-    {
-      type: 'btn',
-      right: true,
-      btns: [
-        {
-          title: '配置',
-          click: (item: any) => {
-            this.openDrawer('editFilter', item.data)
-          },
-          disabledFn: () => {
-            return this.nzDisabled
-          }
-        },
-        {
-          title: '删除',
-          click: (item: any) => {
-            this.modalService.create({
-              nzTitle: '删除',
-              nzContent: '该数据删除后将无法找回，请确认是否删除？',
-              nzClosable: true,
-              nzClassName: 'delete-modal',
-              nzOkDanger: true,
-              nzWidth: MODAL_SMALL_SIZE,
-              nzOnOk: () => {
-                this.filterDelete(item.data)
-              }
-            })
-          },
-          disabledFn: () => {
-            return this.nzDisabled
-          }
-        }
-      ]
-    }
-  ]
-
-  constructor (private modalService: EoNgFeedbackModalService,
-    private router: Router) {
+  constructor (public modalService: EoNgFeedbackModalService,
+    private router: Router,
+    private service: ServGovernanceFilterService) {
     this.strategyType = this.router.url.split('/')[2]
+  }
+
+  ngOnInit (): void {
+    this.filterTableBody = this.service.createFilterTbody(this)
   }
 
   disabledEdit (value: any) {
     this.nzDisabled = value
   }
 
-  filterTableClick = (item: any) => {
+  filterTableClick = (item: {data:FilterForm}) => {
     this.openDrawer('editFilter', item.data)
   }
 
-  openDrawer (type: string, data?: any) {
+  openDrawer = (type: string, data?: FilterForm) => {
     switch (type) {
       case 'addFilter': {
-        this.editFilter = null
+        this.editFilter = undefined
         break
       }
       case 'editFilter': {
         this.remoteSelectList = []
         this.remoteSelectNameList = []
         this.filterForm = Object.assign({}, data)
-        if (data.values?.length === 1 && data.values[0] === 'ALL') {
+        if (data!.values?.length === 1 && data!.values[0] === 'ALL') {
           this.filterForm.allChecked = true
         }
         this.editFilter = Object.assign({}, data)
-        if (data.name === 'ip') {
+        if (data!.name === 'ip') {
           this.filterForm.values = [this.filterForm.values.join('\n')]
-          this.editFilter.values = [this.editFilter.values.join('\n')]
+          this.editFilter!.values = [this.editFilter!.values.join('\n')]
         }
         break
       }
@@ -178,14 +133,16 @@ export class FilterTableComponent {
     val && this.drawerFilterRef?.close()
   }
 
-  filterDelete (item: any) {
+  filterDelete = (context:FilterTableComponent, item: FilterForm) => {
     this.filterNamesSet.delete(item.name)
-    for (const index in this.filterShowList) {
-      if (this.filterShowList[index] === item) {
-        this.filterShowList.splice(Number(index), 1)
-        this.filterShowList = [...this.filterShowList]
+    for (const index in context._filterShowList) {
+      if (context._filterShowList[index] === item) {
+        context._filterShowList.splice(Number(index), 1)
+        context._filterShowList = [...context._filterShowList]
       }
     }
+
+    context.filterShowListChange.emit(context.filterShowList)
   }
 
   cleanFilterForm () {
@@ -202,7 +159,7 @@ export class FilterTableComponent {
       pattern: null,
       patternIsPass: true
     }
-    this.editFilter = null
+    this.editFilter = undefined
     this.remoteSelectList = []
     this.remoteSelectNameList = []
     this.staticsList = []

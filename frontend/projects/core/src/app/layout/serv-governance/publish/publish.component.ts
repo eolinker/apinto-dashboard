@@ -1,12 +1,13 @@
 /* eslint-disable dot-notation */
-import { ViewportScroller } from '@angular/common'
 import { Component, Input, OnInit, TemplateRef } from '@angular/core'
 import { FormGroup, UntypedFormBuilder, Validators } from '@angular/forms'
-import { ActivatedRoute, Router } from '@angular/router'
-import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feedback'
+import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
+import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { defaultAutoTips } from '../../../constant/conf'
+import { EmptyHttpResponse } from '../../../constant/type'
 import { ApiService } from '../../../service/api.service'
-import { BaseInfoService } from '../../../service/base-info.service'
+import { publishTableBody, publishTableHeadName } from '../types/conf'
+import { StrategyPublishListData } from '../types/types'
 
 @Component({
   selector: 'eo-ng-service-governance-publish',
@@ -26,7 +27,7 @@ import { BaseInfoService } from '../../../service/base-info.service'
         <input
           eo-ng-input
           class="w-INPUT_NORMAL"
-          formControlName="version_name"
+          formControlName="versionName"
           eoNgUserAccess="{{ 'serv-governance/' + strategyType }}"
         />
       </nz-form-control>
@@ -52,14 +53,14 @@ import { BaseInfoService } from '../../../service/base-info.service'
       >
       <nz-form-control
         [nzValidateStatus]="
-          !strategyIsPublish && strategyUnpulishMsg ? 'error' : ''
+          !strategyIsPublish && strategyUnpublishMsg ? 'error' : ''
         "
-        [nzErrorTip]="strategyUnpulishMsg"
+        [nzErrorTip]="strategyUnpublishMsg"
       >
         <div>
           <eo-ng-apinto-table
             [nzTbody]="publishTableBody"
-            [nzThead]="publishTabelHeadName"
+            [nzThead]="publishTableHeadName"
             [(nzData)]="publishList"
             [nzNoScroll]="true"
             nzTableLayout="fixed"
@@ -74,52 +75,28 @@ import { BaseInfoService } from '../../../service/base-info.service'
   ]
 })
 export class ServiceGovernancePublishComponent implements OnInit {
+  @Input() strategiesStatusTpl:TemplateRef<any>|undefined
   @Input() closeModal?:(value?:any)=>void
   validateForm: FormGroup = new FormGroup({})
   nzDisabled:boolean = false
   strategyType:string = ''
 
-  publishTabelHeadName:Array<any> = [
-    {
-      title: '策略名称'
-    },
-    {
-      title: '优先级'
-    },
-    {
-      title: '状态'
-    },
-    {
-      title: '操作时间'
-    }
-  ]
-
-  publishTableBody:Array<any> = [
-    { key: 'name' },
-    { key: 'priority' },
-    { key: 'status' },
-    { key: 'opt_time' }
-  ]
-
+  publishTableHeadName:THEAD_TYPE[] = [...publishTableHeadName]
+  publishTableBody:TBODY_TYPE[]= [...publishTableBody]
   publishList: Array<any> = []
 
   strategySource:string = ''
-  strategyUnpulishMsg:string = ''
+  strategyUnpublishMsg:string = ''
 
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
-  strategiesStatusTpl:TemplateRef<any>|undefined
-  strategyIsPublish:string = ''
+  strategyIsPublish:boolean = false
   clusterName:string = ''
-  constructor (private baseInfo:BaseInfoService,
-    private viewportScroller: ViewportScroller,
+  constructor (
                 private message: EoNgFeedbackMessageService,
-                private modalService:EoNgFeedbackModalService,
                 private api:ApiService,
-                private activateInfo:ActivatedRoute,
-                private router:Router,
                 private fb: UntypedFormBuilder) {
     this.validateForm = this.fb.group({
-      version_name: ['', [Validators.required]],
+      versionName: ['', [Validators.required]],
       desc: ['']
     })
   }
@@ -138,37 +115,35 @@ export class ServiceGovernancePublishComponent implements OnInit {
 
   // 获取待发布的策略列表
   getPublishList () {
-    this.api.get('strategy/' + this.strategyType + '/to-publishs', { cluster_name: this.clusterName }).subscribe((resp:any) => {
-      if (resp.code === 0) {
-        this.publishList = resp.data.strategies
-        this.strategyIsPublish = resp.data.is_publish
-        this.strategySource = resp.data.source
-        this.validateForm.controls['version_name'].setValue(resp.data.version_name)
-        this.strategyUnpulishMsg = resp.data.unpublish_msg
-        if (!resp.data.is_publish && !this.strategyUnpulishMsg) {
-          if (this.publishList?.length > 0) {
-            this.strategyUnpulishMsg = '当前策略不可发布'
-          } else {
-            this.strategyUnpulishMsg = '当前无可发布策略'
+    this.api.get('strategy/' + this.strategyType + '/to-publishs', { clusterName: this.clusterName })
+      .subscribe((resp:{ code:number, data:StrategyPublishListData, msg:string}) => {
+        if (resp.code === 0) {
+          this.publishList = resp.data.strategies
+          this.strategyIsPublish = resp.data.isPublish
+          this.strategySource = resp.data.source
+          this.validateForm.controls['versionName'].setValue(resp.data.versionName)
+          this.strategyUnpublishMsg = resp.data.unpublishMsg
+          if (!resp.data.isPublish && !this.strategyUnpublishMsg) {
+            if (this.publishList?.length > 0) {
+              this.strategyUnpublishMsg = '当前策略不可发布'
+            } else {
+              this.strategyUnpublishMsg = '当前无可发布策略'
+            }
           }
         }
-      } else {
-        this.message.error(resp.msg || '获取数据失败!')
-      }
-    })
+      })
   }
 
   // 发布策略，仅当表单校验通过且策略可发布时才可发布，否则需显示提示语
   publish () {
     if (this.validateForm.valid && this.strategyIsPublish) {
-      this.api.post('strategy/' + this.strategyType + '/publish', { version_name: (this.validateForm.controls['version_name'].value || ''), desc: (this.validateForm.controls['desc'].value || ''), source: (this.strategySource || '') }, { cluster_name: this.clusterName }).subscribe((resp:any) => {
-        if (resp.code === 0) {
-          this.message.success(resp.msg || '发布策略成功!', { nzDuration: 1000 })
-          this.closeModal && this.closeModal()
-        } else {
-          this.message.error(resp.msg || '发布策略失败!')
-        }
-      })
+      this.api.post('strategy/' + this.strategyType + '/publish', { versionName: (this.validateForm.controls['versionName'].value || ''), desc: (this.validateForm.controls['desc'].value || ''), source: (this.strategySource || '') }, { clusterName: this.clusterName })
+        .subscribe((resp:EmptyHttpResponse) => {
+          if (resp.code === 0) {
+            this.message.success(resp.msg || '发布策略成功!', { nzDuration: 1000 })
+            this.closeModal && this.closeModal()
+          }
+        })
     } else {
       Object.values(this.validateForm.controls).forEach((control) => {
         if (control.invalid) {

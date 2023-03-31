@@ -1,6 +1,5 @@
 /* eslint-disable camelcase */
-/* eslint-disable dot-notation */
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
+import { Component, OnInit } from '@angular/core'
 import { Router } from '@angular/router'
 import { EoNgFeedbackModalService, EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { ApiService } from 'projects/core/src/app/service/api.service'
@@ -9,6 +8,10 @@ import { NzModalRef } from 'ng-zorro-antd/modal'
 import { MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
 import { BaseInfoService } from 'projects/core/src/app/service/base-info.service'
 import { DeployClusterCertFormComponent } from './form/form.component'
+import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
+import { deployCertsTableBody, deployCertsTableHeadName } from '../types/conf'
+import { DeployCertListData } from '../types/types'
+import { EmptyHttpResponse } from 'projects/core/src/app/constant/type'
 
 @Component({
   selector: 'eo-ng-deploy-cluster-cert',
@@ -19,60 +22,17 @@ import { DeployClusterCertFormComponent } from './form/form.component'
   ]
 })
 export class DeployClusterCertComponent implements OnInit {
-  @ViewChild('certContentTpl', { read: TemplateRef, static: true }) certContentTpl: TemplateRef<any> | undefined
-
-  readonly nowUrl:string = this.router.routerState.snapshot.url
-
   clusterName:string=''
-
-  certsList:Array<{id:string, name:string, valid_time:string, operator:string, create_time:string, update_time:string}>=[]
-
   nzDisabled:boolean = false
-
-  certsTableHeadName: Array<object> = [
-    { title: '证书' },
-    { title: '证书有效期' },
-    { title: '更新者' },
-    { title: '更新时间' },
-    {
-      title: '操作',
-      right: true
-    }
-  ]
-
-  certsTableBody: Array<any> =[
-    { key: 'name' },
-    { key: 'valid_time' },
-    { key: 'operator' },
-    { key: 'update_time' },
-    {
-      type: 'btn',
-      right: true,
-      btns: [
-        {
-          title: '修改',
-          disabledFn: () => { return this.nzDisabled },
-          click: (item:any) => {
-            this.openDrawer('editCert', item.data)
-          }
-        },
-        {
-          title: '删除',
-          disabledFn: () => { return this.nzDisabled },
-          click: (item:any) => {
-            this.delete(item.data)
-          }
-        }
-      ]
-    }
-  ]
-
   modalRef:NzModalRef | undefined
+  certsList:DeployCertListData[]=[]
+  certsTableHeadName: THEAD_TYPE[] = [...deployCertsTableHeadName]
+  certsTableBody: TBODY_TYPE[] =[...deployCertsTableBody]
 
   constructor (
                 private message: EoNgFeedbackMessageService,
                 private modalService:EoNgFeedbackModalService,
-                public api:ApiService,
+                private api:ApiService,
                 private baseInfo:BaseInfoService,
                 private router:Router,
                 private appConfigService:AppConfigService) {
@@ -84,6 +44,11 @@ export class DeployClusterCertComponent implements OnInit {
     if (!this.clusterName) {
       this.router.navigate(['/'])
     }
+    this.certsTableBody[4].btns[0].disabledFn = () => { return this.nzDisabled }
+    this.certsTableBody[4].btns[0].click = (item:any) => { this.openDrawer('editCert', item.data) }
+    this.certsTableBody[4].btns[1].disabledFn = () => { return this.nzDisabled }
+    this.certsTableBody[4].btns[1].click = (item:any) => { this.delete(item.data) }
+
     this.getCertsList()
   }
 
@@ -91,11 +56,11 @@ export class DeployClusterCertComponent implements OnInit {
     this.nzDisabled = value
   }
 
-  certTableClick = (item:any) => {
+  certTableClick = (item:{data:DeployCertListData}) => {
     this.openDrawer('editCert', item.data)
   }
 
-  delete (item:any, e?:Event) {
+  delete (item:DeployCertListData, e?:Event) {
     e?.stopPropagation()
     this.modalService.create({
       nzTitle: '删除',
@@ -111,16 +76,15 @@ export class DeployClusterCertComponent implements OnInit {
   }
 
   getCertsList () {
-    this.api.get('cluster/' + this.clusterName + '/certificates').subscribe(resp => {
-      if (resp.code === 0) {
-        this.certsList = resp.data.certificates
-      } else {
-        this.message.error(resp.msg || '获取列表数据失败!')
-      }
-    })
+    this.api.get('cluster/' + this.clusterName + '/certificates')
+      .subscribe((resp:{code:number, data:{certificates:DeployCertListData[]}, msg:string}) => {
+        if (resp.code === 0) {
+          this.certsList = resp.data.certificates
+        }
+      })
   }
 
-  openDrawer (usage:string, data?:any, e?:Event):void {
+  openDrawer (usage:string, data?:DeployCertListData, e?:Event):void {
     e?.stopPropagation()
     this.modalRef = this.modalService.create({
       nzTitle: usage === 'addCert' ? '新建证书' : '修改证书',
@@ -140,14 +104,13 @@ export class DeployClusterCertComponent implements OnInit {
     this.modalRef?.close()
   }
 
-  deleteCert (row:{id:number, name:string, operator:string, update_time:string, valid_time:string, create_time:string}):void {
-    this.api.delete('cluster/' + (this.clusterName || '') + '/certificate/' + (row.id || '')).subscribe(resp => {
-      if (resp.code === 0) {
-        this.getCertsList()
-        this.message.success(resp.msg || '删除成功!', { nzDuration: 1000 })
-      } else {
-        this.message.error(resp.msg || '删除证书失败!', { nzDuration: 1000 })
-      }
-    })
+  deleteCert (row:DeployCertListData):void {
+    this.api.delete('cluster/' + (this.clusterName || '') + '/certificate/' + (row.id || ''))
+      .subscribe((resp:EmptyHttpResponse) => {
+        if (resp.code === 0) {
+          this.getCertsList()
+          this.message.success(resp.msg || '删除成功!', { nzDuration: 1000 })
+        }
+      })
   }
 }

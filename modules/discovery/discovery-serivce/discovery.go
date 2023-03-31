@@ -23,6 +23,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/user"
 	"github.com/eolinker/apinto-dashboard/modules/variable"
 	"github.com/eolinker/apinto-dashboard/modules/variable/variable-entry"
+	variable_model "github.com/eolinker/apinto-dashboard/modules/variable/variable-model"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
 	"github.com/go-basic/uuid"
@@ -204,12 +205,12 @@ func (d *discoveryService) CreateDiscovery(ctx context.Context, namespaceID int,
 			if err != nil {
 				return err
 			}
-			quoteMap := make(map[quote_entry.QuoteTargetKindType][]int)
-			for _, variableInfo := range variables {
-				quoteMap[quote_entry.QuoteTargetKindTypeVariable] = append(quoteMap[quote_entry.QuoteTargetKindTypeVariable], variableInfo.Id)
-			}
 
-			if err = d.quoteStore.Set(txCtx, discoveryInfo.Id, quote_entry.QuoteKindTypeDiscovery, quoteMap); err != nil {
+			variableIds := common.SliceToSliceIds(variables, func(t *variable_model.GlobalVariable) int {
+				return t.Id
+			})
+
+			if err = d.quoteStore.Set(txCtx, discoveryInfo.Id, quote_entry.QuoteKindTypeDiscovery, quote_entry.QuoteTargetKindTypeVariable, variableIds...); err != nil {
 				return err
 			}
 		}
@@ -289,17 +290,14 @@ func (d *discoveryService) UpdateDiscovery(ctx context.Context, namespaceID int,
 			}
 
 			//更新引用， 获取新的引用变量ID
-			targetMaps := make(map[quote_entry.QuoteTargetKindType][]int)
-			variableIDList := make([]int, 0)
 			variables, err := d.globalVariableService.GetByKeys(ctx, namespaceID, variableList)
 			if err != nil {
 				return err
 			}
-			for _, variableInfo := range variables {
-				variableIDList = append(variableIDList, variableInfo.Id)
-			}
-			targetMaps[quote_entry.QuoteTargetKindTypeVariable] = variableIDList
-			if err = d.quoteStore.Set(txCtx, discoveryInfo.Id, quote_entry.QuoteKindTypeDiscovery, targetMaps); err != nil {
+			variableIds := common.SliceToSliceIds(variables, func(t *variable_model.GlobalVariable) int {
+				return t.Id
+			})
+			if err = d.quoteStore.Set(txCtx, discoveryInfo.Id, quote_entry.QuoteKindTypeDiscovery, quote_entry.QuoteTargetKindTypeVariable, variableIds...); err != nil {
 				return err
 			}
 		}

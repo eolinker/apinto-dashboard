@@ -16,11 +16,14 @@ import {
   EoNgFeedbackModalService,
   EoNgFeedbackMessageService
 } from 'eo-ng-feedback'
+import { THEAD_TYPE } from 'eo-ng-table'
 import { NzModalRef } from 'ng-zorro-antd/modal'
 import { MODAL_NORMAL_SIZE, MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
 import { ApiService } from 'projects/core/src/app/service/api.service'
 import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { EO_TBODY_TYPE } from 'projects/eo-ng-apinto-table/src/public-api'
 import { DeployEnvironmentDetailComponent } from '../detail/detail.component'
+import { DeployGlobalEnvTableBody, DeployGlobalEnvTableHeadName } from '../types/conf'
 
 @Component({
   selector: 'eo-ng-deploy-environment-list',
@@ -50,7 +53,7 @@ export class DeployEnvironmentListComponent {
       usage: number
       description: string
       operator: string
-      create_time: string
+      createTime: string
     }>
     total: number
   } = {
@@ -60,46 +63,8 @@ export class DeployEnvironmentListComponent {
 
   nzDisabled: boolean = false
 
-  globalEnvTableHeadName: Array<any> = [
-    { title: 'KEY' },
-    { title: '描述' },
-    { title: '创建者' },
-    { title: '创建时间' },
-    { title: '状态' },
-    {
-      title: '操作',
-      right: true
-    }
-  ]
-
-  globalEnvTableBody: Array<any> = [
-    { key: 'key' },
-    { key: 'description' },
-    { key: 'operator' },
-    { key: 'create_time' },
-    { key: 'status' },
-    {
-      type: 'btn',
-      right: true,
-      btns: [
-        {
-          title: '查看',
-          click: (item: any) => {
-            this.openDrawer(item.data)
-          }
-        },
-        {
-          title: '删除',
-          disabledFn: (data:any, item:any) => {
-            return this.nzDisabled || item.data.status === 'IN_USE'
-          },
-          click: (item: any) => {
-            this.deleteModal(item.data)
-          }
-        }
-      ]
-    }
-  ]
+  globalEnvTableHeadName: THEAD_TYPE[] = [...DeployGlobalEnvTableHeadName]
+  globalEnvTableBody: EO_TBODY_TYPE[] = [...DeployGlobalEnvTableBody]
 
   editConfigDrawerRef: NzModalRef | undefined
 
@@ -111,9 +76,9 @@ export class DeployEnvironmentListComponent {
   searchForm: { key: string; status: string } = { key: '', status: '' }
 
   // 环境变量分页参数
-  variablePage: { page_num: number; page_size: number; total: number } = {
-    page_num: 1,
-    page_size: 20,
+  variablePage: { pageNum: number; pageSize: number; total: number } = {
+    pageNum: 1,
+    pageSize: 20,
     total: 0
   }
 
@@ -135,6 +100,15 @@ export class DeployEnvironmentListComponent {
 
   ngAfterViewInit () {
     this.globalEnvTableBody[4].title = this.variableStatusTpl
+    this.globalEnvTableBody[5].btns[0].click = (item: any) => {
+      this.openDrawer(item.data)
+    }
+    this.globalEnvTableBody[5].btns[1].click = (item: any) => {
+      this.deleteModal(item.data)
+    }
+    this.globalEnvTableBody[5].btns[1].disabledFn = (data:any, item:any) => {
+      return this.nzDisabled || item.data.status === 'IN_USE'
+    }
   }
 
   disabledEdit (value: any) {
@@ -159,8 +133,8 @@ export class DeployEnvironmentListComponent {
   getVariables () {
     this.api
       .get('variables', {
-        page_num: this.variablePage.page_num,
-        page_size: this.variablePage.page_size,
+        pageNum: this.variablePage.pageNum,
+        pageSize: this.variablePage.pageSize,
         key: this.searchForm?.key || '',
         status: this.searchForm?.status || ''
       })
@@ -168,8 +142,6 @@ export class DeployEnvironmentListComponent {
         if (resp.code === 0) {
           this.globalEnvForms = resp.data
           this.variablePage.total = resp.data.total
-        } else {
-          this.message.error(resp.msg || '获取列表数据失败！')
         }
       })
   }
@@ -183,8 +155,6 @@ export class DeployEnvironmentListComponent {
       if (resp.code === 0) {
         this.message.success(resp.msg || '删除成功', { nzDuration: 1000 })
         this.getVariables()
-      } else {
-        this.message.error(resp.msg || '删除失败！')
       }
     })
   }

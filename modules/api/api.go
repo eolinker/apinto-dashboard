@@ -17,6 +17,7 @@ type IAPIService interface {
 	GetAPICountByGroupUUID(ctx context.Context, namespaceID int, groupUUID string) int64
 	GetAPIVersionInfo(ctx context.Context, namespaceID int, uuid string) (*apimodel.APIVersionInfo, error)
 	GetAPIInfo(ctx context.Context, namespaceID int, uuid string) (*apimodel.APIInfo, error)
+	GetAPIInfoById(ctx context.Context, id int) (*apimodel.APIInfo, error)
 	GetAPIInfoByGroupUUID(ctx context.Context, namespaceID int, groupUUID string) ([]*apimodel.APIInfo, error)
 	GetAPIInfoByUUIDS(ctx context.Context, namespaceID int, uuids []string) ([]*apimodel.APIInfo, error)
 	GetAPIInfoByPath(ctx context.Context, namespaceID int, path string) ([]*apimodel.APIInfo, error)
@@ -68,5 +69,5 @@ type APIDriverInfo struct {
 
 type IAPIDriver interface {
 	CheckInput(input *api_dto.APIInfo) error
-	ToApinto(name, desc string, disable bool, method []string, requestPath, requestPathLabel, proxyPath, serviceName string, timeout, retry int, enableWebsocket bool, match []*api_entry.MatchConf, header []*api_entry.ProxyHeader) *v1.RouterConfig
+	ToApinto(name, desc string, disable bool, method []string, requestPath, requestPathLabel, proxyPath, serviceName string, timeout, retry int, enableWebsocket bool, match []*api_entry.MatchConf, header []*api_entry.ProxyHeader, templateUUID string) *v1.RouterConfig
 }
