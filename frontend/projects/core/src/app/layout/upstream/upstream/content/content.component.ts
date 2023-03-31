@@ -46,7 +46,7 @@ export class UpstreamContentComponent implements OnInit {
       //   title: this.tab1Tpl,
       //   routerLink: '.',
       //   queryParams: {
-      //     service_name: this.serviceName
+      //     serviceName: this.serviceName
       //   },
       //   queryParamsHandling: 'merge'
       // },

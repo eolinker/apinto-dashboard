@@ -12,10 +12,12 @@
 import { Component, OnInit } from '@angular/core'
 import { Router } from '@angular/router'
 import { EoNgBreadcrumbOptions } from 'eo-ng-breadcrumb'
+import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { MenuOptions } from 'eo-ng-menu'
 import { NzModalRef } from 'ng-zorro-antd/modal'
 import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
 import { Subscription } from 'rxjs'
+import { ApiService } from '../../service/api.service'
 
 @Component({
   selector: 'basic-layout',
@@ -40,7 +42,9 @@ export class BasicLayoutComponent implements OnInit {
   private subscription4: Subscription = new Subscription()
 
   constructor (
+              private message: EoNgFeedbackMessageService,
               private router: Router,
+              private api:ApiService,
               private appConfigService: AppConfigService
   ) {
     this.subscription1 = this.appConfigService.repFlashBreadcrumb().subscribe((data:any) => {
@@ -73,15 +77,21 @@ export class BasicLayoutComponent implements OnInit {
   }
 
   getSideMenu () {
-    this.subscription4 = this.appConfigService.getMenuList().subscribe((res) => {
-      this.sideMenuOptions = [...res]
-      for (const index in this.sideMenuOptions) {
-        this.sideMenuOptions[index].openChange = (value:any) => {
-          this.openHandler(value.id)
+    this.subscription4 = this.appConfigService.getMenuList()
+      .subscribe((res:MenuOptions[]) => {
+        this.sideMenuOptions = [...res]
+        for (const index in this.sideMenuOptions) {
+          this.sideMenuOptions[index].openChange = (value:MenuOptions) => {
+            this.openHandler(value['id']!)
+          }
         }
-      }
-      this.getAccess()
-    })
+        this.getAccess()
+      })
+  }
+
+  updateAuth = () => {
+    this.modalRef?.close()
+    this.router.navigate(['/', 'auth-update'])
   }
 
   getAccess () {
@@ -109,7 +119,7 @@ export class BasicLayoutComponent implements OnInit {
       for (const index in this.sideMenuOptions) {
         if (router.split('/')[1] === this.sideMenuOptions[index]['router']?.split('/')[0]) {
           if (this.sideMenuOptions[index].children?.length) {
-            this.openHandler(this.sideMenuOptions[index]['id'])
+            this.openHandler(this.sideMenuOptions[index]['id']!)
           }
           break
         }

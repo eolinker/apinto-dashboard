@@ -23,3 +23,7 @@ strategy_grey_edit 编辑
 audit_log_view 查看
 ext_app_view 查看
 ext_app_edit 编辑
+plugin_view 查看
+plugin_edit 编辑
+plugin_template_view 查看
+plugin_template_edit 编辑

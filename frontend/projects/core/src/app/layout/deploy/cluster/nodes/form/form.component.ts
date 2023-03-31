@@ -4,6 +4,7 @@ import { FormGroup, UntypedFormBuilder } from '@angular/forms'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { ApiService } from 'projects/core/src/app/service/api.service'
+import { DeployClusterNodeThead } from '../../types/conf'
 
 @Component({
   selector: 'eo-ng-deploy-cluster-nodes-form',
@@ -93,17 +94,7 @@ export class DeployClusterNodesFormComponent implements OnInit {
   nodesTestList:Array<any> = []
   source:string = ''
 
-  nodesTableHeadName2:Array<any> = [
-    {
-      title: '名称',
-      width: 150
-    },
-    { title: '管理地址' },
-    { title: '服务地址' },
-    {
-      title: '状态'
-    }
-  ]
+  nodesTableHeadName2:Array<any> = [...DeployClusterNodeThead]
 
   constructor (
     private message: EoNgFeedbackMessageService,
@@ -132,11 +123,11 @@ export class DeployClusterNodesFormComponent implements OnInit {
   testCluster ():void {
     if (this.validateResetNodeForm.controls['clusterAddr'].value && (/(\w+):\/\/([a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\.?)(:\d+)/.test(this.validateResetNodeForm.controls['clusterAddr'].value) || /(\w+):\/\/(((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3})(:\d*)/.test(this.validateResetNodeForm.controls['clusterAddr'].value))) {
       this.testFlag = true
-      this.api.get('cluster-test', { cluster_addr: this.validateResetNodeForm.controls['clusterAddr'].value }).subscribe(resp => {
+      this.api.get('cluster-test', { clusterAddr: this.validateResetNodeForm.controls['clusterAddr'].value }).subscribe(resp => {
         if (resp.code === 0) {
           this.nodesTestList = resp.data.nodes
           this.source = resp.data.source
-          this.clusterCanBeCreated = resp.data.is_update
+          this.clusterCanBeCreated = resp.data.isUpdate
           if (this.nodesTestList.length > 0) {
             this.nodesTestTableShow = true
           }
@@ -149,7 +140,6 @@ export class DeployClusterNodesFormComponent implements OnInit {
         } else {
           this.validateResetNodeForm.controls['clusterAddr'].markAsDirty()
           this.validateResetNodeForm.controls['clusterAddr'].updateValueAndValidity({ onlySelf: true })
-          this.message.error(resp.msg || '获取列表数据失败！', { nzDuration: 1000 })
         }
       })
     } else {
@@ -162,13 +152,12 @@ export class DeployClusterNodesFormComponent implements OnInit {
     this.testFlag = true
     this.validateResetNodeForm.controls['clusterAddr'].updateValueAndValidity()
     if (this.validateResetNodeForm.controls['clusterAddr'].valid && this.source) {
-      this.api.post('cluster/' + this.clusterName + '/node/reset', { source: this.source || '', cluster_addr: this.validateResetNodeForm.controls['clusterAddr'].value || '' }).subscribe(resp => {
+      this.api.post('cluster/' + this.clusterName + '/node/reset', { source: this.source || '', clusterAddr: this.validateResetNodeForm.controls['clusterAddr'].value || '' }).subscribe(resp => {
         if (resp.code === 0) {
           this.closeModal()
           this.message.success(resp.msg || '重置成功!', { nzDuration: 1000 })
           return true
         } else {
-          this.message.error(resp.msg || '重置失败!')
           return false
         }
       })

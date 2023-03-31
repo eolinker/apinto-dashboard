@@ -279,7 +279,7 @@
     </nz-form-item>
   </form>
 
-  <nz-form-item class="mb-0 sticky bg-white bottom-0 py-mbase">
+  <nz-form-item class="mb-0 sticky bg-white bottom-0 py-mbase z-50">
     <nz-form-control [nzOffset]="6" [nzSpan]="18">
       <button
         class="ant-btn-primary"
@@ -287,6 +287,7 @@
         type="submit"
         eo-ng-button
         (click)="saveStrategy()"
+        [nzLoading]="submitButtonLoading"
       >
         {{ editPage ? '提交' : '保存' }}
       </button>
