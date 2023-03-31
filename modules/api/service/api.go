@@ -1118,7 +1118,7 @@ func (a *apiService) online(ctx context.Context, namespaceId, operator int, api 
 
 			//封装router配置
 			apiDriverInfo := a.GetAPIDriver(latest.Driver)
-			routerConfig := apiDriverInfo.ToApinto(api.UUID, api.Desc, false, latest.Method, latest.RequestPath, latest.RequestPathLabel, latest.ProxyPath, strings.ToLower(latest.ServiceName), latest.Timeout, latest.Retry, latest.EnableWebsocket, latest.Match, latest.Header)
+			routerConfig := apiDriverInfo.ToApinto(api.UUID, api.Desc, false, latest.Method, latest.RequestPath, latest.RequestPathLabel, latest.ProxyPath, strings.ToLower(latest.ServiceName), latest.Timeout, latest.Retry, latest.EnableWebsocket, latest.Match, latest.Header, latest.TemplateUUID)
 
 			//未上线
 			if runtime == nil {
@@ -1608,7 +1608,7 @@ func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, u
 	err = a.apiStore.Transaction(ctx, func(txCtx context.Context) error {
 
 		apiDriverInfo := a.GetAPIDriver(latestVersion.Driver)
-		routerConfig := apiDriverInfo.ToApinto(apiInfo.UUID, apiInfo.Desc, false, latestVersion.Method, latestVersion.RequestPath, latestVersion.RequestPathLabel, latestVersion.ProxyPath, strings.ToLower(latestVersion.ServiceName), latestVersion.Timeout, latestVersion.Retry, latestVersion.EnableWebsocket, latestVersion.Match, latestVersion.Header)
+		routerConfig := apiDriverInfo.ToApinto(apiInfo.UUID, apiInfo.Desc, false, latestVersion.Method, latestVersion.RequestPath, latestVersion.RequestPathLabel, latestVersion.ProxyPath, strings.ToLower(latestVersion.ServiceName), latestVersion.Timeout, latestVersion.Retry, latestVersion.EnableWebsocket, latestVersion.Match, latestVersion.Header, latestVersion.TemplateUUID)
 		if runtime == nil {
 			runtime = &apientry.APIRuntime{
 				NamespaceId: namespaceId,
@@ -1681,7 +1681,7 @@ func (a *apiService) ResetOnline(ctx context.Context, _, clusterId int) {
 			log.Errorf("apiService-ResetOnline-getVersion versionId=%d, clusterId=%d,err=%d", runtime.VersionID, clusterId, err.Error())
 			continue
 		}
-		routerConfig := a.GetAPIDriver(version.Driver).ToApinto(apiInfo.UUID, apiInfo.Desc, false, version.Method, version.RequestPath, version.RequestPathLabel, version.ProxyPath, strings.ToLower(version.ServiceName), version.Timeout, version.Retry, version.EnableWebsocket, version.Match, version.Header)
+		routerConfig := a.GetAPIDriver(version.Driver).ToApinto(apiInfo.UUID, apiInfo.Desc, false, version.Method, version.RequestPath, version.RequestPathLabel, version.ProxyPath, strings.ToLower(version.ServiceName), version.Timeout, version.Retry, version.EnableWebsocket, version.Match, version.Header, version.TemplateUUID)
 
 		if err = client.ForRouter().Create(*routerConfig); err != nil {
 			log.Errorf("apiService-ResetOnline-apintoCreate routerConfig=%d, clusterId=%d,err=%d", routerConfig, clusterId, err.Error())

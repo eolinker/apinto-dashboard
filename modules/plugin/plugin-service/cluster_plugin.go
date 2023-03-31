@@ -628,24 +628,24 @@ func (c *clusterPluginService) Publish(ctx context.Context, namespaceId, userId 
 	}
 
 	//获取全局插件
-	globalPlugins, err := c.pluginService.GetBasicInfoList(ctx, namespaceId)
-	if err != nil {
-		return err
-	}
-	globalPluginsMap := common.SliceToMap(globalPlugins, func(t *plugin_model.PluginBasic) string {
-		return t.Name
-	})
+	//globalPlugins, err := c.pluginService.GetBasicInfoList(ctx, namespaceId)
+	//if err != nil {
+	//	return err
+	//}
+	//globalPluginsMap := common.SliceToMap(globalPlugins, func(t *plugin_model.PluginBasic) string {
+	//	return t.Name
+	//})
 	//校验要发布的配置的JsonSchema格式是否正确
-	for _, p := range publishes {
-		//如果是删除操作，则不校验
-		if p.OptType == 3 {
-			continue
-		}
-		gp := globalPluginsMap[p.PluginName]
-		if err = common.JsonSchemaValid(gp.Schema, p.NoReleasedConfig.Config); err != nil {
-			return errors.New(fmt.Sprintf("插件%s配置格式错误 err=%s", p.PluginName, err.Error()))
-		}
-	}
+	//for _, p := range publishes {
+	//	//如果是删除操作，则不校验
+	//	if p.OptType == 3 {
+	//		continue
+	//	}
+	//	gp := globalPluginsMap[p.PluginName]
+	//	if err = common.JsonSchemaValid(gp.Schema, p.NoReleasedConfig.Config); err != nil {
+	//		return errors.New(fmt.Sprintf("插件%s配置格式错误 err=%s", p.PluginName, err.Error()))
+	//	}
+	//}
 
 	//获取集群当前运行的版本
 	currentVersion, err := c.GetPublishVersion(ctx, clusterId)
