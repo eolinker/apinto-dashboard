@@ -69,5 +69,5 @@ type APIDriverInfo struct {
 
 type IAPIDriver interface {
 	CheckInput(input *api_dto.APIInfo) error
-	ToApinto(name, desc string, disable bool, method []string, requestPath, requestPathLabel, proxyPath, serviceName string, timeout, retry int, enableWebsocket bool, match []*api_entry.MatchConf, header []*api_entry.ProxyHeader) *v1.RouterConfig
+	ToApinto(name, desc string, disable bool, method []string, requestPath, requestPathLabel, proxyPath, serviceName string, timeout, retry int, enableWebsocket bool, match []*api_entry.MatchConf, header []*api_entry.ProxyHeader, templateUUID string) *v1.RouterConfig
 }
