@@ -1,5 +1,5 @@
 /*
- * @Author:
+ * @Author: 
  * @Date: 2022-07-11 23:20:14
  * @LastEditors:
  * @LastEditTime: 2022-09-20 23:14:26
@@ -10,15 +10,10 @@ import { NgModule } from '@angular/core'
 import { RouterModule, Routes } from '@angular/router'
 import { RedirectPageService } from './service/redirect-page.service'
 import { AuthGuardService } from './service/auth-guard.service'
-import { LoginComponent } from './layout/login/login.component'
 import { BasicLayoutComponent } from './layout/basic-layout/basic-layout.component'
 import { CustomPreloadingStrategy } from './custom-preloading-strategy'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 const routes: Routes = [
-  {
-    path: 'login',
-    component: LoginComponent
-  },
   {
     path: '',
     component: BasicLayoutComponent,

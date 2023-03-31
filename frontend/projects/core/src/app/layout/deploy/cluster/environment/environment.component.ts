@@ -11,12 +11,15 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
 import { Router } from '@angular/router'
 import { EoNgFeedbackModalService, EoNgFeedbackMessageService } from 'eo-ng-feedback'
+import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { NzModalRef } from 'ng-zorro-antd/modal'
 import { MODAL_NORMAL_SIZE, MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
 import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { ApiService } from 'projects/core/src/app/service/api.service'
 import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
 import { BaseInfoService } from 'projects/core/src/app/service/base-info.service'
+import { DeployService } from '../../deploy.service'
+import { DeployClusterEnvConfigThead } from '../types/conf'
 import { DeployClusterEnvironmentConfigFormComponent } from './config/form/form.component'
 import { DeployClusterEnvironmentConfigUpdateComponent } from './config/update/update.component'
 import { DeployClusterEnvironmentHistoryChangeComponent } from './history/change/change.component'
@@ -44,90 +47,13 @@ export class DeployClusterEnvironmentComponent implements OnInit {
 
   clusterName:string=''
   readonly nowUrl:string = this.router.routerState.snapshot.url
-   configsList: Array<{ key: string, value: string, variable_id: number, publish:string, status:string, desc:string, operator:string, update_time:string, create_time:string, id: number, checked:boolean}> = []
+   configsList: Array<{ key: string, value: string, variableId: number, publish:string, status:string, desc:string, operator:string, updateTime:string, createTime:string, id: number, checked:boolean}> = []
 
   drawerRef:NzModalRef | undefined
   nzDisabled:boolean = false
 
-  configsTableHeadName: Array<object> = [
-    { title: 'KEY', resizeable: true },
-    { title: 'VALUE', resizeable: true },
-    { title: '描述', resizeable: true },
-    { title: '发布状态', resizeable: true },
-    { title: '更新者', resizeable: true },
-    { title: '更新时间' },
-    {
-      title: '操作',
-      right: true
-    }
-  ]
-
-  configsTableBody: Array<any> =[
-    {
-      key: 'key'
-    },
-    {
-      key: 'value'
-    },
-    {
-      key: 'desc'
-    },
-    {
-      key: 'publish'
-    },
-    {
-      key: 'operator'
-    },
-    {
-      key: 'update_time'
-    },
-    {
-      type: 'btn',
-      right: true,
-      showFn: (item:any) => {
-        return item.publish !== 'DEFECT'
-      },
-      btns: [
-        {
-          title: '编辑',
-          disabledFn: () => {
-            return this.nzDisabled
-          },
-          click: (item:any) => {
-            this.openDrawer('editConfig', item.data)
-          }
-        },
-        {
-          title: '删除',
-          click: (item:any) => {
-            this.delete(item.data)
-          },
-          disabledFn: () => {
-            return this.nzDisabled
-          }
-        }
-      ]
-    },
-    {
-      type: 'btn',
-      right: true,
-      showFn: (item:any) => {
-        return item.publish === 'DEFECT'
-      },
-      btns: [
-        {
-          title: '编辑',
-          click: (item:any) => {
-            this.openDrawer('editConfig', item.data)
-          },
-          disabledFn: () => {
-            return this.nzDisabled
-          }
-        }
-      ]
-    }
-
-  ]
+  configsTableHeadName: THEAD_TYPE[]= [...DeployClusterEnvConfigThead]
+  configsTableBody: TBODY_TYPE[]=[...this.service.createClusterEnvConfigTbody(this)]
 
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
 
@@ -138,7 +64,8 @@ export class DeployClusterEnvironmentComponent implements OnInit {
           private modalService:EoNgFeedbackModalService,
           private api:ApiService,
           private router:Router,
-          private appConfigService:AppConfigService) {
+          private appConfigService:AppConfigService,
+          private service:DeployService) {
     this.appConfigService.reqFlashBreadcrumb([{ title: '网关集群', routerLink: 'deploy/cluster' }, { title: '环境变量' }])
   }
 
@@ -164,8 +91,6 @@ export class DeployClusterEnvironmentComponent implements OnInit {
     this.api.get('cluster/' + this.clusterName + '/variables').subscribe(resp => {
       if (resp.code === 0) {
         this.configsList = resp.data.variables
-      } else {
-        this.message.error(resp.msg || '获取列表数据失败!')
       }
     })
   }
@@ -194,8 +119,6 @@ export class DeployClusterEnvironmentComponent implements OnInit {
       if (resp.code === 0) {
         this.message.success(resp.msg || '删除成功', { nzDuration: 1000 })
         this.getConfigsList()
-      } else {
-        this.message.error(resp.msg || '删除失败!')
       }
     })
   }
@@ -292,5 +215,11 @@ export class DeployClusterEnvironmentComponent implements OnInit {
   closeModal = (fresh?:boolean) => {
     fresh && this.getConfigsList()
     this.drawerRef?.close()
+  }
+
+  copyCallback () {
+    this.message.success('复制成功', {
+      nzDuration: 1000
+    })
   }
 }

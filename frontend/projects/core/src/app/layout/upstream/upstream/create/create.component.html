@@ -1,7 +1,7 @@
 <!--
- * @Author:  
+ * @Author: 
  * @Date: 2022-08-09 23:06:58
- * @LastEditors:  
+ * @LastEditors: 
  * @LastEditTime: 2022-09-28 00:25:00
  * @FilePath: /apinto/src/app/layout/upstream/upstream-create/upstream-create.component.html
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
@@ -95,10 +95,10 @@
       >
       <nz-form-control class="form-input">
         <eo-ng-select
-          name="discovery_name"
+          name="discoveryName"
           class="w-INPUT_NORMAL"
           required
-          formControlName="discovery_name"
+          formControlName="discoveryName"
           (ngModelChange)="changeBasedata()"
           [nzOptions]="discoveryList"
           [nzDisabled]="nzDisabled"
@@ -140,7 +140,7 @@
       </nz-form-control>
     </nz-form-item>
 
-    <nz-form-item class="mb-0 sticky bg-white bottom-0 py-mbase">
+    <nz-form-item class="mb-0 sticky bg-white bottom-0 py-mbase z-50">
       <div class="w-[110px] leading-[32px] text-right"></div>
       <nz-form-control class="form-input">
         <button
@@ -149,6 +149,7 @@
           type="submit"
           eo-ng-button
           (click)="saveUpstream()"
+          [nzLoading]="submitButtonLoading"
         >
           {{ editPage ? '提交' : '保存' }}
         </button>

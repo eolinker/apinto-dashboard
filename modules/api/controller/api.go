@@ -249,6 +249,7 @@ func (a *apiController) getInfo(ginCtx *gin.Context) {
 		EnableWebsocket: info.Version.EnableWebsocket,
 		Match:           info.Version.Match,
 		Header:          info.Version.Header,
+		TemplateUUID:    info.Version.TemplateUUID,
 	}
 
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(map[string]interface{}{"api": apiInfo}))
@@ -455,11 +456,11 @@ func (a *apiController) batchOnlineCheck(ginCtx *gin.Context) {
 
 	for _, item := range batchOnlineList {
 		checkItem := &api_dto.ApiBatchOnlineCheckListItem{
-			ServiceName: item.ServiceName,
-			ClusterEnv:  item.ClusterEnv,
-			Status:      item.Status,
-			Result:      item.Result,
-			Solution:    item.Solution,
+			ServiceTemplate: item.ServiceTemplate,
+			ClusterEnv:      item.ClusterEnv,
+			Status:          item.Status,
+			Result:          item.Result,
+			Solution:        item.Solution,
 		}
 
 		outputList = append(outputList, checkItem)
