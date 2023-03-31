@@ -152,7 +152,7 @@ func (a *apiHTTP) CheckInput(input *api_dto.APIInfo) error {
 	return nil
 }
 
-func (a *apiHTTP) ToApinto(name, desc string, disable bool, method []string, requestPath, requestPathLabel, proxyPath, serviceName string, timeout, retry int, enableWebsocket bool, match []*api_entry.MatchConf, header []*api_entry.ProxyHeader) *v1.RouterConfig {
+func (a *apiHTTP) ToApinto(name, desc string, disable bool, method []string, requestPath, requestPathLabel, proxyPath, serviceName string, timeout, retry int, enableWebsocket bool, match []*api_entry.MatchConf, header []*api_entry.ProxyHeader, templateUUID string) *v1.RouterConfig {
 
 	rewriteHeaders := make(map[string]string)
 	for _, ph := range header {
@@ -236,6 +236,10 @@ func (a *apiHTTP) ToApinto(name, desc string, disable bool, method []string, req
 		rules = append(rules, rule)
 	}
 
+	templateID := ""
+	if templateUUID != "" {
+		templateID = fmt.Sprintf("%s@template", templateUUID)
+	}
 	return &v1.RouterConfig{
 		Name:            name,
 		Description:     desc,
@@ -247,7 +251,7 @@ func (a *apiHTTP) ToApinto(name, desc string, disable bool, method []string, req
 		RequestPath:     requestPath,
 		Rules:           rules,
 		Service:         fmt.Sprintf("%s@service", serviceName),
-		Template:        "",
+		Template:        templateID,
 		Retry:           retry,
 		Timeout:         timeout,
 		EnableWebsocket: enableWebsocket,
