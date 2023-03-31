@@ -4,11 +4,14 @@
   "compilerOptions": {
     "baseUrl": ".",
     "outDir": "../dist/",
-    // "outDir": "./dist/out-tsc",
     "forceConsistentCasingInFileNames": true,
     "paths": {
-      "eoNgApintoTable": ["dist/eo-ng-apinto-table"],
-      "eoNgApintoUser": ["dist/eo-ng-apinto-user"]
+      "eoNgApintoTable": [
+        "dist/eo-ng-apinto-table"
+      ],
+      "eoNgApintoUser": [
+        "dist/eo-ng-apinto-user"
+      ]
     },
     "strict": true,
     "noImplicitOverride": true,
@@ -21,9 +24,13 @@
     "experimentalDecorators": true,
     "moduleResolution": "node",
     "importHelpers": true,
-    "target": "es2020",
+    "target": "ES2022",
     "module": "es2020",
-    "lib": ["es2020", "dom"]
+    "lib": [
+      "es2020",
+      "dom"
+    ],
+    "useDefineForClassFields": false
   },
   "angularCompilerOptions": {
     "skipLibCheck": true,

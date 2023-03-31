@@ -10,9 +10,12 @@
 import { Component, OnInit } from '@angular/core'
 import { Router } from '@angular/router'
 import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feedback'
+import { THEAD_TYPE } from 'eo-ng-table'
 import { MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
 import { ApiService } from 'projects/core/src/app/service/api.service'
 import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { EO_TBODY_TYPE } from 'projects/eo-ng-apinto-table/src/public-api'
+import { ServicesTablebody, ServicesTableHeadName } from '../../upstream/types/conf'
 
 @Component({
   selector: 'eo-ng-service-discovery-list',
@@ -33,48 +36,20 @@ export class ServiceDiscoveryListComponent implements OnInit {
   serviceName:string = ''
   serviceNameForSear:string = ''
   servicesList : Array<object> = []
-  servicesTableHeadName: Array<object> = [
-    { title: '服务名称' },
-    { title: '服务类型' },
-    { title: '描述' },
-    { title: '更新时间' },
-    {
-      title: '操作',
-      right: true
-    }
-  ]
-
-  servicesTableBody: Array<any> =[
-    { key: 'name' },
-    { key: 'driver' },
-    { key: 'desc' },
-    { key: 'update_time' },
-    {
-      type: 'btn',
-      right: true,
-      btns: [
-        {
-          title: '查看',
-          click: (item:any) => {
-            this.router.navigate(['/', 'upstream', 'serv-discovery', 'content', item.data.name])
-          }
-        },
-        {
-          title: '删除',
-          disabledFn: (data:any, item:any) => {
-            return this.nzDisabled || !item.data.is_delete
-          },
-          click: (item:any) => {
-            this.delete(item.data)
-          }
-        }
-      ]
-    }
-
-  ]
+  servicesTableHeadName: THEAD_TYPE[] = [...ServicesTableHeadName]
+  servicesTableBody: EO_TBODY_TYPE[] =[...ServicesTablebody]
 
   ngOnInit (): void {
     this.getServicesList()
+    this.servicesTableBody[4].btns[0].click = (item:any) => {
+      this.router.navigate(['/', 'upstream', 'serv-discovery', 'content', item.data.name])
+    }
+    this.servicesTableBody[4].btns[1].disabledFn = (data:any, item:any) => {
+      return this.nzDisabled || !item.data.isDelete
+    }
+    this.servicesTableBody[4].btns[1].click = (item:any) => {
+      this.delete(item.data)
+    }
   }
 
   getServicesList () {
@@ -82,8 +57,6 @@ export class ServiceDiscoveryListComponent implements OnInit {
       if (resp.code === 0) {
         this.servicesList = resp.data.discoveries
         this.serviceName = this.serviceNameForSear
-      } else {
-        this.message.error(resp.msg || '获取列表数据失败!')
       }
     })
   }
@@ -120,8 +93,6 @@ export class ServiceDiscoveryListComponent implements OnInit {
       if (resp.code === 0) {
         this.getServicesList()
         this.message.success(resp.msg || '删除成功!', { nzDuration: 1000 })
-      } else {
-        this.message.error(resp.msg || '删除失败!')
       }
     })
   }

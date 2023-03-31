@@ -1,6 +1,8 @@
 import { Component, Input, OnInit } from '@angular/core'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
+import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { ApiService } from 'projects/core/src/app/service/api.service'
+import { DeployService } from '../../../../deploy.service'
 
 @Component({
   selector: 'eo-ng-deploy-cluster-environment-config-update',
@@ -76,62 +78,17 @@ import { ApiService } from 'projects/core/src/app/service/api.service'
 export class DeployClusterEnvironmentConfigUpdateComponent implements OnInit {
   @Input() closeModal?:(value?:any)=>void
   clustersList:Array<{env:string, status:string, name:string, checked:boolean, id:number}>=[]
-  clusterTableHeadName: Array<object> = [
-    {
-      type: 'checkbox',
-      click: () => {
-        this.getClusterCheckedList()
-      }
-    },
-    { title: '集群名称', resizeable: true },
-    { title: '所在环境' }
-  ]
-
-  clusterTableBody: Array<object> =[
-    {
-      key: 'checked',
-      type: 'checkbox',
-      click: () => {
-        this.getClusterCheckedList()
-      }
-    },
-    { key: 'name' },
-    {
-      key: 'env'
-    }
-  ]
-
-  configsTable2HeadName: Array<object> = [
-    {
-      type: 'checkbox',
-      click: () => {
-        this.getVarCheckedList()
-      }
-    },
-    { title: 'KEY', resizeable: true },
-    { title: 'VALUE', resizeable: true },
-    { title: '更新时间' }
-  ]
-
-  configsTable2Body: Array<object> =[
-    {
-      key: 'checked',
-      type: 'checkbox',
-      click: () => {
-        this.getVarCheckedList()
-      }
-    },
-    { key: 'key' },
-    { key: 'value' },
-    { key: 'update_time' }
-  ]
+  clusterTableHeadName:THEAD_TYPE[] = [...this.service.createClusterEnvUpdateThead(this)]
+  clusterTableBody:TBODY_TYPE[] = [...this.service.createClusterEnvUpdateTbody(this)]
+  configsTable2HeadName: THEAD_TYPE[] = [...this.service.createClusterEnvUpdate2Thead(this)]
+  configsTable2Body: TBODY_TYPE[]=[...this.service.createClusterEnvUpdate2Tbody(this)]
 
   // eslint-disable-next-line camelcase
-  updateConfigsList: Array<{ key: string, value: string, variable_id: number, publish:string, status:string, desc:string, operator:string, update_time:string, create_time:string, id: number, checked:boolean}> = []
+  updateConfigsList: Array<{ key: string, value: string, variableId: number, publish:string, status:string, desc:string, operator:string, updateTime:string, createTime:string, id: number, checked:boolean}> = []
   clusterName:string = ''
 
   // eslint-disable-next-line camelcase
-  updateConfigForm:{clusters:Array<{name:string, env:string, id:number}>, variables:Array<{key:string, value:string, variable_id:number, id:number}>}=
+  updateConfigForm:{clusters:Array<{name:string, env:string, id:number}>, variables:Array<{key:string, value:string, variableId:number, id:number}>}=
       {
         clusters: [],
         variables: []
@@ -140,7 +97,9 @@ export class DeployClusterEnvironmentConfigUpdateComponent implements OnInit {
   startValidate:boolean = false // 开始校验数据，当用户点击过提交按钮才触发
   constructor (
     private message: EoNgFeedbackMessageService,
-    private api:ApiService) { }
+    private api:ApiService,
+    private service:DeployService
+  ) { }
 
   ngOnInit (): void {
     this.getUpdateData()
@@ -151,8 +110,6 @@ export class DeployClusterEnvironmentConfigUpdateComponent implements OnInit {
       if (resp.code === 0) {
         this.clustersList = resp.data.info.clusters
         this.updateConfigsList = resp.data.info.variables
-      } else {
-        this.message.error(resp.msg || '获取列表数据失败!')
       }
     })
   }
@@ -184,8 +141,6 @@ export class DeployClusterEnvironmentConfigUpdateComponent implements OnInit {
         if (resp.code === 0) {
           this.message.success(resp.msg || '同步成功', { nzDuration: 1000 })
           this.closeModal && this.closeModal()
-        } else {
-          this.message.error(resp.msg || '同步失败!')
         }
       })
     }

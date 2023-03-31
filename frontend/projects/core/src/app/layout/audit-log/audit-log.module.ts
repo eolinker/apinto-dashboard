@@ -15,6 +15,8 @@ import { EoNgApintoTableModule } from 'projects/eo-ng-apinto-table/src/public-ap
 
 import zh from '@angular/common/locales/zh'
 import { AuditLogDetailComponent } from './detail/detail.component'
+import { EoNgFeedbackTooltipModule } from 'eo-ng-feedback'
+import { EoNgCopyModule } from 'eo-ng-copy'
 
 registerLocaleData(zh)
 
@@ -35,7 +37,9 @@ registerLocaleData(zh)
     ReactiveFormsModule,
     EoNgDatePickerModule,
     ComponentModule,
-    EoNgApintoTableModule
+    EoNgApintoTableModule,
+    EoNgFeedbackTooltipModule,
+    EoNgCopyModule
   ]
 })
 export class AuditLogModule { }

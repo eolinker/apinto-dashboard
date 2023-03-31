@@ -1,5 +1,4 @@
 /* eslint-disable dot-notation */
-/* eslint-disable no-unused-expressions */
 /* eslint-disable camelcase */
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
 import { Router } from '@angular/router'
@@ -11,6 +10,9 @@ import { MODAL_SMALL_SIZE } from '../../../constant/app.config'
 import { BaseInfoService } from '../../../service/base-info.service'
 import { ApplicationAuthenticationFormComponent } from './form/form.component'
 import { differenceInCalendarDays } from 'date-fns'
+import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
+import { authenticationTableBody, authenticationTableHeadName } from '../types/conf'
+import { AuthListData } from '../types/types'
 
 @Component({
   selector: 'eo-ng-application-authentication',
@@ -41,67 +43,9 @@ export class ApplicationAuthenticationComponent implements OnInit {
   @ViewChild('authContentTpl', { read: TemplateRef, static: true }) authContentTpl: TemplateRef<any> | undefined
   appId:string = ''
   nzDisabled:boolean = false
-
-  authenticationTableHeadName:Array<object> = [
-
-    { title: '鉴权类型' },
-    { title: '参数位置' },
-    { title: '参数名' },
-    { title: '参数信息' },
-    { title: '过期时间' },
-    { title: '隐藏鉴权信息' },
-    { title: '更新者' },
-    { title: '更新时间' },
-    {
-      title: '操作',
-      right: true
-    }
-  ]
-
-  authenticationTableBody:Array<any> = [
-    { key: 'driver' },
-    { key: 'param_position' },
-    { key: 'param_name' },
-    { key: 'param_info' },
-    {
-      key: 'expire_time_string',
-      styleFn: (item:any) => {
-        if (item.expire_time && differenceInCalendarDays(item.expire_time * 1000, new Date()) < 0) {
-          return 'color:red'
-        }
-        return ''
-      }
-    },
-    {
-      key: 'is_transparent'
-    },
-    { key: 'operator' },
-    { key: 'update_time' },
-    {
-      type: 'btn',
-      right: true,
-      btns: [{
-        title: '查看',
-        click: (item:any) => {
-          this.openDrawer(item.data.uuid)
-        }
-      },
-      {
-        title: '删除',
-        disabledFn: () => {
-          return this.nzDisabled
-        },
-        click: (item:any) => {
-          this.delete(item.data)
-        }
-      }
-      ]
-    }
-  ]
-
-  authenticationList:Array<{uuid:string, info:string, driver:string, expire_time_string:string, expire_time:number, operator:string, update_time:string, rule_info:string, is_transparent:boolean}>=[
-  ]
-
+  authenticationTableHeadName:THEAD_TYPE[] = [...authenticationTableHeadName]
+  authenticationTableBody:TBODY_TYPE[] = [...authenticationTableBody]
+  authenticationList:AuthListData[] = []
   modalRef:NzModalRef | undefined
 
   constructor (
@@ -116,13 +60,27 @@ export class ApplicationAuthenticationComponent implements OnInit {
 
   ngOnInit (): void {
     this.appId = this.baseInfo.allParamsInfo.appId
+    this.initTable()
     if (!this.appId) {
       this.router.navigate(['/', 'application'])
     }
     this.getAuthsData()
   }
 
-  authTableClick = (item:any) => {
+  initTable () {
+    this.authenticationTableBody[4].styleFn = (item:any) => {
+      if (item.expireTime && differenceInCalendarDays(item.expireTime * 1000, new Date()) < 0) {
+        return 'color:red'
+      }
+      return ''
+    }
+
+    this.authenticationTableBody[8].btns[0].click = (item:any) => { this.openDrawer(item.data.uuid) }
+    this.authenticationTableBody[8].btns[1].disabledFn = () => { return this.nzDisabled }
+    this.authenticationTableBody[8].btns[1].click = (item:any) => { this.delete(item.data) }
+  }
+
+  authTableClick = (item:{data:AuthListData}) => {
     this.openDrawer(item.data.uuid)
   }
 
@@ -144,7 +102,7 @@ export class ApplicationAuthenticationComponent implements OnInit {
     })
   }
 
-  delete (item:any, e?:Event) {
+  delete (item:AuthListData, e?:Event) {
     e?.stopPropagation()
     this.modalService.create({
       nzTitle: '删除',
@@ -158,8 +116,6 @@ export class ApplicationAuthenticationComponent implements OnInit {
           if (resp.code === 0) {
             this.message.success(resp.msg || '删除成功!', { nzDuration: 1000 })
             this.getAuthsData()
-          } else {
-            this.message.error(resp.msg || '删除失败!')
           }
         })
       }
@@ -175,16 +131,14 @@ export class ApplicationAuthenticationComponent implements OnInit {
 
   // 获取鉴权列表
   getAuthsData () {
-    this.api.get('application/auths', { app_id: this.appId }).subscribe(resp => {
+    this.api.get('application/auths', { appId: this.appId }).subscribe((resp:{code:number, data:{auths:AuthListData[]}, msg:string}) => {
       if (resp.code === 0) {
         for (const index in resp.data.auths) {
           resp.data.auths[index].driver = this.getAuthDriver(resp.data.auths[index].driver)
-          resp.data.auths[index].is_transparent = resp.data.auths[index].is_transparent ? '是' : '否'
-          resp.data.auths[index].expire_time_string = resp.data.auths[index].expire_time === 0 ? '永不过期' : this.getDateInList(resp.data.auths[index].expire_time)
+          resp.data.auths[index].isTransparent = resp.data.auths[index].isTransparent ? '是' : '否'
+          resp.data.auths[index].expireTimeString = resp.data.auths[index].expireTime === 0 ? '永不过期' : this.getDateInList(resp.data.auths[index].expireTime)
         }
         this.authenticationList = resp.data.auths
-      } else {
-        this.message.error(resp.msg || '获取数据失败!')
       }
     })
   }
