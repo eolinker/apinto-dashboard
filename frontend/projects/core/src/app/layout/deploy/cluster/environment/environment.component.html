@@ -1,0 +1,116 @@
+<!--
+ * @Author: 
+ * @Date: 2022-07-21 00:25:31
+ * @LastEditors: 
+ * @LastEditTime: 2022-07-29 01:03:34
+ * @FilePath: /apinto/src/app/layout/deploy/deploy-cluster-environment/deploy-cluster-environment.html
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+-->
+<div class="">
+  <div
+    class="list-header pl-btnbase pr-btnrbase py-btnybase flex flex-nowrap items-center justify-between"
+  >
+    <div>
+      <button
+        class="ant-btn-primary"
+        eo-ng-button
+        eoNgUserAccess="deploy/cluster"
+        (disabledEdit)="disabledEdit($event)"
+        (click)="openDrawer('addConfig')"
+      >
+        新建配置
+      </button>
+      <button
+        class="ml-btnybase ant-btn-primary"
+        eo-ng-button
+        eoNgUserAccess="deploy/cluster"
+        (click)="openDrawer('publish')"
+      >
+        发布
+      </button>
+      <button
+        class="ml-btnybase"
+        eo-ng-button
+        eoNgUserAccess="deploy/cluster"
+        (click)="openDrawer('updateConfig')"
+      >
+        同步配置
+      </button>
+    </div>
+    <div>
+      <button
+        class="ml-btnybase floatR"
+        eo-ng-button
+        (click)="openDrawer('publishRecords')"
+      >
+        发布历史
+      </button>
+      <button
+        class="floatR"
+        eo-ng-button
+        (click)="openDrawer('operateRecords')"
+      >
+        更改历史
+      </button>
+    </div>
+  </div>
+  <div class="list-content">
+    <eo-ng-apinto-table
+      class=""
+      [nzTbody]="configsTableBody"
+      [nzThead]="configsTableHeadName"
+      [(nzData)]="configsList"
+      [nzTrClick]="configTableClick"
+      [nzMaxOperatorButton]="2"
+    >
+    </eo-ng-apinto-table>
+  </div>
+</div>
+
+<ng-template #operatorStatusTpl let-item="item">
+  <div class="leading-[22px] flex items-center">
+    <span
+      eoNgFeedbackTooltip
+      [nzTooltipTitle]="item.key"
+      nzTooltipPlacement="top"
+      [nzTooltipVisible]="false"
+      nzTooltipTrigger="hover"
+    >
+      {{ item.key }}</span
+    >
+
+    <ng-container [ngSwitch]="item.publish">
+      <span class="status-new-icon" *ngSwitchCase="'NEW'">新</span>
+      <span class="status-change-icon" *ngSwitchCase="'MODIFY'">改</span>
+      <span class="status-delete-icon" *ngSwitchCase="'DELETE'">删</span>
+    </ng-container>
+    <span
+      class="h-[20px] leading-[22px] text-[12px] opacity-0 cursor-pointer inline-flex items-center"
+      eo-copy
+      nzType="primary"
+      [copyText]="item.key"
+      (copyCallback)="copyCallback()"
+      (click)="$event.stopPropagation()"
+    >
+      <svg class="iconpark-icon">
+        <use href="#copy"></use>
+      </svg>
+    </span>
+  </div>
+</ng-template>
+
+<ng-template #publishStatusTpl let-item="item">
+  <ng-container [ngSwitch]="item.publish">
+    <span *ngSwitchCase="'UNPUBLISHED'" class="red-bold">未发布</span>
+    <span *ngSwitchCase="'PUBLISHED'" class="green-bold">已发布</span>
+    <span *ngSwitchCase="'DEFECT'" style="font-weight: bold">缺失</span>
+  </ng-container>
+</ng-template>
+
+<ng-template #publishTypeTpl let-item="item">
+  <ng-container [ngSwitch]="item.optType">
+    <span *ngSwitchCase="'NEW'" class="green-bold">新增</span>
+    <span *ngSwitchCase="'MODIFY'" style="font-weight: bold">更新</span>
+    <span *ngSwitchCase="'DELETE'" class="grey-bold">缺失</span>
+  </ng-container>
+</ng-template>

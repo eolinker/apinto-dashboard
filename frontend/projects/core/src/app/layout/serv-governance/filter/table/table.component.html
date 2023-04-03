@@ -1,0 +1,62 @@
+<div>
+  <button
+    type="button"
+    eoNgUserAccess="{{ 'serv-governance/' + strategyType }}"
+    eo-ng-button
+    (click)="openDrawer('addFilter')"
+  >
+    添加条件
+  </button>
+</div>
+<div
+  *ngIf="_filterShowList.length > 0 && _filterShowList !== []"
+  class="mt-btnybase"
+  style="width: 524px"
+>
+  <eo-ng-apinto-table
+    [nzTbody]="filterTableBody"
+    [nzThead]="filterTableHeadName"
+    [nzData]="_filterShowList"
+    [nzTrClick]="filterTableClick"
+    eoNgUserAccess="{{ 'serv-governance/' + strategyType }}"
+    (disabledEdit)="disabledEdit($event)"
+    [nzDisabled]="nzDisabled"
+    [nzNoScroll]="true"
+    [nzMaxOperatorButton]="2"
+    nzTableLayout="fixed"
+  >
+  </eo-ng-apinto-table>
+  <div
+    class="ant-form-item-explain"
+    *ngIf="filterTableTip && (!filterTableTipShowFn || filterTableTipShowFn())"
+  >
+    <div role="alert" class="ant-form-item-explain-error">
+      {{ filterTableTip }}
+    </div>
+  </div>
+</div>
+<ng-template #filterContentTpl let-data>
+  <eo-ng-serv-governance-filter-form
+    [(filterForm)]="filterForm"
+    [(filterType)]="filterType"
+    [(remoteSelectList)]="remoteSelectList"
+    [(remoteSelectNameList)]="remoteSelectNameList"
+    [(staticsList)]="staticsList"
+    [filterNamesSet]="filterNamesSet"
+    [editFilter]="editFilter"
+  ></eo-ng-serv-governance-filter-form>
+</ng-template>
+
+<ng-template #filterFooterTpl let-ref="ref">
+  <eo-ng-filter-footer
+    [(filterForm)]="filterForm"
+    [(filterShowList)]="filterShowList"
+    [(filterNamesSet)]="filterNamesSet"
+    [remoteSelectList]="remoteSelectList"
+    [staticsList]="staticsList"
+    [editFilter]="editFilter"
+    [filterType]="filterType"
+    [remoteSelectNameList]="remoteSelectNameList"
+    (drawerClose)="drawerClose($event)"
+  ></eo-ng-filter-footer>
+</ng-template>

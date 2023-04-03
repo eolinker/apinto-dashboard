@@ -1,0 +1,327 @@
+nz-table-sorters.ant-table-column-sorters {
+  .ant-table-column-title {
+    flex: none;
+  }
+}
+
+.ant-table-measure-now {
+  display: none;
+}
+nz-table-inner-scroll,
+nz-table-inner-default {
+  .ant-input {
+    // border: none;
+  }
+  .ant-table tfoot > tr > td,
+  .ant-table-tbody > tr > td {
+    border: none;
+    border-bottom: 1px solid #e8e8e8 !important;
+  }
+  .ant-table-thead > tr > th {
+    padding: 0 var(--LAYOUT_PADDING);
+    color: var(--TITLE_TEXT);
+    font-weight: 400;
+    border: none;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    white-space: nowrap;
+  }
+}
+
+.tab-list .ant-table-thead > tr > th {
+  border-top: none;
+}
+
+table tr td.ant-table-selection-column,
+table tr th.ant-table-selection-column {
+  padding: 0 !important;
+  padding-left: var(--LAYOUT_PADDING) !important;
+  vertical-align: middle;
+}
+
+.arrayItem {
+  .ant-table {
+    background-color: transparent;
+  }
+  .ant-table-thead,
+  .ant-table-tbody tr {
+    height: 0px !important;
+  }
+  .ant-table-tbody > tr > td {
+    padding: 0 8px 16px 0 !important;
+    border: none !important;
+  }
+  .ant-table-tbody > tr:last-child > td {
+    padding: 0 8px 0 0 !important;
+    border: none;
+  }
+
+  .ant-table-tbody > tr.ant-table-row:hover > td,
+  .ant-table-tbody > tr > td.ant-table-cell-row-hover {
+    background-color: transparent !important;
+  }
+
+  .eo-ng-table-btns {
+    height: 32px;
+    line-height: 32px;
+    button {
+      line-height: 32px;
+      height: 32px;
+      span {
+        line-height: 32px;
+        height: 32px;
+      }
+    }
+  }
+
+  nz-table-inner-default tr > td {
+    border-right: none !important;
+
+    input {
+      border: 1px solid var(--border-color);
+      background-color: #fff;
+    }
+    input:hover,
+    input:focus,
+    input:active {
+      border: 1px solid var(--primary-color) !important;
+    }
+
+    .ant-input[disabled],
+    .ant-input[disabled]:hover,
+    .ant-input[disabled]:active,
+    .ant-input[disabled]:focus {
+      border: 1px solid #d9d9d9;
+      background-color: var(--disabled-background-color) !important;
+    }
+
+    .ant-input-status-error:not(.ant-input-disabled):not(
+        .ant-input-borderless
+      ).ant-input,
+    .ant-input-status-error:not(.ant-input-disabled):not(
+        .ant-input-borderless
+      ).ant-input:hover {
+      background: #fff;
+      border-color: rgb(255, 60, 50) !important;
+      color: rgb(255, 60, 50) !important;
+    }
+  }
+  eo-ng-table .ant-input,
+  eo-ng-table .ant-input-group,
+  eo-ng-table .ant-input[disabled],
+  eo-ng-table
+    eo-ng-select.ant-select:not(.ant-select-customize-input):not(
+      .ant-select-lg
+    ):not(.ant-select-sm):not(.ant-select-disabled)
+    .ant-select-selector,
+  eo-ng-table
+    eo-ng-select.ant-select-disabled.ant-select:not(.ant-select-customize-input)
+    .ant-select-selector {
+    border-color: var(--border-color);
+  }
+}
+
+.arrayItem.custom,
+.arrayItem.fuse-header {
+  tr td:first-child input.ant-input {
+    width: 174px !important;
+  }
+  tr td:nth-child(2) input.ant-input {
+    width: 164px !important;
+  }
+
+  td:has(input.ant-input-status-error) {
+    padding-bottom: 0px !important;
+
+    + td {
+      padding-bottom: 24px !important;
+    }
+  }
+}
+
+.arrayItem.header {
+  tr td:first-child input.ant-input {
+    width: 174px !important;
+  }
+  tr td:nth-child(2) input.ant-input {
+    width: 164px !important;
+  }
+}
+
+// 应用鉴权配置jwt标签信息
+.arrayItem.label {
+  tr td:first-child input.ant-input {
+    width: 168px !important;
+  }
+  tr td:nth-child(2) input.ant-input {
+    width: 168px !important;
+  }
+}
+
+.arrayItem.grey-nodes {
+  td input.ant-input {
+    width: 346px !important;
+  }
+
+  td:has(input.ant-input-status-error) {
+    padding-bottom: 0px !important;
+  }
+}
+
+.ant-form-item-label.table-label > label,
+label.table-label {
+  height: 40px;
+  line-height: 40px !important;
+  white-space: nowrap;
+  padding-top: 0;
+}
+
+.drawer-table {
+  margin: 0 auto;
+}
+
+.ant-table-row-expand-icon:focus,
+.ant-table-row-expand-icon:hover {
+  color: var(--primary-color);
+}
+
+.arrayItem .ant-table table {
+  table-layout: auto !important;
+}
+
+.ant-table-row-expand-icon {
+  width: 20px !important;
+  height: 20px !important;
+  border-color: #d9d9d9;
+
+  &.ant-table-row-expand-icon-expanded::after {
+    top: 9px !important;
+    bottom: 8px !important;
+    left: 4px !important;
+    right: 4px !important;
+    color: #d9d9d9;
+  }
+
+  &.ant-table-row-expand-icon-expanded::before {
+    top: 9px !important;
+    left: 5px !important;
+    right: 5px !important;
+    color: #d9d9d9;
+  }
+
+  &.ant-table-row-expand-icon-collapsed::before {
+    top: 9px !important;
+    bottom: 8px !important;
+    left: 4px !important;
+    right: 4px !important;
+    color: #d9d9d9;
+  }
+
+  &.ant-table-row-expand-icon-collapsed::after {
+    top: 5px !important;
+    bottom: 5px !important;
+    left: 9px !important;
+    right: 8px !important;
+    color: #d9d9d9;
+  }
+}
+
+.ant-collapse-content {
+  > .ant-collapse-content-box {
+    padding: 0px;
+  }
+  nz-table-inner-scroll .ant-table-thead > tr > th {
+    border-top: none;
+  }
+  nz-table-inner-scroll .ant-table-tbody > tr > td {
+    border-bottom: none !important;
+  }
+}
+.innerTable {
+  width: 100%;
+}
+
+.innerTable .ant-table-container table > thead > tr:first-child th,
+.innerTable .ant-table-container table > thead > tr:first-child th:last-child {
+  border-top: none !important;
+}
+
+.ant-transfer-customize-list .ant-transfer-list {
+  display: inline-block;
+  width: 538px;
+}
+.filter-drawer {
+  .ant-drawer-body {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  eo-ng-transfer {
+    .ant-table table {
+      width: 498px !important;
+      max-height: 584px;
+    }
+    .ant-input-affix-wrapper {
+      height: 32px;
+    }
+    .eo-ng-transfer-render-top {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .ant-btn-primary {
+      padding: 0 !important;
+    }
+    .ant-btn-icon-only.ant-btn-sm {
+      width: 16px;
+      height: 16px;
+    }
+    .ant-transfer-operation {
+      margin: 0 var(--LAYOUT_PADDING);
+    }
+    .ant-transfer-list-header {
+      height: 56px !important;
+      border-bottom: none;
+    }
+    .ant-transfer-list-body-search-wrapper {
+      padding-right: var(--LAYOUT_PADDING);
+    }
+
+    .ant-transfer-list-header-render {
+      font-weight: bold;
+      font-size: 16px;
+      font-family: 'Helvetica Neue', 'Helvetica', 'PingFang SC',
+        'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC',
+        'WenQuanYi Micro Hei', 'Arial', sans-serif;
+      margin-right: 8px;
+    }
+  }
+}
+
+audit-log-drawer {
+  td {
+    white-space: unset !important;
+  }
+}
+
+.ant-table-cell-ellipsis {
+  word-break: break-all;
+}
+
+.ant-table table {
+  width: 100% !important;
+}
+
+.arrayItem,
+.ant-table-cell {
+  div:has(.ant-input-status-error) + .error-tips {
+    display: block;
+  }
+}
+
+.ant-table-cell-fix-right {
+  right: 0px;
+}
+.ant-table-cell-fix-left {
+  left: 0px;
+}

@@ -1,0 +1,82 @@
+<div class="">
+  <div
+    class="list-header pl-btnbase pr-btnrbase py-btnybase flex flex-nowrap items-center justify-between"
+  >
+    <button
+      eo-ng-button
+      type="button"
+      class="ant-btn-primary"
+      eoNgUserAccess="{{ 'serv-governance/' + strategyType }}"
+      (click)="addStrategy()"
+    >
+      新建策略
+    </button>
+
+    <div class="floatR">
+      <button
+        eo-ng-button
+        type="button"
+        class="ant-btn-primary"
+        (click)="openDrawer('publish')"
+        [disabled]="!clusterName"
+        eoNgUserAccess="{{ 'serv-governance/' + strategyType }}"
+        (disabledEdit)="disabledEdit($event)"
+      >
+        发布
+      </button>
+    </div>
+  </div>
+  <div class="list-content">
+    <eo-ng-apinto-table
+      class=""
+      [nzTbody]="strategiesTableBody"
+      [nzThead]="strategiesTableHeadName"
+      [nzData]="strategiesList"
+      [nzMaxOperatorButton]="2"
+      [nzTrClick]="strategiesTableClick"
+    >
+    </eo-ng-apinto-table>
+  </div>
+</div>
+<ng-template #switchTpl let-item="item">
+  <eo-ng-switch
+    [(ngModel)]="!item.isStop"
+    [nzControl]="true"
+    eoNgUserAccess="{{ 'serv-governance/' + strategyType }}"
+    (click)="stopStrategy($event, item, !item.isStop)"
+    [nzDisabled]="nzDisabled"
+  ></eo-ng-switch>
+</ng-template>
+
+<ng-template #priorityTpl let-item="item">
+  <input
+    eo-ng-input
+    type="number"
+    class="priority-input"
+    aotucomplete="off"
+    eoNgUserAccess="{{ 'serv-governance/' + strategyType }}"
+    [attr.id]="item.uuid"
+    class="strategy-priority-input"
+    [(ngModel)]="item.priority"
+    (click)="$event.stopPropagation()"
+    (focus)="changeEditingPriority($event, item.priority)"
+    (blur)="checkPriority(item.priority, item.uuid)"
+    (keyup.enter)="checkPriority(item.priority, item.uuid)"
+    [nzStatus]="checkListStatus(item.priority)"
+  />
+</ng-template>
+
+<ng-template #strategiesStatusTpl let-item="item">
+  <eo-ng-table-status [status]="item.status"></eo-ng-table-status>
+</ng-template>
+
+<ng-template #isDisableTpl>
+  <span
+    eoNgFeedbackTooltip
+    nzTooltipTitle="策略的限流规则是否被生效执行"
+    nzTooltipPlacement="top"
+    [nzTooltipVisible]="false"
+    nzTooltipTrigger="hover"
+    >启停</span
+  ></ng-template
+>
