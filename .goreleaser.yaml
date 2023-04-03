@@ -1,13 +1,14 @@
 # .goreleaser.yml
+dist: apinto-build
+
 builds:
-  - id: apinto-dashboard
+  - id: apserver
     goos:
       - linux
       - darwin
     goarch:
       - amd64
       - arm64
-      - "386"
     goarm:
       - "6"
     gomips:
@@ -16,24 +17,34 @@ builds:
       - v1
     targets:
       - linux_arm64
-      - linux_386
+      - linux_amd64
       - darwin_arm64
-    dir: ./app/apinto-dashboard
-    main: .
-    binary: apinto-dashboard
+      - darwin_amd64
+    tags:
+      - release
+      - mysql
+    dir: ./app/apserver
+    main: ./
+    binary: apserver
     builder: go
     gobinary: go
+    env:
+      - CGO_ENABLED=0
     ldflags:
-      - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}} -X main.builtBy=goreleaser
+      - -s -w
+      - -X "github.com/eolinker/apinto-dashboard/app/apserver/version.Version={{.Version}}"
+      - -X "github.com/eolinker/apinto-dashboard/app/apserver/version.gitcommit={{.Commit}}"
+      - -X "github.com/eolinker/apinto-dashboard/app/apserver/version.buildtime={{.Date}}"
+      - -X "github.com/eolinker/apinto-dashboard/app/apserver/version.builduser=goreleaser"
+      - -X "github.com/eolinker/apinto-dashboard/app/apserver/version.goversion={{.Env.GOVERSION}}"
+
 archives:
   - id: default
     format: tar.gz
-    wrap_in_directory: apinto-dashboard
-    name_template: "{{ .ProjectName }}_{{ .Tag }}_{{ .Os }}_{{ .Arch }}"
+    wrap_in_directory: "apserver_{{ .Tag }}"
+    name_template: "apserver_{{ .Tag }}_{{ .Os }}_{{ .Arch }}"
     files:
-      - src: 'build/resources/*'
+      - src: 'scripts/resource/*'
         dst: /
         strip_parent: true
-release:
-  name_template: "{{ .Tag }}"
-  mode: append
+
