@@ -16,13 +16,11 @@ jobs:
       - name: SetUpGo
         uses: actions/setup-go@v3
         with:
-          go-version: '1.19.4'
+          go-version: '1.17.3'
       - name: Checkout  #Checkout代码
         uses: actions/checkout@v3
       - name: GoTidy
-        run: |
-          go mod tidy
-          echo "GOVERSION=$(go version)" >> $GITHUB_ENV
+        run: go mod tidy
       - name: Create archives on Release   #创建各种系统架构下的二进制包并上传至release assets
         uses: goreleaser/goreleaser-action@v3.1.0
         with:
@@ -38,7 +36,7 @@ jobs:
       - name: SetupGo
         uses: actions/setup-go@v3
         with:
-          go-version: '1.19.4'
+          go-version: '1.17.3'
       - uses: actions/checkout@v3
       - name: SetOutput
         id: vars
@@ -48,12 +46,16 @@ jobs:
           go mod tidy
       - name: Pack  #运行打包脚本并且将生成的tar包复制至Dockerfile所在目录
         run: |
-          ./builds/cmd/docker-build.sh ${{ steps.vars.outputs.tag }}
+          ./build/cmd/package.sh ${{ steps.vars.outputs.tag }}
+          cp ./out/apinto-dashboard-${{ steps.vars.outputs.tag }}.linux.x64.tar.gz ./build/resources/apinto-dashboard.linux.x64.tar.gz
       - name: Login Docker   #登录docker
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
+      - name: buildImage
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/apinto-dashboard:${{ steps.vars.outputs.tag }} -f ./build/resources/Dockerfile ./build/resources
       - name: pushImage
         run: |
           docker push ${{ secrets.DOCKER_USERNAME }}/apinto-dashboard:${{ steps.vars.outputs.tag }}

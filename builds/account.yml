@@ -1,5 +1,0 @@
-account_list:
-- user_name: admin
-  password: admin
-  info:
-    desc: admin用户
