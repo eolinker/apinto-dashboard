@@ -1,0 +1,130 @@
+<div
+  *ngIf="nzTableTheadConfig && nzTableTheadConfig.length > 0"
+  class="eo-test-table-opr-btns"
+  style="
+    display: flex;
+    margin-top: 6px;
+    position: absolute;
+    z-index: 4;
+    right: 10px;
+  "
+>
+  <eo-ng-dropdown
+    style="cursor: pointer"
+    [title]="dropdownTitleTpl"
+    [itemTmp]="dropdownMenTpl"
+    [menus]="nzTableTheadConfig"
+    trigger="click"
+    overlayClassName="eo-monitor-table-dropdown"
+  >
+  </eo-ng-dropdown>
+  <ng-template #dropdownTitleTpl>
+    <svg class="iconpark-icon">
+      <use href="#setting"></use>
+    </svg>
+  </ng-template>
+  <ng-template #dropdownMenTpl let-item="item">
+    <label
+      style="width: 100%"
+      (click)="$event.stopPropagation()"
+      class="eo-test-app-checkbox"
+      (ngModelChange)="
+        nzChangeTableConfigChange.emit({ value: $event, item: item })
+      "
+      eo-ng-checkbox
+      [(ngModel)]="item.checked"
+      >{{ item.title }}</label
+    >
+  </ng-template>
+</div>
+<eo-ng-table
+  [nzTbody]="nzTbody"
+  [nzThead]="nzThead"
+  [nzData]="nzData"
+  [nzTrClick]="nzTrClick"
+  [nzTotal]="nzTotal"
+  [nzPageIndex]="nzPageIndex"
+  [nzPageSize]="nzPageSize"
+  [nzFrontPagination]="nzFrontPagination"
+  [nzShowPagination]="nzShowPagination"
+  [nzPageSizeOptions]="nzPageSizeOptions"
+  [nzShowSizeChanger]="nzShowPagination"
+  [nzShowQuickJumper]="nzShowPagination"
+  [nzShowTotal]="totalTpl"
+  [nzScroll]="nzScroll"
+  [nzCheckAddRow]="nzCheckAddRow"
+  (nzFilterChange)="nzFilterChange?.emit($event)"
+  (nzPageIndexChange)="nzPageIndexChange?.emit($event)"
+  (nzPageSizeChange)="nzPageSizeChange?.emit($event)"
+  (nzDataChange)="nzDataChange?.emit($event)"
+  [nzTrBottomTmp]="nzTrBottomTmp"
+  [nzDraggable]="nzDraggable"
+  [nzDragCheck]="nzDragCheck"
+  (nzDragEnd)="nzDragEnd?.emit($event)"
+  (getScrollViewPort)="handlerScrollView($event)"
+  [nzLoading]="nzLoading"
+>
+</eo-ng-table>
+<ng-template #totalTpl let-total>共 {{ nzTotal }} 条</ng-template>
+<ng-template #theadTpl let-item="item" let-index="i">
+  <span
+    eoNgFeedbackTooltip
+    [nzTooltipTitle]="item.tooltip || ''"
+    [nzTooltipTitleContext]="item"
+    [nzTooltipVisible]="item.tooltipVisible || false"
+    [nzTooltipTrigger]="item.tooltip ? item.tooltipTrigger || 'hover' : null"
+  >
+    <span *ngIf="item.required" class="required-symbol">*</span
+    ><span class="default-title-th-span">{{ item.titleString }}</span>
+  </span>
+</ng-template>
+
+<ng-template #tbodyTpl let-item="item" let-rowItem="rowItem">
+  <div class="leading-[22px] flex items-center">
+    <span
+      class="mr-[8px] inline-block truncate"
+      eoNgFeedbackTooltip
+      [nzTooltipTitle]="
+        rowItem.json
+          ? transferToJson(
+              item[rowItem.key + 'Tooltip'] ||
+                (rowItem.keyPrefix || '') +
+                  item[rowItem.key] +
+                  (rowItem.keySuffix || '')
+            )
+          : item[rowItem.key + 'Tooltip'] ||
+            (rowItem.keyPrefix || '') +
+              item[rowItem.key] +
+              (rowItem.keySuffix || '')
+      "
+      [nzTooltipTitleContext]="{ rowItem: rowItem, item: item }"
+      [nzTooltipVisible]="rowItem.tooltipVisible || false"
+      [nzTooltipTrigger]="rowItem.tooltipTrigger || 'hover'"
+      [nzTooltipOverlayClassName]="rowItem.json ? 'tooltip-json' : ''"
+      >{{ rowItem.keyPrefix }}{{ item[rowItem.key] }}{{ rowItem.keySuffix }}
+    </span>
+
+    <span
+      *ngIf="
+        rowItem.copy &&
+        (rowItem.keyPrefix || '') +
+          item[rowItem.key] +
+          (rowItem.keySuffix || '')
+      "
+      class="h-[20px] leading-[22px] text-[12px] opacity-0 cursor-pointer inline-flex items-center"
+      eo-copy
+      nzType="primary"
+      [copyText]="
+        (rowItem.keyPrefix || '') +
+        item[rowItem.key] +
+        (rowItem.keySuffix || '')
+      "
+      (copyCallback)="copyCallback()"
+      (click)="$event.stopPropagation()"
+    >
+      <svg class="iconpark-icon">
+        <use href="#copy"></use>
+      </svg>
+    </span>
+  </div>
+</ng-template>
