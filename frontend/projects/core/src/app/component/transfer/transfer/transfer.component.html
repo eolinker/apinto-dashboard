@@ -1,0 +1,116 @@
+<eo-ng-transfer-list
+  class="ant-transfer-list"
+  [ngStyle]="nzListStyle"
+  data-direction="left"
+  direction="left"
+  [titleText]="nzTitles[0]"
+  [showSelectAll]="nzShowSelectAll"
+  [dataSource]="leftDataSource"
+  [filter]="leftFilter"
+  [filterOption]="nzFilterOption"
+  (filterChange)="handleFilterChange($event)"
+  [renderList]="nzRenderList && nzRenderList[0]"
+  [renderTitle]="nzRenderTitleList && nzRenderTitleList[0]"
+  [renderTop]="nzRenderTopList && nzRenderTopList[0]"
+  [renderTopParams]="nzRenderTopParamsList && nzRenderTopParamsList[0]"
+  [render]="nzRender"
+  [disabled]="nzDisabled"
+  [showSearch]="nzShowSearch"
+  [searchPlaceholder]="
+    nzSearchPlaceholder || locale ? locale.searchPlaceholder : undefined
+  "
+  [notFoundContent]="nzNotFoundContent"
+  [itemUnit]="nzItemUnit || locale ? locale.itemUnit : undefined"
+  [itemsUnit]="nzItemsUnit || locale ? locale.itemsUnit : undefined"
+  [footer]="nzFooter"
+  (handleSelect)="handleLeftSelect($event)"
+  (handleSelectAll)="handleLeftSelectAll($event)"
+></eo-ng-transfer-list>
+<ng-container *ngIf="!nzNoButton">
+  <div *ngIf="dir !== 'rtl'" class="ant-transfer-operation">
+    <button
+      nz-button
+      type="button"
+      (click)="moveToLeft()"
+      [disabled]="nzDisabled || !leftActive"
+      [nzType]="'primary'"
+      [nzSize]="'small'"
+    >
+      <span
+        ><svg class="iconpark-icon"><use href="#left-small"></use></svg
+      ></span>
+      <span *ngIf="nzOperations[1]">{{ nzOperations[1] }}</span>
+    </button>
+    <button
+      nz-button
+      type="button"
+      (click)="moveToRight()"
+      [disabled]="nzDisabled || !rightActive"
+      [nzType]="'primary'"
+      [nzSize]="'small'"
+    >
+      <span
+        ><svg class="iconpark-icon"><use href="#right-small"></use></svg
+      ></span>
+      <span *ngIf="nzOperations[0]">{{ nzOperations[0] }}</span>
+    </button>
+  </div>
+</ng-container>
+<ng-container *ngIf="!nzNoButton">
+  <div *ngIf="dir === 'rtl'" class="ant-transfer-operation">
+    <button
+      nz-button
+      type="button"
+      (click)="moveToRight()"
+      [disabled]="nzDisabled || !rightActive"
+      [nzType]="'primary'"
+      [nzSize]="'small'"
+    >
+      <span
+        ><svg class="iconpark-icon"><use href="#left-small"></use></svg
+      ></span>
+      <span *ngIf="nzOperations[0]">{{ nzOperations[0] }}</span>
+    </button>
+    <button
+      nz-button
+      type="button"
+      (click)="moveToLeft()"
+      [disabled]="nzDisabled || !leftActive"
+      [nzType]="'primary'"
+      [nzSize]="'small'"
+    >
+      <span
+        ><svg class="iconpark-icon"><use href="#right-small"></use></svg
+      ></span>
+      <span *ngIf="nzOperations[1]">{{ nzOperations[1] }}</span>
+    </button>
+  </div>
+</ng-container>
+<eo-ng-transfer-list
+  class="ant-transfer-list"
+  [ngStyle]="nzListStyle"
+  data-direction="right"
+  direction="right"
+  [titleText]="nzTitles[1]"
+  [showSelectAll]="nzShowSelectAll"
+  [dataSource]="rightDataSource"
+  [filter]="rightFilter"
+  [filterOption]="nzFilterOption"
+  (filterChange)="handleFilterChange($event)"
+  [renderList]="nzRenderList && nzRenderList[1]"
+  [renderTitle]="nzRenderTitleList && nzRenderTitleList[1]"
+  [renderTop]="nzRenderTopList && nzRenderTopList[1]"
+  [renderTopParams]="nzRenderTopParamsList && nzRenderTopParamsList[1]"
+  [render]="nzRender"
+  [disabled]="nzDisabled"
+  [showSearch]="nzShowSearch"
+  [searchPlaceholder]="
+    nzSearchPlaceholder || locale ? locale.searchPlaceholder : undefined
+  "
+  [notFoundContent]="nzNotFoundContent"
+  [itemUnit]="nzItemUnit || locale ? locale.itemUnit : undefined"
+  [itemsUnit]="nzItemsUnit || locale ? locale.itemsUnit : undefined"
+  [footer]="nzFooter"
+  (handleSelect)="handleRightSelect($event)"
+  (handleSelectAll)="handleRightSelectAll($event)"
+></eo-ng-transfer-list>
