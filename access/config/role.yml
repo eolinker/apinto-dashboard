@@ -1,0 +1,37 @@
+-
+  id: -1
+  title: 超级管理员
+  uuid: super-admin
+  desc: 超级管理员角色
+  is_addable: false  #表示用户是否可以添加该角色
+  Module: /
+  access:
+    - cluster_view
+    - cluster_edit
+    - variable_view
+    - variable_edit
+    - service_view
+    - service_edit
+    - discovery_view
+    - discovery_edit
+    - application_view
+    - application_edit
+    - api_view
+    - api_edit
+    - strategy_traffic_view
+    - strategy_traffic_edit
+    - strategy_fuse_view
+    - strategy_fuse_edit
+    - strategy_visit_view
+    - strategy_visit_edit
+    - strategy_cache_view
+    - strategy_cache_edit
+    - strategy_grey_view
+    - strategy_grey_edit
+    - audit_log_view
+    - ext_app_view
+    - ext_app_edit
+    - plugin_view
+    - plugin_edit
+    - plugin_template_view
+    - plugin_template_edit
