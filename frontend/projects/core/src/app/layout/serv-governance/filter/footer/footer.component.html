@@ -1,0 +1,12 @@
+<button
+  eo-ng-button
+  class="ant-btn-primary drawer-footer-button-left"
+  [disabled]="checkFilterToSave()"
+  (click)="saveFilter()"
+  eoNgUserAccess="{{ 'serv-governance/' + strategyType }}"
+>
+  {{ editFilter ? '提交' : '保存' }}
+</button>
+<button eo-ng-button class="ml-btnybase" (click)="drawerClose.emit(true)">
+  取消
+</button>

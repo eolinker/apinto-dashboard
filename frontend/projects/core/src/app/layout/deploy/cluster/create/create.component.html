@@ -1,0 +1,143 @@
+<div class="">
+  <form
+    nz-form
+    [nzNoColon]="true"
+    [nzAutoTips]="autoTips"
+    [formGroup]="validateForm"
+  >
+    <div
+      class="list-header mt-formtop flex-nowrap items-center justify-between"
+    >
+      <nz-form-item>
+        <nz-form-label [nzSpan]="7" nzRequired>集群名称：</nz-form-label>
+
+        <nz-form-control [nzSpan]="12" [nzErrorTip]="nameErrorTpl">
+          <input
+            class="w-INPUT_NORMAL"
+            eo-ng-input
+            #clusterNameInput
+            formControlName="clusterName"
+            placeholder="英文数字下划线组合，首字母必须为英文"
+          />
+
+          <ng-template #nameErrorTpl let-control>
+            <ng-container *ngIf="control.hasError('pattern')"
+              >英文数字下划线任意一种，首字母必须为英文</ng-container
+            >
+            <ng-container *ngIf="control.hasError('required')"
+              >必填项</ng-container
+            ></ng-template
+          >
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label [nzSpan]="7" nzRequired>环境：</nz-form-label>
+
+        <nz-form-control [nzSpan]="12">
+          <eo-ng-select
+            class="w-INPUT_NORMAL"
+            formControlName="envValue"
+            nzAllowClear
+            [nzOptions]="environmentList"
+          ></eo-ng-select>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label [nzSpan]="7">描述：</nz-form-label>
+
+        <nz-form-control [nzSpan]="12">
+          <textarea
+            class="w-INPUT_NORMAL"
+            rows="6"
+            eo-ng-input
+            formControlName="clusterDesc"
+            placeholder="请输入"
+          ></textarea>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item class="mb-0">
+        <nz-form-label [nzSpan]="7" nzRequired
+          >集群地址(网关节点)：</nz-form-label
+        >
+
+        <nz-form-control [nzSpan]="12" [nzErrorTip]="nodeErrorTpl">
+          <div class="flex">
+            <input
+              class="w-INPUT_NORMAL"
+              eo-ng-input
+              formControlName="clusterAddr"
+              placeholder="请输入"
+            />
+            <button
+              eo-ng-button
+              type="button"
+              class="ant-btn-primary ml-btnybase"
+              (click)="testCluster()"
+              [nzLoading]="testButtonLoading"
+            >
+              测试
+            </button>
+          </div>
+          <ng-template #nodeErrorTpl let-control>
+            <ng-container *ngIf="control.hasError('required')"
+              >请输入集群地址</ng-container
+            >
+            <ng-container *ngIf="control.hasError('pattern')"
+              >集群地址输入错误，请重新输入</ng-container
+            >
+
+            <ng-container *ngIf="control.hasError('source')"
+              >集群地址需要通过测试</ng-container
+            >
+          </ng-template>
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+    <div class="mt-btnybase mb-0" style="padding-bottom: '0px'">
+      <nz-form-item *ngIf="nodesTableShow" class="mb-0">
+        <nz-form-control [nzOffset]="7" [nzSpan]="12">
+          <div style="width: 524px">
+            <eo-ng-apinto-table
+              [nzTbody]="nodesTableBody"
+              [nzThead]="nodesTableHeadName"
+              [nzData]="nodesList"
+              [nzNoScroll]="true"
+              nzTableLayout="fixed"
+            >
+            </eo-ng-apinto-table>
+          </div>
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+    <div class="list-footer">
+      <nz-form-item
+        class="mb-0 sticky bg-white bottom-0 py-mbase z-50"
+        *ngIf="nodesTableShow"
+      >
+        <nz-form-control [nzOffset]="7">
+          <button
+            class="ant-btn-primary"
+            eo-ng-button
+            [nzLoading]="submitButtonLoading"
+            (click)="saveCluster()"
+          >
+            保存
+          </button>
+          <button eo-ng-button class="ml-btnybase" (click)="cancel()">
+            取消
+          </button>
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+  </form>
+</div>
+
+<ng-template #nodeStatusTpl let-item="item">
+  <ng-container [ngSwitch]="item.status">
+    <span *ngSwitchCase="'NOTRUNNING'" class="red-bold">未运行</span>
+    <span *ngSwitchCase="'RUNNING'" class="green-bold">运行中</span>
+  </ng-container>
+</ng-template>

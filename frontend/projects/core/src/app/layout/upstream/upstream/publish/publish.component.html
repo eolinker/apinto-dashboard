@@ -1,0 +1,26 @@
+<!--
+ * @Author: 
+ * @Date: 2022-08-17 23:42:52
+ * @LastEditors: 
+ * @LastEditTime: 2022-08-23 17:44:44
+ * @FilePath: /apinto/src/app/layout/upstream/upstream/upstream-publish/upstream-publish.component.html
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+-->
+<div class="">
+  <div class="list-content tab-list">
+    <eo-ng-apinto-table
+      class=""
+      [nzTbody]="clustersTableBody"
+      [nzThead]="clustersTableHeadName"
+      [nzData]="clustersList"
+      [nzMaxOperatorButton]="2"
+      eoNgUserAccess="upstream/upstream"
+      (disabledEdit)="disabledEdit($event)"
+      [nzNoScroll]="true"
+    >
+    </eo-ng-apinto-table>
+  </div>
+</div>
+<ng-template #clusterStatusTpl let-item="item">
+  <eo-ng-table-status [status]="item.status"></eo-ng-table-status>
+</ng-template>

@@ -1,0 +1,17 @@
+<div class="content-tabs-fixed">
+  <eo-ng-tabs
+    [nzLinkRouter]="true"
+    [(nzSelectedIndex)]="selectedIndex"
+    [nzOptions]="tabOptions"
+  ></eo-ng-tabs>
+  <ng-template #tab1Tpl>
+    <span>上线管理</span>
+  </ng-template>
+
+  <ng-template #tab2Tpl>
+    <span>服务信息</span>
+  </ng-template>
+</div>
+<div class="inside-content-fixed-top-51">
+  <router-outlet></router-outlet>
+</div>

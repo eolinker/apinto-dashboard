@@ -1,0 +1,63 @@
+input[type='file'] {
+  display: none !important;
+}
+
+input#groupName {
+  width: 254px !important;
+}
+
+textarea.ant-input {
+  min-height: 68px;
+  height: 68px;
+}
+
+input.w131 {
+  width: 131px !important;
+}
+
+.group-search {
+  eo-ng-input-group {
+    border-radius: 50px;
+  }
+  input[eo-ng-input].ant-input:not([nzBorderless]),
+  input[eo-ng-input].ant-input:not([nzBorderless]):focus,
+  input[eo-ng-input].ant-input:not([nzBorderless]):hover {
+    padding: 0;
+    border: none;
+    outline: 0;
+    height: 20px !important;
+  }
+}
+
+.group-search-large {
+  input[eo-ng-input].ant-input:not([nzBorderless]),
+  input[eo-ng-input].ant-input:not([nzBorderless]):focus,
+  input[eo-ng-input].ant-input:not([nzBorderless]):hover {
+    padding: 0;
+    border: none;
+    outline: 0;
+    height: 20px !important;
+  }
+}
+
+app-api-create {
+  [eo-ng-input].w508 {
+    width: 508px !important;
+  }
+  .form-input {
+    width: 508px !important;
+  }
+
+  eo-ng-select.form-input eo-ng-select-top-control {
+    width: 100% !important;
+  }
+}
+
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type='number'] {
+  -moz-appearance: textfield;
+}
