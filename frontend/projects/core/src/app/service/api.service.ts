@@ -8,8 +8,7 @@
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
 /* eslint-disable no-useless-constructor */
-import { HttpHeaders } from '@angular/common/http'
-import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http'
+import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http'
 import { Inject, Injectable, InjectionToken } from '@angular/core'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { catchError, Observable, throwError } from 'rxjs'
@@ -124,9 +123,7 @@ export class ApiService {
     if (params && params['query']) {
       params['query'] = JSON.stringify(params['query'])
     }
-    if (this.getUnderline(url)) {
-      params = this.underline(params)
-    }
+    params = this.underline(params)
 
     for (const index in params) {
       if (typeof params[index] === 'string') {
@@ -155,18 +152,18 @@ export class ApiService {
       }
     }
 
-    for (const index in body) {
-      if (typeof body[index] === 'string') {
-        body[index] = body[index].trim()
+    if (body && !(body instanceof FormData)) {
+      for (const index in body) {
+        if (typeof body[index] === 'string') {
+          body[index] = body[index].trim()
+        }
       }
     }
 
     if (params) { params['namespace'] = 'default' } else { params = { namespace: 'default' } }
 
-    if (this.getUnderline(url)) {
-      body = this.underline(body)
-      params = this.underline(params)
-    }
+    body = !(body instanceof FormData) ? this.underline(body) : body
+    params = this.underline(params)
 
     return this.http.post(this.urlPrefix + 'api/' + url, body, {
       params: params,
@@ -191,10 +188,8 @@ export class ApiService {
     }
     if (params) { params['namespace'] = 'default' } else { params = { namespace: 'default' } }
 
-    if (this.getUnderline(url)) {
-      body = this.underline(body)
-      params = this.underline(params)
-    }
+    body = this.underline(body)
+    params = this.underline(params)
 
     return this.http.put(this.urlPrefix + 'api/' + url, body, {
       params: params,
@@ -214,9 +209,7 @@ export class ApiService {
 
     if (params) { params['namespace'] = 'default' } else { params = { namespace: 'default' } }
 
-    if (this.getUnderline(url)) {
-      params = this.underline(params)
-    }
+    params = this.underline(params)
     return this.http.delete(this.urlPrefix + 'api/' + url, { params: params })
       .pipe(
         catchError(this.handleError)
@@ -237,10 +230,8 @@ export class ApiService {
     }
     if (params) { params['namespace'] = 'default' } else { params = { namespace: 'default' } }
 
-    if (this.getUnderline(url)) {
-      body = this.underline(body)
-      params = this.underline(params)
-    }
+    body = this.underline(body)
+    params = this.underline(params)
 
     return this.http.patch(this.urlPrefix + 'api/' + url, body, {
       params: params,
@@ -251,12 +242,7 @@ export class ApiService {
       )
   }
 
-  getUnderline (url:string):boolean {
-    return url.includes('warn') || url.includes('monitor')
-  }
-
   handleError = (error: HttpErrorResponse) => {
-    console.log(error)
     if (error.status === 0) {
       // A client-side or network error occurred. Handle it accordingly.
       console.error('An error occurred:', error.error)
@@ -265,6 +251,9 @@ export class ApiService {
       // The response body may contain clues as to what went wrong.
       console.error(
         `Backend returned code ${error.status}, body was: `, error.error)
+    }
+    if (error.error.msg) {
+      this.message.error(error.error.msg)
     }
     // Return an observable with a user-facing error message.
     return throwError(() => new Error('Something bad happened; please try again later.'))

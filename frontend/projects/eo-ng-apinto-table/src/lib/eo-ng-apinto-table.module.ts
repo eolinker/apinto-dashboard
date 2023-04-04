@@ -11,7 +11,7 @@ import { EoNgSwitchModule } from 'eo-ng-switch'
 import { EoNgDropdownModule } from 'eo-ng-dropdown'
 import { TableComponent } from './table/table.component'
 import { EoNgCheckboxModule } from 'eo-ng-checkbox'
-
+import { EoNgCopyModule } from 'eo-ng-copy'
 @NgModule({
   declarations: [
     TableComponent
@@ -28,7 +28,8 @@ import { EoNgCheckboxModule } from 'eo-ng-checkbox'
     EoNgFeedbackTooltipModule,
     EoNgSwitchModule,
     EoNgDropdownModule,
-    EoNgCheckboxModule
+    EoNgCheckboxModule,
+    EoNgCopyModule
   ],
   exports: [
     TableComponent

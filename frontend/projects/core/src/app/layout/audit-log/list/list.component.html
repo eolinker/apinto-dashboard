@@ -3,7 +3,7 @@
     <div class="group-search-large">
       <label class="">操作类型：</label>
       <eo-ng-select
-        [(ngModel)]="searchData.operate_type"
+        [(ngModel)]="searchData.operateType"
         [nzOptions]="listOfType"
         [nzAllowClear]="true"
         nzPlaceHolder="请选择"
@@ -67,8 +67,8 @@
       [nzShowPagination]="true"
       [nzFrontPagination]="false"
       [nzTotal]="searchData.total"
-      [(nzPageIndex)]="searchData.page_num"
-      [(nzPageSize)]="searchData.page_size"
+      [(nzPageIndex)]="searchData.pageNum"
+      [(nzPageSize)]="searchData.pageSize"
       (nzPageIndexChange)="getLogList()"
       (nzPageSizeChange)="getLogList()"
     >

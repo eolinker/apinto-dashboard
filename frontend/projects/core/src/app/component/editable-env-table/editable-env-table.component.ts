@@ -12,6 +12,7 @@ import { ApiService } from 'projects/core/src/app/service/api.service'
 })
 export class EditableEnvTableComponent implements OnInit {
   @Output() eoChooseEnv = new EventEmitter()
+  envTableLoading:boolean = true
   envNameForSear:string = ''
   environmentTableHeadName: Array<object> = [
     { title: 'KEY' },
@@ -107,9 +108,9 @@ export class EditableEnvTableComponent implements OnInit {
   environmentList:Array<any> = []
 
   // 环境变量分页参数
-  variablePage:{page_num:number, page_size:number, total:number}={
-    page_num: 1,
-    page_size: 15,
+  variablePage:{pageNum:number, pageSize:number, total:number}={
+    pageNum: 1,
+    pageSize: 15,
     total: 0
   }
 
@@ -126,15 +127,14 @@ export class EditableEnvTableComponent implements OnInit {
   }
 
   getEnvlist (key?:string) {
-    this.api.get('variables', { page_num: this.variablePage.page_num, page_size: this.variablePage.page_size, key: key || '' }).subscribe(resp => {
+    this.api.get('variables', { pageNum: this.variablePage.pageNum, pageSize: this.variablePage.pageSize, key: key || '' }).subscribe(resp => {
+      this.envTableLoading = false
       if (resp.code === 0) {
         resp.data.variables.forEach((element:any) => {
           element.disabled = true
         })
         this.environmentList = resp.data.variables
         this.variablePage.total = resp.data.total
-      } else {
-        this.message.error(resp.msg || '获取列表数据失败!')
       }
     })
   }
@@ -155,8 +155,6 @@ export class EditableEnvTableComponent implements OnInit {
       if (resp.code === 0) {
         this.message.success(resp.msg || '添加成功！', { nzDuration: 1000 })
         this.getEnvlist()
-      } else {
-        this.message.error(resp.msg || '添加失败!')
       }
     })
   }

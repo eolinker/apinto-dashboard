@@ -1,51 +1,23 @@
 /* eslint-disable dot-notation */
-/* eslint-disable camelcase */
 import {
   Component,
-  EventEmitter,
   Input,
   OnInit,
-  Output,
   TemplateRef,
   ViewChild
 } from '@angular/core'
 import { FormGroup, UntypedFormBuilder, Validators } from '@angular/forms'
-import { ActivatedRoute, Router } from '@angular/router'
+import { Router } from '@angular/router'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { ApiService } from 'projects/core/src/app/service/api.service'
 import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
-import { FilterShowData } from '../../filter/footer/footer.component'
 import { EoNgMyValidators } from 'projects/core/src/app/constant/eo-ng-validator'
 import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { BaseInfoService } from 'projects/core/src/app/service/base-info.service'
-
-interface FuseStrategyData {
-  name: string
-  uuid?: string
-  desc?: string
-  priority?: number | null
-  filters: Array<{
-    name: string
-    values: Array<string>
-    type?: string
-    label?: string
-    title?: string
-  }>
-  config: {
-    metric: string
-    fuse_condition: { status_codes: Array<number>; count: number }
-    fuse_time: { time: number; max_time: number }
-    recover_condition: { status_codes: Array<number>; count: number }
-    response: {
-      status_code: number
-      content_type: string
-      charset: string
-      header: Array<{ key: string; value: string }>
-      body: string
-    }
-  }
-  [key: string]: any
-}
+import { FilterShowData, FuseStrategyData } from '../../types/types'
+import { SelectOption } from 'eo-ng-select'
+import { metricsList } from '../../types/conf'
+import { EmptyHttpResponse } from 'projects/core/src/app/constant/type'
 
 @Component({
   selector: 'eo-ng-fuse-create',
@@ -61,21 +33,13 @@ export class FuseCreateComponent implements OnInit {
   @Input() clusterName: string = ''
   @Input() strategyUuid: string = ''
   @Input() fromList: boolean = false
-  @Output() changeToList: EventEmitter<any> = new EventEmitter()
 
   filterNamesSet: Set<string> = new Set() // 用户已选择的筛选条件放入set中,在显示筛选条件的选择器里需要过去set中存在的值
-
   validatePriority: boolean = true
-
   filterShowList: FilterShowData[] = [] // 展示在前端页面的筛选条件表格,包含uuid和对应选项名称,实际提交时只需要uuid
-
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
-
-  metricsList: Array<{ label: string; value: string; disable?: boolean }> = [
-    { label: '上游服务', value: '{service}' },
-    { label: 'API', value: '{api}' }
-  ]
-
+  metricsList:SelectOption[]= [...metricsList]
+  submitButtonLoading:boolean = false
   createStrategyForm: FuseStrategyData = {
     name: '',
     desc: '',
@@ -83,12 +47,12 @@ export class FuseCreateComponent implements OnInit {
     filters: [],
     config: {
       metric: '{service}',
-      fuse_condition: { status_codes: [500], count: 3 },
-      fuse_time: { time: 2, max_time: 300 },
-      recover_condition: { status_codes: [200], count: 3 },
+      fuseCondition: { statusCodes: [500], count: 3 },
+      fuseTime: { time: 2, maxTime: 300 },
+      recoverCondition: { statusCodes: [200], count: 3 },
       response: {
-        status_code: 500,
-        content_type: 'application/json',
+        statusCode: 500,
+        contentType: 'application/json',
         charset: 'UTF-8',
         header: [{ key: '', value: '' }],
         body: ''
@@ -112,7 +76,6 @@ export class FuseCreateComponent implements OnInit {
     private baseInfo:BaseInfoService,
     private message: EoNgFeedbackMessageService,
     private api: ApiService,
-    private activateInfo: ActivatedRoute,
     private fb: UntypedFormBuilder,
     private appConfigService: AppConfigService,
     private router:Router
@@ -131,11 +94,11 @@ export class FuseCreateComponent implements OnInit {
     })
 
     this.responseForm = this.fb.group({
-      status_code: [
+      statusCode: [
         200,
         [Validators.required, Validators.pattern(/^[1-9]{1}\d{2}$/)]
       ],
-      content_type: ['application/json', [Validators.required]],
+      contentType: ['application/json', [Validators.required]],
       charset: ['UTF-8', [Validators.required]],
       header: [],
       body: ['']
@@ -188,16 +151,16 @@ export class FuseCreateComponent implements OnInit {
               resp.data.strategy!.priority || null
             )
             this.validateForm.controls['configFuseCount'].setValue(
-              resp.data.strategy!.config.fuse_condition.count || 3
+              resp.data.strategy!.config.fuseCondition.count || 3
             )
             this.validateForm.controls['configFuseTime'].setValue(
-              resp.data.strategy!.config.fuse_time.time || 2
+              resp.data.strategy!.config.fuseTime.time || 2
             )
             this.validateForm.controls['configFuseMaxTime'].setValue(
-              resp.data.strategy!.config.fuse_time.max_time || 300
+              resp.data.strategy!.config.fuseTime.maxTime || 300
             )
             this.validateForm.controls['configRecoverCount'].setValue(
-              resp.data.strategy!.config.recover_condition.count || 3
+              resp.data.strategy!.config.recoverCondition.count || 3
             )
             this.createStrategyForm = resp.data.strategy!
             this.createStrategyForm.filters =
@@ -217,11 +180,11 @@ export class FuseCreateComponent implements OnInit {
                 ? resp.data.strategy!.config.response.header
                 : [{ key: '', value: '' }]
 
-            this.responseForm.controls['status_code'].setValue(
-              resp.data.strategy!.config.response.status_code || 200
+            this.responseForm.controls['statusCode'].setValue(
+              resp.data.strategy!.config.response.statusCode || 200
             )
-            this.responseForm.controls['content_type'].setValue(
-              resp.data.strategy!.config.response.content_type ||
+            this.responseForm.controls['contentType'].setValue(
+              resp.data.strategy!.config.response.contentType ||
                 'application/json'
             )
             this.responseForm.controls['charset'].setValue(
@@ -230,8 +193,6 @@ export class FuseCreateComponent implements OnInit {
             this.responseForm.controls['body'].setValue(
               resp.data.strategy!.config.response.body || ''
             )
-          } else {
-            this.message.error(resp.msg || '获取数据失败!')
           }
         }
       )
@@ -246,8 +207,8 @@ export class FuseCreateComponent implements OnInit {
     const arrayAfterChange: Array<number> = []
     switch (type) {
       case 'fuse':
-        for (const el of this.createStrategyForm.config.fuse_condition
-          .status_codes) {
+        for (const el of this.createStrategyForm.config.fuseCondition
+          .statusCodes) {
           if (!/^[1-9]{1}\d{2}$/.test(el + '')) {
             return true
           } else {
@@ -256,13 +217,13 @@ export class FuseCreateComponent implements OnInit {
             }
           }
         }
-        this.createStrategyForm.config.fuse_condition.status_codes =
+        this.createStrategyForm.config.fuseCondition.statusCodes =
           arrayAfterChange
         this.showFuseStatusCodeError = false
         return false
       case 'recover':
-        for (const el of this.createStrategyForm.config.recover_condition
-          .status_codes) {
+        for (const el of this.createStrategyForm.config.recoverCondition
+          .statusCodes) {
           if (!/^[1-9]{1}\d{2}$/.test(el + '')) {
             return true
           } else {
@@ -271,7 +232,7 @@ export class FuseCreateComponent implements OnInit {
             }
           }
         }
-        this.createStrategyForm.config.recover_condition.status_codes =
+        this.createStrategyForm.config.recoverCondition.statusCodes =
           arrayAfterChange
         this.showRecoverStatusCodeError = false
         return false
@@ -283,35 +244,34 @@ export class FuseCreateComponent implements OnInit {
   // 提交策略
   saveStrategy () {
     this.showFuseStatusCodeError =
-      this.createStrategyForm.config.fuse_condition.status_codes.length === 0 ||
+      this.createStrategyForm.config.fuseCondition.statusCodes.length === 0 ||
       this.checkStatusCode('fuse')
     this.showRecoverStatusCodeError =
-      this.createStrategyForm.config.recover_condition.status_codes.length ===
+      this.createStrategyForm.config.recoverCondition.statusCodes.length ===
         0 || this.checkStatusCode('recover')
     if (
       this.validateForm.valid &&
       this.responseForm.valid &&
-      this.createStrategyForm.config.fuse_condition.status_codes.length > 0 &&
+      this.createStrategyForm.config.fuseCondition.statusCodes.length > 0 &&
       !this.showFuseStatusCodeError &&
-      this.createStrategyForm.config.recover_condition.status_codes.length >
+      this.createStrategyForm.config.recoverCondition.statusCodes.length >
         0 &&
       !this.showRecoverStatusCodeError
     ) {
       delete this.createStrategyForm['extender']
-
       this.createStrategyForm.filters = []
       for (const index in this.filterShowList) {
         this.createStrategyForm.filters.push({
           name: this.filterShowList[index].name,
-          values:
-            this.filterShowList[index].name === 'ip'
-              ? [...this.filterShowList[index].values[0].split(/[\n]/).filter(value => { return !!value }), ...this.filterShowList[index].values.slice(1)]
-              : this.filterShowList[index].values
+          values: this.filterShowList[index].name === 'ip'
+            ? [...this.filterShowList[index].values[0].split(/[\n]/).filter(value => { return !!value }), ...this.filterShowList[index].values.slice(1)]
+            : this.filterShowList[index].values
+
         })
       }
 
       this.createStrategyForm.config.response.header =
-        this.responseHeaderList.filter((item: any) => {
+        this.responseHeaderList.filter((item: {key:string, value:string|number}) => {
           return item.key && item.value
         })
 
@@ -323,59 +283,58 @@ export class FuseCreateComponent implements OnInit {
         filters: this.createStrategyForm.filters,
         config: {
           metric: this.createStrategyForm.config.metric,
-          fuse_condition: {
-            status_codes:
-              this.createStrategyForm.config.fuse_condition.status_codes,
+          fuseCondition: {
+            statusCodes:
+              this.createStrategyForm.config.fuseCondition.statusCodes,
             count: Number(this.validateForm.controls['configFuseCount'].value)
           },
-          fuse_time: {
+          fuseTime: {
             time: Number(this.validateForm.controls['configFuseTime'].value),
-            max_time: Number(
+            maxTime: Number(
               this.validateForm.controls['configFuseMaxTime'].value
             )
           },
-          recover_condition: {
-            status_codes:
-              this.createStrategyForm.config.recover_condition.status_codes,
+          recoverCondition: {
+            statusCodes:
+              this.createStrategyForm.config.recoverCondition.statusCodes,
             count: Number(
               this.validateForm.controls['configRecoverCount'].value
             )
           },
           response: {
-            status_code: Number(
-              this.responseForm.controls['status_code'].value
+            statusCode: Number(
+              this.responseForm.controls['statusCode'].value
             ),
-            content_type: this.responseForm.controls['content_type'].value,
+            contentType: this.responseForm.controls['contentType'].value,
             charset: this.responseForm.controls['charset'].value,
             header: this.createStrategyForm.config.response.header,
             body: this.responseForm.controls['body'].value || ''
           }
         }
       }
+      this.submitButtonLoading = true
 
       if (!this.editPage) {
         this.api
-          .post('strategy/fuse', data, { cluster_name: this.clusterName })
-          .subscribe((resp: any) => {
+          .post('strategy/fuse', data, { clusterName: this.clusterName })
+          .subscribe((resp: EmptyHttpResponse) => {
+            this.submitButtonLoading = false
             if (resp.code === 0) {
               this.message.success(resp.msg || '创建成功!', { nzDuration: 1000 })
               this.backToList()
-            } else {
-              this.message.error(resp.msg || '创建失败!')
             }
           })
       } else {
         this.api
           .put('strategy/fuse', data, {
-            cluster_name: this.clusterName,
+            clusterName: this.clusterName,
             uuid: this.strategyUuid
           })
-          .subscribe((resp: any) => {
+          .subscribe((resp: EmptyHttpResponse) => {
+            this.submitButtonLoading = false
             if (resp.code === 0) {
               this.message.success(resp.msg || '修改成功!', { nzDuration: 1000 })
               this.backToList()
-            } else {
-              this.message.error(resp.msg || '修改失败!')
             }
           })
       }
@@ -389,7 +348,7 @@ export class FuseCreateComponent implements OnInit {
     }
   }
 
-  // 返回列表页，当fromList为true时，该页面左侧有分组
+  // 返回列表页
   backToList () {
     this.router.navigate(['/', 'serv-governance', 'fuse', 'group', 'list', this.clusterName])
   }

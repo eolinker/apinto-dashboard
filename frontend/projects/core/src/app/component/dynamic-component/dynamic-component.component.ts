@@ -8,6 +8,7 @@ import { Subscription } from 'rxjs'
 import { MODAL_NORMAL_SIZE } from '../../constant/app.config'
 import { NzModalRef } from 'ng-zorro-antd/modal'
 import { EditableEnvTableComponent } from '../editable-env-table/editable-env-table.component'
+import { ApiService } from '../../service/api.service'
 
 @Component({
   selector: 'dynamic-component',
@@ -58,7 +59,8 @@ export class DynamicComponentComponent implements OnInit {
 
   constructor (
     private modalService:EoNgFeedbackModalService,
-     private changeDetectorRef:ChangeDetectorRef) { }
+     private changeDetectorRef:ChangeDetectorRef,
+     private api:ApiService) { }
 
   ngOnInit (): void {
   }
@@ -92,25 +94,25 @@ export class DynamicComponentComponent implements OnInit {
       return true
     } else {
       if (items['x-reactions'].otherwise) {
-        if (items['name'] !== 'secret' && items['name'] !== 'public_key') {
+        if (items['name'] !== 'secret' && items['name'] !== 'publicKey') {
           return !this.seachForDeps(items['x-reactions'].dependencies[0])
         } else if (items['name'] === 'secret') {
           const temres = this.seachForDeps(items['x-reactions'].dependencies[0])
           const tesresstring:string = (typeof temres === 'boolean') ? '' : temres
           return !tesresstring?.includes('HS')
-        } else if (items['name'] === 'public_key') {
+        } else if (items['name'] === 'publicKey') {
           const temres = this.seachForDeps(items['x-reactions'].dependencies[0])
           const tesresstring:string = (typeof temres === 'boolean') ? '' : temres
           return !(tesresstring?.includes('RS') || tesresstring?.includes('ES'))
         }
       } else {
-        if (items['name'] !== 'secret' && items['name'] !== 'public_key') {
+        if (items['name'] !== 'secret' && items['name'] !== 'publicKey') {
           return !!this.seachForDeps(items['x-reactions'].dependencies[0])
         } else if (items['name'] === 'secret') {
           const temres = this.seachForDeps(items['x-reactions'].dependencies[0])
           const tesresstring:string = (typeof temres === 'boolean') ? '' : temres
           return tesresstring?.includes('HS')
-        } else if (items['name'] === 'public_key') {
+        } else if (items['name'] === 'publicKey') {
           const temres = this.seachForDeps(items['x-reactions'].dependencies[0])
           const tesresstring:string = (typeof temres === 'boolean') ? '' : temres
           return tesresstring?.includes('RS') || tesresstring?.includes('ES')
@@ -246,7 +248,7 @@ export class DynamicComponentComponent implements OnInit {
   seachForDepsDeep (itemList:any, itemName:string):any {
     if (itemList.properties) {
       for (let i = 0; i < itemList.properties.length; i++) {
-        if (itemList.properties[i].name === itemName) {
+        if (itemList.properties[i].name === itemName || itemList.properties[i].name === itemName.replace(/_([a-z])/g, (p, m) => m.toUpperCase())) {
           return itemList.properties[i].default
         } else if (itemList.properties[i].properties) {
           return this.seachForDepsDeep(itemList.properties[i], itemName)
@@ -254,7 +256,7 @@ export class DynamicComponentComponent implements OnInit {
       }
       return false
     } else {
-      if (itemList.name === itemName) {
+      if (itemList.name === itemName || itemList.name === itemName.replace(/_([a-z])/g, (p, m) => m.toUpperCase())) {
         return itemList.default
       }
     }
@@ -453,7 +455,7 @@ export class DynamicComponentComponent implements OnInit {
 
   chooseEnv = (item:any) => {
     if (!item?.data?.editing) {
-      // this.createUpstreamForm.config.static_conf[0].addr = '${' + item.key + '}'
+      // this.createUpstreamForm.config.staticConf[0].addr = '${' + item.key + '}'
       // this.itemList[0].properties[1].properties[0].properties[0].default = '${' + item.data.key + '}'
       this.fillEnv(this.propertyWaitForChoose.properties, item.data.key)
       this.changeDetectorRef.markForCheck()
@@ -465,7 +467,7 @@ export class DynamicComponentComponent implements OnInit {
 
   fillEnv = (properties:any, key:string) => {
     for (let i = 0; i < properties.length; i++) {
-      if (properties[i].name === 'value' || properties[i].name === 'addrs_variable') {
+      if (properties[i].name === 'value' || properties[i].name === 'addrsVariable') {
         properties[i].default = '${' + key + '}'
       } else if (properties.properties) {
         this.fillEnv(properties, key)
