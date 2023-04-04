@@ -91,6 +91,7 @@ const (
 	LogKindGlobalPlugin    = "global_plugin"
 	LogKindClusterPlugin   = "cluster_plugin"
 	LogKindPluginTemplate  = "plugin_template"
+	LogKindMiddlewareGroup = "middleware_group"
 )
 
 var (
@@ -118,6 +119,7 @@ var (
 		LogKindGlobalPlugin:    "全局插件",
 		LogKindClusterPlugin:   "集群插件",
 		LogKindPluginTemplate:  "插件模板",
+		LogKindMiddlewareGroup: "拦截器分组",
 	}
 	logKindOrder = []LogKind{LogKindAPI, LogKindService, LogKindDiscovery, LogKindApplication, LogKindCluster, LogKindGlobalVariable, LogKindClusterVariable,
 		LogKindStrategyTraffic, LogKindStrategyFuse, LogKindStrategyVisit, LogKindStrategyCache, LogKindStrategyGrey,
