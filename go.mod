@@ -3,8 +3,9 @@ module github.com/eolinker/apinto-dashboard
 go 1.18
 
 require (
+	github.com/eolinker/apinto-module v0.0.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/eolinker/eosc v0.8.2
+	github.com/eolinker/eosc v0.10.1
 	github.com/gin-gonic/gin v1.8.1
 	github.com/go-basic/uuid v1.0.0
 	github.com/go-redis/redis/v8 v8.11.5
@@ -56,4 +57,8 @@ require (
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
+)
+replace (
+	github.com/eolinker/eosc  => ../eosc
+	github.com/eolinker/apinto-module => ../apinto-module
 )
