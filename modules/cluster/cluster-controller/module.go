@@ -10,6 +10,10 @@ import (
 type ClusterPluginDriver struct {
 }
 
+func (c *ClusterPluginDriver) NeedRegisterIndex() bool {
+	return true
+}
+
 func NewClusterPlugin() apinto_module.Driver {
 	return &ClusterPluginDriver{}
 }
@@ -42,7 +46,7 @@ type ClusterModule struct {
 	routers apinto_module.RoutersInfo
 }
 
-func (c *ClusterModule) SkillSupport() (apinto_module.ProviderSupport, bool) {
+func (c *ClusterModule) Support() (apinto_module.ProviderSupport, bool) {
 	return nil, false
 }
 
