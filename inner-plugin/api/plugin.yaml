@@ -1,0 +1,6 @@
+id: "eolink:inner_api_manager"
+name: "inner_api_manager"
+cname: "api管理"
+resume: "内置插件-api管理模块"
+icon: ""
+driver: "inner_api"
