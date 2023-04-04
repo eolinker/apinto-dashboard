@@ -5,10 +5,11 @@ package controller
 import (
 	"embed"
 	_ "embed"
+	"errors"
 	"fmt"
+	"github.com/eolinker/eosc/log"
 	"io/fs"
 	"net/http"
-	"path"
 	"strings"
 	"time"
 
@@ -19,9 +20,11 @@ import (
 var (
 	expires      = time.Hour * 24 * 7
 	cacheControl = fmt.Sprintf("public, max-age=%d", 3600*24*7)
+
+	filePathErr = errors.New("filePath is illegal. ")
 )
 
-type joinPathFunc func(c *gin.Context) string
+type joinPathFunc func(c *gin.Context) (string, error)
 
 //go:embed dist/index.html
 var indexContext []byte
@@ -54,33 +57,72 @@ func EmbedFrontend(r *gin.Engine) {
 }
 
 func EmbedPluginFrontend(r *gin.Engine) {
-	fileDir := "../../controller/plugin"
+	fileDir := "./plugin"
+	pluginFs := gin.Dir(fileDir, false)
 
 	//获取插件图标
-	StaticFS(r.Group("/plugin/icon/:id/:file"), "/", "", gin.Dir(fileDir, false), func(c *gin.Context) string {
-		id := c.Param("id")
-		file := c.Param("file")
-		return fmt.Sprintf("%s/%s", id, file)
+	StaticFS(r.Group("/plugin/icon"), "/plugin/icon", pluginFs, func(c *gin.Context) (string, error) {
+		filePath := strings.Trim(c.Param("filepath"), "/")
+		list := strings.Split(filePath, "/")
+		pathLen := len(list)
+		//若文件路径层级多于 id/file 或 filepath 为空
+		if pathLen > 2 || filePath == "" {
+			return "", filePathErr
+		}
+		//防止读取resources目录
+		if pathLen == 2 && list[1] == "resources" {
+			return "", filePathErr
+		}
+		if pathLen == 1 {
+			//TODO 从插件配置文件获取图标名
+			fileName := ""
+			return fmt.Sprintf("%s/%s", list[0], fileName), nil
+		}
+		return filePath, nil
 	})
 
 	//获取插件描述中要用到的MD文件
-	StaticFS(r.Group("/plugin/md/:id/:file"), "/", "", gin.Dir(fileDir, false), func(c *gin.Context) string {
-		id := c.Param("id")
-		file := c.Param("file")
-		return fmt.Sprintf("%s/%s", id, file)
-	})
-	//插件描述中要用到的资源
-	StaticFS(r.Group("/plugin/info/:id/resources"), "/", "/*filepath", gin.Dir(fileDir, false), func(c *gin.Context) string {
-		id := c.Param("id")
-		filePath := c.Param("filepath")
-		return fmt.Sprintf("%s/resources/%s", id, filePath)
+	StaticFS(r.Group("/plugin/md"), "/plugin/md", pluginFs, func(c *gin.Context) (string, error) {
+		filePath := strings.Trim(c.Param("filepath"), "/")
+		list := strings.Split(filePath, "/")
+		pathLen := len(list)
+		//若文件路径层级多于 id/file 或 filepath 为空
+		if pathLen > 2 || filePath == "" {
+			return "", filePathErr
+		}
+		//防止读取resources目录
+		if pathLen == 2 && list[1] == "resources" {
+			return "", filePathErr
+		}
+		if pathLen == 1 {
+			return fmt.Sprintf("%s/%s", list[0], "README.md"), nil
+		}
+		return filePath, nil
 	})
 
-	//插件详情页
-	StaticFS(r.Group("/plugin/info/:id/:file"), "/", "", gin.Dir(fileDir, false), func(c *gin.Context) string {
-		id := c.Param("id")
-		file := c.Param("file")
-		return fmt.Sprintf("%s/%s", id, file)
+	//插件详情页  插件描述中要用到的资源
+	StaticFS(r.Group("/plugin/info"), "/plugin/info", pluginFs, func(c *gin.Context) (string, error) {
+		filePath := strings.Trim(c.Param("filepath"), "/")
+
+		list := strings.Split(filePath, "/")
+		pathLen := len(list)
+		//若filepath为空
+		if filePath == "" {
+			return "", filePathErr
+		}
+		//防止读取resources目录
+		if pathLen == 2 && list[1] == "resources" {
+			return "", filePathErr
+		}
+		//若文件路径层级为 id/resources/*filepath
+		if pathLen > 2 && list[1] == "resources" {
+			return filePath, nil
+		}
+		if pathLen == 1 {
+			return fmt.Sprintf("%s/%s", list[0], "README.md"), nil
+		}
+
+		return filePath, nil
 	})
 
 	//获取插件列表
@@ -108,34 +150,33 @@ func indexHtml(ginCtx *gin.Context) {
 	return
 }
 
-func StaticFS(group *gin.RouterGroup, relativePath, extendedPath string, fs http.FileSystem, pathFunc joinPathFunc) {
-	if strings.Contains(relativePath, ":") || strings.Contains(relativePath, "*") {
-		panic("URL parameters can not be used when serving a static folder")
-	}
+func StaticFS(group *gin.RouterGroup, relativePath string, fs http.FileSystem, pathFunc joinPathFunc) {
 	handler := createStaticHandler(relativePath, fs, pathFunc)
-	urlPattern := relativePath
-	if extendedPath != "" {
-		urlPattern = path.Join(relativePath, extendedPath)
-	}
 
 	// Register GET and HEAD handlers
-	group.GET(urlPattern, handler)
-	group.HEAD(urlPattern, handler)
+	group.GET("/*filepath", handler)
+	group.HEAD("/*filepath", handler)
 }
 
 func createStaticHandler(relativePath string, fs http.FileSystem, pathFunc joinPathFunc) gin.HandlerFunc {
 	fileServer := http.StripPrefix(relativePath, http.FileServer(fs))
 
 	return func(c *gin.Context) {
-		file := pathFunc(c)
+		file, err := pathFunc(c)
+		if err != nil {
+			log.Info(fmt.Errorf("%s:%w", c.Request.URL.Path, err))
+			c.Data(http.StatusNotFound, "application/text", []byte("404 page not found"))
+			return
+		}
 		// Check if file exists and/or if we have permission to access it
 		f, err := fs.Open(file)
 		if err != nil {
-			c.Writer.WriteHeader(http.StatusNotFound)
-			//TODO 文件不存在时的handler
+			//c.Writer.WriteHeader(http.StatusNotFound)
+			//TODO 文件不存在时
 			//c.handlers = group.engine.noRoute
 			// Reset index
 			//c.index = -1
+			c.Data(http.StatusNotFound, "application/text", []byte("404 page not found"))
 			return
 		}
 		f.Close()
