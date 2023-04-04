@@ -10,9 +10,10 @@ var _ IQuoteStore = (*quoteStore)(nil)
 
 type IQuoteStore interface {
 	store.IBaseStore[quote_entry.Quote]
-	DelBySource(ctx context.Context, source int, kind quote_entry.QuoteKindType) error                                                       //删除source所有的引用，比如source=discoveryID,则删除该discoveryID引用的所有东西
-	DelByTarget(ctx context.Context, target int, kind quote_entry.QuoteTargetKindType) error                                                 //删除target所有的引用
-	Set(ctx context.Context, source int, kind quote_entry.QuoteKindType, targetMaps map[quote_entry.QuoteTargetKindType][]int) error         //重置source的引用列表， targetMaps map[targetKind][]target
+	DelBySource(ctx context.Context, source int, kind quote_entry.QuoteKindType) error       //删除source所有的引用，比如source=discoveryID,则删除该discoveryID引用的所有东西
+	DelByTarget(ctx context.Context, target int, kind quote_entry.QuoteTargetKindType) error //删除target所有的引用
+	DelSourceTarget(ctx context.Context, source int, kind quote_entry.QuoteKindType, targetKind quote_entry.QuoteTargetKindType) error
+	Set(ctx context.Context, source int, kind quote_entry.QuoteKindType, targetKind quote_entry.QuoteTargetKindType, target ...int) error    //重置source的引用列表， targetMaps map[targetKind][]target
 	Count(ctx context.Context, target int, targetKind quote_entry.QuoteTargetKindType) (int, error)                                          //获取target被引用的次数
 	GetSourceQuote(ctx context.Context, source int, kind quote_entry.QuoteKindType) (map[quote_entry.QuoteTargetKindType][]int, error)       //获取source引用了哪些， map[targetKind][]target
 	GetTargetQuote(ctx context.Context, target int, targetKind quote_entry.QuoteTargetKindType) (map[quote_entry.QuoteKindType][]int, error) //获取target 被哪些引用了， map[QuoteKindType][]source
@@ -27,26 +28,28 @@ func (q *quoteStore) DelBySource(ctx context.Context, source int, kind quote_ent
 	return err
 }
 
+func (q *quoteStore) DelSourceTarget(ctx context.Context, source int, kind quote_entry.QuoteKindType, targetKind quote_entry.QuoteTargetKindType) error {
+	return q.DB(ctx).Delete(q.TargetType, "`source` = ? and `kind` = ? and `target_kind` = ?", source, kind, targetKind).Error
+}
+
 func (q *quoteStore) DelByTarget(ctx context.Context, target int, kind quote_entry.QuoteTargetKindType) error {
 	_, err := q.DeleteWhere(ctx, map[string]interface{}{"`target`": target, "`target_kind`": kind})
 	return err
 }
 
 // Set 调用方开启事务
-func (q *quoteStore) Set(ctx context.Context, source int, kind quote_entry.QuoteKindType, targetMaps map[quote_entry.QuoteTargetKindType][]int) error {
-	if err := q.DB(ctx).Delete(q.TargetType, "`source` = ? and `kind` = ?", source, kind).Error; err != nil {
+func (q *quoteStore) Set(ctx context.Context, source int, kind quote_entry.QuoteKindType, targetKind quote_entry.QuoteTargetKindType, targets ...int) error {
+	if err := q.DB(ctx).Delete(q.TargetType, "`source` = ? and `kind` = ? and `target_kind` = ?", source, kind, targetKind).Error; err != nil {
 		return err
 	}
 	list := make([]*quote_entry.Quote, 0)
-	for targetKind, targets := range targetMaps {
-		for _, target := range targets {
-			list = append(list, &quote_entry.Quote{
-				Kind:       kind,
-				Source:     source,
-				Target:     target,
-				TargetKind: targetKind,
-			})
-		}
+	for _, target := range targets {
+		list = append(list, &quote_entry.Quote{
+			Kind:       kind,
+			Source:     source,
+			Target:     target,
+			TargetKind: targetKind,
+		})
 	}
 	if len(list) > 0 {
 		return q.DB(ctx).Create(list).Error

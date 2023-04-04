@@ -93,7 +93,7 @@ func (e *variablesController) get(ginCtx *gin.Context) {
 			ClusterName: item.ClusterName,
 			Environment: item.Environment,
 			Value:       item.Value,
-			Status:      enum.ClusterVariablePublish(item.Status),
+			Status:      enum.PublishType(item.Status),
 		}
 		list = append(list, data)
 	}

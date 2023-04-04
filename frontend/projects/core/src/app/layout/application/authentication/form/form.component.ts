@@ -1,14 +1,16 @@
 /* eslint-disable dot-notation */
-import { Component, OnInit } from '@angular/core'
+import { Component, Input, OnInit } from '@angular/core'
 import { FormGroup, UntypedFormBuilder, Validators } from '@angular/forms'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { ApiService } from 'projects/core/src/app/service/api.service'
 import { differenceInCalendarDays } from 'date-fns'
 import { SelectOption } from 'eo-ng-select'
-import { AuthData } from '../../types/types'
+import { ApplicationAuthForm, AuthData } from '../../types/types'
 import { algorithmList, authLabelTableBody, positionList, verifyList } from '../../types/conf'
 import { TBODY_TYPE } from 'eo-ng-table'
+import { ArrayItemData, EmptyHttpResponse } from 'projects/core/src/app/constant/type'
+import { setFormValue } from 'projects/core/src/app/constant/form'
 
 @Component({
   selector: 'eo-ng-application-authentication-form',
@@ -17,6 +19,7 @@ import { TBODY_TYPE } from 'eo-ng-table'
   ]
 })
 export class ApplicationAuthenticationFormComponent implements OnInit {
+  @Input() closeModal? :(value?:boolean)=>void
   appId:string = ''
   authId:string = ''
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
@@ -29,28 +32,24 @@ export class ApplicationAuthenticationFormComponent implements OnInit {
   listOfAlgorithm:SelectOption[] = [...algorithmList]
   positionList:SelectOption[]=[...positionList]
   listOfVerify:SelectOption[] = [...verifyList]
-
+  canBeSave:boolean = false// 判断动态组件内的必填数据是否填写
   labelHeaderTableBody:TBODY_TYPE[]= [...authLabelTableBody]
-
-  labelHeaderList: Array<{ key: string; value: string }> = [
+  labelHeaderList:ArrayItemData[] = [
     { key: '', value: '' },
     { key: '', value: '' }
   ]
 
-  // 判断动态组件内的必填数据是否填写
-  canBeSave:boolean = false
-
   // eslint-disable-next-line camelcase
-  createAuthForm: {position:string, uuid?:string, token_name:string, is_transparent:boolean, expire_time:number, expire_time_date:Date|null, driver:string, config:any} = {
+  createAuthForm:ApplicationAuthForm = {
     position: 'header',
     uuid: '',
-    token_name: 'Authorization',
-    is_transparent: false,
-    expire_time: 0,
-    expire_time_date: null,
+    tokenName: 'Authorization',
+    isTransparent: false,
+    expireTime: 0,
+    expireTimeDate: null,
     driver: 'basic',
     config: {
-      user_name: '',
+      userName: '',
       password: '',
       apikey: '',
       ak: '',
@@ -58,7 +57,7 @@ export class ApplicationAuthenticationFormComponent implements OnInit {
       iss: '',
       algorithm: '',
       secret: '',
-      public_key: '',
+      publicKey: '',
       label: [{ key: '', value: '' }]
     }
   }
@@ -69,18 +68,18 @@ export class ApplicationAuthenticationFormComponent implements OnInit {
     private fb: UntypedFormBuilder) {
     this.validateForm = this.fb.group({
       driver: ['basic', [Validators.required]],
-      is_transparent: [false],
+      isTransparent: [false],
       position: ['header'],
-      token_name: ['Authorization'],
-      expire_time_date: [''],
+      tokenName: ['Authorization'],
+      expireTimeDate: [''],
       iss: [''],
       algorithm: ['HS256'],
       secret: [''],
-      public_key: [''],
+      publicKey: [''],
       user: [''],
-      user_path: [''],
-      claims_to_verify: [[]],
-      signature_is_base64: [false]
+      userPath: [''],
+      claimsToVerify: [[]],
+      signatureIsBase64: [false]
     })
   }
 
@@ -93,32 +92,13 @@ export class ApplicationAuthenticationFormComponent implements OnInit {
   }
 
   initTable () {
-    this.labelHeaderTableBody[0].disabledFn = () => {
-      return this.nzDisabled
-    }
-    this.labelHeaderTableBody[1].disabledFn = () => {
-      return this.nzDisabled
-    }
-
-    this.labelHeaderTableBody[2].btns[0].disabledFn = () => {
-      return this.nzDisabled
-    }
-
-    this.labelHeaderTableBody[2].showFn = (item: any) => {
-      return item === this.labelHeaderList[0]
-    }
-
-    this.labelHeaderTableBody[3].btns[0].disabledFn = () => {
-      return this.nzDisabled
-    }
-
-    this.labelHeaderTableBody[3].btns[1].disabledFn = () => {
-      return this.nzDisabled
-    }
-
-    this.labelHeaderTableBody[3].showFn = (item: any) => {
-      return item !== this.labelHeaderList[0]
-    }
+    this.labelHeaderTableBody[0].disabledFn = () => { return this.nzDisabled }
+    this.labelHeaderTableBody[1].disabledFn = () => { return this.nzDisabled }
+    this.labelHeaderTableBody[2].btns[0].disabledFn = () => { return this.nzDisabled }
+    this.labelHeaderTableBody[2].showFn = (item: any) => { return item === this.labelHeaderList[0] }
+    this.labelHeaderTableBody[3].btns[0].disabledFn = () => { return this.nzDisabled }
+    this.labelHeaderTableBody[3].btns[1].disabledFn = () => { return this.nzDisabled }
+    this.labelHeaderTableBody[3].showFn = (item: any) => { return item !== this.labelHeaderList[0] }
   }
 
   disabledEdit (value:any) {
@@ -126,20 +106,22 @@ export class ApplicationAuthenticationFormComponent implements OnInit {
   }
 
   getAuthMessage () {
-    this.api.get('application/auth', { app_id: this.appId, uuid: this.authId }).subscribe((resp:any) => {
+    this.api.get('application/auth', { appId: this.appId, uuid: this.authId }).subscribe((resp:any) => {
       if (resp.code === 0) {
         this.createAuthForm = resp.data.auth
-        this.validateForm.controls['driver'].setValue(resp.data.auth.driver)
-        this.validateForm.controls['is_transparent'].setValue(resp.data.auth.is_transparent)
-        this.validateForm.controls['position'].setValue(resp.data.auth.position)
-        this.validateForm.controls['token_name'].setValue(resp.data.auth.token_name)
+        setFormValue(this.validateForm, {
+          ...resp.data.auth,
+          algorithm: 'HS256',
+          claimsToVerify: [],
+          ...resp.data.auth.config
+        })
         const data = resp.data.auth
-        if (this.createAuthForm.expire_time) {
-          this.validateForm.controls['expire_time_date'].setValue(new Date(Number(data.expire_time) * 1000))
+        if (this.createAuthForm.expireTime) {
+          this.validateForm.controls['expireTimeDate'].setValue(new Date(Number(data.expireTime) * 1000))
         }
 
         if (data?.config?.label && Object.keys(data.config.label)) {
-          const tempLabel:Array<{key:string, value:any}> = []
+          const tempLabel:ArrayItemData[] = []
           for (const index in Object.keys(data.config.label)) {
             tempLabel.push({ key: Object.keys(data.config.label)[index], value: data.config.label[Object.keys(data.config.label)[index]] })
           }
@@ -152,7 +134,7 @@ export class ApplicationAuthenticationFormComponent implements OnInit {
           this.createAuthForm.config.label = [{ key: '', value: '' }]
           this.labelHeaderList = [{ key: '', value: '' }, { key: '', value: '' }]
         }
-        this.createAuthForm.config.user_name = this.createAuthForm.config?.user_name ? this.createAuthForm.config.user_name : ''
+        this.createAuthForm.config.userName = this.createAuthForm.config?.userName ? this.createAuthForm.config.userName : ''
         this.createAuthForm.config.password = this.createAuthForm.config?.password ? this.createAuthForm.config.password : ''
         this.createAuthForm.config.apikey = this.createAuthForm.config?.apikey ? this.createAuthForm.config.apikey : ''
         this.createAuthForm.config.ak = this.createAuthForm.config?.ak ? this.createAuthForm.config.ak : ''
@@ -160,17 +142,7 @@ export class ApplicationAuthenticationFormComponent implements OnInit {
         this.createAuthForm.config.iss = this.createAuthForm.config?.iss ? this.createAuthForm.config.iss : ''
         this.createAuthForm.config.algorithm = this.createAuthForm.config?.algorithm ? this.createAuthForm.config.algorithm : 'HS256'
         this.createAuthForm.config.secret = this.createAuthForm.config?.secret ? this.createAuthForm.config.secret : ''
-        this.createAuthForm.config.public_key = this.createAuthForm.config?.public_key ? this.createAuthForm.config.public_key : ''
-        this.validateForm.controls['iss'].setValue(resp.data.auth.config?.iss || '')
-        this.validateForm.controls['algorithm'].setValue(resp.data.auth.config?.algorithm || 'HS256')
-        this.validateForm.controls['secret'].setValue(resp.data.auth.config?.secret || '')
-        this.validateForm.controls['public_key'].setValue(resp.data.auth.config?.public_key || '')
-        this.validateForm.controls['user'].setValue(resp.data.auth.config?.user || '')
-        this.validateForm.controls['user_path'].setValue(resp.data.auth.config?.user_path || '')
-        this.validateForm.controls['claims_to_verify'].setValue(resp.data.auth.config?.claims_to_verify || [])
-        this.validateForm.controls['signature_is_base64'].setValue(resp.data.auth.config?.signature_is_base64 || false)
-      } else {
-        this.message.error(resp.msg || '获取数据失败!')
+        this.createAuthForm.config.publicKey = this.createAuthForm.config?.publicKey ? this.createAuthForm.config.publicKey : ''
       }
     })
   }
@@ -185,8 +157,6 @@ export class ApplicationAuthenticationFormComponent implements OnInit {
             this.baseData = resp.data.drivers[index].render
           }
         }
-      } else {
-        this.message.error(resp.msg || '获取列表数据失败!')
       }
     })
   }
@@ -206,7 +176,7 @@ export class ApplicationAuthenticationFormComponent implements OnInit {
     this.canBeSave = false
     switch (this.validateForm.controls['driver'].value) {
       case 'basic': {
-        if (!value.config.user_name || !value.config.password) {
+        if (!value.config.userName || !value.config.password) {
           this.canBeSave = false
           return
         }
@@ -238,7 +208,7 @@ export class ApplicationAuthenticationFormComponent implements OnInit {
           this.canBeSave = false
 
           break
-        } else if ((value.config.algorithm?.includes('RS') || value.config.algorithm?.includes('ES')) && (!value.config.iss || !value.config.public_key)) {
+        } else if ((value.config.algorithm?.includes('RS') || value.config.algorithm?.includes('ES')) && (!value.config.iss || !value.config.publicKey)) {
           this.canBeSave = false
 
           break
@@ -275,28 +245,28 @@ export class ApplicationAuthenticationFormComponent implements OnInit {
       const tempLabel: Map<string, any> = new Map()
       let body:AuthData|undefined
       if (this.validateForm.controls['driver'].value !== 'jwt') {
-        this.createAuthForm.expire_time = this.validateForm.controls['expire_time_date'].value ? Math.floor(new Date(this.validateForm.controls['expire_time_date'].value.setHours(23, 59, 59)).getTime() / 1000) : 0
-        this.createAuthForm.config.public_key = this.createAuthForm.config.public_key === null ? '' : this.createAuthForm.config.public_key
+        this.createAuthForm.expireTime = this.validateForm.controls['expireTimeDate'].value ? Math.floor(new Date(this.validateForm.controls['expireTimeDate'].value.setHours(23, 59, 59)).getTime() / 1000) : 0
+        this.createAuthForm.config.publicKey = this.createAuthForm.config.publicKey === null ? '' : this.createAuthForm.config.publicKey
         this.createAuthForm.config.secret = this.createAuthForm.config.secret === null ? '' : this.createAuthForm.config.secret
-        if (this.createAuthForm.config.label?.length > 0) {
+        if (this.createAuthForm.config?.label && this.createAuthForm.config?.label?.length > 0) {
           for (const index in this.createAuthForm.config.label) {
             if (this.createAuthForm.config.label[index].key !== null && this.createAuthForm.config.label[index].key !== '' && this.createAuthForm.config.label[index].value !== null && this.createAuthForm.config.label[index].value !== '') {
               tempLabel.set(this.createAuthForm.config.label[index].key, this.createAuthForm.config.label[index].value)
             }
           }
         }
-        const obj = Object.create(null)
+        const obj:{[k:string]:any} = Object.create(null)
         for (const [k, v] of tempLabel) {
           obj[k] = v
         }
         this.createAuthForm.config.label = obj
         body = {
-          ...this.createAuthForm,
+          ...this.createAuthForm as AuthData,
           driver: this.validateForm.controls['driver'].value,
-          is_transparent: this.validateForm.controls['is_transparent'].value,
-          expire_time: this.validateForm.controls['expire_time_date'].value ? Math.floor(new Date(this.validateForm.controls['expire_time_date'].value.setHours(23, 59, 59)).getTime() / 1000) : 0,
+          isTransparent: this.validateForm.controls['isTransparent'].value,
+          expireTime: this.validateForm.controls['expireTimeDate'].value ? Math.floor(new Date(this.validateForm.controls['expireTimeDate'].value.setHours(23, 59, 59)).getTime() / 1000) : 0,
           position: this.validateForm.controls['position'].value,
-          token_name: this.validateForm.controls['token_name'].value
+          tokenName: this.validateForm.controls['tokenName'].value
         }
       } else {
         for (const label of this.labelHeaderList) {
@@ -312,55 +282,50 @@ export class ApplicationAuthenticationFormComponent implements OnInit {
 
         body = {
           driver: this.validateForm.controls['driver'].value,
-          is_transparent: this.validateForm.controls['is_transparent'].value,
-          expire_time: this.validateForm.controls['expire_time_date'].value ? Math.floor(new Date(this.validateForm.controls['expire_time_date'].value.setHours(23, 59, 59)).getTime() / 1000) : 0,
+          isTransparent: this.validateForm.controls['isTransparent'].value,
+          expireTime: this.validateForm.controls['expireTimeDate'].value ? Math.floor(new Date(this.validateForm.controls['expireTimeDate'].value.setHours(23, 59, 59)).getTime() / 1000) : 0,
           position: this.validateForm.controls['position'].value,
-          token_name: this.validateForm.controls['token_name'].value,
+          tokenName: this.validateForm.controls['tokenName'].value,
           config: {
             iss: this.validateForm.controls['iss'].value,
             algorithm: this.validateForm.controls['algorithm'].value,
             secret: this.validateForm.controls['secret'].value,
-            public_key: this.validateForm.controls['public_key'].value,
+            publicKey: this.validateForm.controls['publicKey'].value,
             user: this.validateForm.controls['user'].value,
-            user_path: this.validateForm.controls['user_path'].value,
-            claims_to_verify: this.validateForm.controls['claims_to_verify'].value,
-            signature_is_base64: this.validateForm.controls['signature_is_base64'].value,
+            userPath: this.validateForm.controls['userPath'].value,
+            claimsToVerify: this.validateForm.controls['claimsToVerify'].value,
+            signatureIsBase64: this.validateForm.controls['signatureIsBase64'].value,
             label: obj
           }
         }
 
         if (body.config.algorithm!.includes('HS')) {
-          delete body.config.public_key
+          delete body.config.publicKey
         } else {
           delete body.config.secret
-          delete body.config.signature_is_base64
+          delete body.config.signatureIsBase64
         }
       }
       if (this.authId) {
-        this.api.put('application/auth', { ...body }, { app_id: this.appId, uuid: this.createAuthForm.uuid }).subscribe((resp:any) => {
-          if (resp.code === 0) {
-            this.message.success(resp.msg || '修改鉴权成功', { nzDuration: 1000 })
-            this.closeModal(true)
-            return true
-          } else {
-            this.message.error(resp.msg || '修改鉴权失败!')
-            this.closeModal()
-
-            return true
-          }
-        })
+        this.api.put('application/auth', { ...body }, { appId: this.appId, uuid: this.createAuthForm.uuid })
+          .subscribe((resp:EmptyHttpResponse) => {
+            if (resp.code === 0) {
+              this.message.success(resp.msg || '修改鉴权成功', { nzDuration: 1000 })
+              this.closeModal && this.closeModal(true)
+            } else {
+              this.closeModal && this.closeModal()
+            }
+          })
       } else {
-        this.api.post('application/auth', { ...body }, { app_id: this.appId }).subscribe((resp:any) => {
-          if (resp.code === 0) {
-            this.message.success(resp.msg || '新增鉴权成功', { nzDuration: 1000 })
-            this.closeModal(true)
-            return true
-          } else {
-            this.message.error(resp.msg || '新增鉴权失败!')
-            this.closeModal()
-            return true
-          }
-        })
+        this.api.post('application/auth', { ...body }, { appId: this.appId })
+          .subscribe((resp:EmptyHttpResponse) => {
+            if (resp.code === 0) {
+              this.message.success(resp.msg || '新增鉴权成功', { nzDuration: 1000 })
+              this.closeModal && this.closeModal(true)
+            } else {
+              this.closeModal && this.closeModal()
+            }
+          })
       }
     } else {
       Object.values(this.validateForm.controls).forEach((control) => {
@@ -370,11 +335,7 @@ export class ApplicationAuthenticationFormComponent implements OnInit {
         }
       })
     }
-    return false
   }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  closeModal = (freshList?:boolean) => {}
 
   // Can not select days after today and today
   disabledDate = (current: Date): boolean =>

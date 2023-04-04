@@ -58,6 +58,11 @@
   (nzPageSizeChange)="nzPageSizeChange?.emit($event)"
   (nzDataChange)="nzDataChange?.emit($event)"
   [nzTrBottomTmp]="nzTrBottomTmp"
+  [nzDraggable]="nzDraggable"
+  [nzDragCheck]="nzDragCheck"
+  (nzDragEnd)="nzDragEnd?.emit($event)"
+  (getScrollViewPort)="handlerScrollView($event)"
+  [nzLoading]="nzLoading"
 >
 </eo-ng-table>
 <ng-template #totalTpl let-total>共 {{ nzTotal }} 条</ng-template>
@@ -73,17 +78,53 @@
     ><span class="default-title-th-span">{{ item.titleString }}</span>
   </span>
 </ng-template>
+
 <ng-template #tbodyTpl let-item="item" let-rowItem="rowItem">
-  <span
-    class="default-tpl-td-span"
-    eoNgFeedbackTooltip
-    [nzTooltipTitle]="
-      rowItem.tooltip ||
-      (rowItem.keyPrefix || '') + item[rowItem.key] + (rowItem.keySuffix || '')
-    "
-    [nzTooltipTitleContext]="{ rowItem: rowItem, item: item }"
-    [nzTooltipVisible]="rowItem.tooltipVisibel || false"
-    [nzTooltipTrigger]="rowItem.tooltipTrigger || 'hover'"
-    >{{ rowItem.keyPrefix }}{{ item[rowItem.key] }}{{ rowItem.keySuffix }}
-  </span>
+  <div class="leading-[22px] flex items-center">
+    <span
+      class="mr-[8px] inline-block truncate"
+      eoNgFeedbackTooltip
+      [nzTooltipTitle]="
+        rowItem.json
+          ? transferToJson(
+              item[rowItem.key + 'Tooltip'] ||
+                (rowItem.keyPrefix || '') +
+                  item[rowItem.key] +
+                  (rowItem.keySuffix || '')
+            )
+          : item[rowItem.key + 'Tooltip'] ||
+            (rowItem.keyPrefix || '') +
+              item[rowItem.key] +
+              (rowItem.keySuffix || '')
+      "
+      [nzTooltipTitleContext]="{ rowItem: rowItem, item: item }"
+      [nzTooltipVisible]="rowItem.tooltipVisible || false"
+      [nzTooltipTrigger]="rowItem.tooltipTrigger || 'hover'"
+      [nzTooltipOverlayClassName]="rowItem.json ? 'tooltip-json' : ''"
+      >{{ rowItem.keyPrefix }}{{ item[rowItem.key] }}{{ rowItem.keySuffix }}
+    </span>
+
+    <span
+      *ngIf="
+        rowItem.copy &&
+        (rowItem.keyPrefix || '') +
+          item[rowItem.key] +
+          (rowItem.keySuffix || '')
+      "
+      class="h-[20px] leading-[22px] text-[12px] opacity-0 cursor-pointer inline-flex items-center"
+      eo-copy
+      nzType="primary"
+      [copyText]="
+        (rowItem.keyPrefix || '') +
+        item[rowItem.key] +
+        (rowItem.keySuffix || '')
+      "
+      (copyCallback)="copyCallback()"
+      (click)="$event.stopPropagation()"
+    >
+      <svg class="iconpark-icon">
+        <use href="#copy"></use>
+      </svg>
+    </span>
+  </div>
 </ng-template>

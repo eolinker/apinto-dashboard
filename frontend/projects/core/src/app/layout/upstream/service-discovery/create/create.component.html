@@ -1,7 +1,7 @@
 <!--
- * @Author:  
+ * @Author: 
  * @Date: 2022-08-09 23:06:58
- * @LastEditors:  
+ * @LastEditors: 
  * @LastEditTime: 2022-09-28 00:19:14
  * @FilePath: /apinto/src/app/layout/upstream/service-discovery-create/service-discovery-create.component.html
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
@@ -87,7 +87,7 @@
       </nz-form-control>
     </nz-form-item>
 
-    <nz-form-item class="mb-0 sticky bg-white bottom-0 py-mbase">
+    <nz-form-item class="mb-0 sticky bg-white bottom-0 py-mbase z-50">
       <nz-form-control [nzOffset]="5" [nzSpan]="14">
         <button
           class="ant-btn-primary"
@@ -95,6 +95,7 @@
           eo-ng-button
           (click)="saveService()"
           eoNgUserAccess="upstream/serv-discovery"
+          [nzLoading]="submitButtonLoading"
         >
           {{ editPage ? '提交' : '保存' }}
         </button>

@@ -1,6 +1,8 @@
 import { Component, Input, OnInit, TemplateRef, ViewChild } from '@angular/core'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
+import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { ApiService } from 'projects/core/src/app/service/api.service'
+import { DeployClusterOperateRecordTbody, DeployClusterOperateRecordThead, DeployClusterPublishRecordTbody, DeployClusterPublishRecordThead } from '../../../types/conf'
 
 @Component({
   selector: 'eo-ng-deploy-cluster-environment-history-publish',
@@ -17,8 +19,8 @@ import { ApiService } from 'projects/core/src/app/service/api.service'
       [nzShowPagination]="true"
       [nzFrontPagination]="false"
       [nzTotal]="publishRecordsPage.total"
-      [(nzPageIndex)]="publishRecordsPage.page_num"
-      [(nzPageSize)]="publishRecordsPage.page_size"
+      [(nzPageIndex)]="publishRecordsPage.pageNum"
+      [(nzPageSize)]="publishRecordsPage.pageSize"
       [nzPageSizeOptions]="pageSizeOptions"
       (nzPageIndexChange)="getPublishRecords()"
       (nzPageSizeChange)="getPublishRecords()"
@@ -65,51 +67,24 @@ export class DeployClusterEnvironmentHistoryPublishComponent implements OnInit {
   @Input() publishTypeTpl: TemplateRef<any> | undefined
 
   // eslint-disable-next-line camelcase
-  publishRecordsData:{historys:Array<{id:number, name:string, create_time:string, opt_type:string, operator:string, detailShow:boolean, detail:Array<{key:string, old_value:string, new_value:string, opt_type:string, create_time:string}>}>, total:number}=
+  publishRecordsData:{historys:Array<{id:number, name:string, createTime:string, optType:string, operator:string, detailShow:boolean, detail:Array<{key:string, oldValue:string, newValue:string, optType:string, createTime:string}>}>, total:number}=
       {
         historys: [],
         total: 0
       }
 
-  publishRecordTabelHeadName: Array<object> = [
-    { width: 45 },
-    { title: '版本名称', resizeable: true },
-    { title: '发布者', resizeable: true },
-    { title: '发布时间' }
-  ]
+  publishRecordTabelHeadName: THEAD_TYPE[]= [...DeployClusterPublishRecordThead]
+  publishRecordTableBody: TBODY_TYPE[]=[...DeployClusterPublishRecordTbody]
 
-  publishRecordTableBody: Array<any> =[
-    {
-      key: ''
-    },
-    { key: 'name' },
-    { key: 'operator' },
-    { key: 'create_time' }
-  ]
-
-  publishRecordDetailsTabelHeadName: Array<object> = [
-    { title: 'KEY', resizeable: true },
-    { title: 'OLD VALUE', resizeable: true },
-    { title: 'NEW VALUE', resizeable: true },
-    { title: '类型', resizeable: true },
-    { title: '操作时间' }
-  ]
-
-  publishRecordDetailsTableBody: Array<any> =[
-    { key: 'key' },
-    { key: 'old_value' },
-    { key: 'new_value' },
-    { key: 'opt_type' },
-    { key: 'create_time' }
-  ]
-
+  publishRecordDetailsTabelHeadName: THEAD_TYPE[] = [...DeployClusterOperateRecordThead]
+  publishRecordDetailsTableBody: TBODY_TYPE[] = [...DeployClusterOperateRecordTbody]
   pageSizeOptions:Array<number>=[15, 20, 50, 100]
 
   // 发布历史分页
   // eslint-disable-next-line camelcase
-  publishRecordsPage:{page_num:number, page_size:number, total:number}={
-    page_num: 1,
-    page_size: 15,
+  publishRecordsPage:{pageNum:number, pageSize:number, total:number}={
+    pageNum: 1,
+    pageSize: 15,
     total: 0
   }
 
@@ -128,15 +103,13 @@ export class DeployClusterEnvironmentHistoryPublishComponent implements OnInit {
   }
 
   getPublishRecords () {
-    this.api.get('cluster/' + this.clusterName + '/variable/publish-history', { page_num: 1, page_size: 20 }).subscribe(resp => {
+    this.api.get('cluster/' + this.clusterName + '/variable/publish-history', { pageNum: this.publishRecordsPage.pageNum, pageSize: this.publishRecordsPage.pageSize }).subscribe(resp => {
       if (resp.code === 0) {
         this.publishRecordsData = resp.data
         for (const history of resp.data.historys) {
           history.isExpand = false
         }
         this.publishRecordsPage.total = resp.data.total
-      } else {
-        this.message.error(resp.msg || '获取列表数据失败!')
       }
     })
   }

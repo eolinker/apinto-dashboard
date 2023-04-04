@@ -43,6 +43,7 @@ import { DeployEnvironmentComponent } from './environment/environment.component'
 import { EoNgApintoTableModule } from 'projects/eo-ng-apinto-table/src/public-api'
 import { EoNgCollapseModule } from 'eo-ng-collapse'
 import { EoNgCopyModule } from 'eo-ng-copy'
+import { EoNgCodeboxModule } from 'eo-ng-codebox'
 import { DeployClusterCertFormComponent } from './cluster/cert/form/form.component'
 import { DeployClusterEnvironmentConfigFormComponent } from './cluster/environment/config/form/form.component'
 import { DeployClusterEnvironmentConfigUpdateComponent } from './cluster/environment/config/update/update.component'
@@ -51,6 +52,15 @@ import { DeployClusterEnvironmentHistoryChangeComponent } from './cluster/enviro
 import { DeployClusterEnvironmentHistoryPublishComponent } from './cluster/environment/history/publish/publish.component'
 import { DeployClusterNodesFormComponent } from './cluster/nodes/form/form.component'
 import { DeployEnvironmentDetailComponent } from './environment/detail/detail.component'
+import { DeployPluginComponent } from './plugin/deploy-plugin.component'
+import { DeployPluginCreateComponent } from './plugin/create/create.component'
+import { DeployPluginListComponent } from './plugin/list/list.component'
+import { DeployPluginMessageComponent } from './plugin/message/message.component'
+import { DeployClusterPluginComponent } from './cluster/plugin/plugin.component'
+import { DeployClusterPluginConfigFormComponent } from './cluster/plugin/config/config.component'
+import { DeployClusterPluginHistoryChangeComponent } from './cluster/plugin/history/change/change.component'
+import { DeployClusterPluginHistoryPublishComponent } from './cluster/plugin/history/publish/publish.component'
+import { DeployClusterPluginPublishComponent } from './cluster/plugin/publish/publish.component'
 
 @NgModule({
   declarations: [
@@ -71,7 +81,16 @@ import { DeployEnvironmentDetailComponent } from './environment/detail/detail.co
     DeployClusterEnvironmentHistoryChangeComponent,
     DeployClusterEnvironmentHistoryPublishComponent,
     DeployClusterNodesFormComponent,
-    DeployEnvironmentDetailComponent
+    DeployEnvironmentDetailComponent,
+    DeployPluginComponent,
+    DeployPluginListComponent,
+    DeployPluginCreateComponent,
+    DeployPluginMessageComponent,
+    DeployClusterPluginComponent,
+    DeployClusterPluginConfigFormComponent,
+    DeployClusterPluginHistoryChangeComponent,
+    DeployClusterPluginHistoryPublishComponent,
+    DeployClusterPluginPublishComponent
   ],
   imports: [
     EoNgLayoutModule,
@@ -108,7 +127,8 @@ import { DeployEnvironmentDetailComponent } from './environment/detail/detail.co
     DeployRoutingModule,
     EoNgApintoTableModule,
     EoNgCollapseModule,
-    EoNgCopyModule
+    EoNgCopyModule,
+    EoNgCodeboxModule
   ]
 })
 export class DeployModule { }

@@ -2,11 +2,6 @@ import { NgModule } from '@angular/core'
 import { CommonModule } from '@angular/common'
 
 import { ApiRoutingModule } from './api-routing.module'
-import { ApiContentComponent } from './content/content.component'
-import { ApiCreateComponent } from './create/create.component'
-import { ApiManagementComponent } from './group/group.component'
-import { ApiManagementListComponent } from './list/list.component'
-import { ApiMessageComponent } from './message/message.component'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { EoNgBreadcrumbModule } from 'eo-ng-breadcrumb'
 import { EoNgButtonModule } from 'eo-ng-button'
@@ -23,6 +18,7 @@ import { EoNgSwitchModule } from 'eo-ng-switch'
 import { EoNgTableModule } from 'eo-ng-table'
 import { EoNgTabsModule } from 'eo-ng-tabs'
 import { EoNgTreeModule } from 'eo-ng-tree'
+import { EoNgCodeboxModule } from 'eo-ng-codebox'
 import { NzAvatarModule } from 'ng-zorro-antd/avatar'
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox'
 import { NzHighlightModule } from 'ng-zorro-antd/core/highlight'
@@ -36,16 +32,31 @@ import { ComponentModule } from '../../component/component.module'
 import { EoNgTransferModule } from '../../component/transfer/transfer.module'
 import { RouterComponent } from './router/router.component'
 import { DirectiveModule } from '../../directive/directive.module'
-import { MatchFormComponent } from './match/form/form.component'
-import { MatchTableComponent } from './match/table/table.component'
 import { EoNgApintoTableModule } from 'projects/eo-ng-apinto-table/src/public-api'
-import { ApiImportComponent } from './import/import.component'
 import { NzUploadModule } from 'ng-zorro-antd/upload'
 import { NzDropDownModule } from 'ng-zorro-antd/dropdown'
-import { ApiBatchPublishComponent } from './publish/batch/publish.component'
-import { ApiPublishComponent } from './publish/single/publish.component'
-import { ApiManagementProxyComponent } from './proxy/proxy.component'
-import { ApiManagementEditGroupComponent } from './group/edit-group/edit-group.component'
+import { ApiListComponent } from './api-list/api-list.component'
+import { ApiContentComponent } from './api-list/content/content.component'
+import { ApiCreateComponent } from './api-list/create/create.component'
+import { ApiManagementComponent } from './api-list/group/group.component'
+import { ApiManagementListComponent } from './api-list/list/list.component'
+import { ApiMessageComponent } from './api-list/message/message.component'
+import { ApiPublishComponent } from './api-list/publish/single/publish.component'
+import { MatchFormComponent } from './api-list/match/form/form.component'
+import { MatchTableComponent } from './api-list/match/table/table.component'
+import { ApiImportComponent } from './api-list/import/import.component'
+import { ApiBatchPublishComponent } from './api-list/publish/batch/publish.component'
+import { ApiManagementProxyComponent } from './api-list/proxy/proxy.component'
+import { ApiManagementEditGroupComponent } from './api-list/group/edit-group/edit-group.component'
+import { ApiPluginTemplateComponent } from './plugin/plugin.component'
+import { ApiPluginTemplateContentComponent } from './plugin/content/content.component'
+import { ApiPluginTemplateCreateComponent } from './plugin/create/create.component'
+import { ApiPluginTemplateListComponent } from './plugin/list/list.component'
+import { ApiPluginTemplateMessageComponent } from './plugin/message/message.component'
+import { ApiPluginConfigFormComponent } from './plugin/config/form/form.component'
+import { ApiPluginConfigTableComponent } from './plugin/config/table/table.component'
+import { ApiPluginTemplatePublishComponent } from './plugin/publish/publish.component'
+import { EoNgCopyModule } from 'eo-ng-copy'
 
 @NgModule({
   declarations: [
@@ -61,7 +72,16 @@ import { ApiManagementEditGroupComponent } from './group/edit-group/edit-group.c
     ApiImportComponent,
     ApiBatchPublishComponent,
     ApiManagementProxyComponent,
-    ApiManagementEditGroupComponent
+    ApiManagementEditGroupComponent,
+    ApiListComponent,
+    ApiPluginTemplateComponent,
+    ApiPluginTemplateListComponent,
+    ApiPluginTemplateCreateComponent,
+    ApiPluginTemplateContentComponent,
+    ApiPluginTemplateMessageComponent,
+    ApiPluginConfigFormComponent,
+    ApiPluginConfigTableComponent,
+    ApiPluginTemplatePublishComponent
   ],
   imports: [
     EoNgLayoutModule,
@@ -98,7 +118,9 @@ import { ApiManagementEditGroupComponent } from './group/edit-group/edit-group.c
     DirectiveModule,
     EoNgApintoTableModule,
     NzUploadModule,
-    NzDropDownModule
+    NzDropDownModule,
+    EoNgCodeboxModule,
+    EoNgCopyModule
   ],
   exports: [
     MatchTableComponent,

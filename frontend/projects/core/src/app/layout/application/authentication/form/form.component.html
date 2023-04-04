@@ -20,7 +20,7 @@
     <nz-form-control class="">
       <eo-ng-switch
         name="transparent"
-        formControlName="is_transparent"
+        formControlName="isTransparent"
         nzCheckedChildren="开"
         nzUnCheckedChildren="关"
         [nzDisabled]="nzDisabled"
@@ -65,8 +65,8 @@
           <input
             type="text"
             eo-ng-input
-            name="token_name"
-            formControlName="token_name"
+            name="tokenName"
+            formControlName="tokenName"
             class="w206"
             placeholder="请输入TokenName"
             required
@@ -154,7 +154,7 @@
       class="form-row"
       *ngIf="!validateForm.controls['algorithm'].value.includes('HS')"
     >
-      <label class="label" for="public_key">
+      <label class="label" for="publicKey">
         <span class="required-symbol">*</span>RSA公钥：</label
       >
       <nz-form-control class="form-input">
@@ -163,7 +163,7 @@
           type="text"
           eo-ng-input
           name="iss"
-          formControlName="public_key"
+          formControlName="publicKey"
           placeholder="请输入RSA公钥"
           required
           eoNgUserAccess="application"
@@ -185,13 +185,13 @@
       </nz-form-control>
     </nz-form-item>
     <nz-form-item class="form-row">
-      <label class="label" for="user_path"> 用户名JsonPath：</label>
+      <label class="label" for="userPath"> 用户名JsonPath：</label>
       <nz-form-control class="form-input">
         <input
           type="text"
           eo-ng-input
-          name="user_path"
-          formControlName="user_path"
+          name="userPath"
+          formControlName="userPath"
           class="w-INPUT_NORMAL"
           placeholder="请输入用户名JsonPath"
           eoNgUserAccess="application"
@@ -199,12 +199,12 @@
       </nz-form-control>
     </nz-form-item>
     <nz-form-item class="form-row">
-      <label class="label" for="claims_to_verify">校验字段：</label>
+      <label class="label" for="claimsToVerify">校验字段：</label>
       <nz-form-control [nzSpan]="5">
         <eo-ng-select
           class="w-INPUT_NORMAL"
-          name="claims_to_verify"
-          formControlName="claims_to_verify"
+          name="claimsToVerify"
+          formControlName="claimsToVerify"
           [nzOptions]="listOfVerify"
           eoNgUserAccess="application"
           [nzDisabled]="nzDisabled"
@@ -219,12 +219,12 @@
       class="form-row"
       *ngIf="validateForm.controls['algorithm'].value.includes('HS')"
     >
-      <label class="label" for="signature_is_base64">是否Base64加密：</label>
+      <label class="label" for="signatureIsBase64">是否Base64加密：</label>
 
       <nz-form-control>
         <eo-ng-switch
-          name="signature_is_base64"
-          formControlName="signature_is_base64"
+          name="signatureIsBase64"
+          formControlName="signatureIsBase64"
           [nzDisabled]="nzDisabled"
         ></eo-ng-switch>
       </nz-form-control>
@@ -241,8 +241,8 @@
         class="w-INPUT_NORMAL"
         [nzDisabledDate]="disabledDate"
         [nzAllowClear]="true"
-        name="expire_time"
-        formControlName="expire_time_date"
+        name="expireTime"
+        formControlName="expireTimeDate"
         [nzDisabled]="nzDisabled"
       ></nz-date-picker>
     </nz-form-control>
