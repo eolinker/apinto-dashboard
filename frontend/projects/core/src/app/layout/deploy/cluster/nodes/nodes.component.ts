@@ -1,15 +1,17 @@
 /* eslint-disable camelcase */
 /* eslint-disable dot-notation */
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
-import { FormGroup, UntypedFormBuilder } from '@angular/forms'
-import { Router, ActivatedRoute } from '@angular/router'
+import { FormGroup } from '@angular/forms'
+import { Router } from '@angular/router'
 import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feedback'
+import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { NzModalRef } from 'ng-zorro-antd/modal'
 import { MODAL_NORMAL_SIZE } from 'projects/core/src/app/constant/app.config'
 import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { ApiService } from 'projects/core/src/app/service/api.service'
 import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
 import { BaseInfoService } from 'projects/core/src/app/service/base-info.service'
+import { DeployClusterNodeTbody, DeployClusterNodeThead } from '../types/conf'
 import { DeployClusterNodesFormComponent } from './form/form.component'
 
 @Component({
@@ -27,29 +29,14 @@ export class DeployClusterNodesComponent implements OnInit {
   clusterName:string=''
   readonly nowUrl:string = this.router.routerState.snapshot.url
 
-  nodesForms:{nodes:Array<{id:number, name:string, service_addr:string, admin_addr:string, status:string}>, is_update:boolean}=
+  nodesForms:{nodes:Array<{id:number, name:string, serviceAddr:string, adminAddr:string, status:string}>, isUpdate:boolean}=
     {
       nodes: [],
-      is_update: false
+      isUpdate: false
     }
 
-  nodesTableHeadName:Array<any> = [
-    {
-      title: '名称'
-    },
-    { title: '管理地址' },
-    { title: '服务地址' },
-    {
-      title: '状态'
-    }
-  ]
-
-  nodesTableBody: Array<any> =[
-    { key: 'name' },
-    { key: 'admin_addr' },
-    { key: 'service_addr' },
-    { key: 'status' }
-  ]
+  nodesTableHeadName:THEAD_TYPE[] = [...DeployClusterNodeThead]
+  nodesTableBody: TBODY_TYPE[]=[...DeployClusterNodeTbody]
 
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
 
@@ -59,8 +46,6 @@ export class DeployClusterNodesComponent implements OnInit {
                 private baseInfo:BaseInfoService,
                 private message: EoNgFeedbackMessageService,
                 private api:ApiService, private router:Router,
-                private activateInfo:ActivatedRoute,
-                private fb: UntypedFormBuilder,
                 private appConfigService:AppConfigService) {
     this.appConfigService.reqFlashBreadcrumb([{ title: '网关集群', routerLink: 'deploy/cluster' }, { title: '网关节点' }])
   }
@@ -81,8 +66,6 @@ export class DeployClusterNodesComponent implements OnInit {
     this.api.get('cluster/' + this.clusterName + '/nodes').subscribe(resp => {
       if (resp.code === 0) {
         this.nodesForms = resp.data
-      } else {
-        this.message.error(resp.msg || '获取列表数据失败！', { nzDuration: 1000 })
       }
     })
   }
@@ -98,8 +81,6 @@ export class DeployClusterNodesComponent implements OnInit {
       if (resp.code === 0) {
         this.message.success(resp.msg || '操作成功！', { nzDuration: 1000 })
         this.getNodeslist()
-      } else {
-        this.message.error(resp.msg || '操作失败！')
       }
     })
   }

@@ -34,7 +34,10 @@ const (
 	AuditLogView
 	ExtAPPView
 	ExtAPPEdit
-
+	PluginView
+	PluginEdit
+	PluginTemplateView
+	PluginTemplateEdit
 	lastId
 	unknown
 )

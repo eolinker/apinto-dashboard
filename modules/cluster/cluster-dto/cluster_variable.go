@@ -5,14 +5,14 @@ import (
 )
 
 type ClusterVariableItem struct {
-	Id         int                         `json:"id,omitempty"`          //环境变量主键ID
-	VariableId int                         `json:"variable_id,omitempty"` //全局环境变量ID
-	Key        string                      `json:"key"`
-	Value      string                      `json:"value"`
-	Publish    enum.ClusterVariablePublish `json:"publish"`
-	Desc       string                      `json:"desc"`
-	Operator   string                      `json:"operator"`
-	UpdateTime string                      `json:"update_time"`
+	Id         int              `json:"id,omitempty"`          //环境变量主键ID
+	VariableId int              `json:"variable_id,omitempty"` //全局环境变量ID
+	Key        string           `json:"key"`
+	Value      string           `json:"value"`
+	Publish    enum.PublishType `json:"publish"`
+	Desc       string           `json:"desc"`
+	Operator   string           `json:"operator"`
+	UpdateTime string           `json:"update_time"`
 }
 
 type ClusterVariableSyncConf struct {
@@ -30,19 +30,19 @@ type SyncConf struct {
 }
 
 type ClusterHistoryOut struct {
-	Key        string               `json:"key"`
-	OldValue   string               `json:"old_value"`
-	NewValue   string               `json:"new_value"`
-	CreateTime string               `json:"create_time"`
-	OptType    enum.VariableOptType `json:"opt_type"`
+	Key        string             `json:"key"`
+	OldValue   string             `json:"old_value"`
+	NewValue   string             `json:"new_value"`
+	CreateTime string             `json:"create_time"`
+	OptType    enum.ChangeOptType `json:"opt_type"`
 }
 
 type VariableToPublishOut struct {
-	Key             string               `json:"key"`
-	FinishValue     string               `json:"finish_value"`
-	NoReleasedValue string               `json:"no_released_value"`
-	CreateTime      string               `json:"create_time"`
-	OptType         enum.VariableOptType `json:"opt_type"`
+	Key             string             `json:"key"`
+	FinishValue     string             `json:"finish_value"`
+	NoReleasedValue string             `json:"no_released_value"`
+	CreateTime      string             `json:"create_time"`
+	OptType         enum.ChangeOptType `json:"opt_type"`
 }
 
 type VariablePublishInput struct {
@@ -61,9 +61,9 @@ type VariablePublishOut struct {
 }
 
 type VariablePublishDetails struct {
-	Key        string               `json:"key"`
-	OldValue   string               `json:"old_value"`
-	NewValue   string               `json:"new_value"`
-	OptType    enum.VariableOptType `json:"opt_type"`
-	CreateTime string               `json:"create_time"`
+	Key        string             `json:"key"`
+	OldValue   string             `json:"old_value"`
+	NewValue   string             `json:"new_value"`
+	OptType    enum.ChangeOptType `json:"opt_type"`
+	CreateTime string             `json:"create_time"`
 }

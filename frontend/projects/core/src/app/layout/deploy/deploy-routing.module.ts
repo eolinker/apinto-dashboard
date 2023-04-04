@@ -10,7 +10,11 @@ import { DeployClusterNodesComponent } from './cluster/nodes/nodes.component'
 import { DeployEnvironmentCreateComponent } from './environment/create/create.component'
 import { DeployEnvironmentComponent } from './environment/environment.component'
 import { DeployEnvironmentListComponent } from './environment/list/list.component'
-
+import { DeployPluginComponent } from './plugin/deploy-plugin.component'
+import { DeployPluginCreateComponent } from './plugin/create/create.component'
+import { DeployPluginListComponent } from './plugin/list/list.component'
+import { DeployPluginMessageComponent } from './plugin/message/message.component'
+import { DeployClusterPluginComponent } from './cluster/plugin/plugin.component'
 const routes: Routes = [{
   path: '',
   component: DeployClusterComponent,
@@ -49,6 +53,10 @@ const routes: Routes = [{
             {
               path: 'nodes',
               component: DeployClusterNodesComponent
+            },
+            {
+              path: 'plugin',
+              component: DeployClusterPluginComponent
             }
           ]
         }]
@@ -68,6 +76,24 @@ const routes: Routes = [{
         {
           path: 'create',
           component: DeployEnvironmentCreateComponent
+        }
+      ]
+    },
+    {
+      path: 'plugin',
+      component: DeployPluginComponent,
+      children: [
+        {
+          path: '',
+          component: DeployPluginListComponent
+        },
+        {
+          path: 'create',
+          component: DeployPluginCreateComponent
+        },
+        {
+          path: 'message/:pluginName',
+          component: DeployPluginMessageComponent
         }
       ]
     }

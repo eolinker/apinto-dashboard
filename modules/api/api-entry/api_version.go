@@ -17,6 +17,8 @@ type APIVersionConfig struct {
 	RequestPathLabel string         `json:"request_path_label"`
 	ServiceID        int            `json:"service_id"`
 	ServiceName      string         `json:"service_name"`
+	TemplateID       int            `json:"template_id"`
+	TemplateUUID     string         `json:"template_uuid"`
 	Method           []string       `json:"method"`
 	ProxyPath        string         `json:"proxy_path"`
 	Timeout          int            `json:"timeout"`

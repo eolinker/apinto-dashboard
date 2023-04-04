@@ -88,6 +88,9 @@ const (
 	LogKindNoticeEmail     = "notice_email"      //通知渠道邮箱
 	LogKindNoticeWebhook   = "notice_webhook"    //通知渠道webhook
 	LogKindWarnStrategy    = "warn_strategy"     //告警策略
+	LogKindGlobalPlugin    = "global_plugin"
+	LogKindClusterPlugin   = "cluster_plugin"
+	LogKindPluginTemplate  = "plugin_template"
 )
 
 var (
@@ -112,10 +115,13 @@ var (
 		LogKindNoticeEmail:     "邮箱",
 		LogKindNoticeWebhook:   "webhook",
 		LogKindWarnStrategy:    "告警策略",
+		LogKindGlobalPlugin:    "全局插件",
+		LogKindClusterPlugin:   "集群插件",
+		LogKindPluginTemplate:  "插件模板",
 	}
 	logKindOrder = []LogKind{LogKindAPI, LogKindService, LogKindDiscovery, LogKindApplication, LogKindCluster, LogKindGlobalVariable, LogKindClusterVariable,
-		LogKindStrategyTraffic, LogKindStrategyFuse, LogKindStrategyVisit, LogKindStrategyCache, LogKindStrategyGrey, LogKindUser, LogKindRole,
-		LogKindAPIGroup, LogKindExtAPP, LogKindMonPartition, LogKindNoticeEmail, LogKindNoticeWebhook, LogKindWarnStrategy}
+		LogKindStrategyTraffic, LogKindStrategyFuse, LogKindStrategyVisit, LogKindStrategyCache, LogKindStrategyGrey,
+		LogKindAPIGroup, LogKindExtAPP}
 	logKindList []LogKindsItem
 )
 

@@ -1,7 +1,7 @@
 <!--
- * @Author:  
+ * @Author: 
  * @Date: 2022-08-23 23:38:27
- * @LastEditors:  
+ * @LastEditors: 
  * @LastEditTime: 2022-08-24 00:21:43
  * @FilePath: /apinto/src/app/layout/application/application-management-list/application-management-list.component.html
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
@@ -46,8 +46,8 @@
       [nzShowPagination]="true"
       [nzFrontPagination]="false"
       [nzTotal]="applicationsForm.total"
-      [(nzPageIndex)]="applicationsForm.page_num"
-      [(nzPageSize)]="applicationsForm.page_size"
+      [(nzPageIndex)]="applicationsForm.pageNum"
+      [(nzPageSize)]="applicationsForm.pageSize"
       (nzPageIndexChange)="getApplicationsList()"
       (nzPageSizeChange)="getApplicationsList()"
     >

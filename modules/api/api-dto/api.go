@@ -39,6 +39,7 @@ type APIInfo struct {
 	EnableWebsocket  bool                     `json:"enable_websocket"`
 	Match            []*api_entry.MatchConf   `json:"match"`
 	Header           []*api_entry.ProxyHeader `json:"proxy_header"`
+	TemplateUUID     string                   `json:"template_uuid"`
 }
 
 type MatchConf struct {
@@ -55,11 +56,11 @@ type ProxyHeader struct {
 }
 
 type ApiBatchOnlineCheckListItem struct {
-	ServiceName string                 `json:"service"`
-	ClusterEnv  string                 `json:"cluster"`
-	Status      bool                   `json:"status"`
-	Result      string                 `json:"result,omitempty"`
-	Solution    *frontend_model.Router `json:"solution,omitempty"`
+	ServiceTemplate string                 `json:"service_template"`
+	ClusterEnv      string                 `json:"cluster"`
+	Status          bool                   `json:"status"`
+	Result          string                 `json:"result,omitempty"`
+	Solution        *frontend_model.Router `json:"solution,omitempty"`
 }
 
 type ApiBatchCheckListItem struct {

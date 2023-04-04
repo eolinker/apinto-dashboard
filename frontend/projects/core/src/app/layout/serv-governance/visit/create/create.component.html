@@ -104,7 +104,7 @@
         <eo-ng-select
           required
           class="w-INPUT_NORMAL"
-          [(ngModel)]="createStrategyForm.config.visit_rule"
+          [(ngModel)]="createStrategyForm.config.visitRule"
           [nzOptions]="visitRuleList"
           nzPlaceHolder="请选择"
           [ngModelOptions]="{ standalone: true }"
@@ -152,7 +152,7 @@
     </nz-form-item>
   </form>
 
-  <nz-form-item class="mb-0 sticky bg-white bottom-0 py-mbase">
+  <nz-form-item class="mb-0 sticky bg-white bottom-0 py-mbase z-50">
     <nz-form-control [nzOffset]="7" [nzSpan]="18">
       <button
         class="ant-btn-primary"
@@ -160,6 +160,7 @@
         type="submit"
         eo-ng-button
         (click)="saveStrategy()"
+        [nzLoading]="submitButtonLoading"
       >
         {{ editPage ? '提交' : '保存' }}
       </button>
