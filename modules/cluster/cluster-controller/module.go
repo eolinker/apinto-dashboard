@@ -7,7 +7,11 @@ import (
 	"strings"
 )
 
-type ClusterPlugin struct {
+type ClusterPluginDriver struct {
+}
+
+func NewClusterPlugin() apinto_module.Driver {
+	return &ClusterPluginDriver{}
 }
 
 const (
@@ -19,19 +23,15 @@ var (
 	clusterAccess = []apinto_module.AccessInfo{apinto_module.NewSimpleAccess(ClusterView, "查看"), apinto_module.NewSimpleAccess(ClusterEdit, "编辑", ClusterView)}
 )
 
-func (c *ClusterPlugin) Access() []apinto_module.AccessInfo {
-	return clusterAccess
-}
-
-func (c *ClusterPlugin) CreateModule(name string, apiPrefix string, config interface{}) (apinto_module.Module, error) {
+func (c *ClusterPluginDriver) CreateModule(name string, apiPrefix string, config interface{}) (apinto_module.Module, error) {
 	return NewClusterModule(apiPrefix), nil
 }
 
-func (c *ClusterPlugin) CheckConfig(name string, apiPrefix string, config interface{}) error {
+func (c *ClusterPluginDriver) CheckConfig(name string, apiPrefix string, config interface{}) error {
 	return nil
 }
 
-func (c *ClusterPlugin) CreatePlugin(define interface{}) (apinto_module.Plugin, error) {
+func (c *ClusterPluginDriver) CreatePlugin(define interface{}) (apinto_module.Plugin, error) {
 	return c, nil
 }
 
@@ -42,6 +42,10 @@ type ClusterModule struct {
 	routers apinto_module.RoutersInfo
 }
 
+func (c *ClusterModule) SkillSupport() (apinto_module.ProviderSupport, bool) {
+	return nil, false
+}
+
 func (c *ClusterModule) Routers() (apinto_module.Routers, bool) {
 	return c, true
 }
@@ -50,10 +54,9 @@ func (c *ClusterModule) Middleware() (apinto_module.Middleware, bool) {
 	return nil, false
 }
 
-func (c *ClusterModule) SkillSupport() (apinto_module.SkillSupport, bool) {
-	return nil, false
+func (c *ClusterModule) Access() []apinto_module.AccessInfo {
+	return clusterAccess
 }
-
 func NewClusterModule(apiPrefix string) *ClusterModule {
 	if !strings.HasPrefix(apiPrefix, "/") {
 		apiPrefix = "/" + apiPrefix
