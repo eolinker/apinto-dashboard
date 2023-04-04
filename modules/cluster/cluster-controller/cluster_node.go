@@ -17,9 +17,14 @@ type clusterNodeController struct {
 	clusterNodeService cluster.IClusterNodeService
 }
 
-func RegisterClusterNodeRouter(router gin.IRoutes) {
+func newClusterNodeController() *clusterNodeController {
 	c := &clusterNodeController{}
 	bean.Autowired(&c.clusterNodeService)
+	return c
+}
+
+func RegisterClusterNodeRouter(router gin.IRoutes) {
+	c := newClusterNodeController()
 
 	router.GET("/cluster/:cluster_name/nodes", controller.GenAccessHandler(access.ClusterView, access.ClusterEdit), c.nodes)
 	router.POST("/cluster/:cluster_name/node/reset", controller.GenAccessHandler(access.ClusterEdit), c.reset)
