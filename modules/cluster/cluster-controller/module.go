@@ -42,8 +42,12 @@ func (c *ClusterPluginDriver) CreatePlugin(define interface{}) (apinto_module.Pl
 type ClusterModule struct {
 	isInit    bool
 	apiPrefix string
+	name      string
+	routers   apinto_module.RoutersInfo
+}
 
-	routers apinto_module.RoutersInfo
+func (c *ClusterModule) Name() string {
+	return c.name
 }
 
 func (c *ClusterModule) Support() (apinto_module.ProviderSupport, bool) {

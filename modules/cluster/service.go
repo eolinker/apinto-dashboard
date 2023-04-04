@@ -10,6 +10,10 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/online"
 )
 
+const (
+	ProviderName = "cluster"
+)
+
 type IApintoClient interface {
 	GetClient(ctx context.Context, clusterId int) (v1.IClient, error)
 	SetClient(namespace, clusterId int)
