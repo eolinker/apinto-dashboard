@@ -13,8 +13,8 @@ github.com/dgrijalva/jwt-go v3.2.0+incompatible h1:7qlOGliEKZXTDg6OTjfoBKDXWrumC
 github.com/dgrijalva/jwt-go v3.2.0+incompatible/go.mod h1:E3ru+11k8xSBh+hMPgOLZmtrrCbhqsmaPHjLKYnJCaQ=
 github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f h1:lO4WD4F/rVNCu3HqELle0jiPLLBs70cWOduZpkS1E78=
 github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f/go.mod h1:cuUVRXasLTGF7a8hSLbxyZXjz+1KgoB3wDUb6vlszIc=
-github.com/eolinker/eosc v0.8.2 h1:boMBMy2XF3hAPFgfZxdYfZsU97n7sPUuVTjH3ySW/4o=
-github.com/eolinker/eosc v0.8.2/go.mod h1:qmQL0fQ3amkAaZnN7LTjUEbYVre+phen1DR8d41x0PE=
+github.com/eolinker/eosc v0.10.1 h1:fSmIw89yO0blnTLjndXvlCupMlnwkeB0wjvBMiHWymk=
+github.com/eolinker/eosc v0.10.1/go.mod h1:0qIXUSG/WmdSHzBixE3dJppvOQ7rHFRibjXRgZY0JHQ=
 github.com/fsnotify/fsnotify v1.5.4 h1:jRbGcIw6P2Meqdwuo0H1p6JVLbL5DHKAKlYndzMwVZI=
 github.com/fsnotify/fsnotify v1.5.4/go.mod h1:OVB6XrOHzAwXMpEM7uPOzcehqUV2UqJxmVXmkdnm1bU=
 github.com/getkin/kin-openapi v0.61.0/go.mod h1:7Yn5whZr5kJi6t+kShccXS8ae1APpYTW6yheSwk8Yi4=
