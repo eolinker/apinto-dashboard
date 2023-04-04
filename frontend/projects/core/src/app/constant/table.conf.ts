@@ -1,5 +1,6 @@
 import { MenuOptions } from 'eo-ng-menu'
-import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
+import { THEAD_TYPE } from 'eo-ng-table'
+import { EO_TBODY_TYPE } from 'projects/eo-ng-apinto-table/src/public-api'
 
 // 监控告警列表参数
 export const monitorAlarmStrategyTableHead:THEAD_TYPE[] = [
@@ -12,12 +13,23 @@ export const monitorAlarmStrategyTableHead:THEAD_TYPE[] = [
   { title: '更新者', key: 'operator' },
   { title: '更新时间', key: 'updateTime', showSort: true }
 ]
-export const monitorAlarmStrategyTableBody:TBODY_TYPE[] = [
-  { key: 'strategyTitle' },
-  { key: 'warnDimension' },
-  { key: 'warnTarget' },
-  { key: 'warnRule' },
-  { key: 'warnFrequency' },
+export const monitorAlarmStrategyTableBody:EO_TBODY_TYPE[] = [
+  {
+    key: 'strategyTitle',
+    copy: true
+  },
+  {
+    key: 'warnDimension'
+  },
+  {
+    key: 'warnTarget'
+  },
+  {
+    key: 'warnRule'
+  },
+  {
+    key: 'warnFrequency'
+  },
   { key: 'isEnable' },
   { key: 'operator' },
   { key: 'updateTime' }
@@ -53,10 +65,17 @@ export const monitorAlarmHistoryTableHead:THEAD_TYPE[] = [
   { title: '告警状态' },
   { title: '告警时间', showSort: true }
 ]
-export const monitorAlarmHistoryTableBody:TBODY_TYPE[] = [
-  { key: 'strategyTitle' },
-  { key: 'warnTarget' },
-  { key: 'warnContent' },
+export const monitorAlarmHistoryTableBody:EO_TBODY_TYPE[] = [
+  {
+    key: 'strategyTitle',
+    copy: true
+  },
+  {
+    key: 'warnTarget'
+  },
+  {
+    key: 'warnContent'
+  },
   { key: 'status' },
   { key: 'createTime' }
 ]
@@ -70,11 +89,20 @@ export const webhooksTableHead:THEAD_TYPE[] = [
   { title: '更新者' },
   { title: '更新时间' }
 ]
-export const webhooksTableBody:TBODY_TYPE[] = [
-  { key: 'title' },
-  { key: 'url' },
-  { key: 'method' },
-  { key: 'contentType' },
+export const webhooksTableBody:EO_TBODY_TYPE[] = [
+  {
+    key: 'title',
+    copy: true
+  },
+  {
+    key: 'url'
+  },
+  {
+    key: 'method'
+  },
+  {
+    key: 'contentType'
+  },
   { key: 'operator' },
   { key: 'updateTime' }
 ]

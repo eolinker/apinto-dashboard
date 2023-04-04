@@ -1,6 +1,8 @@
 import { Component, Input, OnInit, TemplateRef } from '@angular/core'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
+import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { ApiService } from 'projects/core/src/app/service/api.service'
+import { DeployClusterOperateRecordTbody, DeployClusterOperateRecordThead } from '../../../types/conf'
 
 @Component({
   selector: 'eo-ng-deploy-cluster-environment-history-change',
@@ -16,8 +18,8 @@ import { ApiService } from 'projects/core/src/app/service/api.service'
       [nzShowPagination]="true"
       [nzFrontPagination]="false"
       [nzTotal]="operateRecordsPage.total"
-      [(nzPageIndex)]="operateRecordsPage.page_num"
-      [(nzPageSize)]="operateRecordsPage.page_size"
+      [(nzPageIndex)]="operateRecordsPage.pageNum"
+      [(nzPageSize)]="operateRecordsPage.pageSize"
       [nzPageSizeOptions]="pageSizeOptions"
       (nzPageIndexChange)="getOperateRecords()"
       (nzPageSizeChange)="getOperateRecords()"
@@ -31,33 +33,20 @@ import { ApiService } from 'projects/core/src/app/service/api.service'
 export class DeployClusterEnvironmentHistoryChangeComponent implements OnInit {
   @Input() publishTypeTpl: TemplateRef<any> | undefined
   // eslint-disable-next-line camelcase
-  operateRecordsData:{historys:Array<{key:string, old_value:string, new_value:string, create_time:string, opt_type:string}>, total:number}=
+  operateRecordsData:{historys:Array<{key:string, oldValue:string, newValue:string, createTime:string, optType:string}>, total:number}=
       {
         historys: [],
         total: 0
       }
 
-  operateRecordTabelHeadName: Array<object> = [
-    { title: 'KEY', resizeable: true },
-    { title: 'OLD VALUE', resizeable: true },
-    { title: 'NEW VALUE', resizeable: true },
-    { title: '类型', resizeable: true },
-    { title: '操作时间' }
-  ]
-
-  operateRecordTableBody: Array<any> =[
-    { key: 'key' },
-    { key: 'old_value' },
-    { key: 'new_value' },
-    { key: 'opt_type' },
-    { key: 'create_time' }
-  ]
+  operateRecordTabelHeadName: THEAD_TYPE[] = [...DeployClusterOperateRecordThead]
+  operateRecordTableBody:TBODY_TYPE[]=[...DeployClusterOperateRecordTbody]
 
   // 更改历史分页
   // eslint-disable-next-line camelcase
-  operateRecordsPage:{page_num:number, page_size:number, total:number}={
-    page_num: 1,
-    page_size: 15,
+  operateRecordsPage:{pageNum:number, pageSize:number, total:number}={
+    pageNum: 1,
+    pageSize: 15,
     total: 0
   }
 
@@ -76,12 +65,10 @@ export class DeployClusterEnvironmentHistoryChangeComponent implements OnInit {
   }
 
   getOperateRecords () {
-    this.api.get('cluster/' + this.clusterName + '/variable/update-history', { page_num: this.operateRecordsPage.page_num, page_size: this.operateRecordsPage.page_size }).subscribe(resp => {
+    this.api.get('cluster/' + this.clusterName + '/variable/update-history', { pageNum: this.operateRecordsPage.pageNum, pageSize: this.operateRecordsPage.pageSize }).subscribe(resp => {
       if (resp.code === 0) {
         this.operateRecordsData = resp.data
         this.operateRecordsPage.total = resp.data.total
-      } else {
-        this.message.error(resp.msg || '获取列表数据失败!')
       }
     })
   }

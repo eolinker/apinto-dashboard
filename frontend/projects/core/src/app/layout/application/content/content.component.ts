@@ -8,11 +8,9 @@
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
 import { ChangeDetectorRef, Component, ElementRef, OnInit, Renderer2, TemplateRef, ViewChild } from '@angular/core'
-import { Router, ActivatedRoute } from '@angular/router'
+import { Router } from '@angular/router'
 import { TabTemplateContext } from 'ng-zorro-antd/tabs'
-import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { TabsOptions } from 'eo-ng-tabs'
-import { ApiService } from 'projects/core/src/app/service/api.service'
 import { BaseInfoService } from '../../../service/base-info.service'
 
 @Component({
@@ -29,12 +27,13 @@ export class ApplicationContentComponent implements OnInit {
   options:Array<any>=[]
 
   tabOptions:TabsOptions[]=[]
-  selectedIndex:number = 0
-  readonly nowUrl:string = this.router.routerState.snapshot.url
 
-  constructor (private message: EoNgFeedbackMessageService,
+  constructor (
     private baseInfo:BaseInfoService,
-    private api:ApiService, private router:Router, private activateInfo:ActivatedRoute, private cdRef: ChangeDetectorRef, private elem: ElementRef, private renderer: Renderer2) {
+    private router:Router,
+    private cdRef: ChangeDetectorRef,
+    private elem: ElementRef,
+    private renderer: Renderer2) {
   }
 
   ngOnInit (): void {

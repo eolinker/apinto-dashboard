@@ -1,5 +1,4 @@
 import { Component } from '@angular/core'
-import { Router } from '@angular/router'
 
 @Component({
   selector: 'app-router',
@@ -10,15 +9,4 @@ import { Router } from '@angular/router'
   ]
 })
 export class RouterComponent {
-  constructor (private router:Router) {
-    if (this.router.url === '/router') {
-      this.router.navigate(['/', 'router', 'group', 'list'])
-    }
-  }
-
-  ngDoCheck () {
-    if (this.router.url === '/router') {
-      this.router.navigate(['/', 'router', 'group', 'list'])
-    }
-  }
 }

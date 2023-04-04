@@ -17,6 +17,7 @@ export class ExternalAppCreateComponent implements OnInit {
   @Input() editPage: boolean = false
   @Input() appId: string = ''
   validateForm: FormGroup = new FormGroup({})
+  submitButtonLoading:boolean = false
 
   constructor (
     private message: EoNgFeedbackMessageService,
@@ -66,8 +67,6 @@ export class ExternalAppCreateComponent implements OnInit {
             resp.data.info.desc
           )
           this.validateForm.controls['id'].disable()
-        } else {
-          this.message.error(resp.msg || '获取数据失败!')
         }
       })
   }
@@ -76,8 +75,6 @@ export class ExternalAppCreateComponent implements OnInit {
     this.api.get('random/external-app/id').subscribe((resp: any) => {
       if (resp.code === 0) {
         this.validateForm.controls['id'].setValue(resp.data.id)
-      } else {
-        this.message.error(resp.msg || '获取应用ID失败!')
       }
     })
   }
@@ -89,17 +86,17 @@ export class ExternalAppCreateComponent implements OnInit {
   // 保存鉴权，editPage = true时，表示页面为编辑页，false为新建页
   saveApplication () {
     if (this.validateForm.valid) {
+      this.submitButtonLoading = true
       if (!this.editPage) {
         this.api
           .post('external-app', {
             ...this.validateForm.value
           })
           .subscribe((resp: any) => {
+            this.submitButtonLoading = false
             if (resp.code === 0) {
               this.message.success(resp.msg || '添加成功')
               this.backToList()
-            } else {
-              this.message.error(resp.msg || '添加失败!')
             }
           })
       } else {
@@ -108,11 +105,10 @@ export class ExternalAppCreateComponent implements OnInit {
             ...this.validateForm.value
           }, { id: this.validateForm.controls['id'].value })
           .subscribe((resp: any) => {
+            this.submitButtonLoading = false
             if (resp.code === 0) {
               this.message.success(resp.msg || '修改成功')
               this.backToList()
-            } else {
-              this.message.error(resp.msg || '修改失败!')
             }
           })
       }

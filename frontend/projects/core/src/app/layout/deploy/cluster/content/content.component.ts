@@ -27,6 +27,7 @@ export class DeployClusterContentComponent implements OnInit {
   @ViewChild('tab1', { read: TemplateRef, static: true }) tab1: TemplateRef<TabTemplateContext> | string = '环境变量'
   @ViewChild('tab2', { read: TemplateRef, static: true }) tab2: TemplateRef<TabTemplateContext> | string = '证书管理'
   @ViewChild('tab3', { read: TemplateRef, static: true }) tab3: TemplateRef<TabTemplateContext> | string = '网关节点'
+  @ViewChild('tab5', { read: TemplateRef, static: true }) tab5: TemplateRef<TabTemplateContext> | string = '插件管理'
   clusterName:string=''
   clusterDesc:string=''
   _clusterDesc:string=''
@@ -63,6 +64,11 @@ export class DeployClusterContentComponent implements OnInit {
         title: this.tab3,
         routerLink: 'nodes',
         queryParamsHandling: 'merge'
+      },
+      {
+        title: this.tab5,
+        routerLink: 'plugin',
+        queryParamsHandling: 'merge'
       }
     ]
     this.cdRef.detectChanges()
@@ -73,12 +79,10 @@ export class DeployClusterContentComponent implements OnInit {
   }
 
   getClustersData () {
-    this.api.get('cluster', { cluster_name: this.clusterName }).subscribe((resp:{code:number, data:{cluster:{desc:string, [key:string]:any}}, msg:string}) => {
+    this.api.get('cluster', { clusterName: this.clusterName }).subscribe((resp:{code:number, data:{cluster:{desc:string, [key:string]:any}}, msg:string}) => {
       if (resp.code === 0) {
         this.clusterDesc = resp.data.cluster.desc
         this._clusterDesc = resp.data.cluster.desc
-      } else {
-        this.message.error(resp.msg || '获取列表数据失败！')
       }
     })
   }
@@ -88,7 +92,6 @@ export class DeployClusterContentComponent implements OnInit {
       if (resp.code === 0) {
         this.clusterDesc = this._clusterDesc
       } else {
-        this.message.error(resp.msg || '修改失败！')
         this._clusterDesc = this.clusterDesc
       }
     })

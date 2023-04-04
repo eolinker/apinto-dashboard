@@ -1,0 +1,90 @@
+<div class="drawer-list-content drawer-table" style="margin-top: 0px">
+  <eo-ng-apinto-table
+    class="drawer-table"
+    [nzTbody]="publishRecordTableBody"
+    [nzThead]="publishRecordTabelHeadName"
+    [(nzData)]="publishRecordsData.historys"
+    [nzTrBottomTmp]="nzTrBottomTmp"
+    [nzTrClick]="publishRTableClick"
+    [nzNoScroll]="true"
+    [nzShowPagination]="true"
+    [nzFrontPagination]="false"
+    [nzTotal]="publishRecordsPage.total"
+    [(nzPageIndex)]="publishRecordsPage.pageNum"
+    [(nzPageSize)]="publishRecordsPage.pageSize"
+    [nzPageSizeOptions]="pageSizeOptions"
+    (nzPageIndexChange)="getPublishRecords()"
+    (nzPageSizeChange)="getPublishRecords()"
+  >
+  </eo-ng-apinto-table>
+</div>
+<ng-template #nzTrBottomTmp let-item="item" let-apis="apis" let-index="index">
+  <tr *ngIf="item.data.isExpand">
+    <td style="border-right: none; background-color: #e8e8e8"></td>
+    <td colspan="3" style="border: none; padding: 0; margin-top: -2px">
+      <div style="width: 100%">
+        <eo-ng-apinto-table
+          class="floatR innerTable"
+          [nzTbody]="publishRecordDetailsTableBody"
+          [nzThead]="publishRecordDetailsTabelHeadName"
+          [(nzData)]="item.data.details"
+          nzTableLayout="fixed"
+          [nzScrollY]="9999"
+        >
+        </eo-ng-apinto-table>
+      </div>
+    </td>
+  </tr>
+</ng-template>
+
+<ng-template #showInnerTableBtnTpl let-item="item">
+  <button eo-ng-row-expand-button [expand]="item.isExpand"></button>
+</ng-template>
+
+<ng-template #innerTableOldValueTpl let-item="item">
+  <span
+    eoNgFeedbackTooltip
+    [nzTooltipTitle]="
+      transferToJson(
+        '状态：' +
+          getStatusString(item.oldConfig.status) +
+          '，配置信息：' +
+          item.oldConfig.config
+      )
+    "
+    [nzTooltipVisible]="false"
+    [nzTooltipTrigger]="'hover'"
+    nzTooltipOverlayClassName="tooltip-json"
+  >
+    {{
+      '状态：' +
+        getStatusString(item.oldConfig.status) +
+        '，配置信息：' +
+        item.oldConfig.config
+    }}
+  </span>
+</ng-template>
+
+<ng-template #innerTableNewValueTpl let-item="item">
+  <span
+    eoNgFeedbackTooltip
+    [nzTooltipTitle]="
+      transferToJson(
+        '状态：' +
+          getStatusString(item.newConfig.status) +
+          '，配置信息：' +
+          item.newConfig.config
+      )
+    "
+    [nzTooltipVisible]="false"
+    [nzTooltipTrigger]="'hover'"
+    nzTooltipOverlayClassName="tooltip-json"
+  >
+    {{
+      '状态：' +
+        getStatusString(item.newConfig.status) +
+        '，配置信息：' +
+        item.newConfig.config
+    }}
+  </span></ng-template
+>

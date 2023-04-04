@@ -12,7 +12,7 @@ export interface APITabParams {
     /** 组件类型 */
     type?: string
     // 实际
-    partition_id?:string // 分区的uuid
+    partitionId?:string // 分区的uuid
   }
 
 export interface APITabType {
