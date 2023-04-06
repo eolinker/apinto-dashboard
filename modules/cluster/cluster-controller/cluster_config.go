@@ -15,9 +15,14 @@ type clusterConfigController struct {
 	configService cluster.IClusterConfigService
 }
 
-func RegisterClusterConfigRouter(router gin.IRoutes) {
+func newClusterConfigController() *clusterConfigController {
 	c := &clusterConfigController{}
 	bean.Autowired(&c.configService)
+	return c
+}
+
+func RegisterClusterConfigRouter(router gin.IRoutes) {
+	c := newClusterConfigController()
 
 	router.GET("/cluster/:cluster_name/configuration/:type", controller.GenAccessHandler(access.ClusterView, access.ClusterEdit), c.get)
 	router.PUT("/cluster/:cluster_name/configuration/:type", controller.GenAccessHandler(access.ClusterEdit), c.edit)
