@@ -2,7 +2,6 @@ package variable_controller
 
 import (
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/enum"
@@ -23,10 +22,10 @@ func RegisterVariablesRouter(router gin.IRoutes) {
 	c := &variablesController{}
 	bean.Autowired(&c.globalVariableService)
 
-	router.GET("/variables", controller.GenAccessHandler(access.VariableView, access.VariableEdit, access.ServiceView, access.DiscoveryView), c.gets)
-	router.GET("/variable", controller.GenAccessHandler(access.VariableView, access.VariableEdit), c.get)
-	router.POST("/variable", controller.GenAccessHandler(access.VariableEdit, access.ServiceEdit, access.DiscoveryEdit), controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindGlobalVariable), c.post)
-	router.DELETE("/variable", controller.GenAccessHandler(access.VariableEdit), controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindGlobalVariable), c.del)
+	router.GET("/variables", c.gets)
+	router.GET("/variable", c.get)
+	router.POST("/variable", controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindGlobalVariable), c.post)
+	router.DELETE("/variable", controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindGlobalVariable), c.del)
 }
 
 // 获取全局环境变量列表
