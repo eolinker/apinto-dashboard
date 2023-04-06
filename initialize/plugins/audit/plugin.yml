@@ -1,0 +1,13 @@
+id: "audit.apinto.com"
+name: "audit"
+version: "v1.0"
+icon: ""
+driver: "audit.apinto.com"
+core: false
+install:
+  auto: true
+  front: audit-log
+  navigation: "navigation.audit"
+main:
+  middleware:
+    - audit_log

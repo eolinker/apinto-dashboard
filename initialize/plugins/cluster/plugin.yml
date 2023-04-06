@@ -1,0 +1,10 @@
+id: "cluster.apinto.com"
+name: "cluster"
+version: "v1.0"
+icon: ""
+driver: "cluster.apinto.com"
+core: false
+install:
+  auto: true
+  front: deploy/cluster
+  navigation: "navigation.infrastructure"
