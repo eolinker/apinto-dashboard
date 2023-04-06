@@ -10,10 +10,6 @@ import (
 type ClusterPluginDriver struct {
 }
 
-func (c *ClusterPluginDriver) NeedRegisterIndex() bool {
-	return true
-}
-
 func NewClusterPlugin() apinto_module.Driver {
 	return &ClusterPluginDriver{}
 }
