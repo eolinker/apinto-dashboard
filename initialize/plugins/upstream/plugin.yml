@@ -1,0 +1,10 @@
+id: "upstream.apinto.com"
+name: "upstream"
+version: "v1.0"
+icon: ""
+driver: "upstream.apinto.com"
+core: false
+install:
+  auto: true
+  front: upstream/upstream
+  navigation: "navigation.upstream"
