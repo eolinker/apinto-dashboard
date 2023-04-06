@@ -2,7 +2,7 @@ package store
 
 import (
 	"context"
-	"github.com/eolinker/apinto-dashboard/modules/module_plugin/entry"
+	"github.com/eolinker/apinto-dashboard/modules/module-plugin/entry"
 	"github.com/eolinker/apinto-dashboard/store"
 )
 
