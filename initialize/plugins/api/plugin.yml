@@ -6,6 +6,7 @@ driver: api.apinto.com
 core: false
 install:
   auto: true
+  front: true
   navigation: "id"
 main:
   middleware:
