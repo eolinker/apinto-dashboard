@@ -1,0 +1,9 @@
+id: "cluster_plugin.apinto.com"
+name: "cluster_plugin"
+version: "v1.0"
+icon: ""
+driver: "cluster_plugin.apinto.com"
+core: false
+install:
+  auto: true
+  front: deploy/cluster
