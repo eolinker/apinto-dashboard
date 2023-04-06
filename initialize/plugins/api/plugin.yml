@@ -8,8 +8,3 @@ install:
   auto: true
   front: router/api
   navigation: "id"
-main:
-  middleware:
-    
-
-
