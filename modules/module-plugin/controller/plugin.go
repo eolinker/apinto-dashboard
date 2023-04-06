@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"github.com/eolinker/apinto-dashboard/access"
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	plugin2 "github.com/eolinker/apinto-dashboard/client/v1/initialize/plugin"
 	"github.com/eolinker/apinto-dashboard/common"
@@ -27,17 +26,17 @@ func RegisterPluginRouter(router gin.IRoutes) {
 	bean.Autowired(&p.pluginService)
 	bean.Autowired(&p.extenderCache)
 
-	router.GET("/plugins", controller.GenAccessHandler(access.PluginView, access.PluginEdit), p.plugins)
-	router.GET("/basic/info/plugins", controller.GenAccessHandler(access.PluginView, access.PluginEdit), p.basicInfoPlugins)
-	router.GET("/plugin", controller.GenAccessHandler(access.PluginView, access.PluginEdit), p.plugin)
+	router.GET("/plugins", p.plugins)
+	router.GET("/basic/info/plugins", p.basicInfoPlugins)
+	router.GET("/plugin", p.plugin)
 
-	router.POST("/plugin", controller.GenAccessHandler(access.PluginEdit), controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindGlobalPlugin), p.createPlugin)
-	router.PUT("/plugin", controller.GenAccessHandler(access.PluginEdit), controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindGlobalPlugin), p.updatePlugin)
-	router.DELETE("/plugin", controller.GenAccessHandler(access.PluginEdit), controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindGlobalPlugin), p.delPlugin)
+	router.POST("/plugin", controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindGlobalPlugin), p.createPlugin)
+	router.PUT("/plugin", controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindGlobalPlugin), p.updatePlugin)
+	router.DELETE("/plugin", controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindGlobalPlugin), p.delPlugin)
 
 	router.GET("/plugin/extendeds", p.pluginExtendeds)
 	router.GET("/plugins/render", p.pluginRender)
-	router.PUT("/plugin/sort", controller.GenAccessHandler(access.PluginEdit), controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindGlobalPlugin), p.pluginSort)
+	router.PUT("/plugin/sort", controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindGlobalPlugin), p.pluginSort)
 	router.GET("/plugin/enum", p.pluginEnum)
 }
 
