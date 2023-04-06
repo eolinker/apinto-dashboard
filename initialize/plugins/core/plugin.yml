@@ -1,0 +1,14 @@
+id: "core.apinto.com"
+name: "core"
+version: ""
+icon: ""
+driver: core.apinto.com
+core: true
+install:
+  auto: true
+  front: none
+main:
+  middleware:
+
+
+
