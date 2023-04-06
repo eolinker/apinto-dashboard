@@ -1,7 +1,6 @@
 package cluster_controller
 
 import (
-	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
@@ -21,10 +20,10 @@ func RegisterClusterCertificateRouter(router gin.IRoutes) {
 	c := &clusterCertificateController{}
 	bean.Autowired(&c.clusterCertificateService)
 
-	router.POST("/cluster/:cluster_name/certificate", controller.GenAccessHandler(access.ClusterEdit), c.post)
-	router.PUT("/cluster/:cluster_name/certificate/:certificate_id", controller.GenAccessHandler(access.ClusterEdit), c.put)
-	router.DELETE("/cluster/:cluster_name/certificate/:certificate_id", controller.GenAccessHandler(access.ClusterEdit), c.del)
-	router.GET("/cluster/:cluster_name/certificates", controller.GenAccessHandler(access.ClusterView, access.ClusterEdit), c.gets)
+	router.POST("/cluster/:cluster_name/certificate", c.post)
+	router.PUT("/cluster/:cluster_name/certificate/:certificate_id", c.put)
+	router.DELETE("/cluster/:cluster_name/certificate/:certificate_id", c.del)
+	router.GET("/cluster/:cluster_name/certificates", c.gets)
 }
 
 // gets 获取证书列表

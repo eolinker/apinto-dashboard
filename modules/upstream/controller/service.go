@@ -2,7 +2,6 @@ package upstream_controller
 
 import (
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/enum"
@@ -28,16 +27,16 @@ func RegisterServiceRouter(router gin.IRouter) {
 	bean.Autowired(&c.service)
 	bean.Autowired(&c.discovery)
 
-	router.GET("/services", controller.GenAccessHandler(access.ServiceView, access.ServiceEdit), c.getList)
-	router.GET("/service", controller.GenAccessHandler(access.ServiceView, access.ServiceEdit), c.getInfo)
-	router.PUT("/service", controller.GenAccessHandler(access.ServiceEdit), controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindService), c.alter)
-	router.POST("/service", controller.GenAccessHandler(access.ServiceEdit), controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindService), c.create)
-	router.DELETE("/service", controller.GenAccessHandler(access.ServiceEdit), controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindService), c.del)
+	router.GET("/services", c.getList)
+	router.GET("/service", c.getInfo)
+	router.PUT("/service", controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindService), c.alter)
+	router.POST("/service", controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindService), c.create)
+	router.DELETE("/service", controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindService), c.del)
 	router.GET("/service/enum", c.getEnum)
 
-	router.PUT("/service/:service_name/online", controller.GenAccessHandler(access.ServiceEdit), controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindService), c.online)
-	router.PUT("/service/:service_name/offline", controller.GenAccessHandler(access.ServiceEdit), controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindService), c.offline)
-	router.GET("/service/:service_name/onlines", controller.GenAccessHandler(access.ServiceView, access.ServiceEdit), c.getOnlineList)
+	router.PUT("/service/:service_name/online", controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindService), c.online)
+	router.PUT("/service/:service_name/offline", controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindService), c.offline)
+	router.GET("/service/:service_name/onlines", c.getOnlineList)
 
 	//router.GET("/service/:service_name/api", c.getApi)
 	//router.PUT("/service/:service_name/api", c.putApi)

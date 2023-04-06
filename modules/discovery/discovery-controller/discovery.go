@@ -2,7 +2,6 @@ package discovery_controller
 
 import (
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/modules/discovery/discovery-serivce"
@@ -27,17 +26,17 @@ func RegisterDiscoveryRouter(router gin.IRouter) {
 	c := &discoveryController{}
 	bean.Autowired(&c.discoveryService)
 
-	router.GET("/discoveries", controller.GenAccessHandler(access.DiscoveryView, access.DiscoveryEdit), c.getList)
-	router.GET("/discovery", controller.GenAccessHandler(access.DiscoveryView, access.DiscoveryEdit), c.getInfo)
-	router.POST("/discovery", controller.GenAccessHandler(access.DiscoveryEdit), controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindDiscovery), c.create)
-	router.PUT("/discovery", controller.GenAccessHandler(access.DiscoveryEdit), controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindDiscovery), c.update)
-	router.DELETE("/discovery", controller.GenAccessHandler(access.DiscoveryEdit), controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindDiscovery), c.delete)
+	router.GET("/discoveries", c.getList)
+	router.GET("/discovery", c.getInfo)
+	router.POST("/discovery", controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindDiscovery), c.create)
+	router.PUT("/discovery", controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindDiscovery), c.update)
+	router.DELETE("/discovery", controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindDiscovery), c.delete)
 	router.GET("/discovery/enum", c.getEnum)
-	router.GET("/discovery/drivers", controller.GenAccessHandler(access.DiscoveryView, access.DiscoveryEdit), c.getDrivers)
+	router.GET("/discovery/drivers", c.getDrivers)
 
-	router.PUT("/discovery/:discovery_name/online", controller.GenAccessHandler(access.DiscoveryEdit), controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindDiscovery), c.online)
-	router.PUT("/discovery/:discovery_name/offline", controller.GenAccessHandler(access.DiscoveryEdit), controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindDiscovery), c.offline)
-	router.GET("/discovery/:discovery_name/onlines", controller.GenAccessHandler(access.DiscoveryView, access.DiscoveryEdit), c.getOnlineList)
+	router.PUT("/discovery/:discovery_name/online", controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindDiscovery), c.online)
+	router.PUT("/discovery/:discovery_name/offline", controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindDiscovery), c.offline)
+	router.GET("/discovery/:discovery_name/onlines", c.getOnlineList)
 }
 
 // getList 获取注册中心列表
