@@ -19,10 +19,6 @@ const (
 	ClusterEdit = "edit"
 )
 
-var (
-	clusterAccess = []apinto_module.AccessInfo{apinto_module.NewSimpleAccess(ClusterView, "查看"), apinto_module.NewSimpleAccess(ClusterEdit, "编辑", ClusterView)}
-)
-
 func (c *ClusterPluginDriver) CreateModule(name string, apiPrefix string, config interface{}) (apinto_module.Module, error) {
 	return NewClusterModule(apiPrefix), nil
 }
@@ -58,9 +54,6 @@ func (c *ClusterModule) Middleware() (apinto_module.Middleware, bool) {
 	return nil, false
 }
 
-func (c *ClusterModule) Access() []apinto_module.AccessInfo {
-	return clusterAccess
-}
 func NewClusterModule(apiPrefix string) *ClusterModule {
 	if !strings.HasPrefix(apiPrefix, "/") {
 		apiPrefix = "/" + apiPrefix

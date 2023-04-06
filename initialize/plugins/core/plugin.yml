@@ -6,7 +6,7 @@ driver: core.apinto.com
 core: true
 install:
   auto: true
-  front: false
+  front: none
 main:
   middleware:
 
