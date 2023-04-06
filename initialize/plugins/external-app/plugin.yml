@@ -1,0 +1,10 @@
+id: "ext_app.apinto.com"
+name: "ext_app"
+version: "v1.0"
+icon: ""
+driver: "ext_app.apinto.com"
+core: false
+install:
+  auto: true
+  front: system/ext-app
+  navigation: "navigation.system"

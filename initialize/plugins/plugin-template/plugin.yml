@@ -1,0 +1,10 @@
+id: "plugin_template.apinto.com"
+name: "plugin_template"
+version: "v1.0"
+icon: ""
+driver: "plugin_template.apinto.com"
+core: false
+install:
+  auto: true
+  front: router/plugin
+  navigation: "navigation.api"
