@@ -7,6 +7,7 @@ import (
 type ModulePluginItem struct {
 	*entry.ModulePlugin
 	IsEnable bool
+	IsInner  bool
 }
 
 type PluginGroup struct {

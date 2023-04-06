@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/eolinker/apinto-dashboard/modules/base/locker-service"
-	"github.com/eolinker/apinto-dashboard/modules/module-plugin"
+	module_plugin "github.com/eolinker/apinto-dashboard/modules/module-plugin"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/dto"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/model"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/store"
@@ -22,6 +22,16 @@ type modulePluginService struct {
 	lockService        locker_service.IAsynLockService
 }
 
+func newModulePluginService() module_plugin.IModulePluginService {
+
+	s := &modulePluginService{}
+	bean.Autowired(&s.pluginStore)
+	bean.Autowired(&s.pluginEnableStore)
+	bean.Autowired(&s.pluginPackageStore)
+	bean.Autowired(&s.lockService)
+	return s
+}
+
 func (m *modulePluginService) GetPlugins(ctx context.Context, groupUUID, searchName string) ([]*model.ModulePluginItem, []*model.PluginGroup, error) {
 	//TODO implement me
 	panic("implement me")
@@ -32,7 +42,7 @@ func (m *modulePluginService) GetPluginInfo(ctx context.Context, pluginUUID stri
 	panic("implement me")
 }
 
-func (m *modulePluginService) GetPluginGroupsEnum(ctx context.Context) (*model.PluginGroup, error) {
+func (m *modulePluginService) GetPluginGroupsEnum(ctx context.Context) ([]*model.PluginGroup, error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -55,14 +65,4 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, pluginUUID strin
 func (m *modulePluginService) DisablePlugin(ctx context.Context, pluginUUID string) error {
 	//TODO implement me
 	panic("implement me")
-}
-
-func newModulePluginService() module_plugin.IModulePluginService {
-
-	s := &modulePluginService{}
-	bean.Autowired(&s.pluginStore)
-	bean.Autowired(&s.pluginEnableStore)
-	bean.Autowired(&s.pluginPackageStore)
-	bean.Autowired(&s.lockService)
-	return s
 }
