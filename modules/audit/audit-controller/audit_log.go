@@ -3,7 +3,6 @@ package audit_controller
 import (
 	"context"
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 
@@ -23,8 +22,8 @@ func RegisterAuditLogRouter(router gin.IRoutes) {
 	a := &auditLogController{}
 	bean.Autowired(&a.auditLogService)
 
-	router.GET("/audit-logs", controller.GenAccessHandler(access.AuditLogView), a.getLogs)
-	router.GET("/audit-log", controller.GenAccessHandler(access.AuditLogView), a.getDetail)
+	router.GET("/audit-logs", a.getLogs)
+	router.GET("/audit-log", a.getDetail)
 	router.GET("/audit-log/kinds", a.getTargets)
 }
 

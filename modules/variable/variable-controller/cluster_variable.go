@@ -3,7 +3,6 @@ package variable_controller
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/enum"
@@ -28,16 +27,16 @@ func RegisterClusterVariableRouter(router gin.IRoutes) {
 	c := &clusterVariableController{}
 	bean.Autowired(&c.clusterVariableService)
 
-	router.GET("/cluster/:cluster_name/variables", controller.GenAccessHandler(access.VariableView, access.VariableEdit), c.gets)
-	router.POST("/cluster/:cluster_name/variable", controller.GenAccessHandler(access.VariableEdit), controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindClusterVariable), c.post)
-	router.PUT("/cluster/:cluster_name/variable", controller.GenAccessHandler(access.VariableEdit), controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindClusterVariable), c.put)
-	router.DELETE("/cluster/:cluster_name/variable", controller.GenAccessHandler(access.VariableEdit), controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindClusterVariable), c.del)
-	router.GET("/cluster/:cluster_name/variable/update-history", controller.GenAccessHandler(access.VariableView, access.VariableEdit), c.updateHistory)
-	router.POST("/cluster/:cluster_name/variable/sync-conf", controller.GenAccessHandler(access.VariableEdit), c.syncConf)
-	router.GET("/cluster/:cluster_name/variable/to-publishs", controller.GenAccessHandler(access.VariableView, access.VariableEdit), c.toPublishs)
-	router.POST("/cluster/:cluster_name/variable/publish", controller.GenAccessHandler(access.VariableEdit), controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindClusterVariable), c.publish)
-	router.GET("/cluster/:cluster_name/variable/publish-history", controller.GenAccessHandler(access.VariableView, access.VariableEdit), c.publishHistory)
-	router.GET("/cluster/:cluster_name/variable/sync-conf", controller.GenAccessHandler(access.VariableView, access.VariableEdit), c.getSyncConf)
+	router.GET("/cluster/:cluster_name/variables", c.gets)
+	router.POST("/cluster/:cluster_name/variable", controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindClusterVariable), c.post)
+	router.PUT("/cluster/:cluster_name/variable", controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindClusterVariable), c.put)
+	router.DELETE("/cluster/:cluster_name/variable", controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindClusterVariable), c.del)
+	router.GET("/cluster/:cluster_name/variable/update-history", c.updateHistory)
+	router.POST("/cluster/:cluster_name/variable/sync-conf", c.syncConf)
+	router.GET("/cluster/:cluster_name/variable/to-publishs", c.toPublishs)
+	router.POST("/cluster/:cluster_name/variable/publish", controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindClusterVariable), c.publish)
+	router.GET("/cluster/:cluster_name/variable/publish-history", c.publishHistory)
+	router.GET("/cluster/:cluster_name/variable/sync-conf", c.getSyncConf)
 }
 
 // gets 获取列表
