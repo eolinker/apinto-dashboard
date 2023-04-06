@@ -20,9 +20,9 @@ type middlewareController struct {
 func RegisterMiddlewareGroupRouter(router gin.IRoutes) {
 	c := &middlewareController{}
 	bean.Autowired(&c.middlewareService)
-	router.GET("/middleware", c.groups)
-	router.POST("/middleware", controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindMiddleware), c.save)
-	router.PUT("/middleware", controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindMiddleware), c.save)
+	router.GET("/system/middleware", c.groups)
+	router.POST("/system/middleware", controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindMiddleware), c.save)
+	router.PUT("/system/middleware", controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindMiddleware), c.save)
 }
 
 func (m *middlewareController) groups(ginCtx *gin.Context) {

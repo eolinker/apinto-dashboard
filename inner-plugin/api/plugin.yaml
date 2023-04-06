@@ -1,0 +1,6 @@
+id: "api.apinto.com"
+name: "api"
+cname: "api管理"
+resume: "内置插件-api管理模块"
+icon: ""
+driver: "api.apinto.com"

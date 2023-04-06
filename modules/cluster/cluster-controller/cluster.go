@@ -22,10 +22,15 @@ type clusterController struct {
 	clusterNodeService cluster.IClusterNodeService
 }
 
-func RegisterClusterRouter(router gin.IRoutes) {
+func newClusterController() *clusterController {
 	c := &clusterController{}
 	bean.Autowired(&c.clusterService)
 	bean.Autowired(&c.clusterNodeService)
+	return c
+}
+
+func RegisterClusterRouter(router gin.IRoutes) {
+	c := newClusterController()
 
 	router.GET("/clusters", controller.GenAccessHandler(access.ClusterView, access.ClusterEdit), c.clusters)
 	router.GET("/cluster/enum", c.clusterEnum)
