@@ -1,14 +1,19 @@
 id: "core.apinto.com"
 name: "core"
-version: ""
+version: "v1.0"
 icon: ""
-driver: core.apinto.com
+driver: "core.apinto.com"
 core: true
 install:
   auto: true
-  front: none
+  front: ""
 main:
   middleware:
+    - logger
+    - must_namespace
+    - gzip
+    - expire
+
 
 
 

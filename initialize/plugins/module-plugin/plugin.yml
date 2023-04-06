@@ -1,0 +1,10 @@
+id: "module_plugin.apinto.com"
+name: "module_plugin"
+version: "v1.0"
+icon: ""
+driver: "module_plugin.apinto.com"
+core: true
+install:
+  auto: true
+  front: plugin
+  navigation: "navigation.module_plugin"
