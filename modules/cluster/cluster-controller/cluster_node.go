@@ -1,7 +1,6 @@
 package cluster_controller
 
 import (
-	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/enum"
@@ -26,9 +25,9 @@ func newClusterNodeController() *clusterNodeController {
 func RegisterClusterNodeRouter(router gin.IRoutes) {
 	c := newClusterNodeController()
 
-	router.GET("/cluster/:cluster_name/nodes", controller.GenAccessHandler(access.ClusterView, access.ClusterEdit), c.nodes)
-	router.POST("/cluster/:cluster_name/node/reset", controller.GenAccessHandler(access.ClusterEdit), c.reset)
-	router.PUT("/cluster/:cluster_name/node", controller.GenAccessHandler(access.ClusterEdit), c.put)
+	router.GET("/cluster/:cluster_name/nodes", c.nodes)
+	router.POST("/cluster/:cluster_name/node/reset", c.reset)
+	router.PUT("/cluster/:cluster_name/node", c.put)
 }
 
 // gets  获取节点列表

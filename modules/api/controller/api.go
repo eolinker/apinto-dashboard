@@ -3,7 +3,6 @@ package controller
 import (
 	"context"
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/enum"
@@ -29,22 +28,22 @@ type apiController struct {
 func RegisterAPIRouter(router gin.IRouter) {
 	c := &apiController{}
 	bean.Autowired(&c.apiService)
-	router.GET("/routers", controller.GenAccessHandler(access.ApiView, access.ApiEdit), c.routers)
-	router.GET("/router", controller.GenAccessHandler(access.ApiView, access.ApiEdit), c.getInfo)
-	router.POST("/router", controller.GenAccessHandler(access.ApiEdit), controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindAPI), c.create)
-	router.PUT("/router", controller.GenAccessHandler(access.ApiEdit), controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindAPI), c.update)
-	router.DELETE("/router", controller.GenAccessHandler(access.ApiEdit), controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindAPI), c.delete)
+	router.GET("/routers", c.routers)
+	router.GET("/router", c.getInfo)
+	router.POST("/router", controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindAPI), c.create)
+	router.PUT("/router", controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindAPI), c.update)
+	router.DELETE("/router", controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindAPI), c.delete)
 
-	router.POST("/routers/batch-online", controller.GenAccessHandler(access.ApiEdit), controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindAPI), c.batchOnline)
-	router.POST("/routers/batch-offline", controller.GenAccessHandler(access.ApiEdit), controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindAPI), c.batchOffline)
-	router.POST("/routers/batch-online/check", controller.GenAccessHandler(access.ApiEdit), c.batchOnlineCheck)
+	router.POST("/routers/batch-online", controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindAPI), c.batchOnline)
+	router.POST("/routers/batch-offline", controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindAPI), c.batchOffline)
+	router.POST("/routers/batch-online/check", c.batchOnlineCheck)
 
-	router.PUT("/router/online", controller.GenAccessHandler(access.ApiEdit), controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindAPI), c.online)
-	router.PUT("/router/offline", controller.GenAccessHandler(access.ApiEdit), controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindAPI), c.offline)
-	router.GET("/router/onlines", controller.GenAccessHandler(access.ApiView, access.ApiEdit), c.getOnlineList)
-	router.PUT("/router/enable", controller.GenAccessHandler(access.ApiEdit), controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindAPI), c.enableAPI)
-	router.PUT("/router/disable", controller.GenAccessHandler(access.ApiEdit), controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindAPI), c.disableAPI)
-	router.GET("/router/groups", controller.GenAccessHandler(access.ApiView, access.ApiEdit), c.groups)
+	router.PUT("/router/online", controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindAPI), c.online)
+	router.PUT("/router/offline", controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindAPI), c.offline)
+	router.GET("/router/onlines", c.getOnlineList)
+	router.PUT("/router/enable", controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindAPI), c.enableAPI)
+	router.PUT("/router/disable", controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindAPI), c.disableAPI)
+	router.GET("/router/groups", c.groups)
 
 	router.GET("/router/source", c.getSourceList)
 	router.POST("/router/import", c.getImportCheckList)
