@@ -7,7 +7,7 @@ import (
 
 func init() {
 	store.RegisterStore(func(db store.IDB) {
-		middleware := newStore(db)
-		bean.Injection(&middleware)
+		s := newStore(db)
+		bean.Injection(&s)
 	})
 }
