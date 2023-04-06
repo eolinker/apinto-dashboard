@@ -6,5 +6,5 @@ import (
 )
 
 func init() {
-	apinto_module.Register("cluster.apinto.eolink.com", cluster_controller.NewClusterPlugin())
+	apinto_module.Register("cluster.apinto.com", cluster_controller.NewClusterPlugin())
 }
