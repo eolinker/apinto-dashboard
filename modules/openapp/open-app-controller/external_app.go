@@ -2,7 +2,6 @@ package open_app_controller
 
 import (
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/enum"
@@ -23,14 +22,14 @@ func RegisterExternalApplicationRouter(router gin.IRoutes) {
 	e := &externalApplicationController{}
 	bean.Autowired(&e.extAppService)
 
-	router.GET("/external-apps", controller.GenAccessHandler(access.ExtAPPEdit, access.ExtAPPView), e.getList)
-	router.GET("/external-app", controller.GenAccessHandler(access.ExtAPPEdit, access.ExtAPPView), e.getInfo)
-	router.POST("/external-app", controller.GenAccessHandler(access.ExtAPPEdit), controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindExtAPP), e.create)
-	router.PUT("/external-app", controller.GenAccessHandler(access.ExtAPPEdit), controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindExtAPP), e.edit)
-	router.DELETE("/external-app", controller.GenAccessHandler(access.ExtAPPEdit), controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindExtAPP), e.delete)
-	router.PUT("/external-app/enable", controller.GenAccessHandler(access.ExtAPPEdit), e.enable)
-	router.PUT("/external-app/disable", controller.GenAccessHandler(access.ExtAPPEdit), e.disable)
-	router.PUT("/external-app/token", controller.GenAccessHandler(access.ExtAPPEdit), e.flushToken)
+	router.GET("/external-apps", e.getList)
+	router.GET("/external-app", e.getInfo)
+	router.POST("/external-app", controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindExtAPP), e.create)
+	router.PUT("/external-app", controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindExtAPP), e.edit)
+	router.DELETE("/external-app", controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindExtAPP), e.delete)
+	router.PUT("/external-app/enable", e.enable)
+	router.PUT("/external-app/disable", e.disable)
+	router.PUT("/external-app/token", e.flushToken)
 }
 
 func (e *externalApplicationController) getList(ginCtx *gin.Context) {

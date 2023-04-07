@@ -1,0 +1,10 @@
+id: "variable.apinto.com"
+name: "variable"
+version: "v1.0"
+icon: ""
+driver: "variable.apinto.com"
+core: false
+install:
+  auto: true
+  front: deploy/env
+  navigation: "navigation.infrastructure"

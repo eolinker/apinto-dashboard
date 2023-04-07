@@ -1,0 +1,10 @@
+id: "application.apinto.com"
+name: "application"
+version: "v1.0"
+icon: ""
+driver: "application.apinto.com"
+core: false
+install:
+  auto: true
+  front: application
+  navigation: "navigation.application"

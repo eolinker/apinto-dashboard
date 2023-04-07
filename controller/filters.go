@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/eosc/log"
 	"github.com/gin-gonic/gin"
@@ -46,7 +45,7 @@ func GetUserId(ginCtx *gin.Context) int {
 	return ginCtx.GetInt(UserId)
 }
 
-func GenAccessHandler(acs ...access.Access) gin.HandlerFunc {
+func GenAccessHandler() gin.HandlerFunc {
 
 	return func(ginCtx *gin.Context) {
 		// todo 原实现不适合开源，这里埋点用于以后扩展
