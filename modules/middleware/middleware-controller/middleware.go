@@ -21,8 +21,8 @@ func RegisterMiddlewareGroupRouter(router gin.IRoutes) {
 	c := &middlewareController{}
 	bean.Autowired(&c.middlewareService)
 	router.GET("/system/middleware", c.groups)
-	router.POST("/system/middleware", controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindMiddleware), c.save)
-	router.PUT("/system/middleware", controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindMiddleware), c.save)
+	router.POST("/system/middleware", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindMiddleware, c.save))
+	router.PUT("/system/middleware", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindMiddleware, c.save))
 }
 
 func (m *middlewareController) groups(ginCtx *gin.Context) {
@@ -35,7 +35,7 @@ func (m *middlewareController) groups(ginCtx *gin.Context) {
 }
 
 func (m *middlewareController) save(ginCtx *gin.Context) {
-	input := new(dto.Middlewares)
+	input := new(dto.MiddlewaresInput)
 
 	if err := ginCtx.BindJSON(input); err != nil {
 		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
@@ -46,7 +46,7 @@ func (m *middlewareController) save(ginCtx *gin.Context) {
 		return
 	}
 
-	if err := m.middlewareService.Save(ginCtx, input.String()); err != nil {
+	if err := m.middlewareService.Save(ginCtx, input.Groups); err != nil {
 		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}

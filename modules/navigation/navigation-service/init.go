@@ -1,8 +1,14 @@
 package navigation_service
 
-import "github.com/eolinker/eosc/common/bean"
+import (
+	module_plugin "github.com/eolinker/apinto-dashboard/modules/module-plugin"
+	"github.com/eolinker/eosc/common/bean"
+)
+
+var pluginService module_plugin.IModulePluginService
 
 func init() {
 	service := newNavigationService()
 	bean.Injection(&service)
+	bean.Autowired(&pluginService)
 }

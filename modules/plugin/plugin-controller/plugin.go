@@ -30,13 +30,13 @@ func RegisterPluginRouter(router gin.IRoutes) {
 	router.GET("/basic/info/plugins", p.basicInfoPlugins)
 	router.GET("/plugin", p.plugin)
 
-	router.POST("/plugin", controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindGlobalPlugin), p.createPlugin)
-	router.PUT("/plugin", controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindGlobalPlugin), p.updatePlugin)
-	router.DELETE("/plugin", controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindGlobalPlugin), p.delPlugin)
+	router.POST("/plugin", controller.AuditLogHandler(enum.LogOperateTypeCreate, enum.LogKindGlobalPlugin, p.createPlugin))
+	router.PUT("/plugin", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindGlobalPlugin, p.updatePlugin))
+	router.DELETE("/plugin", controller.AuditLogHandler(enum.LogOperateTypeDelete, enum.LogKindGlobalPlugin, p.delPlugin))
 
 	router.GET("/plugin/extendeds", p.pluginExtendeds)
 	router.GET("/plugins/render", p.pluginRender)
-	router.PUT("/plugin/sort", controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindGlobalPlugin), p.pluginSort)
+	router.PUT("/plugin/sort", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindGlobalPlugin, p.pluginSort))
 	router.GET("/plugin/enum", p.pluginEnum)
 }
 
@@ -47,7 +47,7 @@ func (p *pluginController) plugin(ginCtx *gin.Context) {
 
 	pluginInfo, err := p.pluginService.GetByName(ginCtx, namespaceId, name)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -66,7 +66,7 @@ func (p *pluginController) plugins(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	list, err := p.pluginService.GetList(ginCtx, namespaceId)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -99,7 +99,7 @@ func (p *pluginController) basicInfoPlugins(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	list, err := p.pluginService.GetBasicInfoList(ginCtx, namespaceId)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -125,13 +125,13 @@ func (p *pluginController) createPlugin(ginCtx *gin.Context) {
 	input := new(plugin_dto.PluginInput)
 
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	//校验名称是否合法
 	if err := common.IsMatchString(common.EnglishOrNumber_, input.Name); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -143,7 +143,7 @@ func (p *pluginController) createPlugin(ginCtx *gin.Context) {
 	}
 
 	if err := p.pluginService.Create(ginCtx, namespaceId, userId, pluginInfo); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -157,13 +157,13 @@ func (p *pluginController) updatePlugin(ginCtx *gin.Context) {
 	input := new(plugin_dto.PluginInput)
 
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	//校验名称是否合法
 	if err := common.IsMatchString(common.EnglishOrNumber_, input.Name); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -175,7 +175,7 @@ func (p *pluginController) updatePlugin(ginCtx *gin.Context) {
 	}
 
 	if err := p.pluginService.Update(ginCtx, namespaceId, userId, pluginInfo); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -189,7 +189,7 @@ func (p *pluginController) delPlugin(ginCtx *gin.Context) {
 	name := ginCtx.Query("name")
 
 	if err := p.pluginService.Delete(ginCtx, namespaceId, userId, name); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -200,7 +200,7 @@ func (p *pluginController) delPlugin(ginCtx *gin.Context) {
 func (p *pluginController) pluginExtendeds(ginCtx *gin.Context) {
 	extenderList, err := p.extenderCache.GetAll(ginCtx, p.extenderCache.Key())
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	//剔除黑名单中的扩展ID
@@ -230,12 +230,12 @@ func (p *pluginController) pluginSort(ginCtx *gin.Context) {
 	pluginSort := new(plugin_dto.PluginSort)
 
 	if err := ginCtx.BindJSON(pluginSort); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	if err := p.pluginService.Sort(ginCtx, namespaceId, userId, pluginSort.Names); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -247,7 +247,7 @@ func (p *pluginController) pluginEnum(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	plugins, err := p.pluginService.GetList(ginCtx, namespaceId)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -278,7 +278,7 @@ func (p *pluginController) pluginRender(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	plugins, err := p.pluginService.GetList(ginCtx, namespaceId)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 

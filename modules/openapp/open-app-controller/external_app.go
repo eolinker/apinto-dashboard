@@ -24,9 +24,9 @@ func RegisterExternalApplicationRouter(router gin.IRoutes) {
 
 	router.GET("/external-apps", e.getList)
 	router.GET("/external-app", e.getInfo)
-	router.POST("/external-app", controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindExtAPP), e.create)
-	router.PUT("/external-app", controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindExtAPP), e.edit)
-	router.DELETE("/external-app", controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindExtAPP), e.delete)
+	router.POST("/external-app", controller.AuditLogHandler(enum.LogOperateTypeCreate, enum.LogKindExtAPP, e.create))
+	router.PUT("/external-app", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindExtAPP, e.edit))
+	router.DELETE("/external-app", controller.AuditLogHandler(enum.LogOperateTypeDelete, enum.LogKindExtAPP, e.delete))
 	router.PUT("/external-app/enable", e.enable)
 	router.PUT("/external-app/disable", e.disable)
 	router.PUT("/external-app/token", e.flushToken)
@@ -72,7 +72,7 @@ func (e *externalApplicationController) create(ginCtx *gin.Context) {
 
 	input := new(open_app_dto.ExternalAppInfoInput)
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -102,7 +102,7 @@ func (e *externalApplicationController) edit(ginCtx *gin.Context) {
 
 	input := new(open_app_dto.ExternalAppInfoInput)
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 

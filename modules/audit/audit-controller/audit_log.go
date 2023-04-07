@@ -8,7 +8,6 @@ import (
 
 	"github.com/eolinker/apinto-dashboard/enum"
 	audit_service "github.com/eolinker/apinto-dashboard/modules/audit"
-	"github.com/eolinker/eosc/common/bean"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -16,15 +15,6 @@ import (
 
 type auditLogController struct {
 	auditLogService audit_service.IAuditLogService
-}
-
-func RegisterAuditLogRouter(router gin.IRoutes) {
-	a := &auditLogController{}
-	bean.Autowired(&a.auditLogService)
-
-	router.GET("/audit-logs", a.getLogs)
-	router.GET("/audit-log", a.getDetail)
-	router.GET("/audit-log/kinds", a.getTargets)
 }
 
 func (a *auditLogController) getLogs(ginCtx *gin.Context) {

@@ -4,9 +4,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/app/apserver/version"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/modules/application/application-controller"
-	"github.com/eolinker/apinto-dashboard/modules/audit/audit-controller"
 	"github.com/eolinker/apinto-dashboard/modules/base/env-controller"
-	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/base/random-controller"
 	cluster_controller2 "github.com/eolinker/apinto-dashboard/modules/cluster/cluster-controller"
 	"github.com/eolinker/apinto-dashboard/modules/discovery/discovery-controller"
@@ -22,23 +20,21 @@ import (
 
 	"net/http"
 
-	"github.com/eolinker/apinto-dashboard/filter"
 	apiController "github.com/eolinker/apinto-dashboard/modules/api/controller"
 	upstream_controller "github.com/eolinker/apinto-dashboard/modules/upstream/controller"
 	"github.com/gin-gonic/gin"
 )
 
-var mustNamespaceExclude = []string{"/api/random/:template/id", "/api/enum/envs", "/api/application/drivers",
-	"/api/access", "/api/my/modules", "/api/my/profile", "/api/my/password", "/api/roles", "/api/role", "/api/user/password-reset",
-	"/api/role/options", "/api/role", "/api/role/batch-update", "/api/role/batch-remove", "/api/user/delete", "/api/user/profile", "/api/user/list"}
-
-var verifyTokenExclude = []string{"/_system/activation", "/_system/mac", "/_system/run-info"}
+//
+//var mustNamespaceExclude = []string{"/api/random/:template/id", "/api/enum/envs", "/api/application/drivers",
+//	"/api/access", "/api/my/modules", "/api/my/profile", "/api/my/password", "/api/roles", "/api/role", "/api/user/password-reset",
+//	"/api/role/options", "/api/role", "/api/role/batch-update", "/api/role/batch-remove", "/api/user/delete", "/api/user/profile", "/api/user/list"}
+//
+//var verifyTokenExclude = []string{"/_system/activation", "/_system/mac", "/_system/run-info"}
 
 func registerRouter(engine *gin.Engine) {
-	namespaceBuilder := filter.NewBuilder().Root("/api/").Exclude(mustNamespaceExclude...)
-	verifyTokenBuilder := filter.NewBuilder().Root("/api/", "/_system/").Exclude(verifyTokenExclude...)
 
-	engine.Use(controller.Logger, controller.Recovery, verifyTokenBuilder.Build(controller.VerifyToken), namespaceBuilder.Build(namespace_controller.MustNamespace))
+	engine.Use()
 
 	routes := engine.Group("/api")
 
@@ -67,12 +63,11 @@ func registerRouter(engine *gin.Engine) {
 	plugin_controller.RegisterPluginRouter(routes)
 	plugin_controller.RegisterPluginClusterRouter(routes)
 	plugin_template_controller.RegisterPluginTemplateRouter(routes)
-	audit_controller.RegisterAuditLogRouter(routes)
 	open_app_controller.RegisterExternalApplicationRouter(routes)
 
 	user_controller.RegisterUserRouter(routes)
 
-	controller.EmbedPluginFrontend(engine)
+	//controller.EmbedPluginFrontend(engine)
 	controller.EmbedFrontend(engine)
 
 	openAPIRoutes := engine.Group("/api2")

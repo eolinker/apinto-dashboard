@@ -29,13 +29,13 @@ func RegisterServiceRouter(router gin.IRouter) {
 
 	router.GET("/services", c.getList)
 	router.GET("/service", c.getInfo)
-	router.PUT("/service", controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindService), c.alter)
-	router.POST("/service", controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindService), c.create)
-	router.DELETE("/service", controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindService), c.del)
+	router.PUT("/service", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindService, c.alter))
+	router.POST("/service", controller.AuditLogHandler(enum.LogOperateTypeCreate, enum.LogKindService, c.create))
+	router.DELETE("/service", controller.AuditLogHandler(enum.LogOperateTypeDelete, enum.LogKindService, c.del))
 	router.GET("/service/enum", c.getEnum)
 
-	router.PUT("/service/:service_name/online", controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindService), c.online)
-	router.PUT("/service/:service_name/offline", controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindService), c.offline)
+	router.PUT("/service/:service_name/online", controller.AuditLogHandler(enum.LogOperateTypePublish, enum.LogKindService, c.online))
+	router.PUT("/service/:service_name/offline", controller.AuditLogHandler(enum.LogOperateTypePublish, enum.LogKindService, c.offline))
 	router.GET("/service/:service_name/onlines", c.getOnlineList)
 
 	//router.GET("/service/:service_name/api", c.getApi)
@@ -133,13 +133,13 @@ func (s *serviceController) create(ginCtx *gin.Context) {
 
 	inputProxy := new(upstream_dto.ServiceInfoProxy)
 	if err := ginCtx.BindJSON(inputProxy); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	//校验服务名是否合法
 	if err := common.IsMatchString(common.EnglishOrNumber_, inputProxy.Name); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -190,7 +190,7 @@ func (s *serviceController) alter(ginCtx *gin.Context) {
 	backgroundCtx := ginCtx
 	inputProxy := new(upstream_dto.ServiceInfoProxy)
 	if err := ginCtx.BindJSON(inputProxy); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -271,12 +271,12 @@ func (s *serviceController) online(ginCtx *gin.Context) {
 	operator := controller.GetUserId(ginCtx)
 
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	router, err := s.service.OnlineService(ginCtx, namespaceId, operator, serviceName, input.ClusterName)
 	if err != nil && router == nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	} else if err == nil {
 		ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
@@ -301,12 +301,12 @@ func (s *serviceController) offline(ginCtx *gin.Context) {
 	operator := controller.GetUserId(ginCtx)
 
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	if err := s.service.OfflineService(ginCtx, namespaceId, operator, serviceName, input.ClusterName); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
@@ -319,7 +319,7 @@ func (s *serviceController) getOnlineList(ginCtx *gin.Context) {
 
 	list, err := s.service.OnlineList(ginCtx, namespaceId, serviceName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
