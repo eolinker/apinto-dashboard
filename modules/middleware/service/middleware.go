@@ -3,15 +3,14 @@ package service
 import (
 	"context"
 	"encoding/json"
+	system_entry "github.com/eolinker/apinto-dashboard/modules/base/system-entry"
+	system_store "github.com/eolinker/apinto-dashboard/modules/base/system-store"
 
 	"github.com/eolinker/apinto-dashboard/modules/middleware"
 
 	"gorm.io/gorm"
 
-	"github.com/eolinker/apinto-dashboard/modules/system/entry"
 	"github.com/eolinker/eosc/common/bean"
-
-	"github.com/eolinker/apinto-dashboard/modules/system/store"
 
 	"github.com/eolinker/apinto-dashboard/modules/middleware/model"
 )
@@ -27,29 +26,25 @@ func newMiddlewareService() middleware.IMiddlewareService {
 }
 
 type MiddlewareService struct {
-	systemStore store.ISystemStore
+	systemStore system_store.ISystemInfoStore
 }
 
 func (m *MiddlewareService) Save(ctx context.Context, config string) error {
-	value, err := m.systemStore.First(ctx, map[string]interface{}{
-		"key": systemKey,
-	})
+	value, err := m.systemStore.GetSystemInfoByKey(ctx, systemKey)
 	if err != nil {
 		if err != gorm.ErrRecordNotFound {
 			return err
 		}
-		value = &entry.System{
+		value = &system_entry.SystemInfo{
 			Key: systemKey,
 		}
 	}
-	value.Value = config
+	value.Value = []byte(config)
 	return m.systemStore.Save(ctx, value)
 }
 
 func (m *MiddlewareService) Groups(ctx context.Context) (*model.Middleware, error) {
-	value, err := m.systemStore.First(ctx, map[string]interface{}{
-		"key": systemKey,
-	})
+	value, err := m.systemStore.GetSystemInfoByKey(ctx, systemKey)
 	groups := make([]*model.MiddlewareGroup, 0)
 	if err != nil {
 		if err != gorm.ErrRecordNotFound {
