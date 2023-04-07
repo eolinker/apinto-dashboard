@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
+	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-dashboard/modules/base/history-entry"
 	"github.com/eolinker/apinto-dashboard/modules/base/locker-service"
@@ -208,7 +209,7 @@ func (c *clusterVariableService) Create(ctx context.Context, namespaceID int, cl
 		UpdateTime: t,
 	}
 
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Name:        key,
 		ClusterId:   clusterInfo.Id,
 		ClusterName: clusterName,
@@ -296,7 +297,7 @@ func (c *clusterVariableService) Update(ctx context.Context, namespaceID int, cl
 		clusterVariable.UpdateTime = t
 	}
 
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Name:        key,
 		ClusterId:   clusterInfo.Id,
 		ClusterName: clusterName,
@@ -344,7 +345,7 @@ func (c *clusterVariableService) Delete(ctx context.Context, namespaceID int, cl
 		return nil
 	}
 
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Name:        key,
 		ClusterId:   clusterInfo.Id,
 		ClusterName: clusterName,
@@ -707,7 +708,7 @@ func (c *clusterVariableService) Publish(ctx context.Context, namespaceId, userI
 		names = append(names, variableInfo.Key)
 	}
 
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Name:        strings.Join(names, ","),
 		ClusterId:   clusterId,
 		ClusterName: clusterName,
