@@ -27,15 +27,15 @@ func RegisterPluginTemplateRouter(router gin.IRoutes) {
 	router.GET("/plugin/templates", p.templates)
 	router.GET("/plugin/template/enum", p.templateEnum)
 
-	router.POST("/plugin/template", controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindPluginTemplate), p.createTemplate)
-	router.PUT("/plugin/template", controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindPluginTemplate), p.updateTemplate)
-	router.DELETE("/plugin/template", controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindPluginTemplate), p.delTemplate)
+	router.POST("/plugin/template", controller.AuditLogHandler(enum.LogOperateTypeCreate, enum.LogKindPluginTemplate, p.createTemplate))
+	router.PUT("/plugin/template", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindPluginTemplate, p.updateTemplate))
+	router.DELETE("/plugin/template", controller.AuditLogHandler(enum.LogOperateTypeDelete, enum.LogKindPluginTemplate, p.delTemplate))
 
 	router.GET("/plugin/template", p.template)
 
 	router.GET("/plugin/template/onlines", p.onlines)
-	router.PUT("/plugin/template/online", controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindPluginTemplate), p.online)
-	router.PUT("/plugin/template/offline", controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindPluginTemplate), p.offline)
+	router.PUT("/plugin/template/online", controller.AuditLogHandler(enum.LogOperateTypePublish, enum.LogKindPluginTemplate, p.online))
+	router.PUT("/plugin/template/offline", controller.AuditLogHandler(enum.LogOperateTypePublish, enum.LogKindPluginTemplate, p.offline))
 }
 
 // 插件模板列表
