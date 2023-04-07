@@ -133,13 +133,13 @@ func (s *serviceController) create(ginCtx *gin.Context) {
 
 	inputProxy := new(upstream_dto.ServiceInfoProxy)
 	if err := ginCtx.BindJSON(inputProxy); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	//校验服务名是否合法
 	if err := common.IsMatchString(common.EnglishOrNumber_, inputProxy.Name); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -190,7 +190,7 @@ func (s *serviceController) alter(ginCtx *gin.Context) {
 	backgroundCtx := ginCtx
 	inputProxy := new(upstream_dto.ServiceInfoProxy)
 	if err := ginCtx.BindJSON(inputProxy); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -271,12 +271,12 @@ func (s *serviceController) online(ginCtx *gin.Context) {
 	operator := controller.GetUserId(ginCtx)
 
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	router, err := s.service.OnlineService(ginCtx, namespaceId, operator, serviceName, input.ClusterName)
 	if err != nil && router == nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	} else if err == nil {
 		ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
@@ -301,12 +301,12 @@ func (s *serviceController) offline(ginCtx *gin.Context) {
 	operator := controller.GetUserId(ginCtx)
 
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	if err := s.service.OfflineService(ginCtx, namespaceId, operator, serviceName, input.ClusterName); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
@@ -319,7 +319,7 @@ func (s *serviceController) getOnlineList(ginCtx *gin.Context) {
 
 	list, err := s.service.OnlineList(ginCtx, namespaceId, serviceName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 

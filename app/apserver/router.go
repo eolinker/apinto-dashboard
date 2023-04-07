@@ -4,7 +4,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/app/apserver/version"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/modules/application/application-controller"
-	"github.com/eolinker/apinto-dashboard/modules/audit/audit-controller"
 	"github.com/eolinker/apinto-dashboard/modules/base/env-controller"
 	"github.com/eolinker/apinto-dashboard/modules/base/random-controller"
 	cluster_controller2 "github.com/eolinker/apinto-dashboard/modules/cluster/cluster-controller"
@@ -64,12 +63,11 @@ func registerRouter(engine *gin.Engine) {
 	plugin_controller.RegisterPluginRouter(routes)
 	plugin_controller.RegisterPluginClusterRouter(routes)
 	plugin_template_controller.RegisterPluginTemplateRouter(routes)
-	audit_controller.RegisterAuditLogRouter(routes)
 	open_app_controller.RegisterExternalApplicationRouter(routes)
 
 	user_controller.RegisterUserRouter(routes)
 
-	controller.EmbedPluginFrontend(engine)
+	//controller.EmbedPluginFrontend(engine)
 	controller.EmbedFrontend(engine)
 
 	openAPIRoutes := engine.Group("/api2")

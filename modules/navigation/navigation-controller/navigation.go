@@ -21,10 +21,10 @@ func RegisterNavigationRouter(router gin.IRoutes) {
 	bean.Autowired(&c.navigationService)
 	router.GET("/system/navigation", c.list)
 	router.GET("/system/navigation/:uuid", c.info)
-	router.POST("/system/navigation", controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindNavigation), c.add)
-	router.PUT("/system/navigation/:uuid", controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindNavigation), c.update)
-	router.DELETE("/system/navigation/:uuid", controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindCommonGroup), c.delete)
-	router.PUT("/system/navigation", controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindNavigation), c.sort)
+	router.POST("/system/navigation", controller.AuditLogHandler(enum.LogOperateTypeCreate, enum.LogKindNavigation, c.add))
+	router.PUT("/system/navigation/:uuid", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindNavigation, c.update))
+	router.DELETE("/system/navigation/:uuid", controller.AuditLogHandler(enum.LogOperateTypeDelete, enum.LogKindCommonGroup, c.delete))
+	router.PUT("/system/navigation", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindNavigation, c.sort))
 }
 
 func (n *navigationController) list(ctx *gin.Context) {

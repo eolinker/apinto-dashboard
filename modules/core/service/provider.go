@@ -12,7 +12,7 @@ type ProviderService struct {
 	atomic.Pointer[apinto_module.IProviders]
 }
 
-func NewProviderService() *ProviderService {
+func NewProviderService() core.IProviders {
 	p := &ProviderService{}
 	return p
 }

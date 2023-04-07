@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/eolinker/apinto-dashboard/common"
+	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-dashboard/modules/cluster"
 	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-dto"
@@ -158,7 +159,7 @@ func (c *clusterService) Insert(ctx context.Context, namespaceId, userId int, cl
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Name: clusterInput.Name,
 	})
 
@@ -268,7 +269,7 @@ func (c *clusterService) DeleteByNamespaceIdByName(ctx context.Context, namespac
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Name: name,
 	})
 
@@ -314,7 +315,7 @@ func (c *clusterService) UpdateDesc(ctx context.Context, namespaceId, userId int
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Name: name,
 	})
 
