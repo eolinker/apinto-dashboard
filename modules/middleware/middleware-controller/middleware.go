@@ -24,8 +24,8 @@ func RegisterMiddlewareGroupRouter(router gin.IRoutes) {
 	bean.Autowired(&c.middlewareService)
 	bean.Autowired(&c.modulePluginService)
 	router.GET("/middleware", c.groups)
-	router.POST("/middleware", controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindMiddleware), c.save)
-	router.PUT("/middleware", controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindMiddleware), c.save)
+	router.POST("/middleware", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindMiddleware, c.save))
+	router.PUT("/middleware", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindMiddleware, c.save))
 }
 
 func (m *middlewareController) groups(ginCtx *gin.Context) {

@@ -61,8 +61,7 @@ func (a *auditLogController) Handler(ginCtx *gin.Context) {
 
 	userAgent := ginCtx.GetHeader("user-agent")
 
-	errInfo := ginCtx.GetString(controller.ErrorCode)
-	//logger中间件将*ResponseWriterWrapper赋值给了ginCtx.Writer，这里是可断言的
+	errInfo := ginCtx.GetString(controller.ErrorMessage)
 
 	url := fmt.Sprintf("%s %s", ginCtx.Request.Method, ginCtx.Request.RequestURI)
 
