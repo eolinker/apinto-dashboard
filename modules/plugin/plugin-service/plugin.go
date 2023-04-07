@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
+	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/modules/api"
 	"github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-dashboard/modules/base/locker-service"
@@ -258,7 +259,7 @@ func (p *pluginService) Create(ctx context.Context, namespaceId, operator int, i
 	}
 
 	t := time.Now()
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Name: input.Name,
 	})
 
@@ -321,7 +322,7 @@ func (p *pluginService) Update(ctx context.Context, namespaceId, operator int, i
 	}
 
 	t := time.Now()
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Name: input.Name,
 	})
 
@@ -371,7 +372,7 @@ func (p *pluginService) Delete(ctx context.Context, namespaceId, operator int, n
 		return err
 	}
 
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Name: name,
 	})
 
