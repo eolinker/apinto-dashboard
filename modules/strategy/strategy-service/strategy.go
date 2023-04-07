@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
+	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/api"
 	"github.com/eolinker/apinto-dashboard/modules/application"
@@ -302,7 +303,7 @@ func (s *strategyService[T, K]) CreateStrategy(ctx context.Context, namespaceId 
 		input.Uuid = uuid.New()
 	}
 
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:        input.Uuid,
 		Name:        input.Name,
 		ClusterId:   clusterInfo.Id,
@@ -414,7 +415,7 @@ func (s *strategyService[T, K]) UpdateStrategy(ctx context.Context, namespaceId 
 	strategyInfo.Operator = operator
 	strategyInfo.UpdateTime = t
 
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:        input.Uuid,
 		Name:        input.Name,
 		ClusterId:   clusterInfo.Id,
@@ -512,7 +513,7 @@ func (s *strategyService[T, K]) DeleteStrategy(ctx context.Context, namespaceId,
 		isOnline = true
 	}
 
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:        uuid,
 		Name:        strategyInfo.Name,
 		ClusterId:   clusterInfo.Id,
@@ -587,7 +588,7 @@ func (s *strategyService[T, K]) RestoreStrategy(ctx context.Context, namespaceId
 		return errors.New("strategy is already restore. ")
 	}
 
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:        uuid,
 		Name:        strategyInfo.Name,
 		ClusterId:   clusterInfo.Id,
@@ -701,7 +702,7 @@ func (s *strategyService[T, K]) UpdateStop(ctx context.Context, namespaceId, ope
 	if stop {
 		enableOperate = 2
 	}
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:          uuid,
 		Name:          strategyInfo.Name,
 		ClusterId:     clusterInfo.Id,
@@ -865,7 +866,7 @@ func (s *strategyService[T, K]) Publish(ctx context.Context, namespaceId, operat
 		publishUUIDS = append(publishUUIDS, publish.Strategy.UUID)
 		publishNames = append(publishNames, publish.Strategy.Name)
 	}
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:        strings.Join(publishUUIDS, ","),
 		Name:        strings.Join(publishNames, ","),
 		ClusterId:   clusterInfo.Id,
