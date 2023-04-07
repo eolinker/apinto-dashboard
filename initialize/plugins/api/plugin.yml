@@ -1,5 +1,7 @@
 id: "api.apinto.com"
 name: "api"
+cname: "API管理"
+resume: ""
 version: "v1.0"
 icon: ""
 driver: "api.apinto.com"
