@@ -27,6 +27,16 @@ func (n *navigationService) GetUUIDByID(ctx context.Context, id int) (string, er
 	return v.Uuid, nil
 }
 
+func (n *navigationService) GetIDByUUID(ctx context.Context, uuid string) (int, error) {
+	v, err := n.navigationStore.First(ctx, map[string]interface{}{
+		"uuid": uuid,
+	})
+	if err != nil {
+		return 0, err
+	}
+	return v.Id, nil
+}
+
 func newNavigationService() *navigationService {
 	c := &navigationService{}
 	bean.Autowired(&c.navigationStore)
@@ -92,12 +102,14 @@ func (n *navigationService) List(ctx context.Context) ([]*navigation_model.Navig
 }
 
 func (n *navigationService) Info(ctx context.Context, uuid string) (*navigation_model.Navigation, error) {
-	//info, err := n.navigationStore.First(ctx, map[string]interface{}{
-	//	"uuid": uuid,
-	//})
-	//if err != nil {
-	//	return nil, err
-	////}
+	info, err := n.navigationStore.First(ctx, map[string]interface{}{
+		"uuid": uuid,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	pluginService.Get(ctx)
 	//connModules, err := n.navigationModuleStore.List(ctx, map[string]interface{}{
 	//	"navigation_uuid": info.Uuid,
 	//})
