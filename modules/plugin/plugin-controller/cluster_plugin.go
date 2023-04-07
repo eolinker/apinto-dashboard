@@ -98,7 +98,7 @@ func (p *pluginClusterController) editPlugin(ginCtx *gin.Context) {
 
 	input := new(plugin_dto.ClusterPluginInfoInput)
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -134,7 +134,7 @@ func (p *pluginClusterController) updateHistory(ginCtx *gin.Context) {
 
 	histories, total, err := p.clusterPluginService.QueryHistory(ginCtx, namespaceId, pageNum, pageSize, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -184,7 +184,7 @@ func (p *pluginClusterController) publishHistory(ginCtx *gin.Context) {
 
 	list, total, err := p.clusterPluginService.PublishHistory(ginCtx, namespaceId, pageNum, pageSize, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -231,7 +231,7 @@ func (p *pluginClusterController) toPublish(ginCtx *gin.Context) {
 
 	list, err := p.clusterPluginService.ToPublishes(ginCtx, namespaceId, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -262,7 +262,7 @@ func (p *pluginClusterController) toPublish(ginCtx *gin.Context) {
 
 	plugins, err := p.clusterPluginService.GetList(ginCtx, namespaceId, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -296,7 +296,7 @@ func (p *pluginClusterController) publish(ginCtx *gin.Context) {
 
 	input := &plugin_dto.ClusterPluginPublishInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	if input.VersionName == "" || input.Source == "" {
@@ -307,7 +307,7 @@ func (p *pluginClusterController) publish(ginCtx *gin.Context) {
 
 	plugins, err := p.clusterPluginService.GetList(background, namespaceId, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -326,7 +326,7 @@ func (p *pluginClusterController) publish(ginCtx *gin.Context) {
 
 	userId := controller.GetUserId(ginCtx)
 	if err = p.clusterPluginService.Publish(background, namespaceId, userId, clusterName, input.VersionName, input.Desc, input.Source); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))

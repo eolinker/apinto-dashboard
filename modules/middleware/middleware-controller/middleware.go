@@ -1,7 +1,6 @@
 package middleware_controller
 
 import (
-	module_plugin "github.com/eolinker/apinto-dashboard/modules/module-plugin"
 	"net/http"
 
 	"github.com/eolinker/apinto-dashboard/modules/middleware/dto"
@@ -15,17 +14,15 @@ import (
 )
 
 type middlewareController struct {
-	middlewareService   middleware.IMiddlewareService
-	modulePluginService module_plugin.IModulePluginService
+	middlewareService middleware.IMiddlewareService
 }
 
 func RegisterMiddlewareGroupRouter(router gin.IRoutes) {
 	c := &middlewareController{}
 	bean.Autowired(&c.middlewareService)
-	bean.Autowired(&c.modulePluginService)
-	router.GET("/middleware", c.groups)
-	router.POST("/middleware", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindMiddleware, c.save))
-	router.PUT("/middleware", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindMiddleware, c.save))
+	router.GET("/system/middleware", c.groups)
+	router.POST("/system/middleware", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindMiddleware, c.save))
+	router.PUT("/system/middleware", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindMiddleware, c.save))
 }
 
 func (m *middlewareController) groups(ginCtx *gin.Context) {
@@ -34,17 +31,7 @@ func (m *middlewareController) groups(ginCtx *gin.Context) {
 		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
-	middlewares, err := m.modulePluginService.GetMiddlewareList(ginCtx)
-	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
-
-		return
-	}
-	data := map[string]interface{}{
-		"groups":      groups,
-		"middlewares": middlewares,
-	}
-	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(groups))
 }
 
 func (m *middlewareController) save(ginCtx *gin.Context) {

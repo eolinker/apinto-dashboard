@@ -98,7 +98,7 @@ func (a *apiOpenAPIController) syncAPI(ginCtx *gin.Context) {
 		if nodesForm != "" {
 			server, err := a.getServer(nodesForm)
 			if err != nil {
-				ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+				controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 				return
 			}
 			inputData.Server = server
@@ -126,14 +126,14 @@ func (a *apiOpenAPIController) syncAPI(ginCtx *gin.Context) {
 		if nodesForm != "" {
 			server, err := a.getServer(nodesForm)
 			if err != nil {
-				ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+				controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 				return
 			}
 			inputData.Server = server
 		}
 	case "application/json":
 		if err = ginCtx.BindJSON(inputData); err != nil {
-			ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+			controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 			return
 		}
 		//检查Server
