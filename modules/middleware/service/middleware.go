@@ -29,7 +29,12 @@ type MiddlewareService struct {
 	systemStore system_store.ISystemInfoStore
 }
 
-func (m *MiddlewareService) Save(ctx context.Context, config string) error {
+func (m *MiddlewareService) Save(ctx context.Context, config []*model.MiddlewareGroup) error {
+
+	data, err := json.Marshal(config)
+	if err != nil {
+		return err
+	}
 	value, err := m.systemStore.GetSystemInfoByKey(ctx, systemKey)
 	if err != nil {
 		if err != gorm.ErrRecordNotFound {
@@ -39,11 +44,11 @@ func (m *MiddlewareService) Save(ctx context.Context, config string) error {
 			Key: systemKey,
 		}
 	}
-	value.Value = []byte(config)
+	value.Value = data
 	return m.systemStore.Save(ctx, value)
 }
 
-func (m *MiddlewareService) Groups(ctx context.Context) (*model.Middleware, error) {
+func (m *MiddlewareService) Groups(ctx context.Context) ([]*model.MiddlewareGroup, error) {
 	value, err := m.systemStore.GetSystemInfoByKey(ctx, systemKey)
 	groups := make([]*model.MiddlewareGroup, 0)
 	if err != nil {
@@ -57,8 +62,6 @@ func (m *MiddlewareService) Groups(ctx context.Context) (*model.Middleware, erro
 		}
 	}
 
-	return &model.Middleware{
-		Group:       groups,
-		Middlewares: demoMiddlewares,
-	}, nil
+	return groups, nil
+
 }
