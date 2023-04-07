@@ -36,8 +36,14 @@ func (p *modulePluginController) plugins(ginCtx *gin.Context) {
 	groupUUID := ginCtx.Query("group")
 	searchName := ginCtx.Query("search")
 
-	pluginItems, pluginGroups, err := p.modulePluginService.GetPlugins(ginCtx, groupUUID, searchName)
+	pluginItems, err := p.modulePluginService.GetPlugins(ginCtx, groupUUID, searchName)
 	if err != nil {
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Get plugins fail. err:%s", err.Error())))
+		return
+	}
+
+	pluginGroups, err := p.modulePluginService.GetPluginGroups(ginCtx)
+	if err != nil{
 		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Get plugins fail. err:%s", err.Error())))
 		return
 	}
@@ -93,11 +99,12 @@ func (p *modulePluginController) getPluginInfo(ginCtx *gin.Context) {
 }
 
 func (p *modulePluginController) getGroupsEnum(ginCtx *gin.Context) {
-	pluginGroups, err := p.modulePluginService.GetPluginGroupsEnum(ginCtx)
+	pluginGroups, err := p.modulePluginService.GetPluginGroups(ginCtx)
 	if err != nil {
 		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Get plugin groups enum fail. err:%s", err.Error())))
 		return
 	}
+	//TODO 排除内置插件目录
 	groups := make([]*dto.PluginGroup, 0, len(pluginGroups))
 	for _, group := range pluginGroups {
 		groups = append(groups, &dto.PluginGroup{
