@@ -1,0 +1,10 @@
+id: "discovery.apinto.com"
+name: "discovery"
+version: "v1.0"
+icon: ""
+driver: "discovery.apinto.com"
+core: false
+install:
+  auto: true
+  front: upstream/serv-discovery
+  navigation: "navigation.upstream"

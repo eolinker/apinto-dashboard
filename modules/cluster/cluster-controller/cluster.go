@@ -3,7 +3,6 @@ package cluster_controller
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/enum"
@@ -32,13 +31,13 @@ func newClusterController() *clusterController {
 func RegisterClusterRouter(router gin.IRoutes) {
 	c := newClusterController()
 
-	router.GET("/clusters", controller.GenAccessHandler(access.ClusterView, access.ClusterEdit), c.clusters)
+	router.GET("/clusters", c.clusters)
 	router.GET("/cluster/enum", c.clusterEnum)
-	router.GET("/cluster", controller.GenAccessHandler(access.ClusterView, access.ClusterEdit), c.cluster)
-	router.DELETE("/cluster", controller.GenAccessHandler(access.ClusterEdit), controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindCluster), c.del)
-	router.POST("/cluster/", controller.GenAccessHandler(access.ClusterEdit), controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindCluster), c.create)
-	router.GET("/cluster-test", controller.GenAccessHandler(access.ClusterView, access.ClusterEdit), c.test)
-	router.PUT("/cluster/:cluster_name/desc", controller.GenAccessHandler(access.ClusterEdit), controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindCluster), c.putDesc)
+	router.GET("/cluster", c.cluster)
+	router.DELETE("/cluster", controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindCluster), c.del)
+	router.POST("/cluster/", controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindCluster), c.create)
+	router.GET("/cluster-test", c.test)
+	router.PUT("/cluster/:cluster_name/desc", controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindCluster), c.putDesc)
 }
 
 // clusters 获取集群列表

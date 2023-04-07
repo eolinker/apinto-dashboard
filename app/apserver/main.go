@@ -1,14 +1,14 @@
 package main
 
 import (
-	"context"
 	"fmt"
+	"github.com/eolinker/apinto-dashboard/modules/core"
 	"github.com/eolinker/apinto-dashboard/modules/plugin/plugin_timer"
+	"net"
+	"net/http"
 	"os"
 
 	"github.com/eolinker/apinto-dashboard/app/apserver/version"
-	"github.com/eolinker/apinto-dashboard/db_migrator"
-	"github.com/eolinker/apinto-dashboard/store"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
 	"github.com/gin-gonic/gin"
@@ -36,11 +36,12 @@ func main() {
 func run() {
 
 	gin.SetMode(gin.ReleaseMode)
-	engine := gin.Default()
+	//engine := gin.Default()
 
-	registerRouter(engine)
+	//registerRouter(engine)
 
-	//初始化数据库表 sql操作
+	var coreService core.ICore
+	bean.Injection(&coreService)
 	initDB()
 
 	err := bean.Check()
@@ -50,20 +51,11 @@ func run() {
 
 	go plugin_timer.ExtenderTimer()
 	// todo 不适合开源，后续通过插件接入
-
-	if err = engine.Run(fmt.Sprintf(":%d", GetPort())); err != nil {
+	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", GetPort()))
+	if err != nil {
 		panic(err)
 	}
-}
 
-func initDB() {
-	var iDb store.IDB
-
-	bean.Autowired(&iDb)
-
-	ctx := context.Background()
-	db := iDb.DB(ctx)
-
-	db_migrator.InitSql(db)
-
+	s := http.Server{Handler: coreService}
+	s.Serve(listener)
 }

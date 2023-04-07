@@ -1,15 +1,10 @@
 id: "api.apinto.com"
 name: "api"
-version: ""
+version: "v1.0"
 icon: ""
-driver: api.apinto.com
+driver: "api.apinto.com"
 core: false
 install:
   auto: true
   front: router/api
-  navigation: "id"
-main:
-  middleware:
-    
-
-
+  navigation: "navigation.api"
