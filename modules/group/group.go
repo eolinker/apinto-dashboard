@@ -21,4 +21,5 @@ type ICommonGroupService interface {
 	SubGroupUUIDS(groups map[int][]*group_entry.CommonGroup, parentGroup *group_model.CommonGroup, list *[]string)
 	IsGroupExist(ctx context.Context, uuid string) (bool, error)
 	CheckGroupNameReduplicated(ctx context.Context, groupName string, parentID int) (bool, error)
+	GetGroupInfo(ctx context.Context, uuid string) (*group_entry.CommonGroup, error)
 }
