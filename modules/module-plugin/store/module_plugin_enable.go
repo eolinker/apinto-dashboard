@@ -1,7 +1,7 @@
 package store
 
 import (
-	"github.com/eolinker/apinto-dashboard/modules/module_plugin/entry"
+	"github.com/eolinker/apinto-dashboard/modules/module-plugin/entry"
 	"github.com/eolinker/apinto-dashboard/store"
 )
 
