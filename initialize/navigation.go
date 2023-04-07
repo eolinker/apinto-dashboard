@@ -10,6 +10,6 @@ var (
 	navigationContent []byte
 )
 
-func InitNavigation(db store.IDB) {
+func initNavigation(db store.IDB) {
 	// 初始化导航
 }
