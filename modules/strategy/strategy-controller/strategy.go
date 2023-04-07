@@ -98,13 +98,14 @@ func (s *strategyController[T, K]) create(ginCtx *gin.Context) {
 	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Query("cluster_name")
 	if clusterName == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("CreateStrategy fail. err: clusterName can't be nil")))
+
+		controller.ErrorJson(ginCtx, http.StatusOK, "CreateStrategy fail. err: clusterName can't be nil")
 		return
 	}
 
 	input := new(strategy_dto.StrategyInfoInput[T])
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -112,13 +113,13 @@ func (s *strategyController[T, K]) create(ginCtx *gin.Context) {
 
 	//校验参数
 	if err := s.strategyService.CheckInput(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("CreateStrategy fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("CreateStrategy fail. err:%s", err.Error()))
 		return
 	}
 
 	err := s.strategyService.CreateStrategy(ginCtx, namespaceID, operator, clusterName, input)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("CreateAPI fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("CreateAPI fail. err:%s", err.Error()))
 		return
 	}
 

@@ -10,7 +10,7 @@ install:
 main:
   middleware:
     - logger
-    - must_namespace
+    - namespace
     - gzip
     - expire
 
