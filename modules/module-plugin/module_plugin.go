@@ -10,7 +10,8 @@ type IModulePluginService interface {
 	GetPlugins(ctx context.Context, groupUUID, searchName string) ([]*model.ModulePluginItem, error)
 	GetPluginInfo(ctx context.Context, pluginUUID string) (*model.ModulePluginInfo, error)
 	GetPluginGroups(ctx context.Context) ([]*model.PluginGroup, error)
-	GetPluginEnableInfo(ctx context.Context, pluginUUID string) (*model.PluginEnableInfo, *model.PluginEnableRender, error)
+	GetPluginEnableInfo(ctx context.Context, pluginUUID string) (*model.PluginEnableInfo, error)
+	GetPluginEnableRender(ctx context.Context, pluginUUID string) (*model.PluginEnableRender, error)
 	InstallPlugin(ctx context.Context, groupName string, packageContent []byte) error
 	EnablePlugin(ctx context.Context, pluginUUID string, enableInfo *dto.PluginEnableInfo) error
 	DisablePlugin(ctx context.Context, pluginUUID string) error
