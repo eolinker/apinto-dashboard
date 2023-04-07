@@ -1,11 +1,18 @@
 package initialize
 
-import "github.com/eolinker/apinto-dashboard/store"
+import (
+	"github.com/eolinker/apinto-dashboard/store"
+	"github.com/eolinker/eosc/common/bean"
+)
 
 func init() {
-	store.RegisterStore(func(db store.IDB) {
-		InitNavigation(db)
-		InitPlugins(db)
-		InitMiddleware(db)
+
+	var db store.IDB
+	bean.Autowired(&db)
+	bean.AddInitializingBeanFunc(func() {
+		initNavigation(db)
+		initPlugins(db)
+		initMiddleware(db)
 	})
+
 }
