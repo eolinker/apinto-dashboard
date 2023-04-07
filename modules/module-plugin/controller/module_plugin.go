@@ -104,9 +104,13 @@ func (p *modulePluginController) getGroupsEnum(ginCtx *gin.Context) {
 		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Get plugin groups enum fail. err:%s", err.Error())))
 		return
 	}
-	//TODO 排除内置插件目录
+
 	groups := make([]*dto.PluginGroup, 0, len(pluginGroups))
 	for _, group := range pluginGroups {
+		//排除内置插件目录
+		if group.UUID == "inner_plugin" {
+			continue
+		}
 		groups = append(groups, &dto.PluginGroup{
 			UUID: group.UUID,
 			Name: group.Name,
@@ -119,7 +123,12 @@ func (p *modulePluginController) getGroupsEnum(ginCtx *gin.Context) {
 
 func (p *modulePluginController) getEnableInfo(ginCtx *gin.Context) {
 	pluginUUID := ginCtx.Query("id")
-	info, render, err := p.modulePluginService.GetPluginEnableInfo(ginCtx, pluginUUID)
+	info, err := p.modulePluginService.GetPluginEnableInfo(ginCtx, pluginUUID)
+	if err != nil {
+		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Get plugin enable info fail. err:%s", err.Error())))
+		return
+	}
+	render, err := p.modulePluginService.GetPluginEnableRender(ginCtx, pluginUUID)
 	if err != nil {
 		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Get plugin enable info fail. err:%s", err.Error())))
 		return
