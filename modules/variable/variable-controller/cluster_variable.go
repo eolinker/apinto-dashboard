@@ -194,7 +194,7 @@ func (c *clusterVariableController) syncConf(ginCtx *gin.Context) {
 	}
 
 	if len(conf.Clusters) == 0 || len(conf.Variables) == 0 {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("clusters or variables is null"))
+		controller.ErrorJson(ginCtx, http.StatusOK, "clusters or variables is null")
 		return
 	}
 	userId := controller.GetUserId(ginCtx)
@@ -275,7 +275,7 @@ func (c *clusterVariableController) publish(ginCtx *gin.Context) {
 		return
 	}
 	if input.VersionName == "" || input.Source == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("parameter error"))
+		controller.ErrorJson(ginCtx, http.StatusOK, "parameter error")
 		return
 	}
 	background := ginCtx
