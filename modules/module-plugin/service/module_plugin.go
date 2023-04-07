@@ -272,8 +272,7 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 		return err
 	}
 
-	//enableInfo, err := m.pluginEnableStore.Get(ctx, pluginInfo.Id)
-	navigationInfo, err := m.navigationService.Info(ctx, enableInfo.Navigation)
+	navigationID, err := m.navigationService.GetIDByUUID(ctx, enableInfo.Navigation)
 	if err != nil {
 		return err
 	}
@@ -311,7 +310,7 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 		enable := &entry.ModulePluginEnable{
 			Id:         pluginInfo.Id,
 			Name:       enableInfo.Name,
-			Navigation: 0, //TODO
+			Navigation: navigationID,
 			IsEnable:   2,
 			Config:     config,
 			Operator:   userID,

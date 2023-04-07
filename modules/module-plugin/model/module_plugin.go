@@ -54,6 +54,7 @@ type ExtendParamsRender struct {
 }
 
 type InstalledPlugin struct {
+	UUID   string
 	Name   string
 	Driver string
 	Config *PluginEnableCfg
