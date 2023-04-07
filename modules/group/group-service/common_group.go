@@ -21,8 +21,9 @@ import (
 )
 
 const (
-	ApiName     = "api"
-	ServiceName = "service"
+	ApiName      = "api"
+	ServiceName  = "service"
+	ModulePlugin = "module_plugin"
 )
 
 type commonGroupService struct {
@@ -581,6 +582,12 @@ func (c *commonGroupService) getTagId(ctx context.Context, namespaceId int, grou
 		return serviceInfo.ServiceId
 	case ApiName:
 		return 0
+	case ModulePlugin:
+		return 0
 	}
 	return -1
+}
+
+func (c *commonGroupService) GetGroupInfo(ctx context.Context, uuid string) (*group_entry.CommonGroup, error) {
+	return c.commonGroupStore.GetByUUID(ctx, uuid)
 }
