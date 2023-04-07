@@ -344,18 +344,18 @@ func (s *strategyController[T, K]) changePriority(ginCtx *gin.Context) {
 	priorityMap := common.Map[int, int]{}
 	for _, priority := range maps {
 		if priority == 0 {
-			ginCtx.JSON(http.StatusOK, controller.NewErrorResult("优先级不可填空"))
+			controller.ErrorJson(ginCtx, http.StatusOK, "优先级不可填空")
 			return
 		}
 		if priority > 999 {
-			ginCtx.JSON(http.StatusOK, controller.NewErrorResult("优先级不可超过999"))
+			controller.ErrorJson(ginCtx, http.StatusOK, "优先级不可超过999")
 			return
 		}
 		priorityMap[priority] += 1
 	}
 	for _, v := range priorityMap {
 		if v > 1 {
-			ginCtx.JSON(http.StatusOK, controller.NewErrorResult("优先级不可重复"))
+			controller.ErrorJson(ginCtx, http.StatusOK, "优先级不可重复")
 			return
 		}
 	}

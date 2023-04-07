@@ -117,7 +117,7 @@ func (d *discoveryController) create(ginCtx *gin.Context) {
 	input.Driver = strings.ToLower(input.Driver)
 
 	if input.Name == discovery_serivce.DriverStatic {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("discoveryName can't be static. "))
+		controller.ErrorJson(ginCtx, http.StatusOK, "discoveryName can't be static. ")
 		return
 	}
 
@@ -277,7 +277,7 @@ func (d *discoveryController) getOnlineList(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	discoveryName := ginCtx.Param("discovery_name")
 	if discoveryName == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("discovery_name can't be nil. "))
+		controller.ErrorJson(ginCtx, http.StatusOK, "discovery_name can't be nil. ")
 		return
 	}
 	list, err := d.discoveryService.OnlineList(ginCtx, namespaceId, discoveryName)

@@ -45,7 +45,7 @@ func (e *variablesController) gets(ginCtx *gin.Context) {
 	key := ginCtx.Query("key")
 	status := ginCtx.Query("status")
 	if status != "" && !enum.CheckVariableUsageStatus(status) {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("status is illegal. "))
+		controller.ErrorJson(ginCtx, http.StatusOK, "status is illegal. ")
 		return
 	}
 
@@ -113,7 +113,7 @@ func (e *variablesController) post(ginCtx *gin.Context) {
 	}
 
 	if input.Key == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("parameter error"))
+		controller.ErrorJson(ginCtx, http.StatusOK, "parameter error")
 		return
 	}
 
