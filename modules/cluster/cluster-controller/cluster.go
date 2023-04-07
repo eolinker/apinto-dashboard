@@ -115,7 +115,7 @@ func (c *clusterController) cluster(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Query("cluster_name")
 	if clusterName == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("Get cluster info fail. err: cluster_name can't be nil."))
+		controller.ErrorJson(ginCtx, http.StatusOK, "Get cluster info fail. err: cluster_name can't be nil.")
 		return
 	}
 
@@ -157,7 +157,7 @@ func (c *clusterController) create(ginCtx *gin.Context) {
 
 	if input.Name == "" || input.Env == "" || input.Addr == "" || input.Source == "" {
 		fmt.Println(*input)
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("parameter error"))
+		controller.ErrorJson(ginCtx, http.StatusOK, "parameter error")
 		return
 	}
 	userId := controller.GetUserId(ginCtx)
@@ -176,7 +176,7 @@ func (c *clusterController) del(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Query("cluster_name")
 	if clusterName == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("Delete cluster fail. err: cluster_name can't be nil."))
+		controller.ErrorJson(ginCtx, http.StatusOK, "Delete cluster fail. err: cluster_name can't be nil.")
 		return
 	}
 	userId := controller.GetUserId(ginCtx)
