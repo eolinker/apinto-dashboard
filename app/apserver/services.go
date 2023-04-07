@@ -10,6 +10,7 @@ import (
 	_ "github.com/eolinker/apinto-dashboard/modules/group/group-service"
 	_ "github.com/eolinker/apinto-dashboard/modules/middleware/service"
 	_ "github.com/eolinker/apinto-dashboard/modules/namespace/namespace-service"
+	_ "github.com/eolinker/apinto-dashboard/modules/navigation/navigation-service"
 	_ "github.com/eolinker/apinto-dashboard/modules/notice/notice-service"
 	_ "github.com/eolinker/apinto-dashboard/modules/openapi/openapi-service"
 	_ "github.com/eolinker/apinto-dashboard/modules/openapp/openapp-service"

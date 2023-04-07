@@ -2,4 +2,5 @@ groups:
   - prefix: /api
     middleware: []
   - prefix: /api/system/modules
-    middleware: core.access.all
+    middleware:
+      - core.access.all
