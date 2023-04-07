@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
+	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/modules/api"
 	"github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-dashboard/modules/group"
@@ -120,7 +121,7 @@ func (c *commonGroupService) DeleteGroup(ctx context.Context, namespaceId int, o
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: uuid,
 		Name: groupInfo.Name,
 	})
@@ -151,7 +152,7 @@ func (c *commonGroupService) UpdateGroup(ctx context.Context, namespaceId int, o
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: uuid,
 		Name: name,
 	})
@@ -496,7 +497,7 @@ func (c *commonGroupService) CreateGroup(ctx context.Context, namespaceId int, o
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: uuidStr,
 		Name: groupName,
 	})

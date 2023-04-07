@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/eolinker/apinto-dashboard/common"
+	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-dashboard/modules/base/quote-entry"
 	"github.com/eolinker/apinto-dashboard/modules/base/quote-store"
@@ -103,7 +104,7 @@ func (n *noticeChannelService) CreateNoticeChannel(ctx context.Context, namespac
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: channel.Name,
 		Name: channel.Title,
 	})
@@ -151,7 +152,7 @@ func (n *noticeChannelService) UpdateNoticeChannel(ctx context.Context, namespac
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: noticeChannel.Name,
 		Name: noticeChannel.Title,
 	})
@@ -225,7 +226,7 @@ func (n *noticeChannelService) DeleteNoticeChannel(ctx context.Context, namespac
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: noticeChannel.Name,
 		Name: noticeChannel.Title,
 	})
