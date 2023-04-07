@@ -37,7 +37,7 @@ func (c *commonGroupController) groups(ginCtx *gin.Context) {
 
 	root, apis, err := c.commonGroupService.GroupList(ginCtx, namespaceId, groupType, tagName, uuid, queryName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	resApis := make([]*group_dto.CommonGroupApi, 0, len(apis))
@@ -90,12 +90,12 @@ func (c *commonGroupController) updateGroup(ginCtx *gin.Context) {
 	input := new(group_dto.CommonGroupInput)
 
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	if err := c.commonGroupService.UpdateGroup(ginCtx, namespaceId, operator, groupType, input.Name, uuid); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -109,12 +109,12 @@ func (c *commonGroupController) groupSort(ginCtx *gin.Context) {
 
 	input := &group_dto.CommGroupSortInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	if err := c.commonGroupService.GroupSort(ginCtx, namespaceId, groupType, tagName, input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -129,7 +129,7 @@ func (c *commonGroupController) delGroup(ginCtx *gin.Context) {
 	operator := controller.GetUserId(ginCtx)
 
 	if err := c.commonGroupService.DeleteGroup(ginCtx, namespaceId, operator, groupType, uuid); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -145,12 +145,12 @@ func (c *commonGroupController) createGroup(ginCtx *gin.Context) {
 	input := new(group_dto.CommonGroupInput)
 
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	if err := c.commonGroupService.CreateGroup(ginCtx, namespaceId, operator, groupType, tagName, input.Name, input.UUID, input.ParentUUID); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 

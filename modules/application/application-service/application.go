@@ -6,6 +6,7 @@ import (
 	"fmt"
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/common"
+	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/application"
 	"github.com/eolinker/apinto-dashboard/modules/application/application-dto"
@@ -234,7 +235,7 @@ func (a *applicationService) Online(ctx context.Context, namespaceId, userId int
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:        id,
 		Name:        applicationInfo.Name,
 		ClusterId:   clusterInfo.Id,
@@ -330,7 +331,7 @@ func (a *applicationService) Offline(ctx context.Context, namespaceId, userId in
 	runtime.Operator = userId
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:        id,
 		Name:        applicationInfo.Name,
 		ClusterId:   clusterInfo.Id,
@@ -407,7 +408,7 @@ func (a *applicationService) Disable(ctx context.Context, namespaceId, userId in
 		enableOperate = 2
 	}
 
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:          id,
 		Name:          applicationInfo.Name,
 		ClusterId:     clusterInfo.Id,
@@ -448,7 +449,7 @@ func (a *applicationService) CreateApp(ctx context.Context, namespaceId, userId 
 	t := time.Now()
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: input.Id,
 		Name: input.Name,
 	})
@@ -554,7 +555,7 @@ func (a *applicationService) UpdateApp(ctx context.Context, namespaceId, userId 
 	oldApplication := *applicationInfo
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: input.Id,
 		Name: input.Name,
 	})
@@ -642,7 +643,7 @@ func (a *applicationService) DelApp(ctx context.Context, namespaceId, userId int
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: id,
 		Name: applicationInfo.Name,
 	})
