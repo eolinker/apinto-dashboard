@@ -32,7 +32,7 @@ func newModulePluginService() module_plugin.IModulePluginService {
 	return s
 }
 
-func (m *modulePluginService) GetPlugins(ctx context.Context, groupUUID, searchName string) ([]*model.ModulePluginItem, []*model.PluginGroup, error) {
+func (m *modulePluginService) GetPlugins(ctx context.Context, groupUUID, searchName string) ([]*model.ModulePluginItem, error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -42,7 +42,7 @@ func (m *modulePluginService) GetPluginInfo(ctx context.Context, pluginUUID stri
 	panic("implement me")
 }
 
-func (m *modulePluginService) GetPluginGroupsEnum(ctx context.Context) ([]*model.PluginGroup, error) {
+func (m *modulePluginService) GetPluginGroups(ctx context.Context) ([]*model.PluginGroup, error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -63,6 +63,16 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, pluginUUID strin
 }
 
 func (m *modulePluginService) DisablePlugin(ctx context.Context, pluginUUID string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *modulePluginService) GetEnabledPlugins(ctx context.Context) ([]*model.InstalledPlugin, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *modulePluginService) GetMiddlewareList(ctx context.Context) ([]*model.MiddlewareItem, error) {
 	//TODO implement me
 	panic("implement me")
 }
