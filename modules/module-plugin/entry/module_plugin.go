@@ -26,3 +26,11 @@ func (*ModulePlugin) TableName() string {
 func (c *ModulePlugin) IdValue() int {
 	return c.Id
 }
+
+type EnablePlugin struct {
+	UUID   string
+	Name   string
+	Driver string
+	Config []byte
+	Define []byte
+}

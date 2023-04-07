@@ -7,8 +7,10 @@ import (
 )
 
 func init() {
-	modulePluginServiceInfo := newModulePluginService()
-	bean.Injection(&modulePluginServiceInfo)
+	iModulePluginService := newModulePluginService()
+	iModulePlugin := newModulePlugin()
+	bean.Injection(&iModulePluginService)
+	bean.Injection(&iModulePlugin)
 
 	cache.RegisterCacheInitHandler(func(client *redis.ClusterClient) {
 		iExtenderCache := newIExtenderCache(client)
