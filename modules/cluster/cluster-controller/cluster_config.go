@@ -2,7 +2,6 @@ package cluster_controller
 
 import (
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/cluster"
@@ -24,10 +23,10 @@ func newClusterConfigController() *clusterConfigController {
 func RegisterClusterConfigRouter(router gin.IRoutes) {
 	c := newClusterConfigController()
 
-	router.GET("/cluster/:cluster_name/configuration/:type", controller.GenAccessHandler(access.ClusterView, access.ClusterEdit), c.get)
-	router.PUT("/cluster/:cluster_name/configuration/:type", controller.GenAccessHandler(access.ClusterEdit), c.edit)
-	router.PUT("/cluster/:cluster_name/configuration/:type/enable", controller.GenAccessHandler(access.ClusterEdit), c.enable)
-	router.PUT("/cluster/:cluster_name/configuration/:type/disable", controller.GenAccessHandler(access.ClusterEdit), c.disable)
+	router.GET("/cluster/:cluster_name/configuration/:type", c.get)
+	router.PUT("/cluster/:cluster_name/configuration/:type", c.edit)
+	router.PUT("/cluster/:cluster_name/configuration/:type/enable", c.enable)
+	router.PUT("/cluster/:cluster_name/configuration/:type/disable", c.disable)
 }
 
 func (c *clusterConfigController) get(ginCtx *gin.Context) {

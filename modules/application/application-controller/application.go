@@ -1,7 +1,6 @@
 package application_controller
 
 import (
-	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/modules/upstream/upstream-dto"
@@ -28,23 +27,23 @@ func RegisterApplicationRouter(router gin.IRoutes) {
 	bean.Autowired(&c.applicationService)
 	bean.Autowired(&c.applicationAuthService)
 
-	router.GET("/applications", controller.GenAccessHandler(access.ApplicationView, access.ApplicationEdit), c.lists)
+	router.GET("/applications", c.lists)
 	router.GET("/application/enum", c.lists)
-	router.POST("/application", controller.GenAccessHandler(access.ApplicationEdit), controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindApplication), c.createApp)
-	router.GET("/application", controller.GenAccessHandler(access.ApplicationView, access.ApplicationEdit), c.info)
-	router.PUT("/application", controller.GenAccessHandler(access.ApplicationEdit), controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindApplication), c.updateApp)
-	router.DELETE("/application", controller.GenAccessHandler(access.ApplicationEdit), controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindApplication), c.deleteApp)
-	router.GET("/application/onlines", controller.GenAccessHandler(access.ApplicationView, access.ApplicationEdit), c.onlines)
-	router.PUT("/application/online", controller.GenAccessHandler(access.ApplicationEdit), controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindApplication), c.online)
-	router.PUT("/application/offline", controller.GenAccessHandler(access.ApplicationEdit), controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindApplication), c.offline)
-	router.PUT("/application/enable", controller.GenAccessHandler(access.ApplicationEdit), controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindApplication), c.enable)
-	router.PUT("/application/disable", controller.GenAccessHandler(access.ApplicationEdit), controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindApplication), c.disable)
-	router.GET("/application/drivers", controller.GenAccessHandler(access.ApplicationView, access.ApplicationEdit), c.drivers)
-	router.GET("/application/auths", controller.GenAccessHandler(access.ApplicationView, access.ApplicationEdit), c.auths)
-	router.GET("/application/auth", controller.GenAccessHandler(access.ApplicationView, access.ApplicationEdit), c.getAuth)
-	router.POST("/application/auth", controller.GenAccessHandler(access.ApplicationEdit), c.createAuth)
-	router.PUT("/application/auth", controller.GenAccessHandler(access.ApplicationEdit), c.updateAuth)
-	router.DELETE("/application/auth", controller.GenAccessHandler(access.ApplicationEdit), c.delAuth)
+	router.POST("/application", controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindApplication), c.createApp)
+	router.GET("/application", c.info)
+	router.PUT("/application", controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindApplication), c.updateApp)
+	router.DELETE("/application", controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindApplication), c.deleteApp)
+	router.GET("/application/onlines", c.onlines)
+	router.PUT("/application/online", controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindApplication), c.online)
+	router.PUT("/application/offline", controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindApplication), c.offline)
+	router.PUT("/application/enable", controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindApplication), c.enable)
+	router.PUT("/application/disable", controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindApplication), c.disable)
+	router.GET("/application/drivers", c.drivers)
+	router.GET("/application/auths", c.auths)
+	router.GET("/application/auth", c.getAuth)
+	router.POST("/application/auth", c.createAuth)
+	router.PUT("/application/auth", c.updateAuth)
+	router.DELETE("/application/auth", c.delAuth)
 }
 
 func (a *applicationController) lists(ginCtx *gin.Context) {
