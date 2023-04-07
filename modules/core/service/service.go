@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/eolinker/apinto-dashboard/modules/core"
+	"github.com/eolinker/eosc/common/bean"
 	"net/http"
 	"sync"
 	"sync/atomic"
@@ -39,11 +40,18 @@ func (c *coreService) ReloadModule(version string) error {
 	if localVersion != nil && (*localVersion) == version {
 		// todo load module
 		// todo load middleware
-
+		c.rebuild()
 	}
 	return nil
 }
+func (c *coreService) rebuild() {
 
-func NewService() *coreService {
-	return &coreService{}
+}
+func NewService() core.ICore {
+
+	c := &coreService{}
+	bean.AddInitializingBeanFunc(func() {
+		c.rebuild()
+	})
+	return c
 }
