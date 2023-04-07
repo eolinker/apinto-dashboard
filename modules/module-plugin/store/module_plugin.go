@@ -14,6 +14,7 @@ type IModulePluginStore interface {
 	store.IBaseStore[entry.ModulePlugin]
 	GetPluginList(ctx context.Context, groupID int, searchName string) ([]*entry.ModulePlugin, error)
 	GetPluginInfo(ctx context.Context, uuid string) (*entry.ModulePlugin, error)
+	GetEnabledPlugins(ctx context.Context) ([]*entry.EnablePlugin, error)
 }
 
 type modulePluginStore struct {
@@ -39,4 +40,14 @@ func (c *modulePluginStore) GetPluginList(ctx context.Context, groupID int, sear
 
 func (c *modulePluginStore) GetPluginInfo(ctx context.Context, uuid string) (*entry.ModulePlugin, error) {
 	return c.FirstQuery(ctx, "`uuid` = ?", []interface{}{uuid}, "")
+}
+
+func (c *modulePluginStore) GetEnabledPlugins(ctx context.Context) ([]*entry.EnablePlugin, error) {
+	plugins := make([]*entry.EnablePlugin, 0)
+	err := c.DB(ctx).Table("module_plugin").Select("module_plugin.uuid, module_plugin_enable.name, module_plugin.driver, module_plugin_enable.config, module_plugin.details").
+		Joins("left join module_plugin_enable on module_plugin.id = module_plugin_enable.id").
+		Where("module_plugin_enable.is_enable = 2").
+		Scan(&plugins).Error
+
+	return plugins, err
 }
