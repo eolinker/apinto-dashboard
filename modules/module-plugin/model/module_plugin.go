@@ -120,3 +120,38 @@ type MiddlewareItem struct {
 	Name string `json:"name"`
 	Desc string `json:"desc"`
 }
+
+type PluginYmlCfg struct {
+	ID         string            `json:"id" yaml:"id"`
+	Name       string            `json:"name" yaml:"name"`
+	CName      string            `json:"cname" yaml:"cname"`
+	Resume     string            `json:"resume" yaml:"resume"`
+	ICon       string            `json:"icon" yaml:"icon"`
+	Driver     string            `json:"driver" yaml:"driver"`
+	Remote     *RemoteDefine     `json:"remote" yaml:"remote"`
+	Local      *LocalDefine      `json:"local" yaml:"local"`
+	Profession *ProfessionDefine `json:"profession" yaml:"profession"`
+}
+
+type InnerPluginYmlCfg struct {
+	ID      string                 `json:"id" yaml:"id"`
+	Name    string                 `json:"name" yaml:"name"`
+	Version string                 `json:"version" yaml:"version"`
+	CName   string                 `json:"cname" yaml:"cname"`
+	Resume  string                 `json:"resume" yaml:"resume"`
+	ICon    string                 `json:"icon" yaml:"icon"`
+	Driver  string                 `json:"driver" yaml:"driver"`
+	Core    bool                   `json:"core" yaml:"core"`
+	Install *InnerPluginYmlInstall `json:"install" yaml:"install"`
+	Main    *InnerPluginYmlMain    `json:"main" yaml:"main"`
+}
+
+type InnerPluginYmlInstall struct {
+	Auto       bool   `json:"auto" yaml:"auto"`
+	Front      string `json:"front" yaml:"front"`
+	Navigation string `json:"navigation" yaml:"navigation"`
+}
+
+type InnerPluginYmlMain struct {
+	Middleware []string `json:"middleware" yaml:"middleware"`
+}
