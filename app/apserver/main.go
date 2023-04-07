@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/modules/core"
 	"github.com/eolinker/apinto-dashboard/modules/plugin/plugin_timer"
 	"net"
@@ -41,7 +42,9 @@ func run() {
 	//registerRouter(engine)
 
 	var coreService core.ICore
-	bean.Injection(&coreService)
+	bean.Autowired(&coreService)
+	var front core.EngineCreate = new(Front)
+	bean.Injection(&front)
 	initDB()
 
 	err := bean.Check()
@@ -58,4 +61,13 @@ func run() {
 
 	s := http.Server{Handler: coreService}
 	s.Serve(listener)
+}
+
+type Front struct {
+}
+
+func (f *Front) CreateEngine() *gin.Engine {
+	engine := gin.Default()
+	controller.EmbedFrontend(engine)
+	return engine
 }

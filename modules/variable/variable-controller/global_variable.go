@@ -24,8 +24,8 @@ func RegisterVariablesRouter(router gin.IRoutes) {
 
 	router.GET("/variables", c.gets)
 	router.GET("/variable", c.get)
-	router.POST("/variable", controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindGlobalVariable), c.post)
-	router.DELETE("/variable", controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindGlobalVariable), c.del)
+	router.POST("/variable", controller.AuditLogHandler(enum.LogOperateTypeCreate, enum.LogKindGlobalVariable, c.post))
+	router.DELETE("/variable", controller.AuditLogHandler(enum.LogOperateTypeDelete, enum.LogKindGlobalVariable, c.del))
 }
 
 // 获取全局环境变量列表
@@ -108,7 +108,7 @@ func (e *variablesController) post(ginCtx *gin.Context) {
 	input := &variable_dto.GlobalVariableInput{}
 
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -118,7 +118,7 @@ func (e *variablesController) post(ginCtx *gin.Context) {
 	}
 
 	if err := common.IsMatchString(common.EnglishOrNumber_, input.Key); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 

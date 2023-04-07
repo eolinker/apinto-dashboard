@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
+	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/enum"
 	apiservice "github.com/eolinker/apinto-dashboard/modules/api"
 	"github.com/eolinker/apinto-dashboard/modules/api/api-dto"
@@ -477,7 +478,7 @@ func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator in
 	input.UUID = strings.ToLower(input.UUID)
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: input.UUID,
 		Name: input.ApiName,
 	})
@@ -652,7 +653,7 @@ func (a *apiService) UpdateAPI(ctx context.Context, namespaceID int, operator in
 	apiInfo.Operator = operator
 	apiInfo.UpdateTime = t
 
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: input.UUID,
 		Name: input.ApiName,
 	})
@@ -764,7 +765,7 @@ func (a *apiService) DeleteAPI(ctx context.Context, namespaceId, operator int, u
 		Config: version.APIVersionConfig,
 	}
 
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: uuid,
 		Name: apiInfo.Name,
 	})
@@ -1033,7 +1034,7 @@ func (a *apiService) BatchOnline(ctx context.Context, namespaceId int, operator 
 		logCLNameList = append(logCLNameList, cl.Name)
 	}
 
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Name:        strings.Join(logApiNameList, ","),
 		ClusterName: strings.Join(logCLNameList, ","),
 		PublishType: 1,
@@ -1248,7 +1249,7 @@ func (a *apiService) BatchOffline(ctx context.Context, namespaceId int, operator
 		logCLNameList = append(logCLNameList, cl.Name)
 	}
 
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Name:        strings.Join(logApiNameList, ","),
 		ClusterName: strings.Join(logCLNameList, ","),
 		PublishType: 2,
@@ -1596,7 +1597,7 @@ func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, u
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:        uuid,
 		Name:        apiInfo.Name,
 		ClusterId:   clusterInfo.Id,
@@ -1726,7 +1727,7 @@ func (a *apiService) OfflineAPI(ctx context.Context, namespaceId, operator int, 
 	t := time.Now()
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:        uuid,
 		Name:        apiInfo.Name,
 		ClusterId:   clusterInfo.Id,
@@ -1793,7 +1794,7 @@ func (a *apiService) EnableAPI(ctx context.Context, namespaceId, operator int, u
 
 	t := time.Now()
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:          uuid,
 		Name:          apiInfo.Name,
 		ClusterId:     clusterInfo.Id,
@@ -1857,7 +1858,7 @@ func (a *apiService) DisableAPI(ctx context.Context, namespaceId, operator int, 
 	t := time.Now()
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:          uuid,
 		Name:          apiInfo.Name,
 		ClusterId:     clusterInfo.Id,
@@ -2131,7 +2132,7 @@ func (a *apiService) ImportAPI(ctx context.Context, namespaceId, operator int, i
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Name: strings.Join(logAPINames, ","),
 	})
 

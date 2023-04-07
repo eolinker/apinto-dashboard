@@ -37,7 +37,7 @@ func (c *clusterNodeController) nodes(ginCtx *gin.Context) {
 
 	nodes, isUpdate, err := c.clusterNodeService.QueryList(ginCtx, namespaceId, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -65,7 +65,7 @@ func (c *clusterNodeController) reset(ginCtx *gin.Context) {
 
 	input := &cluster_dto.ClusterNodeInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -75,7 +75,7 @@ func (c *clusterNodeController) reset(ginCtx *gin.Context) {
 	}
 	userId := controller.GetUserId(ginCtx)
 	if err := c.clusterNodeService.Reset(ginCtx, namespaceId, userId, clusterName, input.ClusterAddr, input.Source); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
@@ -89,7 +89,7 @@ func (c *clusterNodeController) put(ginCtx *gin.Context) {
 
 	err := c.clusterNodeService.Update(ginCtx, namespaceId, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))

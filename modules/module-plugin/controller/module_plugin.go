@@ -267,7 +267,7 @@ func (p *modulePluginController) enable(ginCtx *gin.Context) {
 
 	input := new(dto.PluginEnableInfo)
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
