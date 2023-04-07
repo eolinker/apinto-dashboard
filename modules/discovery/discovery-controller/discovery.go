@@ -104,13 +104,13 @@ func (d *discoveryController) create(ginCtx *gin.Context) {
 
 	input := new(discover_dto.DiscoveryInfoProxy)
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	//校验注册中心名是否合法
 	if err := common.IsMatchString(common.EnglishOrNumber_, input.Name); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -142,7 +142,7 @@ func (d *discoveryController) update(ginCtx *gin.Context) {
 
 	input := new(discover_dto.DiscoveryInfoProxy)
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -226,12 +226,12 @@ func (d *discoveryController) online(ginCtx *gin.Context) {
 	operator := controller.GetUserId(ginCtx)
 
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	router, err := d.discoveryService.OnlineDiscovery(ginCtx, namespaceId, operator, discoveryName, input.ClusterName)
 	if err != nil && router == nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	} else if err == nil {
 		ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
@@ -261,12 +261,12 @@ func (d *discoveryController) offline(ginCtx *gin.Context) {
 	operator := controller.GetUserId(ginCtx)
 
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	if err := d.discoveryService.OfflineDiscovery(ginCtx, namespaceId, operator, discoveryName, input.ClusterName); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
@@ -282,7 +282,7 @@ func (d *discoveryController) getOnlineList(ginCtx *gin.Context) {
 	}
 	list, err := d.discoveryService.OnlineList(ginCtx, namespaceId, discoveryName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 

@@ -108,7 +108,7 @@ func (e *variablesController) post(ginCtx *gin.Context) {
 	input := &variable_dto.GlobalVariableInput{}
 
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -118,7 +118,7 @@ func (e *variablesController) post(ginCtx *gin.Context) {
 	}
 
 	if err := common.IsMatchString(common.EnglishOrNumber_, input.Key); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
