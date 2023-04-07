@@ -117,6 +117,6 @@ type ProfessionDefine struct {
 
 // MiddlewareItem 拦截器项结构体
 type MiddlewareItem struct {
-	Name string
-	Desc string
+	Name string `json:"name"`
+	Desc string `json:"desc"`
 }

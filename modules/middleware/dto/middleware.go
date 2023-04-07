@@ -3,19 +3,20 @@ package dto
 import (
 	"encoding/json"
 	"errors"
+	"github.com/eolinker/apinto-dashboard/modules/middleware/model"
 	"strings"
 )
 
-type Middlewares struct {
-	Groups []*Middleware `json:"groups"`
+type MiddlewaresInput struct {
+	Groups []*model.Middleware `json:"groups"`
 }
 
-func (m *Middlewares) String() string {
+func (m *MiddlewaresInput) String() string {
 	data, _ := json.Marshal(m.Groups)
 	return string(data)
 }
 
-func (m *Middlewares) ValidCheck() error {
+func (m *MiddlewaresInput) ValidCheck() error {
 	prefixMap := map[string]struct{}{}
 	for _, g := range m.Groups {
 		prefix := strings.TrimSuffix(strings.TrimSpace(g.Prefix), "/")
@@ -25,9 +26,4 @@ func (m *Middlewares) ValidCheck() error {
 		prefixMap[prefix] = struct{}{}
 	}
 	return nil
-}
-
-type Middleware struct {
-	Prefix      string   `json:"prefix"`
-	Middlewares []string `json:"middlewares"`
 }
