@@ -2,6 +2,7 @@ package navigation_service
 
 import (
 	"context"
+	"github.com/eolinker/apinto-dashboard/modules/navigation"
 	"sort"
 
 	"github.com/eolinker/eosc/common/bean"
@@ -27,7 +28,7 @@ func (n *navigationService) GetUUIDByID(ctx context.Context, id int) (string, er
 	return v.Uuid, nil
 }
 
-func newNavigationService() *navigationService {
+func newNavigationService() navigation.INavigationService {
 	c := &navigationService{}
 	bean.Autowired(&c.navigationStore)
 	return c

@@ -70,7 +70,7 @@ func (c *clusterCertificateController) post(ginCtx *gin.Context) {
 		return
 	}
 	if len(input.Key) == 0 || len(input.Pem) == 0 {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("key or pem is null"))
+		controller.ErrorJson(ginCtx, http.StatusOK, "key or pem is null")
 		return
 	}
 
@@ -93,7 +93,7 @@ func (c *clusterCertificateController) put(ginCtx *gin.Context) {
 	certificateId, _ := strconv.Atoi(certificateIdStr)
 	operator := controller.GetUserId(ginCtx)
 	if certificateId <= 0 {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("certificate_id is 0"))
+		controller.ErrorJson(ginCtx, http.StatusOK, "certificate_id is 0")
 		return
 	}
 	input := &cluster_dto.ClusterCertificateInput{}
@@ -104,7 +104,7 @@ func (c *clusterCertificateController) put(ginCtx *gin.Context) {
 	}
 
 	if len(input.Key) == 0 || len(input.Pem) == 0 {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("key or pem is null"))
+		controller.ErrorJson(ginCtx, http.StatusOK, "key or pem is null")
 		return
 	}
 
