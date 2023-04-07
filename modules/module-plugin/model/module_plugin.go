@@ -26,9 +26,9 @@ type PluginEnableInfo struct {
 	Navigation string
 	ApiGroup   string
 	Server     string
-	Header     []ExtendParams
-	Query      []ExtendParams
-	Initialize []ExtendParams
+	Header     []*ExtendParams
+	Query      []*ExtendParams
+	Initialize []*ExtendParams
 }
 
 type PluginEnableRender struct {
@@ -62,11 +62,11 @@ type InstalledPlugin struct {
 
 // PluginEnableCfg 插件启用时的配置
 type PluginEnableCfg struct {
-	APIGroup   string         `json:"api_group"`
-	Server     string         `json:"server"`
-	Header     []ExtendParams `json:"header"`
-	Query      []ExtendParams `json:"query"`
-	Initialize []ExtendParams `json:"initialize"`
+	APIGroup   string          `json:"api_group"`
+	Server     string          `json:"server"`
+	Header     []*ExtendParams `json:"header"`
+	Query      []*ExtendParams `json:"query"`
+	Initialize []*ExtendParams `json:"initialize"`
 }
 
 // RemoteDefine 插件配置文件的driver为remote时的详细配置

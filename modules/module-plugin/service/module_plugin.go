@@ -263,27 +263,87 @@ func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml 
 }
 
 func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, pluginUUID string, enableInfo *dto.PluginEnableInfo) error {
-	//pluginInfo, err := m.pluginStore.GetPluginInfo(ctx, pluginUUID)
-	//if err != nil {
-	//	if err == gorm.ErrRecordNotFound{
-	//		return modulePluginNotFound
-	//	}
-	//	return err
-	//}
-	//
-	//m.pluginEnableStore.Get(ctx, pluginInfo.Id)
-	//
-	//
-	//return m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
-	//	t := time.Now()
-	//
-	//})
-	return nil
+	pluginInfo, err := m.pluginStore.GetPluginInfo(ctx, pluginUUID)
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return modulePluginNotFound
+		}
+		return err
+	}
+
+	//enableInfo, err := m.pluginEnableStore.Get(ctx, pluginInfo.Id)
+	navigationInfo, err := m.navigationService.Info(ctx, enableInfo.Navigation)
+	if err != nil {
+		return err
+	}
+
+	return m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
+		t := time.Now()
+
+		headers := make([]*model.ExtendParams, 0, len(enableInfo.Header))
+		querys := make([]*model.ExtendParams, 0, len(enableInfo.Query))
+		initializes := make([]*model.ExtendParams, 0, len(enableInfo.Initialize))
+		for _, h := range enableInfo.Header {
+			headers = append(headers, &model.ExtendParams{
+				Name:  h.Name,
+				Value: h.Value,
+			})
+		}
+		for _, q := range enableInfo.Query {
+			querys = append(querys, &model.ExtendParams{
+				Name:  q.Name,
+				Value: q.Value,
+			})
+		}
+		for _, i := range enableInfo.Initialize {
+			initializes = append(initializes, &model.ExtendParams{
+				Name:  i.Name,
+				Value: i.Value,
+			})
+		}
+		enableCfg := &model.PluginEnableCfg{
+			APIGroup:   enableInfo.ApiGroup,
+			Server:     enableInfo.Server,
+			Header:     headers,
+			Query:      querys,
+			Initialize: initializes,
+		}
+		config, _ := json.Marshal(enableCfg)
+
+		enable := &entry.ModulePluginEnable{
+			Id:         pluginInfo.Id,
+			Name:       enableInfo.Name,
+			Navigation: 0, //TODO
+			IsEnable:   2,
+			Config:     config,
+			Operator:   userID,
+			UpdateTime: t,
+		}
+		if err = m.pluginEnableStore.Save(txCtx, enable); err != nil {
+			return err
+		}
+		//TODO 重新生成路由
+
+		return nil
+	})
 }
 
 func (m *modulePluginService) DisablePlugin(ctx context.Context, userID int, pluginUUID string) error {
-	//TODO implement me
-	panic("implement me")
+	pluginInfo, err := m.pluginStore.GetPluginInfo(ctx, pluginUUID)
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return modulePluginNotFound
+		}
+		return err
+	}
+	enableInfo, err := m.pluginEnableStore.Get(ctx, pluginInfo.Id)
+	return m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
+
+	}
+}
+
+func (m *modulePluginService) GetEnablePluginsByNavigation(ctx context.Context, navigationID int) ([]*entry.ModulePluginEnable, error){
+
 }
 
 func (m *modulePluginService) GetEnabledPlugins(ctx context.Context) ([]*model.InstalledPlugin, error) {
