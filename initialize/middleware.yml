@@ -1,6 +1,7 @@
 groups:
   - prefix: /api
-    middleware: []
+    middleware:
+    - "core.namespace"
   - prefix: /api/system/modules
     middleware:
-      - core.access.all
+    - "core.access.all"

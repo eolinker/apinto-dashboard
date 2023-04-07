@@ -10,7 +10,7 @@ var (
 	pluginDir embed.FS
 )
 
-func InitPlugins(idb store.IDB) {
+func initPlugins(idb store.IDB) {
 	// todo 初始化插件
 	pluginDir.ReadDir(".")
 }

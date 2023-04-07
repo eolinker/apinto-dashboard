@@ -27,15 +27,15 @@ func RegisterPluginTemplateRouter(router gin.IRoutes) {
 	router.GET("/plugin/templates", p.templates)
 	router.GET("/plugin/template/enum", p.templateEnum)
 
-	router.POST("/plugin/template", controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindPluginTemplate), p.createTemplate)
-	router.PUT("/plugin/template", controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindPluginTemplate), p.updateTemplate)
-	router.DELETE("/plugin/template", controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindPluginTemplate), p.delTemplate)
+	router.POST("/plugin/template", controller.AuditLogHandler(enum.LogOperateTypeCreate, enum.LogKindPluginTemplate, p.createTemplate))
+	router.PUT("/plugin/template", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindPluginTemplate, p.updateTemplate))
+	router.DELETE("/plugin/template", controller.AuditLogHandler(enum.LogOperateTypeDelete, enum.LogKindPluginTemplate, p.delTemplate))
 
 	router.GET("/plugin/template", p.template)
 
 	router.GET("/plugin/template/onlines", p.onlines)
-	router.PUT("/plugin/template/online", controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindPluginTemplate), p.online)
-	router.PUT("/plugin/template/offline", controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindPluginTemplate), p.offline)
+	router.PUT("/plugin/template/online", controller.AuditLogHandler(enum.LogOperateTypePublish, enum.LogKindPluginTemplate, p.online))
+	router.PUT("/plugin/template/offline", controller.AuditLogHandler(enum.LogOperateTypePublish, enum.LogKindPluginTemplate, p.offline))
 }
 
 // 插件模板列表
@@ -43,7 +43,7 @@ func (p *pluginTemplateController) templates(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	templates, err := p.pluginTemplateService.GetList(ginCtx, namespaceId)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -79,7 +79,7 @@ func (p *pluginTemplateController) templateEnum(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	templates, err := p.pluginTemplateService.GetUsableList(ginCtx, namespaceId)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -105,7 +105,7 @@ func (p *pluginTemplateController) createTemplate(ginCtx *gin.Context) {
 
 	input := new(plugin_template_dto.PluginTemplateInput)
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -121,7 +121,7 @@ func (p *pluginTemplateController) createTemplate(ginCtx *gin.Context) {
 
 	//校验名称是否合法
 	if err := common.IsMatchString(common.EnglishOrNumber_, input.Name); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -145,7 +145,7 @@ func (p *pluginTemplateController) createTemplate(ginCtx *gin.Context) {
 	}
 
 	if err := p.pluginTemplateService.Create(ginCtx, namespaceId, userId, detail); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -159,7 +159,7 @@ func (p *pluginTemplateController) updateTemplate(ginCtx *gin.Context) {
 
 	input := new(plugin_template_dto.PluginTemplateInput)
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -170,7 +170,7 @@ func (p *pluginTemplateController) updateTemplate(ginCtx *gin.Context) {
 
 	//校验名称是否合法
 	if err := common.IsMatchString(common.EnglishOrNumber_, input.Name); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -194,7 +194,7 @@ func (p *pluginTemplateController) updateTemplate(ginCtx *gin.Context) {
 	}
 
 	if err := p.pluginTemplateService.Update(ginCtx, namespaceId, userId, detail); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -209,7 +209,7 @@ func (p *pluginTemplateController) delTemplate(ginCtx *gin.Context) {
 	uuid := ginCtx.Query("uuid")
 
 	if err := p.pluginTemplateService.Delete(ginCtx, namespaceId, userId, uuid); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -224,7 +224,7 @@ func (p *pluginTemplateController) template(ginCtx *gin.Context) {
 	uuid := ginCtx.Query("uuid")
 	pluginTemplateDetail, err := p.pluginTemplateService.GetByUUID(ginCtx, namespaceId, uuid)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -255,7 +255,7 @@ func (p *pluginTemplateController) onlines(ginCtx *gin.Context) {
 	uuid := ginCtx.Query("uuid")
 	list, err := p.pluginTemplateService.OnlineList(ginCtx, namespaceId, uuid)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -291,13 +291,13 @@ func (p *pluginTemplateController) online(ginCtx *gin.Context) {
 	}
 	input := &online_dto.UpdateOnlineStatusInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	router, err := p.pluginTemplateService.Online(ginCtx, namespaceId, userId, uuid, input.ClusterName)
 	if err != nil && router == nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	} else if err == nil {
 		ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
@@ -330,12 +330,12 @@ func (p *pluginTemplateController) offline(ginCtx *gin.Context) {
 	}
 	input := &online_dto.UpdateOnlineStatusInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	if err := p.pluginTemplateService.Offline(ginCtx, namespaceId, userId, uuid, input.ClusterName); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
