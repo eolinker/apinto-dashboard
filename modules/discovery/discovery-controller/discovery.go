@@ -28,14 +28,14 @@ func RegisterDiscoveryRouter(router gin.IRouter) {
 
 	router.GET("/discoveries", c.getList)
 	router.GET("/discovery", c.getInfo)
-	router.POST("/discovery", controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindDiscovery), c.create)
-	router.PUT("/discovery", controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindDiscovery), c.update)
-	router.DELETE("/discovery", controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindDiscovery), c.delete)
+	router.POST("/discovery", controller.AuditLogHandler(enum.LogOperateTypeCreate, enum.LogKindDiscovery, c.create))
+	router.PUT("/discovery", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindDiscovery, c.update))
+	router.DELETE("/discovery", controller.AuditLogHandler(enum.LogOperateTypeDelete, enum.LogKindDiscovery, c.delete))
 	router.GET("/discovery/enum", c.getEnum)
 	router.GET("/discovery/drivers", c.getDrivers)
 
-	router.PUT("/discovery/:discovery_name/online", controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindDiscovery), c.online)
-	router.PUT("/discovery/:discovery_name/offline", controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindDiscovery), c.offline)
+	router.PUT("/discovery/:discovery_name/online", controller.AuditLogHandler(enum.LogOperateTypePublish, enum.LogKindDiscovery, c.online))
+	router.PUT("/discovery/:discovery_name/offline", controller.AuditLogHandler(enum.LogOperateTypePublish, enum.LogKindDiscovery, c.offline))
 	router.GET("/discovery/:discovery_name/onlines", c.getOnlineList)
 }
 
