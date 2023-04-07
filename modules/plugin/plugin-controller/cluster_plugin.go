@@ -27,9 +27,9 @@ func RegisterPluginClusterRouter(router gin.IRoutes) {
 	bean.Autowired(&p.clusterPluginService)
 	router.GET("/cluster/:cluster_name/plugins", p.plugins)
 	router.GET("/cluster/:cluster_name/plugin", p.getPlugin)
-	router.POST("/cluster/:cluster_name/plugin", controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindClusterPlugin), p.editPlugin)
+	router.POST("/cluster/:cluster_name/plugin", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindClusterPlugin, p.editPlugin))
 
-	router.POST("/cluster/:cluster_name/plugin/publish", controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindClusterPlugin), p.publish)
+	router.POST("/cluster/:cluster_name/plugin/publish", controller.AuditLogHandler(enum.LogOperateTypePublish, enum.LogKindClusterPlugin, p.publish))
 	router.GET("/cluster/:cluster_name/plugin/to-publish", p.toPublish)
 	router.GET("/cluster/:cluster_name/plugin/publish-history", p.publishHistory)
 	router.GET("/cluster/:cluster_name/plugin/update-history", p.updateHistory)

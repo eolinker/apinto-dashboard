@@ -30,13 +30,13 @@ func RegisterPluginRouter(router gin.IRoutes) {
 	router.GET("/basic/info/plugins", p.basicInfoPlugins)
 	router.GET("/plugin", p.plugin)
 
-	router.POST("/plugin", controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindGlobalPlugin), p.createPlugin)
-	router.PUT("/plugin", controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindGlobalPlugin), p.updatePlugin)
-	router.DELETE("/plugin", controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindGlobalPlugin), p.delPlugin)
+	router.POST("/plugin", controller.AuditLogHandler(enum.LogOperateTypeCreate, enum.LogKindGlobalPlugin, p.createPlugin))
+	router.PUT("/plugin", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindGlobalPlugin, p.updatePlugin))
+	router.DELETE("/plugin", controller.AuditLogHandler(enum.LogOperateTypeDelete, enum.LogKindGlobalPlugin, p.delPlugin))
 
 	router.GET("/plugin/extendeds", p.pluginExtendeds)
 	router.GET("/plugins/render", p.pluginRender)
-	router.PUT("/plugin/sort", controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindGlobalPlugin), p.pluginSort)
+	router.PUT("/plugin/sort", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindGlobalPlugin, p.pluginSort))
 	router.GET("/plugin/enum", p.pluginEnum)
 }
 
