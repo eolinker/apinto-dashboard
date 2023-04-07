@@ -3,7 +3,6 @@ package module_plugin
 import (
 	"context"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/dto"
-	"github.com/eolinker/apinto-dashboard/modules/module-plugin/entry"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/model"
 )
 
@@ -18,7 +17,7 @@ type IModulePluginService interface {
 	EnablePlugin(ctx context.Context, userID int, pluginUUID string, enableInfo *dto.PluginEnableInfo) error
 	DisablePlugin(ctx context.Context, userID int, pluginUUID string) error
 
-	GetEnablePluginsByNavigation(ctx context.Context, navigationID int) ([]*entry.ModulePluginEnable, error)
+	GetEnablePluginsByNavigation(ctx context.Context, navigationID int) ([]*model.NavigationEnabledPlugin, error)
 	//GetEnabledPlugins 获取已启用的插件信息列表
 	GetEnabledPlugins(ctx context.Context) ([]*model.InstalledPlugin, error)
 	//GetMiddlewareList 获取拦截器列表
