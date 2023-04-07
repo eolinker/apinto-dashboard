@@ -29,13 +29,13 @@ func RegisterServiceRouter(router gin.IRouter) {
 
 	router.GET("/services", c.getList)
 	router.GET("/service", c.getInfo)
-	router.PUT("/service", controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindService), c.alter)
-	router.POST("/service", controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindService), c.create)
-	router.DELETE("/service", controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindService), c.del)
+	router.PUT("/service", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindService, c.alter))
+	router.POST("/service", controller.AuditLogHandler(enum.LogOperateTypeCreate, enum.LogKindService, c.create))
+	router.DELETE("/service", controller.AuditLogHandler(enum.LogOperateTypeDelete, enum.LogKindService, c.del))
 	router.GET("/service/enum", c.getEnum)
 
-	router.PUT("/service/:service_name/online", controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindService), c.online)
-	router.PUT("/service/:service_name/offline", controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindService), c.offline)
+	router.PUT("/service/:service_name/online", controller.AuditLogHandler(enum.LogOperateTypePublish, enum.LogKindService, c.online))
+	router.PUT("/service/:service_name/offline", controller.AuditLogHandler(enum.LogOperateTypePublish, enum.LogKindService, c.offline))
 	router.GET("/service/:service_name/onlines", c.getOnlineList)
 
 	//router.GET("/service/:service_name/api", c.getApi)
