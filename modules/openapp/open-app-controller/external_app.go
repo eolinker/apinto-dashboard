@@ -72,7 +72,7 @@ func (e *externalApplicationController) create(ginCtx *gin.Context) {
 
 	input := new(open_app_dto.ExternalAppInfoInput)
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -102,7 +102,7 @@ func (e *externalApplicationController) edit(ginCtx *gin.Context) {
 
 	input := new(open_app_dto.ExternalAppInfoInput)
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
