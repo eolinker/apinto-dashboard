@@ -1,4 +1,4 @@
-package common
+package controller
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 func SetGinContextAuditObject(ctx context.Context, v interface{}) {
 	if ginCtx, ok := ctx.(*gin.Context); ok {
 		objectData, _ := json.Marshal(v)
-		ginCtx.Set("auditObject", string(objectData))
+		ginCtx.Set(AuditObject, string(objectData))
 
 	}
 
@@ -17,6 +17,6 @@ func SetGinContextAuditObject(ctx context.Context, v interface{}) {
 
 func GetGinContextAuditObject(ginCtx *gin.Context) (value any, exists bool) {
 
-	return ginCtx.Get("auditObject")
+	return ginCtx.Get(AuditObject)
 
 }
