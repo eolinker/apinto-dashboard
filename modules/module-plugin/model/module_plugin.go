@@ -155,3 +155,9 @@ type InnerPluginYmlInstall struct {
 type InnerPluginYmlMain struct {
 	Middleware []string `json:"middleware" yaml:"middleware"`
 }
+
+// NavigationEnabledPlugin 用于给导航返回的
+type NavigationEnabledPlugin struct {
+	*entry.ModulePluginEnable
+	UUID string
+}
