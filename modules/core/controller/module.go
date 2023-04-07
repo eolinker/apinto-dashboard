@@ -131,6 +131,7 @@ func (p *Plugin) NewModule(name, apiPrefix string) *Module {
 			HandlerFunc: p.provider,
 		},
 	}
+
 	return &Module{
 		name:              name,
 		apiPrefix:         apiPrefix,

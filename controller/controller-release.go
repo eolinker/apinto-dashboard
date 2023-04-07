@@ -128,7 +128,9 @@ func EmbedPluginFrontend(r *gin.Engine) {
 	//获取插件列表
 	r.GET("/plugin/list/:group", indexHtml)
 }
-
+func favicon(ginCtx *gin.Context) {
+	ginCtx.Writer.WriteString(iconContext)
+}
 func noRoute(ginCtx *gin.Context) {
 	if strings.HasPrefix(ginCtx.Request.URL.Path, "/api/") {
 		ginCtx.Data(http.StatusNotFound, "application/json", []byte("404 page not found"))
