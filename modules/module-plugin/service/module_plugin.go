@@ -20,8 +20,9 @@ import (
 )
 
 var (
-	modulePluginNotFound     = errors.New("plugin doesn't exist. ")
-	ErrModulePluginInstalled = errors.New("plugin has installed. ")
+	ErrModulePluginNotFound    = errors.New("plugin doesn't exist. ")
+	ErrModulePluginInstalled   = errors.New("plugin has installed. ")
+	ErrModulePluginHasDisabled = errors.New("plugin has disabled. ")
 )
 
 type modulePluginService struct {
@@ -266,7 +267,7 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 	pluginInfo, err := m.pluginStore.GetPluginInfo(ctx, pluginUUID)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return modulePluginNotFound
+			return ErrModulePluginNotFound
 		}
 		return err
 	}
@@ -276,40 +277,37 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 	if err != nil {
 		return err
 	}
+	headers := make([]*model.ExtendParams, 0, len(enableInfo.Header))
+	querys := make([]*model.ExtendParams, 0, len(enableInfo.Query))
+	initializes := make([]*model.ExtendParams, 0, len(enableInfo.Initialize))
+	for _, h := range enableInfo.Header {
+		headers = append(headers, &model.ExtendParams{
+			Name:  h.Name,
+			Value: h.Value,
+		})
+	}
+	for _, q := range enableInfo.Query {
+		querys = append(querys, &model.ExtendParams{
+			Name:  q.Name,
+			Value: q.Value,
+		})
+	}
+	for _, i := range enableInfo.Initialize {
+		initializes = append(initializes, &model.ExtendParams{
+			Name:  i.Name,
+			Value: i.Value,
+		})
+	}
+	enableCfg := &model.PluginEnableCfg{
+		APIGroup:   enableInfo.ApiGroup,
+		Server:     enableInfo.Server,
+		Header:     headers,
+		Query:      querys,
+		Initialize: initializes,
+	}
+	config, _ := json.Marshal(enableCfg)
 
 	return m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
-		t := time.Now()
-
-		headers := make([]*model.ExtendParams, 0, len(enableInfo.Header))
-		querys := make([]*model.ExtendParams, 0, len(enableInfo.Query))
-		initializes := make([]*model.ExtendParams, 0, len(enableInfo.Initialize))
-		for _, h := range enableInfo.Header {
-			headers = append(headers, &model.ExtendParams{
-				Name:  h.Name,
-				Value: h.Value,
-			})
-		}
-		for _, q := range enableInfo.Query {
-			querys = append(querys, &model.ExtendParams{
-				Name:  q.Name,
-				Value: q.Value,
-			})
-		}
-		for _, i := range enableInfo.Initialize {
-			initializes = append(initializes, &model.ExtendParams{
-				Name:  i.Name,
-				Value: i.Value,
-			})
-		}
-		enableCfg := &model.PluginEnableCfg{
-			APIGroup:   enableInfo.ApiGroup,
-			Server:     enableInfo.Server,
-			Header:     headers,
-			Query:      querys,
-			Initialize: initializes,
-		}
-		config, _ := json.Marshal(enableCfg)
-
 		enable := &entry.ModulePluginEnable{
 			Id:         pluginInfo.Id,
 			Name:       enableInfo.Name,
@@ -317,7 +315,7 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 			IsEnable:   2,
 			Config:     config,
 			Operator:   userID,
-			UpdateTime: t,
+			UpdateTime: time.Now(),
 		}
 		if err = m.pluginEnableStore.Save(txCtx, enable); err != nil {
 			return err
@@ -332,18 +330,35 @@ func (m *modulePluginService) DisablePlugin(ctx context.Context, userID int, plu
 	pluginInfo, err := m.pluginStore.GetPluginInfo(ctx, pluginUUID)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return modulePluginNotFound
+			return ErrModulePluginNotFound
 		}
 		return err
 	}
 	enableInfo, err := m.pluginEnableStore.Get(ctx, pluginInfo.Id)
-	return m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
-
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return ErrModulePluginHasDisabled
+		}
+		return err
 	}
+
+	return m.pluginEnableStore.Transaction(ctx, func(txCtx context.Context) error {
+		enableInfo.IsEnable = 1
+		enableInfo.Operator = userID
+		enableInfo.UpdateTime = time.Now()
+		_, err = m.pluginEnableStore.Update(txCtx, enableInfo)
+		if err != nil {
+			return err
+		}
+		//TODO 重新生成路由
+
+		return nil
+	})
 }
 
-func (m *modulePluginService) GetEnablePluginsByNavigation(ctx context.Context, navigationID int) ([]*entry.ModulePluginEnable, error){
-
+func (m *modulePluginService) GetEnablePluginsByNavigation(ctx context.Context, navigationID int) ([]*model.NavigationEnabledPlugin, error) {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (m *modulePluginService) GetEnabledPlugins(ctx context.Context) ([]*model.InstalledPlugin, error) {
