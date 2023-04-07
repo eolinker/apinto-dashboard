@@ -213,6 +213,7 @@ func (p *modulePluginController) getEnableInfo(ginCtx *gin.Context) {
 }
 
 func (p *modulePluginController) install(ginCtx *gin.Context) {
+	userId := controller.GetUserId(ginCtx)
 	pluginPackage, err := ginCtx.FormFile("plugin")
 	if err != nil {
 		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("install plugin FormFilefail. err:%s", err.Error())))
@@ -252,7 +253,7 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 
 	//TODO 将压缩包存放本地
 
-	err = p.modulePluginService.InstallPlugin(ginCtx, groupName, fileBuffer)
+	err = p.modulePluginService.InstallPlugin(ginCtx, userId, groupName, fileBuffer)
 	if err != nil {
 		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("install plugin fail. err:%s", err.Error())))
 		return
