@@ -14,4 +14,9 @@ type IModulePluginService interface {
 	InstallPlugin(ctx context.Context, groupName string, packageContent []byte) error
 	EnablePlugin(ctx context.Context, pluginUUID string, enableInfo *dto.PluginEnableInfo) error
 	DisablePlugin(ctx context.Context, pluginUUID string) error
+
+	//GetInstalledPlugins 获取已安装的插件信息列表
+	GetInstalledPlugins(ctx context.Context) ([]*model.InstalledPlugin, error)
+	//GetMiddlewareList 获取拦截器列表
+	GetMiddlewareList(ctx context.Context) ([]*model.MiddlewareItem, error)
 }
