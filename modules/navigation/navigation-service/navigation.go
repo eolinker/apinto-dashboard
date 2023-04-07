@@ -6,13 +6,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/eolinker/apinto-dashboard/modules/module-plugin/entry"
-
-	"github.com/eolinker/eosc/common/bean"
-
 	navigation_entry "github.com/eolinker/apinto-dashboard/modules/navigation/navigation-entry"
-
-	"gorm.io/gorm"
+	"github.com/eolinker/eosc/common/bean"
 
 	navigation_store "github.com/eolinker/apinto-dashboard/modules/navigation/navigation-store"
 
@@ -81,23 +76,37 @@ func (n *navigationService) List(ctx context.Context) ([]*navigation_model.Navig
 	if err != nil {
 		return nil, err
 	}
+	enablePlugins, err := pluginService.GetEnabledPlugins(ctx)
+	if err != nil {
+		return nil, err
+	}
+	pluginMap := make(map[string]string)
+	for _, p := range enablePlugins {
+		pluginMap[p.UUID] = p.Name
+	}
 	navigations := make([]*navigation_model.NavigationBasicInfo, 0)
 	for _, l := range list {
-		_, err = n.navigationStore.First(ctx, map[string]interface{}{
-			"navigation_uuid": l.Uuid,
-		})
-		canDel := false
+
+		moduleIDs := make([]string, 0)
+		if strings.TrimSpace(l.Module) == "" {
+			l.Module = "[]"
+		}
+		err = json.Unmarshal([]byte(l.Module), &moduleIDs)
 		if err != nil {
-			if err != gorm.ErrRecordNotFound {
-				return nil, err
+			return nil, err
+		}
+		canDelete := true
+		for _, id := range moduleIDs {
+			if _, ok := pluginMap[id]; ok {
+				canDelete = false
+				break
 			}
-			canDel = true
 		}
 		navigations = append(navigations, &navigation_model.NavigationBasicInfo{
 			Uuid:      l.Uuid,
 			Title:     l.Title,
 			Icon:      l.Icon,
-			CanDelete: canDel,
+			CanDelete: canDelete,
 			Sort:      l.Sort,
 		})
 	}
@@ -117,9 +126,9 @@ func (n *navigationService) Info(ctx context.Context, uuid string) (*navigation_
 	if err != nil {
 		return nil, err
 	}
-	pluginMap := make(map[string]*entry.ModulePluginEnable)
+	pluginMap := make(map[string]string)
 	for _, p := range enablePlugins {
-		pluginMap[p.Uuid] = p
+		pluginMap[p.UUID] = p.Name
 	}
 
 	moduleIDs := make([]string, 0)
@@ -134,8 +143,8 @@ func (n *navigationService) Info(ctx context.Context, uuid string) (*navigation_
 	for _, m := range moduleIDs {
 		if v, ok := pluginMap[m]; ok {
 			modules = append(modules, &navigation_model.Module{
-				Id:    v.Uuid,
-				Title: v.Name,
+				Id:    m,
+				Title: v,
 			})
 		}
 	}
