@@ -20,9 +20,9 @@ func RegisterCommonGroupRouter(router gin.IRoutes) {
 	c := &commonGroupController{}
 	bean.Autowired(&c.commonGroupService)
 	router.GET("/group/:group_type", c.groups)
-	router.POST("/group/:group_type", controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindCommonGroup), c.createGroup)
-	router.PUT("/group/:group_type/:uuid", controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindCommonGroup), c.updateGroup)
-	router.DELETE("/group/:group_type/:uuid", controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindCommonGroup), c.delGroup)
+	router.POST("/group/:group_type", controller.AuditLogHandler(enum.LogOperateTypeCreate, enum.LogKindCommonGroup, c.createGroup))
+	router.PUT("/group/:group_type/:uuid", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindCommonGroup, c.updateGroup))
+	router.DELETE("/group/:group_type/:uuid", controller.AuditLogHandler(enum.LogOperateTypeDelete, enum.LogKindCommonGroup, c.delGroup))
 	router.PUT("/groups/:group_type/sort", c.groupSort)
 }
 
