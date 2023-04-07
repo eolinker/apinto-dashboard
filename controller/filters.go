@@ -14,6 +14,7 @@ const (
 	Operate        = "Operate"
 	AuditKind      = "AuditKind"
 	LogBody
+	AuditObject
 )
 
 func GetUserId(ginCtx *gin.Context) int {
