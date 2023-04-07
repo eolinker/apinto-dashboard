@@ -2,9 +2,10 @@ package cluster_controller
 
 import (
 	"fmt"
-	"github.com/eolinker/apinto-module"
 	"net/http"
 	"strings"
+
+	"github.com/eolinker/apinto-module"
 )
 
 type ClusterPluginDriver struct {
@@ -36,6 +37,11 @@ type ClusterModule struct {
 	apiPrefix string
 	name      string
 	routers   apinto_module.RoutersInfo
+}
+
+func (c *ClusterModule) Access() []apinto_module.AccessInfo {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (c *ClusterModule) Name() string {
