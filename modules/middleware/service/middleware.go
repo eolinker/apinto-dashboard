@@ -30,9 +30,7 @@ type MiddlewareService struct {
 }
 
 func (m *MiddlewareService) Save(ctx context.Context, config string) error {
-	value, err := m.systemStore.First(ctx, map[string]interface{}{
-		"key": systemKey,
-	})
+	value, err := m.systemStore.GetSystemInfoByKey(ctx, systemKey)
 	if err != nil {
 		if err != gorm.ErrRecordNotFound {
 			return err
