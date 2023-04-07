@@ -31,12 +31,12 @@ func RegisterMiddlewareGroupRouter(router gin.IRoutes) {
 func (m *middlewareController) groups(ginCtx *gin.Context) {
 	groups, err := m.middlewareService.Groups(ginCtx)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	middlewares, err := m.modulePluginService.GetMiddlewareList(ginCtx)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 
 		return
 	}
@@ -51,16 +51,16 @@ func (m *middlewareController) save(ginCtx *gin.Context) {
 	input := new(dto.MiddlewaresInput)
 
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	if err := input.ValidCheck(); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	if err := m.middlewareService.Save(ginCtx, input.Groups); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 

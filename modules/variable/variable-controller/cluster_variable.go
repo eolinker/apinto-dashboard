@@ -77,7 +77,7 @@ func (c *clusterVariableController) post(ginCtx *gin.Context) {
 	item := &cluster_dto.ClusterVariableItem{}
 
 	if err := ginCtx.BindJSON(item); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -105,14 +105,14 @@ func (c *clusterVariableController) put(ginCtx *gin.Context) {
 	item := &cluster_dto.ClusterVariableItem{}
 
 	if err := ginCtx.BindJSON(item); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	userId := controller.GetUserId(ginCtx)
 	err := c.clusterVariableService.Update(ginCtx, namespaceID, clusterName, userId, key, item.Value)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -156,7 +156,7 @@ func (c *clusterVariableController) updateHistory(ginCtx *gin.Context) {
 
 	history, total, err := c.clusterVariableService.QueryHistory(ginCtx, namespaceId, pageNum, pageSize, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -189,7 +189,7 @@ func (c *clusterVariableController) syncConf(ginCtx *gin.Context) {
 
 	conf := new(cluster_dto.SyncConf)
 	if err := ginCtx.BindJSON(conf); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -199,7 +199,7 @@ func (c *clusterVariableController) syncConf(ginCtx *gin.Context) {
 	}
 	userId := controller.GetUserId(ginCtx)
 	if err := c.clusterVariableService.SyncConf(ginCtx, namespaceId, userId, clusterName, conf); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
@@ -214,7 +214,7 @@ func (c *clusterVariableController) toPublishs(ginCtx *gin.Context) {
 	background := ginCtx
 	list, err := c.clusterVariableService.ToPublishs(background, namespaceId, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -236,7 +236,7 @@ func (c *clusterVariableController) toPublishs(ginCtx *gin.Context) {
 
 	globalVariables, err := c.clusterVariableService.GetList(background, namespaceId, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -271,7 +271,7 @@ func (c *clusterVariableController) publish(ginCtx *gin.Context) {
 
 	input := &cluster_dto.VariablePublishInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	if input.VersionName == "" || input.Source == "" {
@@ -282,7 +282,7 @@ func (c *clusterVariableController) publish(ginCtx *gin.Context) {
 
 	globalVariables, err := c.clusterVariableService.GetList(background, namespaceId, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -301,7 +301,7 @@ func (c *clusterVariableController) publish(ginCtx *gin.Context) {
 
 	userId := controller.GetUserId(ginCtx)
 	if err = c.clusterVariableService.Publish(background, namespaceId, userId, clusterName, input.VersionName, input.Desc, input.Source); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
@@ -325,7 +325,7 @@ func (c *clusterVariableController) publishHistory(ginCtx *gin.Context) {
 
 	list, total, err := c.clusterVariableService.PublishHistory(ginCtx, namespaceId, pageNum, pageSize, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -363,7 +363,7 @@ func (c *clusterVariableController) getSyncConf(ginCtx *gin.Context) {
 	clusterName := ginCtx.Param("cluster_name")
 	conf, err := c.clusterVariableService.GetSyncConf(ginCtx, namespaceId, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	syncConf := new(cluster_dto.SyncConf)
