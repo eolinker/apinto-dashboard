@@ -1,6 +1,7 @@
 package store
 
 import (
+	"context"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/entry"
 	"github.com/eolinker/apinto-dashboard/store"
 )
@@ -11,6 +12,7 @@ var (
 
 type IModulePluginEnableStore interface {
 	store.IBaseStore[entry.ModulePluginEnable]
+	GetListByNavigation(ctx context.Context, navigationID int) ([]*entry.ModulePluginEnable, error)
 }
 
 type modulePluginEnable struct {
@@ -19,4 +21,10 @@ type modulePluginEnable struct {
 
 func newModulePluginEnableStore(db store.IDB) IModulePluginEnableStore {
 	return &modulePluginEnable{BaseStore: store.CreateStore[entry.ModulePluginEnable](db)}
+}
+
+func (m *modulePluginEnable) GetListByNavigation(ctx context.Context, navigationID int) ([]*entry.ModulePluginEnable, error) {
+	return m.List(ctx, map[string]interface{}{
+		"navigation": navigationID,
+	})
 }
