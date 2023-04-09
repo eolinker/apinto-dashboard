@@ -53,7 +53,7 @@ type ExtendParamsRender struct {
 	Desc        string `json:"desc" yaml:"desc"`
 }
 
-type InstalledPlugin struct {
+type EnabledPlugin struct {
 	UUID   string
 	Name   string
 	Driver string
@@ -114,6 +114,17 @@ type ProfessionDefine struct {
 	Driver     string            `json:"driver" yaml:"driver"`
 	Name       string            `json:"name" yaml:"name"`
 	Render     map[string]string `json:"render" yaml:"render"`
+}
+
+type InnerDefine struct {
+	ID      string                 `json:"id" yaml:"id"`
+	Name    string                 `json:"name" yaml:"name"`
+	Version string                 `json:"version" yaml:"version"`
+	ICon    string                 `json:"icon" yaml:"icon"`
+	Driver  string                 `json:"driver" yaml:"driver"`
+	Core    bool                   `json:"core" yaml:"core"`
+	Install *InnerPluginYmlInstall `json:"install" yaml:"install"`
+	Main    *InnerPluginYmlMain    `json:"main" yaml:"main"`
 }
 
 // MiddlewareItem 拦截器项结构体
