@@ -36,11 +36,6 @@ func newModulePlugin() module_plugin.IModulePlugin {
 	return s
 }
 
-func (m *modulePlugin) InstallInnerPlugin(ctx context.Context, pluginYml *model.InnerPluginYmlCfg) error {
-	//TODO implement me
-	panic("implement me")
-}
-
 func (m *modulePlugin) GetEnabledPlugins(ctx context.Context) ([]*model.EnabledPlugin, error) {
 	plugins, err := m.pluginStore.GetEnabledPlugins(ctx)
 	if err != nil {
