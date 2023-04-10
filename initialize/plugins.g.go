@@ -4,13 +4,10 @@ import (
 	"context"
 	"embed"
 	"encoding/json"
+	"github.com/eolinker/apinto-dashboard/modules/module-plugin/model"
 	"github.com/eolinker/eosc/common/bean"
 	"os"
 	"path"
-
-	"github.com/eolinker/apinto-dashboard/modules/module-plugin/dto"
-
-	"github.com/eolinker/apinto-dashboard/modules/module-plugin/model"
 
 	"gorm.io/gorm"
 
@@ -25,18 +22,14 @@ var (
 )
 
 type Plugin struct {
-	Id      string         `yaml:"id"`
-	Name    string         `yaml:"name"`
-	CName   string         `yaml:"cname"`
-	Version string         `yaml:"version"`
-	Icon    string         `yaml:"icon"`
-	Driver  string         `yaml:"driver"`
-	Core    bool           `yaml:"core"`
-	Install *PluginInstall `yaml:"install"`
-	Org     string         `yaml:"-"`
-}
-
-type PluginInstall struct {
+	Id         string `yaml:"id"`
+	Name       string `yaml:"name"`
+	CName      string `yaml:"cname"`
+	Resume     string `yaml:"resume"`
+	Version    string `yaml:"version"`
+	Icon       string `yaml:"icon"`
+	Driver     string `yaml:"driver"`
+	Core       bool   `yaml:"core"`
 	Auto       bool   `yaml:"auto"`
 	Front      string `yaml:"front"`
 	Navigation string `yaml:"navigation"`
@@ -51,37 +44,34 @@ func InitPlugins() error {
 		return err
 	}
 	for _, p := range plugins {
-		_, err := service.GetPluginInfo(ctx, p.Id)
+		//TODO 校验内置插件
+
+		pluginInfo, err := service.GetPluginInfo(ctx, p.Id)
 		if err != nil {
 			if err != gorm.ErrRecordNotFound {
 				return err
 			}
 			// 插入安装记录
-			err = service.InstallPlugin(ctx, 0, "", &model.PluginYmlCfg{
-				ID:     p.Id,
-				Name:   p.Name,
-				CName:  p.CName,
-				Resume: "",
-				ICon:   p.Icon,
-				Driver: p.Driver,
-			}, []byte(""))
-			if err != nil {
-				return err
-			}
-			navigation := ""
-			if p.Install != nil {
-				navigation = p.Install.Navigation
-			}
-			err = service.EnablePlugin(ctx, 0, p.Id, &dto.PluginEnableInfo{
+			err = service.InstallInnerPlugin(ctx, &model.InnerPluginYmlCfg{
+				ID:         p.Id,
 				Name:       p.Name,
-				Navigation: navigation,
-				ApiGroup:   "",
+				Version:    p.Version,
+				CName:      p.CName,
+				Resume:     p.Resume,
+				ICon:       p.Icon,
+				Driver:     p.Driver,
+				Front:      p.Front,
+				Navigation: p.Navigation,
+				Core:       p.Core,
+				Auto:       p.Auto,
 			})
 			if err != nil {
 				return err
 			}
 			continue
 		}
+		//TODO 判断version有没改变，有则更新
+
 	}
 	return nil
 }

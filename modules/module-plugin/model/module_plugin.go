@@ -146,16 +146,17 @@ type PluginYmlCfg struct {
 }
 
 type InnerPluginYmlCfg struct {
-	ID      string                 `json:"id" yaml:"id"`
-	Name    string                 `json:"name" yaml:"name"`
-	Version string                 `json:"version" yaml:"version"`
-	CName   string                 `json:"cname" yaml:"cname"`
-	Resume  string                 `json:"resume" yaml:"resume"`
-	ICon    string                 `json:"icon" yaml:"icon"`
-	Driver  string                 `json:"driver" yaml:"driver"`
-	Core    bool                   `json:"core" yaml:"core"`
-	Install *InnerPluginYmlInstall `json:"install" yaml:"install"`
-	Main    *InnerPluginYmlMain    `json:"main" yaml:"main"`
+	ID         string `json:"id" yaml:"id"`
+	Name       string `json:"name" yaml:"name"`
+	Version    string `json:"version" yaml:"version"`
+	CName      string `json:"cname" yaml:"cname"`
+	Resume     string `json:"resume" yaml:"resume"`
+	ICon       string `json:"icon" yaml:"icon"`
+	Driver     string `json:"driver" yaml:"driver"`
+	Front      string `json:"front" yaml:"front"`
+	Navigation string `json:"navigation" yaml:"navigation"`
+	Core       bool   `json:"core" yaml:"core"`
+	Auto       bool   `json:"auto" yaml:"auto"`
 }
 
 type InnerPluginYmlInstall struct {
