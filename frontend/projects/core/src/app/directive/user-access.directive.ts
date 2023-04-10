@@ -3,7 +3,7 @@
 import { Directive, ElementRef, EventEmitter, Input, OnInit, Output, Renderer2 } from '@angular/core'
 import { Router } from '@angular/router'
 import { Subscription } from 'rxjs'
-import { AppConfigService } from '../service/app-config.service'
+import { EoNgNavigationService } from '../service/eo-ng-navigation.service'
 
 @Directive({
   selector: '[eoNgUserAccess]'
@@ -18,7 +18,7 @@ export class UserAccessDirective implements OnInit {
   private subscription: Subscription = new Subscription()
   private subscription1: Subscription = new Subscription()
   constructor (
-    private appConfigService:AppConfigService,
+    private appConfigService:EoNgNavigationService,
     private el:ElementRef,
     private renderer:Renderer2,
     private router:Router) {

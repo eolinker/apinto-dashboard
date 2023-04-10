@@ -53,3 +53,15 @@ span.logo-title {
   text-align: center;
   padding: 12px 8px 12px 8px;
 }
+
+:host ::ng-deep {
+  .inside-menu-scroll eo-ng-menu-default {
+    overflow-x: hidden;
+    overflow-y: auto;
+    height: 100%;
+    display: block;
+  }
+  .inside-menu-scroll eo-ng-menu-default::-webkit-scrollbar {
+    width: 0px;
+  }
+}
