@@ -23,19 +23,19 @@ func NewDriver() *Driver {
 				Method:      http.MethodGet,
 				Path:        "/api/audit-logs",
 				Handler:     "audit.getLogs",
-				HandlerFunc: a.getLogs,
+				HandlerFunc: []apinto_module.HandlerFunc{a.getLogs},
 			},
 			{
 				Method:      http.MethodGet,
 				Path:        "/api/audit-log",
 				Handler:     "audit.getDetail",
-				HandlerFunc: a.getDetail,
+				HandlerFunc: []apinto_module.HandlerFunc{a.getDetail},
 			},
 			{
 				Method:      http.MethodGet,
 				Path:        "/api/audit-log/kinds",
 				Handler:     "audit.getTargets",
-				HandlerFunc: a.getTargets,
+				HandlerFunc: []apinto_module.HandlerFunc{a.getTargets},
 			},
 		},
 		middlewareHandler: []apinto_module.MiddlewareHandler{
