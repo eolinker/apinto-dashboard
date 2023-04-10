@@ -390,6 +390,11 @@ func (m *modulePluginService) GetEnablePluginsByNavigation(ctx context.Context, 
 	return plugins, nil
 }
 
+func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml *model.InnerPluginYmlCfg) error {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (m *modulePluginService) CheckPluginInstalled(ctx context.Context, pluginID string) (bool, error) {
 	isInstalled := false
 
