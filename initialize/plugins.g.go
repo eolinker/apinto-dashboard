@@ -4,9 +4,9 @@ import (
 	"context"
 	"embed"
 	"encoding/json"
-	"fmt"
 	"github.com/eolinker/eosc/common/bean"
 	"os"
+	"path"
 
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/dto"
 
@@ -46,7 +46,7 @@ func InitPlugins() error {
 	var service module_plugin.IModulePluginService
 	bean.Autowired(&service)
 	ctx := context.Background()
-	plugins, err := loadPlugins("plugins", "plugin.yml")
+	plugins, err := loadPlugins("./", "plugin.yml")
 	if err != nil {
 		return err
 	}
@@ -87,13 +87,13 @@ func InitPlugins() error {
 }
 
 func loadPlugins(dir string, target string) ([]*Plugin, error) {
-	entry, err := os.ReadDir(dir)
+	entries, err := pluginDir.ReadDir(dir)
 	if err != nil {
 		return nil, err
 	}
 	plugins := make([]*Plugin, 0)
-	for _, e := range entry {
-		nextFile := fmt.Sprintf("%s/%s", dir, e.Name())
+	for _, e := range entries {
+		nextFile := path.Join(dir, e.Name())
 		if e.IsDir() {
 			s, err := loadPlugins(nextFile, target)
 			if err != nil {
@@ -107,13 +107,14 @@ func loadPlugins(dir string, target string) ([]*Plugin, error) {
 			if err != nil {
 				return nil, err
 			}
-			var p Plugin
-			err = json.Unmarshal(s, &p)
+			p := new(Plugin)
+			err = json.Unmarshal(s, p)
 			if err != nil {
 				log.Errorf("parse file(%s) error: %w")
+				return nil, err
 			}
 			p.Org = string(s)
-			plugins = append(plugins, &p)
+			plugins = append(plugins, p)
 		}
 	}
 	return plugins, nil
