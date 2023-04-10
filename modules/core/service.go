@@ -8,7 +8,8 @@ import (
 
 type ICore interface {
 	http.Handler
-	ReloadModule(version string) error
+	ResetVersion(version string)
+	ReloadModule() error
 }
 
 type IProviders interface {

@@ -17,13 +17,17 @@ var (
 )
 
 type coreService struct {
-	handlerPointer      atomic.Pointer[http.Handler]
-	localVersionPointer atomic.Pointer[string]
-	lock                sync.Mutex
+	handlerPointer atomic.Pointer[http.Handler]
+	localVersion   string
+	lock           sync.Mutex
 
 	modulePluginService module_plugin.IModulePlugin
 	engineCreate        core.EngineCreate
 	providerService     core.IProviders
+}
+
+func (c *coreService) ResetVersion(version string) {
+
 }
 
 func (c *coreService) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -35,17 +39,13 @@ func (c *coreService) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	(*handler).ServeHTTP(w, r)
 }
 
-func (c *coreService) ReloadModule(version string) error {
+func (c *coreService) ReloadModule() error {
 
-	localVersion := c.localVersionPointer.Swap(&version)
-
-	if localVersion != nil && (*localVersion) == version {
-		return nil
-	}
+	lastVersion := "" // todo load lastVersion from redis or db
 	c.lock.Lock()
 	defer c.lock.Unlock()
-	localVersion = c.localVersionPointer.Load()
-	if localVersion != nil && (*localVersion) == version {
+
+	if c.localVersion != lastVersion {
 		// todo load module
 		// todo load middleware
 		err := c.rebuild()
@@ -104,8 +104,6 @@ func NewService(providerService core.IProviders) core.ICore {
 	}
 	bean.Autowired(&c.modulePluginService)
 	bean.Autowired(&c.engineCreate)
-	bean.AddInitializingBeanFunc(func() {
-		c.rebuild()
-	})
+
 	return c
 }
