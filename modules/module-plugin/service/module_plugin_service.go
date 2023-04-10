@@ -267,6 +267,12 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 		return err
 	}
 
+	err = m.lockService.Lock(locker_service.LockNameModulePlugin, pluginInfo.Id)
+	if err != nil {
+		return err
+	}
+	defer m.lockService.Unlock(locker_service.LockNameModulePlugin, pluginInfo.Id)
+
 	navigationID, err := m.navigationService.GetIDByUUID(ctx, enableInfo.Navigation)
 	if err != nil {
 		return err
@@ -328,6 +334,13 @@ func (m *modulePluginService) DisablePlugin(ctx context.Context, userID int, plu
 		}
 		return err
 	}
+
+	err = m.lockService.Lock(locker_service.LockNameModulePlugin, pluginInfo.Id)
+	if err != nil {
+		return err
+	}
+	defer m.lockService.Unlock(locker_service.LockNameModulePlugin, pluginInfo.Id)
+
 	enableInfo, err := m.pluginEnableStore.Get(ctx, pluginInfo.Id)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {

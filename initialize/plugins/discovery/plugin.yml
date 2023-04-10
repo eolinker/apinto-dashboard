@@ -1,5 +1,7 @@
 id: "discovery.apinto.com"
 name: "discovery"
+cname: "服务发现"
+resume: ""
 version: "v1.0"
 icon: ""
 driver: "discovery.apinto.com"
