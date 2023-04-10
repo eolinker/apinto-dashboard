@@ -26,9 +26,9 @@ type PluginEnableInfo struct {
 	Navigation string
 	ApiGroup   string
 	Server     string
-	Header     []ExtendParams
-	Query      []ExtendParams
-	Initialize []ExtendParams
+	Header     []*ExtendParams
+	Query      []*ExtendParams
+	Initialize []*ExtendParams
 }
 
 type PluginEnableRender struct {
@@ -53,7 +53,8 @@ type ExtendParamsRender struct {
 	Desc        string `json:"desc" yaml:"desc"`
 }
 
-type InstalledPlugin struct {
+type EnabledPlugin struct {
+	UUID   string
 	Name   string
 	Driver string
 	Config *PluginEnableCfg
@@ -62,11 +63,11 @@ type InstalledPlugin struct {
 
 // PluginEnableCfg 插件启用时的配置
 type PluginEnableCfg struct {
-	APIGroup   string         `json:"api_group"`
-	Server     string         `json:"server"`
-	Header     []ExtendParams `json:"header"`
-	Query      []ExtendParams `json:"query"`
-	Initialize []ExtendParams `json:"initialize"`
+	APIGroup   string          `json:"api_group"`
+	Server     string          `json:"server"`
+	Header     []*ExtendParams `json:"header"`
+	Query      []*ExtendParams `json:"query"`
+	Initialize []*ExtendParams `json:"initialize"`
 }
 
 // RemoteDefine 插件配置文件的driver为remote时的详细配置
@@ -115,6 +116,17 @@ type ProfessionDefine struct {
 	Render     map[string]string `json:"render" yaml:"render"`
 }
 
+type InnerDefine struct {
+	ID      string                 `json:"id" yaml:"id"`
+	Name    string                 `json:"name" yaml:"name"`
+	Version string                 `json:"version" yaml:"version"`
+	ICon    string                 `json:"icon" yaml:"icon"`
+	Driver  string                 `json:"driver" yaml:"driver"`
+	Core    bool                   `json:"core" yaml:"core"`
+	Install *InnerPluginYmlInstall `json:"install" yaml:"install"`
+	Main    *InnerPluginYmlMain    `json:"main" yaml:"main"`
+}
+
 // MiddlewareItem 拦截器项结构体
 type MiddlewareItem struct {
 	Name string `json:"name"`
@@ -154,4 +166,10 @@ type InnerPluginYmlInstall struct {
 
 type InnerPluginYmlMain struct {
 	Middleware []string `json:"middleware" yaml:"middleware"`
+}
+
+// NavigationEnabledPlugin 用于给导航返回的
+type NavigationEnabledPlugin struct {
+	*entry.ModulePluginEnable
+	UUID string
 }

@@ -1,5 +1,7 @@
 id: "plugin_template.apinto.com"
 name: "plugin_template"
+cname: "插件模板"
+resume: ""
 version: "v1.0"
 icon: ""
 driver: "plugin_template.apinto.com"

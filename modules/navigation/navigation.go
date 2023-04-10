@@ -13,6 +13,7 @@ type INavigationService interface {
 	List(ctx context.Context) ([]*navigation_model.NavigationBasicInfo, error)
 	Info(ctx context.Context, uuid string) (*navigation_model.Navigation, error)
 	GetUUIDByID(ctx context.Context, id int) (string, error)
+	GetIDByUUID(ctx context.Context, uuid string) (int, error)
 	// Sort 更新排序
 	Sort(ctx context.Context, uuids []string) error
 }

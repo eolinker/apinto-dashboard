@@ -1,5 +1,7 @@
 id: "cluster_plugin.apinto.com"
 name: "cluster_plugin"
+cname: "集群插件"
+resume: ""
 version: "v1.0"
 icon: ""
 driver: "cluster_plugin.apinto.com"
