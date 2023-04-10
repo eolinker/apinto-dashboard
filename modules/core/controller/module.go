@@ -128,7 +128,7 @@ func (p *Plugin) NewModule(name, apiPrefix string) *Module {
 			Method:      http.MethodGet,
 			Path:        fmt.Sprintf("/api/common/provider/:name"),
 			Handler:     "core.provider",
-			HandlerFunc: p.provider,
+			HandlerFunc: []apinto_module.HandlerFunc{p.provider},
 		},
 	}
 
