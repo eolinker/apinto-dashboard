@@ -24,16 +24,15 @@ var (
 )
 
 type Plugin struct {
-	Id         string         `yaml:"id"`
-	Name       string         `yaml:"name"`
-	CName      string         `yaml:"cname"`
-	Version    string         `yaml:"version"`
-	Icon       string         `yaml:"icon"`
-	Driver     string         `yaml:"driver"`
-	Core       bool           `yaml:"core"`
-	Install    *PluginInstall `yaml:"install"`
-	Navigation string         `json:"navigation"`
-	Org        string         `yaml:"-"`
+	Id      string         `yaml:"id"`
+	Name    string         `yaml:"name"`
+	CName   string         `yaml:"cname"`
+	Version string         `yaml:"version"`
+	Icon    string         `yaml:"icon"`
+	Driver  string         `yaml:"driver"`
+	Core    bool           `yaml:"core"`
+	Install *PluginInstall `yaml:"install"`
+	Org     string         `yaml:"-"`
 }
 
 type PluginInstall struct {
@@ -66,9 +65,13 @@ func initPlugins(service module_plugin.IModulePluginService) error {
 			if err != nil {
 				return err
 			}
+			navigation := ""
+			if p.Install != nil {
+				navigation = p.Install.Navigation
+			}
 			err = service.EnablePlugin(ctx, 0, p.Id, &dto.PluginEnableInfo{
 				Name:       p.Name,
-				Navigation: p.Navigation,
+				Navigation: navigation,
 				ApiGroup:   "",
 			})
 			if err != nil {
