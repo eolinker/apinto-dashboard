@@ -1,0 +1,125 @@
+<div>
+  <form
+    nz-form
+    [nzNoColon]="true"
+    [nzAutoTips]="autoTips"
+    [formGroup]="validateForm"
+    autocomplete="off"
+  >
+    <nz-form-item class="form-row" *ngIf="invisible">
+      <nz-form-label class="w-[124px]" nzRequired
+        >所属的一级导航：</nz-form-label
+      >
+      <nz-form-control>
+        <div class="flex items-center">
+          <eo-ng-select
+            class="w-[284px] mr-btnybase"
+            name="navigation"
+            required
+            formControlName="navigation"
+            [nzOptions]="navigationList"
+            nzPlaceHolder="请选择"
+            [nzDisabled]="nzDisabled"
+          ></eo-ng-select>
+
+          <button eo-ng-button (click)="goToNavigation()">新建</button>
+        </div>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item class="form-row" *ngIf="showServer">
+      <nz-form-label class="w-[124px]" nzRequired>服务器地址：</nz-form-label>
+      <nz-form-control>
+        <input
+          class="w-INPUT_NORMAL"
+          eo-ng-input
+          name="server"
+          required
+          placeholder="请输入"
+          formControlName="server"
+        />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item class="form-row" *ngIf="showApiGroup">
+      <nz-form-label class="w-[124px]" nzRequired>分组前缀：</nz-form-label>
+      <nz-form-control>
+        <input
+          class="w-INPUT_NORMAL"
+          eo-ng-input
+          name="apiGroup"
+          required
+          placeholder="请输入"
+          formControlName="apiGroup"
+        />
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+
+  <div
+    *ngIf="headerList?.length"
+    nz-row
+    nzJustify="start"
+    nzAligh="top"
+    class="mb-formtop"
+  >
+    <div nz-col>
+      <label class="label table-label block w-[124px]">Header参数：</label>
+    </div>
+    <div nz-col class="" style="width: 100%">
+      <div class="drawer-list-content">
+        <eo-ng-apinto-table
+          class="drawer-table"
+          [nzTbody]="configTableBody"
+          [nzThead]="configTableHeadName"
+          [(nzData)]="headerList"
+          [nzNoScroll]="true"
+          [nzCheckAddRow]="nzCheckAddRow"
+        >
+        </eo-ng-apinto-table>
+      </div>
+    </div>
+  </div>
+  <div
+    *ngIf="queryList?.length"
+    nz-row
+    nzJustify="start"
+    nzAligh="top"
+    class="mb-formtop"
+  >
+    <div nz-col>
+      <label class="label table-label block w-[124px]">Query参数：</label>
+    </div>
+    <div nz-col class="" style="width: 100%">
+      <div class="drawer-list-content" style="padding-bottom: 0px">
+        <eo-ng-apinto-table
+          class="drawer-table"
+          [nzTbody]="configTableBody"
+          [nzThead]="configTableHeadName"
+          [(nzData)]="queryList"
+          [nzNoScroll]="true"
+          [nzCheckAddRow]="nzCheckAddRow"
+        >
+        </eo-ng-apinto-table>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="initializeList?.length" nz-row nzJustify="start" nzAligh="top">
+    <div nz-col>
+      <label class="label table-label block w-[124px]">Initialize参数：</label>
+    </div>
+    <div nz-col class="" style="width: 100%">
+      <div class="drawer-list-content" style="padding-bottom: 0px">
+        <eo-ng-apinto-table
+          class="drawer-table"
+          [nzTbody]="configTableBody"
+          [nzThead]="configTableHeadName"
+          [(nzData)]="initializeList"
+          [nzNoScroll]="true"
+          [nzCheckAddRow]="nzCheckAddRow"
+        >
+        </eo-ng-apinto-table>
+      </div>
+    </div>
+  </div>
+</div>

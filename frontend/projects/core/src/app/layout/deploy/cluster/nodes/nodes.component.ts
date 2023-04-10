@@ -9,7 +9,7 @@ import { NzModalRef } from 'ng-zorro-antd/modal'
 import { MODAL_NORMAL_SIZE } from 'projects/core/src/app/constant/app.config'
 import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { ApiService } from 'projects/core/src/app/service/api.service'
-import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 import { BaseInfoService } from 'projects/core/src/app/service/base-info.service'
 import { DeployClusterNodeTbody, DeployClusterNodeThead } from '../types/conf'
 import { DeployClusterNodesFormComponent } from './form/form.component'
@@ -46,7 +46,7 @@ export class DeployClusterNodesComponent implements OnInit {
                 private baseInfo:BaseInfoService,
                 private message: EoNgFeedbackMessageService,
                 private api:ApiService, private router:Router,
-                private appConfigService:AppConfigService) {
+                private appConfigService:EoNgNavigationService) {
     this.appConfigService.reqFlashBreadcrumb([{ title: '网关集群', routerLink: 'deploy/cluster' }, { title: '网关节点' }])
   }
 

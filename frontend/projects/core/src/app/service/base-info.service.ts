@@ -47,6 +47,11 @@ export interface RouteParams {
   // 系统-外部应用id
   extAppId:string
   roleId:string
+
+  // 插件管理
+  pluginGroupId:string
+  pluginId:string
+  mdFileName:string
 }
 
 @Injectable({
