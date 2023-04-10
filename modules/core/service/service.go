@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"github.com/eolinker/apinto-dashboard/modules/core"
-	"github.com/eolinker/apinto-dashboard/modules/middleware"
 	module_plugin "github.com/eolinker/apinto-dashboard/modules/module-plugin"
 	apinto_module "github.com/eolinker/apinto-module"
 	"github.com/eolinker/eosc/common/bean"
@@ -22,8 +21,7 @@ type coreService struct {
 	localVersionPointer atomic.Pointer[string]
 	lock                sync.Mutex
 
-	middlewareService   middleware.IMiddlewareService
-	modulePluginService module_plugin.IModulePluginService
+	modulePluginService module_plugin.IModulePlugin
 	engineCreate        core.EngineCreate
 	providerService     core.IProviders
 }
@@ -64,10 +62,7 @@ func (c *coreService) rebuild() error {
 	if err != nil {
 		return err
 	}
-	middlewaresConfig, err := c.middlewareService.Groups(ctx)
-	if err != nil {
-		return err
-	}
+
 	builder := apinto_module.NewModuleBuilder(c.engineCreate.CreateEngine())
 	for _, module := range modules {
 		driver, has := apinto_module.GetDriver(module.Driver)
@@ -93,14 +88,8 @@ func (c *coreService) rebuild() error {
 		}
 		builder.Append(m)
 	}
-	middlewares := make([]apinto_module.MiddlewareConfig, 0, len(middlewaresConfig))
-	for _, mid := range middlewaresConfig {
-		middlewares = append(middlewares, apinto_module.MiddlewareConfig{
-			Prefix:   mid.Prefix,
-			Handlers: mid.Middlewares,
-		})
-	}
-	handler, provider, err := builder.Build(middlewares)
+
+	handler, provider, err := builder.Build()
 	if err != nil {
 		return err
 	}
@@ -114,7 +103,6 @@ func NewService(providerService core.IProviders) core.ICore {
 		providerService: providerService,
 	}
 	bean.Autowired(&c.modulePluginService)
-	bean.Autowired(&c.middlewareService)
 	bean.Autowired(&c.engineCreate)
 	bean.AddInitializingBeanFunc(func() {
 		c.rebuild()
