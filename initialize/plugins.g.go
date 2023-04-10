@@ -5,6 +5,7 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"github.com/eolinker/eosc/common/bean"
 	"os"
 
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/dto"
@@ -41,7 +42,9 @@ type PluginInstall struct {
 	Navigation string `yaml:"navigation"`
 }
 
-func initPlugins(service module_plugin.IModulePluginService) error {
+func InitPlugins() error {
+	var service module_plugin.IModulePluginService
+	bean.Autowired(&service)
 	ctx := context.Background()
 	plugins, err := loadPlugins("plugins", "plugin.yml")
 	if err != nil {
