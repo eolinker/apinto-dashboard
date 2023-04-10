@@ -51,7 +51,8 @@ func run() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	// todo 执行导航初始化
+	// todo 执行内置插件初始化
 	go plugin_timer.ExtenderTimer()
 	// todo 不适合开源，后续通过插件接入
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", GetPort()))
