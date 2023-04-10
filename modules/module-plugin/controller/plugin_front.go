@@ -1,8 +1,10 @@
 package controller
 
 import (
-	"errors"
 	"fmt"
+	"github.com/eolinker/apinto-dashboard/controller"
+	module_plugin "github.com/eolinker/apinto-dashboard/modules/module-plugin"
+	"github.com/eolinker/eosc/common/bean"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
@@ -10,36 +12,41 @@ import (
 
 const fileDir = "./plugin"
 
-var (
-	filePathErr = errors.New("filePath is illegal. ")
-)
-
 type pluginFrontController struct {
+	modulePluginService module_plugin.IModulePluginService
 }
 
 func RegisterPluginFrontRouter(router gin.IRoutes) {
 	p := &pluginFrontController{}
+	bean.Autowired(&p.modulePluginService)
+
 	router.GET("/plugin/icon/:id/:file", p.checkPluginID, p.setIConName, p.getPluginInfo)
 	router.GET("/plugin/icon/:id", p.checkPluginID, p.setIConName, p.getPluginInfo)
-
 	router.GET("/plugin/md/:id/:file", p.checkPluginID, p.setMDName, p.getPluginInfo)
 	router.GET("/plugin/md/:id", p.checkPluginID, p.setMDName, p.getPluginInfo)
-
 	router.GET("/plugin/info/:id/resources/*filepath", p.checkPluginID, p.getPluginResources)
 }
 
 func (p *pluginFrontController) checkPluginID(c *gin.Context) {
 	pluginID := c.Param("id")
-	//TODO 若不存在
-	c.Data(http.StatusNotFound, "application/text", []byte("404 page not found"))
-	c.Abort()
+
+	isExist, err := p.modulePluginService.CheckPluginInstalled(c, pluginID)
+	if err != nil {
+		controller.ErrorJson(c, http.StatusOK, err.Error())
+		c.Abort()
+	}
+
+	if !isExist {
+		c.Data(http.StatusNotFound, "application/text", []byte("404 page not found"))
+		c.Abort()
+	}
 }
 
 func (p *pluginFrontController) setIConName(c *gin.Context) {
 	fileName := c.Param("file")
 	if fileName == "" {
 		//TODO 获取插件配置文件内的icon
-		fileName = ""
+		fileName = "icon"
 	}
 	c.Set("file", fileName)
 	c.Set("strip_prefix", "/plugin/icon")
@@ -58,6 +65,7 @@ func (p *pluginFrontController) getPluginInfo(c *gin.Context) {
 	pluginID := c.Param("id")
 	fileName := c.GetString("file")
 	stripPrefix := c.GetString("strip_prefix")
+
 	filePath := fmt.Sprintf("%s/%s", pluginID, fileName)
 
 	pluginFs := gin.Dir(fileDir, false)
