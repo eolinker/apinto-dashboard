@@ -13,7 +13,7 @@ func init() {
 	bean.Injection(&iModulePlugin)
 
 	cache.RegisterCacheInitHandler(func(client *redis.ClusterClient) {
-		iExtenderCache := newIExtenderCache(client)
-		bean.Injection(&iExtenderCache)
+		iInstalledCache := newIInstalledCache(client)
+		bean.Injection(&iInstalledCache)
 	})
 }
