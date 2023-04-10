@@ -9,12 +9,3 @@ core: true
 install:
   auto: true
   front: ""
-main:
-  middleware:
-
-
-
-
-
-
-
