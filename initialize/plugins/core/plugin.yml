@@ -11,10 +11,9 @@ install:
   front: ""
 main:
   middleware:
-    - logger
-    - namespace
-    - gzip
-    - expire
+
+
+
 
 
 
