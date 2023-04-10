@@ -5,7 +5,10 @@ import (
 	"github.com/eolinker/eosc/common/bean"
 )
 
-var pluginService module_plugin.IModulePluginService
+var (
+	pluginService       module_plugin.IModulePlugin
+	modulePluginService module_plugin.IModulePluginService
+)
 
 func init() {
 	service := newNavigationService()
