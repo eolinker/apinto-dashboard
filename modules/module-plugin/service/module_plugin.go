@@ -1,30 +1,19 @@
 package service
 
 import (
-	"context"
+	context "context"
 	"encoding/json"
-	"errors"
-	"github.com/eolinker/apinto-dashboard/modules/base/locker-service"
+	"fmt"
+	locker_service "github.com/eolinker/apinto-dashboard/modules/base/locker-service"
 	"github.com/eolinker/apinto-dashboard/modules/group"
-	group_service "github.com/eolinker/apinto-dashboard/modules/group/group-service"
 	module_plugin "github.com/eolinker/apinto-dashboard/modules/module-plugin"
-	"github.com/eolinker/apinto-dashboard/modules/module-plugin/dto"
-	"github.com/eolinker/apinto-dashboard/modules/module-plugin/entry"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/model"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/store"
 	"github.com/eolinker/apinto-dashboard/modules/navigation"
 	"github.com/eolinker/eosc/common/bean"
-	"github.com/go-basic/uuid"
-	"gorm.io/gorm"
-	"time"
 )
 
-var (
-	modulePluginNotFound     = errors.New("plugin doesn't exist. ")
-	ErrModulePluginInstalled = errors.New("plugin has installed. ")
-)
-
-type modulePluginService struct {
+type modulePlugin struct {
 	pluginStore        store.IModulePluginStore
 	pluginEnableStore  store.IModulePluginEnableStore
 	pluginPackageStore store.IModulePluginPackageStore
@@ -34,9 +23,9 @@ type modulePluginService struct {
 	lockService       locker_service.IAsynLockService
 }
 
-func newModulePluginService() module_plugin.IModulePluginService {
+func newModulePlugin() module_plugin.IModulePlugin {
 
-	s := &modulePluginService{}
+	s := &modulePlugin{}
 	bean.Autowired(&s.pluginStore)
 	bean.Autowired(&s.pluginEnableStore)
 	bean.Autowired(&s.pluginPackageStore)
@@ -47,251 +36,79 @@ func newModulePluginService() module_plugin.IModulePluginService {
 	return s
 }
 
-func (m *modulePluginService) GetPlugins(ctx context.Context, groupUUID, searchName string) ([]*model.ModulePluginItem, error) {
-	groupID := -1
-	if groupUUID != "" {
-		groupInfo, err := m.commonGroup.GetGroupInfo(ctx, groupUUID)
-		if err != nil {
-			return nil, err
-		}
-		groupID = groupInfo.Id
-	}
-	pluginEntries, err := m.pluginStore.GetPluginList(ctx, groupID, searchName)
-	if err != nil {
-		return nil, err
-	}
-	plugins := make([]*model.ModulePluginItem, 0, len(pluginEntries))
-	for _, pluginEntry := range pluginEntries {
-		plugin := &model.ModulePluginItem{
-			ModulePlugin: pluginEntry,
-			IsEnable:     false,
-			IsInner:      true,
-		}
-		//若为非内置
-		if pluginEntry.Type == 2 {
-			plugin.IsInner = false
-		}
-		enableEntry, err := m.pluginEnableStore.Get(ctx, pluginEntry.Id)
-		if err != nil {
-			//若启用表没有插件信息，则为未启用
-			if err == gorm.ErrRecordNotFound {
-				plugin.IsEnable = false
-				plugins = append(plugins, plugin)
-				continue
-			}
-			return nil, err
-		}
-
-		//若插件已启用
-		if enableEntry.IsEnable == 2 {
-			plugin.IsEnable = true
-		}
-		plugins = append(plugins, plugin)
-	}
-	return plugins, nil
+func (m *modulePlugin) InstallInnerPlugin(ctx context.Context, pluginYml *model.InnerPluginYmlCfg) error {
+	//TODO implement me
+	panic("implement me")
 }
 
-func (m *modulePluginService) GetPluginInfo(ctx context.Context, pluginUUID string) (*model.ModulePluginInfo, error) {
-	plugin, err := m.pluginStore.GetPluginInfo(ctx, pluginUUID)
+func (m *modulePlugin) GetEnabledPlugins(ctx context.Context) ([]*model.EnabledPlugin, error) {
+	plugins, err := m.pluginStore.GetEnabledPlugins(ctx)
 	if err != nil {
 		return nil, err
 	}
-
-	info := &model.ModulePluginInfo{
-		ModulePlugin: plugin,
-		IsEnable:     false,
-		Uninstall:    true,
-	}
-	//若为非内置
-	if plugin.Type == 2 {
-		info.Uninstall = false
-	}
-
-	enableEntry, err := m.pluginEnableStore.Get(ctx, plugin.Id)
-	if err != nil && err != gorm.ErrRecordNotFound {
-		if err == gorm.ErrRecordNotFound {
-			return info, nil
+	enablePlugins := make([]*model.EnabledPlugin, 0, len(plugins))
+	for _, p := range plugins {
+		enableCfg := new(model.PluginEnableCfg)
+		_ = json.Unmarshal(p.Config, enableCfg)
+		enablePlugin := &model.EnabledPlugin{
+			UUID:   p.UUID,
+			Name:   p.Name,
+			Driver: p.Driver,
+			Config: enableCfg,
+			Define: nil,
 		}
-		return nil, err
-	}
-
-	//若插件已启用
-	if enableEntry.IsEnable == 2 {
-		info.IsEnable = true
-	}
-	return info, nil
-}
-
-func (m *modulePluginService) GetPluginGroups(ctx context.Context) ([]*model.PluginGroup, error) {
-	groupEntries, err := m.commonGroup.GroupListAll(ctx, -1, group_service.ModulePlugin, group_service.ModulePlugin)
-	if err != nil {
-		return nil, err
-	}
-	groups := make([]*model.PluginGroup, 0, len(groupEntries))
-	for _, entry := range groupEntries {
-		groups = append(groups, &model.PluginGroup{
-			UUID: entry.Uuid,
-			Name: entry.Name,
-		})
-	}
-	return groups, nil
-}
-
-func (m *modulePluginService) GetPluginEnableInfo(ctx context.Context, pluginUUID string) (*model.PluginEnableInfo, error) {
-	pluginInfo, err := m.pluginStore.GetPluginInfo(ctx, pluginUUID)
-	if err != nil {
-		return nil, err
-	}
-	enableEntry, err := m.pluginEnableStore.Get(ctx, pluginInfo.Id)
-	if err != nil {
-		return nil, err
-	}
-
-	//通过导航id获取导航信息
-	navigationUUID, _ := m.navigationService.GetUUIDByID(ctx, enableEntry.Navigation)
-
-	enableCfg := new(model.PluginEnableCfg)
-
-	info := &model.PluginEnableInfo{
-		Name:       enableEntry.Name,
-		Navigation: navigationUUID,
-		ApiGroup:   enableCfg.APIGroup,
-		Server:     enableCfg.Server,
-		Header:     enableCfg.Header,
-		Query:      enableCfg.Query,
-		Initialize: enableCfg.Initialize,
-	}
-
-	return info, nil
-}
-
-func (m *modulePluginService) GetPluginEnableRender(ctx context.Context, pluginUUID string) (*model.PluginEnableRender, error) {
-	pluginInfo, err := m.pluginStore.GetPluginInfo(ctx, pluginUUID)
-	if err != nil {
-		return nil, err
-	}
-
-	renderCfg := &model.PluginEnableRender{
-		Internet:  false,
-		Invisible: true,
-		ApiGroup:  false,
-	}
-	switch pluginInfo.Driver {
-	case "remote":
-		remoteDefine := new(model.RemoteDefine)
-		_ = json.Unmarshal([]byte(pluginInfo.Details), remoteDefine)
-		if !remoteDefine.Internet {
-			renderCfg.Internet = true
-		}
-		renderCfg.Querys = remoteDefine.Querys
-		renderCfg.Initialize = remoteDefine.Initialize
-	case "local":
-		renderCfg.ApiGroup = true
-		localDefine := new(model.LocalDefine)
-		_ = json.Unmarshal([]byte(pluginInfo.Details), localDefine)
-		renderCfg.Headers = localDefine.Headers
-		renderCfg.Querys = localDefine.Querys
-		renderCfg.Initialize = localDefine.Initialize
-		renderCfg.Invisible = localDefine.Invisible
-	}
-	return renderCfg, nil
-}
-
-func (m *modulePluginService) InstallPlugin(ctx context.Context, userID int, groupName string, pluginYml *model.PluginYmlCfg, packageContent []byte) error {
-	//通过插件id来判断插件是否已安装
-	_, err := m.pluginStore.GetPluginInfo(ctx, pluginYml.ID)
-	if err != nil && err != gorm.ErrRecordNotFound {
-		return err
-	}
-	if err == gorm.ErrRecordNotFound {
-		return ErrModulePluginInstalled
-	}
-
-	//判断groupName存不存在，不存在则新建
-	groupInfo, err := m.commonGroup.GetGroupByName(ctx, groupName, 0)
-	if err != nil && err != gorm.ErrRecordNotFound {
-		return err
-	}
-
-	groupID := 0
-	return m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
-		if err == gorm.ErrRecordNotFound {
-			groupID, err = m.commonGroup.CreateGroup(txCtx, -1, userID, group_service.ModulePlugin, "", groupName, uuid.New(), "")
-		} else {
-			groupID = groupInfo.Id
-		}
-
-		t := time.Now()
-		var details []byte
-		switch pluginYml.Driver {
+		switch p.Driver {
 		case "remote":
-			details, _ = json.Marshal(pluginYml.Remote)
+			remote := new(model.RemoteDefine)
+			_ = json.Unmarshal(p.Define, remote)
+			enablePlugin.Define = remote
 		case "local":
-			details, _ = json.Marshal(pluginYml.Local)
+			local := new(model.LocalDefine)
+			_ = json.Unmarshal(p.Define, local)
+			enablePlugin.Define = local
 		case "profession":
-			details, _ = json.Marshal(pluginYml.Profession)
+			profession := new(model.ProfessionDefine)
+			_ = json.Unmarshal(p.Define, profession)
+			enablePlugin.Define = profession
+		default:
+
 		}
 
-		pluginInfo := &entry.ModulePlugin{
-			UUID:       pluginYml.ID,
-			Name:       pluginYml.Name,
-			Group:      groupID,
-			CName:      pluginYml.CName,
-			Resume:     pluginYml.Resume,
-			ICon:       pluginYml.ICon,
-			Type:       2,
-			Driver:     pluginYml.Driver,
-			Details:    details,
-			Operator:   userID,
-			CreateTime: t,
+		enablePlugins = append(enablePlugins, enablePlugin)
+	}
+	return enablePlugins, nil
+}
+
+func (m *modulePlugin) GetMiddlewareList(ctx context.Context) ([]*model.MiddlewareItem, error) {
+	plugins, err := m.pluginStore.GetEnabledPlugins(ctx)
+	if err != nil {
+		return nil, err
+	}
+	middlewares := make([]*model.MiddlewareItem, 0, len(plugins))
+	for _, p := range plugins {
+		switch p.Driver {
+		case "remote", "profession":
+		case "local":
+			local := new(model.LocalDefine)
+			_ = json.Unmarshal(p.Define, local)
+			for _, l := range local.Middleware {
+				middlewares = append(middlewares, &model.MiddlewareItem{
+					Name: fmt.Sprintf("%s.%s", p.Name, l.Name),
+					Desc: l.Desc,
+				})
+			}
+			//内置插件
+		default:
+			inner := new(model.InnerDefine)
+			_ = json.Unmarshal(p.Define, inner)
+			for _, i := range inner.Main.Middleware {
+				middlewares = append(middlewares, &model.MiddlewareItem{
+					Name: fmt.Sprintf("%s.%s", p.Name, i),
+					Desc: "",
+				})
+			}
 		}
-		if err = m.pluginStore.Save(txCtx, pluginInfo); err != nil {
-			return err
-		}
 
-		return m.pluginPackageStore.Save(txCtx, &entry.ModulePluginPackage{
-			Id:      pluginInfo.Id,
-			Package: packageContent,
-		})
-
-	})
-}
-
-func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml *model.InnerPluginYmlCfg) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, pluginUUID string, enableInfo *dto.PluginEnableInfo) error {
-	//pluginInfo, err := m.pluginStore.GetPluginInfo(ctx, pluginUUID)
-	//if err != nil {
-	//	if err == gorm.ErrRecordNotFound{
-	//		return modulePluginNotFound
-	//	}
-	//	return err
-	//}
-	//
-	//m.pluginEnableStore.Get(ctx, pluginInfo.Id)
-	//
-	//
-	//return m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
-	//	t := time.Now()
-	//
-	//})
-	return nil
-}
-
-func (m *modulePluginService) DisablePlugin(ctx context.Context, userID int, pluginUUID string) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (m *modulePluginService) GetEnabledPlugins(ctx context.Context) ([]*model.InstalledPlugin, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (m *modulePluginService) GetMiddlewareList(ctx context.Context) ([]*model.MiddlewareItem, error) {
-	//TODO implement me
-	panic("implement me")
+	}
+	return middlewares, nil
 }

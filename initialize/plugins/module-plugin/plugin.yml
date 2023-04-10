@@ -1,5 +1,7 @@
 id: "module_plugin.apinto.com"
 name: "module_plugin"
+cname: "插件管理"
+resume: ""
 version: "v1.0"
 icon: ""
 driver: "module_plugin.apinto.com"

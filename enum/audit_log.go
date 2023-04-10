@@ -92,6 +92,7 @@ const (
 	LogKindClusterPlugin   = "cluster_plugin"
 	LogKindPluginTemplate  = "plugin_template"
 	LogKindMiddleware      = "middleware"
+	LogKindNavigation      = "navigation"
 )
 
 var (
