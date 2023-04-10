@@ -1,5 +1,7 @@
 id: "cluster.apinto.com"
 name: "cluster"
+cname: "集群管理"
+resume: ""
 version: "v1.0"
 icon: ""
 driver: "cluster.apinto.com"
