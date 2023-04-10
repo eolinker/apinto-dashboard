@@ -6,7 +6,6 @@ version: "v1.0"
 icon: ""
 driver: "api.apinto.com"
 core: false
-
-  auto: true
-  front: router/api
-  navigation: "navigation.api"
+auto: true
+front: router/api
+navigation: "navigation.api"
