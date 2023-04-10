@@ -3,7 +3,6 @@ package controller
 import (
 	"errors"
 	"fmt"
-	"github.com/eolinker/eosc/log"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
@@ -20,71 +19,49 @@ type pluginFrontController struct {
 
 func RegisterPluginFrontRouter(router gin.IRoutes) {
 	p := &pluginFrontController{}
-	router.GET("/plugin/icon/*filepath", p.getPluginICON)
-	router.GET("/plugin/md/*filepath", p.getPluginMD)
-	router.GET("/plugin/info/:id/resources/*filepath", p.getPluginResources)
+	router.GET("/plugin/icon/:id/:file", p.checkPluginID, p.setIConName, p.getPluginInfo)
+	router.GET("/plugin/icon/:id", p.checkPluginID, p.setIConName, p.getPluginInfo)
+
+	router.GET("/plugin/md/:id/:file", p.checkPluginID, p.setMDName, p.getPluginInfo)
+	router.GET("/plugin/md/:id", p.checkPluginID, p.setMDName, p.getPluginInfo)
+
+	router.GET("/plugin/info/:id/resources/*filepath", p.checkPluginID, p.getPluginResources)
 }
 
-// getPluginICON 获取插件描述中要用到的图标
-func (p *pluginFrontController) getPluginICON(c *gin.Context) {
-	filePath := strings.Trim(c.Param("filepath"), "/")
-	list := strings.Split(filePath, "/")
-	pathLen := len(list)
-	//若文件路径层级多于 id/file 或 filepath 为空
-	if pathLen > 2 || filePath == "" {
-		log.Info(fmt.Errorf("%s:%w", c.Request.URL.Path, filePathErr))
-		c.Data(http.StatusNotFound, "application/text", []byte("404 page not found"))
-		return
-	}
-	//防止读取resources目录
-	if pathLen == 2 && list[1] == "resources" {
-		log.Info(fmt.Errorf("%s:%w", c.Request.URL.Path, filePathErr))
-		c.Data(http.StatusNotFound, "application/text", []byte("404 page not found"))
-		return
-	}
-	if pathLen == 1 {
-		//TODO 从插件配置文件获取图标名
-		fileName := ""
-		filePath = fmt.Sprintf("%s/%s", list[0], fileName)
-	}
-
-	pluginFs := gin.Dir(fileDir, false)
-	fileServer := http.StripPrefix("/plugin/icon", http.FileServer(pluginFs))
-	// Check if file exists and/or if we have permission to access it
-	f, err := pluginFs.Open(filePath)
-	if err != nil {
-		//TODO 文件不存在时
-		c.Data(http.StatusNotFound, "application/text", []byte("404 page not found"))
-		return
-	}
-	f.Close()
-
-	fileServer.ServeHTTP(c.Writer, c.Request)
+func (p *pluginFrontController) checkPluginID(c *gin.Context) {
+	pluginID := c.Param("id")
+	//TODO 若不存在
+	c.Data(http.StatusNotFound, "application/text", []byte("404 page not found"))
+	c.Abort()
 }
 
-// getPluginMD 获取插件描述中要用到的MD文件
-func (p *pluginFrontController) getPluginMD(c *gin.Context) {
-	filePath := strings.Trim(c.Param("filepath"), "/")
-	list := strings.Split(filePath, "/")
-	pathLen := len(list)
-	//若文件路径层级多于 id/file 或 filepath 为空
-	if pathLen > 2 || filePath == "" {
-		log.Info(fmt.Errorf("%s:%w", c.Request.URL.Path, filePathErr))
-		c.Data(http.StatusNotFound, "application/text", []byte("404 page not found"))
-		return
+func (p *pluginFrontController) setIConName(c *gin.Context) {
+	fileName := c.Param("file")
+	if fileName == "" {
+		//TODO 获取插件配置文件内的icon
+		fileName = ""
 	}
-	//防止读取resources目录
-	if pathLen == 2 && list[1] == "resources" {
-		log.Info(fmt.Errorf("%s:%w", c.Request.URL.Path, filePathErr))
-		c.Data(http.StatusNotFound, "application/text", []byte("404 page not found"))
-		return
+	c.Set("file", fileName)
+	c.Set("strip_prefix", "/plugin/icon")
+}
+
+func (p *pluginFrontController) setMDName(c *gin.Context) {
+	fileName := c.Param("file")
+	if fileName == "" {
+		fileName = "README.md"
 	}
-	if pathLen == 1 {
-		filePath = fmt.Sprintf("%s/%s", list[0], "README.md")
-	}
+	c.Set("file", fileName)
+	c.Set("strip_prefix", "/plugin/md")
+}
+
+func (p *pluginFrontController) getPluginInfo(c *gin.Context) {
+	pluginID := c.Param("id")
+	fileName := c.GetString("file")
+	stripPrefix := c.GetString("strip_prefix")
+	filePath := fmt.Sprintf("%s/%s", pluginID, fileName)
 
 	pluginFs := gin.Dir(fileDir, false)
-	fileServer := http.StripPrefix("/plugin/md", http.FileServer(pluginFs))
+	fileServer := http.StripPrefix(stripPrefix, http.FileServer(pluginFs))
 	// Check if file exists and/or if we have permission to access it
 	f, err := pluginFs.Open(filePath)
 	if err != nil {
@@ -104,7 +81,7 @@ func (p *pluginFrontController) getPluginResources(c *gin.Context) {
 	filePath := fmt.Sprintf("%s/resources/%s", pluginID, strings.Trim(c.Param("filepath"), "/"))
 
 	pluginFs := gin.Dir(fileDir, false)
-	fileServer := http.StripPrefix("/plugin/md", http.FileServer(pluginFs))
+	fileServer := http.StripPrefix("/plugin/info", http.FileServer(pluginFs))
 	// Check if file exists and/or if we have permission to access it
 	f, err := pluginFs.Open(filePath)
 	if err != nil {
