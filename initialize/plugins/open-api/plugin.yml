@@ -1,5 +1,7 @@
 id: "open_api.apinto.com"
 name: "open_api"
+cname: "open-api"
+resume: ""
 version: "v1.0"
 icon: ""
 driver: "open_api.apinto.com"

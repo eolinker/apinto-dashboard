@@ -1,5 +1,7 @@
 id: "ext_app.apinto.com"
 name: "ext_app"
+cname: "外部应用"
+resume: ""
 version: "v1.0"
 icon: ""
 driver: "ext_app.apinto.com"
