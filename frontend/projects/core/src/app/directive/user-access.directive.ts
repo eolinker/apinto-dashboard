@@ -46,19 +46,26 @@ export class UserAccessDirective implements OnInit {
     if (this.appConfigService.dataUpdated) {
       this.userRightList = this.viewAccess ? this.appConfigService.getViewRightsRouter() : this.appConfigService.getUpdateRightsRouter()
       this.userRight = this.userRightList.indexOf(this.eoNgUserAccess) !== -1
-      if (!this.userRight) {
-        if (this.el.nativeElement.localName === 'eo-ng-dropdown' || this.el.nativeElement.localName === 'a') {
-          this.renderer.setStyle(this.el.nativeElement, 'visibility', 'hidden')
-        } else {
-          this.disabledEdit.emit(true)
-          this.renderer.setProperty(this.el.nativeElement, 'disabled', true)
-        }
+      // if (!this.userRight) {
+      //   if (this.el.nativeElement.localName === 'eo-ng-dropdown' || this.el.nativeElement.localName === 'a') {
+      //     this.renderer.setStyle(this.el.nativeElement, 'visibility', 'hidden')
+      //   } else {
+      //     this.disabledEdit.emit(true)
+      //     this.renderer.setProperty(this.el.nativeElement, 'disabled', true)
+      //   }
+      // } else {
+      //   if (this.el.nativeElement.localName === 'eo-ng-dropdown' || this.el.nativeElement.localName === 'a') {
+      //     this.renderer.setStyle(this.el.nativeElement, 'visibility', 'none')
+      //   } else {
+      //     this.disabledEdit.emit(false)
+      //   }
+      // }
+      
+      if (this.el.nativeElement.localName === 'eo-ng-dropdown' || this.el.nativeElement.localName === 'a') {
+        this.renderer.setStyle(this.el.nativeElement, 'visibility', 'none')
       } else {
-        if (this.el.nativeElement.localName === 'eo-ng-dropdown' || this.el.nativeElement.localName === 'a') {
-          this.renderer.setStyle(this.el.nativeElement, 'visibility', 'none')
-        } else {
-          this.disabledEdit.emit(false)
-        }
+        this.disabledEdit.emit(true)
+        this.renderer.setProperty(this.el.nativeElement, 'disabled', false)
       }
     }
   }
