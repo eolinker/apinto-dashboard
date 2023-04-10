@@ -11,6 +11,7 @@ import { ApiService } from '../../../service/api.service'
 import { EoNgMessageService } from '../../../service/eo-ng-message.service'
 import { PluginInstallConfigTableHeadName, PluginInstallConfigTableBody } from '../types/conf'
 import { PluginInstallConfigData, PluginInstallData } from '../types/types'
+import { NavigationItem } from '../../navigation/types/types'
 
 @Component({
   selector: 'eo-ng-plugin-config',
@@ -52,6 +53,7 @@ export class PluginConfigComponent implements OnInit {
 
   ngOnInit (): void {
     this.getMessage()
+    this.getNavigationList()
   }
 
   getMessage () {
@@ -76,6 +78,16 @@ export class PluginConfigComponent implements OnInit {
         this.showServer = resp.data.render.internet
         this.invisible = resp.data.render.invisible
         this.showApiGroup = resp.data.render.apiGroup
+      }
+    })
+  }
+
+  getNavigationList () {
+    this.api.get('system/navigation').subscribe((resp:{code:number, msg:string, data:{navigations:Array<NavigationItem>}}) => {
+      if (resp.code === 0) {
+        this.navigationList = resp.data.navigations.map((nav:NavigationItem) => {
+          return { label: nav.title, value: nav.uuid }
+        })
       }
     })
   }
