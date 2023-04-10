@@ -38,6 +38,12 @@ const (
 	PluginEdit
 	PluginTemplateView
 	PluginTemplateEdit
+	MonPartitionView
+	MonPartitionEdit
+	NoticeEmailView
+	NoticeEmailEdit
+	NoticeWebhookView
+	NoticeWebhookEdit
 	lastId
 	unknown
 )
