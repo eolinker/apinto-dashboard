@@ -17,6 +17,7 @@ type IModulePluginService interface {
 	DisablePlugin(ctx context.Context, userID int, pluginUUID string) error
 
 	GetEnablePluginsByNavigation(ctx context.Context, navigationID int) ([]*model.NavigationEnabledPlugin, error)
+	CheckPluginInstalled(ctx context.Context, pluginID string) (bool, error)
 }
 
 type IModulePlugin interface {
