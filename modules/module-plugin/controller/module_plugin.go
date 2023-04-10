@@ -271,18 +271,19 @@ func (p *modulePluginController) enable(ginCtx *gin.Context) {
 		return
 	}
 
-	err := p.modulePluginService.EnablePlugin(ginCtx, pluginUUID, input)
+	err := p.modulePluginService.EnablePlugin(ginCtx, controller.GetUserId(ginCtx), pluginUUID, input)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Enable plugin fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Enable plugin fail. err:%s", err.Error()))
 		return
 	}
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
 func (p *modulePluginController) disable(ginCtx *gin.Context) {
+
 	pluginUUID := ginCtx.Query("id")
 
-	err := p.modulePluginService.DisablePlugin(ginCtx, pluginUUID)
+	err := p.modulePluginService.DisablePlugin(ginCtx, controller.GetUserId(ginCtx), pluginUUID)
 	if err != nil {
 		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Disable plugin fail. err:%s", err.Error())))
 		return
