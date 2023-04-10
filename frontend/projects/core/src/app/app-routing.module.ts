@@ -1,7 +1,7 @@
 /*
- * @Author: 
+ * @Author: maggieyyy im.ymj@hotmail.com
  * @Date: 2022-07-11 23:20:14
- * @LastEditors:
+ * @LastEditors: MengjieYang yangmengjie@eolink.com
  * @LastEditTime: 2022-09-20 23:14:26
  * @FilePath: /apinto/src/app/app-routing.module.ts
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
@@ -10,14 +10,37 @@ import { NgModule } from '@angular/core'
 import { RouterModule, Routes } from '@angular/router'
 import { RedirectPageService } from './service/redirect-page.service'
 import { AuthGuardService } from './service/auth-guard.service'
+import { LoginComponent } from './layout/login/login.component'
 import { BasicLayoutComponent } from './layout/basic-layout/basic-layout.component'
 import { CustomPreloadingStrategy } from './custom-preloading-strategy'
-import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
+import { AuthActivationComponent } from './layout/auth/activation/activation.component'
+import { AuthInfoComponent } from './layout/auth/info/info.component'
+import { AuthUpdateComponent } from './layout/auth/update/update.component'
 const routes: Routes = [
+  {
+    path: 'auth',
+    component: AuthActivationComponent
+  },
+  {
+    path: 'login',
+    component: LoginComponent
+  },
   {
     path: '',
     component: BasicLayoutComponent,
     children: [
+      {
+        path: 'auth-info',
+        component: AuthInfoComponent,
+        data: {
+          id: '8'
+        }
+      },
+
+      {
+        path: 'auth-update',
+        component: AuthUpdateComponent
+      },
       {
         path: 'deploy',
         data: {
@@ -68,6 +91,27 @@ const routes: Routes = [
           id: '7'
         },
         loadChildren: () => import('./layout/audit-log/audit-log.module').then(m => m.AuditLogModule)
+      },
+      {
+        path: 'plugin',
+        data: {
+          id: '10'
+        },
+        loadChildren: () => import('./layout/plugin/plugin-management.module').then(m => m.PluginManagementModule)
+      },
+      {
+        path: 'navigation',
+        data: {
+          id: '11'
+        },
+        loadChildren: () => import('./layout/navigation/navigation.module').then(m => m.NavigationModule)
+      },
+      {
+        path: 'interceptor',
+        data: {
+          id: '12'
+        },
+        loadChildren: () => import('./layout/interceptor/interceptor.module').then(m => m.InterceptorModule)
       }
     ]
   }
@@ -77,6 +121,6 @@ const routes: Routes = [
 @NgModule({
   imports: [RouterModule.forRoot(routes, { preloadingStrategy: CustomPreloadingStrategy })],
   exports: [RouterModule],
-  providers: [AuthGuardService, RedirectPageService, CustomPreloadingStrategy, EoNgFeedbackMessageService]
+  providers: [AuthGuardService, RedirectPageService, CustomPreloadingStrategy]
 })
 export class AppRoutingModule { }

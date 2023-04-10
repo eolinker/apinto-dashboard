@@ -1,0 +1,100 @@
+<eo-ng-layout style="overflow: hidden">
+  <eo-ng-header *ngIf="!updateAuth">
+    <div class="logo">
+      <img src="../../../../assets/apinto.svg" alt="apinto" />
+    </div>
+  </eo-ng-header>
+
+  <eo-ng-layout class="total-content" style="min-width: 1366px">
+    <div
+      class="activation-block"
+      *ngIf="!showActivationInfo; else showActivationInfoTpl"
+    >
+      <h1 *ngIf="!updateAuth">激活系统</h1>
+      <h1 *ngIf="updateAuth">更新授权</h1>
+      <ol class="activation-content">
+        <li>
+          <div class="list-title">
+            <label class="li-num">①</label>
+            <span class="ml-[8px]">复制机器码</span>
+          </div>
+          <div class="mt-btnbase">
+            <input
+              class="mr10"
+              eo-ng-input
+              [ngModel]="macCode"
+              disabled="true"
+            />
+            <button
+              eo-copy
+              class="ant-btn-primary ml-[8px]"
+              copyType="click"
+              [copyText]="macCode"
+              eo-ng-button
+              (copyCallback)="copyCallback()"
+            >
+              复制
+            </button>
+          </div>
+        </li>
+        <li>
+          <div class="list-title">
+            <label class="li-num">②</label>
+            <span class="ml-[8px]">上传证书</span>
+          </div>
+          <div class="mt-btnbase">
+            <nz-upload
+              class="ant-btn-primary"
+              [(nzFileList)]="fileList"
+              [nzBeforeUpload]="beforeUpload"
+              [nzLimit]="1"
+              [nzRemove]="removeFile"
+            >
+              <button class="ant-btn-primary" eo-ng-button>上传证书</button>
+              <div
+                class="ant-form-item-extra activation-extra"
+                (click)="$event.stopPropagation()"
+              >
+                请上传cert格式证书
+              </div>
+            </nz-upload>
+          </div>
+        </li>
+
+        <li [ngClass]="{ 'not-active': !canActive }">
+          <div class="list-title">
+            <label class="li-num">③</label>
+            <span class="ml-[8px]"
+              >完成{{ updateAuth ? '授权更新' : '系统激活' }}</span
+            >
+          </div>
+          <div class="mt-btnbase">
+            <button
+              class="ant-btn-primary"
+              eo-ng-button
+              [disabled]="!canActive"
+              type="button"
+              (click)="activeOrUpdate()"
+            >
+              {{ updateAuth ? '更新授权' : '激活系统' }}
+            </button>
+            <div class="ant-form-item-extra">
+              请点击{{ updateAuth ? '更新授权' : '激活系统' }}
+            </div>
+          </div>
+        </li>
+      </ol>
+    </div>
+    <ng-template #showActivationInfoTpl>
+      <div class="activation-block">
+        <h1>{{ authInfo.title }}授权</h1>
+        <ol class="activation-info">
+          <li *ngFor="let info of authInfo.infos">
+            {{ info.key }}：{{ info.value }}
+          </li>
+        </ol>
+        <a class="auth-a" (click)="goToLogin()">跳转至登录页</a>
+      </div>
+    </ng-template>
+  </eo-ng-layout>
+</eo-ng-layout>
