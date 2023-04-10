@@ -122,7 +122,7 @@ func (n *navigationService) Info(ctx context.Context, uuid string) (*navigation_
 		return nil, err
 	}
 
-	enablePlugins, err := pluginService.GetEnablePluginsByNavigation(ctx, info.Id)
+	enablePlugins, err := modulePluginService.GetEnablePluginsByNavigation(ctx, info.Id)
 	if err != nil {
 		return nil, err
 	}
