@@ -1,4 +1,13 @@
 modules:
+  - id: 9
+    title: 监控告警
+    children:
+      - title: 分区管理
+        id: 901
+        module: monitor-alarm
+        access:
+          - mon_partition_view
+          - mon_partition_edit
   - id: 4
     title: API管理
     children:
