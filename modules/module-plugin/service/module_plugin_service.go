@@ -1,9 +1,12 @@
 package service
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/modules/base/locker-service"
 	"github.com/eolinker/apinto-dashboard/modules/group"
 	group_service "github.com/eolinker/apinto-dashboard/modules/group/group-service"
@@ -15,7 +18,9 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/navigation"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/go-basic/uuid"
+	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
+	"os"
 	"time"
 )
 
@@ -32,6 +37,7 @@ type modulePluginService struct {
 
 	commonGroup       group.ICommonGroupService
 	navigationService navigation.INavigationService
+	installedCache    IInstalledCache
 	lockService       locker_service.IAsynLockService
 }
 
@@ -44,6 +50,7 @@ func newModulePluginService() module_plugin.IModulePluginService {
 
 	bean.Autowired(&s.commonGroup)
 	bean.Autowired(&s.navigationService)
+	bean.Autowired(&s.installedCache)
 	bean.Autowired(&s.lockService)
 	return s
 }
@@ -381,4 +388,62 @@ func (m *modulePluginService) GetEnablePluginsByNavigation(ctx context.Context, 
 	}
 
 	return plugins, nil
+}
+
+func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml *model.InnerPluginYmlCfg) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *modulePluginService) CheckPluginInstalled(ctx context.Context, pluginID string) (bool, error) {
+	isInstalled := false
+
+	key := m.installedCache.Key(pluginID)
+	value, err := m.installedCache.Get(ctx, key)
+	if err != nil && err != redis.Nil {
+		return false, err
+	}
+
+	var pluginInfo *entry.ModulePlugin
+	//若redis存在值
+	if err == nil {
+		isInstalled = value.Installed
+	} else {
+		//若redis无缓存
+		pluginInfo, err = m.pluginStore.GetPluginInfo(ctx, pluginID)
+		if err != nil && err != gorm.ErrRecordNotFound {
+			return false, err
+		} else if err == gorm.ErrRecordNotFound {
+			isInstalled = false
+		} else {
+			isInstalled = true
+		}
+		//缓存
+		m.installedCache.Set(ctx, key, &model.PluginInstalledStatus{
+			Installed: isInstalled,
+		}, time.Hour)
+	}
+	//若未安装直接返回
+	if !isInstalled {
+		return false, nil
+	}
+
+	//若插件已安装，检查本地缓存是否存在
+	dirPath := fmt.Sprintf("./plugin/%s", pluginID)
+	// 检查目录是否存在, 若不存在，则从数据库读取数据并解压
+	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
+		packageEntry, err := m.pluginPackageStore.Get(ctx, pluginInfo.Id)
+		if err != nil {
+			return false, err
+		}
+		packageFile := bytes.NewReader(packageEntry.Package)
+		err = common.DeCompress(packageFile, dirPath)
+		if err != nil {
+			//删除目录
+			os.RemoveAll(dirPath)
+			return false, err
+		}
+	}
+
+	return true, nil
 }

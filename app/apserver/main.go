@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/controller"
+	"github.com/eolinker/apinto-dashboard/initialize"
 	"github.com/eolinker/apinto-dashboard/modules/core"
 	"github.com/eolinker/apinto-dashboard/modules/plugin/plugin_timer"
 	"net"
@@ -51,7 +52,13 @@ func run() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	
 	// todo 执行导航初始化
+	// 执行内置插件初始化
+	err = initialize.InitPlugins()
+	if err != nil {
+		log.Fatal(err)
+	}
 	// todo 执行内置插件初始化
 	coreService.ReloadModule()
 	go plugin_timer.ExtenderTimer()

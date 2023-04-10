@@ -1,9 +1,7 @@
 package controller
 
 import (
-	"archive/tar"
 	"bytes"
-	"compress/gzip"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
@@ -14,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-basic/uuid"
 	"gopkg.in/yaml.v3"
-	"io"
 	"net/http"
 	"os"
 	"path"
@@ -265,7 +262,7 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 	randomId := uuid.New()
 	tmpDir := path.Join("./plugin", randomId)
 	//将压缩包的内容存放本地
-	err = DeCompress(packageFile, tmpDir)
+	err = common.DeCompress(packageFile, tmpDir)
 	if err != nil {
 		//删除目录
 		os.RemoveAll(tmpDir)
@@ -306,7 +303,7 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 	}
 
 	//将临时目录重命名为插件id
-	os.Rename(tmpDir, path.Join("./", pluginCfg.ID))
+	os.Rename(tmpDir, path.Join("./plugin", pluginCfg.ID))
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
@@ -337,39 +334,4 @@ func (p *modulePluginController) disable(ginCtx *gin.Context) {
 		return
 	}
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
-}
-
-// DeCompress 解压 tar.gz
-func DeCompress(srcFile io.Reader, dest string) error {
-	gr, err := gzip.NewReader(srcFile)
-	if err != nil {
-		return err
-	}
-	defer gr.Close()
-	tr := tar.NewReader(gr)
-	for {
-		hdr, err := tr.Next()
-		if err != nil {
-			if err == io.EOF {
-				break
-			} else {
-				return err
-			}
-		}
-		filename := path.Join(dest, hdr.Name)
-		file, err := createFile(filename)
-		if err != nil {
-			return err
-		}
-		io.Copy(file, tr)
-	}
-	return nil
-}
-
-func createFile(name string) (*os.File, error) {
-	err := os.MkdirAll(string([]rune(name)[0:strings.LastIndex(name, "/")]), 0755)
-	if err != nil {
-		return nil, err
-	}
-	return os.Create(name)
 }
