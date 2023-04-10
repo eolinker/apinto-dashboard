@@ -61,5 +61,12 @@ func staticFile(prefix string, dir string) apinto_module.RoutersInfo {
 			Labels:      apinto_module.RouterLabelAssets,
 			HandlerFunc: []apinto_module.HandlerFunc{handler},
 		},
+		{
+			Method:      http.MethodHead,
+			Path:        path.Join(prefix, "/*filepath"),
+			Handler:     prefix,
+			Labels:      apinto_module.RouterLabelAssets,
+			HandlerFunc: []apinto_module.HandlerFunc{handler},
+		},
 	}
 }
