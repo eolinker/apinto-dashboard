@@ -17,12 +17,13 @@ type IModulePluginService interface {
 	DisablePlugin(ctx context.Context, userID int, pluginUUID string) error
 
 	GetEnablePluginsByNavigation(ctx context.Context, navigationID int) ([]*model.NavigationEnabledPlugin, error)
+	CheckPluginInstalled(ctx context.Context, pluginID string) (bool, error)
+	InstallInnerPlugin(ctx context.Context, pluginYml *model.InnerPluginYmlCfg) error
 }
 
 type IModulePlugin interface {
-	InstallInnerPlugin(ctx context.Context, pluginYml *model.InnerPluginYmlCfg) error
 	//GetEnabledPlugins 获取已启用的插件信息列表
 	GetEnabledPlugins(ctx context.Context) ([]*model.EnabledPlugin, error)
 	//GetMiddlewareList 获取拦截器列表
-	GetMiddlewareList(ctx context.Context) ([]*model.MiddlewareItem, error)
+	//GetMiddlewareList(ctx context.Context) ([]*model.MiddlewareItem, error)
 }

@@ -6,6 +6,5 @@ version: "v1.0"
 icon: ""
 driver: "open_api.apinto.com"
 core: false
-install:
-  auto: true
-  front: ""
+auto: true
+front: ""
