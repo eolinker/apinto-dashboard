@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/modules/base/locker-service"
+	"github.com/eolinker/apinto-dashboard/modules/core"
 	"github.com/eolinker/apinto-dashboard/modules/group"
 	group_service "github.com/eolinker/apinto-dashboard/modules/group/group-service"
 	module_plugin "github.com/eolinker/apinto-dashboard/modules/module-plugin"
@@ -37,12 +38,12 @@ type modulePluginService struct {
 
 	commonGroup       group.ICommonGroupService
 	navigationService navigation.INavigationService
+	coreService       core.ICore
 	installedCache    IInstalledCache
 	lockService       locker_service.IAsynLockService
 }
 
 func newModulePluginService() module_plugin.IModulePluginService {
-
 	s := &modulePluginService{}
 	bean.Autowired(&s.pluginStore)
 	bean.Autowired(&s.pluginEnableStore)
@@ -50,6 +51,7 @@ func newModulePluginService() module_plugin.IModulePluginService {
 
 	bean.Autowired(&s.commonGroup)
 	bean.Autowired(&s.navigationService)
+	bean.Autowired(&s.coreService)
 	bean.Autowired(&s.installedCache)
 	bean.Autowired(&s.lockService)
 	return s
@@ -326,6 +328,7 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 			return err
 		}
 		//TODO 重新生成路由
+		m.coreService.ResetVersion(uuid.New())
 
 		return nil
 	})
@@ -363,6 +366,7 @@ func (m *modulePluginService) DisablePlugin(ctx context.Context, userID int, plu
 			return err
 		}
 		//TODO 重新生成路由
+		m.coreService.ResetVersion(uuid.New())
 
 		return nil
 	})

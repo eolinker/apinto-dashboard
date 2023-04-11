@@ -34,7 +34,6 @@ func RegisterModulePluginRouter(router gin.IRoutes) {
 	router.POST("/plugin/install", p.install)
 	router.POST("/plugin/enable", p.enable)
 	router.POST("/plugin/disable", p.disable)
-
 }
 
 // 插件列表
