@@ -2,7 +2,6 @@ package controller
 
 import (
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/common/gzip-static"
 	namespace_controller "github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/core"
 	apinto_module "github.com/eolinker/apinto-module"
@@ -26,24 +25,8 @@ func NewCoreDriver() *Plugin {
 
 	middlewareHandler := []apinto_module.MiddlewareHandler{
 		{
-			Name:    "logger",
-			Handler: Logger,
-		},
-		{
-			Name:    "recovery",
-			Handler: Recovery,
-		},
-		{
 			Name:    "namespace",
 			Handler: namespace_controller.MustNamespace,
-		},
-		{
-			Name:    "gzip",
-			Handler: gzip.Gzip(gzip.DefaultCompression),
-		},
-		{
-			Name:    "expire",
-			Handler: addExpires,
 		},
 	}
 	p := &Plugin{
@@ -128,7 +111,7 @@ func (p *Plugin) NewModule(name, apiPrefix string) *Module {
 			Method:      http.MethodGet,
 			Path:        fmt.Sprintf("/api/common/provider/:name"),
 			Handler:     "core.provider",
-			HandlerFunc: p.provider,
+			HandlerFunc: []apinto_module.HandlerFunc{p.provider},
 		},
 	}
 

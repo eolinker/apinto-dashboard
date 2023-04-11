@@ -6,6 +6,6 @@ func init() {
 	providerService := NewProviderService()
 	bean.Injection(&providerService)
 
-	iCore := NewService()
+	iCore := NewService(providerService)
 	bean.Injection(&iCore)
 }

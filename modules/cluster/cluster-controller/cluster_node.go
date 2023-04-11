@@ -70,7 +70,7 @@ func (c *clusterNodeController) reset(ginCtx *gin.Context) {
 	}
 
 	if input.ClusterAddr == "" || input.Source == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("cluster_add is null or source is null"))
+		controller.ErrorJson(ginCtx, http.StatusOK, "cluster_add is null or source is null")
 		return
 	}
 	userId := controller.GetUserId(ginCtx)

@@ -2,7 +2,6 @@ package initialize
 
 import (
 	_ "embed"
-	"github.com/eolinker/apinto-dashboard/store"
 )
 
 var (
@@ -10,6 +9,6 @@ var (
 	navigationContent []byte
 )
 
-func initNavigation(db store.IDB) {
+func InitNavigation() {
 	// 初始化导航
 }

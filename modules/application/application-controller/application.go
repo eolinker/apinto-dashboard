@@ -352,7 +352,7 @@ func (a *applicationController) createAuth(ginCtx *gin.Context) {
 		return
 	}
 	if input.Position == "" || input.TokenName == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("参数位置必填"))
+		controller.ErrorJson(ginCtx, http.StatusOK, "参数位置必填")
 		return
 	}
 	err := a.applicationAuthService.Create(ginCtx, namespaceId, userId, appId, input)
