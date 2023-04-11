@@ -20,6 +20,8 @@ import { PluginConfigComponent } from './config/config.component'
 import { EoNgApintoTableModule } from 'projects/eo-ng-apinto-table/src/public-api'
 import { EoNgSelectModule } from 'eo-ng-select'
 import { EoNgAutoCompleteModule } from 'eo-ng-auto-complete'
+import { GroupComponent } from './group/group.component'
+import { EoNgEmptyModule } from 'eo-ng-empty'
 
 @NgModule({
   declarations: [
@@ -27,7 +29,8 @@ import { EoNgAutoCompleteModule } from 'eo-ng-auto-complete'
     PluginListComponent,
     PluginMessageComponent,
     PluginCreateComponent,
-    PluginConfigComponent
+    PluginConfigComponent,
+    GroupComponent
   ],
   imports: [
     CommonModule,
@@ -45,7 +48,8 @@ import { EoNgAutoCompleteModule } from 'eo-ng-auto-complete'
     EoNgAutoCompleteModule,
     MarkdownModule.forChild(),
     EoNgApintoTableModule,
-    EoNgSelectModule
+    EoNgSelectModule,
+    EoNgEmptyModule
   ],
   exports: [
     PluginManagementComponent
