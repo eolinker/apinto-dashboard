@@ -1,8 +1,8 @@
 /* eslint-disable camelcase */
 /*
- * @Author:
+ * @Author: MengjieYang yangmengjie@eolink.com
  * @Date: 2022-08-17 23:42:52
- * @LastEditors:
+ * @LastEditors: MengjieYang yangmengjie@eolink.com
  * @LastEditTime: 2022-08-24 00:35:02
  * @FilePath: /apinto/src/app/layout/application/application-management-list/application-management-list.component.ts
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
@@ -12,7 +12,7 @@ import { Router } from '@angular/router'
 import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feedback'
 import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { ApiService } from 'projects/core/src/app/service/api.service'
-import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 import { MODAL_SMALL_SIZE } from '../../../constant/app.config'
 import { EmptyHttpResponse } from '../../../constant/type'
 import { applicationsTableBody, applicationsTableHeadName } from '../types/conf'
@@ -43,7 +43,7 @@ export class ApplicationManagementListComponent implements OnInit {
     private modalService:EoNgFeedbackModalService,
     private api:ApiService,
     private router:Router,
-    private appConfigService:AppConfigService
+    private appConfigService:EoNgNavigationService
   ) {
     this.appConfigService.reqFlashBreadcrumb([{ title: '应用管理', routerLink: 'application' }])
   }

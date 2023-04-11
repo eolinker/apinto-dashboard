@@ -1,9 +1,9 @@
 /* eslint-disable camelcase */
 /* eslint-disable dot-notation */
 /*
- * @Author:
+ * @Author: MengjieYang yangmengjie@eolink.com
  * @Date: 2022-07-20 22:34:58
- * @LastEditors:
+ * @LastEditors: MengjieYang yangmengjie@eolink.com
  * @LastEditTime: 2022-08-30 23:21:12
  * @FilePath: /apinto/src/app/layout/deploy/deploy-cluster-environment/deploy-cluster-environment.component.ts
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
@@ -16,7 +16,7 @@ import { NzModalRef } from 'ng-zorro-antd/modal'
 import { MODAL_NORMAL_SIZE, MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
 import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { ApiService } from 'projects/core/src/app/service/api.service'
-import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 import { BaseInfoService } from 'projects/core/src/app/service/base-info.service'
 import { DeployService } from '../../deploy.service'
 import { DeployClusterEnvConfigThead } from '../types/conf'
@@ -64,7 +64,7 @@ export class DeployClusterEnvironmentComponent implements OnInit {
           private modalService:EoNgFeedbackModalService,
           private api:ApiService,
           private router:Router,
-          private appConfigService:AppConfigService,
+          private appConfigService:EoNgNavigationService,
           private service:DeployService) {
     this.appConfigService.reqFlashBreadcrumb([{ title: '网关集群', routerLink: 'deploy/cluster' }, { title: '环境变量' }])
   }

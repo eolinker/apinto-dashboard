@@ -15,7 +15,7 @@ import {
   EoNgFeedbackModalService
 } from 'eo-ng-feedback'
 import { ApiService } from 'projects/core/src/app/service/api.service'
-import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 import { UntypedFormBuilder, FormGroup, Validators } from '@angular/forms'
 import { NzModalRef } from 'ng-zorro-antd/modal'
 import { ApiManagementProxyComponent } from '../proxy/proxy.component'
@@ -28,8 +28,8 @@ import { ApiGroup, ApiGroupsData } from 'projects/core/src/app/constant/type'
 import { BaseInfoService } from 'projects/core/src/app/service/base-info.service'
 import { methodList, proxyHeaderTableHeadName, proxyHeaderTableBody } from '../../types/conf'
 import { APINotFormGroupData } from '../../types/types'
-import { MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
 import { cloneDeep } from 'lodash'
+import { MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
 
 @Component({
   selector: 'eo-ng-api-create',
@@ -82,7 +82,7 @@ export class ApiCreateComponent implements OnInit {
   constructor (private message: EoNgFeedbackMessageService,
     private baseInfo:BaseInfoService,
     private api:ApiService,
-    private appConfigService:AppConfigService,
+    private appConfigService:EoNgNavigationService,
     private fb: UntypedFormBuilder,
     private router: Router,
     private modalService: EoNgFeedbackModalService
