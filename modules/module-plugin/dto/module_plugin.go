@@ -28,7 +28,6 @@ type PluginInfo struct {
 type PluginEnableInfo struct {
 	Name       string         `json:"name"`
 	Navigation string         `json:"navigation"`
-	ApiGroup   string         `json:"api_group"`
 	Server     string         `json:"server"`
 	Header     []ExtendParams `json:"header"`
 	Query      []ExtendParams `json:"query"`
@@ -38,7 +37,6 @@ type PluginEnableInfo struct {
 type PluginEnableRender struct {
 	Internet   bool                 `json:"internet"`
 	Invisible  bool                 `json:"invisible"`
-	ApiGroup   bool                 `json:"api_group"`
 	Headers    []ExtendParamsRender `json:"headers"`
 	Querys     []ExtendParamsRender `json:"querys"`
 	Initialize []ExtendParamsRender `json:"initialize"`

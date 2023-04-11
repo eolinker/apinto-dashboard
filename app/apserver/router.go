@@ -9,7 +9,9 @@ import (
 	cluster_controller2 "github.com/eolinker/apinto-dashboard/modules/cluster/cluster-controller"
 	"github.com/eolinker/apinto-dashboard/modules/discovery/discovery-controller"
 	"github.com/eolinker/apinto-dashboard/modules/group/group-controller"
+	navigation_controller "github.com/eolinker/apinto-dashboard/modules/navigation/navigation-controller"
 
+	module_plugin "github.com/eolinker/apinto-dashboard/modules/module-plugin/controller"
 	"github.com/eolinker/apinto-dashboard/modules/openapi/open-api-controller"
 	"github.com/eolinker/apinto-dashboard/modules/openapp/open-app-controller"
 	plugin_controller "github.com/eolinker/apinto-dashboard/modules/plugin/plugin-controller"
@@ -63,6 +65,9 @@ func registerRouter(engine *gin.Engine) {
 	plugin_controller.RegisterPluginClusterRouter(routes)
 	plugin_template_controller.RegisterPluginTemplateRouter(routes)
 	open_app_controller.RegisterExternalApplicationRouter(routes)
+	module_plugin.RegisterModulePluginRouter(routes)
+	module_plugin.RegisterPluginFrontRouter(engine)
+	navigation_controller.RegisterNavigationRouter(routes)
 
 	user_controller.RegisterUserRouter(routes)
 
