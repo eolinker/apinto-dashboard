@@ -17,37 +17,21 @@ import (
 	"strconv"
 )
 
-type serviceController struct {
+type upstreamController struct {
 	service   upstream.IService
 	discovery discovery.IDiscoveryService
 }
 
-func RegisterServiceRouter(router gin.IRouter) {
-	c := &serviceController{}
+func newUpstreamController() *upstreamController {
+	c := &upstreamController{}
 	bean.Autowired(&c.service)
 	bean.Autowired(&c.discovery)
 
-	router.GET("/services", c.getList)
-	router.GET("/service", c.getInfo)
-	router.PUT("/service", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindService, c.alter))
-	router.POST("/service", controller.AuditLogHandler(enum.LogOperateTypeCreate, enum.LogKindService, c.create))
-	router.DELETE("/service", controller.AuditLogHandler(enum.LogOperateTypeDelete, enum.LogKindService, c.del))
-	router.GET("/service/enum", c.getEnum)
-
-	router.PUT("/service/:service_name/online", controller.AuditLogHandler(enum.LogOperateTypePublish, enum.LogKindService, c.online))
-	router.PUT("/service/:service_name/offline", controller.AuditLogHandler(enum.LogOperateTypePublish, enum.LogKindService, c.offline))
-	router.GET("/service/:service_name/onlines", c.getOnlineList)
-
-	//router.GET("/service/:service_name/api", c.getApi)
-	//router.PUT("/service/:service_name/api", c.putApi)
-	//router.POST("/service/:service_name/api", c.postApi)
-	//router.DELETE("/service/:service_name/api", c.delApi)
-	//
-	//router.GET("/service/:service_name/:group_uuid/apis", c.getApis)
+	return c
 }
 
 // getList 获取服务信息列表
-func (s *serviceController) getList(ginCtx *gin.Context) {
+func (s *upstreamController) getList(ginCtx *gin.Context) {
 	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
 	searchName := ginCtx.Query("name")
 	pageNumStr := ginCtx.Query("page_num")
@@ -89,7 +73,7 @@ func (s *serviceController) getList(ginCtx *gin.Context) {
 }
 
 // getInfo 获取服务信息
-func (s *serviceController) getInfo(ginCtx *gin.Context) {
+func (s *upstreamController) getInfo(ginCtx *gin.Context) {
 	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
 	serviceName := ginCtx.Query("name")
 	if serviceName == "" {
@@ -127,7 +111,7 @@ func (s *serviceController) getInfo(ginCtx *gin.Context) {
 }
 
 // create 新增服务
-func (s *serviceController) create(ginCtx *gin.Context) {
+func (s *upstreamController) create(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	operator := controller.GetUserId(ginCtx)
 
@@ -179,7 +163,7 @@ func (s *serviceController) create(ginCtx *gin.Context) {
 }
 
 // alter 修改服务信息
-func (s *serviceController) alter(ginCtx *gin.Context) {
+func (s *upstreamController) alter(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	serviceName := ginCtx.Query("name")
 	if serviceName == "" {
@@ -230,7 +214,7 @@ func (s *serviceController) alter(ginCtx *gin.Context) {
 }
 
 // del 删除服务信息
-func (s *serviceController) del(ginCtx *gin.Context) {
+func (s *upstreamController) del(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	serviceName := ginCtx.Query("name")
 	if serviceName == "" {
@@ -248,7 +232,7 @@ func (s *serviceController) del(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
-func (s *serviceController) getEnum(ginCtx *gin.Context) {
+func (s *upstreamController) getEnum(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	searchName := ginCtx.Query("name")
 
@@ -264,7 +248,7 @@ func (s *serviceController) getEnum(ginCtx *gin.Context) {
 }
 
 // online 上线
-func (s *serviceController) online(ginCtx *gin.Context) {
+func (s *upstreamController) online(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	serviceName := ginCtx.Param("service_name")
 	input := &online_dto.UpdateOnlineStatusInput{}
@@ -294,7 +278,7 @@ func (s *serviceController) online(ginCtx *gin.Context) {
 }
 
 // online 下线
-func (s *serviceController) offline(ginCtx *gin.Context) {
+func (s *upstreamController) offline(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	serviceName := ginCtx.Param("service_name")
 	input := &online_dto.UpdateOnlineStatusInput{}
@@ -313,7 +297,7 @@ func (s *serviceController) offline(ginCtx *gin.Context) {
 }
 
 // getOnlineList 上线管理列表
-func (s *serviceController) getOnlineList(ginCtx *gin.Context) {
+func (s *upstreamController) getOnlineList(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	serviceName := ginCtx.Param("service_name")
 
@@ -344,7 +328,7 @@ func (s *serviceController) getOnlineList(ginCtx *gin.Context) {
 }
 
 //// getApi 获取api接口信息
-//func (s *serviceController) getApi(ginCtx *gin.Context) {
+//func (s *upstreamController) getApi(ginCtx *gin.Context) {
 //	_ = namespace_controller.GetNamespaceId(ginCtx)
 //	_ = ginCtx.Param("service_name")
 //	uuid := ginCtx.Query("uuid")
@@ -369,7 +353,7 @@ func (s *serviceController) getOnlineList(ginCtx *gin.Context) {
 //}
 //
 //// getApis 目录下下的api接口信息
-//func (s *serviceController) getApis(ginCtx *gin.Context) {
+//func (s *upstreamController) getApis(ginCtx *gin.Context) {
 //	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 //	serviceName := ginCtx.Param("service_name")
 //	directoryUuid := ginCtx.Param("group_uuid")
@@ -398,7 +382,7 @@ func (s *serviceController) getOnlineList(ginCtx *gin.Context) {
 //}
 //
 //// postApi 新增api接口
-//func (s *serviceController) postApi(ginCtx *gin.Context) {
+//func (s *upstreamController) postApi(ginCtx *gin.Context) {
 //	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 //	serviceName := ginCtx.Param("service_name")
 //	operator := controller.GetUserId(ginCtx)
@@ -415,7 +399,7 @@ func (s *serviceController) getOnlineList(ginCtx *gin.Context) {
 //}
 //
 //// putApi 修改api接口
-//func (s *serviceController) putApi(ginCtx *gin.Context) {
+//func (s *upstreamController) putApi(ginCtx *gin.Context) {
 //	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 //	serviceName := ginCtx.Param("service_name")
 //	uuid := ginCtx.Query("api_uuid")
@@ -434,7 +418,7 @@ func (s *serviceController) getOnlineList(ginCtx *gin.Context) {
 //}
 //
 //// delApi 删除api接口
-//func (s *serviceController) delApi(ginCtx *gin.Context) {
+//func (s *upstreamController) delApi(ginCtx *gin.Context) {
 //	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 //	serviceName := ginCtx.Param("service_name")
 //	input := new(dto.DeleteServiceApiInput)
