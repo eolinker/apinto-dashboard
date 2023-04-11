@@ -14,6 +14,7 @@ type ProviderService struct {
 
 func NewProviderService() core.IProviders {
 	p := &ProviderService{}
+
 	return p
 }
 func (p *ProviderService) Set(providers apinto_module.IProviders) {

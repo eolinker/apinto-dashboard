@@ -359,7 +359,7 @@ func (a *apiController) batchOnline(ginCtx *gin.Context) {
 	}
 
 	if input.OnlineToken == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("online_token can't be nil. "))
+		controller.ErrorJson(ginCtx, http.StatusOK, "online_token can't be nil. ")
 		return
 	}
 
@@ -400,7 +400,7 @@ func (a *apiController) batchOffline(ginCtx *gin.Context) {
 	}
 
 	if len(input.ApiUUIDs) == 0 || len(input.ClusterNames) == 0 {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("api_uuids or cluster_names can't be nil. "))
+		controller.ErrorJson(ginCtx, http.StatusOK, "api_uuids or cluster_names can't be nil. ")
 		return
 	}
 
@@ -441,7 +441,7 @@ func (a *apiController) batchOnlineCheck(ginCtx *gin.Context) {
 	}
 
 	if len(input.ApiUUIDs) == 0 || len(input.ClusterNames) == 0 {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("api_uuids or cluster_names can't be nil. "))
+		controller.ErrorJson(ginCtx, http.StatusOK, "api_uuids or cluster_names can't be nil. ")
 		return
 	}
 

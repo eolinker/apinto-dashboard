@@ -1,9 +1,12 @@
 package service
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/modules/base/locker-service"
 	"github.com/eolinker/apinto-dashboard/modules/group"
 	group_service "github.com/eolinker/apinto-dashboard/modules/group/group-service"
@@ -15,7 +18,9 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/navigation"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/go-basic/uuid"
+	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
+	"os"
 	"time"
 )
 
@@ -32,6 +37,7 @@ type modulePluginService struct {
 
 	commonGroup       group.ICommonGroupService
 	navigationService navigation.INavigationService
+	installedCache    IInstalledCache
 	lockService       locker_service.IAsynLockService
 }
 
@@ -44,6 +50,7 @@ func newModulePluginService() module_plugin.IModulePluginService {
 
 	bean.Autowired(&s.commonGroup)
 	bean.Autowired(&s.navigationService)
+	bean.Autowired(&s.installedCache)
 	bean.Autowired(&s.lockService)
 	return s
 }
@@ -236,6 +243,7 @@ func (m *modulePluginService) InstallPlugin(ctx context.Context, userID int, gro
 		pluginInfo := &entry.ModulePlugin{
 			UUID:       pluginYml.ID,
 			Name:       pluginYml.Name,
+			Version:    pluginYml.Version,
 			Group:      groupID,
 			CName:      pluginYml.CName,
 			Resume:     pluginYml.Resume,
@@ -266,6 +274,12 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 		}
 		return err
 	}
+
+	err = m.lockService.Lock(locker_service.LockNameModulePlugin, pluginInfo.Id)
+	if err != nil {
+		return err
+	}
+	defer m.lockService.Unlock(locker_service.LockNameModulePlugin, pluginInfo.Id)
 
 	navigationID, err := m.navigationService.GetIDByUUID(ctx, enableInfo.Navigation)
 	if err != nil {
@@ -328,6 +342,13 @@ func (m *modulePluginService) DisablePlugin(ctx context.Context, userID int, plu
 		}
 		return err
 	}
+
+	err = m.lockService.Lock(locker_service.LockNameModulePlugin, pluginInfo.Id)
+	if err != nil {
+		return err
+	}
+	defer m.lockService.Unlock(locker_service.LockNameModulePlugin, pluginInfo.Id)
+
 	enableInfo, err := m.pluginEnableStore.Get(ctx, pluginInfo.Id)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -368,4 +389,114 @@ func (m *modulePluginService) GetEnablePluginsByNavigation(ctx context.Context, 
 	}
 
 	return plugins, nil
+}
+
+func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml *model.InnerPluginYmlCfg) error {
+	//判断groupName存不存在，不存在则新建
+	groupInfo, err := m.commonGroup.GetGroupByName(ctx, "内置插件", 0)
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return err
+	}
+
+	groupID := 0
+	if err == gorm.ErrRecordNotFound {
+		groupID, err = m.commonGroup.CreateGroup(ctx, -1, 0, group_service.ModulePlugin, "", "内置插件", uuid.New(), "")
+	} else {
+		groupID = groupInfo.Id
+	}
+
+	navigationID, err := m.navigationService.GetIDByUUID(ctx, pluginYml.Navigation)
+	if err != nil {
+		return fmt.Errorf("navigation %s doesn't exist. ", pluginYml.Navigation)
+	}
+
+	return m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
+
+		t := time.Now()
+		pluginInfo := &entry.ModulePlugin{
+			UUID:       pluginYml.ID,
+			Name:       pluginYml.Name,
+			Version:    pluginYml.Version,
+			Group:      groupID,
+			CName:      pluginYml.CName,
+			Resume:     pluginYml.Resume,
+			ICon:       pluginYml.ICon,
+			Type:       2,
+			Driver:     pluginYml.Driver,
+			Details:    []byte{},
+			Operator:   0,
+			CreateTime: t,
+		}
+		if err = m.pluginStore.Save(txCtx, pluginInfo); err != nil {
+			return err
+		}
+		isEnable := 1
+		if pluginYml.Auto {
+			isEnable = 2
+		}
+		enable := &entry.ModulePluginEnable{
+			Id:         pluginInfo.Id,
+			Name:       pluginYml.Name,
+			Navigation: navigationID,
+			IsEnable:   isEnable,
+			Config:     []byte{},
+			Operator:   0,
+			UpdateTime: t,
+		}
+
+		return m.pluginEnableStore.Save(txCtx, enable)
+	})
+}
+
+func (m *modulePluginService) CheckPluginInstalled(ctx context.Context, pluginID string) (bool, error) {
+	isInstalled := false
+
+	key := m.installedCache.Key(pluginID)
+	value, err := m.installedCache.Get(ctx, key)
+	if err != nil && err != redis.Nil {
+		return false, err
+	}
+
+	var pluginInfo *entry.ModulePlugin
+	//若redis存在值
+	if err == nil {
+		isInstalled = value.Installed
+	} else {
+		//若redis无缓存
+		pluginInfo, err = m.pluginStore.GetPluginInfo(ctx, pluginID)
+		if err != nil && err != gorm.ErrRecordNotFound {
+			return false, err
+		} else if err == gorm.ErrRecordNotFound {
+			isInstalled = false
+		} else {
+			isInstalled = true
+		}
+		//缓存
+		m.installedCache.Set(ctx, key, &model.PluginInstalledStatus{
+			Installed: isInstalled,
+		}, time.Hour)
+	}
+	//若未安装直接返回
+	if !isInstalled {
+		return false, nil
+	}
+
+	//若插件已安装，检查本地缓存是否存在
+	dirPath := fmt.Sprintf("./plugin/%s", pluginID)
+	// 检查目录是否存在, 若不存在，则从数据库读取数据并解压
+	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
+		packageEntry, err := m.pluginPackageStore.Get(ctx, pluginInfo.Id)
+		if err != nil {
+			return false, err
+		}
+		packageFile := bytes.NewReader(packageEntry.Package)
+		err = common.DeCompress(packageFile, dirPath)
+		if err != nil {
+			//删除目录
+			os.RemoveAll(dirPath)
+			return false, err
+		}
+	}
+
+	return true, nil
 }
