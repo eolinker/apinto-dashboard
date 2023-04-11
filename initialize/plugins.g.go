@@ -71,7 +71,9 @@ func InitPlugins() error {
 			continue
 		}
 		//TODO 判断version有没改变，有则更新
+		if pluginInfo.Version != p.Version {
 
+		}
 	}
 	return nil
 }
@@ -103,7 +105,6 @@ func loadPlugins(dir string, target string) ([]*Plugin, error) {
 				log.Errorf("parse file(%s) error: %w")
 				return nil, err
 			}
-			p.Org = string(s)
 			plugins = append(plugins, p)
 		}
 	}
