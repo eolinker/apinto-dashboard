@@ -13,11 +13,6 @@ func NewNavigationPlugin() apinto_module.Driver {
 	return &NavigationDriver{}
 }
 
-const (
-	View = "view"
-	Edit = "edit"
-)
-
 func (c *NavigationDriver) CreateModule(name string, config interface{}) (apinto_module.Module, error) {
 	return NewNavigationModule(), nil
 }
