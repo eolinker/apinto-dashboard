@@ -99,7 +99,7 @@ export class ApiManagementComponent implements OnInit {
             this.groupScrollToBottom()
           }
         })
-      } 
+      }
     })
   }
 
@@ -226,7 +226,7 @@ export class ApiManagementComponent implements OnInit {
       if (resp.code === 0) {
         this.message.success(resp.msg || '删除成功', { nzDuration: 1000 })
         this.closeModal()
-      } 
+      }
     })
   }
 
