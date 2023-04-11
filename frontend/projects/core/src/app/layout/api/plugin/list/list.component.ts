@@ -5,7 +5,7 @@ import { THEAD_TYPE, TBODY_TYPE } from 'eo-ng-table'
 import { MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
 import { EmptyHttpResponse } from 'projects/core/src/app/constant/type'
 import { ApiService } from 'projects/core/src/app/service/api.service'
-import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 import { RouterService } from '../../router.service'
 import { PluginTemplateTableHeadName } from '../../types/conf'
 import { PluginTemplateItem } from '../../types/types'
@@ -27,7 +27,7 @@ export class ApiPluginTemplateListComponent implements OnInit {
     private modalService: EoNgFeedbackModalService,
     private api: ApiService,
     public router: Router,
-    private appConfigService: AppConfigService,
+    private appConfigService: EoNgNavigationService,
     private service:RouterService
   ) {
     this.appConfigService.reqFlashBreadcrumb([{ title: '插件模板' }])

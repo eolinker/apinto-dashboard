@@ -4,7 +4,7 @@ import { Router } from '@angular/router'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { Subscription } from 'rxjs'
 import { ApiService } from '../../service/api.service'
-import { AppConfigService } from '../../service/app-config.service'
+import { EoNgNavigationService } from '../../service/eo-ng-navigation.service'
 
 @Component({
   selector: 'eo-ng-login',
@@ -14,7 +14,7 @@ import { AppConfigService } from '../../service/app-config.service'
 export class LoginComponent implements OnInit {
   private subscription: Subscription = new Subscription()
   constructor (
-    private appConfigService: AppConfigService,
+    private appConfigService: EoNgNavigationService,
     private api: ApiService,
     private router:Router,
     private message: EoNgFeedbackMessageService

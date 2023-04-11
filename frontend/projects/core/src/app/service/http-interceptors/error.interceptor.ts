@@ -9,7 +9,7 @@ import {
 } from '@angular/common/http'
 import { tap, Observable } from 'rxjs'
 import { Router } from '@angular/router'
-import { AppConfigService } from '../app-config.service'
+import { EoNgNavigationService } from '../app-config.service'
 import { NzModalService } from 'ng-zorro-antd/modal'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 
@@ -18,7 +18,7 @@ export class ErrorInterceptor implements HttpInterceptor {
   private loadingMessageId:string = ''
   constructor (
     private router: Router,
-    private appConfigService: AppConfigService,
+    private appConfigService: EoNgNavigationService,
     private modalService:NzModalService,
     private message: EoNgFeedbackMessageService) {}
 
@@ -28,7 +28,11 @@ export class ErrorInterceptor implements HttpInterceptor {
         // this.hideLoader()
         if (event instanceof HttpResponse) {
           this.checkAccess(event.body.code, event, request.method)
-          event.body.data = this.camel(event.body.data)
+          try {
+            event.body.data = this.camel(event.body.data)
+          } catch {
+            console.warn('解析接口数据出现问题')
+          }
         }
       }
       )
@@ -67,7 +71,7 @@ export class ErrorInterceptor implements HttpInterceptor {
         }, 1000)
         break
       default:
-        if (!(responseBody.url.includes('sso/login/check')) && !(requestMethod === 'PUT' && responseBody.url.split('?')[0].split('/')[responseBody.url.split('?')[0].split('/').length - 1] === 'online') && code !== 0) {
+        if (code !== undefined && !(responseBody.url.includes('sso/login/check')) && !(requestMethod === 'PUT' && responseBody.url.split('?')[0].split('/')[responseBody.url.split('?')[0].split('/').length - 1] === 'online') && code !== 0) {
           this.message.error(responseBody.body.msg || '操作失败！')
         }
     }

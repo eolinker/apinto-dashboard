@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/modules/base/locker-service"
+	"github.com/eolinker/apinto-dashboard/modules/core"
 	"github.com/eolinker/apinto-dashboard/modules/group"
 	group_service "github.com/eolinker/apinto-dashboard/modules/group/group-service"
 	module_plugin "github.com/eolinker/apinto-dashboard/modules/module-plugin"
@@ -37,12 +38,12 @@ type modulePluginService struct {
 
 	commonGroup       group.ICommonGroupService
 	navigationService navigation.INavigationService
+	coreService       core.ICore
 	installedCache    IInstalledCache
 	lockService       locker_service.IAsynLockService
 }
 
 func newModulePluginService() module_plugin.IModulePluginService {
-
 	s := &modulePluginService{}
 	bean.Autowired(&s.pluginStore)
 	bean.Autowired(&s.pluginEnableStore)
@@ -50,6 +51,7 @@ func newModulePluginService() module_plugin.IModulePluginService {
 
 	bean.Autowired(&s.commonGroup)
 	bean.Autowired(&s.navigationService)
+	bean.Autowired(&s.coreService)
 	bean.Autowired(&s.installedCache)
 	bean.Autowired(&s.lockService)
 	return s
@@ -159,11 +161,11 @@ func (m *modulePluginService) GetPluginEnableInfo(ctx context.Context, pluginUUI
 	navigationUUID, _ := m.navigationService.GetUUIDByID(ctx, enableEntry.Navigation)
 
 	enableCfg := new(model.PluginEnableCfg)
+	_ = json.Unmarshal(enableEntry.Config, enableCfg)
 
 	info := &model.PluginEnableInfo{
 		Name:       enableEntry.Name,
 		Navigation: navigationUUID,
-		ApiGroup:   enableCfg.APIGroup,
 		Server:     enableCfg.Server,
 		Header:     enableCfg.Header,
 		Query:      enableCfg.Query,
@@ -182,21 +184,19 @@ func (m *modulePluginService) GetPluginEnableRender(ctx context.Context, pluginU
 	renderCfg := &model.PluginEnableRender{
 		Internet:  false,
 		Invisible: true,
-		ApiGroup:  false,
 	}
 	switch pluginInfo.Driver {
 	case "remote":
 		remoteDefine := new(model.RemoteDefine)
-		_ = json.Unmarshal([]byte(pluginInfo.Details), remoteDefine)
+		_ = json.Unmarshal(pluginInfo.Details, remoteDefine)
 		if !remoteDefine.Internet {
 			renderCfg.Internet = true
 		}
 		renderCfg.Querys = remoteDefine.Querys
 		renderCfg.Initialize = remoteDefine.Initialize
 	case "local":
-		renderCfg.ApiGroup = true
 		localDefine := new(model.LocalDefine)
-		_ = json.Unmarshal([]byte(pluginInfo.Details), localDefine)
+		_ = json.Unmarshal(pluginInfo.Details, localDefine)
 		renderCfg.Headers = localDefine.Headers
 		renderCfg.Querys = localDefine.Querys
 		renderCfg.Initialize = localDefine.Initialize
@@ -307,7 +307,6 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 		})
 	}
 	enableCfg := &model.PluginEnableCfg{
-		APIGroup:   enableInfo.ApiGroup,
 		Server:     enableInfo.Server,
 		Header:     headers,
 		Query:      querys,
@@ -329,6 +328,7 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 			return err
 		}
 		//TODO 重新生成路由
+		m.coreService.ResetVersion(uuid.New())
 
 		return nil
 	})
@@ -366,6 +366,7 @@ func (m *modulePluginService) DisablePlugin(ctx context.Context, userID int, plu
 			return err
 		}
 		//TODO 重新生成路由
+		m.coreService.ResetVersion(uuid.New())
 
 		return nil
 	})
