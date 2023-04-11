@@ -9,7 +9,7 @@ import (
 	_ "github.com/eolinker/apinto-dashboard/modules/core/service"
 	_ "github.com/eolinker/apinto-dashboard/modules/discovery/discovery-serivce"
 	_ "github.com/eolinker/apinto-dashboard/modules/group/group-service"
-	_ "github.com/eolinker/apinto-dashboard/modules/middleware/service"
+
 	_ "github.com/eolinker/apinto-dashboard/modules/module-plugin/service"
 	_ "github.com/eolinker/apinto-dashboard/modules/namespace/namespace-service"
 	_ "github.com/eolinker/apinto-dashboard/modules/navigation/navigation-service"

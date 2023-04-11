@@ -47,25 +47,25 @@ func NewDriver() *Driver {
 	}
 }
 
-func (d *Driver) CreateModule(name string, apiPrefix string, config interface{}) (apinto_module.Module, error) {
-	return d.newModule(name, apiPrefix), nil
+func (d *Driver) CreateModule(name string, config interface{}) (apinto_module.Module, error) {
+	return d.newModule(name), nil
 }
 
-func (d *Driver) CheckConfig(name string, apiPrefix string, config interface{}) error {
+func (d *Driver) CheckConfig(name string, config interface{}) error {
 	return nil
 }
 
 func (d *Driver) CreatePlugin(define interface{}) (apinto_module.Plugin, error) {
 	return d, nil
 }
-func (d *Driver) newModule(name string, apiPrefix string) *Module {
+func (d *Driver) newModule(name string) *Module {
 
-	return &Module{name: name, apiPrefix: apiPrefix, middlewareHandler: d.middlewareHandler, routers: d.routers}
+	return &Module{name: name, middlewareHandler: d.middlewareHandler, routers: d.routers}
 }
 
 type Module struct {
-	name              string
-	apiPrefix         string
+	name string
+
 	routers           apinto_module.RoutersInfo
 	middlewareHandler []apinto_module.MiddlewareHandler
 }
