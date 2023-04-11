@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/initialize"
 	"github.com/eolinker/apinto-dashboard/modules/core"
 	"github.com/eolinker/apinto-dashboard/modules/plugin/plugin_timer"
@@ -80,6 +79,6 @@ type Front struct {
 
 func (f *Front) CreateEngine() *gin.Engine {
 	engine := gin.Default()
-	controller.EmbedFrontend(engine)
+
 	return engine
 }

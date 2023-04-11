@@ -18,7 +18,7 @@ const (
 )
 
 func (c *ClusterPluginDriver) CreateModule(name string, config interface{}) (apinto_module.Module, error) {
-	return NewClusterModule(), nil
+	return NewClusterModule(name), nil
 }
 
 func (c *ClusterPluginDriver) CheckConfig(name string, config interface{}) error {
@@ -52,9 +52,9 @@ func (c *ClusterModule) Middleware() (apinto_module.Middleware, bool) {
 	return nil, false
 }
 
-func NewClusterModule() *ClusterModule {
+func NewClusterModule(name string) *ClusterModule {
 
-	return &ClusterModule{}
+	return &ClusterModule{name: name}
 }
 
 func (c *ClusterModule) RoutersInfo() apinto_module.RoutersInfo {

@@ -24,10 +24,8 @@ func NewCoreDriver() *Plugin {
 
 	middlewareHandler := []apinto_module.MiddlewareHandler{
 		{
-			Name: "namespace",
-			Rule: apinto_module.MiddlewareRule{
-				apinto_module.RouterTypeApi,
-			},
+			Name:    "namespace",
+			Rule:    apinto_module.MiddlewareRule(apinto_module.RouterLabelApi),
 			Handler: namespace_controller.MustNamespace,
 		},
 	}
