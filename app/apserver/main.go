@@ -1,14 +1,15 @@
 package main
 
 import (
-	"context"
 	"fmt"
+	"github.com/eolinker/apinto-dashboard/initialize"
+	"github.com/eolinker/apinto-dashboard/modules/core"
 	"github.com/eolinker/apinto-dashboard/modules/plugin/plugin_timer"
+	"net"
+	"net/http"
 	"os"
 
 	"github.com/eolinker/apinto-dashboard/app/apserver/version"
-	"github.com/eolinker/apinto-dashboard/db_migrator"
-	"github.com/eolinker/apinto-dashboard/store"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
 	"github.com/gin-gonic/gin"
@@ -36,11 +37,14 @@ func main() {
 func run() {
 
 	gin.SetMode(gin.ReleaseMode)
-	engine := gin.Default()
+	//engine := gin.Default()
 
-	registerRouter(engine)
+	//registerRouter(engine)
 
-	//初始化数据库表 sql操作
+	var coreService core.ICore
+	bean.Autowired(&coreService)
+	var front core.EngineCreate = new(Front)
+	bean.Injection(&front)
 	initDB()
 
 	err := bean.Check()
@@ -48,22 +52,33 @@ func run() {
 		log.Fatal(err)
 	}
 
+	// 执行导航初始化
+	err = initialize.InitNavigation()
+	if err != nil {
+		log.Fatal(err)
+	}
+	// 执行内置插件初始化
+	err = initialize.InitPlugins()
+	if err != nil {
+		log.Fatal(err)
+	}
+	coreService.ReloadModule()
 	go plugin_timer.ExtenderTimer()
 	// todo 不适合开源，后续通过插件接入
-
-	if err = engine.Run(fmt.Sprintf(":%d", GetPort())); err != nil {
+	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", GetPort()))
+	if err != nil {
 		panic(err)
 	}
+
+	s := http.Server{Handler: coreService}
+	s.Serve(listener)
 }
 
-func initDB() {
-	var iDb store.IDB
+type Front struct {
+}
 
-	bean.Autowired(&iDb)
+func (f *Front) CreateEngine() *gin.Engine {
+	engine := gin.Default()
 
-	ctx := context.Background()
-	db := iDb.DB(ctx)
-
-	db_migrator.InitSql(db)
-
+	return engine
 }

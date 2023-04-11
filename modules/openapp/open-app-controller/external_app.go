@@ -2,10 +2,8 @@ package open_app_controller
 
 import (
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
-	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/openapp"
 	"github.com/eolinker/apinto-dashboard/modules/openapp/open-app-dto"
@@ -13,26 +11,30 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
+	"sync"
 )
 
 type externalApplicationController struct {
 	extAppService openapp.IExternalApplicationService
 }
 
-func RegisterExternalApplicationRouter(router gin.IRoutes) {
-	e := &externalApplicationController{}
-	bean.Autowired(&e.extAppService)
+var (
+	locker             sync.Mutex
+	controllerInstance *externalApplicationController
+)
 
-	router.GET("/external-apps", controller.GenAccessHandler(access.ExtAPPEdit, access.ExtAPPView), e.getList)
-	router.GET("/external-app", controller.GenAccessHandler(access.ExtAPPEdit, access.ExtAPPView), e.getInfo)
-	router.POST("/external-app", controller.GenAccessHandler(access.ExtAPPEdit), controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindExtAPP), e.create)
-	router.PUT("/external-app", controller.GenAccessHandler(access.ExtAPPEdit), controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindExtAPP), e.edit)
-	router.DELETE("/external-app", controller.GenAccessHandler(access.ExtAPPEdit), controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindExtAPP), e.delete)
-	router.PUT("/external-app/enable", controller.GenAccessHandler(access.ExtAPPEdit), e.enable)
-	router.PUT("/external-app/disable", controller.GenAccessHandler(access.ExtAPPEdit), e.disable)
-	router.PUT("/external-app/token", controller.GenAccessHandler(access.ExtAPPEdit), e.flushToken)
+func newExternalApplicationController() *externalApplicationController {
+	if controllerInstance == nil {
+		locker.Lock()
+		defer locker.Unlock()
+		if controllerInstance == nil {
+			controllerInstance = &externalApplicationController{}
+			bean.Autowired(&controllerInstance.extAppService)
+		}
+	}
+	return controllerInstance
+
 }
-
 func (e *externalApplicationController) getList(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	list, err := e.extAppService.AppList(ginCtx, namespaceId)
@@ -73,7 +75,7 @@ func (e *externalApplicationController) create(ginCtx *gin.Context) {
 
 	input := new(open_app_dto.ExternalAppInfoInput)
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -103,7 +105,7 @@ func (e *externalApplicationController) edit(ginCtx *gin.Context) {
 
 	input := new(open_app_dto.ExternalAppInfoInput)
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 

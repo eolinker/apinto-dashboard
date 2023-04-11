@@ -5,6 +5,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/eolinker/apinto-dashboard/db_migrator"
+	_ "github.com/eolinker/apinto-dashboard/initialize"
 	"github.com/eolinker/apinto-dashboard/store"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -12,7 +14,7 @@ import (
 	"time"
 )
 
-func init() {
+func initDB() {
 	dns := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", GetDBUserName(), GetDBPassword(), GetDBIp(), GetDBPort(), GetDbName())
 	dialector := mysql.Open(dns)
 	db, err := gorm.Open(dialector, &gorm.Config{
@@ -28,6 +30,7 @@ func init() {
 	sqlDb.SetConnMaxLifetime(time.Second * 9)
 	sqlDb.SetMaxOpenConns(200)
 	sqlDb.SetMaxIdleConns(200)
+	db_migrator.InitSql(db)
 	store.InitStoreDB(db)
 
 }

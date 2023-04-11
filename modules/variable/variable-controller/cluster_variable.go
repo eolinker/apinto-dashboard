@@ -3,7 +3,6 @@ package variable_controller
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/enum"
@@ -28,16 +27,16 @@ func RegisterClusterVariableRouter(router gin.IRoutes) {
 	c := &clusterVariableController{}
 	bean.Autowired(&c.clusterVariableService)
 
-	router.GET("/cluster/:cluster_name/variables", controller.GenAccessHandler(access.VariableView, access.VariableEdit), c.gets)
-	router.POST("/cluster/:cluster_name/variable", controller.GenAccessHandler(access.VariableEdit), controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindClusterVariable), c.post)
-	router.PUT("/cluster/:cluster_name/variable", controller.GenAccessHandler(access.VariableEdit), controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindClusterVariable), c.put)
-	router.DELETE("/cluster/:cluster_name/variable", controller.GenAccessHandler(access.VariableEdit), controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindClusterVariable), c.del)
-	router.GET("/cluster/:cluster_name/variable/update-history", controller.GenAccessHandler(access.VariableView, access.VariableEdit), c.updateHistory)
-	router.POST("/cluster/:cluster_name/variable/sync-conf", controller.GenAccessHandler(access.VariableEdit), c.syncConf)
-	router.GET("/cluster/:cluster_name/variable/to-publishs", controller.GenAccessHandler(access.VariableView, access.VariableEdit), c.toPublishs)
-	router.POST("/cluster/:cluster_name/variable/publish", controller.GenAccessHandler(access.VariableEdit), controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindClusterVariable), c.publish)
-	router.GET("/cluster/:cluster_name/variable/publish-history", controller.GenAccessHandler(access.VariableView, access.VariableEdit), c.publishHistory)
-	router.GET("/cluster/:cluster_name/variable/sync-conf", controller.GenAccessHandler(access.VariableView, access.VariableEdit), c.getSyncConf)
+	router.GET("/cluster/:cluster_name/variables", c.gets)
+	router.POST("/cluster/:cluster_name/variable", controller.AuditLogHandler(enum.LogOperateTypeCreate, enum.LogKindClusterVariable, c.post))
+	router.PUT("/cluster/:cluster_name/variable", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindClusterVariable, c.put))
+	router.DELETE("/cluster/:cluster_name/variable", controller.AuditLogHandler(enum.LogOperateTypeDelete, enum.LogKindClusterVariable, c.del))
+	router.GET("/cluster/:cluster_name/variable/update-history", c.updateHistory)
+	router.POST("/cluster/:cluster_name/variable/sync-conf", c.syncConf)
+	router.GET("/cluster/:cluster_name/variable/to-publishs", c.toPublishs)
+	router.POST("/cluster/:cluster_name/variable/publish", controller.AuditLogHandler(enum.LogOperateTypePublish, enum.LogKindClusterVariable, c.publish))
+	router.GET("/cluster/:cluster_name/variable/publish-history", c.publishHistory)
+	router.GET("/cluster/:cluster_name/variable/sync-conf", c.getSyncConf)
 }
 
 // gets 获取列表
@@ -78,7 +77,7 @@ func (c *clusterVariableController) post(ginCtx *gin.Context) {
 	item := &cluster_dto.ClusterVariableItem{}
 
 	if err := ginCtx.BindJSON(item); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -106,14 +105,14 @@ func (c *clusterVariableController) put(ginCtx *gin.Context) {
 	item := &cluster_dto.ClusterVariableItem{}
 
 	if err := ginCtx.BindJSON(item); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	userId := controller.GetUserId(ginCtx)
 	err := c.clusterVariableService.Update(ginCtx, namespaceID, clusterName, userId, key, item.Value)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -157,7 +156,7 @@ func (c *clusterVariableController) updateHistory(ginCtx *gin.Context) {
 
 	history, total, err := c.clusterVariableService.QueryHistory(ginCtx, namespaceId, pageNum, pageSize, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -190,17 +189,17 @@ func (c *clusterVariableController) syncConf(ginCtx *gin.Context) {
 
 	conf := new(cluster_dto.SyncConf)
 	if err := ginCtx.BindJSON(conf); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	if len(conf.Clusters) == 0 || len(conf.Variables) == 0 {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("clusters or variables is null"))
+		controller.ErrorJson(ginCtx, http.StatusOK, "clusters or variables is null")
 		return
 	}
 	userId := controller.GetUserId(ginCtx)
 	if err := c.clusterVariableService.SyncConf(ginCtx, namespaceId, userId, clusterName, conf); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
@@ -215,7 +214,7 @@ func (c *clusterVariableController) toPublishs(ginCtx *gin.Context) {
 	background := ginCtx
 	list, err := c.clusterVariableService.ToPublishs(background, namespaceId, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -237,7 +236,7 @@ func (c *clusterVariableController) toPublishs(ginCtx *gin.Context) {
 
 	globalVariables, err := c.clusterVariableService.GetList(background, namespaceId, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -272,18 +271,18 @@ func (c *clusterVariableController) publish(ginCtx *gin.Context) {
 
 	input := &cluster_dto.VariablePublishInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	if input.VersionName == "" || input.Source == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("parameter error"))
+		controller.ErrorJson(ginCtx, http.StatusOK, "parameter error")
 		return
 	}
 	background := ginCtx
 
 	globalVariables, err := c.clusterVariableService.GetList(background, namespaceId, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -302,7 +301,7 @@ func (c *clusterVariableController) publish(ginCtx *gin.Context) {
 
 	userId := controller.GetUserId(ginCtx)
 	if err = c.clusterVariableService.Publish(background, namespaceId, userId, clusterName, input.VersionName, input.Desc, input.Source); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
@@ -326,7 +325,7 @@ func (c *clusterVariableController) publishHistory(ginCtx *gin.Context) {
 
 	list, total, err := c.clusterVariableService.PublishHistory(ginCtx, namespaceId, pageNum, pageSize, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -364,7 +363,7 @@ func (c *clusterVariableController) getSyncConf(ginCtx *gin.Context) {
 	clusterName := ginCtx.Param("cluster_name")
 	conf, err := c.clusterVariableService.GetSyncConf(ginCtx, namespaceId, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	syncConf := new(cluster_dto.SyncConf)
