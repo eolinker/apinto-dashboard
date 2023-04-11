@@ -172,12 +172,7 @@ type NavigationEnabledPlugin struct {
 	UUID string
 }
 
-// NavigationModules 导航所需要的模块信息
-type NavigationModules struct {
-	NavigationID int
-	Modules      []*NavigationModuleInfo
-}
-
+// NavigationModuleInfo 导航所需要的模块信息
 type NavigationModuleInfo struct {
 	Name  string
 	Title string
