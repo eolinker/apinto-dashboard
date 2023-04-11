@@ -8,8 +8,10 @@ import (
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
 	"net/http"
+	"strconv"
 	"sync"
 	"sync/atomic"
+	"time"
 )
 
 var (
@@ -46,13 +48,12 @@ func (c *coreService) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (c *coreService) ReloadModule() error {
 
-	lastVersion := "" // todo load lastVersion from redis or db
+	lastVersion := strconv.FormatInt(time.Now().UnixNano(), 16) // todo load lastVersion from redis or db
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
 	if c.localVersion != lastVersion {
-		// todo load module
-		// todo load middleware
+		c.localVersion = lastVersion
 		err := c.rebuild()
 		if err != nil {
 			log.Error("error to rebuild core:", err)
