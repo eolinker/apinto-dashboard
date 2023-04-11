@@ -31,7 +31,7 @@ export class ErrorInterceptor implements HttpInterceptor {
           try {
             event.body.data = this.camel(event.body.data)
           } catch {
-            console.warn('解析接口数据出现问题')
+            console.warn('转化接口数据命名法出现问题')
           }
         }
       }
