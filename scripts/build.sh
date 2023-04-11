@@ -34,7 +34,7 @@ echo "Start building apinto dashboard monolithic ${VERSION}..."
 echo ""
 echo "Step 1 - building apinto dashboard frontend..."
 
-if [[ "$BUILD_MODE" == "all" || ! -d "controller/dist" ]];then
+if [[ "$BUILD_MODE" == "all" || ! -d "frontend/dist" ]];then
   echo "begin frontend building..."
   if command -v pnpm > /dev/null
   then
