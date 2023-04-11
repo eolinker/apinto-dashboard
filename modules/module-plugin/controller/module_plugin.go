@@ -22,18 +22,11 @@ type modulePluginController struct {
 	modulePluginService module_plugin.IModulePluginService
 }
 
-func RegisterModulePluginRouter(router gin.IRoutes) {
+func newModulePluginController() *modulePluginController {
 
 	p := &modulePluginController{}
 	bean.Autowired(&p.modulePluginService)
-	router.GET("/plugin/installed", p.plugins)
-	router.GET("/plugin/info", p.getPluginInfo)
-	router.GET("/plugin/groups/enum", p.getGroupsEnum)
-	router.GET("/plugin/enable", p.getEnableInfo)
-
-	router.POST("/plugin/install", p.install)
-	router.POST("/plugin/enable", p.enable)
-	router.POST("/plugin/disable", p.disable)
+	return p
 }
 
 // 插件列表

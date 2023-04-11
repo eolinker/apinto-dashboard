@@ -35,3 +35,12 @@ type EnablePlugin struct {
 	Config []byte
 	Define []byte
 }
+
+// EnabledModule 启用的导航模块信息
+type EnabledModule struct {
+	Name         string `gorm:"column:name" json:"name"`
+	Title        string `gorm:"column:cname" json:"cname"`
+	Type         int    `gorm:"column:type" json:"type"`
+	NavigationID int    `gorm:"column:navigation" json:"navigation"`
+	Front        string `gorm:"column:front" json:"front"`
+}
