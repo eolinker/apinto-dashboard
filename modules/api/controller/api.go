@@ -44,32 +44,6 @@ func newApiController() *apiController {
 
 }
 
-func RegisterAPIRouter(router gin.IRouter) {
-	c := &apiController{}
-	bean.Autowired(&c.apiService)
-	router.GET("/routers", c.routers)
-	router.GET("/router", c.getInfo)
-	router.POST("/router", controller.AuditLogHandler(enum.LogOperateTypeCreate, enum.LogKindAPI, c.create))
-	router.PUT("/router", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindAPI, c.update))
-	router.DELETE("/router", controller.AuditLogHandler(enum.LogOperateTypeDelete, enum.LogKindAPI, c.delete))
-
-	router.POST("/routers/batch-online", controller.AuditLogHandler(enum.LogOperateTypePublish, enum.LogKindAPI, c.batchOnline))
-	router.POST("/routers/batch-offline", controller.AuditLogHandler(enum.LogOperateTypePublish, enum.LogKindAPI, c.batchOffline))
-	router.POST("/routers/batch-online/check", c.batchOnlineCheck)
-
-	router.PUT("/router/online", controller.AuditLogHandler(enum.LogOperateTypePublish, enum.LogKindAPI, c.online))
-	router.PUT("/router/offline", controller.AuditLogHandler(enum.LogOperateTypePublish, enum.LogKindAPI, c.offline))
-	router.GET("/router/onlines", c.getOnlineList)
-	router.PUT("/router/enable", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindAPI, c.enableAPI))
-	router.PUT("/router/disable", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindAPI, c.disableAPI))
-	router.GET("/router/groups", c.groups)
-
-	router.GET("/router/source", c.getSourceList)
-	router.POST("/router/import", c.getImportCheckList)
-	router.GET("/router/enum", c.routerEnum)
-	router.PUT("/router/import", controller.AuditLogHandler(enum.LogOperateTypeCreate, enum.LogKindAPI, c.importAPI))
-}
-
 func (a *apiController) routerEnum(ginCtx *gin.Context) {
 	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
 	serviceNames := ginCtx.Query("service_names")
