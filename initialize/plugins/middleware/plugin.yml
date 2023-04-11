@@ -1,10 +1,11 @@
 id: "middleware.apinto.com"
 name: "middleware"
+cname: "中间件"
+resume: ""
 version: "v1.0"
 icon: ""
 driver: "middleware.apinto.com"
 core: true
-install:
-  auto: true
-  front: interceptor
-  navigation: "navigation.middleware"
+auto: true
+front: interceptor
+navigation: "navigation.middleware"

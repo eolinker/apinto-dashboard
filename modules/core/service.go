@@ -8,7 +8,9 @@ import (
 
 type ICore interface {
 	http.Handler
-	ReloadModule(version string) error
+	ResetVersion(version string)
+	ReloadModule() error
+	CheckNewModule(pluginID, name, apiGroup string, config interface{}) error
 }
 
 type IProviders interface {

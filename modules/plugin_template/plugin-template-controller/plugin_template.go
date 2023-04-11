@@ -110,12 +110,12 @@ func (p *pluginTemplateController) createTemplate(ginCtx *gin.Context) {
 	}
 
 	if input.Name == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("插件模板名称为必填项"))
+		controller.ErrorJson(ginCtx, http.StatusOK, "插件模板名称为必填项")
 		return
 	}
 
 	if len(input.Plugins) == 0 {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("插件配置为必填项"))
+		controller.ErrorJson(ginCtx, http.StatusOK, "插件配置为必填项")
 		return
 	}
 
@@ -164,7 +164,7 @@ func (p *pluginTemplateController) updateTemplate(ginCtx *gin.Context) {
 	}
 
 	if len(input.Plugins) == 0 {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("插件配置为必填项"))
+		controller.ErrorJson(ginCtx, http.StatusOK, "插件配置为必填项")
 		return
 	}
 

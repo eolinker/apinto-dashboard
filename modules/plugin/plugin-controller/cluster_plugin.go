@@ -300,7 +300,7 @@ func (p *pluginClusterController) publish(ginCtx *gin.Context) {
 		return
 	}
 	if input.VersionName == "" || input.Source == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("parameter error"))
+		controller.ErrorJson(ginCtx, http.StatusOK, "parameter error")
 		return
 	}
 	background := ginCtx

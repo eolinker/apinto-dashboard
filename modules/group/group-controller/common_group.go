@@ -149,7 +149,7 @@ func (c *commonGroupController) createGroup(ginCtx *gin.Context) {
 		return
 	}
 
-	if err := c.commonGroupService.CreateGroup(ginCtx, namespaceId, operator, groupType, tagName, input.Name, input.UUID, input.ParentUUID); err != nil {
+	if _, err := c.commonGroupService.CreateGroup(ginCtx, namespaceId, operator, groupType, tagName, input.Name, input.UUID, input.ParentUUID); err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
