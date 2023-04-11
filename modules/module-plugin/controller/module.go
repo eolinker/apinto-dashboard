@@ -12,11 +12,6 @@ func NewModulePlugin() apinto_module.Driver {
 	return &ModulePluginDriver{}
 }
 
-const (
-	ModulePluginView = "view"
-	ModulePluginEdit = "edit"
-)
-
 func (c *ModulePluginDriver) CreateModule(name string, config interface{}) (apinto_module.Module, error) {
 	return NewModulePluginModule(name), nil
 }
@@ -112,31 +107,31 @@ func (c *ModulePluginModule) initRouter() {
 		},
 		{
 			Method:      http.MethodGet,
-			Path:        "/api/plugin/icon/:id/:file",
+			Path:        "/plugin/icon/:id/:file",
 			Handler:     "pluginFront.getPluginIcon",
 			HandlerFunc: []apinto_module.HandlerFunc{controllerPluginFront.checkPluginID, controllerPluginFront.setIConName, controllerPluginFront.getPluginInfo},
 		},
 		{
 			Method:      http.MethodGet,
-			Path:        "/api/plugin/icon/:id",
+			Path:        "/plugin/icon/:id",
 			Handler:     "pluginFront.getPluginIconDefault",
 			HandlerFunc: []apinto_module.HandlerFunc{controllerPluginFront.checkPluginID, controllerPluginFront.setIConName, controllerPluginFront.getPluginInfo},
 		},
 		{
 			Method:      http.MethodGet,
-			Path:        "/api/plugin/md/:id/:file",
+			Path:        "/plugin/md/:id/:file",
 			Handler:     "pluginFront.getPluginMD",
 			HandlerFunc: []apinto_module.HandlerFunc{controllerPluginFront.checkPluginID, controllerPluginFront.setMDName, controllerPluginFront.getPluginInfo},
 		},
 		{
 			Method:      http.MethodGet,
-			Path:        "/api/plugin/md/:id",
+			Path:        "/plugin/md/:id",
 			Handler:     "pluginFront.getPluginMDDefault",
 			HandlerFunc: []apinto_module.HandlerFunc{controllerPluginFront.checkPluginID, controllerPluginFront.setMDName, controllerPluginFront.getPluginInfo},
 		},
 		{
 			Method:      http.MethodGet,
-			Path:        "/api/plugin/info/:id/resources/*filepath",
+			Path:        "/plugin/info/:id/resources/*filepath",
 			Handler:     "pluginFront.getPluginResources",
 			HandlerFunc: []apinto_module.HandlerFunc{controllerPluginFront.checkPluginID, controllerPluginFront.getPluginResources},
 		},

@@ -123,6 +123,7 @@ func (p *Plugin) NewModule(name string) *Module {
 
 	routers = append(routers, favicon())
 	routers = append(routers, indexRouter())
+	routers = append(routers, commonStrategy()...)
 	return &Module{
 		name:              name,
 		middlewareHandler: p.middlewareHandler,
