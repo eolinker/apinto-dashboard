@@ -106,3 +106,40 @@ func (m *modulePlugin) GetMiddlewareList(ctx context.Context) ([]*model.Middlewa
 	}
 	return middlewares, nil
 }
+
+func (m *modulePlugin) GetModulesByNavigations(ctx context.Context, navigationIDs []int) ([]*model.NavigationModules, error) {
+	moduleInfos, err := m.pluginStore.GetEnabledModules(ctx, navigationIDs)
+	if err != nil {
+		return nil, err
+	}
+	navigationMap := make(map[int][]*model.NavigationModuleInfo, len(navigationIDs))
+	for _, module := range moduleInfos {
+		infos, has := navigationMap[module.NavigationID]
+		if !has {
+			infos = make([]*model.NavigationModuleInfo, 0, 3)
+		}
+		info := &model.NavigationModuleInfo{
+			Name:  module.Name,
+			Title: module.Title,
+			Type:  "outer",
+			Path:  "",
+		}
+		//若模块为内置模块
+		if module.Type == 0 || module.Type == 1 {
+			info.Type = "built-in"
+			info.Path = module.Front
+		}
+		infos = append(infos, info)
+		navigationMap[module.NavigationID] = infos
+	}
+
+	modules := make([]*model.NavigationModules, 0, len(navigationMap))
+	for navigationID, info := range navigationMap {
+		modules = append(modules, &model.NavigationModules{
+			NavigationID: navigationID,
+			Modules:      info,
+		})
+	}
+
+	return modules, nil
+}
