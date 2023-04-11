@@ -3,26 +3,35 @@ package service
 import (
 	"context"
 
+	"github.com/eolinker/eosc/common/bean"
+
 	module_plugin "github.com/eolinker/apinto-dashboard/modules/module-plugin"
 
-	"github.com/eolinker/apinto-dashboard/modules/navigation"
+	navigation_service "github.com/eolinker/apinto-dashboard/modules/navigation"
 
 	"github.com/eolinker/apinto-dashboard/modules/core/model"
 )
 
 type INavigationService interface {
-	List(ctx context.Context) ([]*model.Navigation, error)
+	List(ctx context.Context) ([]*model.Navigation, map[string]string, error)
 }
 
-type navigationService struct {
-	navigationService   navigation.INavigationService
+type navigation struct {
+	navigationService   navigation_service.INavigationService
 	modulePluginService module_plugin.IModulePlugin
 }
 
-func (n *navigationService) List(ctx context.Context) ([]*model.Navigation, error) {
+func newNavigationService() INavigationService {
+	n := &navigation{}
+	bean.Autowired(&n.navigationService)
+	bean.Autowired(&n.modulePluginService)
+	return n
+}
+
+func (n *navigation) List(ctx context.Context) ([]*model.Navigation, map[string]string, error) {
 	list, err := n.navigationService.List(ctx)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	ids := make([]int, 0, len(list))
 	for _, l := range list {
@@ -30,8 +39,9 @@ func (n *navigationService) List(ctx context.Context) ([]*model.Navigation, erro
 	}
 	moduleMap, err := n.modulePluginService.GetModulesByNavigations(ctx, ids)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
+	access := make(map[string]string)
 	navigations := make([]*model.Navigation, 0, len(list))
 	for _, l := range list {
 		modules := make([]*model.Module, 0)
@@ -41,6 +51,7 @@ func (n *navigationService) List(ctx context.Context) ([]*model.Navigation, erro
 				if i == 0 {
 					defaultModule = v.Name
 				}
+				access[v.Name] = "edit"
 				modules = append(modules, &model.Module{
 					Name:  v.Name,
 					Title: v.Title,
@@ -53,10 +64,10 @@ func (n *navigationService) List(ctx context.Context) ([]*model.Navigation, erro
 		navigations = append(navigations, &model.Navigation{
 			Title:    l.Title,
 			Icon:     l.Icon,
-			IconType: l.IconType,
+			IconType: "css",
 			Modules:  modules,
 			Default:  defaultModule,
 		})
 	}
-	return navigations, nil
+	return navigations, access, nil
 }
