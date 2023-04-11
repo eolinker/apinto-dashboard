@@ -1,0 +1,91 @@
+<div
+  class="flex flex-nowrap justify-start overflow-y-hidden max-h-[calc(100vh_-_50px)]"
+>
+  <div>
+    <div
+      class="block-inline-block relative min-w-GROUP min-h-[calc(100vh_-_50px)] spreed-content"
+      style="width: 240px"
+    >
+      <div class="flex items-center justify-between px-[11px] py-btnbase">
+        <eo-ng-search-input-group
+          class="w-[calc(100%)]"
+          [eoInputVal]="queryName"
+          [eoNoWidth]="true"
+          (eoClick)="queryName = ''; getPluginList()"
+        >
+          <input
+            type="text"
+            eo-ng-input
+            placeholder="搜索企业插件名称"
+            [(ngModel)]="queryName"
+            (blur)="getPluginList()"
+            (keyup.enter)="getPluginList()"
+          />
+        </eo-ng-search-input-group>
+      </div>
+
+      <div
+        class="h-[calc(100%_-_56px)] absolute overflow-x-hidden overflow-y-auto w-[100%]"
+        #groupComponent
+      >
+        <div
+          class="group-title cursor-pointer"
+          [ngClass]="{ 'group-title-selected': showAll }"
+          (click)="viewAllPlugins()"
+        >
+          <svg class="iconpark-icon mr5 fs18"><use href="#suoyou"></use></svg>
+          <span>所有插件</span>
+        </div>
+        <div>
+          <eo-ng-tree-default
+            nzBlockNode
+            #eoNgTreeDefault
+            [nzData]="nodesList"
+            (nzClick)="activeNode($event)"
+          ></eo-ng-tree-default>
+        </div>
+      </div>
+      <!-- 拖动条 -->
+      <div
+        class="divide_line_ldcc"
+        maxWidth="450"
+        minWidth="200"
+        eo-ng-tree-drag
+      ></div>
+    </div>
+  </div>
+  <div class="w-[100%]">
+    <div class="">
+      <div
+        class="list-header pl-btnbase pr-btnrbase py-btnybase flex flex-nowrap items-center justify-between"
+      >
+        <div>
+          <button
+            eo-ng-button
+            class="ant-btn-primary"
+            eoNgUserAccess="plugin"
+            (disabledEdit)="disabledEdit($event)"
+            (click)="installPlugin()"
+          >
+            安装插件
+          </button>
+        </div>
+        <div>
+          <eo-ng-radio-group
+            [(ngModel)]="radioValue"
+            [nzOptions]="radioOptions"
+            [nzDisabled]="nzDisabled"
+            nzStyle="button"
+            nzButtonStyle="solid"
+          ></eo-ng-radio-group>
+        </div>
+      </div>
+      <div class="list-content pb-[4px]">
+        <eo-ng-card-list
+          [cardList]="filterPluginList()"
+          (cardClick)="handerCardClick($event)"
+        ></eo-ng-card-list>
+      </div>
+    </div>
+  </div>
+</div>
