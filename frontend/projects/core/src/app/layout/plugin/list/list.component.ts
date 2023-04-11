@@ -4,7 +4,7 @@ import { EoNgFeedbackModalService } from 'eo-ng-feedback'
 import { RadioOption } from 'eo-ng-radio'
 import { EoNgTreeDefaultComponent } from 'eo-ng-tree'
 import { NzModalRef } from 'ng-zorro-antd/modal'
-import { NzTreeNode, NzTreeNodeOptions, NzFormatEmitEvent } from 'ng-zorro-antd/tree'
+import { NzTreeNode, NzTreeNodeOptions } from 'ng-zorro-antd/tree'
 import { Subscription } from 'rxjs'
 import { CardItem } from '../../../component/card-list/card-list.component'
 import { MODAL_SMALL_SIZE } from '../../../constant/app.config'
@@ -14,7 +14,8 @@ import { BaseInfoService } from '../../../service/base-info.service'
 import { EoNgMessageService } from '../../../service/eo-ng-message.service'
 import { PluginCreateComponent } from '../create/create.component'
 import { PluginListStatusItems } from '../types/conf'
-import { PluginItem, PluginGroupItem } from '../types/types'
+import { PluginItem } from '../types/types'
+import { EoNgPluginService } from '../eo-ng-plugin.service'
 
 @Component({
   selector: 'eo-ng-plugin-list',
@@ -27,7 +28,6 @@ export class PluginListComponent implements OnInit {
   nzDisabled:boolean = false
   radioOptions:RadioOption[] = [...PluginListStatusItems]
   radioValue:string|boolean = ''
-  pluginList:(PluginItem & CardItem)[] = []
   modalRef:NzModalRef | undefined
   showAll:boolean = true
   groupUuid:string = '' // 供右侧list页面用
@@ -35,6 +35,7 @@ export class PluginListComponent implements OnInit {
   activatedNode?: NzTreeNode;
   mdFileName:string = ''
   private subscription: Subscription = new Subscription()
+  private subscription1: Subscription = new Subscription()
   public nodesList:NzTreeNodeOptions[] = []
 
   constructor (
@@ -44,7 +45,8 @@ export class PluginListComponent implements OnInit {
     private router:Router,
     private route: ActivatedRoute,
     private baseInfo:BaseInfoService,
-    private message:EoNgMessageService) {
+    private message:EoNgMessageService,
+    public service:EoNgPluginService) {
     this.appConfigService.reqFlashBreadcrumb([{ title: '企业插件' }])
   }
 
@@ -53,36 +55,28 @@ export class PluginListComponent implements OnInit {
     this.subscription = this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
         this.groupUuid = this.baseInfo.allParamsInfo.pluginGroupId
-        console.log('sub')
-        this.getPluginList()
+        this.service.groupUuid = this.groupUuid
+        this.service.getPluginList()
       }
     })
-    console.log('init')
+    this.subscription1 = this.service.repFlashList().subscribe(() => {
+      this.queryName = this.service.queryName
+      this.service.getPluginList()
+    })
+    this.service.getPluginList()
   }
 
   onDestroy () {
     this.subscription.unsubscribe()
-  }
-
-  // 获取分组和插件列表
-  getPluginList () {
-    this.api.get('system/plugin/installed', { group: this.groupUuid || '', search: this.queryName || '' }).subscribe((resp:{code:number, data:{plugins:PluginItem[], groups:PluginGroupItem[]}, msg:string}) => {
-      if (resp.code === 0) {
-        this.nodesList = this.nodesTransfer(resp.data.groups)
-        this.pluginList = resp.data.plugins.map((plugin:PluginItem) => {
-          const newPlugin:PluginItem & CardItem = { ...plugin, title: plugin.cname, desc: plugin.resume, iconAddr: plugin.icon } as PluginItem & CardItem
-          return newPlugin
-        })
-      }
-    })
+    this.subscription1.unsubscribe()
   }
 
   // 根据状态展示响应的插件（前端筛选）
   filterPluginList () {
     if (this.radioValue === '') {
-      return this.pluginList
+      return this.service.pluginList
     } else {
-      return this.pluginList.filter((plugin:PluginItem) => {
+      return this.service.pluginList.filter((plugin:PluginItem) => {
         return plugin.enable === this.radioValue
       })
     }
@@ -97,52 +91,7 @@ export class PluginListComponent implements OnInit {
     if (this.activatedNode?.isSelected) {
   this.activatedNode!.isSelected = false
     }
-    this.router.navigate(['/', 'plugin', 'list', ''])
-  }
-
-  // 遍历目录列表，转化成tree组件需要的参数格式
-  // 第一级目录不可以创建api，当root为true时，标志该目录为第一级，并放入firstLevelMap
-  nodesTransfer (data:any): NzTreeNodeOptions[] {
-    const res:NzTreeNodeOptions[] = []
-    for (const index in data) {
-      data[index].key = data[index].uuid
-      data[index].title = data[index].name
-      if (this.groupUuid && data[index].uuid === this.groupUuid) {
-        data[index].selected = true
-        this.showAll = false
-      }
-      if (data[index].children?.length > 0) {
-        data[index].children = this.nodesTransfer(data[index].children)
-      }
-      res.push(data[index])
-    }
-    return res
-  }
-
-  // 点击分组节点时，切换activatedNode
-  // 当节点是目录时，右侧页面需要跳转至list页
-  // 当节点是api时，右侧页面需要跳转至API编辑页
-  activeNode (data: NzFormatEmitEvent): void {
-    if (
-      data.keys![0] &&
-      this.groupUuid !== data.keys![0] &&
-      this.eoNgTreeDefault?.getTreeNodeByKey(this.groupUuid)?.isSelected
-    ) {
-      // @ts-ignore
-      this.eoNgTreeDefault.getTreeNodeByKey(this.groupUuid).isSelected = false
-    }
-
-    this.showAll = false
-    data.node!.isExpanded = !data.node!.isExpanded
-    // eslint-disable-next-line dot-notation
-    if (data.node!.origin['uuid']) {
-      // eslint-disable-next-line dot-notation
-      this.router.navigate(['/', 'plugin', 'list', data.node!.origin['uuid']])
-    } else {
-      // eslint-disable-next-line dot-notation
-      this.router.navigate(['/', 'plugin', 'list', ''])
-    }
-    this.activatedNode = data.node!
+    this.router.navigate(['/', 'plugin', 'group', 'list', ''])
   }
 
   disabledEdit (value:any) {
@@ -157,7 +106,7 @@ export class PluginListComponent implements OnInit {
       nzOkDisabled: this.nzDisabled,
       nzOnOk: (component:PluginCreateComponent) => {
         if (component.submit()) {
-          this.getPluginList()
+          this.service.getPluginList()
           return true
         } else {
           return false
