@@ -4,6 +4,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/modules/upstream/upstream-dto"
+	"sync"
 
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/application"
@@ -17,9 +18,27 @@ import (
 	"strconv"
 )
 
+var (
+	locker             sync.Mutex
+	controllerInstance *applicationController
+)
+
 type applicationController struct {
 	applicationService     application.IApplicationService
 	applicationAuthService application.IApplicationAuthService
+}
+
+func newApplicationController() *applicationController {
+	if controllerInstance == nil {
+		locker.Lock()
+		defer locker.Unlock()
+		if controllerInstance == nil {
+			controllerInstance = &applicationController{}
+			bean.Autowired(&controllerInstance.applicationService)
+			bean.Autowired(&controllerInstance.applicationAuthService)
+		}
+	}
+	return controllerInstance
 }
 
 func RegisterApplicationRouter(router gin.IRoutes) {
