@@ -15,6 +15,7 @@ type IModulePluginStore interface {
 	GetPluginList(ctx context.Context, groupID int, searchName string) ([]*entry.ModulePlugin, error)
 	GetPluginInfo(ctx context.Context, uuid string) (*entry.ModulePlugin, error)
 	GetEnabledPlugins(ctx context.Context) ([]*entry.EnablePlugin, error)
+	GetEnabledModules(ctx context.Context, navigationIds []int) ([]*entry.EnabledModule, error)
 }
 
 type modulePluginStore struct {
@@ -45,9 +46,22 @@ func (c *modulePluginStore) GetPluginInfo(ctx context.Context, uuid string) (*en
 func (c *modulePluginStore) GetEnabledPlugins(ctx context.Context) ([]*entry.EnablePlugin, error) {
 	plugins := make([]*entry.EnablePlugin, 0)
 	err := c.DB(ctx).Table("module_plugin").Select("module_plugin.uuid, module_plugin_enable.name, module_plugin.driver, module_plugin_enable.config, module_plugin.details").
-		Joins("left join module_plugin_enable on module_plugin.id = module_plugin_enable.id").
+		Joins("right join module_plugin_enable on module_plugin.id = module_plugin_enable.id").
 		Where("module_plugin_enable.is_enable = 2").
 		Scan(&plugins).Error
 
 	return plugins, err
+}
+
+// GetEnabledModules 通过导航id列表获取启用的模块信息
+func (c *modulePluginStore) GetEnabledModules(ctx context.Context, navigationIds []int) ([]*entry.EnabledModule, error) {
+	modules := make([]*entry.EnabledModule, 0)
+	db := c.DB(ctx).Table("module_plugin").Select("module_plugin_enable.name, module_plugin.cname, module_plugin.type, module_plugin_enable.navigation, module_plugin.front").
+		Joins("right join module_plugin_enable on module_plugin.id = module_plugin_enable.id")
+	if len(navigationIds) > 0 {
+		db = db.Where("module_plugin_enable.navigation in (?)", navigationIds)
+	}
+	err := db.Where("module_plugin_enable.is_enable = 2").Scan(&modules).Error
+
+	return modules, err
 }
