@@ -7,6 +7,7 @@ import (
 	coreController "github.com/eolinker/apinto-dashboard/modules/core/controller"
 	discovery_controller "github.com/eolinker/apinto-dashboard/modules/discovery/discovery-controller"
 	navigationController "github.com/eolinker/apinto-dashboard/modules/navigation/navigation-controller"
+	open_api_controller "github.com/eolinker/apinto-dashboard/modules/openapi/open-api-controller"
 	apintoModule "github.com/eolinker/apinto-module"
 )
 
@@ -18,4 +19,5 @@ func init() {
 	apintoModule.Register("navigation.apinto.com", navigationController.NewNavigationPlugin())
 	apintoModule.Register("audit.apinto.com", auditController.NewDriver())
 	apintoModule.Register("discovery.apinto.com", discovery_controller.NewPluginDriver())
+	apintoModule.Register("open_api.apinto.com", open_api_controller.NewPluginDriver())
 }
