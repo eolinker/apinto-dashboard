@@ -65,7 +65,7 @@ func (n *navigationController) add(ctx *gin.Context) {
 		return
 	}
 
-	if err := n.navigationService.Add(ctx, input.Uuid, input.Name, input.Icon); err != nil {
+	if err := n.navigationService.Add(ctx, input.Uuid, input.Name, input.Icon, "url"); err != nil {
 		ctx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}

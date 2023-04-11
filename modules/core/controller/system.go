@@ -3,6 +3,8 @@ package controller
 import (
 	"net/http"
 
+	"github.com/eolinker/eosc/common/bean"
+
 	"github.com/eolinker/apinto-dashboard/controller"
 
 	"github.com/eolinker/apinto-dashboard/modules/core/service"
@@ -17,14 +19,18 @@ type System struct {
 	routers           apinto_module.RoutersInfo
 }
 
+func newSystem() *System {
+	s := &System{routers: make(apinto_module.RoutersInfo, 0)}
+	s.initRouter()
+	bean.Autowired(&s.navigationService)
+	return s
+}
+
 func (s *System) RoutersInfo() apinto_module.RoutersInfo {
 	return s.routers
 }
 
 func (s *System) initRouter() {
-	if s.routers == nil {
-		s.routers = make(apinto_module.RoutersInfo, 0)
-	}
 	s.routers = append(s.routers, apinto_module.RouterInfo{
 		Method:      http.MethodGet,
 		Path:        "/api/system/modules",
@@ -35,7 +41,7 @@ func (s *System) initRouter() {
 }
 
 func (s *System) list(ctx *gin.Context) {
-	list, err := s.navigationService.List(ctx)
+	list, access, err := s.navigationService.List(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
@@ -43,6 +49,6 @@ func (s *System) list(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, controller.NewSuccessResult(map[string]interface{}{
 		"navigation": list,
-		"access":     "",
+		"access":     access,
 	}))
 }
