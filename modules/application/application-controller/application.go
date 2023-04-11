@@ -1,10 +1,10 @@
 package application_controller
 
 import (
-	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/modules/upstream/upstream-dto"
+	"sync"
 
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/application"
@@ -18,9 +18,27 @@ import (
 	"strconv"
 )
 
+var (
+	locker             sync.Mutex
+	controllerInstance *applicationController
+)
+
 type applicationController struct {
 	applicationService     application.IApplicationService
 	applicationAuthService application.IApplicationAuthService
+}
+
+func newApplicationController() *applicationController {
+	if controllerInstance == nil {
+		locker.Lock()
+		defer locker.Unlock()
+		if controllerInstance == nil {
+			controllerInstance = &applicationController{}
+			bean.Autowired(&controllerInstance.applicationService)
+			bean.Autowired(&controllerInstance.applicationAuthService)
+		}
+	}
+	return controllerInstance
 }
 
 func RegisterApplicationRouter(router gin.IRoutes) {
@@ -28,23 +46,23 @@ func RegisterApplicationRouter(router gin.IRoutes) {
 	bean.Autowired(&c.applicationService)
 	bean.Autowired(&c.applicationAuthService)
 
-	router.GET("/applications", controller.GenAccessHandler(access.ApplicationView, access.ApplicationEdit), c.lists)
+	router.GET("/applications", c.lists)
 	router.GET("/application/enum", c.lists)
-	router.POST("/application", controller.GenAccessHandler(access.ApplicationEdit), controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindApplication), c.createApp)
-	router.GET("/application", controller.GenAccessHandler(access.ApplicationView, access.ApplicationEdit), c.info)
-	router.PUT("/application", controller.GenAccessHandler(access.ApplicationEdit), controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindApplication), c.updateApp)
-	router.DELETE("/application", controller.GenAccessHandler(access.ApplicationEdit), controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindApplication), c.deleteApp)
-	router.GET("/application/onlines", controller.GenAccessHandler(access.ApplicationView, access.ApplicationEdit), c.onlines)
-	router.PUT("/application/online", controller.GenAccessHandler(access.ApplicationEdit), controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindApplication), c.online)
-	router.PUT("/application/offline", controller.GenAccessHandler(access.ApplicationEdit), controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindApplication), c.offline)
-	router.PUT("/application/enable", controller.GenAccessHandler(access.ApplicationEdit), controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindApplication), c.enable)
-	router.PUT("/application/disable", controller.GenAccessHandler(access.ApplicationEdit), controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindApplication), c.disable)
-	router.GET("/application/drivers", controller.GenAccessHandler(access.ApplicationView, access.ApplicationEdit), c.drivers)
-	router.GET("/application/auths", controller.GenAccessHandler(access.ApplicationView, access.ApplicationEdit), c.auths)
-	router.GET("/application/auth", controller.GenAccessHandler(access.ApplicationView, access.ApplicationEdit), c.getAuth)
-	router.POST("/application/auth", controller.GenAccessHandler(access.ApplicationEdit), c.createAuth)
-	router.PUT("/application/auth", controller.GenAccessHandler(access.ApplicationEdit), c.updateAuth)
-	router.DELETE("/application/auth", controller.GenAccessHandler(access.ApplicationEdit), c.delAuth)
+	router.POST("/application", controller.AuditLogHandler(enum.LogOperateTypeCreate, enum.LogKindApplication, c.createApp))
+	router.GET("/application", c.info)
+	router.PUT("/application", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindApplication, c.updateApp))
+	router.DELETE("/application", controller.AuditLogHandler(enum.LogOperateTypeDelete, enum.LogKindApplication, c.deleteApp))
+	router.GET("/application/onlines", c.onlines)
+	router.PUT("/application/online", controller.AuditLogHandler(enum.LogOperateTypePublish, enum.LogKindApplication, c.online))
+	router.PUT("/application/offline", controller.AuditLogHandler(enum.LogOperateTypePublish, enum.LogKindApplication, c.offline))
+	router.PUT("/application/enable", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindApplication, c.enable))
+	router.PUT("/application/disable", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindApplication, c.disable))
+	router.GET("/application/drivers", c.drivers)
+	router.GET("/application/auths", c.auths)
+	router.GET("/application/auth", c.getAuth)
+	router.POST("/application/auth", c.createAuth)
+	router.PUT("/application/auth", c.updateAuth)
+	router.DELETE("/application/auth", c.delAuth)
 }
 
 func (a *applicationController) lists(ginCtx *gin.Context) {
@@ -64,7 +82,7 @@ func (a *applicationController) lists(ginCtx *gin.Context) {
 	userId := controller.GetUserId(ginCtx)
 	list, count, err := a.applicationService.AppList(ginCtx, namespaceId, userId, pageNum, pageSize, name)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -90,7 +108,7 @@ func (a *applicationController) enum(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	list, err := a.applicationService.AppListAll(ginCtx, namespaceId)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -114,7 +132,7 @@ func (a *applicationController) info(ginCtx *gin.Context) {
 
 	info, err := a.applicationService.AppInfoDetails(ginCtx, namespaceId, id)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -152,17 +170,17 @@ func (a *applicationController) createApp(ginCtx *gin.Context) {
 	userId := controller.GetUserId(ginCtx)
 	input := new(application_dto.ApplicationInput)
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	if err := input.Check(); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	if err := a.applicationService.CreateApp(ginCtx, namespaceId, userId, input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
@@ -174,17 +192,17 @@ func (a *applicationController) updateApp(ginCtx *gin.Context) {
 
 	input := new(application_dto.ApplicationInput)
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	if err := input.Check(); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	if err := a.applicationService.UpdateApp(ginCtx, namespaceId, userId, input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
@@ -195,7 +213,7 @@ func (a *applicationController) deleteApp(ginCtx *gin.Context) {
 	id := ginCtx.Query("app_id")
 	userId := controller.GetUserId(ginCtx)
 	if err := a.applicationService.DelApp(ginCtx, namespaceId, userId, id); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
@@ -206,7 +224,7 @@ func (a *applicationController) onlines(ginCtx *gin.Context) {
 	id := ginCtx.Query("app_id")
 	list, err := a.applicationService.OnlineList(ginCtx, namespaceId, id)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	resp := make([]*online_dto.OnlineOut, 0, len(list))
@@ -236,11 +254,11 @@ func (a *applicationController) online(ginCtx *gin.Context) {
 	id := ginCtx.Query("app_id")
 	input := &online_dto.UpdateOnlineStatusInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	if err := a.applicationService.Online(ginCtx, namespaceId, userId, id, input.ClusterName); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
@@ -252,11 +270,11 @@ func (a *applicationController) offline(ginCtx *gin.Context) {
 	id := ginCtx.Query("app_id")
 	input := &online_dto.UpdateOnlineStatusInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	if err := a.applicationService.Offline(ginCtx, namespaceId, userId, id, input.ClusterName); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
@@ -268,11 +286,11 @@ func (a *applicationController) enable(ginCtx *gin.Context) {
 	id := ginCtx.Query("app_id")
 	input := &online_dto.UpdateOnlineStatusInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	if err := a.applicationService.Disable(ginCtx, namespaceId, userId, id, input.ClusterName, false); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
@@ -284,11 +302,11 @@ func (a *applicationController) disable(ginCtx *gin.Context) {
 	id := ginCtx.Query("app_id")
 	input := &online_dto.UpdateOnlineStatusInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	if err := a.applicationService.Disable(ginCtx, namespaceId, userId, id, input.ClusterName, true); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
@@ -315,7 +333,7 @@ func (a *applicationController) auths(ginCtx *gin.Context) {
 	appId := ginCtx.Query("app_id")
 	list, err := a.applicationAuthService.GetList(ginCtx, namespaceId, appId)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -349,16 +367,16 @@ func (a *applicationController) createAuth(ginCtx *gin.Context) {
 
 	input := &application_dto.ApplicationAuthInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	if input.Position == "" || input.TokenName == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("参数位置必填"))
+		controller.ErrorJson(ginCtx, http.StatusOK, "参数位置必填")
 		return
 	}
 	err := a.applicationAuthService.Create(ginCtx, namespaceId, userId, appId, input)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -373,12 +391,12 @@ func (a *applicationController) updateAuth(ginCtx *gin.Context) {
 
 	input := &application_dto.ApplicationAuthInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	err := a.applicationAuthService.Update(ginCtx, namespaceId, userId, appId, uuid, input)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -392,7 +410,7 @@ func (a *applicationController) delAuth(ginCtx *gin.Context) {
 
 	err := a.applicationAuthService.Delete(ginCtx, namespaceId, userId, uuid)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -406,7 +424,7 @@ func (a *applicationController) getAuth(ginCtx *gin.Context) {
 
 	auth, err := a.applicationAuthService.Info(ginCtx, namespaceId, appId, uuid)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	resAuth := &application_dto.ApplicationAuthOut{
