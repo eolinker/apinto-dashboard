@@ -243,6 +243,7 @@ func (m *modulePluginService) InstallPlugin(ctx context.Context, userID int, gro
 		pluginInfo := &entry.ModulePlugin{
 			UUID:       pluginYml.ID,
 			Name:       pluginYml.Name,
+			Version:    pluginYml.Version,
 			Group:      groupID,
 			CName:      pluginYml.CName,
 			Resume:     pluginYml.Resume,
@@ -391,8 +392,60 @@ func (m *modulePluginService) GetEnablePluginsByNavigation(ctx context.Context, 
 }
 
 func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml *model.InnerPluginYmlCfg) error {
-	//TODO implement me
-	panic("implement me")
+	//判断groupName存不存在，不存在则新建
+	groupInfo, err := m.commonGroup.GetGroupByName(ctx, "内置插件", 0)
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return err
+	}
+
+	groupID := 0
+	if err == gorm.ErrRecordNotFound {
+		groupID, err = m.commonGroup.CreateGroup(ctx, -1, 0, group_service.ModulePlugin, "", "内置插件", uuid.New(), "")
+	} else {
+		groupID = groupInfo.Id
+	}
+
+	navigationID, err := m.navigationService.GetIDByUUID(ctx, pluginYml.Navigation)
+	if err != nil {
+		return fmt.Errorf("navigation %s doesn't exist. ", pluginYml.Navigation)
+	}
+
+	return m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
+
+		t := time.Now()
+		pluginInfo := &entry.ModulePlugin{
+			UUID:       pluginYml.ID,
+			Name:       pluginYml.Name,
+			Version:    pluginYml.Version,
+			Group:      groupID,
+			CName:      pluginYml.CName,
+			Resume:     pluginYml.Resume,
+			ICon:       pluginYml.ICon,
+			Type:       2,
+			Driver:     pluginYml.Driver,
+			Details:    []byte{},
+			Operator:   0,
+			CreateTime: t,
+		}
+		if err = m.pluginStore.Save(txCtx, pluginInfo); err != nil {
+			return err
+		}
+		isEnable := 1
+		if pluginYml.Auto {
+			isEnable = 2
+		}
+		enable := &entry.ModulePluginEnable{
+			Id:         pluginInfo.Id,
+			Name:       pluginYml.Name,
+			Navigation: navigationID,
+			IsEnable:   isEnable,
+			Config:     []byte{},
+			Operator:   0,
+			UpdateTime: t,
+		}
+
+		return m.pluginEnableStore.Save(txCtx, enable)
+	})
 }
 
 func (m *modulePluginService) CheckPluginInstalled(ctx context.Context, pluginID string) (bool, error) {
