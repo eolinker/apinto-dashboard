@@ -89,7 +89,6 @@ func (m *modulePlugin) GetMiddlewareList(ctx context.Context) ([]*model.Middlewa
 			for _, l := range local.Middleware {
 				middlewares = append(middlewares, &model.MiddlewareItem{
 					Name: fmt.Sprintf("%s.%s", p.Name, l.Name),
-					Desc: l.Desc,
 				})
 			}
 			//内置插件
