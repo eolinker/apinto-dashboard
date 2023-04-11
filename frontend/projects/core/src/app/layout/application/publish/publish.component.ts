@@ -4,7 +4,7 @@ import { Router } from '@angular/router'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { ApiService } from 'projects/core/src/app/service/api.service'
-import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 import { CommonPublishTableBody, CommonPublishTableHeadName } from '../../../constant/conf'
 import { EmptyHttpResponse, PublishManagementData } from '../../../constant/type'
 import { BaseInfoService } from '../../../service/base-info.service'
@@ -33,7 +33,7 @@ export class ApplicationPublishComponent implements OnInit {
                 public api:ApiService,
                 private baseInfo:BaseInfoService,
                 private router:Router,
-                private appConfigService:AppConfigService,
+                private appConfigService:EoNgNavigationService,
                 private publishFailModal:PublishFailService) {
     this.appConfigService.reqFlashBreadcrumb([{ title: '应用管理', routerLink: 'application' }, { title: '上线管理' }])
   }

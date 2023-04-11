@@ -7,7 +7,7 @@ import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { NzModalRef } from 'ng-zorro-antd/modal'
 import { MODAL_NORMAL_SIZE } from '../../../constant/app.config'
 import { ApiService } from '../../../service/api.service'
-import { AppConfigService } from '../../../service/app-config.service'
+import { EoNgNavigationService } from '../../../service/eo-ng-navigation.service'
 import { AuditLogDetailComponent } from '../detail/detail.component'
 import { auditLogsTableBody, auditLogsTableHeadName, auditQueryStatusTypeList } from '../types/conf'
 import { AuditLogDetail, AuditLogsData } from '../types/types'
@@ -65,7 +65,7 @@ export class AuditLogListComponent implements OnInit {
     private message: EoNgFeedbackMessageService,
      private api:ApiService,
      private modalService: EoNgFeedbackModalService,
-     private appConfigService:AppConfigService) {
+     private appConfigService:EoNgNavigationService) {
     this.appConfigService.reqFlashBreadcrumb([{ title: '审计日志' }])
   }
 

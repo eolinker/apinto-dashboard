@@ -5,7 +5,7 @@ import { FormGroup, UntypedFormBuilder, Validators } from '@angular/forms'
 import { Router } from '@angular/router'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { ApiService } from 'projects/core/src/app/service/api.service'
-import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 import { EO_TBODY_TYPE } from 'projects/eo-ng-apinto-table/src/public-api'
 import { defaultAutoTips } from '../../../constant/conf'
 import { ArrayItemData, EmptyHttpResponse, RandomId } from '../../../constant/type'
@@ -55,7 +55,7 @@ export class ApplicationCreateComponent implements OnInit {
     private api: ApiService,
     private router: Router,
     private fb: UntypedFormBuilder,
-    private appConfigService: AppConfigService
+    private appConfigService: EoNgNavigationService
   ) {
     this.appConfigService.reqFlashBreadcrumb([
       { title: '应用管理', routerLink: 'application' },
