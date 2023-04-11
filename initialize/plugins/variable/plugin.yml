@@ -1,10 +1,11 @@
 id: "variable.apinto.com"
 name: "variable"
+cname: "全局环境变量"
+resume: ""
 version: "v1.0"
 icon: ""
 driver: "variable.apinto.com"
 core: false
-install:
-  auto: true
-  front: deploy/env
-  navigation: "navigation.infrastructure"
+auto: true
+front: deploy/env
+navigation: "navigation.infrastructure"

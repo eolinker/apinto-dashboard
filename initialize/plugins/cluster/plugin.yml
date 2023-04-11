@@ -1,10 +1,11 @@
 id: "cluster.apinto.com"
 name: "cluster"
+cname: "集群管理"
+resume: ""
 version: "v1.0"
 icon: ""
 driver: "cluster.apinto.com"
 core: false
-install:
-  auto: true
-  front: deploy/cluster
-  navigation: "navigation.infrastructure"
+auto: true
+front: deploy/cluster
+navigation: "navigation.infrastructure"

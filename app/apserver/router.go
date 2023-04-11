@@ -67,7 +67,6 @@ func registerRouter(engine *gin.Engine) {
 
 	user_controller.RegisterUserRouter(routes)
 
-	//controller.EmbedPluginFrontend(engine)
 	controller.EmbedFrontend(engine)
 
 	openAPIRoutes := engine.Group("/api2")

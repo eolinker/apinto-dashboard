@@ -1,10 +1,11 @@
 id: "plugin.apinto.com"
 name: "plugin"
+cname: "全局插件"
+resume: ""
 version: "v1.0"
 icon: ""
 driver: "plugin.apinto.com"
 core: false
-install:
-  auto: true
-  front: deploy/plugin
-  navigation: "navigation.infrastructure"
+auto: true
+front: deploy/plugin
+navigation: "navigation.infrastructure"

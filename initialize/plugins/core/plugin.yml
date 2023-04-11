@@ -1,19 +1,10 @@
 id: "core.apinto.com"
 name: "core"
+cname: "核心"
+resume: ""
 version: "v1.0"
 icon: ""
 driver: "core.apinto.com"
 core: true
-install:
-  auto: true
-  front: ""
-main:
-  middleware:
-    - logger
-    - namespace
-    - gzip
-    - expire
-
-
-
-
+auto: true
+front: ""
