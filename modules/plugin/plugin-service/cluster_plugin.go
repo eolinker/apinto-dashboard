@@ -8,6 +8,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/client/v1"
 	global_plugin "github.com/eolinker/apinto-dashboard/client/v1/initialize/plugin"
 	"github.com/eolinker/apinto-dashboard/common"
+	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-dashboard/modules/base/locker-service"
@@ -291,7 +292,7 @@ func (c *clusterPluginService) EditPlugin(ctx context.Context, namespaceID int, 
 		clusterPlugin.UpdateTime = t
 	}
 
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Name:        pluginName,
 		ClusterId:   clusterInfo.Id,
 		ClusterName: clusterName,
@@ -724,7 +725,7 @@ func (c *clusterPluginService) Publish(ctx context.Context, namespaceId, userId 
 		names = append(names, pluginInfo.ClusterPlugin.PluginName)
 	}
 
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Name:        strings.Join(names, ","),
 		ClusterId:   clusterId,
 		ClusterName: clusterName,

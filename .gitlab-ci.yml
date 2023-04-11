@@ -10,7 +10,7 @@ variables:
 default:
   cache:
     paths:
-      - controller/dist/
+      - frontend/dist/
       - ${BUILD_DIR}
 stages:
   - notice
