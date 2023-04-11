@@ -12,11 +12,6 @@ func NewClusterPlugin() apinto_module.Driver {
 	return &ClusterPluginDriver{}
 }
 
-const (
-	ClusterView = "view"
-	ClusterEdit = "edit"
-)
-
 func (c *ClusterPluginDriver) CreateModule(name string, config interface{}) (apinto_module.Module, error) {
 	return NewClusterModule(name), nil
 }
