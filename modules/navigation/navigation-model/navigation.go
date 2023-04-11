@@ -4,6 +4,7 @@ type NavigationBasicInfo struct {
 	Uuid      string `json:"uuid"`
 	Title     string `json:"title"`
 	Icon      string `json:"icon"`
+	IconType  string `json:"icon_type"`
 	CanDelete bool   `json:"can_delete"`
 	Sort      int    `json:"-"`
 }
