@@ -16,13 +16,12 @@ export type CardItem = {title:string, enable:boolean, desc:string, iconAddr?:str
             <ng-template #cardStatusTml>
               <ng-container *ngIf="type === 'plugin'">
               <span class="mr-[16px]" *ngIf="card?.isInner">内置</span>
-                <span *ngIf="card.enable"> 已启用</span>
+                <span class="text-theme" *ngIf="card.enable"> 已启用</span>
                 <span *ngIf="!card.enable"> 未启用</span>
               </ng-container>
             </ng-template>
             <ng-template #avatarTemplate>
-              <img *ngIf="card.iconAddr" [src]="card.iconAddr" alt="plugin icon" width="64px" height="50px">
-              <svg *ngIf="!card.iconAddr"  class="w-[64px] h-[50px]"><use href="#bug"></use></svg>
+              <img [src]="card.iconAddr||'./assets/default-plugin-icon.svg'" alt="plugin icon" width="64px" height="50px">
             </ng-template>
             <p class="mt-[20px] card-desc-text">{{card.desc}}</p>
           </nz-card>

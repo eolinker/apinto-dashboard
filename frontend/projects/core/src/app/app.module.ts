@@ -44,19 +44,7 @@ export function markedOptionsFactory (): MarkedOptions {
   console.log('markdown')
   renderer.link = (href, title, text) => {
     let html = linkRenderer.call(renderer, href, title, text)
-    if (href && /^(?![http])[.]*/.test(href!) && /^(?![#])[.]*/.test(href!) && href.includes('.md')) {
-      console.log(html)
-      const str = 'routerLink="' + href + '"'
-      html = html.replace(/href="[^"]*"/i, str)
-      console.log(html)
-    } else if (href && /^(?![http])[.]*/.test(href!) && /^(?![#])[.]*/.test(href!)) {
-      const newHref = href
-      console.log(newHref)
-      html = html.replace(/href="[^"]*"/i, 'href=' + newHref)
-      console.log(html)
-    } else {
-      html = html.replace(/^<a /, '<a role="link"  tabindex="0" target="_blank" rel="nofollow noopener noreferrer" ')
-    }
+    html = html.replace(/^<a /, '<a role="link"  tabindex="0" target="_blank" rel="nofollow noopener noreferrer" ')
     return html
   }
 

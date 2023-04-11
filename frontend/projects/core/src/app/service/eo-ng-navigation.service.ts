@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core'
 import { MenuOptions } from 'eo-ng-menu'
 import { Subject, Observable } from 'rxjs'
 import { ApiService } from './api.service'
+import { v4 as uuidv4 } from 'uuid'
 
 @Injectable({
   providedIn: 'root'
@@ -119,18 +120,21 @@ export class EoNgNavigationService {
           this.routerNameMap = new Map()
           this.noAccess = true
           for (const navigation of resp.data.navigation) {
+            console.log(navigation.modules?.length, navigation.default, this.getDefaultModule(navigation).path)
             const menu = {
               title: navigation.title,
+              titleString: navigation.title,
               icon: navigation.icon,
               iconType: navigation.iconType,
               menu: true,
-              name: navigation.name,
-              ...(navigation.modules?.length > 0
+              key: uuidv4(),
+              ...(navigation.modules?.length > 0 && !navigation.default
                 ? {
                     children: navigation.modules.map((module:any) => {
                       this.routerNameMap.set(module.name, module.path)
                       return {
                         title: module.title,
+                        titleString: navigation.title,
                         name: module.name,
                         type: module.type,
                         ...(module.type === 'buildin'
@@ -145,11 +149,15 @@ export class EoNgNavigationService {
                       }
                     })
                   }
-                : {
-                    routerLink: navigation.path,
-                    matchRouter: true,
-                    matchRouterExact: false
-                  })
+                : (navigation.modules?.length > 0 && this.getDefaultModule(navigation).path
+                    ? {
+                        name: this.getDefaultModule(navigation).name,
+                        routerLink: this.getDefaultModule(navigation).path,
+                        matchRouter: true,
+                        matchRouterExact: false,
+                        type: this.getDefaultModule(navigation).type
+                      }
+                    : {}))
             }
 
             if (navigation.name && navigation.path) {
@@ -176,6 +184,18 @@ export class EoNgNavigationService {
         }
       })
     })
+  }
+
+  getDefaultModule (nav:any):{name:string, path:string, type:string} {
+    let res = { name: '', path: '', type: '' }
+    if (!nav.default) { return res }
+    for (const module of nav.modules) {
+      if (module.name === nav.default) {
+        res = { ...res, ...module }
+        return res
+      }
+    }
+    return res
   }
 
   findMainPage () {
