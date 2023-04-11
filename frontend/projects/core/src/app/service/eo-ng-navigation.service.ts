@@ -120,14 +120,13 @@ export class EoNgNavigationService {
           this.routerNameMap = new Map()
           this.noAccess = true
           for (const navigation of resp.data.navigation) {
-            console.log(navigation.modules?.length, navigation.default, this.getDefaultModule(navigation).path)
             const menu = {
               title: navigation.title,
               titleString: navigation.title,
-              icon: navigation.icon,
               iconType: navigation.iconType,
               menu: true,
               key: uuidv4(),
+              ...(navigation.iconType === 'css' ? { icon: navigation.icon } : { iconSrc: navigation.icon }),
               ...(navigation.modules?.length > 0 && !navigation.default
                 ? {
                     children: navigation.modules.map((module:any) => {
