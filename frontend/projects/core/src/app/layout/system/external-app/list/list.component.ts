@@ -6,7 +6,7 @@ import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feed
 import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
 import { ApiService } from 'projects/core/src/app/service/api.service'
-import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 import { ExternalAppListTableBody, ExternalAppListTableHeadName } from '../../types/conf'
 
 @Component({
@@ -24,7 +24,7 @@ export class ExternalAppListComponent implements OnInit {
   appsList:Array<any> = []
 
   constructor (private router:Router, private message: EoNgFeedbackMessageService, private modalService:EoNgFeedbackModalService, private api:ApiService,
-    private appConfigService: AppConfigService) {
+    private appConfigService: EoNgNavigationService) {
     this.appConfigService.reqFlashBreadcrumb([
       { title: '外部应用' }
     ])

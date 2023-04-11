@@ -1,0 +1,143 @@
+<div class="flex h-[calc(100%_-_64px)]">
+  <div
+    class="w-[200px] inline-block h-[100%] border-0 border-b-[1px] border-r-[1px] border-solid border-color-base"
+  >
+    <button
+      eo-ng-button
+      class="w-[180px] my-btnybase ml-btnbase"
+      (click)="addNewGroupDiv()"
+    >
+      + 新建前缀分组
+    </button>
+    <ng-container *ngFor="let group of groups">
+      <div
+        *ngIf="!group.editing"
+        (click)="changeCurrentGroup(group)"
+        class="flex justify-between items-center h-[40px] cursor-pointer hover:bg-HOVER_BG"
+        [ngClass]="{ 'bg-HOVER_BG': group.prefix === currentGroup }"
+      >
+        <span class="truncate ml-btnbase">{{ group.prefix }}</span>
+        <button
+          eo-ng-button
+          class="mr-btnbase"
+          nzType="text"
+          (click)="deleteGroup(group.prefix!, $event)"
+        >
+          <svg class="iconpark-icon"><use href="#close"></use></svg>
+        </button>
+      </div>
+      <div
+        *ngIf="group.editing"
+        class="flex justify-between items-center h-[40px]"
+      >
+        <input
+          eo-ng-input
+          class="ml-btnbase mr-btnbase"
+          [(ngModel)]="group.prefix"
+          (blur)="addNewGroup(group)"
+          (keyup.enter)="addNewGroup(group)"
+        />
+        <button
+          eo-ng-button
+          class="mr-btnbase"
+          nzType="text"
+          (click)="editingGroup = false; groups.pop()"
+        >
+          <svg class="iconpark-icon"><use href="#close"></use></svg>
+        </button>
+      </div>
+    </ng-container>
+  </div>
+  <div
+    cdkDropListGroup
+    class="w-[calc(100%_-_200px)] flex h-[100%] justify-center"
+  >
+    <div class="w-[50%] mr-mbase">
+      <div class="flex justify-center">
+        <input
+          class="w-INPUT_NORMAL my-btnybase"
+          readonly
+          eo-ng-input
+          [(ngModel)]="currentGroup"
+        />
+      </div>
+      <div
+        class="block h-[calc(100%_-_64px)] border-[1px] border-l-0 border-solid border-color-base rounded-r"
+      >
+        <ul
+          *ngIf="currentGroupData.length"
+          class="draggable-list h-[100%] overflow-auto"
+          nz-list
+          nzSize="large"
+          cdkDropList
+          [cdkDropListData]="currentGroupData"
+          (cdkDropListDropped)="drop($event)"
+        >
+          <li
+            class="draggable-item justify-start"
+            nz-list-item
+            *ngFor="let item of currentGroupData"
+            nzNoFlex
+            cdkDrag
+          >
+            <span class="font-medium mr-btnbase whitespace-nowrap">{{
+              item.name
+            }}</span>
+            <span class="text-DESC_TEXT truncate">{{ item.desc }}</span>
+          </li>
+        </ul>
+        <div
+          *ngIf="!currentGroupData.length"
+          class="flex flex-col h-[100%] justify-center"
+        >
+          <div class="flex justify-center">
+            <svg class="w-[76px] h-[76px]">
+              <use href="#tianjia"></use>
+            </svg>
+          </div>
+          <div class="flex justify-center">
+            <span>请从右侧的可用过滤器列表中拖拽过滤器到本区域</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="w-[50%] mr-btnrbase">
+      <div class="flex justify-center mt-[10px]">
+        <span class="my-btnybase block leading-[22px]">可用拦截器</span>
+      </div>
+      <div
+        class="h-[calc(100%_-_64px)] border-[1px] border-solid border-color-base rounded"
+      >
+        <ul
+          *ngIf="draggableData.length"
+          class="draggable-list h-[100%] overflow-auto"
+          nz-list
+          nzSize="large"
+          cdkDropList
+          [cdkDropListData]="draggableData"
+          (cdkDropListDropped)="drop($event)"
+        >
+          <li
+            class="draggable-item justify-start"
+            nz-list-item
+            *ngFor="let item of draggableData"
+            nzNoFlex
+            cdkDrag
+          >
+            <span class="font-medium mr-btnbase whitespace-nowrap">{{
+              item.name
+            }}</span>
+            <span class="text-DESC_TEXT truncate">{{ item.desc }}</span>
+          </li>
+        </ul>
+        <eo-ng-empty *ngIf="!draggableData?.length"></eo-ng-empty>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="my-btnybase">
+  <button class="ml-btnybase" eo-ng-button (click)="resetGroup()">取消</button>
+  <button class="ml-btnybase" nzType="primary" eo-ng-button (click)="submit()">
+    提交
+  </button>
+</div>
