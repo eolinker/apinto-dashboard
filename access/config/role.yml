@@ -35,3 +35,9 @@
     - plugin_edit
     - plugin_template_view
     - plugin_template_edit
+    - mon_partition_view
+    - mon_partition_edit
+    - notice_email_view
+    - notice_email_edit
+    - notice_webhook_view
+    - notice_webhook_edit
