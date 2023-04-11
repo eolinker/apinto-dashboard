@@ -16,15 +16,11 @@ type pluginFrontController struct {
 	modulePluginService module_plugin.IModulePluginService
 }
 
-func RegisterPluginFrontRouter(router gin.IRoutes) {
+func newPluginFrontController() *pluginFrontController {
 	p := &pluginFrontController{}
 	bean.Autowired(&p.modulePluginService)
 
-	router.GET("/plugin/icon/:id/:file", p.checkPluginID, p.setIConName, p.getPluginInfo)
-	router.GET("/plugin/icon/:id", p.checkPluginID, p.setIConName, p.getPluginInfo)
-	router.GET("/plugin/md/:id/:file", p.checkPluginID, p.setMDName, p.getPluginInfo)
-	router.GET("/plugin/md/:id", p.checkPluginID, p.setMDName, p.getPluginInfo)
-	router.GET("/plugin/info/:id/resources/*filepath", p.checkPluginID, p.getPluginResources)
+	return p
 }
 
 func (p *pluginFrontController) checkPluginID(c *gin.Context) {
