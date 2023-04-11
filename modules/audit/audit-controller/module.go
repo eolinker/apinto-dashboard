@@ -47,11 +47,11 @@ func NewDriver() *Driver {
 	}
 }
 
-func (d *Driver) CreateModule(name string, apiPrefix string, config interface{}) (apinto_module.Module, error) {
+func (d *Driver) CreateModule(name string, config interface{}) (apinto_module.Module, error) {
 	return d.newModule(name, apiPrefix), nil
 }
 
-func (d *Driver) CheckConfig(name string, apiPrefix string, config interface{}) error {
+func (d *Driver) CheckConfig(name string, config interface{}) error {
 	return nil
 }
 
