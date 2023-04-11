@@ -64,8 +64,7 @@ export class UserAccessDirective implements OnInit {
       if (this.el.nativeElement.localName === 'eo-ng-dropdown' || this.el.nativeElement.localName === 'a') {
         this.renderer.setStyle(this.el.nativeElement, 'visibility', 'none')
       } else {
-        this.disabledEdit.emit(true)
-        this.renderer.setProperty(this.el.nativeElement, 'disabled', false)
+        this.disabledEdit.emit(false)
       }
     }
   }
