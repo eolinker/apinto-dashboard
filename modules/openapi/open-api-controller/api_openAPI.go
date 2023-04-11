@@ -44,15 +44,8 @@ func newOpenApiController() *apiOpenAPIController {
 
 func (a *apiOpenAPIController) getImportInfo(ginCtx *gin.Context) {
 	//检测openAPI token
-	token := ginCtx.GetHeader("Authorization")
-	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
-	_, err := a.extAPPService.CheckExtAPPToken(ginCtx, namespaceID, token)
-	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("GetAPIImportInfos fail. err:%s", err)))
-		return
-	}
 
-	groups, services, formats, err := a.apiOpenAPIService.GetSyncImportInfo(ginCtx, namespaceID)
+	groups, services, formats, err := a.apiOpenAPIService.GetSyncImportInfo(ginCtx, namespace_controller.GetNamespaceId(ginCtx))
 	if err != nil {
 		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("GetAPIImportInfos fail. err:%s", err)))
 		return
@@ -66,14 +59,6 @@ func (a *apiOpenAPIController) getImportInfo(ginCtx *gin.Context) {
 }
 
 func (a *apiOpenAPIController) syncAPI(ginCtx *gin.Context) {
-	//检测openAPI token 并获取相应外部应用的id
-	token := ginCtx.GetHeader("Authorization")
-	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
-	appID, err := a.extAPPService.CheckExtAPPToken(ginCtx, namespaceID, token)
-	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("syncAPI fail. err:%s", err)))
-		return
-	}
 
 	inputData := new(openapi_dto.SyncImportData)
 	//组装同步信息
@@ -118,6 +103,7 @@ func (a *apiOpenAPIController) syncAPI(ginCtx *gin.Context) {
 		contentForm := ginCtx.PostForm("content")
 		isBase64Encode := ginCtx.PostForm("encode") == "base64"
 		content := []byte(contentForm)
+		var err error
 		if isBase64Encode {
 			content, err = common.Base64Decode(contentForm)
 			if err != nil {
@@ -143,7 +129,7 @@ func (a *apiOpenAPIController) syncAPI(ginCtx *gin.Context) {
 			inputData.Server = server
 		}
 	case "application/json":
-		if err = ginCtx.BindJSON(inputData); err != nil {
+		if err := ginCtx.BindJSON(inputData); err != nil {
 			controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 			return
 		}
@@ -178,7 +164,7 @@ func (a *apiOpenAPIController) syncAPI(ginCtx *gin.Context) {
 		return
 	}
 
-	checkList, err := a.apiOpenAPIService.SyncImport(ginCtx, namespaceID, appID, inputData)
+	checkList, err := a.apiOpenAPIService.SyncImport(ginCtx, namespace_controller.GetNamespaceId(ginCtx), ginCtx.GetInt("appId"), inputData)
 	if err != nil {
 		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("syncAPI fail. err:%s", err)))
 		return
