@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"github.com/eolinker/apinto-module"
+	apinto_module "github.com/eolinker/apinto-module"
 	"net/http"
 )
 
@@ -13,8 +13,8 @@ func NewModulePlugin() apinto_module.Driver {
 }
 
 const (
-	ModuleView = "view"
-	ModuleEdit = "edit"
+	ModulePluginView = "view"
+	ModulePluginEdit = "edit"
 )
 
 func (c *ModulePluginDriver) CreateModule(name string, config interface{}) (apinto_module.Module, error) {
@@ -65,94 +65,80 @@ func (c *ModulePluginModule) RoutersInfo() apinto_module.RoutersInfo {
 }
 
 func (c *ModulePluginModule) initRouter() {
-	modulePluginController := RegisterModulePluginRouter()
-	clrController := newClusterController()
-	nodeController := newClusterNodeController()
-	configController := newClusterConfigController()
-
+	mPluginController := newModulePluginController()
+	controllerPluginFront := newPluginFrontController()
 	c.routers = []apinto_module.RouterInfo{
 		{
 			Method:      http.MethodGet,
-			Path:        "/api/cluster/lists",
-			Handler:     "cluster.list",
-			HandlerFunc: []apinto_module.HandlerFunc{clrController.clusters},
+			Path:        "/api/plugin/installed",
+			Handler:     "modulePlugin.plugins",
+			HandlerFunc: []apinto_module.HandlerFunc{mPluginController.plugins},
 		},
 		{
 			Method:      http.MethodGet,
-			Path:        "/api/cluster/enum",
-			Handler:     "cluster.enum",
-			HandlerFunc: []apinto_module.HandlerFunc{clrController.clusterEnum},
+			Path:        "/api/plugin/info",
+			Handler:     "modulePlugin.getPluginInfo",
+			HandlerFunc: []apinto_module.HandlerFunc{mPluginController.getPluginInfo},
 		},
 		{
 			Method:      http.MethodGet,
-			Path:        "/api/cluster",
-			Handler:     "cluster.info",
-			HandlerFunc: []apinto_module.HandlerFunc{clrController.cluster},
-		},
-		{
-			Method:      http.MethodDelete,
-			Path:        "/api/cluster",
-			Handler:     "cluster.delete",
-			HandlerFunc: []apinto_module.HandlerFunc{clrController.del},
-		}, {
-			Method:      http.MethodPost,
-			Path:        "/api/cluster",
-			Handler:     "cluster.create",
-			HandlerFunc: []apinto_module.HandlerFunc{clrController.create},
+			Path:        "/api/plugin/groups/enum",
+			Handler:     "modulePlugin.getGroupsEnum",
+			HandlerFunc: []apinto_module.HandlerFunc{mPluginController.getGroupsEnum},
 		},
 		{
 			Method:      http.MethodGet,
-			Path:        "/api/cluster-test",
-			Handler:     "cluster.test",
-			HandlerFunc: []apinto_module.HandlerFunc{clrController.test},
-		},
-		{
-			Method:      http.MethodPut,
-			Path:        "/api/cluster/:cluster_name/desc",
-			Handler:     "cluster.desc.edit",
-			HandlerFunc: []apinto_module.HandlerFunc{clrController.putDesc},
-		},
-		{
-			Method:      http.MethodGet,
-			Path:        "/api/cluster/:cluster_name/nodes",
-			Handler:     "cluster.nodes",
-			HandlerFunc: []apinto_module.HandlerFunc{nodeController.nodes},
+			Path:        "/api/plugin/enable",
+			Handler:     "modulePlugin.getEnableInfo",
+			HandlerFunc: []apinto_module.HandlerFunc{mPluginController.getEnableInfo},
 		},
 		{
 			Method:      http.MethodPost,
-			Path:        "/api/cluster/:cluster_name/node/reset",
-			Handler:     "cluster.nodes.reset",
-			HandlerFunc: []apinto_module.HandlerFunc{nodeController.reset},
+			Path:        "/api/plugin/install",
+			Handler:     "modulePlugin.install",
+			HandlerFunc: []apinto_module.HandlerFunc{mPluginController.install},
 		},
 		{
-			Method:      http.MethodPut,
-			Path:        "/api/cluster/:cluster_name/node",
-			Handler:     "cluster.nodes.edit",
-			HandlerFunc: []apinto_module.HandlerFunc{nodeController.put},
+			Method:      http.MethodPost,
+			Path:        "/api/plugin/enable",
+			Handler:     "modulePlugin.enable",
+			HandlerFunc: []apinto_module.HandlerFunc{mPluginController.enable},
+		},
+		{
+			Method:      http.MethodPost,
+			Path:        "/api/plugin/disable",
+			Handler:     "modulePlugin.disable",
+			HandlerFunc: []apinto_module.HandlerFunc{mPluginController.disable},
 		},
 		{
 			Method:      http.MethodGet,
-			Path:        "/api/cluster/:cluster_name/configuration/:type",
-			Handler:     "cluster.config",
-			HandlerFunc: []apinto_module.HandlerFunc{configController.get},
+			Path:        "/api/plugin/icon/:id/:file",
+			Handler:     "pluginFront.getPluginIcon",
+			HandlerFunc: []apinto_module.HandlerFunc{controllerPluginFront.checkPluginID, controllerPluginFront.setIConName, controllerPluginFront.getPluginInfo},
 		},
 		{
-			Method:      http.MethodPut,
-			Path:        "/api/cluster/:cluster_name/configuration/:type",
-			Handler:     "cluster.config.edit",
-			HandlerFunc: []apinto_module.HandlerFunc{configController.edit},
+			Method:      http.MethodGet,
+			Path:        "/api/plugin/icon/:id",
+			Handler:     "pluginFront.getPluginIconDefault",
+			HandlerFunc: []apinto_module.HandlerFunc{controllerPluginFront.checkPluginID, controllerPluginFront.setIConName, controllerPluginFront.getPluginInfo},
 		},
 		{
-			Method:      http.MethodPut,
-			Path:        "/api/cluster/:cluster_name/configuration/:type/enable",
-			Handler:     "cluster.config.enable",
-			HandlerFunc: []apinto_module.HandlerFunc{configController.enable},
+			Method:      http.MethodGet,
+			Path:        "/api/plugin/md/:id/:file",
+			Handler:     "pluginFront.getPluginMD",
+			HandlerFunc: []apinto_module.HandlerFunc{controllerPluginFront.checkPluginID, controllerPluginFront.setMDName, controllerPluginFront.getPluginInfo},
 		},
 		{
-			Method:      http.MethodPut,
-			Path:        "/api/cluster/:cluster_name/configuration/:type/disable",
-			Handler:     "cluster.config.disable",
-			HandlerFunc: []apinto_module.HandlerFunc{configController.disable},
+			Method:      http.MethodGet,
+			Path:        "/api/plugin/md/:id",
+			Handler:     "pluginFront.getPluginMDDefault",
+			HandlerFunc: []apinto_module.HandlerFunc{controllerPluginFront.checkPluginID, controllerPluginFront.setMDName, controllerPluginFront.getPluginInfo},
+		},
+		{
+			Method:      http.MethodGet,
+			Path:        "/api/plugin/info/:id/resources/*filepath",
+			Handler:     "pluginFront.getPluginResources",
+			HandlerFunc: []apinto_module.HandlerFunc{controllerPluginFront.checkPluginID, controllerPluginFront.getPluginResources},
 		},
 	}
 }
