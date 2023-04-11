@@ -28,9 +28,7 @@
       style="width: 100%"
       (click)="$event.stopPropagation()"
       class="eo-test-app-checkbox"
-      (ngModelChange)="
-        nzChangeTableConfigChange.emit({ value: $event, item: item })
-      "
+      (ngModelChange)="nzChangeTableConfigChange.emit({ value: $event, item: item })"
       eo-ng-checkbox
       [(ngModel)]="item.checked"
       >{{ item.title }}</label
