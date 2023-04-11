@@ -3,7 +3,6 @@ package controller
 import (
 	"fmt"
 	namespace_controller "github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
-	"github.com/eolinker/apinto-dashboard/modules/core"
 	apinto_module "github.com/eolinker/apinto-module"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/gin-gonic/gin"
@@ -18,14 +17,17 @@ var (
 
 type Plugin struct {
 	middlewareHandler []apinto_module.MiddlewareHandler
-	providers         core.IProviders
+	providers         apinto_module.IProviders
 }
 
 func NewCoreDriver() *Plugin {
 
 	middlewareHandler := []apinto_module.MiddlewareHandler{
 		{
-			Name:    "namespace",
+			Name: "namespace",
+			Rule: apinto_module.MiddlewareRule{
+				apinto_module.RouterTypeApi,
+			},
 			Handler: namespace_controller.MustNamespace,
 		},
 	}
@@ -37,11 +39,11 @@ func NewCoreDriver() *Plugin {
 	return p
 }
 
-func (p *Plugin) CreateModule(name string, apiPrefix string, config interface{}) (apinto_module.Module, error) {
-	return p.NewModule(name, apiPrefix), nil
+func (p *Plugin) CreateModule(name string, config interface{}) (apinto_module.Module, error) {
+	return p.NewModule(name), nil
 }
 
-func (p *Plugin) CheckConfig(name string, apiPrefix string, config interface{}) error {
+func (p *Plugin) CheckConfig(name string, config interface{}) error {
 	return nil
 }
 
@@ -51,7 +53,6 @@ func (p *Plugin) CreatePlugin(define interface{}) (apinto_module.Plugin, error) 
 
 type Module struct {
 	name              string
-	apiPrefix         string
 	middlewareHandler []apinto_module.MiddlewareHandler
 	routers           apinto_module.RoutersInfo
 }
@@ -69,7 +70,7 @@ func (m *Module) Name() string {
 }
 
 func (m *Module) Routers() (apinto_module.Routers, bool) {
-	return m, false
+	return m, true
 }
 
 func (m *Module) Middleware() (apinto_module.Middleware, bool) {
@@ -99,12 +100,12 @@ func (p *Plugin) provider(context *gin.Context) {
 	context.JSON(200, map[string]interface{}{
 		"code": "00000",
 		"data": map[string]interface{}{
-			"cargos": result,
+			name: result,
 		},
 	})
 
 }
-func (p *Plugin) NewModule(name, apiPrefix string) *Module {
+func (p *Plugin) NewModule(name string) *Module {
 
 	routers := apinto_module.RoutersInfo{
 		{
@@ -112,12 +113,20 @@ func (p *Plugin) NewModule(name, apiPrefix string) *Module {
 			Path:        fmt.Sprintf("/api/common/provider/:name"),
 			Handler:     "core.provider",
 			HandlerFunc: []apinto_module.HandlerFunc{p.provider},
+			Labels:      apinto_module.RouterLabelAssets,
 		},
 	}
+	assets := staticFile("/assets", "dist/assets")
+	routers = append(routers, assets...)
+	aceBuilds := staticFile("/ace-builds", "dist/ace-builds")
+	routers = append(routers, aceBuilds...)
+	frontend := staticFile("/frontend", "dist")
+	routers = append(routers, frontend...)
 
+	routers = append(routers, favicon())
+	routers = append(routers, indexRouter())
 	return &Module{
 		name:              name,
-		apiPrefix:         apiPrefix,
 		middlewareHandler: p.middlewareHandler,
 		routers:           routers,
 	}

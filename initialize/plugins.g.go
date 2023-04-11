@@ -3,10 +3,9 @@ package initialize
 import (
 	"context"
 	"embed"
-	"encoding/json"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/model"
 	"github.com/eolinker/eosc/common/bean"
-	"os"
+	"gopkg.in/yaml.v3"
 	"path"
 
 	"gorm.io/gorm"
@@ -39,7 +38,7 @@ func InitPlugins() error {
 	var service module_plugin.IModulePluginService
 	bean.Autowired(&service)
 	ctx := context.Background()
-	plugins, err := loadPlugins("./", "plugin.yml")
+	plugins, err := loadPlugins("plugins", "plugin.yml")
 	if err != nil {
 		return err
 	}
@@ -95,12 +94,12 @@ func loadPlugins(dir string, target string) ([]*Plugin, error) {
 			continue
 		}
 		if e.Name() == target {
-			s, err := os.ReadFile(nextFile)
+			s, err := pluginDir.ReadFile(nextFile)
 			if err != nil {
 				return nil, err
 			}
 			p := new(Plugin)
-			err = json.Unmarshal(s, p)
+			err = yaml.Unmarshal(s, p)
 			if err != nil {
 				log.Errorf("parse file(%s) error: %w")
 				return nil, err

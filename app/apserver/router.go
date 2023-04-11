@@ -9,7 +9,7 @@ import (
 	cluster_controller2 "github.com/eolinker/apinto-dashboard/modules/cluster/cluster-controller"
 	"github.com/eolinker/apinto-dashboard/modules/discovery/discovery-controller"
 	"github.com/eolinker/apinto-dashboard/modules/group/group-controller"
-	middleware_controller "github.com/eolinker/apinto-dashboard/modules/middleware/middleware-controller"
+
 	"github.com/eolinker/apinto-dashboard/modules/openapi/open-api-controller"
 	"github.com/eolinker/apinto-dashboard/modules/openapp/open-app-controller"
 	plugin_controller "github.com/eolinker/apinto-dashboard/modules/plugin/plugin-controller"
@@ -49,7 +49,6 @@ func registerRouter(engine *gin.Engine) {
 	application_controller.RegisterApplicationRouter(routes)
 	group_controller.RegisterCommonGroupRouter(routes)
 
-	middleware_controller.RegisterMiddlewareGroupRouter(routes)
 	env_controller.RegisterEnumRouter(routes)
 	apiController.RegisterAPIRouter(routes)
 	random_controller.RegisterRandomRouter(routes)
