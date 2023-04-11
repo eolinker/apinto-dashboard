@@ -24,6 +24,8 @@ type IModulePluginService interface {
 type IModulePlugin interface {
 	//GetEnabledPlugins 获取已启用的插件信息列表
 	GetEnabledPlugins(ctx context.Context) ([]*model.EnabledPlugin, error)
+	//GetModulesByNavigations 获取指定导航列表下的模块
+	GetModulesByNavigations(ctx context.Context, navigationIDs []int) ([]*model.NavigationModules, error)
 	//GetMiddlewareList 获取拦截器列表
 	//GetMiddlewareList(ctx context.Context) ([]*model.MiddlewareItem, error)
 }
