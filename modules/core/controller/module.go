@@ -2,11 +2,12 @@ package controller
 
 import (
 	"fmt"
+	"net/http"
+
 	namespace_controller "github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	apinto_module "github.com/eolinker/apinto-module"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 var (
@@ -124,6 +125,9 @@ func (p *Plugin) NewModule(name string) *Module {
 	routers = append(routers, favicon())
 	routers = append(routers, indexRouter())
 	routers = append(routers, commonStrategy()...)
+
+	systemRouter := newSystem()
+	routers = append(routers, systemRouter.RoutersInfo()...)
 	return &Module{
 		name:              name,
 		middlewareHandler: p.middlewareHandler,
