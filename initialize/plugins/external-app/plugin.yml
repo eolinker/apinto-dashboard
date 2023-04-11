@@ -1,0 +1,11 @@
+id: "ext_app.apinto.com"
+name: "ext_app"
+cname: "外部应用"
+resume: ""
+version: "v1.0"
+icon: ""
+driver: "ext_app.apinto.com"
+core: false
+auto: true
+front: system/ext-app
+navigation: "navigation.system"

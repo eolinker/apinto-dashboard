@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/common"
+	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/modules/api"
 	"github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-dashboard/modules/base/frontend-model"
@@ -189,7 +190,7 @@ func (p *pluginTemplateService) Create(ctx context.Context, namespaceId, operato
 	}
 
 	t := time.Now()
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: input.UUID,
 		Name: input.Name,
 	})
@@ -287,7 +288,7 @@ func (p *pluginTemplateService) Update(ctx context.Context, namespaceId, operato
 	}
 
 	t := time.Now()
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: input.UUID,
 		Name: pluginTemplate.Name,
 	})
@@ -389,7 +390,7 @@ func (p *pluginTemplateService) Delete(ctx context.Context, namespaceId, operato
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: uuid,
 		Name: pluginTemplate.Name,
 	})
@@ -679,7 +680,7 @@ func (p *pluginTemplateService) Online(ctx context.Context, namespaceId, operato
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:        uuid,
 		Name:        pluginTemplate.Name,
 		ClusterId:   clusterInfo.Id,
@@ -796,7 +797,7 @@ func (p *pluginTemplateService) Offline(ctx context.Context, namespaceId, operat
 
 	t := time.Now()
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:        uuid,
 		Name:        pluginTemplate.Name,
 		ClusterId:   clusterInfo.Id,

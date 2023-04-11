@@ -1,0 +1,11 @@
+id: "upstream.apinto.com"
+name: "upstream"
+cname: "上游服务"
+resume: ""
+version: "v1.0"
+icon: ""
+driver: "upstream.apinto.com"
+core: false
+auto: true
+front: upstream/upstream
+navigation: "navigation.upstream"

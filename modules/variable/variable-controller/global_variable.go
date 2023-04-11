@@ -2,7 +2,6 @@ package variable_controller
 
 import (
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/enum"
@@ -23,10 +22,10 @@ func RegisterVariablesRouter(router gin.IRoutes) {
 	c := &variablesController{}
 	bean.Autowired(&c.globalVariableService)
 
-	router.GET("/variables", controller.GenAccessHandler(access.VariableView, access.VariableEdit, access.ServiceView, access.DiscoveryView), c.gets)
-	router.GET("/variable", controller.GenAccessHandler(access.VariableView, access.VariableEdit), c.get)
-	router.POST("/variable", controller.GenAccessHandler(access.VariableEdit, access.ServiceEdit, access.DiscoveryEdit), controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindGlobalVariable), c.post)
-	router.DELETE("/variable", controller.GenAccessHandler(access.VariableEdit), controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindGlobalVariable), c.del)
+	router.GET("/variables", c.gets)
+	router.GET("/variable", c.get)
+	router.POST("/variable", controller.AuditLogHandler(enum.LogOperateTypeCreate, enum.LogKindGlobalVariable, c.post))
+	router.DELETE("/variable", controller.AuditLogHandler(enum.LogOperateTypeDelete, enum.LogKindGlobalVariable, c.del))
 }
 
 // 获取全局环境变量列表
@@ -46,7 +45,7 @@ func (e *variablesController) gets(ginCtx *gin.Context) {
 	key := ginCtx.Query("key")
 	status := ginCtx.Query("status")
 	if status != "" && !enum.CheckVariableUsageStatus(status) {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("status is illegal. "))
+		controller.ErrorJson(ginCtx, http.StatusOK, "status is illegal. ")
 		return
 	}
 
@@ -109,17 +108,17 @@ func (e *variablesController) post(ginCtx *gin.Context) {
 	input := &variable_dto.GlobalVariableInput{}
 
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	if input.Key == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("parameter error"))
+		controller.ErrorJson(ginCtx, http.StatusOK, "parameter error")
 		return
 	}
 
 	if err := common.IsMatchString(common.EnglishOrNumber_, input.Key); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 

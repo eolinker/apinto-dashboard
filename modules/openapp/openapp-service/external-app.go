@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
+	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-dashboard/modules/base/locker-service"
 	"github.com/eolinker/apinto-dashboard/modules/openapp"
@@ -114,7 +115,7 @@ func (e *externalApplicationService) CreateApp(ctx context.Context, namespaceId,
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: input.Id,
 		Name: input.Name,
 	})
@@ -158,7 +159,7 @@ func (e *externalApplicationService) UpdateApp(ctx context.Context, namespaceId,
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: input.Id,
 		Name: input.Name,
 	})
@@ -193,7 +194,7 @@ func (e *externalApplicationService) DelApp(ctx context.Context, namespaceId, us
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: appInfo.UUID,
 		Name: appInfo.Name,
 	})

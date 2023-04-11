@@ -34,7 +34,7 @@ func (s *strategyCommonController) filterOptions(ginCtx *gin.Context) {
 
 	options, err := s.strategyService.GetFilterOptions(ginCtx, namespaceId)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -70,7 +70,7 @@ func (s *strategyCommonController) filterRemote(ginCtx *gin.Context) {
 
 	remote, count, err := s.strategyService.GetFilterRemote(ginCtx, namespaceId, name, keyword, groupUUID, pageNum, pageSize)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -90,7 +90,7 @@ func (s *strategyCommonController) metricsOptions(ginCtx *gin.Context) {
 
 	options, err := s.strategyService.GetMetricsOptions()
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 

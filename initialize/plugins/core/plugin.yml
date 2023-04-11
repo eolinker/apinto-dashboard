@@ -1,14 +1,10 @@
 id: "core.apinto.com"
 name: "core"
-version: ""
+cname: "核心"
+resume: ""
+version: "v1.0"
 icon: ""
-driver: core.apinto.com
+driver: "core.apinto.com"
 core: true
-install:
-  auto: true
-  front: none
-main:
-  middleware:
-
-
-
+auto: true
+front: ""
