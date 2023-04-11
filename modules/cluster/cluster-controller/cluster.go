@@ -3,7 +3,6 @@ package cluster_controller
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/enum"
@@ -32,13 +31,13 @@ func newClusterController() *clusterController {
 func RegisterClusterRouter(router gin.IRoutes) {
 	c := newClusterController()
 
-	router.GET("/clusters", controller.GenAccessHandler(access.ClusterView, access.ClusterEdit), c.clusters)
+	router.GET("/clusters", c.clusters)
 	router.GET("/cluster/enum", c.clusterEnum)
-	router.GET("/cluster", controller.GenAccessHandler(access.ClusterView, access.ClusterEdit), c.cluster)
-	router.DELETE("/cluster", controller.GenAccessHandler(access.ClusterEdit), controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindCluster), c.del)
-	router.POST("/cluster/", controller.GenAccessHandler(access.ClusterEdit), controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindCluster), c.create)
-	router.GET("/cluster-test", controller.GenAccessHandler(access.ClusterView, access.ClusterEdit), c.test)
-	router.PUT("/cluster/:cluster_name/desc", controller.GenAccessHandler(access.ClusterEdit), controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindCluster), c.putDesc)
+	router.GET("/cluster", c.cluster)
+	router.DELETE("/cluster", controller.AuditLogHandler(enum.LogOperateTypeDelete, enum.LogKindCluster, c.del))
+	router.POST("/cluster/", controller.AuditLogHandler(enum.LogOperateTypeCreate, enum.LogKindCluster, c.create))
+	router.GET("/cluster-test", c.test)
+	router.PUT("/cluster/:cluster_name/desc", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindCluster, c.putDesc))
 }
 
 // clusters 获取集群列表
@@ -47,7 +46,7 @@ func (c *clusterController) clusters(ginCtx *gin.Context) {
 
 	clusters, err := c.clusterService.QueryListByNamespaceId(ginCtx, namespaceId)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -76,7 +75,7 @@ func (c *clusterController) clusterEnum(ginCtx *gin.Context) {
 
 	list, err := c.clusterService.GetByNamespaceId(ginCtx, namespaceId)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -116,13 +115,13 @@ func (c *clusterController) cluster(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Query("cluster_name")
 	if clusterName == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("Get cluster info fail. err: cluster_name can't be nil."))
+		controller.ErrorJson(ginCtx, http.StatusOK, "Get cluster info fail. err: cluster_name can't be nil.")
 		return
 	}
 
 	clusterInfo, err := c.clusterService.QueryByNamespaceId(ginCtx, namespaceId, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -146,24 +145,24 @@ func (c *clusterController) create(ginCtx *gin.Context) {
 
 	input := &cluster_dto.ClusterInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	//校验是否合法
 	if err := common.IsMatchString(common.EnglishOrNumber_, input.Name); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	if input.Name == "" || input.Env == "" || input.Addr == "" || input.Source == "" {
 		fmt.Println(*input)
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("parameter error"))
+		controller.ErrorJson(ginCtx, http.StatusOK, "parameter error")
 		return
 	}
 	userId := controller.GetUserId(ginCtx)
 	if err := c.clusterService.Insert(ginCtx, namespaceId, userId, input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -177,12 +176,12 @@ func (c *clusterController) del(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Query("cluster_name")
 	if clusterName == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("Delete cluster fail. err: cluster_name can't be nil."))
+		controller.ErrorJson(ginCtx, http.StatusOK, "Delete cluster fail. err: cluster_name can't be nil.")
 		return
 	}
 	userId := controller.GetUserId(ginCtx)
 	if err := c.clusterService.DeleteByNamespaceIdByName(ginCtx, namespaceId, userId, clusterName); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
@@ -198,12 +197,12 @@ func (c *clusterController) putDesc(ginCtx *gin.Context) {
 	clusterInput := &cluster_dto.ClusterInput{}
 	err := ginCtx.BindJSON(clusterInput)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	userId := controller.GetUserId(ginCtx)
 	if err = c.clusterService.UpdateDesc(ginCtx, namespaceId, userId, clusterName, clusterInput.Desc); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))

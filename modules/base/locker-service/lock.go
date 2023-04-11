@@ -21,6 +21,7 @@ const (
 	LockNamePluginTemplate  = "plugin_template"
 	LockNamePluginNamespace = "plugin_namespace"
 	LockNameClusterPlugin   = "cluster_plugin"
+	LockNameModulePlugin    = "module_plugin" //企业插件
 )
 
 type IAsynLockService interface {
