@@ -82,7 +82,7 @@ func (n *navigationController) update(ctx *gin.Context) {
 		return
 	}
 
-	if err := n.navigationService.Save(ctx, uuid, input.Name, input.Icon); err != nil {
+	if err := n.navigationService.Save(ctx, uuid, input.Name, input.Icon, "url"); err != nil {
 		ctx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
