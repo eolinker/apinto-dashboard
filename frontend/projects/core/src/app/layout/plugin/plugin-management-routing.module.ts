@@ -13,11 +13,13 @@ const routes: Routes = [
     },
     children: [
       {
-        path: 'list/:pluginGroupId',
-        component: PluginListComponent
-      },
-      {
         path: 'list',
+        children: [
+          {
+            path: ':pluginGroupId',
+            component: PluginListComponent
+          }
+        ],
         component: PluginListComponent
       },
       {
