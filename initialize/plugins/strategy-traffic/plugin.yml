@@ -1,0 +1,11 @@
+id: "strategy-grey.apinto.com"
+name: "strategy-grey"
+cname: "灰度策略"
+resume: ""
+version: "v1.0"
+icon: "network-tree"
+driver: "strategy-grey.apinto.com"
+core: false
+auto: true
+front: "serv-governance/grey"
+navigation: "navigation.strategy"
