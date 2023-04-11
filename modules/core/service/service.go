@@ -28,7 +28,7 @@ type coreService struct {
 	providerService     IProviderService
 }
 
-func (c *coreService) CheckNewModule(pluginID, name, apiGroup string, config interface{}) error {
+func (c *coreService) CheckNewModule(pluginID, name string, config interface{}) error {
 	//TODO implement me
 	panic("implement me")
 }
