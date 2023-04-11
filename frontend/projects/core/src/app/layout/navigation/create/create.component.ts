@@ -24,8 +24,8 @@ const getBase64 = (file: File): Promise<string | ArrayBuffer | null> =>
   styles: [
     `:host ::ng-deep{
       .ant-upload.ant-upload-select-picture-card{
-        height:32px;
-        width:32px;
+        height:64px;
+        width:64px;
 
         [nz-upload-btn]{
           display:block;
@@ -42,7 +42,7 @@ export class NavigationCreateComponent {
   editPage:boolean = false
   navigationUuid:string = ''
   listOfControl: Array<{ id: number; controlInstance: string }> = [];
-  imageUrl:string = ''
+  imageUrl:string = '' || './assets/default-navigation-icon.png'
 
   modalRef:NzModalRef|undefined
   get childArray () {
