@@ -159,11 +159,11 @@ func (m *modulePluginService) GetPluginEnableInfo(ctx context.Context, pluginUUI
 	navigationUUID, _ := m.navigationService.GetUUIDByID(ctx, enableEntry.Navigation)
 
 	enableCfg := new(model.PluginEnableCfg)
+	_ = json.Unmarshal(enableEntry.Config, enableCfg)
 
 	info := &model.PluginEnableInfo{
 		Name:       enableEntry.Name,
 		Navigation: navigationUUID,
-		ApiGroup:   enableCfg.APIGroup,
 		Server:     enableCfg.Server,
 		Header:     enableCfg.Header,
 		Query:      enableCfg.Query,
@@ -182,21 +182,19 @@ func (m *modulePluginService) GetPluginEnableRender(ctx context.Context, pluginU
 	renderCfg := &model.PluginEnableRender{
 		Internet:  false,
 		Invisible: true,
-		ApiGroup:  false,
 	}
 	switch pluginInfo.Driver {
 	case "remote":
 		remoteDefine := new(model.RemoteDefine)
-		_ = json.Unmarshal([]byte(pluginInfo.Details), remoteDefine)
+		_ = json.Unmarshal(pluginInfo.Details, remoteDefine)
 		if !remoteDefine.Internet {
 			renderCfg.Internet = true
 		}
 		renderCfg.Querys = remoteDefine.Querys
 		renderCfg.Initialize = remoteDefine.Initialize
 	case "local":
-		renderCfg.ApiGroup = true
 		localDefine := new(model.LocalDefine)
-		_ = json.Unmarshal([]byte(pluginInfo.Details), localDefine)
+		_ = json.Unmarshal(pluginInfo.Details, localDefine)
 		renderCfg.Headers = localDefine.Headers
 		renderCfg.Querys = localDefine.Querys
 		renderCfg.Initialize = localDefine.Initialize
@@ -307,7 +305,6 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 		})
 	}
 	enableCfg := &model.PluginEnableCfg{
-		APIGroup:   enableInfo.ApiGroup,
 		Server:     enableInfo.Server,
 		Header:     headers,
 		Query:      querys,

@@ -24,7 +24,6 @@ type ModulePluginInfo struct {
 type PluginEnableInfo struct {
 	Name       string
 	Navigation string
-	ApiGroup   string
 	Server     string
 	Header     []*ExtendParams
 	Query      []*ExtendParams
@@ -34,7 +33,6 @@ type PluginEnableInfo struct {
 type PluginEnableRender struct {
 	Internet   bool
 	Invisible  bool
-	ApiGroup   bool
 	Headers    []ExtendParamsRender
 	Querys     []ExtendParamsRender
 	Initialize []ExtendParamsRender
@@ -63,7 +61,6 @@ type EnabledPlugin struct {
 
 // PluginEnableCfg 插件启用时的配置
 type PluginEnableCfg struct {
-	APIGroup   string          `json:"api_group"`
 	Server     string          `json:"server"`
 	Header     []*ExtendParams `json:"header"`
 	Query      []*ExtendParams `json:"query"`
@@ -81,8 +78,8 @@ type RemoteDefine struct {
 
 // LocalDefine 插件配置文件的driver为local时的详细配置
 type LocalDefine struct {
+	Server     string               `json:"server" yaml:"server"`
 	Middleware []*MiddlewareDefine  `json:"middleware" yaml:"middleware"`
-	ApiGroup   string               `json:"apigroup" yaml:"apigroup"`
 	Api        *ApiDefine           `json:"api" yaml:"api"`
 	Path       string               `json:"path" yaml:"path"`
 	Invisible  bool                 `json:"invisible" yaml:"invisible"`
@@ -92,18 +89,17 @@ type LocalDefine struct {
 }
 
 type MiddlewareDefine struct {
-	Name string `json:"name" yaml:"name"`
-	Path string `json:"path" yaml:"path"`
-	Desc string `json:"desc" yaml:"desc"`
+	Name string     `json:"name" yaml:"name"`
+	Path string     `json:"path" yaml:"path"`
+	Rule [][]string `json:"rule" yaml:"rule"`
 }
 
 type ApiDefine struct {
-	Prefix string                               `json:"prefix" yaml:"prefix"`
-	Paths  map[string]map[string]*ApiPathDefine `json:"paths" yaml:"paths"`
+	Paths map[string]map[string]*ApiPathDefine `json:"paths" yaml:"paths"`
 }
 
 type ApiPathDefine struct {
-	Access []string `json:"access" yaml:"access"`
+	Label []string `json:"label" yaml:"label"`
 }
 
 // ProfessionDefine 插件配置文件的driver为profession时的详细配置
