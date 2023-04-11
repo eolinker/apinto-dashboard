@@ -15,7 +15,7 @@ export type CardItem = {title:string, enable:boolean, desc:string, iconAddr?:str
 
             <ng-template #cardStatusTml>
               <ng-container *ngIf="type === 'plugin'">
-              <span class="mr-[16px]" *ngIf="card?.isInner">内置</span>
+              <span class="mr-[16px] font-medium" *ngIf="card?.isInner">内置</span>
                 <span class="text-theme" *ngIf="card.enable"> 已启用</span>
                 <span *ngIf="!card.enable"> 未启用</span>
               </ng-container>
