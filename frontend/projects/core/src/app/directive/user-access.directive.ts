@@ -60,7 +60,7 @@ export class UserAccessDirective implements OnInit {
       //     this.disabledEdit.emit(false)
       //   }
       // }
-      
+
       if (this.el.nativeElement.localName === 'eo-ng-dropdown' || this.el.nativeElement.localName === 'a') {
         this.renderer.setStyle(this.el.nativeElement, 'visibility', 'none')
       } else {

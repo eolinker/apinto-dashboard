@@ -19,36 +19,29 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
+)
+
+var (
+	locker             sync.Mutex
+	controllerInstance *apiController
 )
 
 type apiController struct {
 	apiService service.IAPIService
 }
 
-func RegisterAPIRouter(router gin.IRouter) {
-	c := &apiController{}
-	bean.Autowired(&c.apiService)
-	router.GET("/routers", c.routers)
-	router.GET("/router", c.getInfo)
-	router.POST("/router", controller.AuditLogHandler(enum.LogOperateTypeCreate, enum.LogKindAPI, c.create))
-	router.PUT("/router", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindAPI, c.update))
-	router.DELETE("/router", controller.AuditLogHandler(enum.LogOperateTypeDelete, enum.LogKindAPI, c.delete))
+func newApiController() *apiController {
+	if controllerInstance == nil {
+		locker.Lock()
+		defer locker.Unlock()
+		if controllerInstance == nil {
+			controllerInstance = &apiController{}
+			bean.Autowired(&controllerInstance.apiService)
+		}
+	}
+	return controllerInstance
 
-	router.POST("/routers/batch-online", controller.AuditLogHandler(enum.LogOperateTypePublish, enum.LogKindAPI, c.batchOnline))
-	router.POST("/routers/batch-offline", controller.AuditLogHandler(enum.LogOperateTypePublish, enum.LogKindAPI, c.batchOffline))
-	router.POST("/routers/batch-online/check", c.batchOnlineCheck)
-
-	router.PUT("/router/online", controller.AuditLogHandler(enum.LogOperateTypePublish, enum.LogKindAPI, c.online))
-	router.PUT("/router/offline", controller.AuditLogHandler(enum.LogOperateTypePublish, enum.LogKindAPI, c.offline))
-	router.GET("/router/onlines", c.getOnlineList)
-	router.PUT("/router/enable", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindAPI, c.enableAPI))
-	router.PUT("/router/disable", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindAPI, c.disableAPI))
-	router.GET("/router/groups", c.groups)
-
-	router.GET("/router/source", c.getSourceList)
-	router.POST("/router/import", c.getImportCheckList)
-	router.GET("/router/enum", c.routerEnum)
-	router.PUT("/router/import", controller.AuditLogHandler(enum.LogOperateTypeCreate, enum.LogKindAPI, c.importAPI))
 }
 
 func (a *apiController) routerEnum(ginCtx *gin.Context) {
