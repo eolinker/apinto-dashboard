@@ -8,7 +8,7 @@ CREATE TABLE `module_plugin` (
     `resume` varchar(255) NOT NULL COMMENT '简介',
     `icon` varchar(255) NOT NULL COMMENT '图标的文件名，相对路径',
     `type` tinyint(1) NOT NULL COMMENT '是否为内置插件 0为内置-内核模块 1为内置-非内核 2为非内置',
-    `front` varchar(255) NOT NULL COMMENT '前端模块路由 为空表示不需要在前端显示',
+    `front` varchar(255) COMMENT '前端模块路由 为空表示不需要在前端显示',
     `driver` varchar(255) NOT NULL COMMENT '插件类型',
     `details` mediumtext NOT NULL COMMENT '插件详情',
     `operator` int(11) DEFAULT NULL COMMENT '更新人/操作人',
@@ -33,3 +33,14 @@ CREATE TABLE `module_plugin_package` (
     `package` mediumblob NOT NULL COMMENT '安装包',
     PRIMARY KEY (`id`) USING BTREE,
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC COMMENT='模块插件安装包表';
+
+CREATE TABLE `navigation` (
+    `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `uuid` varchar(36) NOT NULL COMMENT 'uuid，唯一id',
+    `title` varchar(255) NOT NULL COMMENT '导航名称',
+    `icon` mediumtext COMMENT 'Icon信息，dataurl格式',
+    `sort` tinyint(4) unsigned NOT NULL COMMENT '排序，数字越小优先级越高',
+    `module` text COMMENT '模块ID列表',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `unique_uuid` (`uuid`) USING BTREE COMMENT '唯一uuid'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC COMMENT='导航表';
