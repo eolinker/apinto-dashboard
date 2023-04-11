@@ -3,11 +3,9 @@ package controller
 import (
 	"errors"
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/common/gzip-static"
 	"github.com/eolinker/apinto-dashboard/controller"
-	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/api"
 	api_model "github.com/eolinker/apinto-dashboard/modules/api/model"
 	"github.com/eolinker/apinto-dashboard/modules/application"
@@ -48,11 +46,11 @@ func RegisterMonitorRouter(router gin.IRoutes) {
 
 	prefix := "/monitor"
 
-	router.GET("/monitor/partitions", controller.GenAccessHandler(access.MonPartitionView), m.getPartitionList)
-	router.GET("/monitor/partition", controller.GenAccessHandler(access.MonPartitionEdit), m.getPartitionInfo)
-	router.POST("/monitor/partition", controller.GenAccessHandler(access.MonPartitionEdit), controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindMonPartition), m.createPartition)
-	router.PUT("/monitor/partition", controller.GenAccessHandler(access.MonPartitionEdit), controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindMonPartition), m.editPartition)
-	router.DELETE("/monitor/partition", controller.GenAccessHandler(access.MonPartitionEdit), controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindMonPartition), m.delPartition)
+	router.GET("/monitor/partitions", m.getPartitionList)
+	router.GET("/monitor/partition", m.getPartitionInfo)
+	router.POST("/monitor/partition", m.createPartition)
+	router.PUT("/monitor/partition", m.editPartition)
+	router.DELETE("/monitor/partition", m.delPartition)
 	//总览
 	router.POST(prefix+"/overview/summary", gzip.Gzip(gzip.DefaultCompression), m.overviewSummary)
 	router.POST(prefix+"/overview/invoke", gzip.Gzip(gzip.DefaultCompression), m.overviewInvoke)
