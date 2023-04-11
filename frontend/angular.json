@@ -42,7 +42,7 @@
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
             "deployUrl": "/frontend/",
-            "outputPath": "../modules/core/controller/controller/dist",
+            "outputPath": "../modules/core/controller/dist",
             "index": "projects/core/src/index.html",
             "main": "projects/core/src/main.ts",
             "polyfills": "projects/core/src/polyfills.ts",
