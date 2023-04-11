@@ -9,7 +9,7 @@
  * @FilePath: /apinto/src/app/basic-layout/basic-layout.component.ts
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
-import { Component, OnInit } from '@angular/core'
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
 import { Router } from '@angular/router'
 import { EoNgBreadcrumbOptions } from 'eo-ng-breadcrumb'
 import { MenuOptions } from 'eo-ng-menu'
@@ -26,6 +26,7 @@ import { AuthInfoDetailComponent } from '../auth/info/detail/detail.component'
   styleUrls: ['./basic-layout.component.scss']
 })
 export class BasicLayoutComponent implements OnInit {
+  @ViewChild('menuTpl', { read: TemplateRef, static: false }) menuTpl: TemplateRef<any> | undefined
   sideMenuOptions :MenuOptions[] = []
   breadcrumbOptions: EoNgBreadcrumbOptions[] = []
   currentRouter:string = '' // 当前路由
@@ -55,7 +56,8 @@ export class BasicLayoutComponent implements OnInit {
     this.subscription2 = this.navigationService.repFlashMenu().subscribe(() => {
       this.sideMenuOptions = [...this.navigationService.getCurrentMenuList()]
       for (const menu of this.sideMenuOptions) {
-        menu.open = this.openMap[menu.title as string]
+        menu.title = this.menuTpl!
+        menu.open = this.openMap[menu['titleString']! as string]
       }
     })
 
@@ -83,9 +85,10 @@ export class BasicLayoutComponent implements OnInit {
         this.sideMenuOptions = [...res]
         for (const index in this.sideMenuOptions) {
           this.sideMenuOptions[index].openChange = (value:MenuOptions) => {
-            this.openHandler(value['name']!)
+            this.openHandler(value['key']!)
           }
         }
+        console.log(this.sideMenuOptions)
         this.getAccess()
       })
   }
@@ -144,7 +147,7 @@ export class BasicLayoutComponent implements OnInit {
       for (const index in this.sideMenuOptions) {
         if (router.split('/')[1] === this.sideMenuOptions[index]['router']?.split('/')[0]) {
           if (this.sideMenuOptions[index].children?.length) {
-            this.openHandler(this.sideMenuOptions[index]['name']!)
+            this.openHandler(this.sideMenuOptions[index]['key']!)
           }
           break
         }
@@ -154,14 +157,14 @@ export class BasicLayoutComponent implements OnInit {
     }
   }
 
-  openHandler (name: string): void {
+  openHandler (key: string): void {
     for (const index in this.sideMenuOptions) {
-      if (this.sideMenuOptions[index]['name'] !== name) {
+      if (this.sideMenuOptions[index]['key'] !== key) {
         this.sideMenuOptions[index].open = false
       } else {
         this.sideMenuOptions[index].open = true
       }
-      this.openMap[this.sideMenuOptions[index]['title'] as string] = !!this.sideMenuOptions[index].open
+      this.openMap[this.sideMenuOptions[index]['key'] as string] = !!this.sideMenuOptions[index].open
     }
   }
 

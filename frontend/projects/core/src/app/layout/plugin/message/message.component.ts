@@ -1,14 +1,15 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, Inject, OnInit } from '@angular/core'
 import { EoNgFeedbackModalService } from 'eo-ng-feedback'
 import { NzModalRef } from 'ng-zorro-antd/modal'
 import { MODAL_NORMAL_SIZE, MODAL_SMALL_SIZE } from '../../../constant/app.config'
 import { EmptyHttpResponse } from '../../../constant/type'
-import { ApiService } from '../../../service/api.service'
+import { API_URL, ApiService } from '../../../service/api.service'
 import { BaseInfoService } from '../../../service/base-info.service'
 import { EoNgMessageService } from '../../../service/eo-ng-message.service'
 import { EoNgNavigationService } from '../../../service/eo-ng-navigation.service'
 import { PluginConfigComponent } from '../config/config.component'
 import { PluginMessage } from '../types/types'
+import { MarkdownService } from 'ngx-markdown'
 
 @Component({
   selector: 'eo-ng-plugin-message',
@@ -54,7 +55,7 @@ import { PluginMessage } from '../types/types'
 
   </header>
   <section class="block ml-btnbase mr-btnrbase p-btnbase markdown-block">
-    <markdown [src]="getMd()" [srcRelativeLink]="true"  (error)="onError($event)"></markdown>
+    <markdown [src]="getMd()" [srcRelativeLink]="true"   (error)="onError($event)"></markdown>
   </section>
   `,
   styles: [
@@ -72,14 +73,18 @@ import { PluginMessage } from '../types/types'
 export class PluginMessageComponent implements OnInit {
   title:string = ''
   resume:string = ''
-  icon:string = ''
+  icon:string = '' || './assets/default-plugin-icon.svg'
   enable:boolean = false
   uninstall:boolean = false
   pluginId:string = ''
   modalRef:NzModalRef|undefined
   mdFileName:string = ''
-  constructor (private message:EoNgMessageService, private modalService:EoNgFeedbackModalService, private api:ApiService, private baseInfo:BaseInfoService,
-    private appConfigService: EoNgNavigationService) {
+  constructor (private message:EoNgMessageService,
+    private modalService:EoNgFeedbackModalService,
+    private api:ApiService, private baseInfo:BaseInfoService,
+    private appConfigService: EoNgNavigationService,
+    private markdownService: MarkdownService,
+    @Inject(API_URL) public urlPrefix:string) {
     this.appConfigService.reqFlashBreadcrumb([
       { title: '企业插件', routerLink: ['/', 'plugin', 'list', ''] },
       { title: '插件详情' }
@@ -90,6 +95,28 @@ export class PluginMessageComponent implements OnInit {
     this.pluginId = this.baseInfo.allParamsInfo.pluginId
     this.mdFileName = this.baseInfo.allParamsInfo.mdFileName
     this.getPluginDetail()
+    this.markdownService.renderer.link = (href, title, text) => {
+      let html = ''
+      if (href && /^(?![http])[.]*/.test(href!) && /^(?![#])[.]*/.test(href!) && href.includes('.md')) {
+        html = `<a href="plugin/message/${this.pluginId}/${href}">${text}</a>`
+      } else if (href && /^(?![http])[.]*/.test(href!) && /^(?![#])[.]*/.test(href!)) {
+        html = `<a href="plugin/message/${this.pluginId}/${href}">${text}</a>`
+      } else {
+        html = '<a  role="link"  tabindex="0" target="_blank" rel="nofollow noopener noreferrer" href="' + href + '">' + text + '</a>'
+      }
+
+      return html
+    }
+
+    this.markdownService.renderer.image = (src, title, alt) => {
+      let html
+      if (src && /^(?![http])[.]*/.test(src!)) {
+        html = `<image src="${this.urlPrefix}plugin/info/${this.pluginId}/resource/${src}" alt=${alt}/>`
+      } else {
+        html = `<image src="${src}" alt=${alt}/>`
+      }
+      return html
+    }
   }
 
   getPluginDetail () {
@@ -105,17 +132,12 @@ export class PluginMessageComponent implements OnInit {
       })
   }
 
-  changeMd (value:any) {
-    console.log(value)
-  }
-
   getMd () {
-    // return `../../plugin/info/${this.pluginId}/${this.mdFileName}'`
-    return 'assets/README.md'
+    return `../../plugin/info/${this.pluginId}/${this.mdFileName}'`
   }
 
   onError (value:any) {
-    console.log(value)
+    console.error('解析md文档出现问题', value)
   }
 
   enablePlugin () {

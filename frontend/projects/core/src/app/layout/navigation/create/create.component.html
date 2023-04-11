@@ -36,18 +36,9 @@
         [nzSize]="100"
       >
         <ng-container *ngIf="!fileList.length">
-          <span
-            class="upload-icon flex justify-center items-center h-[100%] w-[100%]"
-            nz-icon
-            nzType="plus"
-          ></span>
           <div class="ant-upload-text"></div>
         </ng-container>
-        <img
-          *ngIf="fileList.length"
-          [src]="imageUrl"
-          style="width: 100%; height: 100%"
-        />
+        <img [src]="imageUrl" style="width: 100%; height: 100%" />
       </nz-upload>
 
       <div
@@ -55,7 +46,7 @@
         style="padding-left: 0"
         (click)="$event.stopPropagation()"
       >
-        请上传16 * 16 png，大小 100k 以内
+        请上传64*64px的png图标，大小100k以内
       </div>
     </nz-form-control>
   </nz-form-item>
