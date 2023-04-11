@@ -1,11 +1,15 @@
 package service
 
-import "github.com/eolinker/eosc/common/bean"
+import (
+	apinto_module "github.com/eolinker/apinto-module"
+	"github.com/eolinker/eosc/common/bean"
+)
 
 func init() {
 	providerService := NewProviderService()
-	bean.Injection(&providerService)
 
+	var iProviders apinto_module.IProviders = providerService
+	bean.Injection(&iProviders)
 	iCore := NewService(providerService)
 	bean.Injection(&iCore)
 }
