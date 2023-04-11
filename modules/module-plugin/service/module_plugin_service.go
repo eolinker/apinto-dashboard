@@ -405,9 +405,12 @@ func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml 
 		groupID = groupInfo.Id
 	}
 
-	navigationID, err := m.navigationService.GetIDByUUID(ctx, pluginYml.Navigation)
-	if err != nil {
-		return fmt.Errorf("navigation %s doesn't exist. ", pluginYml.Navigation)
+	navigationID := -1
+	if pluginYml.Navigation != "" {
+		navigationID, err = m.navigationService.GetIDByUUID(ctx, pluginYml.Navigation)
+		if err != nil {
+			return fmt.Errorf("navigation %s doesn't exist. ", pluginYml.Navigation)
+		}
 	}
 
 	return m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
