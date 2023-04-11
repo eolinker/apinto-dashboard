@@ -30,9 +30,8 @@ func (n *navigationStore) SortByUUIDs(ctx context.Context, uuids []string) error
 }
 
 func (n *navigationStore) MaxSort(ctx context.Context) (int, error) {
-	sql := "SELECT MAX(`sort`) FROM `navigation`"
 	var maxSort = 0
-	err := n.DB(ctx).Exec(sql).Scan(&maxSort).Error
+	err := n.DB(ctx).Table(`navigation`).Select("IFNULL(max(sort), 0)").Scan(&maxSort).Error
 	return maxSort, err
 }
 
