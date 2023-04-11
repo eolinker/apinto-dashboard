@@ -86,7 +86,7 @@ export class PluginMessageComponent implements OnInit {
     private markdownService: MarkdownService,
     @Inject(API_URL) public urlPrefix:string) {
     this.appConfigService.reqFlashBreadcrumb([
-      { title: '企业插件', routerLink: ['/', 'plugin', 'list', ''] },
+      { title: '企业插件', routerLink: ['/', 'plugin', 'group', 'list', ''] },
       { title: '插件详情' }
     ])
   }
@@ -133,7 +133,8 @@ export class PluginMessageComponent implements OnInit {
   }
 
   getMd () {
-    return `../../plugin/info/${this.pluginId}/${this.mdFileName}'`
+    // return `../../plugin/info/${this.pluginId}/${this.mdFileName}'`
+    return 'assets/README.md'
   }
 
   onError (value:any) {
