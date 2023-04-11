@@ -171,3 +171,16 @@ type NavigationEnabledPlugin struct {
 	*entry.ModulePluginEnable
 	UUID string
 }
+
+// NavigationModules 导航所需要的模块信息
+type NavigationModules struct {
+	NavigationID int
+	Modules      []*NavigationModuleInfo
+}
+
+type NavigationModuleInfo struct {
+	Name  string
+	Title string
+	Type  string
+	Path  string
+}
