@@ -17,7 +17,6 @@ import { NzTableModule } from 'ng-zorro-antd/table'
 import { NzAvatarModule } from 'ng-zorro-antd/avatar'
 import { EoNgBreadcrumbModule } from 'eo-ng-breadcrumb'
 import { EoNgLayoutModule } from 'eo-ng-layout'
-import { EoNgMenuModule } from 'eo-ng-menu'
 import { EoNgSelectModule } from 'eo-ng-select'
 import { EoNgFeedbackModalModule, EoNgFeedbackTooltipModule } from 'eo-ng-feedback'
 import { EoNgTabsModule } from 'eo-ng-tabs'
@@ -50,6 +49,8 @@ import { DirectiveModule } from '../directive/directive.module'
 import { NzUploadModule } from 'ng-zorro-antd/upload'
 import { EoNgEmptyModule } from 'eo-ng-empty'
 import { AuthInfoDetailComponent } from './auth/info/detail/detail.component'
+import { EoNgMenuModule } from 'eo-ng-menu';
+import { IframePageComponent } from './iframe-page/iframe-page.component'
 
 @NgModule({
   declarations: [
@@ -60,7 +61,8 @@ import { AuthInfoDetailComponent } from './auth/info/detail/detail.component'
     AuthActivationComponent,
     AuthInfoComponent,
     AuthUpdateComponent,
-    AuthInfoDetailComponent
+    AuthInfoDetailComponent,
+    IframePageComponent
   ],
   imports: [
     AppRoutingModule,
