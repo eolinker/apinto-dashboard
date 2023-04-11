@@ -3,7 +3,6 @@ package controller
 import (
 	"context"
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/enum"
@@ -20,36 +19,29 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
+)
+
+var (
+	locker             sync.Mutex
+	controllerInstance *apiController
 )
 
 type apiController struct {
 	apiService service.IAPIService
 }
 
-func RegisterAPIRouter(router gin.IRouter) {
-	c := &apiController{}
-	bean.Autowired(&c.apiService)
-	router.GET("/routers", controller.GenAccessHandler(access.ApiView, access.ApiEdit), c.routers)
-	router.GET("/router", controller.GenAccessHandler(access.ApiView, access.ApiEdit), c.getInfo)
-	router.POST("/router", controller.GenAccessHandler(access.ApiEdit), controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindAPI), c.create)
-	router.PUT("/router", controller.GenAccessHandler(access.ApiEdit), controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindAPI), c.update)
-	router.DELETE("/router", controller.GenAccessHandler(access.ApiEdit), controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindAPI), c.delete)
+func newApiController() *apiController {
+	if controllerInstance == nil {
+		locker.Lock()
+		defer locker.Unlock()
+		if controllerInstance == nil {
+			controllerInstance = &apiController{}
+			bean.Autowired(&controllerInstance.apiService)
+		}
+	}
+	return controllerInstance
 
-	router.POST("/routers/batch-online", controller.GenAccessHandler(access.ApiEdit), controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindAPI), c.batchOnline)
-	router.POST("/routers/batch-offline", controller.GenAccessHandler(access.ApiEdit), controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindAPI), c.batchOffline)
-	router.POST("/routers/batch-online/check", controller.GenAccessHandler(access.ApiEdit), c.batchOnlineCheck)
-
-	router.PUT("/router/online", controller.GenAccessHandler(access.ApiEdit), controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindAPI), c.online)
-	router.PUT("/router/offline", controller.GenAccessHandler(access.ApiEdit), controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindAPI), c.offline)
-	router.GET("/router/onlines", controller.GenAccessHandler(access.ApiView, access.ApiEdit), c.getOnlineList)
-	router.PUT("/router/enable", controller.GenAccessHandler(access.ApiEdit), controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindAPI), c.enableAPI)
-	router.PUT("/router/disable", controller.GenAccessHandler(access.ApiEdit), controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindAPI), c.disableAPI)
-	router.GET("/router/groups", controller.GenAccessHandler(access.ApiView, access.ApiEdit), c.groups)
-
-	router.GET("/router/source", c.getSourceList)
-	router.POST("/router/import", c.getImportCheckList)
-	router.GET("/router/enum", c.routerEnum)
-	router.PUT("/router/import", controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindAPI), c.importAPI)
 }
 
 func (a *apiController) routerEnum(ginCtx *gin.Context) {
@@ -58,7 +50,7 @@ func (a *apiController) routerEnum(ginCtx *gin.Context) {
 
 	apiList, err := a.apiService.GetAPIListByServiceName(ginCtx, namespaceID, strings.Split(serviceNames, ","))
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	apis := make([]*api_dto.APIEnum, 0, len(apiList))
@@ -83,7 +75,7 @@ func (a *apiController) groups(ginCtx *gin.Context) {
 
 	root, apis, err := a.apiService.GetGroups(ginCtx, namespaceID, parentUUID, queryName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -262,7 +254,7 @@ func (a *apiController) create(ginCtx *gin.Context) {
 
 	input := new(api_dto.APIInfo)
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -301,7 +293,7 @@ func (a *apiController) update(ginCtx *gin.Context) {
 
 	input := new(api_dto.APIInfo)
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -355,12 +347,12 @@ func (a *apiController) batchOnline(ginCtx *gin.Context) {
 
 	input := &api_dto.ApiBatchInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	if input.OnlineToken == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("online_token can't be nil. "))
+		controller.ErrorJson(ginCtx, http.StatusOK, "online_token can't be nil. ")
 		return
 	}
 
@@ -396,12 +388,12 @@ func (a *apiController) batchOffline(ginCtx *gin.Context) {
 
 	input := &api_dto.ApiBatchInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	if len(input.ApiUUIDs) == 0 || len(input.ClusterNames) == 0 {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("api_uuids or cluster_names can't be nil. "))
+		controller.ErrorJson(ginCtx, http.StatusOK, "api_uuids or cluster_names can't be nil. ")
 		return
 	}
 
@@ -437,12 +429,12 @@ func (a *apiController) batchOnlineCheck(ginCtx *gin.Context) {
 
 	input := &api_dto.ApiBatchInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	if len(input.ApiUUIDs) == 0 || len(input.ClusterNames) == 0 {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("api_uuids or cluster_names can't be nil. "))
+		controller.ErrorJson(ginCtx, http.StatusOK, "api_uuids or cluster_names can't be nil. ")
 		return
 	}
 
@@ -486,13 +478,13 @@ func (a *apiController) online(ginCtx *gin.Context) {
 	}
 	input := &online_dto.UpdateOnlineStatusInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	router, err := a.apiService.OnlineAPI(ginCtx, namespaceId, userId, apiUUID, input.ClusterName)
 	if err != nil && router == nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	} else if err == nil {
 		ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
@@ -525,12 +517,12 @@ func (a *apiController) offline(ginCtx *gin.Context) {
 	}
 	input := &online_dto.UpdateOnlineStatusInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	if err := a.apiService.OfflineAPI(ginCtx, namespaceId, userId, apiUUID, input.ClusterName); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
@@ -547,12 +539,12 @@ func (a *apiController) enableAPI(ginCtx *gin.Context) {
 	}
 	input := &online_dto.UpdateOnlineStatusInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	if err := a.apiService.EnableAPI(ginCtx, namespaceId, userId, apiUUID, input.ClusterName); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
@@ -569,12 +561,12 @@ func (a *apiController) disableAPI(ginCtx *gin.Context) {
 	}
 	input := &online_dto.UpdateOnlineStatusInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	if err := a.apiService.DisableAPI(ginCtx, namespaceId, userId, apiUUID, input.ClusterName); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
@@ -591,7 +583,7 @@ func (a *apiController) getOnlineList(ginCtx *gin.Context) {
 
 	list, err := a.apiService.OnlineList(ginCtx, namespaceId, apiUUID)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -695,7 +687,7 @@ func (a *apiController) importAPI(ginCtx *gin.Context) {
 
 	input := new(api_dto.ImportAPIInfos)
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
