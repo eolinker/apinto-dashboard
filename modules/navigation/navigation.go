@@ -7,8 +7,8 @@ import (
 )
 
 type INavigationService interface {
-	Add(ctx context.Context, uuid string, name string, icon string) error
-	Save(ctx context.Context, uuid string, name string, icon string) error
+	Add(ctx context.Context, uuid string, name string, icon string, iconType string) error
+	Save(ctx context.Context, uuid string, name string, icon string, iconType string) error
 	Delete(ctx context.Context, uuid string) error
 	List(ctx context.Context) ([]*navigation_model.NavigationBasicInfo, error)
 	Info(ctx context.Context, uuid string) (*navigation_model.Navigation, error)
