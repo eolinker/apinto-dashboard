@@ -14,4 +14,5 @@ func init() {
 	service := newNavigationService()
 	bean.Injection(&service)
 	bean.Autowired(&pluginService)
+	bean.Autowired(&modulePluginService)
 }
