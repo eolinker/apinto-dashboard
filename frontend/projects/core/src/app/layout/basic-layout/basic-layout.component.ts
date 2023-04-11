@@ -9,7 +9,7 @@
  * @FilePath: /apinto/src/app/basic-layout/basic-layout.component.ts
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
+import { Component, OnInit } from '@angular/core'
 import { Router } from '@angular/router'
 import { EoNgBreadcrumbOptions } from 'eo-ng-breadcrumb'
 import { MenuOptions } from 'eo-ng-menu'
@@ -26,7 +26,6 @@ import { AuthInfoDetailComponent } from '../auth/info/detail/detail.component'
   styleUrls: ['./basic-layout.component.scss']
 })
 export class BasicLayoutComponent implements OnInit {
-  @ViewChild('menuTpl', { read: TemplateRef, static: false }) menuTpl: TemplateRef<any> | undefined
   sideMenuOptions :MenuOptions[] = []
   breadcrumbOptions: EoNgBreadcrumbOptions[] = []
   currentRouter:string = '' // 当前路由
@@ -56,7 +55,6 @@ export class BasicLayoutComponent implements OnInit {
     this.subscription2 = this.navigationService.repFlashMenu().subscribe(() => {
       this.sideMenuOptions = [...this.navigationService.getCurrentMenuList()]
       for (const menu of this.sideMenuOptions) {
-        menu.title = this.menuTpl!
         menu.open = this.openMap[menu['titleString']! as string]
       }
     })
@@ -88,7 +86,6 @@ export class BasicLayoutComponent implements OnInit {
             this.openHandler(value['key']!)
           }
         }
-        console.log(this.sideMenuOptions)
         this.getAccess()
       })
   }
