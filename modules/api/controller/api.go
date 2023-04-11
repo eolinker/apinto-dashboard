@@ -19,10 +19,29 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
+)
+
+var (
+	locker             sync.Mutex
+	controllerInstance *apiController
 )
 
 type apiController struct {
 	apiService service.IAPIService
+}
+
+func newApiController() *apiController {
+	if controllerInstance == nil {
+		locker.Lock()
+		defer locker.Unlock()
+		if controllerInstance == nil {
+			controllerInstance = &apiController{}
+			bean.Autowired(&controllerInstance.apiService)
+		}
+	}
+	return controllerInstance
+
 }
 
 func RegisterAPIRouter(router gin.IRouter) {
