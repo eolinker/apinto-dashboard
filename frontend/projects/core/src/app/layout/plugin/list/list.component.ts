@@ -53,11 +53,11 @@ export class PluginListComponent implements OnInit {
     this.subscription = this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
         this.groupUuid = this.baseInfo.allParamsInfo.pluginGroupId
+        console.log('sub')
         this.getPluginList()
       }
     })
-
-    this.getPluginList()
+    console.log('init')
   }
 
   onDestroy () {
@@ -66,7 +66,7 @@ export class PluginListComponent implements OnInit {
 
   // 获取分组和插件列表
   getPluginList () {
-    this.api.get('system/plugin/installed', { group: this.groupUuid, search: this.queryName }).subscribe((resp:{code:number, data:{plugins:PluginItem[], groups:PluginGroupItem[]}, msg:string}) => {
+    this.api.get('system/plugin/installed', { group: this.groupUuid || '', search: this.queryName || '' }).subscribe((resp:{code:number, data:{plugins:PluginItem[], groups:PluginGroupItem[]}, msg:string}) => {
       if (resp.code === 0) {
         this.nodesList = this.nodesTransfer(resp.data.groups)
         this.pluginList = resp.data.plugins.map((plugin:PluginItem) => {

@@ -6,6 +6,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/modules/discovery/discovery-serivce"
 	"github.com/eolinker/apinto-dashboard/modules/upstream/upstream-dto"
+	"sync"
 
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
@@ -22,6 +23,23 @@ type discoveryController struct {
 	discoveryService discovery.IDiscoveryService
 }
 
+var (
+	locker             sync.Mutex
+	controllerInstance *discoveryController
+)
+
+func newDiscoveryController() *discoveryController {
+	if controllerInstance == nil {
+		locker.Lock()
+		defer locker.Unlock()
+		if controllerInstance == nil {
+			controllerInstance = &discoveryController{}
+			bean.Autowired(&controllerInstance.discoveryService)
+		}
+	}
+	return controllerInstance
+
+}
 func RegisterDiscoveryRouter(router gin.IRouter) {
 	c := &discoveryController{}
 	bean.Autowired(&c.discoveryService)
