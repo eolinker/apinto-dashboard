@@ -24,7 +24,10 @@ func NewCoreDriver() *Plugin {
 
 	middlewareHandler := []apinto_module.MiddlewareHandler{
 		{
-			Name:    "namespace",
+			Name: "namespace",
+			Rule: apinto_module.MiddlewareRule{
+				apinto_module.RouterTypeApi,
+			},
 			Handler: namespace_controller.MustNamespace,
 		},
 	}
@@ -67,7 +70,7 @@ func (m *Module) Name() string {
 }
 
 func (m *Module) Routers() (apinto_module.Routers, bool) {
-	return m, false
+	return m, true
 }
 
 func (m *Module) Middleware() (apinto_module.Middleware, bool) {
@@ -121,6 +124,7 @@ func (p *Plugin) NewModule(name string) *Module {
 	routers = append(routers, frontend...)
 
 	routers = append(routers, favicon())
+	routers = append(routers, indexRouter())
 	return &Module{
 		name:              name,
 		middlewareHandler: p.middlewareHandler,
