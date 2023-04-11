@@ -48,7 +48,7 @@ func NewDriver() *Driver {
 }
 
 func (d *Driver) CreateModule(name string, config interface{}) (apinto_module.Module, error) {
-	return d.newModule(name, apiPrefix), nil
+	return d.newModule(name, ""), nil
 }
 
 func (d *Driver) CheckConfig(name string, config interface{}) error {
