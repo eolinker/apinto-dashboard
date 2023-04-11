@@ -1,11 +1,11 @@
-id: "strategy-cache.apinto.com"
-name: "strategy-cache"
-cname: "导航管理"
+id: "strategy-fuse.apinto.com"
+name: "strategy-fuse"
+cname: "熔断策略"
 resume: ""
 version: "v1.0"
 icon: "network-tree"
-driver: "strategy-cache.apinto.com"
+driver: "strategy-fuse.apinto.com"
 core: false
 auto: true
-front: "serv-governance/cache"
+front: "serv-governance/fuse"
 navigation: "navigation.strategy"
