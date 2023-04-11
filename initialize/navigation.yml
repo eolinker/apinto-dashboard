@@ -18,13 +18,10 @@
   icon: "form-one"
 - id: "navigation.module_plugin"
   name: "企业插件"
-  icon: "system" #TODO
+  icon: "puzzle"
 - id: "navigation.system"
   name: "系统管理"
   icon: "system"
 - id: "navigation.navigation"
   name: "导航管理"
-  icon: "system" #TODO
-- id: "navigation.middleware"
-  name: "拦截器管理"
-  icon: "system" #TODO
+  icon: "daohang"

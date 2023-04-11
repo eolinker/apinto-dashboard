@@ -6,7 +6,6 @@ import (
 	navigation_dto "github.com/eolinker/apinto-dashboard/modules/navigation/navigation-dto"
 
 	"github.com/eolinker/apinto-dashboard/controller"
-	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/navigation"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/gin-gonic/gin"
@@ -16,16 +15,22 @@ type navigationController struct {
 	navigationService navigation.INavigationService
 }
 
-func RegisterNavigationRouter(router gin.IRoutes) {
+func newNavigationController() *navigationController {
 	c := &navigationController{}
 	bean.Autowired(&c.navigationService)
-	router.GET("/system/navigation", c.list)
-	router.GET("/system/navigation/:uuid", c.info)
-	router.POST("/system/navigation", controller.AuditLogHandler(enum.LogOperateTypeCreate, enum.LogKindNavigation, c.add))
-	router.PUT("/system/navigation/:uuid", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindNavigation, c.update))
-	router.DELETE("/system/navigation/:uuid", controller.AuditLogHandler(enum.LogOperateTypeDelete, enum.LogKindCommonGroup, c.delete))
-	router.PUT("/system/navigation", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindNavigation, c.sort))
+	return c
 }
+
+//func RegisterNavigationRouter(router gin.IRoutes) {
+//	c := &navigationController{}
+//	bean.Autowired(&c.navigationService)
+//	router.GET("/system/navigation", c.list)
+//	router.GET("/system/navigation/:uuid", c.info)
+//	router.POST("/system/navigation", controller.AuditLogHandler(enum.LogOperateTypeCreate, enum.LogKindNavigation, c.add))
+//	router.PUT("/system/navigation/:uuid", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindNavigation, c.update))
+//	router.DELETE("/system/navigation/:uuid", controller.AuditLogHandler(enum.LogOperateTypeDelete, enum.LogKindCommonGroup, c.delete))
+//	router.PUT("/system/navigation", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindNavigation, c.sort))
+//}
 
 func (n *navigationController) list(ctx *gin.Context) {
 	navigations, err := n.navigationService.List(ctx)
