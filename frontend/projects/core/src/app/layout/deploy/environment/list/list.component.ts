@@ -3,9 +3,9 @@
 /* eslint-disable camelcase */
 /* eslint-disable dot-notation */
 /*
- * @Author:
+ * @Author: MengjieYang yangmengjie@eolink.com
  * @Date: 2022-07-20 22:34:58
- * @LastEditors:
+ * @LastEditors: MengjieYang yangmengjie@eolink.com
  * @LastEditTime: 2022-11-02 23:51:33
  * @FilePath: /apinto/src/app/layout/deploy/deploy-environment/deploy-environment.component.ts
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
@@ -20,7 +20,7 @@ import { THEAD_TYPE } from 'eo-ng-table'
 import { NzModalRef } from 'ng-zorro-antd/modal'
 import { MODAL_NORMAL_SIZE, MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
 import { ApiService } from 'projects/core/src/app/service/api.service'
-import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 import { EO_TBODY_TYPE } from 'projects/eo-ng-apinto-table/src/public-api'
 import { DeployEnvironmentDetailComponent } from '../detail/detail.component'
 import { DeployGlobalEnvTableBody, DeployGlobalEnvTableHeadName } from '../types/conf'
@@ -87,7 +87,7 @@ export class DeployEnvironmentListComponent {
     private modalService: EoNgFeedbackModalService,
     private api: ApiService,
     private router: Router,
-    private appConfigService: AppConfigService
+    private appConfigService: EoNgNavigationService
   ) {
     this.appConfigService.reqFlashBreadcrumb([
       { title: '环境变量', routerLink: 'deploy/env' }

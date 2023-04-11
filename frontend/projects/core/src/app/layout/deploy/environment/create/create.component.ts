@@ -8,7 +8,7 @@ import {
 } from 'eo-ng-feedback'
 import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { ApiService } from 'projects/core/src/app/service/api.service'
-import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 
 @Component({
   selector: 'eo-ng-deploy-environment-create',
@@ -34,7 +34,7 @@ export class DeployEnvironmentCreateComponent implements OnInit {
     private api: ApiService,
     private fb: UntypedFormBuilder,
     private router: Router,
-    private appConfigService: AppConfigService
+    private appConfigService: EoNgNavigationService
   ) {
     this.validateForm = this.fb.group({
       key: [

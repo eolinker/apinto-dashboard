@@ -6,7 +6,7 @@ import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feed
 import { THEAD_TYPE } from 'eo-ng-table'
 import { MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
 import { ApiService } from 'projects/core/src/app/service/api.service'
-import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 import { EO_TBODY_TYPE } from 'projects/eo-ng-apinto-table/src/public-api'
 import { UpstreamListTableBody, UpstreamListTableHeadName } from '../types/conf'
 
@@ -21,7 +21,7 @@ export class UpstreamListComponent implements OnInit {
                 private modalService:EoNgFeedbackModalService,
                 private api:ApiService,
                 private router:Router,
-                private appConfigService:AppConfigService) {
+                private appConfigService:EoNgNavigationService) {
     this.appConfigService.reqFlashBreadcrumb([{ title: '上游管理', routerLink: 'upstream/upstream' }])
   }
 

@@ -68,7 +68,13 @@ func (c *coreService) rebuild() error {
 	if err != nil {
 		return err
 	}
-
+	//modules := []*model.EnabledPlugin{{
+	//	UUID:   "core",
+	//	Name:   "core",
+	//	Driver: "core.apinto.com",
+	//	Config: nil,
+	//	Define: nil,
+	//}}
 	builder := apinto_module.NewModuleBuilder(c.engineCreate.CreateEngine())
 	for _, module := range modules {
 		driver, has := apinto_module.GetDriver(module.Driver)
