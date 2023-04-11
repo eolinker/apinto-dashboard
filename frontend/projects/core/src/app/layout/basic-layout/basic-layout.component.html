@@ -28,9 +28,28 @@
       [nzInlineIndent]="20"
     >
       <eo-ng-inline-menu
+        class="overflow-hidden h-[calc(100%_-_68px)] block inside-menu-scroll"
         [nzInlineIndent]="20"
         [nzOptions]="sideMenuOptions"
       ></eo-ng-inline-menu>
+      <ng-template #menuTpl let-option="option">
+        <svg *ngIf="option.iconType === 'css'" class="iconpark-icon mr-[4px]">
+          <use [attr.href]="'#' + option.icon"></use>
+        </svg>
+        <img
+          *ngIf="option.iconType !== 'css'"
+          [src]="option.icon"
+          style="height: 16px; width: 16px"
+        />
+        <a
+          [routerLink]="option.routerLink"
+          [eoNgDisableLink]="option.check"
+          [eoNgDisableLinkParam]="option"
+          [queryParams]="option.queryParams"
+          [queryParamsHandling]="option.queryParamsHandling || 'merge'"
+          >{{ option.titleString }}
+        </a>
+      </ng-template>
       <div class="auth-box">
         <p>版权所有 © 银云信息技术</p>
       </div>
