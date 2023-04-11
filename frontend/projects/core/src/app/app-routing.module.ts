@@ -16,6 +16,7 @@ import { CustomPreloadingStrategy } from './custom-preloading-strategy'
 import { AuthActivationComponent } from './layout/auth/activation/activation.component'
 import { AuthInfoComponent } from './layout/auth/info/info.component'
 import { AuthUpdateComponent } from './layout/auth/update/update.component'
+import { IframePageComponent } from './layout/iframe-page/iframe-page.component'
 const routes: Routes = [
   {
     path: 'auth',
@@ -107,11 +108,11 @@ const routes: Routes = [
         loadChildren: () => import('./layout/navigation/navigation.module').then(m => m.NavigationModule)
       },
       {
-        path: 'interceptor',
+        path: 'iframe/**',
         data: {
-          id: '12'
+
         },
-        loadChildren: () => import('./layout/interceptor/interceptor.module').then(m => m.InterceptorModule)
+        component: IframePageComponent
       }
     ]
   }

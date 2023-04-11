@@ -93,7 +93,12 @@ export class ApplicationAuthenticationComponent implements OnInit {
       nzTitle: '配置鉴权信息',
       nzWidth: MODAL_SMALL_SIZE,
       nzContent: ApplicationAuthenticationFormComponent,
-      nzComponentParams: { authId: authId, appId: this.appId, closeModal: this.closeModal },
+      nzComponentParams: {
+        authId: authId,
+        appId: this.appId,
+        closeModal: this.closeModal,
+        nzDisabled: this.nzDisabled
+      },
       nzOkDisabled: this.nzDisabled,
       nzOnOk: (component:ApplicationAuthenticationFormComponent) => {
         component.saveAuth()
