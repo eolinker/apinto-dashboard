@@ -23,7 +23,12 @@ type coreService struct {
 
 	modulePluginService module_plugin.IModulePlugin
 	engineCreate        core.EngineCreate
-	providerService     core.IProviders
+	providerService     IProviderService
+}
+
+func (c *coreService) CheckNewModule(pluginID, name, apiGroup string, config interface{}) error {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (c *coreService) ResetVersion(version string) {
@@ -75,13 +80,13 @@ func (c *coreService) rebuild() error {
 			log.Errorf("create plugin %s error:%s", module.Name, err.Error())
 			continue
 		}
-		err = plugin.CheckConfig(module.Name, module.Config.APIGroup, module.Config)
+		err = plugin.CheckConfig(module.Name, module.Config)
 		if err != nil {
 			log.Errorf("plugin module %s config error:%s", module.Name, err.Error())
 			continue
 		}
 
-		m, err := plugin.CreateModule(module.Name, module.Config.APIGroup, module.Config)
+		m, err := plugin.CreateModule(module.Name, module.Config)
 		if err != nil {
 			log.Errorf("create module %s  error:%s", module.Name, err.Error())
 			continue
@@ -94,10 +99,10 @@ func (c *coreService) rebuild() error {
 		return err
 	}
 	c.handlerPointer.Store(&handler)
-	c.providerService.Set(provider)
+	c.providerService.set(provider)
 	return nil
 }
-func NewService(providerService core.IProviders) core.ICore {
+func NewService(providerService IProviderService) core.ICore {
 
 	c := &coreService{
 		providerService: providerService,
