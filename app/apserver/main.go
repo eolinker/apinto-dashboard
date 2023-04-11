@@ -52,14 +52,17 @@ func run() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	
-	// todo 执行导航初始化
+
+	// 执行导航初始化
+	err = initialize.InitNavigation()
+	if err != nil {
+		log.Fatal(err)
+	}
 	// 执行内置插件初始化
 	err = initialize.InitPlugins()
 	if err != nil {
 		log.Fatal(err)
 	}
-	// todo 执行内置插件初始化
 	coreService.ReloadModule()
 	go plugin_timer.ExtenderTimer()
 	// todo 不适合开源，后续通过插件接入
