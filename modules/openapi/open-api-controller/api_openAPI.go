@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 type apiOpenAPIController struct {
@@ -22,13 +23,23 @@ type apiOpenAPIController struct {
 	extAPPService     openapp.IExternalApplicationService
 }
 
-func RegisterApiOpenAPIRouter(router gin.IRoutes) {
-	a := &apiOpenAPIController{}
-	bean.Autowired(&a.apiOpenAPIService)
-	bean.Autowired(&a.extAPPService)
+var (
+	locker             sync.Mutex
+	controllerInstance *apiOpenAPIController
+)
 
-	router.GET("/apis/import", a.getImportInfo)
-	router.POST("/apis/import", a.syncAPI)
+func newOpenApiController() *apiOpenAPIController {
+	if controllerInstance == nil {
+		locker.Lock()
+		defer locker.Unlock()
+		if controllerInstance == nil {
+			controllerInstance = &apiOpenAPIController{}
+			bean.Autowired(&controllerInstance.extAPPService)
+			bean.Autowired(&controllerInstance.apiOpenAPIService)
+		}
+	}
+	return controllerInstance
+
 }
 
 func (a *apiOpenAPIController) getImportInfo(ginCtx *gin.Context) {
@@ -98,7 +109,7 @@ func (a *apiOpenAPIController) syncAPI(ginCtx *gin.Context) {
 		if nodesForm != "" {
 			server, err := a.getServer(nodesForm)
 			if err != nil {
-				ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+				controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 				return
 			}
 			inputData.Server = server
@@ -126,14 +137,14 @@ func (a *apiOpenAPIController) syncAPI(ginCtx *gin.Context) {
 		if nodesForm != "" {
 			server, err := a.getServer(nodesForm)
 			if err != nil {
-				ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+				controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 				return
 			}
 			inputData.Server = server
 		}
 	case "application/json":
 		if err = ginCtx.BindJSON(inputData); err != nil {
-			ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+			controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 			return
 		}
 		//检查Server

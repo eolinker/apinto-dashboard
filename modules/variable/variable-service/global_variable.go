@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/eolinker/apinto-dashboard/common"
+	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-dashboard/modules/base/quote-entry"
 	"github.com/eolinker/apinto-dashboard/modules/base/quote-store"
@@ -199,7 +200,7 @@ func (g *globalVariableService) Create(ctx context.Context, namespaceID, userID 
 		UpdateTime: time.Now(),
 	}
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Name: key,
 	})
 
@@ -235,7 +236,7 @@ func (g *globalVariableService) Delete(ctx context.Context, namespaceID, userID 
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Name: key,
 	})
 
