@@ -18,14 +18,10 @@ type variablesController struct {
 	globalVariableService variable.IGlobalVariableService
 }
 
-func RegisterVariablesRouter(router gin.IRoutes) {
+func newVariablesController() *variablesController {
 	c := &variablesController{}
 	bean.Autowired(&c.globalVariableService)
-
-	router.GET("/variables", c.gets)
-	router.GET("/variable", c.get)
-	router.POST("/variable", controller.AuditLogHandler(enum.LogOperateTypeCreate, enum.LogKindGlobalVariable, c.post))
-	router.DELETE("/variable", controller.AuditLogHandler(enum.LogOperateTypeDelete, enum.LogKindGlobalVariable, c.del))
+	return c
 }
 
 // 获取全局环境变量列表
