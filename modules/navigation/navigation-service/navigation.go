@@ -2,6 +2,7 @@ package navigation_service
 
 import (
 	"context"
+
 	"github.com/eolinker/apinto-dashboard/modules/navigation"
 
 	"encoding/json"
@@ -107,6 +108,7 @@ func (n *navigationService) List(ctx context.Context) ([]*navigation_model.Navig
 			}
 		}
 		navigations = append(navigations, &navigation_model.NavigationBasicInfo{
+			ID:        l.Id,
 			Uuid:      l.Uuid,
 			Title:     l.Title,
 			Icon:      l.Icon,
@@ -116,6 +118,10 @@ func (n *navigationService) List(ctx context.Context) ([]*navigation_model.Navig
 	}
 	sort.Sort(navigation_model.Navigations(navigations))
 	return navigations, nil
+}
+
+func (n *navigationService) Modules(ctx context.Context) {
+
 }
 
 func (n *navigationService) Info(ctx context.Context, uuid string) (*navigation_model.Navigation, error) {
