@@ -3,9 +3,9 @@ package controller
 import (
 	"net/http"
 
-	module_plugin "github.com/eolinker/apinto-dashboard/modules/module-plugin"
+	"github.com/eolinker/apinto-dashboard/controller"
 
-	"github.com/eolinker/apinto-dashboard/modules/navigation"
+	"github.com/eolinker/apinto-dashboard/modules/core/service"
 
 	"github.com/gin-gonic/gin"
 
@@ -13,9 +13,8 @@ import (
 )
 
 type System struct {
-	navigationService   navigation.INavigationService
-	modulePluginService module_plugin.IModulePlugin
-	routers             apinto_module.RoutersInfo
+	navigationService service.INavigationService
+	routers           apinto_module.RoutersInfo
 }
 
 func (s *System) RoutersInfo() apinto_module.RoutersInfo {
@@ -31,13 +30,19 @@ func (s *System) initRouter() {
 		Path:        "/api/system/modules",
 		Handler:     "core.modules",
 		Labels:      apinto_module.RouterLabelModule,
-		HandlerFunc: []apinto_module.HandlerFunc{s.modules},
+		HandlerFunc: []apinto_module.HandlerFunc{s.list},
 	})
 }
 
-func (s *System) modules(ctx *gin.Context) {
+func (s *System) list(ctx *gin.Context) {
 	list, err := s.navigationService.List(ctx)
 	if err != nil {
-
+		ctx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		return
 	}
+
+	ctx.JSON(http.StatusOK, controller.NewSuccessResult(map[string]interface{}{
+		"navigation": list,
+		"access":     "",
+	}))
 }
