@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core'
 import { CanActivate, Router } from '@angular/router'
 import { Observable, of } from 'rxjs'
-import { AppConfigService } from './app-config.service'
+import { EoNgNavigationService } from './app-config.service'
 
 @Injectable({
   providedIn: 'root'
 })
 export class RedirectPageService implements CanActivate, CanActivate {
   // eslint-disable-next-line  no-useless-constructor
-  constructor (private router: Router, private appConfigService: AppConfigService) {}
+  constructor (private router: Router, private appConfigService: EoNgNavigationService) {}
 
   canActivate (): Observable<boolean> {
     if (!this.router.routerState.snapshot.url) {

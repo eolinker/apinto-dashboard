@@ -59,6 +59,7 @@ eo-ng-flow-control-create .limit-bg {
 
 .ant-form-item-label > label::after {
   margin: 0 !important;
+  content: '';
 }
 
 .ant-drawer-body .ant-form-item-label > label::after {

@@ -1,11 +1,11 @@
 id: "navigation.apinto.com"
 name: "navigation"
-cname: "导航栏"
+cname: "导航管理"
 resume: ""
 version: "v1.0"
-icon: ""
+icon: "daohang"
 driver: "navigation.apinto.com"
-core: false
+core: true
 auto: true
-front: deploy/env
+front: navigation
 navigation: "navigation.navigation"

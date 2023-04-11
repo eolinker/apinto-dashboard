@@ -1,0 +1,64 @@
+<div
+  class="list-header pl-btnbase pr-btnrbase py-btnybase flex flex-nowrap items-center justify-between"
+>
+  <div>
+    <button
+      eo-ng-button
+      class="ant-btn-primary"
+      (click)="openNavigationModal(true)"
+    >
+      新建导航
+    </button>
+  </div>
+</div>
+<div class="ml-btnbase mr-btnrbase w-[60%]">
+  <eo-ng-empty *ngIf="!navigationList?.length"></eo-ng-empty>
+  <ul
+    *ngIf="navigationList.length"
+    class="draggable-list"
+    nz-list
+    [nzDataSource]="navigationList"
+    nzBordered
+    nzSize="large"
+    cdkDropList
+    (cdkDropListDropped)="drop($event)"
+  >
+    <li
+      class="draggable-item"
+      nz-list-item
+      *ngFor="let item of navigationList"
+      nzNoFlex
+      cdkDrag
+      cdkDragBoundary=".draggable-list"
+    >
+      <ul nz-list-item-actions>
+        <nz-list-item-action>
+          <button
+            class="ml-btnybase"
+            eo-ng-button
+            (click)="openNavigationModal(false, item.uuid)"
+          >
+            编辑
+          </button>
+          <button
+            class="ml-btnybase"
+            eo-ng-button
+            (click)="disableNavigationModal(item.uuid)"
+            [disabled]="!item.canDelete"
+          >
+            删除
+          </button>
+        </nz-list-item-action>
+      </ul>
+      <div class="flex items-center">
+        <svg
+          class="iconpark-icon border-[1px] border-solid border-color-base mr-btnybase"
+        >
+          <use href="#hamburger-button"></use>
+        </svg>
+        <img [src]="item.icon" style="width: 40px; height: 40px" />
+        <span>{{ item.title }}</span>
+      </div>
+    </li>
+  </ul>
+</div>
