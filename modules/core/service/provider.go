@@ -1,23 +1,26 @@
 package service
 
 import (
-	"github.com/eolinker/apinto-dashboard/modules/core"
 	apinto_module "github.com/eolinker/apinto-module"
 	"sync/atomic"
 )
 
-var _ core.IProviders = (*ProviderService)(nil)
+var _ IProviderService = (*ProviderService)(nil)
 
+type IProviderService interface {
+	apinto_module.IProviders
+	set(providers apinto_module.IProviders)
+}
 type ProviderService struct {
 	atomic.Pointer[apinto_module.IProviders]
 }
 
-func NewProviderService() core.IProviders {
+func NewProviderService() IProviderService {
 	p := &ProviderService{}
 
 	return p
 }
-func (p *ProviderService) Set(providers apinto_module.IProviders) {
+func (p *ProviderService) set(providers apinto_module.IProviders) {
 	p.Store(&providers)
 }
 func (p *ProviderService) Provider(name string) (apinto_module.Provider, bool) {
