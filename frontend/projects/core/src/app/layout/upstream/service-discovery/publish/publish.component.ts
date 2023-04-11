@@ -5,7 +5,7 @@ import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { THEAD_TYPE } from 'eo-ng-table'
 import { PublishTableHeadName, PublishTableBody } from 'projects/core/src/app/constant/conf'
 import { ApiService } from 'projects/core/src/app/service/api.service'
-import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 import { BaseInfoService } from 'projects/core/src/app/service/base-info.service'
 import { PublishFailService } from 'projects/core/src/app/service/publish-fail.service'
 import { EO_TBODY_TYPE } from 'projects/eo-ng-apinto-table/src/public-api'
@@ -35,7 +35,7 @@ export class ServiceDiscoveryPublishComponent implements OnInit {
      private message: EoNgFeedbackMessageService,
       public api:ApiService,
        private router:Router,
-       private appConfigService:AppConfigService,
+       private appConfigService:EoNgNavigationService,
        private publishFailModal:PublishFailService) {
     this.appConfigService.reqFlashBreadcrumb([{ title: '服务发现', routerLink: 'upstream/serv-discovery' }, { title: '上线管理' }])
   }

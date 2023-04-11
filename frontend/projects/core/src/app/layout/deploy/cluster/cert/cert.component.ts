@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core'
 import { Router } from '@angular/router'
 import { EoNgFeedbackModalService, EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { ApiService } from 'projects/core/src/app/service/api.service'
-import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 import { NzModalRef } from 'ng-zorro-antd/modal'
 import { MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
 import { BaseInfoService } from 'projects/core/src/app/service/base-info.service'
@@ -35,7 +35,7 @@ export class DeployClusterCertComponent implements OnInit {
                 private api:ApiService,
                 private baseInfo:BaseInfoService,
                 private router:Router,
-                private appConfigService:AppConfigService) {
+                private appConfigService:EoNgNavigationService) {
     this.appConfigService.reqFlashBreadcrumb([{ title: '网关集群', routerLink: 'deploy/cluster' }, { title: '证书管理' }])
   }
 
