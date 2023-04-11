@@ -1,0 +1,11 @@
+id: "navigation.apinto.com"
+name: "navigation"
+cname: "导航栏"
+resume: ""
+version: "v1.0"
+icon: ""
+driver: "navigation.apinto.com"
+core: false
+auto: true
+front: deploy/env
+navigation: "navigation.navigation"
