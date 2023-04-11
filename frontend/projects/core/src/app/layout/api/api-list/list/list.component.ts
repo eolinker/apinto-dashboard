@@ -4,13 +4,13 @@ import { Router, NavigationEnd } from '@angular/router'
 import { NzTreeNodeOptions } from 'ng-zorro-antd/tree'
 import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feedback'
 import { ApiService } from 'projects/core/src/app/service/api.service'
-import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 import { Subscription } from 'rxjs'
 import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { BaseInfoService } from 'projects/core/src/app/service/base-info.service'
+import { MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
 import { apisTableHeadName, apisTableBody } from '../../types/conf'
 import { APIList } from '../../types/types'
-import { MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
 
 @Component({
   selector: 'eo-ng-api-management-list',
@@ -62,7 +62,7 @@ export class ApiManagementListComponent implements OnInit {
     private api:ApiService,
     private router:Router,
     private baseInfo:BaseInfoService,
-    private appConfigService:AppConfigService) {
+    private appConfigService:EoNgNavigationService) {
     this.appConfigService.reqFlashBreadcrumb([{ title: 'API管理', routerLink: 'router/api/group/list' }])
   }
 
@@ -140,7 +140,7 @@ export class ApiManagementListComponent implements OnInit {
         this.apisForm.total = resp.data.total || this.apisForm.total
         this.apisForm.pageNum = resp.data.pageNum || this.apisForm.pageNum
         this.apisForm.pageSize = resp.data.pageSize || this.apisForm.pageSize
-      } 
+      }
     })
   }
 
@@ -152,7 +152,7 @@ export class ApiManagementListComponent implements OnInit {
           this.sourcesList.push({ text: resp.data.list[index].title, value: resp.data.list[index].id })
           this.apisTableHeadName[5].filterOpts = this.sourcesList
         }
-      } 
+      }
     })
   }
 

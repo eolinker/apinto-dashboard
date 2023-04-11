@@ -1,8 +1,8 @@
 /* eslint-disable dot-notation */
 /*
- * @Author:
+ * @Author: MengjieYang yangmengjie@eolink.com
  * @Date: 2022-07-20 22:34:58
- * @LastEditors:
+ * @LastEditors: MengjieYang yangmengjie@eolink.com
  * @LastEditTime: 2022-09-28 00:20:26
  * @FilePath: /apinto/src/app/layout/deploy/deploy-cluster-list/deploy-cluster-list.component.ts
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
@@ -23,12 +23,12 @@ import {
   EoNgFeedbackMessageService
 } from 'eo-ng-feedback'
 import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
-import { MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
 import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { ApiService } from 'projects/core/src/app/service/api.service'
-import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 import { DeployService } from '../../deploy.service'
 import { ClustersThead } from '../types/conf'
+import { MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
 
 @Component({
   selector: 'eo-ng-deploy-cluster-list',
@@ -63,7 +63,7 @@ export class DeployClusterListComponent implements OnInit {
     private modalService: EoNgFeedbackModalService,
     private api: ApiService,
     public router: Router,
-    private appConfigService: AppConfigService,
+    private appConfigService: EoNgNavigationService,
     private service:DeployService
   ) {
     this.appConfigService.reqFlashBreadcrumb([{ title: '网关集群', routerLink: 'deploy/cluster' }])
