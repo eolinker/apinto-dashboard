@@ -14,6 +14,7 @@ type ModulePlugin struct {
 	Resume     string    `gorm:"column:resume" json:"resume"`
 	ICon       string    `gorm:"column:icon" json:"icon"`
 	Type       int       `gorm:"column:type" json:"type"`
+	Front      string    `gorm:"column:front" json:"front"`
 	Driver     string    `gorm:"column:driver" json:"driver"`
 	Details    []byte    `gorm:"column:details" json:"details"`
 	Operator   int       `gorm:"column:operator" json:"operator"`
