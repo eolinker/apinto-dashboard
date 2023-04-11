@@ -14,7 +14,7 @@ CREATE TABLE `module_plugin` (
     `operator` int(11) DEFAULT NULL COMMENT '更新人/操作人',
     `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     PRIMARY KEY (`id`) USING BTREE,
-    UNIQUE KEY `unique_uuid` (`uuid`) USING BTREE,
+    UNIQUE KEY `unique_uuid` (`uuid`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC COMMENT='模块插件表';
 
 CREATE TABLE `module_plugin_enable` (
@@ -25,11 +25,11 @@ CREATE TABLE `module_plugin_enable` (
     `config` text NOT NULL COMMENT '启用配置',
     `operator` int(11) DEFAULT NULL COMMENT '更新人/操作人',
     `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
-    PRIMARY KEY (`id`) USING BTREE,
+    PRIMARY KEY (`id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC COMMENT='模块插件启用表';
 
 CREATE TABLE `module_plugin_package` (
     `id` int(11) NOT NULL COMMENT '模块插件表的主键ID',
     `package` mediumblob NOT NULL COMMENT '安装包',
-    PRIMARY KEY (`id`) USING BTREE,
+    PRIMARY KEY (`id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC COMMENT='模块插件安装包表';
