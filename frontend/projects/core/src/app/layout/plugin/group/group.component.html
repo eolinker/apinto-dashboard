@@ -1,0 +1,68 @@
+<div
+  class="flex flex-nowrap justify-start overflow-y-hidden max-h-[calc(100vh_-_50px)]"
+>
+  <div>
+    <div
+      class="block-inline-block relative min-w-GROUP min-h-[calc(100vh_-_50px)] spreed-content"
+      style="width: 240px"
+    >
+      <div class="flex items-center justify-between px-[11px] py-btnbase">
+        <eo-ng-search-input-group
+          class="w-[calc(100%)]"
+          [eoInputVal]="service.queryName"
+          [eoNoWidth]="true"
+          (eoClick)="service.queryName = ''; getPluginList()"
+        >
+          <input
+            type="text"
+            eo-ng-input
+            placeholder="搜索企业插件名称"
+            [(ngModel)]="service.queryName"
+            (blur)="getPluginList()"
+            (keyup.enter)="getPluginList()"
+          />
+        </eo-ng-search-input-group>
+      </div>
+
+      <div
+        class="h-[calc(100%_-_56px)] absolute overflow-x-hidden overflow-y-auto w-[100%]"
+        #groupComponent
+      >
+        <div
+          class="group-title cursor-pointer"
+          [ngClass]="{ 'group-title-selected': service.showAll }"
+          (click)="viewAllPlugins()"
+        >
+          <svg class="iconpark-icon mr5 fs18"><use href="#suoyou"></use></svg>
+          <span>所有插件</span>
+        </div>
+        <div>
+          <eo-ng-tree-default
+            nzBlockNode
+            #eoNgTreeDefault
+            [nzData]="service.nodesList"
+            (nzClick)="activeNode($event)"
+          ></eo-ng-tree-default>
+        </div>
+      </div>
+      <!-- 拖动条 -->
+      <div
+        class="divide_line_ldcc"
+        maxWidth="450"
+        minWidth="200"
+        eo-ng-tree-drag
+      ></div>
+    </div>
+  </div>
+  <div class="w-[100%]">
+    <router-outlet></router-outlet>
+  </div>
+</div>
+
+<div
+  class="flex flex-nowrap justify-start overflow-y-hidden max-h-[calc(100vh_-_50px)]"
+>
+  <ng-template #emptyTpl class="w-[100%]">
+    <eo-ng-empty nzMainTitle="暂无数据" nzInputImage="simple"></eo-ng-empty>
+  </ng-template>
+</div>

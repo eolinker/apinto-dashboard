@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router'
 import { PluginListComponent } from './list/list.component'
 import { PluginManagementComponent } from './plugin-management.component'
 import { PluginMessageComponent } from './message/message.component'
+import { GroupComponent } from './group/group.component'
 
 const routes: Routes = [
   {
@@ -13,14 +14,20 @@ const routes: Routes = [
     },
     children: [
       {
-        path: 'list',
+        path: 'group',
+        component: GroupComponent,
         children: [
           {
-            path: ':pluginGroupId',
-            component: PluginListComponent
+            path: 'list',
+            component: PluginListComponent,
+            children: [
+              {
+                path: ':pluginGroupId',
+                component: PluginListComponent
+              }
+            ]
           }
-        ],
-        component: PluginListComponent
+        ]
       },
       {
         path: 'message/:pluginId',
