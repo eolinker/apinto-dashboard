@@ -8,4 +8,4 @@ driver: "plugin_template.apinto.com"
 core: false
 auto: true
 front: router/plugin
-navigation: "navigation.api"
+navigation: "navigation.public_config"
