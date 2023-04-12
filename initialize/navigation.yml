@@ -15,7 +15,7 @@
   icon: "file-cabinet"
 - id: "navigation.public_config"
   name: "公共配置"
-  icon: "puzzle"
+  icon: "xiangmu"
 - id: "navigation.module_plugin"
   name: "插件市场"
   icon: "puzzle"
