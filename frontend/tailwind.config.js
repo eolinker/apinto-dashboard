@@ -33,7 +33,7 @@ module.exports = {
         mbase: '20px',
         label: '12px', // 选择器和label之间的间距，待删
         btnbase: '10px', // x方向的间距
-        btnybase: '16px', // y轴方向的间距
+        btnybase: '10px', // y轴方向的间距
         btnrbase: '20px', // 页面最右侧边距20px
         formtop: '20px',
         icon: '5px',
