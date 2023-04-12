@@ -10,6 +10,7 @@ type ModulePlugin struct {
 	Name       string    `gorm:"column:name" json:"name"`
 	Version    string    `gorm:"column:version" json:"version"`
 	Group      int       `gorm:"column:group" json:"group"`
+	Navigation string    `gorm:"column:navigation" json:"navigation"`
 	CName      string    `gorm:"column:cname" json:"cname"`
 	Resume     string    `gorm:"column:resume" json:"resume"`
 	ICon       string    `gorm:"column:icon" json:"icon"`
@@ -39,9 +40,9 @@ type EnablePlugin struct {
 
 // EnabledModule 启用的导航模块信息
 type EnabledModule struct {
-	Name         string `gorm:"column:name" json:"name"`
-	Title        string `gorm:"column:cname" json:"cname"`
-	Type         int    `gorm:"column:type" json:"type"`
-	NavigationID int    `gorm:"column:navigation" json:"navigation"`
-	Front        string `gorm:"column:front" json:"front"`
+	Name       string `gorm:"column:name" json:"name"`
+	Title      string `gorm:"column:cname" json:"cname"`
+	Type       int    `gorm:"column:type" json:"type"`
+	Navigation string `gorm:"column:navigation" json:"navigation"`
+	Front      string `gorm:"column:front" json:"front"`
 }

@@ -25,8 +25,13 @@
   </div>
   <div class="list-content pb-[4px] h-[calc(100%_-_64px)] overflow-y-auto">
     <eo-ng-card-list
+      *ngIf="filterPluginList().length; else emptyTpl"
       [cardList]="filterPluginList()"
       (cardClick)="handerCardClick($event)"
     ></eo-ng-card-list>
+
+    <ng-template #emptyTpl class="w-[100%]">
+      <eo-ng-empty nzMainTitle="暂无数据" nzInputImage="simple"></eo-ng-empty>
+    </ng-template>
   </div>
 </div>

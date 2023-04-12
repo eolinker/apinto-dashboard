@@ -1,0 +1,10 @@
+id: "open_api.apinto.com"
+name: "open_api"
+cname: "open-api"
+resume: ""
+version: "v1.0"
+icon: "inner-plugin.png"
+driver: "open_api.apinto.com"
+core: false
+auto: true
+front: ""
