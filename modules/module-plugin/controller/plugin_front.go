@@ -95,13 +95,13 @@ func (p *pluginFrontController) getPluginInfo(c *gin.Context) {
 	}
 	//若为内置插件，则从内嵌目录中获取
 	if info.Type == 0 || info.Type == 1 {
-		fsHandler, err := initialize.GetInnerPluginFSHandler(stripPrefix, filePath)
-		//若文件不存在
+		fsHandler, err := initialize.GetInnerPluginFS(filePath)
 		if err != nil {
 			c.Data(http.StatusNotFound, "application/text", []byte("404 page not found"))
 			return
 		}
-		fsHandler.ServeHTTP(c.Writer, c.Request)
+		c.FileFromFS(filePath, fsHandler)
+		//fsHandler.ServeHTTP(c.Writer, c.Request)
 		return
 	}
 
@@ -122,6 +122,7 @@ func (p *pluginFrontController) getPluginInfo(c *gin.Context) {
 // getPluginMD 获取插件描述中要用到的MD文件
 func (p *pluginFrontController) getPluginResources(c *gin.Context) {
 	pluginID := c.Param("id")
+	//TODO 若为内置插件
 
 	filePath := fmt.Sprintf("%s/resources/%s", pluginID, strings.Trim(c.Param("filepath"), "/"))
 

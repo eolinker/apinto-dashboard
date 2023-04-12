@@ -1,0 +1,10 @@
+id: "core.apinto.com"
+name: "core"
+cname: "核心"
+resume: ""
+version: "v1.0"
+icon: "inner-plugin.png"
+driver: "core.apinto.com"
+core: true
+auto: true
+front: ""
