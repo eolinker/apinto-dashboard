@@ -1,6 +1,7 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core'
+import { Component, EventEmitter, Inject, Input, Output } from '@angular/core'
+import { API_URL } from '../../service/api.service'
 
-export type CardItem = {title:string, enable:boolean, desc:string, iconAddr?:string, isInner?:boolean, [k:string]:any}
+export type CardItem = {title:string, enable:boolean, desc:string, iconAddr?:string, isInner?:boolean, id:string, [k:string]:any}
 @Component({
   selector: 'eo-ng-card-list',
   template: `
@@ -15,13 +16,13 @@ export type CardItem = {title:string, enable:boolean, desc:string, iconAddr?:str
 
             <ng-template #cardStatusTml>
               <ng-container *ngIf="type === 'plugin'">
-              <span class="mr-[16px]" *ngIf="card?.isInner">内置</span>
+              <span class="mr-[16px] font-medium" *ngIf="card?.isInner">内置</span>
                 <span class="text-theme" *ngIf="card.enable"> 已启用</span>
                 <span *ngIf="!card.enable"> 未启用</span>
               </ng-container>
             </ng-template>
             <ng-template #avatarTemplate>
-              <img [src]="card.iconAddr||'./assets/default-plugin-icon.svg'" alt="plugin icon" width="64px" height="50px">
+              <img [src]="card.iconAddr? (urlPrefix + 'plugin/info/' + card.id + '/'+card.iconAddr) : './assets/default-plugin-icon.svg'" alt="plugin icon" width="64px" height="50px">
             </ng-template>
             <p class="mt-[20px] card-desc-text">{{card.desc}}</p>
           </nz-card>
@@ -49,6 +50,10 @@ export class CardListComponent {
 
   @Input() type:string = 'plugin'
   @Output() cardClick:EventEmitter<CardItem> = new EventEmitter()
+
+  constructor (
+    @Inject(API_URL) public urlPrefix:string) {
+  }
 
   handlerCardClick (card:CardItem) {
     this.cardClick.emit(card)
