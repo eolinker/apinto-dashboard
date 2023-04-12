@@ -13,12 +13,14 @@ func initRouter(name string) apinto_module.RoutersInfo {
 			Path:        "/api/apis/import",
 			Handler:     "applications.getImportInfo",
 			HandlerFunc: []apinto_module.HandlerFunc{c.getImportInfo},
+			Labels:      apinto_module.RouterLabelOpenApi,
 		},
 		{
 			Method:      http.MethodPost,
 			Path:        "/api/apis/import",
 			Handler:     "applications.syncAPI",
 			HandlerFunc: []apinto_module.HandlerFunc{c.syncAPI},
+			Labels:      apinto_module.RouterLabelOpenApi,
 		},
 	}
 }
