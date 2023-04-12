@@ -5,7 +5,7 @@ import "time"
 type ModulePluginEnable struct {
 	Id         int       `gorm:"id" json:"id"`
 	Name       string    `gorm:"name" json:"name"`
-	Navigation int       `gorm:"navigation" json:"navigation"`
+	Navigation string    `gorm:"navigation" json:"navigation"`
 	IsEnable   int       `gorm:"is_enable" json:"is_enable"`
 	Config     []byte    `gorm:"config" json:"config"`
 	Operator   int       `gorm:"operator" json:"operator"`
