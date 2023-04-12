@@ -360,7 +360,7 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 		}
 
 	}
-	err = m.coreService.CheckNewModule(enableInfo.Name, pluginInfo.Driver, checkConfig, define)
+	err = m.coreService.CheckNewModule(pluginInfo.UUID, enableInfo.Name, pluginInfo.Driver, define, checkConfig)
 	if err != nil {
 		return err
 	}
