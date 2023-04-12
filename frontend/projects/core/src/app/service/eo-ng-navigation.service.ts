@@ -136,7 +136,7 @@ export class EoNgNavigationService {
                         titleString: navigation.title,
                         name: module.name,
                         type: module.type,
-                        ...(module.type === 'buildin'
+                        ...(module.type === 'build-in'
                           ? {
                               routerLink: module.path,
                               matchRouter: true,

@@ -169,7 +169,8 @@ type InnerPluginYmlMain struct {
 // NavigationEnabledPlugin 用于给导航返回的
 type NavigationEnabledPlugin struct {
 	*entry.ModulePluginEnable
-	UUID string
+	UUID  string
+	CName string
 }
 
 // NavigationModuleInfo 导航所需要的模块信息
