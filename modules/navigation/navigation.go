@@ -7,13 +7,7 @@ import (
 )
 
 type INavigationService interface {
-	Add(ctx context.Context, uuid string, name string, icon string, iconType string) error
-	Save(ctx context.Context, uuid string, name string, icon string, iconType string) error
-	Delete(ctx context.Context, uuid string) error
-	List(ctx context.Context) ([]*navigation_model.NavigationBasicInfo, error)
+	Add(ctx context.Context, uuid string, title string, icon string) error
 	Info(ctx context.Context, uuid string) (*navigation_model.Navigation, error)
-	GetUUIDByID(ctx context.Context, id int) (string, error)
-	GetIDByUUID(ctx context.Context, uuid string) (int, error)
-	// Sort 更新排序
-	Sort(ctx context.Context, uuids []string) error
+	List(ctx context.Context) ([]*navigation_model.Navigation, error)
 }
