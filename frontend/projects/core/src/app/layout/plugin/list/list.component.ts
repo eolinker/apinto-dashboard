@@ -21,6 +21,11 @@ import { EoNgPluginService } from '../eo-ng-plugin.service'
   selector: 'eo-ng-plugin-list',
   templateUrl: './list.component.html',
   styles: [
+    `:host ::ng-deep{
+      display:block;
+      height:100%;
+      overflow:hidden;
+    }`
   ]
 })
 export class PluginListComponent implements OnInit {

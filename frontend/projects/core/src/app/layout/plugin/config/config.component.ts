@@ -11,7 +11,7 @@ import { ApiService } from '../../../service/api.service'
 import { EoNgMessageService } from '../../../service/eo-ng-message.service'
 import { PluginInstallConfigTableHeadName, PluginInstallConfigTableBody } from '../types/conf'
 import { PluginInstallConfigData, PluginInstallData } from '../types/types'
-import { NavigationItem } from '../../navigation/types/types'
+import { EoNgNavigationService } from '../../../service/eo-ng-navigation.service'
 
 @Component({
   selector: 'eo-ng-plugin-config',
@@ -24,12 +24,10 @@ export class PluginConfigComponent implements OnInit {
   configTableHeadName:THEAD_TYPE[] = [...PluginInstallConfigTableHeadName]
   configTableBody:EO_TBODY_TYPE[] = [...PluginInstallConfigTableBody]
   name:string = ''
-  navigation:string = ''
   apiGroup:string = ''
   server:string = ''
 
   showServer:boolean = false
-  invisible:boolean = false
   showApiGroup:boolean = false
 
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
@@ -43,9 +41,9 @@ export class PluginConfigComponent implements OnInit {
   nzDisabled:boolean = false
 
   modalRef:NzModalRef|undefined
-  constructor (private fb: UntypedFormBuilder, private api:ApiService, private message:EoNgMessageService) {
+  constructor (private fb: UntypedFormBuilder, private api:ApiService, private message:EoNgMessageService,
+    private navService:EoNgNavigationService) {
     this.validateForm = this.fb.group({
-      navigation: ['', [Validators.required]],
       server: ['', [Validators.required]],
       apiGroup: ['', [Validators.required]]
     })
@@ -53,14 +51,12 @@ export class PluginConfigComponent implements OnInit {
 
   ngOnInit (): void {
     this.getMessage()
-    this.getNavigationList()
   }
 
   getMessage () {
     this.api.get('system/plugin/enable', { id: this.pluginId }).subscribe((resp:{code:number, data:PluginInstallData, msg:string}) => {
       if (resp.code === 0) {
         this.name = resp.data.module.name
-        this.navigation = resp.data.module.navigation
         this.apiGroup = resp.data.module.apiGroup
         this.server = resp.data.module.server
         this.headerList = resp.data.module.header.map((header:PluginInstallConfigData) => {
@@ -76,34 +72,13 @@ export class PluginConfigComponent implements OnInit {
           return initItem
         })
         this.showServer = resp.data.render.internet
-        this.invisible = resp.data.render.invisible
         this.showApiGroup = resp.data.render.apiGroup
       }
     })
   }
 
-  getNavigationList () {
-    this.api.get('system/navigation').subscribe((resp:{code:number, msg:string, data:{navigations:Array<NavigationItem>}}) => {
-      if (resp.code === 0) {
-        this.navigationList = resp.data.navigations.map((nav:NavigationItem) => {
-          return { label: nav.title, value: nav.uuid }
-        })
-      }
-    })
-  }
-
-  goToNavigation () {
-    this.modalRef?.close()
-    window.open('../../../navigation')
-  }
-
   checkValid () {
     let valid:boolean = true
-    if (this.invisible && this.validateForm.controls['navigation'].invalid) {
-      valid = false
-      this.validateForm.controls['navigation'].markAsDirty()
-      this.validateForm.controls['navigation'].updateValueAndValidity({ onlySelf: true })
-    }
     if (this.showApiGroup && this.validateForm.controls['apiGroup'].invalid) {
       valid = false
       this.validateForm.controls['apiGroup'].markAsDirty()
@@ -122,7 +97,6 @@ export class PluginConfigComponent implements OnInit {
     if (this.checkValid()) {
       const data = {
         name: this.name,
-        navigation: this.validateForm.controls['navigation'].value,
         apiGroup: this.validateForm.controls['apiGroup'].value,
         server: this.validateForm.controls['server'].value,
         header: this.headerList.map((header:PluginInstallConfigData) => {
@@ -139,6 +113,7 @@ export class PluginConfigComponent implements OnInit {
       this.api.post('system/plugin/enable', { id: this.pluginId }, data).subscribe((resp:EmptyHttpResponse) => {
         if (resp.code === 0) {
           this.message.success(resp.msg || '启用插件成功')
+          this.navService.reqFlashMenu()
         }
       })
     }
