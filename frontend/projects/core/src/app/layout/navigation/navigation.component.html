@@ -11,7 +11,10 @@
     </button>
   </div>
 </div>
-<div class="ml-btnbase mr-btnrbase w-[60%]">
+<div
+  class="ml-btnbase mr-btnrbase w-[60%] h-[calc(100%_-_64px)]"
+  [ngClass]="{ 'overflow-y-auto': navigationList.length }"
+>
   <eo-ng-empty *ngIf="!navigationList?.length"></eo-ng-empty>
   <ul
     *ngIf="navigationList.length"
@@ -56,7 +59,18 @@
         >
           <use href="#hamburger-button"></use>
         </svg>
-        <img [src]="item.icon" style="width: 40px; height: 40px" />
+        <svg
+          class="iconpark-icon mr-[5px]"
+          *ngIf="!item.icon || item.iconType === 'css'"
+        >
+          <use [attr.href]="'#' + (item.icon || 'daohang')"></use>
+        </svg>
+
+        <img
+          *ngIf="item.icon && item.iconType !== 'css'"
+          [src]="item.icon"
+          class="iconpark-icon mr-[5px]"
+        />
         <span>{{ item.title }}</span>
       </div>
     </li>
