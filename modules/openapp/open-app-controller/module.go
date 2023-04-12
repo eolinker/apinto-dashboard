@@ -24,9 +24,14 @@ func (c *PluginDriver) CheckConfig(name string, config interface{}) error {
 }
 
 type ClusterModule struct {
-	isInit  bool
-	name    string
-	routers apinto_module.RoutersInfo
+	isInit     bool
+	name       string
+	routers    apinto_module.RoutersInfo
+	middleware []apinto_module.MiddlewareHandler
+}
+
+func (c *ClusterModule) MiddlewaresInfo() []apinto_module.MiddlewareHandler {
+	return c.middleware
 }
 
 func (c *ClusterModule) Name() string {
@@ -42,7 +47,7 @@ func (c *ClusterModule) Routers() (apinto_module.Routers, bool) {
 }
 
 func (c *ClusterModule) Middleware() (apinto_module.Middleware, bool) {
-	return nil, false
+	return c, true
 }
 
 func NewClusterModule(name string) *ClusterModule {
@@ -52,7 +57,8 @@ func NewClusterModule(name string) *ClusterModule {
 
 func (c *ClusterModule) RoutersInfo() apinto_module.RoutersInfo {
 	if !c.isInit {
-		c.routers = initRouter(c.name)
+		c.routers, c.middleware = initRouter(c.name)
+
 		c.isInit = true
 	}
 	return c.routers
