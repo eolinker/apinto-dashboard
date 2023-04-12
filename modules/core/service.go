@@ -9,7 +9,7 @@ type ICore interface {
 	http.Handler
 	ResetVersion(version string)
 	ReloadModule() error
-	CheckNewModule(name, driver string, config, define interface{}) error
+	CheckNewModule(uuid, name, driver string, define, config interface{}) error
 	HasModule(module string, path string) bool
 }
 
