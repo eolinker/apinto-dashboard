@@ -52,7 +52,7 @@ func (c *coreService) HasModule(module string, path string) bool {
 	return has
 }
 
-func (c *coreService) CheckNewModule(pluginID, name string, config interface{}) error {
+func (c *coreService) CheckNewModule(name, driver string, config, define interface{}) error {
 	return nil
 }
 
