@@ -7,8 +7,6 @@ import (
 
 	module_plugin "github.com/eolinker/apinto-dashboard/modules/module-plugin"
 
-	navigation_service "github.com/eolinker/apinto-dashboard/modules/navigation"
-
 	"github.com/eolinker/apinto-dashboard/modules/core/model"
 )
 
@@ -17,13 +15,13 @@ type INavigationService interface {
 }
 
 type navigation struct {
-	navigationService   navigation_service.INavigationService
+	//navigationService   navigation_service.INavigationService
 	modulePluginService module_plugin.IModulePlugin
 }
 
 func newNavigationService() INavigationService {
 	n := &navigation{}
-	bean.Autowired(&n.navigationService)
+	//bean.Autowired(&n.navigationService)
 	bean.Autowired(&n.modulePluginService)
 	return n
 }
