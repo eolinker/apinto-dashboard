@@ -7,6 +7,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/model"
 	"github.com/eolinker/eosc/common/bean"
 	"gopkg.in/yaml.v3"
+	"io/fs"
 	"net/http"
 	"path"
 
@@ -40,6 +41,7 @@ func InitPlugins() error {
 	var service module_plugin.IModulePluginService
 	bean.Autowired(&service)
 	ctx := context.Background()
+
 	plugins, err := loadPlugins("plugins", "plugin.yml")
 	if err != nil {
 		return err
@@ -112,8 +114,17 @@ func loadPlugins(dir string, target string) ([]*Plugin, error) {
 	return plugins, nil
 }
 
-func GetInnerPluginFSHandler(stripPrefix, filePath string) (http.Handler, error) {
-	fileServer := http.StripPrefix(stripPrefix, http.FileServer(http.FS(pluginDir)))
+func GetInnerPluginFS(filePath string) (http.FileSystem, error) {
+	//先检验文件是否存在
 	_, err := pluginDir.ReadFile(fmt.Sprintf("plugins/%s", filePath))
-	return fileServer, err
+	if err != nil {
+		return nil, err
+	}
+
+	pluginsFS, err := fs.Sub(pluginDir, "plugins")
+	if err != nil {
+		return nil, err
+	}
+	//fileServer := http.StripPrefix(stripPrefix, http.FileServer(http.FS(pluginsFS)))
+	return http.FS(pluginsFS), nil
 }
