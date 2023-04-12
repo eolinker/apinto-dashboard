@@ -1,4 +1,4 @@
-<div class="">
+<div class="h-[100%]">
   <div
     class="list-header pl-btnbase pr-btnrbase py-btnybase flex flex-nowrap items-center justify-between"
   >
@@ -23,7 +23,7 @@
       ></eo-ng-radio-group>
     </div>
   </div>
-  <div class="list-content pb-[4px]">
+  <div class="list-content pb-[4px] h-[calc(100%_-_64px)] overflow-y-auto">
     <eo-ng-card-list
       [cardList]="filterPluginList()"
       (cardClick)="handerCardClick($event)"
