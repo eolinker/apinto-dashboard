@@ -41,8 +41,15 @@ func (p *pluginFrontController) checkPluginID(c *gin.Context) {
 func (p *pluginFrontController) setIConName(c *gin.Context) {
 	fileName := c.Param("file")
 	if fileName == "" {
-		//TODO 获取插件配置文件内的icon
-		fileName = "icon"
+		//获取插件配置的icon
+		pluginID := c.Param("id")
+		info, err := p.modulePluginService.GetPluginInfo(c, pluginID)
+		if err != nil {
+			c.Data(http.StatusNotFound, "application/text", []byte("404 page not found"))
+			c.Abort()
+			return
+		}
+		fileName = info.ICon
 	}
 	c.Set("file", fileName)
 	c.Set("strip_prefix", "/plugin/icon")
