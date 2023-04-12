@@ -133,8 +133,7 @@ export class PluginMessageComponent implements OnInit {
   }
 
   getMd () {
-    // return `../../plugin/info/${this.pluginId}/${this.mdFileName}'`
-    return 'assets/README.md'
+    return `../../plugin/info/${this.pluginId}/${this.mdFileName}'`
   }
 
   onError (value:any) {
