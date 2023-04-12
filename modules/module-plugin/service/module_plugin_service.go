@@ -306,10 +306,12 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 
 	var config []byte
 	var checkConfig *model.PluginEnableCfg
+	var define interface{}
 	//若为内置插件
 	if pluginInfo.Type == 0 || pluginInfo.Type == 1 {
 		checkConfig = nil
 		config = []byte{}
+		define = nil
 	} else {
 		//若为非内置插件
 		headers := make([]*model.ExtendParams, 0, len(enableInfo.Header))
@@ -341,8 +343,27 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 		}
 		config, _ = json.Marshal(enableCfg)
 		checkConfig = enableCfg
-	}
 
+		switch pluginInfo.Driver {
+		case "remote":
+			remote := new(model.RemoteDefine)
+			_ = json.Unmarshal(pluginInfo.Details, remote)
+			define = remote
+		case "local":
+			local := new(model.LocalDefine)
+			_ = json.Unmarshal(pluginInfo.Details, local)
+			define = local
+		case "profession":
+			profession := new(model.ProfessionDefine)
+			_ = json.Unmarshal(pluginInfo.Details, profession)
+			define = profession
+		}
+
+	}
+	err = m.coreService.CheckNewModule(enableInfo.Name, pluginInfo.Driver, checkConfig, define)
+	if err != nil {
+		return err
+	}
 	err = m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
 		enable := &entry.ModulePluginEnable{
 			Id:         pluginInfo.Id,
@@ -353,11 +374,8 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 			Operator:   userID,
 			UpdateTime: time.Now(),
 		}
-		if err = m.pluginEnableStore.Save(txCtx, enable); err != nil {
-			return err
-		}
 
-		return m.coreService.CheckNewModule(pluginInfo.UUID, enableInfo.Name, checkConfig)
+		return m.pluginEnableStore.Save(txCtx, enable)
 	})
 	if err != nil {
 		return err
