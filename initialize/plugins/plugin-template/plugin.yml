@@ -3,7 +3,7 @@ name: "plugin_template"
 cname: "插件模板"
 resume: ""
 version: "v1.0"
-icon: ""
+icon: "inner-plugin.png"
 driver: "plugin_template.apinto.com"
 core: false
 auto: true
