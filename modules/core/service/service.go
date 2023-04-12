@@ -54,9 +54,9 @@ func (c *coreService) HasModule(module string, path string) bool {
 }
 
 func (c *coreService) CheckNewModule(UUID, name, driverName string, define, config interface{}) error {
-	m, err := createModule(driverName, name, define, config)
+	newModule, err := createModule(driverName, name, define, config)
 	if err != nil {
-		continue
+		return err
 	}
 	c.lock.Lock()
 	defer c.lock.Unlock()
@@ -83,7 +83,9 @@ func (c *coreService) CheckNewModule(UUID, name, driverName string, define, conf
 		modulesData.data[module.Name] = struct{}{}
 		builder.Append(m)
 	}
+	builder.Append(newModule)
 
+	builder.Build()
 	return nil
 }
 func createModule(driverName, name string, define, config interface{}) (apinto_module.Module, error) {
