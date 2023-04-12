@@ -9,7 +9,7 @@ type ICore interface {
 	http.Handler
 	ResetVersion(version string)
 	ReloadModule() error
-	CheckNewModule(pluginID, name, apiGroup string, config interface{}) error
+	CheckNewModule(pluginID, name string, config interface{}) error
 }
 
 type EngineCreate interface {

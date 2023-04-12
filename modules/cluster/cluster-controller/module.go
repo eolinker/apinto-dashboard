@@ -12,11 +12,6 @@ func NewClusterPlugin() apinto_module.Driver {
 	return &ClusterPluginDriver{}
 }
 
-const (
-	ClusterView = "view"
-	ClusterEdit = "edit"
-)
-
 func (c *ClusterPluginDriver) CreateModule(name string, config interface{}) (apinto_module.Module, error) {
 	return NewClusterModule(name), nil
 }
@@ -72,7 +67,7 @@ func (c *ClusterModule) initRouter() {
 	c.routers = []apinto_module.RouterInfo{
 		{
 			Method:      http.MethodGet,
-			Path:        "/api/cluster/lists",
+			Path:        "/api/clusters",
 			Handler:     "cluster.list",
 			HandlerFunc: []apinto_module.HandlerFunc{clrController.clusters},
 		},
