@@ -175,8 +175,9 @@ type NavigationEnabledPlugin struct {
 
 // NavigationModuleInfo 导航所需要的模块信息
 type NavigationModuleInfo struct {
-	Name  string
-	Title string
-	Type  string
-	Path  string
+	Name       string
+	Title      string
+	Type       string
+	Path       string
+	Navigation string
 }
