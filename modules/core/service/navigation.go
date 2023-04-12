@@ -47,8 +47,9 @@ func (n *navigation) List(ctx context.Context) ([]*model.Navigation, map[string]
 		modules := make([]*model.Module, 0)
 		defaultModule := ""
 		if vs, ok := moduleMap[l.ID]; ok {
+
 			for i, v := range vs {
-				if i == 0 {
+				if i == 0 && v.Title == l.Title {
 					defaultModule = v.Name
 				}
 				access[v.Name] = "edit"
@@ -58,6 +59,9 @@ func (n *navigation) List(ctx context.Context) ([]*model.Navigation, map[string]
 					Type:  v.Type,
 					Path:  v.Path,
 				})
+			}
+			if len(vs) > 1 {
+				defaultModule = ""
 			}
 		}
 
