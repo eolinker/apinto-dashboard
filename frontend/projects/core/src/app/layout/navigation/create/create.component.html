@@ -37,8 +37,29 @@
       >
         <ng-container *ngIf="!fileList.length">
           <div class="ant-upload-text"></div>
+          <svg
+            class="icon-image iconpark-icon h-[100%] w-[100%]"
+            *ngIf="iconSvg"
+          >
+            <use [attr.href]="'#' + iconSvg"></use>
+          </svg>
         </ng-container>
-        <img [src]="imageUrl" style="width: 100%; height: 100%" />
+
+        <ng-container *ngIf="!iconSvg">
+          <img
+            class="icon-image"
+            [src]="imageUrl"
+            style="width: 100%; height: 100%"
+          />
+        </ng-container>
+
+        <svg
+          *ngIf="iconSvg || fileList.length"
+          (click)="deleteIcon($event)"
+          class="delete-icon iconpark-icon absolute ml-[-10px] mt-[-5px] bg-[#fff] rounded-[50px] p-[2px] opacity-0 border-[1px] border-solid border-BORDER"
+        >
+          <use href="#guanbi"></use>
+        </svg>
       </nz-upload>
 
       <div
@@ -63,14 +84,15 @@
           <span *ngIf="first">子导航配置：</span>
         </nz-form-label>
         <nz-form-control
+          class="child-navigation"
           [nzSpan]="14"
           [formGroupName]="index"
           cdkDrag
-          class="cursor-pointer"
         >
           <div class="flex items-center">
             <svg
-              class="iconpark-icon border-[1px] border-solid border-color-base mr-btnybase"
+              cdkDragHandle
+              class="cursor-pointer iconpark-icon border-[1px] border-solid border-color-base mr-btnybase"
             >
               <use href="#hamburger-button"></use>
             </svg>
