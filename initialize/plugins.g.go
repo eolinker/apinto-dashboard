@@ -3,9 +3,11 @@ package initialize
 import (
 	"context"
 	"embed"
+	"fmt"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/model"
 	"github.com/eolinker/eosc/common/bean"
 	"gopkg.in/yaml.v3"
+	"net/http"
 	"path"
 
 	"gorm.io/gorm"
@@ -108,4 +110,10 @@ func loadPlugins(dir string, target string) ([]*Plugin, error) {
 		}
 	}
 	return plugins, nil
+}
+
+func GetInnerPluginFSHandler(stripPrefix, filePath string) (http.Handler, error) {
+	fileServer := http.StripPrefix(stripPrefix, http.FileServer(http.FS(pluginDir)))
+	_, err := pluginDir.ReadFile(fmt.Sprintf("plugins/%s", filePath))
+	return fileServer, err
 }
