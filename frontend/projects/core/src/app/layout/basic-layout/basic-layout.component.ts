@@ -86,7 +86,7 @@ export class BasicLayoutComponent implements OnInit {
             this.openHandler(value['key']!)
           }
         }
-        this.getAccess()
+        // this.getAccess()
       })
   }
 

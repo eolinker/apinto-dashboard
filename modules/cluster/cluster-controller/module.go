@@ -63,7 +63,7 @@ func (c *ClusterModule) initRouter() {
 	clrController := newClusterController()
 	nodeController := newClusterNodeController()
 	configController := newClusterConfigController()
-
+	certificateController := newClusterCertificateController()
 	c.routers = []apinto_module.RouterInfo{
 		{
 			Method:      http.MethodGet,
@@ -147,6 +147,31 @@ func (c *ClusterModule) initRouter() {
 			Path:        "/api/cluster/:cluster_name/configuration/:type/disable",
 			Handler:     "cluster.config.disable",
 			HandlerFunc: []apinto_module.HandlerFunc{configController.disable},
+		},
+
+		{
+			Method:      http.MethodPost,
+			Path:        "/api/cluster/:cluster_name/certificate",
+			Handler:     "cluster.certificates.post",
+			HandlerFunc: []apinto_module.HandlerFunc{certificateController.post},
+		},
+		{
+			Method:      http.MethodPut,
+			Path:        "/api/cluster/:cluster_name/certificate/:certificate_id",
+			Handler:     "cluster.certificates.put",
+			HandlerFunc: []apinto_module.HandlerFunc{certificateController.put},
+		},
+		{
+			Method:      http.MethodDelete,
+			Path:        "/api/cluster/:cluster_name/certificate/:certificate_id",
+			Handler:     "cluster.certificates.del",
+			HandlerFunc: []apinto_module.HandlerFunc{certificateController.del},
+		},
+		{
+			Method:      http.MethodGet,
+			Path:        "/api/cluster/:cluster_name/certificates",
+			Handler:     "cluster.certificates.gets",
+			HandlerFunc: []apinto_module.HandlerFunc{certificateController.gets},
 		},
 	}
 }

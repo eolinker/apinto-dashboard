@@ -123,10 +123,9 @@ export class EoNgNavigationService {
             const menu = {
               title: navigation.title,
               titleString: navigation.title,
-              iconType: navigation.iconType,
               menu: true,
               key: uuidv4(),
-              ...(navigation.iconType === 'css' ? { icon: navigation.icon } : { iconSrc: navigation.icon }),
+              icon: navigation.icon || 'daohang',
               ...(navigation.modules?.length > 0 && !navigation.default
                 ? {
                     children: navigation.modules.map((module:any) => {
