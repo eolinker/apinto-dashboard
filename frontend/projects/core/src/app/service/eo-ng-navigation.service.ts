@@ -136,7 +136,7 @@ export class EoNgNavigationService {
                         titleString: navigation.title,
                         name: module.name,
                         type: module.type,
-                        ...(module.type === 'build-in'
+                        ...(module.type === 'built-in'
                           ? {
                               routerLink: module.path,
                               matchRouter: true,
@@ -156,7 +156,11 @@ export class EoNgNavigationService {
                         matchRouterExact: false,
                         type: this.getDefaultModule(navigation).type
                       }
-                    : {}))
+                    : {
+                        routerLink: 'iframe',
+                        matchRouter: true,
+                        matchRouterExact: false
+                      }))
             }
 
             if (navigation.name && navigation.path) {

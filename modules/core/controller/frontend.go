@@ -26,7 +26,23 @@ func favicon() apinto_module.RouterInfo {
 		HandlerFunc: []apinto_module.HandlerFunc{frontend.Favicon},
 	}
 }
-
+func moduleRouters() apinto_module.RoutersInfo {
+	mc := NewModuleController()
+	return apinto_module.RoutersInfo{
+		{
+			Method:      http.MethodGet,
+			Path:        "/:module/*path",
+			Labels:      apinto_module.RouterLabelModule,
+			HandlerFunc: []apinto_module.HandlerFunc{mc.HandleModule},
+		},
+		{
+			Method:      http.MethodGet,
+			Path:        "/:module",
+			Labels:      apinto_module.RouterLabelModule,
+			HandlerFunc: []apinto_module.HandlerFunc{mc.HandleModule},
+		},
+	}
+}
 func staticFile(prefix string, dir string) apinto_module.RoutersInfo {
 	fileSystem := frontend.GetFileSystem(dir)
 	handler := func(ginCtx *gin.Context) {
