@@ -27,7 +27,6 @@ type PluginInfo struct {
 
 type PluginEnableInfo struct {
 	Name       string         `json:"name"`
-	Navigation string         `json:"navigation"`
 	Server     string         `json:"server"`
 	Header     []ExtendParams `json:"header"`
 	Query      []ExtendParams `json:"query"`

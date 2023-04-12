@@ -73,6 +73,10 @@ func (m *modulePluginService) GetPlugins(ctx context.Context, groupUUID, searchN
 	}
 	plugins := make([]*model.ModulePluginItem, 0, len(pluginEntries))
 	for _, pluginEntry := range pluginEntries {
+		//内置-内核插件不返回
+		if pluginEntry.Type == 0 {
+			continue
+		}
 		plugin := &model.ModulePluginItem{
 			ModulePlugin: pluginEntry,
 			IsEnable:     false,
@@ -158,15 +162,11 @@ func (m *modulePluginService) GetPluginEnableInfo(ctx context.Context, pluginUUI
 		return nil, err
 	}
 
-	//通过导航id获取导航信息
-	navigationUUID, _ := m.navigationService.GetUUIDByID(ctx, enableEntry.Navigation)
-
 	enableCfg := new(model.PluginEnableCfg)
 	_ = json.Unmarshal(enableEntry.Config, enableCfg)
 
 	info := &model.PluginEnableInfo{
 		Name:       enableEntry.Name,
-		Navigation: navigationUUID,
 		Server:     enableCfg.Server,
 		Header:     enableCfg.Header,
 		Query:      enableCfg.Query,
@@ -223,7 +223,7 @@ func (m *modulePluginService) InstallPlugin(ctx context.Context, userID int, gro
 	}
 
 	groupID := 0
-	return m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
+	err = m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
 		if err == gorm.ErrRecordNotFound {
 			groupID, err = m.commonGroup.CreateGroup(txCtx, -1, userID, group_service.ModulePlugin, "", groupName, uuid.New(), "")
 		} else {
@@ -246,6 +246,7 @@ func (m *modulePluginService) InstallPlugin(ctx context.Context, userID int, gro
 			Name:       pluginYml.Name,
 			Version:    pluginYml.Version,
 			Group:      groupID,
+			Navigation: pluginYml.Navigation,
 			CName:      pluginYml.CName,
 			Resume:     pluginYml.Resume,
 			ICon:       pluginYml.ICon,
@@ -266,6 +267,25 @@ func (m *modulePluginService) InstallPlugin(ctx context.Context, userID int, gro
 		})
 
 	})
+	if err != nil {
+		return err
+	}
+	//缓存
+	_ = m.installedCache.Set(ctx, m.installedCache.Key(pluginYml.ID), &model.PluginInstalledStatus{
+		Installed: true,
+	}, time.Hour)
+
+	return nil
+}
+
+func (m *modulePluginService) UninstallPlugin(ctx context.Context, pluginID string) error {
+	//TODO
+
+	_ = m.installedCache.Set(ctx, m.installedCache.Key(pluginID), &model.PluginInstalledStatus{
+		Installed: false,
+	}, time.Hour)
+
+	return nil
 }
 
 func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, pluginUUID string, enableInfo *dto.PluginEnableInfo) error {
@@ -283,50 +303,55 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 	}
 	defer m.lockService.Unlock(locker_service.LockNameModulePlugin, pluginInfo.Id)
 
-	navigationID, err := m.navigationService.GetIDByUUID(ctx, enableInfo.Navigation)
-	if err != nil {
-		return err
+	//若输入的启用模块名为空，则为默认的模块名
+	if enableInfo.Name == "" {
+		enableInfo.Name = pluginInfo.Name
 	}
-	headers := make([]*model.ExtendParams, 0, len(enableInfo.Header))
-	querys := make([]*model.ExtendParams, 0, len(enableInfo.Query))
-	initializes := make([]*model.ExtendParams, 0, len(enableInfo.Initialize))
-	for _, h := range enableInfo.Header {
-		headers = append(headers, &model.ExtendParams{
-			Name:  h.Name,
-			Value: h.Value,
-		})
-	}
-	for _, q := range enableInfo.Query {
-		querys = append(querys, &model.ExtendParams{
-			Name:  q.Name,
-			Value: q.Value,
-		})
-	}
-	for _, i := range enableInfo.Initialize {
-		initializes = append(initializes, &model.ExtendParams{
-			Name:  i.Name,
-			Value: i.Value,
-		})
-	}
-	enableCfg := &model.PluginEnableCfg{
-		Server:     enableInfo.Server,
-		Header:     headers,
-		Query:      querys,
-		Initialize: initializes,
-	}
-	config, _ := json.Marshal(enableCfg)
 
-	checkConfig := enableCfg
+	var config []byte
+	var checkConfig *model.PluginEnableCfg
 	//若为内置插件
 	if pluginInfo.Type == 0 || pluginInfo.Type == 1 {
 		checkConfig = nil
+		config = []byte{}
+	} else {
+		//若为非内置插件
+		headers := make([]*model.ExtendParams, 0, len(enableInfo.Header))
+		querys := make([]*model.ExtendParams, 0, len(enableInfo.Query))
+		initializes := make([]*model.ExtendParams, 0, len(enableInfo.Initialize))
+		for _, h := range enableInfo.Header {
+			headers = append(headers, &model.ExtendParams{
+				Name:  h.Name,
+				Value: h.Value,
+			})
+		}
+		for _, q := range enableInfo.Query {
+			querys = append(querys, &model.ExtendParams{
+				Name:  q.Name,
+				Value: q.Value,
+			})
+		}
+		for _, i := range enableInfo.Initialize {
+			initializes = append(initializes, &model.ExtendParams{
+				Name:  i.Name,
+				Value: i.Value,
+			})
+		}
+		enableCfg := &model.PluginEnableCfg{
+			Server:     enableInfo.Server,
+			Header:     headers,
+			Query:      querys,
+			Initialize: initializes,
+		}
+		config, _ = json.Marshal(enableCfg)
+		checkConfig = enableCfg
 	}
 
 	err = m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
 		enable := &entry.ModulePluginEnable{
 			Id:         pluginInfo.Id,
 			Name:       enableInfo.Name,
-			Navigation: navigationID,
+			Navigation: pluginInfo.Navigation,
 			IsEnable:   2,
 			Config:     config,
 			Operator:   userID,
@@ -356,6 +381,11 @@ func (m *modulePluginService) DisablePlugin(ctx context.Context, userID int, plu
 			return ErrModulePluginNotFound
 		}
 		return err
+	}
+
+	//内置-内核插件不可以禁用
+	if pluginInfo.Type == 0 {
+		return errors.New("inner-core plugin can't be disable. ")
 	}
 
 	err = m.lockService.Lock(locker_service.LockNameModulePlugin, pluginInfo.Id)
@@ -428,19 +458,12 @@ func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml 
 		groupID = groupInfo.Id
 	}
 
-	navigationID := -1
-	if pluginYml.Navigation != "" {
-		navigationID, err = m.navigationService.GetIDByUUID(ctx, pluginYml.Navigation)
-		if err != nil {
-			return fmt.Errorf("navigation %s doesn't exist. ", pluginYml.Navigation)
-		}
-	}
 	pluginType := 1
 	if pluginYml.Core {
 		pluginType = 0
 	}
 
-	return m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
+	err = m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
 
 		t := time.Now()
 		pluginInfo := &entry.ModulePlugin{
@@ -448,6 +471,7 @@ func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml 
 			Name:       pluginYml.Name,
 			Version:    pluginYml.Version,
 			Group:      groupID,
+			Navigation: pluginYml.Navigation,
 			CName:      pluginYml.CName,
 			Resume:     pluginYml.Resume,
 			ICon:       pluginYml.ICon,
@@ -468,7 +492,7 @@ func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml 
 		enable := &entry.ModulePluginEnable{
 			Id:         pluginInfo.Id,
 			Name:       pluginYml.Name,
-			Navigation: navigationID,
+			Navigation: pluginYml.Navigation,
 			IsEnable:   isEnable,
 			Config:     []byte{},
 			Operator:   0,
@@ -477,6 +501,15 @@ func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml 
 
 		return m.pluginEnableStore.Save(txCtx, enable)
 	})
+	if err != nil {
+		return err
+	}
+	//缓存
+	_ = m.installedCache.Set(ctx, m.installedCache.Key(pluginYml.ID), &model.PluginInstalledStatus{
+		Installed: true,
+	}, time.Hour)
+
+	return nil
 }
 
 func (m *modulePluginService) CheckPluginInstalled(ctx context.Context, pluginID string) (bool, error) {
@@ -488,13 +521,12 @@ func (m *modulePluginService) CheckPluginInstalled(ctx context.Context, pluginID
 		return false, err
 	}
 
-	var pluginInfo *entry.ModulePlugin
 	//若redis存在值
 	if err == nil {
 		isInstalled = value.Installed
 	} else {
 		//若redis无缓存
-		pluginInfo, err = m.pluginStore.GetPluginInfo(ctx, pluginID)
+		_, err = m.pluginStore.GetPluginInfo(ctx, pluginID)
 		if err != nil && err != gorm.ErrRecordNotFound {
 			return false, err
 		} else if err == gorm.ErrRecordNotFound {
@@ -507,27 +539,32 @@ func (m *modulePluginService) CheckPluginInstalled(ctx context.Context, pluginID
 			Installed: isInstalled,
 		}, time.Hour)
 	}
-	//若未安装直接返回
-	if !isInstalled {
-		return false, nil
-	}
 
-	//若插件已安装，检查本地缓存是否存在
-	dirPath := fmt.Sprintf("./plugin/%s", pluginID)
-	// 检查目录是否存在, 若不存在，则从数据库读取数据并解压
-	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
-		packageEntry, err := m.pluginPackageStore.Get(ctx, pluginInfo.Id)
-		if err != nil {
-			return false, err
-		}
-		packageFile := bytes.NewReader(packageEntry.Package)
-		err = common.DeCompress(packageFile, dirPath)
-		if err != nil {
-			//删除目录
-			os.RemoveAll(dirPath)
-			return false, err
+	return isInstalled, nil
+}
+
+func (m *modulePluginService) CheckPluginISDeCompress(ctx context.Context, pluginID string) error {
+	pluginInfo, err := m.pluginStore.GetPluginInfo(ctx, pluginID)
+	if err != nil {
+		return err
+	}
+	//若插件已安装且为非内置插件，检查本地缓存是否存在
+	if pluginInfo.Type == 2 {
+		dirPath := fmt.Sprintf("./plugin/%s", pluginID)
+		// 检查目录是否存在, 若不存在，则从数据库读取数据并解压
+		if _, err := os.Stat(dirPath); os.IsNotExist(err) {
+			packageEntry, err := m.pluginPackageStore.Get(ctx, pluginInfo.Id)
+			if err != nil {
+				return err
+			}
+			packageFile := bytes.NewReader(packageEntry.Package)
+			err = common.DeCompress(packageFile, dirPath)
+			if err != nil {
+				//删除目录
+				os.RemoveAll(dirPath)
+				return err
+			}
 		}
 	}
-
-	return true, nil
+	return nil
 }
