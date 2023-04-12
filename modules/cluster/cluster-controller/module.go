@@ -67,7 +67,7 @@ func (c *ClusterModule) initRouter() {
 	c.routers = []apinto_module.RouterInfo{
 		{
 			Method:      http.MethodGet,
-			Path:        "/api/cluster/lists",
+			Path:        "/api/clusters",
 			Handler:     "cluster.list",
 			HandlerFunc: []apinto_module.HandlerFunc{clrController.clusters},
 		},

@@ -12,11 +12,6 @@ func NewModulePlugin() apinto_module.Driver {
 	return &ModulePluginDriver{}
 }
 
-const (
-	ModulePluginView = "view"
-	ModulePluginEdit = "edit"
-)
-
 func (c *ModulePluginDriver) CreateModule(name string, config interface{}) (apinto_module.Module, error) {
 	return NewModulePluginModule(name), nil
 }
@@ -70,73 +65,73 @@ func (c *ModulePluginModule) initRouter() {
 	c.routers = []apinto_module.RouterInfo{
 		{
 			Method:      http.MethodGet,
-			Path:        "/api/plugin/installed",
+			Path:        "/api/system/plugin/installed",
 			Handler:     "modulePlugin.plugins",
 			HandlerFunc: []apinto_module.HandlerFunc{mPluginController.plugins},
 		},
 		{
 			Method:      http.MethodGet,
-			Path:        "/api/plugin/info",
+			Path:        "/api/system/plugin/info",
 			Handler:     "modulePlugin.getPluginInfo",
 			HandlerFunc: []apinto_module.HandlerFunc{mPluginController.getPluginInfo},
 		},
 		{
 			Method:      http.MethodGet,
-			Path:        "/api/plugin/groups/enum",
+			Path:        "/api/system/plugin/groups/enum",
 			Handler:     "modulePlugin.getGroupsEnum",
 			HandlerFunc: []apinto_module.HandlerFunc{mPluginController.getGroupsEnum},
 		},
 		{
 			Method:      http.MethodGet,
-			Path:        "/api/plugin/enable",
+			Path:        "/api/system/plugin/enable",
 			Handler:     "modulePlugin.getEnableInfo",
 			HandlerFunc: []apinto_module.HandlerFunc{mPluginController.getEnableInfo},
 		},
 		{
 			Method:      http.MethodPost,
-			Path:        "/api/plugin/install",
+			Path:        "/api/system/plugin/install",
 			Handler:     "modulePlugin.install",
 			HandlerFunc: []apinto_module.HandlerFunc{mPluginController.install},
 		},
 		{
 			Method:      http.MethodPost,
-			Path:        "/api/plugin/enable",
+			Path:        "/api/system/plugin/enable",
 			Handler:     "modulePlugin.enable",
 			HandlerFunc: []apinto_module.HandlerFunc{mPluginController.enable},
 		},
 		{
 			Method:      http.MethodPost,
-			Path:        "/api/plugin/disable",
+			Path:        "/api/system/plugin/disable",
 			Handler:     "modulePlugin.disable",
 			HandlerFunc: []apinto_module.HandlerFunc{mPluginController.disable},
 		},
 		{
 			Method:      http.MethodGet,
-			Path:        "/api/plugin/icon/:id/:file",
+			Path:        "/plugin/icon/:id/:file",
 			Handler:     "pluginFront.getPluginIcon",
 			HandlerFunc: []apinto_module.HandlerFunc{controllerPluginFront.checkPluginID, controllerPluginFront.setIConName, controllerPluginFront.getPluginInfo},
 		},
 		{
 			Method:      http.MethodGet,
-			Path:        "/api/plugin/icon/:id",
+			Path:        "/plugin/icon/:id",
 			Handler:     "pluginFront.getPluginIconDefault",
 			HandlerFunc: []apinto_module.HandlerFunc{controllerPluginFront.checkPluginID, controllerPluginFront.setIConName, controllerPluginFront.getPluginInfo},
 		},
 		{
 			Method:      http.MethodGet,
-			Path:        "/api/plugin/md/:id/:file",
+			Path:        "/plugin/md/:id/:file",
 			Handler:     "pluginFront.getPluginMD",
 			HandlerFunc: []apinto_module.HandlerFunc{controllerPluginFront.checkPluginID, controllerPluginFront.setMDName, controllerPluginFront.getPluginInfo},
 		},
 		{
 			Method:      http.MethodGet,
-			Path:        "/api/plugin/md/:id",
+			Path:        "/plugin/md/:id",
 			Handler:     "pluginFront.getPluginMDDefault",
 			HandlerFunc: []apinto_module.HandlerFunc{controllerPluginFront.checkPluginID, controllerPluginFront.setMDName, controllerPluginFront.getPluginInfo},
 		},
 		{
 			Method:      http.MethodGet,
-			Path:        "/api/plugin/info/:id/resources/*filepath",
+			Path:        "/plugin/info/:id/resources/*filepath",
 			Handler:     "pluginFront.getPluginResources",
 			HandlerFunc: []apinto_module.HandlerFunc{controllerPluginFront.checkPluginID, controllerPluginFront.getPluginResources},
 		},

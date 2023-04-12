@@ -23,20 +23,11 @@ type clusterVariableController struct {
 	clusterVariableService variable.IClusterVariableService
 }
 
-func RegisterClusterVariableRouter(router gin.IRoutes) {
+func newClusterVariableController() *clusterVariableController {
 	c := &clusterVariableController{}
 	bean.Autowired(&c.clusterVariableService)
 
-	router.GET("/cluster/:cluster_name/variables", c.gets)
-	router.POST("/cluster/:cluster_name/variable", controller.AuditLogHandler(enum.LogOperateTypeCreate, enum.LogKindClusterVariable, c.post))
-	router.PUT("/cluster/:cluster_name/variable", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindClusterVariable, c.put))
-	router.DELETE("/cluster/:cluster_name/variable", controller.AuditLogHandler(enum.LogOperateTypeDelete, enum.LogKindClusterVariable, c.del))
-	router.GET("/cluster/:cluster_name/variable/update-history", c.updateHistory)
-	router.POST("/cluster/:cluster_name/variable/sync-conf", c.syncConf)
-	router.GET("/cluster/:cluster_name/variable/to-publishs", c.toPublishs)
-	router.POST("/cluster/:cluster_name/variable/publish", controller.AuditLogHandler(enum.LogOperateTypePublish, enum.LogKindClusterVariable, c.publish))
-	router.GET("/cluster/:cluster_name/variable/publish-history", c.publishHistory)
-	router.GET("/cluster/:cluster_name/variable/sync-conf", c.getSyncConf)
+	return c
 }
 
 // gets 获取列表
