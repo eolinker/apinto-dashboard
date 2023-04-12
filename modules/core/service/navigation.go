@@ -29,12 +29,9 @@ func newNavigationService() INavigationService {
 }
 
 func (n *navigation) List(ctx context.Context) ([]*model.Navigation, map[string]string, error) {
-	return nil, nil, nil
-	//list, err := n.navigationService.List(ctx)
-	//if err != nil {
-	//	return nil, nil, err
-	//}
-	//
+	//return nil, nil, nil
+	list := n.navigationService.List()
+
 	//ids := make([]int, 0, len(list))
 	//for _, l := range list {
 	//	ids = append(ids, l.ID)
