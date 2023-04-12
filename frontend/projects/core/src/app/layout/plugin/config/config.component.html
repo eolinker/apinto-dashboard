@@ -6,26 +6,6 @@
     [formGroup]="validateForm"
     autocomplete="off"
   >
-    <nz-form-item class="form-row" *ngIf="invisible">
-      <nz-form-label class="w-[124px]" nzRequired
-        >所属的一级导航：</nz-form-label
-      >
-      <nz-form-control>
-        <div class="flex items-center">
-          <eo-ng-select
-            class="w-[284px] mr-btnybase"
-            name="navigation"
-            required
-            formControlName="navigation"
-            [nzOptions]="navigationList"
-            nzPlaceHolder="请选择"
-            [nzDisabled]="nzDisabled"
-          ></eo-ng-select>
-
-          <button eo-ng-button (click)="goToNavigation()">新建</button>
-        </div>
-      </nz-form-control>
-    </nz-form-item>
 
     <nz-form-item class="form-row" *ngIf="showServer">
       <nz-form-label class="w-[124px]" nzRequired>服务器地址：</nz-form-label>
