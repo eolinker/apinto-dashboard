@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"github.com/eolinker/apinto-dashboard/cache"
 	"github.com/eolinker/apinto-dashboard/modules/core"
 	module_plugin "github.com/eolinker/apinto-dashboard/modules/module-plugin"
@@ -52,10 +53,70 @@ func (c *coreService) HasModule(module string, path string) bool {
 	return has
 }
 
-func (c *coreService) CheckNewModule(pluginID, name string, config interface{}) error {
+func (c *coreService) CheckNewModule(UUID, name, driverName string, define, config interface{}) error {
+	m, err := createModule(driverName, name, define, config)
+	if err != nil {
+		continue
+	}
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	ctx := context.Background()
+	modules, err := c.modulePluginService.GetEnabledPlugins(ctx)
+	if err != nil {
+		return err
+	}
+	modulesData := newTModulesData()
+	builder := apinto_module.NewModuleBuilder(c.engineCreate.CreateEngine())
+	for _, module := range modules {
+		if module.Name == name {
+			if module.UUID == UUID {
+				continue
+			} else {
+				return fmt.Errorf("%w on %s", apinto_module.ErrorModuleNameConflict, module.UUID)
+			}
+		}
+		m, err := createModule(module.Driver, module.Name, module.Define, module.Config)
+		if err != nil {
+			continue
+		}
+		modulesData.data[module.Name] = struct{}{}
+		builder.Append(m)
+	}
+
 	return nil
 }
+func createModule(driverName, name string, define, config interface{}) (apinto_module.Module, error) {
+	driver, has := apinto_module.GetDriver(driverName)
+	if !has {
 
+		err := fmt.Errorf("%w %s", apinto_module.ErrorDriverNotExist, driverName)
+		log.Error(err)
+		return nil, err
+	}
+	plugin, err := driver.CreatePlugin(define)
+	if err != nil {
+		err2 := fmt.Errorf("create plugin %s error:%w", name, err)
+		log.Error(err2)
+		return nil, err2
+	}
+	err = plugin.CheckConfig(name, config)
+	if err != nil {
+
+		err2 := fmt.Errorf("plugin module %s config error:%w", name, err)
+		log.Error(err2)
+		return nil, err2
+	}
+
+	m, err := plugin.CreateModule(name, config)
+	if err != nil {
+
+		err2 := fmt.Errorf("create module %s  error:%w", name, err)
+		log.Error(err2)
+		return nil, err2
+	}
+	return m, nil
+}
 func (c *coreService) ResetVersion(version string) {
 	if version == "" {
 		version = uuid.New()
