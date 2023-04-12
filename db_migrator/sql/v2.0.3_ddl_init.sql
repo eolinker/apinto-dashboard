@@ -4,6 +4,7 @@ CREATE TABLE `module_plugin` (
     `name` varchar(255) NOT NULL COMMENT '插件名',
     `version` varchar(36) NOT NULL COMMENT 'version',
     `group` int(11) NOT NULL COMMENT '分组id',
+    `navigation` varchar(255) COMMENT '导航id',
     `cname` varchar(255) NOT NULL COMMENT '昵称',
     `resume` varchar(255) NOT NULL COMMENT '简介',
     `icon` varchar(255) NOT NULL COMMENT '图标的文件名，相对路径',
@@ -20,7 +21,7 @@ CREATE TABLE `module_plugin` (
 CREATE TABLE `module_plugin_enable` (
     `id` int(11) NOT NULL COMMENT '模块插件的主键id',
     `name` varchar(255) NOT NULL COMMENT '模块名，可以改，默认为模块插件的name',
-    `navigation` int(11) NOT NULL COMMENT '导航id',
+    `navigation` varchar(255) NOT NULL COMMENT '导航id',
     `is_enable` tinyint(1) NOT NULL COMMENT '是否启用 1未启用 2启用',
     `config` text NOT NULL COMMENT '启用配置',
     `operator` int(11) DEFAULT NULL COMMENT '更新人/操作人',

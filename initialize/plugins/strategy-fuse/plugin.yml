@@ -1,6 +1,6 @@
 id: "strategy-fuse.apinto.com"
 name: "strategy-fuse"
-cname: "熔断策略"
+cname: "熔断"
 resume: ""
 version: "v1.0"
 icon: "network-tree"

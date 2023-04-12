@@ -8,4 +8,4 @@ driver: "discovery.apinto.com"
 core: false
 auto: true
 front: upstream/serv-discovery
-navigation: "navigation.upstream"
+navigation: "navigation.infrastructure"
