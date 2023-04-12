@@ -6,10 +6,14 @@ import (
 )
 
 func init() {
+	navigationService := newNavigationService()
+	bean.Injection(&navigationService)
+
 	providerService := NewProviderService()
 
 	var iProviders apinto_module.IProviders = providerService
 	bean.Injection(&iProviders)
 	iCore := NewService(providerService)
 	bean.Injection(&iCore)
+
 }

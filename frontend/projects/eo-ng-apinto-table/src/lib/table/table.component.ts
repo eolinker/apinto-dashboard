@@ -13,6 +13,10 @@ import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
       .ant-table-tbody > tr:hover .opacity-0{
         opacity:1 !important;
       }
+
+      eo-ng-table.cursorPointer tbody tr{
+        cursor:pointer;
+      }
     }`
   ]
 })
@@ -32,6 +36,7 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
   scrHeight:any;
   scrWidth:any;
   tableScrollCdk:any
+  cursorPointer:boolean = false
   constructor (ngZone:NgZone, cdr:ChangeDetectorRef, private message: EoNgFeedbackMessageService, private el:ElementRef, private router:Router) {
     super(ngZone, cdr)
   }
@@ -65,6 +70,11 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
     }
     if (change['nzThead']) {
       this.getThead()
+    }
+    if (change['nzTrClick']) {
+      if (this.nzTrClick) {
+        this.cursorPointer = true
+      }
     }
   }
 
