@@ -14,7 +14,7 @@ import { MarkdownService } from 'ngx-markdown'
 @Component({
   selector: 'eo-ng-plugin-message',
   template: `
-  <header class="my-btnybase ml-btnbase mr-btnrbase">
+  <header class="mx-[40px] my-[20px]">
     <div class="flex justify-between  mb-btnybase items-center">
       <div class="flex">
         <div class="mr-btnrbase w-[50px] h-[50px]">
@@ -60,7 +60,7 @@ import { MarkdownService } from 'ngx-markdown'
     <p>{{resume}}</p>
 
   </header>
-  <section class="flex-1 ml-btnbase mr-btnrbase p-btnbase markdown-block overflow-auto">
+  <section class="flex-1 p-[40px] markdown-block overflow-auto">
       <eo-ng-empty *ngIf="showEmpty" nzMainTitle="暂无数据" nzInputImage="simple"></eo-ng-empty>
     <markdown *ngIf="!showEmpty" [src]="getMd()" [srcRelativeLink]="true"  (load)="loadMd()" (error)="onError($event)"></markdown>
   </section>
@@ -68,14 +68,13 @@ import { MarkdownService } from 'ngx-markdown'
   styles: [
     `
     .markdown-block{
-      border:1px solid var(--border-color);
+      border-top:1px solid var(--border-color);
     }
     :host ::ng-deep{
       height:100%;
       display:flex;
     flex-direction: column;
       overflow-y:hidden;
-      padding-bottom:20px;
       img{
         max-width:100%
       }
