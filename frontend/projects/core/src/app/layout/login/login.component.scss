@@ -1,3 +1,11 @@
+:host ::ng-deep {
+  height: 100%;
+  width: 100%;
+  display: block;
+  background-color: #f5f7fa;
+  overflow: hidden;
+}
+
 eo-ng-apinto:host {
   display: inline-block;
   width: 100vw;
