@@ -16,14 +16,10 @@ type clusterCertificateController struct {
 	clusterCertificateService cluster.IClusterCertificateService
 }
 
-func RegisterClusterCertificateRouter(router gin.IRoutes) {
+func newClusterCertificateController() *clusterCertificateController {
 	c := &clusterCertificateController{}
 	bean.Autowired(&c.clusterCertificateService)
-
-	router.POST("/cluster/:cluster_name/certificate", c.post)
-	router.PUT("/cluster/:cluster_name/certificate/:certificate_id", c.put)
-	router.DELETE("/cluster/:cluster_name/certificate/:certificate_id", c.del)
-	router.GET("/cluster/:cluster_name/certificates", c.gets)
+	return c
 }
 
 // gets 获取证书列表
