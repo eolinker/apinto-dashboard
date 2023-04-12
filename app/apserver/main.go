@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/initialize"
-	"github.com/eolinker/apinto-dashboard/modules/core"
-	"github.com/eolinker/apinto-dashboard/modules/plugin/plugin_timer"
 	"net"
 	"net/http"
 	"os"
+
+	"github.com/eolinker/apinto-dashboard/initialize"
+	"github.com/eolinker/apinto-dashboard/modules/core"
+	"github.com/eolinker/apinto-dashboard/modules/plugin/plugin_timer"
 
 	"github.com/eolinker/apinto-dashboard/app/apserver/version"
 	"github.com/eolinker/eosc/common/bean"
@@ -52,11 +53,6 @@ func run() {
 		log.Fatal(err)
 	}
 
-	// 执行导航初始化
-	err = initialize.InitNavigation()
-	if err != nil {
-		log.Fatal(err)
-	}
 	// 执行内置插件初始化
 	err = initialize.InitPlugins()
 	if err != nil {

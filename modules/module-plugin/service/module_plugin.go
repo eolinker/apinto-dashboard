@@ -9,7 +9,6 @@ import (
 	module_plugin "github.com/eolinker/apinto-dashboard/modules/module-plugin"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/model"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/store"
-	"github.com/eolinker/apinto-dashboard/modules/navigation"
 	"github.com/eolinker/eosc/common/bean"
 )
 
@@ -18,9 +17,8 @@ type modulePlugin struct {
 	pluginEnableStore  store.IModulePluginEnableStore
 	pluginPackageStore store.IModulePluginPackageStore
 
-	commonGroup       group.ICommonGroupService
-	navigationService navigation.INavigationService
-	lockService       locker_service.IAsynLockService
+	commonGroup group.ICommonGroupService
+	lockService locker_service.IAsynLockService
 }
 
 func newModulePlugin() module_plugin.IModulePlugin {
@@ -31,7 +29,6 @@ func newModulePlugin() module_plugin.IModulePlugin {
 	bean.Autowired(&s.pluginPackageStore)
 
 	bean.Autowired(&s.commonGroup)
-	bean.Autowired(&s.navigationService)
 	bean.Autowired(&s.lockService)
 	return s
 }
@@ -107,31 +104,31 @@ func (m *modulePlugin) GetMiddlewareList(ctx context.Context) ([]*model.Middlewa
 	return middlewares, nil
 }
 
-func (m *modulePlugin) GetModulesByNavigations(ctx context.Context, navigationIDs []int) (map[int][]*model.NavigationModuleInfo, error) {
-	moduleInfos, err := m.pluginStore.GetEnabledModules(ctx, navigationIDs)
+func (m *modulePlugin) GetNavigationModules(ctx context.Context) ([]*model.NavigationModuleInfo, error) {
+	moduleInfos, err := m.pluginStore.GetNavigationModules(ctx)
 	if err != nil {
 		return nil, err
 	}
-	navigationMap := make(map[int][]*model.NavigationModuleInfo, len(navigationIDs))
+
+	list := make([]*model.NavigationModuleInfo, 0, len(moduleInfos))
 	for _, module := range moduleInfos {
-		infos, has := navigationMap[module.NavigationID]
-		if !has {
-			infos = make([]*model.NavigationModuleInfo, 0, 3)
+		//路由为空的不需要返回
+		if module.Front == "" {
+			continue
 		}
 		info := &model.NavigationModuleInfo{
-			Name:  module.Name,
-			Title: module.Title,
-			Type:  "outer",
-			Path:  "",
+			Name:       module.Name,
+			Title:      module.Title,
+			Type:       "outer",
+			Path:       "",
+			Navigation: module.Navigation,
 		}
 		//若模块为内置模块
 		if module.Type == 0 || module.Type == 1 {
 			info.Type = "built-in"
 			info.Path = module.Front
 		}
-		infos = append(infos, info)
-		navigationMap[module.NavigationID] = infos
+		list = append(list, info)
 	}
-
-	return navigationMap, nil
+	return list, nil
 }
