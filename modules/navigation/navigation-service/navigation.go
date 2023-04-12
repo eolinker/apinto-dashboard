@@ -2,7 +2,9 @@ package navigation_service
 
 import (
 	"context"
-	"sort"
+
+	"github.com/eolinker/apinto-dashboard/modules/navigation"
+	"github.com/eolinker/eosc/common/bean"
 
 	"github.com/eolinker/eosc"
 
@@ -10,35 +12,47 @@ import (
 )
 
 type navigationService struct {
-	navigations eosc.Untyped[string, *navigation_model.Navigation]
-	index       int
+	dataService   navigation.INavigationDataService
+	navigationMap eosc.Untyped[string, *navigation_model.Navigation]
+	navigations   []*navigation_model.Navigation
 }
 
 func newNavigationService() *navigationService {
-	return &navigationService{navigations: eosc.BuildUntyped[string, *navigation_model.Navigation]()}
+	n := &navigationService{}
+	bean.Autowired(&n.navigationMap)
+	return n
 }
 
-func (n *navigationService) Add(ctx context.Context, uuid string, title string, icon string) error {
-	_, has := n.navigations.Get(uuid)
-	if has {
-		return nil
+func (n *navigationService) initData() {
+	navigations := n.dataService.GetNavigationData()
+	ns := make([]*navigation_model.Navigation, 0, len(navigations))
+	nsMap := eosc.BuildUntyped[string, *navigation_model.Navigation]()
+	for _, nv := range navigations {
+		_, ok := nsMap.Get(nv.Uuid)
+		if !ok {
+			v := &navigation_model.Navigation{
+				Uuid:  nv.Uuid,
+				Title: nv.Title,
+				Icon:  nv.Icon,
+			}
+			nsMap.Set(nv.Uuid, v)
+			ns = append(ns, v)
+		}
 	}
-	n.navigations.Set(uuid, &navigation_model.Navigation{
-		Uuid:  uuid,
-		Title: title,
-		Icon:  icon,
-		Index: n.index,
-	})
-	n.index++
-	return nil
+	n.navigations = ns
+	n.navigationMap = nsMap
 }
 
 func (n *navigationService) Info(ctx context.Context, uuid string) (*navigation_model.Navigation, bool) {
-	return n.navigations.Get(uuid)
+	if n.navigationMap == nil {
+		n.initData()
+	}
+	return n.navigationMap.Get(uuid)
 }
 
-func (n *navigationService) List(ctx context.Context) ([]*navigation_model.Navigation, error) {
-	navigations := n.navigations.List()
-	sort.Sort(navigation_model.Navigations(navigations))
-	return navigations, nil
+func (n *navigationService) List(ctx context.Context) []*navigation_model.Navigation {
+	if n.navigations == nil {
+		n.initData()
+	}
+	return n.navigations
 }
