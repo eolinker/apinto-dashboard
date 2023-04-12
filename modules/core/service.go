@@ -10,6 +10,7 @@ type ICore interface {
 	ResetVersion(version string)
 	ReloadModule() error
 	CheckNewModule(pluginID, name string, config interface{}) error
+	HasModule(module string, path string) bool
 }
 
 type EngineCreate interface {

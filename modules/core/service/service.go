@@ -18,6 +18,14 @@ var (
 	_ core.ICore = (*coreService)(nil)
 )
 
+type tModulesData struct {
+	data map[string]struct{}
+}
+
+func newTModulesData() *tModulesData {
+	return &tModulesData{data: map[string]struct{}{}}
+}
+
 type coreService struct {
 	handlerPointer atomic.Pointer[http.Handler]
 	localVersion   string
@@ -26,11 +34,19 @@ type coreService struct {
 	modulePluginService module_plugin.IModulePlugin
 	engineCreate        core.EngineCreate
 	providerService     IProviderService
+	modulesData         *tModulesData
+}
+
+func (c *coreService) HasModule(module string, path string) bool {
+	if c.modulesData == nil {
+		return false
+	}
+	_, has := c.modulesData.data[module]
+	return has
 }
 
 func (c *coreService) CheckNewModule(pluginID, name string, config interface{}) error {
-	//TODO implement me
-	panic("implement me")
+	return nil
 }
 
 func (c *coreService) ResetVersion(version string) {
@@ -68,13 +84,7 @@ func (c *coreService) rebuild() error {
 	if err != nil {
 		return err
 	}
-	//modules := []*model.EnabledPlugin{{
-	//	UUID:   "core",
-	//	Name:   "core",
-	//	Driver: "core.apinto.com",
-	//	Config: nil,
-	//	Define: nil,
-	//}}
+	modulesData := newTModulesData()
 	builder := apinto_module.NewModuleBuilder(c.engineCreate.CreateEngine())
 	for _, module := range modules {
 		driver, has := apinto_module.GetDriver(module.Driver)
@@ -98,6 +108,7 @@ func (c *coreService) rebuild() error {
 			log.Errorf("create module %s  error:%s", module.Name, err.Error())
 			continue
 		}
+		modulesData.data[module.Name] = struct{}{}
 		builder.Append(m)
 	}
 
@@ -107,6 +118,7 @@ func (c *coreService) rebuild() error {
 	}
 	c.handlerPointer.Store(&handler)
 	c.providerService.set(provider)
+	c.modulesData = modulesData
 	return nil
 }
 func NewService(providerService IProviderService) core.ICore {
