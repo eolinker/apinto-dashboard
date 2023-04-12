@@ -3,7 +3,7 @@ name: "api"
 cname: "API管理"
 resume: ""
 version: "v1.0"
-icon: ""
+icon: "inner-plugin.png"
 driver: "api.apinto.com"
 core: false
 auto: true
