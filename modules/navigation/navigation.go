@@ -7,7 +7,10 @@ import (
 )
 
 type INavigationService interface {
-	Add(ctx context.Context, uuid string, title string, icon string) error
-	Info(ctx context.Context, uuid string) (*navigation_model.Navigation, error)
+	Info(ctx context.Context, uuid string) (*navigation_model.Navigation, bool)
 	List(ctx context.Context) ([]*navigation_model.Navigation, error)
+}
+
+type INavigationDataService interface {
+	GetNavigationData() []*navigation_model.Navigation
 }
