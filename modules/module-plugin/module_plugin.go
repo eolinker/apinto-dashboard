@@ -18,6 +18,7 @@ type IModulePluginService interface {
 
 	GetEnablePluginsByNavigation(ctx context.Context, navigationID int) ([]*model.NavigationEnabledPlugin, error)
 	CheckPluginInstalled(ctx context.Context, pluginID string) (bool, error)
+	CheckPluginISDeCompress(ctx context.Context, pluginID string) error
 	InstallInnerPlugin(ctx context.Context, pluginYml *model.InnerPluginYmlCfg) error
 }
 
@@ -25,7 +26,7 @@ type IModulePlugin interface {
 	//GetEnabledPlugins 获取已启用的插件信息列表
 	GetEnabledPlugins(ctx context.Context) ([]*model.EnabledPlugin, error)
 	//GetModulesByNavigations 获取指定导航列表下的模块
-	GetModulesByNavigations(ctx context.Context, navigationIDs []int) (map[int][]*model.NavigationModuleInfo, error)
+	GetModulesByNavigations(ctx context.Context, navigations []string) (map[string][]*model.NavigationModuleInfo, error)
 	//GetMiddlewareList 获取拦截器列表
 	//GetMiddlewareList(ctx context.Context) ([]*model.MiddlewareItem, error)
 }

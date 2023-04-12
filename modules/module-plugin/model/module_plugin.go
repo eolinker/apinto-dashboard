@@ -23,7 +23,6 @@ type ModulePluginInfo struct {
 
 type PluginEnableInfo struct {
 	Name       string
-	Navigation string
 	Server     string
 	Header     []*ExtendParams
 	Query      []*ExtendParams
@@ -134,6 +133,7 @@ type PluginYmlCfg struct {
 	Name       string            `json:"name" yaml:"name"`
 	Version    string            `json:"version" yaml:"version"`
 	CName      string            `json:"cname" yaml:"cname"`
+	Navigation string            `json:"navigation" yaml:"navigation"`
 	Resume     string            `json:"resume" yaml:"resume"`
 	ICon       string            `json:"icon" yaml:"icon"`
 	Driver     string            `json:"driver" yaml:"driver"`

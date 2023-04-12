@@ -29,8 +29,7 @@ type coreService struct {
 }
 
 func (c *coreService) CheckNewModule(pluginID, name string, config interface{}) error {
-	//TODO implement me
-	panic("implement me")
+	return nil
 }
 
 func (c *coreService) ResetVersion(version string) {

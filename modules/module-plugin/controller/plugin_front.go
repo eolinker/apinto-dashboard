@@ -3,8 +3,10 @@ package controller
 import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/controller"
+	"github.com/eolinker/apinto-dashboard/initialize"
 	module_plugin "github.com/eolinker/apinto-dashboard/modules/module-plugin"
 	"github.com/eolinker/eosc/common/bean"
+	"github.com/eolinker/eosc/log"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
@@ -35,7 +37,16 @@ func (p *pluginFrontController) checkPluginID(c *gin.Context) {
 	if !isExist {
 		c.Data(http.StatusNotFound, "application/text", []byte("404 page not found"))
 		c.Abort()
+		return
 	}
+	//若插件存在
+	err = p.modulePluginService.CheckPluginISDeCompress(c, pluginID)
+	if err != nil {
+		log.Errorf("Decompress Plugin Package fail. pluginID:%s, err:%s", pluginID, err)
+		c.Abort()
+		return
+	}
+
 }
 
 func (p *pluginFrontController) setIConName(c *gin.Context) {
@@ -50,7 +61,11 @@ func (p *pluginFrontController) setIConName(c *gin.Context) {
 			return
 		}
 		fileName = info.ICon
+		if fileName == "" {
+			fileName = "icon.png"
+		}
 	}
+
 	c.Set("file", fileName)
 	c.Set("strip_prefix", "/plugin/icon")
 }
@@ -71,6 +86,25 @@ func (p *pluginFrontController) getPluginInfo(c *gin.Context) {
 
 	filePath := fmt.Sprintf("%s/%s", pluginID, fileName)
 
+	//判断插件存不存在
+	info, err := p.modulePluginService.GetPluginInfo(c, pluginID)
+	if err != nil {
+		c.Data(http.StatusNotFound, "application/text", []byte("404 page not found"))
+		c.Abort()
+		return
+	}
+	//若为内置插件，则从内嵌目录中获取
+	if info.Type == 0 || info.Type == 1 {
+		fsHandler, err := initialize.GetInnerPluginFSHandler(stripPrefix, filePath)
+		//若文件不存在
+		if err != nil {
+			c.Data(http.StatusNotFound, "application/text", []byte("404 page not found"))
+			return
+		}
+		fsHandler.ServeHTTP(c.Writer, c.Request)
+		return
+	}
+
 	pluginFs := gin.Dir(fileDir, false)
 	fileServer := http.StripPrefix(stripPrefix, http.FileServer(pluginFs))
 	// Check if file exists and/or if we have permission to access it
@@ -80,7 +114,7 @@ func (p *pluginFrontController) getPluginInfo(c *gin.Context) {
 		c.Data(http.StatusNotFound, "application/text", []byte("404 page not found"))
 		return
 	}
-	f.Close()
+	defer f.Close()
 
 	fileServer.ServeHTTP(c.Writer, c.Request)
 }
