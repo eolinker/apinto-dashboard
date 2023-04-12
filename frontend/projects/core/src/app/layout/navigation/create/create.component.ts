@@ -9,6 +9,7 @@ import { EoNgMessageService } from '../../../service/eo-ng-message.service'
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop'
 import { NzModalRef } from 'ng-zorro-antd/modal'
 import { NavigationData } from '../types/types'
+import { v4 as uuidv4 } from 'uuid'
 
 const getBase64 = (file: File): Promise<string | ArrayBuffer | null> =>
   new Promise((resolve, reject) => {
@@ -31,7 +32,23 @@ const getBase64 = (file: File): Promise<string | ArrayBuffer | null> =>
           display:block;
         }
       }
-    }`
+
+    .icon-image:hover + svg.delete-icon{
+        opacity:1 !important;
+      }
+
+      svg.delete-icon:hover{
+        opacity:1 !important;
+        border:1px solid var(--primary-color) !important;
+      }
+
+
+    .child-navigation .ant-form-item-explain{
+      margin-left:32px;
+    }
+    }
+
+`
   ]
 })
 export class NavigationCreateComponent {
@@ -39,6 +56,7 @@ export class NavigationCreateComponent {
   validateForm: FormGroup = new FormGroup({ })
 
   fileList: NzUploadFile[] = [];
+  iconSvg:string = '' // 导航图标为iconpark时
   editPage:boolean = false
   navigationUuid:string = ''
   listOfControl: Array<{ id: number; controlInstance: string }> = [];
@@ -97,13 +115,14 @@ export class NavigationCreateComponent {
             name: resp.data.navigation.title
           }
         )
-        this.fileList = [this.dataURLtoFile(resp.data.navigation.icon) as any]
+        this.fileList = resp.data.navigation.iconType === 'css' ? [] : [this.dataURLtoFile(resp.data.navigation.icon) as any]
+        this.iconSvg = resp.data.navigation.iconType === 'css' ? resp.data.navigation.icon : ''
         this.handlerFileChange()
         const childArray = this.validateForm.controls['children'] as FormArray
         resp.data.navigation.modules.forEach((module:{id:string, title:string}) => {
           const childGroup = new FormGroup({})
           childGroup.addControl('id', new FormControl(module.id))
-          childGroup.addControl('title', new FormControl(module.title))
+          childGroup.addControl('title', new FormControl(module.title, [Validators.required]))
           childArray.push(childGroup)
         })
       }
@@ -131,16 +150,25 @@ export class NavigationCreateComponent {
     if (this.validateForm.controls['name'].invalid) {
       return
     }
-    const iconBase64 = await getBase64(this.fileList[0] as any)
+    const iconBase64 = this.fileList.length ? await getBase64(this.fileList[0] as any) : (this.iconSvg || '')
     if (this.editPage) {
-      this.api.put(`system/navigation/${this.navigationUuid}`, { name: this.validateForm.controls['name'].value, icon: iconBase64, modules: this.validateForm.controls['children'].value }).subscribe((resp:EmptyHttpResponse) => {
+      this.api.put(`system/navigation/${this.navigationUuid}`, {
+        name: this.validateForm.controls['name'].value,
+        icon: iconBase64,
+        modules: this.validateForm.controls['children'].value,
+        iconType: this.iconSvg ? 'css' : ''
+      }).subscribe((resp:EmptyHttpResponse) => {
         if (resp.code === 0) {
           this.message.success(resp.msg || '编辑导航成功')
           this.modalRef?.close()
         }
       })
     } else {
-      this.api.post('system/navigation', { uuid: this.navigationUuid, name: this.validateForm.controls['name'].value, icon: iconBase64 }).subscribe((resp:EmptyHttpResponse) => {
+      this.api.post('system/navigation', {
+        name: this.validateForm.controls['name'].value,
+        icon: iconBase64,
+        uuid: uuidv4()
+      }).subscribe((resp:EmptyHttpResponse) => {
         if (resp.code === 0) {
           this.message.success(resp.msg || '新建导航成功')
           this.modalRef?.close()
@@ -150,6 +178,13 @@ export class NavigationCreateComponent {
   }
 
   async handlerFileChange () {
-    this.imageUrl = await getBase64(this.fileList[0] as any) as string
+    this.imageUrl = this.fileList.length ? await getBase64(this.fileList[0] as any) as string : './assets/default-navigation-icon.png'
+  }
+
+  deleteIcon (e:Event) {
+    e?.stopPropagation()
+    this.fileList = []
+    this.iconSvg = ''
+    this.handlerFileChange()
   }
 }
