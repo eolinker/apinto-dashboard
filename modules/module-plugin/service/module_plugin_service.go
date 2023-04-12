@@ -162,15 +162,11 @@ func (m *modulePluginService) GetPluginEnableInfo(ctx context.Context, pluginUUI
 		return nil, err
 	}
 
-	//通过导航id获取导航信息
-	navigationUUID, _ := m.navigationService.GetUUIDByID(ctx, enableEntry.Navigation)
-
 	enableCfg := new(model.PluginEnableCfg)
 	_ = json.Unmarshal(enableEntry.Config, enableCfg)
 
 	info := &model.PluginEnableInfo{
 		Name:       enableEntry.Name,
-		Navigation: navigationUUID,
 		Server:     enableCfg.Server,
 		Header:     enableCfg.Header,
 		Query:      enableCfg.Query,
@@ -246,20 +242,20 @@ func (m *modulePluginService) InstallPlugin(ctx context.Context, userID int, gro
 		}
 
 		pluginInfo := &entry.ModulePlugin{
-			UUID:         pluginYml.ID,
-			Name:         pluginYml.Name,
-			Version:      pluginYml.Version,
-			Group:        groupID,
-			NavigationID: pluginYml.NavigationID,
-			CName:        pluginYml.CName,
-			Resume:       pluginYml.Resume,
-			ICon:         pluginYml.ICon,
-			Type:         2,
-			Front:        "", //TODO
-			Driver:       pluginYml.Driver,
-			Details:      details,
-			Operator:     userID,
-			CreateTime:   t,
+			UUID:       pluginYml.ID,
+			Name:       pluginYml.Name,
+			Version:    pluginYml.Version,
+			Group:      groupID,
+			Navigation: pluginYml.Navigation,
+			CName:      pluginYml.CName,
+			Resume:     pluginYml.Resume,
+			ICon:       pluginYml.ICon,
+			Type:       2,
+			Front:      "", //TODO
+			Driver:     pluginYml.Driver,
+			Details:    details,
+			Operator:   userID,
+			CreateTime: t,
 		}
 		if err = m.pluginStore.Save(txCtx, pluginInfo); err != nil {
 			return err
@@ -306,14 +302,6 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 		return err
 	}
 	defer m.lockService.Unlock(locker_service.LockNameModulePlugin, pluginInfo.Id)
-
-	navigationID := -1
-	if pluginInfo.NavigationID != "" {
-		navigationID, err = m.navigationService.GetIDByUUID(ctx, pluginInfo.NavigationID)
-		if err != nil {
-			navigationID = -1
-		}
-	}
 
 	//若输入的启用模块名为空，则为默认的模块名
 	if enableInfo.Name == "" {
@@ -363,7 +351,7 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 		enable := &entry.ModulePluginEnable{
 			Id:         pluginInfo.Id,
 			Name:       enableInfo.Name,
-			Navigation: navigationID,
+			Navigation: pluginInfo.Navigation,
 			IsEnable:   2,
 			Config:     config,
 			Operator:   userID,
@@ -470,13 +458,6 @@ func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml 
 		groupID = groupInfo.Id
 	}
 
-	navigationID := -1
-	if pluginYml.Navigation != "" {
-		navigationID, err = m.navigationService.GetIDByUUID(ctx, pluginYml.Navigation)
-		if err != nil {
-			navigationID = -1
-		}
-	}
 	pluginType := 1
 	if pluginYml.Core {
 		pluginType = 0
@@ -490,6 +471,7 @@ func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml 
 			Name:       pluginYml.Name,
 			Version:    pluginYml.Version,
 			Group:      groupID,
+			Navigation: pluginYml.Navigation,
 			CName:      pluginYml.CName,
 			Resume:     pluginYml.Resume,
 			ICon:       pluginYml.ICon,
@@ -510,7 +492,7 @@ func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml 
 		enable := &entry.ModulePluginEnable{
 			Id:         pluginInfo.Id,
 			Name:       pluginYml.Name,
-			Navigation: navigationID,
+			Navigation: pluginYml.Navigation,
 			IsEnable:   isEnable,
 			Config:     []byte{},
 			Operator:   0,

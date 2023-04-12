@@ -187,7 +187,6 @@ func (p *modulePluginController) getEnableInfo(ginCtx *gin.Context) {
 
 	enableInfo := &dto.PluginEnableInfo{
 		Name:       info.Name,
-		Navigation: info.Navigation,
 		Server:     info.Server,
 		Header:     infoHeader,
 		Query:      infoQuery,
