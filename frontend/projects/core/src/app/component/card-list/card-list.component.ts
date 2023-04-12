@@ -8,7 +8,7 @@ export type CardItem = {title:string|TemplateRef<any>, enable:boolean, desc:stri
     <div class="p-[20px] flex flex-wrap">
       <ng-container *ngFor="let card of cardList">
       <div class="relative">
-        <nz-card [nzHoverable]="true" class='w-[280px] h-[150px] mr-btnrbase mb-btnrbase' (click)="handlerCardClick(card)">
+        <nz-card [nzHoverable]="true" class='w-[280px] min-h-[120px] mr-btnrbase mb-btnrbase' (click)="handlerCardClick(card)">
           <nz-card-meta
               [nzTitle]="card.title"
               [nzDescription]="cardStatusTml"
@@ -29,7 +29,7 @@ export type CardItem = {title:string|TemplateRef<any>, enable:boolean, desc:stri
             <p class="mt-[20px] card-desc-text">{{card.desc}}</p>
           </nz-card>
 
-          <div class="absolute top-[14px] right-[28px]">
+          <div class="absolute top-[14px] right-[35px]">
           <span class="text-[12px] font-medium text-[#0A89FF] bg-[#0A89FF1A] px-[4px] py-[2px] leading-[20px] rounded" *ngIf="card.enable">已启用</span>
           <span  class="text-[12px] font-medium text-[#bbbbbb] bg-[#bbbbbb1A] px-[4px] py-[2px] leading-[20px] rounded" *ngIf="!card.enable"> 未启用</span>
           </div>
@@ -59,9 +59,10 @@ export type CardItem = {title:string|TemplateRef<any>, enable:boolean, desc:stri
       margin-bottom:0px;
     }
       p.card-desc-text{
+        font-size:12px;
         word-break: break-all;
         display: -webkit-box;
-        -webkit-line-clamp: 2;
+        -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;
         overflow: hidden;
       }
