@@ -104,7 +104,7 @@ export class NavigationComponent implements OnInit {
   }
 
   openNavigationModal (add:boolean, uuid?:string) {
-    this.modalService.create({
+    this.modalRef = this.modalService.create({
       nzTitle: add ? '新建导航' : '编辑导航',
       nzWidth: MODAL_SMALL_SIZE,
       nzContent: NavigationCreateComponent,

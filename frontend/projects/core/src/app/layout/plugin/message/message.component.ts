@@ -17,11 +17,17 @@ import { MarkdownService } from 'ngx-markdown'
   <header class="my-btnybase ml-btnbase mr-btnrbase">
     <div class="flex justify-between  mb-btnybase items-center">
       <div class="flex">
-      <img class="mr-btnrbase" [src]="icon" alt="plugin icon" width="64px" height="50px">
+        <div class="mr-btnrbase w-[50px] h-[50px]">
+            <img class="mr-btnrbase" [src]="icon" alt="icon" width="50px" height="50px">
+      </div>
+        <div class="flex flex-col justify-around">
+          <p class="text-[14px] font-medium">{{title}}</p>
+          <p>
 
-        <div>
-          <p class="text-[18px] font-medium">{{title}}</p>
-          <p>{{enable? '启用':'未启用'}}</p>
+          <span class="mr-[8px] font-medium text-[#0A89FF] bg-[#0A89FF1A] px-[4px] py-[2px] leading-[20px] rounded" *ngIf="enable">已启用</span>
+                <span  class="mr-[8px] font-medium text-[#bbbbbb] bg-[#bbbbbb1A] px-[4px] py-[2px] leading-[20px] rounded" *ngIf="!enable"> 未启用</span>
+
+          </p>
         </div>
       </div>
       <div>
@@ -54,8 +60,9 @@ import { MarkdownService } from 'ngx-markdown'
     <p>{{resume}}</p>
 
   </header>
-  <section class="block ml-btnbase mr-btnrbase p-btnbase markdown-block">
-    <markdown [src]="getMd()" [srcRelativeLink]="true"   (error)="onError($event)"></markdown>
+  <section class="flex-1 ml-btnbase mr-btnrbase p-btnbase markdown-block">
+      <eo-ng-empty *ngIf="showEmpty" nzMainTitle="暂无数据" nzInputImage="simple"></eo-ng-empty>
+    <markdown *ngIf="!showEmpty" [src]="getMd()" [srcRelativeLink]="true"  (load)="loadMd()" (error)="onError($event)"></markdown>
   </section>
   `,
   styles: [
@@ -64,6 +71,11 @@ import { MarkdownService } from 'ngx-markdown'
       border:1px solid var(--border-color);
     }
     :host ::ng-deep{
+      height:100%;
+      display:flex;
+    flex-direction: column;
+      overflow-y:hidden;
+      padding-bottom:20px;
       img{
         max-width:100%
       }
@@ -79,6 +91,7 @@ export class PluginMessageComponent implements OnInit {
   pluginId:string = ''
   modalRef:NzModalRef|undefined
   mdFileName:string = ''
+  showEmpty:boolean = false
   constructor (private message:EoNgMessageService,
     private modalService:EoNgFeedbackModalService,
     private api:ApiService, private baseInfo:BaseInfoService,
@@ -133,11 +146,16 @@ export class PluginMessageComponent implements OnInit {
   }
 
   getMd () {
-    return `../../plugin/info/${this.pluginId}/${this.mdFileName}'`
+    return `../../plugin/info/${this.pluginId}/${this.mdFileName || ''}`
+  }
+
+  loadMd () {
+    this.showEmpty = false
   }
 
   onError (value:any) {
     console.error('解析md文档出现问题', value)
+    this.showEmpty = true
   }
 
   enablePlugin () {
@@ -183,6 +201,7 @@ export class PluginMessageComponent implements OnInit {
     this.api.post('system/plugin/disable', { id: this.pluginId }).subscribe((resp:EmptyHttpResponse) => {
       if (resp.code === 0) {
         this.message.success(resp.msg || '禁用成功')
+        this.appConfigService.reqFlashMenu()
         this.modalRef?.close()
       }
     })
@@ -193,6 +212,7 @@ export class PluginMessageComponent implements OnInit {
     this.api.post('system/plugin/uninstall', { id: this.pluginId }).subscribe((resp:EmptyHttpResponse) => {
       if (resp.code === 0) {
         this.message.success(resp.msg || '卸载成功')
+        this.appConfigService.reqFlashMenu()
         this.modalRef?.close()
       }
     })

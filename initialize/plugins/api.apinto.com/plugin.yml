@@ -1,0 +1,11 @@
+id: "api.apinto.com"
+name: "api"
+cname: "API管理"
+resume: ""
+version: "v1.0"
+icon: "inner-plugin.png"
+driver: "api.apinto.com"
+core: false
+auto: true
+front: router/api
+navigation: "navigation.api"
