@@ -122,6 +122,7 @@ func (p *pluginFrontController) getPluginInfo(c *gin.Context) {
 // getPluginMD 获取插件描述中要用到的MD文件
 func (p *pluginFrontController) getPluginResources(c *gin.Context) {
 	pluginID := c.Param("id")
+	//TODO 若为内置插件
 
 	filePath := fmt.Sprintf("%s/resources/%s", pluginID, strings.Trim(c.Param("filepath"), "/"))
 
