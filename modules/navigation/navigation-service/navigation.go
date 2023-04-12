@@ -83,14 +83,7 @@ func (n *navigationService) List(ctx context.Context) ([]*navigation_model.Navig
 	if err != nil {
 		return nil, err
 	}
-	enablePlugins, err := pluginService.GetEnabledPlugins(ctx)
-	if err != nil {
-		return nil, err
-	}
-	pluginMap := make(map[string]string)
-	for _, p := range enablePlugins {
-		pluginMap[p.UUID] = p.Name
-	}
+
 	navigations := make([]*navigation_model.NavigationBasicInfo, 0)
 	for _, l := range list {
 
@@ -102,19 +95,19 @@ func (n *navigationService) List(ctx context.Context) ([]*navigation_model.Navig
 		if err != nil {
 			return nil, err
 		}
-		canDelete := true
-		for _, id := range moduleIDs {
-			if _, ok := pluginMap[id]; ok {
-				canDelete = false
-				break
-			}
+
+		plugins, err := modulePluginService.GetEnablePluginsByNavigation(ctx, l.Id)
+		if err != nil {
+			return nil, err
 		}
+
 		navigations = append(navigations, &navigation_model.NavigationBasicInfo{
 			ID:        l.Id,
 			Uuid:      l.Uuid,
 			Title:     l.Title,
 			Icon:      l.Icon,
-			CanDelete: canDelete,
+			IconType:  l.IconType,
+			CanDelete: len(plugins) < 1,
 			Sort:      l.Sort,
 		})
 	}
@@ -151,12 +144,27 @@ func (n *navigationService) Info(ctx context.Context, uuid string) (*navigation_
 	if err != nil {
 		return nil, err
 	}
+	hasMap := make(map[string]struct{})
 	modules := make([]*navigation_model.Module, 0, len(moduleIDs))
 	for _, m := range moduleIDs {
 		if v, ok := pluginMap[m]; ok {
 			modules = append(modules, &navigation_model.Module{
 				Id:    m,
 				Title: v,
+			})
+			hasMap[m] = struct{}{}
+		}
+	}
+	plugins, err := modulePluginService.GetEnablePluginsByNavigation(ctx, info.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, p := range plugins {
+		if _, ok := hasMap[p.UUID]; !ok {
+			modules = append(modules, &navigation_model.Module{
+				Id:    p.UUID,
+				Title: p.Name,
 			})
 		}
 	}
@@ -170,7 +178,7 @@ func (n *navigationService) Info(ctx context.Context, uuid string) (*navigation_
 			CanDelete: len(modules) < 1,
 			Sort:      info.Sort,
 		},
-		Modules: nil,
+		Modules: modules,
 	}, nil
 }
 
