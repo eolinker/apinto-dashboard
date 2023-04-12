@@ -882,7 +882,7 @@ eo-ng-tree-default:not(.ant-select-tree) {
   }
 
   .ant-tree-treenode {
-    height: 40px;
+    height: 30px;
   }
   .ant-tree-treenode button {
     opacity: 0;
@@ -898,6 +898,10 @@ eo-ng-tree-default:not(.ant-select-tree) {
       opacity: 1;
     }
   }
+}
+
+.ant-tree .ant-tree-treenode {
+  border-radius: 0px;
 }
 
 .ant-select-tree {
@@ -1022,7 +1026,7 @@ nz-slider {
 
 .group-title {
   padding: 4px var(--LAYOUT_PADDING);
-  height: 40px;
+  height: 30px;
   display: flex;
   align-items: center;
 }
@@ -1121,7 +1125,7 @@ nz-slider {
 }
 
 .ant-table-pagination.ant-pagination {
-  margin-right: 20px;
+  margin: 10px;
 }
 eo-ng-select.limit-select .ant-select-selection-search {
   display: inline-block;

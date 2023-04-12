@@ -33,7 +33,7 @@ export class BasicLayoutComponent implements OnInit {
   modalRef:NzModalRef | undefined
   showEmpty:boolean = false
   showSideLine:boolean = true
-
+  seletedGuide:boolean = false
   authInfo:{title:string, infos:Array<{key:string, value:string}>}
   = { title: '', infos: [] }
 
@@ -63,6 +63,7 @@ export class BasicLayoutComponent implements OnInit {
       if (this.router.url !== this.currentRouter) {
         this.selectOrOpenMenu(this.router.url)
       }
+      this.seletedGuide = this.router.url.includes('guide')
     })
   }
 
@@ -167,5 +168,9 @@ export class BasicLayoutComponent implements OnInit {
 
   goToGithub () {
     window.open('https://github.com/eolinker/apinto')
+  }
+
+  goToGuide () {
+    this.router.navigate(['/', 'guide'])
   }
 }

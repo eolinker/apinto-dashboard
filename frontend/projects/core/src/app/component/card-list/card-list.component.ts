@@ -23,7 +23,7 @@ export type CardItem = {title:string, enable:boolean, desc:string, iconAddr?:str
             </ng-template>
             <ng-template #avatarTemplate>
             <div style="height:50px; width:50px;">
-              <img [src]="card.iconAddr? (urlPrefix + 'plugin/info/' + card.id + '/'+card.iconAddr) : './assets/default-plugin-icon.svg'" alt="icon" width="50px" height="50px">
+              <img [src]="card.iconAddr? (urlPrefix + 'plugin/icon/' + card.id + '/'+card.iconAddr) : './assets/default-plugin-icon.svg'" alt="icon" width="50px" height="50px">
               </div>
             </ng-template>
             <p class="mt-[20px] card-desc-text">{{card.desc}}</p>
