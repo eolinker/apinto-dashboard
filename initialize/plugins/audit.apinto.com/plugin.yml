@@ -1,0 +1,11 @@
+id: "audit.apinto.com"
+name: "audit"
+cname: "操作日志"
+resume: ""
+version: "v1.0"
+icon: "inner-plugin.png"
+driver: "audit.apinto.com"
+core: false
+auto: true
+front: audit-log
+navigation: "navigation.system"

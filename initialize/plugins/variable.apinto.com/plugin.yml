@@ -1,0 +1,11 @@
+id: "variable.apinto.com"
+name: "variable"
+cname: "环境变量"
+resume: ""
+version: "v1.0"
+icon: "inner-plugin.png"
+driver: "variable.apinto.com"
+core: false
+auto: true
+front: deploy/env
+navigation: "navigation.infrastructure"
