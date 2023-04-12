@@ -125,7 +125,7 @@ func (p *Plugin) NewModule(name string) *Module {
 	routers = append(routers, favicon())
 	routers = append(routers, indexRouter())
 	routers = append(routers, commonStrategy()...)
-
+	routers = append(routers, moduleRouters()...)
 	systemRouter := newSystem()
 	routers = append(routers, systemRouter.RoutersInfo()...)
 	return &Module{

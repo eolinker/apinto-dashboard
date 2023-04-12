@@ -28,7 +28,11 @@ type coreService struct {
 	providerService     IProviderService
 }
 
-func (c *coreService) CheckNewModule(pluginID, name, apiGroup string, config interface{}) error {
+func (c *coreService) HasModule(module string, path string) bool {
+	return true
+}
+
+func (c *coreService) CheckNewModule(pluginID, name string, config interface{}) error {
 	return nil
 }
 
