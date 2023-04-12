@@ -1,6 +1,6 @@
 id: "strategy-cache.apinto.com"
 name: "strategy-cache"
-cname: "缓存策略"
+cname: "数据缓存"
 resume: ""
 version: "v1.0"
 icon: "network-tree"
