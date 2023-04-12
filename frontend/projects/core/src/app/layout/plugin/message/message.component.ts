@@ -60,7 +60,7 @@ import { MarkdownService } from 'ngx-markdown'
     <p>{{resume}}</p>
 
   </header>
-  <section class="flex-1 ml-btnbase mr-btnrbase p-btnbase markdown-block">
+  <section class="flex-1 ml-btnbase mr-btnrbase p-btnbase markdown-block overflow-auto">
       <eo-ng-empty *ngIf="showEmpty" nzMainTitle="暂无数据" nzInputImage="simple"></eo-ng-empty>
     <markdown *ngIf="!showEmpty" [src]="getMd()" [srcRelativeLink]="true"  (load)="loadMd()" (error)="onError($event)"></markdown>
   </section>
