@@ -18,6 +18,19 @@ type externalApplicationController struct {
 	extAppService openapp.IExternalApplicationService
 }
 
+func (c externalApplicationController) openApiCheck(ginCtx *gin.Context) {
+	//检测openAPI token 并获取相应外部应用的id
+	token := ginCtx.GetHeader("Authorization")
+	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
+	appID, err := c.extAppService.CheckExtAPPToken(ginCtx, namespaceID, token)
+	if err != nil {
+		ginCtx.Abort()
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("syncAPI fail. err:%s", err))
+		return
+	}
+	ginCtx.Set("appId", appID)
+}
+
 var (
 	locker             sync.Mutex
 	controllerInstance *externalApplicationController
