@@ -5,7 +5,6 @@ import (
 	plugin2 "github.com/eolinker/apinto-dashboard/client/v1/initialize/plugin"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
-	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/plugin"
 	"github.com/eolinker/apinto-dashboard/modules/plugin/plugin-dto"
@@ -21,23 +20,11 @@ type pluginController struct {
 	extenderCache plugin_service.IExtenderCache
 }
 
-func RegisterPluginRouter(router gin.IRoutes) {
+func newPluginController() *pluginController {
 	p := &pluginController{}
 	bean.Autowired(&p.pluginService)
 	bean.Autowired(&p.extenderCache)
-
-	router.GET("/plugins", p.plugins)
-	router.GET("/basic/info/plugins", p.basicInfoPlugins)
-	router.GET("/plugin", p.plugin)
-
-	router.POST("/plugin", controller.AuditLogHandler(enum.LogOperateTypeCreate, enum.LogKindGlobalPlugin, p.createPlugin))
-	router.PUT("/plugin", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindGlobalPlugin, p.updatePlugin))
-	router.DELETE("/plugin", controller.AuditLogHandler(enum.LogOperateTypeDelete, enum.LogKindGlobalPlugin, p.delPlugin))
-
-	router.GET("/plugin/extendeds", p.pluginExtendeds)
-	router.GET("/plugins/render", p.pluginRender)
-	router.PUT("/plugin/sort", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindGlobalPlugin, p.pluginSort))
-	router.GET("/plugin/enum", p.pluginEnum)
+	return p
 }
 
 // 单个插件信息

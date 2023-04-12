@@ -18,6 +18,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/store"
 	"github.com/eolinker/apinto-dashboard/modules/navigation"
 	"github.com/eolinker/eosc/common/bean"
+	"github.com/eolinker/eosc/log"
 	"github.com/go-basic/uuid"
 	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
@@ -249,6 +250,7 @@ func (m *modulePluginService) InstallPlugin(ctx context.Context, userID int, gro
 			Resume:     pluginYml.Resume,
 			ICon:       pluginYml.ICon,
 			Type:       2,
+			Front:      "", //TODO
 			Driver:     pluginYml.Driver,
 			Details:    details,
 			Operator:   userID,
@@ -314,7 +316,13 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 	}
 	config, _ := json.Marshal(enableCfg)
 
-	return m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
+	checkConfig := enableCfg
+	//若为内置插件
+	if pluginInfo.Type == 0 || pluginInfo.Type == 1 {
+		checkConfig = nil
+	}
+
+	err = m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
 		enable := &entry.ModulePluginEnable{
 			Id:         pluginInfo.Id,
 			Name:       enableInfo.Name,
@@ -327,11 +335,18 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 		if err = m.pluginEnableStore.Save(txCtx, enable); err != nil {
 			return err
 		}
-		//TODO 重新生成路由
-		m.coreService.ResetVersion(uuid.New())
 
-		return nil
+		return m.coreService.CheckNewModule(pluginInfo.UUID, enableInfo.Name, checkConfig)
 	})
+	if err != nil {
+		return err
+	}
+	//TODO 重新生成路由
+	err = m.coreService.ReloadModule()
+	if err != nil {
+		log.Error(err)
+	}
+	return nil
 }
 
 func (m *modulePluginService) DisablePlugin(ctx context.Context, userID int, pluginUUID string) error {
@@ -357,19 +372,25 @@ func (m *modulePluginService) DisablePlugin(ctx context.Context, userID int, plu
 		return err
 	}
 
-	return m.pluginEnableStore.Transaction(ctx, func(txCtx context.Context) error {
+	err = m.pluginEnableStore.Transaction(ctx, func(txCtx context.Context) error {
 		enableInfo.IsEnable = 1
 		enableInfo.Operator = userID
 		enableInfo.UpdateTime = time.Now()
 		_, err = m.pluginEnableStore.Update(txCtx, enableInfo)
-		if err != nil {
-			return err
-		}
-		//TODO 重新生成路由
-		m.coreService.ResetVersion(uuid.New())
 
-		return nil
+		return err
 	})
+	if err != nil {
+		return err
+	}
+
+	//TODO 重新生成路由
+	err = m.coreService.ReloadModule()
+	if err != nil {
+		log.Error(err)
+	}
+
+	return nil
 }
 
 func (m *modulePluginService) GetEnablePluginsByNavigation(ctx context.Context, navigationID int) ([]*model.NavigationEnabledPlugin, error) {
@@ -386,6 +407,7 @@ func (m *modulePluginService) GetEnablePluginsByNavigation(ctx context.Context, 
 		plugins = append(plugins, &model.NavigationEnabledPlugin{
 			ModulePluginEnable: p,
 			UUID:               pluginInfo.UUID,
+			CName:              pluginInfo.CName,
 		})
 	}
 
@@ -413,6 +435,10 @@ func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml 
 			return fmt.Errorf("navigation %s doesn't exist. ", pluginYml.Navigation)
 		}
 	}
+	pluginType := 1
+	if pluginYml.Core {
+		pluginType = 0
+	}
 
 	return m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
 
@@ -425,7 +451,8 @@ func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml 
 			CName:      pluginYml.CName,
 			Resume:     pluginYml.Resume,
 			ICon:       pluginYml.ICon,
-			Type:       2,
+			Type:       pluginType,
+			Front:      pluginYml.Front,
 			Driver:     pluginYml.Driver,
 			Details:    []byte{},
 			Operator:   0,

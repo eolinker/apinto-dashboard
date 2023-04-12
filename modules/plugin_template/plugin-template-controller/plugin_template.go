@@ -20,22 +20,10 @@ type pluginTemplateController struct {
 	pluginTemplateService plugin_template.IPluginTemplateService
 }
 
-func RegisterPluginTemplateRouter(router gin.IRoutes) {
+func newPluginTemplateController() *pluginTemplateController {
 	p := &pluginTemplateController{}
 	bean.Autowired(&p.pluginTemplateService)
-
-	router.GET("/plugin/templates", p.templates)
-	router.GET("/plugin/template/enum", p.templateEnum)
-
-	router.POST("/plugin/template", controller.AuditLogHandler(enum.LogOperateTypeCreate, enum.LogKindPluginTemplate, p.createTemplate))
-	router.PUT("/plugin/template", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindPluginTemplate, p.updateTemplate))
-	router.DELETE("/plugin/template", controller.AuditLogHandler(enum.LogOperateTypeDelete, enum.LogKindPluginTemplate, p.delTemplate))
-
-	router.GET("/plugin/template", p.template)
-
-	router.GET("/plugin/template/onlines", p.onlines)
-	router.PUT("/plugin/template/online", controller.AuditLogHandler(enum.LogOperateTypePublish, enum.LogKindPluginTemplate, p.online))
-	router.PUT("/plugin/template/offline", controller.AuditLogHandler(enum.LogOperateTypePublish, enum.LogKindPluginTemplate, p.offline))
+	return p
 }
 
 // 插件模板列表

@@ -125,7 +125,7 @@ export class PluginMessageComponent implements OnInit {
         if (resp.code === 0) {
           this.title = resp.data.plugin.cname
           this.resume = resp.data.plugin.resume
-          this.icon = resp.data.plugin.icon
+          this.icon = resp.data.plugin.icon ? `${this.urlPrefix}plugin/info/${this.pluginId}/resource/${resp.data.plugin.icon}` : './assets/default-plugin-icon.svg'
           this.enable = resp.data.plugin.enable
           this.uninstall = resp.data.plugin.uninstall
         }
