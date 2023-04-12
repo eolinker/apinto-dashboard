@@ -16,7 +16,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/entry"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/model"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/store"
-	"github.com/eolinker/apinto-dashboard/modules/navigation"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
 	"github.com/go-basic/uuid"
@@ -37,11 +36,10 @@ type modulePluginService struct {
 	pluginEnableStore  store.IModulePluginEnableStore
 	pluginPackageStore store.IModulePluginPackageStore
 
-	commonGroup       group.ICommonGroupService
-	navigationService navigation.INavigationService
-	coreService       core.ICore
-	installedCache    IInstalledCache
-	lockService       locker_service.IAsynLockService
+	commonGroup    group.ICommonGroupService
+	coreService    core.ICore
+	installedCache IInstalledCache
+	lockService    locker_service.IAsynLockService
 }
 
 func newModulePluginService() module_plugin.IModulePluginService {
@@ -51,7 +49,6 @@ func newModulePluginService() module_plugin.IModulePluginService {
 	bean.Autowired(&s.pluginPackageStore)
 
 	bean.Autowired(&s.commonGroup)
-	bean.Autowired(&s.navigationService)
 	bean.Autowired(&s.coreService)
 	bean.Autowired(&s.installedCache)
 	bean.Autowired(&s.lockService)
