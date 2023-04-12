@@ -1,10 +1,10 @@
 eo-logo:host {
-    img {
-      width: 92px;
-    }
-    cursor: pointer;
+  img {
+    width: 92px;
   }
-  
-  ::selection {
-    background:#22549d; 
-  }
+  cursor: pointer;
+}
+
+::selection {
+  background: #7371fc;
+}

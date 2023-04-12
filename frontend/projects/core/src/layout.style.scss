@@ -2,7 +2,7 @@
   position: fixed;
   top: 51px;
   width: 100%;
-  min-width: 1170px;
+  // min-width: 1170px;
 }
 .logo {
   display: flex;
@@ -172,7 +172,7 @@ eo-ng-tabs {
 
 eo-ng-layout {
   .ant-layout-header {
-    min-width: 1366px;
+    // min-width: 1366px;
     position: fixed;
     top: 0px;
     z-index: 999;
@@ -180,7 +180,7 @@ eo-ng-layout {
 
   .ant-layout.ant-layout-has-sider {
     top: 50px;
-    min-width: 1366px;
+    // min-width: 1366px;
   }
 
   eo-ng-sider.ant-layout-sider {
@@ -199,7 +199,7 @@ eo-ng-layout {
   position: fixed;
   top: 94px;
   width: calc(100% - 195px);
-  min-width: 1170px;
+  // min-width: 1170px;
   height: calc(100vh - 94px);
   overflow: auto;
 }
