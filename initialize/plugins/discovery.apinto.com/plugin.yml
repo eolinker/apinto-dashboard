@@ -1,0 +1,11 @@
+id: "discovery.apinto.com"
+name: "discovery"
+cname: "服务发现"
+resume: ""
+version: "v1.0"
+icon: "inner-plugin.png"
+driver: "discovery.apinto.com"
+core: false
+auto: true
+front: upstream/serv-discovery
+navigation: "navigation.infrastructure"
