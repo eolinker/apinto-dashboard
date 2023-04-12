@@ -246,19 +246,20 @@ func (m *modulePluginService) InstallPlugin(ctx context.Context, userID int, gro
 		}
 
 		pluginInfo := &entry.ModulePlugin{
-			UUID:       pluginYml.ID,
-			Name:       pluginYml.Name,
-			Version:    pluginYml.Version,
-			Group:      groupID,
-			CName:      pluginYml.CName,
-			Resume:     pluginYml.Resume,
-			ICon:       pluginYml.ICon,
-			Type:       2,
-			Front:      "", //TODO
-			Driver:     pluginYml.Driver,
-			Details:    details,
-			Operator:   userID,
-			CreateTime: t,
+			UUID:         pluginYml.ID,
+			Name:         pluginYml.Name,
+			Version:      pluginYml.Version,
+			Group:        groupID,
+			NavigationID: pluginYml.NavigationID,
+			CName:        pluginYml.CName,
+			Resume:       pluginYml.Resume,
+			ICon:         pluginYml.ICon,
+			Type:         2,
+			Front:        "", //TODO
+			Driver:       pluginYml.Driver,
+			Details:      details,
+			Operator:     userID,
+			CreateTime:   t,
 		}
 		if err = m.pluginStore.Save(txCtx, pluginInfo); err != nil {
 			return err
@@ -306,9 +307,12 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 	}
 	defer m.lockService.Unlock(locker_service.LockNameModulePlugin, pluginInfo.Id)
 
-	navigationID, err := m.navigationService.GetIDByUUID(ctx, enableInfo.Navigation)
-	if err != nil {
-		return err
+	navigationID := -1
+	if pluginInfo.NavigationID != "" {
+		navigationID, err = m.navigationService.GetIDByUUID(ctx, pluginInfo.NavigationID)
+		if err != nil {
+			navigationID = -1
+		}
 	}
 
 	//若输入的启用模块名为空，则为默认的模块名
@@ -470,7 +474,7 @@ func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml 
 	if pluginYml.Navigation != "" {
 		navigationID, err = m.navigationService.GetIDByUUID(ctx, pluginYml.Navigation)
 		if err != nil {
-			return fmt.Errorf("navigation %s doesn't exist. ", pluginYml.Navigation)
+			navigationID = -1
 		}
 	}
 	pluginType := 1

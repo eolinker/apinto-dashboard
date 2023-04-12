@@ -4,6 +4,7 @@ CREATE TABLE `module_plugin` (
     `name` varchar(255) NOT NULL COMMENT '插件名',
     `version` varchar(36) NOT NULL COMMENT 'version',
     `group` int(11) NOT NULL COMMENT '分组id',
+    `navigation_id` varchar(255) COMMENT '导航uuid',
     `cname` varchar(255) NOT NULL COMMENT '昵称',
     `resume` varchar(255) NOT NULL COMMENT '简介',
     `icon` varchar(255) NOT NULL COMMENT '图标的文件名，相对路径',
