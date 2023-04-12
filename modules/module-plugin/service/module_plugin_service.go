@@ -434,6 +434,10 @@ func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml 
 			return fmt.Errorf("navigation %s doesn't exist. ", pluginYml.Navigation)
 		}
 	}
+	pluginType := 1
+	if pluginYml.Core {
+		pluginType = 0
+	}
 
 	return m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
 
@@ -446,7 +450,7 @@ func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml 
 			CName:      pluginYml.CName,
 			Resume:     pluginYml.Resume,
 			ICon:       pluginYml.ICon,
-			Type:       2,
+			Type:       pluginType,
 			Front:      pluginYml.Front,
 			Driver:     pluginYml.Driver,
 			Details:    []byte{},
