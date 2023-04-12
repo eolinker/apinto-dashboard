@@ -1,8 +1,6 @@
 package navigation_service
 
 import (
-	"context"
-
 	"github.com/eolinker/apinto-dashboard/modules/navigation"
 	"github.com/eolinker/eosc/common/bean"
 
@@ -17,9 +15,9 @@ type navigationService struct {
 	navigations   []*navigation_model.Navigation
 }
 
-func newNavigationService() *navigationService {
+func newNavigationService() navigation.INavigationService {
 	n := &navigationService{}
-	bean.Autowired(&n.navigationMap)
+	bean.Autowired(&n.dataService)
 	return n
 }
 
@@ -43,14 +41,14 @@ func (n *navigationService) initData() {
 	n.navigationMap = nsMap
 }
 
-func (n *navigationService) Info(ctx context.Context, uuid string) (*navigation_model.Navigation, bool) {
+func (n *navigationService) Info(uuid string) (*navigation_model.Navigation, bool) {
 	if n.navigationMap == nil {
 		n.initData()
 	}
 	return n.navigationMap.Get(uuid)
 }
 
-func (n *navigationService) List(ctx context.Context) []*navigation_model.Navigation {
+func (n *navigationService) List() []*navigation_model.Navigation {
 	if n.navigations == nil {
 		n.initData()
 	}
