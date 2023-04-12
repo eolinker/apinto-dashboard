@@ -17,7 +17,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/model"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/store"
 	"github.com/eolinker/eosc/common/bean"
-	"github.com/eolinker/eosc/log"
 	"github.com/go-basic/uuid"
 	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
@@ -364,10 +363,8 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 		return err
 	}
 	//TODO 重新生成路由
-	err = m.coreService.ReloadModule()
-	if err != nil {
-		log.Error(err)
-	}
+	m.coreService.ResetVersion("")
+
 	return nil
 }
 
@@ -412,10 +409,7 @@ func (m *modulePluginService) DisablePlugin(ctx context.Context, userID int, plu
 	}
 
 	//TODO 重新生成路由
-	err = m.coreService.ReloadModule()
-	if err != nil {
-		log.Error(err)
-	}
+	m.coreService.ResetVersion("")
 
 	return nil
 }

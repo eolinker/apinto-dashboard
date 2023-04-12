@@ -84,12 +84,14 @@ func (c *coreService) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (c *coreService) ReloadModule() error {
 	c.once.Do(func() {
+		c.cacheCommon.SetNX(context.Background(), moduleConfigVersionKey, uuid.New(), 0)
 		go c.doLoop()
 	})
 	version, err := c.cacheCommon.Get(context.Background(), moduleConfigVersionKey)
 	if err != nil {
 		log.Errorf("get module config version:%s", err.Error())
-		return c.reloadModule(uuid.New())
+
+		return err
 	}
 
 	return c.reloadModule(string(version))
@@ -97,7 +99,12 @@ func (c *coreService) ReloadModule() error {
 func (c *coreService) doLoop() {
 	tick := time.Tick(time.Second * 10)
 	for range tick {
-		c.ReloadModule()
+		version, err := c.cacheCommon.Get(context.Background(), moduleConfigVersionKey)
+		if err != nil {
+			log.Errorf("get module config version:%s", err.Error())
+			continue
+		}
+		c.reloadModule(string(version))
 	}
 
 }
@@ -167,6 +174,6 @@ func NewService(providerService IProviderService) core.ICore {
 	}
 	bean.Autowired(&c.modulePluginService)
 	bean.Autowired(&c.engineCreate)
-
+	bean.Autowired(&c.cacheCommon)
 	return c
 }
