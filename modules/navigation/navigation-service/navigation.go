@@ -31,6 +31,7 @@ func (n *navigationService) initData() {
 			v := &navigation_model.Navigation{
 				Uuid:  nv.Uuid,
 				Title: nv.Title,
+				Name:  nv.Name,
 				Icon:  nv.Icon,
 			}
 			nsMap.Set(nv.Uuid, v)
