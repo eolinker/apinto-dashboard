@@ -29,8 +29,7 @@ type coreService struct {
 }
 
 func (c *coreService) CheckNewModule(pluginID, name, apiGroup string, config interface{}) error {
-	//TODO implement me
-	panic("implement me")
+	return nil
 }
 
 func (c *coreService) ResetVersion(version string) {
@@ -68,13 +67,7 @@ func (c *coreService) rebuild() error {
 	if err != nil {
 		return err
 	}
-	//modules := []*model.EnabledPlugin{{
-	//	UUID:   "core",
-	//	Name:   "core",
-	//	Driver: "core.apinto.com",
-	//	Config: nil,
-	//	Define: nil,
-	//}}
+
 	builder := apinto_module.NewModuleBuilder(c.engineCreate.CreateEngine())
 	for _, module := range modules {
 		driver, has := apinto_module.GetDriver(module.Driver)
