@@ -156,7 +156,11 @@ export class EoNgNavigationService {
                         matchRouterExact: false,
                         type: this.getDefaultModule(navigation).type
                       }
-                    : {}))
+                    : {
+                        routerLink: 'iframe',
+                        matchRouter: true,
+                        matchRouterExact: false
+                      }))
             }
 
             if (navigation.name && navigation.path) {
