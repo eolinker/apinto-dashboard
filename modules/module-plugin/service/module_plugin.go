@@ -104,31 +104,31 @@ func (m *modulePlugin) GetMiddlewareList(ctx context.Context) ([]*model.Middlewa
 	return middlewares, nil
 }
 
-func (m *modulePlugin) GetModulesByNavigations(ctx context.Context, navigations []string) (map[string][]*model.NavigationModuleInfo, error) {
-	moduleInfos, err := m.pluginStore.GetEnabledModules(ctx, navigations)
+func (m *modulePlugin) GetNavigationModules(ctx context.Context) ([]*model.NavigationModuleInfo, error) {
+	moduleInfos, err := m.pluginStore.GetNavigationModules(ctx)
 	if err != nil {
 		return nil, err
 	}
-	navigationMap := make(map[string][]*model.NavigationModuleInfo, len(navigations))
+
+	list := make([]*model.NavigationModuleInfo, 0, len(moduleInfos))
 	for _, module := range moduleInfos {
-		infos, has := navigationMap[module.Navigation]
-		if !has {
-			infos = make([]*model.NavigationModuleInfo, 0, 3)
+		//路由为空的不需要返回
+		if module.Front == "" {
+			continue
 		}
 		info := &model.NavigationModuleInfo{
-			Name:  module.Name,
-			Title: module.Title,
-			Type:  "outer",
-			Path:  "",
+			Name:       module.Name,
+			Title:      module.Title,
+			Type:       "outer",
+			Path:       "",
+			Navigation: module.Navigation,
 		}
 		//若模块为内置模块
 		if module.Type == 0 || module.Type == 1 {
 			info.Type = "built-in"
 			info.Path = module.Front
 		}
-		infos = append(infos, info)
-		navigationMap[module.Navigation] = infos
+		list = append(list, info)
 	}
-
-	return navigationMap, nil
+	return list, nil
 }
