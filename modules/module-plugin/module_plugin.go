@@ -18,6 +18,7 @@ type IModulePluginService interface {
 
 	GetEnablePluginsByNavigation(ctx context.Context, navigationID int) ([]*model.NavigationEnabledPlugin, error)
 	CheckPluginInstalled(ctx context.Context, pluginID string) (bool, error)
+	CheckPluginISDeCompress(ctx context.Context, pluginID string) error
 	InstallInnerPlugin(ctx context.Context, pluginYml *model.InnerPluginYmlCfg) error
 }
 
