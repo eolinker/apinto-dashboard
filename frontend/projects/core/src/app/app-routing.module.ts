@@ -108,10 +108,15 @@ const routes: Routes = [
         loadChildren: () => import('./layout/navigation/navigation.module').then(m => m.NavigationModule)
       },
       {
-        path: 'iframe/**',
+        path: 'iframe',
         data: {
 
         },
+        children: [{
+          path: '**',
+          component: IframePageComponent
+        }
+        ],
         component: IframePageComponent
       }
     ]

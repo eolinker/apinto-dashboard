@@ -16,13 +16,15 @@ export type CardItem = {title:string, enable:boolean, desc:string, iconAddr?:str
 
             <ng-template #cardStatusTml>
               <ng-container *ngIf="type === 'plugin'">
-              <span class="mr-[16px] font-medium" *ngIf="card?.isInner">内置</span>
-                <span class="text-theme" *ngIf="card.enable"> 已启用</span>
-                <span *ngIf="!card.enable"> 未启用</span>
+              <span class="mr-[8px] font-medium text-[#00785A] bg-[#00785A1A] px-[4px] py-[2px] leading-[20px] rounded" *ngIf="card?.isInner">内置</span>
+                <span class="mr-[8px] font-medium text-[#0A89FF] bg-[#0A89FF1A] px-[4px] py-[2px] leading-[20px] rounded" *ngIf="card.enable">已启用</span>
+                <span  class="mr-[8px] font-medium text-[#bbbbbb] bg-[#bbbbbb1A] px-[4px] py-[2px] leading-[20px] rounded" *ngIf="!card.enable"> 未启用</span>
               </ng-container>
             </ng-template>
             <ng-template #avatarTemplate>
-              <img [src]="card.iconAddr? (urlPrefix + 'plugin/info/' + card.id + '/'+card.iconAddr) : './assets/default-plugin-icon.svg'" alt="plugin icon" width="64px" height="50px">
+            <div style="height:50px; width:50px;">
+              <img [src]="card.iconAddr? (urlPrefix + 'plugin/info/' + card.id + '/'+card.iconAddr) : './assets/default-plugin-icon.svg'" alt="icon" width="50px" height="50px">
+              </div>
             </ng-template>
             <p class="mt-[20px] card-desc-text">{{card.desc}}</p>
           </nz-card>
@@ -32,9 +34,18 @@ export type CardItem = {title:string, enable:boolean, desc:string, iconAddr?:str
   styles: [
     `
     :host ::ng-deep{
-      nz-card > .ant-card-body{
-        padding:18px 22px;
-      }
+      nz-card {
+        &.ant-card-hoverable:hover{
+          border-color:var(--primary-color);
+          box-shadow:none;
+        }
+        > .ant-card-body{
+          padding:18px 22px;
+        }
+        .ant-card-meta-title{
+          font-size:14px;
+        }
+    }
       p.card-desc-text{
         word-break: break-all;
         display: -webkit-box;
