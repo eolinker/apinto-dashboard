@@ -407,6 +407,7 @@ func (m *modulePluginService) GetEnablePluginsByNavigation(ctx context.Context, 
 		plugins = append(plugins, &model.NavigationEnabledPlugin{
 			ModulePluginEnable: p,
 			UUID:               pluginInfo.UUID,
+			CName:              pluginInfo.CName,
 		})
 	}
 
