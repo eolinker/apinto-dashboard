@@ -138,7 +138,7 @@ export class PluginMessageComponent implements OnInit {
         if (resp.code === 0) {
           this.title = resp.data.plugin.cname
           this.resume = resp.data.plugin.resume
-          this.icon = resp.data.plugin.icon ? `${this.urlPrefix}plugin/info/${this.pluginId}/resource/${resp.data.plugin.icon}` : './assets/default-plugin-icon.svg'
+          this.icon = resp.data.plugin.icon ? `${this.urlPrefix}plugin/icon/${this.pluginId}/${resp.data.plugin.icon}` : './assets/default-plugin-icon.svg'
           this.enable = resp.data.plugin.enable
           this.uninstall = resp.data.plugin.uninstall
         }
@@ -146,7 +146,7 @@ export class PluginMessageComponent implements OnInit {
   }
 
   getMd () {
-    return `../../plugin/info/${this.pluginId}/${this.mdFileName || ''}`
+    return `../../plugin/md/${this.pluginId}/${this.mdFileName || ''}`
   }
 
   loadMd () {

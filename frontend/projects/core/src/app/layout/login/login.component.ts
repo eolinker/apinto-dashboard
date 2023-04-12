@@ -24,7 +24,7 @@ export class LoginComponent implements OnInit {
     this.api.checkAuth().subscribe((resp:any) => {
       if (resp.code === 0) {
         this.subscription = this.appConfigService.getMenuList().subscribe(() => {
-          this.router.navigate([this.appConfigService.getPageRoute()])
+          // this.router.navigate([this.appConfigService.getPageRoute()])
         })
       }
     })

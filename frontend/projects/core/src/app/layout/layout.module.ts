@@ -50,7 +50,8 @@ import { NzUploadModule } from 'ng-zorro-antd/upload'
 import { EoNgEmptyModule } from 'eo-ng-empty'
 import { AuthInfoDetailComponent } from './auth/info/detail/detail.component'
 import { EoNgMenuModule } from 'eo-ng-menu';
-import { IframePageComponent } from './iframe-page/iframe-page.component'
+import { IframePageComponent } from './iframe-page/iframe-page.component';
+import { GuideComponent } from './guide/guide.component'
 
 @NgModule({
   declarations: [
@@ -62,7 +63,8 @@ import { IframePageComponent } from './iframe-page/iframe-page.component'
     AuthInfoComponent,
     AuthUpdateComponent,
     AuthInfoDetailComponent,
-    IframePageComponent
+    IframePageComponent,
+    GuideComponent
   ],
   imports: [
     AppRoutingModule,

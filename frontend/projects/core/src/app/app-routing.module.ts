@@ -17,6 +17,7 @@ import { AuthActivationComponent } from './layout/auth/activation/activation.com
 import { AuthInfoComponent } from './layout/auth/info/info.component'
 import { AuthUpdateComponent } from './layout/auth/update/update.component'
 import { IframePageComponent } from './layout/iframe-page/iframe-page.component'
+import { GuideComponent } from './layout/guide/guide.component'
 const routes: Routes = [
   {
     path: 'auth',
@@ -30,6 +31,11 @@ const routes: Routes = [
     path: '',
     component: BasicLayoutComponent,
     children: [
+
+      {
+        path: 'guide',
+        component: GuideComponent
+      },
       {
         path: 'auth-info',
         component: AuthInfoComponent,
