@@ -4,6 +4,7 @@ CREATE TABLE `module_plugin` (
     `name` varchar(255) NOT NULL COMMENT '插件名',
     `version` varchar(36) NOT NULL COMMENT 'version',
     `group` int(11) NOT NULL COMMENT '分组id',
+    `navigation` varchar(255) COMMENT '导航id',
     `cname` varchar(255) NOT NULL COMMENT '昵称',
     `resume` varchar(255) NOT NULL COMMENT '简介',
     `icon` varchar(255) NOT NULL COMMENT '图标的文件名，相对路径',
@@ -14,13 +15,13 @@ CREATE TABLE `module_plugin` (
     `operator` int(11) DEFAULT NULL COMMENT '更新人/操作人',
     `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     PRIMARY KEY (`id`) USING BTREE,
-    UNIQUE KEY `unique_uuid` (`uuid`) USING BTREE,
+    UNIQUE KEY `unique_uuid` (`uuid`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC COMMENT='模块插件表';
 
 CREATE TABLE `module_plugin_enable` (
     `id` int(11) NOT NULL COMMENT '模块插件的主键id',
     `name` varchar(255) NOT NULL COMMENT '模块名，可以改，默认为模块插件的name',
-    `navigation` int(11) NOT NULL COMMENT '导航id',
+    `navigation` varchar(255) NOT NULL COMMENT '导航id',
     `is_enable` tinyint(1) NOT NULL COMMENT '是否启用 1未启用 2启用',
     `config` text NOT NULL COMMENT '启用配置',
     `operator` int(11) DEFAULT NULL COMMENT '更新人/操作人',
@@ -32,17 +33,6 @@ CREATE TABLE `module_plugin_enable` (
 CREATE TABLE `module_plugin_package` (
     `id` int(11) NOT NULL COMMENT '模块插件表的主键ID',
     `package` mediumblob NOT NULL COMMENT '安装包',
-    PRIMARY KEY (`id`) USING BTREE,
+    PRIMARY KEY (`id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC COMMENT='模块插件安装包表';
 
-CREATE TABLE `navigation` (
-    `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-    `uuid` varchar(36) NOT NULL COMMENT 'uuid，唯一id',
-    `title` varchar(255) NOT NULL COMMENT '导航名称',
-    `icon` text COMMENT 'Icon信息，dataurl格式',
-    `icon_type` varchar(255) NOT NULL COMMENT '图标类型，可选值:url、css',
-    `sort` tinyint(4) unsigned NOT NULL COMMENT '排序，数字越小优先级越高',
-    `module` text COMMENT '模块ID列表',
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `unique_uuid` (`uuid`) USING BTREE COMMENT '唯一uuid'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC COMMENT='导航表';
