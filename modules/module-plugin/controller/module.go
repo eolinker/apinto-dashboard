@@ -95,6 +95,12 @@ func (c *ModulePluginModule) initRouter() {
 		},
 		{
 			Method:      http.MethodPost,
+			Path:        "/api/system/plugin/uninstall",
+			Handler:     "modulePlugin.uninstall",
+			HandlerFunc: []apinto_module.HandlerFunc{mPluginController.uninstall},
+		},
+		{
+			Method:      http.MethodPost,
 			Path:        "/api/system/plugin/enable",
 			Handler:     "modulePlugin.enable",
 			HandlerFunc: []apinto_module.HandlerFunc{mPluginController.enable},
