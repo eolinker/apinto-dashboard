@@ -30,6 +30,14 @@ func NewErrorResult(msg string) *Result {
 	}
 }
 
+func NewResult(Code int, data interface{}, Msg string) *Result {
+	return &Result{
+		Code: Code,
+		Data: data,
+		Msg:  Msg,
+	}
+}
+
 func NewNoAccessError(msg string) *Result {
 	return &Result{
 		Code: accessCode,
