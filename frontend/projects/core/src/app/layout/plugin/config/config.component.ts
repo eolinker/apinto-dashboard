@@ -10,7 +10,7 @@ import { EmptyHttpResponse } from '../../../constant/type'
 import { ApiService } from '../../../service/api.service'
 import { EoNgMessageService } from '../../../service/eo-ng-message.service'
 import { PluginInstallConfigTableHeadName, PluginInstallConfigTableBody } from '../types/conf'
-import { PluginInstallConfigData, PluginInstallData } from '../types/types'
+import { PluginInstallConfigData } from '../types/types'
 import { EoNgNavigationService } from '../../../service/eo-ng-navigation.service'
 
 @Component({
@@ -24,11 +24,9 @@ export class PluginConfigComponent implements OnInit {
   configTableHeadName:THEAD_TYPE[] = [...PluginInstallConfigTableHeadName]
   configTableBody:EO_TBODY_TYPE[] = [...PluginInstallConfigTableBody]
   name:string = ''
-  apiGroup:string = ''
   server:string = ''
 
   showServer:boolean = false
-  showApiGroup:boolean = false
 
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
   validateForm:FormGroup = new FormGroup({})
@@ -41,6 +39,7 @@ export class PluginConfigComponent implements OnInit {
   nzDisabled:boolean = false
 
   modalRef:NzModalRef|undefined
+  refreshPage:Function|undefined
   constructor (private fb: UntypedFormBuilder, private api:ApiService, private message:EoNgMessageService,
     private navService:EoNgNavigationService) {
     this.validateForm = this.fb.group({
@@ -54,36 +53,10 @@ export class PluginConfigComponent implements OnInit {
   }
 
   getMessage () {
-    this.api.get('system/plugin/enable', { id: this.pluginId }).subscribe((resp:{code:number, data:PluginInstallData, msg:string}) => {
-      if (resp.code === 0) {
-        this.name = resp.data.module.name
-        this.apiGroup = resp.data.module.apiGroup
-        this.server = resp.data.module.server
-        this.headerList = resp.data.module.header.map((header:PluginInstallConfigData) => {
-          header.placeholder = header.placeholder || '请输入'
-          return header
-        })
-        this.queryList = resp.data.module.query.map((query:PluginInstallConfigData) => {
-          query.placeholder = query.placeholder || '请输入'
-          return query
-        })
-        this.initializeList = resp.data.module.initialize.map((initItem:PluginInstallConfigData) => {
-          initItem.placeholder = initItem.placeholder || '请输入'
-          return initItem
-        })
-        this.showServer = resp.data.render.internet
-        this.showApiGroup = resp.data.render.apiGroup
-      }
-    })
   }
 
   checkValid () {
     let valid:boolean = true
-    if (this.showApiGroup && this.validateForm.controls['apiGroup'].invalid) {
-      valid = false
-      this.validateForm.controls['apiGroup'].markAsDirty()
-      this.validateForm.controls['apiGroup'].updateValueAndValidity({ onlySelf: true })
-    }
     if (this.showServer && this.validateForm.controls['server'].invalid) {
       valid = false
       this.validateForm.controls['server'].markAsDirty()
@@ -110,10 +83,11 @@ export class PluginConfigComponent implements OnInit {
         })
       }
 
-      this.api.post('system/plugin/enable', { id: this.pluginId }, data).subscribe((resp:EmptyHttpResponse) => {
+      this.api.post('system/plugin/enable', data, { id: this.pluginId }).subscribe((resp:EmptyHttpResponse) => {
         if (resp.code === 0) {
           this.message.success(resp.msg || '启用插件成功')
           this.navService.reqFlashMenu()
+          this.refreshPage && this.refreshPage()
         }
       })
     }
