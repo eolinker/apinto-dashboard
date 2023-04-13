@@ -293,15 +293,25 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 		return err
 	}
 
-	err = m.lockService.Lock(locker_service.LockNameModulePlugin, pluginInfo.Id)
+	//全局异步锁
+	err = m.lockService.Lock(locker_service.LockNameModulePlugin, 0)
 	if err != nil {
-		return err
+		return errors.New("现在有人在操作,请稍后再试")
 	}
-	defer m.lockService.Unlock(locker_service.LockNameModulePlugin, pluginInfo.Id)
+	defer m.lockService.Unlock(locker_service.LockNameModulePlugin, 0)
 
 	//若输入的启用模块名为空，则为默认的模块名
 	if enableInfo.Name == "" {
 		enableInfo.Name = pluginInfo.Name
+	}
+
+	//校验模块名, 若启用的模块有同名的则报错
+	info, err := m.pluginEnableStore.GetByModuleName(ctx, enableInfo.Name)
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return err
+	}
+	if info != nil && info.IsEnable == 1 {
+		return errors.New("已有同名的插件")
 	}
 
 	var config []byte
@@ -400,11 +410,11 @@ func (m *modulePluginService) DisablePlugin(ctx context.Context, userID int, plu
 		return errors.New("inner-core plugin can't be disable. ")
 	}
 
-	err = m.lockService.Lock(locker_service.LockNameModulePlugin, pluginInfo.Id)
+	err = m.lockService.Lock(locker_service.LockNameModulePlugin, 0)
 	if err != nil {
 		return err
 	}
-	defer m.lockService.Unlock(locker_service.LockNameModulePlugin, pluginInfo.Id)
+	defer m.lockService.Unlock(locker_service.LockNameModulePlugin, 0)
 
 	enableInfo, err := m.pluginEnableStore.Get(ctx, pluginInfo.Id)
 	if err != nil {
