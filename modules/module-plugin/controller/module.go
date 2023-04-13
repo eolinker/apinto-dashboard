@@ -1,6 +1,7 @@
 package controller
 
 import (
+	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	apinto_module "github.com/eolinker/apinto-module"
 	"net/http"
 )
@@ -91,25 +92,25 @@ func (c *ModulePluginModule) initRouter() {
 			Method:      http.MethodPost,
 			Path:        "/api/system/plugin/install",
 			Handler:     "modulePlugin.install",
-			HandlerFunc: []apinto_module.HandlerFunc{mPluginController.install},
+			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypeCreate.Handler, mPluginController.install},
 		},
 		{
 			Method:      http.MethodPost,
 			Path:        "/api/system/plugin/uninstall",
 			Handler:     "modulePlugin.uninstall",
-			HandlerFunc: []apinto_module.HandlerFunc{mPluginController.uninstall},
+			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypeDelete.Handler, mPluginController.uninstall},
 		},
 		{
 			Method:      http.MethodPost,
 			Path:        "/api/system/plugin/enable",
 			Handler:     "modulePlugin.enable",
-			HandlerFunc: []apinto_module.HandlerFunc{mPluginController.enable},
+			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypeEdit.Handler, mPluginController.enable},
 		},
 		{
 			Method:      http.MethodPost,
 			Path:        "/api/system/plugin/disable",
 			Handler:     "modulePlugin.disable",
-			HandlerFunc: []apinto_module.HandlerFunc{mPluginController.disable},
+			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypeEdit.Handler, mPluginController.disable},
 		},
 		{
 			Method:      http.MethodGet,
