@@ -33,6 +33,7 @@ func (n *navigationService) initData() {
 				Title: nv.Title,
 				Name:  nv.Name,
 				Icon:  nv.Icon,
+				Quick: nv.Quick,
 			}
 			nsMap.Set(nv.Uuid, v)
 			ns = append(ns, v)
