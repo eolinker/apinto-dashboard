@@ -111,11 +111,7 @@ func (m *modulePluginService) GetPluginInfo(ctx context.Context, pluginUUID stri
 	info := &model.ModulePluginInfo{
 		ModulePlugin: plugin,
 		IsEnable:     false,
-		Uninstall:    true,
-	}
-	//若为非内置
-	if plugin.Type == 2 {
-		info.Uninstall = false
+		Uninstall:    false,
 	}
 
 	enableEntry, err := m.pluginEnableStore.Get(ctx, plugin.Id)
@@ -124,6 +120,10 @@ func (m *modulePluginService) GetPluginInfo(ctx context.Context, pluginUUID stri
 			return info, nil
 		}
 		return nil, err
+	}
+	//若为非内置插件，且为停用状态
+	if enableEntry.IsEnable == 1 && plugin.Type == 2 {
+		info.Uninstall = false
 	}
 
 	//若插件已启用
