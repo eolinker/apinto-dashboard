@@ -290,7 +290,7 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 	if err != nil {
 		//文件不存在，删除目录
 		os.RemoveAll(tmpDir)
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("安装插件失败  配置文件文件不存在. err:%s", err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, "安装插件失败  配置文件文件不存在.")
 		return
 	}
 	defer pluginCfgFile.Close()
@@ -312,7 +312,7 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 	if err != nil {
 		//文件不存在，删除目录
 		os.RemoveAll(tmpDir)
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("安装插件失败 README.md 文件不存在. err:%s", err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, "安装插件失败 README.md 文件不存在")
 		return
 	}
 	defer mdFile.Close()
@@ -322,7 +322,7 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 	if err != nil {
 		//文件不存在，删除目录
 		os.RemoveAll(tmpDir)
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("安装插件失败 图标文件不存在. err:%s", err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, "安装插件失败 图标文件不存在")
 		return
 	}
 	defer iconFile.Close()
