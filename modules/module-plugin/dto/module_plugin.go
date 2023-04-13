@@ -35,7 +35,6 @@ type PluginEnableInfo struct {
 
 type PluginEnableRender struct {
 	Internet   bool                 `json:"internet"`
-	Invisible  bool                 `json:"invisible"`
 	Headers    []ExtendParamsRender `json:"headers"`
 	Querys     []ExtendParamsRender `json:"querys"`
 	Initialize []ExtendParamsRender `json:"initialize"`
