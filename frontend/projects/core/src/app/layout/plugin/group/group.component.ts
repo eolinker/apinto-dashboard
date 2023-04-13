@@ -35,7 +35,6 @@ export class GroupComponent implements OnInit {
   }
 
   ngOnInit (): void {
-    console.log('init')
     this.service.getPluginList()
   }
 

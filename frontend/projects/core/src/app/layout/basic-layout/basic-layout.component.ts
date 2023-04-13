@@ -64,9 +64,7 @@ export class BasicLayoutComponent implements OnInit {
     })
 
     this.subscription2 = this.navigationService.repFlashMenu().subscribe(() => {
-      console.log('menu')
       this.sideMenuOptions = [this.guideMenu, ...this.navigationService.getCurrentMenuList()]
-      console.log(this.sideMenuOptions)
       for (const menu of this.sideMenuOptions) {
         menu.open = this.openMap[menu['titleString']! as string]
       }
