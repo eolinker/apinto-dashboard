@@ -62,23 +62,11 @@ import { MarkdownService } from 'ngx-markdown'
   </header>
   <section class="flex-1 p-[40px] markdown-block overflow-auto">
       <eo-ng-empty *ngIf="showEmpty" nzMainTitle="暂无数据" nzInputImage="simple"></eo-ng-empty>
-    <markdown *ngIf="!showEmpty" [src]="getMd()" [srcRelativeLink]="true"  (load)="loadMd()" (error)="onError($event)"></markdown>
+    <markdown  clipboard class="markdown-body" *ngIf="!showEmpty" [src]="getMd()" [srcRelativeLink]="true"  (load)="loadMd()" (error)="onError($event)"></markdown>
   </section>
   `,
-  styles: [
-    `
-    .markdown-block{
-      border-top:1px solid var(--border-color);
-    }
-    :host ::ng-deep{
-      height:100%;
-      display:flex;
-    flex-direction: column;
-      overflow-y:hidden;
-      img{
-        max-width:100%
-      }
-    }`
+  styleUrls: [
+    './message.component.scss'
   ]
 })
 export class PluginMessageComponent implements OnInit {
@@ -146,6 +134,7 @@ export class PluginMessageComponent implements OnInit {
   }
 
   getMd () {
+    // return './assets/README.md' // 本地调试用
     return `../../plugin/md/${this.pluginId}/${this.mdFileName || ''}`
   }
 
@@ -168,7 +157,13 @@ export class PluginMessageComponent implements OnInit {
       showServer: false
     }
     this.api.get('system/plugin/enable', { id: this.pluginId }).subscribe((resp:{code:number, data:PluginInstallData, msg:string}) => {
-      if (resp.code === 0) {
+      if (resp.code === 30001) {
+        this.message.success(resp.msg || '启用插件成功')
+        const subscription = this.appConfigService.getMenuList().subscribe(() => {
+          subscription.unsubscribe()
+        })
+        this.getPluginDetail()
+      } else if (resp.code === 0) {
         params.name = resp.data.module.name
         params.server = resp.data.module.server
         params.headerList = resp.data.module.header.map((header:PluginInstallConfigData) => {
