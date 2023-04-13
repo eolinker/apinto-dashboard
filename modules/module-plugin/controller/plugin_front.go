@@ -90,7 +90,6 @@ func (p *pluginFrontController) getPluginInfo(c *gin.Context) {
 	info, err := p.modulePluginService.GetPluginInfo(c, pluginID)
 	if err != nil {
 		c.Data(http.StatusNotFound, "application/text", []byte("404 page not found"))
-		c.Abort()
 		return
 	}
 	//若为内置插件，则从内嵌目录中获取
@@ -101,7 +100,6 @@ func (p *pluginFrontController) getPluginInfo(c *gin.Context) {
 			return
 		}
 		c.FileFromFS(filePath, fsHandler)
-		//fsHandler.ServeHTTP(c.Writer, c.Request)
 		return
 	}
 
@@ -110,7 +108,7 @@ func (p *pluginFrontController) getPluginInfo(c *gin.Context) {
 	// Check if file exists and/or if we have permission to access it
 	f, err := pluginFs.Open(filePath)
 	if err != nil {
-		//TODO 文件不存在时
+		//文件不存在时
 		c.Data(http.StatusNotFound, "application/text", []byte("404 page not found"))
 		return
 	}
@@ -122,16 +120,30 @@ func (p *pluginFrontController) getPluginInfo(c *gin.Context) {
 // getPluginMD 获取插件描述中要用到的MD文件
 func (p *pluginFrontController) getPluginResources(c *gin.Context) {
 	pluginID := c.Param("id")
-	//TODO 若为内置插件
-
+	//判断插件存不存在
+	info, err := p.modulePluginService.GetPluginInfo(c, pluginID)
+	if err != nil {
+		c.Data(http.StatusNotFound, "application/text", []byte("404 page not found"))
+		return
+	}
 	filePath := fmt.Sprintf("%s/resources/%s", pluginID, strings.Trim(c.Param("filepath"), "/"))
+	//若为内置插件，则从内嵌目录中获取
+	if info.Type == 0 || info.Type == 1 {
+		fsHandler, err := initialize.GetInnerPluginFS(filePath)
+		if err != nil {
+			c.Data(http.StatusNotFound, "application/text", []byte("404 page not found"))
+			return
+		}
+		c.FileFromFS(filePath, fsHandler)
+		return
+	}
 
 	pluginFs := gin.Dir(fileDir, false)
 	fileServer := http.StripPrefix("/plugin/info", http.FileServer(pluginFs))
 	// Check if file exists and/or if we have permission to access it
 	f, err := pluginFs.Open(filePath)
 	if err != nil {
-		//TODO 文件不存在时
+		//文件不存在时
 		c.Data(http.StatusNotFound, "application/text", []byte("404 page not found"))
 		return
 	}

@@ -125,6 +125,5 @@ func GetInnerPluginFS(filePath string) (http.FileSystem, error) {
 	if err != nil {
 		return nil, err
 	}
-	//fileServer := http.StripPrefix(stripPrefix, http.FileServer(http.FS(pluginsFS)))
 	return http.FS(pluginsFS), nil
 }
