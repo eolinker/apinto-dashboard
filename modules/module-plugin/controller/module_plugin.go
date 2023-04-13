@@ -314,6 +314,21 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
+func (p *modulePluginController) uninstall(ginCtx *gin.Context) {
+	userId := controller.GetUserId(ginCtx)
+	pluginUUID := ginCtx.Query("id")
+	err := p.modulePluginService.UninstallPlugin(ginCtx, userId, pluginUUID)
+	if err != nil {
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
+		return
+	}
+
+	//删除插件在本地的缓存
+	os.RemoveAll(path.Join("./plugin", pluginUUID))
+
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
+}
+
 func (p *modulePluginController) enable(ginCtx *gin.Context) {
 	pluginUUID := ginCtx.Query("id")
 
