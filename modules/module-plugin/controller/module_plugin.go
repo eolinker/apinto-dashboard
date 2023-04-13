@@ -39,13 +39,13 @@ func (p *modulePluginController) plugins(ginCtx *gin.Context) {
 
 	pluginItems, err := p.modulePluginService.GetPlugins(ginCtx, groupUUID, searchName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Get plugins fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Get plugins fail. err:%s", err.Error()))
 		return
 	}
 
 	pluginGroups, err := p.modulePluginService.GetPluginGroups(ginCtx)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Get plugins fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Get plugins fail. err:%s", err.Error()))
 		return
 	}
 	plugins := make([]*dto.PluginListItem, 0, len(pluginItems))
@@ -81,7 +81,7 @@ func (p *modulePluginController) getPluginInfo(ginCtx *gin.Context) {
 
 	pluginInfo, err := p.modulePluginService.GetPluginInfo(ginCtx, pluginUUID)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Get plugin Info fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Get plugin Info fail. err:%s", err.Error()))
 		return
 	}
 
@@ -102,7 +102,7 @@ func (p *modulePluginController) getPluginInfo(ginCtx *gin.Context) {
 func (p *modulePluginController) getGroupsEnum(ginCtx *gin.Context) {
 	pluginGroups, err := p.modulePluginService.GetPluginGroups(ginCtx)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Get plugin groups enum fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Get plugin groups enum fail. err:%s", err.Error()))
 		return
 	}
 
@@ -126,13 +126,13 @@ func (p *modulePluginController) getEnableInfo(ginCtx *gin.Context) {
 	pluginUUID := ginCtx.Query("id")
 	info, err := p.modulePluginService.GetPluginEnableInfo(ginCtx, pluginUUID)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Get plugin enable info fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Get plugin enable info fail. err:%s", err.Error()))
 		return
 	}
 
 	render, err := p.modulePluginService.GetPluginEnableRender(ginCtx, pluginUUID)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Get plugin enable info fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Get plugin enable info fail. err:%s", err.Error()))
 		return
 	}
 
@@ -144,7 +144,7 @@ func (p *modulePluginController) getEnableInfo(ginCtx *gin.Context) {
 			Server: "",
 		})
 		if err != nil {
-			ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("启用插件失败:%s", err.Error())))
+			controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("启用插件失败:%s", err.Error()))
 			return
 		}
 		ginCtx.JSON(http.StatusOK, controller.NewResult(enablePluginStatus, nil, "success"))
@@ -228,13 +228,13 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 	userId := controller.GetUserId(ginCtx)
 	pluginPackage, err := ginCtx.FormFile("plugin")
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("install plugin FormFilefail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("install plugin FormFilefail. err:%s", err.Error()))
 		return
 	}
 
 	file, err := pluginPackage.Open()
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("install plugin openFile fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("install plugin openFile fail. err:%s", err.Error()))
 		return
 	}
 	defer file.Close()
@@ -252,7 +252,7 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 
 	groupName := ginCtx.PostForm("group_name")
 	if groupName == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("install plugin fail. err: groupName is null. ")))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("install plugin fail. err: groupName is null. "))
 		return
 	}
 
@@ -260,7 +260,7 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 	fileBuffer := make([]byte, 0)
 	_, err = file.Read(fileBuffer)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("install plugin read file fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("install plugin read file fail. err:%s", err.Error()))
 		return
 	}
 	packageFile := bytes.NewReader(fileBuffer)
@@ -272,7 +272,7 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 	if err != nil {
 		//删除目录
 		os.RemoveAll(tmpDir)
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("install plugin decompress file fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("install plugin decompress file fail. err:%s", err.Error()))
 		return
 	}
 
@@ -283,20 +283,20 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 	if err != nil {
 		//文件不存在，删除目录
 		os.RemoveAll(tmpDir)
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("install plugin plugin.yml doesn't exist. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("install plugin plugin.yml doesn't exist. err:%s", err.Error()))
 		return
 	}
 	defer pluginCfgFile.Close()
 	pluginBuffer := make([]byte, 0)
 	_, err = pluginCfgFile.Read(pluginBuffer)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("install plugin read plugin.yml fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("install plugin read plugin.yml fail. err:%s", err.Error()))
 		return
 	}
 	pluginCfg := new(model.PluginYmlCfg)
 	err = yaml.Unmarshal(pluginBuffer, pluginCfg)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("install plugin unmarshal plugin.yml fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("install plugin unmarshal plugin.yml fail. err:%s", err.Error()))
 		return
 	}
 
@@ -304,7 +304,7 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 	if err != nil {
 		//删除目录
 		os.RemoveAll(tmpDir)
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("install plugin fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("install plugin fail. err:%s", err.Error()))
 		return
 	}
 
@@ -336,7 +336,7 @@ func (p *modulePluginController) disable(ginCtx *gin.Context) {
 
 	err := p.modulePluginService.DisablePlugin(ginCtx, controller.GetUserId(ginCtx), pluginUUID)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Disable plugin fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Disable plugin fail. err:%s", err.Error()))
 		return
 	}
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))

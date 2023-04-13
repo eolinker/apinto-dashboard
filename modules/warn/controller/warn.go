@@ -79,7 +79,7 @@ func RegisterWarnRouter(router gin.IRouter) {
 func (w *warnController) delWebhook(ginCtx *gin.Context) {
 	uid := ginCtx.Query("uuid")
 	if uid == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("uuid is null"))
+		controller.ErrorJson(ginCtx, http.StatusOK, "uuid is null")
 		return
 	}
 
@@ -87,7 +87,7 @@ func (w *warnController) delWebhook(ginCtx *gin.Context) {
 	userId := controller.GetUserId(ginCtx)
 
 	if err := w.noticeChannelService.DeleteNoticeChannel(ginCtx, namespaceId, userId, uid); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -99,20 +99,20 @@ func (w *warnController) webhook(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	uid := ginCtx.Query("uuid")
 	if uid == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("uuid is null"))
+		controller.ErrorJson(ginCtx, http.StatusOK, "uuid is null")
 		return
 	}
 
 	channel, err := w.noticeChannelService.NoticeChannelByName(ginCtx, namespaceId, uid)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	webhook := &notice_model.NoticeChannelWebhook{}
 
 	if err = json.Unmarshal([]byte(channel.Config), webhook); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -141,7 +141,7 @@ func (w *warnController) webhooks(ginCtx *gin.Context) {
 
 	list, err := w.noticeChannelService.NoticeChannelList(ginCtx, namespaceId, 1)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -151,7 +151,7 @@ func (w *warnController) webhooks(ginCtx *gin.Context) {
 		webhook := &notice_model.NoticeChannelWebhook{}
 
 		if err = json.Unmarshal([]byte(channel.Config), webhook); err != nil {
-			ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+			controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 			return
 		}
 		webhooks = append(webhooks, &warn_dto.WebhooksOutput{
@@ -182,13 +182,13 @@ func (w *warnController) createWebhook(ginCtx *gin.Context) {
 	webhookInput := new(warn_dto.WebhookInput)
 
 	if err := ginCtx.BindJSON(webhookInput); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	//参数校验
 	if err := checkWebhookParam(webhookInput); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -213,7 +213,7 @@ func (w *warnController) createWebhook(ginCtx *gin.Context) {
 	}
 
 	if err := w.noticeChannelService.CreateNoticeChannel(ginCtx, namespaceId, userId, channel); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -228,18 +228,18 @@ func (w *warnController) updateWebhook(ginCtx *gin.Context) {
 	webhookInput := new(warn_dto.WebhookInput)
 
 	if err := ginCtx.BindJSON(webhookInput); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	if webhookInput.Uuid == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("uuid is null"))
+		controller.ErrorJson(ginCtx, http.StatusOK, "uuid is null")
 		return
 	}
 
 	//参数校验
 	if err := checkWebhookParam(webhookInput); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -264,7 +264,7 @@ func (w *warnController) updateWebhook(ginCtx *gin.Context) {
 	}
 
 	if err := w.noticeChannelService.UpdateNoticeChannel(ginCtx, namespaceId, userId, channel); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -304,7 +304,7 @@ func (w *warnController) getEmail(ginCtx *gin.Context) {
 
 	list, err := w.noticeChannelService.NoticeChannelList(ginCtx, namespaceId, 2)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -314,7 +314,7 @@ func (w *warnController) getEmail(ginCtx *gin.Context) {
 		email := &notice_model.NoticeChannelEmail{}
 
 		if err = json.Unmarshal([]byte(list[0].Config), email); err != nil {
-			ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+			controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 			return
 		}
 
@@ -342,13 +342,13 @@ func (w *warnController) createEmail(ginCtx *gin.Context) {
 	emailInput := new(warn_dto.EmailInput)
 
 	if err := ginCtx.BindJSON(emailInput); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	//参数校验
 	if err := checkEmailParam(emailInput); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -371,7 +371,7 @@ func (w *warnController) createEmail(ginCtx *gin.Context) {
 	}
 
 	if err := w.noticeChannelService.CreateNoticeChannel(ginCtx, namespaceId, userId, channel); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -385,17 +385,17 @@ func (w *warnController) updateEmail(ginCtx *gin.Context) {
 	emailInput := new(warn_dto.EmailInput)
 
 	if err := ginCtx.BindJSON(emailInput); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	if emailInput.Uuid == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("uuid is null"))
+		controller.ErrorJson(ginCtx, http.StatusOK, "uuid is null")
 		return
 	}
 
 	//参数校验
 	if err := checkEmailParam(emailInput); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -418,7 +418,7 @@ func (w *warnController) updateEmail(ginCtx *gin.Context) {
 	}
 
 	if err := w.noticeChannelService.UpdateNoticeChannel(ginCtx, namespaceId, userId, channel); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -442,14 +442,14 @@ func (w *warnController) warnHistory(ginCtx *gin.Context) {
 	partitionId := ginCtx.Query("partition_id")
 	partitionInfo, err := w.monitorService.PartitionInfo(ginCtx, namespaceId, partitionId)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	start, _ := strconv.Atoi(ginCtx.Query("start_time"))
 	end, _ := strconv.Atoi(ginCtx.Query("end_time"))
 	if int64(end) > time.Now().Unix() {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("查询结束时间不能大于当前时间"))
+		controller.ErrorJson(ginCtx, http.StatusOK, "查询结束时间不能大于当前时间")
 		return
 	}
 	startTime := time.Unix(int64(start), 0)
@@ -467,7 +467,7 @@ func (w *warnController) warnHistory(ginCtx *gin.Context) {
 
 	list, total, err := w.warnHistoryService.QueryList(ginCtx, namespaceId, partitionInfo.Id, pageNum, pageSize, startTime, endTime, name)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -506,7 +506,7 @@ func (w *warnController) channels(ginCtx *gin.Context) {
 
 	list, err := w.noticeChannelService.NoticeChannelList(ginCtx, namespaceId, 0)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -531,14 +531,14 @@ func (w *warnController) strategys(ginCtx *gin.Context) {
 	partitionId := ginCtx.Query("partition_id")
 	partitionInfo, err := w.monitorService.PartitionInfo(ginCtx, namespaceId, partitionId)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	start, _ := strconv.Atoi(ginCtx.Query("start_time"))
 	end, _ := strconv.Atoi(ginCtx.Query("end_time"))
 	if int64(end) > time.Now().Unix() {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("查询结束时间不能大于当前时间"))
+		controller.ErrorJson(ginCtx, http.StatusOK, "查询结束时间不能大于当前时间")
 		return
 	}
 	startTime := time.Unix(int64(start), 0)
@@ -572,14 +572,14 @@ func (w *warnController) strategys(ginCtx *gin.Context) {
 	}
 	listPage, count, err := w.warnStrategyService.WarnStrategyListPage(ginCtx, namespaceId, query)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	//获取所有API
 	apiList, err := w.apiService.GetAPIInfoAll(ginCtx, namespaceId)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	apiMaps := common.SliceToMap(apiList, func(t *api_model.APIInfo) string {
@@ -589,7 +589,7 @@ func (w *warnController) strategys(ginCtx *gin.Context) {
 	//获取所有上游服务
 	serviceList, err := w.service.GetServiceListAll(ginCtx, namespaceId)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	serviceMaps := common.SliceToMap(serviceList, func(t *upstream_model.ServiceListItem) string {
@@ -699,12 +699,12 @@ func (w *warnController) strategy(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	uid := ginCtx.Query("uuid")
 	if uid == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("uuid is null"))
+		controller.ErrorJson(ginCtx, http.StatusOK, "uuid is null")
 		return
 	}
 	warnStrategy, err := w.warnStrategyService.WarnStrategyByUuid(ginCtx, namespaceId, uid)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -720,17 +720,17 @@ func (w *warnController) updateStrategyStatus(ginCtx *gin.Context) {
 	strategy := &warn_dto.WarnStrategyInput{}
 
 	if err := ginCtx.BindJSON(strategy); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	if strategy.Uuid == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("uuid is null"))
+		controller.ErrorJson(ginCtx, http.StatusOK, "uuid is null")
 		return
 	}
 
 	if err := w.warnStrategyService.UpdateWarnStrategyStatus(ginCtx, strategy.Uuid, strategy.IsEnable); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -741,12 +741,12 @@ func (w *warnController) deleteStrategy(ginCtx *gin.Context) {
 
 	uid := ginCtx.Query("uuid")
 	if uid == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("uuid is null"))
+		controller.ErrorJson(ginCtx, http.StatusOK, "uuid is null")
 		return
 	}
 
 	if err := w.warnStrategyService.DeleteWarnStrategy(ginCtx, uid); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -761,18 +761,18 @@ func (w *warnController) createStrategy(ginCtx *gin.Context) {
 	strategy := &warn_dto.WarnStrategyInput{}
 
 	if err := ginCtx.BindJSON(strategy); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	if err := checkWarnStrategyParam(strategy); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	partitionInfo, err := w.monitorService.PartitionInfo(ginCtx, namespaceId, strategy.PartitionId)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -781,7 +781,7 @@ func (w *warnController) createStrategy(ginCtx *gin.Context) {
 	input := dtoWarnStrategyToModel(strategy, partitionInfo.Id)
 
 	if err := w.warnStrategyService.CreateWarnStrategy(ginCtx, namespaceId, userId, input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -797,25 +797,25 @@ func (w *warnController) updateStrategy(ginCtx *gin.Context) {
 	strategy := &warn_dto.WarnStrategyInput{}
 
 	if err := ginCtx.BindJSON(strategy); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	if err := checkWarnStrategyParam(strategy); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	partitionInfo, err := w.monitorService.PartitionInfo(ginCtx, namespaceId, strategy.PartitionId)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	input := dtoWarnStrategyToModel(strategy, partitionInfo.Id)
 
 	if err = w.warnStrategyService.UpdateWarnStrategy(ginCtx, namespaceId, userId, input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
