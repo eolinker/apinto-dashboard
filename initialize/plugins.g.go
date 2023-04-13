@@ -4,12 +4,13 @@ import (
 	"context"
 	"embed"
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/modules/module-plugin/model"
-	"github.com/eolinker/eosc/common/bean"
-	"gopkg.in/yaml.v3"
 	"io/fs"
 	"net/http"
 	"path"
+
+	"github.com/eolinker/apinto-dashboard/modules/module-plugin/model"
+	"github.com/eolinker/eosc/common/bean"
+	"gopkg.in/yaml.v3"
 
 	"gorm.io/gorm"
 

@@ -8,13 +8,13 @@ import { BaseInfoService } from '../../../service/base-info.service'
 import { EoNgMessageService } from '../../../service/eo-ng-message.service'
 import { EoNgNavigationService } from '../../../service/eo-ng-navigation.service'
 import { PluginConfigComponent } from '../config/config.component'
-import { PluginMessage } from '../types/types'
+import { PluginInstallConfigData, PluginInstallData, PluginMessage } from '../types/types'
 import { MarkdownService } from 'ngx-markdown'
 
 @Component({
   selector: 'eo-ng-plugin-message',
   template: `
-  <header class="my-btnybase ml-btnbase mr-btnrbase">
+  <header class="mx-[40px] my-[20px]">
     <div class="flex justify-between  mb-btnybase items-center">
       <div class="flex">
         <div class="mr-btnrbase w-[50px] h-[50px]">
@@ -60,7 +60,7 @@ import { MarkdownService } from 'ngx-markdown'
     <p>{{resume}}</p>
 
   </header>
-  <section class="flex-1 ml-btnbase mr-btnrbase p-btnbase markdown-block">
+  <section class="flex-1 p-[40px] markdown-block overflow-auto">
       <eo-ng-empty *ngIf="showEmpty" nzMainTitle="暂无数据" nzInputImage="simple"></eo-ng-empty>
     <markdown *ngIf="!showEmpty" [src]="getMd()" [srcRelativeLink]="true"  (load)="loadMd()" (error)="onError($event)"></markdown>
   </section>
@@ -68,14 +68,13 @@ import { MarkdownService } from 'ngx-markdown'
   styles: [
     `
     .markdown-block{
-      border:1px solid var(--border-color);
+      border-top:1px solid var(--border-color);
     }
     :host ::ng-deep{
       height:100%;
       display:flex;
     flex-direction: column;
       overflow-y:hidden;
-      padding-bottom:20px;
       img{
         max-width:100%
       }
@@ -124,7 +123,8 @@ export class PluginMessageComponent implements OnInit {
     this.markdownService.renderer.image = (src, title, alt) => {
       let html
       if (src && /^(?![http])[.]*/.test(src!)) {
-        html = `<image src="${this.urlPrefix}plugin/info/${this.pluginId}/resource/${src}" alt=${alt}/>`
+        const newSrc = src.replace('./resource', '/resource')
+        html = `<image src="${this.urlPrefix}plugin/info/${this.pluginId}${newSrc}" alt=${alt}/>`
       } else {
         html = `<image src="${src}" alt=${alt}/>`
       }
@@ -138,7 +138,7 @@ export class PluginMessageComponent implements OnInit {
         if (resp.code === 0) {
           this.title = resp.data.plugin.cname
           this.resume = resp.data.plugin.resume
-          this.icon = resp.data.plugin.icon ? `${this.urlPrefix}plugin/info/${this.pluginId}/resource/${resp.data.plugin.icon}` : './assets/default-plugin-icon.svg'
+          this.icon = resp.data.plugin.icon ? `${this.urlPrefix}plugin/icon/${this.pluginId}/${resp.data.plugin.icon}` : './assets/default-plugin-icon.svg'
           this.enable = resp.data.plugin.enable
           this.uninstall = resp.data.plugin.uninstall
         }
@@ -146,7 +146,7 @@ export class PluginMessageComponent implements OnInit {
   }
 
   getMd () {
-    return `../../plugin/info/${this.pluginId}/${this.mdFileName || ''}`
+    return `../../plugin/md/${this.pluginId}/${this.mdFileName || ''}`
   }
 
   loadMd () {
@@ -159,18 +159,60 @@ export class PluginMessageComponent implements OnInit {
   }
 
   enablePlugin () {
-    this.modalService.create({
-      nzTitle: '启用',
-      nzWidth: MODAL_NORMAL_SIZE,
-      nzContent: PluginConfigComponent,
-      nzComponentParams: {
+    const params:{name:string, server:string, headerList:Array<PluginInstallConfigData>, queryList:Array<PluginInstallConfigData>, initializeList:Array<PluginInstallConfigData>, showServer:boolean } = {
+      name: '',
+      server: '',
+      headerList: [],
+      queryList: [],
+      initializeList: [],
+      showServer: false
+    }
+    this.api.get('system/plugin/enable', { id: this.pluginId }).subscribe((resp:{code:number, data:PluginInstallData, msg:string}) => {
+      if (resp.code === 0) {
+        params.name = resp.data.module.name
+        params.server = resp.data.module.server
+        params.headerList = resp.data.module.header.map((header:PluginInstallConfigData) => {
+          header.placeholder = header.placeholder || '请输入'
+          return header
+        })
+        params.queryList = resp.data.module.query.map((query:PluginInstallConfigData) => {
+          query.placeholder = query.placeholder || '请输入'
+          return query
+        })
+        params.initializeList = resp.data.module.initialize.map((initItem:PluginInstallConfigData) => {
+          initItem.placeholder = initItem.placeholder || '请输入'
+          return initItem
+        })
+        params.showServer = resp.data.render.internet
 
-      },
-      nzOkText: '确定',
-      nzCancelText: '取消',
-      nzOnOk: (component:PluginConfigComponent) => {
-        component.enablePlugin()
-        return false
+        if (params.showServer || params.headerList.length || params.queryList.length || params.initializeList.length) {
+          this.modalService.create({
+            nzTitle: '启用',
+            nzWidth: MODAL_NORMAL_SIZE,
+            nzContent: PluginConfigComponent,
+            nzComponentParams: {
+              refreshPage: this.getPluginDetail,
+              pluginId: this.pluginId
+
+            },
+            nzOkText: '确定',
+            nzCancelText: '取消',
+            nzOnOk: (component:PluginConfigComponent) => {
+              component.enablePlugin()
+              return false
+            }
+          })
+        } else {
+          this.api.post('system/plugin/enable', { name: params.name }, { id: this.pluginId }).subscribe((resp:EmptyHttpResponse) => {
+            if (resp.code === 0) {
+              this.message.success(resp.msg || '启用插件成功')
+              const subscription = this.appConfigService.getMenuList().subscribe(() => {
+                subscription.unsubscribe()
+              })
+              this.getPluginDetail()
+            }
+          })
+        }
       }
     })
   }
@@ -198,10 +240,13 @@ export class PluginMessageComponent implements OnInit {
 
   // 禁用插件
   disablePlugin () {
-    this.api.post('system/plugin/disable', { id: this.pluginId }).subscribe((resp:EmptyHttpResponse) => {
+    this.api.post('system/plugin/disable', {}, { id: this.pluginId }).subscribe((resp:EmptyHttpResponse) => {
       if (resp.code === 0) {
         this.message.success(resp.msg || '禁用成功')
-        this.appConfigService.reqFlashMenu()
+        const subscription = this.appConfigService.getMenuList().subscribe(() => {
+          subscription.unsubscribe()
+        })
+        this.getPluginDetail()
         this.modalRef?.close()
       }
     })
@@ -209,10 +254,13 @@ export class PluginMessageComponent implements OnInit {
 
   // 卸载插件
   deletePlugin () {
-    this.api.post('system/plugin/uninstall', { id: this.pluginId }).subscribe((resp:EmptyHttpResponse) => {
+    this.api.post('system/plugin/uninstall', {}, { id: this.pluginId }).subscribe((resp:EmptyHttpResponse) => {
       if (resp.code === 0) {
         this.message.success(resp.msg || '卸载成功')
-        this.appConfigService.reqFlashMenu()
+        const subscription = this.appConfigService.getMenuList().subscribe(() => {
+          subscription.unsubscribe()
+        })
+        this.getPluginDetail()
         this.modalRef?.close()
       }
     })
