@@ -253,7 +253,7 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 		return
 	}
 
-	groupName := ginCtx.PostForm("groupName")
+	groupName := ginCtx.PostForm("group_name")
 	if groupName == "" {
 		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("install plugin fail. err: groupName is null. ")))
 		return
@@ -318,10 +318,9 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 	//将临时目录重命名为插件id
 	newDirName := fmt.Sprintf("%s%s%s", PluginDir, string(os.PathSeparator), pluginCfg.ID)
 	err = os.Rename(tmpDir, newDirName)
-	fmt.Println("oldPath=", tmpDir)
-	fmt.Println("newPath=", newDirName)
-	fmt.Println("currentPath=", PluginDir)
-	fmt.Println("xxxxxxxxxxxxxxxxxxxxxx\n", err)
+	if err != nil {
+		log.Errorf("安装插件更改临时目录名失败 err: %s", err)
+	}
 
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
