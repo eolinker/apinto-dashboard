@@ -37,6 +37,17 @@ export class BasicLayoutComponent implements OnInit {
   authInfo:{title:string, infos:Array<{key:string, value:string}>}
   = { title: '', infos: [] }
 
+  guideMenu:MenuOptions = {
+    matchRouter: true,
+    matchRouterExact: false,
+    menu: true,
+    name: 'guide',
+    routerLink: 'guide',
+    title: '🚀 快速入门',
+    type: 'built-in',
+    menuTitleClassName: 'menu-icon-hidden'
+  }
+
   private subscription1: Subscription = new Subscription()
   private subscription2: Subscription = new Subscription()
   private subscription3: Subscription = new Subscription()
@@ -53,7 +64,9 @@ export class BasicLayoutComponent implements OnInit {
     })
 
     this.subscription2 = this.navigationService.repFlashMenu().subscribe(() => {
-      this.sideMenuOptions = [...this.navigationService.getCurrentMenuList()]
+      console.log('menu')
+      this.sideMenuOptions = [this.guideMenu, ...this.navigationService.getCurrentMenuList()]
+      console.log(this.sideMenuOptions)
       for (const menu of this.sideMenuOptions) {
         menu.open = this.openMap[menu['titleString']! as string]
       }
@@ -81,7 +94,7 @@ export class BasicLayoutComponent implements OnInit {
   getSideMenu () {
     this.subscription4 = this.navigationService.getMenuList()
       .subscribe((res:MenuOptions[]) => {
-        this.sideMenuOptions = [...res]
+        this.sideMenuOptions = [this.guideMenu, ...res]
         // for (const index in this.sideMenuOptions) {
         //   this.sideMenuOptions[index].openChange = (value:MenuOptions) => {
         //     this.openHandler(value['key']!)
@@ -168,9 +181,5 @@ export class BasicLayoutComponent implements OnInit {
 
   goToGithub () {
     window.open('https://github.com/eolinker/apinto')
-  }
-
-  goToGuide () {
-    this.router.navigate(['/', 'guide'])
   }
 }
