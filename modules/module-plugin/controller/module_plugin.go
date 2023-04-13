@@ -213,6 +213,7 @@ func (p *modulePluginController) getEnableInfo(ginCtx *gin.Context) {
 
 	enableRender := &dto.PluginEnableRender{
 		Internet:   render.Internet,
+		Invisible:  render.Invisible,
 		Headers:    renderHeader,
 		Querys:     renderQuery,
 		Initialize: renderInitialize,

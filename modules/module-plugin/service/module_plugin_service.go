@@ -123,7 +123,7 @@ func (m *modulePluginService) GetPluginInfo(ctx context.Context, pluginUUID stri
 	}
 	//若为非内置插件，且为停用状态
 	if enableEntry.IsEnable == 1 && plugin.Type == 2 {
-		info.Uninstall = false
+		info.Uninstall = true
 	}
 
 	//若插件已启用
@@ -192,7 +192,8 @@ func (m *modulePluginService) GetPluginEnableRender(ctx context.Context, pluginU
 	}
 
 	renderCfg := &model.PluginEnableRender{
-		Internet: false,
+		Invisible: true,
+		Internet:  false,
 	}
 	switch pluginInfo.Driver {
 	case "remote":
@@ -209,6 +210,7 @@ func (m *modulePluginService) GetPluginEnableRender(ctx context.Context, pluginU
 		renderCfg.Headers = localDefine.Headers
 		renderCfg.Querys = localDefine.Querys
 		renderCfg.Initialize = localDefine.Initialize
+		renderCfg.Invisible = localDefine.Invisible
 	}
 	return renderCfg, nil
 }
