@@ -69,7 +69,7 @@ func switchMethod(method string) int {
 		return int(audit_model.LogOperateTypeNone)
 	case http.MethodPost:
 		return int(audit_model.LogOperateTypeCreate)
-	case http.MethodPut:
+	case http.MethodPut, http.MethodPatch:
 		return int(audit_model.LogOperateTypeEdit)
 	case http.MethodDelete:
 		return int(audit_model.LogOperateTypeDelete)
