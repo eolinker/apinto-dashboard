@@ -10,6 +10,11 @@ import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
   styles: [
     `
     :host ::ng-deep{
+
+      .ant-table{
+        box-shadow:0px 2px 2px -2px var(--border-color);
+      }
+
       .ant-table-tbody > tr:hover .opacity-0{
         opacity:1 !important;
       }
@@ -212,7 +217,7 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
         const monitorTabsHeight = document.getElementsByClassName('monitor-total-content').length > 0 ? 42 : 0 // 监控分区内tabs高度
         const monitorTabsPieHeight = document.getElementsByClassName('eo-ng-monitor-detail-pie').length > 0 ? (document.getElementsByClassName('eo-ng-monitor-detail-pie')[0]?.getBoundingClientRect().height + 32 + 32 + 20 + 10) : 0 // 监控分区内详情页面饼图及tabs高度
         // 表格在弹窗内，需要减去弹窗标题高度53，弹窗顶部100px，弹窗内部上下padding20*2， 表头高度； 否则减去表格顶部间隙12px，底部间隙20px，表头高度
-        scrollY = this.el.nativeElement.classList.contains('drawer-table') ? (this.scrHeight > 660 ? 660 - drawerHeaderHeight - drawerFooterHeight - drawerPagationHeight - 40 - 40 - 20 - 63 - drawerButtonAreaHeight : 660 - drawerHeaderHeight - drawerFooterHeight - drawerPagationHeight - 40 - 40 - 20 - 63 - 69 - 150) : (this.scrHeight - navTop - headerHeight - footerHeight - pagationHeight - clusterDescHeight - monitorTabsHeight - monitorTabsPieHeight - 20 - 6 - 40 - 1 + 10)
+        scrollY = this.el.nativeElement.classList.contains('drawer-table') ? (this.scrHeight > 660 ? 660 - drawerHeaderHeight - drawerFooterHeight - drawerPagationHeight - 40 - 40 - 20 - 63 - drawerButtonAreaHeight : 660 - drawerHeaderHeight - drawerFooterHeight - drawerPagationHeight - 40 - 40 - 14 - 63 - 69 - 150) : (this.scrHeight - navTop - headerHeight - footerHeight - pagationHeight - clusterDescHeight - monitorTabsHeight - monitorTabsPieHeight - 14 - 6 - 40 - 1 + 10)
       }
     }
 

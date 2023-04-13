@@ -26,10 +26,12 @@ import { EoNgMessageService } from '../../../service/eo-ng-message.service'
             [nzBeforeUpload]="beforeUpload"
             [nzLimit]="1"
             [nzRemove]="removeFile"
+            nzAccept=".zip"
           >
             <button id="uploadBtn" [nzDanger]="fileError" eo-ng-button>
               选择文件
             </button>
+          </nz-upload>
             <div
               *ngIf="fileError"
               class="ant-form-item-explain-error"
@@ -44,7 +46,6 @@ import { EoNgMessageService } from '../../../service/eo-ng-message.service'
             >
               仅支持官方提供插件配置模板文件
             </div>
-          </nz-upload>
         </nz-form-control>
       </nz-form-item>
   <nz-form-item class="form-row">
