@@ -30,7 +30,7 @@ export type CardItem = {title:string|TemplateRef<any>, enable:boolean, desc:stri
             <p class="mt-[20px] card-desc-text">{{card.desc}}</p>
           </nz-card>
 
-          <div class="absolute top-[14px] right-[35px]">
+          <div class="absolute top-[14px] right-[24px]">
           <span class="text-[12px] font-medium text-[#0A89FF] bg-[#0A89FF1A] px-[4px] py-[2px] leading-[20px] rounded" *ngIf="card.enable">已启用</span>
           <span  class="text-[12px] font-medium text-[#bbbbbb] bg-[#bbbbbb1A] px-[4px] py-[2px] leading-[20px] rounded" *ngIf="!card.enable"> 未启用</span>
           </div>
