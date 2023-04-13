@@ -111,11 +111,7 @@ func (m *modulePluginService) GetPluginInfo(ctx context.Context, pluginUUID stri
 	info := &model.ModulePluginInfo{
 		ModulePlugin: plugin,
 		IsEnable:     false,
-		Uninstall:    true,
-	}
-	//若为非内置
-	if plugin.Type == 2 {
-		info.Uninstall = false
+		Uninstall:    false,
 	}
 
 	enableEntry, err := m.pluginEnableStore.Get(ctx, plugin.Id)
@@ -124,6 +120,10 @@ func (m *modulePluginService) GetPluginInfo(ctx context.Context, pluginUUID stri
 			return info, nil
 		}
 		return nil, err
+	}
+	//若为非内置插件，且为停用状态
+	if enableEntry.IsEnable == 1 && plugin.Type == 2 {
+		info.Uninstall = false
 	}
 
 	//若插件已启用
@@ -293,15 +293,25 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 		return err
 	}
 
-	err = m.lockService.Lock(locker_service.LockNameModulePlugin, pluginInfo.Id)
+	//全局异步锁
+	err = m.lockService.Lock(locker_service.LockNameModulePlugin, 0)
 	if err != nil {
-		return err
+		return errors.New("现在有人在操作,请稍后再试")
 	}
-	defer m.lockService.Unlock(locker_service.LockNameModulePlugin, pluginInfo.Id)
+	defer m.lockService.Unlock(locker_service.LockNameModulePlugin, 0)
 
 	//若输入的启用模块名为空，则为默认的模块名
 	if enableInfo.Name == "" {
 		enableInfo.Name = pluginInfo.Name
+	}
+
+	//校验模块名, 若启用的模块有同名的则报错
+	info, err := m.pluginEnableStore.GetByModuleName(ctx, enableInfo.Name)
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return err
+	}
+	if info != nil && info.IsEnable == 1 {
+		return errors.New("已有同名的插件")
 	}
 
 	var config []byte
@@ -400,11 +410,11 @@ func (m *modulePluginService) DisablePlugin(ctx context.Context, userID int, plu
 		return errors.New("inner-core plugin can't be disable. ")
 	}
 
-	err = m.lockService.Lock(locker_service.LockNameModulePlugin, pluginInfo.Id)
+	err = m.lockService.Lock(locker_service.LockNameModulePlugin, 0)
 	if err != nil {
 		return err
 	}
-	defer m.lockService.Unlock(locker_service.LockNameModulePlugin, pluginInfo.Id)
+	defer m.lockService.Unlock(locker_service.LockNameModulePlugin, 0)
 
 	enableInfo, err := m.pluginEnableStore.Get(ctx, pluginInfo.Id)
 	if err != nil {
@@ -473,7 +483,6 @@ func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml 
 	}
 
 	err = m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
-
 		t := time.Now()
 		pluginInfo := &entry.ModulePlugin{
 			UUID:       pluginYml.ID,
@@ -519,6 +528,48 @@ func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml 
 	}, time.Hour)
 
 	return nil
+}
+
+func (m *modulePluginService) UpdateInnerPlugin(ctx context.Context, pluginYml *model.InnerPluginYmlCfg) error {
+
+	pluginType := 1
+	if pluginYml.Core {
+		pluginType = 0
+	}
+
+	pluginInfo, err := m.pluginStore.GetPluginInfo(ctx, pluginYml.ID)
+	if err != nil {
+		return err
+	}
+	t := time.Now()
+
+	pluginInfo.Name = pluginYml.Name
+	pluginInfo.Version = pluginYml.Version
+	pluginInfo.Navigation = pluginYml.Navigation
+	pluginInfo.CName = pluginYml.CName
+	pluginInfo.Resume = pluginYml.Resume
+	pluginInfo.ICon = pluginYml.ICon
+	pluginInfo.Type = pluginType
+	pluginInfo.Front = pluginYml.Front
+	pluginInfo.Driver = pluginYml.Driver
+	pluginInfo.CreateTime = t
+
+	return m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
+		if _, err = m.pluginStore.Update(txCtx, pluginInfo); err != nil {
+			return err
+		}
+
+		//name和enable不更新
+		enable := &entry.ModulePluginEnable{
+			Id:         pluginInfo.Id,
+			Navigation: pluginYml.Navigation,
+			Config:     []byte{},
+			Operator:   0,
+			UpdateTime: t,
+		}
+		_, err = m.pluginEnableStore.Update(txCtx, enable)
+		return err
+	})
 }
 
 func (m *modulePluginService) CheckPluginInstalled(ctx context.Context, pluginID string) (bool, error) {
