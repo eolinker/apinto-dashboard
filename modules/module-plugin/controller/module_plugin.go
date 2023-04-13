@@ -29,6 +29,9 @@ func newModulePluginController() *modulePluginController {
 	return p
 }
 
+// enablePluginStatus 当获取插件信息时可以直接启用时返回的状态码
+const enablePluginStatus = 30001
+
 // 插件列表
 func (p *modulePluginController) plugins(ginCtx *gin.Context) {
 	groupUUID := ginCtx.Query("group")
@@ -126,9 +129,25 @@ func (p *modulePluginController) getEnableInfo(ginCtx *gin.Context) {
 		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Get plugin enable info fail. err:%s", err.Error())))
 		return
 	}
+
 	render, err := p.modulePluginService.GetPluginEnableRender(ginCtx, pluginUUID)
 	if err != nil {
 		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Get plugin enable info fail. err:%s", err.Error())))
+		return
+	}
+
+	//若模块名没有冲突，且没有需要填的，直接启用
+	if !info.NameConflict && !render.Internet && len(render.Headers) == 0 && len(render.Querys) == 0 && len(render.Initialize) == 0 {
+		userId := controller.GetUserId(ginCtx)
+		err = p.modulePluginService.EnablePlugin(ginCtx, userId, pluginUUID, &dto.PluginEnableInfo{
+			Name:   info.Name,
+			Server: "",
+		})
+		if err != nil {
+			ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("启用插件失败:%s", err.Error())))
+			return
+		}
+		ginCtx.JSON(enablePluginStatus, controller.NewSuccessResult(nil))
 		return
 	}
 
@@ -152,6 +171,13 @@ func (p *modulePluginController) getEnableInfo(ginCtx *gin.Context) {
 			Name:  i.Name,
 			Value: i.Value,
 		})
+	}
+	enableInfo := &dto.PluginEnableInfo{
+		Name:       info.Name,
+		Server:     info.Server,
+		Header:     infoHeader,
+		Query:      infoQuery,
+		Initialize: infoInitialize,
 	}
 
 	renderHeader := make([]dto.ExtendParamsRender, 0, len(render.Headers))
@@ -185,17 +211,8 @@ func (p *modulePluginController) getEnableInfo(ginCtx *gin.Context) {
 		})
 	}
 
-	enableInfo := &dto.PluginEnableInfo{
-		Name:       info.Name,
-		Server:     info.Server,
-		Header:     infoHeader,
-		Query:      infoQuery,
-		Initialize: infoInitialize,
-	}
-
 	enableRender := &dto.PluginEnableRender{
 		Internet:   render.Internet,
-		Invisible:  render.Invisible,
 		Headers:    renderHeader,
 		Querys:     renderQuery,
 		Initialize: renderInitialize,
@@ -307,7 +324,7 @@ func (p *modulePluginController) enable(ginCtx *gin.Context) {
 
 	err := p.modulePluginService.EnablePlugin(ginCtx, controller.GetUserId(ginCtx), pluginUUID, input)
 	if err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Enable plugin fail. err:%s", err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
