@@ -6,7 +6,6 @@
     [formGroup]="validateForm"
     autocomplete="off"
   >
-
     <nz-form-item class="form-row" *ngIf="showServer">
       <nz-form-label class="w-[124px]" nzRequired>服务器地址：</nz-form-label>
       <nz-form-control>
@@ -17,20 +16,6 @@
           required
           placeholder="请输入"
           formControlName="server"
-        />
-      </nz-form-control>
-    </nz-form-item>
-
-    <nz-form-item class="form-row" *ngIf="showApiGroup">
-      <nz-form-label class="w-[124px]" nzRequired>分组前缀：</nz-form-label>
-      <nz-form-control>
-        <input
-          class="w-INPUT_NORMAL"
-          eo-ng-input
-          name="apiGroup"
-          required
-          placeholder="请输入"
-          formControlName="apiGroup"
         />
       </nz-form-control>
     </nz-form-item>
