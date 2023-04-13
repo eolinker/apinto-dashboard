@@ -20,6 +20,7 @@ type IModulePluginService interface {
 	CheckPluginInstalled(ctx context.Context, pluginID string) (bool, error)
 	CheckPluginISDeCompress(ctx context.Context, pluginID string) error
 	InstallInnerPlugin(ctx context.Context, pluginYml *model.InnerPluginYmlCfg) error
+	UpdateInnerPlugin(ctx context.Context, pluginYml *model.InnerPluginYmlCfg) error
 }
 
 type IModulePlugin interface {
