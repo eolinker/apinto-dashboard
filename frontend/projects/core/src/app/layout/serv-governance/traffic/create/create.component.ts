@@ -100,7 +100,7 @@ export class TrafficCreateComponent implements OnInit {
     })
 
     this.appConfigService.reqFlashBreadcrumb([
-      { title: '流量策略', routerLink: 'serv-governance' },
+      { title: '流量策略', routerLink: 'serv-governance/traffic' },
       { title: '新建流量策略' }
     ])
   }

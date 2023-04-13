@@ -28,13 +28,6 @@
       [nzInlineIndent]="20"
       class="overflow-hidden block inside-menu-scroll"
     >
-      <div
-        class="h-[50px] flex items-center pl-[20px] cursor-pointer"
-        [ngClass]="{ 'item-selected': seletedGuide }"
-        (click)="goToGuide()"
-      >
-        🚀 快速入门
-      </div>
       <eo-ng-inline-menu
         [nzInlineIndent]="20"
         [nzOptions]="sideMenuOptions"
