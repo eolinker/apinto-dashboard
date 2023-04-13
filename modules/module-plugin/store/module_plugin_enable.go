@@ -13,7 +13,7 @@ var (
 type IModulePluginEnableStore interface {
 	store.IBaseStore[entry.ModulePluginEnable]
 	GetListByNavigation(ctx context.Context, navigationID int) ([]*entry.ModulePluginEnable, error)
-	GetByModuleName(ctx context.Context, moduleName string) (*entry.ModulePluginEnable, error)
+	GetEnabledPluginByName(ctx context.Context, moduleName string) (*entry.ModulePluginEnable, error)
 }
 
 type modulePluginEnable struct {
@@ -30,6 +30,6 @@ func (m *modulePluginEnable) GetListByNavigation(ctx context.Context, navigation
 	})
 }
 
-func (m *modulePluginEnable) GetByModuleName(ctx context.Context, moduleName string) (*entry.ModulePluginEnable, error) {
-	return m.FirstQuery(ctx, "name = ?", []interface{}{moduleName}, "")
+func (m *modulePluginEnable) GetEnabledPluginByName(ctx context.Context, moduleName string) (*entry.ModulePluginEnable, error) {
+	return m.FirstQuery(ctx, "name = ? and is_enable = 2", []interface{}{moduleName}, "")
 }
