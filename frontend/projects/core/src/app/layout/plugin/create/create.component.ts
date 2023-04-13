@@ -26,7 +26,7 @@ import { EoNgMessageService } from '../../../service/eo-ng-message.service'
             [nzBeforeUpload]="beforeUpload"
             [nzLimit]="1"
             [nzRemove]="removeFile"
-            nzAccept=".zip"
+            nzAccept=".zip,.gz"
           >
             <button id="uploadBtn" [nzDanger]="fileError" eo-ng-button>
               选择文件
