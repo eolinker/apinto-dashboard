@@ -47,6 +47,7 @@ export class EoNgPluginService {
           const newPlugin:PluginItem & CardItem = { ...plugin, title: plugin.cname, desc: plugin.resume, iconAddr: plugin.icon } as PluginItem & CardItem
           return newPlugin
         })
+        console.log(this)
       }
     })
   }

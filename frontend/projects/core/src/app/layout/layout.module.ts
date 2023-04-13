@@ -49,9 +49,10 @@ import { DirectiveModule } from '../directive/directive.module'
 import { NzUploadModule } from 'ng-zorro-antd/upload'
 import { EoNgEmptyModule } from 'eo-ng-empty'
 import { AuthInfoDetailComponent } from './auth/info/detail/detail.component'
-import { EoNgMenuModule } from 'eo-ng-menu';
-import { IframePageComponent } from './iframe-page/iframe-page.component';
+import { EoNgMenuModule } from 'eo-ng-menu'
+import { IframePageComponent } from './iframe-page/iframe-page.component'
 import { GuideComponent } from './guide/guide.component'
+import { NzDividerModule } from 'ng-zorro-antd/divider'
 
 @NgModule({
   declarations: [
@@ -103,7 +104,8 @@ import { GuideComponent } from './guide/guide.component'
     DirectiveModule,
     EoNgUploadModule,
     NzUploadModule,
-    EoNgEmptyModule
+    EoNgEmptyModule,
+    NzDividerModule
   ],
   exports: [
     BasicLayoutComponent
