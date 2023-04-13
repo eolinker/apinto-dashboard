@@ -607,3 +607,8 @@ func (c *commonGroupService) getTagId(ctx context.Context, namespaceId int, grou
 func (c *commonGroupService) GetGroupInfo(ctx context.Context, uuid string) (*group_entry.CommonGroup, error) {
 	return c.commonGroupStore.GetByUUID(ctx, uuid)
 }
+
+func (c *commonGroupService) DeleteGroupByID(ctx context.Context, id int) error {
+	_, err := c.commonGroupStore.Delete(ctx, id)
+	return err
+}

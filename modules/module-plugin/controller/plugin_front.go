@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/initialize"
 	module_plugin "github.com/eolinker/apinto-dashboard/modules/module-plugin"
@@ -9,10 +10,19 @@ import (
 	"github.com/eolinker/eosc/log"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"os"
 	"strings"
 )
 
-const fileDir = "./plugin"
+var PluginDir string
+
+func init() {
+	currentPath, err := common.GetCurrentPath()
+	if err != nil {
+		panic(err)
+	}
+	PluginDir = fmt.Sprintf("%s%splugin", currentPath, string(os.PathSeparator))
+}
 
 type pluginFrontController struct {
 	modulePluginService module_plugin.IModulePluginService
@@ -40,7 +50,7 @@ func (p *pluginFrontController) checkPluginID(c *gin.Context) {
 		return
 	}
 	//若插件存在
-	err = p.modulePluginService.CheckPluginISDeCompress(c, pluginID)
+	err = p.modulePluginService.CheckPluginISDeCompress(c, PluginDir, pluginID)
 	if err != nil {
 		log.Errorf("Decompress Plugin Package fail. pluginID:%s, err:%s", pluginID, err)
 		c.Abort()
@@ -103,7 +113,7 @@ func (p *pluginFrontController) getPluginInfo(c *gin.Context) {
 		return
 	}
 
-	pluginFs := gin.Dir(fileDir, false)
+	pluginFs := gin.Dir(PluginDir, false)
 	fileServer := http.StripPrefix(stripPrefix, http.FileServer(pluginFs))
 	// Check if file exists and/or if we have permission to access it
 	f, err := pluginFs.Open(filePath)
@@ -138,7 +148,7 @@ func (p *pluginFrontController) getPluginResources(c *gin.Context) {
 		return
 	}
 
-	pluginFs := gin.Dir(fileDir, false)
+	pluginFs := gin.Dir(PluginDir, false)
 	fileServer := http.StripPrefix("/plugin/info", http.FileServer(pluginFs))
 	// Check if file exists and/or if we have permission to access it
 	f, err := pluginFs.Open(filePath)

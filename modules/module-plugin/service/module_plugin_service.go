@@ -17,6 +17,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/model"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/store"
 	"github.com/eolinker/eosc/common/bean"
+	"github.com/eolinker/eosc/log"
 	"github.com/go-basic/uuid"
 	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
@@ -224,7 +225,7 @@ func (m *modulePluginService) InstallPlugin(ctx context.Context, userID int, gro
 	if err == nil {
 		return ErrModulePluginInstalled
 	}
-	
+
 	//全局异步锁
 	err = m.lockService.Lock(locker_service.LockNameModulePlugin, 0)
 	if err != nil {
@@ -339,6 +340,16 @@ func (m *modulePluginService) UninstallPlugin(ctx context.Context, userID int, p
 	if enableInfo.IsEnable == 2 {
 		return errors.New("插件启用中，不可以卸载")
 	}
+	//检查该分组下除了插件自身是否有其它插件，若没有则删除分组
+	deleteGroup := false
+	pluginList, err := m.pluginStore.GetPluginList(ctx, pluginInfo.Group, "")
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return err
+	}
+	if len(pluginList) <= 1 {
+		deleteGroup = true
+	}
+
 	err = m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
 		//从package表，启用表，插件表中删除
 		_, err = m.pluginPackageStore.Delete(txCtx, pluginInfo.Id)
@@ -353,9 +364,12 @@ func (m *modulePluginService) UninstallPlugin(ctx context.Context, userID int, p
 		if err != nil {
 			return err
 		}
-		//TODO 检查该插件所在分组，若该分组下只有这个插件则删除该分组
+		//删除该分组
+		if deleteGroup {
+			err = m.commonGroup.DeleteGroupByID(txCtx, pluginInfo.Group)
+		}
 
-		return nil
+		return err
 	})
 	if err != nil {
 		return err
@@ -556,7 +570,7 @@ func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml 
 
 	groupID := 0
 	if err == gorm.ErrRecordNotFound {
-		groupID, err = m.commonGroup.CreateGroup(ctx, -1, 0, group_service.ModulePlugin, "", "内置插件", uuid.New(), "")
+		groupID, err = m.commonGroup.CreateGroup(ctx, -1, 0, group_service.ModulePlugin, "", "内置插件", "inner_plugin", "")
 	} else {
 		groupID = groupInfo.Id
 	}
@@ -687,14 +701,14 @@ func (m *modulePluginService) CheckPluginInstalled(ctx context.Context, pluginID
 	return isInstalled, nil
 }
 
-func (m *modulePluginService) CheckPluginISDeCompress(ctx context.Context, pluginID string) error {
+func (m *modulePluginService) CheckPluginISDeCompress(ctx context.Context, pluginDir string, pluginID string) error {
 	pluginInfo, err := m.pluginStore.GetPluginInfo(ctx, pluginID)
 	if err != nil {
 		return err
 	}
 	//若插件已安装且为非内置插件，检查本地缓存是否存在
 	if pluginInfo.Type == 2 {
-		dirPath := fmt.Sprintf("./plugin/%s", pluginID)
+		dirPath := fmt.Sprintf("%s/%s", pluginDir, pluginID)
 		// 检查目录是否存在, 若不存在，则从数据库读取数据并解压
 		if _, err := os.Stat(dirPath); os.IsNotExist(err) {
 			packageEntry, err := m.pluginPackageStore.Get(ctx, pluginInfo.Id)
@@ -702,6 +716,13 @@ func (m *modulePluginService) CheckPluginISDeCompress(ctx context.Context, plugi
 				return err
 			}
 			packageFile := bytes.NewReader(packageEntry.Package)
+			//创建目录
+			err = os.MkdirAll(dirPath, os.ModePerm)
+			if err != nil {
+				log.Error("安装插件失败, 无法创建目录:", err)
+				return err
+			}
+
 			err = common.DeCompress(packageFile, dirPath)
 			if err != nil {
 				//删除目录
