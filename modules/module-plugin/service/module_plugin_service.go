@@ -7,6 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
+	"github.com/eolinker/apinto-dashboard/controller"
+	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-dashboard/modules/base/locker-service"
 	"github.com/eolinker/apinto-dashboard/modules/core"
 	"github.com/eolinker/apinto-dashboard/modules/group"
@@ -240,6 +242,11 @@ func (m *modulePluginService) InstallPlugin(ctx context.Context, userID int, gro
 	}
 
 	groupID := 0
+
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+		Uuid: pluginYml.ID,
+		Name: pluginYml.CName,
+	})
 	err = m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
 		if err == gorm.ErrRecordNotFound {
 			groupID, err = m.commonGroup.CreateGroup(txCtx, -1, userID, group_service.ModulePlugin, "", groupName, uuid.New(), "")
@@ -349,6 +356,11 @@ func (m *modulePluginService) UninstallPlugin(ctx context.Context, userID int, p
 	if len(pluginList) <= 1 {
 		deleteGroup = true
 	}
+
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+		Uuid: pluginID,
+		Name: pluginInfo.CName,
+	})
 
 	err = m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
 		//从package表，启用表，插件表中删除
@@ -472,6 +484,12 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 	if err != nil {
 		return err
 	}
+
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+		Uuid:          pluginUUID,
+		Name:          pluginInfo.CName,
+		EnableOperate: 1,
+	})
 	err = m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
 		enable := &entry.ModulePluginEnable{
 			Id:         pluginInfo.Id,
@@ -522,6 +540,11 @@ func (m *modulePluginService) DisablePlugin(ctx context.Context, userID int, plu
 		return err
 	}
 
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+		Uuid:          pluginUUID,
+		Name:          pluginInfo.CName,
+		EnableOperate: 2,
+	})
 	err = m.pluginEnableStore.Transaction(ctx, func(txCtx context.Context) error {
 		enableInfo.IsEnable = 1
 		enableInfo.Operator = userID
