@@ -1,9 +1,10 @@
 <div
   class="flex flex-nowrap justify-start overflow-y-hidden max-h-[calc(100vh_-_50px)]"
+  *ngIf="service.nodesList.length > 0; else emptyTpl"
 >
   <div>
     <div
-      class="block-inline-block relative min-w-GROUP min-h-[calc(100vh_-_50px)] spreed-content"
+      class="inline-block relative min-w-GROUP min-h-[calc(100vh_-_50px)] spreed-content"
       style="width: 240px"
     >
       <div class="flex items-center justify-between px-[11px] py-btnbase">
