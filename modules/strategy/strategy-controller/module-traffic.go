@@ -122,7 +122,7 @@ func (c *StrategyTrafficModule) initRouter() {
 			Method:      http.MethodPost,
 			Path:        "/api/strategy/traffic/priority",
 			Handler:     "strategy-traffic.changePriority",
-			HandlerFunc: []apinto_module.HandlerFunc{strategyTrafficController.changePriority},
+			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypeEdit.Handler, strategyTrafficController.changePriority},
 		},
 		{
 			Method:      http.MethodGet,
