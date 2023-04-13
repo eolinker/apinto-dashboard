@@ -82,8 +82,4 @@ export class CardListComponent {
   handlerCardClick (card:CardItem) {
     this.cardClick.emit(card)
   }
-
-  show (value:any) {
-    console.log(value)
-  }
 }
