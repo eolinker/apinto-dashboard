@@ -34,7 +34,7 @@ span.logo-title {
 }
 
 .content-without-sider {
-  min-width: 1170px;
+  // min-width: 1170px;
   width: calc(100vw - 196px) !important;
   height: calc(100vh - 50px) !important;
   overflow: auto;
@@ -63,5 +63,9 @@ span.logo-title {
   }
   .inside-menu-scroll eo-ng-menu-default::-webkit-scrollbar {
     width: 0px;
+  }
+
+  div.item-selected {
+    background-color: var(--menu-item-active-background-color);
   }
 }

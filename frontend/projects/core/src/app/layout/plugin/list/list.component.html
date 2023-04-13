@@ -10,7 +10,7 @@
         (disabledEdit)="disabledEdit($event)"
         (click)="installPlugin()"
       >
-        安装插件
+        上传插件
       </button>
     </div>
     <div>
@@ -23,7 +23,9 @@
       ></eo-ng-radio-group>
     </div>
   </div>
-  <div class="list-content pb-[4px] h-[calc(100%_-_64px)] overflow-y-auto">
+  <div
+    class="list-content pb-[4px] h-[calc(100%_-_64px)] overflow-y-auto border-0 border-t-[1px] border-solid border-color-base"
+  >
     <eo-ng-card-list
       *ngIf="filterPluginList().length; else emptyTpl"
       [cardList]="filterPluginList()"
