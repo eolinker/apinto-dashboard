@@ -1,6 +1,7 @@
 package application_controller
 
 import (
+	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	apinto_module "github.com/eolinker/apinto-module"
 	"net/http"
 )
@@ -54,13 +55,13 @@ func initRouter(name string) apinto_module.RoutersInfo {
 			Method:      http.MethodPut,
 			Path:        "/api/application/online",
 			Handler:     "applications.online",
-			HandlerFunc: []apinto_module.HandlerFunc{c.online},
+			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypePublish.Handler, c.online},
 		},
 		{
 			Method:      http.MethodPut,
 			Path:        "/api/application/offline",
 			Handler:     "applications.offline",
-			HandlerFunc: []apinto_module.HandlerFunc{c.offline},
+			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypePublish.Handler, c.offline},
 		},
 		{
 			Method:      http.MethodPut,
