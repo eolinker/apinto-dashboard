@@ -274,7 +274,7 @@ func (p *pluginTemplateController) online(ginCtx *gin.Context) {
 	userId := controller.GetUserId(ginCtx)
 	uuid := ginCtx.Query("uuid")
 	if uuid == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("uuid can't be nil")))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("uuid can't be nil"))
 		return
 	}
 	input := &online_dto.UpdateOnlineStatusInput{}
@@ -313,7 +313,7 @@ func (p *pluginTemplateController) offline(ginCtx *gin.Context) {
 	userId := controller.GetUserId(ginCtx)
 	uuid := ginCtx.Query("uuid")
 	if uuid == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("uuid can't be nil")))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("uuid can't be nil"))
 		return
 	}
 	input := &online_dto.UpdateOnlineStatusInput{}
