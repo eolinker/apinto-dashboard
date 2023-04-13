@@ -98,13 +98,13 @@ func (c *StrategyCacheModule) initRouter() {
 			Method:      http.MethodPatch,
 			Path:        "/api/strategy/cache/restore",
 			Handler:     "strategy-cache.restore",
-			HandlerFunc: []apinto_module.HandlerFunc{strategyCacheController.restore},
+			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypeEdit.Handler, strategyCacheController.restore},
 		},
 		{
 			Method:      http.MethodPatch,
 			Path:        "/api/strategy/cache/stop",
 			Handler:     "strategy-cache.updateStop",
-			HandlerFunc: []apinto_module.HandlerFunc{strategyCacheController.updateStop},
+			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypeEdit.Handler, strategyCacheController.updateStop},
 		},
 		{
 			Method:      http.MethodGet,
@@ -122,7 +122,7 @@ func (c *StrategyCacheModule) initRouter() {
 			Method:      http.MethodPost,
 			Path:        "/api/strategy/cache/priority",
 			Handler:     "strategy-cache.changePriority",
-			HandlerFunc: []apinto_module.HandlerFunc{strategyCacheController.changePriority},
+			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypeEdit.Handler, strategyCacheController.changePriority},
 		},
 		{
 			Method:      http.MethodGet,
