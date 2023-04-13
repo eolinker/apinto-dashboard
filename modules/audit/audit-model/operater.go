@@ -42,7 +42,7 @@ var (
 		LogOperateTypePublish: "publish",
 	}
 	logOperateTypeTitles = map[LogOperateType]string{
-		LogOperateTypeCreate:  "创建",
+		LogOperateTypeCreate:  "新建",
 		LogOperateTypeEdit:    "编辑",
 		LogOperateTypeDelete:  "删除",
 		LogOperateTypePublish: "发布",
