@@ -122,7 +122,7 @@ export class PluginCreateComponent {
     const formData = new FormData()
     formData.append('plugin', this.fileList[0] as any)
     // eslint-disable-next-line dot-notation
-    formData.append('groupName', this.validateForm.controls['name'].value as any)
+    formData.append('group_name', this.validateForm.controls['name'].value as any)
     return this.api.post('system/plugin/install', formData).subscribe((resp:EmptyHttpResponse) => {
       if (resp.code === 0) {
         this.message.success(resp.msg || '安装插件成功')
