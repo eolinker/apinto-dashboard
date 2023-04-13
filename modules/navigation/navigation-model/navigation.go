@@ -5,4 +5,5 @@ type Navigation struct {
 	Name  string `json:"-" yaml:"name"`
 	Title string `json:"title" yaml:"cname"`
 	Icon  string `json:"icon" yaml:"icon"`
+	Quick bool   `json:"quick" yaml:"quick"`
 }
