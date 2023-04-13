@@ -5,10 +5,10 @@ export type CardItem = {title:string|TemplateRef<any>, enable:boolean, desc:stri
 @Component({
   selector: 'eo-ng-card-list',
   template: `
-    <div class="p-[20px] flex flex-wrap">
+    <div class="p-[20px] grid gap-6 py-5 2xl:grid-cols-4 lg:grid-cols-3 sm:grid-cols-1">
       <ng-container *ngFor="let card of cardList">
       <div class="relative">
-        <nz-card [nzHoverable]="true" class='w-[280px] min-h-[120px] mr-btnrbase mb-btnrbase' (click)="handlerCardClick(card)">
+        <nz-card [nzHoverable]="true" class='min-h-[120px] mr-btnrbase mb-btnrbase' (click)="handlerCardClick(card)">
           <nz-card-meta
               [nzTitle]="card.title"
               [nzDescription]="cardStatusTml"
@@ -51,7 +51,7 @@ export type CardItem = {title:string|TemplateRef<any>, enable:boolean, desc:stri
         .ant-card-meta-title{
           font-size:14px;
           font-weight:bold;
-          max-width:140px;
+          max-width:calc(100% - 50px);
         }
     }
 

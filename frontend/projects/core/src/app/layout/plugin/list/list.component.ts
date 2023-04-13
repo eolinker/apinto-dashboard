@@ -74,7 +74,7 @@ export class PluginListComponent implements OnInit {
     this.service.getPluginList()
   }
 
-  onDestroy () {
+  ngOnDestroy () {
     this.subscription.unsubscribe()
     this.subscription1.unsubscribe()
   }
