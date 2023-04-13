@@ -1,6 +1,7 @@
 package strategy_controller
 
 import (
+	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-module"
 	"net/http"
 )
@@ -115,7 +116,7 @@ func (c *StrategyCacheModule) initRouter() {
 			Method:      http.MethodPost,
 			Path:        "/api/strategy/cache/publish",
 			Handler:     "strategy-cache.publish",
-			HandlerFunc: []apinto_module.HandlerFunc{strategyCacheController.publish},
+			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypePublish.Handler, strategyCacheController.publish},
 		},
 		{
 			Method:      http.MethodPost,

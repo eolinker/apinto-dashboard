@@ -1,6 +1,7 @@
 package controller
 
 import (
+	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	group_controller "github.com/eolinker/apinto-dashboard/modules/group/group-controller"
 	apinto_module "github.com/eolinker/apinto-module"
 	"net/http"
@@ -46,13 +47,13 @@ func initRouter(name string) apinto_module.RoutersInfo {
 			Method:      http.MethodPost,
 			Path:        "/api/routers/batch-online",
 			Handler:     "api.batchOnline",
-			HandlerFunc: []apinto_module.HandlerFunc{c.batchOnline},
+			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypePublish.Handler, c.batchOnline},
 		},
 		{
 			Method:      http.MethodPost,
 			Path:        "/api/routers/batch-offline",
 			Handler:     "api.batchOffline",
-			HandlerFunc: []apinto_module.HandlerFunc{c.batchOffline},
+			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypePublish.Handler, c.batchOffline},
 		},
 		{
 			Method:      http.MethodPost,
@@ -65,13 +66,13 @@ func initRouter(name string) apinto_module.RoutersInfo {
 			Method:      http.MethodPut,
 			Path:        "/api/router/online",
 			Handler:     "api.online",
-			HandlerFunc: []apinto_module.HandlerFunc{c.online},
+			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypePublish.Handler, c.online},
 		},
 		{
 			Method:      http.MethodPut,
 			Path:        "/api/router/offline",
 			Handler:     "api.offline",
-			HandlerFunc: []apinto_module.HandlerFunc{c.offline},
+			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypePublish.Handler, c.offline},
 		},
 		{
 			Method:      http.MethodGet,

@@ -47,7 +47,7 @@ func (e *variablesController) gets(ginCtx *gin.Context) {
 
 	variableList, total, err := e.globalVariableService.List(ginCtx, pageNum, pageSize, namespaceID, key, enum.GetStatusIndexByName(status))
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("GetGlobalVariable fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("GetGlobalVariable fail. err:%s", err.Error()))
 		return
 	}
 	resp := make([]*variable_dto.GlobalVariableListItem, 0, len(variableList))
@@ -73,12 +73,12 @@ func (e *variablesController) get(ginCtx *gin.Context) {
 	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
 	key := ginCtx.Query("key")
 	if key == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("GetGlobalVariable Info fail. err: key can't be nil")))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("GetGlobalVariable Info fail. err: key can't be nil"))
 		return
 	}
 	variableDetails, err := e.globalVariableService.GetInfo(ginCtx, namespaceID, key)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("GetGlobalVariable Info fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("GetGlobalVariable Info fail. err:%s", err.Error()))
 		return
 	}
 	list := make([]*variable_dto.GlobalVariableDetailsItem, 0, len(variableDetails))
@@ -122,7 +122,7 @@ func (e *variablesController) post(ginCtx *gin.Context) {
 	userId := controller.GetUserId(ginCtx)
 	_, err := e.globalVariableService.Create(ginCtx, namespaceID, userId, input.Key, input.Desc)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Create GlobalVariable fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Create GlobalVariable fail. err:%s", err.Error()))
 		return
 	}
 
@@ -133,7 +133,7 @@ func (e *variablesController) post(ginCtx *gin.Context) {
 func (e *variablesController) del(ginCtx *gin.Context) {
 	key := ginCtx.Query("key")
 	if key == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Delete GlobalVariable fail. err: key can't be nil")))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Delete GlobalVariable fail. err: key can't be nil"))
 		return
 	}
 
@@ -141,7 +141,7 @@ func (e *variablesController) del(ginCtx *gin.Context) {
 	userID := controller.GetUserId(ginCtx)
 	err := e.globalVariableService.Delete(ginCtx, namespaceID, userID, key)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Delete GlobalVariable fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Delete GlobalVariable fail. err:%s", err.Error()))
 		return
 	}
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))

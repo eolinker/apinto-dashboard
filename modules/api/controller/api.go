@@ -185,7 +185,7 @@ func (a *apiController) routers(ginCtx *gin.Context) {
 
 	apiList, total, err := a.apiService.GetAPIList(ginCtx, namespaceID, groupUUID, searchName, searchSources, pageNum, pageSize)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("GetAPIList fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("GetAPIList fail. err:%s", err.Error()))
 		return
 	}
 	apis := make([]*api_dto.APIListItem, 0, len(apiList))
@@ -216,13 +216,13 @@ func (a *apiController) getInfo(ginCtx *gin.Context) {
 	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
 	apiUUID := ginCtx.Query("uuid")
 	if apiUUID == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("GetApiInfo fail. err: uuid can't be nil")))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("GetApiInfo fail. err: uuid can't be nil"))
 		return
 	}
 
 	info, err := a.apiService.GetAPIVersionInfo(ginCtx, namespaceID, apiUUID)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("GetApiInfo fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("GetApiInfo fail. err:%s", err.Error()))
 		return
 	}
 
@@ -264,17 +264,17 @@ func (a *apiController) create(ginCtx *gin.Context) {
 	//API管理器校验参数
 	driver := a.apiService.GetAPIDriver(input.Driver)
 	if driver == nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("CreateAPI fail. err: driver is invalid. ")))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("CreateAPI fail. err: driver is invalid. "))
 		return
 	}
 	if err := driver.CheckInput(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("CreateAPI fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("CreateAPI fail. err:%s", err.Error()))
 		return
 	}
 
 	err := a.apiService.CreateAPI(ginCtx, namespaceId, userId, input)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("CreateAPI fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("CreateAPI fail. err:%s", err.Error()))
 		return
 	}
 
@@ -287,7 +287,7 @@ func (a *apiController) update(ginCtx *gin.Context) {
 	userId := controller.GetUserId(ginCtx)
 	apiUUID := ginCtx.Query("uuid")
 	if apiUUID == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("UpdateApi fail. err: uuid can't be nil")))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("UpdateApi fail. err: uuid can't be nil"))
 		return
 	}
 
@@ -303,18 +303,18 @@ func (a *apiController) update(ginCtx *gin.Context) {
 	//API管理器校验参数
 	driver := a.apiService.GetAPIDriver(input.Driver)
 	if driver == nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("UpdateAPI fail. err: driver is invalid. ")))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("UpdateAPI fail. err: driver is invalid. "))
 		return
 	}
 	input.UUID = apiUUID
 	if err := driver.CheckInput(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("UpdateAPI fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("UpdateAPI fail. err:%s", err.Error()))
 		return
 	}
 
 	err := a.apiService.UpdateAPI(ginCtx, namespaceId, userId, input)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("UpdateApi fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("UpdateApi fail. err:%s", err.Error()))
 		return
 	}
 
@@ -326,14 +326,14 @@ func (a *apiController) delete(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	apiUUID := ginCtx.Query("uuid")
 	if apiUUID == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("DeleteApi fail. err: uuid can't be nil")))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("DeleteApi fail. err: uuid can't be nil"))
 		return
 	}
 
 	userId := controller.GetUserId(ginCtx)
 	err := a.apiService.DeleteAPI(ginCtx, namespaceId, userId, apiUUID)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("DeleteApi fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("DeleteApi fail. err:%s", err.Error()))
 		return
 	}
 
@@ -358,7 +358,7 @@ func (a *apiController) batchOnline(ginCtx *gin.Context) {
 
 	batchOnlineList, err := a.apiService.BatchOnline(ginCtx, namespaceId, userId, input.OnlineToken)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("BatchOnline Apis fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("BatchOnline Apis fail. err:%s", err.Error()))
 		return
 	}
 
@@ -399,7 +399,7 @@ func (a *apiController) batchOffline(ginCtx *gin.Context) {
 
 	batchOfflineList, err := a.apiService.BatchOffline(ginCtx, namespaceId, userId, input.ApiUUIDs, input.ClusterNames)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("BatchOffline Apis fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("BatchOffline Apis fail. err:%s", err.Error()))
 		return
 	}
 
@@ -440,7 +440,7 @@ func (a *apiController) batchOnlineCheck(ginCtx *gin.Context) {
 
 	batchOnlineList, onlineToken, err := a.apiService.BatchOnlineCheck(ginCtx, namespaceId, userId, input.ApiUUIDs, input.ClusterNames)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("BatchOffline Apis fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("BatchOffline Apis fail. err:%s", err.Error()))
 		return
 	}
 
@@ -473,7 +473,7 @@ func (a *apiController) online(ginCtx *gin.Context) {
 	userId := controller.GetUserId(ginCtx)
 	apiUUID := ginCtx.Query("uuid")
 	if apiUUID == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("uuid can't be nil")))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("uuid can't be nil"))
 		return
 	}
 	input := &online_dto.UpdateOnlineStatusInput{}
@@ -512,7 +512,7 @@ func (a *apiController) offline(ginCtx *gin.Context) {
 	userId := controller.GetUserId(ginCtx)
 	apiUUID := ginCtx.Query("uuid")
 	if apiUUID == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("uuid can't be nil")))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("uuid can't be nil"))
 		return
 	}
 	input := &online_dto.UpdateOnlineStatusInput{}
@@ -534,7 +534,7 @@ func (a *apiController) enableAPI(ginCtx *gin.Context) {
 	userId := controller.GetUserId(ginCtx)
 	apiUUID := ginCtx.Query("uuid")
 	if apiUUID == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("uuid can't be nil")))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("uuid can't be nil"))
 		return
 	}
 	input := &online_dto.UpdateOnlineStatusInput{}
@@ -556,7 +556,7 @@ func (a *apiController) disableAPI(ginCtx *gin.Context) {
 	userId := controller.GetUserId(ginCtx)
 	apiUUID := ginCtx.Query("uuid")
 	if apiUUID == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("uuid can't be nil")))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("uuid can't be nil"))
 		return
 	}
 	input := &online_dto.UpdateOnlineStatusInput{}
@@ -577,7 +577,7 @@ func (a *apiController) getOnlineList(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	apiUUID := ginCtx.Query("uuid")
 	if apiUUID == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("DeleteApi fail. err: uuid can't be nil")))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("DeleteApi fail. err: uuid can't be nil"))
 		return
 	}
 
@@ -623,18 +623,18 @@ func (a *apiController) getSourceList(ginCtx *gin.Context) {
 func (a *apiController) getImportCheckList(ginCtx *gin.Context) {
 	fileInfo, err := ginCtx.FormFile("file")
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("import swagger get file fail. err: %s. ", err)))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("import swagger get file fail. err: %s. ", err))
 		return
 	}
 	file, err := fileInfo.Open()
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("import swagger open file fail. err: %s. ", err)))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("import swagger open file fail. err: %s. ", err))
 		return
 	}
 	fileData := make([]byte, fileInfo.Size)
 	_, err = file.Read(fileData)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("import swagger  read file fail. err: %s. ", err)))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("import swagger  read file fail. err: %s. ", err))
 		return
 	}
 	defer file.Close()
@@ -644,12 +644,12 @@ func (a *apiController) getImportCheckList(ginCtx *gin.Context) {
 
 	groupID := ginCtx.PostForm("group")
 	if groupID == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("import swagger fail. err: group can't be null. ")))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("import swagger fail. err: group can't be null. "))
 		return
 	}
 	serviceName := ginCtx.PostForm("upstream")
 	if serviceName == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("import swagger fail. err: upstream can't be null. ")))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("import swagger fail. err: upstream can't be null. "))
 		return
 	}
 	requestPrefix := ginCtx.PostForm("request_prefix")
@@ -657,7 +657,7 @@ func (a *apiController) getImportCheckList(ginCtx *gin.Context) {
 	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
 	checkList, token, err := a.apiService.GetImportCheckList(ginCtx, namespaceID, fileData, groupID, serviceName, requestPrefix)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("import swagger fail. err: %s. ", err)))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("import swagger fail. err: %s. ", err))
 		return
 	}
 
@@ -693,7 +693,7 @@ func (a *apiController) importAPI(ginCtx *gin.Context) {
 
 	err := a.apiService.ImportAPI(ginCtx, namespaceID, userId, input)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("importAPI fail. err: %s. ", err)))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("importAPI fail. err: %s. ", err))
 		return
 	}
 

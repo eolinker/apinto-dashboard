@@ -1,6 +1,7 @@
 package plugin_template_controller
 
 import (
+	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-module"
 	"net/http"
 )
@@ -109,13 +110,13 @@ func (c *PluginTemplateModule) initRouter() {
 			Method:      http.MethodPut,
 			Path:        "/api/plugin/template/online",
 			Handler:     "plugin-template.online",
-			HandlerFunc: []apinto_module.HandlerFunc{pluginTemplateCtl.online},
+			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypePublish.Handler, pluginTemplateCtl.online},
 		},
 		{
 			Method:      http.MethodPut,
 			Path:        "/api/plugin/template/offline",
 			Handler:     "plugin-template.offline",
-			HandlerFunc: []apinto_module.HandlerFunc{pluginTemplateCtl.offline},
+			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypePublish.Handler, pluginTemplateCtl.offline},
 		},
 	}
 }
