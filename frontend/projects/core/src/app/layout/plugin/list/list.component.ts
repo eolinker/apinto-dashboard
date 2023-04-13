@@ -70,13 +70,12 @@ export class PluginListComponent implements OnInit {
       this.service.getPluginList()
       console.log('sub2')
     })
-    console.log('init')
-    this.service.getPluginList()
   }
 
   ngOnDestroy () {
     this.subscription.unsubscribe()
     this.subscription1.unsubscribe()
+    this.service.pluginList = [] // 清空pluginList，否则第二次进入该组件时会多请求一次所有图片
   }
 
   // 根据状态展示响应的插件（前端筛选）

@@ -32,6 +32,7 @@ type PluginEnableInfo struct {
 
 type PluginEnableRender struct {
 	Internet   bool
+	Invisible  bool
 	Headers    []ExtendParamsRender
 	Querys     []ExtendParamsRender
 	Initialize []ExtendParamsRender
@@ -81,6 +82,7 @@ type LocalDefine struct {
 	Middleware []*MiddlewareDefine  `json:"middleware" yaml:"middleware"`
 	Api        *ApiDefine           `json:"api" yaml:"api"`
 	Path       string               `json:"path" yaml:"path"`
+	Invisible  bool                 `json:"invisible" yaml:"invisible"`
 	Headers    []ExtendParamsRender `json:"headers" yaml:"headers"`
 	Querys     []ExtendParamsRender `json:"querys" yaml:"querys"`
 	Initialize []ExtendParamsRender `json:"initialize" yaml:"initialize"`
