@@ -21,7 +21,6 @@
         <img
           src="https://img.shields.io/github/stars/eolinker/apinto?style=social"
           alt=""
-          class="p-[2px] bg-MAIN_BG rounded"
         />
       </button>
       <button eo-ng-button>提交&nbsp;Issue</button>
@@ -29,93 +28,77 @@
   </div>
 </section>
 <section class="p-mbase m-mbase bg-MAIN_BG rounded">
-  <p class="text-[18px] leading-[26px] font-bold">🚀 快速入门指南</p>
-  <div
-    class="ml-[32px] mr-[60px] mt-btnbase flex justify-between max-w-[955px]"
-  >
-    <div class="w-[190px] flex flex-col justify-between">
-      <img class="w-[190px] h-[100px]" />
-      <div class="flex flex-1 mt-btnbase">
-        <div
-          class="ant-steps-item-icon min-w-[24px] w-[24px] h-[24px] flex items-center justify-center"
-        >
-          <svg class="iconpark-icon"><use href="#chenggong"></use></svg>
-        </div>
-        <div class="flex flex-col justify-between">
-          <div>
-            <p>创建集群</p>
-            <p>创建 Apinto 网关集群，集群用于承载网络流量</p>
-          </div>
-          <div class="mt-[14px]">
-            <button eo-ng-button nzType="primary">已完成</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="w-[190px] flex flex-col justify-between">
-      <img class="w-[190px] h-[100px]" />
-      <div class="flex flex-1 mt-btnbase">
-        <div
-          class="ant-steps-item-icon min-w-[24px] w-[24px] h-[24px] flex items-center justify-center"
-        >
-          <svg class="iconpark-icon"><use href="#chenggong"></use></svg>
-        </div>
-        <div class="flex flex-col justify-between">
-          <div>
-            <p>添加上游服务</p>
-            <p>添加上游服务器或动态服务发现，接收网关节点转发的流量</p>
-          </div>
-          <div class="mt-[14px]">
-            <button eo-ng-button nzType="primary">已完成</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="w-[190px] flex flex-col justify-between">
-      <img class="w-[190px] h-[100px]" />
-      <div class="flex flex-1 mt-btnbase">
-        <div
-          class="ant-steps-item-icon min-w-[24px] w-[24px] h-[24px] flex items-center justify-center"
-        >
-          <svg class="iconpark-icon"><use href="#chenggong"></use></svg>
-        </div>
-        <div class="flex flex-col justify-between">
-          <div>
-            <p>添加 API</p>
-            <p>添加需要网关转发的 API</p>
-          </div>
-          <div class="mt-[14px]">
-            <button eo-ng-button nzType="primary">已完成</button>
+  <p class="text-[18px] leading-[26px] font-bold mb-[26px]">🚀 快速入门指南</p>
+  <div>
+    <div
+      class="ml-[32px] mt-btnbase flex justify-between grid gap-6 py-5 2xl:grid-cols-4 xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 xs:grid-cols-1"
+    >
+      <ng-container *ngFor="let step of stepList; let index = index">
+        <div class="w-[190px] flex flex-col justify-between">
+          <img
+            [src]="step.img || '../../../assets/default-guide-icon.png'"
+            class="w-[190px] h-[100px] mb-[20px] rounded"
+          />
+          <div class="flex flex-1 mt-btnbase">
+            <div
+              class="ant-steps-item-icon min-w-[24px] w-[24px] h-[24px] flex items-center justify-center"
+              [ngClass]="{
+                'border-theme': step.status !== 'undo',
+                'bg-theme': step.status === 'doing',
+                'text-MAIN_BG': step.status === 'doing'
+              }"
+            >
+              <svg *ngIf="step.status === 'done'" class="iconpark-icon">
+                <use href="#chenggong"></use>
+              </svg>
+              <span *ngIf="step.status !== 'done'">{{ index + 1 }}</span>
+            </div>
+            <div class="flex flex-col justify-between">
+              <div>
+                <p>{{ step.title }}</p>
+                <p *ngFor="let desc of step.desc">{{ desc }}</p>
+              </div>
+              <div class="mt-[14px]">
+                <button *ngIf="step.status === 'done'" eo-ng-button>
+                  已完成
+                </button>
+                <button
+                  *ngIf="step.status === 'doing'"
+                  eo-ng-button
+                  nzType="primary"
+                >
+                  前往
+                </button>
+                <button *ngIf="step.status === 'undo'" eo-ng-button>
+                  未完成
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
-
-    <div class="w-[190px] flex flex-col justify-between">
-      <img class="w-[190px] h-[100px]" />
-      <div class="flex flex-1 mt-btnbase">
-        <div
-          class="ant-steps-item-icon min-w-[24px] w-[24px] h-[24px] flex items-center justify-center"
-        >
-          <svg class="iconpark-icon"><use href="#chenggong"></use></svg>
-        </div>
-        <div class="flex flex-col justify-between">
-          <div>
-            <p>发布 API</p>
-            <p>发布之后就可以通过 Apinto 安全高效地访问API啦！</p>
-          </div>
-          <div class="mt-[14px]">
-            <button eo-ng-button nzType="primary">已完成</button>
-          </div>
-        </div>
-      </div>
+      </ng-container>
     </div>
   </div>
 </section>
 
 <section class="p-mbase m-mbase bg-MAIN_BG rounded">
-  <p class="text-[18px] leading-[26px] font-bold">👀 进阶操作</p>
-  <div class="ml-[32px] mr-[20px] mt-btnbase"></div>
+  <p class="text-[18px] leading-[26px] font-bold mb-[40px]">👀 进阶操作</p>
+
+  <div
+    class="ml-[32px] mr-[60px] mt-btnbase flex justify-between max-w-[970px]"
+  >
+    <ng-container *ngFor="let tutor of tutorialsList; let last = last">
+      <div class="w-[190px] flex flex-col justify-between leading-[20px]">
+        <p class="font-bold">{{ tutor.title }}</p>
+        <ul style="padding-inline-start: 20px">
+          <ng-container *ngFor="let item of tutor.content">
+            <li>
+              <a>{{ item.text }}</a>
+            </li>
+          </ng-container>
+        </ul>
+      </div>
+      <nz-divider *ngIf="!last" nzType="vertical" class="h-auto"></nz-divider>
+    </ng-container>
+  </div>
 </section>
