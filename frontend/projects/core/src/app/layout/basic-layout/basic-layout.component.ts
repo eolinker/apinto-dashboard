@@ -33,7 +33,7 @@ export class BasicLayoutComponent implements OnInit {
   modalRef:NzModalRef | undefined
   showEmpty:boolean = false
   showSideLine:boolean = true
-
+  seletedGuide:boolean = false
   authInfo:{title:string, infos:Array<{key:string, value:string}>}
   = { title: '', infos: [] }
 
@@ -63,6 +63,7 @@ export class BasicLayoutComponent implements OnInit {
       if (this.router.url !== this.currentRouter) {
         this.selectOrOpenMenu(this.router.url)
       }
+      this.seletedGuide = this.router.url.includes('guide')
     })
   }
 
@@ -81,11 +82,11 @@ export class BasicLayoutComponent implements OnInit {
     this.subscription4 = this.navigationService.getMenuList()
       .subscribe((res:MenuOptions[]) => {
         this.sideMenuOptions = [...res]
-        for (const index in this.sideMenuOptions) {
-          this.sideMenuOptions[index].openChange = (value:MenuOptions) => {
-            this.openHandler(value['key']!)
-          }
-        }
+        // for (const index in this.sideMenuOptions) {
+        //   this.sideMenuOptions[index].openChange = (value:MenuOptions) => {
+        //     this.openHandler(value['key']!)
+        //   }
+        // }
         // this.getAccess()
       })
   }
@@ -144,7 +145,7 @@ export class BasicLayoutComponent implements OnInit {
       for (const index in this.sideMenuOptions) {
         if (router.split('/')[1] === this.sideMenuOptions[index]['router']?.split('/')[0]) {
           if (this.sideMenuOptions[index].children?.length) {
-            this.openHandler(this.sideMenuOptions[index]['key']!)
+            // this.openHandler(this.sideMenuOptions[index]['key']!)
           }
           break
         }
@@ -154,18 +155,22 @@ export class BasicLayoutComponent implements OnInit {
     }
   }
 
-  openHandler (key: string): void {
-    for (const index in this.sideMenuOptions) {
-      if (this.sideMenuOptions[index]['key'] !== key) {
-        this.sideMenuOptions[index].open = false
-      } else {
-        this.sideMenuOptions[index].open = true
-      }
-      this.openMap[this.sideMenuOptions[index]['key'] as string] = !!this.sideMenuOptions[index].open
-    }
-  }
+  // openHandler (key: string): void {
+  //   for (const index in this.sideMenuOptions) {
+  //     if (this.sideMenuOptions[index]['key'] !== key) {
+  //       // this.sideMenuOptions[index].open = false
+  //     } else {
+  //       this.sideMenuOptions[index].open = true
+  //     }
+  //     this.openMap[this.sideMenuOptions[index]['key'] as string] = !!this.sideMenuOptions[index].open
+  //   }
+  // }
 
   goToGithub () {
     window.open('https://github.com/eolinker/apinto')
+  }
+
+  goToGuide () {
+    this.router.navigate(['/', 'guide'])
   }
 }

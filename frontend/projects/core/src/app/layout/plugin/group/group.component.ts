@@ -34,15 +34,6 @@ export class GroupComponent {
     this.appConfigService.reqFlashBreadcrumb([{ title: '企业插件' }])
   }
 
-  ngOnInit (): void {
-    this.getGroupList()
-  }
-
-  // 获取分组列表, 将api返回的数据通过nodesTransfer转化为分组组件需要的参数格式
-  getGroupList () {
-    this.service.getPluginList()
-  }
-
   viewAllPlugins () {
     this.service.showAll = true
     if (this.service.groupUuid && this.eoNgTreeDefault?.getTreeNodeByKey(this.service.groupUuid)?.isSelected) {
