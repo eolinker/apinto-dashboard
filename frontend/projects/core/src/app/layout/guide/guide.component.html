@@ -45,7 +45,8 @@
               [ngClass]="{
                 'border-theme': step.status !== 'undo',
                 'bg-theme': step.status === 'doing',
-                'text-MAIN_BG': step.status === 'doing'
+                'text-MAIN_BG': step.status === 'doing',
+                'text-theme': step.status === 'done'
               }"
             >
               <svg *ngIf="step.status === 'done'" class="iconpark-icon">
