@@ -10,6 +10,7 @@ import { EoNgNavigationService } from '../../../service/eo-ng-navigation.service
 import { PluginConfigComponent } from '../config/config.component'
 import { PluginInstallConfigData, PluginInstallData, PluginMessage } from '../types/types'
 import { MarkdownService } from 'ngx-markdown'
+import { Router } from '@angular/router'
 
 @Component({
   selector: 'eo-ng-plugin-message',
@@ -84,6 +85,7 @@ export class PluginMessageComponent implements OnInit {
     private api:ApiService, private baseInfo:BaseInfoService,
     private appConfigService: EoNgNavigationService,
     private markdownService: MarkdownService,
+    private router:Router,
     @Inject(API_URL) public urlPrefix:string) {
     this.appConfigService.reqFlashBreadcrumb([
       { title: '企业插件', routerLink: ['/', 'plugin', 'group', 'list', ''] },
@@ -255,7 +257,7 @@ export class PluginMessageComponent implements OnInit {
         const subscription = this.appConfigService.getMenuList().subscribe(() => {
           subscription.unsubscribe()
         })
-        this.getPluginDetail()
+        this.router.navigate(['/', 'plugin', 'group', 'list'])
         this.modalRef?.close()
       }
     })
