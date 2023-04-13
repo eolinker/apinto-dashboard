@@ -8,5 +8,5 @@ import (
 type LogOperateType audit_model.LogOperateType
 
 func (l LogOperateType) Handler(ginCtx *gin.Context) {
-	ginCtx.Set(Operate, l)
+	ginCtx.Set(Operate, int(l))
 }
