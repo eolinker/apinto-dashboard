@@ -23,4 +23,5 @@ type ICommonGroupService interface {
 	GetGroupByName(ctx context.Context, groupName string, parentID int) (*group_entry.CommonGroup, error)
 	CheckGroupNameReduplicated(ctx context.Context, groupName string, parentID int) (bool, error)
 	GetGroupInfo(ctx context.Context, uuid string) (*group_entry.CommonGroup, error)
+	DeleteGroupByID(ctx context.Context, id int) error
 }
