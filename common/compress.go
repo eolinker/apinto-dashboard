@@ -8,7 +8,6 @@ import (
 	"io"
 	"os"
 	"path"
-	"strings"
 )
 
 // DeCompress 解压 tar.gz
@@ -56,19 +55,6 @@ func DeCompress(srcFile io.Reader, dest string) error {
 			log.Errorf("未知文件类型: %s in %s\n", hdr.Typeflag, hdr.Name)
 			return fmt.Errorf("未知文件类型: %s in %s\n", hdr.Typeflag, hdr.Name)
 		}
-		//file, err := createFile(filePath)
-		//if err != nil {
-		//	return err
-		//}
-		//io.Copy(file, tr)
 	}
 	return nil
-}
-
-func createFile(name string) (*os.File, error) {
-	err := os.MkdirAll(string([]rune(name)[:strings.LastIndex(name, "/")]), 0755)
-	if err != nil {
-		return nil, err
-	}
-	return os.Create(name)
 }
