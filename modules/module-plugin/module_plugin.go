@@ -13,6 +13,7 @@ type IModulePluginService interface {
 	GetPluginEnableInfo(ctx context.Context, pluginUUID string) (*model.PluginEnableInfo, error)
 	GetPluginEnableRender(ctx context.Context, pluginUUID string) (*model.PluginEnableRender, error)
 	InstallPlugin(ctx context.Context, userID int, groupName string, pluginYml *model.PluginYmlCfg, packageContent []byte) error
+	UninstallPlugin(ctx context.Context, userID int, pluginID string) error
 	EnablePlugin(ctx context.Context, userID int, pluginUUID string, enableInfo *dto.PluginEnableInfo) error
 	DisablePlugin(ctx context.Context, userID int, pluginUUID string) error
 
