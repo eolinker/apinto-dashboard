@@ -201,11 +201,11 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
 
         const headerHeight = document.getElementsByClassName('list-header')[0]?.getBoundingClientRect().height || 0// list-header高度，通常为表格上方按钮
         const footerHeight = document.getElementsByClassName('list-footer')[0]?.getBoundingClientRect().height || 0 // list-footer高度，通常为表格下方按钮
-        const pagationHeight = this.nzShowPagination ? 48 : 0 // 分页高度
+        const pagationHeight = this.nzShowPagination ? 42 : 0 // 分页高度
 
         const drawerHeaderHeight = document.getElementsByClassName('drawer-list-header')[0]?.getBoundingClientRect().height || 0// list-header高度，通常为表格上方按钮
         const drawerFooterHeight = document.getElementsByClassName('drawer-list-footer')[0]?.getBoundingClientRect().height || 0 // list-footer高度，通常为表格下方按钮
-        const drawerPagationHeight = this.nzShowPagination ? 48 : 0 // 分页高度
+        const drawerPagationHeight = this.nzShowPagination ? 42 : 0 // 分页高度
         const drawerButtonAreaHeight = document.getElementsByClassName('ant-modal-footer')[0]?.getBoundingClientRect().height || 0 // 弹窗底部
 
         const clusterDescHeight = document.getElementsByClassName('cluster-desc-block')[0]?.getBoundingClientRect().height || 0 // 集群环境变量里的集群描述高度
@@ -221,11 +221,12 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
     }
 
     if (this.nzData !== undefined && scrollY < this.nzData.length * 40) {
-      this.nzScroll = { x: this.nzScroll.x, y: scrollY > 50 ? scrollY + 'px' : '50px' }
+      this.nzScroll = { x: this.nzScroll.x || '100%', y: scrollY > 50 ? scrollY + 'px' : '50px' }
       this.tableScrollCdk?.ngOnInit()
     } else {
-      this.nzScroll = { x: this.nzScroll.x, y: undefined }
+      this.nzScroll = { x: this.nzScroll.x || '100%', y: undefined }
     }
+    console.log(this.nzScroll)
   }
 
   stopTrClick (index:number, length:number, e:any) {
