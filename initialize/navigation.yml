@@ -1,24 +1,36 @@
-- id: "navigation.api"
-  name: "API"
-  icon: "APIjiekou-7mme3dcg"
+- id: "navigation.api"  # 导航ID，插件模块通过该id绑定到导航下，作为子导航展示
+  name: "api"           # 导航英文名
+  cname: "API"          # 导航中文名
+  icon: "APIjiekou-7mme3dcg"  # 导航icon，该处填写css信息，需要和前端沟通同步
+  quick: true           # 当导航只有一个子导航时，是否将其作为一级导航展示
 - id: "navigation.application"
-  name: "应用"
+  name: "application"
+  cname: "应用"
   icon: "yingyong-7mmhj11e"
+  quick: true
 - id: "navigation.upstream"
-  name: "上游"
+  name: "upstream"
+  cname: "上游"
   icon: "connection-box"
+  quick: true
 - id: "navigation.strategy"
-  name: "策略"
+  name: "strategy"
+  cname: "策略"
   icon: "network-tree"
 - id: "navigation.infrastructure"
-  name: "基础设施"
+  name: "infrastructure"
+  cname: "基础设施"
   icon: "file-cabinet"
 - id: "navigation.public_config"
-  name: "公共配置"
+  name: "public-configuration"
+  cname: "公共配置"
   icon: "xiangmu"
 - id: "navigation.module_plugin"
-  name: "插件市场"
+  name: "plugin-market"
+  cname: "插件市场"
   icon: "puzzle"
+  quick: true
 - id: "navigation.system"
-  name: "系统管理"
+  name: "system"
+  cname: "系统管理"
   icon: "system"
