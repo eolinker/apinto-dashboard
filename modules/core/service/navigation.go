@@ -60,7 +60,7 @@ func (n *navigation) List(ctx context.Context) ([]*model.Navigation, map[string]
 			delete(moduleMap, l.Uuid)
 		}
 		defaultModule := ""
-		if len(ms) == 1 {
+		if len(ms) == 1 && l.Quick {
 			defaultModule = ms[0].Name
 		}
 
