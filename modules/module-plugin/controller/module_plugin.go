@@ -284,14 +284,13 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 		return
 	}
 
-	//TODO 校验解压目录下有没有必要的文件 plugin.yml icon README.md
-
+	//校验解压目录下有没有必要的文件 plugin.yml icon README.md
 	//读取plugin.yml
-	pluginCfgFile, _ := os.Open(path.Join(tmpDir, "plugin.yml"))
+	pluginCfgFile, err := os.Open(path.Join(tmpDir, "plugin.yml"))
 	if err != nil {
 		//文件不存在，删除目录
 		os.RemoveAll(tmpDir)
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("install plugin plugin.yml doesn't exist. err:%s", err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("安装插件失败  配置文件文件不存在. err:%s", err.Error()))
 		return
 	}
 	defer pluginCfgFile.Close()
@@ -306,6 +305,27 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("install plugin unmarshal plugin.yml fail. err:%s", err.Error()))
 		return
 	}
+	//TODO 校验plugin.yml
+
+	//README.md是否存在
+	mdFile, err := os.Open(path.Join(tmpDir, "README.md"))
+	if err != nil {
+		//文件不存在，删除目录
+		os.RemoveAll(tmpDir)
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("安装插件失败 README.md 文件不存在. err:%s", err.Error()))
+		return
+	}
+	defer mdFile.Close()
+
+	//图标文件是否存在
+	iconFile, err := os.Open(path.Join(tmpDir, pluginCfg.ICon))
+	if err != nil {
+		//文件不存在，删除目录
+		os.RemoveAll(tmpDir)
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("安装插件失败 图标文件不存在. err:%s", err.Error()))
+		return
+	}
+	defer iconFile.Close()
 
 	err = p.modulePluginService.InstallPlugin(ginCtx, userId, groupName, pluginCfg, fileBuffer)
 	if err != nil {

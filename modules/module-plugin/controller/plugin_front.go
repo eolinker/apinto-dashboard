@@ -77,7 +77,6 @@ func (p *pluginFrontController) setIConName(c *gin.Context) {
 	}
 
 	c.Set("file", fileName)
-	c.Set("strip_prefix", "/plugin/icon")
 }
 
 func (p *pluginFrontController) setMDName(c *gin.Context) {
@@ -86,13 +85,11 @@ func (p *pluginFrontController) setMDName(c *gin.Context) {
 		fileName = "README.md"
 	}
 	c.Set("file", fileName)
-	c.Set("strip_prefix", "/plugin/md")
 }
 
 func (p *pluginFrontController) getPluginInfo(c *gin.Context) {
 	pluginID := c.Param("id")
 	fileName := c.GetString("file")
-	stripPrefix := c.GetString("strip_prefix")
 
 	filePath := fmt.Sprintf("%s/%s", pluginID, fileName)
 
@@ -102,29 +99,28 @@ func (p *pluginFrontController) getPluginInfo(c *gin.Context) {
 		c.Data(http.StatusNotFound, "application/text", []byte("404 page not found"))
 		return
 	}
+
+	var fs http.FileSystem
 	//若为内置插件，则从内嵌目录中获取
 	if info.Type == 0 || info.Type == 1 {
-		fsHandler, err := initialize.GetInnerPluginFS(filePath)
+		fs, err = initialize.GetInnerPluginFS(filePath)
 		if err != nil {
 			c.Data(http.StatusNotFound, "application/text", []byte("404 page not found"))
 			return
 		}
-		c.FileFromFS(filePath, fsHandler)
-		return
+	} else {
+		fs = gin.Dir(PluginDir, false)
+		// Check if file exists and/or if we have permission to access it
+		f, err := fs.Open(filePath)
+		if err != nil {
+			//文件不存在时
+			c.Data(http.StatusNotFound, "application/text", []byte("404 page not found"))
+			return
+		}
+		defer f.Close()
 	}
 
-	pluginFs := gin.Dir(PluginDir, false)
-	fileServer := http.StripPrefix(stripPrefix, http.FileServer(pluginFs))
-	// Check if file exists and/or if we have permission to access it
-	f, err := pluginFs.Open(filePath)
-	if err != nil {
-		//文件不存在时
-		c.Data(http.StatusNotFound, "application/text", []byte("404 page not found"))
-		return
-	}
-	defer f.Close()
-
-	fileServer.ServeHTTP(c.Writer, c.Request)
+	c.FileFromFS(filePath, fs)
 }
 
 // getPluginMD 获取插件描述中要用到的MD文件
@@ -137,27 +133,26 @@ func (p *pluginFrontController) getPluginResources(c *gin.Context) {
 		return
 	}
 	filePath := fmt.Sprintf("%s/resources/%s", pluginID, strings.Trim(c.Param("filepath"), "/"))
+
+	var fs http.FileSystem
 	//若为内置插件，则从内嵌目录中获取
 	if info.Type == 0 || info.Type == 1 {
-		fsHandler, err := initialize.GetInnerPluginFS(filePath)
+		fs, err = initialize.GetInnerPluginFS(filePath)
 		if err != nil {
 			c.Data(http.StatusNotFound, "application/text", []byte("404 page not found"))
 			return
 		}
-		c.FileFromFS(filePath, fsHandler)
-		return
+	} else {
+		fs = gin.Dir(PluginDir, false)
+		// Check if file exists and/or if we have permission to access it
+		f, err := fs.Open(filePath)
+		if err != nil {
+			//文件不存在时
+			c.Data(http.StatusNotFound, "application/text", []byte("404 page not found"))
+			return
+		}
+		defer f.Close()
 	}
 
-	pluginFs := gin.Dir(PluginDir, false)
-	fileServer := http.StripPrefix("/plugin/info", http.FileServer(pluginFs))
-	// Check if file exists and/or if we have permission to access it
-	f, err := pluginFs.Open(filePath)
-	if err != nil {
-		//文件不存在时
-		c.Data(http.StatusNotFound, "application/text", []byte("404 page not found"))
-		return
-	}
-	f.Close()
-
-	fileServer.ServeHTTP(c.Writer, c.Request)
+	c.FileFromFS(filePath, fs)
 }
