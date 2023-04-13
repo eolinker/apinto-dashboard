@@ -147,7 +147,7 @@ func (p *modulePluginController) getEnableInfo(ginCtx *gin.Context) {
 			ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("启用插件失败:%s", err.Error())))
 			return
 		}
-		ginCtx.JSON(enablePluginStatus, controller.NewSuccessResult(nil))
+		ginCtx.JSON(http.StatusOK, controller.NewResult(enablePluginStatus, nil, "success"))
 		return
 	}
 
