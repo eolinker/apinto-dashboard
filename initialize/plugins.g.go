@@ -49,33 +49,37 @@ func InitPlugins() error {
 	for _, p := range plugins {
 		//TODO 校验内置插件
 
+		pluginCfg := &model.InnerPluginYmlCfg{
+			ID:         p.Id,
+			Name:       p.Name,
+			Version:    p.Version,
+			CName:      p.CName,
+			Resume:     p.Resume,
+			ICon:       p.Icon,
+			Driver:     p.Driver,
+			Front:      p.Front,
+			Navigation: p.Navigation,
+			Core:       p.Core,
+			Auto:       p.Auto,
+		}
+
 		pluginInfo, err := service.GetPluginInfo(ctx, p.Id)
 		if err != nil {
 			if err != gorm.ErrRecordNotFound {
 				return err
 			}
 			// 插入安装记录
-			err = service.InstallInnerPlugin(ctx, &model.InnerPluginYmlCfg{
-				ID:         p.Id,
-				Name:       p.Name,
-				Version:    p.Version,
-				CName:      p.CName,
-				Resume:     p.Resume,
-				ICon:       p.Icon,
-				Driver:     p.Driver,
-				Front:      p.Front,
-				Navigation: p.Navigation,
-				Core:       p.Core,
-				Auto:       p.Auto,
-			})
+			err = service.InstallInnerPlugin(ctx, pluginCfg)
 			if err != nil {
 				return err
 			}
-			continue
 		}
-		//TODO 判断version有没改变，有则更新
+		//判断version有没改变，有则更新
 		if pluginInfo.Version != p.Version {
-
+			err = service.UpdateInnerPlugin(ctx, pluginCfg)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil

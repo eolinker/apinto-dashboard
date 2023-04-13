@@ -483,7 +483,6 @@ func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml 
 	}
 
 	err = m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
-
 		t := time.Now()
 		pluginInfo := &entry.ModulePlugin{
 			UUID:       pluginYml.ID,
@@ -529,6 +528,48 @@ func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml 
 	}, time.Hour)
 
 	return nil
+}
+
+func (m *modulePluginService) UpdateInnerPlugin(ctx context.Context, pluginYml *model.InnerPluginYmlCfg) error {
+
+	pluginType := 1
+	if pluginYml.Core {
+		pluginType = 0
+	}
+
+	pluginInfo, err := m.pluginStore.GetPluginInfo(ctx, pluginYml.ID)
+	if err != nil {
+		return err
+	}
+	t := time.Now()
+
+	pluginInfo.Name = pluginYml.Name
+	pluginInfo.Version = pluginYml.Version
+	pluginInfo.Navigation = pluginYml.Navigation
+	pluginInfo.CName = pluginYml.CName
+	pluginInfo.Resume = pluginYml.Resume
+	pluginInfo.ICon = pluginYml.ICon
+	pluginInfo.Type = pluginType
+	pluginInfo.Front = pluginYml.Front
+	pluginInfo.Driver = pluginYml.Driver
+	pluginInfo.CreateTime = t
+
+	return m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
+		if _, err = m.pluginStore.Update(txCtx, pluginInfo); err != nil {
+			return err
+		}
+
+		//name和enable不更新
+		enable := &entry.ModulePluginEnable{
+			Id:         pluginInfo.Id,
+			Navigation: pluginYml.Navigation,
+			Config:     []byte{},
+			Operator:   0,
+			UpdateTime: t,
+		}
+		_, err = m.pluginEnableStore.Update(txCtx, enable)
+		return err
+	})
 }
 
 func (m *modulePluginService) CheckPluginInstalled(ctx context.Context, pluginID string) (bool, error) {
