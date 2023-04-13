@@ -1,6 +1,7 @@
 package upstream_controller
 
 import (
+	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-module"
 	"net/http"
 )
@@ -109,7 +110,7 @@ func (c *UpstreamModule) initRouter() {
 			Method:      http.MethodPut,
 			Path:        "/api/service/:service_name/offline",
 			Handler:     "upstream.offline",
-			HandlerFunc: []apinto_module.HandlerFunc{upstreamCtl.offline},
+			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypePublish.Handler, upstreamCtl.offline},
 		},
 		{
 			Method:      http.MethodGet,

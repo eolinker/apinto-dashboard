@@ -71,7 +71,7 @@ func (m *monitorController) getPartitionList(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	list, err := m.monitorService.PartitionList(ginCtx, namespaceId)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Get monitor partition list fail. err: %s", err)))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Get monitor partition list fail. err: %s", err))
 		return
 	}
 
@@ -86,7 +86,7 @@ func (m *monitorController) getPartitionInfo(ginCtx *gin.Context) {
 
 	info, err := m.monitorService.PartitionInfo(ginCtx, namespaceId, uuid)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Get monitor partition info fail. err: %s", err)))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Get monitor partition info fail. err: %s", err))
 		return
 	}
 
@@ -109,20 +109,20 @@ func (m *monitorController) createPartition(ginCtx *gin.Context) {
 
 	inputProxy := new(monitor_dto.MonitorPartitionInfoProxy)
 	if err := ginCtx.BindJSON(inputProxy); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	var err error
 	inputProxy.Config, err = m.monitorService.CheckInput(inputProxy.SourceType, inputProxy.Config)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	info, err := m.monitorService.CreatePartition(ginCtx, namespaceId, userId, inputProxy)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Create monitor partition fail. err: %s", err)))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Create monitor partition fail. err: %s", err))
 		return
 	}
 
@@ -138,20 +138,20 @@ func (m *monitorController) editPartition(ginCtx *gin.Context) {
 
 	inputProxy := new(monitor_dto.MonitorPartitionInfoProxy)
 	if err := ginCtx.BindJSON(inputProxy); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	var err error
 	inputProxy.Config, err = m.monitorService.CheckInput(inputProxy.SourceType, inputProxy.Config)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	info, err := m.monitorService.UpdatePartition(ginCtx, namespaceId, userId, uuid, inputProxy)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Update monitor partition fail. err: %s", err)))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Update monitor partition fail. err: %s", err))
 		return
 	}
 
@@ -166,7 +166,7 @@ func (m *monitorController) delPartition(ginCtx *gin.Context) {
 
 	err := m.monitorService.DelPartition(ginCtx, namespaceId, uuid)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Delete external-app fail. err: %s", err)))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Delete external-app fail. err: %s", err))
 		return
 	}
 
@@ -179,19 +179,19 @@ func (m *monitorController) overviewSummary(ginCtx *gin.Context) {
 
 	input := new(monitor_dto.MonSummaryInput)
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	if input.Start <= 0 || input.End <= 0 || input.Start >= input.End {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("timestamp is illegal.")))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("timestamp is illegal."))
 		return
 	}
 
 	if len(input.Clusters) == 0 {
 		info, err := m.monitorService.PartitionInfo(ginCtx, namespaceId, input.UUid)
 		if err != nil {
-			ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+			controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 			return
 		}
 		input.Clusters = info.ClusterNames
@@ -199,7 +199,7 @@ func (m *monitorController) overviewSummary(ginCtx *gin.Context) {
 
 	clusters, err := m.clusterService.GetByNames(ginCtx, namespaceId, input.Clusters)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -218,7 +218,7 @@ func (m *monitorController) overviewSummary(ginCtx *gin.Context) {
 
 	request, proxy, err := m.monStatistics.CircularMap(ginCtx, namespaceId, input.UUid, formatTimeByMinute(input.Start), formatTimeByMinute(input.End), wheres)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	resMap := make(map[string]interface{})
@@ -245,19 +245,19 @@ func (m *monitorController) overviewInvoke(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	input := new(monitor_dto.MonSummaryInput)
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	if input.Start <= 0 || input.End <= 0 || input.Start >= input.End {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("timestamp is illegal.")))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("timestamp is illegal."))
 		return
 	}
 
 	if len(input.Clusters) == 0 {
 		info, err := m.monitorService.PartitionInfo(ginCtx, namespaceId, input.UUid)
 		if err != nil {
-			ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+			controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 			return
 		}
 		input.Clusters = info.ClusterNames
@@ -265,7 +265,7 @@ func (m *monitorController) overviewInvoke(ginCtx *gin.Context) {
 
 	clusters, err := m.clusterService.GetByNames(ginCtx, namespaceId, input.Clusters)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -284,7 +284,7 @@ func (m *monitorController) overviewInvoke(ginCtx *gin.Context) {
 
 	values, timeInterval, err := m.monStatistics.Trend(ginCtx, namespaceId, input.UUid, formatTimeByMinute(input.Start), formatTimeByMinute(input.End), wheres)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -306,19 +306,19 @@ func (m *monitorController) overviewMessage(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	input := new(monitor_dto.MonSummaryInput)
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	if input.Start <= 0 || input.End <= 0 || input.Start >= input.End {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("timestamp is illegal.")))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("timestamp is illegal."))
 		return
 	}
 
 	if len(input.Clusters) == 0 {
 		info, err := m.monitorService.PartitionInfo(ginCtx, namespaceId, input.UUid)
 		if err != nil {
-			ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+			controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 			return
 		}
 		input.Clusters = info.ClusterNames
@@ -326,7 +326,7 @@ func (m *monitorController) overviewMessage(ginCtx *gin.Context) {
 
 	clusters, err := m.clusterService.GetByNames(ginCtx, namespaceId, input.Clusters)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -345,7 +345,7 @@ func (m *monitorController) overviewMessage(ginCtx *gin.Context) {
 
 	data, timeInterval, err := m.monStatistics.MessageTrend(ginCtx, namespaceId, input.UUid, formatTimeByMinute(input.Start), formatTimeByMinute(input.End), wheres)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -362,12 +362,12 @@ func (m *monitorController) overviewTop(ginCtx *gin.Context) {
 	input := new(monitor_dto.MonSummaryInput)
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	if input.Start <= 0 || input.End <= 0 || input.Start >= input.End {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("timestamp is illegal.")))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("timestamp is illegal."))
 		return
 	}
 
@@ -375,14 +375,14 @@ func (m *monitorController) overviewTop(ginCtx *gin.Context) {
 	switch input.DataType {
 	case "api", "app", "service":
 	default:
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("data_type is illegal.")))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("data_type is illegal."))
 		return
 	}
 
 	if len(input.Clusters) == 0 {
 		info, err := m.monitorService.PartitionInfo(ginCtx, namespaceId, input.UUid)
 		if err != nil {
-			ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+			controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 			return
 		}
 		input.Clusters = info.ClusterNames
@@ -390,7 +390,7 @@ func (m *monitorController) overviewTop(ginCtx *gin.Context) {
 
 	clusters, err := m.clusterService.GetByNames(ginCtx, namespaceId, input.Clusters)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -413,7 +413,7 @@ func (m *monitorController) overviewTop(ginCtx *gin.Context) {
 		//api TOP10
 		apiList, err := m.monStatistics.Statistics(ginCtx, namespaceId, input.UUid, formatTimeByMinute(input.Start), formatTimeByMinute(input.End), "api", wheres, 10)
 		if err != nil {
-			ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+			controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 			return
 		}
 		//补全api信息
@@ -458,7 +458,7 @@ func (m *monitorController) overviewTop(ginCtx *gin.Context) {
 		//app TOP10
 		appList, err := m.monStatistics.Statistics(ginCtx, namespaceId, input.UUid, formatTimeByMinute(input.Start), formatTimeByMinute(input.End), "app", wheres, 10)
 		if err != nil {
-			ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+			controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 			return
 		}
 		//补全应用信息
@@ -502,7 +502,7 @@ func (m *monitorController) overviewTop(ginCtx *gin.Context) {
 		//upstream TOP10
 		upstreamList, err := m.monStatistics.ProxyStatistics(ginCtx, namespaceId, input.UUid, formatTimeByMinute(input.Start), formatTimeByMinute(input.End), "upstream", wheres, 10)
 		if err != nil {
-			ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+			controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 			return
 		}
 
@@ -549,18 +549,18 @@ func (m *monitorController) getStatistics(ginCtx *gin.Context) {
 
 	input := &monitor_dto.MonCommonInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	if input.EndTime > time.Now().Unix() {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("查询结束时间不能大于当前时间"))
+		controller.ErrorJson(ginCtx, http.StatusOK, "查询结束时间不能大于当前时间")
 		return
 	}
 
 	if len(input.Clusters) == 0 {
 		info, err := m.monitorService.PartitionInfo(ginCtx, namespaceId, input.PartitionId)
 		if err != nil {
-			ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+			controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 			return
 		}
 		input.Clusters = info.ClusterNames
@@ -568,7 +568,7 @@ func (m *monitorController) getStatistics(ginCtx *gin.Context) {
 
 	clusters, err := m.clusterService.GetByNames(ginCtx, namespaceId, input.Clusters)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -589,14 +589,14 @@ func (m *monitorController) getStatistics(ginCtx *gin.Context) {
 		if len(input.ApiIds) > 0 {
 			apiList, err = m.apiService.GetAPIInfoByUUIDS(ginCtx, namespaceId, input.ApiIds)
 			if err != nil {
-				ginCtx.JSON(http.StatusOK, controller.NewErrorResult("query apis error = "+err.Error()))
+				controller.ErrorJson(ginCtx, http.StatusOK, "query apis error = "+err.Error())
 				return
 			}
 		} else if len(input.Services) > 0 {
 
 			apiInfoList, err := m.apiService.GetAPIListByServiceName(ginCtx, namespaceId, input.Services)
 			if err != nil {
-				ginCtx.JSON(http.StatusOK, controller.NewErrorResult("query apis error = "+err.Error()))
+				controller.ErrorJson(ginCtx, http.StatusOK, "query apis error = "+err.Error())
 				return
 			}
 			appIds := common.SliceToSliceIds(apiInfoList, func(t *api_model.APIInfo) string {
@@ -605,13 +605,13 @@ func (m *monitorController) getStatistics(ginCtx *gin.Context) {
 
 			apiList, err = m.apiService.GetAPIInfoByUUIDS(ginCtx, namespaceId, appIds)
 			if err != nil {
-				ginCtx.JSON(http.StatusOK, controller.NewErrorResult("query apis error = "+err.Error()))
+				controller.ErrorJson(ginCtx, http.StatusOK, "query apis error = "+err.Error())
 				return
 			}
 		} else if detailsType == "" {
 			apiList, err = m.apiService.GetAPIInfoAll(ginCtx, namespaceId)
 			if err != nil {
-				ginCtx.JSON(http.StatusOK, controller.NewErrorResult("query apis error = "+err.Error()))
+				controller.ErrorJson(ginCtx, http.StatusOK, "query apis error = "+err.Error())
 				return
 			}
 		}
@@ -624,13 +624,13 @@ func (m *monitorController) getStatistics(ginCtx *gin.Context) {
 		if len(input.AppIds) > 0 {
 			appList, err = m.appService.AppListByUUIDS(ginCtx, namespaceId, input.AppIds)
 			if err != nil {
-				ginCtx.JSON(http.StatusOK, controller.NewErrorResult("query apps error = "+err.Error()))
+				controller.ErrorJson(ginCtx, http.StatusOK, "query apps error = "+err.Error())
 				return
 			}
 		} else if detailsType == "" {
 			appList, err = m.appService.AppListAll(ginCtx, namespaceId)
 			if err != nil {
-				ginCtx.JSON(http.StatusOK, controller.NewErrorResult("query apps error = "+err.Error()))
+				controller.ErrorJson(ginCtx, http.StatusOK, "query apps error = "+err.Error())
 				return
 			}
 		}
@@ -641,19 +641,19 @@ func (m *monitorController) getStatistics(ginCtx *gin.Context) {
 		if len(input.Services) > 0 {
 			serviceList, err = m.service.GetServiceListByNames(ginCtx, namespaceId, input.Services)
 			if err != nil {
-				ginCtx.JSON(http.StatusOK, controller.NewErrorResult("query services error = "+err.Error()))
+				controller.ErrorJson(ginCtx, http.StatusOK, "query services error = "+err.Error())
 				return
 			}
 		} else {
 			serviceList, err = m.service.GetServiceListAll(ginCtx, namespaceId)
 			if err != nil {
-				ginCtx.JSON(http.StatusOK, controller.NewErrorResult("query services error = "+err.Error()))
+				controller.ErrorJson(ginCtx, http.StatusOK, "query services error = "+err.Error())
 				return
 			}
 		}
 
 	default:
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("参数错误"))
+		controller.ErrorJson(ginCtx, http.StatusOK, "参数错误")
 		return
 	}
 
@@ -672,7 +672,7 @@ func (m *monitorController) getStatistics(ginCtx *gin.Context) {
 
 	wheres, err := m.getWheres(ginCtx, namespaceId, input, clusterIds)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -681,20 +681,20 @@ func (m *monitorController) getStatistics(ginCtx *gin.Context) {
 	if callType == "apiOrApp" {
 		maps, err = m.monStatistics.Statistics(ginCtx, namespaceId, input.PartitionId, formatTimeByMinute(input.StartTime), formatTimeByMinute(input.EndTime), groupBy, wheres, 0)
 		if err != nil {
-			ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+			controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 			return
 		}
 	} else if callType == "proxy" {
 		maps, err = m.monStatistics.ProxyStatistics(ginCtx, namespaceId, input.PartitionId, formatTimeByMinute(input.StartTime), formatTimeByMinute(input.EndTime), groupBy, wheres, 0)
 		if err != nil {
-			ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+			controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 			return
 		}
 	}
 	//else if callType == "ip" {
 	//	maps, err = m.monStatistics.IPStatistics(ginCtx, namespaceId, input.PartitionId, formatTimeByMinute(input.Start), formatTimeByMinute(input.End), groupBy, wheres, 200)
 	//	if err != nil {
-	//		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+	//		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 	//		return
 	//	}
 	//}
@@ -708,7 +708,7 @@ func (m *monitorController) getStatistics(ginCtx *gin.Context) {
 			}
 			apiList, err = m.apiService.GetAPIInfoByUUIDS(ginCtx, namespaceId, apiIds)
 			if err != nil {
-				ginCtx.JSON(http.StatusOK, controller.NewErrorResult("query apis error = "+err.Error()))
+				controller.ErrorJson(ginCtx, http.StatusOK, "query apis error = "+err.Error())
 				return
 			}
 
@@ -722,7 +722,7 @@ func (m *monitorController) getStatistics(ginCtx *gin.Context) {
 			}
 			appList, err = m.appService.AppListByUUIDS(ginCtx, namespaceId, appIds)
 			if err != nil {
-				ginCtx.JSON(http.StatusOK, controller.NewErrorResult("query app error = "+err.Error()))
+				controller.ErrorJson(ginCtx, http.StatusOK, "query app error = "+err.Error())
 				return
 			}
 		}
@@ -856,12 +856,12 @@ func (m *monitorController) getStatisticsDetails(ginCtx *gin.Context) {
 
 	input := &monitor_dto.MonCommonInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	if input.EndTime > time.Now().Unix() {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("查询结束时间不能大于当前时间"))
+		controller.ErrorJson(ginCtx, http.StatusOK, "查询结束时间不能大于当前时间")
 		return
 	}
 
@@ -869,17 +869,17 @@ func (m *monitorController) getStatisticsDetails(ginCtx *gin.Context) {
 	switch detailsType {
 	case "api":
 		if input.ApiId == "" {
-			ginCtx.JSON(http.StatusOK, controller.NewErrorResult("api_id can't be null. "))
+			controller.ErrorJson(ginCtx, http.StatusOK, "api_id can't be null. ")
 			return
 		}
 	case "app":
 		if input.AppId == "" {
-			ginCtx.JSON(http.StatusOK, controller.NewErrorResult("app_id can't be null. "))
+			controller.ErrorJson(ginCtx, http.StatusOK, "app_id can't be null. ")
 			return
 		}
 	case "addr":
 		if input.Addr == "" {
-			ginCtx.JSON(http.StatusOK, controller.NewErrorResult("addr can't be null. "))
+			controller.ErrorJson(ginCtx, http.StatusOK, "addr can't be null. ")
 			return
 		}
 	}
@@ -887,7 +887,7 @@ func (m *monitorController) getStatisticsDetails(ginCtx *gin.Context) {
 	if len(input.Clusters) == 0 {
 		info, err := m.monitorService.PartitionInfo(ginCtx, namespaceId, input.PartitionId)
 		if err != nil {
-			ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+			controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 			return
 		}
 		input.Clusters = info.ClusterNames
@@ -895,7 +895,7 @@ func (m *monitorController) getStatisticsDetails(ginCtx *gin.Context) {
 
 	clusters, err := m.clusterService.GetByNames(ginCtx, namespaceId, input.Clusters)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -905,7 +905,7 @@ func (m *monitorController) getStatisticsDetails(ginCtx *gin.Context) {
 
 	wheres, err := m.getWheres(ginCtx, namespaceId, input, clusterIds)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -915,13 +915,13 @@ func (m *monitorController) getStatisticsDetails(ginCtx *gin.Context) {
 	if dataType == "service" {
 		values, timeInterval, err = m.monStatistics.ProxyTrend(ginCtx, namespaceId, input.PartitionId, formatTimeByMinute(input.StartTime), formatTimeByMinute(input.EndTime), wheres)
 		if err != nil {
-			ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+			controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 			return
 		}
 	} else {
 		values, timeInterval, err = m.monStatistics.Trend(ginCtx, namespaceId, input.PartitionId, formatTimeByMinute(input.StartTime), formatTimeByMinute(input.EndTime), wheres)
 		if err != nil {
-			ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+			controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 			return
 		}
 	}

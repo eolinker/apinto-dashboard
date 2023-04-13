@@ -34,10 +34,10 @@ func RegisterClusterRouter(router gin.IRoutes) {
 	router.GET("/clusters", c.clusters)
 	router.GET("/cluster/enum", c.clusterEnum)
 	router.GET("/cluster", c.cluster)
-	router.DELETE("/cluster", controller.AuditLogHandler(enum.LogOperateTypeDelete, enum.LogKindCluster, c.del))
-	router.POST("/cluster/", controller.AuditLogHandler(enum.LogOperateTypeCreate, enum.LogKindCluster, c.create))
+	router.DELETE("/cluster", c.del)
+	router.POST("/cluster/", c.create)
 	router.GET("/cluster-test", c.test)
-	router.PUT("/cluster/:cluster_name/desc", controller.AuditLogHandler(enum.LogOperateTypeEdit, enum.LogKindCluster, c.putDesc))
+	router.PUT("/cluster/:cluster_name/desc", c.putDesc)
 }
 
 // clusters 获取集群列表

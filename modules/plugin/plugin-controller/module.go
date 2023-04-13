@@ -1,6 +1,7 @@
 package plugin_controller
 
 import (
+	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-module"
 	"net/http"
 )
@@ -146,7 +147,7 @@ func (c *PluginModule) initRouter() {
 			Method:      http.MethodPost,
 			Path:        "/api/cluster/:cluster_name/plugin/publish",
 			Handler:     "cluster-plugin.publish",
-			HandlerFunc: []apinto_module.HandlerFunc{clusterPluginCtl.publish},
+			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypePublish.Handler, clusterPluginCtl.publish},
 		},
 		{
 			Method:      http.MethodGet,

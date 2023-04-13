@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/controller"
-	"github.com/eolinker/apinto-dashboard/enum"
+	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
+	apintoModule "github.com/eolinker/apinto-module"
 	"github.com/eolinker/eosc/log"
 	"github.com/gin-gonic/gin"
 	"io"
@@ -30,17 +31,11 @@ func (a *auditLogController) Handler(ginCtx *gin.Context) {
 
 	ginCtx.Next()
 
-	kind := ginCtx.GetString(controller.AuditKind)
+	kind := ginCtx.GetString(apintoModule.ApintoModuleName)
 	operate := ginCtx.GetInt(controller.Operate)
-	//特殊情况. 通用分组controller暂只支持api分组写入审计日志
-	if kind == enum.LogKindCommonGroup {
-		groupType := ginCtx.Param("group_type")
-		if groupType != "api" {
-			return
-		}
-		kind = enum.LogKindAPIGroup
+	if operate == 0 {
+		operate = switchMethod(ginCtx.Request.Method)
 	}
-
 	end := time.Now()
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	userId := controller.GetUserId(ginCtx)
@@ -67,4 +62,17 @@ func (a *auditLogController) Handler(ginCtx *gin.Context) {
 
 	a.auditLogService.Log(namespaceId, userId, operate, kind, url, ginCtx.GetString("auditObject"), ip, userAgent, ginCtx.GetString(controller.LogBody), errInfo, start, end)
 
+}
+func switchMethod(method string) int {
+	switch method {
+	case http.MethodGet:
+		return int(audit_model.LogOperateTypeNone)
+	case http.MethodPost:
+		return int(audit_model.LogOperateTypeCreate)
+	case http.MethodPut:
+		return int(audit_model.LogOperateTypeEdit)
+	case http.MethodDelete:
+		return int(audit_model.LogOperateTypeDelete)
+	}
+	return int(audit_model.LogOperateTypeNone)
 }

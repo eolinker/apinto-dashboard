@@ -1,6 +1,7 @@
 package strategy_controller
 
 import (
+	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-module"
 	"net/http"
 )
@@ -115,7 +116,7 @@ func (c *StrategyGreyModule) initRouter() {
 			Method:      http.MethodPost,
 			Path:        "/api/strategy/grey/publish",
 			Handler:     "strategy-grey.publish",
-			HandlerFunc: []apinto_module.HandlerFunc{strategyGreyController.publish},
+			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypePublish.Handler, strategyGreyController.publish},
 		},
 		{
 			Method:      http.MethodPost,
