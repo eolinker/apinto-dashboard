@@ -32,7 +32,7 @@ func (u *userController) getMyProfile(ginCtx *gin.Context) {
 
 	userInfo, err := u.userInfo.GetUserInfo(ginCtx, userId)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("getMyProfile fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("getMyProfile fail. err:%s", err.Error()))
 		return
 	}
 
@@ -98,7 +98,7 @@ func (u *userController) getUserAccess(ginCtx *gin.Context) {
 
 	accessSet, err := u.userInfo.GetAccessInfo(ginCtx, userID)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("GetUserAccessList fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("GetUserAccessList fail. err:%s", err.Error()))
 		return
 	}
 	allModules := access.GetAllModulesConfig()

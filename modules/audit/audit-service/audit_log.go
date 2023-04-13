@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/eolinker/apinto-dashboard/common"
-	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/audit"
 	"github.com/eolinker/apinto-dashboard/modules/audit/audit-entry"
 	"github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
@@ -52,8 +51,8 @@ func (a *auditLogService) GetLogsList(ctx context.Context, namespaceID, operateT
 		items = append(items, &audit_model.LogListItem{
 			ID:          info.Id,
 			Operator:    operator,
-			OperateType: enum.LogOperateType(info.OperateType),
-			Kind:        enum.LogKind(info.Kind),
+			OperateType: audit_model.LogOperateType(info.OperateType),
+			Kind:        info.Kind,
 			Time:        common.TimeToStr(info.StartTime),
 			IP:          info.IP,
 		})
@@ -79,12 +78,12 @@ func (a *auditLogService) GetLogDetail(ctx context.Context, logID int) ([]*audit
 
 	args = append(args, &audit_model.LogDetailArg{
 		Attr:  "操作类型",
-		Value: enum.GetLogOperateTitle(enum.LogOperateType(info.OperateType)),
+		Value: audit_model.GetLogOperateTitle(audit_model.LogOperateType(info.OperateType)),
 	})
 
 	args = append(args, &audit_model.LogDetailArg{
 		Attr:  "操作对象",
-		Value: enum.GetLogKindTitle(enum.LogKind(info.Kind)),
+		Value: info.Kind,
 	})
 
 	args = append(args, &audit_model.LogDetailArg{
@@ -118,13 +117,13 @@ func (a *auditLogService) GetLogDetail(ctx context.Context, logID int) ([]*audit
 	if object.PublishType != 0 {
 		args = append(args, &audit_model.LogDetailArg{
 			Attr:  "发布类型",
-			Value: enum.GetPublishTypeTitle(object.PublishType),
+			Value: audit_model.GetPublishTypeTitle(object.PublishType),
 		})
 	}
 	if object.EnableOperate != 0 {
 		args = append(args, &audit_model.LogDetailArg{
 			Attr:  "启用禁用操作",
-			Value: enum.GetEnableTypeTitle(object.EnableOperate),
+			Value: audit_model.GetEnableTypeTitle(object.EnableOperate),
 		})
 	}
 	if object.Name != "" {
