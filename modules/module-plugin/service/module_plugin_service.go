@@ -162,11 +162,24 @@ func (m *modulePluginService) GetPluginEnableInfo(ctx context.Context, pluginUUI
 	_ = json.Unmarshal(enableEntry.Config, enableCfg)
 
 	info := &model.PluginEnableInfo{
-		Name:       enableEntry.Name,
-		Server:     enableCfg.Server,
-		Header:     enableCfg.Header,
-		Query:      enableCfg.Query,
-		Initialize: enableCfg.Initialize,
+		Name:         enableEntry.Name,
+		NameConflict: false,
+		Server:       enableCfg.Server,
+		Header:       enableCfg.Header,
+		Query:        enableCfg.Query,
+		Initialize:   enableCfg.Initialize,
+	}
+
+	//检测已启用的插件中是否有同名的
+	nPlugin, err := m.pluginEnableStore.GetEnabledPluginByName(ctx, enableEntry.Name)
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return info, nil
+		}
+		return nil, err
+	}
+	if nPlugin != nil && nPlugin.Id != pluginInfo.Id {
+		info.NameConflict = true
 	}
 
 	return info, nil
@@ -179,8 +192,7 @@ func (m *modulePluginService) GetPluginEnableRender(ctx context.Context, pluginU
 	}
 
 	renderCfg := &model.PluginEnableRender{
-		Internet:  false,
-		Invisible: true,
+		Internet: false,
 	}
 	switch pluginInfo.Driver {
 	case "remote":
@@ -197,7 +209,6 @@ func (m *modulePluginService) GetPluginEnableRender(ctx context.Context, pluginU
 		renderCfg.Headers = localDefine.Headers
 		renderCfg.Querys = localDefine.Querys
 		renderCfg.Initialize = localDefine.Initialize
-		renderCfg.Invisible = localDefine.Invisible
 	}
 	return renderCfg, nil
 }
@@ -306,11 +317,11 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 	}
 
 	//校验模块名, 若启用的模块有同名的则报错
-	info, err := m.pluginEnableStore.GetByModuleName(ctx, enableInfo.Name)
+	info, err := m.pluginEnableStore.GetEnabledPluginByName(ctx, enableInfo.Name)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return err
 	}
-	if info != nil && info.IsEnable == 1 {
+	if info != nil && info.Id != pluginInfo.Id {
 		return errors.New("已有同名的插件")
 	}
 
