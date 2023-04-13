@@ -86,7 +86,9 @@ export class PluginConfigComponent implements OnInit {
       this.api.post('system/plugin/enable', data, { id: this.pluginId }).subscribe((resp:EmptyHttpResponse) => {
         if (resp.code === 0) {
           this.message.success(resp.msg || '启用插件成功')
-          this.navService.reqFlashMenu()
+          const subscription = this.navService.getMenuList().subscribe(() => {
+            subscription.unsubscribe()
+          })
           this.refreshPage && this.refreshPage()
         }
       })

@@ -123,7 +123,8 @@ export class PluginMessageComponent implements OnInit {
     this.markdownService.renderer.image = (src, title, alt) => {
       let html
       if (src && /^(?![http])[.]*/.test(src!)) {
-        html = `<image src="${this.urlPrefix}plugin/info/${this.pluginId}/resource/${src}" alt=${alt}/>`
+        const newSrc = src.replace('./resource', '/resource')
+        html = `<image src="${this.urlPrefix}plugin/info/${this.pluginId}${newSrc}" alt=${alt}/>`
       } else {
         html = `<image src="${src}" alt=${alt}/>`
       }
@@ -205,7 +206,9 @@ export class PluginMessageComponent implements OnInit {
           this.api.post('system/plugin/enable', { name: params.name }, { id: this.pluginId }).subscribe((resp:EmptyHttpResponse) => {
             if (resp.code === 0) {
               this.message.success(resp.msg || '启用插件成功')
-              this.appConfigService.reqFlashMenu()
+              const subscription = this.appConfigService.getMenuList().subscribe(() => {
+                subscription.unsubscribe()
+              })
               this.getPluginDetail()
             }
           })
@@ -240,7 +243,9 @@ export class PluginMessageComponent implements OnInit {
     this.api.post('system/plugin/disable', {}, { id: this.pluginId }).subscribe((resp:EmptyHttpResponse) => {
       if (resp.code === 0) {
         this.message.success(resp.msg || '禁用成功')
-        this.appConfigService.reqFlashMenu()
+        const subscription = this.appConfigService.getMenuList().subscribe(() => {
+          subscription.unsubscribe()
+        })
         this.getPluginDetail()
         this.modalRef?.close()
       }
@@ -252,7 +257,9 @@ export class PluginMessageComponent implements OnInit {
     this.api.post('system/plugin/uninstall', {}, { id: this.pluginId }).subscribe((resp:EmptyHttpResponse) => {
       if (resp.code === 0) {
         this.message.success(resp.msg || '卸载成功')
-        this.appConfigService.reqFlashMenu()
+        const subscription = this.appConfigService.getMenuList().subscribe(() => {
+          subscription.unsubscribe()
+        })
         this.getPluginDetail()
         this.modalRef?.close()
       }
