@@ -38,7 +38,8 @@ export class EoNgNavigationService {
 
   // 获取首页路由地址
   getPageRoute ():string {
-    return this.mainPageRouter
+    return 'guide'
+    // return this.mainPageRouter
   }
 
   // 如果用户没有任何除商业授权以外的功能查看权限, 返回true
