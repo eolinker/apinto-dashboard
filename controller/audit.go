@@ -1,12 +1,12 @@
 package controller
 
-import "github.com/gin-gonic/gin"
+import (
+	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
+	"github.com/gin-gonic/gin"
+)
 
-func AuditLogHandler(operate int, kind string, handlerFunc gin.HandlerFunc) gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		ctx.Set(AuditKind, kind)
-		ctx.Set(Operate, operate)
+type LogOperateType audit_model.LogOperateType
 
-		handlerFunc(ctx)
-	}
+func (l LogOperateType) Handler(ginCtx *gin.Context) {
+	ginCtx.Set(Operate, l)
 }

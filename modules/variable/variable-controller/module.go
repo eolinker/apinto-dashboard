@@ -1,6 +1,7 @@
 package variable_controller
 
 import (
+	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-module"
 	"net/http"
 )
@@ -134,7 +135,7 @@ func (c *VariableModule) initRouter() {
 			Method:      http.MethodPost,
 			Path:        "/api/cluster/:cluster_name/variable/publish",
 			Handler:     "cluster-variable.publish",
-			HandlerFunc: []apinto_module.HandlerFunc{clusterVariableClr.publish},
+			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypePublish.Handler, clusterVariableClr.publish},
 		},
 		{
 			Method:      http.MethodGet,

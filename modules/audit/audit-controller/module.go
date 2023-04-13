@@ -41,7 +41,7 @@ func NewDriver() *Driver {
 		middlewareHandler: []apinto_module.MiddlewareHandler{
 			{
 				Name:    "auditlog",
-				Rule:    apinto_module.MiddlewareRules{{http.MethodPost}, {http.MethodPut}, {http.MethodGet, apinto_module.RouterTypeSensitive}},
+				Rule:    apinto_module.MiddlewareRules{{http.MethodPost}, {http.MethodDelete}, {http.MethodPut}, {http.MethodGet, apinto_module.RouterTypeSensitive}},
 				Handler: a.Handler,
 			},
 		},
