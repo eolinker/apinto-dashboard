@@ -33,10 +33,6 @@ const routes: Routes = [
     children: [
 
       {
-        path: '',
-        component: GuideComponent
-      },
-      {
         path: 'guide',
         component: GuideComponent
       },
