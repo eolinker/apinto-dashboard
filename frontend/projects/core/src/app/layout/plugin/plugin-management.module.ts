@@ -22,6 +22,7 @@ import { EoNgSelectModule } from 'eo-ng-select'
 import { EoNgAutoCompleteModule } from 'eo-ng-auto-complete'
 import { GroupComponent } from './group/group.component'
 import { EoNgEmptyModule } from 'eo-ng-empty'
+import { DirectiveModule } from '../../directive/directive.module'
 
 @NgModule({
   declarations: [
@@ -38,6 +39,7 @@ import { EoNgEmptyModule } from 'eo-ng-empty'
     ReactiveFormsModule,
     PluginManagementRoutingModule,
     ComponentModule,
+    DirectiveModule,
     EoNgTreeModule,
     EoNgInputModule,
     EoNgButtonModule,

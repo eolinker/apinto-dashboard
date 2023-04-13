@@ -1,4 +1,4 @@
-import { Component, TemplateRef, ViewChild } from '@angular/core'
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
 import { Router } from '@angular/router'
 import { EoNgTreeDefaultComponent } from 'eo-ng-tree'
 import { NzFormatEmitEvent, NzTreeNode } from 'ng-zorro-antd/tree'
@@ -13,7 +13,7 @@ import { EoNgPluginService } from '../eo-ng-plugin.service'
   styles: [
   ]
 })
-export class GroupComponent {
+export class GroupComponent implements OnInit {
   @ViewChild('addGroupRef', { read: TemplateRef, static: true }) addGroupRef:
     | TemplateRef<any>
     | string = ''
@@ -32,6 +32,11 @@ export class GroupComponent {
     public service:EoNgPluginService
   ) {
     this.appConfigService.reqFlashBreadcrumb([{ title: '企业插件' }])
+  }
+
+  ngOnInit (): void {
+    console.log('init')
+    this.service.getPluginList()
   }
 
   viewAllPlugins () {
