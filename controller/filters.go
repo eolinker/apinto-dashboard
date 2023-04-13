@@ -13,8 +13,8 @@ const (
 	ErrorMessage   = "ErrorBody"
 	Operate        = "Operate"
 	AuditKind      = "AuditKind"
-	LogBody
-	AuditObject
+	LogBody        = "LogBody"
+	AuditObject    = "auditObject"
 )
 
 func GetUserId(ginCtx *gin.Context) int {

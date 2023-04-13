@@ -35,7 +35,7 @@ func (p *pluginClusterController) plugins(ginCtx *gin.Context) {
 
 	plugins, err := p.clusterPluginService.GetList(ginCtx, namespaceID, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Get ClusterlPlugin List fail. err: %s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Get ClusterlPlugin List fail. err: %s", err.Error()))
 		return
 	}
 	list := make([]*plugin_dto.CluPluginListItem, 0, len(plugins))
@@ -64,13 +64,13 @@ func (p *pluginClusterController) getPlugin(ginCtx *gin.Context) {
 	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
 	pluginName := ginCtx.Query("plugin_name")
 	if pluginName == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprint("Get ClusterlPlugin Info fail. err: plugin_name can't be null. ")))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprint("Get ClusterlPlugin Info fail. err: plugin_name can't be null. "))
 		return
 	}
 
 	pluginInfo, err := p.clusterPluginService.GetPlugin(ginCtx, namespaceID, clusterName, pluginName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Get ClusterlPlugin Info fail. err: %s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Get ClusterlPlugin Info fail. err: %s", err.Error()))
 		return
 	}
 
@@ -97,13 +97,13 @@ func (p *pluginClusterController) editPlugin(ginCtx *gin.Context) {
 
 	status, exist := enum.GetPluginState(input.Status)
 	if !exist {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Edit ClusterPlugin fail. status %s is illegal. ", input.Status)))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Edit ClusterPlugin fail. status %s is illegal. ", input.Status))
 		return
 	}
 
 	err := p.clusterPluginService.EditPlugin(ginCtx, namespaceID, clusterName, userId, input.PluginName, status, input.Config)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Edit ClusterPlugin fail. err: %s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Edit ClusterPlugin fail. err: %s", err.Error()))
 		return
 	}
 
@@ -313,7 +313,7 @@ func (p *pluginClusterController) publish(ginCtx *gin.Context) {
 
 	if len(defectPlugins) > 0 {
 		msg := fmt.Sprintf("插件名为%s的插件处于缺失状态不可发布", strings.Join(defectPlugins, ","))
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(msg))
+		controller.ErrorJson(ginCtx, http.StatusOK, msg)
 		return
 	}
 
