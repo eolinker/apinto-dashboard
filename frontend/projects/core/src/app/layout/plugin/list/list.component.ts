@@ -62,13 +62,11 @@ export class PluginListComponent implements OnInit {
         this.groupUuid = this.baseInfo.allParamsInfo.pluginGroupId
         this.service.groupUuid = this.groupUuid
         this.service.getPluginList()
-        console.log('sub1')
       }
     })
     this.subscription1 = this.service.repFlashList().subscribe(() => {
       this.queryName = this.service.queryName
       this.service.getPluginList()
-      console.log('sub2')
     })
   }
 

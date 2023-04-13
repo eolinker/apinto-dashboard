@@ -122,7 +122,7 @@ func (c *StrategyGreyModule) initRouter() {
 			Method:      http.MethodPost,
 			Path:        "/api/strategy/grey/priority",
 			Handler:     "strategy-grey.changePriority",
-			HandlerFunc: []apinto_module.HandlerFunc{strategyGreyController.changePriority},
+			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypeEdit.Handler, strategyGreyController.changePriority},
 		},
 		{
 			Method:      http.MethodGet,
