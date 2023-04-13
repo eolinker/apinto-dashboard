@@ -8,7 +8,7 @@ import (
 type LogOperateType int
 
 func (l LogOperateType) Handler(ginCtx *gin.Context) {
-	ginCtx.Set("Operate", l)
+	ginCtx.Set("Operate", int(l))
 }
 func init() {
 	for i := LogOperateTypeNone; i < LogOperateTypeALL; i++ {

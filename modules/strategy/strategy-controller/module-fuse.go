@@ -122,7 +122,7 @@ func (c *StrategyFuseModule) initRouter() {
 			Method:      http.MethodPost,
 			Path:        "/api/strategy/fuse/priority",
 			Handler:     "strategy-fuse.changePriority",
-			HandlerFunc: []apinto_module.HandlerFunc{strategyFuseController.changePriority},
+			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypeEdit.Handler, strategyFuseController.changePriority},
 		},
 		{
 			Method:      http.MethodGet,
