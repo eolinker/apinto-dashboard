@@ -32,11 +32,16 @@ export class GuideComponent implements OnInit {
 
   getStepStatus () {
     this.btnLoading = true
+
     this.api.get('system/quick_step').subscribe((resp:{code:number, msg:string, data:{cluster:boolean, upstream:boolean, api:boolean, publishApi:boolean}}) => {
       this.btnLoading = false
       if (resp.code === 0) {
+        let doingFlag = false // 只有一个前往
         for (let i = 0; i < this.stepList.length; i++) {
-          this.stepList[i].status = resp.data[this.stepList[i].name] ? 'done' : (i > 0 && this.stepList[i - 1].status === 'done' ? 'doing' : 'undo')
+          this.stepList[i].status = resp.data[this.stepList[i].name] ? 'done' : ((i === 0 || (i > 0 && this.stepList[i - 1].status === 'done')) && !doingFlag ? 'doing' : 'undo')
+          if (this.stepList[i].status === 'doing') {
+            doingFlag = true
+          }
         }
       }
     })

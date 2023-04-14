@@ -18,6 +18,7 @@ import {
 } from '../types/types'
 import { MarkdownService } from 'ngx-markdown'
 import { Router } from '@angular/router'
+import { UntypedFormBuilder, Validators } from '@angular/forms'
 
 @Component({
   selector: 'eo-ng-plugin-message',
@@ -119,6 +120,7 @@ export class PluginMessageComponent implements OnInit {
     private appConfigService: EoNgNavigationService,
     private markdownService: MarkdownService,
     private router: Router,
+    private fb: UntypedFormBuilder,
     @Inject(API_URL) public urlPrefix: string
   ) {
     this.appConfigService.reqFlashBreadcrumb([
@@ -282,7 +284,11 @@ export class PluginMessageComponent implements OnInit {
                 nzComponentParams: {
                   ...params,
                   refreshPage: this.getPluginDetail,
-                  pluginId: this.pluginId
+                  pluginId: this.pluginId,
+                  validateForm: this.fb.group({
+                    name: [params.name, [Validators.required]],
+                    server: [params.server, [Validators.required]]
+                  })
                 },
                 nzOkText: '确定',
                 nzCancelText: '取消',
