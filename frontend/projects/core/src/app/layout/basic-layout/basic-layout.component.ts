@@ -5,7 +5,7 @@
  * @Author: maggieyyy im.ymj@hotmail.com
  * @Date: 2022-07-12 00:19:11
  * @LastEditors: MengjieYang yangmengjie@eolink.com
- * @LastEditTime: 2022-07-29 02:56:25
+ * @LastEditTime: 2023-04-13 23:40:55
  * @FilePath: /apinto/src/app/basic-layout/basic-layout.component.ts
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -26,18 +26,19 @@ import { AuthInfoDetailComponent } from '../auth/info/detail/detail.component'
   styleUrls: ['./basic-layout.component.scss']
 })
 export class BasicLayoutComponent implements OnInit {
-  sideMenuOptions :MenuOptions[] = []
+  sideMenuOptions: MenuOptions[] = []
   breadcrumbOptions: EoNgBreadcrumbOptions[] = []
-  currentRouter:string = '' // 当前路由
-  openMap:{[name:string]:boolean} = {}
-  modalRef:NzModalRef | undefined
-  showEmpty:boolean = false
-  showSideLine:boolean = true
-  seletedGuide:boolean = false
-  authInfo:{title:string, infos:Array<{key:string, value:string}>}
-  = { title: '', infos: [] }
+  currentRouter: string = '' // 当前路由
+  openMap: { [name: string]: boolean } = {}
+  modalRef: NzModalRef | undefined
+  showEmpty: boolean = false
+  showSideLine: boolean = true
+  authInfo: { title: string; infos: Array<{ key: string; value: string }> } = {
+    title: '',
+    infos: []
+  }
 
-  guideMenu:MenuOptions = {
+  guideMenu: MenuOptions = {
     matchRouter: true,
     matchRouterExact: false,
     menu: true,
@@ -53,18 +54,23 @@ export class BasicLayoutComponent implements OnInit {
   private subscription3: Subscription = new Subscription()
   private subscription4: Subscription = new Subscription()
 
-  constructor (
-              private router: Router,
-              private api:ApiService,
-              private navigationService: EoNgNavigationService,
-              private modalService: NzModalService
+  constructor(
+    private router: Router,
+    private api: ApiService,
+    private navigationService: EoNgNavigationService,
+    private modalService: NzModalService
   ) {
-    this.subscription1 = this.navigationService.repFlashBreadcrumb().subscribe((data:any) => {
-      this.breadcrumbOptions = data
-    })
+    this.subscription1 = this.navigationService
+      .repFlashBreadcrumb()
+      .subscribe((data: any) => {
+        this.breadcrumbOptions = data
+      })
 
     this.subscription2 = this.navigationService.repFlashMenu().subscribe(() => {
-      this.sideMenuOptions = [this.guideMenu, ...this.navigationService.getCurrentMenuList()]
+      this.sideMenuOptions = [
+        this.guideMenu,
+        ...this.navigationService.getCurrentMenuList()
+      ]
       for (const menu of this.sideMenuOptions) {
         menu.open = this.openMap[menu['titleString']! as string]
       }
@@ -74,51 +80,62 @@ export class BasicLayoutComponent implements OnInit {
       if (this.router.url !== this.currentRouter) {
         this.selectOrOpenMenu(this.router.url)
       }
-      this.seletedGuide = this.router.url.includes('guide')
     })
   }
 
-  ngOnInit () {
+  ngOnInit() {
     this.getSideMenu()
   }
 
-  ngOnDestroy () {
+  ngOnDestroy() {
     this.subscription1.unsubscribe()
     this.subscription2.unsubscribe()
     this.subscription3.unsubscribe()
     this.subscription4.unsubscribe()
   }
 
-  getSideMenu () {
-    this.subscription4 = this.navigationService.getMenuList()
-      .subscribe((res:MenuOptions[]) => {
+  getSideMenu() {
+    this.subscription4 = this.navigationService
+      .getMenuList()
+      .subscribe((res: MenuOptions[]) => {
         this.sideMenuOptions = [this.guideMenu, ...res]
         // for (const index in this.sideMenuOptions) {
         //   this.sideMenuOptions[index].openChange = (value:MenuOptions) => {
         //     this.openHandler(value['key']!)
         //   }
         // }
-        // this.getAccess()
+        this.getAccess()
       })
   }
 
-  getAuthInfo () {
+  getAuthInfo() {
     if (this.navigationService.getUserAuthAccess()) {
-      this.api.authGet('activation/info')
-        .subscribe((resp:{code:number, data:{infos:Array<{key:string, value:string}>, title:string}, msg:string}) => {
+      this.api.authGet('activation/info').subscribe(
+        (resp: {
+          code: number
+          data: {
+            infos: Array<{ key: string; value: string }>
+            title: string
+          }
+          msg: string
+        }) => {
           if (resp.code === 0) {
             this.authInfo = resp.data
           }
-        })
+        }
+      )
     }
   }
 
-  openAuthDialog () {
+  openAuthDialog() {
     this.modalRef = this.modalService.create({
       nzWrapClassName: 'auth-modal-header',
       nzTitle: `${this.authInfo.title}授权`,
       nzContent: AuthInfoDetailComponent,
-      nzComponentParams: { eoInfos: this.authInfo.infos, updateAuth: this.updateAuth },
+      nzComponentParams: {
+        eoInfos: this.authInfo.infos,
+        updateAuth: this.updateAuth
+      },
       nzClosable: true,
       nzFooter: null,
       nzWidth: MODAL_SMALL_SIZE
@@ -130,31 +147,38 @@ export class BasicLayoutComponent implements OnInit {
     this.router.navigate(['/', 'auth-update'])
   }
 
-  getAccess () {
+  getAccess() {
     if (this.navigationService.getUserAccess()) {
       this.showEmpty = true
       this.showSideLine = false
     } else {
       this.showEmpty = false
       this.showSideLine = true
-      if (this.router.routerState.snapshot.url === '/' || this.router.routerState.snapshot.url === '/login') {
-        this.router.navigate([this.navigationService.getPageRoute()])
+      if (
+        this.router.routerState.snapshot.url === '/' ||
+        this.router.routerState.snapshot.url === '/login'
+      ) {
+        // this.router.navigate([this.navigationService.getPageRoute()])
+        this.router.navigate(['/', 'guide'])
       }
 
-      if (this.router.url !== this.currentRouter) {
-        setTimeout(() => {
-          this.selectOrOpenMenu(this.router.url)
-        }, 0)
-      }
+      // if (this.router.url !== this.currentRouter) {
+      //   setTimeout(() => {
+      //     this.selectOrOpenMenu(this.router.url)
+      //   }, 0)
+      // }
     }
-    this.getAuthInfo()
+    // this.getAuthInfo()
   }
 
   // 根据路由选中并打开对应menu
-  selectOrOpenMenu (router:string):void {
+  selectOrOpenMenu(router: string): void {
     if (this.sideMenuOptions.length > 0) {
       for (const index in this.sideMenuOptions) {
-        if (router.split('/')[1] === this.sideMenuOptions[index]['router']?.split('/')[0]) {
+        if (
+          router.split('/')[1] ===
+          this.sideMenuOptions[index]['router']?.split('/')[0]
+        ) {
           if (this.sideMenuOptions[index].children?.length) {
             // this.openHandler(this.sideMenuOptions[index]['key']!)
           }
@@ -177,7 +201,7 @@ export class BasicLayoutComponent implements OnInit {
   //   }
   // }
 
-  goToGithub () {
+  goToGithub() {
     window.open('https://github.com/eolinker/apinto')
   }
 }
