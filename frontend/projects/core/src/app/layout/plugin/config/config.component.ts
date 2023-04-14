@@ -27,7 +27,7 @@ export class PluginConfigComponent implements OnInit {
   server:string = ''
 
   showServer:boolean = false
-
+  nameConfilct:boolean = false
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
   validateForm:FormGroup = new FormGroup({})
 
@@ -43,16 +43,11 @@ export class PluginConfigComponent implements OnInit {
   constructor (private fb: UntypedFormBuilder, private api:ApiService, private message:EoNgMessageService,
     private navService:EoNgNavigationService) {
     this.validateForm = this.fb.group({
-      server: ['', [Validators.required]],
-      apiGroup: ['', [Validators.required]]
+      server: ['', [Validators.required]]
     })
   }
 
   ngOnInit (): void {
-    this.getMessage()
-  }
-
-  getMessage () {
   }
 
   checkValid () {
@@ -70,7 +65,6 @@ export class PluginConfigComponent implements OnInit {
     if (this.checkValid()) {
       const data = {
         name: this.name,
-        apiGroup: this.validateForm.controls['apiGroup'].value,
         server: this.validateForm.controls['server'].value,
         header: this.headerList.map((header:PluginInstallConfigData) => {
           return { name: header.name, value: header.value }
