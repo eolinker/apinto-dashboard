@@ -1,6 +1,7 @@
 package strategy_controller
 
 import (
+	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-module"
 	"net/http"
 )
@@ -115,13 +116,13 @@ func (c *StrategyFuseModule) initRouter() {
 			Method:      http.MethodPost,
 			Path:        "/api/strategy/fuse/publish",
 			Handler:     "strategy-fuse.publish",
-			HandlerFunc: []apinto_module.HandlerFunc{strategyFuseController.publish},
+			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypePublish.Handler, strategyFuseController.publish},
 		},
 		{
 			Method:      http.MethodPost,
 			Path:        "/api/strategy/fuse/priority",
 			Handler:     "strategy-fuse.changePriority",
-			HandlerFunc: []apinto_module.HandlerFunc{strategyFuseController.changePriority},
+			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypeEdit.Handler, strategyFuseController.changePriority},
 		},
 		{
 			Method:      http.MethodGet,

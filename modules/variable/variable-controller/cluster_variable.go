@@ -37,7 +37,7 @@ func (c *clusterVariableController) gets(ginCtx *gin.Context) {
 
 	variables, err := c.clusterVariableService.GetList(ginCtx, namespaceID, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Get ClusterlVariable List fail. err: %s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Get ClusterlVariable List fail. err: %s", err.Error()))
 		return
 	}
 	list := make([]*cluster_dto.ClusterVariableItem, 0, len(variables))
@@ -75,7 +75,7 @@ func (c *clusterVariableController) post(ginCtx *gin.Context) {
 	userId := controller.GetUserId(ginCtx)
 
 	if err := c.clusterVariableService.Create(ginCtx, namespaceID, clusterName, userId, item.Key, item.Value, item.Desc); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Create ClusterlVariable fail. err: %s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Create ClusterlVariable fail. err: %s", err.Error()))
 		return
 	}
 
@@ -87,7 +87,7 @@ func (c *clusterVariableController) put(ginCtx *gin.Context) {
 	clusterName := ginCtx.Param("cluster_name")
 	key := ginCtx.Query("key")
 	if key == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Alter ClusterVariable fail. err: key can't be nil. ")))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Alter ClusterVariable fail. err: key can't be nil. "))
 		return
 	}
 
@@ -115,7 +115,7 @@ func (c *clusterVariableController) del(ginCtx *gin.Context) {
 	clusterName := ginCtx.Param("cluster_name")
 	key := ginCtx.Query("key")
 	if key == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Delete ClusterVariable fail. err: key can't be nil. ")))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Delete ClusterVariable fail. err: key can't be nil. "))
 		return
 	}
 	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
@@ -123,7 +123,7 @@ func (c *clusterVariableController) del(ginCtx *gin.Context) {
 
 	err := c.clusterVariableService.Delete(ginCtx, namespaceID, clusterName, userId, key)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Delete ClusterVariable fail. err: %s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Delete ClusterVariable fail. err: %s", err.Error()))
 		return
 	}
 
@@ -286,7 +286,7 @@ func (c *clusterVariableController) publish(ginCtx *gin.Context) {
 
 	if len(defectKeys) > 0 {
 		msg := fmt.Sprintf("key为%s的环境变量处于缺失状态不可发布", strings.Join(defectKeys, ","))
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(msg))
+		controller.ErrorJson(ginCtx, http.StatusOK, msg)
 		return
 	}
 

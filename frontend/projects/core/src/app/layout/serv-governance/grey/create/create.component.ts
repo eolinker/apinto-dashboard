@@ -162,7 +162,7 @@ export class GreyCreateComponent implements OnInit {
             this.appConfigService.reqFlashBreadcrumb([
               {
                 title: '灰度策略',
-                routerLink: 'serv-governance'
+                routerLink: 'serv-governance/grey'
               },
               { title: resp.data.strategy!.name }
             ])

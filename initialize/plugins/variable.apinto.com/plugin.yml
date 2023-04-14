@@ -2,10 +2,11 @@ id: "variable.apinto.com"
 name: "variable"
 cname: "环境变量"
 resume: ""
-version: "v1.0"
+version: "v1.0.0"
 icon: "inner-plugin.png"
 driver: "variable.apinto.com"
-core: false
+type: 1 #0为框架模块 1为核心模块 2为内置模块 3为非内置
 auto: true
 front: deploy/env
 navigation: "navigation.infrastructure"
+group_id: "core_module"

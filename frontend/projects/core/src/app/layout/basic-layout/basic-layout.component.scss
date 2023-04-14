@@ -68,4 +68,8 @@ span.logo-title {
   div.item-selected {
     background-color: var(--menu-item-active-background-color);
   }
+
+  li.menu-icon-hidden > svg {
+    display: none;
+  }
 }
