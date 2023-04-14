@@ -116,7 +116,7 @@ func (m *modulePluginService) GetPluginInfo(ctx context.Context, pluginUUID stri
 	info := &model.ModulePluginInfo{
 		ModulePlugin: plugin,
 		Enable:       false,
-		IsDisable:    true,
+		CanDisable:   true,
 		Uninstall:    false,
 	}
 
@@ -129,7 +129,7 @@ func (m *modulePluginService) GetPluginInfo(ctx context.Context, pluginUUID stri
 	}
 	//框架和核心插件不可以停用
 	if plugin.Type == 0 || plugin.Type == 1 {
-		info.IsDisable = false
+		info.CanDisable = false
 	}
 
 	//若为非内置插件，且为停用状态,才可卸载
@@ -174,24 +174,11 @@ func (m *modulePluginService) GetPluginEnableInfo(ctx context.Context, pluginUUI
 	_ = json.Unmarshal(enableEntry.Config, enableCfg)
 
 	info := &model.PluginEnableInfo{
-		Name:         enableEntry.Name,
-		NameConflict: false,
-		Server:       enableCfg.Server,
-		Header:       enableCfg.Header,
-		Query:        enableCfg.Query,
-		Initialize:   enableCfg.Initialize,
-	}
-
-	//检测已启用的插件中是否有同名的
-	nPlugin, err := m.pluginEnableStore.GetEnabledPluginByName(ctx, enableEntry.Name)
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return info, nil
-		}
-		return nil, err
-	}
-	if nPlugin != nil && nPlugin.Id != pluginInfo.Id {
-		info.NameConflict = true
+		Name:       enableEntry.Name,
+		Server:     enableCfg.Server,
+		Header:     enableCfg.Header,
+		Query:      enableCfg.Query,
+		Initialize: enableCfg.Initialize,
 	}
 
 	return info, nil
@@ -205,8 +192,23 @@ func (m *modulePluginService) GetPluginEnableRender(ctx context.Context, pluginU
 
 	renderCfg := &model.PluginEnableRender{
 		//Invisible: true,
-		Internet: false,
+		Internet:     false,
+		NameConflict: false,
 	}
+
+	enableEntry, err := m.pluginEnableStore.Get(ctx, pluginInfo.Id)
+	if err != nil {
+		return nil, err
+	}
+	//检测已启用的插件中是否有同名的
+	enabledPlugin, err := m.pluginEnableStore.GetEnabledPluginByName(ctx, enableEntry.Name)
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return nil, err
+	}
+	if enabledPlugin != nil && enabledPlugin.Id != pluginInfo.Id {
+		renderCfg.NameConflict = true
+	}
+
 	switch pluginInfo.Driver {
 	case "remote":
 		remoteDefine := new(model.RemoteDefine)
@@ -224,8 +226,8 @@ func (m *modulePluginService) GetPluginEnableRender(ctx context.Context, pluginU
 		renderCfg.Initialize = localDefine.Initialize
 		//renderCfg.Invisible = localDefine.Invisible
 	case "profession":
-
 	}
+
 	return renderCfg, nil
 }
 
