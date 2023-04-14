@@ -16,14 +16,21 @@
     </p>
 
     <div class="mt-mbase">
-      <button eo-ng-button nzType="primary" class="mr-btnrbase">
+      <button
+        eo-ng-button
+        nzType="primary"
+        class="mr-btnrbase"
+        (click)="goToGithub()"
+      >
         Github&nbsp;
         <img
           src="https://img.shields.io/github/stars/eolinker/apinto?style=social"
           alt=""
         />
       </button>
-      <button eo-ng-button>提交&nbsp;Issue</button>
+      <button eo-ng-button (click)="goToGithub('/issues')">
+        提交&nbsp;Issue
+      </button>
     </div>
   </div>
 </section>

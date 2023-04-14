@@ -11,7 +11,6 @@ import { MODAL_SMALL_SIZE } from '../../../constant/app.config'
 import { ApiService } from '../../../service/api.service'
 import { EoNgNavigationService } from '../../../service/eo-ng-navigation.service'
 import { BaseInfoService } from '../../../service/base-info.service'
-import { EoNgMessageService } from '../../../service/eo-ng-message.service'
 import { PluginCreateComponent } from '../create/create.component'
 import { PluginListStatusItems } from '../types/conf'
 import { PluginItem } from '../types/types'
@@ -52,7 +51,6 @@ export class PluginListComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private baseInfo: BaseInfoService,
-    private message: EoNgMessageService,
     public service: EoNgPluginService
   ) {
     this.appConfigService.reqFlashBreadcrumb([{ title: '企业插件' }])
