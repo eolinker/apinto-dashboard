@@ -2,6 +2,7 @@ package cluster
 
 import (
 	"context"
+
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/driver"
 	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-dto"
@@ -38,6 +39,7 @@ type IClusterService interface {
 	DeleteByNamespaceIdByName(ctx context.Context, namespaceId, userId int, name string) error
 	UpdateDesc(ctx context.Context, namespaceId, userId int, name, desc string) error
 	UpdateAddr(ctx context.Context, userId, clusterId int, addr, uuid string) error
+	ClusterCount(ctx context.Context, namespaceId int) (int64, error)
 }
 type IClusterConfigService interface {
 	Get(ctx context.Context, namespaceId int, clusterName, configType string) (interface{}, error)
