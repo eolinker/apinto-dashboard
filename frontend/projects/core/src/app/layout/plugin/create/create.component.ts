@@ -1,7 +1,5 @@
 /* eslint-disable dot-notation */
 import { Component } from '@angular/core'
-import { FormGroup, UntypedFormBuilder, Validators } from '@angular/forms'
-import { AutoCompleteOption } from 'eo-ng-auto-complete'
 import { NzUploadFile } from 'ng-zorro-antd/upload'
 import { defaultAutoTips } from '../../../constant/conf'
 import { EmptyHttpResponse } from '../../../constant/type'
@@ -16,10 +14,9 @@ import { EoNgPluginService } from '../eo-ng-plugin.service'
       nz-form
       [nzNoColon]="true"
       [nzAutoTips]="autoTips"
-      [formGroup]="validateForm"
       autocomplete="off"
     >
-      <nz-form-item class="form-row">
+      <nz-form-item class="form-row mb-0">
         <nz-form-label [nzSpan]="6" nzRequired>上传文件：</nz-form-label>
         <nz-form-control [nzSpan]="14">
           <nz-upload
@@ -55,41 +52,14 @@ import { EoNgPluginService } from '../eo-ng-plugin.service'
 })
 export class PluginCreateComponent {
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
-  validateForm: FormGroup = new FormGroup({})
   fileError: boolean = false
   fileList: NzUploadFile[] = []
-  groupOptions: AutoCompleteOption[] = []
   closeModal:Function | undefined
   constructor (
     public api: ApiService,
-    private fb: UntypedFormBuilder,
     private message: EoNgMessageService,
     private service: EoNgPluginService
   ) {
-    this.validateForm = this.fb.group({
-      file: [null, [Validators.required]]
-    })
-    this.getGroupList()
-  }
-
-  getGroupList () {
-    this.api
-      .get('system/plugin/groups/enum')
-      .subscribe(
-        (resp: {
-          code: number
-          data: { groups: Array<{ uuid: string; name: string }> }
-          msg: string
-        }) => {
-          if (resp.code === 0) {
-            this.groupOptions = resp.data.groups.map(
-              (group: { uuid: string; name: string }) => {
-                return { label: group.name, value: group.name }
-              }
-            )
-          }
-        }
-      )
   }
 
   // 手动上传文件
