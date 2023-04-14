@@ -54,7 +54,7 @@ export class BasicLayoutComponent implements OnInit {
   private subscription3: Subscription = new Subscription()
   private subscription4: Subscription = new Subscription()
 
-  constructor(
+  constructor (
     private router: Router,
     private api: ApiService,
     private navigationService: EoNgNavigationService,
@@ -83,18 +83,18 @@ export class BasicLayoutComponent implements OnInit {
     })
   }
 
-  ngOnInit() {
+  ngOnInit () {
     this.getSideMenu()
   }
 
-  ngOnDestroy() {
+  ngOnDestroy () {
     this.subscription1.unsubscribe()
     this.subscription2.unsubscribe()
     this.subscription3.unsubscribe()
     this.subscription4.unsubscribe()
   }
 
-  getSideMenu() {
+  getSideMenu () {
     this.subscription4 = this.navigationService
       .getMenuList()
       .subscribe((res: MenuOptions[]) => {
@@ -108,7 +108,7 @@ export class BasicLayoutComponent implements OnInit {
       })
   }
 
-  getAuthInfo() {
+  getAuthInfo () {
     if (this.navigationService.getUserAuthAccess()) {
       this.api.authGet('activation/info').subscribe(
         (resp: {
@@ -127,7 +127,7 @@ export class BasicLayoutComponent implements OnInit {
     }
   }
 
-  openAuthDialog() {
+  openAuthDialog () {
     this.modalRef = this.modalService.create({
       nzWrapClassName: 'auth-modal-header',
       nzTitle: `${this.authInfo.title}授权`,
@@ -147,7 +147,7 @@ export class BasicLayoutComponent implements OnInit {
     this.router.navigate(['/', 'auth-update'])
   }
 
-  getAccess() {
+  getAccess () {
     if (this.navigationService.getUserAccess()) {
       this.showEmpty = true
       this.showSideLine = false
@@ -172,7 +172,7 @@ export class BasicLayoutComponent implements OnInit {
   }
 
   // 根据路由选中并打开对应menu
-  selectOrOpenMenu(router: string): void {
+  selectOrOpenMenu (router: string): void {
     if (this.sideMenuOptions.length > 0) {
       for (const index in this.sideMenuOptions) {
         if (
@@ -201,7 +201,11 @@ export class BasicLayoutComponent implements OnInit {
   //   }
   // }
 
-  goToGithub() {
+  goToGithub () {
     window.open('https://github.com/eolinker/apinto')
+  }
+
+  goToHelp () {
+    window.open('https://help.apinto.com/docs')
   }
 }

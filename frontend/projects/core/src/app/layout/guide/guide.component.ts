@@ -50,4 +50,8 @@ export class GuideComponent implements OnInit {
       this.router.navigate([step.toDoUrl])
     }
   }
+
+  goToGithub (url?:string) {
+    window.open(`https://github.com/eolinker/apinto${url || ''}`)
+  }
 }
