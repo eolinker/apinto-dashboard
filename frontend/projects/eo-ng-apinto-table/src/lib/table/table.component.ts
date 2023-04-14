@@ -226,10 +226,10 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
     }
 
     if (this.nzData !== undefined && scrollY < this.nzData.length * 40) {
-      this.nzScroll = { x: this.nzScroll.x || '100%', y: scrollY > 50 ? scrollY + 'px' : '50px' }
+      this.nzScroll = { x: this.nzNoScroll ? undefined : this.nzScroll.x || '100%', y: scrollY > 50 ? scrollY + 'px' : '50px' }
       this.tableScrollCdk?.ngOnInit()
     } else {
-      this.nzScroll = { x: this.nzScroll.x || '100%', y: undefined }
+      this.nzScroll = { x: this.nzNoScroll ? undefined : this.nzScroll.x || '100%', y: undefined }
     }
   }
 
