@@ -3,6 +3,8 @@ package cluster_service
 import (
 	"context"
 	"encoding/json"
+	"time"
+
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
@@ -14,7 +16,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/variable"
 	"github.com/eolinker/eosc/common/bean"
 	"gopkg.in/errgo.v2/errors"
-	"time"
 )
 
 type clusterService struct {
@@ -36,6 +37,12 @@ func newClusterService() cluster.IClusterService {
 	bean.Autowired(&s.apintoClientService)
 
 	return s
+}
+
+func (c *clusterService) ClusterCount(ctx context.Context, namespaceId int) (int64, error) {
+	return c.clusterStore.ClusterCount(ctx, map[string]interface{}{
+		"namespace": namespaceId,
+	})
 }
 
 func (c *clusterService) GetAllCluster(ctx context.Context) ([]*cluster_model2.Cluster, error) {

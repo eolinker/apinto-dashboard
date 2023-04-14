@@ -2,6 +2,7 @@ package upstream
 
 import (
 	"context"
+
 	"github.com/eolinker/apinto-dashboard/modules/base/frontend-model"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-model"
 	upstream_model "github.com/eolinker/apinto-dashboard/modules/upstream/model"
@@ -28,4 +29,5 @@ type IService interface {
 	GetServiceRemoteOptions(ctx context.Context, namespaceID, pageNum, pageSize int, keyword string) ([]*strategy_model.RemoteServices, int, error)
 	GetServiceRemoteByNames(ctx context.Context, namespaceID int, uuids []string) ([]*strategy_model.RemoteServices, error)
 	ResetOnline(ctx context.Context, namespaceId, clusterId int)
+	UpstreamCount(ctx context.Context, namespaceId int) (int64, error)
 }
