@@ -8,11 +8,10 @@ import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
+	"github.com/eolinker/apinto-dashboard/initialize"
 	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-dashboard/modules/base/locker-service"
 	"github.com/eolinker/apinto-dashboard/modules/core"
-	"github.com/eolinker/apinto-dashboard/modules/group"
-	group_service "github.com/eolinker/apinto-dashboard/modules/group/group-service"
 	module_plugin "github.com/eolinker/apinto-dashboard/modules/module-plugin"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/dto"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/entry"
@@ -20,7 +19,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/store"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
-	"github.com/go-basic/uuid"
 	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
 	"os"
@@ -28,17 +26,18 @@ import (
 )
 
 var (
-	ErrModulePluginNotFound    = errors.New("plugin doesn't exist. ")
-	ErrModulePluginInstalled   = errors.New("plugin has installed. ")
-	ErrModulePluginHasDisabled = errors.New("plugin has disabled. ")
+	ErrModulePluginNotFound    = errors.New("插件不存在")
+	ErrModulePluginInstalled   = errors.New("插件已安装")
+	ErrModulePluginHasDisabled = errors.New("插件已停用")
 )
+
+const PluginGroupOther = "other"
 
 type modulePluginService struct {
 	pluginStore        store.IModulePluginStore
 	pluginEnableStore  store.IModulePluginEnableStore
 	pluginPackageStore store.IModulePluginPackageStore
 
-	commonGroup    group.ICommonGroupService
 	coreService    core.ICore
 	installedCache IInstalledCache
 	lockService    locker_service.IAsynLockService
@@ -50,29 +49,33 @@ func newModulePluginService() module_plugin.IModulePluginService {
 	bean.Autowired(&s.pluginEnableStore)
 	bean.Autowired(&s.pluginPackageStore)
 
-	bean.Autowired(&s.commonGroup)
 	bean.Autowired(&s.coreService)
 	bean.Autowired(&s.installedCache)
 	bean.Autowired(&s.lockService)
 	return s
 }
 
-func (m *modulePluginService) GetPlugins(ctx context.Context, groupUUID, searchName string) ([]*model.ModulePluginItem, error) {
-	groupID := -1
-	if groupUUID != "" {
-		groupInfo, err := m.commonGroup.GetGroupInfo(ctx, groupUUID)
-		if err != nil {
-			return nil, err
+func (m *modulePluginService) GetPlugins(ctx context.Context, groupID, searchName string) ([]*model.ModulePluginItem, error) {
+	var pluginEntries []*entry.ModulePlugin
+	var err error
+	//判断groupID是不是其它分组
+	if groupID == PluginGroupOther {
+		groupList := initialize.GetModulePluginGroups()
+		groups := make([]string, 0, len(groupList))
+		for _, group := range groupList {
+			groups = append(groups, group.ID)
 		}
-		groupID = groupInfo.Id
+		pluginEntries, err = m.pluginStore.GetOtherGroupPlugins(ctx, groups, searchName)
+	} else {
+		pluginEntries, err = m.pluginStore.GetPluginList(ctx, groupID, searchName)
 	}
-	pluginEntries, err := m.pluginStore.GetPluginList(ctx, groupID, searchName)
+
 	if err != nil {
 		return nil, err
 	}
 	plugins := make([]*model.ModulePluginItem, 0, len(pluginEntries))
 	for _, pluginEntry := range pluginEntries {
-		//内置-内核插件不返回
+		//框架插件不返回
 		if pluginEntry.Type == 0 {
 			continue
 		}
@@ -82,14 +85,13 @@ func (m *modulePluginService) GetPlugins(ctx context.Context, groupUUID, searchN
 			IsInner:      true,
 		}
 		//若为非内置
-		if pluginEntry.Type == 2 {
+		if pluginEntry.Type == 3 {
 			plugin.IsInner = false
 		}
 		enableEntry, err := m.pluginEnableStore.Get(ctx, pluginEntry.Id)
 		if err != nil {
 			//若启用表没有插件信息，则为未启用
 			if err == gorm.ErrRecordNotFound {
-				plugin.IsEnable = false
 				plugins = append(plugins, plugin)
 				continue
 			}
@@ -113,7 +115,8 @@ func (m *modulePluginService) GetPluginInfo(ctx context.Context, pluginUUID stri
 
 	info := &model.ModulePluginInfo{
 		ModulePlugin: plugin,
-		IsEnable:     false,
+		Enable:       false,
+		IsDisable:    true,
 		Uninstall:    false,
 	}
 
@@ -124,30 +127,36 @@ func (m *modulePluginService) GetPluginInfo(ctx context.Context, pluginUUID stri
 		}
 		return nil, err
 	}
-	//若为非内置插件，且为停用状态
-	if enableEntry.IsEnable == 1 && plugin.Type == 2 {
+	//框架和核心插件不可以停用
+	if plugin.Type == 0 || plugin.Type == 1 {
+		info.IsDisable = false
+	}
+
+	//若为非内置插件，且为停用状态,才可卸载
+	if enableEntry.IsEnable == 1 && plugin.Type == 3 {
 		info.Uninstall = true
 	}
 
 	//若插件已启用
 	if enableEntry.IsEnable == 2 {
-		info.IsEnable = true
+		info.Enable = true
 	}
 	return info, nil
 }
 
-func (m *modulePluginService) GetPluginGroups(ctx context.Context) ([]*model.PluginGroup, error) {
-	groupEntries, err := m.commonGroup.GroupListAll(ctx, -1, group_service.ModulePlugin, group_service.ModulePlugin)
-	if err != nil {
-		return nil, err
-	}
-	groups := make([]*model.PluginGroup, 0, len(groupEntries))
-	for _, entry := range groupEntries {
+func (m *modulePluginService) GetPluginGroups() ([]*model.PluginGroup, error) {
+	list := initialize.GetModulePluginGroups()
+	groups := make([]*model.PluginGroup, 0, len(list)+1)
+	for _, item := range list {
 		groups = append(groups, &model.PluginGroup{
-			UUID: entry.Uuid,
-			Name: entry.Name,
+			UUID: item.ID,
+			Name: item.Name,
 		})
 	}
+	groups = append(groups, &model.PluginGroup{
+		UUID: PluginGroupOther,
+		Name: "其它",
+	})
 	return groups, nil
 }
 
@@ -195,8 +204,8 @@ func (m *modulePluginService) GetPluginEnableRender(ctx context.Context, pluginU
 	}
 
 	renderCfg := &model.PluginEnableRender{
-		Invisible: true,
-		Internet:  false,
+		//Invisible: true,
+		Internet: false,
 	}
 	switch pluginInfo.Driver {
 	case "remote":
@@ -213,12 +222,14 @@ func (m *modulePluginService) GetPluginEnableRender(ctx context.Context, pluginU
 		renderCfg.Headers = localDefine.Headers
 		renderCfg.Querys = localDefine.Querys
 		renderCfg.Initialize = localDefine.Initialize
-		renderCfg.Invisible = localDefine.Invisible
+		//renderCfg.Invisible = localDefine.Invisible
+	case "profession":
+
 	}
 	return renderCfg, nil
 }
 
-func (m *modulePluginService) InstallPlugin(ctx context.Context, userID int, groupName string, pluginYml *model.PluginYmlCfg, packageContent []byte) error {
+func (m *modulePluginService) InstallPlugin(ctx context.Context, userID int, pluginYml *model.PluginYmlCfg, packageContent []byte) error {
 	//通过插件id来判断插件是否已安装
 	_, err := m.pluginStore.GetPluginInfo(ctx, pluginYml.ID)
 	if err != nil && err != gorm.ErrRecordNotFound {
@@ -235,25 +246,11 @@ func (m *modulePluginService) InstallPlugin(ctx context.Context, userID int, gro
 	}
 	defer m.lockService.Unlock(locker_service.LockNameModulePlugin, 0)
 
-	//判断groupName存不存在，不存在则新建
-	groupInfo, err := m.commonGroup.GetGroupByName(ctx, groupName, 0)
-	if err != nil && err != gorm.ErrRecordNotFound {
-		return err
-	}
-
-	groupID := 0
-
 	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: pluginYml.ID,
 		Name: pluginYml.CName,
 	})
 	err = m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
-		if err == gorm.ErrRecordNotFound {
-			groupID, err = m.commonGroup.CreateGroup(txCtx, -1, userID, group_service.ModulePlugin, "", groupName, uuid.New(), "")
-		} else {
-			groupID = groupInfo.Id
-		}
-
 		t := time.Now()
 		var details []byte
 		switch pluginYml.Driver {
@@ -269,12 +266,12 @@ func (m *modulePluginService) InstallPlugin(ctx context.Context, userID int, gro
 			UUID:       pluginYml.ID,
 			Name:       pluginYml.Name,
 			Version:    pluginYml.Version,
-			Group:      groupID,
+			Group:      pluginYml.GroupID,
 			Navigation: pluginYml.Navigation,
 			CName:      pluginYml.CName,
 			Resume:     pluginYml.Resume,
 			ICon:       pluginYml.ICon,
-			Type:       2,
+			Type:       3,
 			Front:      "", //TODO
 			Driver:     pluginYml.Driver,
 			Details:    details,
@@ -325,16 +322,16 @@ func (m *modulePluginService) UninstallPlugin(ctx context.Context, userID int, p
 		return err
 	}
 
+	if pluginInfo.Type == 0 || pluginInfo.Type == 1 || pluginInfo.Type == 2 {
+		return errors.New("内置插件不可以卸载")
+	}
+
 	//全局异步锁
 	err = m.lockService.Lock(locker_service.LockNameModulePlugin, 0)
 	if err != nil {
 		return errors.New("现在有人在操作,请稍后再试")
 	}
 	defer m.lockService.Unlock(locker_service.LockNameModulePlugin, 0)
-
-	if pluginInfo.Type == 0 || pluginInfo.Type == 1 {
-		return errors.New("内置插件不可以卸载")
-	}
 
 	enableInfo, err := m.pluginEnableStore.Get(ctx, pluginInfo.Id)
 	if err != nil {
@@ -346,15 +343,6 @@ func (m *modulePluginService) UninstallPlugin(ctx context.Context, userID int, p
 	//校验插件已经禁用
 	if enableInfo.IsEnable == 2 {
 		return errors.New("插件启用中，不可以卸载")
-	}
-	//检查该分组下除了插件自身是否有其它插件，若没有则删除分组
-	deleteGroup := false
-	pluginList, err := m.pluginStore.GetPluginList(ctx, pluginInfo.Group, "")
-	if err != nil && err != gorm.ErrRecordNotFound {
-		return err
-	}
-	if len(pluginList) <= 1 {
-		deleteGroup = true
 	}
 
 	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
@@ -375,10 +363,6 @@ func (m *modulePluginService) UninstallPlugin(ctx context.Context, userID int, p
 		_, err = m.pluginStore.Delete(txCtx, pluginInfo.Id)
 		if err != nil {
 			return err
-		}
-		//删除该分组
-		if deleteGroup {
-			err = m.commonGroup.DeleteGroupByID(txCtx, pluginInfo.Group)
 		}
 
 		return err
@@ -521,9 +505,8 @@ func (m *modulePluginService) DisablePlugin(ctx context.Context, userID int, plu
 		return err
 	}
 
-	//内置-内核插件不可以禁用
-	if pluginInfo.Type == 0 {
-		return errors.New("inner-core plugin can't be disable. ")
+	if pluginInfo.Type == 0 || pluginInfo.Type == 1 {
+		return errors.New("核心模块不可以停用")
 	}
 
 	err = m.lockService.Lock(locker_service.LockNameModulePlugin, 0)
@@ -563,65 +546,27 @@ func (m *modulePluginService) DisablePlugin(ctx context.Context, userID int, plu
 	return nil
 }
 
-func (m *modulePluginService) GetEnablePluginsByNavigation(ctx context.Context, navigationID int) ([]*model.NavigationEnabledPlugin, error) {
-	enabledPlugins, err := m.pluginEnableStore.GetListByNavigation(ctx, navigationID)
-	if err != nil {
-		return nil, err
-	}
-	plugins := make([]*model.NavigationEnabledPlugin, 0, len(enabledPlugins))
-	for _, p := range enabledPlugins {
-		pluginInfo, err := m.pluginStore.Get(ctx, p.Id)
-		if err != nil {
-			return nil, err
-		}
-		plugins = append(plugins, &model.NavigationEnabledPlugin{
-			ModulePluginEnable: p,
-			UUID:               pluginInfo.UUID,
-			CName:              pluginInfo.CName,
-		})
-	}
-
-	return plugins, nil
-}
-
 func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml *model.InnerPluginYmlCfg) error {
-	//判断groupName存不存在，不存在则新建
-	groupInfo, err := m.commonGroup.GetGroupByName(ctx, "内置插件", 0)
-	if err != nil && err != gorm.ErrRecordNotFound {
-		return err
-	}
 
-	groupID := 0
-	if err == gorm.ErrRecordNotFound {
-		groupID, err = m.commonGroup.CreateGroup(ctx, -1, 0, group_service.ModulePlugin, "", "内置插件", "inner_plugin", "")
-	} else {
-		groupID = groupInfo.Id
-	}
-
-	pluginType := 1
-	if pluginYml.Core {
-		pluginType = 0
-	}
-
-	err = m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
+	err := m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
 		t := time.Now()
 		pluginInfo := &entry.ModulePlugin{
 			UUID:       pluginYml.ID,
 			Name:       pluginYml.Name,
 			Version:    pluginYml.Version,
-			Group:      groupID,
+			Group:      pluginYml.GroupID,
 			Navigation: pluginYml.Navigation,
 			CName:      pluginYml.CName,
 			Resume:     pluginYml.Resume,
 			ICon:       pluginYml.ICon,
-			Type:       pluginType,
+			Type:       pluginYml.Type,
 			Front:      pluginYml.Front,
 			Driver:     pluginYml.Driver,
 			Details:    []byte{},
 			Operator:   0,
 			CreateTime: t,
 		}
-		if err = m.pluginStore.Save(txCtx, pluginInfo); err != nil {
+		if err := m.pluginStore.Save(txCtx, pluginInfo); err != nil {
 			return err
 		}
 		isEnable := 1
@@ -653,11 +598,6 @@ func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml 
 
 func (m *modulePluginService) UpdateInnerPlugin(ctx context.Context, pluginYml *model.InnerPluginYmlCfg) error {
 
-	pluginType := 1
-	if pluginYml.Core {
-		pluginType = 0
-	}
-
 	pluginInfo, err := m.pluginStore.GetPluginInfo(ctx, pluginYml.ID)
 	if err != nil {
 		return err
@@ -670,7 +610,7 @@ func (m *modulePluginService) UpdateInnerPlugin(ctx context.Context, pluginYml *
 	pluginInfo.CName = pluginYml.CName
 	pluginInfo.Resume = pluginYml.Resume
 	pluginInfo.ICon = pluginYml.ICon
-	pluginInfo.Type = pluginType
+	pluginInfo.Type = pluginYml.Type
 	pluginInfo.Front = pluginYml.Front
 	pluginInfo.Driver = pluginYml.Driver
 	pluginInfo.CreateTime = t
@@ -730,7 +670,7 @@ func (m *modulePluginService) CheckPluginISDeCompress(ctx context.Context, plugi
 		return err
 	}
 	//若插件已安装且为非内置插件，检查本地缓存是否存在
-	if pluginInfo.Type == 2 {
+	if pluginInfo.Type == 3 {
 		dirPath := fmt.Sprintf("%s/%s", pluginDir, pluginID)
 		// 检查目录是否存在, 若不存在，则从数据库读取数据并解压
 		if _, err := os.Stat(dirPath); os.IsNotExist(err) {
