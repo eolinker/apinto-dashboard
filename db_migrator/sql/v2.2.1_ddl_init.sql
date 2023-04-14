@@ -14,6 +14,7 @@ CREATE TABLE `module_plugin` (
     `details` mediumtext NOT NULL COMMENT '插件详情',
     `operator` int(11) DEFAULT NULL COMMENT '更新人/操作人',
     `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`) USING BTREE,
     UNIQUE KEY `unique_uuid` (`uuid`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC COMMENT='模块插件表';
