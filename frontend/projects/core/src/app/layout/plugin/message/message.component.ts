@@ -51,7 +51,7 @@ import { Router } from '@angular/router'
             </p>
           </div>
         </div>
-        <div>
+        <div *ngIf="showBtn">
           <button
             *ngIf="!enable"
             class="ml-btnybase ant-btn-primary"
@@ -61,7 +61,7 @@ import { Router } from '@angular/router'
             启用
           </button>
           <button
-            *ngIf="enable"
+            *ngIf="enable && canDisable"
             class="ml-btnybase"
             eo-ng-button
             (click)="disablePluginModal(false)"
@@ -109,7 +109,9 @@ export class PluginMessageComponent implements OnInit {
   modalRef: NzModalRef | undefined
   mdFileName: string = ''
   showEmpty: boolean = false
-  constructor(
+  canDisable:boolean = false
+  showBtn:boolean = false
+  constructor (
     private message: EoNgMessageService,
     private modalService: EoNgFeedbackModalService,
     private api: ApiService,
@@ -125,7 +127,7 @@ export class PluginMessageComponent implements OnInit {
     ])
   }
 
-  ngOnInit(): void {
+  ngOnInit (): void {
     this.pluginId = this.baseInfo.allParamsInfo.pluginId
     this.mdFileName = this.baseInfo.allParamsInfo.mdFileName
     this.getPluginDetail()
@@ -168,7 +170,7 @@ export class PluginMessageComponent implements OnInit {
     }
   }
 
-  getPluginDetail() {
+  getPluginDetail () {
     this.api
       .get('system/plugin/info', { id: this.pluginId })
       .subscribe(
@@ -185,26 +187,28 @@ export class PluginMessageComponent implements OnInit {
               : './assets/default-plugin-icon.svg'
             this.enable = resp.data.plugin.enable
             this.uninstall = resp.data.plugin.uninstall
+            this.canDisable = resp.data.plugin.canDisable // true表示该插件可禁用
+            this.showBtn = true
           }
         }
       )
   }
 
-  getMd() {
+  getMd () {
     return './assets/README.md' // 本地调试用
     // return `../../plugin/md/${this.pluginId}/${this.mdFileName || ''}`
   }
 
-  loadMd() {
+  loadMd () {
     this.showEmpty = false
   }
 
-  onError(value: any) {
+  onError (value: any) {
     console.error('解析md文档出现问题', value)
     this.showEmpty = true
   }
 
-  enablePlugin() {
+  enablePlugin () {
     const params: {
       name: string
       server: string
@@ -212,13 +216,15 @@ export class PluginMessageComponent implements OnInit {
       queryList: Array<PluginInstallConfigData>
       initializeList: Array<PluginInstallConfigData>
       showServer: boolean
+      nameConflict:boolean
     } = {
       name: '',
       server: '',
       headerList: [],
       queryList: [],
       initializeList: [],
-      showServer: false
+      showServer: false,
+      nameConflict: false
     }
     this.api
       .get('system/plugin/enable', { id: this.pluginId })
@@ -235,37 +241,46 @@ export class PluginMessageComponent implements OnInit {
           } else if (resp.code === 0) {
             params.name = resp.data.module.name
             params.server = resp.data.module.server
-            params.headerList = resp.data.module.header.map(
+            params.headerList = resp.data.render.headers.map(
               (header: PluginInstallConfigData) => {
                 header.placeholder = header.placeholder || '请输入'
+                const currentValue = this.findConfigValue(resp.data.module.header, header.name)
+                header.value = currentValue === undefined ? header.value : currentValue
                 return header
               }
             )
-            params.queryList = resp.data.module.query.map(
+            params.queryList = resp.data.render.querys.map(
               (query: PluginInstallConfigData) => {
                 query.placeholder = query.placeholder || '请输入'
+                const currentValue = this.findConfigValue(resp.data.module.query, query.name)
+                query.value = currentValue === undefined ? query.value : currentValue
                 return query
               }
             )
-            params.initializeList = resp.data.module.initialize.map(
+            params.initializeList = resp.data.render.initialize.map(
               (initItem: PluginInstallConfigData) => {
                 initItem.placeholder = initItem.placeholder || '请输入'
+                const currentValue = this.findConfigValue(resp.data.module.initialize, initItem.name)
+                initItem.value = currentValue === undefined ? initItem.value : currentValue
                 return initItem
               }
             )
             params.showServer = resp.data.render.internet
-
+            params.nameConflict = resp.data.render.nameConflict
             if (
               params.showServer ||
+              params.nameConflict ||
               params.headerList.length ||
               params.queryList.length ||
               params.initializeList.length
             ) {
+              console.log(params)
               this.modalService.create({
                 nzTitle: '启用',
                 nzWidth: MODAL_NORMAL_SIZE,
                 nzContent: PluginConfigComponent,
                 nzComponentParams: {
+                  ...params,
                   refreshPage: this.getPluginDetail,
                   pluginId: this.pluginId
                 },
@@ -300,7 +315,16 @@ export class PluginMessageComponent implements OnInit {
       )
   }
 
-  disablePluginModal(deletePlugin: boolean) {
+  findConfigValue (valueList:Array<PluginInstallConfigData>, key:string) {
+    for (const item of valueList) {
+      if (item.name === key) {
+        return item.value
+      }
+    }
+    return undefined
+  }
+
+  disablePluginModal (deletePlugin: boolean) {
     this.modalRef = this.modalService.create({
       nzTitle: deletePlugin ? '卸载' : '停用',
       nzContent: `该插件${
@@ -324,7 +348,7 @@ export class PluginMessageComponent implements OnInit {
   }
 
   // 禁用插件
-  disablePlugin() {
+  disablePlugin () {
     this.api
       .post('system/plugin/disable', {}, { id: this.pluginId })
       .subscribe((resp: EmptyHttpResponse) => {
@@ -342,7 +366,7 @@ export class PluginMessageComponent implements OnInit {
   }
 
   // 卸载插件
-  deletePlugin() {
+  deletePlugin () {
     this.api
       .post('system/plugin/uninstall', {}, { id: this.pluginId })
       .subscribe((resp: EmptyHttpResponse) => {
