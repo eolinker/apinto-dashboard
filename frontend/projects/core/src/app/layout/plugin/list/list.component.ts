@@ -45,7 +45,7 @@ export class PluginListComponent implements OnInit {
   private subscription1: Subscription = new Subscription()
   public nodesList: NzTreeNodeOptions[] = []
 
-  constructor(
+  constructor (
     public api: ApiService,
     private modalService: EoNgFeedbackModalService,
     private appConfigService: EoNgNavigationService,
@@ -58,7 +58,7 @@ export class PluginListComponent implements OnInit {
     this.appConfigService.reqFlashBreadcrumb([{ title: '企业插件' }])
   }
 
-  ngOnInit(): void {
+  ngOnInit (): void {
     this.groupUuid = this.baseInfo.allParamsInfo.pluginGroupId
     this.subscription = this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
@@ -73,14 +73,14 @@ export class PluginListComponent implements OnInit {
     })
   }
 
-  ngOnDestroy() {
+  ngOnDestroy () {
     this.subscription.unsubscribe()
     this.subscription1.unsubscribe()
     this.service.pluginList = [] // 清空pluginList，否则第二次进入该组件时会多请求一次所有图片
   }
 
   // 根据状态展示响应的插件（前端筛选）
-  filterPluginList() {
+  filterPluginList () {
     if (this.radioValue === '') {
       return this.service.pluginList
     } else {
@@ -91,7 +91,7 @@ export class PluginListComponent implements OnInit {
   }
 
   // 右侧页面切换至所有插件的列表页
-  viewAllPlugins() {
+  viewAllPlugins () {
     this.showAll = true
     if (
       this.groupUuid &&
@@ -105,27 +105,31 @@ export class PluginListComponent implements OnInit {
     this.router.navigate(['/', 'plugin', 'group', 'list', ''])
   }
 
-  disabledEdit(value: any) {
+  disabledEdit (value: any) {
     this.nzDisabled = value
   }
 
-  installPlugin() {
+  installPlugin () {
     this.modalRef = this.modalService.create({
       nzTitle: '安装插件',
       nzWidth: MODAL_SMALL_SIZE,
       nzContent: PluginCreateComponent,
+      nzComponentParams: {
+        closeModal: this.closeModal
+      },
       nzOkDisabled: this.nzDisabled,
       nzOnOk: (component: PluginCreateComponent) => {
-        if (component.submit()) {
-          return true
-        } else {
-          return false
-        }
+        component.submit()
+        return false
       }
     })
   }
 
-  handerCardClick(card: CardItem) {
+  closeModal = () => {
+    this.modalRef?.close()
+  }
+
+  handerCardClick (card: CardItem) {
     // eslint-disable-next-line dot-notation
     this.router.navigate(['../../message', card['id'] || 'test', ''], {
       relativeTo: this.route
