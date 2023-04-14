@@ -3,9 +3,10 @@ package api_store
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	"github.com/eolinker/apinto-dashboard/modules/api/api-entry"
 	"github.com/eolinker/apinto-dashboard/store"
-	"strings"
 )
 
 type IAPIStore interface {
@@ -21,6 +22,7 @@ type IAPIStore interface {
 	GetByIds(ctx context.Context, namespaceID int, ids []int) ([]*api_entry.API, error)
 	GetListAll(ctx context.Context, namespaceID int) ([]*api_entry.API, error)
 	GetSourceList(ctx context.Context) ([]*api_entry.APISource, error)
+	APICount(ctx context.Context, params map[string]interface{}) (int64, error)
 }
 
 type apiStore struct {
@@ -63,6 +65,12 @@ func (a *apiStore) GetListPageByGroupIDs(ctx context.Context, namespaceID, pageN
 	}
 
 	return apis, int(count), nil
+}
+
+func (a *apiStore) APICount(ctx context.Context, params map[string]interface{}) (int64, error) {
+	var count int64
+	err := a.DB(ctx).Where(params).Model(api_entry.API{}).Count(&count).Error
+	return count, err
 }
 
 func (a *apiStore) GetCountByGroupID(ctx context.Context, namespaceID int, groupID string) (int64, error) {
