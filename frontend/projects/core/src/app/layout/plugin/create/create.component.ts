@@ -69,7 +69,8 @@ export class PluginCreateComponent {
   fileList: NzUploadFile[] = []
   groupOptions: AutoCompleteOption[] = []
   name = ''
-  constructor(
+  closeModal:Function | undefined
+  constructor (
     public api: ApiService,
     private fb: UntypedFormBuilder,
     private message: EoNgMessageService,
@@ -82,7 +83,7 @@ export class PluginCreateComponent {
     this.getGroupList()
   }
 
-  getGroupList() {
+  getGroupList () {
     this.api
       .get('system/plugin/groups/enum')
       .subscribe(
@@ -111,13 +112,13 @@ export class PluginCreateComponent {
   }
 
   // 移除文件
-  removeFile() {
+  removeFile () {
     this.fileList = []
     this.fileError = true
     return true
   }
 
-  checkValid() {
+  checkValid () {
     if (
       this.fileList.length === 0 ||
       !this.validateForm.controls['name'].valid
@@ -134,9 +135,9 @@ export class PluginCreateComponent {
     return true
   }
 
-  submit() {
+  submit () {
     if (!this.checkValid()) {
-      return false
+      return
     }
     const formData = new FormData()
     formData.append('plugin', this.fileList[0] as any)
@@ -145,15 +146,13 @@ export class PluginCreateComponent {
       'group_name',
       this.validateForm.controls['name'].value as any
     )
-    return this.api
+    this.api
       .post('system/plugin/install', formData)
       .subscribe((resp: EmptyHttpResponse) => {
         if (resp.code === 0) {
           this.message.success(resp.msg || '安装插件成功')
           this.service.getPluginList()
-          return true
-        } else {
-          return false
+          this.closeModal && this.closeModal()
         }
       })
   }
