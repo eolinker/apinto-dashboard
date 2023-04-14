@@ -2,6 +2,7 @@ package upstream_store
 
 import (
 	"context"
+
 	"github.com/eolinker/apinto-dashboard/modules/upstream/upstream-entry"
 	"github.com/eolinker/apinto-dashboard/store"
 )
@@ -12,6 +13,7 @@ type IServiceStore interface {
 	GetByName(ctx context.Context, namespaceId int, name string) (*upstream_entry.Service, error)
 	GetListAll(ctx context.Context, namespaceId int) ([]*upstream_entry.Service, error)
 	GetByNames(ctx context.Context, namespaceId int, names []string) ([]*upstream_entry.Service, error)
+	ServiceCount(ctx context.Context, params map[string]interface{}) (int64, error)
 }
 
 type serviceStore struct {
@@ -20,6 +22,12 @@ type serviceStore struct {
 
 func newServiceStore(db store.IDB) IServiceStore {
 	return &serviceStore{BaseStore: store.CreateStore[upstream_entry.Service](db)}
+}
+
+func (s *serviceStore) ServiceCount(ctx context.Context, params map[string]interface{}) (int64, error) {
+	var count int64
+	err := s.DB(ctx).Where(params).Model(upstream_entry.Service{}).Count(&count).Error
+	return count, err
 }
 
 func (s *serviceStore) GetListPage(ctx context.Context, namespaceID int, searchName string, pageNum int, pageSize int) ([]*upstream_entry.Service, int, error) {

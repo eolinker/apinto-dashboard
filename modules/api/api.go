@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+
 	"github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/driver"
 	"github.com/eolinker/apinto-dashboard/modules/api/api-dto"
@@ -56,6 +57,8 @@ type IAPIService interface {
 	GetAPIRemoteOptions(ctx context.Context, namespaceId, pageNum, pageSize int, keyword, groupUuid string) ([]*strategy_model.RemoteApis, int, error)
 	GetAPIRemoteByUUIDS(ctx context.Context, namespace int, uuids []string) ([]*strategy_model.RemoteApis, error)
 	ResetOnline(ctx context.Context, namespaceId, clusterId int)
+	APICount(ctx context.Context, namespaceId int) (int64, error)
+	APIOnlineCount(ctx context.Context, namespaceId int) (int64, error)
 }
 
 type IAPIDriverManager interface {
