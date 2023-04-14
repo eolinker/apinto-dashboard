@@ -20,6 +20,7 @@ type ModulePlugin struct {
 	Details    []byte    `gorm:"column:details" json:"details"`
 	Operator   int       `gorm:"column:operator" json:"operator"`
 	CreateTime time.Time `gorm:"column:create_time" json:"create_time"`
+	UpdateTime time.Time `gorm:"column:update_time" json:"update_time"`
 }
 
 func (*ModulePlugin) TableName() string {

@@ -277,6 +277,7 @@ func (m *modulePluginService) InstallPlugin(ctx context.Context, userID int, plu
 			Details:    details,
 			Operator:   userID,
 			CreateTime: t,
+			UpdateTime: t,
 		}
 		if err = m.pluginStore.Save(txCtx, pluginInfo); err != nil {
 			return err
@@ -565,6 +566,7 @@ func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml 
 			Details:    []byte{},
 			Operator:   0,
 			CreateTime: t,
+			UpdateTime: t,
 		}
 		if err := m.pluginStore.Save(txCtx, pluginInfo); err != nil {
 			return err
@@ -613,7 +615,7 @@ func (m *modulePluginService) UpdateInnerPlugin(ctx context.Context, pluginYml *
 	pluginInfo.Type = pluginYml.Type
 	pluginInfo.Front = pluginYml.Front
 	pluginInfo.Driver = pluginYml.Driver
-	pluginInfo.CreateTime = t
+	pluginInfo.UpdateTime = t
 
 	return m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
 		if _, err = m.pluginStore.Update(txCtx, pluginInfo); err != nil {
