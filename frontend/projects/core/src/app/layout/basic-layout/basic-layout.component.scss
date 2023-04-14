@@ -72,4 +72,11 @@ span.logo-title {
   li.menu-icon-hidden > svg {
     display: none;
   }
+  .ant-menu-sub.ant-menu-inline {
+    li.menu-no-content {
+      .ant-menu-item-group-title {
+        padding-left: 42px !important;
+      }
+    }
+  }
 }
