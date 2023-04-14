@@ -90,7 +90,7 @@ func (m *modulePlugin) GetNavigationModules(ctx context.Context) ([]*model.Navig
 			Navigation: module.Navigation,
 		}
 		//若模块为内置模块
-		if module.Type == 0 || module.Type == 1 {
+		if module.Type == 0 || module.Type == 1 || module.Type == 2 {
 			info.Type = "built-in"
 			info.Path = module.Front
 		}
