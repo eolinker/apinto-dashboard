@@ -32,10 +32,11 @@ type Plugin struct {
 	Version    string `yaml:"version"`
 	Icon       string `yaml:"icon"`
 	Driver     string `yaml:"driver"`
-	Core       bool   `yaml:"core"`
-	Auto       bool   `yaml:"auto"`
 	Front      string `yaml:"front"`
 	Navigation string `yaml:"navigation"`
+	GroupID    string `yaml:"group_id"`
+	Type       int    `yaml:"type"`
+	Auto       bool   `yaml:"auto"`
 }
 
 func InitPlugins() error {
@@ -60,7 +61,8 @@ func InitPlugins() error {
 			Driver:     p.Driver,
 			Front:      p.Front,
 			Navigation: p.Navigation,
-			Core:       p.Core,
+			GroupID:    p.GroupID,
+			Type:       p.Type,
 			Auto:       p.Auto,
 		}
 
@@ -74,6 +76,7 @@ func InitPlugins() error {
 			if err != nil {
 				return err
 			}
+			continue
 		}
 		//判断version有没改变，有则更新
 		if pluginInfo.Version != p.Version {
