@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+
 	"github.com/eolinker/apinto-dashboard/modules/base/runtime-entry"
 )
 
@@ -11,6 +12,7 @@ type BaseRuntimeStore[T any] interface {
 	GetByCluster(ctx context.Context, clusterId int) ([]*T, error)
 	GetForCluster(ctx context.Context, id int, clusterId int) (*T, error)
 	OnlineCount(ctx context.Context, id int) (int64, error)
+	OnlineCountByKind(ctx context.Context) (int64, error)
 }
 
 type BaseRuntime[T any] struct {
@@ -46,6 +48,15 @@ func (b *BaseRuntime[T]) OnlineCount(ctx context.Context, target int) (int64, er
 		return 0, err
 	}
 	return count, nil
+}
+
+func (b *BaseRuntime[T]) OnlineCountByKind(ctx context.Context) (int64, error) {
+	var count int64
+	err := b.BaseKindStore.DB(ctx).Where(map[string]interface{}{
+		"kind":      b.BaseKindHandler.Kind(),
+		"is_online": 1,
+	}).Group("target").Count(&count).Error
+	return count, err
 }
 
 func CreateRuntime[T any](handler BaseKindHandler[T, runtime_entry.Runtime], db IDB) *BaseRuntime[T] {

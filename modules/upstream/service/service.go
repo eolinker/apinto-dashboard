@@ -4,6 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sort"
+	"strings"
+	"time"
+
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	api "github.com/eolinker/apinto-dashboard/modules/api"
@@ -30,9 +34,6 @@ import (
 	"github.com/eolinker/eosc/log"
 	"github.com/go-basic/uuid"
 	"gorm.io/gorm"
-	"sort"
-	"strings"
-	"time"
 )
 
 type service struct {
@@ -73,6 +74,12 @@ func newServiceService() upstream.IService {
 	bean.Autowired(&s.historyStore)
 	bean.Autowired(&s.userInfoService)
 	return s
+}
+
+func (s *service) UpstreamCount(ctx context.Context, namespaceId int) (int64, error) {
+	return s.serviceStore.ServiceCount(ctx, map[string]interface{}{
+		"namespace": namespaceId,
+	})
 }
 
 func (s *service) GetServiceList(ctx context.Context, namespaceID int, searchName string, pageNum int, pageSize int) ([]*upstream_model.ServiceListItem, int, error) {
