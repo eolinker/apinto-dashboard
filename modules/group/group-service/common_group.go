@@ -22,9 +22,8 @@ import (
 )
 
 const (
-	ApiName      = "api"
-	ServiceName  = "service"
-	ModulePlugin = "module_plugin"
+	ApiName     = "api"
+	ServiceName = "service"
 )
 
 type commonGroupService struct {
@@ -597,8 +596,6 @@ func (c *commonGroupService) getTagId(ctx context.Context, namespaceId int, grou
 		}
 		return serviceInfo.ServiceId
 	case ApiName:
-		return 0
-	case ModulePlugin:
 		return 0
 	}
 	return -1
