@@ -6,8 +6,21 @@
     [formGroup]="validateForm"
     autocomplete="off"
   >
+    <nz-form-item class="form-row" *ngIf="nameConfilct">
+      <nz-form-label class="" nzRequired>模块名：</nz-form-label>
+      <nz-form-control>
+        <input
+          class="w-INPUT_NORMAL"
+          eo-ng-input
+          name="name"
+          required
+          placeholder="请输入"
+          formControlName="name"
+        />
+      </nz-form-control>
+    </nz-form-item>
     <nz-form-item class="form-row" *ngIf="showServer">
-      <nz-form-label class="w-[124px]" nzRequired>服务器地址：</nz-form-label>
+      <nz-form-label class="" nzRequired>服务器地址：</nz-form-label>
       <nz-form-control>
         <input
           class="w-INPUT_NORMAL"
@@ -29,7 +42,7 @@
     class="mb-formtop"
   >
     <div nz-col>
-      <label class="label table-label block w-[124px]">Header参数：</label>
+      <label class="label table-label block">Header参数：</label>
     </div>
     <div nz-col class="" style="width: 100%">
       <div class="drawer-list-content">
@@ -53,7 +66,7 @@
     class="mb-formtop"
   >
     <div nz-col>
-      <label class="label table-label block w-[124px]">Query参数：</label>
+      <label class="label table-label block">Query参数：</label>
     </div>
     <div nz-col class="" style="width: 100%">
       <div class="drawer-list-content" style="padding-bottom: 0px">
@@ -71,7 +84,7 @@
   </div>
   <div *ngIf="initializeList?.length" nz-row nzJustify="start" nzAligh="top">
     <div nz-col>
-      <label class="label table-label block w-[124px]">Initialize参数：</label>
+      <label class="label table-label block">Initialize参数：</label>
     </div>
     <div nz-col class="" style="width: 100%">
       <div class="drawer-list-content" style="padding-bottom: 0px">

@@ -11,10 +11,6 @@ import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
     `
     :host ::ng-deep{
 
-      .ant-table{
-        box-shadow:0px 2px 2px -2px var(--border-color);
-      }
-
       .ant-table-tbody > tr:hover .opacity-0{
         opacity:1 !important;
       }
