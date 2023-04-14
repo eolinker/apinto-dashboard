@@ -128,6 +128,7 @@ func (p *Plugin) NewModule(name string) *Module {
 	routers = append(routers, moduleRouters()...)
 	systemRouter := newSystem()
 	routers = append(routers, systemRouter.RoutersInfo()...)
+	routers = append(routers, envEnumRouters()...)
 	return &Module{
 		name:              name,
 		middlewareHandler: p.middlewareHandler,
