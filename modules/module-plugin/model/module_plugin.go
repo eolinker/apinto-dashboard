@@ -17,22 +17,22 @@ type PluginGroup struct {
 
 type ModulePluginInfo struct {
 	*entry.ModulePlugin
-	Enable    bool
-	IsDisable bool
-	Uninstall bool
+	Enable     bool
+	CanDisable bool
+	Uninstall  bool
 }
 
 type PluginEnableInfo struct {
-	Name         string
-	NameConflict bool
-	Server       string
-	Header       []*ExtendParams
-	Query        []*ExtendParams
-	Initialize   []*ExtendParams
+	Name       string
+	Server     string
+	Header     []*ExtendParams
+	Query      []*ExtendParams
+	Initialize []*ExtendParams
 }
 
 type PluginEnableRender struct {
-	Internet bool
+	Internet     bool
+	NameConflict bool
 	//Invisible  bool
 	Headers    []ExtendParamsRender
 	Querys     []ExtendParamsRender
