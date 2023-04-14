@@ -49,15 +49,6 @@ import { EoNgPluginService } from '../eo-ng-plugin.service'
           </div>
         </nz-form-control>
       </nz-form-item>
-      <nz-form-item class="form-row">
-        <nz-form-label [nzSpan]="6" nzRequired>分组：</nz-form-label>
-        <nz-form-control [nzSpan]="14">
-          <eo-ng-auto-complete
-            formControlName="name"
-            [nzOptions]="groupOptions"
-          ></eo-ng-auto-complete>
-        </nz-form-control>
-      </nz-form-item>
     </form>
   `,
   styles: []
@@ -68,7 +59,6 @@ export class PluginCreateComponent {
   fileError: boolean = false
   fileList: NzUploadFile[] = []
   groupOptions: AutoCompleteOption[] = []
-  name = ''
   closeModal:Function | undefined
   constructor (
     public api: ApiService,
@@ -77,8 +67,7 @@ export class PluginCreateComponent {
     private service: EoNgPluginService
   ) {
     this.validateForm = this.fb.group({
-      file: [null, [Validators.required]],
-      name: ['', [Validators.required]]
+      file: [null, [Validators.required]]
     })
     this.getGroupList()
   }
@@ -119,20 +108,8 @@ export class PluginCreateComponent {
   }
 
   checkValid () {
-    if (
-      this.fileList.length === 0 ||
-      !this.validateForm.controls['name'].valid
-    ) {
-      this.fileError = this.fileList.length === 0
-      if (this.validateForm.controls['name'].invalid) {
-        this.validateForm.controls['name'].markAsDirty()
-        this.validateForm.controls['name'].updateValueAndValidity({
-          onlySelf: true
-        })
-      }
-      return false
-    }
-    return true
+    this.fileError = this.fileList.length === 0
+    return !this.fileError
   }
 
   submit () {
@@ -141,11 +118,6 @@ export class PluginCreateComponent {
     }
     const formData = new FormData()
     formData.append('plugin', this.fileList[0] as any)
-    // eslint-disable-next-line dot-notation
-    formData.append(
-      'group_name',
-      this.validateForm.controls['name'].value as any
-    )
     this.api
       .post('system/plugin/install', formData)
       .subscribe((resp: EmptyHttpResponse) => {
