@@ -52,10 +52,11 @@ func (b *BaseRuntime[T]) OnlineCount(ctx context.Context, target int) (int64, er
 
 func (b *BaseRuntime[T]) OnlineCountByKind(ctx context.Context) (int64, error) {
 	var count int64
-	err := b.BaseKindStore.DB(ctx).Where(map[string]interface{}{
+	var t T
+	err := b.DB(ctx).Table("`runtime`").Where(map[string]interface{}{
 		"kind":      b.BaseKindHandler.Kind(),
 		"is_online": 1,
-	}).Group("target").Count(&count).Error
+	}).Group("target").Model(t).Count(&count).Error
 	return count, err
 }
 
