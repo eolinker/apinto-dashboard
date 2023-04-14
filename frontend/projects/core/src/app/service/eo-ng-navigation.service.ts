@@ -16,47 +16,47 @@ export class EoNgNavigationService {
   private userRoleId: string = '' // 当前用户角色id
   private userId: string = '' // 当前用户id
   private accessMap: Map<string, Array<string>> = new Map()
-  constructor(public api: ApiService) {}
+  constructor (public api: ApiService) {}
 
-  setUserRoleId(val: string) {
+  setUserRoleId (val: string) {
     this.userRoleId = val
   }
 
-  getUserRoleId() {
+  getUserRoleId () {
     return this.userRoleId
   }
 
-  setUserId(id: string) {
+  setUserId (id: string) {
     this.userId = id
   }
 
-  getUserId() {
+  getUserId () {
     return this.userId
   }
 
   // 获取首页路由地址
-  getPageRoute(): string {
+  getPageRoute (): string {
     return '/guide'
     // return this.mainPageRouter
   }
 
   // 如果用户没有任何除商业授权以外的功能查看权限, 返回true
-  getUserAccess() {
+  getUserAccess () {
     return this.noAccess
   }
 
   // 用户是否有查看授权的权限，有则返回true
-  getUserAuthAccess() {
+  getUserAuthAccess () {
     return this.viewRightsRouterList.includes('auth-info')
   }
 
   private flashFlag: Subject<boolean> = new Subject<boolean>()
 
-  reqFlashMenu() {
+  reqFlashMenu () {
     this.flashFlag.next(true)
   }
 
-  repFlashMenu() {
+  repFlashMenu () {
     return this.flashFlag.asObservable()
   }
 
@@ -64,12 +64,12 @@ export class EoNgNavigationService {
     Array<string>
   >()
 
-  reqUpdateRightList() {
+  reqUpdateRightList () {
     this.userUpdeteRightList.next(this.updateRightsRouterList)
     this.dataUpdated = true
   }
 
-  repUpdateRightList() {
+  repUpdateRightList () {
     return this.userUpdeteRightList.asObservable()
   }
 
@@ -77,30 +77,30 @@ export class EoNgNavigationService {
     Array<string>
   >()
 
-  reqViewRightList() {
+  reqViewRightList () {
     this.userViewUpdeteRightList.next(this.viewRightsRouterList)
     this.dataUpdated = true
   }
 
-  repViewRightList() {
+  repViewRightList () {
     return this.userViewUpdeteRightList.asObservable()
   }
 
-  getUpdateRightsRouter() {
+  getUpdateRightsRouter () {
     return this.updateRightsRouterList
   }
 
-  getViewRightsRouter() {
+  getViewRightsRouter () {
     return this.viewRightsRouterList
   }
 
   // 获取最新目录列表
-  getMenuList(): Observable<MenuOptions[]> {
+  getMenuList (): Observable<MenuOptions[]> {
     return this.getRightsList()
   }
 
   // 获取当前目录列表
-  getCurrentMenuList(): MenuOptions[] {
+  getCurrentMenuList (): MenuOptions[] {
     return this.menuList
   }
 
@@ -112,7 +112,7 @@ export class EoNgNavigationService {
   findFirstModulesId: boolean = false
   noAccess: boolean = true
   // 获得最新的权限列表和菜单
-  getRightsList(): Observable<MenuOptions[]> {
+  getRightsList (): Observable<MenuOptions[]> {
     return new Observable((observer) => {
       this.api.get('system/modules').subscribe((resp: any) => {
         if (resp.code === 0) {
@@ -122,6 +122,7 @@ export class EoNgNavigationService {
           this.accessMap = new Map()
           this.routerNameMap = new Map()
           this.noAccess = true
+          console.log(resp)
           for (const navigation of resp.data.navigation) {
             const menu = {
               title: navigation.title,
@@ -152,20 +153,28 @@ export class EoNgNavigationService {
                   }
                 : navigation.modules?.length > 0 &&
                   this.getDefaultModule(navigation).path
-                ? {
-                    name: this.getDefaultModule(navigation).name,
-                    routerLink: this.getDefaultModule(navigation).path,
-                    matchRouter: true,
-                    matchRouterExact: false,
-                    type: this.getDefaultModule(navigation).type
-                  }
-                : {
-                    routerLink: 'iframe',
-                    matchRouter: true,
-                    matchRouterExact: false
-                  })
+                  ? {
+                      name: this.getDefaultModule(navigation).name,
+                      routerLink: this.getDefaultModule(navigation).path,
+                      matchRouter: true,
+                      matchRouterExact: false,
+                      type: this.getDefaultModule(navigation).type
+                    }
+                  : (navigation.modules?.length > 0
+                      ? {
+                          routerLink: 'iframe',
+                          matchRouter: true,
+                          matchRouterExact: false
+                        }
+                      : {
+                          children: [{
+                            menu: true,
+                            group: true,
+                            title: '暂无内容',
+                            menuTitleClassName: 'menu-no-content'
+                          }]
+                        }))
             }
-
             if (navigation.name && navigation.path) {
               this.routerNameMap.set(navigation.name, navigation.path)
             }
@@ -195,7 +204,7 @@ export class EoNgNavigationService {
     })
   }
 
-  getDefaultModule(nav: any): { name: string; path: string; type: string } {
+  getDefaultModule (nav: any): { name: string; path: string; type: string } {
     let res = { name: '', path: '', type: '' }
     if (!nav.default) {
       return res
@@ -209,7 +218,7 @@ export class EoNgNavigationService {
     return res
   }
 
-  findMainPage() {
+  findMainPage () {
     for (const menu of this.menuList) {
       if (menu.routerLink && this.accessMap?.get(menu?.routerLink)?.length) {
         this.mainPageRouter = menu.routerLink
@@ -229,7 +238,7 @@ export class EoNgNavigationService {
   }
 
   // 检查用户是否有编辑该路由页面下内容的权限,若有返回true
-  checkUpdateRight(menuRouter: string) {
+  checkUpdateRight (menuRouter: string) {
     return new Observable((observer) => {
       if (this.updateRightsRouterList?.length === 0) {
         this.getMenuList().subscribe(() => {
@@ -252,16 +261,16 @@ export class EoNgNavigationService {
 
   private breadcrumb: Subject<any> = new Subject<any>()
   private breadcrumbList: MenuOptions[] = []
-  getLatestBreadcrumb() {
+  getLatestBreadcrumb () {
     return this.breadcrumbList
   }
 
-  reqFlashBreadcrumb(value: any) {
+  reqFlashBreadcrumb (value: any) {
     this.breadcrumbList = value
     this.breadcrumb.next(value)
   }
 
-  repFlashBreadcrumb() {
+  repFlashBreadcrumb () {
     return this.breadcrumb.asObservable()
   }
 }
