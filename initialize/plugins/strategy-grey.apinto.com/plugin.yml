@@ -5,7 +5,8 @@ resume: ""
 version: "v1.0"
 icon: "inner-plugin.png"
 driver: "strategy-grey.apinto.com"
-core: false
+type: 2 #0为框架模块 1为核心模块 2为内置模块 3为非内置
 auto: true
 front: "serv-governance/grey"
 navigation: "navigation.strategy"
+group_id: "strategy"
