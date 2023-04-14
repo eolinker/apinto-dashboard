@@ -21,6 +21,7 @@ export type PluginMessage = {
     icon:string
     enable:boolean
     uninstall:boolean
+    canDisable:boolean
 }
 
 export type PluginInstallConfigData = {
@@ -34,8 +35,6 @@ export type PluginInstallConfigData = {
 export type PluginInstallData = {
     module:{
         name:string
-        navigation:string
-        apiGroup:string
         server:string
         header:Array<PluginInstallConfigData>
         query:Array<PluginInstallConfigData>
@@ -44,9 +43,9 @@ export type PluginInstallData = {
     render:{
         internet:boolean
         invisible:boolean
-        apiGroup:boolean
-        header:Array<PluginInstallConfigData>
-        query:Array<PluginInstallConfigData>
+        headers:Array<PluginInstallConfigData>
+        querys:Array<PluginInstallConfigData>
         initialize:Array<PluginInstallConfigData>
+        nameConflict:boolean
     }
 }
