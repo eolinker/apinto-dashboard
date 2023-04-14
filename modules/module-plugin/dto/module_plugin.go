@@ -16,14 +16,14 @@ type PluginGroup struct {
 }
 
 type PluginInfo struct {
-	Id        string `json:"id"`
-	Name      string `json:"name"`
-	Cname     string `json:"cname"`
-	Resume    string `json:"resume"`
-	Icon      string `json:"icon"`
-	Enable    bool   `json:"enable"`
-	IsDisable bool   `json:"is_disable"`
-	Uninstall bool   `json:"uninstall"`
+	Id         string `json:"id"`
+	Name       string `json:"name"`
+	Cname      string `json:"cname"`
+	Resume     string `json:"resume"`
+	Icon       string `json:"icon"`
+	Enable     bool   `json:"enable"`
+	CanDisable bool   `json:"can_disable"`
+	Uninstall  bool   `json:"uninstall"`
 }
 
 type PluginEnableInfo struct {
@@ -37,9 +37,10 @@ type PluginEnableInfo struct {
 type PluginEnableRender struct {
 	Internet bool `json:"internet"`
 	//Invisible  bool                 `json:"invisible"`
-	Headers    []ExtendParamsRender `json:"headers"`
-	Querys     []ExtendParamsRender `json:"querys"`
-	Initialize []ExtendParamsRender `json:"initialize"`
+	NameConflict bool                 `json:"name_conflict"`
+	Headers      []ExtendParamsRender `json:"headers"`
+	Querys       []ExtendParamsRender `json:"querys"`
+	Initialize   []ExtendParamsRender `json:"initialize"`
 }
 
 type ExtendParams struct {
