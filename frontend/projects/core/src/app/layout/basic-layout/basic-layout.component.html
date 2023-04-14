@@ -19,6 +19,7 @@
     </div>
     <div class="flex h-[49px] items-center justify-between">
       <eo-ng-breadcrumb [nzOptions]="breadcrumbOptions"></eo-ng-breadcrumb>
+      <button eo-ng-button class="mr-btnrbase">帮助文档</button>
     </div>
   </eo-ng-header>
   <eo-ng-layout class="total-content">
@@ -28,13 +29,6 @@
       [nzInlineIndent]="20"
       class="overflow-hidden block inside-menu-scroll"
     >
-      <div
-        class="h-[50px] flex items-center pl-[20px] cursor-pointer"
-        [ngClass]="{ 'item-selected': seletedGuide }"
-        (click)="goToGuide()"
-      >
-        🚀 快速入门
-      </div>
       <eo-ng-inline-menu
         [nzInlineIndent]="20"
         [nzOptions]="sideMenuOptions"

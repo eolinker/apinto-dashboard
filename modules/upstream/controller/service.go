@@ -48,7 +48,7 @@ func (s *upstreamController) getList(ginCtx *gin.Context) {
 	backgroundCtx := ginCtx
 	listItems, total, err := s.service.GetServiceList(backgroundCtx, namespaceID, searchName, pageNum, pageSize)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("GetServiceList fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("GetServiceList fail. err:%s", err.Error()))
 		return
 	}
 	services := make([]*upstream_dto.ServiceListItem, 0, len(listItems))
@@ -77,19 +77,19 @@ func (s *upstreamController) getInfo(ginCtx *gin.Context) {
 	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
 	serviceName := ginCtx.Query("name")
 	if serviceName == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("GetServiceInfo Info fail. err: serviceName can't be nil")))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("GetServiceInfo Info fail. err: serviceName can't be nil"))
 		return
 	}
 	backgroundCtx := ginCtx
 	info, err := s.service.GetServiceInfo(backgroundCtx, namespaceID, serviceName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("GetServiceInfo fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("GetServiceInfo fail. err:%s", err.Error()))
 		return
 	}
 
 	discoveryName, _, driver, err := s.discovery.GetServiceDiscoveryDriverByID(backgroundCtx, info.DiscoveryId)
 	if err != nil && driver == nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("GetServiceInfo fail. Get discovery driver fail. %s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("GetServiceInfo fail. Get discovery driver fail. %s", err.Error()))
 		return
 	}
 	conf := driver.FormatConfig([]byte(info.Config))
@@ -130,12 +130,12 @@ func (s *upstreamController) create(ginCtx *gin.Context) {
 	backgroundCtx := ginCtx
 	discoveryID, driverName, driver, err := s.discovery.GetServiceDiscoveryDriver(backgroundCtx, namespaceId, inputProxy.DiscoveryName)
 	if err != nil && driver == nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("CreateService fail. Get discovery driver fail. %s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("CreateService fail. Get discovery driver fail. %s", err.Error()))
 		return
 	}
 	newConf, formatAddr, variableList, err := driver.CheckInput(inputProxy.Config)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("CreateService fail. Err: %s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("CreateService fail. Err: %s", err.Error()))
 		return
 	}
 	inputProxy.Config = newConf
@@ -155,7 +155,7 @@ func (s *upstreamController) create(ginCtx *gin.Context) {
 
 	_, err = s.service.CreateService(backgroundCtx, namespaceId, operator, input, variableList)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("CreateService fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("CreateService fail. err:%s", err.Error()))
 		return
 	}
 
@@ -167,7 +167,7 @@ func (s *upstreamController) alter(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	serviceName := ginCtx.Query("name")
 	if serviceName == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("UpdateService Info fail. err: serviceName can't be nil")))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("UpdateService Info fail. err: serviceName can't be nil"))
 		return
 	}
 	operator := controller.GetUserId(ginCtx)
@@ -180,13 +180,13 @@ func (s *upstreamController) alter(ginCtx *gin.Context) {
 
 	discoveryID, driverName, driver, err := s.discovery.GetServiceDiscoveryDriver(backgroundCtx, namespaceId, inputProxy.DiscoveryName)
 	if err != nil && driver == nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("UpdateService fail. Get discovery driver fail. %s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("UpdateService fail. Get discovery driver fail. %s", err.Error()))
 		return
 	}
 
 	newConf, formatAddr, variableList, err := driver.CheckInput(inputProxy.Config)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("UpdateService fail. Err: %s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("UpdateService fail. Err: %s", err.Error()))
 		return
 	}
 	inputProxy.Config = newConf
@@ -206,7 +206,7 @@ func (s *upstreamController) alter(ginCtx *gin.Context) {
 
 	err = s.service.UpdateService(backgroundCtx, namespaceId, operator, input, variableList)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("UpdateService fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("UpdateService fail. err:%s", err.Error()))
 		return
 	}
 
@@ -218,14 +218,14 @@ func (s *upstreamController) del(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	serviceName := ginCtx.Query("name")
 	if serviceName == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("DeleteService Info fail. err: serviceName can't be nil")))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("DeleteService Info fail. err: serviceName can't be nil"))
 		return
 	}
 	userId := controller.GetUserId(ginCtx)
 
 	err := s.service.DeleteService(ginCtx, namespaceId, userId, serviceName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("DeleteService fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("DeleteService fail. err:%s", err.Error()))
 		return
 	}
 
@@ -238,7 +238,7 @@ func (s *upstreamController) getEnum(ginCtx *gin.Context) {
 
 	serviceList, err := s.service.GetServiceEnum(ginCtx, namespaceId, searchName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("GetServiceEnum fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("GetServiceEnum fail. err:%s", err.Error()))
 		return
 	}
 
