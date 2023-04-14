@@ -27,7 +27,7 @@ export class PluginConfigComponent implements OnInit {
   server:string = ''
 
   showServer:boolean = false
-  nameConfilct:boolean = false
+  nameConflict:boolean = false
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
   validateForm:FormGroup = new FormGroup({})
 
@@ -43,6 +43,7 @@ export class PluginConfigComponent implements OnInit {
   constructor (private fb: UntypedFormBuilder, private api:ApiService, private message:EoNgMessageService,
     private navService:EoNgNavigationService) {
     this.validateForm = this.fb.group({
+      name: ['', [Validators.required]],
       server: ['', [Validators.required]]
     })
   }
@@ -52,6 +53,12 @@ export class PluginConfigComponent implements OnInit {
 
   checkValid () {
     let valid:boolean = true
+    if (this.nameConflict && this.validateForm.controls['name'].invalid) {
+      valid = false
+      this.validateForm.controls['name'].markAsDirty()
+      this.validateForm.controls['name'].updateValueAndValidity({ onlySelf: true })
+    }
+
     if (this.showServer && this.validateForm.controls['server'].invalid) {
       valid = false
       this.validateForm.controls['server'].markAsDirty()
@@ -64,7 +71,7 @@ export class PluginConfigComponent implements OnInit {
   enablePlugin () {
     if (this.checkValid()) {
       const data = {
-        name: this.name,
+        name: this.nameConflict ? this.validateForm.controls['name'].value : this.name || '',
         server: this.validateForm.controls['server'].value,
         header: this.headerList.map((header:PluginInstallConfigData) => {
           return { name: header.name, value: header.value }
