@@ -9,7 +9,7 @@ type ModulePlugin struct {
 	UUID       string    `gorm:"column:uuid" json:"uuid"`
 	Name       string    `gorm:"column:name" json:"name"`
 	Version    string    `gorm:"column:version" json:"version"`
-	Group      int       `gorm:"column:group" json:"group"`
+	Group      string    `gorm:"column:group" json:"group"`
 	Navigation string    `gorm:"column:navigation" json:"navigation"`
 	CName      string    `gorm:"column:cname" json:"cname"`
 	Resume     string    `gorm:"column:resume" json:"resume"`
