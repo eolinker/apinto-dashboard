@@ -32,10 +32,11 @@ type Plugin struct {
 	Version    string `yaml:"version"`
 	Icon       string `yaml:"icon"`
 	Driver     string `yaml:"driver"`
-	Core       bool   `yaml:"core"`
-	Auto       bool   `yaml:"auto"`
 	Front      string `yaml:"front"`
 	Navigation string `yaml:"navigation"`
+	GroupID    string `yaml:"group_id"`
+	Type       int    `yaml:"type"`
+	Auto       bool   `yaml:"auto"`
 }
 
 func InitPlugins() error {
@@ -50,33 +51,39 @@ func InitPlugins() error {
 	for _, p := range plugins {
 		//TODO 校验内置插件
 
+		pluginCfg := &model.InnerPluginYmlCfg{
+			ID:         p.Id,
+			Name:       p.Name,
+			Version:    p.Version,
+			CName:      p.CName,
+			Resume:     p.Resume,
+			ICon:       p.Icon,
+			Driver:     p.Driver,
+			Front:      p.Front,
+			Navigation: p.Navigation,
+			GroupID:    p.GroupID,
+			Type:       p.Type,
+			Auto:       p.Auto,
+		}
+
 		pluginInfo, err := service.GetPluginInfo(ctx, p.Id)
 		if err != nil {
 			if err != gorm.ErrRecordNotFound {
 				return err
 			}
 			// 插入安装记录
-			err = service.InstallInnerPlugin(ctx, &model.InnerPluginYmlCfg{
-				ID:         p.Id,
-				Name:       p.Name,
-				Version:    p.Version,
-				CName:      p.CName,
-				Resume:     p.Resume,
-				ICon:       p.Icon,
-				Driver:     p.Driver,
-				Front:      p.Front,
-				Navigation: p.Navigation,
-				Core:       p.Core,
-				Auto:       p.Auto,
-			})
+			err = service.InstallInnerPlugin(ctx, pluginCfg)
 			if err != nil {
 				return err
 			}
 			continue
 		}
-		//TODO 判断version有没改变，有则更新
+		//判断version有没改变，有则更新
 		if pluginInfo.Version != p.Version {
-
+			err = service.UpdateInnerPlugin(ctx, pluginCfg)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -126,6 +133,5 @@ func GetInnerPluginFS(filePath string) (http.FileSystem, error) {
 	if err != nil {
 		return nil, err
 	}
-	//fileServer := http.StripPrefix(stripPrefix, http.FileServer(http.FS(pluginsFS)))
 	return http.FS(pluginsFS), nil
 }

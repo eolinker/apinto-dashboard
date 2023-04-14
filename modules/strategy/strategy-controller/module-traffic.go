@@ -1,6 +1,7 @@
 package strategy_controller
 
 import (
+	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-module"
 	"net/http"
 )
@@ -115,13 +116,13 @@ func (c *StrategyTrafficModule) initRouter() {
 			Method:      http.MethodPost,
 			Path:        "/api/strategy/traffic/publish",
 			Handler:     "strategy-traffic.publish",
-			HandlerFunc: []apinto_module.HandlerFunc{strategyTrafficController.publish},
+			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypePublish.Handler, strategyTrafficController.publish},
 		},
 		{
 			Method:      http.MethodPost,
 			Path:        "/api/strategy/traffic/priority",
 			Handler:     "strategy-traffic.changePriority",
-			HandlerFunc: []apinto_module.HandlerFunc{strategyTrafficController.changePriority},
+			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypeEdit.Handler, strategyTrafficController.changePriority},
 		},
 		{
 			Method:      http.MethodGet,

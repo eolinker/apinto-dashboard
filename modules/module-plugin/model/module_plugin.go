@@ -17,21 +17,23 @@ type PluginGroup struct {
 
 type ModulePluginInfo struct {
 	*entry.ModulePlugin
-	IsEnable  bool
+	Enable    bool
+	IsDisable bool
 	Uninstall bool
 }
 
 type PluginEnableInfo struct {
-	Name       string
-	Server     string
-	Header     []*ExtendParams
-	Query      []*ExtendParams
-	Initialize []*ExtendParams
+	Name         string
+	NameConflict bool
+	Server       string
+	Header       []*ExtendParams
+	Query        []*ExtendParams
+	Initialize   []*ExtendParams
 }
 
 type PluginEnableRender struct {
-	Internet   bool
-	Invisible  bool
+	Internet bool
+	//Invisible  bool
 	Headers    []ExtendParamsRender
 	Querys     []ExtendParamsRender
 	Initialize []ExtendParamsRender
@@ -134,6 +136,7 @@ type PluginYmlCfg struct {
 	Version    string            `json:"version" yaml:"version"`
 	CName      string            `json:"cname" yaml:"cname"`
 	Navigation string            `json:"navigation" yaml:"navigation"`
+	GroupID    string            `json:"group_id" yaml:"group_id"`
 	Resume     string            `json:"resume" yaml:"resume"`
 	ICon       string            `json:"icon" yaml:"icon"`
 	Driver     string            `json:"driver" yaml:"driver"`
@@ -152,7 +155,8 @@ type InnerPluginYmlCfg struct {
 	Driver     string `json:"driver" yaml:"driver"`
 	Front      string `json:"front" yaml:"front"`
 	Navigation string `json:"navigation" yaml:"navigation"`
-	Core       bool   `json:"core" yaml:"core"`
+	GroupID    string `json:"group_id" yaml:"group_id"`
+	Type       int    `json:"type" yaml:"type"`
 	Auto       bool   `json:"auto" yaml:"auto"`
 }
 
