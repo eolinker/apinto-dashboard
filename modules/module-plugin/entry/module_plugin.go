@@ -9,7 +9,7 @@ type ModulePlugin struct {
 	UUID       string    `gorm:"column:uuid" json:"uuid"`
 	Name       string    `gorm:"column:name" json:"name"`
 	Version    string    `gorm:"column:version" json:"version"`
-	Group      int       `gorm:"column:group" json:"group"`
+	Group      string    `gorm:"column:group" json:"group"`
 	Navigation string    `gorm:"column:navigation" json:"navigation"`
 	CName      string    `gorm:"column:cname" json:"cname"`
 	Resume     string    `gorm:"column:resume" json:"resume"`
@@ -20,6 +20,7 @@ type ModulePlugin struct {
 	Details    []byte    `gorm:"column:details" json:"details"`
 	Operator   int       `gorm:"column:operator" json:"operator"`
 	CreateTime time.Time `gorm:"column:create_time" json:"create_time"`
+	UpdateTime time.Time `gorm:"column:update_time" json:"update_time"`
 }
 
 func (*ModulePlugin) TableName() string {

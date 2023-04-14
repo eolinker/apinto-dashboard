@@ -22,6 +22,7 @@ type PluginInfo struct {
 	Resume    string `json:"resume"`
 	Icon      string `json:"icon"`
 	Enable    bool   `json:"enable"`
+	IsDisable bool   `json:"is_disable"`
 	Uninstall bool   `json:"uninstall"`
 }
 
@@ -34,8 +35,8 @@ type PluginEnableInfo struct {
 }
 
 type PluginEnableRender struct {
-	Internet   bool                 `json:"internet"`
-	Invisible  bool                 `json:"invisible"`
+	Internet bool `json:"internet"`
+	//Invisible  bool                 `json:"invisible"`
 	Headers    []ExtendParamsRender `json:"headers"`
 	Querys     []ExtendParamsRender `json:"querys"`
 	Initialize []ExtendParamsRender `json:"initialize"`
