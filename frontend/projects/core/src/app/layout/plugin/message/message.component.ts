@@ -195,8 +195,8 @@ export class PluginMessageComponent implements OnInit {
   }
 
   getMd () {
-    return './assets/README.md' // 本地调试用
-    // return `../../plugin/md/${this.pluginId}/${this.mdFileName || ''}`
+    // return './assets/README.md' // 本地调试用
+    return `../../plugin/md/${this.pluginId}/${this.mdFileName || ''}`
   }
 
   loadMd () {
