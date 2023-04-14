@@ -6,6 +6,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"reflect"
+	"sort"
+	"strings"
+	"time"
+
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/enum"
@@ -39,10 +44,6 @@ import (
 	"golang.org/x/exp/slices"
 	"golang.org/x/sync/errgroup"
 	"gorm.io/gorm"
-	"reflect"
-	"sort"
-	"strings"
-	"time"
 )
 
 type apiService struct {
@@ -102,6 +103,16 @@ func (a *apiService) GetAPICountByGroupUUID(ctx context.Context, namespaceID int
 		return 0
 	}
 	return count
+}
+
+func (a *apiService) APICount(ctx context.Context, namespaceId int) (int64, error) {
+	return a.apiStore.APICount(ctx, map[string]interface{}{
+		"namespace": namespaceId,
+	})
+}
+
+func (a *apiService) APIOnlineCount(ctx context.Context, namespaceId int) (int64, error) {
+	return a.apiRuntime.OnlineCountByKind(ctx)
 }
 
 func (a *apiService) GetGroups(ctx context.Context, namespaceId int, parentUuid, queryName string) (*group_model.CommonGroupRoot, []*group_model.CommonGroupApi, error) {
