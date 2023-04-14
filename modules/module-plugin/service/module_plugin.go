@@ -3,7 +3,6 @@ package service
 import (
 	context "context"
 	"encoding/json"
-	"fmt"
 	locker_service "github.com/eolinker/apinto-dashboard/modules/base/locker-service"
 	"github.com/eolinker/apinto-dashboard/modules/group"
 	module_plugin "github.com/eolinker/apinto-dashboard/modules/module-plugin"
@@ -69,39 +68,6 @@ func (m *modulePlugin) GetEnabledPlugins(ctx context.Context) ([]*model.EnabledP
 		enablePlugins = append(enablePlugins, enablePlugin)
 	}
 	return enablePlugins, nil
-}
-
-func (m *modulePlugin) GetMiddlewareList(ctx context.Context) ([]*model.MiddlewareItem, error) {
-	plugins, err := m.pluginStore.GetEnabledPlugins(ctx)
-	if err != nil {
-		return nil, err
-	}
-	middlewares := make([]*model.MiddlewareItem, 0, len(plugins))
-	for _, p := range plugins {
-		switch p.Driver {
-		case "remote", "profession":
-		case "local":
-			local := new(model.LocalDefine)
-			_ = json.Unmarshal(p.Define, local)
-			for _, l := range local.Middleware {
-				middlewares = append(middlewares, &model.MiddlewareItem{
-					Name: fmt.Sprintf("%s.%s", p.Name, l.Name),
-				})
-			}
-			//内置插件
-		default:
-			inner := new(model.InnerDefine)
-			_ = json.Unmarshal(p.Define, inner)
-			for _, i := range inner.Main.Middleware {
-				middlewares = append(middlewares, &model.MiddlewareItem{
-					Name: fmt.Sprintf("%s.%s", p.Name, i),
-					Desc: "",
-				})
-			}
-		}
-
-	}
-	return middlewares, nil
 }
 
 func (m *modulePlugin) GetNavigationModules(ctx context.Context) ([]*model.NavigationModuleInfo, error) {
