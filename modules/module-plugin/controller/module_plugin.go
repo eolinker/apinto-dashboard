@@ -45,7 +45,7 @@ func (p *modulePluginController) plugins(ginCtx *gin.Context) {
 		return
 	}
 
-	pluginGroups, err := p.modulePluginService.GetPluginGroups(ginCtx)
+	pluginGroups, err := p.modulePluginService.GetPluginGroups()
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Get plugins fail. err:%s", err.Error()))
 		return
@@ -94,7 +94,8 @@ func (p *modulePluginController) getPluginInfo(ginCtx *gin.Context) {
 		Cname:     pluginInfo.CName,
 		Resume:    pluginInfo.Resume,
 		Icon:      pluginInfo.ICon,
-		Enable:    pluginInfo.IsEnable,
+		Enable:    pluginInfo.Enable,
+		IsDisable: pluginInfo.IsDisable,
 		Uninstall: pluginInfo.Uninstall,
 	}
 	data["plugin"] = info
@@ -102,7 +103,7 @@ func (p *modulePluginController) getPluginInfo(ginCtx *gin.Context) {
 }
 
 func (p *modulePluginController) getGroupsEnum(ginCtx *gin.Context) {
-	pluginGroups, err := p.modulePluginService.GetPluginGroups(ginCtx)
+	pluginGroups, err := p.modulePluginService.GetPluginGroups()
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Get plugin groups enum fail. err:%s", err.Error()))
 		return
@@ -111,9 +112,9 @@ func (p *modulePluginController) getGroupsEnum(ginCtx *gin.Context) {
 	groups := make([]*dto.PluginGroup, 0, len(pluginGroups))
 	for _, group := range pluginGroups {
 		//排除内置插件目录
-		if group.UUID == "inner_plugin" {
-			continue
-		}
+		//if group.UUID == "inner_plugin" {
+		//	continue
+		//}
 		groups = append(groups, &dto.PluginGroup{
 			UUID: group.UUID,
 			Name: group.Name,
@@ -214,8 +215,8 @@ func (p *modulePluginController) getEnableInfo(ginCtx *gin.Context) {
 	}
 
 	enableRender := &dto.PluginEnableRender{
-		Internet:   render.Internet,
-		Invisible:  render.Invisible,
+		Internet: render.Internet,
+		//Invisible:  render.Invisible,
 		Headers:    renderHeader,
 		Querys:     renderQuery,
 		Initialize: renderInitialize,
@@ -261,7 +262,6 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 
 	//读取压缩文件的内容
 	fileBuffer, err := io.ReadAll(file)
-	//_, err = file.Read(fileBuffer)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("install plugin read file fail. err:%s", err.Error()))
 		return
@@ -290,7 +290,7 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 	if err != nil {
 		//文件不存在，删除目录
 		os.RemoveAll(tmpDir)
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("安装插件失败  配置文件文件不存在. err:%s", err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, "安装插件失败  配置文件文件不存在.")
 		return
 	}
 	defer pluginCfgFile.Close()
@@ -312,7 +312,7 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 	if err != nil {
 		//文件不存在，删除目录
 		os.RemoveAll(tmpDir)
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("安装插件失败 README.md 文件不存在. err:%s", err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, "安装插件失败 README.md 文件不存在")
 		return
 	}
 	defer mdFile.Close()
@@ -322,12 +322,12 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 	if err != nil {
 		//文件不存在，删除目录
 		os.RemoveAll(tmpDir)
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("安装插件失败 图标文件不存在. err:%s", err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, "安装插件失败 图标文件不存在")
 		return
 	}
 	defer iconFile.Close()
 
-	err = p.modulePluginService.InstallPlugin(ginCtx, userId, groupName, pluginCfg, fileBuffer)
+	err = p.modulePluginService.InstallPlugin(ginCtx, userId, pluginCfg, fileBuffer)
 	if err != nil {
 		//删除目录
 		os.RemoveAll(tmpDir)
