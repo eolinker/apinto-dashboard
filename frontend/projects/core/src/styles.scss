@@ -1173,7 +1173,11 @@ nz-slider {
 }
 
 .ant-table-pagination.ant-pagination {
-  margin: 10px;
+  box-shadow: 0 -2px 2px -2px var(--border-color);
+  padding-top: 9px;
+  padding-bottom: 10px;
+  margin: 0px 10px;
+  margin-top: 1px;
 }
 eo-ng-select.limit-select .ant-select-selection-search {
   display: inline-block;
