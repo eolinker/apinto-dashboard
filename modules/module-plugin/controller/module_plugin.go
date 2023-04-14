@@ -89,14 +89,14 @@ func (p *modulePluginController) getPluginInfo(ginCtx *gin.Context) {
 
 	data := common.Map[string, interface{}]{}
 	info := &dto.PluginInfo{
-		Id:        pluginInfo.UUID,
-		Name:      pluginInfo.Name,
-		Cname:     pluginInfo.CName,
-		Resume:    pluginInfo.Resume,
-		Icon:      pluginInfo.ICon,
-		Enable:    pluginInfo.Enable,
-		IsDisable: pluginInfo.IsDisable,
-		Uninstall: pluginInfo.Uninstall,
+		Id:         pluginInfo.UUID,
+		Name:       pluginInfo.Name,
+		Cname:      pluginInfo.CName,
+		Resume:     pluginInfo.Resume,
+		Icon:       pluginInfo.ICon,
+		Enable:     pluginInfo.Enable,
+		CanDisable: pluginInfo.CanDisable,
+		Uninstall:  pluginInfo.Uninstall,
 	}
 	data["plugin"] = info
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
@@ -140,7 +140,7 @@ func (p *modulePluginController) getEnableInfo(ginCtx *gin.Context) {
 	}
 
 	//若模块名没有冲突，且没有需要填的，直接启用
-	if !info.NameConflict && !render.Internet && len(render.Headers) == 0 && len(render.Querys) == 0 && len(render.Initialize) == 0 {
+	if !render.NameConflict && !render.Internet && len(render.Headers) == 0 && len(render.Querys) == 0 && len(render.Initialize) == 0 {
 		userId := controller.GetUserId(ginCtx)
 		err = p.modulePluginService.EnablePlugin(ginCtx, userId, pluginUUID, &dto.PluginEnableInfo{
 			Name:   info.Name,
@@ -215,7 +215,8 @@ func (p *modulePluginController) getEnableInfo(ginCtx *gin.Context) {
 	}
 
 	enableRender := &dto.PluginEnableRender{
-		Internet: render.Internet,
+		Internet:     render.Internet,
+		NameConflict: render.NameConflict,
 		//Invisible:  render.Invisible,
 		Headers:    renderHeader,
 		Querys:     renderQuery,
@@ -251,12 +252,6 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 	}
 	if pluginPackage.Size > 4<<20 {
 		ginCtx.String(http.StatusBadRequest, "File too large")
-		return
-	}
-
-	groupName := ginCtx.PostForm("group_name")
-	if groupName == "" {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("install plugin fail. err: groupName is null. "))
 		return
 	}
 
