@@ -68,13 +68,13 @@ func (s *strategyController[T, K]) get(ginCtx *gin.Context) {
 	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
 	uuid := ginCtx.Query("uuid")
 	if uuid == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("GetStrategyInfo fail. err: uuid can't be nil")))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("GetStrategyInfo fail. err: uuid can't be nil"))
 		return
 	}
 
 	info, extender, err := s.strategyService.GetInfo(ginCtx, namespaceID, uuid)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("GetStrategyInfo fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("GetStrategyInfo fail. err:%s", err.Error()))
 		return
 	}
 
@@ -130,12 +130,12 @@ func (s *strategyController[T, K]) update(ginCtx *gin.Context) {
 	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Query("cluster_name")
 	if clusterName == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("UpdateStrategy fail. err: clusterName can't be nil")))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("UpdateStrategy fail. err: clusterName can't be nil"))
 		return
 	}
 	uuid := ginCtx.Query("uuid")
 	if uuid == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("UpdateStrategy fail. err: uuid can't be nil")))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("UpdateStrategy fail. err: uuid can't be nil"))
 		return
 	}
 
@@ -150,13 +150,13 @@ func (s *strategyController[T, K]) update(ginCtx *gin.Context) {
 
 	//校验参数
 	if err := s.strategyService.CheckInput(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("UpdateStrategy fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("UpdateStrategy fail. err:%s", err.Error()))
 		return
 	}
 
 	err := s.strategyService.UpdateStrategy(ginCtx, namespaceID, operator, clusterName, input)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("UpdateStrategy fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("UpdateStrategy fail. err:%s", err.Error()))
 		return
 	}
 
@@ -167,19 +167,19 @@ func (s *strategyController[T, K]) del(ginCtx *gin.Context) {
 	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Query("cluster_name")
 	if clusterName == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("DeleteStrategy fail. err: clusterName can't be nil")))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("DeleteStrategy fail. err: clusterName can't be nil"))
 		return
 	}
 	uuid := ginCtx.Query("uuid")
 	if uuid == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("DeleteStrategy fail. err: uuid can't be nil")))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("DeleteStrategy fail. err: uuid can't be nil"))
 		return
 	}
 
 	userID := controller.GetUserId(ginCtx)
 	err := s.strategyService.DeleteStrategy(ginCtx, namespaceID, userID, clusterName, uuid)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("DeleteStrategy fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("DeleteStrategy fail. err:%s", err.Error()))
 		return
 	}
 
@@ -190,19 +190,19 @@ func (s *strategyController[T, K]) restore(ginCtx *gin.Context) {
 	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Query("cluster_name")
 	if clusterName == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("RestoreStrategy fail. err: clusterName can't be nil")))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("RestoreStrategy fail. err: clusterName can't be nil"))
 		return
 	}
 	uuid := ginCtx.Query("uuid")
 	if uuid == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("RestoreStrategy fail. err: uuid can't be nil")))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("RestoreStrategy fail. err: uuid can't be nil"))
 		return
 	}
 
 	userID := controller.GetUserId(ginCtx)
 	err := s.strategyService.RestoreStrategy(ginCtx, namespaceID, userID, clusterName, uuid)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("RestoreStrategy fail. err:%s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("RestoreStrategy fail. err:%s", err.Error()))
 		return
 	}
 

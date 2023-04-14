@@ -22,9 +22,8 @@ import (
 )
 
 const (
-	ApiName      = "api"
-	ServiceName  = "service"
-	ModulePlugin = "module_plugin"
+	ApiName     = "api"
+	ServiceName = "service"
 )
 
 type commonGroupService struct {
@@ -598,12 +597,15 @@ func (c *commonGroupService) getTagId(ctx context.Context, namespaceId int, grou
 		return serviceInfo.ServiceId
 	case ApiName:
 		return 0
-	case ModulePlugin:
-		return 0
 	}
 	return -1
 }
 
 func (c *commonGroupService) GetGroupInfo(ctx context.Context, uuid string) (*group_entry.CommonGroup, error) {
 	return c.commonGroupStore.GetByUUID(ctx, uuid)
+}
+
+func (c *commonGroupService) DeleteGroupByID(ctx context.Context, id int) error {
+	_, err := c.commonGroupStore.Delete(ctx, id)
+	return err
 }
