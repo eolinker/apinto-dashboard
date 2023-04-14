@@ -60,17 +60,29 @@
                 <p *ngFor="let desc of step.desc">{{ desc }}</p>
               </div>
               <div class="mt-[14px]">
-                <button *ngIf="step.status === 'done'" eo-ng-button>
+                <button
+                  *ngIf="step.status === 'done'"
+                  eo-ng-button
+                  [nzLoading]="btnLoading"
+                  (click)="goToStep(step)"
+                >
                   已完成
                 </button>
                 <button
                   *ngIf="step.status === 'doing'"
                   eo-ng-button
+                  [nzLoading]="btnLoading"
                   nzType="primary"
+                  (click)="goToStep(step)"
                 >
                   前往
                 </button>
-                <button *ngIf="step.status === 'undo'" eo-ng-button>
+                <button
+                  *ngIf="step.status === 'undo'"
+                  eo-ng-button
+                  [nzLoading]="btnLoading"
+                  (click)="goToStep(step)"
+                >
                   未完成
                 </button>
               </div>

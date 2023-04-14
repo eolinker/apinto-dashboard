@@ -21,37 +21,40 @@ import { EoNgPluginService } from '../eo-ng-plugin.service'
   selector: 'eo-ng-plugin-list',
   templateUrl: './list.component.html',
   styles: [
-    `:host ::ng-deep{
-      display:block;
-      height:100%;
-      overflow:hidden;
-    }`
+    `
+      :host ::ng-deep {
+        display: block;
+        height: 100%;
+        overflow: hidden;
+      }
+    `
   ]
 })
 export class PluginListComponent implements OnInit {
   @ViewChild('eoNgTreeDefault') eoNgTreeDefault!: EoNgTreeDefaultComponent
-  nzDisabled:boolean = false
-  radioOptions:RadioOption[] = [...PluginListStatusItems]
-  radioValue:string|boolean = ''
-  modalRef:NzModalRef | undefined
-  showAll:boolean = true
-  groupUuid:string = '' // 供右侧list页面用
-  queryName:string = '' // 支持搜索目录名称和api名称
-  activatedNode?: NzTreeNode;
-  mdFileName:string = ''
+  nzDisabled: boolean = false
+  radioOptions: RadioOption[] = [...PluginListStatusItems]
+  radioValue: string | boolean = ''
+  modalRef: NzModalRef | undefined
+  showAll: boolean = true
+  groupUuid: string = '' // 供右侧list页面用
+  queryName: string = '' // 支持搜索目录名称和api名称
+  activatedNode?: NzTreeNode
+  mdFileName: string = ''
   private subscription: Subscription = new Subscription()
   private subscription1: Subscription = new Subscription()
-  public nodesList:NzTreeNodeOptions[] = []
+  public nodesList: NzTreeNodeOptions[] = []
 
   constructor (
-    public api:ApiService,
-    private modalService:EoNgFeedbackModalService,
-    private appConfigService:EoNgNavigationService,
-    private router:Router,
+    public api: ApiService,
+    private modalService: EoNgFeedbackModalService,
+    private appConfigService: EoNgNavigationService,
+    private router: Router,
     private route: ActivatedRoute,
-    private baseInfo:BaseInfoService,
-    private message:EoNgMessageService,
-    public service:EoNgPluginService) {
+    private baseInfo: BaseInfoService,
+    private message: EoNgMessageService,
+    public service: EoNgPluginService
+  ) {
     this.appConfigService.reqFlashBreadcrumb([{ title: '企业插件' }])
   }
 
@@ -81,7 +84,7 @@ export class PluginListComponent implements OnInit {
     if (this.radioValue === '') {
       return this.service.pluginList
     } else {
-      return this.service.pluginList.filter((plugin:PluginItem) => {
+      return this.service.pluginList.filter((plugin: PluginItem) => {
         return plugin.enable === this.radioValue
       })
     }
@@ -90,16 +93,19 @@ export class PluginListComponent implements OnInit {
   // 右侧页面切换至所有插件的列表页
   viewAllPlugins () {
     this.showAll = true
-    if (this.groupUuid && this.eoNgTreeDefault?.getTreeNodeByKey(this.groupUuid)?.isSelected) {
-    this.eoNgTreeDefault.getTreeNodeByKey(this.groupUuid)!.isSelected = false
+    if (
+      this.groupUuid &&
+      this.eoNgTreeDefault?.getTreeNodeByKey(this.groupUuid)?.isSelected
+    ) {
+      this.eoNgTreeDefault.getTreeNodeByKey(this.groupUuid)!.isSelected = false
     }
     if (this.activatedNode?.isSelected) {
-  this.activatedNode!.isSelected = false
+      this.activatedNode!.isSelected = false
     }
     this.router.navigate(['/', 'plugin', 'group', 'list', ''])
   }
 
-  disabledEdit (value:any) {
+  disabledEdit (value: any) {
     this.nzDisabled = value
   }
 
@@ -108,20 +114,25 @@ export class PluginListComponent implements OnInit {
       nzTitle: '安装插件',
       nzWidth: MODAL_SMALL_SIZE,
       nzContent: PluginCreateComponent,
+      nzComponentParams: {
+        closeModal: this.closeModal
+      },
       nzOkDisabled: this.nzDisabled,
-      nzOnOk: (component:PluginCreateComponent) => {
-        if (component.submit()) {
-          this.service.getPluginList()
-          return true
-        } else {
-          return false
-        }
+      nzOnOk: (component: PluginCreateComponent) => {
+        component.submit()
+        return false
       }
     })
   }
 
-  handerCardClick (card:CardItem) {
+  closeModal = () => {
+    this.modalRef?.close()
+  }
+
+  handerCardClick (card: CardItem) {
     // eslint-disable-next-line dot-notation
-    this.router.navigate(['../../message', card['id'] || 'test', ''], { relativeTo: this.route })
+    this.router.navigate(['../../message', card['id'] || 'test', ''], {
+      relativeTo: this.route
+    })
   }
 }
