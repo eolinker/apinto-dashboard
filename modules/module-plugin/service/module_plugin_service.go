@@ -29,6 +29,7 @@ var (
 	ErrModulePluginNotFound    = errors.New("插件不存在")
 	ErrModulePluginInstalled   = errors.New("插件已安装")
 	ErrModulePluginHasDisabled = errors.New("插件已停用")
+	ErrModulePluginHasEnabled  = errors.New("插件已启用")
 )
 
 const PluginGroupOther = "other"
@@ -397,6 +398,15 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 	}
 	defer m.lockService.Unlock(locker_service.LockNameModulePlugin, 0)
 
+	//判断插件是否已启用
+	enable, err := m.pluginEnableStore.Get(ctx, pluginInfo.Id)
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return err
+	}
+	if enable != nil && enable.IsEnable == 2 {
+		return ErrModulePluginHasEnabled
+	}
+
 	//若输入的启用模块名为空，则为默认的模块名
 	if enableInfo.Name == "" {
 		enableInfo.Name = pluginInfo.Name
@@ -478,7 +488,7 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 		EnableOperate: 1,
 	})
 	err = m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
-		enable := &entry.ModulePluginEnable{
+		enableEntry := &entry.ModulePluginEnable{
 			Id:         pluginInfo.Id,
 			Name:       enableInfo.Name,
 			Navigation: pluginInfo.Navigation,
@@ -488,7 +498,7 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 			UpdateTime: time.Now(),
 		}
 
-		return m.pluginEnableStore.Save(txCtx, enable)
+		return m.pluginEnableStore.Save(txCtx, enableEntry)
 	})
 	if err != nil {
 		return err
