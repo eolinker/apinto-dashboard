@@ -183,6 +183,11 @@ func (p *modulePluginController) getEnableInfo(ginCtx *gin.Context) {
 		Initialize: infoInitialize,
 	}
 
+	//若模块名没有冲突，不需要给前端发送
+	if !render.NameConflict {
+		enableInfo.Name = ""
+	}
+
 	renderHeader := make([]dto.ExtendParamsRender, 0, len(render.Headers))
 	renderQuery := make([]dto.ExtendParamsRender, 0, len(render.Querys))
 	renderInitialize := make([]dto.ExtendParamsRender, 0, len(render.Initialize))

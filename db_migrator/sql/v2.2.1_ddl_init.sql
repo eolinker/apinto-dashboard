@@ -27,8 +27,7 @@ CREATE TABLE `module_plugin_enable` (
     `config` text NOT NULL COMMENT '启用配置',
     `operator` int(11) DEFAULT NULL COMMENT '更新人/操作人',
     `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
-    PRIMARY KEY (`id`) USING BTREE,
-    UNIQUE KEY `unique_name` (`name`) USING BTREE
+    PRIMARY KEY (`id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC COMMENT='模块插件启用表';
 
 CREATE TABLE `module_plugin_package` (
