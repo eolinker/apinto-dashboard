@@ -49,15 +49,15 @@ func (m *modulePlugin) GetEnabledPlugins(ctx context.Context) ([]*model.EnabledP
 			Define: nil,
 		}
 		switch p.Driver {
-		case "remote":
+		case pluginDriverRemote:
 			remote := new(model.RemoteDefine)
 			_ = json.Unmarshal(p.Define, remote)
 			enablePlugin.Define = remote
-		case "local":
+		case pluginDriverLocal:
 			local := new(model.LocalDefine)
 			_ = json.Unmarshal(p.Define, local)
 			enablePlugin.Define = local
-		case "profession":
+		case pluginDriverProfession:
 			profession := new(model.ProfessionDefine)
 			_ = json.Unmarshal(p.Define, profession)
 			enablePlugin.Define = profession
@@ -90,7 +90,7 @@ func (m *modulePlugin) GetNavigationModules(ctx context.Context) ([]*model.Navig
 			Navigation: module.Navigation,
 		}
 		//若模块为内置模块
-		if module.Type == 0 || module.Type == 1 || module.Type == 2 {
+		if IsInnerPlugin(module.Type) {
 			info.Type = "built-in"
 			info.Path = module.Front
 		}
