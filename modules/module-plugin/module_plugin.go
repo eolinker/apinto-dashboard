@@ -9,7 +9,7 @@ import (
 type IModulePluginService interface {
 	GetPlugins(ctx context.Context, groupID, searchName string) ([]*model.ModulePluginItem, error)
 	GetPluginInfo(ctx context.Context, pluginUUID string) (*model.ModulePluginInfo, error)
-	GetPluginGroups() ([]*model.PluginGroup, error)
+	GetPluginGroups(ctx context.Context) ([]*model.PluginGroup, error)
 	GetPluginEnableInfo(ctx context.Context, pluginUUID string) (*model.PluginEnableInfo, error)
 	GetPluginEnableRender(ctx context.Context, pluginUUID string) (*model.PluginEnableRender, error)
 	InstallPlugin(ctx context.Context, userID int, pluginYml *model.PluginYmlCfg, packageContent []byte) error
