@@ -11,8 +11,9 @@ type PluginListItem struct {
 }
 
 type PluginGroup struct {
-	UUID string `json:"uuid"`
-	Name string `json:"name"`
+	UUID  string `json:"uuid"`
+	Name  string `json:"name"`
+	Count int    `json:"count,omitempty"`
 }
 
 type PluginInfo struct {
