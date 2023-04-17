@@ -8,7 +8,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/dto"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/model"
-	"github.com/eolinker/apinto-dashboard/modules/module-plugin/service"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
 	"github.com/gin-gonic/gin"
@@ -46,7 +45,7 @@ func (p *modulePluginController) plugins(ginCtx *gin.Context) {
 		return
 	}
 
-	pluginGroups, err := p.modulePluginService.GetPluginGroups()
+	pluginGroups, err := p.modulePluginService.GetPluginGroups(ginCtx)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Get plugins fail. err:%s", err.Error()))
 		return
@@ -54,11 +53,7 @@ func (p *modulePluginController) plugins(ginCtx *gin.Context) {
 	plugins := make([]*dto.PluginListItem, 0, len(pluginItems))
 	groups := make([]*dto.PluginGroup, 0, len(pluginGroups))
 
-	groupCountMap := make(map[string]int, 7) //记录分组名对应的插件数
-	hasGroupPluginsCount := 0                //记录有具体分组名的插件数量
 	for _, item := range pluginItems {
-		groupCountMap[item.Group]++
-
 		plugins = append(plugins, &dto.PluginListItem{
 			Id:      item.UUID,
 			Name:    item.Name,
@@ -71,19 +66,12 @@ func (p *modulePluginController) plugins(ginCtx *gin.Context) {
 	}
 
 	for _, group := range pluginGroups {
-		hasGroupPluginsCount = hasGroupPluginsCount + groupCountMap[group.UUID]
-
 		groups = append(groups, &dto.PluginGroup{
 			UUID:  group.UUID,
 			Name:  group.Name,
-			Count: groupCountMap[group.UUID],
+			Count: group.Count,
 		})
 	}
-	groups = append(groups, &dto.PluginGroup{
-		UUID:  service.PluginGroupOther,
-		Name:  "其它",
-		Count: len(pluginItems) - hasGroupPluginsCount,
-	})
 
 	data := common.Map[string, interface{}]{}
 	data["plugins"] = plugins
@@ -116,7 +104,7 @@ func (p *modulePluginController) getPluginInfo(ginCtx *gin.Context) {
 }
 
 func (p *modulePluginController) getGroupsEnum(ginCtx *gin.Context) {
-	pluginGroups, err := p.modulePluginService.GetPluginGroups()
+	pluginGroups, err := p.modulePluginService.GetPluginGroups(ginCtx)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Get plugin groups enum fail. err:%s", err.Error()))
 		return
@@ -129,10 +117,7 @@ func (p *modulePluginController) getGroupsEnum(ginCtx *gin.Context) {
 			Name: group.Name,
 		})
 	}
-	groups = append(groups, &dto.PluginGroup{
-		UUID: service.PluginGroupOther,
-		Name: "其它",
-	})
+
 	data := common.Map[string, interface{}]{}
 	data["groups"] = groups
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
