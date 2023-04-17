@@ -1,7 +1,7 @@
 package service
 
 const (
-	pluginGroupOther = "other"
+	PluginGroupOther = "other"
 
 	// statusPluginDisable 插件停用枚举值
 	statusPluginDisable = 1

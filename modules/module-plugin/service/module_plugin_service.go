@@ -51,7 +51,7 @@ func (m *modulePluginService) GetPlugins(ctx context.Context, groupID, searchNam
 	var pluginEntries []*entry.ModulePlugin
 	var err error
 	//判断groupID是不是其它分组
-	if groupID == pluginGroupOther {
+	if groupID == PluginGroupOther {
 		groupList := initialize.GetModulePluginGroups()
 		groups := make([]string, 0, len(groupList))
 		for _, group := range groupList {
@@ -145,10 +145,6 @@ func (m *modulePluginService) GetPluginGroups() ([]*model.PluginGroup, error) {
 			Name: item.Name,
 		})
 	}
-	groups = append(groups, &model.PluginGroup{
-		UUID: pluginGroupOther,
-		Name: "其它",
-	})
 	return groups, nil
 }
 
