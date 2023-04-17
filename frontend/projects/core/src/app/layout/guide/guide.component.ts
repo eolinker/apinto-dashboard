@@ -48,7 +48,6 @@ export class GuideComponent implements OnInit {
   }
 
   goToStep (step:StepItem) {
-    console.log(step)
     if (step.status === 'done') {
       this.router.navigate([step.doneUrl])
     } else {

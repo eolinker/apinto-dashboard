@@ -11,6 +11,7 @@ export type PluginItem = {
 export type PluginGroupItem = {
     uuid:string
     name:string
+    count:number
 }
 
 export type PluginMessage = {
