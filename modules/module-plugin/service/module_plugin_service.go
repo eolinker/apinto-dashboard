@@ -51,7 +51,7 @@ func (m *modulePluginService) GetPlugins(ctx context.Context, groupID, searchNam
 	var pluginEntries []*entry.ModulePlugin
 	var err error
 	//判断groupID是不是其它分组
-	if groupID == PluginGroupOther {
+	if groupID == pluginGroupOther {
 		groupList := initialize.GetModulePluginGroups()
 		groups := make([]string, 0, len(groupList))
 		for _, group := range groupList {
@@ -136,15 +136,37 @@ func (m *modulePluginService) GetPluginInfo(ctx context.Context, pluginUUID stri
 	return info, nil
 }
 
-func (m *modulePluginService) GetPluginGroups() ([]*model.PluginGroup, error) {
+func (m *modulePluginService) GetPluginGroups(ctx context.Context) ([]*model.PluginGroup, error) {
+	pluginEntries, err := m.pluginStore.GetPluginList(ctx, "", "")
+	if err != nil {
+		return nil, err
+	}
+
+	groupCountMap := make(map[string]int, 7) //记录分组名对应的插件数
+	hasGroupPluginsCount := 0                //记录有具体分组名的插件数量
+	total := 0
+	for _, item := range pluginEntries {
+		if item.Type != pluginTypeFrame {
+			groupCountMap[item.Group]++
+			total++
+		}
+	}
+
 	list := initialize.GetModulePluginGroups()
 	groups := make([]*model.PluginGroup, 0, len(list)+1)
 	for _, item := range list {
+		hasGroupPluginsCount = hasGroupPluginsCount + groupCountMap[item.ID]
 		groups = append(groups, &model.PluginGroup{
-			UUID: item.ID,
-			Name: item.Name,
+			UUID:  item.ID,
+			Name:  item.Name,
+			Count: groupCountMap[item.ID],
 		})
 	}
+	groups = append(groups, &model.PluginGroup{
+		UUID:  pluginGroupOther,
+		Name:  "其它",
+		Count: total - hasGroupPluginsCount,
+	})
 	return groups, nil
 }
 

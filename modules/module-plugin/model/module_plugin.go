@@ -11,8 +11,9 @@ type ModulePluginItem struct {
 }
 
 type PluginGroup struct {
-	UUID string
-	Name string
+	UUID  string
+	Name  string
+	Count int
 }
 
 type ModulePluginInfo struct {
