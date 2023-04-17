@@ -15,6 +15,9 @@ export class EoNgPluginService {
   groupUuid: string = '' // 供右侧list页面用
   queryName:string = ''
   showAll:boolean = true
+  radioValue:string|boolean = ''
+  pluginList:(PluginItem & CardItem)[] = []
+  totalNum:number = 0
   constructor (private api:ApiService,
     private baseInfo:BaseInfoService) { }
 
@@ -34,15 +37,17 @@ export class EoNgPluginService {
     return this.flashFlag.asObservable()
   }
 
-  radioValue:string|boolean = ''
-  pluginList:(PluginItem & CardItem)[] = []
-
   // 获取分组和插件列表
   getPluginList () {
     this.groupUuid = this.baseInfo.allParamsInfo.pluginGroupId
     this.api.get('system/plugin/installed', { group: this.groupUuid || '', search: this.queryName || '' }).subscribe((resp:{code:number, data:{plugins:PluginItem[], groups:PluginGroupItem[]}, msg:string}) => {
       if (resp.code === 0) {
         this.nodesList = this.nodesTransfer(resp.data.groups)
+        this.totalNum = 0
+        for (const node of this.nodesList) {
+          // eslint-disable-next-line dot-notation
+          this.totalNum += node['count'] || 0
+        }
         this.pluginList = resp.data.plugins.map((plugin:PluginItem) => {
           const newPlugin:PluginItem & CardItem = { ...plugin, title: plugin.cname, desc: plugin.resume, iconAddr: plugin.icon } as PluginItem & CardItem
           return newPlugin
@@ -57,7 +62,7 @@ export class EoNgPluginService {
     const res:NzTreeNodeOptions[] = []
     for (const index in data) {
       data[index].key = data[index].uuid
-      data[index].title = data[index].name
+      data[index].title = `${data[index].name}（${data[index].count || 0}）`
       if (this.groupUuid && data[index].uuid === this.groupUuid) {
         data[index].selected = true
         this.showAll = false

@@ -71,7 +71,6 @@ export class BasicLayoutComponent implements OnInit {
         this.guideMenu,
         ...this.navigationService.getCurrentMenuList()
       ]
-      console.log(this.sideMenuOptions)
       for (const menu of this.sideMenuOptions) {
         menu.open = this.openMap[menu['titleString']! as string]
       }
