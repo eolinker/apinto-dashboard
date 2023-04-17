@@ -276,7 +276,6 @@ export class PluginMessageComponent implements OnInit {
               params.queryList.length ||
               params.initializeList.length
             ) {
-              console.log(params)
               this.modalService.create({
                 nzTitle: '启用',
                 nzWidth: MODAL_NORMAL_SIZE,
