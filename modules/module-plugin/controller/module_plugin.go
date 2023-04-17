@@ -8,6 +8,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/dto"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/model"
+	"github.com/eolinker/apinto-dashboard/modules/module-plugin/service"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
 	"github.com/gin-gonic/gin"
@@ -53,7 +54,11 @@ func (p *modulePluginController) plugins(ginCtx *gin.Context) {
 	plugins := make([]*dto.PluginListItem, 0, len(pluginItems))
 	groups := make([]*dto.PluginGroup, 0, len(pluginGroups))
 
+	groupCountMap := make(map[string]int, 7) //记录分组名对应的插件数
+	hasGroupPluginsCount := 0                //记录有具体分组名的插件数量
 	for _, item := range pluginItems {
+		groupCountMap[item.Group]++
+
 		plugins = append(plugins, &dto.PluginListItem{
 			Id:      item.UUID,
 			Name:    item.Name,
@@ -66,11 +71,19 @@ func (p *modulePluginController) plugins(ginCtx *gin.Context) {
 	}
 
 	for _, group := range pluginGroups {
+		hasGroupPluginsCount = hasGroupPluginsCount + groupCountMap[group.UUID]
+
 		groups = append(groups, &dto.PluginGroup{
-			UUID: group.UUID,
-			Name: group.Name,
+			UUID:  group.UUID,
+			Name:  group.Name,
+			Count: groupCountMap[group.UUID],
 		})
 	}
+	groups = append(groups, &dto.PluginGroup{
+		UUID:  service.PluginGroupOther,
+		Name:  "其它",
+		Count: len(pluginItems) - hasGroupPluginsCount,
+	})
 
 	data := common.Map[string, interface{}]{}
 	data["plugins"] = plugins
@@ -111,15 +124,15 @@ func (p *modulePluginController) getGroupsEnum(ginCtx *gin.Context) {
 
 	groups := make([]*dto.PluginGroup, 0, len(pluginGroups))
 	for _, group := range pluginGroups {
-		//排除内置插件目录
-		//if group.UUID == "inner_plugin" {
-		//	continue
-		//}
 		groups = append(groups, &dto.PluginGroup{
 			UUID: group.UUID,
 			Name: group.Name,
 		})
 	}
+	groups = append(groups, &dto.PluginGroup{
+		UUID: service.PluginGroupOther,
+		Name: "其它",
+	})
 	data := common.Map[string, interface{}]{}
 	data["groups"] = groups
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
