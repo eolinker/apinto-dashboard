@@ -25,15 +25,6 @@ import (
 	"time"
 )
 
-var (
-	ErrModulePluginNotFound    = errors.New("插件不存在")
-	ErrModulePluginInstalled   = errors.New("插件已安装")
-	ErrModulePluginHasDisabled = errors.New("插件已停用")
-	ErrModulePluginHasEnabled  = errors.New("插件已启用")
-)
-
-const PluginGroupOther = "other"
-
 type modulePluginService struct {
 	pluginStore        store.IModulePluginStore
 	pluginEnableStore  store.IModulePluginEnableStore
@@ -60,7 +51,7 @@ func (m *modulePluginService) GetPlugins(ctx context.Context, groupID, searchNam
 	var pluginEntries []*entry.ModulePlugin
 	var err error
 	//判断groupID是不是其它分组
-	if groupID == PluginGroupOther {
+	if groupID == pluginGroupOther {
 		groupList := initialize.GetModulePluginGroups()
 		groups := make([]string, 0, len(groupList))
 		for _, group := range groupList {
@@ -77,7 +68,7 @@ func (m *modulePluginService) GetPlugins(ctx context.Context, groupID, searchNam
 	plugins := make([]*model.ModulePluginItem, 0, len(pluginEntries))
 	for _, pluginEntry := range pluginEntries {
 		//框架插件不返回
-		if pluginEntry.Type == 0 {
+		if pluginEntry.Type == pluginTypeFrame {
 			continue
 		}
 		plugin := &model.ModulePluginItem{
@@ -86,7 +77,7 @@ func (m *modulePluginService) GetPlugins(ctx context.Context, groupID, searchNam
 			IsInner:      true,
 		}
 		//若为非内置
-		if pluginEntry.Type == 3 {
+		if !IsInnerPlugin(pluginEntry.Type) {
 			plugin.IsInner = false
 		}
 		enableEntry, err := m.pluginEnableStore.Get(ctx, pluginEntry.Id)
@@ -100,7 +91,7 @@ func (m *modulePluginService) GetPlugins(ctx context.Context, groupID, searchNam
 		}
 
 		//若插件已启用
-		if enableEntry.IsEnable == 2 {
+		if enableEntry.IsEnable == statusPluginEnable {
 			plugin.IsEnable = true
 		}
 		plugins = append(plugins, plugin)
@@ -128,18 +119,18 @@ func (m *modulePluginService) GetPluginInfo(ctx context.Context, pluginUUID stri
 		}
 		return nil, err
 	}
-	//框架和核心插件不可以停用
-	if plugin.Type == 0 || plugin.Type == 1 {
+	//根据类型判断是否能停用
+	if IsPluginCanDisable(plugin.Type) {
 		info.CanDisable = false
 	}
 
 	//若为非内置插件，且为停用状态,才可卸载
-	if enableEntry.IsEnable == 1 && plugin.Type == 3 {
+	if enableEntry.IsEnable == statusPluginDisable && !IsInnerPlugin(plugin.Type) {
 		info.Uninstall = true
 	}
 
 	//若插件已启用
-	if enableEntry.IsEnable == 2 {
+	if enableEntry.IsEnable == statusPluginEnable {
 		info.Enable = true
 	}
 	return info, nil
@@ -155,7 +146,7 @@ func (m *modulePluginService) GetPluginGroups() ([]*model.PluginGroup, error) {
 		})
 	}
 	groups = append(groups, &model.PluginGroup{
-		UUID: PluginGroupOther,
+		UUID: pluginGroupOther,
 		Name: "其它",
 	})
 	return groups, nil
@@ -211,7 +202,7 @@ func (m *modulePluginService) GetPluginEnableRender(ctx context.Context, pluginU
 	}
 
 	switch pluginInfo.Driver {
-	case "remote":
+	case pluginDriverRemote:
 		remoteDefine := new(model.RemoteDefine)
 		_ = json.Unmarshal(pluginInfo.Details, remoteDefine)
 		if !remoteDefine.Internet {
@@ -219,14 +210,14 @@ func (m *modulePluginService) GetPluginEnableRender(ctx context.Context, pluginU
 		}
 		renderCfg.Querys = remoteDefine.Querys
 		renderCfg.Initialize = remoteDefine.Initialize
-	case "local":
+	case pluginDriverLocal:
 		localDefine := new(model.LocalDefine)
 		_ = json.Unmarshal(pluginInfo.Details, localDefine)
 		renderCfg.Headers = localDefine.Headers
 		renderCfg.Querys = localDefine.Querys
 		renderCfg.Initialize = localDefine.Initialize
 		//renderCfg.Invisible = localDefine.Invisible
-	case "profession":
+	case pluginDriverProfession:
 	}
 
 	return renderCfg, nil
@@ -257,11 +248,11 @@ func (m *modulePluginService) InstallPlugin(ctx context.Context, userID int, plu
 		t := time.Now()
 		var details []byte
 		switch pluginYml.Driver {
-		case "remote":
+		case pluginDriverRemote:
 			details, _ = json.Marshal(pluginYml.Remote)
-		case "local":
+		case pluginDriverLocal:
 			details, _ = json.Marshal(pluginYml.Local)
-		case "profession":
+		case pluginDriverProfession:
 			details, _ = json.Marshal(pluginYml.Profession)
 		}
 
@@ -274,7 +265,7 @@ func (m *modulePluginService) InstallPlugin(ctx context.Context, userID int, plu
 			CName:      pluginYml.CName,
 			Resume:     pluginYml.Resume,
 			ICon:       pluginYml.ICon,
-			Type:       3,
+			Type:       pluginTypeNotInner,
 			Front:      "", //TODO
 			Driver:     pluginYml.Driver,
 			Details:    details,
@@ -289,7 +280,7 @@ func (m *modulePluginService) InstallPlugin(ctx context.Context, userID int, plu
 			Id:         pluginInfo.Id,
 			Name:       pluginYml.Name,
 			Navigation: pluginYml.Navigation,
-			IsEnable:   1,
+			IsEnable:   statusPluginDisable,
 			Config:     []byte{},
 			Operator:   userID,
 			UpdateTime: t,
@@ -326,7 +317,7 @@ func (m *modulePluginService) UninstallPlugin(ctx context.Context, userID int, p
 		return err
 	}
 
-	if pluginInfo.Type == 0 || pluginInfo.Type == 1 || pluginInfo.Type == 2 {
+	if IsInnerPlugin(pluginInfo.Type) {
 		return errors.New("内置插件不可以卸载")
 	}
 
@@ -344,8 +335,8 @@ func (m *modulePluginService) UninstallPlugin(ctx context.Context, userID int, p
 		}
 		return err
 	}
-	//校验插件已经禁用
-	if enableInfo.IsEnable == 2 {
+	//校验插件启用状态
+	if enableInfo.IsEnable == statusPluginEnable {
 		return errors.New("插件启用中，不可以卸载")
 	}
 
@@ -403,7 +394,7 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return err
 	}
-	if enable != nil && enable.IsEnable == 2 {
+	if enable != nil && enable.IsEnable == statusPluginEnable {
 		return ErrModulePluginHasEnabled
 	}
 
@@ -425,7 +416,7 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 	var checkConfig *model.PluginEnableCfg
 	var define interface{}
 	//若为内置插件
-	if pluginInfo.Type == 0 || pluginInfo.Type == 1 {
+	if IsInnerPlugin(pluginInfo.Type) {
 		checkConfig = nil
 		config = []byte{}
 		define = nil
@@ -462,15 +453,15 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 		checkConfig = enableCfg
 
 		switch pluginInfo.Driver {
-		case "remote":
+		case pluginDriverRemote:
 			remote := new(model.RemoteDefine)
 			_ = json.Unmarshal(pluginInfo.Details, remote)
 			define = remote
-		case "local":
+		case pluginDriverLocal:
 			local := new(model.LocalDefine)
 			_ = json.Unmarshal(pluginInfo.Details, local)
 			define = local
-		case "profession":
+		case pluginDriverProfession:
 			profession := new(model.ProfessionDefine)
 			_ = json.Unmarshal(pluginInfo.Details, profession)
 			define = profession
@@ -492,7 +483,7 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 			Id:         pluginInfo.Id,
 			Name:       enableInfo.Name,
 			Navigation: pluginInfo.Navigation,
-			IsEnable:   2,
+			IsEnable:   statusPluginEnable,
 			Config:     config,
 			Operator:   userID,
 			UpdateTime: time.Now(),
@@ -518,7 +509,7 @@ func (m *modulePluginService) DisablePlugin(ctx context.Context, userID int, plu
 		return err
 	}
 
-	if pluginInfo.Type == 0 || pluginInfo.Type == 1 {
+	if IsPluginCanDisable(pluginInfo.Type) {
 		return errors.New("核心模块不可以停用")
 	}
 
@@ -542,7 +533,7 @@ func (m *modulePluginService) DisablePlugin(ctx context.Context, userID int, plu
 		EnableOperate: 2,
 	})
 	err = m.pluginEnableStore.Transaction(ctx, func(txCtx context.Context) error {
-		enableInfo.IsEnable = 1
+		enableInfo.IsEnable = statusPluginDisable
 		enableInfo.Operator = userID
 		enableInfo.UpdateTime = time.Now()
 		_, err = m.pluginEnableStore.Update(txCtx, enableInfo)
@@ -583,9 +574,9 @@ func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml 
 		if err := m.pluginStore.Save(txCtx, pluginInfo); err != nil {
 			return err
 		}
-		isEnable := 1
+		isEnable := statusPluginDisable
 		if pluginYml.Auto {
-			isEnable = 2
+			isEnable = statusPluginEnable
 		}
 		enable := &entry.ModulePluginEnable{
 			Id:         pluginInfo.Id,
@@ -684,7 +675,7 @@ func (m *modulePluginService) CheckPluginISDeCompress(ctx context.Context, plugi
 		return err
 	}
 	//若插件已安装且为非内置插件，检查本地缓存是否存在
-	if pluginInfo.Type == 3 {
+	if !IsInnerPlugin(pluginInfo.Type) {
 		dirPath := fmt.Sprintf("%s/%s", pluginDir, pluginID)
 		// 检查目录是否存在, 若不存在，则从数据库读取数据并解压
 		if _, err := os.Stat(dirPath); os.IsNotExist(err) {

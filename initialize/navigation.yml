@@ -28,7 +28,7 @@
 - id: "navigation.module_plugin"
   name: "plugin-market"
   cname: "插件市场"
-  icon: "puzzle"
+  icon: "shop"
   quick: true
 - id: "navigation.system"
   name: "system"
