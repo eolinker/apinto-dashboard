@@ -3,29 +3,18 @@ package audit_controller
 import (
 	"context"
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/controller"
+	"github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 
-	"github.com/eolinker/apinto-dashboard/enum"
-	audit_service "github.com/eolinker/apinto-dashboard/modules/audit"
-	"github.com/eolinker/eosc/common/bean"
+	"github.com/eolinker/apinto-dashboard/modules/audit"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
 )
 
 type auditLogController struct {
-	auditLogService audit_service.IAuditLogService
-}
-
-func RegisterAuditLogRouter(router gin.IRoutes) {
-	a := &auditLogController{}
-	bean.Autowired(&a.auditLogService)
-
-	router.GET("/audit-logs", controller.GenAccessHandler(access.AuditLogView), a.getLogs)
-	router.GET("/audit-log", controller.GenAccessHandler(access.AuditLogView), a.getDetail)
-	router.GET("/audit-log/kinds", a.getTargets)
+	auditLogService audit.IAuditLogService
 }
 
 func (a *auditLogController) getLogs(ginCtx *gin.Context) {
@@ -47,18 +36,18 @@ func (a *auditLogController) getLogs(ginCtx *gin.Context) {
 		pageSize = 20
 	}
 
-	//判断操作目标合不合法
-	if kind != "" && !enum.IsLogKindExist(kind) {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("kind %s is illegal. ", kind)))
-		return
-	}
+	////判断操作目标合不合法
+	//if kind != "" && !audit.IsLogKindExist(kind) {
+	//	controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("kind %s is illegal. ", kind))
+	//	return
+	//}
 
 	operate := 0
 	if operateType != "" {
 		//若operteType或非法,则会为0
-		operate = int(enum.GetLogOperateIndex(operateType))
+		operate = int(audit_model.GetLogOperateIndex(operateType))
 		if operate == 0 {
-			ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("operate_type %s is illegal. ", operateType)))
+			controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("operate_type %s is illegal. ", operateType))
 			return
 		}
 	}
@@ -68,21 +57,21 @@ func (a *auditLogController) getLogs(ginCtx *gin.Context) {
 	if startStr != "" {
 		start, err = strconv.ParseInt(startStr, 10, 64)
 		if err != nil {
-			ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("start %s is illegal. ", startStr)))
+			controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("start %s is illegal. ", startStr))
 			return
 		}
 	}
 	if endStr != "" {
 		end, err = strconv.ParseInt(endStr, 10, 64)
 		if err != nil {
-			ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("end %s is illegal. ", endStr)))
+			controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("end %s is illegal. ", endStr))
 			return
 		}
 	}
 
 	logList, total, err := a.auditLogService.GetLogsList(context.Background(), namespaceId, operate, kind, keyword, start, end, pageNum, pageSize)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("get audit-log fail. err: %s. ", err)))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("get audit-log fail. err: %s. ", err))
 		return
 	}
 
@@ -96,13 +85,13 @@ func (a *auditLogController) getDetail(ginCtx *gin.Context) {
 	logIDStr := ginCtx.Query("log_id")
 	logID, err := strconv.Atoi(logIDStr)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("log_id %s is illegal. err: %s", logIDStr, err)))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("log_id %s is illegal. err: %s", logIDStr, err))
 		return
 	}
 
 	details, err := a.auditLogService.GetLogDetail(context.Background(), logID)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("get log detail fail. err: %s. ", err)))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("get log detail fail. err: %s. ", err))
 		return
 	}
 	data := make(map[string]interface{})
@@ -112,6 +101,6 @@ func (a *auditLogController) getDetail(ginCtx *gin.Context) {
 
 func (a *auditLogController) getTargets(ginCtx *gin.Context) {
 	data := make(map[string]interface{})
-	data["items"] = enum.GetLogKinds()
+	//data["items"] = enum.GetLogKinds()
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }

@@ -1,3 +1,11 @@
+:host ::ng-deep {
+  height: 100%;
+  width: 100%;
+  display: block;
+  background-color: #f5f7fa;
+  overflow: hidden;
+}
+
 eo-ng-apinto:host {
   display: inline-block;
   width: 100vw;
@@ -88,7 +96,7 @@ nz-divider {
 .ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-item-selected,
 .ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-submenu-selected,
 .ant-menu-horizontal > .ant-menu-item-selected a {
-  color: #22549d !important;
+  color: #7371fc !important;
 }
 
 .ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-item:hover::after,
@@ -99,7 +107,7 @@ nz-divider {
 .ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-submenu-open::after,
 .ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-item-selected::after,
 .ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-submenu-selected::after {
-  border-bottom-color: #22549d;
+  border-bottom-color: #7371fc;
 }
 
 .ant-menu-horizontal {
@@ -107,7 +115,7 @@ nz-divider {
 }
 
 ::selection {
-  background: #22549d;
+  background: #7371fc;
 }
 
 a {

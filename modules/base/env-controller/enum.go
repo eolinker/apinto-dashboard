@@ -11,13 +11,11 @@ import (
 type enumController struct {
 }
 
-func RegisterEnumRouter(router gin.IRoutes) {
-
-	c := &enumController{}
-	router.GET("/enum/envs", c.getEnv)
+func NewEnumController() *enumController {
+	return &enumController{}
 }
 
-func (e *enumController) getEnv(context *gin.Context) {
+func (e *enumController) GetEnv(context *gin.Context) {
 	//enums, err := e.enumService.GetByType(entry.EnvType)
 	//if err != nil {
 	//	context.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))

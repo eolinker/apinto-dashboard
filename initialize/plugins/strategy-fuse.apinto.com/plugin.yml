@@ -1,0 +1,12 @@
+id: "strategy-fuse.apinto.com"
+name: "strategy-fuse"
+cname: "熔断"
+resume: ""
+version: "v1.0.0"
+icon: "inner-plugin.png"
+driver: "strategy-fuse.apinto.com"
+type: 2 #0为框架模块 1为核心模块 2为内置模块 3为非内置
+auto: true
+front: "serv-governance/fuse"
+navigation: "navigation.strategy"
+group_id: "strategy"
