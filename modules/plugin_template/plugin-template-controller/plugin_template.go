@@ -2,7 +2,6 @@ package plugin_template_controller
 
 import (
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/enum"
@@ -21,22 +20,10 @@ type pluginTemplateController struct {
 	pluginTemplateService plugin_template.IPluginTemplateService
 }
 
-func RegisterPluginTemplateRouter(router gin.IRoutes) {
+func newPluginTemplateController() *pluginTemplateController {
 	p := &pluginTemplateController{}
 	bean.Autowired(&p.pluginTemplateService)
-
-	router.GET("/plugin/templates", controller.GenAccessHandler(access.PluginTemplateView, access.PluginTemplateEdit), p.templates)
-	router.GET("/plugin/template/enum", p.templateEnum)
-
-	router.POST("/plugin/template", controller.GenAccessHandler(access.PluginTemplateEdit), controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindPluginTemplate), p.createTemplate)
-	router.PUT("/plugin/template", controller.GenAccessHandler(access.PluginTemplateEdit), controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindPluginTemplate), p.updateTemplate)
-	router.DELETE("/plugin/template", controller.GenAccessHandler(access.PluginTemplateEdit), controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindPluginTemplate), p.delTemplate)
-
-	router.GET("/plugin/template", controller.GenAccessHandler(access.PluginTemplateView, access.PluginTemplateEdit), p.template)
-
-	router.GET("/plugin/template/onlines", controller.GenAccessHandler(access.PluginTemplateView, access.PluginTemplateEdit), p.onlines)
-	router.PUT("/plugin/template/online", controller.GenAccessHandler(access.PluginTemplateEdit), controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindPluginTemplate), p.online)
-	router.PUT("/plugin/template/offline", controller.GenAccessHandler(access.PluginTemplateEdit), controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindPluginTemplate), p.offline)
+	return p
 }
 
 // 插件模板列表
@@ -44,7 +31,7 @@ func (p *pluginTemplateController) templates(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	templates, err := p.pluginTemplateService.GetList(ginCtx, namespaceId)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -80,7 +67,7 @@ func (p *pluginTemplateController) templateEnum(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	templates, err := p.pluginTemplateService.GetUsableList(ginCtx, namespaceId)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -106,23 +93,23 @@ func (p *pluginTemplateController) createTemplate(ginCtx *gin.Context) {
 
 	input := new(plugin_template_dto.PluginTemplateInput)
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	if input.Name == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("插件模板名称为必填项"))
+		controller.ErrorJson(ginCtx, http.StatusOK, "插件模板名称为必填项")
 		return
 	}
 
 	if len(input.Plugins) == 0 {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("插件配置为必填项"))
+		controller.ErrorJson(ginCtx, http.StatusOK, "插件配置为必填项")
 		return
 	}
 
 	//校验名称是否合法
 	if err := common.IsMatchString(common.EnglishOrNumber_, input.Name); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -146,7 +133,7 @@ func (p *pluginTemplateController) createTemplate(ginCtx *gin.Context) {
 	}
 
 	if err := p.pluginTemplateService.Create(ginCtx, namespaceId, userId, detail); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -160,18 +147,18 @@ func (p *pluginTemplateController) updateTemplate(ginCtx *gin.Context) {
 
 	input := new(plugin_template_dto.PluginTemplateInput)
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	if len(input.Plugins) == 0 {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("插件配置为必填项"))
+		controller.ErrorJson(ginCtx, http.StatusOK, "插件配置为必填项")
 		return
 	}
 
 	//校验名称是否合法
 	if err := common.IsMatchString(common.EnglishOrNumber_, input.Name); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -195,7 +182,7 @@ func (p *pluginTemplateController) updateTemplate(ginCtx *gin.Context) {
 	}
 
 	if err := p.pluginTemplateService.Update(ginCtx, namespaceId, userId, detail); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -210,7 +197,7 @@ func (p *pluginTemplateController) delTemplate(ginCtx *gin.Context) {
 	uuid := ginCtx.Query("uuid")
 
 	if err := p.pluginTemplateService.Delete(ginCtx, namespaceId, userId, uuid); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -225,7 +212,7 @@ func (p *pluginTemplateController) template(ginCtx *gin.Context) {
 	uuid := ginCtx.Query("uuid")
 	pluginTemplateDetail, err := p.pluginTemplateService.GetByUUID(ginCtx, namespaceId, uuid)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -256,7 +243,7 @@ func (p *pluginTemplateController) onlines(ginCtx *gin.Context) {
 	uuid := ginCtx.Query("uuid")
 	list, err := p.pluginTemplateService.OnlineList(ginCtx, namespaceId, uuid)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -287,18 +274,18 @@ func (p *pluginTemplateController) online(ginCtx *gin.Context) {
 	userId := controller.GetUserId(ginCtx)
 	uuid := ginCtx.Query("uuid")
 	if uuid == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("uuid can't be nil")))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("uuid can't be nil"))
 		return
 	}
 	input := &online_dto.UpdateOnlineStatusInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	router, err := p.pluginTemplateService.Online(ginCtx, namespaceId, userId, uuid, input.ClusterName)
 	if err != nil && router == nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	} else if err == nil {
 		ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
@@ -326,17 +313,17 @@ func (p *pluginTemplateController) offline(ginCtx *gin.Context) {
 	userId := controller.GetUserId(ginCtx)
 	uuid := ginCtx.Query("uuid")
 	if uuid == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("uuid can't be nil")))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("uuid can't be nil"))
 		return
 	}
 	input := &online_dto.UpdateOnlineStatusInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	if err := p.pluginTemplateService.Offline(ginCtx, namespaceId, userId, uuid, input.ClusterName); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))

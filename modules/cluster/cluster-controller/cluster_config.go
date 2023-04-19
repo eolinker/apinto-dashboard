@@ -2,7 +2,6 @@ package cluster_controller
 
 import (
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/cluster"
@@ -15,14 +14,19 @@ type clusterConfigController struct {
 	configService cluster.IClusterConfigService
 }
 
-func RegisterClusterConfigRouter(router gin.IRoutes) {
+func newClusterConfigController() *clusterConfigController {
 	c := &clusterConfigController{}
 	bean.Autowired(&c.configService)
+	return c
+}
 
-	router.GET("/cluster/:cluster_name/configuration/:type", controller.GenAccessHandler(access.ClusterView, access.ClusterEdit), c.get)
-	router.PUT("/cluster/:cluster_name/configuration/:type", controller.GenAccessHandler(access.ClusterEdit), c.edit)
-	router.PUT("/cluster/:cluster_name/configuration/:type/enable", controller.GenAccessHandler(access.ClusterEdit), c.enable)
-	router.PUT("/cluster/:cluster_name/configuration/:type/disable", controller.GenAccessHandler(access.ClusterEdit), c.disable)
+func RegisterClusterConfigRouter(router gin.IRoutes) {
+	c := newClusterConfigController()
+
+	router.GET("/cluster/:cluster_name/configuration/:type", c.get)
+	router.PUT("/cluster/:cluster_name/configuration/:type", c.edit)
+	router.PUT("/cluster/:cluster_name/configuration/:type/enable", c.enable)
+	router.PUT("/cluster/:cluster_name/configuration/:type/disable", c.disable)
 }
 
 func (c *clusterConfigController) get(ginCtx *gin.Context) {
@@ -31,13 +35,13 @@ func (c *clusterConfigController) get(ginCtx *gin.Context) {
 	configType := ginCtx.Param("type")
 
 	if !c.configService.IsConfigTypeExist(configType) {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("get %s fail. err: %s doesn't exist. ", configType, configType)))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("get %s fail. err: %s doesn't exist. ", configType, configType))
 		return
 	}
 
 	info, err := c.configService.Get(ginCtx, namespaceId, clusterName, configType)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("get %s fail. err: %s ", configType, err)))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("get %s fail. err: %s ", configType, err))
 		return
 	}
 
@@ -56,24 +60,24 @@ func (c *clusterConfigController) edit(ginCtx *gin.Context) {
 	operator := controller.GetUserId(ginCtx)
 
 	if !c.configService.IsConfigTypeExist(configType) {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("edit %s fail. err: %s doesn't exist. ", configType, configType)))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("edit %s fail. err: %s doesn't exist. ", configType, configType))
 		return
 	}
 
 	body, err := ginCtx.GetRawData()
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("edit %s fail. err: %s ", configType, err)))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("edit %s fail. err: %s ", configType, err))
 		return
 	}
 
 	if err = c.configService.CheckInput(configType, body); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("edit %s fail. err: %s ", configType, err)))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("edit %s fail. err: %s ", configType, err))
 		return
 	}
 
 	err = c.configService.Edit(ginCtx, namespaceId, operator, clusterName, configType, body)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("edit %s fail. err: %s ", configType, err)))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("edit %s fail. err: %s ", configType, err))
 		return
 	}
 
@@ -87,12 +91,12 @@ func (c *clusterConfigController) enable(ginCtx *gin.Context) {
 	operator := controller.GetUserId(ginCtx)
 
 	if !c.configService.IsConfigTypeExist(configType) {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("enable %s fail. err: %s doesn't exist. ", configType, configType)))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("enable %s fail. err: %s doesn't exist. ", configType, configType))
 		return
 	}
 
 	if err := c.configService.Enable(ginCtx, namespaceId, operator, clusterName, configType); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("enable %s fail. err: %s  ", configType, err)))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("enable %s fail. err: %s  ", configType, err))
 		return
 	}
 	ginCtx.JSON(http.StatusOK, controller.Result{
@@ -107,12 +111,12 @@ func (c *clusterConfigController) disable(ginCtx *gin.Context) {
 	operator := controller.GetUserId(ginCtx)
 
 	if !c.configService.IsConfigTypeExist(configType) {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("disable %s fail. err: %s doesn't exist. ", configType, configType)))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("disable %s fail. err: %s doesn't exist. ", configType, configType))
 		return
 	}
 
 	if err := c.configService.Disable(ginCtx, namespaceId, operator, clusterName, configType); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("disable %s fail. err: %s  ", configType, err)))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("disable %s fail. err: %s  ", configType, err))
 		return
 	}
 	ginCtx.JSON(http.StatusOK, controller.Result{

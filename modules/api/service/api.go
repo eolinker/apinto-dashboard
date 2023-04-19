@@ -6,7 +6,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"reflect"
+	"sort"
+	"strings"
+	"time"
+
 	"github.com/eolinker/apinto-dashboard/common"
+	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/enum"
 	apiservice "github.com/eolinker/apinto-dashboard/modules/api"
 	"github.com/eolinker/apinto-dashboard/modules/api/api-dto"
@@ -38,10 +44,6 @@ import (
 	"golang.org/x/exp/slices"
 	"golang.org/x/sync/errgroup"
 	"gorm.io/gorm"
-	"reflect"
-	"sort"
-	"strings"
-	"time"
 )
 
 type apiService struct {
@@ -101,6 +103,16 @@ func (a *apiService) GetAPICountByGroupUUID(ctx context.Context, namespaceID int
 		return 0
 	}
 	return count
+}
+
+func (a *apiService) APICount(ctx context.Context, namespaceId int) (int64, error) {
+	return a.apiStore.APICount(ctx, map[string]interface{}{
+		"namespace": namespaceId,
+	})
+}
+
+func (a *apiService) APIOnlineCount(ctx context.Context, namespaceId int) (int64, error) {
+	return a.apiRuntime.OnlineCountByKind(ctx)
 }
 
 func (a *apiService) GetGroups(ctx context.Context, namespaceId int, parentUuid, queryName string) (*group_model.CommonGroupRoot, []*group_model.CommonGroupApi, error) {
@@ -477,7 +489,7 @@ func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator in
 	input.UUID = strings.ToLower(input.UUID)
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: input.UUID,
 		Name: input.ApiName,
 	})
@@ -652,7 +664,7 @@ func (a *apiService) UpdateAPI(ctx context.Context, namespaceID int, operator in
 	apiInfo.Operator = operator
 	apiInfo.UpdateTime = t
 
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: input.UUID,
 		Name: input.ApiName,
 	})
@@ -764,7 +776,7 @@ func (a *apiService) DeleteAPI(ctx context.Context, namespaceId, operator int, u
 		Config: version.APIVersionConfig,
 	}
 
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: uuid,
 		Name: apiInfo.Name,
 	})
@@ -1033,7 +1045,7 @@ func (a *apiService) BatchOnline(ctx context.Context, namespaceId int, operator 
 		logCLNameList = append(logCLNameList, cl.Name)
 	}
 
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Name:        strings.Join(logApiNameList, ","),
 		ClusterName: strings.Join(logCLNameList, ","),
 		PublishType: 1,
@@ -1248,7 +1260,7 @@ func (a *apiService) BatchOffline(ctx context.Context, namespaceId int, operator
 		logCLNameList = append(logCLNameList, cl.Name)
 	}
 
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Name:        strings.Join(logApiNameList, ","),
 		ClusterName: strings.Join(logCLNameList, ","),
 		PublishType: 2,
@@ -1596,7 +1608,7 @@ func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, u
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:        uuid,
 		Name:        apiInfo.Name,
 		ClusterId:   clusterInfo.Id,
@@ -1726,7 +1738,7 @@ func (a *apiService) OfflineAPI(ctx context.Context, namespaceId, operator int, 
 	t := time.Now()
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:        uuid,
 		Name:        apiInfo.Name,
 		ClusterId:   clusterInfo.Id,
@@ -1793,7 +1805,7 @@ func (a *apiService) EnableAPI(ctx context.Context, namespaceId, operator int, u
 
 	t := time.Now()
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:          uuid,
 		Name:          apiInfo.Name,
 		ClusterId:     clusterInfo.Id,
@@ -1857,7 +1869,7 @@ func (a *apiService) DisableAPI(ctx context.Context, namespaceId, operator int, 
 	t := time.Now()
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:          uuid,
 		Name:          apiInfo.Name,
 		ClusterId:     clusterInfo.Id,
@@ -2131,7 +2143,7 @@ func (a *apiService) ImportAPI(ctx context.Context, namespaceId, operator int, i
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Name: strings.Join(logAPINames, ","),
 	})
 

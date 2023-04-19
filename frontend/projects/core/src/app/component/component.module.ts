@@ -1,7 +1,7 @@
 /*
- * @Author:
+ * @Author: MengjieYang yangmengjie@eolink.com
  * @Date: 2022-08-09 23:06:58
- * @LastEditors:
+ * @LastEditors: MengjieYang yangmengjie@eolink.com
  * @LastEditTime: 2022-08-23 16:45:46
  * @FilePath: /apinto/src/app/component/component.module.ts
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
@@ -25,7 +25,6 @@ import { EoNgButtonModule } from 'eo-ng-button'
 import { EoNgFeedbackTooltipModule } from 'eo-ng-feedback'
 import { EoNgSwitchModule } from 'eo-ng-switch'
 import { NzTableModule } from 'ng-zorro-antd/table'
-import { EoNgAutoCompleteModule } from 'eo-ng-auto-complete'
 import { EoNgDropdownModule } from 'eo-ng-dropdown'
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox'
 import { NzOutletModule } from 'ng-zorro-antd/core/outlet'
@@ -39,6 +38,9 @@ import { EoNgSearchInputGroupComponent } from './eo-ng-search-input-group/eo-ng-
 import { ApiMethodTagComponent } from './api-method-tag/api-method-tag.component'
 import { CopyAddrListComponent } from './copy-addr-list/copy-addr-list.component'
 import { EoNgCopyModule } from 'eo-ng-copy'
+import { CardListComponent } from './card-list/card-list.component'
+import { NzCardModule } from 'ng-zorro-antd/card'
+import { NzListModule } from 'ng-zorro-antd/list'
 @NgModule({
   declarations: [
     EditableEnvTableComponent,
@@ -47,7 +49,8 @@ import { EoNgCopyModule } from 'eo-ng-copy'
     TableDisabledStatusTdComponent,
     EoNgSearchInputGroupComponent,
     ApiMethodTagComponent,
-    CopyAddrListComponent
+    CopyAddrListComponent,
+    CardListComponent
   ],
   imports: [
     CommonModule,
@@ -72,12 +75,13 @@ import { EoNgCopyModule } from 'eo-ng-copy'
     NzOutletModule,
     EoNgDropdownModule,
     EoNgSelectModule,
-    EoNgAutoCompleteModule,
     NzPopconfirmModule,
     NzDividerModule,
     DirectiveModule,
     EoNgApintoTableModule,
-    EoNgCopyModule
+    EoNgCopyModule,
+    NzCardModule,
+    NzListModule
   ],
   exports: [
     EditableEnvTableComponent,
@@ -86,7 +90,8 @@ import { EoNgCopyModule } from 'eo-ng-copy'
     TableDisabledStatusTdComponent,
     EoNgSearchInputGroupComponent,
     ApiMethodTagComponent,
-    CopyAddrListComponent
+    CopyAddrListComponent,
+    CardListComponent
   ]
 })
 export class ComponentModule { }

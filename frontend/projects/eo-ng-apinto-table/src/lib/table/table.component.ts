@@ -10,8 +10,13 @@ import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
   styles: [
     `
     :host ::ng-deep{
+
       .ant-table-tbody > tr:hover .opacity-0{
         opacity:1 !important;
+      }
+
+      eo-ng-table.cursorPointer tbody tr{
+        cursor:pointer;
       }
     }`
   ]
@@ -32,6 +37,7 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
   scrHeight:any;
   scrWidth:any;
   tableScrollCdk:any
+  cursorPointer:boolean = false
   constructor (ngZone:NgZone, cdr:ChangeDetectorRef, private message: EoNgFeedbackMessageService, private el:ElementRef, private router:Router) {
     super(ngZone, cdr)
   }
@@ -65,6 +71,11 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
     }
     if (change['nzThead']) {
       this.getThead()
+    }
+    if (change['nzTrClick']) {
+      if (this.nzTrClick) {
+        this.cursorPointer = true
+      }
     }
   }
 
@@ -191,18 +202,18 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
 
         const headerHeight = document.getElementsByClassName('list-header')[0]?.getBoundingClientRect().height || 0// list-header高度，通常为表格上方按钮
         const footerHeight = document.getElementsByClassName('list-footer')[0]?.getBoundingClientRect().height || 0 // list-footer高度，通常为表格下方按钮
-        const pagationHeight = this.nzShowPagination ? 48 : 0 // 分页高度
+        const pagationHeight = this.nzShowPagination ? 42 : 0 // 分页高度
 
         const drawerHeaderHeight = document.getElementsByClassName('drawer-list-header')[0]?.getBoundingClientRect().height || 0// list-header高度，通常为表格上方按钮
         const drawerFooterHeight = document.getElementsByClassName('drawer-list-footer')[0]?.getBoundingClientRect().height || 0 // list-footer高度，通常为表格下方按钮
-        const drawerPagationHeight = this.nzShowPagination ? 48 : 0 // 分页高度
+        const drawerPagationHeight = this.nzShowPagination ? 42 : 0 // 分页高度
         const drawerButtonAreaHeight = document.getElementsByClassName('ant-modal-footer')[0]?.getBoundingClientRect().height || 0 // 弹窗底部
 
         const clusterDescHeight = document.getElementsByClassName('cluster-desc-block')[0]?.getBoundingClientRect().height || 0 // 集群环境变量里的集群描述高度
         const monitorTabsHeight = document.getElementsByClassName('monitor-total-content').length > 0 ? 42 : 0 // 监控分区内tabs高度
         const monitorTabsPieHeight = document.getElementsByClassName('eo-ng-monitor-detail-pie').length > 0 ? (document.getElementsByClassName('eo-ng-monitor-detail-pie')[0]?.getBoundingClientRect().height + 32 + 32 + 20 + 10) : 0 // 监控分区内详情页面饼图及tabs高度
         // 表格在弹窗内，需要减去弹窗标题高度53，弹窗顶部100px，弹窗内部上下padding20*2， 表头高度； 否则减去表格顶部间隙12px，底部间隙20px，表头高度
-        scrollY = this.el.nativeElement.classList.contains('drawer-table') ? (this.scrHeight > 660 ? 660 - drawerHeaderHeight - drawerFooterHeight - drawerPagationHeight - 40 - 40 - 20 - 63 - drawerButtonAreaHeight : 660 - drawerHeaderHeight - drawerFooterHeight - drawerPagationHeight - 40 - 40 - 20 - 63 - 69 - 150) : (this.scrHeight - navTop - headerHeight - footerHeight - pagationHeight - clusterDescHeight - monitorTabsHeight - monitorTabsPieHeight - 20 - 6 - 40 - 1 + 10)
+        scrollY = this.el.nativeElement.classList.contains('drawer-table') ? (this.scrHeight > 660 ? 660 - drawerHeaderHeight - drawerFooterHeight - drawerPagationHeight - 40 - 40 - 20 - 63 - drawerButtonAreaHeight : 660 - drawerHeaderHeight - drawerFooterHeight - drawerPagationHeight - 40 - 40 - 14 - 63 - 69 - 150) : (this.scrHeight - navTop - headerHeight - footerHeight - pagationHeight - clusterDescHeight - monitorTabsHeight - monitorTabsPieHeight - 14 - 6 - 40 - 1 + 10)
       }
     }
 
@@ -211,10 +222,10 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
     }
 
     if (this.nzData !== undefined && scrollY < this.nzData.length * 40) {
-      this.nzScroll = { x: this.nzScroll.x, y: scrollY > 50 ? scrollY + 'px' : '50px' }
+      this.nzScroll = { x: this.nzNoScroll ? undefined : this.nzScroll.x || '100%', y: scrollY > 50 ? scrollY + 'px' : '50px' }
       this.tableScrollCdk?.ngOnInit()
     } else {
-      this.nzScroll = { x: this.nzScroll.x, y: undefined }
+      this.nzScroll = { x: this.nzNoScroll ? undefined : this.nzScroll.x || '100%', y: undefined }
     }
   }
 

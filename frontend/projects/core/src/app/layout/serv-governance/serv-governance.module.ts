@@ -48,7 +48,6 @@ import { GreyCreateComponent } from './grey/create/create.component'
 import { GreyMessageComponent } from './grey/message/message.component'
 import { VisitCreateComponent } from './visit/create/create.component'
 import { VisitMessageComponent } from './visit/message/message.component'
-import { EoNgAutoCompleteModule } from 'eo-ng-auto-complete'
 import { NzSliderModule } from 'ng-zorro-antd/slider'
 import { NzInputNumberModule } from 'ng-zorro-antd/input-number'
 import { ApiModule } from '../api/api.module'
@@ -117,7 +116,6 @@ import { EoNgEmptyModule } from 'eo-ng-empty'
     NzHighlightModule,
     DirectiveModule,
     ServGovernanceRoutingModule,
-    EoNgAutoCompleteModule,
     EoNgRadioModule,
     NzSliderModule,
     NzInputNumberModule,
