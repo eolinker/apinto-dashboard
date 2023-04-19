@@ -4,7 +4,7 @@ import { FormGroup, UntypedFormBuilder, Validators } from '@angular/forms'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { ApiService } from 'projects/core/src/app/service/api.service'
-import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 import { Buffer } from 'buffer'
 import { EmptyHttpResponse } from 'projects/core/src/app/constant/type'
 
@@ -75,7 +75,7 @@ export class DeployClusterCertFormComponent implements OnInit {
     private message: EoNgFeedbackMessageService,
     public api:ApiService,
     private fb: UntypedFormBuilder,
-    private appConfigService:AppConfigService) {
+    private appConfigService:EoNgNavigationService) {
     this.validateForm = this.fb.group({
       key: ['', [Validators.required]],
       pem: ['', [Validators.required]]

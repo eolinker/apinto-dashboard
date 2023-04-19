@@ -4,7 +4,7 @@ import { FormGroup, UntypedFormBuilder, Validators } from '@angular/forms'
 import { Router } from '@angular/router'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { ApiService } from 'projects/core/src/app/service/api.service'
-import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 import { EoNgMyValidators } from 'projects/core/src/app/constant/eo-ng-validator'
 import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { BaseInfoService } from 'projects/core/src/app/service/base-info.service'
@@ -77,7 +77,7 @@ export class GreyCreateComponent implements OnInit {
     private message: EoNgFeedbackMessageService,
     private api: ApiService,
     private fb: UntypedFormBuilder,
-    private appConfigService: AppConfigService,
+    private appConfigService: EoNgNavigationService,
     private router:Router
   ) {
     this.validateForm = this.fb.group({
@@ -162,7 +162,7 @@ export class GreyCreateComponent implements OnInit {
             this.appConfigService.reqFlashBreadcrumb([
               {
                 title: '灰度策略',
-                routerLink: 'serv-governance'
+                routerLink: 'serv-governance/grey'
               },
               { title: resp.data.strategy!.name }
             ])

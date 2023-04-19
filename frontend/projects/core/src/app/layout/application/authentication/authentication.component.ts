@@ -4,7 +4,7 @@ import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
 import { Router } from '@angular/router'
 import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feedback'
 import { ApiService } from 'projects/core/src/app/service/api.service'
-import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 import { NzModalRef } from 'ng-zorro-antd/modal'
 import { MODAL_SMALL_SIZE } from '../../../constant/app.config'
 import { BaseInfoService } from '../../../service/base-info.service'
@@ -54,7 +54,7 @@ export class ApplicationAuthenticationComponent implements OnInit {
                private baseInfo:BaseInfoService,
                private modalService:EoNgFeedbackModalService,
                private router:Router,
-               private appConfigService:AppConfigService) {
+               private appConfigService:EoNgNavigationService) {
     this.appConfigService.reqFlashBreadcrumb([{ title: '应用管理', routerLink: 'application' }, { title: '鉴权管理' }])
   }
 
@@ -93,7 +93,12 @@ export class ApplicationAuthenticationComponent implements OnInit {
       nzTitle: '配置鉴权信息',
       nzWidth: MODAL_SMALL_SIZE,
       nzContent: ApplicationAuthenticationFormComponent,
-      nzComponentParams: { authId: authId, appId: this.appId, closeModal: this.closeModal },
+      nzComponentParams: {
+        authId: authId,
+        appId: this.appId,
+        closeModal: this.closeModal,
+        nzDisabled: this.nzDisabled
+      },
       nzOkDisabled: this.nzDisabled,
       nzOnOk: (component:ApplicationAuthenticationFormComponent) => {
         component.saveAuth()

@@ -1,7 +1,7 @@
 /*
- * @Author:
+ * @Author: maggieyyy im.ymj@hotmail.com
  * @Date: 2022-07-11 23:20:14
- * @LastEditors:
+ * @LastEditors: MengjieYang yangmengjie@eolink.com
  * @LastEditTime: 2022-09-20 22:01:32
  * @FilePath: /apinto/src/app/app.module.ts
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
@@ -17,7 +17,6 @@ import { NzTableModule } from 'ng-zorro-antd/table'
 import { NzAvatarModule } from 'ng-zorro-antd/avatar'
 import { EoNgBreadcrumbModule } from 'eo-ng-breadcrumb'
 import { EoNgLayoutModule } from 'eo-ng-layout'
-import { EoNgMenuModule } from 'eo-ng-menu'
 import { EoNgSelectModule } from 'eo-ng-select'
 import { EoNgFeedbackModalModule, EoNgFeedbackTooltipModule } from 'eo-ng-feedback'
 import { EoNgTabsModule } from 'eo-ng-tabs'
@@ -34,6 +33,8 @@ import { EoNgTransferModule } from '../component/transfer/transfer.module'
 import { EoNgCopyModule } from 'eo-ng-copy'
 import { EoNgUploadModule } from 'eo-ng-upload'
 import { LoginComponent } from './login/login.component'
+import { LogoComponent } from './login/logo/logo.component'
+import { PasswordComponent } from './login/password/password.component'
 import { NzFormModule } from 'ng-zorro-antd/form'
 import { NzLayoutModule } from 'ng-zorro-antd/layout'
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
@@ -41,14 +42,30 @@ import { NzCheckboxModule } from 'ng-zorro-antd/checkbox'
 import { NzGridModule } from 'ng-zorro-antd/grid'
 import { NzModalModule } from 'ng-zorro-antd/modal'
 import { NzHighlightModule } from 'ng-zorro-antd/core/highlight'
+import { AuthActivationComponent } from './auth/activation/activation.component'
+import { AuthInfoComponent } from './auth/info/info.component'
+import { AuthUpdateComponent } from './auth/update/update.component'
 import { DirectiveModule } from '../directive/directive.module'
 import { NzUploadModule } from 'ng-zorro-antd/upload'
 import { EoNgEmptyModule } from 'eo-ng-empty'
+import { AuthInfoDetailComponent } from './auth/info/detail/detail.component'
+import { EoNgMenuModule } from 'eo-ng-menu'
+import { IframePageComponent } from './iframe-page/iframe-page.component'
+import { GuideComponent } from './guide/guide.component'
+import { NzDividerModule } from 'ng-zorro-antd/divider'
 
 @NgModule({
   declarations: [
     BasicLayoutComponent,
-    LoginComponent
+    LoginComponent,
+    LogoComponent,
+    PasswordComponent,
+    AuthActivationComponent,
+    AuthInfoComponent,
+    AuthUpdateComponent,
+    AuthInfoDetailComponent,
+    IframePageComponent,
+    GuideComponent
   ],
   imports: [
     AppRoutingModule,
@@ -87,7 +104,8 @@ import { EoNgEmptyModule } from 'eo-ng-empty'
     DirectiveModule,
     EoNgUploadModule,
     NzUploadModule,
-    EoNgEmptyModule
+    EoNgEmptyModule,
+    NzDividerModule
   ],
   exports: [
     BasicLayoutComponent

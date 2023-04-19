@@ -3,7 +3,6 @@ package plugin_controller
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/enum"
@@ -22,18 +21,11 @@ type pluginClusterController struct {
 	clusterPluginService plugin.IClusterPluginService
 }
 
-func RegisterPluginClusterRouter(router gin.IRoutes) {
+func newPluginClusterController() *pluginClusterController {
 
 	p := &pluginClusterController{}
 	bean.Autowired(&p.clusterPluginService)
-	router.GET("/cluster/:cluster_name/plugins", controller.GenAccessHandler(access.PluginView, access.PluginEdit), p.plugins)
-	router.GET("/cluster/:cluster_name/plugin", controller.GenAccessHandler(access.PluginView, access.PluginEdit), p.getPlugin)
-	router.POST("/cluster/:cluster_name/plugin", controller.GenAccessHandler(access.PluginEdit), controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindClusterPlugin), p.editPlugin)
-
-	router.POST("/cluster/:cluster_name/plugin/publish", controller.GenAccessHandler(access.PluginEdit), controller.LogHandler(enum.LogOperateTypePublish, enum.LogKindClusterPlugin), p.publish)
-	router.GET("/cluster/:cluster_name/plugin/to-publish", controller.GenAccessHandler(access.PluginView, access.PluginEdit), p.toPublish)
-	router.GET("/cluster/:cluster_name/plugin/publish-history", controller.GenAccessHandler(access.PluginView, access.PluginEdit), p.publishHistory)
-	router.GET("/cluster/:cluster_name/plugin/update-history", controller.GenAccessHandler(access.PluginView, access.PluginEdit), p.updateHistory)
+	return p
 }
 
 // 插件列表
@@ -43,7 +35,7 @@ func (p *pluginClusterController) plugins(ginCtx *gin.Context) {
 
 	plugins, err := p.clusterPluginService.GetList(ginCtx, namespaceID, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Get ClusterlPlugin List fail. err: %s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Get ClusterlPlugin List fail. err: %s", err.Error()))
 		return
 	}
 	list := make([]*plugin_dto.CluPluginListItem, 0, len(plugins))
@@ -72,13 +64,13 @@ func (p *pluginClusterController) getPlugin(ginCtx *gin.Context) {
 	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
 	pluginName := ginCtx.Query("plugin_name")
 	if pluginName == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprint("Get ClusterlPlugin Info fail. err: plugin_name can't be null. ")))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprint("Get ClusterlPlugin Info fail. err: plugin_name can't be null. "))
 		return
 	}
 
 	pluginInfo, err := p.clusterPluginService.GetPlugin(ginCtx, namespaceID, clusterName, pluginName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Get ClusterlPlugin Info fail. err: %s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Get ClusterlPlugin Info fail. err: %s", err.Error()))
 		return
 	}
 
@@ -99,19 +91,19 @@ func (p *pluginClusterController) editPlugin(ginCtx *gin.Context) {
 
 	input := new(plugin_dto.ClusterPluginInfoInput)
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	status, exist := enum.GetPluginState(input.Status)
 	if !exist {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Edit ClusterPlugin fail. status %s is illegal. ", input.Status)))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Edit ClusterPlugin fail. status %s is illegal. ", input.Status))
 		return
 	}
 
 	err := p.clusterPluginService.EditPlugin(ginCtx, namespaceID, clusterName, userId, input.PluginName, status, input.Config)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(fmt.Sprintf("Edit ClusterPlugin fail. err: %s", err.Error())))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Edit ClusterPlugin fail. err: %s", err.Error()))
 		return
 	}
 
@@ -135,7 +127,7 @@ func (p *pluginClusterController) updateHistory(ginCtx *gin.Context) {
 
 	histories, total, err := p.clusterPluginService.QueryHistory(ginCtx, namespaceId, pageNum, pageSize, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -185,7 +177,7 @@ func (p *pluginClusterController) publishHistory(ginCtx *gin.Context) {
 
 	list, total, err := p.clusterPluginService.PublishHistory(ginCtx, namespaceId, pageNum, pageSize, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -232,7 +224,7 @@ func (p *pluginClusterController) toPublish(ginCtx *gin.Context) {
 
 	list, err := p.clusterPluginService.ToPublishes(ginCtx, namespaceId, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -263,7 +255,7 @@ func (p *pluginClusterController) toPublish(ginCtx *gin.Context) {
 
 	plugins, err := p.clusterPluginService.GetList(ginCtx, namespaceId, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -297,18 +289,18 @@ func (p *pluginClusterController) publish(ginCtx *gin.Context) {
 
 	input := &plugin_dto.ClusterPluginPublishInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	if input.VersionName == "" || input.Source == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("parameter error"))
+		controller.ErrorJson(ginCtx, http.StatusOK, "parameter error")
 		return
 	}
 	background := ginCtx
 
 	plugins, err := p.clusterPluginService.GetList(background, namespaceId, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -321,13 +313,13 @@ func (p *pluginClusterController) publish(ginCtx *gin.Context) {
 
 	if len(defectPlugins) > 0 {
 		msg := fmt.Sprintf("插件名为%s的插件处于缺失状态不可发布", strings.Join(defectPlugins, ","))
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(msg))
+		controller.ErrorJson(ginCtx, http.StatusOK, msg)
 		return
 	}
 
 	userId := controller.GetUserId(ginCtx)
 	if err = p.clusterPluginService.Publish(background, namespaceId, userId, clusterName, input.VersionName, input.Desc, input.Source); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))

@@ -76,7 +76,7 @@
   // 按钮背景色
   --button-primary-background-color: var(--primary-color);
   // 按钮hover背景色
-  --button-primary-hover-background-color: #3067b8;
+  --button-primary-hover-background-color: #7371fccc;
   // “更多”按钮背景色
   --BTN_PRIMARY_MORE_BG: #2196f3;
   // “更多”按钮hover背景色
@@ -171,9 +171,9 @@
   --TITLE_TEXT: #666666;
   --TIP_TEXT_COLOR: #bbbbbb;
   --BTN_DISABLED_BG: #f8f8fa;
-  --primary-color: #22549d;
+  --primary-color: #7371fc;
   --LABEL_COLOR: #5a5a5a;
-  --PRIMARY_BUTTON_DISABLED_BG: #22549d33;
+  --PRIMARY_BUTTON_DISABLED_BG: #7371fc33;
   --scrollbar-thumb-background-color_BG: rgba(0, 0, 0, 0.05);
   --icon-size: 16px;
 
@@ -191,8 +191,8 @@
   --button-text-hover-text-color: var(--text-color);
   --button-text-hover-background-color: hsl(0, 0%, 95.1%);
   --button-primary-border-color: rgba(0, 0, 0, 0.07);
-  --button-primary-active-border-color: #3067b8;
-  --button-primary-active-background-color: #3067b8;
+  --button-primary-active-border-color: #7371fccc;
+  --button-primary-active-background-color: #7371fccc;
   --button-primary-shadow-color: #d9d9d9;
   --button-default-border-color: var(--border-color);
   --button-default-hover-border-color: rgba(0, 0, 0, 0.07);
@@ -342,7 +342,7 @@ ol,
 p,
 pre,
 ul {
-  margin-bottom: 0em !important;
+  margin-bottom: 0em;
 }
 
 // div,
@@ -358,6 +358,54 @@ ul {
 .ace_line {
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro',
     monospace !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  markdown.markdown-body {
+    color-scheme: light;
+    --color-prettylights-syntax-comment: #6e7781;
+    --color-prettylights-syntax-constant: #0550ae;
+    --color-prettylights-syntax-entity: #8250df;
+    --color-prettylights-syntax-storage-modifier-import: #24292f;
+    --color-prettylights-syntax-entity-tag: #116329;
+    --color-prettylights-syntax-keyword: #cf222e;
+    --color-prettylights-syntax-string: #0a3069;
+    --color-prettylights-syntax-variable: #953800;
+    --color-prettylights-syntax-brackethighlighter-unmatched: #82071e;
+    --color-prettylights-syntax-invalid-illegal-text: #f6f8fa;
+    --color-prettylights-syntax-invalid-illegal-bg: #82071e;
+    --color-prettylights-syntax-carriage-return-text: #f6f8fa;
+    --color-prettylights-syntax-carriage-return-bg: #cf222e;
+    --color-prettylights-syntax-string-regexp: #116329;
+    --color-prettylights-syntax-markup-list: #3b2300;
+    --color-prettylights-syntax-markup-heading: #0550ae;
+    --color-prettylights-syntax-markup-italic: #24292f;
+    --color-prettylights-syntax-markup-bold: #24292f;
+    --color-prettylights-syntax-markup-deleted-text: #82071e;
+    --color-prettylights-syntax-markup-deleted-bg: #ffebe9;
+    --color-prettylights-syntax-markup-inserted-text: #116329;
+    --color-prettylights-syntax-markup-inserted-bg: #dafbe1;
+    --color-prettylights-syntax-markup-changed-text: #953800;
+    --color-prettylights-syntax-markup-changed-bg: #ffd8b5;
+    --color-prettylights-syntax-markup-ignored-text: #eaeef2;
+    --color-prettylights-syntax-markup-ignored-bg: #0550ae;
+    --color-prettylights-syntax-meta-diff-range: #8250df;
+    --color-prettylights-syntax-brackethighlighter-angle: #57606a;
+    --color-prettylights-syntax-sublimelinter-gutter-mark: #8c959f;
+    --color-prettylights-syntax-constant-other-reference-link: #0a3069;
+    --color-fg-default: #24292f;
+    --color-fg-muted: #57606a;
+    --color-fg-subtle: #6e7781;
+    --color-canvas-default: #ffffff;
+    --color-canvas-subtle: #f6f8fa;
+    --color-border-default: #d0d7de;
+    --color-border-muted: hsla(210, 18%, 87%, 1);
+    --color-neutral-muted: rgba(175, 184, 193, 0.2);
+    --color-accent-fg: #0969da;
+    --color-accent-emphasis: #0969da;
+    --color-attention-subtle: #fff8c5;
+    --color-danger-fg: #cf222e;
+  }
 }
 
 a {
@@ -882,7 +930,7 @@ eo-ng-tree-default:not(.ant-select-tree) {
   }
 
   .ant-tree-treenode {
-    height: 40px;
+    height: 30px;
   }
   .ant-tree-treenode button {
     opacity: 0;
@@ -898,6 +946,10 @@ eo-ng-tree-default:not(.ant-select-tree) {
       opacity: 1;
     }
   }
+}
+
+.ant-tree .ant-tree-treenode {
+  border-radius: 0px;
 }
 
 .ant-select-tree {
@@ -1022,7 +1074,7 @@ nz-slider {
 
 .group-title {
   padding: 4px var(--LAYOUT_PADDING);
-  height: 40px;
+  height: 30px;
   display: flex;
   align-items: center;
 }
@@ -1121,7 +1173,11 @@ nz-slider {
 }
 
 .ant-table-pagination.ant-pagination {
-  margin-right: 20px;
+  box-shadow: 0 -2px 2px -2px var(--border-color);
+  padding-top: 9px;
+  padding-bottom: 10px;
+  margin: 0px 10px;
+  margin-top: 1px;
 }
 eo-ng-select.limit-select .ant-select-selection-search {
   display: inline-block;
@@ -1809,4 +1865,29 @@ eo-ng-monitor-alarm-strategy-config {
 .no-access-empty nz-empty .ant-empty-image {
   margin-top: 126px;
   height: 240px;
+}
+
+.draggable-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  cursor: move;
+  color: var(--text-color);
+  font-size: 14px;
+}
+.cdk-drag-preview {
+  background-color: var(--background-color);
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+  box-sizing: border-box;
+  border-radius: 4px;
+  box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+    0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
+  svg {
+    color: var(--text-color);
+  }
+}
+
+.ant-input-affix-wrapper {
+  transition: none;
 }
