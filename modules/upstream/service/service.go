@@ -4,7 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sort"
+	"strings"
+	"time"
+
 	"github.com/eolinker/apinto-dashboard/common"
+	"github.com/eolinker/apinto-dashboard/controller"
 	api "github.com/eolinker/apinto-dashboard/modules/api"
 	"github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-dashboard/modules/base/frontend-model"
@@ -29,9 +34,6 @@ import (
 	"github.com/eolinker/eosc/log"
 	"github.com/go-basic/uuid"
 	"gorm.io/gorm"
-	"sort"
-	"strings"
-	"time"
 )
 
 type service struct {
@@ -72,6 +74,12 @@ func newServiceService() upstream.IService {
 	bean.Autowired(&s.historyStore)
 	bean.Autowired(&s.userInfoService)
 	return s
+}
+
+func (s *service) UpstreamCount(ctx context.Context, namespaceId int) (int64, error) {
+	return s.serviceStore.ServiceCount(ctx, map[string]interface{}{
+		"namespace": namespaceId,
+	})
 }
 
 func (s *service) GetServiceList(ctx context.Context, namespaceID int, searchName string, pageNum int, pageSize int) ([]*upstream_model.ServiceListItem, int, error) {
@@ -238,7 +246,7 @@ func (s *service) CreateService(ctx context.Context, namespaceID, userId int, in
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: input.UUID,
 		Name: input.Name,
 	})
@@ -336,7 +344,7 @@ func (s *service) UpdateService(ctx context.Context, namespaceID, userId int, in
 	serviceInfo.UpdateTime = time.Now()
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: input.UUID,
 		Name: input.Name,
 	})
@@ -442,7 +450,7 @@ func (s *service) DeleteService(ctx context.Context, namespaceID, userId int, se
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: serviceInfo.UUID,
 		Name: serviceName,
 	})
@@ -709,7 +717,7 @@ func (s *service) OnlineService(ctx context.Context, namespaceId, operator int, 
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:        serviceInfo.UUID,
 		Name:        serviceName,
 		ClusterId:   clusterId,
@@ -857,7 +865,7 @@ func (s *service) OfflineService(ctx context.Context, namespaceId, operator int,
 	runtime.Operator = operator
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:        serviceInfo.UUID,
 		Name:        serviceName,
 		ClusterId:   clusterInfo.Id,

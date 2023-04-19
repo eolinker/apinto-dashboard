@@ -1,0 +1,124 @@
+<section class="p-mbase m-mbase bg-MAIN_BG rounded">
+  <p class="text-[18px] leading-[26px] font-bold">
+    ❤️ Hi~ 欢迎使用 Apinto Gateway
+  </p>
+  <div class="ml-[32px] mr-[20px] mt-btnbase">
+    <p class="leading-[22px] text-[14px]">
+      Apinto是一款高性能、可扩展、易维护的云原生API网关。
+    </p>
+    <p class="leading-[22px] text-[14px]">
+      Apinto基于GO语言模块化开发，5分钟极速部署，配置简单、易于维护，支持集群与动态扩容，并且提供几十款网关插件和实用的企业级插件，让用户开箱即用。
+    </p>
+    <p class="mt-[20px] leading-[22px] text-[14px]">
+      如果您喜欢
+      Apinto，请给我们一颗Star，您的支持是我们最大的动力。如果您在使用过程中有需求和疑问，欢迎提交Github
+      Issue或者加入我们的用户讨论群。
+    </p>
+
+    <div class="mt-mbase">
+      <button
+        eo-ng-button
+        nzType="primary"
+        class="mr-btnrbase"
+        (click)="goToGithub()"
+      >
+        Github&nbsp;
+        <img
+          src="https://img.shields.io/github/stars/eolinker/apinto?style=social"
+          alt=""
+        />
+      </button>
+      <button eo-ng-button (click)="goToGithub('/issues')">
+        提交&nbsp;Issue
+      </button>
+    </div>
+  </div>
+</section>
+<section class="p-mbase m-mbase bg-MAIN_BG rounded">
+  <p class="text-[18px] leading-[26px] font-bold mb-[26px]">🚀 快速入门指南</p>
+  <div>
+    <div
+      class="ml-[32px] mt-btnbase flex justify-between grid gap-6 py-5 2xl:grid-cols-4 xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 xs:grid-cols-1"
+    >
+      <ng-container *ngFor="let step of stepList; let index = index">
+        <div class="w-[190px] flex flex-col justify-between">
+          <img
+            [src]="step.img || '../../../assets/default-guide-icon.png'"
+            class="w-[190px] h-[100px] mb-[20px] rounded"
+          />
+          <div class="flex flex-1 mt-btnbase">
+            <div
+              class="ant-steps-item-icon min-w-[24px] w-[24px] h-[24px] flex items-center justify-center"
+              [ngClass]="{
+                'border-theme': step.status !== 'undo',
+                'bg-theme': step.status === 'doing',
+                'text-MAIN_BG': step.status === 'doing',
+                'text-theme': step.status === 'done'
+              }"
+            >
+              <svg *ngIf="step.status === 'done'" class="iconpark-icon">
+                <use href="#chenggong"></use>
+              </svg>
+              <span *ngIf="step.status !== 'done'">{{ index + 1 }}</span>
+            </div>
+            <div class="flex flex-col justify-between">
+              <div>
+                <p>{{ step.title }}</p>
+                <p *ngFor="let desc of step.desc">{{ desc }}</p>
+              </div>
+              <div class="mt-[14px]">
+                <button
+                  *ngIf="step.status === 'done'"
+                  eo-ng-button
+                  [nzLoading]="btnLoading"
+                  (click)="goToStep(step)"
+                >
+                  已完成
+                </button>
+                <button
+                  *ngIf="step.status === 'doing'"
+                  eo-ng-button
+                  [nzLoading]="btnLoading"
+                  nzType="primary"
+                  (click)="goToStep(step)"
+                >
+                  前往
+                </button>
+                <button
+                  *ngIf="step.status === 'undo'"
+                  eo-ng-button
+                  [nzLoading]="btnLoading"
+                  (click)="goToStep(step)"
+                >
+                  未完成
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</section>
+
+<section class="p-mbase m-mbase bg-MAIN_BG rounded">
+  <p class="text-[18px] leading-[26px] font-bold mb-[40px]">👀 进阶操作</p>
+
+  <div
+    class="ml-[32px] mr-[60px] mt-btnbase flex justify-between max-w-[970px]"
+  >
+    <ng-container *ngFor="let tutor of tutorialsList; let last = last">
+      <div class="w-[190px] flex flex-col justify-between leading-[20px]">
+        <p class="font-bold">{{ tutor.title }}</p>
+        <ul style="padding-inline-start: 20px">
+          <ng-container *ngFor="let item of tutor.content">
+            <li>
+              <a>{{ item.text }}</a>
+            </li>
+          </ng-container>
+        </ul>
+      </div>
+      <nz-divider *ngIf="!last" nzType="vertical" class="h-auto"></nz-divider>
+    </ng-container>
+  </div>
+</section>

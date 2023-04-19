@@ -5,7 +5,7 @@ import { THEAD_TYPE, TBODY_TYPE } from 'eo-ng-table'
 import { NzModalRef } from 'ng-zorro-antd/modal'
 import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { ApiService } from 'projects/core/src/app/service/api.service'
-import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 import { BaseInfoService } from 'projects/core/src/app/service/base-info.service'
 import { DeployService } from '../../deploy.service'
 import { DeployClusterPluginPublishComponent } from './publish/publish.component'
@@ -47,7 +47,7 @@ export class DeployClusterPluginComponent implements OnInit {
           private modalService:EoNgFeedbackModalService,
           private api:ApiService,
           private router:Router,
-          private appConfigService:AppConfigService,
+          private appConfigService:EoNgNavigationService,
           private service:DeployService) {
     this.appConfigService.reqFlashBreadcrumb([{ title: '网关集群', routerLink: 'deploy/cluster' }, { title: '插件管理' }])
   }

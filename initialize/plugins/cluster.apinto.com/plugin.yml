@@ -1,0 +1,12 @@
+id: "cluster.apinto.com"
+name: "cluster"
+cname: "集群"
+resume: ""
+version: "v1.0.0"
+icon: "inner-plugin.png"
+driver: "cluster.apinto.com"
+type: 1 #0为框架模块 1为核心模块 2为内置模块 3为非内置
+auto: true
+front: deploy/cluster
+navigation: "navigation.infrastructure"
+group_id: "core_module"

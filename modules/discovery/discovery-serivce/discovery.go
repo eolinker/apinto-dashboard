@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
+	"github.com/eolinker/apinto-dashboard/controller"
 	driver_manager "github.com/eolinker/apinto-dashboard/driver"
 	"github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-dashboard/modules/base/frontend-model"
@@ -157,7 +158,7 @@ func (d *discoveryService) CreateDiscovery(ctx context.Context, namespaceID int,
 	input.UUID = strings.ToLower(input.UUID)
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: input.UUID,
 		Name: input.Name,
 	})
@@ -254,7 +255,7 @@ func (d *discoveryService) UpdateDiscovery(ctx context.Context, namespaceID int,
 	discoveryInfo.UpdateTime = t
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: input.UUID,
 		Name: input.Name,
 	})
@@ -345,7 +346,7 @@ func (d *discoveryService) DeleteDiscovery(ctx context.Context, namespaceID, use
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: discoveryInfo.UUID,
 		Name: discoveryName,
 	})
@@ -566,7 +567,7 @@ func (d *discoveryService) OnlineDiscovery(ctx context.Context, namespaceId, ope
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:        discoveryInfo.UUID,
 		Name:        discoveryName,
 		ClusterId:   clusterInfo.Id,
@@ -691,7 +692,7 @@ func (d *discoveryService) OfflineDiscovery(ctx context.Context, namespaceId, op
 	t := time.Now()
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:        discoveryInfo.UUID,
 		Name:        discoveryName,
 		ClusterId:   clusterInfo.Id,

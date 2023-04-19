@@ -1,12 +1,11 @@
 <!--
- * @Author: 
+ * @Author: MengjieYang yangmengjie@eolink.com
  * @Date: 2022-07-20 00:02:55
- * @LastEditors: 
+ * @LastEditors: MengjieYang yangmengjie@eolink.com
  * @LastEditTime: 2022-07-29 02:44:37
  * @FilePath: /apinto/src/app/layout/basic-layout/basic-layout.component.html
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
-
 <eo-ng-layout>
   <eo-ng-header>
     <div class="logo">
@@ -20,6 +19,9 @@
     </div>
     <div class="flex h-[49px] items-center justify-between">
       <eo-ng-breadcrumb [nzOptions]="breadcrumbOptions"></eo-ng-breadcrumb>
+      <button eo-ng-button class="mr-btnrbase" (click)="goToHelp()">
+        帮助文档
+      </button>
     </div>
   </eo-ng-header>
   <eo-ng-layout class="total-content">
@@ -27,14 +29,12 @@
       [nzInlineCollapsed]="false"
       [nzWidth]="195"
       [nzInlineIndent]="20"
+      class="overflow-hidden block inside-menu-scroll"
     >
       <eo-ng-inline-menu
         [nzInlineIndent]="20"
         [nzOptions]="sideMenuOptions"
       ></eo-ng-inline-menu>
-      <div class="auth-box">
-        <p>版权所有 © 银云信息技术</p>
-      </div>
     </eo-ng-sider>
     <eo-ng-layout
       class="content-without-sider"

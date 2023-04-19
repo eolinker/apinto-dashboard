@@ -3,7 +3,10 @@ package cluster_service
 import (
 	"context"
 	"encoding/json"
+	"time"
+
 	"github.com/eolinker/apinto-dashboard/common"
+	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-dashboard/modules/cluster"
 	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-dto"
@@ -13,7 +16,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/variable"
 	"github.com/eolinker/eosc/common/bean"
 	"gopkg.in/errgo.v2/errors"
-	"time"
 )
 
 type clusterService struct {
@@ -35,6 +37,12 @@ func newClusterService() cluster.IClusterService {
 	bean.Autowired(&s.apintoClientService)
 
 	return s
+}
+
+func (c *clusterService) ClusterCount(ctx context.Context, namespaceId int) (int64, error) {
+	return c.clusterStore.ClusterCount(ctx, map[string]interface{}{
+		"namespace": namespaceId,
+	})
 }
 
 func (c *clusterService) GetAllCluster(ctx context.Context) ([]*cluster_model2.Cluster, error) {
@@ -158,7 +166,7 @@ func (c *clusterService) Insert(ctx context.Context, namespaceId, userId int, cl
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Name: clusterInput.Name,
 	})
 
@@ -268,7 +276,7 @@ func (c *clusterService) DeleteByNamespaceIdByName(ctx context.Context, namespac
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Name: name,
 	})
 
@@ -314,7 +322,7 @@ func (c *clusterService) UpdateDesc(ctx context.Context, namespaceId, userId int
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Name: name,
 	})
 

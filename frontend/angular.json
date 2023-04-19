@@ -42,7 +42,7 @@
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
             "deployUrl": "/frontend/",
-            "outputPath": "../controller/dist",
+            "outputPath": "./dist",
             "index": "projects/core/src/index.html",
             "main": "projects/core/src/main.ts",
             "polyfills": "projects/core/src/polyfills.ts",
@@ -81,9 +81,15 @@
               "node_modules/eo-ng-table/styles.scss",
               "node_modules/eo-ng-tabs/styles.scss",
               "node_modules/eo-ng-tree/styles.scss",
-              "projects/core/src/styles.scss"
+              "projects/core/src/styles.scss",
+              "node_modules/prismjs/plugins/line-numbers/prism-line-numbers.css",
+              "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css",
+              "node_modules/prismjs/plugins/command-line/prism-command-line.css",
+              "node_modules/katex/dist/katex.min.css",
+              "node_modules/github-markdown-css/github-markdown.css"
             ],
-            "scripts": [],
+            "scripts": [
+            ],
             "allowedCommonJsDependencies": [
               "ace-builds",
               "ace-builds/src-noconflict/ext-language_tools"

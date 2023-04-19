@@ -38,6 +38,7 @@
   </ng-template>
 </div>
 <eo-ng-table
+  [ngClass]="{ cursorPointer: cursorPointer }"
   [nzTbody]="nzTbody"
   [nzThead]="nzThead"
   [nzData]="nzData"
@@ -69,6 +70,7 @@
 <ng-template #theadTpl let-item="item" let-index="i">
   <span
     eoNgFeedbackTooltip
+    nzTooltipPlacement="topLeft"
     [nzTooltipTitle]="item.tooltip || ''"
     [nzTooltipTitleContext]="item"
     [nzTooltipVisible]="item.tooltipVisible || false"
@@ -84,6 +86,7 @@
     <span
       class="mr-[8px] inline-block truncate"
       eoNgFeedbackTooltip
+      nzTooltipPlacement="topLeft"
       [nzTooltipTitle]="
         rowItem.json
           ? transferToJson(
