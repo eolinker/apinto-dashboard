@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	namespace_controller "github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
+	notice_controller "github.com/eolinker/apinto-dashboard/modules/notice/controller"
 	apinto_module "github.com/eolinker/apinto-module"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/gin-gonic/gin"
@@ -129,6 +130,7 @@ func (p *Plugin) NewModule(name string) *Module {
 	systemRouter := newSystem()
 	routers = append(routers, systemRouter.RoutersInfo()...)
 	routers = append(routers, envEnumRouters()...)
+	routers = append(routers, notice_controller.InitRouter()...)
 	return &Module{
 		name:              name,
 		middlewareHandler: p.middlewareHandler,
