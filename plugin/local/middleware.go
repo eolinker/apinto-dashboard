@@ -24,6 +24,7 @@ func (p *ProxyAPi) CreateMiddleware(name, path, life string, rule [][]string) ap
 			Name: name,
 			Rule: apinto_module.CreateMiddlewareRules(rule),
 			Handler: func(ginCtx *gin.Context) {
+				ginCtx.Next()
 				doMiddleware(ginCtx, url, p.module)
 			},
 		}
@@ -34,7 +35,7 @@ func (p *ProxyAPi) CreateMiddleware(name, path, life string, rule [][]string) ap
 		Name: name,
 		Rule: apinto_module.CreateMiddlewareRules(rule),
 		Handler: func(ginCtx *gin.Context) {
-			ginCtx.Next()
+
 			doMiddleware(ginCtx, url, p.module)
 		},
 	}

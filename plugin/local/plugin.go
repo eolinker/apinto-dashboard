@@ -2,7 +2,9 @@ package local
 
 import (
 	"encoding/json"
+	"fmt"
 	apinto_module "github.com/eolinker/apinto-module"
+	"strings"
 )
 
 type tPlugin struct {
@@ -30,10 +32,28 @@ func (t *tPlugin) CreateModule(name string, config interface{}) (apinto_module.M
 	for _, html := range t.define.Router.Html {
 		module.routersInfo = append(module.routersInfo, p.CreateHtml(html.Path, html.Label))
 	}
-	for _,a:=range t.define.Router.Frontend{
-
+	for _, a := range t.define.Router.Frontend {
+		module.routersInfo = append(module.routersInfo, p.CreateHtml(a, apinto_module.RouterLabelAssets))
 	}
-	module.routersInfo = append(module.routersInfo,p.)
+	for path, ms := range t.define.Router.Api {
+		for method, att := range ms {
+			module.routersInfo = append(module.routersInfo, p.CreateApi(fmt.Sprintf("%s.%s", method, path), method, path, att.Label))
+
+		}
+	}
+	for path, ms := range t.define.Router.OpenApi {
+		for method, att := range ms {
+			module.routersInfo = append(module.routersInfo, p.CreateOpenApi(fmt.Sprintf("%s.%s", method, path), method, path, att.Label))
+		}
+	}
+	for _, m := range t.define.Middleware {
+		rules := make([][]string, 0, len(m.Rule))
+		for _, rl := range m.Rule {
+			rules = append(rules, strings.Split(rl, ","))
+		}
+		module.middlewareHandler = append(module.middlewareHandler, p.CreateMiddleware(m.Name, m.Path, m.Life, rules))
+	}
+
 	return module, nil
 }
 
