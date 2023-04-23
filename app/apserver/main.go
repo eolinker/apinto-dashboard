@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	apinto_module "github.com/eolinker/apinto-module"
 	"net"
 	"net/http"
 	"os"
@@ -75,6 +76,6 @@ type Front struct {
 
 func (f *Front) CreateEngine() *gin.Engine {
 	engine := gin.Default()
-
+	engine.Use(apinto_module.SetRepeatReader)
 	return engine
 }
