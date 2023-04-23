@@ -7,6 +7,7 @@ import (
 	clusterController "github.com/eolinker/apinto-dashboard/modules/cluster/cluster-controller"
 	coreController "github.com/eolinker/apinto-dashboard/modules/core/controller"
 	discovery_controller "github.com/eolinker/apinto-dashboard/modules/discovery/discovery-controller"
+	email_controller "github.com/eolinker/apinto-dashboard/modules/email/controller"
 	module_plugin_controller "github.com/eolinker/apinto-dashboard/modules/module-plugin/controller"
 	open_api_controller "github.com/eolinker/apinto-dashboard/modules/openapi/open-api-controller"
 	open_app_controller "github.com/eolinker/apinto-dashboard/modules/openapp/open-app-controller"
@@ -15,6 +16,7 @@ import (
 	strategy_controller "github.com/eolinker/apinto-dashboard/modules/strategy/strategy-controller"
 	upstream_controller "github.com/eolinker/apinto-dashboard/modules/upstream/controller"
 	variable_controller "github.com/eolinker/apinto-dashboard/modules/variable/variable-controller"
+	webhook_controller "github.com/eolinker/apinto-dashboard/modules/webhook/controller"
 	"github.com/eolinker/apinto-dashboard/plugin/local"
 	apintoModule "github.com/eolinker/apinto-module"
 )
@@ -39,5 +41,10 @@ func init() {
 	apintoModule.Register("strategy-visit.apinto.com", strategy_controller.NewStrategyVisit())
 	apintoModule.Register("upstream.apinto.com", upstream_controller.NewUpstreamDriver())
 	apintoModule.Register("variable.apinto.com", variable_controller.NewVariableDriver())
+
 	apintoModule.Register("local", local.NewDriver())
+
+	apintoModule.Register("email.apinto.com", email_controller.NewEmailDriver())
+	apintoModule.Register("webhook.apinto.com", webhook_controller.NewWebhookDriver())
+
 }

@@ -1,0 +1,89 @@
+syntax = "proto3";
+
+option go_package = "github.com/eolinker/apinto-monitor/grpc-service";
+
+message EmptyRequest {
+}
+
+message GetApisReq {
+  int32 namespace_id = 1;
+  string path = 3;
+}
+
+message GetApisByUUIDsReq {
+  int32 namespace_id = 1;
+  repeated string uuids = 2;
+}
+
+message GetServicesReq {
+  int32 namespace_id = 1;
+  string name = 2;
+}
+
+message GetServicesByNamesReq {
+  int32 namespace_id = 1;
+  repeated string names = 2;
+}
+
+message GetAppsReq {
+  int32 namespace_id = 1;
+}
+
+message GetAppsByUuidsReq {
+  int32 namespace_id = 1;
+  repeated string uuids = 2;
+}
+
+message NamespacesListResp{
+  repeated NamespaceItem items = 1;
+}
+
+message NamespaceItem{
+  int32 namespace_id = 1;
+  string namespace_name = 2;
+}
+
+message ApisResp{
+  repeated ApisItem items = 1;
+}
+
+message ApisItem {
+  string uuid = 1;
+  string name = 2;
+  string group_uuid = 3;
+  string path = 4;
+  string desc = 5;
+  repeated string methods = 6;
+}
+
+message ServicesResp {
+  repeated ServicesItem items = 1;
+}
+
+message ServicesItem {
+  string name = 1;
+  string desc = 2;
+}
+
+message AppsResp {
+  repeated AppsItem items = 1;
+}
+
+message AppsItem {
+  string uuid = 1;
+  string name = 2;
+  string desc = 3;
+}
+
+service GetConsoleInfo {
+  rpc GetAllNamespaces (EmptyRequest) returns (NamespacesListResp) {}
+
+  rpc GetApis(GetApisReq) returns (ApisResp) {}
+  rpc GetApisByUUIDs(GetApisByUUIDsReq) returns (ApisResp) {}
+
+  rpc GetAllServices(GetServicesReq) returns (ServicesResp) {}
+  rpc GetAllServicesByNames(GetServicesByNamesReq) returns (ServicesResp) {}
+
+  rpc GetAllApps(GetAppsReq) returns (AppsResp) {}
+  rpc GetAppsByUuids(GetAppsByUuidsReq) returns (AppsResp) {}
+}

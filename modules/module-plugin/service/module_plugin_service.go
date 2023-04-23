@@ -219,23 +219,21 @@ func (m *modulePluginService) GetPluginEnableRender(ctx context.Context, pluginU
 		renderCfg.NameConflict = true
 	}
 
+	pluginDefine := new(model.PluginDefine)
+	_ = json.Unmarshal(pluginInfo.Details, pluginDefine)
+
 	switch pluginInfo.Driver {
 	case pluginDriverRemote:
-		remoteDefine := new(model.RemoteDefine)
-		_ = json.Unmarshal(pluginInfo.Details, remoteDefine)
-		if !remoteDefine.Internet {
+		if !pluginDefine.Internet {
 			renderCfg.Internet = true
 		}
-		renderCfg.Querys = remoteDefine.Querys
-		renderCfg.Initialize = remoteDefine.Initialize
+		renderCfg.Querys = pluginDefine.Querys
+		renderCfg.Initialize = pluginDefine.Initialize
 	case pluginDriverLocal:
-		localDefine := new(model.LocalDefine)
-		_ = json.Unmarshal(pluginInfo.Details, localDefine)
-		renderCfg.Headers = localDefine.Headers
-		renderCfg.Querys = localDefine.Querys
-		renderCfg.Initialize = localDefine.Initialize
+		renderCfg.Headers = pluginDefine.Headers
+		renderCfg.Querys = pluginDefine.Querys
+		renderCfg.Initialize = pluginDefine.Initialize
 		//renderCfg.Invisible = localDefine.Invisible
-	case pluginDriverProfession:
 	}
 
 	return renderCfg, nil
@@ -264,15 +262,7 @@ func (m *modulePluginService) InstallPlugin(ctx context.Context, userID int, plu
 	})
 	err = m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
 		t := time.Now()
-		var details []byte
-		switch pluginYml.Driver {
-		case pluginDriverRemote:
-			details, _ = json.Marshal(pluginYml.Remote)
-		case pluginDriverLocal:
-			details, _ = json.Marshal(pluginYml.Local)
-		case pluginDriverProfession:
-			details, _ = json.Marshal(pluginYml.Profession)
-		}
+		details, _ := json.Marshal(pluginYml.Define)
 
 		pluginInfo := &entry.ModulePlugin{
 			UUID:       pluginYml.ID,
@@ -284,7 +274,7 @@ func (m *modulePluginService) InstallPlugin(ctx context.Context, userID int, plu
 			Resume:     pluginYml.Resume,
 			ICon:       pluginYml.ICon,
 			Type:       pluginTypeNotInner,
-			Front:      "", //TODO
+			Front:      "",
 			Driver:     pluginYml.Driver,
 			Details:    details,
 			Operator:   userID,
@@ -470,21 +460,9 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 		config, _ = json.Marshal(enableCfg)
 		checkConfig = enableCfg
 
-		switch pluginInfo.Driver {
-		case pluginDriverRemote:
-			remote := new(model.RemoteDefine)
-			_ = json.Unmarshal(pluginInfo.Details, remote)
-			define = remote
-		case pluginDriverLocal:
-			local := new(model.LocalDefine)
-			_ = json.Unmarshal(pluginInfo.Details, local)
-			define = local
-		case pluginDriverProfession:
-			profession := new(model.ProfessionDefine)
-			_ = json.Unmarshal(pluginInfo.Details, profession)
-			define = profession
-		}
-
+		defineCfg := new(model.PluginDefine)
+		_ = json.Unmarshal(pluginInfo.Details, defineCfg)
+		define = defineCfg
 	}
 	err = m.coreService.CheckNewModule(pluginInfo.UUID, enableInfo.Name, pluginInfo.Driver, define, checkConfig)
 	if err != nil {
