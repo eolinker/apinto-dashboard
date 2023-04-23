@@ -1,19 +1,15 @@
 package controller
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
-	"github.com/eolinker/apinto-dashboard/enum"
 	service "github.com/eolinker/apinto-dashboard/modules/api"
 	api_model "github.com/eolinker/apinto-dashboard/modules/api/model"
 	namespace_controller "github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/monitor"
 	"github.com/eolinker/apinto-dashboard/modules/notice"
-	notice_model "github.com/eolinker/apinto-dashboard/modules/notice/notice-model"
 	"github.com/eolinker/apinto-dashboard/modules/upstream"
 	upstream_model "github.com/eolinker/apinto-dashboard/modules/upstream/model"
 	"github.com/eolinker/apinto-dashboard/modules/warn"
@@ -49,390 +45,16 @@ func RegisterWarnRouter(router gin.IRouter) {
 
 	prefix := "/warn"
 
-	//webhook操作
-	router.DELETE(prefix+"/webhook", controller.GenAccessHandler(access.NoticeWebhookView, access.NoticeWebhookEdit), controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindNoticeWebhook), w.delWebhook)
-	router.POST(prefix+"/webhook", controller.GenAccessHandler(access.NoticeWebhookView, access.NoticeWebhookEdit), controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindNoticeWebhook), w.createWebhook)
-	router.PUT(prefix+"/webhook", controller.GenAccessHandler(access.NoticeWebhookView, access.NoticeWebhookEdit), controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindNoticeWebhook), w.updateWebhook)
-	router.GET(prefix+"/webhook", controller.GenAccessHandler(access.NoticeWebhookView, access.NoticeWebhookEdit), w.webhook)
-	router.GET(prefix+"/webhooks", controller.GenAccessHandler(access.NoticeWebhookView, access.NoticeWebhookEdit), w.webhooks)
-
-	//邮箱操作
-	router.POST(prefix+"/email", controller.GenAccessHandler(access.NoticeEmailView, access.NoticeEmailEdit), controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindNoticeEmail), w.createEmail)
-	router.PUT(prefix+"/email", controller.GenAccessHandler(access.NoticeEmailView, access.NoticeEmailEdit), controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindNoticeWebhook), w.updateEmail)
-	router.GET(prefix+"/email", controller.GenAccessHandler(access.NoticeEmailView, access.NoticeEmailEdit), w.getEmail)
-
 	//告警历史
-	router.GET(prefix+"/history", controller.GenAccessHandler(access.MonPartitionView), w.warnHistory)
-	//可选渠道列表
-	router.GET(prefix+"/channels", w.channels)
+	router.GET(prefix+"/history", w.warnHistory)
 
 	//告警策略
-	router.GET(prefix+"/strategys", controller.GenAccessHandler(access.MonPartitionView), w.strategys)
-	router.POST(prefix+"/strategy", controller.GenAccessHandler(access.MonPartitionView, access.MonPartitionEdit), controller.LogHandler(enum.LogOperateTypeCreate, enum.LogKindWarnStrategy), w.createStrategy)
-	router.PUT(prefix+"/strategy", controller.GenAccessHandler(access.MonPartitionView, access.MonPartitionEdit), controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindWarnStrategy), w.updateStrategy)
+	router.GET(prefix+"/strategys", w.strategys)
+	router.POST(prefix+"/strategy", w.createStrategy)
+	router.PUT(prefix+"/strategy", w.updateStrategy)
 	router.GET(prefix+"/strategy", w.strategy)
-	router.PATCH(prefix+"/strategy", controller.GenAccessHandler(access.MonPartitionView, access.MonPartitionEdit), controller.LogHandler(enum.LogOperateTypeEdit, enum.LogKindWarnStrategy), w.updateStrategyStatus)
-	router.DELETE(prefix+"/strategy", controller.GenAccessHandler(access.MonPartitionView, access.MonPartitionEdit), controller.LogHandler(enum.LogOperateTypeDelete, enum.LogKindWarnStrategy), w.deleteStrategy)
-}
-
-// delWebhook 删除webhook
-func (w *warnController) delWebhook(ginCtx *gin.Context) {
-	uid := ginCtx.Query("uuid")
-	if uid == "" {
-		controller.ErrorJson(ginCtx, http.StatusOK, "uuid is null")
-		return
-	}
-
-	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
-
-	if err := w.noticeChannelService.DeleteNoticeChannel(ginCtx, namespaceId, userId, uid); err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
-		return
-	}
-
-	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
-}
-
-// webhook 获取单个webhook信息
-func (w *warnController) webhook(ginCtx *gin.Context) {
-	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	uid := ginCtx.Query("uuid")
-	if uid == "" {
-		controller.ErrorJson(ginCtx, http.StatusOK, "uuid is null")
-		return
-	}
-
-	channel, err := w.noticeChannelService.NoticeChannelByName(ginCtx, namespaceId, uid)
-	if err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
-		return
-	}
-
-	webhook := &notice_model.NoticeChannelWebhook{}
-
-	if err = json.Unmarshal([]byte(channel.Config), webhook); err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
-		return
-	}
-
-	webhookOutPut := &warn_dto.WebhookOutput{
-		Uuid:          channel.Name,
-		Title:         channel.Title,
-		Desc:          webhook.Desc,
-		Url:           webhook.Url,
-		Method:        webhook.Method,
-		ContentType:   webhook.ContentType,
-		NoticeType:    webhook.NoticeType,
-		UserSeparator: webhook.UserSeparator,
-		Header:        webhook.Header,
-		Template:      webhook.Template,
-	}
-
-	resMap := make(map[string]interface{})
-
-	resMap["webhook"] = webhookOutPut
-	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(resMap))
-}
-
-// webhook 获取webhook列表
-func (w *warnController) webhooks(ginCtx *gin.Context) {
-	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-
-	list, err := w.noticeChannelService.NoticeChannelList(ginCtx, namespaceId, 1)
-	if err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
-		return
-	}
-
-	webhooks := make([]*warn_dto.WebhooksOutput, 0, len(list))
-	for _, channel := range list {
-
-		webhook := &notice_model.NoticeChannelWebhook{}
-
-		if err = json.Unmarshal([]byte(channel.Config), webhook); err != nil {
-			controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
-			return
-		}
-		webhooks = append(webhooks, &warn_dto.WebhooksOutput{
-			Uuid:        channel.Name,
-			Title:       channel.Title,
-			Url:         webhook.Url,
-			Method:      webhook.Method,
-			ContentType: webhook.ContentType,
-			Operator:    channel.Operator,
-			UpdateTime:  common.TimeToStr(channel.UpdateTime),
-			CreateTime:  common.TimeToStr(channel.CreateTime),
-			IsDelete:    channel.IsDelete,
-		})
-	}
-	resMap := make(map[string]interface{})
-
-	resMap["webhooks"] = webhooks
-
-	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(resMap))
-}
-
-// createWebhook 新建webhook
-func (w *warnController) createWebhook(ginCtx *gin.Context) {
-
-	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
-
-	webhookInput := new(warn_dto.WebhookInput)
-
-	if err := ginCtx.BindJSON(webhookInput); err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
-		return
-	}
-
-	//参数校验
-	if err := checkWebhookParam(webhookInput); err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
-		return
-	}
-
-	config := &notice_model.NoticeChannelWebhook{
-		Desc:          webhookInput.Desc,
-		Url:           webhookInput.Url,
-		Method:        webhookInput.Method,
-		ContentType:   webhookInput.ContentType,
-		NoticeType:    webhookInput.NoticeType,
-		UserSeparator: webhookInput.UserSeparator,
-		Header:        webhookInput.Header,
-		Template:      webhookInput.Template,
-	}
-
-	bytes, _ := json.Marshal(config)
-
-	channel := &notice_model.NoticeChannel{
-		Name:   uuid.New(),
-		Title:  webhookInput.Title,
-		Type:   1,
-		Config: string(bytes),
-	}
-
-	if err := w.noticeChannelService.CreateNoticeChannel(ginCtx, namespaceId, userId, channel); err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
-		return
-	}
-
-	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
-}
-
-// updateWebhook 修改webhook
-func (w *warnController) updateWebhook(ginCtx *gin.Context) {
-	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
-
-	webhookInput := new(warn_dto.WebhookInput)
-
-	if err := ginCtx.BindJSON(webhookInput); err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
-		return
-	}
-
-	if webhookInput.Uuid == "" {
-		controller.ErrorJson(ginCtx, http.StatusOK, "uuid is null")
-		return
-	}
-
-	//参数校验
-	if err := checkWebhookParam(webhookInput); err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
-		return
-	}
-
-	config := &notice_model.NoticeChannelWebhook{
-		Desc:          webhookInput.Desc,
-		Url:           webhookInput.Url,
-		Method:        webhookInput.Method,
-		ContentType:   webhookInput.ContentType,
-		NoticeType:    webhookInput.NoticeType,
-		UserSeparator: webhookInput.UserSeparator,
-		Header:        webhookInput.Header,
-		Template:      webhookInput.Template,
-	}
-
-	bytes, _ := json.Marshal(config)
-
-	channel := &notice_model.NoticeChannel{
-		Name:   webhookInput.Uuid,
-		Title:  webhookInput.Title,
-		Type:   1,
-		Config: string(bytes),
-	}
-
-	if err := w.noticeChannelService.UpdateNoticeChannel(ginCtx, namespaceId, userId, channel); err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
-		return
-	}
-
-	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
-}
-
-func checkWebhookParam(webhookInput *warn_dto.WebhookInput) error {
-	if webhookInput.Url == "" {
-		return errors.New("url is null")
-	}
-
-	if webhookInput.Title == "" {
-		return errors.New("title is null")
-	}
-
-	method := webhookInput.Method
-	if method != http.MethodPost && method != http.MethodGet {
-		return errors.New("method param fail " + method)
-	}
-
-	noticeType := webhookInput.NoticeType
-	if noticeType != "single" && noticeType != "many" {
-		return errors.New("notice_type param fail " + noticeType)
-	}
-
-	contentType := webhookInput.ContentType
-	if contentType != "JSON" && contentType != "form-data" {
-		return errors.New("content_type param fail " + contentType)
-	}
-	return nil
-}
-
-// getEmail 获取通知邮箱
-func (w *warnController) getEmail(ginCtx *gin.Context) {
-
-	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-
-	list, err := w.noticeChannelService.NoticeChannelList(ginCtx, namespaceId, 2)
-	if err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
-		return
-	}
-
-	resMap := make(map[string]interface{})
-	if len(list) > 0 {
-
-		email := &notice_model.NoticeChannelEmail{}
-
-		if err = json.Unmarshal([]byte(list[0].Config), email); err != nil {
-			controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
-			return
-		}
-
-		emailInfo := &warn_dto.EmailOutput{
-			Uuid:     list[0].Name,
-			SmtpUrl:  email.SmtpUrl,
-			SmtpPort: email.SmtpPort,
-			Protocol: email.Protocol,
-			Email:    list[0].Title,
-			Account:  email.Account,
-			Password: email.Password,
-		}
-
-		resMap["email_info"] = emailInfo
-	}
-
-	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(resMap))
-}
-
-// createEmail 创建通知邮箱
-func (w *warnController) createEmail(ginCtx *gin.Context) {
-
-	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
-	emailInput := new(warn_dto.EmailInput)
-
-	if err := ginCtx.BindJSON(emailInput); err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
-		return
-	}
-
-	//参数校验
-	if err := checkEmailParam(emailInput); err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
-		return
-	}
-
-	config := &notice_model.NoticeChannelEmail{
-		SmtpUrl:  emailInput.SmtpUrl,
-		Email:    emailInput.Email,
-		SmtpPort: emailInput.SmtpPort,
-		Protocol: emailInput.Protocol,
-		Account:  emailInput.Account,
-		Password: emailInput.Password,
-	}
-
-	bytes, _ := json.Marshal(config)
-
-	channel := &notice_model.NoticeChannel{
-		Name:   uuid.New(),
-		Title:  emailInput.Email,
-		Type:   2,
-		Config: string(bytes),
-	}
-
-	if err := w.noticeChannelService.CreateNoticeChannel(ginCtx, namespaceId, userId, channel); err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
-		return
-	}
-
-	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
-}
-
-// updateEmail 修改通知邮箱
-func (w *warnController) updateEmail(ginCtx *gin.Context) {
-	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
-	emailInput := new(warn_dto.EmailInput)
-
-	if err := ginCtx.BindJSON(emailInput); err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
-		return
-	}
-	if emailInput.Uuid == "" {
-		controller.ErrorJson(ginCtx, http.StatusOK, "uuid is null")
-		return
-	}
-
-	//参数校验
-	if err := checkEmailParam(emailInput); err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
-		return
-	}
-
-	config := &notice_model.NoticeChannelEmail{
-		SmtpUrl:  emailInput.SmtpUrl,
-		SmtpPort: emailInput.SmtpPort,
-		Protocol: emailInput.Protocol,
-		Account:  emailInput.Account,
-		Email:    emailInput.Email,
-		Password: emailInput.Password,
-	}
-
-	bytes, _ := json.Marshal(config)
-
-	channel := &notice_model.NoticeChannel{
-		Name:   emailInput.Uuid,
-		Title:  emailInput.Email,
-		Type:   2,
-		Config: string(bytes),
-	}
-
-	if err := w.noticeChannelService.UpdateNoticeChannel(ginCtx, namespaceId, userId, channel); err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
-		return
-	}
-
-	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
-}
-
-func checkEmailParam(input *warn_dto.EmailInput) error {
-	if input.SmtpUrl == "" {
-		return errors.New("smtp_url is null")
-	}
-	if input.SmtpPort == 0 {
-		return errors.New("smtp_port is 0")
-	}
-	return nil
+	router.PATCH(prefix+"/strategy", w.updateStrategyStatus)
+	router.DELETE(prefix+"/strategy", w.deleteStrategy)
 }
 
 // warnHistory 告警历史
@@ -500,31 +122,6 @@ func (w *warnController) warnHistory(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(resMap))
 }
 
-// channels 可选渠道列表
-func (w *warnController) channels(ginCtx *gin.Context) {
-	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-
-	list, err := w.noticeChannelService.NoticeChannelList(ginCtx, namespaceId, 0)
-	if err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
-		return
-	}
-
-	channel := make([]*warn_dto.NoticeChannel, 0, len(list))
-	for _, noticeChannel := range list {
-		channel = append(channel, &warn_dto.NoticeChannel{
-			Uuid:  noticeChannel.Name,
-			Title: noticeChannel.Title,
-			Type:  noticeChannel.Type,
-		})
-	}
-
-	resMap := make(map[string]interface{})
-
-	resMap["channels"] = channel
-	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(resMap))
-}
-
 // strategys 告警策略列表
 func (w *warnController) strategys(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
@@ -587,7 +184,7 @@ func (w *warnController) strategys(ginCtx *gin.Context) {
 	})
 
 	//获取所有上游服务
-	serviceList, err := w.service.GetServiceListAll(ginCtx, namespaceId)
+	serviceList, err := w.service.GetServiceListAll(ginCtx, namespaceId, "")
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return

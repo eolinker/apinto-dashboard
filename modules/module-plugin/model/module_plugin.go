@@ -69,49 +69,50 @@ type PluginEnableCfg struct {
 	Initialize []*ExtendParams `json:"initialize"`
 }
 
-// RemoteDefine 插件配置文件的driver为remote时的详细配置
-type RemoteDefine struct {
-	Internet   bool                 `json:"internet" yaml:"internet"`
-	Server     string               `json:"server" yaml:"server"`
-	Path       string               `json:"path" yaml:"path"`
-	Querys     []ExtendParamsRender `json:"querys" yaml:"querys"`
-	Initialize []ExtendParamsRender `json:"initialize" yaml:"initialize"`
-}
-
-// LocalDefine 插件配置文件的driver为local时的详细配置
-type LocalDefine struct {
-	Server     string               `json:"server" yaml:"server"`
-	Middleware []*MiddlewareDefine  `json:"middleware" yaml:"middleware"`
-	Api        *ApiDefine           `json:"api" yaml:"api"`
-	Path       string               `json:"path" yaml:"path"`
-	Invisible  bool                 `json:"invisible" yaml:"invisible"`
-	Headers    []ExtendParamsRender `json:"headers" yaml:"headers"`
-	Querys     []ExtendParamsRender `json:"querys" yaml:"querys"`
-	Initialize []ExtendParamsRender `json:"initialize" yaml:"initialize"`
+// PluginDefine 插件安装文件里的Define配置
+type PluginDefine struct {
+	Internet   bool                 `json:"internet,omitempty" yaml:"internet,omitempty"`     //remote
+	Server     string               `json:"server,omitempty" yaml:"server,omitempty"`         //remote
+	Path       string               `json:"path,omitempty" yaml:"path,omitempty"`             //remote
+	Middleware []*MiddlewareDefine  `json:"middleware,omitempty" yaml:"middleware,omitempty"` //local
+	Router     *RouterDefine        `json:"router,omitempty" yaml:"router,omitempty"`         //local
+	Headers    []ExtendParamsRender `json:"headers,omitempty" yaml:"headers,omitempty"`       //local
+	Querys     []ExtendParamsRender `json:"querys,omitempty" yaml:"querys,omitempty"`         //remote local
+	Initialize []ExtendParamsRender `json:"initialize,omitempty" yaml:"initialize,omitempty"` //remote local
+	Profession string               `json:"profession" yaml:"profession"`                     //dynamic
+	Skill      string               `json:"skill" yaml:"skill"`                               //dynamic
+	Drivers    []DynamicTitleDefine `json:"drivers" yaml:"drivers"`                           //dynamic
+	Fields     []DynamicTitleDefine `json:"fields" yaml:"fields"`                             //dynamic
+	Render     map[string]string    `json:"render" yaml:"render"`                             //dynamic
 }
 
 type MiddlewareDefine struct {
-	Name string     `json:"name" yaml:"name"`
-	Path string     `json:"path" yaml:"path"`
-	Rule [][]string `json:"rule" yaml:"rule"`
+	Name string   `json:"name" yaml:"name"`
+	Path string   `json:"path" yaml:"path"`
+	Life string   `json:"life" yaml:"life"`
+	Rule []string `json:"rule" yaml:"rule"`
 }
 
-type ApiDefine struct {
-	Paths map[string]map[string]*ApiPathDefine `json:"paths" yaml:"paths"`
+type RouterDefine struct {
+	Home     string                               `json:"home" yaml:"home"`
+	Html     []*RouterHtmlDefine                  `json:"html" yaml:"html"`
+	Frontend []string                             `json:"frontend" yaml:"frontend"`
+	Api      map[string]map[string]*ApiPathDefine `json:"api" yaml:"api"`
+	Openapi  map[string]map[string]*ApiPathDefine `json:"openapi" yaml:"openapi"`
+}
+
+type RouterHtmlDefine struct {
+	Path  string   `json:"path" yaml:"path"`
+	Label []string `json:"label" yaml:"label"`
 }
 
 type ApiPathDefine struct {
 	Label []string `json:"label" yaml:"label"`
 }
 
-// ProfessionDefine 插件配置文件的driver为profession时的详细配置
-type ProfessionDefine struct {
-	Type       string            `json:"type" yaml:"type"`
-	Profession string            `json:"profession" yaml:"profession"`
-	Drivers    []string          `json:"drivers" yaml:"drivers"`
-	Driver     string            `json:"driver" yaml:"driver"`
-	Name       string            `json:"name" yaml:"name"`
-	Render     map[string]string `json:"render" yaml:"render"`
+type DynamicTitleDefine struct {
+	Name  string `json:"name" yaml:"name"`
+	Title string `json:"title" yaml:"title"`
 }
 
 type InnerDefine struct {
@@ -132,18 +133,16 @@ type MiddlewareItem struct {
 }
 
 type PluginYmlCfg struct {
-	ID         string            `json:"id" yaml:"id"`
-	Name       string            `json:"name" yaml:"name"`
-	Version    string            `json:"version" yaml:"version"`
-	CName      string            `json:"cname" yaml:"cname"`
-	Navigation string            `json:"navigation" yaml:"navigation"`
-	GroupID    string            `json:"group_id" yaml:"group_id"`
-	Resume     string            `json:"resume" yaml:"resume"`
-	ICon       string            `json:"icon" yaml:"icon"`
-	Driver     string            `json:"driver" yaml:"driver"`
-	Remote     *RemoteDefine     `json:"remote" yaml:"remote"`
-	Local      *LocalDefine      `json:"local" yaml:"local"`
-	Profession *ProfessionDefine `json:"profession" yaml:"profession"`
+	ID         string        `json:"id" yaml:"id"`
+	Name       string        `json:"name" yaml:"name"`
+	Version    string        `json:"version" yaml:"version"`
+	CName      string        `json:"cname" yaml:"cname"`
+	Navigation string        `json:"navigation" yaml:"navigation"`
+	GroupID    string        `json:"group_id" yaml:"group_id"`
+	Resume     string        `json:"resume" yaml:"resume"`
+	ICon       string        `json:"icon" yaml:"icon"`
+	Driver     string        `json:"driver" yaml:"driver"`
+	Define     *PluginDefine `json:"define" yaml:"define"`
 }
 
 type InnerPluginYmlCfg struct {
