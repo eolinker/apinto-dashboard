@@ -9,6 +9,7 @@ type ServiceListItem struct {
 	Name        string
 	UUID        string
 	Scheme      string
+	Desc        string
 	DiscoveryID int
 	DriverName  string
 	Config      string
