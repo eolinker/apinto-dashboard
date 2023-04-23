@@ -15,7 +15,7 @@ import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
         opacity:1 !important;
       }
 
-      eo-ng-table.cursorPointer tbody tr{
+      eo-ng-table.cursorPointer tbody tr:not(.ant-table-placeholder){
         cursor:pointer;
       }
     }`
@@ -59,6 +59,8 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
     setTimeout(() => {
       this.getSrollY()
     }, 0)
+
+    console.log(this)
   }
 
   override ngOnChanges (change:SimpleChanges) {
