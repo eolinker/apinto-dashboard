@@ -60,12 +60,12 @@ func (p *ProxyAPi) createApi(name, method, prefix, path string, labels []string)
 			for k, v := range p.headers {
 				request.Header.Set(k, v)
 			}
-
-			apintoKeysData, err := json.Marshal(ginCtx.Keys)
-			if err != nil {
-				return
+			if ginCtx.Keys != nil {
+				apintoKeysData, err := json.Marshal(ginCtx.Keys)
+				if err == nil {
+					request.Header.Set("apinto-runtime-keys", string(apintoKeysData))
+				}
 			}
-			request.Header.Set("apinto-runtime-keys", string(apintoKeysData))
 
 			response, err := http.DefaultClient.Do(request)
 			if err != nil {
