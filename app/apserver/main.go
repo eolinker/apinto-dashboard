@@ -4,6 +4,7 @@ import (
 	"fmt"
 	grpc_service "github.com/eolinker/apinto-dashboard/grpc-service"
 	"github.com/eolinker/apinto-dashboard/modules/grpc-service/service"
+	apinto_module "github.com/eolinker/apinto-module"
 	"google.golang.org/grpc"
 	"net"
 	"net/http"
@@ -63,7 +64,6 @@ func run() {
 	}
 	coreService.ReloadModule()
 	go plugin_timer.ExtenderTimer()
-	// todo 不适合开源，后续通过插件接入
 
 	httpListener, err := net.Listen("tcp", fmt.Sprintf(":%d", GetPort()))
 	if err != nil {
