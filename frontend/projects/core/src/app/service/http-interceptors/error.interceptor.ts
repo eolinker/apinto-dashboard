@@ -28,10 +28,13 @@ export class ErrorInterceptor implements HttpInterceptor {
         // this.hideLoader()
         if (event instanceof HttpResponse) {
           this.checkAccess(event.body.code, event, request.method)
-          try {
-            event.body.data = this.camel(event.body.data)
-          } catch {
-            console.warn('转化接口数据命名法出现问题')
+          console.log(request.url)
+          if (!request.url.includes('api/dynamic/')) {
+            try {
+              event.body.data = this.camel(event.body.data)
+            } catch {
+              console.warn('转化接口数据命名法出现问题')
+            }
           }
         }
       }
