@@ -24,6 +24,7 @@ const (
 	HistoryKindPluginTemplate  HistoryKind = "plugin_template"
 	HistoryKindPlugin          HistoryKind = "plugin"
 	HistoryKindClusterPlugin   HistoryKind = "cluster_plugin"
+	HistoryKindDynamicModule   HistoryKind = "dynamic_module"
 )
 
 // History 变更记录表
