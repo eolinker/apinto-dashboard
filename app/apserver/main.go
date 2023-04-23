@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	grpc_service "github.com/eolinker/apinto-dashboard/grpc-service"
+	"github.com/eolinker/apinto-dashboard/modules/grpc-service/service"
 	"google.golang.org/grpc"
 	"net"
 	"net/http"
@@ -74,6 +76,9 @@ func run() {
 
 	httpServer := &http.Server{Handler: coreService}
 	grpcServer := grpc.NewServer()
+
+	grpc_service.RegisterGetConsoleInfoServer(grpcServer, service.NewConsoleInfoService())
+	grpc_service.RegisterNoticeSendServer(grpcServer, service.NewNoticeSendService())
 
 	console := newConsoleServer(httpServer, grpcServer)
 	go func() {
