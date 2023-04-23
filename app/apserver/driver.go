@@ -15,6 +15,7 @@ import (
 	strategy_controller "github.com/eolinker/apinto-dashboard/modules/strategy/strategy-controller"
 	upstream_controller "github.com/eolinker/apinto-dashboard/modules/upstream/controller"
 	variable_controller "github.com/eolinker/apinto-dashboard/modules/variable/variable-controller"
+	"github.com/eolinker/apinto-dashboard/plugin/local"
 	apintoModule "github.com/eolinker/apinto-module"
 )
 
@@ -38,4 +39,5 @@ func init() {
 	apintoModule.Register("strategy-visit.apinto.com", strategy_controller.NewStrategyVisit())
 	apintoModule.Register("upstream.apinto.com", upstream_controller.NewUpstreamDriver())
 	apintoModule.Register("variable.apinto.com", variable_controller.NewVariableDriver())
+	apintoModule.Register("local", local.NewDriver())
 }
