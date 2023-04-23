@@ -11,7 +11,7 @@ type IServiceStore interface {
 	store.IBaseStore[upstream_entry.Service]
 	GetListPage(ctx context.Context, namespaceID int, searchName string, pageNum int, pageSize int) ([]*upstream_entry.Service, int, error)
 	GetByName(ctx context.Context, namespaceId int, name string) (*upstream_entry.Service, error)
-	GetListAll(ctx context.Context, namespaceId int) ([]*upstream_entry.Service, error)
+	GetListAll(ctx context.Context, namespaceId int, searchName string) ([]*upstream_entry.Service, error)
 	GetByNames(ctx context.Context, namespaceId int, names []string) ([]*upstream_entry.Service, error)
 	ServiceCount(ctx context.Context, params map[string]interface{}) (int64, error)
 }
@@ -66,8 +66,12 @@ func (s *serviceStore) GetByNames(ctx context.Context, namespaceId int, names []
 	return services, err
 }
 
-func (s *serviceStore) GetListAll(ctx context.Context, namespaceId int) ([]*upstream_entry.Service, error) {
+func (s *serviceStore) GetListAll(ctx context.Context, namespaceId int, searchName string) ([]*upstream_entry.Service, error) {
 	services := make([]*upstream_entry.Service, 0)
-	err := s.DB(ctx).Where("`namespace` = ?", namespaceId).Find(&services).Error
+	db := s.DB(ctx).Where("`namespace` = ?", namespaceId)
+	if searchName != "" {
+		db = db.Where("`name` like ?", "%"+searchName+"%")
+	}
+	err := db.Find(&services).Error
 	return services, err
 }
