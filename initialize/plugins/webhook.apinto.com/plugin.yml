@@ -1,6 +1,6 @@
 id: "webhook.apinto.com"
 name: "webhook"
-cname: "邮箱设置"
+cname: "webhook设置"
 resume: ""
 version: "v1.0.0"
 icon: "inner-plugin.png"
