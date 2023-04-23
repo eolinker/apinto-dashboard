@@ -88,8 +88,7 @@
               "node_modules/katex/dist/katex.min.css",
               "node_modules/github-markdown-css/github-markdown.css"
             ],
-            "scripts": [
-            ],
+            "scripts": [],
             "allowedCommonJsDependencies": [
               "ace-builds",
               "ace-builds/src-noconflict/ext-language_tools"

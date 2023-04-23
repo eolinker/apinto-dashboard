@@ -1,0 +1,36 @@
+<div class="w-[100%] overflow-x-hidden">
+  <section class="drawer-list-header mb-formtop">
+    <div>
+      <label class="label inline-blockw-[42px] text-right">名称：</label
+      ><span>{{ name }}</span>
+    </div>
+    <div>
+      <label class="label inline-block w-[42px] text-right">ID：</label
+      ><span>{{ id }}</span>
+    </div>
+    <div>
+      <label class="label inline-block w-[42px] text-right">描述：</label
+      ><span>{{ desc }}</span>
+    </div>
+  </section>
+  <div class="drawer-list-content">
+    <eo-ng-apinto-table
+      class=""
+      [nzTbody]="publishTableBody"
+      [nzThead]="publishTableHeadName"
+      [nzData]="publishList"
+      [nzTrClick]="tableClick"
+      [nzNoScroll]="true"
+    >
+    </eo-ng-apinto-table>
+  </div>
+  <div class="drawer-list-footer mt-formtop flex justify-end">
+    <span
+      >已选择{{ selectedNum }}项
+      <ng-container *ngIf="selectedNum">：</ng-container
+      ><ng-container *ngFor="let item of selectedClusters; let last = last"
+        >{{ item }}{{ last ? '' : ',' }}</ng-container
+      ></span
+    >
+  </div>
+</div>
