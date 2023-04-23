@@ -17,7 +17,6 @@ const (
 	// pluginTypeNotInner 非内置插件类型
 	pluginTypeNotInner = 3
 
-	pluginDriverRemote     = "remote"
-	pluginDriverLocal      = "local"
-	pluginDriverProfession = "profession"
+	pluginDriverRemote = "remote"
+	pluginDriverLocal  = "local"
 )
