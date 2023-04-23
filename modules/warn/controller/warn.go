@@ -184,7 +184,7 @@ func (w *warnController) strategys(ginCtx *gin.Context) {
 	})
 
 	//获取所有上游服务
-	serviceList, err := w.service.GetServiceListAll(ginCtx, namespaceId)
+	serviceList, err := w.service.GetServiceListAll(ginCtx, namespaceId, "")
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return

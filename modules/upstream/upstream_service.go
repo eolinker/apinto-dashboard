@@ -13,7 +13,7 @@ import (
 type IService interface {
 	GetServiceList(ctx context.Context, namespaceID int, searchName string, pageNum int, pageSize int) ([]*upstream_model.ServiceListItem, int, error)
 	GetServiceListByNames(ctx context.Context, namespaceID int, names []string) ([]*upstream_model.ServiceListItem, error)
-	GetServiceListAll(ctx context.Context, namespaceID int) ([]*upstream_model.ServiceListItem, error)
+	GetServiceListAll(ctx context.Context, namespaceID int, searchName string) ([]*upstream_model.ServiceListItem, error)
 	GetServiceInfo(ctx context.Context, namespaceID int, serviceName string) (*upstream_model.ServiceInfo, error)
 	CreateService(ctx context.Context, namespaceID, userId int, input *upstream_dto.ServiceInfo, variableList []string) (int, error)
 	UpdateService(ctx context.Context, namespaceID, userId int, input *upstream_dto.ServiceInfo, variableList []string) error
