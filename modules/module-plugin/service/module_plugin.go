@@ -3,12 +3,14 @@ package service
 import (
 	context "context"
 	"encoding/json"
+	"errors"
 	locker_service "github.com/eolinker/apinto-dashboard/modules/base/locker-service"
 	"github.com/eolinker/apinto-dashboard/modules/group"
 	module_plugin "github.com/eolinker/apinto-dashboard/modules/module-plugin"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/model"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/store"
 	"github.com/eolinker/eosc/common/bean"
+	"gorm.io/gorm"
 )
 
 type modulePlugin struct {
@@ -97,4 +99,34 @@ func (m *modulePlugin) GetNavigationModules(ctx context.Context) ([]*model.Navig
 		list = append(list, info)
 	}
 	return list, nil
+}
+
+func (m *modulePlugin) GetEnabledPluginByModuleName(ctx context.Context, moduleName string) (*model.ModulePluginInfo, error) {
+	enableInfo, err := m.pluginEnableStore.GetEnabledPluginByName(ctx, moduleName)
+	if err != nil && err != gorm.ErrRecordNotFound {
+		if err == gorm.ErrRecordNotFound {
+			return nil, errors.New("插件未启用")
+		}
+		return nil, err
+	}
+
+	plugin, err := m.pluginStore.Get(ctx, enableInfo.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	info := &model.ModulePluginInfo{
+		ModulePlugin: plugin,
+		Enable:       true,
+		CanDisable:   true,
+		Uninstall:    false,
+	}
+
+	//根据类型判断是否能停用
+	if IsPluginCanDisable(plugin.Type) {
+		info.CanDisable = false
+	}
+
+	return info, nil
+
 }
