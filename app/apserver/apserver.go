@@ -55,7 +55,6 @@ func (c *consoleServer) Wait() error {
 				c.close()
 				return nil
 			}
-
 		default:
 			continue
 		}
