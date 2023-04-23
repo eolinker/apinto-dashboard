@@ -2,11 +2,14 @@ package service
 
 import (
 	"context"
+	"time"
+
+	"github.com/eolinker/eosc/log"
+
 	"github.com/eolinker/apinto-dashboard/access"
 	"github.com/eolinker/apinto-dashboard/modules/user"
 	user_entry "github.com/eolinker/apinto-dashboard/modules/user/user-entry"
 	user_model "github.com/eolinker/apinto-dashboard/modules/user/user-model"
-	"time"
 )
 
 const AdminName = "admin"
@@ -36,8 +39,12 @@ func (u *userInfoService) GetUserInfoMaps(ctx context.Context, userIds ...int) (
 
 	maps := make(map[int]*user_model.UserInfo)
 	for _, userId := range userIds {
+		if _, ok := maps[userId]; ok {
+			continue
+		}
 		userInfo, err := u.GetUserInfo(ctx, userId)
 		if err != nil {
+			log.Error("get user info error: ", err)
 			continue
 		}
 		maps[userInfo.Id] = userInfo
