@@ -4,6 +4,7 @@ import (
 	context "context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	locker_service "github.com/eolinker/apinto-dashboard/modules/base/locker-service"
 	"github.com/eolinker/apinto-dashboard/modules/group"
 	module_plugin "github.com/eolinker/apinto-dashboard/modules/module-plugin"
@@ -50,22 +51,9 @@ func (m *modulePlugin) GetEnabledPlugins(ctx context.Context) ([]*model.EnabledP
 			Config: enableCfg,
 			Define: nil,
 		}
-		switch p.Driver {
-		case pluginDriverRemote:
-			remote := new(model.RemoteDefine)
-			_ = json.Unmarshal(p.Define, remote)
-			enablePlugin.Define = remote
-		case pluginDriverLocal:
-			local := new(model.LocalDefine)
-			_ = json.Unmarshal(p.Define, local)
-			enablePlugin.Define = local
-		case pluginDriverProfession:
-			profession := new(model.ProfessionDefine)
-			_ = json.Unmarshal(p.Define, profession)
-			enablePlugin.Define = profession
-		default:
-
-		}
+		define := new(model.PluginDefine)
+		_ = json.Unmarshal(p.Define, define)
+		enablePlugin.Define = define
 
 		enablePlugins = append(enablePlugins, enablePlugin)
 	}
@@ -80,21 +68,21 @@ func (m *modulePlugin) GetNavigationModules(ctx context.Context) ([]*model.Navig
 
 	list := make([]*model.NavigationModuleInfo, 0, len(moduleInfos))
 	for _, module := range moduleInfos {
-		//路由为空的不需要返回
-		if module.Front == "" {
+		//导航id不存在表示不需要在前端显示
+		if IsInnerPlugin(module.Type) && module.Front == "" {
 			continue
 		}
 		info := &model.NavigationModuleInfo{
 			Name:       module.Name,
 			Title:      module.Title,
-			Type:       "outer",
-			Path:       "",
+			Type:       "built-in",
+			Path:       module.Front,
 			Navigation: module.Navigation,
 		}
-		//若模块为内置模块
-		if IsInnerPlugin(module.Type) {
-			info.Type = "built-in"
-			info.Path = module.Front
+		//若模块为非内置模块
+		if !IsInnerPlugin(module.Type) {
+			info.Type = "outer"
+			info.Path = fmt.Sprintf("/%s", module.Name)
 		}
 		list = append(list, info)
 	}
