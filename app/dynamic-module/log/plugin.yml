@@ -1,0 +1,33 @@
+id: "log.apinto.com"
+name: "log"
+cname: "Access日志"
+resume: ""
+version: "v1.0.0"
+icon: "inner-plugin.png"
+driver: "dynamic.apinto.com"
+front: profession/access_log
+navigation: "navigation.system"
+group_id: "core_module"
+define:  # 动态模块定义
+  profession: output
+  drivers:
+    - name: file
+      title: 文件
+    - name: http_output
+      title: http请求
+    - name: nsqd
+      title: NSQD
+    - name: syslog_output
+      title: Syslog
+    - name: kafka_output
+      title: Kafka
+  skill: github.com/eolinker/apinto/http-entry.http-entry.IOutput
+  fields:
+    - name: title           # 定义从响应中对应字段中获取显示值
+      title: 名称
+    - name: id
+      title: ID
+    - name: description
+      title: 描述
+  render:
+    file:
