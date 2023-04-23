@@ -96,7 +96,7 @@ func (p *ProxyAPi) CreateHtml(dir string, appendLabel []string) apinto_module.Ro
 				ginCtx.Error(err)
 				return
 			}
-			if response.Header.Get("context-type")
+
 			for k, vs := range response.Header {
 				if len(vs) > 0 {
 					ginCtx.Header(k, vs[0])
