@@ -28,4 +28,6 @@ type IModulePlugin interface {
 	GetEnabledPlugins(ctx context.Context) ([]*model.EnabledPlugin, error)
 	//GetNavigationModules 获取导航接口所需要的模块列表
 	GetNavigationModules(ctx context.Context) ([]*model.NavigationModuleInfo, error)
+	//GetEnabledPluginByModuleName 根据已启用插件的模块名获取插件信息
+	GetEnabledPluginByModuleName(ctx context.Context, moduleName string) (*model.ModulePluginInfo, error)
 }
