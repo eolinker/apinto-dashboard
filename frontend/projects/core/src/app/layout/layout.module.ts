@@ -53,6 +53,9 @@ import { EoNgMenuModule } from 'eo-ng-menu'
 import { IframePageComponent } from './iframe-page/iframe-page.component'
 import { GuideComponent } from './guide/guide.component'
 import { NzDividerModule } from 'ng-zorro-antd/divider'
+import { DynamicDemoComponent } from './dynamic-demo/dynamic-demo.component'
+import { OuterComponent } from './outer/outer.component'
+import { SafePipe } from '../pipe/safe.pipe'
 
 @NgModule({
   declarations: [
@@ -65,7 +68,10 @@ import { NzDividerModule } from 'ng-zorro-antd/divider'
     AuthUpdateComponent,
     AuthInfoDetailComponent,
     IframePageComponent,
-    GuideComponent
+    GuideComponent,
+    DynamicDemoComponent,
+    OuterComponent,
+    SafePipe
   ],
   imports: [
     AppRoutingModule,
