@@ -8,9 +8,8 @@ import (
 func init() {
 	store.RegisterStore(func(db store.IDB) {
 		userInfo := newUserInfoStore(db)
-		userRole := newUserRoleStore(db)
+
 		bean.Injection(&userInfo)
 
-		bean.Injection(&userRole)
 	})
 }

@@ -2,6 +2,10 @@ package main
 
 import (
 	"fmt"
+	grpc_service "github.com/eolinker/apinto-dashboard/grpc-service"
+	"github.com/eolinker/apinto-dashboard/modules/grpc-service/service"
+	apinto_module "github.com/eolinker/apinto-module"
+	"google.golang.org/grpc"
 	"net"
 	"net/http"
 	"os"
@@ -60,14 +64,41 @@ func run() {
 	}
 	coreService.ReloadModule()
 	go plugin_timer.ExtenderTimer()
-	// todo 不适合开源，后续通过插件接入
-	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", GetPort()))
+
+	httpListener, err := net.Listen("tcp", fmt.Sprintf(":%d", GetPort()))
+	if err != nil {
+		panic(err)
+	}
+	grpcListener, err := net.Listen("tcp", fmt.Sprintf(":%d", 8181))
 	if err != nil {
 		panic(err)
 	}
 
-	s := http.Server{Handler: coreService}
-	s.Serve(listener)
+	httpServer := &http.Server{Handler: coreService}
+	grpcServer := grpc.NewServer()
+
+	grpc_service.RegisterGetConsoleInfoServer(grpcServer, service.NewConsoleInfoService())
+	grpc_service.RegisterNoticeSendServer(grpcServer, service.NewNoticeSendService())
+
+	console := newConsoleServer(httpServer, grpcServer)
+	go func() {
+		err := httpServer.Serve(httpListener)
+		if err != nil {
+			log.Error("listen httpServer error: ", err)
+		}
+	}()
+	go func() {
+		err := grpcServer.Serve(grpcListener)
+		if err != nil {
+			log.Error("listen grpcServer error: ", err)
+		}
+	}()
+
+	err = console.Wait()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 }
 
 type Front struct {
@@ -75,6 +106,6 @@ type Front struct {
 
 func (f *Front) CreateEngine() *gin.Engine {
 	engine := gin.Default()
-
+	engine.Use(apinto_module.SetRepeatReader)
 	return engine
 }
