@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/controller"
 	apinto_module "github.com/eolinker/apinto-module"
+	"github.com/eolinker/eosc/log"
 	"github.com/gin-gonic/gin"
 	"io"
 	"net/http"
@@ -74,18 +75,18 @@ func (p *ProxyAPi) createApi(name, method, prefix, path string, labels []string)
 			responseData, _ := io.ReadAll(response.Body)
 			response.Body.Close()
 
-			action := response.Header.Get("apinto-action")
+			event := response.Header.Get("apinto-event")
 
 			contentType := response.Header.Get("content-type")
 
-			if action == "update" {
-				updateResponse, err := apinto_module.DecodeUpdateResponse(data)
-				if err == nil {
-					for event, v := range updateResponse.Event {
-						apinto_module.DoEvent(event, v)
+			if len(event) > 0 {
+				eventObjs := make(map[string]any)
+				if err := json.Unmarshal([]byte(event), &eventObjs); err == nil {
+					for k, v := range eventObjs {
+						apinto_module.DoEvent(k, v)
 					}
-					contentType = updateResponse.ContentType
-					responseData = []byte(updateResponse.Body)
+				} else {
+					log.Warnf("invalid event for :%s.%s on %s %s", p.module, name, method, path)
 				}
 			}
 			ginCtx.Data(response.StatusCode, contentType, responseData)
