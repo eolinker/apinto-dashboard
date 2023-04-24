@@ -10,6 +10,11 @@ message GetApisReq {
   string path = 3;
 }
 
+message GetApisByServicesReq {
+  int32 namespace_id = 1;
+  repeated string services = 2;
+}
+
 message GetApisByUUIDsReq {
   int32 namespace_id = 1;
   repeated string uuids = 2;
@@ -79,6 +84,7 @@ service GetConsoleInfo {
   rpc GetAllNamespaces (EmptyRequest) returns (NamespacesListResp) {}
 
   rpc GetApis(GetApisReq) returns (ApisResp) {}
+  rpc GetApisByServices(GetApisByServicesReq) returns (ApisResp) {}
   rpc GetApisByUUIDs(GetApisByUUIDsReq) returns (ApisResp) {}
 
   rpc GetAllServices(GetServicesReq) returns (ServicesResp) {}
