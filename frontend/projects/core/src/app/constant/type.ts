@@ -61,6 +61,13 @@ export interface ClustersData{
   updateTime: string
 }
 
+// 简易集群列表，即将集群名与环境名组合在一起的一级目录
+export type ClusterSimpleOption = {
+  id:string
+  name:string
+  title:string
+}
+
 // 获取远程类型的选项（用在服务治理-筛选条件和监控告警-选择api和上游 -api
 export interface RemoteApiData{
   uuid: string,
