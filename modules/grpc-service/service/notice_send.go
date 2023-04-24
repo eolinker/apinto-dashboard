@@ -37,8 +37,12 @@ func NewNoticeSendService() grpc_service.NoticeSendServer {
 }
 
 func (n *noticeSendService) Send(ctx context.Context, req *grpc_service.NoticeSendReq) (*grpc_service.NoticeSendResp, error) {
-	//获取所有用户信息
-	userInfos, err := n.userService.GetUserInfoMaps(ctx)
+	//获取用户信息
+	userIds := make([]int, 0, len(req.UserIds))
+	for _, id := range req.UserIds {
+		userIds = append(userIds, int(id))
+	}
+	userInfos, err := n.userService.GetUserInfoMaps(ctx, userIds...)
 	if err != nil {
 		log.Errorf("warn-notice send fail. userService.userInfos error:%s", err.Error())
 		return nil, fmt.Errorf("获取用户信息失败 error:%s", err)
@@ -57,8 +61,8 @@ func (n *noticeSendService) Send(ctx context.Context, req *grpc_service.NoticeSe
 	//获取用户的邮箱和通知渠道ID
 	userEmailStr := make([]string, 0)
 	noticeUserId := make([]string, 0)
-	for _, userId := range req.UserIds {
-		if u, ok := userInfos[int(userId)]; ok {
+	for _, userId := range userIds {
+		if u, ok := userInfos[userId]; ok {
 			if len(strings.TrimSpace(u.Email)) > 0 {
 				userEmailStr = append(userEmailStr, u.Email)
 			}

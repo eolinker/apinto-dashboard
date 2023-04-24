@@ -32,11 +32,11 @@ func (c *ModulePlugin) IdValue() int {
 }
 
 type EnablePlugin struct {
-	UUID   string
-	Name   string
-	Driver string
-	Config []byte
-	Define []byte
+	UUID    string
+	Name    string
+	Driver  string
+	Config  []byte
+	Details []byte
 }
 
 // EnabledModule 启用的导航模块信息
