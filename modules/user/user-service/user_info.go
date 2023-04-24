@@ -27,8 +27,27 @@ func newUserInfoService() user.IUserInfoService {
 	apinto_module.RegisterEventHandler("login", u.loginHandler)
 	return u
 }
+func decode(v any) (*user_model.UserBase, error) {
+	return apinto_module.DecodeFor[user_model.UserBase](v)
+}
 func (u *userInfoService) loginHandler(login string, v any) {
-
+	userBase, err := decode(v)
+	if err != nil {
+		return
+	}
+	now := time.Now()
+	userEntry := &user_entry.UserInfo{
+		Id:            0,
+		Sex:           userBase.Sex,
+		UserName:      userBase.UserName,
+		NoticeUserId:  userBase.NoticeUserId,
+		NickName:      userBase.NickName,
+		Email:         userBase.Email,
+		Phone:         userBase.Phone,
+		Avatar:        userBase.Avatar,
+		LastLoginTime: &now,
+	}
+	u.userInfoStore.Save(context.Background(), userEntry)
 }
 func (u *userInfoService) GetUserInfoMaps(ctx context.Context, userIds ...int) (map[int]*user_model.UserInfo, error) {
 
