@@ -1,0 +1,97 @@
+import { Component, OnInit } from '@angular/core'
+import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
+import { IntelligentPluginService } from '../intelligent-plugin.service'
+import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
+import { ApiService } from '../../../service/api.service'
+import { DynamicPublish, DynamicPublishCluster, DynamicPublishData } from '../types/types'
+
+@Component({
+  selector: 'eo-ng-intelligent-plugin-publish',
+  templateUrl: './publish.component.html',
+  styles: [
+  ]
+})
+export class IntelligentPluginPublishComponent implements OnInit {
+  name:string = ''
+  id:string = ''
+  desc:string = ''
+  publishTableBody:TBODY_TYPE[] = [...this.service.createPluginTbody(this)]
+  publishTableHeadName:THEAD_TYPE[] = [...this.service.createPluginThead(this)]
+  publishList:DynamicPublishCluster[] = []
+  selectedNum:number = 0
+  selectedClusters:Array<string> = []
+  moduleName:string = ''
+  constructor (
+    private message: EoNgFeedbackMessageService,
+    private service:IntelligentPluginService,
+    private api:ApiService) {}
+
+  ngOnInit (): void {
+    this.getPublishList()
+  }
+
+  getPublishList () {
+    this.api.get(`dynamic/cluster/${this.moduleName}/${this.id}`).subscribe((resp:{code:number, msg:string, data:DynamicPublishData}) => {
+      if (resp.code === 0) {
+        this.publishList = resp.data.clusters
+      }
+    })
+  }
+
+  tableClick = (item:any) => {
+    console.log(item)
+    item.checked = !item.checked
+    item.data.checked = !item.data.checked
+    this.checkSelectedCluster()
+  }
+
+  // 点击表头全选
+  checkAll () {
+    console.log(this)
+    this.checkSelectedCluster()
+  }
+
+  // 点击单条数据
+  clickData (value:any) {
+    console.log(value)
+    this.checkSelectedCluster()
+  }
+
+  checkSelectedCluster () {
+    console.log(this.publishList)
+    this.selectedClusters = this.publishList.filter((item:any) => {
+      return item.checked
+    }).map((item) => {
+      return item.name
+    })
+    this.selectedNum = this.selectedClusters.length
+  }
+
+  offline () {
+    console.log(this)
+    const cluster:Array<string> = this.publishList.filter((item) => {
+      return item.checked
+    }).map((item) => {
+      return item.name
+    })
+    this.api.post(`dynamic/offline/${this.moduleName}/${this.id}`, { cluster: cluster }).subscribe((resp:DynamicPublish) => {
+      if (resp.code === 0) {
+        this.message.success(resp.msg)
+      }
+    })
+  }
+
+  online () {
+    console.log(this)
+    const cluster:Array<string> = this.publishList.filter((item) => {
+      return item.checked
+    }).map((item) => {
+      return item.name
+    })
+    this.api.post(`dynamic/online/${this.moduleName}/${this.id}`, { cluster: cluster }).subscribe((resp:DynamicPublish) => {
+      if (resp.code === 0) {
+        this.message.success(resp.msg)
+      }
+    })
+  }
+}

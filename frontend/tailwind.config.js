@@ -27,7 +27,9 @@ module.exports = {
         SEC_TEXT: 'var(--SEC_TEXT)',
         MAIN_DISABLED_BG: 'var(--disabled-background-color)',
         FIX_BG: '#ffffff',
-        theme: 'var(--primary-color)'
+        theme: 'var(--primary-color)',
+        DESC_TEXT: '#666666',
+        HOVER_BG: 'var(--item-hover-background-color)'
       },
       spacing: {
         mbase: '20px',

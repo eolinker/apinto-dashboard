@@ -1,0 +1,82 @@
+<div class="w-[100%] overflow-x-hidden">
+  <div
+    class="list-header pl-btnbase pr-btnrbase py-btnybase flex flex-nowrap items-center justify-between"
+  >
+    <button
+      eo-ng-button
+      class="ant-btn-primary"
+      eoNgUserAccess="application"
+      (disabledEdit)="disabledEdit($event)"
+      (click)="addData()"
+    >
+      新建{{ pluginName }}
+    </button>
+
+    <div>
+      <eo-ng-select
+        class="w-INPUT_NORMAL"
+        [nzMaxTagCount]="3"
+        [nzMaxTagPlaceholder]="tagPlaceHolder"
+        [nzShowCheckAll]="true"
+        nzMode="multiple"
+        nzPlaceHolder="所有集群"
+        [(ngModel)]="cluster"
+        (ngModelChange)="getTableData()"
+        [nzOptions]="clusterOptions"
+        [nzDisabled]="nzDisabled"
+        (disabledEdit)="disabledEdit($event)"
+      >
+      </eo-ng-select>
+      <ng-template #tagPlaceHolder let-selectedList
+        >and {{ selectedList.length }} more selected</ng-template
+      >
+
+      <eo-ng-search-input-group
+        class="ml-btnybase"
+        [eoInputVal]="keyword"
+        (eoClick)="keyword = ''; getTableData()"
+      >
+        <input
+          type="text"
+          eo-ng-input
+          [placeholder]="'搜索' + pluginName + '名称'"
+          [(ngModel)]="keyword"
+          (keyup.enter)="getTableData()"
+        />
+      </eo-ng-search-input-group>
+    </div>
+  </div>
+
+  <div class="list-content pb-[4px]">
+    <eo-ng-apinto-table
+      class=""
+      [nzTbody]="tableBody"
+      [nzThead]="tableHeadName"
+      [nzData]="tableData.data"
+      [nzTrClick]="tableClick"
+      [nzMaxOperatorButton]="3"
+      [nzNoScroll]="true"
+      [nzShowPagination]="tableData.pagination"
+      [nzFrontPagination]="!tableData.pagination"
+      [nzTotal]="tableData.total"
+      [(nzPageIndex)]="tableData.pageNum"
+      [(nzPageSize)]="tableData.pageSize"
+      (nzPageIndexChange)="getList()"
+      (nzPageSizeChange)="getList()"
+    >
+    </eo-ng-apinto-table>
+  </div>
+</div>
+
+<ng-template
+  #clusterStatusTpl
+  let-item="item"
+  let-originItem="originItem"
+  let-index="index"
+  let-rowItem="rowItem"
+  let-apis="apis"
+>
+  <eo-ng-table-status [status]="item[rowItem.key]"></eo-ng-table-status>
+</ng-template>
+
+<ng-template #loadingTpl let-item="item"> <nz-spin nzSimple></nz-spin> </ng-template>

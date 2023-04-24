@@ -24,7 +24,8 @@ func (m *ModuleController) HandleModule(ginCtx *gin.Context) {
 	if hasModule {
 		frontend.IndexHtml(ginCtx)
 	} else {
-		ginCtx.Redirect(302, "/")
+		//ginCtx.Redirect(302, "/")
+		frontend.IndexHtml(ginCtx)
 	}
 
 }
