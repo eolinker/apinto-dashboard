@@ -645,7 +645,7 @@ func (m *monitorController) getStatistics(ginCtx *gin.Context) {
 				return
 			}
 		} else {
-			serviceList, err = m.service.GetServiceListAll(ginCtx, namespaceId)
+			serviceList, err = m.service.GetServiceListAll(ginCtx, namespaceId, "")
 			if err != nil {
 				controller.ErrorJson(ginCtx, http.StatusOK, "query services error = "+err.Error())
 				return

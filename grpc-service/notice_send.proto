@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option go_package = "github.com/eolinker/apinto-monitor/grpc-service";
+
+message NoticeSendResp {
+  int32 send_status = 1;
+  string err_msg = 2;
+}
+
+message NoticeMsg {
+  string title = 1;
+  string msg = 2;
+}
+
+message NoticeSendReq {
+  repeated string user_names = 1;
+  int32 namespace_id = 2;
+  map<string, NoticeMsg> notices = 3;
+}
+
+service NoticeSend {
+  rpc Send(NoticeSendReq) returns (NoticeSendResp) {}
+}
