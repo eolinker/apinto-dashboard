@@ -1,8 +1,17 @@
 package service
 
-import "github.com/eolinker/eosc/common/bean"
+import (
+	"github.com/eolinker/apinto-dashboard/cache"
+	"github.com/eolinker/eosc/common/bean"
+	"github.com/go-redis/redis/v8"
+)
 
 func init() {
 	infoService := newUserInfoService()
 	bean.Injection(&infoService)
+
+	cache.RegisterCacheInitHandler(func(client *redis.ClusterClient) {
+		userInfo := newUserInfoCache(client)
+		bean.Injection(&userInfo)
+	})
 }
