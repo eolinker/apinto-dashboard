@@ -8,6 +8,7 @@ import (
 	"time"
 
 	cluster_model "github.com/eolinker/apinto-dashboard/modules/cluster/cluster-model"
+	"github.com/eolinker/apinto-dashboard/modules/user"
 
 	"gorm.io/gorm"
 
@@ -32,7 +33,7 @@ const (
 )
 
 type dynamicService struct {
-	//userService    user.IUserInfoService
+	userService    user.IUserInfoService
 	clusterService cluster.IClusterService
 
 	dynamicStore        dynamic_store.IDynamicStore
@@ -75,10 +76,10 @@ func (d *dynamicService) List(ctx context.Context, namespaceId int, profession s
 	items := make([]map[string]string, 0, len(list))
 	for _, l := range list {
 		updater := ""
-		//u, err := d.userService.GetUserInfo(ctx, l.Updater)
-		//if err == nil {
-		//	updater = u.UserName
-		//}
+		u, err := d.userService.GetUserInfo(ctx, l.Updater)
+		if err == nil {
+			updater = u.UserName
+		}
 
 		item := map[string]string{
 			"id":          l.Name,
@@ -217,7 +218,7 @@ func (d *dynamicService) Online(ctx context.Context, namespaceId int, profession
 			CreateTime:  now,
 		}
 		history := &dynamic_entry.DynamicPublishHistory{
-			VersionName: info.Version,
+			VersionName: cfg.Version,
 			ClusterId:   c.Id,
 			NamespaceId: namespaceId,
 			Publish:     cfg,
@@ -324,10 +325,11 @@ func (d *dynamicService) ClusterStatus(ctx context.Context, namespaceId int, pro
 		return nil, nil, err
 	}
 	result := make([]*dynamic_model.DynamicCluster, 0, len(clusters))
+	online := false
 	for _, c := range clusters {
 		v, err := d.publishHistoryStore.First(ctx, map[string]interface{}{
 			"namespace":    namespaceId,
-			"cluster":      c.Cluster,
+			"cluster":      c.Id,
 			"target":       moduleInfo.Id,
 			"version_name": moduleInfo.Version,
 			"kind":         "dynamic_module",
@@ -351,15 +353,17 @@ func (d *dynamicService) ClusterStatus(ctx context.Context, namespaceId int, pro
 			})
 			continue
 		}
-		status := statusOnline
-		if info.BasicInfo.Version != moduleInfo.Version {
-			status = statusOffline
+		status := statusOffline
+		if info.BasicInfo.Version == moduleInfo.Version {
+			status = statusOnline
+			online = true
+
 		}
 		updater := ""
-		//u, err := d.userService.GetUserInfo(ctx, v.Operator)
-		//if err == nil {
-		//	updater = u.UserName
-		//}
+		u, err := d.userService.GetUserInfo(ctx, v.Operator)
+		if err == nil {
+			updater = u.UserName
+		}
 		result = append(result, &dynamic_model.DynamicCluster{
 			Name:       c.Name,
 			Title:      c.Name,
@@ -372,6 +376,7 @@ func (d *dynamicService) ClusterStatus(ctx context.Context, namespaceId int, pro
 		ID:          moduleInfo.Name,
 		Title:       moduleInfo.Title,
 		Description: moduleInfo.Description,
+		Online:      online,
 	}, result, nil
 }
 
@@ -463,7 +468,7 @@ func (d *dynamicService) saveVersion(ctx context.Context, version *dynamic_entry
 func newDynamicService() dynamic.IDynamicService {
 	d := &dynamicService{}
 	bean.Autowired(&d.dynamicStore)
-	//bean.Autowired(&d.userService)
+	bean.Autowired(&d.userService)
 	bean.Autowired(&d.clusterService)
 	bean.Autowired(&d.publishVersionStore)
 	bean.Autowired(&d.publishHistoryStore)
