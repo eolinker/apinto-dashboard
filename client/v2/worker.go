@@ -7,9 +7,49 @@ import (
 
 var existKeys = getFieldTags(reflect.TypeOf(BasicInfo{}))
 
-type WorkerInfo struct {
-	*BasicInfo
-	Append map[string]interface{}
+type WorkerInfo[T any] struct {
+	BasicInfo *T
+	Append    map[string]interface{}
+}
+
+func (r *WorkerInfo[T]) UnmarshalJSON(bytes []byte) error {
+	basicInfo := new(T)
+	err := json.Unmarshal(bytes, basicInfo)
+	if err != nil {
+		return err
+	}
+	tmp := make(map[string]interface{})
+	err = json.Unmarshal(bytes, &tmp)
+	if err != nil {
+		return err
+	}
+	r.BasicInfo = basicInfo
+	for _, key := range existKeys {
+		delete(tmp, key)
+	}
+	r.Append = tmp
+	return nil
+}
+
+func (r *WorkerInfo[T]) MarshalJSON() ([]byte, error) {
+	tmp := make(map[string]interface{})
+	for key, value := range r.Append {
+		tmp[key] = value
+	}
+	val := reflect.ValueOf(r.BasicInfo)
+	if val.Kind() == reflect.Pointer {
+		val = val.Elem()
+	}
+	num := val.NumField()
+	typ := val.Type()
+	for i := 0; i < num; i++ {
+		tag := typ.Field(i).Tag.Get("json")
+		if tag == "-" || tag == "" {
+			continue
+		}
+		tmp[tag] = val.Field(i).Interface()
+	}
+	return json.Marshal(tmp)
 }
 
 type BasicInfo struct {
@@ -33,23 +73,4 @@ func getFieldTags(typ reflect.Type) []string {
 		tags = append(tags, typ.Field(i).Tag.Get("json"))
 	}
 	return tags
-}
-
-func (r *WorkerInfo) UnmarshalJSON(bytes []byte) error {
-	basicInfo := new(BasicInfo)
-	err := json.Unmarshal(bytes, basicInfo)
-	if err != nil {
-		return err
-	}
-	tmp := make(map[string]interface{})
-	err = json.Unmarshal(bytes, &tmp)
-	if err != nil {
-		return err
-	}
-	r.BasicInfo = basicInfo
-	for _, key := range existKeys {
-		delete(tmp, key)
-	}
-	r.Append = tmp
-	return nil
 }
