@@ -5,7 +5,7 @@ resume: ""
 version: "v1.0.0"
 icon: "inner-plugin.png"
 driver: "dynamic.apinto.com"
-front: template/access_log
+front: profession/access_log
 navigation: "navigation.system"
 group_id: "core_module"
 define:  # 动态模块定义

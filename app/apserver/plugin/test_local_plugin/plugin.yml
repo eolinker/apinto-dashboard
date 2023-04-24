@@ -1,0 +1,24 @@
+id: "test_local_plugin" # uuid ,扩展的唯一标识
+name: "test_local" # 插件名，小写英文，数字、下划线，不区分大小写，不能以数字开头，将作为安装时的默认模块名
+cname: "测试的local_plugin" # 昵称，格式不限，用于显示
+navigation: ""
+version: "v1.0.0"
+resume: "" # 简介， 100字以内，用于列表显示
+icon: "inner-plugin.png" #  图标的文件名，相对路径
+driver: "local" # 类型
+local: # type = local 时生效，所有通过控制台代理发起请求（包括iframe）
+  server: "" # 服务器地址， 包括协议， 如  https://www.apispace.com
+  api: # 路由定义
+    paths:
+      GET: # POST GET PUT DELETE
+        /asd/asd/asd:  # path, 支持 restful，不过包括前缀， 如 /upstream/
+          label:
+            - test
+  path: "/asd" # 入口url，invisible = true时 忽略
+  invisible: false
+  headers: #打开扩展需要的header, 调用模块时会传给他，包括 api、middleware和 iframe前端
+    - name: "a" #参数名
+      value: "a" #默认值 或 demo值
+      title: "测试header" #字段名
+      placeholder: "测试placeholder" #字段输入辅助
+      desc: "描述" #描述

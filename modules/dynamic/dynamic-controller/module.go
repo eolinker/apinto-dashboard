@@ -1,7 +1,6 @@
 package dynamic_controller
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -16,28 +15,17 @@ func NewDynamicModuleDriver() apinto_module.Driver {
 }
 
 func (c *DynamicModuleDriver) CreatePlugin(define interface{}) (apinto_module.Plugin, error) {
-	data, err := json.Marshal(define)
-	if err != nil {
-		return nil, err
-	}
-	target := new(DynamicModulePlugin)
-	err = json.Unmarshal(data, target)
-	if err != nil {
-		return nil, err
-	}
-	return target, nil
+	return &DynamicModulePlugin{
+		define: define,
+	}, nil
 }
 
 type DynamicModulePlugin struct {
-	Profession string            `json:"profession"`
-	Drivers    []*Basic          `json:"drivers"`
-	Fields     []*Basic          `json:"fields"`
-	Skill      string            `json:"skill"`
-	Render     map[string]string `json:"render"`
+	define interface{}
 }
 
 func (d *DynamicModulePlugin) CreateModule(name string, config interface{}) (apinto_module.Module, error) {
-	return NewDynamicModule(name, d), nil
+	return NewDynamicModule(name, d.define), nil
 }
 
 func (d *DynamicModulePlugin) CheckConfig(name string, config interface{}) error {
@@ -45,8 +33,8 @@ func (d *DynamicModulePlugin) CheckConfig(name string, config interface{}) error
 }
 
 type DynamicModule struct {
-	name string
-	*DynamicModulePlugin
+	name    string
+	define  interface{}
 	routers apinto_module.RoutersInfo
 }
 
@@ -66,8 +54,8 @@ func (c *DynamicModule) Middleware() (apinto_module.Middleware, bool) {
 	return nil, false
 }
 
-func NewDynamicModule(name string, define *DynamicModulePlugin) *DynamicModule {
-	dm := &DynamicModule{name: name, DynamicModulePlugin: define}
+func NewDynamicModule(name string, define interface{}) *DynamicModule {
+	dm := &DynamicModule{name: name, define: define}
 	dm.initRouter()
 	return dm
 }
@@ -76,7 +64,7 @@ func (c *DynamicModule) RoutersInfo() apinto_module.RoutersInfo {
 	return c.routers
 }
 func (c *DynamicModule) initRouter() {
-	dynamicController := newDynamicController(c.name, c.DynamicModulePlugin)
+	dynamicController := newDynamicController(c.name, c.define)
 	c.routers = []apinto_module.RouterInfo{
 		{
 			Method:      http.MethodGet,
