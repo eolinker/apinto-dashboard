@@ -2,79 +2,105 @@ package service
 
 import (
 	"context"
-	"github.com/eolinker/apinto-dashboard/access"
+	"fmt"
+	"github.com/eolinker/apinto-dashboard/cache"
 	"github.com/eolinker/apinto-dashboard/modules/user"
 	user_entry "github.com/eolinker/apinto-dashboard/modules/user/user-entry"
 	user_model "github.com/eolinker/apinto-dashboard/modules/user/user-model"
+	user_store "github.com/eolinker/apinto-dashboard/modules/user/user-store"
+	"github.com/eolinker/eosc/common/bean"
 	"time"
 )
 
 const AdminName = "admin"
 const defaultPwd = "12345678"
 
-var (
-	accessSet = make(map[access.Access]struct{})
-)
-
-func init() {
-	all := access.All()
-	for _, a := range all {
-		accessSet[a] = struct{}{}
-	}
-}
-
 type userInfoService struct {
+	userInfoStore user_store.IUserInfoStore
+	cache         cache.IRedisCache[user_model.UserInfo]
 }
 
 func newUserInfoService() user.IUserInfoService {
 	u := &userInfoService{}
-
+	bean.Autowired(&u.userInfoStore)
 	return u
 }
 
 func (u *userInfoService) GetUserInfoMaps(ctx context.Context, userIds ...int) (map[int]*user_model.UserInfo, error) {
 
 	maps := make(map[int]*user_model.UserInfo)
+	need := make([]int, 0, len(userIds))
+
 	for _, userId := range userIds {
-		userInfo, err := u.GetUserInfo(ctx, userId)
-		if err != nil {
-			continue
+		userInfo, ok := u.getCache(ctx, userId)
+		if ok {
+			maps[userInfo.Id] = userInfo
+		} else {
+			need = append(need, userId)
 		}
-		maps[userInfo.Id] = userInfo
+	}
+	if len(need) > 0 {
+		if len(need) < 5 {
+			for _, userId := range need {
+				userInfo, err := u.GetUserInfo(ctx, userId)
+				if err == nil {
+					maps[userInfo.Id] = userInfo
+				} else {
+
+				}
+			}
+		}
 	}
 
 	return maps, nil
 }
+func (u *userInfoService) getCache(ctx context.Context, userID int) (*user_model.UserInfo, bool) {
+	key := fmt.Sprintf("apinto:userinfo-id:%d", userID)
+	userModel, err := u.cache.Get(ctx, key)
+	if err != nil {
+		return nil, false
+	}
+	return userModel, true
+}
 
 // GetUserInfo 获取不到用户信息记录错误即可，不必返回error
 func (u *userInfoService) GetUserInfo(ctx context.Context, userID int) (*user_model.UserInfo, error) {
-	return &user_model.UserInfo{
-		UserInfo: &user_entry.UserInfo{
+	key := fmt.Sprintf("apinto:userinfo-id:%d", userID)
+	userModel, err := u.cache.Get(ctx, key)
+	if err == nil {
+		return userModel, nil
+	}
+	userInfo, err := u.userInfoStore.Get(ctx, userID)
+	if err != nil {
+		userModel = &user_model.UserInfo{
 			Id:            userID,
 			Sex:           0,
-			UserName:      AdminName,
+			UserName:      "unknown",
 			NoticeUserId:  "",
-			NickName:      AdminName,
-			Email:         "",
-			Phone:         "",
+			NickName:      "unknown",
+			Email:         "unknown",
+			Phone:         "unknown",
 			Avatar:        "",
-			Remark:        "",
-			RoleIds:       "",
-			Status:        0,
-			IsDelete:      false,
-			Operator:      0,
-			FlushTime:     time.Time{},
-			CreateTime:    time.Time{},
-			UpdateTime:    time.Time{},
 			LastLoginTime: nil,
-		},
-		OperateEnable: false,
-		Operator:      "",
-	}, nil
-
+		}
+	} else {
+		userModel = entryToModule(userInfo)
+	}
+	u.cache.Set(ctx, key, userModel, time.Hour)
+	return userModel, nil
 }
 
-func (u *userInfoService) GetAccessInfo(ctx context.Context, userId int) (map[access.Access]struct{}, error) {
-	// todo 临时实现，后续插件化
-	return accessSet, nil
+func entryToModule(info *user_entry.UserInfo) *user_model.UserInfo {
+
+	return &user_model.UserInfo{
+		Id:            info.Id,
+		Sex:           info.Sex,
+		UserName:      info.UserName,
+		NoticeUserId:  info.NoticeUserId,
+		NickName:      info.NickName,
+		Email:         info.Email,
+		Phone:         info.Phone,
+		Avatar:        info.Avatar,
+		LastLoginTime: info.LastLoginTime,
+	}
 }
