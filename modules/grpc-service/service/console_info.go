@@ -89,6 +89,27 @@ func (c *consoleInfoService) GetApisByUUIDs(ctx context.Context, req *grpc_servi
 	}, nil
 }
 
+func (c *consoleInfoService) GetApisByServices(ctx context.Context, req *grpc_service.GetApisByServicesReq) (*grpc_service.ApisResp, error) {
+	apis, err := c.apiService.GetAPIListByServiceName(ctx, int(req.NamespaceId), req.Services)
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return nil, fmt.Errorf("通过服务列表获取API列表报错. err: %s", err)
+	}
+	items := make([]*grpc_service.ApisItem, 0, len(apis))
+	for _, apiInfo := range apis {
+		items = append(items, &grpc_service.ApisItem{
+			Uuid:      apiInfo.UUID,
+			Name:      apiInfo.Name,
+			GroupUuid: apiInfo.GroupUUID,
+			Path:      apiInfo.RequestPathLabel,
+			Desc:      apiInfo.Desc,
+			Methods:   apiInfo.Method,
+		})
+	}
+	return &grpc_service.ApisResp{
+		Items: items,
+	}, nil
+}
+
 func (c *consoleInfoService) GetAllServices(ctx context.Context, req *grpc_service.GetServicesReq) (*grpc_service.ServicesResp, error) {
 	services, err := c.upstreamService.GetServiceListAll(ctx, int(req.NamespaceId), req.Name)
 	if err != nil && err != gorm.ErrRecordNotFound {
