@@ -7,7 +7,6 @@ message EmptyRequest {
 
 message GetApisReq {
   int32 namespace_id = 1;
-  string name = 2;
   string path = 3;
 }
 
@@ -33,7 +32,6 @@ message GetServicesByNamesReq {
 
 message GetAppsReq {
   int32 namespace_id = 1;
-  string name = 2;
 }
 
 message GetAppsByUuidsReq {
@@ -86,6 +84,7 @@ service GetConsoleInfo {
   rpc GetAllNamespaces (EmptyRequest) returns (NamespacesListResp) {}
 
   rpc GetApis(GetApisReq) returns (ApisResp) {}
+  rpc GetApisByServices(GetApisByServicesReq) returns (ApisResp) {}
   rpc GetApisByUUIDs(GetApisByUUIDsReq) returns (ApisResp) {}
 
   rpc GetAllServices(GetServicesReq) returns (ServicesResp) {}

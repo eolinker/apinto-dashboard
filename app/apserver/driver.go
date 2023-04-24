@@ -18,6 +18,7 @@ import (
 	upstream_controller "github.com/eolinker/apinto-dashboard/modules/upstream/controller"
 	variable_controller "github.com/eolinker/apinto-dashboard/modules/variable/variable-controller"
 	webhook_controller "github.com/eolinker/apinto-dashboard/modules/webhook/controller"
+	"github.com/eolinker/apinto-dashboard/plugin/local"
 	apintoModule "github.com/eolinker/apinto-module"
 )
 
@@ -41,6 +42,9 @@ func init() {
 	apintoModule.Register("strategy-visit.apinto.com", strategy_controller.NewStrategyVisit())
 	apintoModule.Register("upstream.apinto.com", upstream_controller.NewUpstreamDriver())
 	apintoModule.Register("variable.apinto.com", variable_controller.NewVariableDriver())
+
+	apintoModule.Register("local", local.NewDriver())
+
 	apintoModule.Register("email.apinto.com", email_controller.NewEmailDriver())
 	apintoModule.Register("webhook.apinto.com", webhook_controller.NewWebhookDriver())
 	apintoModule.Register("dynamic.apinto.com", dynamic_controller.NewDynamicModuleDriver())
