@@ -1,6 +1,7 @@
 package v2
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"testing"
@@ -16,6 +17,12 @@ func TestClient(t *testing.T) {
 	for _, r := range result {
 		fmt.Println(r)
 	}
+	data, err := json.Marshal(result)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	fmt.Println(string(data))
 }
 
 func TestStructKey(t *testing.T) {

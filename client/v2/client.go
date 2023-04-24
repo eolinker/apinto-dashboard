@@ -9,9 +9,9 @@ import (
 )
 
 type IClient interface {
-	List(profession string) ([]*WorkerInfo, error)
-	Info(profession string, name string) (*WorkerInfo, error)
-	Set(profession string, name string, info *WorkerInfo) error
+	List(profession string) ([]*WorkerInfo[BasicInfo], error)
+	Info(profession string, name string) (*WorkerInfo[BasicInfo], error)
+	Set(profession string, name string, info *WorkerInfo[BasicInfo]) error
 	Delete(profession string, name string) error
 	Cluster() (*Cluster, error)
 	Addr() string
@@ -49,12 +49,12 @@ func (c *Client) Addr() string {
 	return c.addr
 }
 
-func (c *Client) List(profession string) ([]*WorkerInfo, error) {
+func (c *Client) List(profession string) ([]*WorkerInfo[BasicInfo], error) {
 	respBody, err := sendTo(c.client, http.MethodGet, fmt.Sprintf("%s/api/%s", c.addr, profession), nil, "", []int{200})
 	if err != nil {
 		return nil, err
 	}
-	result := make([]*WorkerInfo, 0)
+	result := make([]*WorkerInfo[BasicInfo], 0)
 	err = json.Unmarshal(respBody, &result)
 	if err != nil {
 		return nil, fmt.Errorf("unmarshal data error: %w, body is %s", err, respBody)
@@ -62,12 +62,12 @@ func (c *Client) List(profession string) ([]*WorkerInfo, error) {
 	return result, nil
 }
 
-func (c *Client) Info(profession string, name string) (*WorkerInfo, error) {
+func (c *Client) Info(profession string, name string) (*WorkerInfo[BasicInfo], error) {
 	respBody, err := sendTo(c.client, http.MethodGet, fmt.Sprintf("%s/api/%s/%s", c.addr, profession, name), nil, "", []int{200})
 	if err != nil {
 		return nil, err
 	}
-	result := new(WorkerInfo)
+	result := new(WorkerInfo[BasicInfo])
 	err = json.Unmarshal(respBody, result)
 	if err != nil {
 		return nil, fmt.Errorf("unmarshal data error: %w, body is %s", err, respBody)
@@ -75,7 +75,7 @@ func (c *Client) Info(profession string, name string) (*WorkerInfo, error) {
 	return result, nil
 }
 
-func (c *Client) Set(profession string, name string, info *WorkerInfo) error {
+func (c *Client) Set(profession string, name string, info *WorkerInfo[BasicInfo]) error {
 	header := http.Header{}
 	header.Set("content-type", "application/json")
 	body, _ := json.Marshal(info)

@@ -33,7 +33,7 @@ type DynamicModulePlugin struct {
 	Drivers    []*Basic          `json:"drivers"`
 	Fields     []*Basic          `json:"fields"`
 	Skill      string            `json:"skill"`
-	Render     map[string]Render `json:"render"`
+	Render     map[string]string `json:"render"`
 }
 
 func (d *DynamicModulePlugin) CreateModule(name string, config interface{}) (apinto_module.Module, error) {

@@ -2244,49 +2244,51 @@ func (a *apiService) GetAPIListByName(ctx context.Context, namespaceId int, name
 }
 
 func (a *apiService) GetAPIListByServiceName(ctx context.Context, namespaceId int, serviceNames []string) ([]*apimodel.APIInfo, error) {
-
-	var err error
-	groupAPIs := make([]*apimodel.APIInfo, 0)
-
-	for _, serviceName := range serviceNames {
-
-		target := 0
-		if serviceName != "" {
-			serviceId, err := a.service.GetServiceIDByName(ctx, namespaceId, serviceName)
-			if err != nil {
-				return nil, err
-			}
-			target = serviceId
-		}
-
-		apiList := make([]*apientry.API, 0)
-
-		if target > 0 {
-			quote, err := a.quoteStore.GetTargetQuote(ctx, target, quote_entry.QuoteTargetKindTypeService)
-			if err != nil {
-				return nil, err
-			}
-			apiList, err = a.apiStore.GetByIds(ctx, namespaceId, quote[quote_entry.QuoteKindTypeAPI])
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			apiList, err = a.apiStore.GetListAll(ctx, namespaceId)
-			if err != nil {
-				return nil, err
-			}
-		}
-
-		for _, api := range apiList {
-			groupApi := &apimodel.APIInfo{
-				API: api,
-			}
-			groupAPIs = append(groupAPIs, groupApi)
-		}
-
+	if len(serviceNames) == 0 {
+		return []*apimodel.APIInfo{}, nil
 	}
 
-	return groupAPIs, nil
+	apiIDSet := make(map[int]struct{})
+	for _, serviceName := range serviceNames {
+		if strings.TrimSpace(serviceName) == "" {
+			continue
+		}
+
+		target, err := a.service.GetServiceIDByName(ctx, namespaceId, serviceName)
+		if err != nil {
+			continue
+		}
+		quote, err := a.quoteStore.GetTargetQuote(ctx, target, quote_entry.QuoteTargetKindTypeService)
+		if err != nil {
+			return nil, err
+		}
+
+		//apiID去重
+		for _, id := range quote[quote_entry.QuoteKindTypeAPI] {
+			if _, has := apiIDSet[id]; !has {
+				apiIDSet[id] = struct{}{}
+			}
+		}
+	}
+	apiIDList := make([]int, 0, len(apiIDSet))
+	for id := range apiIDSet {
+		apiIDList = append(apiIDList, id)
+	}
+
+	apis := make([]*apimodel.APIInfo, 0)
+	apiList, err := a.apiStore.GetByIds(ctx, namespaceId, apiIDList)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, api := range apiList {
+		groupApi := &apimodel.APIInfo{
+			API: api,
+		}
+		apis = append(apis, groupApi)
+	}
+
+	return apis, nil
 }
 
 func (a *apiService) isApiCanDelete(ctx context.Context, apiId int) (bool, error) {
