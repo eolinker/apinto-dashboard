@@ -8,7 +8,7 @@ type Dynamic struct {
 	Name        string    `gorm:"column:name"`
 	Title       string    `gorm:"column:title"`
 	Driver      string    `gorm:"column:driver"`
-	Description string    `gorm:"column:desc"`
+	Description string    `gorm:"column:description"`
 	Version     string    `gorm:"column:version"`
 	Config      string    `gorm:"column:config"`
 	Profession  string    `gorm:"column:profession"`
