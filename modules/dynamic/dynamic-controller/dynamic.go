@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/eolinker/eosc/log"
+
 	dynamic_dto "github.com/eolinker/apinto-dashboard/modules/dynamic/dynamic-dto"
 
 	module_plugin "github.com/eolinker/apinto-dashboard/modules/module-plugin"
@@ -23,11 +25,37 @@ type dynamicController struct {
 	modulePluginService module_plugin.IModulePlugin
 	dynamicService      dynamic.IDynamicService
 	clusterService      cluster.IClusterService
-	*DynamicModulePlugin
+
+	Profession string
+	Drivers    []*Basic
+	Fields     []*Basic
+	Skill      string
+	Render     map[string]Render
 }
 
-func newDynamicController(name string, define *DynamicModulePlugin) *dynamicController {
-	d := &dynamicController{moduleName: name, DynamicModulePlugin: define}
+func newDynamicController(name string, define interface{}) *dynamicController {
+	tmp, _ := json.Marshal(define)
+	var cfg DynamicDefine
+	json.Unmarshal(tmp, &cfg)
+	render := make(map[string]Render)
+	for key, value := range cfg.Render {
+		r := make(Render)
+		err := json.Unmarshal([]byte(value), &r)
+		if err != nil {
+			log.Errorf("dynamic define parse error: %w,body is %s", err, value)
+			continue
+		}
+		render[key] = r
+	}
+
+	d := &dynamicController{
+		moduleName: name,
+		Profession: cfg.Profession,
+		Drivers:    cfg.Drivers,
+		Fields:     cfg.Fields,
+		Skill:      cfg.Skill,
+		Render:     render,
+	}
 	bean.Autowired(&d.dynamicService)
 	return d
 }
@@ -144,9 +172,37 @@ func (c *dynamicController) offline(ctx *gin.Context) {
 }
 
 func (c *dynamicController) render(ctx *gin.Context) {
+	pluginInfo, err := c.modulePluginService.GetEnabledPluginByModuleName(ctx, c.moduleName)
+	if err != nil {
+		controller.ErrorJson(ctx, http.StatusOK, err.Error())
+		return
+	}
+	ctx.JSON(http.StatusOK, controller.NewSuccessResult(map[string]interface{}{
+		"id":     pluginInfo.UUID,
+		"name":   pluginInfo.Name,
+		"title":  pluginInfo.CName,
+		"render": c.Render,
+	}))
 }
 
 func (c *dynamicController) clusterStatusList(ctx *gin.Context) {
+	namespaceID := namespace_controller.GetNamespaceId(ctx)
+	keyword := ctx.GetString("keyword")
+	clusters := ctx.GetStringSlice("cluster")
+	page := ctx.GetInt("page")
+	pageSize := ctx.GetInt("page_size")
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		page = 15
+	}
+	clusterInfo, err := c.dynamicService.ClusterStatuses(ctx, namespaceID, c.Profession, clusters, keyword, page, pageSize)
+	if err != nil {
+		controller.ErrorJson(ctx, http.StatusOK, err.Error())
+		return
+	}
+	ctx.JSON(http.StatusOK, controller.NewSuccessResult(clusterInfo))
 }
 
 func (c *dynamicController) clusterStatus(ctx *gin.Context) {

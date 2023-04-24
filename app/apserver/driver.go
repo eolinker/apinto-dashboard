@@ -7,6 +7,7 @@ import (
 	clusterController "github.com/eolinker/apinto-dashboard/modules/cluster/cluster-controller"
 	coreController "github.com/eolinker/apinto-dashboard/modules/core/controller"
 	discovery_controller "github.com/eolinker/apinto-dashboard/modules/discovery/discovery-controller"
+	dynamic_controller "github.com/eolinker/apinto-dashboard/modules/dynamic/dynamic-controller"
 	email_controller "github.com/eolinker/apinto-dashboard/modules/email/controller"
 	module_plugin_controller "github.com/eolinker/apinto-dashboard/modules/module-plugin/controller"
 	open_api_controller "github.com/eolinker/apinto-dashboard/modules/openapi/open-api-controller"
@@ -42,5 +43,6 @@ func init() {
 	apintoModule.Register("variable.apinto.com", variable_controller.NewVariableDriver())
 	apintoModule.Register("email.apinto.com", email_controller.NewEmailDriver())
 	apintoModule.Register("webhook.apinto.com", webhook_controller.NewWebhookDriver())
+	apintoModule.Register("dynamic.apinto.com", dynamic_controller.NewDynamicModuleDriver())
 
 }
