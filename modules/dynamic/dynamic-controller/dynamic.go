@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
+	cluster_model "github.com/eolinker/apinto-dashboard/modules/cluster/cluster-model"
+
 	"github.com/eolinker/eosc/log"
 
 	dynamic_dto "github.com/eolinker/apinto-dashboard/modules/dynamic/dynamic-dto"
@@ -57,6 +59,8 @@ func newDynamicController(name string, define interface{}) *dynamicController {
 		Render:     render,
 	}
 	bean.Autowired(&d.dynamicService)
+	bean.Autowired(&d.modulePluginService)
+	bean.Autowired(&d.clusterService)
 	return d
 }
 
@@ -72,8 +76,14 @@ func (c *dynamicController) list(ctx *gin.Context) {
 	if pageSize < 1 {
 		page = 15
 	}
-
-	cs, err := c.clusterService.GetByNames(ctx, namespaceID, clusters)
+	all := len(clusters) < 1
+	var cs []*cluster_model.Cluster
+	var err error
+	if all {
+		cs, err = c.clusterService.GetAllCluster(ctx)
+	} else {
+		cs, err = c.clusterService.GetByNames(ctx, namespaceID, clusters)
+	}
 	if err != nil {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
 		return
@@ -99,7 +109,7 @@ func (c *dynamicController) list(ctx *gin.Context) {
 	}
 	fields = append(fields, defaultFields...)
 
-	list, err := c.dynamicService.List(ctx, namespaceID, c.moduleName, columns, keyword, page, pageSize)
+	list, err := c.dynamicService.List(ctx, namespaceID, c.Profession, columns, keyword, page, pageSize)
 	if err != nil {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
 		return
@@ -114,7 +124,7 @@ func (c *dynamicController) list(ctx *gin.Context) {
 		"name":    pluginInfo.Name,
 		"title":   pluginInfo.CName,
 		"drivers": c.Drivers,
-		"fields":  c.Fields,
+		"fields":  fields,
 		"list":    list,
 	}))
 	return
@@ -134,9 +144,14 @@ func (c *dynamicController) info(ctx *gin.Context) {
 func (c *dynamicController) online(ctx *gin.Context) {
 	namespaceID := namespace_controller.GetNamespaceId(ctx)
 	uuid := ctx.Param("uuid")
-	clusters := ctx.GetStringSlice("cluster")
+	var tmp dynamic_dto.Cluster
+	err := ctx.BindJSON(&tmp)
+	if err != nil {
+		controller.ErrorJson(ctx, http.StatusOK, err.Error())
+		return
+	}
 	userId := controller.GetUserId(ctx)
-	success, fail, err := c.dynamicService.Online(ctx, namespaceID, c.Profession, uuid, clusters, userId)
+	success, fail, err := c.dynamicService.Online(ctx, namespaceID, c.Profession, uuid, tmp.Cluster, userId)
 	if err != nil {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
 		return

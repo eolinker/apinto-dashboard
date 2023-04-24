@@ -92,7 +92,7 @@ func (c *DynamicModule) initRouter() {
 		},
 		{
 			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("/api/dynamic/%s/render", c.name),
+			Path:        fmt.Sprintf("/api/dynamic/%s/status", c.name),
 			Handler:     "dynamic.cluster_statuses",
 			HandlerFunc: []apinto_module.HandlerFunc{dynamicController.clusterStatusList},
 		},

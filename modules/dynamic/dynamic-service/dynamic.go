@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"time"
 
+	cluster_model "github.com/eolinker/apinto-dashboard/modules/cluster/cluster-model"
+
 	"gorm.io/gorm"
 
 	v2 "github.com/eolinker/apinto-dashboard/client/v2"
@@ -15,8 +17,6 @@ import (
 	"github.com/eolinker/eosc/log"
 
 	"github.com/eolinker/apinto-dashboard/modules/cluster"
-
-	"github.com/eolinker/apinto-dashboard/modules/user"
 
 	dynamic_model "github.com/eolinker/apinto-dashboard/modules/dynamic/dynamic-model"
 
@@ -32,7 +32,7 @@ const (
 )
 
 type dynamicService struct {
-	userService    user.IUserInfoService
+	//userService    user.IUserInfoService
 	clusterService cluster.IClusterService
 
 	dynamicStore        dynamic_store.IDynamicStore
@@ -75,10 +75,10 @@ func (d *dynamicService) List(ctx context.Context, namespaceId int, profession s
 	items := make([]map[string]string, 0, len(list))
 	for _, l := range list {
 		updater := ""
-		u, err := d.userService.GetUserInfo(ctx, l.Updater)
-		if err == nil {
-			updater = u.UserName
-		}
+		//u, err := d.userService.GetUserInfo(ctx, l.Updater)
+		//if err == nil {
+		//	updater = u.UserName
+		//}
 
 		item := map[string]string{
 			"id":          l.Name,
@@ -117,12 +117,29 @@ func (d *dynamicService) ClusterStatuses(ctx context.Context, namespaceId int, p
 	if err != nil {
 		return nil, err
 	}
-	clusters, err := d.clusterService.GetByNames(ctx, namespaceId, names)
+	var clusters []*cluster_model.Cluster
+	all := len(names) < 1
+	if all {
+
+		clusters, err = d.clusterService.GetAllCluster(ctx)
+		names = make([]string, 0, len(clusters))
+	} else {
+		clusters, err = d.clusterService.GetByNames(ctx, namespaceId, names)
+	}
+	if err != nil {
+		return nil, err
+	}
+
 	versionMap := make(map[string]map[string]string)
+
 	for _, c := range clusters {
+		if all {
+			names = append(names, c.Name)
+		}
 		client := GetClusterClient(c.Name, c.Addr)
 		workers, err := client.List(profession)
 		if err != nil {
+			log.Errorf("get worker(%s) list error: %w.", profession, err)
 			continue
 		}
 		for _, w := range workers {
@@ -170,7 +187,6 @@ func (d *dynamicService) Online(ctx context.Context, namespaceId int, profession
 		}
 		return nil, nil, err
 	}
-
 	clusters, err := d.clusterService.GetByNames(ctx, namespaceId, names)
 	if err != nil {
 		return nil, nil, err
@@ -178,17 +194,25 @@ func (d *dynamicService) Online(ctx context.Context, namespaceId int, profession
 	successClusters := make([]string, 0, len(clusters))
 	failClusters := make([]string, 0, len(clusters))
 	now := time.Now()
-	var publishConfig dynamic_entry.DynamicPublishConfig
+	var publishConfig v2.WorkerInfo[dynamic_entry.BasicInfo]
 	err = json.Unmarshal([]byte(info.Config), &publishConfig)
 	if err != nil {
 		return nil, nil, err
 	}
+	publishConfig.BasicInfo.Id = fmt.Sprintf("%s@%s", name, profession)
+	publishConfig.BasicInfo.Name = name
+	publishConfig.BasicInfo.Driver = info.Driver
+	publishConfig.BasicInfo.Description = info.Description
+	publishConfig.BasicInfo.Version = info.Version
+	publishConfig.BasicInfo.Create = info.CreateTime.Format("2006-01-02 15:04:05")
+	publishConfig.BasicInfo.Update = info.UpdateTime.Format("2006-01-02 15:04:05")
 
+	cfg := &dynamic_entry.DynamicPublishConfig{BasicInfo: publishConfig.BasicInfo, Append: publishConfig.Append}
 	for _, c := range clusters {
 		version := &dynamic_entry.DynamicPublishVersion{
 			ClusterId:   c.Id,
 			NamespaceId: namespaceId,
-			Publish:     &publishConfig,
+			Publish:     cfg,
 			Operator:    updater,
 			CreateTime:  now,
 		}
@@ -196,7 +220,7 @@ func (d *dynamicService) Online(ctx context.Context, namespaceId int, profession
 			VersionName: info.Version,
 			ClusterId:   c.Id,
 			NamespaceId: namespaceId,
-			Publish:     &publishConfig,
+			Publish:     cfg,
 			OptType:     1,
 			Operator:    updater,
 			CreateTime:  now,
@@ -235,16 +259,25 @@ func (d *dynamicService) Offline(ctx context.Context, namespaceId int, professio
 	successClusters := make([]string, 0, len(clusters))
 	failClusters := make([]string, 0, len(clusters))
 	now := time.Now()
-	var publishConfig dynamic_entry.DynamicPublishConfig
+	var publishConfig v2.WorkerInfo[dynamic_entry.BasicInfo]
 	err = json.Unmarshal([]byte(info.Config), &publishConfig)
 	if err != nil {
 		return nil, nil, err
 	}
+	publishConfig.BasicInfo.Id = fmt.Sprintf("%s@%s", name, profession)
+	publishConfig.BasicInfo.Name = name
+	publishConfig.BasicInfo.Driver = info.Driver
+	publishConfig.BasicInfo.Description = info.Description
+	publishConfig.BasicInfo.Version = info.Version
+	publishConfig.BasicInfo.Create = info.CreateTime.Format("2006-01-02 15:04:05")
+	publishConfig.BasicInfo.Update = info.UpdateTime.Format("2006-01-02 15:04:05")
+
+	cfg := &dynamic_entry.DynamicPublishConfig{BasicInfo: publishConfig.BasicInfo, Append: publishConfig.Append}
 	for _, c := range clusters {
 		version := &dynamic_entry.DynamicPublishVersion{
 			ClusterId:   c.Id,
 			NamespaceId: namespaceId,
-			Publish:     &publishConfig,
+			Publish:     cfg,
 			Operator:    updater,
 			CreateTime:  now,
 		}
@@ -252,7 +285,7 @@ func (d *dynamicService) Offline(ctx context.Context, namespaceId int, professio
 			VersionName: info.Version,
 			ClusterId:   c.Id,
 			NamespaceId: namespaceId,
-			Publish:     &publishConfig,
+			Publish:     cfg,
 			OptType:     3,
 			Operator:    updater,
 			CreateTime:  now,
@@ -323,10 +356,10 @@ func (d *dynamicService) ClusterStatus(ctx context.Context, namespaceId int, pro
 			status = statusOffline
 		}
 		updater := ""
-		u, err := d.userService.GetUserInfo(ctx, v.Operator)
-		if err == nil {
-			updater = u.UserName
-		}
+		//u, err := d.userService.GetUserInfo(ctx, v.Operator)
+		//if err == nil {
+		//	updater = u.UserName
+		//}
 		result = append(result, &dynamic_model.DynamicCluster{
 			Name:       c.Name,
 			Title:      c.Name,
@@ -342,7 +375,7 @@ func (d *dynamicService) ClusterStatus(ctx context.Context, namespaceId int, pro
 	}, result, nil
 }
 
-func (d *dynamicService) Create(ctx context.Context, namespaceId int, module string, title string, name string, driver string, description string, body string, updater int) error {
+func (d *dynamicService) Create(ctx context.Context, namespaceId int, profession string, title string, name string, driver string, description string, body string, updater int) error {
 	now := time.Now()
 	info := &dynamic_entry.Dynamic{
 		NamespaceId: namespaceId,
@@ -352,7 +385,7 @@ func (d *dynamicService) Create(ctx context.Context, namespaceId int, module str
 		Description: description,
 		Version:     genVersion(now),
 		Config:      body,
-		Profession:  module,
+		Profession:  profession,
 		Updater:     updater,
 		CreateTime:  now,
 		UpdateTime:  now,
@@ -360,16 +393,16 @@ func (d *dynamicService) Create(ctx context.Context, namespaceId int, module str
 	return d.dynamicStore.Insert(ctx, info)
 }
 
-func (d *dynamicService) Save(ctx context.Context, namespaceId int, module string, title string, name string, description string, body string, updater int) error {
+func (d *dynamicService) Save(ctx context.Context, namespaceId int, profession string, title string, name string, description string, body string, updater int) error {
 
 	info, err := d.dynamicStore.First(ctx, map[string]interface{}{
-		"namespace": namespaceId,
-		"module":    module,
-		"name":      name,
+		"namespace":  namespaceId,
+		"profession": profession,
+		"name":       name,
 	})
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return fmt.Errorf("%s(%s) not found", module, name)
+			return fmt.Errorf("%s(%s) not found", profession, name)
 		}
 		return err
 	}
@@ -386,11 +419,11 @@ func (d *dynamicService) Save(ctx context.Context, namespaceId int, module strin
 	return d.dynamicStore.Save(ctx, info)
 }
 
-func (d *dynamicService) Delete(ctx context.Context, namespaceId int, module string, name string) error {
+func (d *dynamicService) Delete(ctx context.Context, namespaceId int, profession string, name string) error {
 	_, err := d.dynamicStore.DeleteWhere(ctx, map[string]interface{}{
-		"namespace": namespaceId,
-		"module":    module,
-		"name":      name,
+		"namespace":  namespaceId,
+		"profession": profession,
+		"name":       name,
 	})
 	return err
 }
@@ -407,16 +440,21 @@ func (d *dynamicService) saveVersion(ctx context.Context, version *dynamic_entry
 			if err = d.publishHistoryStore.Insert(txCtx, history); err != nil {
 				return err
 			}
-			return client.Set(history.Publish.Profession, history.Publish.Name, &v2.WorkerInfo[v2.BasicInfo]{
-				BasicInfo: &v2.BasicInfo{
-					Profession:  version.Publish.BasicInfo.Profession,
-					Name:        version.Publish.BasicInfo.Name,
-					Driver:      version.Publish.BasicInfo.Name,
-					Description: version.Publish.BasicInfo.Description,
-					Version:     history.VersionName,
-				},
-				Append: version.Publish.Append,
-			})
+			if history.OptType == 1 {
+				return client.Set(history.Publish.Profession, history.Publish.Name, &v2.WorkerInfo[v2.BasicInfo]{
+					BasicInfo: &v2.BasicInfo{
+						Profession:  version.Publish.BasicInfo.Profession,
+						Name:        version.Publish.BasicInfo.Name,
+						Driver:      version.Publish.BasicInfo.Name,
+						Description: version.Publish.BasicInfo.Description,
+						Version:     history.Publish.BasicInfo.Version,
+					},
+					Append: version.Publish.Append,
+				})
+			} else if history.OptType == 3 {
+				return client.Delete(history.Publish.Profession, history.Publish.Name)
+			}
+
 		}
 		return nil
 	})
@@ -425,8 +463,10 @@ func (d *dynamicService) saveVersion(ctx context.Context, version *dynamic_entry
 func newDynamicService() dynamic.IDynamicService {
 	d := &dynamicService{}
 	bean.Autowired(&d.dynamicStore)
-	bean.Autowired(&d.userService)
+	//bean.Autowired(&d.userService)
 	bean.Autowired(&d.clusterService)
+	bean.Autowired(&d.publishVersionStore)
+	bean.Autowired(&d.publishHistoryStore)
 	return d
 }
 
