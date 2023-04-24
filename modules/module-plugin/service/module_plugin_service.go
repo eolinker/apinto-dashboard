@@ -108,7 +108,7 @@ func (m *modulePluginService) GetPluginInfo(ctx context.Context, pluginUUID stri
 	info := &model.ModulePluginInfo{
 		ModulePlugin: plugin,
 		Enable:       false,
-		CanDisable:   true,
+		CanDisable:   false,
 		Uninstall:    false,
 	}
 
@@ -119,9 +119,9 @@ func (m *modulePluginService) GetPluginInfo(ctx context.Context, pluginUUID stri
 		}
 		return nil, err
 	}
-	//根据类型判断是否能停用
+	//根据类型判断是否显示可停用
 	if IsPluginCanDisable(plugin.Type) {
-		info.CanDisable = false
+		info.CanDisable = true
 	}
 
 	//若为非内置插件，且为停用状态,才可卸载
