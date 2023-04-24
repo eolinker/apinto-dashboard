@@ -22,6 +22,11 @@ type DynamicField struct {
 	Enum  []string `json:"enum,omitempty"`
 }
 
+type DynamicInfo struct {
+	*DynamicBasicInfo
+	Append map[string]interface{}
+}
+
 type DynamicBasicInfo struct {
 	ID          string `json:"id"`
 	Title       string `json:"title"`

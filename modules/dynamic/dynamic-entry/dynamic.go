@@ -11,7 +11,7 @@ type Dynamic struct {
 	Description string    `gorm:"column:desc"`
 	Version     string    `gorm:"column:version"`
 	Config      string    `gorm:"column:config"`
-	Module      string    `gorm:"column:module"`
+	Profession  string    `gorm:"column:profession"`
 	Updater     int       `gorm:"column:updater"`
 	CreateTime  time.Time `gorm:"column:create_time"`
 	UpdateTime  time.Time `gorm:"column:update_time"`

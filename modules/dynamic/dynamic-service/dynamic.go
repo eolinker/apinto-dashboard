@@ -40,32 +40,34 @@ type dynamicService struct {
 	publishVersionStore dynamic_store.IDynamicPublishVersionStore
 }
 
-func (d *dynamicService) Info(ctx context.Context, namespaceId int, module string, name string) (*dynamic_model.DynamicBasicInfo, map[string]interface{}, error) {
+func (d *dynamicService) Info(ctx context.Context, namespaceId int, profession string, name string) (*v2.WorkerInfo[dynamic_model.DynamicBasicInfo], error) {
 	info, err := d.dynamicStore.First(ctx, map[string]interface{}{
-		"namespace": namespaceId,
-		"module":    module,
-		"name":      name,
+		"namespace":  namespaceId,
+		"profession": profession,
+		"name":       name,
 	})
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	tmp := make(map[string]interface{})
 	err = json.Unmarshal([]byte(info.Config), &tmp)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-
-	return &dynamic_model.DynamicBasicInfo{
-		ID:          info.Name,
-		Title:       info.Title,
-		Description: info.Description,
-	}, tmp, nil
+	return &v2.WorkerInfo[dynamic_model.DynamicBasicInfo]{
+		BasicInfo: &dynamic_model.DynamicBasicInfo{
+			ID:          info.Name,
+			Title:       info.Title,
+			Description: info.Description,
+		},
+		Append: tmp,
+	}, nil
 }
 
-func (d *dynamicService) List(ctx context.Context, namespaceId int, module string, columns []string, keyword string, page int, pageSize int) ([]map[string]string, error) {
+func (d *dynamicService) List(ctx context.Context, namespaceId int, profession string, columns []string, keyword string, page int, pageSize int) ([]map[string]string, error) {
 	list, err := d.dynamicStore.ListPageByKeyword(ctx, map[string]interface{}{
-		"namespace": namespaceId,
-		"module":    module,
+		"namespace":  namespaceId,
+		"profession": profession,
 	}, keyword, page, pageSize)
 	if err != nil {
 		return nil, err
@@ -107,10 +109,10 @@ func (d *dynamicService) List(ctx context.Context, namespaceId int, module strin
 	return items, nil
 }
 
-func (d *dynamicService) ClusterStatuses(ctx context.Context, namespaceId int, module string, profession string, names []string, keyword string, page int, pageSize int) (map[string]map[string]string, error) {
+func (d *dynamicService) ClusterStatuses(ctx context.Context, namespaceId int, profession string, names []string, keyword string, page int, pageSize int) (map[string]map[string]string, error) {
 	list, err := d.dynamicStore.ListPageByKeyword(ctx, map[string]interface{}{
-		"namespace": namespaceId,
-		"module":    module,
+		"namespace":  namespaceId,
+		"profession": profession,
 	}, keyword, page, pageSize)
 	if err != nil {
 		return nil, err
@@ -124,10 +126,10 @@ func (d *dynamicService) ClusterStatuses(ctx context.Context, namespaceId int, m
 			continue
 		}
 		for _, w := range workers {
-			if _, ok := versionMap[w.Id]; !ok {
-				versionMap[w.Name] = make(map[string]string)
+			if _, ok := versionMap[w.BasicInfo.Id]; !ok {
+				versionMap[w.BasicInfo.Name] = make(map[string]string)
 			}
-			versionMap[w.Name][c.Name] = w.Version
+			versionMap[w.BasicInfo.Name][c.Name] = w.BasicInfo.Version
 		}
 	}
 	result := make(map[string]map[string]string)
@@ -156,15 +158,15 @@ func (d *dynamicService) ClusterStatuses(ctx context.Context, namespaceId int, m
 	return result, nil
 }
 
-func (d *dynamicService) Online(ctx context.Context, namespaceId int, module string, profession string, name string, names []string, updater int) ([]string, []string, error) {
+func (d *dynamicService) Online(ctx context.Context, namespaceId int, profession string, name string, names []string, updater int) ([]string, []string, error) {
 	info, err := d.dynamicStore.First(ctx, map[string]interface{}{
-		"namespace": namespaceId,
-		"module":    module,
-		"name":      name,
+		"namespace":  namespaceId,
+		"profession": profession,
+		"name":       name,
 	})
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return nil, nil, fmt.Errorf("%s(%s) not found", module, name)
+			return nil, nil, fmt.Errorf("%s(%s) not found", profession, name)
 		}
 		return nil, nil, err
 	}
@@ -217,15 +219,15 @@ func (d *dynamicService) Online(ctx context.Context, namespaceId int, module str
 	return successClusters, failClusters, nil
 }
 
-func (d *dynamicService) Offline(ctx context.Context, namespaceId int, module string, profession, name string, names []string, updater int) ([]string, []string, error) {
+func (d *dynamicService) Offline(ctx context.Context, namespaceId int, profession, name string, names []string, updater int) ([]string, []string, error) {
 	info, err := d.dynamicStore.First(ctx, map[string]interface{}{
-		"namespace": namespaceId,
-		"module":    module,
-		"name":      name,
+		"namespace":  namespaceId,
+		"profession": profession,
+		"name":       name,
 	})
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return nil, nil, fmt.Errorf("%s(%s) not found", module, name)
+			return nil, nil, fmt.Errorf("%s(%s) not found", profession, name)
 		}
 		return nil, nil, err
 	}
@@ -274,11 +276,11 @@ func (d *dynamicService) Offline(ctx context.Context, namespaceId int, module st
 	return successClusters, failClusters, nil
 }
 
-func (d *dynamicService) ClusterStatus(ctx context.Context, namespaceId int, module string, profession, name string) (*dynamic_model.DynamicBasicInfo, []*dynamic_model.DynamicCluster, error) {
+func (d *dynamicService) ClusterStatus(ctx context.Context, namespaceId int, profession, name string) (*dynamic_model.DynamicBasicInfo, []*dynamic_model.DynamicCluster, error) {
 	moduleInfo, err := d.dynamicStore.First(ctx, map[string]interface{}{
-		"namespace": namespaceId,
-		"module":    module,
-		"name":      name,
+		"namespace":  namespaceId,
+		"profession": profession,
+		"name":       name,
 	})
 	if err != nil {
 		return nil, nil, err
@@ -317,7 +319,7 @@ func (d *dynamicService) ClusterStatus(ctx context.Context, namespaceId int, mod
 			continue
 		}
 		status := statusOnline
-		if info.Version != moduleInfo.Version {
+		if info.BasicInfo.Version != moduleInfo.Version {
 			status = statusOffline
 		}
 		updater := ""
@@ -350,7 +352,7 @@ func (d *dynamicService) Create(ctx context.Context, namespaceId int, module str
 		Description: description,
 		Version:     genVersion(now),
 		Config:      body,
-		Module:      module,
+		Profession:  module,
 		Updater:     updater,
 		CreateTime:  now,
 		UpdateTime:  now,
@@ -405,7 +407,7 @@ func (d *dynamicService) saveVersion(ctx context.Context, version *dynamic_entry
 			if err = d.publishHistoryStore.Insert(txCtx, history); err != nil {
 				return err
 			}
-			return client.Set(history.Publish.Profession, history.Publish.Name, &v2.WorkerInfo{
+			return client.Set(history.Publish.Profession, history.Publish.Name, &v2.WorkerInfo[v2.BasicInfo]{
 				BasicInfo: &v2.BasicInfo{
 					Profession:  version.Publish.BasicInfo.Profession,
 					Name:        version.Publish.BasicInfo.Name,
