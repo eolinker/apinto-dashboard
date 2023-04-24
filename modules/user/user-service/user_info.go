@@ -8,6 +8,7 @@ import (
 	user_entry "github.com/eolinker/apinto-dashboard/modules/user/user-entry"
 	user_model "github.com/eolinker/apinto-dashboard/modules/user/user-model"
 	user_store "github.com/eolinker/apinto-dashboard/modules/user/user-store"
+	apinto_module "github.com/eolinker/apinto-module"
 	"github.com/eolinker/eosc/common/bean"
 	"time"
 )
@@ -23,9 +24,12 @@ type userInfoService struct {
 func newUserInfoService() user.IUserInfoService {
 	u := &userInfoService{}
 	bean.Autowired(&u.userInfoStore)
+	apinto_module.RegisterEventHandler("login", u.loginHandler)
 	return u
 }
+func (u *userInfoService) loginHandler(login string, v any) {
 
+}
 func (u *userInfoService) GetUserInfoMaps(ctx context.Context, userIds ...int) (map[int]*user_model.UserInfo, error) {
 
 	maps := make(map[int]*user_model.UserInfo)
