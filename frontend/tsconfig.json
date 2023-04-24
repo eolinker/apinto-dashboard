@@ -6,12 +6,8 @@
     "outDir": "../dist/",
     "forceConsistentCasingInFileNames": true,
     "paths": {
-      "eoNgApintoTable": [
-        "dist/eo-ng-apinto-table"
-      ],
-      "eoNgApintoUser": [
-        "dist/eo-ng-apinto-user"
-      ]
+      "eoNgApintoTable": ["dist/eo-ng-apinto-table"],
+      "eoNgApintoUser": ["dist/eo-ng-apinto-user"]
     },
     "strict": true,
     "noImplicitOverride": true,
@@ -26,11 +22,9 @@
     "importHelpers": true,
     "target": "ES2022",
     "module": "es2020",
-    "lib": [
-      "es2020",
-      "dom"
-    ],
-    "useDefineForClassFields": false
+    "lib": ["es2020", "dom"],
+    "useDefineForClassFields": false,
+    "jsx": "react"
   },
   "angularCompilerOptions": {
     "skipLibCheck": true,
