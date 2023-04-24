@@ -58,12 +58,33 @@ func (u *userInfoService) GetUserInfoMaps(ctx context.Context, userIds ...int) (
 			for _, userId := range userIds {
 				userSet[userId] = struct{}{}
 			}
-			//tempMaps := make(map[int]*user_model.UserInfo, len(userIds))
+			tempMaps := make(map[int]*user_model.UserInfo, len(userIds))
 			for _, userInfo := range userList {
 				userModel := entryToModule(userInfo)
+				if _, has := userSet[userInfo.Id]; has {
+					tempMaps[userInfo.Id] = userModel
+					delete(userSet, userInfo.Id)
+				}
 				u.cache.Set(ctx, fmt.Sprintf("apinto:userinfo-id:%d", userModel.Id), userModel, time.Hour)
 				u.cache.Set(ctx, fmt.Sprintf("apinto:userinfo-name:%s", userModel.UserName), userModel, time.Hour)
 			}
+			//补全传入的userIds中数据库不存在的数据
+			for userID := range userSet {
+				userModel := &user_model.UserInfo{
+					Id:            userID,
+					Sex:           0,
+					UserName:      "unknown",
+					NoticeUserId:  "",
+					NickName:      "unknown",
+					Email:         "",
+					Phone:         "unknown",
+					Avatar:        "",
+					LastLoginTime: nil,
+				}
+				u.cache.Set(ctx, fmt.Sprintf("apinto:userinfo-id:%d", userModel.Id), userModel, time.Hour)
+				tempMaps[userID] = userModel
+			}
+			maps = tempMaps
 		}
 	}
 
@@ -157,14 +178,14 @@ func (u *userInfoService) GetUserInfoByNames(ctx context.Context, userNames ...s
 	}
 	if len(need) > 0 {
 		if len(need) < 5 {
-			//for _, userId := range need {
-			//	userInfo, err := u.GetUserInfoByName(ctx, userId)
-			//	if err == nil {
-			//		maps[userInfo.Id] = userInfo
-			//	} else {
-			//
-			//	}
-			//}
+			for _, userId := range need {
+				userInfo, err := u.GetUserInfoByName(ctx, userId)
+				if err == nil {
+					maps[userInfo.Id] = userInfo
+				} else {
+
+				}
+			}
 		}
 	}
 
