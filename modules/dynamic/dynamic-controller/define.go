@@ -11,7 +11,7 @@ type DynamicDefine struct {
 type Render map[string]interface{}
 
 type Basic struct {
-	Name  string   `json:"moduleName"`
+	Name  string   `json:"name"`
 	Title string   `json:"title"`
 	Attr  string   `json:"attr,omitempty"`
 	Enum  []string `json:"enum,omitempty"`

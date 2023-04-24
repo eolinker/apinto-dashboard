@@ -23,7 +23,7 @@ func (d *dynamicStore) ListPageByKeyword(ctx context.Context, params map[string]
 	builder := strings.Builder{}
 	args := make([]interface{}, 0, len(params))
 	for key, value := range params {
-		if !isInit {
+		if isInit {
 			builder.WriteString(" AND ")
 		}
 		builder.WriteString(fmt.Sprintf("`%s` = ? ", key))
