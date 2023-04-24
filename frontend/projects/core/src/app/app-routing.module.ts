@@ -18,6 +18,9 @@ import { AuthInfoComponent } from './layout/auth/info/info.component'
 import { AuthUpdateComponent } from './layout/auth/update/update.component'
 import { IframePageComponent } from './layout/iframe-page/iframe-page.component'
 import { GuideComponent } from './layout/guide/guide.component'
+import { DynamicDemoComponent } from './layout/dynamic-demo/dynamic-demo.component'
+import { OuterComponent } from './layout/outer/outer.component'
+import { IntelligentPluginLayoutComponent } from './component/intelligent-plugin/layout/layout.component'
 const routes: Routes = [
   {
     path: 'auth',
@@ -114,16 +117,32 @@ const routes: Routes = [
         loadChildren: () => import('./layout/navigation/navigation.module').then(m => m.NavigationModule)
       },
       {
-        path: 'iframe',
+        path: 'dynamic-demo',
         data: {
 
         },
         children: [{
           path: '**',
-          component: IframePageComponent
+          component: DynamicDemoComponent
         }
         ],
-        component: IframePageComponent
+        component: DynamicDemoComponent
+      },
+      {
+        path: 'template',
+        data: {
+        },
+        component: OuterComponent,
+        children: [
+          {
+            path: 'iframe',
+            component: IframePageComponent
+          },
+          {
+            path: '**',
+            component: IntelligentPluginLayoutComponent
+          }
+        ]
       }
     ]
   }

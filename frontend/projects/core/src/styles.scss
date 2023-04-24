@@ -1176,8 +1176,8 @@ nz-slider {
   box-shadow: 0 -2px 2px -2px var(--border-color);
   padding-top: 9px;
   padding-bottom: 10px;
-  margin: 0px 10px;
-  margin-top: 1px;
+  margin: 0px 10px !important;
+  margin-top: 1px !important;
 }
 eo-ng-select.limit-select .ant-select-selection-search {
   display: inline-block;
@@ -1433,6 +1433,10 @@ eo-ng-apinto-user-avatar {
 .divide_line_ldcc:hover {
   border-right-width: 3px;
   border-right-color: #e8e8e8;
+}
+
+.ant-menu {
+  color: var(--text-color);
 }
 
 .ant-menu-submenu-arrow,
