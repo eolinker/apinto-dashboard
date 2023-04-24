@@ -7,6 +7,7 @@ type DynamicPublishHistory struct {
 	VersionName string
 	ClusterId   int
 	NamespaceId int
+	Target      int
 	Desc        string
 	VersionId   int
 	Publish     *DynamicPublishConfig //此次发布的数据
