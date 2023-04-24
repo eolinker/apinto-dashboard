@@ -52,7 +52,7 @@ func (m *modulePlugin) GetEnabledPlugins(ctx context.Context) ([]*model.EnabledP
 			Define: nil,
 		}
 		define := new(model.PluginDefine)
-		_ = json.Unmarshal(p.Define, define)
+		_ = json.Unmarshal(p.Details, define)
 		enablePlugin.Define = define
 
 		enablePlugins = append(enablePlugins, enablePlugin)
