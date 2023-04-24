@@ -20,7 +20,7 @@ import (
 type dynamicController struct {
 	moduleName string
 
-	modulePluginService module_plugin.IModulePluginService
+	modulePluginService module_plugin.IModulePlugin
 	dynamicService      dynamic.IDynamicService
 	clusterService      cluster.IClusterService
 	*DynamicModulePlugin
@@ -76,10 +76,15 @@ func (c *dynamicController) list(ctx *gin.Context) {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
 		return
 	}
+	pluginInfo, err := c.modulePluginService.GetEnabledPluginByModuleName(ctx, c.moduleName)
+	if err != nil {
+		controller.ErrorJson(ctx, http.StatusOK, err.Error())
+		return
+	}
 	ctx.JSON(http.StatusOK, controller.NewSuccessResult(map[string]interface{}{
-		"id":      "",
-		"name":    "",
-		"title":   "",
+		"id":      pluginInfo.UUID,
+		"name":    pluginInfo.Name,
+		"title":   pluginInfo.CName,
 		"drivers": c.Drivers,
 		"fields":  c.Fields,
 		"list":    list,
@@ -88,7 +93,14 @@ func (c *dynamicController) list(ctx *gin.Context) {
 }
 
 func (c *dynamicController) info(ctx *gin.Context) {
-
+	namespaceID := namespace_controller.GetNamespaceId(ctx)
+	uuid := ctx.Param("uuid")
+	info, err := c.dynamicService.Info(ctx, namespaceID, c.Profession, uuid)
+	if err != nil {
+		controller.ErrorJson(ctx, http.StatusOK, err.Error())
+		return
+	}
+	ctx.JSON(http.StatusOK, controller.NewSuccessResult(info))
 }
 
 func (c *dynamicController) online(ctx *gin.Context) {
@@ -96,7 +108,7 @@ func (c *dynamicController) online(ctx *gin.Context) {
 	uuid := ctx.Param("uuid")
 	clusters := ctx.GetStringSlice("cluster")
 	userId := controller.GetUserId(ctx)
-	success, fail, err := c.dynamicService.Online(ctx, namespaceID, c.moduleName, c.Profession, uuid, clusters, userId)
+	success, fail, err := c.dynamicService.Online(ctx, namespaceID, c.Profession, uuid, clusters, userId)
 	if err != nil {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
 		return
@@ -116,7 +128,7 @@ func (c *dynamicController) offline(ctx *gin.Context) {
 	uuid := ctx.Param("uuid")
 	clusters := ctx.GetStringSlice("cluster")
 	userId := controller.GetUserId(ctx)
-	success, fail, err := c.dynamicService.Offline(ctx, namespaceID, c.moduleName, c.Profession, uuid, clusters, userId)
+	success, fail, err := c.dynamicService.Offline(ctx, namespaceID, c.Profession, uuid, clusters, userId)
 	if err != nil {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
 		return
@@ -138,6 +150,20 @@ func (c *dynamicController) clusterStatusList(ctx *gin.Context) {
 }
 
 func (c *dynamicController) clusterStatus(ctx *gin.Context) {
+	namespaceID := namespace_controller.GetNamespaceId(ctx)
+	uuid := ctx.Param("uuid")
+	basic, clusters, err := c.dynamicService.ClusterStatus(ctx, namespaceID, c.Profession, uuid)
+	if err != nil {
+		controller.ErrorJson(ctx, http.StatusOK, err.Error())
+		return
+	}
+	ctx.JSON(http.StatusOK, controller.NewSuccessResult(map[string]interface{}{
+		"id":          basic.ID,
+		"name":        basic.ID,
+		"title":       basic.Title,
+		"description": basic.Description,
+		"clusters":    clusters,
+	}))
 }
 
 func (c *dynamicController) batchDelete(ctx *gin.Context) {
@@ -153,7 +179,7 @@ func (c *dynamicController) create(ctx *gin.Context) {
 		return
 	}
 	body, _ := json.Marshal(worker.Append)
-	err = c.dynamicService.Create(ctx, namespaceID, c.moduleName, worker.Title, worker.Name, worker.Driver, worker.Description, string(body), controller.GetUserId(ctx))
+	err = c.dynamicService.Create(ctx, namespaceID, c.Profession, worker.Title, worker.Name, worker.Driver, worker.Description, string(body), controller.GetUserId(ctx))
 	if err != nil {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
 		return
@@ -171,7 +197,7 @@ func (c *dynamicController) save(ctx *gin.Context) {
 		return
 	}
 	body, _ := json.Marshal(worker.Append)
-	err = c.dynamicService.Save(ctx, namespaceID, c.moduleName, worker.Title, uuid, worker.Description, string(body), controller.GetUserId(ctx))
+	err = c.dynamicService.Save(ctx, namespaceID, c.Profession, worker.Title, uuid, worker.Description, string(body), controller.GetUserId(ctx))
 	if err != nil {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
 		return

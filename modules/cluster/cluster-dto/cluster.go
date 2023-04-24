@@ -17,6 +17,7 @@ type ClusterOut struct {
 	Name       string             `json:"name,omitempty"`
 	Env        string             `json:"env,omitempty"`
 	Status     enum.ClusterStatus `json:"status,omitempty"`
+	UUID       string             `json:"uuid,omitempty"`
 	Desc       string             `json:"desc,omitempty"`
 	CreateTime string             `json:"create_time,omitempty"`
 	UpdateTime string             `json:"update_time,omitempty"`
