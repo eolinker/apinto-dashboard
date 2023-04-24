@@ -12,7 +12,7 @@ type tPlugin struct {
 }
 
 func newTPlugin(define interface{}) (apinto_module.Plugin, error) {
-	dv, err := decode[Define](define)
+	dv, err := DecodeDefine(define)
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +26,7 @@ func (t *tPlugin) CreateModule(name string, config interface{}) (apinto_module.M
 	}
 
 	p := NewProxyAPi(cv.Server, name, cv)
-	module := &tModule{}
+	module := &tModule{name: name}
 
 	module.routersInfo = append(module.routersInfo, p.CreateHome(t.define.Router.Home))
 	for _, html := range t.define.Router.Html {
@@ -65,9 +65,15 @@ func (t *tPlugin) CheckConfig(name string, config interface{}) error {
 	return nil
 }
 func (t *tPlugin) checkConfig(name string, config interface{}) (*Config, error) {
-	return decode[Config](config)
+	return DecodeConfig(config)
 }
+func DecodeDefine(define interface{}) (*Define, error) {
+	return apinto_module.DecodeFor[Define](define)
+}
+func DecodeConfig(config interface{}) (*Config, error) {
+	return apinto_module.DecodeFor[Config](config)
 
+}
 func decode[T any](v interface{}) (*T, error) {
 	var err error
 	var data []byte
