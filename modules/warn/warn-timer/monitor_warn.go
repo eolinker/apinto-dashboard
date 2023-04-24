@@ -793,7 +793,7 @@ func (mon *monitorWarn) getSourceInfo(ctx context.Context, namespaceId int) (api
 		return nil
 	})
 	errGroup.Go(func() error {
-		serviceListAll, err := mon.service.GetServiceListAll(ctx, namespaceId)
+		serviceListAll, err := mon.service.GetServiceListAll(ctx, namespaceId, "")
 		if err != nil {
 			log.Errorf("monitorWarn-service.GetServiceListAll err=%s", err.Error())
 			return err
