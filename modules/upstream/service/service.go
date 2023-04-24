@@ -83,7 +83,6 @@ func (s *service) UpstreamCount(ctx context.Context, namespaceId int) (int64, er
 }
 
 func (s *service) GetServiceList(ctx context.Context, namespaceID int, searchName string, pageNum int, pageSize int) ([]*upstream_model.ServiceListItem, int, error) {
-	var sl []*upstream_entry2.Service
 	sl, total, err := s.serviceStore.GetListPage(ctx, namespaceID, searchName, pageNum, pageSize)
 	if err != nil {
 		return nil, 0, err
@@ -112,8 +111,8 @@ func (s *service) GetServiceList(ctx context.Context, namespaceID int, searchNam
 
 	return list, total, nil
 }
-func (s *service) GetServiceListAll(ctx context.Context, namespaceID int) ([]*upstream_model.ServiceListItem, error) {
-	sl, err := s.serviceStore.GetListAll(ctx, namespaceID)
+func (s *service) GetServiceListAll(ctx context.Context, namespaceID int, searchName string) ([]*upstream_model.ServiceListItem, error) {
+	sl, err := s.serviceStore.GetListAll(ctx, namespaceID, searchName)
 	if err != nil {
 		return nil, err
 	}
@@ -124,6 +123,7 @@ func (s *service) GetServiceListAll(ctx context.Context, namespaceID int) ([]*up
 		li := &upstream_model.ServiceListItem{
 			Name:       item.Name,
 			UUID:       item.UUID,
+			Desc:       item.Desc,
 			UpdateTime: item.UpdateTime,
 		}
 
