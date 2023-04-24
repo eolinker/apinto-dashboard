@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/cache"
 	"github.com/eolinker/apinto-dashboard/modules/user"
 	user_entry "github.com/eolinker/apinto-dashboard/modules/user/user-entry"
 	user_model "github.com/eolinker/apinto-dashboard/modules/user/user-model"
@@ -18,12 +17,13 @@ const defaultPwd = "12345678"
 
 type userInfoService struct {
 	userInfoStore user_store.IUserInfoStore
-	cache         cache.IRedisCache[user_model.UserInfo]
+	cache         IUserInfoCache
 }
 
 func newUserInfoService() user.IUserInfoService {
 	u := &userInfoService{}
 	bean.Autowired(&u.userInfoStore)
+	bean.Autowired(&u.cache)
 	apinto_module.RegisterEventHandler("login", u.loginHandler)
 	return u
 }
