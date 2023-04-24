@@ -30,7 +30,7 @@ func (s *dynamicPublishHistoryHandler) Encode(sr *dynamic_entry.DynamicPublishHi
 		Kind:        s.Kind(),
 		ClusterId:   sr.ClusterId,
 		NamespaceId: sr.NamespaceId,
-		Target:      sr.ClusterId,
+		Target:      sr.Target,
 		VersionId:   sr.VersionId,
 		Data:        string(val),
 		Desc:        sr.Desc,
