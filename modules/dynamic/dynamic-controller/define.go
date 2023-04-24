@@ -1,5 +1,13 @@
 package dynamic_controller
 
+type DynamicDefine struct {
+	Profession string            `json:"profession"`
+	Drivers    []*Basic          `json:"drivers"`
+	Fields     []*Basic          `json:"fields"`
+	Skill      string            `json:"skill"`
+	Render     map[string]string `json:"render"`
+}
+
 type Render map[string]interface{}
 
 type Basic struct {
