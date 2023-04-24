@@ -169,9 +169,14 @@ func (c *dynamicController) online(ctx *gin.Context) {
 func (c *dynamicController) offline(ctx *gin.Context) {
 	namespaceID := namespace_controller.GetNamespaceId(ctx)
 	uuid := ctx.Param("uuid")
-	clusters := ctx.GetStringSlice("cluster")
+	var tmp dynamic_dto.Cluster
+	err := ctx.BindJSON(&tmp)
+	if err != nil {
+		controller.ErrorJson(ctx, http.StatusOK, err.Error())
+		return
+	}
 	userId := controller.GetUserId(ctx)
-	success, fail, err := c.dynamicService.Offline(ctx, namespaceID, c.Profession, uuid, clusters, userId)
+	success, fail, err := c.dynamicService.Offline(ctx, namespaceID, c.Profession, uuid, tmp.Cluster, userId)
 	if err != nil {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
 		return
@@ -238,7 +243,40 @@ func (c *dynamicController) clusterStatus(ctx *gin.Context) {
 }
 
 func (c *dynamicController) batchDelete(ctx *gin.Context) {
-
+	namespaceID := namespace_controller.GetNamespaceId(ctx)
+	ids := ctx.Query("uuids")
+	uuids := make([]string, 0)
+	err := json.Unmarshal([]byte(ids), &uuids)
+	if err != nil {
+		controller.ErrorJson(ctx, http.StatusOK, err.Error())
+		return
+	}
+	success := make([]string, 0, len(uuids))
+	fail := make([]string, 0, len(uuids))
+	for _, uuid := range uuids {
+		info, _, err := c.dynamicService.ClusterStatus(ctx, namespaceID, c.Profession, uuid)
+		if err != nil {
+			fail = append(fail, uuid)
+		}
+		if info.Online {
+			fail = append(fail, uuid)
+			continue
+		}
+		err = c.dynamicService.Delete(ctx, namespaceID, c.Profession, uuid)
+		if err != nil {
+			fail = append(fail, uuid)
+		} else {
+			success = append(success, uuid)
+		}
+	}
+	if len(fail) > 0 {
+		ctx.JSON(http.StatusOK, controller.NewResult(-1, map[string]interface{}{
+			"success": success,
+			"fail":    fail,
+		}, "delete error"))
+		return
+	}
+	ctx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
 func (c *dynamicController) create(ctx *gin.Context) {
