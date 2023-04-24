@@ -52,7 +52,23 @@ func (u *userInfoService) GetUserInfoMaps(ctx context.Context, userIds ...int) (
 			userList, err := u.userInfoStore.GetAll(ctx)
 			if err != nil {
 				//只有当数据库报错时才会到这
-
+				//补全返回信息
+				tempMaps := make(map[int]*user_model.UserInfo, len(userIds))
+				for _, userId := range userIds {
+					userModel := &user_model.UserInfo{
+						Id:            userId,
+						Sex:           0,
+						UserName:      "unknown",
+						NoticeUserId:  "",
+						NickName:      "unknown",
+						Email:         "",
+						Phone:         "unknown",
+						Avatar:        "",
+						LastLoginTime: nil,
+					}
+					tempMaps[userId] = userModel
+				}
+				return tempMaps, nil
 			}
 			userSet := make(map[int]struct{}, len(userIds))
 			for _, userId := range userIds {
@@ -181,11 +197,63 @@ func (u *userInfoService) GetUserInfoByNames(ctx context.Context, userNames ...s
 			for _, userId := range need {
 				userInfo, err := u.GetUserInfoByName(ctx, userId)
 				if err == nil {
-					maps[userInfo.Id] = userInfo
-				} else {
-
+					maps[userInfo.UserName] = userInfo
 				}
 			}
+		} else {
+			//获取所有用户并存到缓存
+			userList, err := u.userInfoStore.GetAll(ctx)
+			if err != nil {
+				//只有当数据库报错时才会到这
+				//补全返回信息
+				tempMaps := make(map[string]*user_model.UserInfo, len(userNames))
+				for _, userName := range userNames {
+					userModel := &user_model.UserInfo{
+						Id:            0,
+						Sex:           0,
+						UserName:      userName,
+						NoticeUserId:  "",
+						NickName:      "unknown",
+						Email:         "",
+						Phone:         "unknown",
+						Avatar:        "",
+						LastLoginTime: nil,
+					}
+					tempMaps[userName] = userModel
+				}
+				return tempMaps, nil
+			}
+			userSet := make(map[string]struct{}, len(userNames))
+			for _, userName := range userNames {
+				userSet[userName] = struct{}{}
+			}
+			tempMaps := make(map[string]*user_model.UserInfo, len(userNames))
+			for _, userInfo := range userList {
+				userModel := entryToModule(userInfo)
+				if _, has := userSet[userInfo.UserName]; has {
+					tempMaps[userInfo.UserName] = userModel
+					delete(userSet, userInfo.UserName)
+				}
+				u.cache.Set(ctx, fmt.Sprintf("apinto:userinfo-id:%d", userModel.Id), userModel, time.Hour)
+				u.cache.Set(ctx, fmt.Sprintf("apinto:userinfo-name:%s", userModel.UserName), userModel, time.Hour)
+			}
+			//补全传入的userIds中数据库不存在的数据
+			for userName := range userSet {
+				userModel := &user_model.UserInfo{
+					Id:            0,
+					Sex:           0,
+					UserName:      userName,
+					NoticeUserId:  "",
+					NickName:      "unknown",
+					Email:         "",
+					Phone:         "unknown",
+					Avatar:        "",
+					LastLoginTime: nil,
+				}
+				u.cache.Set(ctx, fmt.Sprintf("apinto:userinfo-name:%d", userModel.UserName), userModel, time.Hour)
+				tempMaps[userName] = userModel
+			}
+			maps = tempMaps
 		}
 	}
 
