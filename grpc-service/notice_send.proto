@@ -13,7 +13,7 @@ message NoticeMsg {
 }
 
 message NoticeSendReq {
-  repeated int64 user_ids = 1;
+  repeated string user_names = 1;
   int32 namespace_id = 2;
   map<string, NoticeMsg> notices = 3;
 }
