@@ -21,14 +21,14 @@ import { EoNgNavigationService } from '../../service/eo-ng-navigation.service'
 })
 export class LoginComponent implements OnInit {
   private subscription: Subscription = new Subscription()
-  constructor(
+  constructor (
     private appConfigService: EoNgNavigationService,
     private api: ApiService,
     private router: Router,
     private message: EoNgFeedbackMessageService
   ) {}
 
-  ngOnInit() {
+  ngOnInit () {
     this.api.checkAuth().subscribe((resp: any) => {
       if (resp.code === 0) {
         this.subscription = this.appConfigService
@@ -40,7 +40,7 @@ export class LoginComponent implements OnInit {
     })
   }
 
-  ngOnDestroy() {
+  ngOnDestroy () {
     this.subscription.unsubscribe()
   }
 }

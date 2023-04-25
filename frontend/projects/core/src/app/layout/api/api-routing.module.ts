@@ -75,7 +75,7 @@ const routes: Routes = [{
       ]
     },
     {
-      path: 'plugin',
+      path: 'plugin-template',
       component: ApiPluginTemplateComponent,
       children: [
         {

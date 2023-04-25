@@ -80,7 +80,7 @@ describe('ServiceDiscoveryMessageComponent test', () => {
             component: ServiceDiscoveryMessageComponent
           },
           {
-            path: 'upstream/serv-discovery/create',
+            path: 'upstream/discovery/create',
             component: ServiceDiscoveryCreateComponent
           }
         ]
