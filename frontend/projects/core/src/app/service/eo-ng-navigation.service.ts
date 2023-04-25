@@ -34,6 +34,11 @@ export class EoNgNavigationService {
     return this.userId
   }
 
+  // TODO返回控制台是否开启用户角色插件
+  getUserPlugin () {
+    return false
+  }
+
   // 获取首页路由地址
   getPageRoute (): string {
     return '/guide'

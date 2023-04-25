@@ -28,7 +28,7 @@ export class RouterService {
           {
             title: '查看',
             click: (item:any) => {
-              context.router.navigate(['/', 'router', 'plugin', 'content', item.data.uuid])
+              context.router.navigate(['/', 'router', 'plugin-template', 'content', item.data.uuid])
             }
           },
           {
