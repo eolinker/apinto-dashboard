@@ -57,16 +57,24 @@ type EnabledPlugin struct {
 	UUID   string
 	Name   string
 	Driver string
-	Config *PluginEnableCfg
+	Config interface{}
 	Define interface{}
 }
 
-// PluginEnableCfg 插件启用时的配置
+// PluginEnableCfg 插件启用配置
 type PluginEnableCfg struct {
 	Server     string          `json:"server"`
 	Header     []*ExtendParams `json:"header"`
 	Query      []*ExtendParams `json:"query"`
 	Initialize []*ExtendParams `json:"initialize"`
+}
+
+// PluginEnableCfgMap 创建插件时启用的配置
+type PluginEnableCfgMap struct {
+	Server     string            `json:"server"`
+	Header     map[string]string `json:"header"`
+	Query      map[string]string `json:"query"`
+	Initialize map[string]string `json:"initialize"`
 }
 
 // PluginDefine 插件安装文件里的Define配置

@@ -80,6 +80,22 @@ message AppsItem {
   string desc = 3;
 }
 
+message NavigationModulesResp {
+  repeated NavigationItem navigation_items = 1;
+  repeated ModuleItem modules_items = 2;
+}
+
+message NavigationItem {
+  string id = 1; //navigation_id
+  string cname = 2;
+}
+
+message ModuleItem {
+  string name = 1;
+  string cname = 2;
+  string navigation_id = 3;
+}
+
 service GetConsoleInfo {
   rpc GetAllNamespaces (EmptyRequest) returns (NamespacesListResp) {}
 
@@ -92,4 +108,6 @@ service GetConsoleInfo {
 
   rpc GetAllApps(GetAppsReq) returns (AppsResp) {}
   rpc GetAppsByUuids(GetAppsByUuidsReq) returns (AppsResp) {}
+
+  rpc GetNavigationModules(EmptyRequest) returns (NavigationModulesResp) {}
 }
