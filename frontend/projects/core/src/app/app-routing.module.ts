@@ -104,7 +104,7 @@ const routes: Routes = [
         loadChildren: () => import('./layout/audit-log/audit-log.module').then(m => m.AuditLogModule)
       },
       {
-        path: 'plugin',
+        path: 'module-plugin',
         data: {
           id: '10'
         },
