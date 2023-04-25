@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/eolinker/eosc/log"
 	"net/http"
+
+	"github.com/eolinker/eosc/log"
 )
 
 type IPlugin[T any] interface {
@@ -42,7 +43,9 @@ func (p *plugin[T]) List() ([]*T, error) {
 		}
 
 		infos := new(PluginConfig[T])
-
+		if string(res) == "[]" {
+			return infos.Plugin, nil
+		}
 		if err = json.Unmarshal(res, &infos); err != nil {
 			log.Errorf("plugin-json.Unmarshal err=%s", err)
 			resErr = err
@@ -54,7 +57,7 @@ func (p *plugin[T]) List() ([]*T, error) {
 	return nil, resErr
 }
 
-//Set T 包含所有组件 修改就是一次性修改所有的全局插件
+// Set T 包含所有组件 修改就是一次性修改所有的全局插件
 func (p *plugin[T]) Set(t []*T) error {
 	cf := PluginConfig[T]{
 		Plugin: t,

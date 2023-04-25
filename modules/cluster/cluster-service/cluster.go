@@ -5,6 +5,10 @@ import (
 	"encoding/json"
 	"time"
 
+	v1 "github.com/eolinker/apinto-dashboard/client/v1"
+
+	"github.com/eolinker/apinto-dashboard/client/v1/initialize/plugin"
+
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
@@ -197,7 +201,12 @@ func (c *clusterService) Insert(ctx context.Context, namespaceId, userId int, cl
 			node.ClusterId = entryCluster.Id
 		}
 
-		return c.clusterNodeService.Insert(txCtx, entryClusterNodes)
+		err = c.clusterNodeService.Insert(txCtx, entryClusterNodes)
+		if err != nil {
+			return err
+		}
+
+		return c.initGlobalPlugin(ctx, entryCluster.Id, entryCluster.Addr)
 	})
 }
 
@@ -305,6 +314,25 @@ func (c *clusterService) DeleteByNamespaceIdByName(ctx context.Context, namespac
 
 }
 
+func (c *clusterService) initGlobalPlugin(ctx context.Context, id int, addr string) error {
+	client, err := c.apintoClientService.GetClient(ctx, id)
+	if err != nil {
+		client, err = v1.NewClient([]string{addr})
+		if err != nil {
+			return err
+		}
+	}
+	list, err := client.ForGlobalPlugin().List()
+	if err != nil {
+		return err
+	}
+	if len(list) < 1 {
+		// 全局插件未初始化
+		return client.ForGlobalPlugin().Set(plugin.GetGlobalPluginConf())
+	}
+	return nil
+}
+
 // UpdateDesc 修改集群描述
 func (c *clusterService) UpdateDesc(ctx context.Context, namespaceId, userId int, name, desc string) error {
 	clusterId, err := c.CheckByNamespaceByName(ctx, namespaceId, name)
@@ -352,7 +380,11 @@ func (c *clusterService) UpdateAddr(ctx context.Context, userId, clusterId int, 
 			return err
 		}
 
-		return c.clusterHistoryStore.HistoryEdit(txCtx, oldCluster.NamespaceId, clusterInfo.Id, oldCluster, clusterInfo, userId)
+		err = c.clusterHistoryStore.HistoryEdit(txCtx, oldCluster.NamespaceId, clusterInfo.Id, oldCluster, clusterInfo, userId)
+		if err != nil {
+			return err
+		}
+		return c.initGlobalPlugin(ctx, clusterId, addr)
 	})
 
 }
