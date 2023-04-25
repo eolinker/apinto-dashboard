@@ -34,7 +34,6 @@ export class CustomEnvVariableReactComponentWrapperComponent {
   @Input() nzCode?: string
 
   ngOnChanges(changes: SimpleChanges): void {
-    console.log(changes)
     this.render()
   }
 
@@ -47,7 +46,6 @@ export class CustomEnvVariableReactComponentWrapperComponent {
   }
 
   handleChange = (data: string) => {
-    console.log(data)
     this.onChange.emit(data)
   }
 
