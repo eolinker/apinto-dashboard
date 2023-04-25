@@ -59,18 +59,16 @@ export class IntelligentPluginListComponent implements OnInit {
     this.getClusters()
     this.getRender()
     this.getTableData()
-    console.log(this)
   }
 
   getTableData () {
     this.tableLoading = true
-    console.log(this.cluster)
     // 表格内的其他数据与状态数据是分别获取的，如果list先返回，需要先展示除了状态数据以外的其他数据
-    forkJoin([this.api.get(`dynamic/list/${this.moduleName}`, {
+    forkJoin([this.api.get(`dynamic/${this.moduleName}/list`, {
       page: this.tableData.pageNum,
       pageSize: this.tableData.pageSize,
       keyword: this.keyword,
-      clusters: this.cluster
+      cluster: this.cluster
     }).pipe(
       map(res => {
         if (res.code === 0) {
@@ -78,8 +76,12 @@ export class IntelligentPluginListComponent implements OnInit {
         }
         return res
       })),
-    this.api.get(`dynamic/status/${this.moduleName}`)]).subscribe((val:Array<any>) => {
-      console.log(val)
+    this.api.get(`dynamic/${this.moduleName}/status`, {
+      page: this.tableData.pageNum,
+      pageSize: this.tableData.pageSize,
+      keyword: this.keyword,
+      cluster: this.cluster
+    })]).subscribe((val:Array<any>) => {
       this.refreshTableData(this.tableData.data, val[1].data)
     })
   }
@@ -93,7 +95,7 @@ export class IntelligentPluginListComponent implements OnInit {
   }
 
   getRender () {
-    this.api.get(`dynamic/render/${this.moduleName}`).subscribe((resp:{code:number, msg:string, data:DynamicRender}) => {
+    this.api.get(`dynamic/${this.moduleName}/render`).subscribe((resp:{code:number, msg:string, data:DynamicRender}) => {
       if (resp.code === 0) {
         this.renderSchema = resp.data.render
       }
@@ -109,7 +111,6 @@ export class IntelligentPluginListComponent implements OnInit {
         this.cluster = this.clusterOptions.map((cluster:SelectOption) => {
           return cluster.value
         })
-        console.log(this.cluster)
       }
     })
   }
@@ -139,7 +140,6 @@ export class IntelligentPluginListComponent implements OnInit {
     const newTableHeadConfig:THEAD_TYPE[] = []
     const newTableBodyConfig:TBODY_TYPE[] = []
     let statusColFlag:boolean = true
-    console.log(fields)
     for (const field of fields) {
       if (field.attr === 'status' && statusColFlag) {
         newTableHeadConfig.push(
@@ -216,10 +216,7 @@ export class IntelligentPluginListComponent implements OnInit {
     return this.clusterStatusTpl
   }
 
-  getList () {}
-
   publish (value:any) {
-    console.log(value)
     this.modalRef = this.modalService.create({
       nzTitle: `${value.data.name} 上线管理`,
       nzWidth: MODAL_NORMAL_SIZE,
@@ -273,7 +270,6 @@ export class IntelligentPluginListComponent implements OnInit {
   }
 
   editData (value:any) {
-    console.log(value)
     this.modalRef = this.modalService.create({
       nzTitle: `编辑${this.pluginName}`,
       nzWidth: MODAL_NORMAL_SIZE,
@@ -286,19 +282,28 @@ export class IntelligentPluginListComponent implements OnInit {
       },
       nzOnOk: (component:IntelligentPluginCreateComponent) => {
         // eslint-disable-next-line dot-notation
-        this.saveData(JSON.parse(JSON.stringify(component.form['values'])), component.uuid)
+        this.saveData(JSON.parse(JSON.stringify(component.form['values'])), component.uuid, true)
         return false
       }
     })
   }
 
-  saveData (form:{[k:string]:any}, id:string = uuidv4()) {
-    this.api.post(`info/${this.moduleName}/${id}`, { ...form }).subscribe((resp:EmptyHttpResponse) => {
-      if (resp.code === 0) {
-        this.message.success(resp.msg || '操作成功')
-        this.modalRef?.close()
-      }
-    })
+  saveData (form:{[k:string]:any}, id:string = uuidv4(), editPage?:boolean) {
+    if (editPage) {
+      this.api.put(`dynamic/${this.moduleName}/config/${id}`, { ...form }).subscribe((resp:EmptyHttpResponse) => {
+        if (resp.code === 0) {
+          this.message.success(resp.msg || '操作成功')
+          this.modalRef?.close()
+        }
+      })
+    } else {
+      this.api.post(`dynamic/${this.moduleName}/config/${id}`, { ...form }).subscribe((resp:EmptyHttpResponse) => {
+        if (resp.code === 0) {
+          this.message.success(resp.msg || '操作成功')
+          this.modalRef?.close()
+        }
+      })
+    }
   }
 
   deleteDataModal (items:{id:string, [k:string]:any}) {
@@ -317,11 +322,10 @@ export class IntelligentPluginListComponent implements OnInit {
 
   // 删除单条数据
   deleteData = (items:{id:string, [k:string]:any}) => {
-    console.log(items)
-    this.api.delete(`dynamic/batch/${this.moduleName}`, { uuids: [items.id] }).subscribe((resp:any) => {
+    this.api.delete(`dynamic/${this.moduleName}/batch`, { uuids: [items.id] }).subscribe((resp:any) => {
       if (resp.code === 0) {
         this.message.success(resp.msg || '删除成功!')
-        this.getList()
+        this.getTableData()
       }
     })
   }

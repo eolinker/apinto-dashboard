@@ -61,8 +61,8 @@
       [nzTotal]="tableData.total"
       [(nzPageIndex)]="tableData.pageNum"
       [(nzPageSize)]="tableData.pageSize"
-      (nzPageIndexChange)="getList()"
-      (nzPageSizeChange)="getList()"
+      (nzPageIndexChange)="getTableData()"
+      (nzPageSizeChange)="getTableData()"
     >
     </eo-ng-apinto-table>
   </div>
@@ -79,4 +79,6 @@
   <eo-ng-table-status [status]="item[rowItem.key]"></eo-ng-table-status>
 </ng-template>
 
-<ng-template #loadingTpl let-item="item"> <nz-spin nzSimple></nz-spin> </ng-template>
+<ng-template #loadingTpl let-item="item">
+  <nz-spin nzSimple></nz-spin>
+</ng-template>
