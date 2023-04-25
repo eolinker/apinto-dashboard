@@ -44,11 +44,12 @@ func (m *modulePlugin) GetEnabledPlugins(ctx context.Context) ([]*model.EnabledP
 	for _, p := range plugins {
 		enableCfg := new(model.PluginEnableCfg)
 		_ = json.Unmarshal(p.Config, enableCfg)
+		enableCfgMap := enabledCfgListToMap(enableCfg)
 		enablePlugin := &model.EnabledPlugin{
 			UUID:   p.UUID,
 			Name:   p.Name,
 			Driver: p.Driver,
-			Config: enableCfg,
+			Config: enableCfgMap,
 			Define: nil,
 		}
 		define := new(model.PluginDefine)

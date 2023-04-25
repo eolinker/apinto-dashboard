@@ -1,5 +1,5 @@
 id: "strategy-traffic.apinto.com"
-name: "strategy-traffic"
+name: "traffic"
 cname: "流量限制"
 resume: ""
 version: "v1.0.1"
