@@ -66,10 +66,10 @@ export class PasswordComponent implements OnInit {
               this.message.create('success', '登录成功')
               const callbackUrl:string | null = this.route.snapshot.queryParams['callback']
               if (callbackUrl) {
-                // this.router.navigate([callbackUrl])
+                this.router.navigate([callbackUrl])
               }
               else {
-                // this.router.navigate([''])
+                this.router.navigate([''])
               }
             }
           })

@@ -19,9 +19,16 @@
     </div>
     <div class="flex h-[49px] items-center justify-between">
       <eo-ng-breadcrumb [nzOptions]="breadcrumbOptions"></eo-ng-breadcrumb>
-      <button eo-ng-button class="mr-btnrbase" (click)="goToHelp()">
-        帮助文档
-      </button>
+      <div>
+        <button eo-ng-button class="mr-btnrbase" (click)="goToHelp()">
+          帮助文档
+        </button>
+
+        <eo-ng-apinto-user-avatar
+          *ngIf="userAvatar"
+          class="avatar mg-top-right"
+        ></eo-ng-apinto-user-avatar>
+      </div>
     </div>
   </eo-ng-header>
   <eo-ng-layout class="total-content">
