@@ -1,8 +1,8 @@
 id: "ext_app.apinto.com"
-name: "ext_app"
+name: "ext-app"
 cname: "OpenAPI"
 resume: ""
-version: "v1.0.1"
+version: "v1.0.2"
 icon: "OpenAPI.png"
 driver: "ext_app.apinto.com"
 type: 2 #0为框架模块 1为核心模块 2为内置模块 3为非内置
