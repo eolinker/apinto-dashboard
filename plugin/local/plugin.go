@@ -33,7 +33,8 @@ func (t *tPlugin) CreateModule(name string, config interface{}) (apinto_module.M
 		module.routersInfo = append(module.routersInfo, p.CreateHtml(html.Path, html.Label))
 	}
 	for _, a := range t.define.Router.Frontend {
-		module.routersInfo = append(module.routersInfo, p.CreateHtml(a, apinto_module.RouterLabelAssets))
+		path := fmt.Sprintf("/%s/", strings.Trim(a, "/"))
+		module.routersInfo = append(module.routersInfo, p.CreateHtml(path, apinto_module.RouterLabelAssets))
 	}
 	for path, ms := range t.define.Router.Api {
 		for method, att := range ms {
