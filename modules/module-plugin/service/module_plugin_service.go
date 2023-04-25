@@ -275,7 +275,7 @@ func (m *modulePluginService) InstallPlugin(ctx context.Context, userID int, plu
 			Resume:     pluginYml.Resume,
 			ICon:       pluginYml.ICon,
 			Type:       pluginTypeNotInner,
-			Front:      "",
+			Front:      pluginYml.Front,
 			Driver:     pluginYml.Driver,
 			Details:    details,
 			Operator:   userID,
