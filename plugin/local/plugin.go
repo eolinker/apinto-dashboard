@@ -28,7 +28,7 @@ func (t *tPlugin) CreateModule(name string, config interface{}) (apinto_module.M
 	p := NewProxyAPi(cv.Server, name, cv)
 	module := &tModule{name: name}
 
-	module.routersInfo = append(module.routersInfo, p.CreateHome(t.define.Router.Home))
+	module.routersInfo = append(module.routersInfo, p.CreateHome(t.define.Router.Home)...)
 	for _, html := range t.define.Router.Html {
 		module.routersInfo = append(module.routersInfo, p.CreateHtml(html.Path, html.Label))
 	}
