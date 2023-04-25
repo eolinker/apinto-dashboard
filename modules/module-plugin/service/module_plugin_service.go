@@ -630,7 +630,7 @@ func (m *modulePluginService) UpdateInnerPlugin(ctx context.Context, pluginYml *
 			Operator:   0,
 			UpdateTime: t,
 		}
-		err = m.pluginEnableStore.Save(txCtx, enable)
+		_, err = m.pluginEnableStore.Update(txCtx, enable)
 		return err
 	})
 }
