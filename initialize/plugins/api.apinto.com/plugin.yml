@@ -2,8 +2,8 @@ id: "api.apinto.com"
 name: "api"
 cname: "API管理"
 resume: "Apinto是一个基于 Golang 开发的微服务网关，能够实现高性能 HTTP API 转发、多租户管理、API 访问权限控制等目的，拥有强大的自定义插件系统可以自行扩展，能够快速帮助企业进行 API 服务治理、提高 API 服务的稳定性和安全性。未来我们将提供插件市场，通过Apinto强大的插件拓展能力，用户可像乐高积木一样根据需要自行拓展Apinto的插件，丰富Apinto的能力。"
-version: "v1.0.0"
-icon: "inner-plugin.png"
+version: "v1.0.1"
+icon: "API 访问限制.png"
 driver: "api.apinto.com"
 type: 1 #0为框架模块 1为核心模块 2为内置模块 3为非内置
 auto: true
