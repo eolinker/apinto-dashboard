@@ -82,8 +82,14 @@ func (m *modulePlugin) GetNavigationModules(ctx context.Context) ([]*model.Navig
 		//若模块为非内置模块
 		if !IsInnerPlugin(module.Type) {
 			info.Type = "outer"
-			info.Path = fmt.Sprintf("/%s", module.Name)
+			//TODO 临时处理
+			if module.Front != "" {
+				info.Path = module.Front
+			} else {
+				info.Path = fmt.Sprintf("/%s", module.Name)
+			}
 		}
+
 		list = append(list, info)
 	}
 	return list, nil
