@@ -1,4 +1,4 @@
-CREATE TABLE `module_plugin` (
+create table if not exists `module_plugin` (
     `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '模块插件主键ID',
     `uuid` varchar(36) NOT NULL COMMENT 'UUID',
     `name` varchar(255) NOT NULL COMMENT '插件名',
@@ -19,7 +19,7 @@ CREATE TABLE `module_plugin` (
     UNIQUE KEY `unique_uuid` (`uuid`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC COMMENT='模块插件表';
 
-CREATE TABLE `module_plugin_enable` (
+create table if not exists `module_plugin_enable` (
     `id` int(11) NOT NULL COMMENT '模块插件的主键id',
     `name` varchar(255) NOT NULL COMMENT '模块名，可以改，默认为模块插件的name',
     `navigation` varchar(255) NOT NULL COMMENT '导航id',
@@ -30,7 +30,7 @@ CREATE TABLE `module_plugin_enable` (
     PRIMARY KEY (`id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC COMMENT='模块插件启用表';
 
-CREATE TABLE `module_plugin_package` (
+create table if not exists `module_plugin_package` (
     `id` int(11) NOT NULL COMMENT '模块插件表的主键ID',
     `package` mediumblob NOT NULL COMMENT '安装包',
     PRIMARY KEY (`id`) USING BTREE
