@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/go-redis/redis/v8"
+	"strings"
 	"time"
 )
 
@@ -79,10 +80,14 @@ func (r *redisCache[T]) SetAll(ctx context.Context, key string, t []*T, expirati
 	return r.client.Set(ctx, key, bytes, expiration).Err()
 }
 
-func CreateRedisCache[T any](client *redis.ClusterClient) IRedisCache[T] {
+func CreateRedisCache[T any](client *redis.ClusterClient, key ...string) IRedisCache[T] {
+	keyPrefix := "apinto-dashboard:"
+	if len(key) > 0 {
+		keyPrefix = strings.Join(key, ":")
+	}
 	return &redisCache[T]{
 		client:    client,
-		keyPrefix: "apinto-dashboard:",
+		keyPrefix: keyPrefix,
 	}
 }
 
