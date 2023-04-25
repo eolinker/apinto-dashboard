@@ -12,6 +12,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/store"
 	"github.com/eolinker/eosc/common/bean"
 	"gorm.io/gorm"
+	"strings"
 )
 
 type modulePlugin struct {
@@ -44,11 +45,12 @@ func (m *modulePlugin) GetEnabledPlugins(ctx context.Context) ([]*model.EnabledP
 	for _, p := range plugins {
 		enableCfg := new(model.PluginEnableCfg)
 		_ = json.Unmarshal(p.Config, enableCfg)
+		enableCfgMap := enabledCfgListToMap(enableCfg)
 		enablePlugin := &model.EnabledPlugin{
 			UUID:   p.UUID,
 			Name:   p.Name,
 			Driver: p.Driver,
-			Config: enableCfg,
+			Config: enableCfgMap,
 			Define: nil,
 		}
 		define := new(model.PluginDefine)
@@ -68,22 +70,25 @@ func (m *modulePlugin) GetNavigationModules(ctx context.Context) ([]*model.Navig
 
 	list := make([]*model.NavigationModuleInfo, 0, len(moduleInfos))
 	for _, module := range moduleInfos {
-		//导航id不存在表示不需要在前端显示
-		if IsInnerPlugin(module.Type) && module.Front == "" {
+		//导航不存在表示不需要在前端显示
+		if module.Navigation == "" {
 			continue
 		}
 		info := &model.NavigationModuleInfo{
 			Name:       module.Name,
 			Title:      module.Title,
 			Type:       "built-in",
-			Path:       module.Front,
+			Path:       module.Name,
 			Navigation: module.Navigation,
+		}
+		if module.Front != "" {
+			info.Path = fmt.Sprintf("%s/%s", strings.Trim(module.Front, "/"), module.Name)
 		}
 		//若模块为非内置模块
 		if !IsInnerPlugin(module.Type) {
 			info.Type = "outer"
-			info.Path = fmt.Sprintf("/%s", module.Name)
 		}
+
 		list = append(list, info)
 	}
 	return list, nil

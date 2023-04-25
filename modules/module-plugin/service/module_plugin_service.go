@@ -230,6 +230,7 @@ func (m *modulePluginService) GetPluginEnableRender(ctx context.Context, pluginU
 		renderCfg.Querys = pluginDefine.Querys
 		renderCfg.Initialize = pluginDefine.Initialize
 	case pluginDriverLocal:
+		renderCfg.Internet = true
 		renderCfg.Headers = pluginDefine.Headers
 		renderCfg.Querys = pluginDefine.Querys
 		renderCfg.Initialize = pluginDefine.Initialize
@@ -421,7 +422,7 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 	}
 
 	var config []byte
-	var checkConfig *model.PluginEnableCfg
+	var checkConfig *model.PluginEnableCfgMap
 	var define interface{}
 	//若为内置插件
 	if IsInnerPlugin(pluginInfo.Type) {
@@ -458,7 +459,7 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 			Initialize: initializes,
 		}
 		config, _ = json.Marshal(enableCfg)
-		checkConfig = enableCfg
+		checkConfig = enabledCfgListToMap(enableCfg)
 
 		defineCfg := new(model.PluginDefine)
 		_ = json.Unmarshal(pluginInfo.Details, defineCfg)
@@ -505,7 +506,7 @@ func (m *modulePluginService) DisablePlugin(ctx context.Context, userID int, plu
 		return err
 	}
 
-	if IsPluginCanDisable(pluginInfo.Type) {
+	if !IsPluginCanDisable(pluginInfo.Type) {
 		return errors.New("核心模块不可以停用")
 	}
 

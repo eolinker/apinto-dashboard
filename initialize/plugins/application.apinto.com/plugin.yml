@@ -7,6 +7,6 @@ icon: "应用管理.png"
 driver: "application.apinto.com"
 type: 1 #0为框架模块 1为核心模块 2为内置模块 3为非内置
 auto: true
-front: application
+front:
 navigation: "navigation.application"
 group_id: "core_module"
