@@ -72,10 +72,16 @@ func doMiddleware(ginCtx *gin.Context, url string, module string) {
 		}
 	}
 	if middlewareResponse.Abort {
-		if middlewareResponse.Body != nil {
-			ginCtx.Data(middlewareResponse.StatusCode, middlewareResponse.ContentType, middlewareResponse.Body)
-		}
 		ginCtx.Abort()
+		switch middlewareResponse.Action {
+		case "redirect":
+			ginCtx.Redirect(middlewareResponse.StatusCode, string(middlewareResponse.Body))
+		default:
+
+			ginCtx.Data(middlewareResponse.StatusCode, middlewareResponse.ContentType, middlewareResponse.Body)
+
+		}
+
 	}
 
 }

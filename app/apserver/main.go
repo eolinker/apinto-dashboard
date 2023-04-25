@@ -5,6 +5,7 @@ import (
 	grpc_service "github.com/eolinker/apinto-dashboard/grpc-service"
 	"github.com/eolinker/apinto-dashboard/modules/grpc-service/service"
 	apinto_module "github.com/eolinker/apinto-module"
+	"github.com/soheilhy/cmux"
 	"google.golang.org/grpc"
 	"net"
 	"net/http"
@@ -65,14 +66,14 @@ func run() {
 	coreService.ReloadModule()
 	go plugin_timer.ExtenderTimer()
 
-	httpListener, err := net.Listen("tcp", fmt.Sprintf(":%d", GetPort()))
+	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", GetPort()))
 	if err != nil {
 		panic(err)
 	}
-	grpcListener, err := net.Listen("tcp", fmt.Sprintf(":%d", 8181))
-	if err != nil {
-		panic(err)
-	}
+	// Create a cmux.
+	m := cmux.New(listener)
+	grpcL := m.Match(cmux.HTTP2HeaderField("content-type", "application/grpc"))
+	httpL := m.Match(cmux.HTTP1Fast())
 
 	httpServer := &http.Server{Handler: coreService}
 	grpcServer := grpc.NewServer()
@@ -82,18 +83,24 @@ func run() {
 
 	console := newConsoleServer(httpServer, grpcServer)
 	go func() {
-		err := httpServer.Serve(httpListener)
+		err := httpServer.Serve(httpL)
 		if err != nil {
 			log.Error("listen httpServer error: ", err)
 		}
 	}()
 	go func() {
-		err := grpcServer.Serve(grpcListener)
+		err := grpcServer.Serve(grpcL)
 		if err != nil {
 			log.Error("listen grpcServer error: ", err)
 		}
 	}()
-
+	go func() {
+		err := m.Serve()
+		if err != nil {
+			log.Error("server close: ", err)
+			return
+		}
+	}()
 	err = console.Wait()
 	if err != nil {
 		log.Fatal(err)

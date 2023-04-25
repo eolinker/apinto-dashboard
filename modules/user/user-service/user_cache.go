@@ -16,6 +16,6 @@ type batchOnlineApiTaskCache struct {
 
 func newUserInfoCache(client *redis.ClusterClient) IUserInfoCache {
 	return &batchOnlineApiTaskCache{
-		IRedisCache: cache.CreateRedisCache[user_model.UserInfo](client),
+		IRedisCache: cache.CreateRedisCache[user_model.UserInfo](client, "apinto", "user-center"),
 	}
 }
