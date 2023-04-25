@@ -91,8 +91,8 @@ export class IntelligentPluginService {
     const tbody:EO_TBODY_TYPE[] = [
       {
         type: 'checkbox',
-        click: (item:any) => {
-          component.clickData(item)
+        click: () => {
+          component.clickData()
         }
       },
       {

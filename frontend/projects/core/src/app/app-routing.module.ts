@@ -71,6 +71,7 @@ const routes: Routes = [
         data: {
           id: '3'
         },
+        pathMatch: 'prefix',
         loadChildren: () => import('./layout/application/application.module').then(m => m.ApplicationModule)
       },
 
@@ -129,15 +130,24 @@ const routes: Routes = [
         component: DynamicDemoComponent
       },
       {
+        path: 'iframe',
+        children: [
+          {
+            path: ':moduleName',
+            children: [{
+              path: '**',
+              component: IframePageComponent
+            }
+            ]
+          }
+        ]
+      },
+      {
         path: 'template',
         data: {
         },
         component: OuterComponent,
         children: [
-          {
-            path: 'iframe',
-            component: IframePageComponent
-          },
           {
             path: '**',
             component: IntelligentPluginLayoutComponent
