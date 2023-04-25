@@ -1,5 +1,5 @@
 id: "strategy-grey.apinto.com"
-name: "strategy-grey"
+name: "grey"
 cname: "灰度发布"
 resume: ""
 version: "v1.0.1"
@@ -7,6 +7,6 @@ icon: "灰度发布.png"
 driver: "strategy-grey.apinto.com"
 type: 2 #0为框架模块 1为核心模块 2为内置模块 3为非内置
 auto: true
-front: "serv-governance/grey"
+front: serv-governance
 navigation: "navigation.strategy"
 group_id: "strategy"

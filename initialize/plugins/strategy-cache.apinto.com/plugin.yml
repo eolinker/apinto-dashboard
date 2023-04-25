@@ -1,5 +1,5 @@
 id: "strategy-cache.apinto.com"
-name: "strategy-cache"
+name: "cache"
 cname: "数据缓存"
 resume: ""
 version: "v1.0.1"
@@ -7,6 +7,6 @@ icon: "数据缓存.png"
 driver: "strategy-cache.apinto.com"
 type: 2 #0为框架模块 1为核心模块 2为内置模块 3为非内置
 auto: true
-front: "serv-governance/cache"
+front: serv-governance
 navigation: "navigation.strategy"
 group_id: "strategy"

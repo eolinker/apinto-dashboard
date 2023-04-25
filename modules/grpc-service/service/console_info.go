@@ -2,11 +2,14 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/grpc-service"
 	"github.com/eolinker/apinto-dashboard/modules/api"
 	"github.com/eolinker/apinto-dashboard/modules/application"
+	module_plugin "github.com/eolinker/apinto-dashboard/modules/module-plugin"
 	"github.com/eolinker/apinto-dashboard/modules/namespace"
+	navigation_service "github.com/eolinker/apinto-dashboard/modules/navigation"
 	"github.com/eolinker/apinto-dashboard/modules/upstream"
 	"github.com/eolinker/eosc/common/bean"
 	"gorm.io/gorm"
@@ -15,10 +18,12 @@ import (
 var _ grpc_service.GetConsoleInfoServer = (*consoleInfoService)(nil)
 
 type consoleInfoService struct {
-	namespaceService namespace.INamespaceService
-	apiService       api.IAPIService
-	upstreamService  upstream.IService
-	appService       application.IApplicationService
+	namespaceService    namespace.INamespaceService
+	apiService          api.IAPIService
+	upstreamService     upstream.IService
+	appService          application.IApplicationService
+	modulePluginService module_plugin.IModulePlugin
+	navigationService   navigation_service.INavigationService
 }
 
 func NewConsoleInfoService() grpc_service.GetConsoleInfoServer {
@@ -27,6 +32,8 @@ func NewConsoleInfoService() grpc_service.GetConsoleInfoServer {
 	bean.Autowired(&c.apiService)
 	bean.Autowired(&c.upstreamService)
 	bean.Autowired(&c.appService)
+	bean.Autowired(&c.modulePluginService)
+	bean.Autowired(&c.navigationService)
 	return c
 }
 
@@ -177,5 +184,33 @@ func (c *consoleInfoService) GetAppsByUuids(ctx context.Context, req *grpc_servi
 	}
 	return &grpc_service.AppsResp{
 		Items: items,
+	}, nil
+}
+
+func (c *consoleInfoService) GetNavigationModules(ctx context.Context, req *grpc_service.EmptyRequest) (*grpc_service.NavigationModulesResp, error) {
+	modules, err := c.modulePluginService.GetNavigationModules(ctx)
+	if err != nil {
+		return nil, errors.New("获取导航模块列表失败")
+	}
+	navigations := c.navigationService.List()
+	navigationItems := make([]*grpc_service.NavigationItem, 0, len(navigations))
+	modulesItems := make([]*grpc_service.ModuleItem, 0, len(modules))
+
+	for _, item := range navigations {
+		navigationItems = append(navigationItems, &grpc_service.NavigationItem{
+			Id:    item.Uuid,
+			Cname: item.Title,
+		})
+	}
+	for _, item := range modules {
+		modulesItems = append(modulesItems, &grpc_service.ModuleItem{
+			Name:         item.Name,
+			Cname:        item.Title,
+			NavigationId: item.Navigation,
+		})
+	}
+	return &grpc_service.NavigationModulesResp{
+		NavigationItems: navigationItems,
+		ModulesItems:    modulesItems,
 	}, nil
 }
