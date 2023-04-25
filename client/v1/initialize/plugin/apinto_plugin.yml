@@ -1,4 +1,8 @@
 -
+  id: eolinker.com:apinto:access_log
+  name: access_log
+  status: global
+-
   id: eolinker.com:apinto:monitor
   name: monitor
   status: global
