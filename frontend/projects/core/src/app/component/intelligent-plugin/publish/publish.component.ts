@@ -31,7 +31,7 @@ export class IntelligentPluginPublishComponent implements OnInit {
   }
 
   getPublishList () {
-    this.api.get(`dynamic/cluster/${this.moduleName}/${this.id}`).subscribe((resp:{code:number, msg:string, data:DynamicPublishData}) => {
+    this.api.get(`dynamic/${this.moduleName}/cluster/${this.id}`).subscribe((resp:{code:number, msg:string, data:DynamicPublishData}) => {
       if (resp.code === 0) {
         this.publishList = resp.data.clusters
       }
@@ -39,7 +39,6 @@ export class IntelligentPluginPublishComponent implements OnInit {
   }
 
   tableClick = (item:any) => {
-    console.log(item)
     item.checked = !item.checked
     item.data.checked = !item.data.checked
     this.checkSelectedCluster()
@@ -47,18 +46,15 @@ export class IntelligentPluginPublishComponent implements OnInit {
 
   // 点击表头全选
   checkAll () {
-    console.log(this)
     this.checkSelectedCluster()
   }
 
   // 点击单条数据
-  clickData (value:any) {
-    console.log(value)
+  clickData () {
     this.checkSelectedCluster()
   }
 
   checkSelectedCluster () {
-    console.log(this.publishList)
     this.selectedClusters = this.publishList.filter((item:any) => {
       return item.checked
     }).map((item) => {
@@ -68,13 +64,12 @@ export class IntelligentPluginPublishComponent implements OnInit {
   }
 
   offline () {
-    console.log(this)
     const cluster:Array<string> = this.publishList.filter((item) => {
       return item.checked
     }).map((item) => {
       return item.name
     })
-    this.api.post(`dynamic/offline/${this.moduleName}/${this.id}`, { cluster: cluster }).subscribe((resp:DynamicPublish) => {
+    this.api.put(`dynamic/${this.moduleName}/offline/${this.id}`, { cluster: cluster }).subscribe((resp:DynamicPublish) => {
       if (resp.code === 0) {
         this.message.success(resp.msg)
       }
@@ -82,13 +77,12 @@ export class IntelligentPluginPublishComponent implements OnInit {
   }
 
   online () {
-    console.log(this)
     const cluster:Array<string> = this.publishList.filter((item) => {
       return item.checked
     }).map((item) => {
       return item.name
     })
-    this.api.post(`dynamic/online/${this.moduleName}/${this.id}`, { cluster: cluster }).subscribe((resp:DynamicPublish) => {
+    this.api.put(`dynamic/${this.moduleName}/online/${this.id}`, { cluster: cluster }).subscribe((resp:DynamicPublish) => {
       if (resp.code === 0) {
         this.message.success(resp.msg)
       }

@@ -19,21 +19,23 @@ export class EoNgJsonService {
         } else if (type === 'array') {
           const items = param.items
           if (this.dataType.includes(items.type)) {
-            obj[key] = [items.default || (
-              items.type === 'string'
-                ? ((items.required !== false && items?.enum?.length > 0) ? items.enum[0] : '')
-                : (items.type === 'number' ? ((items.required !== false && items.enum.length > 0) ? items.enum[0] : 0) : (items.type === 'boolean' ? ((items.required !== false && items.enum.length > 0) ? items.enum[0] : false) : null)))]
+            obj[key] = items.required === false
+              ? items.default || null
+              : items.default || [(
+                items.type === 'string'
+                  ? ((items.required !== false && items?.enum?.length > 0) ? items.enum[0] : (items.required === false ? null : ''))
+                  : (items.type === 'number' ? ((items.required !== false && items.enum.length > 0) ? items.enum[0] : (items.required === false ? null : 0)) : (items.type === 'boolean' ? ((items.required !== false && items.enum.length > 0) ? items.enum[0] : (items.required === false ? null : false)) : null)))]
           } else {
             obj[key] = [this.handleJsonSchema2Json(items)]
           }
         } else if (type === 'object') {
           obj[key] = this.handleJsonSchema2Json(param)
         } else if (type === 'number' || type === 'integer') {
-          obj[key] = ((param.required !== false && param?.enum?.length > 0) ? param.enum[0] : 0)
+          obj[key] = ((param.required !== false && param?.enum?.length > 0) ? param.enum[0] : (param.required === false ? null : 0))
         } else if (type === 'boolean') {
-          obj[key] = ((param.required !== false && param?.enum?.length > 0) ? param.enum[0] : false)
+          obj[key] = ((param.required !== false && param?.enum?.length > 0) ? param.enum[0] : (param.required === false ? null : false))
         } else if (type === 'string') {
-          obj[key] = ((param.required !== false && param?.enum?.length > 0) ? param.enum[0] : '')
+          obj[key] = ((param.required !== false && param?.enum?.length > 0) ? param.enum[0] : (param.required === false ? null : ''))
         }
       }
     }

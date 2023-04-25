@@ -46,7 +46,7 @@ export class ApiPluginTemplateContentComponent implements OnInit {
   ngOnInit (): void {
     this.uuid = this.baseInfo.allParamsInfo.pluginTemplateId
     if (!this.uuid) {
-      this.router.navigate(['/', 'router', 'plugin'])
+      this.router.navigate(['/', 'router', 'plugin-template'])
     }
   }
 
