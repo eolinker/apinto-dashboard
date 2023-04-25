@@ -10,65 +10,72 @@ import (
 	"strings"
 )
 
-func (p *ProxyAPi) CreateHome(path string) apinto_module.RouterInfo {
+func (p *ProxyAPi) CreateHome(path string) []apinto_module.RouterInfo {
 	baseHtml := []byte(fmt.Sprintf(fmt.Sprintf("<base href=\"/module/%s\">", p.module)))
-	routerRoot := fmt.Sprintf("/module/%s/", p.module)
-	routerPath := routerRoot
+	routerRoot := fmt.Sprintf("/module/%s", p.module)
 
 	if !strings.HasPrefix(path, "/") {
 		path = "/" + path
 	}
-	if strings.HasSuffix(path, "/") {
-		routerPath = fmt.Sprintf("/module/%s/*path", p.module)
+	//if strings.HasSuffix(path, "/") {
+	//	routerPath = fmt.Sprintf("/module/%s/*path", p.module)
+	//}
+	handler := func(ginCtx *gin.Context) {
+		query := ginCtx.Request.URL.Query()
+		for k, v := range p.query {
+			query.Set(k, v)
+		}
+		header := ginCtx.Request.Header
+		for k, v := range p.headers {
+			header.Set(k, v)
+		}
+
+		targetPath := strings.Replace(ginCtx.Request.URL.Path, routerRoot, path, 1)
+
+		target := fmt.Sprintf("%s%s?%s", p.server, targetPath, query.Encode())
+
+		request, err := http.NewRequest(http.MethodGet, target, nil)
+		if err != nil {
+			ginCtx.Error(err)
+			return
+		}
+		request.Header = header
+		response, err := http.DefaultClient.Do(request)
+		if err != nil {
+			ginCtx.Error(err)
+			return
+		}
+		body, err := io.ReadAll(response.Body)
+		response.Body.Close()
+		if err != nil {
+			ginCtx.Error(err)
+			return
+		}
+		statusCode := response.StatusCode
+		contentType := response.Header.Get("content-type")
+
+		if bytes.Index(body, []byte(`<base href="/">`)) > 0 {
+			body = bytes.Replace(body, []byte(`<base href="/">`), baseHtml, 1)
+		} else {
+			body = bytes.Replace(body, []byte(`</head>`), bytes.Join([][]byte{baseHtml, []byte(`</head>`)}, []byte("\n")), 1)
+		}
+
+		ginCtx.Data(statusCode, contentType, body)
 	}
-	return apinto_module.RouterInfo{
-		Method:  http.MethodGet,
-		Path:    routerPath,
-		Handler: fmt.Sprintf("%s.home", p.module),
-		Labels:  apinto_module.RouterLabelModule,
-		HandlerFunc: []apinto_module.HandlerFunc{func(ginCtx *gin.Context) {
-			query := ginCtx.Request.URL.Query()
-			for k, v := range p.query {
-				query.Set(k, v)
-			}
-			header := ginCtx.Request.Header
-			for k, v := range p.headers {
-				header.Set(k, v)
-			}
-
-			targetPath := strings.Replace(ginCtx.Request.URL.Path, routerRoot, path, 1)
-
-			target := fmt.Sprintf("%s%s?%s", p.server, targetPath, query.Encode())
-
-			request, err := http.NewRequest(http.MethodGet, target, nil)
-			if err != nil {
-				ginCtx.Error(err)
-				return
-			}
-			request.Header = header
-			response, err := http.DefaultClient.Do(request)
-			if err != nil {
-				ginCtx.Error(err)
-				return
-			}
-			body, err := io.ReadAll(response.Body)
-			response.Body.Close()
-			if err != nil {
-				ginCtx.Error(err)
-				return
-			}
-			statusCode := response.StatusCode
-			contentType := response.Header.Get("content-type")
-
-			if bytes.Index(body, []byte(`<base href="/">`)) > 0 {
-				body = bytes.Replace(body, []byte(`<base href="/">`), baseHtml, 1)
-			} else {
-				body = bytes.Replace(body, []byte(`</head>`), bytes.Join([][]byte{baseHtml, []byte(`</head>`)}, []byte("\n")), 1)
-			}
-
-			ginCtx.Data(statusCode, contentType, body)
-		}},
-	}
+	return []apinto_module.RouterInfo{{
+		Method:      http.MethodGet,
+		Path:        fmt.Sprintf("/module/%s", p.module),
+		Handler:     fmt.Sprintf("%s.home", p.module),
+		Labels:      apinto_module.RouterLabelModule,
+		HandlerFunc: []apinto_module.HandlerFunc{handler},
+	},
+		{
+			Method:      http.MethodGet,
+			Path:        fmt.Sprintf("/module/%s/:sub/*path", p.module),
+			Handler:     fmt.Sprintf("%s.home", p.module),
+			Labels:      apinto_module.RouterLabelModule,
+			HandlerFunc: []apinto_module.HandlerFunc{handler},
+		}}
 }
 func (p *ProxyAPi) CreateHtml(dir string, appendLabel []string) apinto_module.RouterInfo {
 	routerRoot := fmt.Sprintf("/module/%s/%s", p.module, strings.TrimPrefix(dir, "/"))
