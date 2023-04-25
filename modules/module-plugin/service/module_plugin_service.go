@@ -230,6 +230,7 @@ func (m *modulePluginService) GetPluginEnableRender(ctx context.Context, pluginU
 		renderCfg.Querys = pluginDefine.Querys
 		renderCfg.Initialize = pluginDefine.Initialize
 	case pluginDriverLocal:
+		renderCfg.Internet = true
 		renderCfg.Headers = pluginDefine.Headers
 		renderCfg.Querys = pluginDefine.Querys
 		renderCfg.Initialize = pluginDefine.Initialize
