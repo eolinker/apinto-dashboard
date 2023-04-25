@@ -1,4 +1,4 @@
-CREATE TABLE `notice_channel` (
+create table if not exists `notice_channel` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
   `namespace` int(11) NOT NULL COMMENT '工作空间',
   `name` varchar(36) NOT NULL COMMENT 'email或uuid',

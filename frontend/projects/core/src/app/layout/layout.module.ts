@@ -56,6 +56,7 @@ import { NzDividerModule } from 'ng-zorro-antd/divider'
 import { DynamicDemoComponent } from './dynamic-demo/dynamic-demo.component'
 import { OuterComponent } from './outer/outer.component'
 import { SafePipe } from '../pipe/safe.pipe'
+import { NzSpinModule } from 'ng-zorro-antd/spin'
 
 @NgModule({
   declarations: [
@@ -111,7 +112,8 @@ import { SafePipe } from '../pipe/safe.pipe'
     EoNgUploadModule,
     NzUploadModule,
     EoNgEmptyModule,
-    NzDividerModule
+    NzDividerModule,
+    NzSpinModule
   ],
   exports: [
     BasicLayoutComponent
