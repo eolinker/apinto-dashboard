@@ -3,11 +3,11 @@ name: "log"
 cname: "Access日志"
 resume: ""
 version: "v1.0.0"
-icon: "inner-plugin.png"
+icon: "Access日志.png"
 driver: "dynamic.apinto.com"
 front: template/access_log
 navigation: "navigation.system"
-group_id: "core_module"
+group_id: "log"
 define:  # 动态模块定义
   profession: output
   drivers:
