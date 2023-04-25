@@ -6,7 +6,7 @@
   name: "访问鉴权"
 - id: "security"
   name: "安全"
-- id: "operation_log"
+- id: "log"
   name: "日志"
 - id: "devops"
   name: "DevOps"
