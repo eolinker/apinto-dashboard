@@ -1,0 +1,121 @@
+<div class="m-btnbase mb-0">
+  <eo-ng-feedback-alert
+    nzType="info"
+    nzMessage="邮箱设置用于触发告警策略系统发送邮件给用户。"
+    nzShowIcon
+    [nzBanner]="true"
+    [nzCloseable]="true"
+  ></eo-ng-feedback-alert>
+</div>
+<div class="mt-mbase">
+  <form
+    nz-form
+    [nzNoColon]="true"
+    [nzAutoTips]="autoTips"
+    [formGroup]="validateForm"
+    autocomplete="off"
+  >
+    <nz-form-item>
+      <nz-form-label [nzSpan]="9" nzRequired>SMTP地址：</nz-form-label>
+      <nz-form-control [nzSpan]="10">
+        <input
+          type="text"
+          eo-ng-input
+          name="smtpUrl"
+          class="w-INPUT_NORMAL"
+          formControlName="smtpUrl"
+          placeholder="请输入"
+          required
+          eoNgUserAccess="system/email"
+          (disabledEdit)="disabledEdit($event)"
+        />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="9" nzRequired>SMTP端口：</nz-form-label>
+      <nz-form-control [nzSpan]="10">
+        <input
+          type="number"
+          eo-ng-input
+          class="w-INPUT_NORMAL"
+          name="smtpPort"
+          formControlName="smtpPort"
+          placeholder="请输入"
+          required
+          eoNgUserAccess="system/email"
+        />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="9" nzRequired>通信协议：</nz-form-label>
+      <nz-form-control [nzSpan]="10">
+        <eo-ng-select
+          class="w-INPUT_NORMAL"
+          [nzOptions]="listOfProtocols"
+          formControlName="protocol"
+          nzPlaceHolder="请选择"
+          [nzDisabled]="nzDisabled"
+        ></eo-ng-select>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="9">发件邮箱：</nz-form-label>
+      <nz-form-control [nzSpan]="10">
+        <input
+          class="w-INPUT_NORMAL"
+          type="text"
+          eo-ng-input
+          name="email"
+          formControlName="email"
+          placeholder="请输入"
+          eoNgUserAccess="system/email"
+        />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="9">账号：</nz-form-label>
+      <nz-form-control [nzSpan]="10">
+        <input
+          class="w-INPUT_NORMAL"
+          eo-ng-input
+          name="account"
+          placeholder="请输入"
+          formControlName="account"
+          eoNgUserAccess="system/email"
+        />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item class="mb-0">
+      <nz-form-label [nzSpan]="9">密码：</nz-form-label>
+      <nz-form-control [nzSpan]="10">
+        <input
+          class="w-INPUT_NORMAL"
+          eo-ng-input
+          name="password"
+          placeholder="请输入"
+          formControlName="password"
+          eoNgUserAccess="system/email"
+        />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item class="bg-white mb-0 sticky bottom-0 pt-mbase pb-mbase">
+      <nz-form-control [nzOffset]="9" [nzSpan]="18">
+        <button
+          class="ant-btn-primary"
+          eoNgUserAccess="system/email"
+          type="submit"
+          eo-ng-button
+          (click)="save()"
+        >
+          {{ editPage ? '提交' : '保存' }}
+        </button>
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+</div>

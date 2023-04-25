@@ -43,12 +43,11 @@ export class IntelligentPluginCreateComponent implements OnInit {
   }
 
   ngAfterViewInit () {
-    console.log(this.formily)
     this.form = this.formily.reactComponent.current.form
   }
 
   getMessage () {
-    this.api.get(`/dynamic/info/${this.moduleName}/${this.uuid}`)
+    this.api.get(`/dynamic/${this.moduleName}/info/${this.uuid}`)
       .subscribe((resp:{code:number, msg:string, data:{[k:string]:any}}) => {
         if (resp.code === 0) {
           this.initFormValue = resp.data
