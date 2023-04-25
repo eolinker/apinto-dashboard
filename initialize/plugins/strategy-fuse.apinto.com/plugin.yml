@@ -1,5 +1,5 @@
 id: "strategy-fuse.apinto.com"
-name: "strategy-fuse"
+name: "fuse"
 cname: "熔断"
 resume: ""
 version: "v1.0.1"

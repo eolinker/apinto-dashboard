@@ -1,5 +1,5 @@
 id: "audit.apinto.com"
-name: "audit"
+name: "audit-log"
 cname: "Debug日志"
 resume: ""
 version: "v1.0.3"
