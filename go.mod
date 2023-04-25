@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/eolinker/apinto-module v0.0.0
-	github.com/eolinker/eosc v0.10.1
+	github.com/eolinker/eosc v0.12.1
 	github.com/gin-gonic/gin v1.9.0
 	github.com/go-basic/uuid v1.0.0
 	github.com/go-redis/redis/v8 v8.11.5
