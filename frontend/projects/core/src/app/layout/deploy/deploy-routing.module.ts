@@ -62,7 +62,7 @@ const routes: Routes = [{
         }]
     },
     {
-      path: 'env',
+      path: 'variable',
       component: DeployEnvironmentComponent,
       data: {
         id: '102',

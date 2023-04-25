@@ -78,10 +78,10 @@ export class ApiPluginTemplateListComponent implements OnInit {
   }
 
   pluginTableClick= (item:any) => {
-    this.router.navigate(['/', 'router', 'plugin', 'content', item.data.uuid])
+    this.router.navigate(['/', 'router', 'plugin-template', 'content', item.data.uuid])
   }
 
   addPluginTemplate (): void {
-    this.router.navigate(['/', 'router', 'plugin', 'create'])
+    this.router.navigate(['/', 'router', 'plugin-template', 'create'])
   }
 }
