@@ -51,6 +51,9 @@ import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { CustomCodeboxReactComponentWrapperComponent } from './formily2-react/component/codebox/CustomCodeboxComponentWrapper'
 import { CustomEnvVariableReactComponentWrapperComponent } from './formily2-react/component/editable-env-table/CustomEnvVariableComponentWrapper'
 import { EoNgCodeboxModule } from 'eo-ng-codebox'
+import { UserAvatarComponent } from './user-avatar/user-avatar.component'
+import { ResetPswComponent } from './reset-psw/reset-psw.component'
+import { UserProfileComponent } from './user-profile/user-profile.component'
 @NgModule({
   declarations: [
     EditableEnvTableComponent,
@@ -68,7 +71,10 @@ import { EoNgCodeboxModule } from 'eo-ng-codebox'
     IntelligentPluginListComponent,
     IntelligentPluginPublishComponent,
     IntelligentPluginCreateComponent,
-    CustomEnvVariableReactComponentWrapperComponent
+    CustomEnvVariableReactComponentWrapperComponent,
+    UserAvatarComponent,
+    ResetPswComponent,
+    UserProfileComponent
   ],
   imports: [
     CommonModule,
@@ -112,7 +118,10 @@ import { EoNgCodeboxModule } from 'eo-ng-codebox'
     ApiMethodTagComponent,
     CopyAddrListComponent,
     CardListComponent,
-    Formily2ReactComponent
+    Formily2ReactComponent,
+    UserAvatarComponent,
+    ResetPswComponent,
+    UserProfileComponent
   ]
 })
 export class ComponentModule { }

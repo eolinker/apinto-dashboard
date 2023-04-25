@@ -39,7 +39,7 @@ export class ApiPluginTemplateCreateComponent implements OnInit {
     private jsonService:EoNgJsonService
   ) {
     this.appConfigService.reqFlashBreadcrumb([
-      { title: '插件模板', routerLink: 'router/plugin' },
+      { title: '插件模板', routerLink: 'router/plugin-template' },
       { title: '新建模板' }
     ])
 
@@ -52,7 +52,7 @@ export class ApiPluginTemplateCreateComponent implements OnInit {
   ngOnInit (): void {
     if (this.baseInfo.allParamsInfo.pluginTemplateId) {
       this.appConfigService.reqFlashBreadcrumb([
-        { title: '插件模板', routerLink: 'router/plugin' },
+        { title: '插件模板', routerLink: 'router/plugin-template' },
         { title: '编辑模板' }
       ])
     }
@@ -87,7 +87,7 @@ export class ApiPluginTemplateCreateComponent implements OnInit {
 
   // 返回列表页，当fromList为true时，该页面左侧有分组
   backToList () {
-    this.router.navigate(['/', 'router', 'plugin'])
+    this.router.navigate(['/', 'router', 'plugin-template'])
   }
 
   handlerConfigListChange () {

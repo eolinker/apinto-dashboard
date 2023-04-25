@@ -139,7 +139,7 @@ export class ApiPublishComponent implements OnInit {
                 label: '跳转至模板上线管理',
                 type: 'primary',
                 onClick: () => {
-                  window.open(`router/plugin/content/${resp.data.router.params.templateUuid}`)
+                  window.open(`router/plugin-template/content/${resp.data.router.params.templateUuid}`)
                   return true
                 },
                 disabled: !resp.data.router.params.templateUuid

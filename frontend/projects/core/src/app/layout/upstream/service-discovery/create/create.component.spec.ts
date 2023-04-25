@@ -68,7 +68,7 @@ describe('ServiceDiscoveryCreateComponent test as editPage is false', () => {
             component: ServiceDiscoveryMessageComponent
           },
           {
-            path: 'upstream/serv-discovery',
+            path: 'upstream/discovery',
             component: ServiceDiscoveryListComponent
           }
         ]
