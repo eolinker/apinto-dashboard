@@ -19,6 +19,24 @@ export interface UserListData{
   email:string
 }
 
+export interface UserData{
+  sex?:number
+  avatar?:string
+  email:string
+  phone:string
+  user_name:string
+  nick_name:string
+  role_ids:Array<string>
+  desc:string
+  notice_user_id:string
+}
+
+export interface MonitorAlarmChannelsData {
+  uuid: string
+  title: string
+  type: 1 | 2
+}
+
 // 创建/修改目录
 export interface GroupData{
   name:string

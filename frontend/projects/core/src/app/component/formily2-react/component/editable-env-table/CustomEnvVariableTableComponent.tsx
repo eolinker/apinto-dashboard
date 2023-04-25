@@ -79,7 +79,6 @@ export const CustomEnvVariableTableComponent: React.FunctionComponent<Props> = (
 
   React.useEffect(() => {
     getEnvlist()
-    console.log('test')
   }, [])
 
   // const handleChange = (value: string) => {}
@@ -141,7 +140,6 @@ export const CustomEnvVariableTableComponent: React.FunctionComponent<Props> = (
     if (editing) {
       return
     }
-    console.log(editing)
     const newData: DataType = {
       key: '',
       description: ''
@@ -191,14 +189,12 @@ export const CustomEnvVariableTableComponent: React.FunctionComponent<Props> = (
   const save = async () => {
     try {
       const row = (await form.validateFields()) as DataType
-      console.log(row, form)
       axios
         .post(`${environment.urlPrefix}api/variable`, {
           key: row.key || '',
           desc: row.description || ''
         })
         .then(({ data }) => {
-          console.log(data)
           if (data.code === 0) {
             message.success(data.msg)
             getEnvlist()

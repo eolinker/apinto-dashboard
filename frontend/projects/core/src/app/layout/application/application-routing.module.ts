@@ -37,6 +37,10 @@ const routes: Routes = [{
           component: ApplicationAuthenticationComponent
         }
       ]
+    },
+    {
+      path: '**',
+      component: ApplicationManagementListComponent
     }
   ]
 }]
