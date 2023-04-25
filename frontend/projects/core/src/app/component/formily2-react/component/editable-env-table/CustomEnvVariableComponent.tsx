@@ -15,7 +15,6 @@ export const CustomEnvVariableComponent = React.forwardRef(
     const openModal = (e: any) => {
       e.preventDefault()
       const handleChooseEnv = ({ key }: any) => {
-        console.log(key)
         modalRef?.destroy()
         onChange && onChange(key)
       }
