@@ -100,7 +100,7 @@ export class PluginListComponent implements OnInit {
     if (this.activatedNode?.isSelected) {
       this.activatedNode!.isSelected = false
     }
-    this.router.navigate(['/', 'plugin', 'group', 'list', ''])
+    this.router.navigate(['/', 'module-plugin', 'group', 'list', ''])
   }
 
   disabledEdit (value: any) {

@@ -90,7 +90,7 @@ export class DeployEnvironmentListComponent {
     private appConfigService: EoNgNavigationService
   ) {
     this.appConfigService.reqFlashBreadcrumb([
-      { title: '环境变量', routerLink: 'deploy/env' }
+      { title: '环境变量', routerLink: 'deploy/variable' }
     ])
   }
 
@@ -160,7 +160,7 @@ export class DeployEnvironmentListComponent {
   }
 
   addConfig () {
-    this.router.navigate(['/', 'deploy', 'env', 'create'])
+    this.router.navigate(['/', 'deploy', 'variable', 'create'])
   }
 
   resetSearch () {

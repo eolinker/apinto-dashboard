@@ -24,7 +24,7 @@
           eo-ng-input
           formControlName="name"
           placeholder="英文数字下划线任意一种，首字母必须为英文"
-          eoNgUserAccess="upstream/serv-discovery"
+          eoNgUserAccess="upstream/discovery"
         />
         <ng-template #nameErrorTpl let-control>
           <ng-container *ngIf="control.hasError('pattern')"
@@ -47,7 +47,7 @@
           eo-ng-input
           formControlName="desc"
           placeholder="请输入"
-          eoNgUserAccess="upstream/serv-discovery"
+          eoNgUserAccess="upstream/discovery"
         ></textarea>
       </nz-form-control>
     </nz-form-item>
@@ -62,7 +62,7 @@
           formControlName="driver"
           (ngModelChange)="changeBasedata()"
           [nzOptions]="driverList"
-          eoNgUserAccess="upstream/serv-discovery"
+          eoNgUserAccess="upstream/discovery"
           [nzDisabled]="nzDisabled"
           (disabledEdit)="disabledEdit($event)"
         ></eo-ng-select>
@@ -94,7 +94,7 @@
           type="submit"
           eo-ng-button
           (click)="saveService()"
-          eoNgUserAccess="upstream/serv-discovery"
+          eoNgUserAccess="upstream/discovery"
           [nzLoading]="submitButtonLoading"
         >
           {{ editPage ? '提交' : '保存' }}

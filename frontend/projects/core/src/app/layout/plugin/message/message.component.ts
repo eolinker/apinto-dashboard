@@ -124,7 +124,7 @@ export class PluginMessageComponent implements OnInit {
     @Inject(API_URL) public urlPrefix: string
   ) {
     this.appConfigService.reqFlashBreadcrumb([
-      { title: '企业插件', routerLink: ['/', 'plugin', 'group', 'list', ''] },
+      { title: '企业插件', routerLink: ['/', 'module-plugin', 'group', 'list', ''] },
       { title: '插件详情' }
     ])
   }
@@ -198,7 +198,7 @@ export class PluginMessageComponent implements OnInit {
 
   getMd () {
     // return './assets/README.md' // 本地调试用
-    return `../../plugin/md/${this.pluginId}/${this.mdFileName || ''}`
+    return `../../module-plugin/md/${this.pluginId}/${this.mdFileName || ''}`
   }
 
   loadMd () {
@@ -382,7 +382,7 @@ export class PluginMessageComponent implements OnInit {
             .subscribe(() => {
               subscription.unsubscribe()
             })
-          this.router.navigate(['/', 'plugin', 'group', 'list'])
+          this.router.navigate(['/', 'module-plugin', 'group', 'list'])
           this.modalRef?.close()
         }
       })
