@@ -1,11 +1,11 @@
-id: "log.apinto.com"
-name: "log"
-cname: "Access日志"
+id: "access-log.apinto.com"
+name: "access-log"
+cname: "输出日志"
 resume: ""
 version: "v1.0.0"
 icon: "Access日志.png"
 driver: "dynamic.apinto.com"
-front: template/access_log
+front: template
 navigation: "navigation.system"
 group_id: "log"
 define:  # 动态模块定义
@@ -21,7 +21,7 @@ define:  # 动态模块定义
       title: Syslog
     - name: kafka_output
       title: Kafka
-  skill: github.com/eolinker/apinto/http-entry.http-entry.IOutput
+  skill: Access-Output
   fields:
     - name: title           # 定义从响应中对应字段中获取显示值
       title: 名称
