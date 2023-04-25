@@ -19,6 +19,12 @@ export interface UserListData{
   email:string
 }
 
+export interface MonitorAlarmChannelsData {
+  uuid: string
+  title: string
+  type: 1 | 2
+}
+
 // 创建/修改目录
 export interface GroupData{
   name:string

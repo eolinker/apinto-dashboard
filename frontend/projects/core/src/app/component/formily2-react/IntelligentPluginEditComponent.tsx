@@ -48,7 +48,6 @@ import {
 } from '@formily/react'
 import { CustomCodeboxComponent } from './component/codebox/CustomCodeboxComponent'
 import { CustomEnvVariableComponent } from './component/editable-env-table/CustomEnvVariableComponent'
-import { isEqual } from 'lodash-es'
 
 const DynamicRender = observer(() => {
   const field = useField()
@@ -126,7 +125,6 @@ export const IntelligentPluginEditComponent = React.forwardRef(
 
     const submitRef = React.createRef()
     DYNAMIC_INJECT_SCHEMA = schema
-    console.log(demo, demoSchema)
 
     const form = createForm()
 
