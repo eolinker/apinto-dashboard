@@ -7,6 +7,6 @@ icon: "debug日志.png"
 driver: "audit.apinto.com"
 type: 2 #0为框架模块 1为核心模块 2为内置模块 3为非内置
 auto: true
-front: audit-log
+front:
 navigation: "navigation.system"
 group_id: "log"
