@@ -29,7 +29,7 @@ export class ServiceDiscoveryListComponent implements OnInit {
                private api:ApiService,
                private router:Router,
                private appConfigService:EoNgNavigationService) {
-    this.appConfigService.reqFlashBreadcrumb([{ title: '服务发现', routerLink: 'upstream/serv-discovery' }])
+    this.appConfigService.reqFlashBreadcrumb([{ title: '服务发现', routerLink: 'upstream/discovery' }])
   }
 
   nzDisabled:boolean = false
@@ -42,7 +42,7 @@ export class ServiceDiscoveryListComponent implements OnInit {
   ngOnInit (): void {
     this.getServicesList()
     this.servicesTableBody[4].btns[0].click = (item:any) => {
-      this.router.navigate(['/', 'upstream', 'serv-discovery', 'content', item.data.name])
+      this.router.navigate(['/', 'upstream', 'discovery', 'content', item.data.name])
     }
     this.servicesTableBody[4].btns[1].disabledFn = (data:any, item:any) => {
       return this.nzDisabled || !item.data.isDelete
@@ -66,11 +66,11 @@ export class ServiceDiscoveryListComponent implements OnInit {
   }
 
   serviceTableClick = (item:any) => {
-    this.router.navigate(['/', 'upstream', 'serv-discovery', 'content', item.data.name])
+    this.router.navigate(['/', 'upstream', 'discovery', 'content', item.data.name])
   }
 
   addService () {
-    this.router.navigate(['/', 'upstream', 'serv-discovery', 'create'])
+    this.router.navigate(['/', 'upstream', 'discovery', 'create'])
   }
 
   delete (item:any, e?:Event) {

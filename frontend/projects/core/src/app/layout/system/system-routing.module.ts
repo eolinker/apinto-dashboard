@@ -1,10 +1,14 @@
 import { NgModule } from '@angular/core'
 import { RouterModule, Routes } from '@angular/router'
+import { SystemEmailConfigComponent } from './email/config/config.component'
+import { SystemEmailComponent } from './email/system-email.component'
 import { ExternalAppCreateComponent } from './external-app/create/create.component'
 import { ExternalAppComponent } from './external-app/external-app.component'
 import { ExternalAppListComponent } from './external-app/list/list.component'
 import { ExternalAppMessageComponent } from './external-app/message/message.component'
 import { SystemComponent } from './system.component'
+import { SystemWebhookListComponent } from './webhook/list/list.component'
+import { SystemWebhookComponent } from './webhook/webhook.component'
 
 const routes: Routes = [
   {
@@ -34,8 +38,33 @@ const routes: Routes = [
             component: ExternalAppMessageComponent
           }
         ]
+      },
+      {
+        path: 'email',
+        component: SystemEmailComponent,
+        data: {
+          id: '603'
+        },
+        children: [
+          {
+            path: '',
+            component: SystemEmailConfigComponent
+          }
+        ]
+      },
+      {
+        path: 'webhook',
+        component: SystemWebhookComponent,
+        data: {
+          id: '604'
+        },
+        children: [
+          {
+            path: '',
+            component: SystemWebhookListComponent
+          }
+        ]
       }
-
     ]
   }]
 
