@@ -145,7 +145,7 @@ export class EoNgNavigationService {
                               matchRouterExact: false
                             }
                           : {
-                              path: module.path
+                              path: `iframe/${module.name}`
                             })
                       }
                     })
