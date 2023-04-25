@@ -506,7 +506,7 @@ func (m *modulePluginService) DisablePlugin(ctx context.Context, userID int, plu
 		return err
 	}
 
-	if IsPluginCanDisable(pluginInfo.Type) {
+	if !IsPluginCanDisable(pluginInfo.Type) {
 		return errors.New("核心模块不可以停用")
 	}
 
