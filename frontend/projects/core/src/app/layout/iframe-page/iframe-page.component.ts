@@ -10,7 +10,7 @@ import { take } from 'rxjs'
   selector: 'eo-ng-iframe-page',
   template: `
   <nz-spin class="iframe-spin" [nzSpinning]="!start">
-      <iframe *ngIf="start "[src] ="path | safe:'resourceUrl'" #iframe id="iframe" (load)="onLoad()" scrolling="yes" >
+      <iframe *ngIf="start "[src] ="'http://localhost:5555/role/test' | safe:'resourceUrl'" #iframe id="iframe" (load)="onLoad()" scrolling="yes" >
       <p>Your browser does not support iframe.</p>
       </iframe>
   </nz-spin>
@@ -72,7 +72,7 @@ export class IframePageComponent implements OnInit {
     }
   }
 
-  start:boolean = false
+  start:boolean = true
   iframeSrc:string = ''
   iframeDom:Window|null = null
   moduleName:string = ''
