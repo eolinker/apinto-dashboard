@@ -618,7 +618,7 @@ func (m *modulePluginService) UpdateInnerPlugin(ctx context.Context, pluginYml *
 	pluginInfo.UpdateTime = t
 
 	return m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
-		if _, err = m.pluginStore.Update(txCtx, pluginInfo); err != nil {
+		if err = m.pluginStore.Save(txCtx, pluginInfo); err != nil {
 			return err
 		}
 
