@@ -52,6 +52,8 @@ export interface RouteParams {
   pluginGroupId:string
   pluginId:string
   mdFileName:string
+
+  moduleName:string
 }
 
 @Injectable({
