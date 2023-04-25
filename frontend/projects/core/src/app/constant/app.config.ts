@@ -298,7 +298,7 @@ export const AppConfig: any = {
     },
     {
       title: '企业插件',
-      routerLink: 'plugin',
+      routerLink: 'module-plugin',
       menu: true,
       id: 10,
       level: 0,
