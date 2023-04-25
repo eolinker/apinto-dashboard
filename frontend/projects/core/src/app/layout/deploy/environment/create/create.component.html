@@ -13,7 +13,7 @@
         class="w-INPUT_NORMAL"
         formControlName="key"
         placeholder="英文数字下划线任意一种，首字母必须为英文"
-        eoNgUserAccess="deploy/env"
+        eoNgUserAccess="deploy/variable"
       />
 
       <ng-template #nameErrorTpl let-control>
@@ -34,7 +34,7 @@
         eo-ng-input
         formControlName="desc"
         placeholder="请输入"
-        eoNgUserAccess="deploy/env"
+        eoNgUserAccess="deploy/variable"
       ></textarea>
     </nz-form-control>
   </nz-form-item>
@@ -44,7 +44,7 @@
       <button
         eo-ng-button
         class="ant-btn-primary"
-        eoNgUserAccess="deploy/env"
+        eoNgUserAccess="deploy/variable"
         (click)="save()"
         [nzLoading]="submitButtonLoading"
       >

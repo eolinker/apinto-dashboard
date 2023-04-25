@@ -4,12 +4,13 @@ import { ApiService } from '../../service/api.service'
 import { EoNgNavigationService } from '../../service/eo-ng-navigation.service'
 import { Router } from '@angular/router'
 import { BaseInfoService } from '../../service/base-info.service'
+import { take } from 'rxjs'
 
 @Component({
   selector: 'eo-ng-iframe-page',
   template: `
   <nz-spin class="iframe-spin" [nzSpinning]="!start">
-      <iframe *ngIf="start "[src] ="path | safe:'resourceUrl'" #iframe id="iframe" (load)="onLoad()" scrolling="yes" >
+      <iframe *ngIf="start "[src] ="'http://localhost:5555/role/test' | safe:'resourceUrl'" #iframe id="iframe" (load)="onLoad()" scrolling="yes" >
       <p>Your browser does not support iframe.</p>
       </iframe>
   </nz-spin>
@@ -57,12 +58,21 @@ export class IframePageComponent implements OnInit {
           newRouterArr = newRouterArr.join('').split('/')
           newRouterArr[newRouterArr.length - 1] = `${newRouterArr[newRouterArr.length - 1]}#${e.data.url}`
           window.location.href = newRouterArr.join('/')
+          break
+        }
+        case 'menu': {
+          this.navigation.reqFlashMenu()
+          break
+        }
+        case 'userInfo': {
+          this.getUserRequestFromIframe(e.data)
+          break
         }
       }
     }
   }
 
-  start:boolean = false
+  start:boolean = true
   iframeSrc:string = ''
   iframeDom:Window|null = null
   moduleName:string = ''
@@ -144,18 +154,53 @@ export class IframePageComponent implements OnInit {
     }
   }
 
+  getUserRequestFromIframe ({ func }:any) {
+    switch (func) {
+      case 'apinto.flashUserInfo': {
+        this.iframeDom?.postMessage({
+          type: 'userInfo',
+          userId: this.navigation.getUserId(),
+          apinto: true
+        }, '*')
+        break
+      }
+      case 'apinto.renewUserInfo': {
+        // 控制台重新获取用户信息，以便头像中使用，等待接口
+        this.navigation.reqUpdateRightList()
+        this.navigation.repUpdateRightList().pipe(take(1)).subscribe(() => {
+          this.iframeDom?.postMessage({
+            type: 'userInfo',
+            userId: this.navigation.getUserId(),
+            userRoleId: this.navigation.getUserRoleId(),
+            userAccess: this.navigation.getRightsList(),
+            apinto: true
+          }, '*')
+        })
+        break
+      }
+      case 'apinto.getCurrentUserInfo': {
+        this.iframeDom?.postMessage({
+          type: 'userInfo',
+          userId: this.navigation.getUserId(),
+          apinto: true
+        }, '*')
+        break
+      }
+    }
+  }
+
   ngOnInit (): void {
-    this.moduleName = this.baseInfo.allParamsInfo.moduleName
-    if (!this.path && this.router.url.includes('#')) {
-      this.path = this.router.url.split('#')[1]
-      this.getIframeSrc()
-    }
-    if (!this.path && !this.router.url.includes('#')) {
-      this.getPath()
-    }
-    if (this.path) {
-      this.start = true
-    }
+    // this.moduleName = this.baseInfo.allParamsInfo.moduleName
+    // if (!this.path && this.router.url.includes('#')) {
+    //   this.path = this.router.url.split('#')[1]
+    //   this.getIframeSrc()
+    // }
+    // if (!this.path && !this.router.url.includes('#')) {
+    //   this.getPath()
+    // }
+    // if (this.path) {
+    //   this.start = true
+    // }
   }
 
   getPath () {

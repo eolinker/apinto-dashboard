@@ -49,6 +49,8 @@ export class BasicLayoutComponent implements OnInit {
     menuTitleClassName: 'menu-icon-hidden'
   }
 
+  userAvatar:boolean = false // 是否显示用户头像，取决于是否开启用户权限插件
+
   private subscription1: Subscription = new Subscription()
   private subscription2: Subscription = new Subscription()
   private subscription3: Subscription = new Subscription()
@@ -74,6 +76,7 @@ export class BasicLayoutComponent implements OnInit {
       for (const menu of this.sideMenuOptions) {
         menu.open = this.openMap[menu['titleString']! as string]
       }
+      this.userAvatar = this.navigationService.getUserPlugin()
     })
 
     this.subscription3 = this.router.events.subscribe(() => {
