@@ -71,12 +71,12 @@ export class ServiceDiscoveryCreateComponent implements OnInit {
       desc: [''],
       driver: ['nacos', [Validators.required]]
     })
-    this.appConfigService.reqFlashBreadcrumb([{ title: '服务发现', routerLink: 'upstream/serv-discovery' }, { title: '新建服务' }])
+    this.appConfigService.reqFlashBreadcrumb([{ title: '服务发现', routerLink: 'upstream/discovery' }, { title: '新建服务' }])
   }
 
   ngOnInit (): void {
     if (this.editPage) {
-      this.appConfigService.reqFlashBreadcrumb([{ title: '服务发现', routerLink: 'upstream/serv-discovery' }, { title: '服务信息' }])
+      this.appConfigService.reqFlashBreadcrumb([{ title: '服务发现', routerLink: 'upstream/discovery' }, { title: '服务信息' }])
       this.validateForm.controls['driver'].disable()
       this.validateForm.controls['name'].disable()
       this.getServiceMessage()
@@ -256,6 +256,6 @@ export class ServiceDiscoveryCreateComponent implements OnInit {
   }
 
   backToList () {
-    this.router.navigate(['/', 'upstream', 'serv-discovery'])
+    this.router.navigate(['/', 'upstream', 'discovery'])
   }
 }

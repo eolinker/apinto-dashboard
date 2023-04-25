@@ -37,7 +37,7 @@ export class ServiceDiscoveryPublishComponent implements OnInit {
        private router:Router,
        private appConfigService:EoNgNavigationService,
        private publishFailModal:PublishFailService) {
-    this.appConfigService.reqFlashBreadcrumb([{ title: '服务发现', routerLink: 'upstream/serv-discovery' }, { title: '上线管理' }])
+    this.appConfigService.reqFlashBreadcrumb([{ title: '服务发现', routerLink: 'upstream/discovery' }, { title: '上线管理' }])
   }
 
   ngOnInit (): void {
