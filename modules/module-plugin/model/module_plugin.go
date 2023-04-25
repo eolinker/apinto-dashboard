@@ -150,6 +150,7 @@ type PluginYmlCfg struct {
 	Resume     string        `json:"resume" yaml:"resume"`
 	ICon       string        `json:"icon" yaml:"icon"`
 	Driver     string        `json:"driver" yaml:"driver"`
+	Front      string        `json:"front" yaml:"front"`
 	Define     *PluginDefine `json:"define" yaml:"define"`
 }
 
