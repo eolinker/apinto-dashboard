@@ -106,6 +106,7 @@ func NewModule() *Module {
 	routers = append(routers, systemRouter.RoutersInfo()...)
 	routers = append(routers, envEnumRouters()...)
 	routers = append(routers, notice_controller.InitRouter()...)
+	routers = append(routers, userRouters()...)
 	m.routers = routers
 
 	bean.Autowired(&m.providers)
