@@ -12,8 +12,9 @@ var (
 
 type IModulePluginStore interface {
 	store.IBaseStore[entry.ModulePlugin]
-	GetOtherGroupPlugins(ctx context.Context, groupIDs []string, searchName string) ([]*entry.ModulePlugin, error)
-	GetPluginList(ctx context.Context, groupID string, searchName string) ([]*entry.ModulePlugin, error)
+	GetOtherGroupPlugins(ctx context.Context, groupIDs []string, searchName string) ([]*entry.PluginListItem, error)
+	GetPluginList(ctx context.Context, groupID string, searchName string) ([]*entry.PluginListItem, error)
+	GetInnerPluginList(ctx context.Context) ([]*entry.ModulePlugin, error)
 	GetPluginInfo(ctx context.Context, uuid string) (*entry.ModulePlugin, error)
 	GetEnabledPlugins(ctx context.Context) ([]*entry.EnablePlugin, error)
 	GetNavigationModules(ctx context.Context) ([]*entry.EnabledModule, error)
@@ -27,29 +28,39 @@ func newModulePluginStore(db store.IDB) IModulePluginStore {
 	return &modulePluginStore{BaseStore: store.CreateStore[entry.ModulePlugin](db)}
 }
 
-func (c *modulePluginStore) GetPluginList(ctx context.Context, groupID string, searchName string) ([]*entry.ModulePlugin, error) {
-	plugins := make([]*entry.ModulePlugin, 0)
-	db := c.DB(ctx).Model(plugins)
+func (c *modulePluginStore) GetPluginList(ctx context.Context, groupID string, searchName string) ([]*entry.PluginListItem, error) {
+	plugins := make([]*entry.PluginListItem, 0)
+
+	db := c.DB(ctx).Table("module_plugin").Select("module_plugin.uuid, module_plugin.name, module_plugin.cname, module_plugin.resume, module_plugin.icon, module_plugin.type, module_plugin.group, module_plugin_enable.is_enable").
+		Joins("right join module_plugin_enable on module_plugin.id = module_plugin_enable.id")
 	if groupID != "" {
 		db = db.Where("`group` = ?", groupID)
 	}
 	if searchName != "" {
 		db = db.Where("`cname` like ? ", "%"+searchName+"%")
 	}
-	err := db.Order("create_time DESC").Find(&plugins).Error
+	err := db.Order("create_time DESC").Scan(&plugins).Error
 	return plugins, err
 }
 
-func (c *modulePluginStore) GetOtherGroupPlugins(ctx context.Context, groupIDs []string, searchName string) ([]*entry.ModulePlugin, error) {
+func (c *modulePluginStore) GetInnerPluginList(ctx context.Context) ([]*entry.ModulePlugin, error) {
 	plugins := make([]*entry.ModulePlugin, 0)
-	db := c.DB(ctx).Model(plugins)
+	err := c.DB(ctx).Model(plugins).Where("`type` = 0 or `type` = 1 or `type` = 2").Find(&plugins).Error
+	return plugins, err
+}
+
+func (c *modulePluginStore) GetOtherGroupPlugins(ctx context.Context, groupIDs []string, searchName string) ([]*entry.PluginListItem, error) {
+	plugins := make([]*entry.PluginListItem, 0)
+
+	db := c.DB(ctx).Table("module_plugin").Select("module_plugin.uuid, module_plugin.name, module_plugin.cname, module_plugin.resume, module_plugin.icon, module_plugin.type, module_plugin.group, module_plugin_enable.is_enable").
+		Joins("right join module_plugin_enable on module_plugin.id = module_plugin_enable.id")
 	if len(groupIDs) > 0 {
 		db = db.Where("`group` not in (?)", groupIDs)
 	}
 	if searchName != "" {
 		db = db.Where("`cname` like ? ", "%"+searchName+"%")
 	}
-	err := db.Order("create_time DESC").Find(&plugins).Error
+	err := db.Order("create_time DESC").Scan(&plugins).Error
 	return plugins, err
 }
 

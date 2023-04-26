@@ -11,6 +11,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/store"
 	"github.com/eolinker/eosc/common/bean"
 	"gorm.io/gorm"
+	"time"
 )
 
 type modulePlugin struct {
@@ -18,8 +19,9 @@ type modulePlugin struct {
 	pluginEnableStore  store.IModulePluginEnableStore
 	pluginPackageStore store.IModulePluginPackageStore
 
-	commonGroup group.ICommonGroupService
-	lockService locker_service.IAsynLockService
+	navigationModulesCache module_plugin.INavigationModulesCache
+	commonGroup            group.ICommonGroupService
+	lockService            locker_service.IAsynLockService
 }
 
 func newModulePlugin() module_plugin.IModulePlugin {
@@ -29,6 +31,7 @@ func newModulePlugin() module_plugin.IModulePlugin {
 	bean.Autowired(&s.pluginEnableStore)
 	bean.Autowired(&s.pluginPackageStore)
 
+	bean.Autowired(&s.navigationModulesCache)
 	bean.Autowired(&s.commonGroup)
 	bean.Autowired(&s.lockService)
 	return s
@@ -61,9 +64,16 @@ func (m *modulePlugin) GetEnabledPlugins(ctx context.Context) ([]*model.EnabledP
 }
 
 func (m *modulePlugin) GetNavigationModules(ctx context.Context) ([]*model.NavigationModuleInfo, error) {
-	moduleInfos, err := m.pluginStore.GetNavigationModules(ctx)
-	if err != nil {
-		return nil, err
+	key := m.navigationModulesCache.Key()
+
+	moduleInfos, err := m.navigationModulesCache.GetAll(ctx, key)
+	if err != nil || len(moduleInfos) == 0 {
+		moduleInfos, err = m.pluginStore.GetNavigationModules(ctx)
+		if err != nil {
+			return nil, err
+		}
+		//缓存
+		_ = m.navigationModulesCache.SetAll(ctx, key, moduleInfos, 10*time.Minute)
 	}
 
 	list := make([]*model.NavigationModuleInfo, 0, len(moduleInfos))

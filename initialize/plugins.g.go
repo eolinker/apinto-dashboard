@@ -4,6 +4,7 @@ import (
 	"context"
 	"embed"
 	"fmt"
+	"github.com/eolinker/apinto-dashboard/common"
 	"io/fs"
 	"net/http"
 	"path"
@@ -11,8 +12,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/model"
 	"github.com/eolinker/eosc/common/bean"
 	"gopkg.in/yaml.v3"
-
-	"gorm.io/gorm"
 
 	"github.com/eolinker/eosc/log"
 
@@ -48,6 +47,14 @@ func InitPlugins() error {
 	if err != nil {
 		return err
 	}
+
+	innerPlugins, err := service.GetInnerPluginList(ctx)
+	if err != nil {
+		return err
+	}
+	innerPluginsMap := common.SliceToMap(innerPlugins, func(t *model.ModulePluginInfo) string {
+		return t.UUID
+	})
 	for _, p := range plugins {
 		//TODO 校验内置插件
 
@@ -66,23 +73,21 @@ func InitPlugins() error {
 			Auto:       p.Auto,
 		}
 
-		pluginInfo, err := service.GetPluginInfo(ctx, p.Id)
-		if err != nil {
-			if err != gorm.ErrRecordNotFound {
-				return err
-			}
+		pluginInfo, has := innerPluginsMap[p.Id]
+		if !has {
 			// 插入安装记录
 			err = service.InstallInnerPlugin(ctx, pluginCfg)
 			if err != nil {
 				return err
 			}
 			continue
-		}
-		//判断version有没改变，有则更新
-		if pluginInfo.Version != p.Version {
-			err = service.UpdateInnerPlugin(ctx, pluginCfg)
-			if err != nil {
-				return err
+		} else {
+			//判断version有没改变，有则更新
+			if pluginInfo.Version != p.Version {
+				err = service.UpdateInnerPlugin(ctx, pluginCfg)
+				if err != nil {
+					return err
+				}
 			}
 		}
 	}

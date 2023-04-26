@@ -14,6 +14,8 @@ func init() {
 
 	cache.RegisterCacheInitHandler(func(client *redis.ClusterClient) {
 		iInstalledCache := newIInstalledCache(client)
+		iNavigationModulesCache := newNavigationModulesCache(client)
 		bean.Injection(&iInstalledCache)
+		bean.Injection(&iNavigationModulesCache)
 	})
 }
