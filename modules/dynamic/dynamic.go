@@ -10,7 +10,7 @@ import (
 
 type IDynamicService interface {
 	Info(ctx context.Context, namespaceId int, profession string, name string) (*v2.WorkerInfo[dynamic_model.DynamicBasicInfo], error)
-	List(ctx context.Context, namespaceId int, profession string, columns []string, keyword string, page int, pageSize int) ([]map[string]string, error)
+	List(ctx context.Context, namespaceId int, profession string, columns []string, keyword string, page int, pageSize int) ([]map[string]string, int, error)
 
 	Online(ctx context.Context, namespaceId int, profession string, name string, names []string, updater int) ([]string, []string, error)
 	Offline(ctx context.Context, namespaceId int, profession string, name string, names []string, updater int) ([]string, []string, error)
