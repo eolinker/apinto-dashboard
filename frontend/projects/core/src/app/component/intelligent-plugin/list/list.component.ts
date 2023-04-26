@@ -41,9 +41,6 @@ export class IntelligentPluginListComponent implements OnInit {
   modalRef:NzModalRef|undefined
   statusMap:{[k:string]:any} = {}
   tableLoading:boolean = true
-  tableFreshCount:number = 0
-  listVersion:number = 0
-  statusVersion:number = 0
   private subscription: Subscription = new Subscription()
 
   constructor (
@@ -60,9 +57,20 @@ export class IntelligentPluginListComponent implements OnInit {
     this.moduleName = this.baseInfo.allParamsInfo.moduleName
     this.subscription = this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
-        console.log(this.router.url)
         this.moduleName = this.baseInfo.allParamsInfo.moduleName
+        this.pluginName = ''
+        this.keyword = ''
+        this.cluster = []
+        this.clusterOptions = []
+        this.tableBody = [...this.service.createTbody(this)]
+        this.tableHeadName = [...IntelligentPluginDefaultThead]
+        this.tableData = { data: [], pagination: true, total: 1, pageSize: 20, pageNum: 1 }
 
+        this.driverOptions = []
+        this.renderSchema = {} // 动态渲染数据，是json schema
+        this.modalRef = undefined
+        this.statusMap = {}
+        this.tableLoading = true
         this.getClusters()
         this.getRender()
         this.getTableData()
@@ -71,7 +79,6 @@ export class IntelligentPluginListComponent implements OnInit {
     this.getClusters()
     this.getRender()
     this.getTableData()
-    console.log(this)
   }
 
   ngOnDestroy () {
@@ -85,7 +92,7 @@ export class IntelligentPluginListComponent implements OnInit {
       page: this.tableData.pageNum,
       pageSize: this.tableData.pageSize,
       keyword: this.keyword,
-      cluster: this.cluster
+      cluster: JSON.stringify(this.cluster)
     }).pipe(
       map(res => {
         if (res.code === 0) {
@@ -97,7 +104,7 @@ export class IntelligentPluginListComponent implements OnInit {
       page: this.tableData.pageNum,
       pageSize: this.tableData.pageSize,
       keyword: this.keyword,
-      cluster: this.cluster
+      cluster: JSON.stringify(this.cluster)
     })]).subscribe((val:Array<any>) => {
       this.refreshTableData(this.tableData.data, val[1].data)
     })
@@ -316,13 +323,15 @@ export class IntelligentPluginListComponent implements OnInit {
       this.api.put(`dynamic/${this.moduleName}/config/${id}`, { ...form }).subscribe((resp:EmptyHttpResponse) => {
         if (resp.code === 0) {
           this.message.success(resp.msg || '操作成功')
+          this.getTableData()
           this.modalRef?.close()
         }
       })
     } else {
-      this.api.post(`dynamic/${this.moduleName}/config/${id}`, { ...form }).subscribe((resp:EmptyHttpResponse) => {
+      this.api.post(`dynamic/${this.moduleName}`, { ...form }).subscribe((resp:EmptyHttpResponse) => {
         if (resp.code === 0) {
           this.message.success(resp.msg || '操作成功')
+          this.getTableData()
           this.modalRef?.close()
         }
       })
