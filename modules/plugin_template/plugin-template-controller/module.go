@@ -25,6 +25,26 @@ func (c *PluginTemplateDriver) CreatePlugin(define interface{}) (apinto_module.P
 	return c, nil
 }
 
+func (c *PluginTemplateDriver) GetPluginFrontend(moduleName string) string {
+	return "router/plugin-template"
+}
+
+func (c *PluginTemplateDriver) IsPluginVisible() bool {
+	return true
+}
+
+func (c *PluginTemplateDriver) IsShowServer() bool {
+	return false
+}
+
+func (c *PluginTemplateDriver) IsCanUninstall() bool {
+	return false
+}
+
+func (c *PluginTemplateDriver) IsCanDisable() bool {
+	return false
+}
+
 type PluginTemplateModule struct {
 	isInit  bool
 	name    string
