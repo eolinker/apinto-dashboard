@@ -7,6 +7,31 @@ import (
 type PluginDriver struct {
 }
 
+func (c *PluginDriver) GetPluginFrontend(define interface{}) string {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *PluginDriver) IsPluginInvisible(define interface{}) bool {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *PluginDriver) IsShowServer(define interface{}) bool {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *PluginDriver) IsCanUninstall(define interface{}) bool {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *PluginDriver) IsCanDisable(define interface{}) bool {
+	//TODO implement me
+	panic("implement me")
+}
+
 func NewPluginDriver() apinto_module.Driver {
 	return &PluginDriver{}
 }
