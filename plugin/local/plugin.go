@@ -68,6 +68,28 @@ func (t *tPlugin) CheckConfig(name string, config interface{}) error {
 func (t *tPlugin) checkConfig(name string, config interface{}) (*Config, error) {
 	return DecodeConfig(config)
 }
+
+func (c *tPlugin) GetPluginFrontend(moduleName string) string {
+	//TODO
+	return ""
+}
+
+func (c *tPlugin) IsPluginVisible() bool {
+	return true
+}
+
+func (c *tPlugin) IsShowServer() bool {
+	return true
+}
+
+func (c *tPlugin) IsCanUninstall() bool {
+	return true
+}
+
+func (c *tPlugin) IsCanDisable() bool {
+	return true
+}
+
 func DecodeDefine(define interface{}) (*Define, error) {
 	return apinto_module.DecodeFor[Define](define)
 }

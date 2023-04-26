@@ -20,6 +20,26 @@ func (c *DynamicModuleDriver) CreatePlugin(define interface{}) (apinto_module.Pl
 	}, nil
 }
 
+func (c *DynamicModulePlugin) GetPluginFrontend(moduleName string) string {
+	return fmt.Sprintf("template/%s", moduleName)
+}
+
+func (c *DynamicModulePlugin) IsPluginVisible() bool {
+	return true
+}
+
+func (c *DynamicModulePlugin) IsShowServer() bool {
+	return false
+}
+
+func (c *DynamicModulePlugin) IsCanUninstall() bool {
+	return true
+}
+
+func (c *DynamicModulePlugin) IsCanDisable() bool {
+	return true
+}
+
 type DynamicModulePlugin struct {
 	define interface{}
 }

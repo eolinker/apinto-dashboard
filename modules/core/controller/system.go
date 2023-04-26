@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"github.com/eolinker/apinto-dashboard/modules/core"
 	"net/http"
 
 	namespace_controller "github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
@@ -14,15 +15,13 @@ import (
 	"github.com/eolinker/apinto-dashboard/controller"
 
 	"github.com/eolinker/apinto-dashboard/modules/cluster"
-	"github.com/eolinker/apinto-dashboard/modules/core/service"
-
 	"github.com/gin-gonic/gin"
 
 	apinto_module "github.com/eolinker/apinto-module"
 )
 
 type System struct {
-	navigationService service.INavigationService
+	navigationService core.INavigationService
 	clusterService    cluster.IClusterService
 	apiService        api.IAPIService
 	upstreamService   upstream.IService

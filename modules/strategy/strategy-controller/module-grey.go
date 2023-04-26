@@ -25,6 +25,26 @@ func (c *StrategyGreyDriver) CreatePlugin(define interface{}) (apinto_module.Plu
 	return c, nil
 }
 
+func (c *StrategyGreyDriver) GetPluginFrontend(moduleName string) string {
+	return "serv-governance/grey"
+}
+
+func (c *StrategyGreyDriver) IsPluginVisible() bool {
+	return true
+}
+
+func (c *StrategyGreyDriver) IsShowServer() bool {
+	return false
+}
+
+func (c *StrategyGreyDriver) IsCanUninstall() bool {
+	return false
+}
+
+func (c *StrategyGreyDriver) IsCanDisable() bool {
+	return true
+}
+
 type StrategyGreyModule struct {
 	isInit  bool
 	name    string
