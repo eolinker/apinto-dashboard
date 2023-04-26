@@ -5,7 +5,7 @@ import (
 )
 
 type ModulePluginItem struct {
-	*entry.ModulePlugin
+	*entry.PluginListItem
 	IsEnable bool
 	IsInner  bool
 }

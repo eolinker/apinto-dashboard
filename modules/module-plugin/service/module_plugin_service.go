@@ -30,9 +30,10 @@ type modulePluginService struct {
 	pluginEnableStore  store.IModulePluginEnableStore
 	pluginPackageStore store.IModulePluginPackageStore
 
-	coreService    core.ICore
-	installedCache IInstalledCache
-	lockService    locker_service.IAsynLockService
+	coreService            core.ICore
+	installedCache         IInstalledCache
+	navigationModulesCache module_plugin.INavigationModulesCache
+	lockService            locker_service.IAsynLockService
 }
 
 func newModulePluginService() module_plugin.IModulePluginService {
@@ -43,12 +44,13 @@ func newModulePluginService() module_plugin.IModulePluginService {
 
 	bean.Autowired(&s.coreService)
 	bean.Autowired(&s.installedCache)
+	bean.Autowired(&s.navigationModulesCache)
 	bean.Autowired(&s.lockService)
 	return s
 }
 
 func (m *modulePluginService) GetPlugins(ctx context.Context, groupID, searchName string) ([]*model.ModulePluginItem, error) {
-	var pluginEntries []*entry.ModulePlugin
+	var pluginEntries []*entry.PluginListItem
 	var err error
 	//判断groupID是不是其它分组
 	if groupID == pluginGroupOther {
@@ -72,26 +74,17 @@ func (m *modulePluginService) GetPlugins(ctx context.Context, groupID, searchNam
 			continue
 		}
 		plugin := &model.ModulePluginItem{
-			ModulePlugin: pluginEntry,
-			IsEnable:     false,
-			IsInner:      true,
+			PluginListItem: pluginEntry,
+			IsEnable:       false,
+			IsInner:        true,
 		}
 		//若为非内置
 		if !IsInnerPlugin(pluginEntry.Type) {
 			plugin.IsInner = false
 		}
-		enableEntry, err := m.pluginEnableStore.Get(ctx, pluginEntry.Id)
-		if err != nil {
-			//若启用表没有插件信息，则为未启用
-			if err == gorm.ErrRecordNotFound {
-				plugins = append(plugins, plugin)
-				continue
-			}
-			return nil, err
-		}
 
 		//若插件已启用
-		if enableEntry.IsEnable == statusPluginEnable {
+		if pluginEntry.IsEnable == statusPluginEnable {
 			plugin.IsEnable = true
 		}
 		plugins = append(plugins, plugin)
@@ -165,6 +158,20 @@ func (m *modulePluginService) GetPluginGroups(ctx context.Context) ([]*model.Plu
 		Count: total - hasGroupPluginsCount,
 	})
 	return groups, nil
+}
+
+func (m *modulePluginService) GetInnerPluginList(ctx context.Context) ([]*model.ModulePluginInfo, error) {
+	pluginList, err := m.pluginStore.GetInnerPluginList(ctx)
+	if err != nil {
+		return nil, err
+	}
+	items := make([]*model.ModulePluginInfo, 0, len(pluginList))
+	for _, item := range pluginList {
+		items = append(items, &model.ModulePluginInfo{
+			ModulePlugin: item,
+		})
+	}
+	return items, nil
 }
 
 func (m *modulePluginService) GetPluginEnableInfo(ctx context.Context, pluginUUID string) (*model.PluginEnableInfo, error) {
@@ -514,8 +521,18 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 	if err != nil {
 		return err
 	}
-	//TODO 重新生成路由
+
+	//重新生成路由
 	m.coreService.ResetVersion("")
+
+	//缓存已启用的模块列表
+	enableModules, err := m.pluginStore.GetNavigationModules(ctx)
+	if err != nil {
+		log.Errorf(err.Error())
+		return nil
+	}
+	key := m.navigationModulesCache.Key()
+	_ = m.navigationModulesCache.SetAll(ctx, key, enableModules, 10*time.Minute)
 
 	return nil
 }
@@ -564,8 +581,17 @@ func (m *modulePluginService) DisablePlugin(ctx context.Context, userID int, plu
 		return err
 	}
 
-	//TODO 重新生成路由
+	//重新生成路由
 	m.coreService.ResetVersion("")
+
+	//缓存已启用的模块列表
+	enableModules, err := m.pluginStore.GetNavigationModules(ctx)
+	if err != nil {
+		log.Errorf(err.Error())
+		return nil
+	}
+	key := m.navigationModulesCache.Key()
+	_ = m.navigationModulesCache.SetAll(ctx, key, enableModules, 10*time.Minute)
 
 	return nil
 }
