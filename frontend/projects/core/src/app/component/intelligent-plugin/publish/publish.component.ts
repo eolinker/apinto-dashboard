@@ -21,6 +21,7 @@ export class IntelligentPluginPublishComponent implements OnInit {
   selectedNum:number = 0
   selectedClusters:Array<string> = []
   moduleName:string = ''
+  closeModal:any
   constructor (
     private message: EoNgFeedbackMessageService,
     private service:IntelligentPluginService,
@@ -72,6 +73,7 @@ export class IntelligentPluginPublishComponent implements OnInit {
     this.api.put(`dynamic/${this.moduleName}/offline/${this.id}`, { cluster: cluster }).subscribe((resp:DynamicPublish) => {
       if (resp.code === 0) {
         this.message.success(resp.msg)
+        this.closeModal && this.closeModal()
       }
     })
   }
@@ -85,6 +87,7 @@ export class IntelligentPluginPublishComponent implements OnInit {
     this.api.put(`dynamic/${this.moduleName}/online/${this.id}`, { cluster: cluster }).subscribe((resp:DynamicPublish) => {
       if (resp.code === 0) {
         this.message.success(resp.msg)
+        this.closeModal && this.closeModal()
       }
     })
   }
