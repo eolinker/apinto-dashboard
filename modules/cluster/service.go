@@ -28,6 +28,7 @@ type IClusterCertificateService interface {
 
 type IClusterService interface {
 	GetAllCluster(ctx context.Context) ([]*cluster_model2.Cluster, error)
+	SimpleCluster(ctx context.Context, namespaceId int) ([]*cluster_model2.ClusterSimple, error)
 	CheckByNamespaceByName(ctx context.Context, namespaceId int, name string) (int, error)
 	GetByClusterId(ctx context.Context, clusterId int) (*cluster_model2.Cluster, error)
 	GetByNamespaceByName(ctx context.Context, namespaceId int, name string) (*cluster_model2.Cluster, error)
@@ -36,6 +37,7 @@ type IClusterService interface {
 	Insert(ctx context.Context, namespaceId, userId int, clusterInput *cluster_dto.ClusterInput) error
 	QueryByNamespaceId(ctx context.Context, namespaceId int, clusterName string) (*cluster_model2.Cluster, error)
 	QueryListByNamespaceId(ctx context.Context, namespaceId int) ([]*cluster_model2.Cluster, error)
+
 	DeleteByNamespaceIdByName(ctx context.Context, namespaceId, userId int, name string) error
 	UpdateDesc(ctx context.Context, namespaceId, userId int, name, desc string) error
 	UpdateAddr(ctx context.Context, userId, clusterId int, addr, uuid string) error

@@ -1,0 +1,99 @@
+id: "redis.apinto.com"
+name: "redis"
+cname: "Redis配置"
+resume: ""
+version: "v1.0.0"
+icon: "监控告警.png"
+driver: "dynamic.apinto.com"
+front: template
+navigation: "navigation.system"
+group_id: "log"
+define:  # 动态模块定义
+  profession: output
+  drivers:
+    - name: file
+      title: 文件
+    - name: http_output
+      title: http请求
+    - name: nsqd
+      title: NSQD
+    - name: syslog_output
+      title: Syslog
+    - name: kafka_output
+      title: Kafka
+  skill: Access-Output
+  fields:
+    - name: title           # 定义从响应中对应字段中获取显示值
+      title: 名称
+    - name: id
+      title: ID
+    - name: description
+      title: 描述
+  render:
+    file: |
+      {
+          "type": "object",
+          "properties": {
+              "addrs": {
+                  "type": "array",
+                  "title": "Redis节点列表",
+                  "x-decorator": "FormItem",
+                  "x-component": "ArrayItems",
+                  "items": {
+                      "type": "void",
+                      "x-component": "Space",
+                      "properties": {
+                          "sort": {
+                              "type": "void",
+                              "x-decorator": "FormItem",
+                              "x-component": "ArrayItems.SortHandle"
+                          },
+                          "select": {
+                              "type": "string",
+                              "x-decorator": "FormItem",
+                              "x-component": "Input"
+                          },
+                          "remove": {
+                              "type": "void",
+                              "x-decorator": "FormItem",
+                              "x-component": "ArrayItems.Remove"
+                          }
+                      }
+                  },
+                  "properties": {
+                      "add": {
+                          "type": "void",
+                          "title": "添加节点",
+                          "x-component": "ArrayItems.Addition"
+                      }
+                  },
+                  "name": "addrs",
+                  "x-index": 0,
+                  "required": true
+              },
+              "username": {
+                  "type": "string",
+                  "title": "用户名",
+                  "x-decorator": "FormItem",
+                  "x-component": "Input",
+                  "x-validator": [],
+                  "x-component-props": {},
+                  "x-decorator-props": {},
+                  "name": "username",
+                  "x-index": 1,
+                  "required": true
+              },
+              "password": {
+                  "type": "string",
+                  "title": "密码",
+                  "x-decorator": "FormItem",
+                  "x-component": "Input",
+                  "x-validator": [],
+                  "x-component-props": {},
+                  "x-decorator-props": {},
+                  "name": "password",
+                  "x-index": 2,
+                  "required": true
+              }
+          }
+      }

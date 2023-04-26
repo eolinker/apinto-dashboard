@@ -1,8 +1,9 @@
 package cluster_controller
 
 import (
-	"github.com/eolinker/apinto-module"
 	"net/http"
+
+	"github.com/eolinker/apinto-module"
 )
 
 type ClusterPluginDriver struct {
@@ -70,6 +71,12 @@ func (c *ClusterModule) initRouter() {
 			Path:        "/api/clusters",
 			Handler:     "cluster.list",
 			HandlerFunc: []apinto_module.HandlerFunc{clrController.clusters},
+		},
+		{
+			Method:      http.MethodGet,
+			Path:        "/api/clusters/simple",
+			Handler:     "cluster.simple_list",
+			HandlerFunc: []apinto_module.HandlerFunc{clrController.simpleClusters},
 		},
 		{
 			Method:      http.MethodGet,
