@@ -27,151 +27,201 @@ define:  # 动态模块定义
       title: 名称
     - name: id
       title: ID
+    - name: driver
+      title: 驱动名称
     - name: description
       title: 描述
   render:
     file: |
       {
-          "type": "object",
-          "properties": {
-              "scopes": {
-                  "type": "array",
-                  "title": "作用范围",
-                  "x-decorator": "FormItem",
-                  "x-component": "ArrayItems",
-                  "items": {
-                      "type": "void",
-                      "x-component": "Space",
-                      "properties": {
-                          "sort": {
-                              "type": "void",
-                              "x-decorator": "FormItem",
-                              "x-component": "ArrayItems.SortHandle"
-                          },
-                          "select": {
-                              "type": "string",
-                              "x-decorator": "FormItem",
-                              "x-component": "Select",
-                              "enum": [
-                                  {
-                                      "label": "Access日志",
-                                      "value": "access_log"
-                                  }
-                              ]
-                          },
-                          "remove": {
-                              "type": "void",
-                              "x-decorator": "FormItem",
-                              "x-component": "ArrayItems.Remove"
-                          }
-                      }
+          "type":"object",
+          "properties":{
+            "scopes":{
+              "type":"array",
+              "title":"作用范围",
+              "x-decorator":"FormItem",
+              "x-component":"ArrayItems",
+              "x-decorator-props":{
+                "labelCol":6,
+                "wrapperCol":10
+              },
+              "items":{
+                "type":"void",
+                "x-component":"Space",
+                "properties":{
+                  "sort":{
+                    "type":"void",
+                    "x-decorator":"FormItem",
+                    "x-component":"ArrayItems.SortHandle"
                   },
-                  "properties": {
-                      "add": {
-                          "type": "void",
-                          "title": "添加条目",
-                          "x-component": "ArrayItems.Addition",
-                          "x-component-props": {
-                              "defaultValue": "access_log"
-                          }
+                  "select":{
+                    "type":"string",
+                    "x-decorator":"FormItem",
+                    "x-component":"Select",
+                    "enum":[
+                      {
+                        "label":"Access日志",
+                        "value":"access_log"
                       }
+                    ]
                   },
-                  "name": "scopes",
-                  "x-index": 0,
-                  "required": true
+                  "remove":{
+                    "type":"void",
+                    "x-decorator":"FormItem",
+                    "x-component":"ArrayItems.Remove"
+                  }
+                }
               },
-              "file": {
-                  "type": "string",
-                  "title": "文件名称",
-                  "x-decorator": "FormItem",
-                  "x-component": "Input",
-                  "x-validator": [],
-                  "x-component-props": {},
-                  "x-decorator-props": {},
-                  "name": "file",
-                  "x-designable-id": "qcizy9dde37",
-                  "x-index": 1,
-                  "required": true
+              "properties":{
+                "add":{
+                  "type":"void",
+                  "title":"添加条目",
+                  "x-component":"ArrayItems.Addition",
+                  "x-component-props":{
+                    "defaultValue":"access_log"
+                  }
+                }
               },
-              "dir": {
-                  "type": "string",
-                  "title": "存放目录",
-                  "x-decorator": "FormItem",
-                  "x-component": "Input",
-                  "x-validator": [],
-                  "x-component-props": {},
-                  "x-decorator-props": {},
-                  "name": "dir",
-                  "x-index": 2,
-                  "required": true
+              "name":"scopes",
+              "x-index":0,
+              "required":true
+            },
+            "file":{
+              "type":"string",
+              "title":"文件名称",
+              "x-decorator":"FormItem",
+              "x-component":"Input",
+              "x-validator":[
+              
+              ],
+              "x-component-props":{
+              
               },
-              "period": {
-                  "title": "日志分割周期",
-                  "x-decorator": "FormItem",
-                  "x-component": "Select",
-                  "x-validator": [],
-                  "x-component-props": {},
-                  "x-decorator-props": {},
-                  "enum": [
-                      {
-                          "children": [],
-                          "label": "小时",
-                          "value": "hour"
-                      },
-                      {
-                          "children": [],
-                          "label": "天",
-                          "value": "hour"
-                      }
+              "x-decorator-props":{
+                "labelCol":6,
+                "wrapperCol":10
+              },
+              "name":"file",
+              "x-index":1,
+              "required":true
+            },
+            "dir":{
+              "type":"string",
+              "title":"存放目录",
+              "x-decorator":"FormItem",
+              "x-component":"Input",
+              "x-validator":[
+              
+              ],
+              "x-component-props":{
+              
+              },
+              "x-decorator-props":{
+                "labelCol":6,
+                "wrapperCol":10
+              },
+              "name":"dir",
+              "x-index":2,
+              "required":true
+            },
+            "period":{
+              "title":"日志分割周期",
+              "x-decorator":"FormItem",
+              "x-component":"Select",
+              "x-validator":[
+              
+              ],
+              "x-component-props":{
+              
+              },
+              "x-decorator-props":{
+                "labelCol":6,
+                "wrapperCol":10
+              },
+              "enum":[
+                {
+                  "children":[
+                  
                   ],
-                  "default": "hour",
-                  "name": "period",
-                  "x-index": 3,
-                  "required": true
-              },
-              "expore": {
-                  "type": "number",
-                  "title": "过期时间",
-                  "x-decorator": "FormItem",
-                  "x-component": "NumberPicker",
-                  "x-validator": "integer",
-                  "x-component-props": {},
-                  "x-decorator-props": {},
-                  "name": "expore",
-                  "x-index": 4,
-                  "default": "3",
-                  "description": "单位：天",
-                  "required": true
-              },
-              "type": {
-                  "title": "输出格式",
-                  "x-decorator": "FormItem",
-                  "x-component": "Select",
-                  "x-validator": [],
-                  "x-component-props": {},
-                  "x-decorator-props": {},
-                  "enum": [
-                      {
-                          "children": [],
-                          "label": "单行",
-                          "value": "line"
-                      },
-                      {
-                          "children": [],
-                          "label": "Json",
-                          "value": "json"
-                      }
+                  "label":"小时",
+                  "value":"hour"
+                },
+                {
+                  "children":[
+                  
                   ],
-                  "default": "line",
-                  "name": "type",
-                  "x-index": 5,
-                  "required": true
+                  "label":"天",
+                  "value":"hour"
+                }
+              ],
+              "default":"hour",
+              "name":"period",
+              "x-index":3,
+              "required":true
+            },
+            "expore":{
+              "type":"number",
+              "title":"过期时间",
+              "x-decorator":"FormItem",
+              "x-component":"NumberPicker",
+              "x-validator":"integer",
+              "x-component-props":{
+              
               },
-              "formatter": {
-                  "type": "string",
-                  "title": "格式化配置",
-                  "x-decorator": "FormItem",
-                  "x-component": "Input.TextArea"
+              "x-decorator-props":{
+                "labelCol":6,
+                "wrapperCol":10
+              },
+              "name":"expore",
+              "x-index":4,
+              "default":"3",
+              "description":"单位：天",
+              "required":true
+            },
+            "type":{
+              "title":"输出格式",
+              "x-decorator":"FormItem",
+              "x-component":"Select",
+              "x-validator":[
+              
+              ],
+              "x-component-props":{
+              
+              },
+              "x-decorator-props":{
+                "labelCol":6,
+                "wrapperCol":10
+              },
+              "enum":[
+                {
+                  "children":[
+                  
+                  ],
+                  "label":"单行",
+                  "value":"line"
+                },
+                {
+                  "children":[
+                  
+                  ],
+                  "label":"Json",
+                  "value":"json"
+                }
+              ],
+              "default":"line",
+              "name":"type",
+              "x-index":5,
+              "required":true
+            },
+            "formatter":{
+              "type":"string",
+              "title":"格式化配置",
+              "x-decorator":"FormItem",
+              "x-component":"Input.TextArea",
+              "x-decorator-props":{
+                "labelCol":6,
+                "wrapperCol":10
               }
+            }
           }
       }

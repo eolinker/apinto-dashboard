@@ -11,12 +11,10 @@ import { NzModalRef } from 'ng-zorro-antd/modal'
 import { IntelligentPluginCreateComponent } from '../create/create.component'
 import { DynamicConfig, DynamicDriverData, DynamicField, DynamicListStatus, DynamicRender } from '../types/types'
 import { ClusterSimpleOption, EmptyHttpResponse } from '../../../constant/type'
-import { forkJoin, map } from 'rxjs'
+import { Subscription, forkJoin, map } from 'rxjs'
 import { v4 as uuidv4 } from 'uuid'
-
-const mockData = [
-  { name: 'testName', id: 'ID', desc: '描述', status: '状态', operator: '操作者', update_time: 'xxxx' }
-]
+import { BaseInfoService } from '../../../service/base-info.service'
+import { NavigationEnd, Router } from '@angular/router'
 
 @Component({
   selector: 'eo-ng-intelligent-plugin-list',
@@ -27,7 +25,7 @@ const mockData = [
 export class IntelligentPluginListComponent implements OnInit {
   @ViewChild('clusterStatusTpl', { read: TemplateRef, static: true }) clusterStatusTpl: TemplateRef<any> | undefined
   @ViewChild('loadingTpl', { read: TemplateRef, static: true }) loadingTpl: TemplateRef<any> | undefined
-  moduleName:string = 'test'
+  moduleName:string = ''
   pluginName:string = ''
   keyword:string = ''
   nzDisabled:boolean = false
@@ -36,29 +34,55 @@ export class IntelligentPluginListComponent implements OnInit {
   tableBody:TBODY_TYPE[] = [...this.service.createTbody(this)]
   tableHeadName:THEAD_TYPE[] = [...IntelligentPluginDefaultThead]
   tableData:{data:any[], pagination:boolean, total:number, pageNum:number, pageSize:number}
-  = { data: [...mockData], pagination: true, total: 1, pageSize: 20, pageNum: 1 }
+  = { data: [], pagination: true, total: 1, pageSize: 20, pageNum: 1 }
 
   driverOptions:SelectOption[] = []
   renderSchema:any = {} // 动态渲染数据，是json schema
   modalRef:NzModalRef|undefined
   statusMap:{[k:string]:any} = {}
   tableLoading:boolean = true
-  tableFreshCount:number = 0
-  listVersion:number = 0
-  statusVersion:number = 0
+  private subscription: Subscription = new Subscription()
 
   constructor (
     private message: EoNgFeedbackMessageService,
     private service:IntelligentPluginService,
     private modalService:EoNgFeedbackModalService,
-    private api:ApiService) {
+    private api:ApiService,
+    private router:Router,
+    private baseInfo:BaseInfoService) {
 
   }
 
   ngOnInit (): void {
+    this.moduleName = this.baseInfo.allParamsInfo.moduleName
+    this.subscription = this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        this.moduleName = this.baseInfo.allParamsInfo.moduleName
+        this.pluginName = ''
+        this.keyword = ''
+        this.cluster = []
+        this.clusterOptions = []
+        this.tableBody = [...this.service.createTbody(this)]
+        this.tableHeadName = [...IntelligentPluginDefaultThead]
+        this.tableData = { data: [], pagination: true, total: 1, pageSize: 20, pageNum: 1 }
+
+        this.driverOptions = []
+        this.renderSchema = {} // 动态渲染数据，是json schema
+        this.modalRef = undefined
+        this.statusMap = {}
+        this.tableLoading = true
+        this.getClusters()
+        this.getRender()
+        this.getTableData()
+      }
+    })
     this.getClusters()
     this.getRender()
     this.getTableData()
+  }
+
+  ngOnDestroy () {
+    this.subscription.unsubscribe()
   }
 
   getTableData () {
@@ -68,7 +92,7 @@ export class IntelligentPluginListComponent implements OnInit {
       page: this.tableData.pageNum,
       pageSize: this.tableData.pageSize,
       keyword: this.keyword,
-      cluster: this.cluster
+      cluster: JSON.stringify(this.cluster)
     }).pipe(
       map(res => {
         if (res.code === 0) {
@@ -80,7 +104,7 @@ export class IntelligentPluginListComponent implements OnInit {
       page: this.tableData.pageNum,
       pageSize: this.tableData.pageSize,
       keyword: this.keyword,
-      cluster: this.cluster
+      cluster: JSON.stringify(this.cluster)
     })]).subscribe((val:Array<any>) => {
       this.refreshTableData(this.tableData.data, val[1].data)
     })
@@ -126,9 +150,10 @@ export class IntelligentPluginListComponent implements OnInit {
   }
 
   refreshTableData (tableData:Array<{[k:string]:any}>, statusData:DynamicListStatus) {
+    console.log(tableData, statusData)
     if (tableData.length && statusData && Object.keys(statusData).length) {
       this.tableData.data = tableData.map((item:any) => {
-        return { ...item, ...this.statusMap[item.id] }
+        return { ...item, ...statusData[item.id] }
       })
       // 将table的loding取消
       this.tableLoading = false
@@ -217,15 +242,17 @@ export class IntelligentPluginListComponent implements OnInit {
   }
 
   publish (value:any) {
+    console.log(value)
     this.modalRef = this.modalService.create({
-      nzTitle: `${value.data.name} 上线管理`,
+      nzTitle: `${value.data.title}上线管理`,
       nzWidth: MODAL_NORMAL_SIZE,
       nzContent: IntelligentPluginPublishComponent,
       nzComponentParams: {
-        name: value.data.name,
+        name: value.data.title,
         id: value.data.id,
-        desc: value.data.desc,
-        moduleName: this.moduleName
+        desc: value.data.description,
+        moduleName: this.moduleName,
+        closeModal: this.closeModal
       },
       nzFooter: [{
         label: '取消',
@@ -259,7 +286,9 @@ export class IntelligentPluginListComponent implements OnInit {
       nzComponentParams: {
         renderSchema: this.renderSchema,
         editPage: false,
-        moduleName: this.moduleName
+        moduleName: this.moduleName,
+        driverSelectOptions: this.driverOptions,
+        initFormValue: { driver: this.driverOptions[0].value || '' }
       },
       nzOnOk: (component:IntelligentPluginCreateComponent) => {
         // eslint-disable-next-line dot-notation
@@ -278,7 +307,8 @@ export class IntelligentPluginListComponent implements OnInit {
         renderSchema: this.renderSchema,
         editPage: true,
         moduleName: this.moduleName,
-        uuid: value.data.id
+        uuid: value.data.id,
+        driverSelectOptions: this.driverOptions
       },
       nzOnOk: (component:IntelligentPluginCreateComponent) => {
         // eslint-disable-next-line dot-notation
@@ -293,17 +323,24 @@ export class IntelligentPluginListComponent implements OnInit {
       this.api.put(`dynamic/${this.moduleName}/config/${id}`, { ...form }).subscribe((resp:EmptyHttpResponse) => {
         if (resp.code === 0) {
           this.message.success(resp.msg || '操作成功')
+          this.getTableData()
           this.modalRef?.close()
         }
       })
     } else {
-      this.api.post(`dynamic/${this.moduleName}/config/${id}`, { ...form }).subscribe((resp:EmptyHttpResponse) => {
+      this.api.post(`dynamic/${this.moduleName}`, { ...form }).subscribe((resp:EmptyHttpResponse) => {
         if (resp.code === 0) {
           this.message.success(resp.msg || '操作成功')
+          this.getTableData()
           this.modalRef?.close()
         }
       })
     }
+  }
+
+  closeModal = () => {
+    this.modalRef?.close()
+    this.getTableData()
   }
 
   deleteDataModal (items:{id:string, [k:string]:any}) {
@@ -322,7 +359,7 @@ export class IntelligentPluginListComponent implements OnInit {
 
   // 删除单条数据
   deleteData = (items:{id:string, [k:string]:any}) => {
-    this.api.delete(`dynamic/${this.moduleName}/batch`, { uuids: [items.id] }).subscribe((resp:any) => {
+    this.api.delete(`dynamic/${this.moduleName}/batch`, { uuids: JSON.stringify([items.id]) }).subscribe((resp:any) => {
       if (resp.code === 0) {
         this.message.success(resp.msg || '删除成功!')
         this.getTableData()

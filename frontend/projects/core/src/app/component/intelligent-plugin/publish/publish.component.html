@@ -29,7 +29,7 @@
       >已选择{{ selectedNum }}项
       <ng-container *ngIf="selectedNum">：</ng-container
       ><ng-container *ngFor="let item of selectedClusters; let last = last"
-        >{{ item }}{{ last ? '' : ',' }}</ng-container
+        >{{ item }}{{ last ? '' : '，' }}</ng-container
       ></span
     >
   </div>
