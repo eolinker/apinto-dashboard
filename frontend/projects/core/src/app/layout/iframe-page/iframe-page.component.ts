@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, Input, OnInit, SimpleChanges, ViewChild } from '@angular/core'
+import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core'
 import { IframeHttpService } from '../../service/iframe-http.service'
 import { ApiService } from '../../service/api.service'
 import { EoNgNavigationService } from '../../service/eo-ng-navigation.service'
@@ -10,9 +10,7 @@ import { Subscription, take } from 'rxjs'
   selector: 'eo-ng-iframe-page',
   template: `
   <nz-spin class="iframe-spin" [nzSpinning]="!start">
-      <iframe *ngIf="start "[src] ="path | safe:'resourceUrl'" #iframe id="iframe" (load)="onLoad()" scrolling="yes" >
-      <p>Your browser does not support iframe.</p>
-      </iframe>
+  <div  *ngIf="start" #iframe id="iframePanel" style="height: 100%;display: block"></div>
   </nz-spin>
   `,
   styles: [
@@ -25,7 +23,8 @@ import { Subscription, take } from 'rxjs'
     :host ::ng-deep{
       nz-spin.iframe-spin,
       nz-spin.iframe-spin >.ant-spin-container,
-      iframe{
+      #iframePanel,
+      #iframePanel > iframe{
         width:100%;
         height:100%;
         border:none;
@@ -34,6 +33,70 @@ import { Subscription, take } from 'rxjs'
   ]
 })
 export class IframePageComponent implements OnInit {
+   proxyHandler:{[k:string]:any} ={
+     test: function (params:any) {
+       const response = params
+
+       return new Promise(resolve => {
+         setTimeout(function () {
+           resolve('this is response for call test("' + response + '")')
+         }, 1)
+       })
+     }
+   }
+
+  showIframe = (id: any, url: any, initData: any) => {
+    const iframe = createIframe('id', url)
+    const onLoadCallback = () => {
+      (this.iframe as any).contentWindow.postMessage({ magic: 'apinto', type: 'initialize', data: initData }, '*')
+      window.addEventListener('message', async (event) => {
+        if (event && event.data.magic === 'apinto' && event.data.type === 'request') {
+          // const msg = {
+
+          // }
+          const handler = this.proxyHandler[event.data.path as any]
+          if (typeof handler === 'function') {
+            const args = event.data.data
+            const result = await handler(...args)
+            ;(this.iframe as any).contentWindow.postMessage({
+              requestId: event.data.requestId,
+              magic: 'apinto',
+              type: 'response',
+              data: result
+            }, '*')
+          } else {
+            ;(this.iframe as any).contentWindow.postMessage({
+              requestId: event.data.requestId,
+              magic: 'apinto',
+              type: 'error',
+              data: 'unknown function for:' + event.data.path
+            }, '*')
+          }
+        }
+      })
+    }
+    if ((this.iframe as any).attachEvent) {
+      (this.iframe as any).attachEvent('onload', onLoadCallback)
+    } else {
+      (this.iframe as any).onload = onLoadCallback
+    }
+    const panel = document.getElementById('iframePanel')
+    while (panel?.hasChildNodes()) {
+      panel?.firstChild && panel.removeChild(panel?.firstChild)
+    }
+    panel?.appendChild(iframe)
+
+    function createIframe (id: string, url: string) {
+      const iframe = document.createElement('iframe')
+      iframe.id = id
+      iframe.width = '100%'
+      iframe.height = '100%'
+      iframe.src = url
+
+      return iframe
+    }
+  }
+
   @ViewChild('iframe') iframe: ElementRef|undefined;
   path:string =''
 
@@ -200,14 +263,20 @@ export class IframePageComponent implements OnInit {
 
   ngOnInit (): void {
     this.moduleName = this.baseInfo.allParamsInfo.moduleName
-    this.subscription = this.router.events.subscribe((event) => {
-      if (event instanceof NavigationEnd) {
-        console.log(this.router.url)
-        this.moduleName = this.baseInfo.allParamsInfo.moduleName
-        this.getPath()
-      }
-    })
-    this.getPath()
+    // this.subscription = this.router.events.subscribe((event) => {
+    //   if (event instanceof NavigationEnd) {
+    //     console.log(this.router.url)
+    //     this.moduleName = this.baseInfo.allParamsInfo.moduleName
+    //     this.getPath()
+    //   }
+    // })
+    // this.getPath()
+  }
+
+  ngAfterViewInit () {
+    window.onload = () => {
+      this.showIframe('test', 'http://localhost:4444', {})
+    }
   }
 
   ngOnDestroy () {

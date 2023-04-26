@@ -119,8 +119,14 @@ let DYNAMIC_INJECT_SCHEMA: any
 
 export const IntelligentPluginEditComponent = React.forwardRef(
   (props: { [k: string]: any }, ref) => {
-    const { schema, initFormValue, driverSelectOptions, demo, demoSchema } =
-      props
+    const {
+      schema,
+      initFormValue,
+      driverSelectOptions,
+      demo,
+      demoSchema,
+      editPage = false
+    } = props
     React.useImperativeHandle(ref, () => ({ form, submitRef }))
 
     const submitRef = React.createRef()
@@ -170,6 +176,9 @@ export const IntelligentPluginEditComponent = React.forwardRef(
             wrapperCol: 10
           },
           'x-component': 'Select',
+          'x-component-props': {
+            disabled: editPage
+          },
           'x-display': driverSelectOptions.length > 1 ? 'visible' : 'hidden',
           enum: [...driverSelectOptions]
         },
