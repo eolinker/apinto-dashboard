@@ -11,8 +11,8 @@ import (
 )
 
 func (p *ProxyAPi) CreateHome(path string) []apinto_module.RouterInfo {
-	baseHtml := []byte(fmt.Sprintf(fmt.Sprintf("<base href=\"/module/%s\">", p.module)))
-	routerRoot := fmt.Sprintf("/module/%s", p.module)
+	baseHtml := []byte(fmt.Sprintf(fmt.Sprintf("<base href=\"/agent/%s/\">", p.module)))
+	routerRoot := fmt.Sprintf("/agent/%s", p.module)
 
 	if !strings.HasPrefix(path, "/") {
 		path = "/" + path
@@ -64,21 +64,21 @@ func (p *ProxyAPi) CreateHome(path string) []apinto_module.RouterInfo {
 	}
 	return []apinto_module.RouterInfo{{
 		Method:      http.MethodGet,
-		Path:        fmt.Sprintf("/module/%s", p.module),
+		Path:        fmt.Sprintf("/agent/%s", p.module),
 		Handler:     fmt.Sprintf("%s.home", p.module),
 		Labels:      apinto_module.RouterLabelModule,
 		HandlerFunc: []apinto_module.HandlerFunc{handler},
 	},
 		{
 			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("/module/%s/:sub/*path", p.module),
+			Path:        fmt.Sprintf("/agent/%s/:sub/*path", p.module),
 			Handler:     fmt.Sprintf("%s.home", p.module),
 			Labels:      apinto_module.RouterLabelModule,
 			HandlerFunc: []apinto_module.HandlerFunc{handler},
 		}}
 }
 func (p *ProxyAPi) CreateHtml(dir string, appendLabel []string) apinto_module.RouterInfo {
-	routerRoot := fmt.Sprintf("/module/%s/%s", p.module, strings.TrimPrefix(dir, "/"))
+	routerRoot := fmt.Sprintf("/agent/%s/%s", p.module, strings.TrimPrefix(dir, "/"))
 	routerPath := routerRoot
 	if strings.HasSuffix(dir, "/") {
 		routerPath = fmt.Sprintf("%s*filePath", routerPath)
