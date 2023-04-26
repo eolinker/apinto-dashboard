@@ -13,6 +13,7 @@ type WorkerInfo struct {
 }
 
 type BasicInfo struct {
+	Id          string `json:"id"`
 	Name        string `json:"name"`
 	Title       string `json:"title"`
 	Driver      string `json:"driver"`
