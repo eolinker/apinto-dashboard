@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/cache"
 	"github.com/eolinker/apinto-dashboard/modules/core"
+	"github.com/eolinker/apinto-dashboard/modules/core/controller"
 	module_plugin "github.com/eolinker/apinto-dashboard/modules/module-plugin"
 	apinto_module "github.com/eolinker/apinto-module"
 	"github.com/eolinker/eosc/common/bean"
@@ -43,6 +44,12 @@ type coreService struct {
 	modulesData         *tModulesData
 	cacheCommon         cache.ICommonCache
 	once                sync.Once
+
+	coreModule apinto_module.CoreModule
+}
+
+func (c *coreService) SetCoreModule(module apinto_module.CoreModule) {
+	c.coreModule = module
 }
 
 func (c *coreService) HasModule(module string, path string) bool {
@@ -67,7 +74,7 @@ func (c *coreService) CheckNewModule(UUID, name, driverName string, define, conf
 		return err
 	}
 	modulesData := newTModulesData()
-	builder := apinto_module.NewModuleBuilder(c.engineCreate.CreateEngine())
+	builder := apinto_module.NewModuleBuilder(c.engineCreate.CreateEngine(), c.coreModule)
 	for _, module := range modules {
 		if module.Name == name {
 			if module.UUID == UUID {
@@ -194,7 +201,7 @@ func (c *coreService) rebuild() error {
 		return err
 	}
 	modulesData := newTModulesData()
-	builder := apinto_module.NewModuleBuilder(c.engineCreate.CreateEngine())
+	builder := apinto_module.NewModuleBuilder(c.engineCreate.CreateEngine(), c.coreModule)
 	for _, module := range modules {
 		driver, has := apinto_module.GetDriver(module.Driver)
 		if !has {
@@ -234,6 +241,7 @@ func NewService(providerService IProviderService) core.ICore {
 
 	c := &coreService{
 		providerService: providerService,
+		coreModule:      controller.NewModule(),
 	}
 	bean.Autowired(&c.modulePluginService)
 	bean.Autowired(&c.engineCreate)
