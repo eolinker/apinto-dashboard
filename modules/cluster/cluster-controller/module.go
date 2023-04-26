@@ -25,6 +25,26 @@ func (c *ClusterPluginDriver) CreatePlugin(define interface{}) (apinto_module.Pl
 	return c, nil
 }
 
+func (c *ClusterPluginDriver) GetPluginFrontend(moduleName string) string {
+	return "deploy/cluster"
+}
+
+func (c *ClusterPluginDriver) IsPluginVisible() bool {
+	return true
+}
+
+func (c *ClusterPluginDriver) IsShowServer() bool {
+	return false
+}
+
+func (c *ClusterPluginDriver) IsCanUninstall() bool {
+	return false
+}
+
+func (c *ClusterPluginDriver) IsCanDisable() bool {
+	return false
+}
+
 type Module struct {
 	isInit bool
 
