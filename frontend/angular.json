@@ -43,7 +43,7 @@
           "options": {
             "deployUrl": "/frontend/",
             "outputPath": "./dist",
-            "index": "projects/core/src/index.html",
+            "index": "projects/core/src/index.html",  
             "main": "projects/core/src/main.ts",
             "polyfills": "projects/core/src/polyfills.ts",
             "tsConfig": "tsconfig.app.json",
@@ -72,6 +72,7 @@
               "node_modules/eo-ng-codebox/lib/codebox.component.scss",
               "node_modules/eo-ng-collapse/lib/eo-ng-collapse.component.scss",
               "node_modules/eo-ng-date-picker/styles.scss",
+              "node_modules/eo-ng-empty/styles.scss",
               "node_modules/eo-ng-feedback/styles.scss",
               "node_modules/eo-ng-input/styles.scss",
               "node_modules/eo-ng-menu/styles.scss",

@@ -130,7 +130,7 @@ const routes: Routes = [
         component: DynamicDemoComponent
       },
       {
-        path: 'iframe',
+        path: 'module',
         children: [
           {
             path: ':moduleName',
@@ -149,8 +149,12 @@ const routes: Routes = [
         component: OuterComponent,
         children: [
           {
-            path: '**',
-            component: IntelligentPluginLayoutComponent
+            path: ':moduleName',
+            children: [{
+              path: '**',
+              component: IntelligentPluginLayoutComponent
+            }
+            ]
           }
         ]
       }
