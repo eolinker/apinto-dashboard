@@ -24,6 +24,8 @@ type consoleInfoService struct {
 	appService          application.IApplicationService
 	modulePluginService module_plugin.IModulePlugin
 	navigationService   navigation_service.INavigationService
+
+	modulesCache INavigationModulesCache
 }
 
 func NewConsoleInfoService() grpc_service.GetConsoleInfoServer {
@@ -34,6 +36,8 @@ func NewConsoleInfoService() grpc_service.GetConsoleInfoServer {
 	bean.Autowired(&c.appService)
 	bean.Autowired(&c.modulePluginService)
 	bean.Autowired(&c.navigationService)
+
+	bean.Autowired(&c.modulesCache)
 	return c
 }
 
@@ -188,7 +192,7 @@ func (c *consoleInfoService) GetAppsByUuids(ctx context.Context, req *grpc_servi
 }
 
 func (c *consoleInfoService) GetNavigationModules(ctx context.Context, req *grpc_service.EmptyRequest) (*grpc_service.NavigationModulesResp, error) {
-	modules, err := c.modulePluginService.GetNavigationModules(ctx)
+	modules, err := c.modulePluginService.GetNavigationModules(ctx) //这个接口已从缓存中拿了
 	if err != nil {
 		return nil, errors.New("获取导航模块列表失败")
 	}
