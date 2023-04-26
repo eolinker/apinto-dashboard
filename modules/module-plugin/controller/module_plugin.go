@@ -3,6 +3,12 @@ package controller
 import (
 	"bytes"
 	"fmt"
+	"io"
+	"net/http"
+	"os"
+	"path"
+	"strings"
+
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin"
@@ -13,11 +19,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-basic/uuid"
 	"gopkg.in/yaml.v3"
-	"io"
-	"net/http"
-	"os"
-	"path"
-	"strings"
 )
 
 type modulePluginController struct {
@@ -239,7 +240,6 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("install plugin FormFilefail. err:%s", err.Error()))
 		return
 	}
-
 	file, err := pluginPackage.Open()
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("install plugin openFile fail. err:%s", err.Error()))
