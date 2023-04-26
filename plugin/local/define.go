@@ -12,11 +12,11 @@ type MiddlewareConfig struct {
 	Rule []string `json:"rule"`
 }
 type RouterConfig struct {
-	Home     string                          `json:"home"`
-	Html     []PathConfig                    `json:"html"`
-	Frontend []string                        `json:"frontend"`
-	Api      map[string]map[string]Attribute `json:"api"`
-	OpenApi  map[string]map[string]Attribute `json:"openapi"`
+	Home     string                           `json:"home"`
+	Html     []PathConfig                     `json:"html"`
+	Frontend []string                         `json:"frontend"`
+	Api      map[string]map[string]PathConfig `json:"api"`
+	OpenApi  map[string]map[string]PathConfig `json:"openapi"`
 	Provider []ProviderConfig
 }
 type PathConfig struct {
