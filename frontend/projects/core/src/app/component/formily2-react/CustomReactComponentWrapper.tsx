@@ -153,10 +153,6 @@ export class CustomReactComponentWrapperComponent {
 
   ngOnChanges(changes: SimpleChanges): void {
     // eslint-disable-next-line dot-notation
-    if (changes['demoSchema']) {
-      console.log(this.demoSchema)
-    }
-    console.log(this.demoSchema)
     this.render()
   }
 
