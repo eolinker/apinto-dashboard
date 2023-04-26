@@ -4,7 +4,6 @@ import (
 	context "context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	locker_service "github.com/eolinker/apinto-dashboard/modules/base/locker-service"
 	"github.com/eolinker/apinto-dashboard/modules/group"
 	module_plugin "github.com/eolinker/apinto-dashboard/modules/module-plugin"
@@ -12,7 +11,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/store"
 	"github.com/eolinker/eosc/common/bean"
 	"gorm.io/gorm"
-	"strings"
 )
 
 type modulePlugin struct {
@@ -71,22 +69,14 @@ func (m *modulePlugin) GetNavigationModules(ctx context.Context) ([]*model.Navig
 	list := make([]*model.NavigationModuleInfo, 0, len(moduleInfos))
 	for _, module := range moduleInfos {
 		//导航不存在表示不需要在前端显示
-		if module.Navigation == "" {
+		if !module.IsPluginVisible {
 			continue
 		}
 		info := &model.NavigationModuleInfo{
 			Name:       module.Name,
 			Title:      module.Title,
-			Type:       "built-in",
-			Path:       module.Name,
+			Path:       module.Frontend,
 			Navigation: module.Navigation,
-		}
-		if module.Front != "" {
-			info.Path = fmt.Sprintf("%s/%s", strings.Trim(module.Front, "/"), module.Name)
-		}
-		//若模块为非内置模块
-		if !IsInnerPlugin(module.Type) {
-			info.Type = "outer"
 		}
 
 		list = append(list, info)
@@ -108,18 +98,11 @@ func (m *modulePlugin) GetEnabledPluginByModuleName(ctx context.Context, moduleN
 		return nil, err
 	}
 
-	info := &model.ModulePluginInfo{
+	return &model.ModulePluginInfo{
 		ModulePlugin: plugin,
 		Enable:       true,
-		CanDisable:   true,
-		Uninstall:    false,
-	}
-
-	//根据类型判断是否能停用
-	if IsPluginCanDisable(plugin.Type) {
-		info.CanDisable = false
-	}
-
-	return info, nil
+		CanDisable:   enableInfo.IsCanDisable,
+		Uninstall:    enableInfo.IsCanUninstall,
+	}, nil
 
 }
