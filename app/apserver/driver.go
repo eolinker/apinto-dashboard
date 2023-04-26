@@ -5,7 +5,7 @@ import (
 	application_controller "github.com/eolinker/apinto-dashboard/modules/application/application-controller"
 	auditController "github.com/eolinker/apinto-dashboard/modules/audit/audit-controller"
 	clusterController "github.com/eolinker/apinto-dashboard/modules/cluster/cluster-controller"
-	coreController "github.com/eolinker/apinto-dashboard/modules/core/controller"
+	_ "github.com/eolinker/apinto-dashboard/modules/core/controller"
 	discovery_controller "github.com/eolinker/apinto-dashboard/modules/discovery/discovery-controller"
 	dynamic_controller "github.com/eolinker/apinto-dashboard/modules/dynamic/dynamic-controller"
 	email_controller "github.com/eolinker/apinto-dashboard/modules/email/controller"
@@ -28,7 +28,6 @@ func init() {
 	apintoModule.Register("application.apinto.com", application_controller.NewPluginDriver())
 	apintoModule.Register("audit.apinto.com", auditController.NewDriver())
 	apintoModule.Register("cluster.apinto.com", clusterController.NewClusterPlugin())
-	apintoModule.Register("core.apinto.com", coreController.NewCoreDriver())
 	apintoModule.Register("discovery.apinto.com", discovery_controller.NewPluginDriver())
 	apintoModule.Register("ext_app.apinto.com", open_app_controller.NewPluginDriver())
 	apintoModule.Register("module_plugin.apinto.com", module_plugin_controller.NewModulePlugin())
