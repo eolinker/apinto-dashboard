@@ -70,7 +70,7 @@ func (c *modulePluginStore) GetEnabledPlugins(ctx context.Context) ([]*entry.Ena
 // GetNavigationModules 获取导航接口所需要的模块列表
 func (c *modulePluginStore) GetNavigationModules(ctx context.Context) ([]*entry.EnabledModule, error) {
 	modules := make([]*entry.EnabledModule, 0)
-	err := c.DB(ctx).Table("module_plugin").Select("module_plugin_enable.name, module_plugin.cname, module_plugin.type, module_plugin_enable.navigation, module_plugin.front").
+	err := c.DB(ctx).Table("module_plugin").Select("module_plugin_enable.name, module_plugin.cname, module_plugin.type, module_plugin_enable.navigation, module_plugin_enable.is_plugin_visible,module_plugin_enable.frontend").
 		Joins("right join module_plugin_enable on module_plugin.id = module_plugin_enable.id").
 		Where("module_plugin_enable.is_enable = 2").Scan(&modules).Error
 

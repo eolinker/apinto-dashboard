@@ -190,7 +190,6 @@ type NavigationEnabledPlugin struct {
 type NavigationModuleInfo struct {
 	Name       string
 	Title      string
-	Type       string
 	Path       string
 	Navigation string
 }

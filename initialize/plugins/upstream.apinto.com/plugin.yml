@@ -2,7 +2,7 @@ id: "upstream.apinto.com"
 name: "upstream"
 cname: "上游服务"
 resume: ""
-version: "v1.0.2"
+version: "v1.0.3"
 icon: "上游服务.png"
 driver: "upstream.apinto.com"
 type: 1 #0为框架模块 1为核心模块 2为内置模块 3为非内置

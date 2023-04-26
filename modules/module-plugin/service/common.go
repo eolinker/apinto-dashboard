@@ -14,15 +14,6 @@ func IsInnerPlugin(pluginType int) bool {
 	}
 }
 
-// IsPluginCanDisable 根据插件类型判断插件是否能停用
-func IsPluginCanDisable(pluginType int) bool {
-	//框架和核心插件不可以停用
-	if pluginType == pluginTypeFrame || pluginType == pluginTypeCore {
-		return false
-	}
-	return true
-}
-
 func enabledCfgListToMap(input *model.PluginEnableCfg) *model.PluginEnableCfgMap {
 	headerMap := make(map[string]string, len(input.Header))
 	queryMap := make(map[string]string, len(input.Query))
