@@ -25,6 +25,26 @@ func (c *StrategyTrafficDriver) CreatePlugin(define interface{}) (apinto_module.
 	return c, nil
 }
 
+func (c *StrategyTrafficDriver) GetPluginFrontend(moduleName string) string {
+	return "serv-governance/traffic"
+}
+
+func (c *StrategyTrafficDriver) IsPluginVisible() bool {
+	return true
+}
+
+func (c *StrategyTrafficDriver) IsShowServer() bool {
+	return false
+}
+
+func (c *StrategyTrafficDriver) IsCanUninstall() bool {
+	return false
+}
+
+func (c *StrategyTrafficDriver) IsCanDisable() bool {
+	return true
+}
+
 type StrategyTrafficModule struct {
 	isInit  bool
 	name    string
