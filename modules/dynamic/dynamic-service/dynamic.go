@@ -59,19 +59,20 @@ func (d *dynamicService) Info(ctx context.Context, namespaceId int, profession s
 		BasicInfo: &dynamic_model.DynamicBasicInfo{
 			ID:          info.Name,
 			Title:       info.Title,
+			Driver:      info.Driver,
 			Description: info.Description,
 		},
 		Append: tmp,
 	}, nil
 }
 
-func (d *dynamicService) List(ctx context.Context, namespaceId int, profession string, columns []string, keyword string, page int, pageSize int) ([]map[string]string, error) {
-	list, err := d.dynamicStore.ListPageByKeyword(ctx, map[string]interface{}{
+func (d *dynamicService) List(ctx context.Context, namespaceId int, profession string, columns []string, drivers []string, keyword string, page int, pageSize int) ([]map[string]string, int, error) {
+	list, total, err := d.dynamicStore.ListPageByKeyword(ctx, map[string]interface{}{
 		"namespace":  namespaceId,
 		"profession": profession,
-	}, keyword, page, pageSize)
+	}, drivers, keyword, page, pageSize)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	items := make([]map[string]string, 0, len(list))
 	for _, l := range list {
@@ -84,6 +85,8 @@ func (d *dynamicService) List(ctx context.Context, namespaceId int, profession s
 		item := map[string]string{
 			"id":          l.Name,
 			"title":       l.Title,
+			"driver":      l.Driver,
+			"description": l.Description,
 			"updater":     updater,
 			"update_time": l.UpdateTime.Format("2006-01-02 15:04:05"),
 		}
@@ -107,14 +110,14 @@ func (d *dynamicService) List(ctx context.Context, namespaceId int, profession s
 		}
 		items = append(items, item)
 	}
-	return items, nil
+	return items, total, nil
 }
 
-func (d *dynamicService) ClusterStatuses(ctx context.Context, namespaceId int, profession string, names []string, keyword string, page int, pageSize int) (map[string]map[string]string, error) {
-	list, err := d.dynamicStore.ListPageByKeyword(ctx, map[string]interface{}{
+func (d *dynamicService) ClusterStatuses(ctx context.Context, namespaceId int, profession string, names []string, drivers []string, keyword string, page int, pageSize int) (map[string]map[string]string, error) {
+	list, _, err := d.dynamicStore.ListPageByKeyword(ctx, map[string]interface{}{
 		"namespace":  namespaceId,
 		"profession": profession,
-	}, keyword, page, pageSize)
+	}, drivers, keyword, page, pageSize)
 	if err != nil {
 		return nil, err
 	}

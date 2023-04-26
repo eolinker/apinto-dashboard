@@ -273,6 +273,23 @@ func (c *clusterService) QueryListByNamespaceId(ctx context.Context, namespaceId
 	return list, nil
 }
 
+func (c *clusterService) SimpleCluster(ctx context.Context, namespaceId int) ([]*cluster_model2.ClusterSimple, error) {
+	list, err := c.clusterStore.List(ctx, map[string]interface{}{
+		"namespace": namespaceId,
+	})
+	if err != nil {
+		return nil, err
+	}
+	clusters := make([]*cluster_model2.ClusterSimple, 0, len(list))
+	for _, l := range list {
+		clusters = append(clusters, &cluster_model2.ClusterSimple{
+			Name:  l.Name,
+			Title: l.Name,
+		})
+	}
+	return clusters, nil
+}
+
 // DeleteByNamespaceIdByName 删除集群
 func (c *clusterService) DeleteByNamespaceIdByName(ctx context.Context, namespaceId, userId int, name string) error {
 	clusterId, err := c.CheckByNamespaceByName(ctx, namespaceId, name)

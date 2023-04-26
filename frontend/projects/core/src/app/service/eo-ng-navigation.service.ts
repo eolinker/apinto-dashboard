@@ -17,7 +17,7 @@ export class EoNgNavigationService {
   private userId: string = '' // 当前用户id
   private accessMap: Map<string, Array<string>> = new Map()
   constructor (public api: ApiService) {}
-
+  iframePrefix:string = 'module' // 与后端约定好的，所有iframe打开的页面都要加该前缀
   setUserRoleId (val: string) {
     this.userRoleId = val
   }
@@ -116,6 +116,7 @@ export class EoNgNavigationService {
   firstModulesId: number | null = null
   findFirstModulesId: boolean = false
   noAccess: boolean = true
+  originAccessData:{[k:string]:string} = {} // 从接口获取的access数据
   // 获得最新的权限列表和菜单
   getRightsList (): Observable<MenuOptions[]> {
     return new Observable((observer) => {
@@ -127,6 +128,7 @@ export class EoNgNavigationService {
           this.accessMap = new Map()
           this.routerNameMap = new Map()
           this.noAccess = true
+          this.originAccessData = resp.data.access
           for (const navigation of resp.data.navigation) {
             const menu = {
               title: navigation.title,
@@ -143,15 +145,9 @@ export class EoNgNavigationService {
                         titleString: navigation.title,
                         name: module.name,
                         type: module.type,
-                        ...(module.type === 'built-in'
-                          ? {
-                              routerLink: module.path,
-                              matchRouter: true,
-                              matchRouterExact: false
-                            }
-                          : {
-                              path: `iframe/${module.name}`
-                            })
+                        routerLink: module.path,
+                        matchRouter: true,
+                        matchRouterExact: false
                       }
                     })
                   }
@@ -165,7 +161,7 @@ export class EoNgNavigationService {
                       type: this.getDefaultModule(navigation).type
                     }
                   : (navigation.modules?.length > 0
-                      ? {
+                      ? { // TODO似乎没用，后续排查
                           routerLink: 'iframe',
                           matchRouter: true,
                           matchRouterExact: false

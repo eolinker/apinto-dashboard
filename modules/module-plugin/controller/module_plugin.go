@@ -1,7 +1,14 @@
 package controller
 
 import (
+	"bytes"
 	"fmt"
+	"io"
+	"net/http"
+	"os"
+	"path"
+	"strings"
+
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin"
@@ -12,10 +19,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-basic/uuid"
 	"gopkg.in/yaml.v3"
-	"io"
-	"net/http"
-	"os"
-	"path"
 )
 
 type modulePluginController struct {
@@ -237,7 +240,6 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("install plugin FormFilefail. err:%s", err.Error()))
 		return
 	}
-
 	file, err := pluginPackage.Open()
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("install plugin openFile fail. err:%s", err.Error()))
@@ -246,15 +248,15 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 	defer file.Close()
 
 	// 检查文件类型和大小
-	//contentType := pluginPackage.Header.Get("Content-Type")
-	//if !strings.HasPrefix(contentType, "application/x-gzip") {
-	//	ginCtx.String(http.StatusBadRequest, "Invalid file type")
-	//	return
-	//}
-	//if pluginPackage.Size > 4<<20 {
-	//	ginCtx.String(http.StatusBadRequest, "File too large")
-	//	return
-	//}
+	contentType := pluginPackage.Header.Get("Content-Type")
+	if !strings.HasPrefix(contentType, "application/x-gzip") {
+		ginCtx.String(http.StatusBadRequest, "Invalid file type")
+		return
+	}
+	if pluginPackage.Size > 4<<20 {
+		ginCtx.String(http.StatusBadRequest, "File too large")
+		return
+	}
 
 	//读取压缩文件的内容
 	fileBuffer, err := io.ReadAll(file)
@@ -262,7 +264,7 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("install plugin read file fail. err:%s", err.Error()))
 		return
 	}
-	//packageFile := bytes.NewReader(fileBuffer)
+	packageFile := bytes.NewReader(fileBuffer)
 
 	randomId := uuid.New()
 	tmpDir := fmt.Sprintf("%s%s%s", PluginDir, string(os.PathSeparator), randomId)
@@ -272,8 +274,7 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("install plugin read file fail. err:%s", err.Error()))
 		return
 	}
-	err = common.UnzipFromBytes(fileBuffer, tmpDir)
-	//err = common.DeCompress(packageFile, tmpDir)
+	err = common.DeCompress(packageFile, tmpDir)
 	if err != nil {
 		//删除目录
 		os.RemoveAll(tmpDir)
@@ -336,8 +337,6 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 	newDirName := fmt.Sprintf("%s%s%s", PluginDir, string(os.PathSeparator), pluginCfg.ID)
 	err = os.Rename(tmpDir, newDirName)
 	if err != nil {
-		//删除旧目录
-		os.RemoveAll(tmpDir)
 		log.Errorf("安装插件更改临时目录名失败 err: %s", err)
 	}
 
