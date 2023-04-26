@@ -36,7 +36,7 @@ export class IframePageComponent implements OnInit {
    proxyHandler:{[k:string]:any} ={
      test: function (params:any) {
        const response = params
-
+       console.log('-----测试是否调用到父窗口')
        return new Promise(resolve => {
          setTimeout(function () {
            resolve('this is response for call test("' + response + '")')
@@ -48,7 +48,8 @@ export class IframePageComponent implements OnInit {
   showIframe = (id: any, url: any, initData: any) => {
     const iframe = createIframe('id', url)
     const onLoadCallback = () => {
-      (this.iframe as any).contentWindow.postMessage({ magic: 'apinto', type: 'initialize', data: initData }, '*')
+      console.log(this.iframe)
+      ;(this.iframe as any).contentWindow.postMessage({ magic: 'apinto', type: 'initialize', data: initData }, '*')
       window.addEventListener('message', async (event) => {
         if (event && event.data.magic === 'apinto' && event.data.type === 'request') {
           // const msg = {
@@ -75,10 +76,11 @@ export class IframePageComponent implements OnInit {
         }
       })
     }
+    console.log(this.iframe)
     if ((this.iframe as any).attachEvent) {
       (this.iframe as any).attachEvent('onload', onLoadCallback)
     } else {
-      (this.iframe as any).onload = onLoadCallback
+      (this.iframe as any).contentWindow.onload = onLoadCallback
     }
     const panel = document.getElementById('iframePanel')
     while (panel?.hasChildNodes()) {
@@ -275,6 +277,7 @@ export class IframePageComponent implements OnInit {
 
   ngAfterViewInit () {
     window.onload = () => {
+      console.log('waw')
       this.showIframe('test', 'http://localhost:4444', {})
     }
   }
