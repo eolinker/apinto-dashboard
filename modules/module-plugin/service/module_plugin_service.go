@@ -1,7 +1,6 @@
 package service
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -249,6 +248,7 @@ func (m *modulePluginService) InstallPlugin(ctx context.Context, userID int, plu
 	if err == nil {
 		return ErrModulePluginInstalled
 	}
+	//TODO 通过CreatePlugin提前确定
 
 	//全局异步锁
 	err = m.lockService.Lock(locker_service.LockNameModulePlugin, 0)
@@ -680,7 +680,7 @@ func (m *modulePluginService) CheckPluginISDeCompress(ctx context.Context, plugi
 			if err != nil {
 				return err
 			}
-			packageFile := bytes.NewReader(packageEntry.Package)
+			//packageFile := bytes.NewReader(packageEntry.Package)
 			//创建目录
 			err = os.MkdirAll(dirPath, os.ModePerm)
 			if err != nil {
@@ -688,7 +688,7 @@ func (m *modulePluginService) CheckPluginISDeCompress(ctx context.Context, plugi
 				return err
 			}
 
-			err = common.DeCompress(packageFile, dirPath)
+			err = common.UnzipFromBytes(packageEntry.Package, dirPath)
 			if err != nil {
 				//删除目录
 				os.RemoveAll(dirPath)
