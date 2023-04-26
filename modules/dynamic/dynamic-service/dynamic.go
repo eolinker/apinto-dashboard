@@ -65,13 +65,13 @@ func (d *dynamicService) Info(ctx context.Context, namespaceId int, profession s
 	}, nil
 }
 
-func (d *dynamicService) List(ctx context.Context, namespaceId int, profession string, columns []string, keyword string, page int, pageSize int) ([]map[string]string, error) {
-	list, err := d.dynamicStore.ListPageByKeyword(ctx, map[string]interface{}{
+func (d *dynamicService) List(ctx context.Context, namespaceId int, profession string, columns []string, keyword string, page int, pageSize int) ([]map[string]string, int, error) {
+	list, total, err := d.dynamicStore.ListPageByKeyword(ctx, map[string]interface{}{
 		"namespace":  namespaceId,
 		"profession": profession,
 	}, keyword, page, pageSize)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	items := make([]map[string]string, 0, len(list))
 	for _, l := range list {
@@ -107,11 +107,11 @@ func (d *dynamicService) List(ctx context.Context, namespaceId int, profession s
 		}
 		items = append(items, item)
 	}
-	return items, nil
+	return items, total, nil
 }
 
 func (d *dynamicService) ClusterStatuses(ctx context.Context, namespaceId int, profession string, names []string, keyword string, page int, pageSize int) (map[string]map[string]string, error) {
-	list, err := d.dynamicStore.ListPageByKeyword(ctx, map[string]interface{}{
+	list, _, err := d.dynamicStore.ListPageByKeyword(ctx, map[string]interface{}{
 		"namespace":  namespaceId,
 		"profession": profession,
 	}, keyword, page, pageSize)
