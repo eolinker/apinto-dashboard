@@ -24,6 +24,26 @@ func (c *webhookDriver) CreatePlugin(define interface{}) (apinto_module.Plugin, 
 	return c, nil
 }
 
+func (c *webhookDriver) GetPluginFrontend(moduleName string) string {
+	return "system/webhook"
+}
+
+func (c *webhookDriver) IsPluginVisible() bool {
+	return true
+}
+
+func (c *webhookDriver) IsShowServer() bool {
+	return false
+}
+
+func (c *webhookDriver) IsCanUninstall() bool {
+	return false
+}
+
+func (c *webhookDriver) IsCanDisable() bool {
+	return true
+}
+
 type webhookModule struct {
 	isInit  bool
 	name    string
