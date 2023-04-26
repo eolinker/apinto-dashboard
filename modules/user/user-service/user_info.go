@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/modules/user"
+	user_dto "github.com/eolinker/apinto-dashboard/modules/user/user-dto"
 	user_entry "github.com/eolinker/apinto-dashboard/modules/user/user-entry"
 	user_model "github.com/eolinker/apinto-dashboard/modules/user/user-model"
 	user_store "github.com/eolinker/apinto-dashboard/modules/user/user-store"
@@ -296,4 +297,32 @@ func entryToModule(info *user_entry.UserInfo) *user_model.UserInfo {
 		Avatar:        info.Avatar,
 		LastLoginTime: info.LastLoginTime,
 	}
+}
+
+func (u *userInfoService) UpdateMyProfile(ctx context.Context, userId int, req *user_dto.UpdateMyProfileReq) error {
+	info, err := u.GetUserInfo(ctx, userId)
+	if err != nil {
+		return err
+	}
+
+	entry := &user_entry.UserInfo{
+		Id:           userId,
+		NickName:     req.NickName,
+		Email:        req.Email,
+		NoticeUserId: req.NoticeUserId,
+	}
+	info.NickName = req.NickName
+	info.Email = req.Email
+	info.NoticeUserId = req.NoticeUserId
+	return u.userInfoStore.Transaction(ctx, func(txCtx context.Context) error {
+
+		if err = u.userInfoStore.Save(txCtx, entry); err != nil {
+			return err
+		}
+
+		_ = u.cache.Set(ctx, u.cache.Key(userId), info, time.Minute*30)
+
+		return nil
+	})
+
 }
