@@ -14,6 +14,26 @@ func (c *PluginDriver) CreatePlugin(define interface{}) (apinto_module.Plugin, e
 	return c, nil
 }
 
+func (c *PluginDriver) GetPluginFrontend(moduleName string) string {
+	return "upstream/discovery"
+}
+
+func (c *PluginDriver) IsPluginVisible() bool {
+	return true
+}
+
+func (c *PluginDriver) IsShowServer() bool {
+	return false
+}
+
+func (c *PluginDriver) IsCanUninstall() bool {
+	return false
+}
+
+func (c *PluginDriver) IsCanDisable() bool {
+	return false
+}
+
 // plugin
 func (c *PluginDriver) CreateModule(name string, config interface{}) (apinto_module.Module, error) {
 	return NewModule(name), nil
