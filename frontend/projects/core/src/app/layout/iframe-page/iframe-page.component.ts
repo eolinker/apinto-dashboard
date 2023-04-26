@@ -34,6 +34,7 @@ import { Subscription, take } from 'rxjs'
 })
 export class IframePageComponent implements OnInit {
    proxyHandler:{[k:string]:any} ={
+     ...this.iframeService.apinto2PluginApi,
      test: function (params:any) {
        const response = params
        console.log('-----测试是否调用到父窗口')
@@ -56,14 +57,16 @@ export class IframePageComponent implements OnInit {
 
           // }
           const handler = this.proxyHandler[event.data.path as any]
+          console.log(event, handler)
           if (typeof handler === 'function') {
             const args = event.data.data
             const result = await handler(...args)
+            console.log(iframe, result, this.proxyHandler)
             ;(iframe as any).contentWindow.postMessage({
               requestId: event.data.requestId,
               magic: 'apinto',
               type: 'response',
-              data: result,
+              data: JSON.parse(JSON.stringify(result)),
               apinto: true
             }, '*')
           } else {
