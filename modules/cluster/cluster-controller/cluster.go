@@ -3,6 +3,9 @@ package cluster_controller
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"sort"
+
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/enum"
@@ -12,8 +15,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-model"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/gin-gonic/gin"
-	"net/http"
-	"sort"
 )
 
 type clusterController struct {
@@ -67,6 +68,21 @@ func (c *clusterController) clusters(ginCtx *gin.Context) {
 	m["clusters"] = list
 
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
+
+}
+
+// simpleClusters 获取简易集群列表
+func (c *clusterController) simpleClusters(ginCtx *gin.Context) {
+	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
+
+	clusters, err := c.clusterService.SimpleCluster(ginCtx, namespaceId)
+	if err != nil {
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
+		return
+	}
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(map[string]interface{}{
+		"clusters": clusters,
+	}))
 
 }
 
