@@ -30,6 +30,7 @@ type DynamicInfo struct {
 type DynamicBasicInfo struct {
 	ID          string `json:"id"`
 	Title       string `json:"title"`
+	Driver      string `json:"driver"`
 	Description string `json:"description"`
 	Online      bool   `json:"-"`
 }
