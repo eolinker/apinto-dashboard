@@ -1,11 +1,11 @@
 id: "influxdb.apinto.com"
 name: "influxdb"
-cname: "InfluxDB"
+cname: "InfluxDB配置"
 resume: ""
 version: "v1.0.0"
 icon: "监控告警.png"
 driver: "dynamic.apinto.com"
-front: template/influxdb-v2
+front: template
 navigation: "navigation.system"
 group_id: "monitor"
 define:  # 动态模块定义
@@ -129,4 +129,4 @@ define:  # 动态模块定义
             "x-index": 4
           }
         }
-    }
+      }
