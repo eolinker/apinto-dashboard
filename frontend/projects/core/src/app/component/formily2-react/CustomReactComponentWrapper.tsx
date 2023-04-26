@@ -153,10 +153,6 @@ export class CustomReactComponentWrapperComponent {
 
   ngOnChanges(changes: SimpleChanges): void {
     // eslint-disable-next-line dot-notation
-    if (changes['demoSchema']) {
-      console.log(this.demoSchema)
-    }
-    console.log(this.demoSchema)
     this.render()
   }
 
@@ -174,9 +170,9 @@ export class CustomReactComponentWrapperComponent {
         <div>
           <IntelligentPluginEditComponent
             ref={this.reactComponent}
-            schema={this.mockRenderSchema}
+            schema={this.renderSchema}
             initFormValue={this.initFormValue}
-            driverSelectOptions={this.mockDriverSelectOptions}
+            driverSelectOptions={this.driverSelectOptions}
             editPage={this.editPage}
             demoSchema={this.demoSchema}
             demo={this.demo}
