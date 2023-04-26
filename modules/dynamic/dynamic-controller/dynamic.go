@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	cluster_model "github.com/eolinker/apinto-dashboard/modules/cluster/cluster-model"
 
@@ -64,25 +65,40 @@ func newDynamicController(name string, define interface{}) *dynamicController {
 	return d
 }
 
+func (c *dynamicController) getPage(ctx *gin.Context) (int, int) {
+	page := ctx.Query("page")
+	pageSize := ctx.Query("page_size")
+	p, _ := strconv.Atoi(page)
+	if p < 1 {
+		p = 1
+	}
+	pz, _ := strconv.Atoi(pageSize)
+	if pz < 1 {
+		pz = 15
+	}
+	return p, pz
+}
+
 func (c *dynamicController) list(ctx *gin.Context) {
 	namespaceID := namespace_controller.GetNamespaceId(ctx)
-	keyword := ctx.GetString("keyword")
-	clusters := ctx.GetStringSlice("cluster")
-	page := ctx.GetInt("page")
-	pageSize := ctx.GetInt("page_size")
-	if page < 1 {
-		page = 1
+	keyword := ctx.Query("keyword")
+	clusterNames := ctx.Query("cluster")
+	names := make([]string, 0)
+	if clusterNames != "" {
+		err := json.Unmarshal([]byte(clusterNames), &names)
+		if err != nil {
+			controller.ErrorJson(ctx, http.StatusOK, err.Error())
+			return
+		}
 	}
-	if pageSize < 1 {
-		page = 15
-	}
-	all := len(clusters) < 1
-	var cs []*cluster_model.Cluster
+	page, pageSize := c.getPage(ctx)
+	all := len(names) < 1
 	var err error
+	var cs []*cluster_model.Cluster
 	if all {
 		cs, err = c.clusterService.GetAllCluster(ctx)
 	} else {
-		cs, err = c.clusterService.GetByNames(ctx, namespaceID, clusters)
+		cs, err = c.clusterService.GetByNames(ctx, namespaceID, names)
 	}
 	if err != nil {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
@@ -90,7 +106,7 @@ func (c *dynamicController) list(ctx *gin.Context) {
 	}
 
 	columns := make([]string, 0, len(c.Fields))
-	fields := make([]*Basic, 0, len(c.Fields)+len(clusters)+len(defaultFields))
+	fields := make([]*Basic, 0, len(c.Fields)+len(names)+len(defaultFields))
 	for _, field := range c.Fields {
 		columns = append(columns, field.Name)
 		fields = append(fields, field)
@@ -109,7 +125,7 @@ func (c *dynamicController) list(ctx *gin.Context) {
 	}
 	fields = append(fields, defaultFields...)
 
-	list, err := c.dynamicService.List(ctx, namespaceID, c.Profession, columns, keyword, page, pageSize)
+	list, total, err := c.dynamicService.List(ctx, namespaceID, c.Profession, columns, keyword, page, pageSize)
 	if err != nil {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
 		return
@@ -126,6 +142,7 @@ func (c *dynamicController) list(ctx *gin.Context) {
 		"drivers": c.Drivers,
 		"fields":  fields,
 		"list":    list,
+		"total":   total,
 	}))
 	return
 }
@@ -207,17 +224,19 @@ func (c *dynamicController) render(ctx *gin.Context) {
 
 func (c *dynamicController) clusterStatusList(ctx *gin.Context) {
 	namespaceID := namespace_controller.GetNamespaceId(ctx)
-	keyword := ctx.GetString("keyword")
-	clusters := ctx.GetStringSlice("cluster")
-	page := ctx.GetInt("page")
-	pageSize := ctx.GetInt("page_size")
-	if page < 1 {
-		page = 1
+	keyword := ctx.Query("keyword")
+	clusterNames := ctx.Query("cluster")
+	names := make([]string, 0)
+	if clusterNames != "" {
+		err := json.Unmarshal([]byte(clusterNames), &names)
+		if err != nil {
+			controller.ErrorJson(ctx, http.StatusOK, err.Error())
+			return
+		}
 	}
-	if pageSize < 1 {
-		page = 15
-	}
-	clusterInfo, err := c.dynamicService.ClusterStatuses(ctx, namespaceID, c.Profession, clusters, keyword, page, pageSize)
+
+	page, pageSize := c.getPage(ctx)
+	clusterInfo, err := c.dynamicService.ClusterStatuses(ctx, namespaceID, c.Profession, names, keyword, page, pageSize)
 	if err != nil {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
 		return
