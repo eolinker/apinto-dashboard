@@ -16,6 +16,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/entry"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/model"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/store"
+	apinto_module "github.com/eolinker/apinto-module"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
 	"github.com/go-redis/redis/v8"
@@ -118,13 +119,10 @@ func (m *modulePluginService) GetPluginInfo(ctx context.Context, pluginUUID stri
 		}
 		return nil, err
 	}
-	//根据类型判断是否显示可停用
-	if IsPluginCanDisable(plugin.Type) {
-		info.CanDisable = true
-	}
+	info.CanDisable = enableEntry.IsCanDisable
 
-	//若为非内置插件，且为停用状态,才可卸载
-	if enableEntry.IsEnable == statusPluginDisable && !IsInnerPlugin(plugin.Type) {
+	//若插件可卸载，且为停用，才能返回可卸载
+	if enableEntry.IsEnable == statusPluginDisable && enableEntry.IsCanUninstall {
 		info.Uninstall = true
 	}
 
@@ -223,18 +221,15 @@ func (m *modulePluginService) GetPluginEnableRender(ctx context.Context, pluginU
 
 	switch pluginInfo.Driver {
 	case pluginDriverRemote:
-		if !pluginDefine.Internet {
-			renderCfg.Internet = true
-		}
-		renderCfg.Querys = pluginDefine.Querys
-		renderCfg.Initialize = pluginDefine.Initialize
 	case pluginDriverLocal:
-		renderCfg.Internet = true
 		renderCfg.Headers = pluginDefine.Headers
-		renderCfg.Querys = pluginDefine.Querys
-		renderCfg.Initialize = pluginDefine.Initialize
 		//renderCfg.Invisible = localDefine.Invisible
 	}
+	if enableEntry.IsShowServer {
+		renderCfg.Internet = true
+	}
+	renderCfg.Querys = pluginDefine.Querys
+	renderCfg.Initialize = pluginDefine.Initialize
 
 	return renderCfg, nil
 }
@@ -248,7 +243,15 @@ func (m *modulePluginService) InstallPlugin(ctx context.Context, userID int, plu
 	if err == nil {
 		return ErrModulePluginInstalled
 	}
-	//TODO 通过CreatePlugin提前确定
+
+	driver, has := apinto_module.GetDriver(pluginYml.Driver)
+	if !has {
+		return ErrModulePluginDriverNotFound
+	}
+	plugin, err := driver.CreatePlugin(pluginYml.Define)
+	if err != nil {
+		return fmt.Errorf("创建插件 %s 失败:%s", pluginYml.Name, err.Error())
+	}
 
 	//全局异步锁
 	err = m.lockService.Lock(locker_service.LockNameModulePlugin, 0)
@@ -261,6 +264,7 @@ func (m *modulePluginService) InstallPlugin(ctx context.Context, userID int, plu
 		Uuid: pluginYml.ID,
 		Name: pluginYml.CName,
 	})
+
 	err = m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
 		t := time.Now()
 		details, _ := json.Marshal(pluginYml.Define)
@@ -275,7 +279,6 @@ func (m *modulePluginService) InstallPlugin(ctx context.Context, userID int, plu
 			Resume:     pluginYml.Resume,
 			ICon:       pluginYml.ICon,
 			Type:       pluginTypeNotInner,
-			Front:      pluginYml.Front,
 			Driver:     pluginYml.Driver,
 			Details:    details,
 			Operator:   userID,
@@ -286,13 +289,17 @@ func (m *modulePluginService) InstallPlugin(ctx context.Context, userID int, plu
 			return err
 		}
 		enableInfo := &entry.ModulePluginEnable{
-			Id:         pluginInfo.Id,
-			Name:       pluginYml.Name,
-			Navigation: pluginYml.Navigation,
-			IsEnable:   statusPluginDisable,
-			Config:     []byte{},
-			Operator:   userID,
-			UpdateTime: t,
+			Id:              pluginInfo.Id,
+			Name:            pluginYml.Name,
+			Navigation:      pluginYml.Navigation,
+			IsEnable:        statusPluginDisable,
+			IsCanDisable:    plugin.IsCanDisable(),
+			IsCanUninstall:  plugin.IsCanUninstall(),
+			IsShowServer:    plugin.IsShowServer(),
+			IsPluginVisible: plugin.IsPluginVisible(),
+			Config:          []byte{},
+			Operator:        userID,
+			UpdateTime:      t,
 		}
 
 		if err = m.pluginEnableStore.Save(txCtx, enableInfo); err != nil {
@@ -326,10 +333,6 @@ func (m *modulePluginService) UninstallPlugin(ctx context.Context, userID int, p
 		return err
 	}
 
-	if IsInnerPlugin(pluginInfo.Type) {
-		return errors.New("内置插件不可以卸载")
-	}
-
 	//全局异步锁
 	err = m.lockService.Lock(locker_service.LockNameModulePlugin, 0)
 	if err != nil {
@@ -344,6 +347,11 @@ func (m *modulePluginService) UninstallPlugin(ctx context.Context, userID int, p
 		}
 		return err
 	}
+
+	if !enableInfo.IsCanUninstall {
+		return errors.New("内置插件不可以卸载")
+	}
+
 	//校验插件启用状态
 	if enableInfo.IsEnable == statusPluginEnable {
 		return errors.New("插件启用中，不可以卸载")
@@ -475,15 +483,30 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 		Name:          pluginInfo.CName,
 		EnableOperate: 1,
 	})
+
+	driver, has := apinto_module.GetDriver(pluginInfo.Driver)
+	if !has {
+		return ErrModulePluginDriverNotFound
+	}
+	plugin, err := driver.CreatePlugin(define)
+	if err != nil {
+		return fmt.Errorf("创建插件驱动 %s 失败:%s", pluginInfo.Name, err.Error())
+	}
+
 	err = m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
 		enableEntry := &entry.ModulePluginEnable{
-			Id:         pluginInfo.Id,
-			Name:       enableInfo.Name,
-			Navigation: pluginInfo.Navigation,
-			IsEnable:   statusPluginEnable,
-			Config:     config,
-			Operator:   userID,
-			UpdateTime: time.Now(),
+			Id:              pluginInfo.Id,
+			Name:            enableInfo.Name,
+			Navigation:      pluginInfo.Navigation,
+			IsEnable:        statusPluginEnable,
+			IsCanDisable:    plugin.IsCanDisable(),
+			IsCanUninstall:  plugin.IsCanUninstall(),
+			IsShowServer:    plugin.IsShowServer(),
+			IsPluginVisible: plugin.IsPluginVisible(),
+			Frontend:        plugin.GetPluginFrontend(enableInfo.Name),
+			Config:          config,
+			Operator:        userID,
+			UpdateTime:      time.Now(),
 		}
 
 		return m.pluginEnableStore.Save(txCtx, enableEntry)
@@ -506,10 +529,6 @@ func (m *modulePluginService) DisablePlugin(ctx context.Context, userID int, plu
 		return err
 	}
 
-	if !IsPluginCanDisable(pluginInfo.Type) {
-		return errors.New("核心模块不可以停用")
-	}
-
 	err = m.lockService.Lock(locker_service.LockNameModulePlugin, 0)
 	if err != nil {
 		return err
@@ -522,6 +541,10 @@ func (m *modulePluginService) DisablePlugin(ctx context.Context, userID int, plu
 			return ErrModulePluginHasDisabled
 		}
 		return err
+	}
+
+	if !enableInfo.IsCanDisable {
+		return ErrModulePluginCantDisabled
 	}
 
 	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
@@ -548,8 +571,16 @@ func (m *modulePluginService) DisablePlugin(ctx context.Context, userID int, plu
 }
 
 func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml *model.InnerPluginYmlCfg) error {
+	driver, has := apinto_module.GetDriver(pluginYml.Driver)
+	if !has {
+		panic(fmt.Errorf("not find driver:%s", pluginYml.Driver))
+	}
+	plugin, err := driver.CreatePlugin(nil)
+	if err != nil {
+		panic(fmt.Errorf("create plugin %s error:%s", pluginYml.Name, err.Error()))
+	}
 
-	err := m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
+	err = m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
 		t := time.Now()
 		pluginInfo := &entry.ModulePlugin{
 			UUID:       pluginYml.ID,
@@ -561,7 +592,6 @@ func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml 
 			Resume:     pluginYml.Resume,
 			ICon:       pluginYml.ICon,
 			Type:       pluginYml.Type,
-			Front:      pluginYml.Front,
 			Driver:     pluginYml.Driver,
 			Details:    []byte{},
 			Operator:   0,
@@ -576,13 +606,18 @@ func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml 
 			isEnable = statusPluginEnable
 		}
 		enable := &entry.ModulePluginEnable{
-			Id:         pluginInfo.Id,
-			Name:       pluginYml.Name,
-			Navigation: pluginYml.Navigation,
-			IsEnable:   isEnable,
-			Config:     []byte{},
-			Operator:   0,
-			UpdateTime: t,
+			Id:              pluginInfo.Id,
+			Name:            pluginYml.Name,
+			Navigation:      pluginYml.Navigation,
+			IsEnable:        isEnable,
+			IsCanDisable:    plugin.IsCanDisable(),
+			IsCanUninstall:  plugin.IsCanUninstall(),
+			IsShowServer:    plugin.IsShowServer(),
+			IsPluginVisible: plugin.IsPluginVisible(),
+			Frontend:        plugin.GetPluginFrontend(pluginYml.Name),
+			Config:          []byte{},
+			Operator:        0,
+			UpdateTime:      t,
 		}
 
 		return m.pluginEnableStore.Save(txCtx, enable)
@@ -613,25 +648,38 @@ func (m *modulePluginService) UpdateInnerPlugin(ctx context.Context, pluginYml *
 	pluginInfo.Resume = pluginYml.Resume
 	pluginInfo.ICon = pluginYml.ICon
 	pluginInfo.Type = pluginYml.Type
-	pluginInfo.Front = pluginYml.Front
 	pluginInfo.Driver = pluginYml.Driver
 	pluginInfo.UpdateTime = t
+
+	driver, has := apinto_module.GetDriver(pluginYml.Driver)
+	if !has {
+		panic(fmt.Errorf("not find driver:%s", pluginYml.Driver))
+	}
+	plugin, err := driver.CreatePlugin(nil)
+	if err != nil {
+		panic(fmt.Errorf("create plugin %s error:%s", pluginYml.Name, err.Error()))
+	}
 
 	return m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
 		if err = m.pluginStore.Save(txCtx, pluginInfo); err != nil {
 			return err
 		}
-
-		//name和enable不更新
-		enable := &entry.ModulePluginEnable{
-			Id:         pluginInfo.Id,
-			Navigation: pluginYml.Navigation,
-			Config:     []byte{},
-			Operator:   0,
-			UpdateTime: t,
+		enableInfo, err := m.pluginEnableStore.Get(txCtx, pluginInfo.Id)
+		if err != nil {
+			return err
 		}
-		_, err = m.pluginEnableStore.Update(txCtx, enable)
-		return err
+		//name和enable不更新
+		enableInfo.Navigation = pluginYml.Navigation
+		enableInfo.IsCanDisable = plugin.IsCanDisable()
+		enableInfo.IsCanUninstall = plugin.IsCanUninstall()
+		enableInfo.IsShowServer = plugin.IsShowServer()
+		enableInfo.IsPluginVisible = plugin.IsPluginVisible()
+		enableInfo.Frontend = plugin.GetPluginFrontend(enableInfo.Name)
+		enableInfo.Operator = 0
+		enableInfo.UpdateTime = t
+
+		return m.pluginEnableStore.Save(txCtx, enableInfo)
+
 	})
 }
 
