@@ -1,18 +1,30 @@
 import { HttpClient } from '@angular/common/http'
 import { Inject, Injectable } from '@angular/core'
 import { Observable, Subscriber } from 'rxjs'
-import { API_URL } from './api.service'
+import { API_URL, ApiService } from './api.service'
 
 @Injectable({
   providedIn: 'root'
 })
 export class IframeHttpService {
   constructor (private http:HttpClient,
+    private api:ApiService,
     @Inject(API_URL) public urlPrefix:string) { }
 
   // 所有对外提供的接口都放在这里
   apinto2PluginApi = {
 
+    monitorPartitionList: async () => {
+      return new Promise((resolve) => {
+        this.api.get('monitor/partitions').subscribe((resp:any) => {
+          resolve(resp)
+        })
+      })
+    },
+    warnHistoryList: () => {},
+    warnStrategyList: (uuid:string) => {
+      return this.api.get('warn/strategy', { uuid: uuid })
+    }
   }
 
   openIframe (url:string, option?:{headers?:Array<{name:string, value:string}>}) {
