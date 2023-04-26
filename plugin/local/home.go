@@ -11,7 +11,7 @@ import (
 )
 
 func (p *ProxyAPi) CreateHome(path string) []apinto_module.RouterInfo {
-	baseHtml := []byte(fmt.Sprintf(fmt.Sprintf("<base href=\"/module/%s\">", p.module)))
+	baseHtml := []byte(fmt.Sprintf(fmt.Sprintf("<base href=\"/module/%s/\">", p.module)))
 	routerRoot := fmt.Sprintf("/module/%s", p.module)
 
 	if !strings.HasPrefix(path, "/") {
