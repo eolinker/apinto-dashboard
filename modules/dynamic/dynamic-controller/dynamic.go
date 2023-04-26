@@ -28,6 +28,7 @@ type dynamicController struct {
 	modulePluginService module_plugin.IModulePlugin
 	dynamicService      dynamic.IDynamicService
 	clusterService      cluster.IClusterService
+	drivers             []string
 
 	Profession string
 	Drivers    []*Basic
@@ -50,9 +51,13 @@ func newDynamicController(name string, define interface{}) *dynamicController {
 		}
 		render[key] = r
 	}
-
+	drivers := make([]string, 0, len(cfg.Drivers))
+	for _, driver := range cfg.Drivers {
+		drivers = append(drivers, driver.Name)
+	}
 	d := &dynamicController{
 		moduleName: name,
+		drivers:    drivers,
 		Profession: cfg.Profession,
 		Drivers:    cfg.Drivers,
 		Fields:     cfg.Fields,
@@ -125,7 +130,7 @@ func (c *dynamicController) list(ctx *gin.Context) {
 	}
 	fields = append(fields, defaultFields...)
 
-	list, total, err := c.dynamicService.List(ctx, namespaceID, c.Profession, columns, keyword, page, pageSize)
+	list, total, err := c.dynamicService.List(ctx, namespaceID, c.Profession, columns, c.drivers, keyword, page, pageSize)
 	if err != nil {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
 		return
@@ -236,7 +241,7 @@ func (c *dynamicController) clusterStatusList(ctx *gin.Context) {
 	}
 
 	page, pageSize := c.getPage(ctx)
-	clusterInfo, err := c.dynamicService.ClusterStatuses(ctx, namespaceID, c.Profession, names, keyword, page, pageSize)
+	clusterInfo, err := c.dynamicService.ClusterStatuses(ctx, namespaceID, c.Profession, names, c.drivers, keyword, page, pageSize)
 	if err != nil {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
 		return
