@@ -11,14 +11,14 @@ import (
 
 type IDynamicStore interface {
 	store.IBaseStore[dynamic_entry.Dynamic]
-	ListPageByKeyword(ctx context.Context, params map[string]interface{}, keyword string, page int, pageSize int) ([]*dynamic_entry.Dynamic, error)
+	ListPageByKeyword(ctx context.Context, params map[string]interface{}, keyword string, page int, pageSize int) ([]*dynamic_entry.Dynamic, int, error)
 }
 
 type dynamicStore struct {
 	*store.BaseStore[dynamic_entry.Dynamic]
 }
 
-func (d *dynamicStore) ListPageByKeyword(ctx context.Context, params map[string]interface{}, keyword string, page int, pageSize int) ([]*dynamic_entry.Dynamic, error) {
+func (d *dynamicStore) ListPageByKeyword(ctx context.Context, params map[string]interface{}, keyword string, page int, pageSize int) ([]*dynamic_entry.Dynamic, int, error) {
 	isInit := false
 	builder := strings.Builder{}
 	args := make([]interface{}, 0, len(params))
@@ -35,8 +35,7 @@ func (d *dynamicStore) ListPageByKeyword(ctx context.Context, params map[string]
 		builder.WriteString(" AND `title` LIKE ?")
 		args = append(args, "%"+keyword+"%")
 	}
-	result, _, err := d.ListPage(ctx, builder.String(), page, pageSize, args, "update_time")
-	return result, err
+	return d.ListPage(ctx, builder.String(), page, pageSize, args, "update_time")
 }
 
 func newDynamicStore(db store.IDB) IDynamicStore {
