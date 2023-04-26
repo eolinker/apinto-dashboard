@@ -359,7 +359,7 @@ export class IntelligentPluginListComponent implements OnInit {
 
   // 删除单条数据
   deleteData = (items:{id:string, [k:string]:any}) => {
-    this.api.delete(`dynamic/${this.moduleName}/batch`, { uuids: [items.id] }).subscribe((resp:any) => {
+    this.api.delete(`dynamic/${this.moduleName}/batch`, { uuids: JSON.stringify([items.id]) }).subscribe((resp:any) => {
       if (resp.code === 0) {
         this.message.success(resp.msg || '删除成功!')
         this.getTableData()
