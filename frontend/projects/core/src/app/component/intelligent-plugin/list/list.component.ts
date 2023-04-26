@@ -280,7 +280,8 @@ export class IntelligentPluginListComponent implements OnInit {
         renderSchema: this.renderSchema,
         editPage: false,
         moduleName: this.moduleName,
-        driverSelectOptions: this.driverOptions
+        driverSelectOptions: this.driverOptions,
+        initFormValue: { driver: this.driverOptions[0].value || '' }
       },
       nzOnOk: (component:IntelligentPluginCreateComponent) => {
         // eslint-disable-next-line dot-notation
