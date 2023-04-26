@@ -38,13 +38,14 @@ func (t *tPlugin) CreateModule(name string, config interface{}) (apinto_module.M
 	}
 	for path, ms := range t.define.Router.Api {
 		for method, att := range ms {
-			module.routersInfo = append(module.routersInfo, p.CreateApi(fmt.Sprintf("%s.%s", method, path), method, path, att.Label))
+
+			module.routersInfo = append(module.routersInfo, p.CreateApi(fmt.Sprintf("%s.%s", method, path), method, path, att))
 
 		}
 	}
 	for path, ms := range t.define.Router.OpenApi {
 		for method, att := range ms {
-			module.routersInfo = append(module.routersInfo, p.CreateOpenApi(fmt.Sprintf("%s.%s", method, path), method, path, att.Label))
+			module.routersInfo = append(module.routersInfo, p.CreateOpenApi(fmt.Sprintf("%s.%s", method, path), method, path, att))
 		}
 	}
 	for _, m := range t.define.Middleware {
