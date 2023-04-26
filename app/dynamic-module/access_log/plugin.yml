@@ -1,6 +1,6 @@
 id: "access-log.apinto.com"
 name: "access-log"
-cname: "输出日志"
+cname: "日志输出"
 resume: ""
 version: "v1.0.0"
 icon: "Access日志.png"
