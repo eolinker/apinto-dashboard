@@ -23,6 +23,26 @@ func (c *PluginDriver) CheckConfig(name string, config interface{}) error {
 	return nil
 }
 
+func (c *PluginDriver) GetPluginFrontend(moduleName string) string {
+	return "system/ext-app"
+}
+
+func (c *PluginDriver) IsPluginVisible() bool {
+	return true
+}
+
+func (c *PluginDriver) IsShowServer() bool {
+	return false
+}
+
+func (c *PluginDriver) IsCanUninstall() bool {
+	return false
+}
+
+func (c *PluginDriver) IsCanDisable() bool {
+	return true
+}
+
 type Module struct {
 	isInit     bool
 	name       string

@@ -25,6 +25,26 @@ func (c *UpstreamDriver) CreatePlugin(define interface{}) (apinto_module.Plugin,
 	return c, nil
 }
 
+func (c *UpstreamDriver) GetPluginFrontend(moduleName string) string {
+	return "upstream/upstream"
+}
+
+func (c *UpstreamDriver) IsPluginVisible() bool {
+	return true
+}
+
+func (c *UpstreamDriver) IsShowServer() bool {
+	return false
+}
+
+func (c *UpstreamDriver) IsCanUninstall() bool {
+	return false
+}
+
+func (c *UpstreamDriver) IsCanDisable() bool {
+	return false
+}
+
 type UpstreamModule struct {
 	isInit  bool
 	name    string

@@ -24,6 +24,26 @@ func (c *emailDriver) CreatePlugin(define interface{}) (apinto_module.Plugin, er
 	return c, nil
 }
 
+func (c *emailDriver) GetPluginFrontend(moduleName string) string {
+	return "system/email"
+}
+
+func (c *emailDriver) IsPluginVisible() bool {
+	return true
+}
+
+func (c *emailDriver) IsShowServer() bool {
+	return false
+}
+
+func (c *emailDriver) IsCanUninstall() bool {
+	return false
+}
+
+func (c *emailDriver) IsCanDisable() bool {
+	return true
+}
+
 type emailModule struct {
 	isInit  bool
 	name    string

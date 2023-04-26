@@ -25,6 +25,26 @@ func (c *StrategyCacheDriver) CreatePlugin(define interface{}) (apinto_module.Pl
 	return c, nil
 }
 
+func (c *StrategyCacheDriver) GetPluginFrontend(moduleName string) string {
+	return "serv-governance/cache"
+}
+
+func (c *StrategyCacheDriver) IsPluginVisible() bool {
+	return true
+}
+
+func (c *StrategyCacheDriver) IsShowServer() bool {
+	return false
+}
+
+func (c *StrategyCacheDriver) IsCanUninstall() bool {
+	return false
+}
+
+func (c *StrategyCacheDriver) IsCanDisable() bool {
+	return true
+}
+
 type StrategyCacheModule struct {
 	isInit  bool
 	name    string
