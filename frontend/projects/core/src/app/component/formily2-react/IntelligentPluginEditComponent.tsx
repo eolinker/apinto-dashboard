@@ -146,7 +146,7 @@ export const IntelligentPluginEditComponent = React.forwardRef(
             placeholder: 'ID'
           }
         },
-        name: {
+        title: {
           type: 'string',
           title: '名称',
           required: true,
@@ -173,7 +173,7 @@ export const IntelligentPluginEditComponent = React.forwardRef(
           'x-display': driverSelectOptions.length > 1 ? 'visible' : 'hidden',
           enum: [...driverSelectOptions]
         },
-        desc: {
+        description: {
           type: 'string',
           required: true,
           title: '描述',

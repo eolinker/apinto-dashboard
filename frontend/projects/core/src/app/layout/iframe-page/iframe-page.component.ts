@@ -25,11 +25,11 @@ import { Subscription, take } from 'rxjs'
     :host ::ng-deep{
       nz-spin.iframe-spin,
       nz-spin.iframe-spin >.ant-spin-container,
-    iframe{
-      width:100%;
-      height:100%;
-      border:none;
-    }
+      iframe{
+        width:100%;
+        height:100%;
+        border:none;
+      }
     }`
   ]
 })
