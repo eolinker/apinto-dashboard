@@ -23,6 +23,26 @@ func (c *PluginDriver) CheckConfig(name string, config interface{}) error {
 	return nil
 }
 
+func (c *PluginDriver) GetPluginFrontend(moduleName string) string {
+	return ""
+}
+
+func (c *PluginDriver) IsPluginVisible() bool {
+	return false
+}
+
+func (c *PluginDriver) IsShowServer() bool {
+	return false
+}
+
+func (c *PluginDriver) IsCanUninstall() bool {
+	return false
+}
+
+func (c *PluginDriver) IsCanDisable() bool {
+	return false
+}
+
 type Module struct {
 	isInit  bool
 	name    string
