@@ -27,12 +27,23 @@ export const CustomCodeboxComponent = React.forwardRef(
       height,
       width = '100%',
       onChange,
-      value = mockData
+      value
     } = props
+    const [code, setCode] = React.useState(
+      mode === 'json' ? JSON.stringify(value) : value
+    )
     React.useImperativeHandle(ref, () => ({}))
-
     const handleChange = (value: string) => {
-      onChange(value)
+      setCode(value)
+      let res = value
+      if (mode === 'json') {
+        try {
+          res = JSON.parse(value)
+        } catch {
+          console.error('输入的json语句格式有误')
+        }
+      }
+      onChange(res)
     }
 
     return (
@@ -45,10 +56,9 @@ export const CustomCodeboxComponent = React.forwardRef(
           width={width}
           showGutter
           onChange={(value) => {
-            console.log(value) // 输出代码编辑器内值改变后的值
             handleChange(value)
           }}
-          value={value}
+          value={code}
           wrapEnabled
           enableSnippets // 启用代码段
           setOptions={{
