@@ -25,6 +25,26 @@ func (c *VariableDriver) CreatePlugin(define interface{}) (apinto_module.Plugin,
 	return c, nil
 }
 
+func (c *VariableDriver) GetPluginFrontend(moduleName string) string {
+	return "deploy/variable"
+}
+
+func (c *VariableDriver) IsPluginVisible() bool {
+	return true
+}
+
+func (c *VariableDriver) IsShowServer() bool {
+	return false
+}
+
+func (c *VariableDriver) IsCanUninstall() bool {
+	return false
+}
+
+func (c *VariableDriver) IsCanDisable() bool {
+	return false
+}
+
 type VariableModule struct {
 	isInit  bool
 	name    string
