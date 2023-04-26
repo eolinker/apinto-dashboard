@@ -46,12 +46,12 @@ export class IframePageComponent implements OnInit {
    }
 
   showIframe = (id: any, url: any, initData: any) => {
-    const iframe = createIframe('id', url)
+    const iframe = createIframe('iframe', url)
     const onLoadCallback = () => {
       console.log(this.iframe)
-      ;(this.iframe as any).contentWindow.postMessage({ magic: 'apinto', type: 'initialize', data: initData }, '*')
+      ;(iframe as any).contentWindow.postMessage({ apinto: true, type: 'initialize', data: initData }, '*')
       window.addEventListener('message', async (event) => {
-        if (event && event.data.magic === 'apinto' && event.data.type === 'request') {
+        if (event && event.data.apinto && event.data.type === 'request') {
           // const msg = {
 
           // }
@@ -59,16 +59,18 @@ export class IframePageComponent implements OnInit {
           if (typeof handler === 'function') {
             const args = event.data.data
             const result = await handler(...args)
-            ;(this.iframe as any).contentWindow.postMessage({
+            ;(iframe as any).contentWindow.postMessage({
               requestId: event.data.requestId,
               magic: 'apinto',
               type: 'response',
-              data: result
+              data: result,
+              apinto: true
             }, '*')
           } else {
-            ;(this.iframe as any).contentWindow.postMessage({
+            ;(iframe as any).contentWindow.postMessage({
               requestId: event.data.requestId,
               magic: 'apinto',
+              apinto: true,
               type: 'error',
               data: 'unknown function for:' + event.data.path
             }, '*')
@@ -76,11 +78,11 @@ export class IframePageComponent implements OnInit {
         }
       })
     }
-    console.log(this.iframe)
-    if ((this.iframe as any).attachEvent) {
-      (this.iframe as any).attachEvent('onload', onLoadCallback)
+    console.log(iframe)
+    if ((iframe as any).attachEvent) {
+      (iframe as any).attachEvent('onload', onLoadCallback)
     } else {
-      (this.iframe as any).contentWindow.onload = onLoadCallback
+      (iframe as any).addEventListener('load', onLoadCallback)
     }
     const panel = document.getElementById('iframePanel')
     while (panel?.hasChildNodes()) {

@@ -10,6 +10,11 @@ export class IframeHttpService {
   constructor (private http:HttpClient,
     @Inject(API_URL) public urlPrefix:string) { }
 
+  // 所有对外提供的接口都放在这里
+  apinto2PluginApi = {
+
+  }
+
   openIframe (url:string, option?:{headers?:Array<{name:string, value:string}>}) {
     return new Observable((observer: Subscriber<any>) => {
       let objectUrl: string|null

@@ -26,7 +26,7 @@ export class IntelligentPluginCreateComponent implements OnInit {
   @Input() initFormValue: { [k: string]: any } = {}
   @Input() driverSelectOptions: SelectOption[] = []
 
-  form:{[k:string]:any} = {}
+  form:any|undefined
   moduleName:string = ''
   uuid:string = ''
 
@@ -50,7 +50,13 @@ export class IntelligentPluginCreateComponent implements OnInit {
     this.api.get(`dynamic/${this.moduleName}/info/${this.uuid}`)
       .subscribe((resp:{code:number, msg:string, data:{[k:string]:any}}) => {
         if (resp.code === 0) {
-          this.initFormValue = resp.data
+          const res:{[k:string]:any} = {}
+          for (const key of Object.keys(resp.data)) {
+            if (resp.data[key] !== '') {
+              res[key] = resp.data[key]
+            }
+          }
+          this.form.setValues(res)
         }
       })
   }
