@@ -25,6 +25,26 @@ func (c *StrategyVisitDriver) CreatePlugin(define interface{}) (apinto_module.Pl
 	return c, nil
 }
 
+func (c *StrategyVisitDriver) GetPluginFrontend(moduleName string) string {
+	return "serv-governance/visit"
+}
+
+func (c *StrategyVisitDriver) IsPluginVisible() bool {
+	return true
+}
+
+func (c *StrategyVisitDriver) IsShowServer() bool {
+	return false
+}
+
+func (c *StrategyVisitDriver) IsCanUninstall() bool {
+	return false
+}
+
+func (c *StrategyVisitDriver) IsCanDisable() bool {
+	return true
+}
+
 type StrategyVisitModule struct {
 	isInit  bool
 	name    string

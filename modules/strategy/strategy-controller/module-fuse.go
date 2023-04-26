@@ -25,6 +25,26 @@ func (c *StrategyFuseDriver) CreatePlugin(define interface{}) (apinto_module.Plu
 	return c, nil
 }
 
+func (c *StrategyFuseDriver) GetPluginFrontend(moduleName string) string {
+	return "serv-governance/fuse"
+}
+
+func (c *StrategyFuseDriver) IsPluginVisible() bool {
+	return true
+}
+
+func (c *StrategyFuseDriver) IsShowServer() bool {
+	return false
+}
+
+func (c *StrategyFuseDriver) IsCanUninstall() bool {
+	return false
+}
+
+func (c *StrategyFuseDriver) IsCanDisable() bool {
+	return true
+}
+
 type StrategyFuseModule struct {
 	isInit  bool
 	name    string
