@@ -59,6 +59,7 @@ func (d *dynamicService) Info(ctx context.Context, namespaceId int, profession s
 		BasicInfo: &dynamic_model.DynamicBasicInfo{
 			ID:          info.Name,
 			Title:       info.Title,
+			Driver:      info.Driver,
 			Description: info.Description,
 		},
 		Append: tmp,
