@@ -2,6 +2,7 @@ import * as React from 'react'
 import AceEditor from 'react-ace'
 import 'ace-builds/src-noconflict/mode-jsx' // jsx模式的包
 import 'ace-builds/src-noconflict/mode-yaml' // yaml模式的包
+import 'ace-builds/src-noconflict/mode-json' // yaml模式的包
 import 'ace-builds/src-noconflict/theme-monokai' // monokai的主题样式
 import 'ace-builds/src-noconflict/theme-xcode' // monokai的主题样式
 import 'ace-builds/src-noconflict/ext-language_tools' // 代码联想
