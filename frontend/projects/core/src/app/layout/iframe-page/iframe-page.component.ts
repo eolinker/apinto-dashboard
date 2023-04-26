@@ -1,16 +1,16 @@
-import { Component, ElementRef, HostListener, Input, OnInit, ViewChild } from '@angular/core'
+import { Component, ElementRef, HostListener, Input, OnInit, SimpleChanges, ViewChild } from '@angular/core'
 import { IframeHttpService } from '../../service/iframe-http.service'
 import { ApiService } from '../../service/api.service'
 import { EoNgNavigationService } from '../../service/eo-ng-navigation.service'
-import { Router } from '@angular/router'
+import { NavigationEnd, Router } from '@angular/router'
 import { BaseInfoService } from '../../service/base-info.service'
-import { take } from 'rxjs'
+import { Subscription, take } from 'rxjs'
 
 @Component({
   selector: 'eo-ng-iframe-page',
   template: `
   <nz-spin class="iframe-spin" [nzSpinning]="!start">
-      <iframe *ngIf="start "[src] ="'http://localhost:5555/role/test' | safe:'resourceUrl'" #iframe id="iframe" (load)="onLoad()" scrolling="yes" >
+      <iframe *ngIf="start "[src] ="path | safe:'resourceUrl'" #iframe id="iframe" (load)="onLoad()" scrolling="yes" >
       <p>Your browser does not support iframe.</p>
       </iframe>
   </nz-spin>
@@ -35,7 +35,7 @@ import { take } from 'rxjs'
 })
 export class IframePageComponent implements OnInit {
   @ViewChild('iframe') iframe: ElementRef|undefined;
-  @Input() path:string =''
+  path:string =''
 
   @HostListener('window:message', ['$event'])
   onMessage (e:any) {
@@ -47,6 +47,11 @@ export class IframePageComponent implements OnInit {
         }
         case 'breadcrumb': {
           // TODO要对每个面包屑导航做特殊处理 ${modulesName}/...
+          for (const breadcrumb of e.data.breadcrumbOption) {
+            if (breadcrumb.routerLink) {
+              breadcrumb.routerLink = `${this.navigation.iframePrefix}/${this.moduleName}/${breadcrumb.routerLink}`
+            }
+          }
           this.navigation.reqFlashBreadcrumb(e.data.breadcrumbOption)
           break
         }
@@ -76,6 +81,9 @@ export class IframePageComponent implements OnInit {
   iframeSrc:string = ''
   iframeDom:Window|null = null
   moduleName:string = ''
+  initMessage:object|null = null
+  private subscription: Subscription = new Subscription()
+
   constructor (private iframeService:IframeHttpService, private api:ApiService,
     private navigation:EoNgNavigationService, private router:Router,
     private baseInfo:BaseInfoService) {}
@@ -84,6 +92,7 @@ export class IframePageComponent implements OnInit {
     switch (func) {
       case 'apinto.get': {
         this.api.get(url, params).subscribe((resp:any) => {
+          resp.data = this.api.underline(resp.data)
           this.iframeDom?.postMessage({
             callback: callback,
             callbackPrefixParam: callbackPrefixParam,
@@ -98,6 +107,7 @@ export class IframePageComponent implements OnInit {
       }
       case 'apinto.post': {
         this.api.post(url, body, params).subscribe((resp:any) => {
+          resp.data = this.api.underline(resp.data)
           this.iframeDom?.postMessage({
             callback: callback,
             callbackPrefixParam: callbackPrefixParam,
@@ -112,6 +122,7 @@ export class IframePageComponent implements OnInit {
       }
       case 'apinto.put': {
         this.api.put(url, body, params).subscribe((resp:any) => {
+          resp.data = this.api.underline(resp.data)
           this.iframeDom?.postMessage({
             callback: callback,
             callbackPrefixParam: callbackPrefixParam,
@@ -126,6 +137,7 @@ export class IframePageComponent implements OnInit {
       }
       case 'apinto.delete': {
         this.api.delete(url, params).subscribe((resp:any) => {
+          resp.data = this.api.underline(resp.data)
           this.iframeDom?.postMessage({
             callback: callback,
             callbackPrefixParam: callbackPrefixParam,
@@ -140,6 +152,7 @@ export class IframePageComponent implements OnInit {
       }
       case 'apinto.patch': {
         this.api.patch(url, body, params).subscribe((resp:any) => {
+          resp.data = this.api.underline(resp.data)
           this.iframeDom?.postMessage({
             callback: callback,
             callbackPrefixParam: callbackPrefixParam,
@@ -156,20 +169,13 @@ export class IframePageComponent implements OnInit {
 
   getUserRequestFromIframe ({ func }:any) {
     switch (func) {
-      case 'apinto.flashUserInfo': {
-        this.iframeDom?.postMessage({
-          type: 'userInfo',
-          userId: this.navigation.getUserId(),
-          apinto: true
-        }, '*')
-        break
-      }
       case 'apinto.renewUserInfo': {
         // 控制台重新获取用户信息，以便头像中使用，等待接口
         this.navigation.reqUpdateRightList()
         this.navigation.repUpdateRightList().pipe(take(1)).subscribe(() => {
           this.iframeDom?.postMessage({
             type: 'userInfo',
+            func: 'apinto.renewUserInfo',
             userId: this.navigation.getUserId(),
             userRoleId: this.navigation.getUserRoleId(),
             userAccess: this.navigation.getRightsList(),
@@ -181,7 +187,10 @@ export class IframePageComponent implements OnInit {
       case 'apinto.getCurrentUserInfo': {
         this.iframeDom?.postMessage({
           type: 'userInfo',
+          func: 'apinto.getCurrentUserInfo',
           userId: this.navigation.getUserId(),
+          userRoleId: this.navigation.getUserRoleId(),
+          userModuleAccess: this.navigation.originAccessData[this.moduleName],
           apinto: true
         }, '*')
         break
@@ -190,35 +199,66 @@ export class IframePageComponent implements OnInit {
   }
 
   ngOnInit (): void {
-    // this.moduleName = this.baseInfo.allParamsInfo.moduleName
-    // if (!this.path && this.router.url.includes('#')) {
-    //   this.path = this.router.url.split('#')[1]
-    //   this.getIframeSrc()
-    // }
-    // if (!this.path && !this.router.url.includes('#')) {
-    //   this.getPath()
-    // }
-    // if (this.path) {
-    //   this.start = true
-    // }
+    this.moduleName = this.baseInfo.allParamsInfo.moduleName
+    this.subscription = this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        console.log(this.router.url)
+        this.moduleName = this.baseInfo.allParamsInfo.moduleName
+        this.getPath()
+      }
+    })
+    this.getPath()
+  }
+
+  ngOnDestroy () {
+    this.subscription.unsubscribe()
   }
 
   getPath () {
+    this.initMessage = null
     this.api.get('system/module', { name: this.moduleName }).subscribe((resp:any) => {
       if (resp.code === 0) {
         if (resp.data.module.query) {
-          this.path = `${resp.data.module.path}?`
+          this.path = `${resp.data.module.path}${this.router.url.includes('#') ? '/' + this.router.url.split('#')[1] : ''}?`
         }
         for (const queryParams of resp.data.module.query) {
           this.path = `${this.path}${queryParams.name}=${queryParams.value}&`
         }
-        this.getIframeSrc({ headers: resp.data.module.header, initialize: resp.data.module.initialize })
+        this.getIframeSrc({ headers: resp.data.module.header })
+        if (resp.data.module.initialize) {
+          this.initMessage = this.getInitMessage(resp.data.module.initialize)
+        }
       }
     })
   }
 
-  testIframe () {
-    return 'test2'
+  getInitMessage (initializeData:Array<{key:string, value:any, type:string}>) {
+    const res:{[k:string]:any} = {}
+    for (const data of initializeData) {
+      switch (data.type) {
+        case 'string': {
+          res[data.key] = res[data.value]
+          break
+        }
+        case 'number': {
+          res[data.key] = Number(res[data.value])
+          break
+        }
+        case 'boolean': {
+          res[data.key] = Boolean(res[data.value])
+          break
+        }
+        case 'array': {
+          res[data.key] = [this.getInitMessage(data.value)]
+          break
+        }
+        case 'object': {
+          res[data.key] = { ...this.getInitMessage(data.value) as any }
+          break
+        }
+      }
+    }
+    return res
   }
 
   // 打开的iframe可能需要传入header
@@ -226,12 +266,11 @@ export class IframePageComponent implements OnInit {
     this.start = true
     this.iframeService.openIframe(this.path, options).subscribe((blob) => {
       this.iframeSrc = blob
+      if (this.initMessage) {
+        window.top?.postMessage({ apinto: true, type: 'init', initialize: this.initMessage }, '*')
+      }
     })
   }
-
-  // ngAfterViewInit () {
-  //   const doc = this.iframe!.nativeElement.contentDocument || this.iframe!.nativeElement.contentWindow
-  // }
 
   onLoad () {
     if (this.start) {
@@ -262,11 +301,11 @@ export class IframePageComponent implements OnInit {
   iframeSrcChanged (oldValue:string, newValue:string, iframeObj:any) {
     console.log('旧地址：' + oldValue)
     console.log('新地址：' + newValue)
-    if (newValue.indexOf('aaaa') > -1) {
-      console.log('有危险，请马上离开……')
-      iframeObj.src = oldValue// 钓鱼地址，恢复原url
-    } else {
-      console.log('安全地址，允许跳转……')
-    }
+    // if (newValue.indexOf('aaaa') > -1) {
+    //   console.log('有危险，请马上离开……')
+    //   iframeObj.src = oldValue// 钓鱼地址，恢复原url
+    // } else {
+    //   console.log('安全地址，允许跳转……')
+    // }
   }
 }

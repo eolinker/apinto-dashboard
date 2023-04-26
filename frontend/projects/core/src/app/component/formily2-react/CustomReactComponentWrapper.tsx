@@ -174,9 +174,9 @@ export class CustomReactComponentWrapperComponent {
         <div>
           <IntelligentPluginEditComponent
             ref={this.reactComponent}
-            schema={this.mockRenderSchema}
+            schema={this.renderSchema}
             initFormValue={this.initFormValue}
-            driverSelectOptions={this.mockDriverSelectOptions}
+            driverSelectOptions={this.driverSelectOptions}
             editPage={this.editPage}
             demoSchema={this.demoSchema}
             demo={this.demo}
