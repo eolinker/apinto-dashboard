@@ -680,7 +680,6 @@ func (m *modulePluginService) CheckPluginISDeCompress(ctx context.Context, plugi
 			if err != nil {
 				return err
 			}
-			//packageFile := bytes.NewReader(packageEntry.Package)
 			//创建目录
 			err = os.MkdirAll(dirPath, os.ModePerm)
 			if err != nil {

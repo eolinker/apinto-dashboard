@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
@@ -262,7 +261,6 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("install plugin read file fail. err:%s", err.Error()))
 		return
 	}
-	packageFile := bytes.NewReader(fileBuffer)
 
 	randomId := uuid.New()
 	tmpDir := fmt.Sprintf("%s%s%s", PluginDir, string(os.PathSeparator), randomId)
@@ -272,7 +270,7 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("install plugin read file fail. err:%s", err.Error()))
 		return
 	}
-	err = common.DeCompress(packageFile, tmpDir)
+	err = common.UnzipFromBytes(fileBuffer, tmpDir)
 	if err != nil {
 		//删除目录
 		os.RemoveAll(tmpDir)
