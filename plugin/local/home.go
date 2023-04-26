@@ -2,6 +2,7 @@ package local
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	apinto_module "github.com/eolinker/apinto-module"
 	"github.com/gin-gonic/gin"
@@ -40,6 +41,12 @@ func (p *ProxyAPi) CreateHome(path string) []apinto_module.RouterInfo {
 			return
 		}
 		request.Header = header
+		if ginCtx.Keys != nil {
+			apintoKeysData, err := json.Marshal(ginCtx.Keys)
+			if err == nil {
+				request.Header.Set("apinto-runtime-keys", string(apintoKeysData))
+			}
+		}
 		response, err := http.DefaultClient.Do(request)
 		if err != nil {
 			ginCtx.Error(err)
