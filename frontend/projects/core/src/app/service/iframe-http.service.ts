@@ -89,6 +89,7 @@ export class IframeHttpService {
             breadcrumb.routerLink = `${this.navigation.iframePrefix}/${this.moduleName}/${breadcrumb.routerLink}`
           }
         }
+        console.log(breadcrumbOption)
         this.navigation.reqFlashBreadcrumb(breadcrumbOption)
         resolve(true)
       })

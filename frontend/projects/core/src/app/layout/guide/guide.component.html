@@ -37,34 +37,73 @@
 <section class="p-mbase m-mbase bg-MAIN_BG rounded">
   <p class="text-[18px] leading-[26px] font-bold mb-[26px]">🚀 快速入门指南</p>
   <div>
+    <img
+      src="../../../assets/guide.jpg"
+      width="60%"
+      alt=""
+      style="margin: auto; display: block"
+    />
     <div
       class="ml-[32px] mt-btnbase flex justify-between grid gap-6 py-5 2xl:grid-cols-4 xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 xs:grid-cols-1"
     >
       <ng-container *ngFor="let step of stepList; let index = index">
         <div class="w-[190px] flex flex-col justify-between">
-          <img
-            [src]="step.img || '../../../assets/default-guide-icon.png'"
-            class="w-[190px] h-[100px] mb-[20px] rounded"
-          />
           <div class="flex flex-1 mt-btnbase">
             <div
               class="ant-steps-item-icon min-w-[24px] w-[24px] h-[24px] flex items-center justify-center"
               [ngClass]="{
-                'border-theme': step.status !== 'undo',
-                'bg-theme': step.status === 'doing',
-                'text-MAIN_BG': step.status === 'doing',
-                'text-theme': step.status === 'done'
+                'border-guide_cluster':
+                  step.status !== 'done' && step.name === 'cluster',
+                'border-guide_upstream':
+                  step.status !== 'done' && step.name === 'upstream',
+                'border-guide_api':
+                  step.status !== 'done' && step.name === 'api',
+                'border-guide_publishApi':
+                  step.status !== 'done' && step.name === 'publishApi',
+                'border-guide_final':
+                  step.status !== 'done' && step.name === 'final',
+                'bg-guide_cluster':
+                  step.status === 'doing' && step.name === 'cluster',
+                'bg-guide_upstream':
+                  step.status === 'doing' && step.name === 'upstream',
+                'bg-guide_api': step.status === 'doing' && step.name === 'api',
+                'bg-guide_publishApi':
+                  step.status === 'doing' && step.name === 'publishApi',
+                'bg-guide_final':
+                  step.status === 'doing' && step.name === 'final',
+                'text-theme': step.status === 'done',
+                'border-theme':step.status === 'done',
+                'text-guide_cluster': step.status === 'doing' && step.name === 'cluster',
+                'text-guide_upstream': step.status === 'doing' && step.name === 'upstream',
+                'text-guide_api': step.status === 'doing' && step.name === 'api',
+                'text-guide_publishApi': step.status === 'doing' && step.name === 'publishApi',
+                'text-guide_final': step.status === 'doing' && step.name === 'final',
               }"
             >
               <svg *ngIf="step.status === 'done'" class="iconpark-icon">
                 <use href="#chenggong"></use>
               </svg>
-              <span *ngIf="step.status !== 'done'">{{ index + 1 }}</span>
+              <span
+                *ngIf="step.status !== 'done'"
+                [ngClass]="{
+                  'text-MAIN_BG':step.status === 'doing',
+                'text-guide_cluster':  step.status !== 'doing'  && step.name === 'cluster',
+                'text-guide_upstream':  step.status !== 'doing'  && step.name === 'upstream',
+                'text-guide_api':   step.status !== 'doing'  && step.name === 'api',
+                'text-guide_publishApi': step.status !== 'doing'  &&  step.name === 'publishApi',
+                'text-guide_final':  step.status !== 'doing'  &&  step.name === 'final',}"
+                >{{ index + 1 }}</span
+              >
             </div>
             <div class="flex flex-col justify-between">
               <div>
-                <p>{{ step.title }}</p>
-                <p *ngFor="let desc of step.desc">{{ desc }}</p>
+                <p [ngClass]="getTitleStyle(step)">{{ step.title }}</p>
+                <p
+                  *ngFor="let desc of step.desc"
+                  [ngClass]="{ 'text-DESC_TEXT': step.status === 'undo' }"
+                >
+                  {{ desc }}
+                </p>
               </div>
               <div class="mt-[14px]">
                 <button
@@ -76,10 +115,10 @@
                   已完成
                 </button>
                 <button
+                  [ngClass]="getDoingBtnClass(step)"
                   *ngIf="step.status === 'doing'"
                   eo-ng-button
                   [nzLoading]="btnLoading"
-                  nzType="primary"
                   (click)="goToStep(step)"
                 >
                   前往
