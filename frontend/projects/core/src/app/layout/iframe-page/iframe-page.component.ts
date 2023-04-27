@@ -81,7 +81,6 @@ export class IframePageComponent implements OnInit {
         }
       })
     }
-    console.log(iframe)
     if ((iframe as any).attachEvent) {
       (iframe as any).attachEvent('onload', onLoadCallback)
     } else {
@@ -270,20 +269,19 @@ export class IframePageComponent implements OnInit {
 
   ngOnInit (): void {
     this.moduleName = this.baseInfo.allParamsInfo.moduleName
-    // this.subscription = this.router.events.subscribe((event) => {
-    //   if (event instanceof NavigationEnd) {
-    //     console.log(this.router.url)
-    //     this.moduleName = this.baseInfo.allParamsInfo.moduleName
-    //     this.getPath()
-    //   }
-    // })
+    this.subscription = this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        console.log(this.router.url)
+        this.moduleName = this.baseInfo.allParamsInfo.moduleName
+        // this.getPath()
+      }
+    })
     // this.getPath()
   }
 
   ngAfterViewInit () {
     window.onload = () => {
-      console.log('waw')
-      this.showIframe('test', 'http://localhost:4444', {})
+      this.showIframe('test', `iframe/${this.moduleName}`, {})
     }
   }
 
