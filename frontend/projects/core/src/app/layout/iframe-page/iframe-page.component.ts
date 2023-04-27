@@ -142,8 +142,8 @@ export class IframePageComponent implements OnInit {
   }
 
   ngAfterViewInit () {
-    this.showIframe('test', 'http://localhost:4444', {})
-    // this.showIframe('test', `agent/${this.moduleName}`, {})
+    // this.showIframe('test', 'http://localhost:4444', {})
+    this.showIframe('test', `agent/${this.moduleName}`, {})
   }
 
   ngOnDestroy () {
