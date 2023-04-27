@@ -41,7 +41,7 @@ func (p *ProxyAPi) CreateOpenApi(name, method, path string, config PathConfig) a
 	if routerPath != "" {
 		routerPath = fmt.Sprintf("/ap2/module/%s/%s", p.module, strings.TrimPrefix(path, "/"))
 	}
-	return p.createApi(name, method, fmt.Sprintf("/api2/module/%s/%s", p.module, strings.TrimPrefix(path, "/")), to, mergeLabel(apinto_module.RouterLabelOpenApi, config.Label))
+	return p.createApi(name, method, routerPath, to, mergeLabel(apinto_module.RouterLabelOpenApi, config.Label))
 }
 func (p *ProxyAPi) proxyApiHandler(name, method, targetPath string) gin.HandlerFunc {
 	return func(ginCtx *gin.Context) {
