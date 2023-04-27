@@ -134,7 +134,7 @@ const routes: Routes = [
         children: [
           {
             path: ':moduleName',
-            children: [{
+            children: [{ path: ':subPath', component: IframePageComponent }, {
               path: '**',
               component: IframePageComponent
             }

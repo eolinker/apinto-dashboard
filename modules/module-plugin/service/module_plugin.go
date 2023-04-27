@@ -52,11 +52,8 @@ func (m *modulePlugin) GetEnabledPlugins(ctx context.Context) ([]*model.EnabledP
 			Name:   p.Name,
 			Driver: p.Driver,
 			Config: enableCfgMap,
-			Define: nil,
+			Define: p.Details,
 		}
-		define := new(model.PluginDefine)
-		_ = json.Unmarshal(p.Details, define)
-		enablePlugin.Define = define
 
 		enablePlugins = append(enablePlugins, enablePlugin)
 	}
