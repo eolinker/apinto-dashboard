@@ -54,7 +54,7 @@ func (p *ProxyAPi) proxyApiHandler(name, method, targetPath string) gin.HandlerF
 		for k, v := range p.query {
 			query.Set(k, v)
 		}
-
+		targetPath = strings.TrimPrefix(targetPath, "/")
 		url := fmt.Sprintf("%s/%s?%s", p.server, targetPath, query.Encode())
 		data, err := ginCtx.GetRawData()
 		if err != nil {

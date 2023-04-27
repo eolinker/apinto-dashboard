@@ -114,9 +114,7 @@ export class IntelligentPluginListComponent implements OnInit {
     this.nzDisabled = value
   }
 
-  tableClick = (item:{data:any[]}) => {
-    console.log(item)
-  }
+  tableClick = () => { }
 
   getRender () {
     this.api.get(`dynamic/${this.moduleName}/render`).subscribe((resp:{code:number, msg:string, data:DynamicRender}) => {
@@ -150,7 +148,6 @@ export class IntelligentPluginListComponent implements OnInit {
   }
 
   refreshTableData (tableData:Array<{[k:string]:any}>, statusData:DynamicListStatus) {
-    console.log(tableData, statusData)
     if (tableData.length && statusData && Object.keys(statusData).length) {
       this.tableData.data = tableData.map((item:any) => {
         return { ...item, ...statusData[item.id] }
@@ -198,10 +195,7 @@ export class IntelligentPluginListComponent implements OnInit {
                 filterMultiple: true,
                 filterOpts: field.enum.map((item:string) => {
                   return { text: item, value: item }
-                }),
-                filterFn: (value:any, data:any) => {
-                  console.log(value, data)
-                }
+                })
               }
             : {}),
           ...(field.attr === 'status'
@@ -242,7 +236,6 @@ export class IntelligentPluginListComponent implements OnInit {
   }
 
   publish (value:any) {
-    console.log(value)
     this.modalRef = this.modalService.create({
       nzTitle: `${value.data.title}上线管理`,
       nzWidth: MODAL_NORMAL_SIZE,

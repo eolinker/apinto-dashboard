@@ -1,10 +1,10 @@
-import { Component, ElementRef, HostListener, OnInit, SimpleChange, SimpleChanges, ViewChild } from '@angular/core'
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core'
 import { IframeHttpService } from '../../service/iframe-http.service'
 import { ApiService } from '../../service/api.service'
 import { EoNgNavigationService } from '../../service/eo-ng-navigation.service'
 import { NavigationEnd, Router } from '@angular/router'
 import { BaseInfoService } from '../../service/base-info.service'
-import { Subscription, take } from 'rxjs'
+import { Subscription } from 'rxjs'
 
 @Component({
   selector: 'eo-ng-iframe-page',
@@ -33,6 +33,7 @@ import { Subscription, take } from 'rxjs'
   ]
 })
 export class IframePageComponent implements OnInit {
+  iframe:any = null
    proxyHandler:{[k:string]:any} ={
      ...this.iframeService.apinto2PluginApi,
      test: function (params:any) {
@@ -46,51 +47,50 @@ export class IframePageComponent implements OnInit {
      }
    }
 
+   listenMessage =async (event:any) => {
+     if (event && event.data.apinto && event.data.type === 'request') {
+       console.log(event)
+       const handler = this.proxyHandler[event.data.path as any]
+       if (typeof handler === 'function') {
+         const args = event.data.data
+         const result = await handler(...args)
+        ;(this.iframe as any).contentWindow.postMessage({
+           requestId: event.data.requestId,
+           magic: 'apinto',
+           type: 'response',
+           data: JSON.parse(JSON.stringify(result)),
+           apinto: true
+         }, '*')
+       } else {
+         ;(this.iframe as any).contentWindow.postMessage({
+           requestId: event.data.requestId,
+           magic: 'apinto',
+           apinto: true,
+           type: 'error',
+           data: 'unknown function for:' + event.data.path
+         }, '*')
+       }
+     }
+   }
+
   showIframe = (id: any, url: any, initData: any) => {
-    const iframe = createIframe('iframe', url)
+    console.log(this)
+    this.iframe = createIframe('iframe', url)
     const onLoadCallback = () => {
       console.log(this.iframe)
-      ;(iframe as any).contentWindow.postMessage({ apinto: true, type: 'initialize', data: initData }, '*')
-      window.addEventListener('message', async (event) => {
-        if (event && event.data.apinto && event.data.type === 'request') {
-          // const msg = {
-
-          // }
-          const handler = this.proxyHandler[event.data.path as any]
-          console.log(event, handler)
-          if (typeof handler === 'function') {
-            const args = event.data.data
-            const result = await handler(...args)
-            console.log(iframe, result, this.proxyHandler)
-            ;(iframe as any).contentWindow.postMessage({
-              requestId: event.data.requestId,
-              magic: 'apinto',
-              type: 'response',
-              data: JSON.parse(JSON.stringify(result)),
-              apinto: true
-            }, '*')
-          } else {
-            ;(iframe as any).contentWindow.postMessage({
-              requestId: event.data.requestId,
-              magic: 'apinto',
-              apinto: true,
-              type: 'error',
-              data: 'unknown function for:' + event.data.path
-            }, '*')
-          }
-        }
-      })
+      ;(this.iframe as any).contentWindow.postMessage({ apinto: true, type: 'initialize', data: initData }, '*')
+      window.addEventListener('message', this.listenMessage)
     }
-    if ((iframe as any).attachEvent) {
-      (iframe as any).attachEvent('onload', onLoadCallback)
+    if ((this.iframe as any).attachEvent) {
+      (this.iframe as any).attachEvent('onload', onLoadCallback)
     } else {
-      (iframe as any).addEventListener('load', onLoadCallback)
+      (this.iframe as any).addEventListener('load', onLoadCallback)
     }
     const panel = document.getElementById('iframePanel')
     while (panel?.hasChildNodes()) {
       panel?.firstChild && panel.removeChild(panel?.firstChild)
     }
-    panel?.appendChild(iframe)
+    panel?.appendChild(this.iframe)
 
     function createIframe (id: string, url: string) {
       console.log(url)
@@ -104,48 +104,17 @@ export class IframePageComponent implements OnInit {
     }
   }
 
-  @ViewChild('iframe') iframe: ElementRef|undefined;
-  path:string =''
-
-  @HostListener('window:message', ['$event'])
-  onMessage (e:any) {
-    if (e.data.apinto) {
-      switch (e.data.type) {
-        case 'request': {
-          this.getRequestFromIframe(e.data)
-          break
-        }
-        case 'breadcrumb': {
-          // TODO要对每个面包屑导航做特殊处理 ${modulesName}/...
-          for (const breadcrumb of e.data.breadcrumbOption) {
-            if (breadcrumb.routerLink) {
-              breadcrumb.routerLink = `${this.navigation.iframePrefix}/${this.moduleName}/${breadcrumb.routerLink}`
-            }
-          }
-          this.navigation.reqFlashBreadcrumb(e.data.breadcrumbOption)
-          break
-        }
-        case 'router': {
-          let newRouterArr:Array<string> = this.router.url.split('#')
-          if (this.router.url.includes('#')) {
-            newRouterArr.pop()
-          }
-          newRouterArr = newRouterArr.join('').split('/')
-          newRouterArr[newRouterArr.length - 1] = `${newRouterArr[newRouterArr.length - 1]}#${e.data.url}`
-          window.location.href = newRouterArr.join('/')
-          break
-        }
-        case 'menu': {
-          this.navigation.reqFlashMenu()
-          break
-        }
-        case 'userInfo': {
-          this.getUserRequestFromIframe(e.data)
-          break
-        }
-      }
-    }
+  // 当组件销毁时需要通知iframe注销
+  stopIframe () {
+    window.removeEventListener('message', this.listenMessage)
+    console.log(this.iframe)
+    ;(this.iframe as any).contentWindow.postMessage({
+      type: 'stopConnection',
+      apinto: true
+    }, '*')
   }
+
+  path:string =''
 
   start:boolean = true
   iframeSrc:string = ''
@@ -157,116 +126,6 @@ export class IframePageComponent implements OnInit {
   constructor (private iframeService:IframeHttpService, private api:ApiService,
     private navigation:EoNgNavigationService, private router:Router,
     private baseInfo:BaseInfoService) {}
-
-  getRequestFromIframe ({ func, body, params, url, callback, callbackPrefixParam, callbackSuffixParam, others }:any) {
-    switch (func) {
-      case 'apinto.get': {
-        this.api.get(url, params).subscribe((resp:any) => {
-          resp.data = this.api.underline(resp.data)
-          this.iframeDom?.postMessage({
-            callback: callback,
-            callbackPrefixParam: callbackPrefixParam,
-            callbackSuffixParam: callbackSuffixParam,
-            others: others,
-            type: 'response',
-            response: resp,
-            apinto: true
-          }, '*')
-        })
-        break
-      }
-      case 'apinto.post': {
-        this.api.post(url, body, params).subscribe((resp:any) => {
-          resp.data = this.api.underline(resp.data)
-          this.iframeDom?.postMessage({
-            callback: callback,
-            callbackPrefixParam: callbackPrefixParam,
-            callbackSuffixParam: callbackSuffixParam,
-            others: others,
-            type: 'response',
-            response: resp,
-            apinto: true
-          }, '*')
-        })
-        break
-      }
-      case 'apinto.put': {
-        this.api.put(url, body, params).subscribe((resp:any) => {
-          resp.data = this.api.underline(resp.data)
-          this.iframeDom?.postMessage({
-            callback: callback,
-            callbackPrefixParam: callbackPrefixParam,
-            callbackSuffixParam: callbackSuffixParam,
-            others: others,
-            type: 'response',
-            response: resp,
-            apinto: true
-          }, '*')
-        })
-        break
-      }
-      case 'apinto.delete': {
-        this.api.delete(url, params).subscribe((resp:any) => {
-          resp.data = this.api.underline(resp.data)
-          this.iframeDom?.postMessage({
-            callback: callback,
-            callbackPrefixParam: callbackPrefixParam,
-            callbackSuffixParam: callbackSuffixParam,
-            others: others,
-            type: 'response',
-            response: resp,
-            apinto: true
-          }, '*')
-        })
-        break
-      }
-      case 'apinto.patch': {
-        this.api.patch(url, body, params).subscribe((resp:any) => {
-          resp.data = this.api.underline(resp.data)
-          this.iframeDom?.postMessage({
-            callback: callback,
-            callbackPrefixParam: callbackPrefixParam,
-            callbackSuffixParam: callbackSuffixParam,
-            others: others,
-            type: 'response',
-            response: resp,
-            apinto: true
-          }, '*')
-        })
-      }
-    }
-  }
-
-  getUserRequestFromIframe ({ func }:any) {
-    switch (func) {
-      case 'apinto.renewUserInfo': {
-        // 控制台重新获取用户信息，以便头像中使用，等待接口
-        this.navigation.reqUpdateRightList()
-        this.navigation.repUpdateRightList().pipe(take(1)).subscribe(() => {
-          this.iframeDom?.postMessage({
-            type: 'userInfo',
-            func: 'apinto.renewUserInfo',
-            userId: this.navigation.getUserId(),
-            userRoleId: this.navigation.getUserRoleId(),
-            userAccess: this.navigation.getRightsList(),
-            apinto: true
-          }, '*')
-        })
-        break
-      }
-      case 'apinto.getCurrentUserInfo': {
-        this.iframeDom?.postMessage({
-          type: 'userInfo',
-          func: 'apinto.getCurrentUserInfo',
-          userId: this.navigation.getUserId(),
-          userRoleId: this.navigation.getUserRoleId(),
-          userModuleAccess: this.navigation.originAccessData[this.moduleName],
-          apinto: true
-        }, '*')
-        break
-      }
-    }
-  }
 
   ngOnInit (): void {
     console.log('init')
@@ -288,6 +147,7 @@ export class IframePageComponent implements OnInit {
   }
 
   ngOnDestroy () {
+    this.stopIframe()
     console.log('ngOnDestroy')
     this.subscription.unsubscribe()
     this.iframeService.subscription.unsubscribe()
