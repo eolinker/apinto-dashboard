@@ -8,9 +8,11 @@ doneUrl:string}
 
 export type TutorialItem = {
       title:string,
-      content:Array<
-        {text:string, url:string}
-      >}
+      content?:Array<
+        {text:string, url?:string, children?:Array<{text:string, url:string}>}
+      >,
+
+    }
 
 export const GuideStepList:Array<StepItem> = [
   {
@@ -49,35 +51,69 @@ export const GuideStepList:Array<StepItem> = [
 
 export const TutorialsList:Array<TutorialItem> = [
   {
-    title: '安全防护',
+    title: '仪表盘',
     content: [
-      { text: '为API设置鉴权/身份认证', url: '' },
-      { text: 'xxx', url: '' },
-      { text: 'xxx', url: '' }
+      { text: '统计报表', url: 'https://help.eolink.com/tutorial/Apinto/c-1371' },
+      { text: '监控告警', url: 'https://help.eolink.com/tutorial/Apinto/c-1372' }
     ]
   },
   {
-    title: '安全防护',
+    title: 'API',
     content: [
-      { text: '为API设置鉴权/身份认证', url: '' },
-      { text: 'xxx', url: '' },
-      { text: 'xxx', url: '' }
+      { text: '添加 API', url: 'https://help.eolink.com/tutorial/Apinto/c-1373' },
+      { text: '发布 API', url: 'https://help.eolink.com/tutorial/Apinto/c-1374' },
+      { text: '对 API 设置额外操作', url: 'https://help.eolink.com/tutorial/Apinto/c-1375' }
     ]
   },
   {
-    title: '安全防护',
+    title: '上游',
     content: [
-      { text: '为API设置鉴权/身份认证', url: '' },
-      { text: 'xxx', url: '' },
-      { text: 'xxx', url: '' }
+      { text: '添加静态上游', url: 'https://help.eolink.com/tutorial/Apinto/c-1346' },
+      { text: '添加动态（服务发现）上游', url: 'https://help.eolink.com/tutorial/Apinto/c-1376' }
     ]
   },
   {
-    title: '安全防护',
+    title: '应用',
     content: [
-      { text: '为API设置鉴权/身份认证', url: '' },
-      { text: 'xxx', url: '' },
-      { text: 'xxx', url: '' }
+      { text: '添加应用', url: 'https://help.eolink.com/tutorial/Apinto/c-1349' },
+      { text: '发布应用', url: 'https://help.eolink.com/tutorial/Apinto/c-1350' },
+      { text: '设置访问鉴权', url: 'https://help.eolink.com/tutorial/Apinto/c-1377' }
+    ]
+  },
+
+  {
+    title: '策略',
+    content: [
+      { text: '限制访问范围', url: 'https://help.eolink.com/tutorial/Apinto/c-1356' },
+      { text: '熔断降级', url: 'https://help.eolink.com/tutorial/Apinto/c-1359' },
+      { text: '灰度发布', url: 'https://help.eolink.com/tutorial/Apinto/c-1360' },
+      { text: '数据缓存', url: 'https://help.eolink.com/tutorial/Apinto/c-1357' },
+      { text: '流量限制', url: 'https://help.eolink.com/tutorial/Apinto/c-1358' }
+    ]
+  },
+  {
+    title: '基础设施',
+    content: [
+      { text: '集群', url: 'https://help.eolink.com/tutorial/Apinto/c-1343' },
+      {
+        text: '服务发现',
+        children: [
+          { text: 'Consul', url: 'https://help.eolink.com/tutorial/Apinto/c-1380' },
+          { text: 'Eureka', url: 'https://help.eolink.com/tutorial/Apinto/c-1381' },
+          { text: 'Nacos', url: 'https://help.eolink.com/tutorial/Apinto/c-1382' }
+        ]
+      },
+      { text: '环境变量', url: 'https://help.eolink.com/tutorial/Apinto/c-1344' },
+      { text: '节点插件', url: 'https://help.eolink.com/tutorial/Apinto/c-1345' }
+    ]
+  },
+  {
+    title: '开发',
+    content: [
+      { text: 'Open API', url: 'https://help.eolink.com/tutorial/Apinto/c-1362' },
+      { text: 'Webhook', url: 'https://help.eolink.com/tutorial/Apinto/c-1386' },
+      { text: 'CLI', url: 'https://help.eolink.com/tutorial/Apinto/c-1385' },
+      { text: '控制台 Debug 日志', url: 'https://help.eolink.com/tutorial/Apinto/c-1361' }
     ]
   }
 ]
