@@ -35,7 +35,6 @@ export class CustomCodeboxReactComponentWrapperComponent {
   @Input() nzCode?: string
 
   ngOnChanges(changes: SimpleChanges): void {
-    console.log(changes)
     this.render()
   }
 

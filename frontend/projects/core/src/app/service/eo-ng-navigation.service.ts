@@ -129,6 +129,7 @@ export class EoNgNavigationService {
           this.routerNameMap = new Map()
           this.noAccess = true
           this.originAccessData = resp.data.access
+          console.log(this.originAccessData)
           for (const navigation of resp.data.navigation) {
             const menu = {
               title: navigation.title,
