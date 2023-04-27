@@ -2,6 +2,17 @@ package controller
 
 import (
 	"fmt"
+	"net/http"
+	"time"
+
+	user_model "github.com/eolinker/apinto-dashboard/modules/user/user-model"
+
+	"github.com/eolinker/apinto-dashboard/cache"
+
+	"github.com/go-basic/uuid"
+
+	module_plugin "github.com/eolinker/apinto-dashboard/modules/module-plugin"
+
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/modules/user"
@@ -9,11 +20,13 @@ import (
 	apinto_module "github.com/eolinker/apinto-module"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 type UserController struct {
-	userInfo user.IUserInfoService
+	userInfo      user.IUserInfoService
+	sessionCache  user.ISessionCache
+	commonCache   cache.ICommonCache
+	moduleService module_plugin.IModulePlugin
 }
 
 func (u *UserController) myProfile(ginCtx *gin.Context) {
@@ -67,7 +80,57 @@ func (u *UserController) myProfileUpdate(ginCtx *gin.Context) {
 
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
-func (u *UserController) myPassword(ginCtx *gin.Context) {
+func (u *UserController) setPassword(ginCtx *gin.Context) {
+	userId := controller.GetUserId(ginCtx)
+
+	req := &user_dto.UpdateMyPasswordReq{}
+	err := ginCtx.BindJSON(req)
+	if err != nil {
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("updateMyPassword fail. err:%s", err.Error()))
+		return
+	}
+
+	if err = u.userInfo.UpdateMyPassword(ginCtx, userId, req); err != nil {
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("updateMyPassword fail. err:%s", err.Error()))
+		return
+
+	}
+	info, err := u.userInfo.GetUserInfo(ginCtx, userId)
+	if err != nil {
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("get user info fail. err:%s", err.Error()))
+		return
+	}
+	userJWT, err := controller.JWTEncode(&controller.UserClaim{
+		Id:        info.Id,
+		Uname:     info.UserName,
+		LoginTime: info.LastLoginTime.Format("2006-01-02 15:04:05"),
+	})
+	if err != nil {
+		controller.ErrorJson(ginCtx, http.StatusOK, "登录失效")
+		return
+	}
+	cookieValue := uuid.New()
+	session := &user_model.Session{
+		Jwt:  userJWT,
+		RJwt: common.Md5(userJWT),
+	}
+
+	if err = u.sessionCache.Set(ginCtx, u.sessionCache.Key(cookieValue), session, time.Hour*24*7); err != nil {
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
+		return
+	}
+
+	//每次登陆都把之前的token清除掉
+	{
+		userIdCookieKey := fmt.Sprintf("userId:%d", info.Id)
+		oldCookie, _ := u.commonCache.Get(ginCtx, userIdCookieKey)
+		_ = u.sessionCache.Delete(ginCtx, u.sessionCache.Key(string(oldCookie)))
+		_ = u.commonCache.Set(ginCtx, userIdCookieKey, []byte(cookieValue), time.Hour*24*7)
+	}
+
+	ginCtx.SetCookie(controller.Session, cookieValue, 0, "", "", false, true)
+
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 
 }
 func (u *UserController) userEnum(ginCtx *gin.Context) {
@@ -103,18 +166,129 @@ func (u *UserController) userEnum(ginCtx *gin.Context) {
 
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
 }
-func (u *UserController) ssoLogin(ginCtx *gin.Context) {
+func (u *UserController) access(ginCtx *gin.Context) {
+	modules, err := u.moduleService.GetEnabledPlugins(ginCtx)
+	if err != nil {
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("get module info fail. err:%s", err.Error()))
+		return
+	}
+	access := make([]*user_dto.UserAccess, 0, len(modules))
+	for _, m := range modules {
+		access = append(access, &user_dto.UserAccess{
+			Name:   m.Name,
+			Access: "edit",
+		})
+	}
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(map[string]interface{}{
+		"access": access,
+	}))
+}
 
+func (u *UserController) ssoLogin(ginCtx *gin.Context) {
+	var loginInfo user_dto.UserLogin
+	err := ginCtx.BindJSON(&loginInfo)
+	if err != nil {
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("bind login param fail. err:%s", err.Error()))
+		return
+	}
+	info, err := u.userInfo.GetUserInfoByName(ginCtx, loginInfo.Username)
+	if err != nil {
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("get user info fail. err:%s", err.Error()))
+		return
+	}
+	if common.Md5(loginInfo.Password) != info.Password {
+		controller.ErrorJson(ginCtx, http.StatusOK, "用户名或密码错误")
+		return
+	}
+	now := time.Now()
+	// 成功登录，更新登录时间
+	err = u.userInfo.UpdateLastLoginTime(ginCtx, info.Id, &now)
+	if err != nil {
+		controller.ErrorJson(ginCtx, http.StatusOK, "登录失败")
+		return
+	}
+
+	userJWT, err := controller.JWTEncode(&controller.UserClaim{
+		Id:        info.Id,
+		Uname:     info.UserName,
+		LoginTime: now.Format("2006-01-02 15:04:05"),
+	})
+	if err != nil {
+		controller.ErrorJson(ginCtx, http.StatusOK, "登录失败")
+		return
+	}
+	cookieValue := uuid.New()
+	session := &user_model.Session{
+		Jwt:  userJWT,
+		RJwt: common.Md5(userJWT),
+	}
+
+	if err = u.sessionCache.Set(ginCtx, u.sessionCache.Key(cookieValue), session, time.Hour*24*7); err != nil {
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
+		return
+	}
+
+	//每次登陆都把之前的token清除掉
+	{
+		userIdCookieKey := fmt.Sprintf("userId:%d", info.Id)
+		oldCookie, _ := u.commonCache.Get(ginCtx, userIdCookieKey)
+		_ = u.sessionCache.Delete(ginCtx, u.sessionCache.Key(string(oldCookie)))
+		_ = u.commonCache.Set(ginCtx, userIdCookieKey, []byte(cookieValue), time.Hour*24*7)
+	}
+
+	ginCtx.SetCookie(controller.Session, cookieValue, 0, "", "", false, true)
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 func (u *UserController) ssoLogout(ginCtx *gin.Context) {
+	cookie, err := ginCtx.Cookie(controller.Session)
+	if err != nil {
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
+		return
+	}
 
+	u.sessionCache.Delete(ginCtx, u.sessionCache.Key(cookie))
+	defer func() {
+		ginCtx.SetCookie(controller.Session, cookie, -1, "", "", false, true)
+	}()
+
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 func (u *UserController) ssoLoginCheck(ginCtx *gin.Context) {
+	cookie, err := ginCtx.Cookie(controller.Session)
+	if err != nil {
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
+		return
+	}
 
+	session, _ := u.sessionCache.Get(ginCtx, u.sessionCache.Key(cookie))
+	if session == nil {
+		controller.ErrorJson(ginCtx, http.StatusOK, "登录失效")
+		return
+	}
+	uc, err := controller.JWTDecode(session.Jwt)
+	if err != nil {
+		controller.ErrorJson(ginCtx, http.StatusOK, "登录失效")
+		return
+	}
+
+	info, err := u.userInfo.GetUserInfo(ginCtx, uc.Id)
+	if err != nil {
+		controller.ErrorJson(ginCtx, http.StatusOK, "登录失效")
+		return
+	}
+	if info.LastLoginTime.Format("2006-01-02 15:04:05") != uc.LoginTime || info.UserName != uc.Uname {
+		controller.ErrorJson(ginCtx, http.StatusOK, "登录失效")
+		return
+	}
+
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(true))
 }
 func newUserController() *UserController {
 	u := &UserController{}
 	bean.Autowired(&u.userInfo)
+	bean.Autowired(&u.sessionCache)
+	bean.Autowired(&u.commonCache)
+	bean.Autowired(&u.moduleService)
 	return u
 }
 
@@ -141,16 +315,18 @@ func userRouters() apinto_module.RoutersInfo {
 			Path:        "/api/my/password",
 			Handler:     "core.my.password",
 			Labels:      apinto_module.RouterLabelApi,
-			HandlerFunc: []apinto_module.HandlerFunc{userController.myPassword},
+			HandlerFunc: []apinto_module.HandlerFunc{userController.setPassword},
 			Alternative: true,
-		}, {
+		},
+		{
 			Method:      http.MethodGet,
-			Path:        "/api/user/enum",
-			Handler:     "core.user.enum",
+			Path:        "/api/my/access",
+			Handler:     "core.my.access",
 			Labels:      apinto_module.RouterLabelApi,
-			HandlerFunc: []apinto_module.HandlerFunc{userController.userEnum},
+			HandlerFunc: []apinto_module.HandlerFunc{userController.access},
 			Alternative: true,
-		}, {
+		},
+		{
 			Method:      http.MethodPost,
 			Path:        "/sso/login",
 			Handler:     "core.sso.login",
