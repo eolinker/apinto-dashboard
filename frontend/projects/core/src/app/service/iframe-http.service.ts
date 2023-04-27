@@ -107,6 +107,11 @@ export class IframeHttpService {
     },
     getCurrentUserInfo: async () => {
       return new Promise((resolve) => {
+        console.log({
+          userId: this.navigation.getUserId(),
+          userRoleId: this.navigation.getUserRoleId(),
+          userModuleAccess: this.navigation.originAccessData[this.moduleName]
+        })
         resolve({
           userId: this.navigation.getUserId(),
           userRoleId: this.navigation.getUserRoleId(),
