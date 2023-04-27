@@ -2,6 +2,7 @@
   name: "gauge-panel"
   cname: "仪表盘"
   icon: "file-cabinet"
+  quick: true
 - id: "navigation.api"  # 导航ID，插件模块通过该id绑定到导航下，作为子导航展示
   name: "api"           # 导航英文名
   cname: "API"          # 导航中文名
