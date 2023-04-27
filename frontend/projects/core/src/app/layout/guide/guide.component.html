@@ -105,20 +105,32 @@
   <p class="text-[18px] leading-[26px] font-bold mb-[40px]">👀 进阶操作</p>
 
   <div
-    class="ml-[32px] mr-[60px] mt-btnbase flex justify-between max-w-[970px]"
+    class="ml-[32px] mt-btnbase flex justify-between grid gap-6 py-5 2xl:grid-cols-4 xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 xs:grid-cols-1"
   >
     <ng-container *ngFor="let tutor of tutorialsList; let last = last">
-      <div class="w-[190px] flex flex-col justify-between leading-[20px]">
+      <div
+        class="w-[190px] flex flex-col justify-start leading-[22px] right-border-box"
+      >
         <p class="font-bold">{{ tutor.title }}</p>
         <ul style="padding-inline-start: 20px">
           <ng-container *ngFor="let item of tutor.content">
             <li>
-              <a>{{ item.text }}</a>
+              <a *ngIf="!item.children" [href]="item.url" target="_blank">{{
+                item.text
+              }}</a>
+              <p *ngIf="item.children">{{ item.text }}</p>
+              <ul *ngIf="item.children" style="padding-inline-start: 20px">
+                <ng-container *ngFor="let child of item.children">
+                  <li>
+                    <a [href]="child.url" target="_blank">{{ child.text }}</a>
+                  </li>
+                </ng-container>
+              </ul>
             </li>
           </ng-container>
         </ul>
       </div>
-      <nz-divider *ngIf="!last" nzType="vertical" class="h-auto"></nz-divider>
+      <!-- <nz-divider *ngIf="!last" nzType="vertical" class="h-auto"></nz-divider> -->
     </ng-container>
   </div>
 </section>
