@@ -2,7 +2,7 @@ id: "strategy-visit.apinto.com"
 name: "visit"
 cname: "API访问"
 resume: ""
-version: "v1.0.2"
+version: "v1.0.3"
 icon: "API 访问限制.png"
 driver: "strategy-visit.apinto.com"
 type: 2 #0为框架模块 1为核心模块 2为内置模块 3为非内置

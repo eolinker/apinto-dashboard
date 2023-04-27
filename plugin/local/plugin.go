@@ -71,8 +71,7 @@ func (t *tPlugin) checkConfig(name string, config interface{}) (*Config, error) 
 }
 
 func (c *tPlugin) GetPluginFrontend(moduleName string) string {
-	//TODO
-	return ""
+	return fmt.Sprintf("module/%s", moduleName)
 }
 
 func (c *tPlugin) IsPluginVisible() bool {
