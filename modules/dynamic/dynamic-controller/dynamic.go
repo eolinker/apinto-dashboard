@@ -38,9 +38,9 @@ type dynamicController struct {
 }
 
 func newDynamicController(name string, define interface{}) *dynamicController {
-	tmp, _ := json.Marshal(define)
+	//tmp, _ := json.Marshal(define)
 	var cfg DynamicDefine
-	json.Unmarshal(tmp, &cfg)
+	json.Unmarshal(define.([]byte), &cfg)
 	render := make(map[string]Render)
 	for key, value := range cfg.Render {
 		r := make(Render)
