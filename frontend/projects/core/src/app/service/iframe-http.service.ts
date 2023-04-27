@@ -22,7 +22,6 @@ export class IframeHttpService {
     this.moduleName = this.baseInfo.allParamsInfo.moduleName
     this.subscription = this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
-        console.log(this.router.url)
         this.moduleName = this.baseInfo.allParamsInfo.moduleName
       }
     })
@@ -405,6 +404,7 @@ export class IframeHttpService {
     },
     clusterList: async () => {
       return new Promise((resolve) => {
+        console.log('clusterList')
         return this.api.get('cluster/enum').subscribe((resp:any) => {
           resolve(resp)
         })
