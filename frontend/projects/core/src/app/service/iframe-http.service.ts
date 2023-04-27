@@ -118,7 +118,6 @@ export class IframeHttpService {
         })
       })
     },
-
     otherUserProfile: async (userId:string) => {
       return new Promise((resolve) => {
         return this.api.get('user/profile', { id: userId }).subscribe((resp:any) => {

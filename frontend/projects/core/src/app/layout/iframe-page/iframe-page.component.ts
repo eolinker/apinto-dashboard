@@ -281,7 +281,7 @@ export class IframePageComponent implements OnInit {
 
   ngAfterViewInit () {
     window.onload = () => {
-      this.showIframe('test', `iframe/${this.moduleName}`, {})
+      this.showIframe('test', `agent/${this.moduleName}`, {})
     }
   }
 
