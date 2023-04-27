@@ -291,8 +291,12 @@ export class IntelligentPluginListComponent implements OnInit {
         initFormValue: { driver: this.driverOptions[0].value || '' }
       },
       nzOnOk: (component:IntelligentPluginCreateComponent) => {
-        // eslint-disable-next-line dot-notation
-        this.saveData(JSON.parse(JSON.stringify(component.form['values'])))
+        component.form.validate().then((res:any) => {
+          if (!res) {
+            // eslint-disable-next-line dot-notation
+            this.saveData(JSON.parse(JSON.stringify(component.form['values'])))
+          }
+        })
         return false
       }
     })
@@ -311,8 +315,12 @@ export class IntelligentPluginListComponent implements OnInit {
         driverSelectOptions: this.driverOptions
       },
       nzOnOk: (component:IntelligentPluginCreateComponent) => {
-        // eslint-disable-next-line dot-notation
-        this.saveData(JSON.parse(JSON.stringify(component.form['values'])), component.uuid, true)
+        component.form.validate().then((res:any) => {
+          if (!res) {
+            // eslint-disable-next-line dot-notation
+            this.saveData(JSON.parse(JSON.stringify(component.form.values)), component.uuid, true)
+          }
+        })
         return false
       }
     })
