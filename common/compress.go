@@ -6,13 +6,12 @@ import (
 	"bytes"
 	"compress/gzip"
 	"fmt"
-	"github.com/eolinker/eosc/log"
-	"golang.org/x/text/encoding/simplifiedchinese"
-	"golang.org/x/text/transform"
 	"io"
 	"os"
 	"path"
 	"path/filepath"
+
+	"github.com/eolinker/eosc/log"
 )
 
 // DeCompress 解压 tar.gz
@@ -87,17 +86,17 @@ func Unzip(src *zip.Reader, dst string) error {
 			if file.Mode().IsDir() {
 				return nil
 			}
-			decodeName := ""
-			if file.Flags == 0 {
-				//如果标致位是0  则是默认的本地编码   默认为gbk
-				i := bytes.NewReader([]byte(file.Name))
-				decoder := transform.NewReader(i, simplifiedchinese.GB18030.NewDecoder())
-				content, _ := io.ReadAll(decoder)
-				decodeName = string(content)
-			} else {
-				//如果标志为是 1 << 11也就是 2048  则是utf-8编码
-				decodeName = file.Name
-			}
+			decodeName := file.Name
+			//if file.Flags == 0 {
+			//	//如果标致位是0  则是默认的本地编码   默认为gbk
+			//	i := bytes.NewReader([]byte(file.Name))
+			//	decoder := transform.NewReader(i, simplifiedchinese.GB18030.NewDecoder())
+			//	content, _ := io.ReadAll(decoder)
+			//	decodeName = string(content)
+			//} else {
+			//如果标志为是 1 << 11也就是 2048  则是utf-8编码
+			//decodeName = file.Name
+			//}
 			// 配置输出目标路径
 			filename := filepath.Join(dst, decodeName)
 			// 创建目标路径所在文件夹
