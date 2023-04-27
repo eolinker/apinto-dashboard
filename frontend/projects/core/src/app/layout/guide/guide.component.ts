@@ -16,7 +16,8 @@ import { GuideStepList, StepItem, TutorialItem, TutorialsList } from './conf'
       background-color: #f5f7fa;
       overflow: hidden;
       overflow-y:auto;
-    }`
+    }
+`
   ]
 })
 export class GuideComponent implements OnInit {
