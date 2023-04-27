@@ -132,7 +132,7 @@ export const IntelligentPluginEditComponent = React.forwardRef(
     const submitRef = React.createRef()
     DYNAMIC_INJECT_SCHEMA = schema
 
-    const form = createForm()
+    const form = createForm({ validateFirst: editPage })
     console.log(initFormValue)
     form.setInitialValues(initFormValue)
     const pluginEditSchema = {
