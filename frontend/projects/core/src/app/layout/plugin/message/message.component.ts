@@ -88,7 +88,6 @@ import { UntypedFormBuilder, Validators } from '@angular/forms'
         nzInputImage="simple"
       ></eo-ng-empty>
       <markdown
-        clipboard
         class="markdown-body"
         *ngIf="!showEmpty"
         [src]="getMd()"
