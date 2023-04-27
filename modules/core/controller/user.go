@@ -71,7 +71,37 @@ func (u *UserController) myPassword(ginCtx *gin.Context) {
 
 }
 func (u *UserController) userEnum(ginCtx *gin.Context) {
+	userInfoList, err := u.userInfo.GetAllUsers(ginCtx)
+	if err != nil {
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("获取用户列表失败. err:%s", err.Error()))
+		return
+	}
 
+	resList := make([]user_dto.UserInfo, 0, len(userInfoList))
+
+	for _, userInfo := range userInfoList {
+		lastLogin := ""
+		if userInfo.LastLoginTime != nil {
+			lastLogin = common.TimeToStr(*userInfo.LastLoginTime)
+		}
+		resUserInfo := user_dto.UserInfo{
+			Id:           userInfo.Id,
+			Sex:          userInfo.Sex,
+			Avatar:       userInfo.Avatar,
+			Email:        userInfo.Email,
+			Phone:        userInfo.Phone,
+			UserName:     userInfo.UserName,
+			NickName:     userInfo.NickName,
+			NoticeUserId: userInfo.NoticeUserId,
+			LastLogin:    lastLogin,
+		}
+		resList = append(resList, resUserInfo)
+	}
+
+	m := make(map[string]interface{})
+	m["users"] = resList
+
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
 }
 func (u *UserController) ssoLogin(ginCtx *gin.Context) {
 
