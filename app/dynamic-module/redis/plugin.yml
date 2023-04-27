@@ -1,7 +1,7 @@
 id: "redis.apinto.com"
 name: "redis"
 cname: "Redis配置"
-resume: ""
+resume: "配置Redis Cluster信息，帮助Apinto节点接入Redis资源。"
 version: "v1.0.0"
 icon: "监控告警.png"
 driver: "dynamic.apinto.com"
