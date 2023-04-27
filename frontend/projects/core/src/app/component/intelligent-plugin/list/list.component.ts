@@ -15,6 +15,7 @@ import { Subscription, forkJoin, map } from 'rxjs'
 import { v4 as uuidv4 } from 'uuid'
 import { BaseInfoService } from '../../../service/base-info.service'
 import { NavigationEnd, Router } from '@angular/router'
+import { EoNgNavigationService } from '../../../service/eo-ng-navigation.service'
 
 @Component({
   selector: 'eo-ng-intelligent-plugin-list',
@@ -49,7 +50,8 @@ export class IntelligentPluginListComponent implements OnInit {
     private modalService:EoNgFeedbackModalService,
     private api:ApiService,
     private router:Router,
-    private baseInfo:BaseInfoService) {
+    private baseInfo:BaseInfoService,
+    private appConfigService: EoNgNavigationService) {
 
   }
 
@@ -145,6 +147,10 @@ export class IntelligentPluginListComponent implements OnInit {
     this.driverOptions = data.drivers.map((driver:DynamicDriverData) => {
       return { label: driver.title, value: driver.name }
     })
+    console.log(data)
+    this.appConfigService.reqFlashBreadcrumb([
+      { title: data.title }
+    ])
   }
 
   refreshTableData (tableData:Array<{[k:string]:any}>, statusData:DynamicListStatus) {

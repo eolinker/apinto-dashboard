@@ -476,9 +476,7 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 		config, _ = json.Marshal(enableCfg)
 		checkConfig = enabledCfgListToMap(enableCfg)
 
-		defineCfg := new(model.PluginDefine)
-		_ = json.Unmarshal(pluginInfo.Details, defineCfg)
-		define = defineCfg
+		define = pluginInfo.Details
 	}
 	err = m.coreService.CheckNewModule(pluginInfo.UUID, enableInfo.Name, pluginInfo.Driver, define, checkConfig)
 	if err != nil {

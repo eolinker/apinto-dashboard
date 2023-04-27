@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core'
+import { Component, OnInit } from '@angular/core'
 import { IframeHttpService } from '../../service/iframe-http.service'
 import { ApiService } from '../../service/api.service'
 import { EoNgNavigationService } from '../../service/eo-ng-navigation.service'
@@ -133,13 +133,11 @@ export class IframePageComponent implements OnInit {
     this.subscription = this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
         console.log(this.router.url)
-        if (this.moduleName !== this.baseInfo.allParamsInfo.moduleName) {
-          this.moduleName = this.baseInfo.allParamsInfo.moduleName
-          this.iframeService.moduleName = this.moduleName
-          this.subscription.unsubscribe()
-          this.iframeService.subscription.unsubscribe()
-          this.showIframe('test', `agent/${this.moduleName}`, {})
-        }
+        this.moduleName = this.baseInfo.allParamsInfo.moduleName
+        this.iframeService.moduleName = this.moduleName
+        this.subscription.unsubscribe()
+        this.iframeService.subscription.unsubscribe()
+        this.showIframe('test', `http://172.18.166.219:8080/agent/${this.moduleName}`, {})
         // this.getPath()
       }
     })
@@ -147,7 +145,7 @@ export class IframePageComponent implements OnInit {
   }
 
   ngAfterViewInit () {
-    this.showIframe('test', `agent/${this.moduleName}`, {})
+    this.showIframe('test', `http://172.18.166.219:8080/agent/${this.moduleName}`, {})
   }
 
   ngOnDestroy () {
