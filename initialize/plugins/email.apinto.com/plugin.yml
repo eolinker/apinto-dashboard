@@ -2,7 +2,7 @@ id: "email.apinto.com"
 name: "email"
 cname: "邮箱设置"
 resume: ""
-version: "v1.0.2"
+version: "v1.0.3"
 icon: "邮箱设置.png"
 driver: "email.apinto.com"
 type: 2 #0为框架模块 1为核心模块 2为内置模块 3为非内置
