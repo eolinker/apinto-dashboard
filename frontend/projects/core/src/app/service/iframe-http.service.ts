@@ -1,24 +1,70 @@
 import { HttpClient } from '@angular/common/http'
 import { Inject, Injectable } from '@angular/core'
-import { Observable, Subscriber, take } from 'rxjs'
+import { Observable, Subscriber, Subscription, take } from 'rxjs'
 import { API_URL, ApiService } from './api.service'
-import { Router } from '@angular/router'
+import { NavigationEnd, Router } from '@angular/router'
 import { EoNgNavigationService } from './eo-ng-navigation.service'
+import { BaseInfoService } from './base-info.service'
 
 @Injectable({
   providedIn: 'root'
 })
 export class IframeHttpService {
+  moduleName:string = ''
+  subscription: Subscription = new Subscription()
+
   constructor (private http:HttpClient,
     private api:ApiService,
     private router:Router,
     private navigation:EoNgNavigationService,
-    @Inject(API_URL) public urlPrefix:string) { }
-
-  moduleName:string = ''
+    private baseInfo:BaseInfoService,
+    @Inject(API_URL) public urlPrefix:string) {
+    this.moduleName = this.baseInfo.allParamsInfo.moduleName
+    this.subscription = this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        console.log(this.router.url)
+        this.moduleName = this.baseInfo.allParamsInfo.moduleName
+      }
+    })
+  }
 
   // 所有对外提供的接口都放在这里
   apinto2PluginApi = {
+    get: async (url:string, params?:{[key:string]:any}) => {
+      return new Promise((resolve) => {
+        return this.api.get(`module/${this.moduleName}/${url}`, params).subscribe((resp:any) => {
+          resolve(resp)
+        })
+      })
+    },
+    post: async (url:string, body?: any, params?:{[key:string]:any}) => {
+      return new Promise((resolve) => {
+        return this.api.post(`module/${this.moduleName}/${url}`, body, params).subscribe((resp:any) => {
+          resolve(resp)
+        })
+      })
+    },
+    put: async (url:string, body?: any, params?:{[key:string]:any}) => {
+      return new Promise((resolve) => {
+        return this.api.put(`module/${this.moduleName}/${url}`, body, params).subscribe((resp:any) => {
+          resolve(resp)
+        })
+      })
+    },
+    delete: async (url:string, params?:{[key:string]:any}) => {
+      return new Promise((resolve) => {
+        return this.api.delete(`module/${this.moduleName}/${url}`, params).subscribe((resp:any) => {
+          resolve(resp)
+        })
+      })
+    },
+    patch: async (url:string, body?:any, params?:{[key:string]:any}) => {
+      return new Promise((resolve) => {
+        return this.api.patch(`module/${this.moduleName}/${url}`, body, params).subscribe((resp:any) => {
+          resolve(resp)
+        })
+      })
+    },
     changeRouter: async (url:string) => {
       return new Promise((resolve) => {
         let newRouterArr:Array<string> = this.router.url.split('#')
@@ -349,7 +395,8 @@ export class IframeHttpService {
         })
       })
     },
-    warnStrategyRemote: (type:string, data?:any) => {
+    // 策略remote选项
+    strategyRemote: (type:string, data?:any) => {
       return new Promise((resolve) => {
         return this.api.get(`strategy/filter-remote/${type}`, data).subscribe((resp:any) => {
           resolve(resp)
