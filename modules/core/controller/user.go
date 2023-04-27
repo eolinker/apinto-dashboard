@@ -325,6 +325,13 @@ func userRouters() apinto_module.RoutersInfo {
 			Labels:      apinto_module.RouterLabelApi,
 			HandlerFunc: []apinto_module.HandlerFunc{userController.access},
 			Alternative: true,
+		}, {
+			Method:      http.MethodGet,
+			Path:        "/api/user/enum",
+			Handler:     "core.user.enum",
+			Labels:      apinto_module.RouterLabelApi,
+			HandlerFunc: []apinto_module.HandlerFunc{userController.userEnum},
+			Alternative: true,
 		},
 		{
 			Method:      http.MethodPost,
