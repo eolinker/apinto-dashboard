@@ -13,7 +13,7 @@ import (
 
 func (p *ProxyAPi) CreateHome(path string) []apinto_module.RouterInfo {
 	baseHtml := []byte(fmt.Sprintf(fmt.Sprintf("<base href=\"/agent/%s/\">", p.module)))
-	routerRoot := fmt.Sprintf("/agent/%s", p.module)
+	routerRoot := fmt.Sprintf("/module/%s", p.module)
 
 	if !strings.HasPrefix(path, "/") {
 		path = "/" + path
@@ -71,14 +71,14 @@ func (p *ProxyAPi) CreateHome(path string) []apinto_module.RouterInfo {
 	}
 	return []apinto_module.RouterInfo{{
 		Method:      http.MethodGet,
-		Path:        fmt.Sprintf("/agent/%s", p.module),
+		Path:        fmt.Sprintf("/module/%s", p.module),
 		Handler:     fmt.Sprintf("%s.home", p.module),
 		Labels:      apinto_module.RouterLabelModule,
 		HandlerFunc: []apinto_module.HandlerFunc{handler},
 	},
 		{
 			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("/agent/%s/:sub/*path", p.module),
+			Path:        fmt.Sprintf("/module/%s/:sub/*path", p.module),
 			Handler:     fmt.Sprintf("%s.home", p.module),
 			Labels:      apinto_module.RouterLabelModule,
 			HandlerFunc: []apinto_module.HandlerFunc{handler},
