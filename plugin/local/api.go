@@ -90,7 +90,7 @@ func (p *ProxyAPi) createApi(name, method, from, to string, labels []string) api
 			contentType := response.Header.Get("content-type")
 			for k, vs := range responseHeader {
 				switch k {
-				case "apinto-event":
+				case "Apinto-Event":
 					for _, v := range vs {
 						if len(v) > 0 {
 							eventObjs := make(map[string]any)
