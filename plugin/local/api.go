@@ -30,7 +30,7 @@ func NewProxyAPi(server string, module string, config *Config) *ProxyAPi {
 func (p *ProxyAPi) CreateApi(name, method, path string, config PathConfig) apinto_module.RouterInfo {
 	to := path
 	routerPath := config.Path
-	if routerPath != "" {
+	if routerPath == "" {
 		routerPath = fmt.Sprintf("/api/module/%s/%s", p.module, strings.TrimPrefix(path, "/"))
 	}
 	return p.createApi(name, method, routerPath, to, mergeLabel(apinto_module.RouterLabelApi, config.Label))
@@ -38,7 +38,7 @@ func (p *ProxyAPi) CreateApi(name, method, path string, config PathConfig) apint
 func (p *ProxyAPi) CreateOpenApi(name, method, path string, config PathConfig) apinto_module.RouterInfo {
 	to := path
 	routerPath := config.Path
-	if routerPath != "" {
+	if routerPath == "" {
 		routerPath = fmt.Sprintf("/ap2/module/%s/%s", p.module, strings.TrimPrefix(path, "/"))
 	}
 	return p.createApi(name, method, routerPath, to, mergeLabel(apinto_module.RouterLabelOpenApi, config.Label))
