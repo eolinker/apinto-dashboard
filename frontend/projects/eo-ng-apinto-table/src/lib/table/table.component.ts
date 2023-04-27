@@ -59,7 +59,6 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
     setTimeout(() => {
       this.getSrollY()
     }, 0)
-    console.log(this)
   }
 
   override ngOnChanges (change:SimpleChanges) {
