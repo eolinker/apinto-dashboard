@@ -6,6 +6,7 @@ import { Component, Input } from '@angular/core'
     <ng-container [ngSwitch]="status">
     <span *ngSwitchCase="'TOUPDATE'" class="blue-bold">待更新</span>
     <span *ngSwitchCase="'待更新'" class="blue-bold">待更新</span>
+    <span *ngSwitchCase="'待发布'" class="blue-bold">待发布</span>
     <span *ngSwitchCase="'GOONLINE'" class="green-bold">已上线</span>
     <span *ngSwitchCase="'已上线'" class="green-bold">已上线</span>
     <span *ngSwitchCase="'已发布'" class="green-bold">已发布</span>
