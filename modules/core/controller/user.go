@@ -138,7 +138,7 @@ func userRouters() apinto_module.RoutersInfo {
 		}, {
 			Method:      http.MethodPost,
 			Path:        "/sso/logout",
-			Handler:     "core.sso.login",
+			Handler:     "core.sso.logout",
 			Labels:      apinto_module.RouterLabelAnonymous,
 			HandlerFunc: []apinto_module.HandlerFunc{userController.ssoLogout},
 			Alternative: true,

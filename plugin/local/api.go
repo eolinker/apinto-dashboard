@@ -70,11 +70,8 @@ func (p *ProxyAPi) proxyApiHandler(name, method, targetPath string) gin.HandlerF
 		for k, v := range p.headers {
 			request.Header.Set(k, v)
 		}
+		apinto_module.CopyKeysToHeader(ginCtx.Keys, request)
 
-		headerName, value := apinto_module.ReadKeys(ginCtx)
-		if headerName != "" {
-			request.Header.Set(headerName, value)
-		}
 		response, err := http.DefaultClient.Do(request)
 		if err != nil {
 			return
