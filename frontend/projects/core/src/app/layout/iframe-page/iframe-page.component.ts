@@ -133,8 +133,13 @@ export class IframePageComponent implements OnInit {
     this.subscription = this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
         console.log(this.router.url)
-        this.moduleName = this.baseInfo.allParamsInfo.moduleName
-        this.iframeService.moduleName = this.moduleName
+        if (this.moduleName !== this.baseInfo.allParamsInfo.moduleName) {
+          this.moduleName = this.baseInfo.allParamsInfo.moduleName
+          this.iframeService.moduleName = this.moduleName
+          this.subscription.unsubscribe()
+          this.iframeService.subscription.unsubscribe()
+          this.showIframe('test', `agent/${this.moduleName}`, {})
+        }
         // this.getPath()
       }
     })
@@ -142,8 +147,9 @@ export class IframePageComponent implements OnInit {
   }
 
   ngAfterViewInit () {
-    // this.showIframe('test', 'http://localhost:4444', {})
-    this.showIframe('test', `agent/${this.moduleName}`, {})
+    this.showIframe('test', 'http://localhost:4444', {})
+    // this.showIframe('test', 'http://localhost:5555', {})
+    // this.showIframe('test', `agent/${this.moduleName}`, {})
   }
 
   ngOnDestroy () {

@@ -197,7 +197,7 @@ export class PluginMessageComponent implements OnInit {
 
   getMd () {
     // return './assets/README.md' // 本地调试用
-    return `../../module-plugin/md/${this.pluginId}/${this.mdFileName || ''}`
+    return `../../plugin/md/${this.pluginId}/${this.mdFileName || ''}`
   }
 
   loadMd () {
@@ -275,7 +275,7 @@ export class PluginMessageComponent implements OnInit {
               params.queryList.length ||
               params.initializeList.length
             ) {
-              this.modalService.create({
+              this.modalRef = this.modalService.create({
                 nzTitle: '启用',
                 nzWidth: MODAL_NORMAL_SIZE,
                 nzContent: PluginConfigComponent,
@@ -311,6 +311,7 @@ export class PluginMessageComponent implements OnInit {
                         subscription.unsubscribe()
                       })
                     this.getPluginDetail()
+                    this.modalRef?.close()
                   }
                 })
             }
