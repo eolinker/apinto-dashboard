@@ -79,19 +79,19 @@ type PluginEnableCfgMap struct {
 
 // PluginDefine 插件安装文件里的Define配置
 type PluginDefine struct {
-	Internet   bool                 `json:"internet,omitempty" yaml:"internet,omitempty"`     //remote
-	Server     string               `json:"server,omitempty" yaml:"server,omitempty"`         //remote
-	Path       string               `json:"path,omitempty" yaml:"path,omitempty"`             //remote
-	Middleware []*MiddlewareDefine  `json:"middleware,omitempty" yaml:"middleware,omitempty"` //local
-	Router     *RouterDefine        `json:"router,omitempty" yaml:"router,omitempty"`         //local
+	//Internet   bool                 `json:"internet,omitempty" yaml:"internet,omitempty"`     //remote
+	Server string `json:"server,omitempty" yaml:"server,omitempty"` //remote
+	Path   string `json:"path,omitempty" yaml:"path,omitempty"`     //remote
+	//Middleware []*MiddlewareDefine  `json:"middleware,omitempty" yaml:"middleware,omitempty"` //local
+	//Router     *RouterDefine        `json:"router,omitempty" yaml:"router,omitempty"`         //local
 	Headers    []ExtendParamsRender `json:"headers,omitempty" yaml:"headers,omitempty"`       //local
 	Querys     []ExtendParamsRender `json:"querys,omitempty" yaml:"querys,omitempty"`         //remote local
 	Initialize []ExtendParamsRender `json:"initialize,omitempty" yaml:"initialize,omitempty"` //remote local
-	Profession string               `json:"profession" yaml:"profession"`                     //dynamic
-	Skill      string               `json:"skill" yaml:"skill"`                               //dynamic
-	Drivers    []DynamicTitleDefine `json:"drivers" yaml:"drivers"`                           //dynamic
-	Fields     []DynamicTitleDefine `json:"fields" yaml:"fields"`                             //dynamic
-	Render     map[string]string    `json:"render" yaml:"render"`                             //dynamic
+	//Profession string               `json:"profession" yaml:"profession"`                     //dynamic
+	//Skill      string               `json:"skill" yaml:"skill"`                               //dynamic
+	//Drivers    []DynamicTitleDefine `json:"drivers" yaml:"drivers"`                           //dynamic
+	//Fields     []DynamicTitleDefine `json:"fields" yaml:"fields"`                             //dynamic
+	//Render     map[string]string    `json:"render" yaml:"render"`                             //dynamic
 }
 
 type MiddlewareDefine struct {
@@ -141,17 +141,17 @@ type MiddlewareItem struct {
 }
 
 type PluginYmlCfg struct {
-	ID         string        `json:"id" yaml:"id"`
-	Name       string        `json:"name" yaml:"name"`
-	Version    string        `json:"version" yaml:"version"`
-	CName      string        `json:"cname" yaml:"cname"`
-	Navigation string        `json:"navigation" yaml:"navigation"`
-	GroupID    string        `json:"group_id" yaml:"group_id"`
-	Resume     string        `json:"resume" yaml:"resume"`
-	ICon       string        `json:"icon" yaml:"icon"`
-	Driver     string        `json:"driver" yaml:"driver"`
-	Front      string        `json:"front" yaml:"front"`
-	Define     *PluginDefine `json:"define" yaml:"define"`
+	ID         string      `json:"id" yaml:"id"`
+	Name       string      `json:"name" yaml:"name"`
+	Version    string      `json:"version" yaml:"version"`
+	CName      string      `json:"cname" yaml:"cname"`
+	Navigation string      `json:"navigation" yaml:"navigation"`
+	GroupID    string      `json:"group_id" yaml:"group_id"`
+	Resume     string      `json:"resume" yaml:"resume"`
+	ICon       string      `json:"icon" yaml:"icon"`
+	Driver     string      `json:"driver" yaml:"driver"`
+	Front      string      `json:"front" yaml:"front"`
+	Define     interface{} `json:"define" yaml:"define"`
 }
 
 type InnerPluginYmlCfg struct {
