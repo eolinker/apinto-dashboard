@@ -16,6 +16,7 @@ const (
 	LogBody        = "LogBody"
 	AuditObject    = "auditObject"
 	UserName       = "userName"
+	NamespaceId    = "namespaceId"
 )
 
 func GetUserId(ginCtx *gin.Context) int {
