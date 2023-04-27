@@ -1,14 +1,7 @@
 package controller
 
 import (
-	"bytes"
 	"fmt"
-	"io"
-	"net/http"
-	"os"
-	"path"
-	"strings"
-
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin"
@@ -19,6 +12,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-basic/uuid"
 	"gopkg.in/yaml.v3"
+	"io"
+	"net/http"
+	"os"
+	"path"
 )
 
 type modulePluginController struct {
@@ -248,15 +245,15 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 	defer file.Close()
 
 	// 检查文件类型和大小
-	contentType := pluginPackage.Header.Get("Content-Type")
-	if !strings.HasPrefix(contentType, "application/x-gzip") {
-		ginCtx.String(http.StatusBadRequest, "Invalid file type")
-		return
-	}
-	if pluginPackage.Size > 4<<20 {
-		ginCtx.String(http.StatusBadRequest, "File too large")
-		return
-	}
+	//contentType := pluginPackage.Header.Get("Content-Type")
+	//if !strings.HasPrefix(contentType, "application/x-gzip") {
+	//	ginCtx.String(http.StatusBadRequest, "Invalid file type")
+	//	return
+	//}
+	//if pluginPackage.Size > 4<<20 {
+	//	ginCtx.String(http.StatusBadRequest, "File too large")
+	//	return
+	//}
 
 	//读取压缩文件的内容
 	fileBuffer, err := io.ReadAll(file)
@@ -264,7 +261,6 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("install plugin read file fail. err:%s", err.Error()))
 		return
 	}
-	packageFile := bytes.NewReader(fileBuffer)
 
 	randomId := uuid.New()
 	tmpDir := fmt.Sprintf("%s%s%s", PluginDir, string(os.PathSeparator), randomId)
@@ -274,7 +270,7 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("install plugin read file fail. err:%s", err.Error()))
 		return
 	}
-	err = common.DeCompress(packageFile, tmpDir)
+	err = common.UnzipFromBytes(fileBuffer, tmpDir)
 	if err != nil {
 		//删除目录
 		os.RemoveAll(tmpDir)
