@@ -1,7 +1,7 @@
 id: "access-log.apinto.com"
 name: "access-log"
 cname: "日志输出"
-resume: ""
+resume: "日志是用来暴露系统内部状态的一种手段，好的日志可以帮助开发人员快速定位问题所在，然后找到合适的方式解决掉问题。日志输出插件提供多种类型的日志输出驱动，支持将 节点访问日志 输出到文件、HTTP服务器、Syslog、Nsqd、Kafka中。"
 version: "v1.0.0"
 icon: "Access日志.png"
 driver: "dynamic.apinto.com"
@@ -214,10 +214,13 @@ define:  # 动态模块定义
               "required":true
             },
             "formatter":{
-              "type":"string",
+              "type":"object",
               "title":"格式化配置",
               "x-decorator":"FormItem",
-              "x-component":"Input.TextArea",
+              "x-component":"CustomCodeboxComponent",
+              "x-component-props":{
+                  "mode":"json"
+              },
               "x-decorator-props":{
                 "labelCol":6,
                 "wrapperCol":10
