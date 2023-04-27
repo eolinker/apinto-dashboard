@@ -2,7 +2,12 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"time"
+
+	"github.com/eolinker/apinto-dashboard/common"
+
 	"github.com/eolinker/apinto-dashboard/modules/user"
 	user_dto "github.com/eolinker/apinto-dashboard/modules/user/user-dto"
 	user_entry "github.com/eolinker/apinto-dashboard/modules/user/user-entry"
@@ -10,7 +15,6 @@ import (
 	user_store "github.com/eolinker/apinto-dashboard/modules/user/user-store"
 	apinto_module "github.com/eolinker/apinto-module"
 	"github.com/eolinker/eosc/common/bean"
-	"time"
 )
 
 const AdminName = "admin"
@@ -28,9 +32,48 @@ func newUserInfoService() user.IUserInfoService {
 	apinto_module.RegisterEventHandler("login", u.loginHandler)
 	return u
 }
+
 func decode(v any) (*user_model.UserBase, error) {
 	return apinto_module.DecodeFor[user_model.UserBase](v)
 }
+
+func (u *userInfoService) save(ctx context.Context, info *user_entry.UserInfo) error {
+	return u.userInfoStore.Transaction(ctx, func(txCtx context.Context) error {
+		userModel := entryToModule(info)
+		err := u.userInfoStore.Save(ctx, info)
+		if err != nil {
+			return err
+		}
+		err = u.cache.Set(ctx, fmt.Sprintf("apinto:userinfo-name:%s", userModel.UserName), userModel, time.Hour)
+		if err != nil {
+			return err
+		}
+		return u.cache.Set(ctx, fmt.Sprintf("apinto:userinfo-id:%d", userModel.Id), userModel, time.Hour)
+	})
+}
+
+func (u *userInfoService) UpdateMyPassword(ctx context.Context, userId int, req *user_dto.UpdateMyPasswordReq) error {
+	info, err := u.userInfoStore.Get(ctx, userId)
+	if err != nil {
+		return err
+	}
+	if common.Md5(req.Old) != info.Password {
+		return errors.New("error old password")
+	}
+	info.Password = common.Md5(req.Password)
+	return u.save(ctx, info)
+}
+
+func (u *userInfoService) UpdateLastLoginTime(ctx context.Context, userId int, loginTime *time.Time) error {
+	info, err := u.userInfoStore.Get(ctx, userId)
+	if err != nil {
+		return err
+	}
+	info.LastLoginTime = loginTime
+	return u.save(ctx, info)
+
+}
+
 func (u *userInfoService) loginHandler(login string, v any) {
 	userBase, err := decode(v)
 	if err != nil {
@@ -182,6 +225,7 @@ func (u *userInfoService) GetUserInfo(ctx context.Context, userID int) (*user_mo
 	if err == nil {
 		return userModel, nil
 	}
+	//var userModel *user_model.UserInfo
 	userInfo, err := u.userInfoStore.Get(ctx, userID)
 	if err != nil {
 		userModel = &user_model.UserInfo{
@@ -209,6 +253,7 @@ func (u *userInfoService) GetUserInfoByName(ctx context.Context, userName string
 	if err == nil {
 		return userModel, nil
 	}
+	//var userModel *user_model.UserInfo
 	userInfo, err := u.userInfoStore.GetByUserName(ctx, userName)
 	if err != nil {
 		userModel = &user_model.UserInfo{
@@ -322,33 +367,19 @@ func entryToModule(info *user_entry.UserInfo) *user_model.UserInfo {
 		Phone:         info.Phone,
 		Avatar:        info.Avatar,
 		LastLoginTime: info.LastLoginTime,
+		Password:      info.Password,
 	}
 }
 
 func (u *userInfoService) UpdateMyProfile(ctx context.Context, userId int, req *user_dto.UpdateMyProfileReq) error {
-	info, err := u.GetUserInfo(ctx, userId)
+	info, err := u.userInfoStore.Get(ctx, userId)
 	if err != nil {
 		return err
 	}
 
-	entry := &user_entry.UserInfo{
-		Id:           userId,
-		NickName:     req.NickName,
-		Email:        req.Email,
-		NoticeUserId: req.NoticeUserId,
-	}
 	info.NickName = req.NickName
 	info.Email = req.Email
 	info.NoticeUserId = req.NoticeUserId
-	return u.userInfoStore.Transaction(ctx, func(txCtx context.Context) error {
-
-		if err = u.userInfoStore.Save(txCtx, entry); err != nil {
-			return err
-		}
-
-		_ = u.cache.Set(ctx, u.cache.Key(userId), info, time.Minute*30)
-
-		return nil
-	})
+	return u.save(ctx, info)
 
 }
