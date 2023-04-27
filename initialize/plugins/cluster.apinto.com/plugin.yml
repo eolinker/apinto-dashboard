@@ -1,8 +1,8 @@
 id: "cluster.apinto.com"
 name: "cluster"
 cname: "集群"
-resume: ""
-version: "v1.0.2"
+resume: "管理和维护多业务、多环境集群，帮助管理同城双活、两地三中心、异地多活等架构场景集群配置，保证集群间信息同步。"
+version: "v1.0.0"
 icon: "集群.png"
 driver: "cluster.apinto.com"
 type: 1 #0为框架模块 1为核心模块 2为内置模块 3为非内置
