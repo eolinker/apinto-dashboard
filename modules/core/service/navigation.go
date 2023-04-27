@@ -43,8 +43,8 @@ func (n *navigation) List(ctx context.Context) ([]*model.Navigation, map[string]
 		moduleMap[m.Navigation] = append(moduleMap[m.Navigation], &model.Module{
 			Name:  m.Name,
 			Title: m.Title,
-			Type:  m.Type,
-			Path:  m.Path,
+			//Type:  m.Type,
+			Path: m.Path,
 		})
 	}
 	list := n.navigationService.List()
