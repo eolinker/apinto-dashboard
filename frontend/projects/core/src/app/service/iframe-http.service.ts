@@ -85,7 +85,7 @@ export class IframeHttpService {
     changeBreadcrumb: async (breadcrumbOption:Array<any>) => {
       return new Promise((resolve) => {
         for (const breadcrumb of breadcrumbOption) {
-          if (breadcrumb.routerLink) {
+          if (breadcrumb.routerLink !== undefined) {
             breadcrumb.routerLink = `${this.navigation.iframePrefix}/${this.moduleName}/${breadcrumb.routerLink}`
           }
         }
@@ -447,6 +447,13 @@ export class IframeHttpService {
     userList: () => {
       return new Promise((resolve) => {
         this.api.get('user/enum').subscribe((resp:any) => {
+          resolve(resp)
+        })
+      })
+    },
+    noticeChannels: () => {
+      return new Promise((resolve) => {
+        this.api.get('warn/channels').subscribe((resp:any) => {
           resolve(resp)
         })
       })
