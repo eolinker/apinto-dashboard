@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
-	"github.com/eolinker/apinto-dashboard/common/gzip-static"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/modules/api"
 	api_model "github.com/eolinker/apinto-dashboard/modules/api/model"
@@ -52,19 +51,19 @@ func RegisterMonitorRouter(router gin.IRoutes) {
 	router.PUT("/monitor/partition", m.editPartition)
 	router.DELETE("/monitor/partition", m.delPartition)
 	//总览
-	router.POST(prefix+"/overview/summary", gzip.Gzip(gzip.DefaultCompression), m.overviewSummary)
-	router.POST(prefix+"/overview/invoke", gzip.Gzip(gzip.DefaultCompression), m.overviewInvoke)
-	router.POST(prefix+"/overview/message", gzip.Gzip(gzip.DefaultCompression), m.overviewMessage)
-	router.POST(prefix+"/overview/top", gzip.Gzip(gzip.DefaultCompression), m.overviewTop)
+	router.POST(prefix+"/overview/summary", m.overviewSummary)
+	router.POST(prefix+"/overview/invoke", m.overviewInvoke)
+	router.POST(prefix+"/overview/message", m.overviewMessage)
+	router.POST(prefix+"/overview/top", m.overviewTop)
 
 	//数据统计
-	router.POST(prefix+"/:dataType", gzip.Gzip(gzip.DefaultCompression), m.getStatistics)
+	router.POST(prefix+"/:dataType", m.getStatistics)
 	//数据统计详情
-	router.POST(prefix+"/:dataType/details", gzip.Gzip(gzip.DefaultCompression), m.getStatisticsDetails)
+	router.POST(prefix+"/:dataType/details", m.getStatisticsDetails)
 	//数据统计详情-数据
-	router.POST(prefix+"/:dataType/details/:detailsType", gzip.Gzip(gzip.DefaultCompression), m.getStatistics)
+	router.POST(prefix+"/:dataType/details/:detailsType", m.getStatistics)
 	//数据统计详情-数据-趋势图
-	router.POST(prefix+"/:dataType/details/:detailsType/trend", gzip.Gzip(gzip.DefaultCompression), m.getStatisticsDetails)
+	router.POST(prefix+"/:dataType/details/:detailsType/trend", m.getStatisticsDetails)
 }
 
 func (m *monitorController) getPartitionList(ginCtx *gin.Context) {

@@ -20,3 +20,11 @@ func GetGinContextAuditObject(ginCtx *gin.Context) (value any, exists bool) {
 	return ginCtx.Get(AuditObject)
 
 }
+
+func GetNamespaceId(ginCtx *gin.Context) int {
+	id := ginCtx.GetInt(NamespaceId)
+	if id == 0 {
+		return 1
+	}
+	return id
+}
