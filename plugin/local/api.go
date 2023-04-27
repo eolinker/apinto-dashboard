@@ -30,7 +30,7 @@ func NewProxyAPi(server string, module string, config *Config) *ProxyAPi {
 func (p *ProxyAPi) CreateApi(name, method, path string, config PathConfig) apinto_module.RouterInfo {
 	to := path
 	routerPath := config.Path
-	if routerPath != "" {
+	if routerPath == "" {
 		routerPath = fmt.Sprintf("/api/module/%s/%s", p.module, strings.TrimPrefix(path, "/"))
 	}
 	return p.createApi(name, method, routerPath, to, mergeLabel(apinto_module.RouterLabelApi, config.Label))
@@ -38,10 +38,10 @@ func (p *ProxyAPi) CreateApi(name, method, path string, config PathConfig) apint
 func (p *ProxyAPi) CreateOpenApi(name, method, path string, config PathConfig) apinto_module.RouterInfo {
 	to := path
 	routerPath := config.Path
-	if routerPath != "" {
+	if routerPath == "" {
 		routerPath = fmt.Sprintf("/ap2/module/%s/%s", p.module, strings.TrimPrefix(path, "/"))
 	}
-	return p.createApi(name, method, fmt.Sprintf("/api2/module/%s/%s", p.module, strings.TrimPrefix(path, "/")), to, mergeLabel(apinto_module.RouterLabelOpenApi, config.Label))
+	return p.createApi(name, method, routerPath, to, mergeLabel(apinto_module.RouterLabelOpenApi, config.Label))
 }
 func (p *ProxyAPi) proxyApiHandler(name, method, targetPath string) gin.HandlerFunc {
 	return func(ginCtx *gin.Context) {
@@ -54,7 +54,7 @@ func (p *ProxyAPi) proxyApiHandler(name, method, targetPath string) gin.HandlerF
 		for k, v := range p.query {
 			query.Set(k, v)
 		}
-
+		targetPath = strings.TrimPrefix(targetPath, "/")
 		url := fmt.Sprintf("%s/%s?%s", p.server, targetPath, query.Encode())
 		data, err := ginCtx.GetRawData()
 		if err != nil {
