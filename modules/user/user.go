@@ -7,6 +7,7 @@ import (
 )
 
 type IUserInfoService interface {
+	GetAllUsers(ctx context.Context) ([]*user_model.UserInfo, error)
 	GetUserInfo(ctx context.Context, userId int) (*user_model.UserInfo, error)
 	GetUserInfoMaps(ctx context.Context, userId ...int) (map[int]*user_model.UserInfo, error)
 	GetUserInfoByName(ctx context.Context, userName string) (*user_model.UserInfo, error)
