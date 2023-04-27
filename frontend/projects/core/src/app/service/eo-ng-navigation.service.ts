@@ -266,9 +266,13 @@ export class EoNgNavigationService {
     return this.breadcrumbList
   }
 
-  reqFlashBreadcrumb (value: any) {
-    this.breadcrumbList = value
-    this.breadcrumb.next(value)
+  reqFlashBreadcrumb (value: any, type?:string) {
+    if (type && type === 'iframe') {
+      
+    } else {
+      this.breadcrumbList = value
+      this.breadcrumb.next(value)
+    }
   }
 
   repFlashBreadcrumb () {

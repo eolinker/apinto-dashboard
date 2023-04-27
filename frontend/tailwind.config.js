@@ -29,7 +29,12 @@ module.exports = {
         FIX_BG: '#ffffff',
         theme: 'var(--primary-color)',
         DESC_TEXT: '#666666',
-        HOVER_BG: 'var(--item-hover-background-color)'
+        HOVER_BG: 'var(--item-hover-background-color)',
+        guide_cluster: '#ee6760',
+        guide_upstream: '#f9a429',
+        guide_api: '#71d24d',
+        guide_publishApi: '#5884ff',
+        guide_final: '#915bf9'
       },
       spacing: {
         mbase: '20px',
