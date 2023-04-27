@@ -57,11 +57,6 @@ const DynamicRender = observer(() => {
   React.useEffect(() => {
     form.clearFormGraph(`${field.address}.*`)
     setSchema(DYNAMIC_INJECT_SCHEMA[form.values.driver])
-    console.log(
-      DYNAMIC_INJECT_SCHEMA,
-      form.values.driver,
-      DYNAMIC_INJECT_SCHEMA[form.values.driver]
-    )
   }, [form.values.driver])
 
   return (
@@ -133,7 +128,6 @@ export const IntelligentPluginEditComponent = React.forwardRef(
     DYNAMIC_INJECT_SCHEMA = schema
 
     const form = createForm({ validateFirst: editPage })
-    console.log(initFormValue)
     form.setInitialValues(initFormValue)
     const pluginEditSchema = {
       type: 'object',
