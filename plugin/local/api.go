@@ -27,26 +27,39 @@ func NewProxyAPi(server string, module string, config *Config) *ProxyAPi {
 	server = strings.TrimSuffix(server, "/")
 	return &ProxyAPi{server: server, module: module, headers: config.Header, query: config.Query}
 }
-func (p *ProxyAPi) CreateApi(name, method, path string, appendLabel []string) apinto_module.RouterInfo {
-	return p.createApi(name, method, fmt.Sprintf("/api/module/%s", p.module), path, mergeLabel(apinto_module.RouterLabelApi, appendLabel))
+func (p *ProxyAPi) CreateApi(name, method, path string, config PathConfig) apinto_module.RouterInfo {
+	to := path
+	if config.Path != "" {
+		to = config.Path
+	}
+	return p.createApi(name, method, fmt.Sprintf("/api/module//%s/%s", p.module, strings.TrimPrefix(path, "/")), to, mergeLabel(apinto_module.RouterLabelApi, config.Label))
 }
-func (p *ProxyAPi) CreateOpenApi(name, method, path string, appendLabel []string) apinto_module.RouterInfo {
-	return p.createApi(name, method, fmt.Sprintf("/api2/module/%s", p.module), path, mergeLabel(apinto_module.RouterLabelOpenApi, appendLabel))
+func (p *ProxyAPi) CreateOpenApi(name, method, path string, config PathConfig) apinto_module.RouterInfo {
+	to := path
+	if config.Path != "" {
+		to = config.Path
+	}
+	return p.createApi(name, method, fmt.Sprintf("/api2/module/%s/%s", p.module, strings.TrimPrefix(path, "/")), to, mergeLabel(apinto_module.RouterLabelOpenApi, config.Label))
 }
-func (p *ProxyAPi) createApi(name, method, prefix, path string, labels []string) apinto_module.RouterInfo {
-	prefix = strings.Trim(prefix, "/")
-	path = strings.TrimPrefix(path, "/")
-	routerPath := fmt.Sprintf("/%s/%s", prefix, strings.TrimPrefix(path, "/"))
-	pathPrefix := fmt.Sprintf("/%s/", prefix)
+func (p *ProxyAPi) createApi(name, method, from, to string, labels []string) apinto_module.RouterInfo {
+
 	return apinto_module.RouterInfo{
 		Method:  method,
-		Path:    routerPath,
+		Path:    from,
 		Handler: fmt.Sprintf("%s.%s", p.module, name),
 		Labels:  labels,
 		HandlerFunc: []apinto_module.HandlerFunc{func(ginCtx *gin.Context) {
-			requestPath := ginCtx.Request.RequestURI
-			targetPath := strings.TrimPrefix(requestPath, pathPrefix)
-			url := fmt.Sprintf("%s/%s", p.server, targetPath)
+
+			targetPath := to
+			for _, param := range ginCtx.Params {
+				targetPath = strings.Replace(targetPath, fmt.Sprint(":", param.Key), param.Value, -1)
+			}
+			query := ginCtx.Request.URL.Query()
+			for k, v := range p.query {
+				query.Set(k, v)
+			}
+
+			url := fmt.Sprintf("%s/%s?%s", p.server, targetPath, query.Encode())
 			data, err := ginCtx.GetRawData()
 			if err != nil {
 				return
@@ -61,13 +74,11 @@ func (p *ProxyAPi) createApi(name, method, prefix, path string, labels []string)
 			for k, v := range p.headers {
 				request.Header.Set(k, v)
 			}
-			if ginCtx.Keys != nil {
-				apintoKeysData, err := json.Marshal(ginCtx.Keys)
-				if err == nil {
-					request.Header.Set("apinto-runtime-keys", string(apintoKeysData))
-				}
-			}
 
+			headerName, value := apinto_module.ReadKeys(ginCtx)
+			if headerName != "" {
+				request.Header.Set(headerName, value)
+			}
 			response, err := http.DefaultClient.Do(request)
 			if err != nil {
 				return
@@ -75,18 +86,28 @@ func (p *ProxyAPi) createApi(name, method, prefix, path string, labels []string)
 			responseData, _ := io.ReadAll(response.Body)
 			response.Body.Close()
 
-			event := response.Header.Get("apinto-event")
-
+			responseHeader := response.Header
 			contentType := response.Header.Get("content-type")
-
-			if len(event) > 0 {
-				eventObjs := make(map[string]any)
-				if err := json.Unmarshal([]byte(event), &eventObjs); err == nil {
-					for k, v := range eventObjs {
-						apinto_module.DoEvent(k, v)
+			for k, vs := range responseHeader {
+				switch k {
+				case "Apinto-Event":
+					for _, v := range vs {
+						if len(v) > 0 {
+							eventObjs := make(map[string]any)
+							if err := json.Unmarshal([]byte(v), &eventObjs); err == nil {
+								for k, v := range eventObjs {
+									apinto_module.DoEvent(k, v)
+								}
+							} else {
+								log.Warnf("invalid event for :%s.%s on %s %s", p.module, name, method, to)
+							}
+						}
 					}
-				} else {
-					log.Warnf("invalid event for :%s.%s on %s %s", p.module, name, method, path)
+				default:
+					for _, v := range vs {
+						ginCtx.Writer.Header().Add(k, v)
+					}
+
 				}
 			}
 			ginCtx.Data(response.StatusCode, contentType, responseData)
