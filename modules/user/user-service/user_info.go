@@ -50,6 +50,32 @@ func (u *userInfoService) loginHandler(login string, v any) {
 	}
 	u.userInfoStore.Save(context.Background(), userEntry)
 }
+
+func (u *userInfoService) GetAllUsers(ctx context.Context) ([]*user_model.UserInfo, error) {
+	infos, err := u.userInfoStore.GetAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	resList := make([]*user_model.UserInfo, 0, len(infos))
+
+	for _, info := range infos {
+		resList = append(resList, &user_model.UserInfo{
+			Id:            info.Id,
+			Sex:           info.Sex,
+			UserName:      info.UserName,
+			NoticeUserId:  info.NoticeUserId,
+			NickName:      info.NickName,
+			Email:         info.Email,
+			Phone:         info.Phone,
+			Avatar:        info.Avatar,
+			LastLoginTime: info.LastLoginTime,
+		})
+	}
+
+	return resList, nil
+}
+
 func (u *userInfoService) GetUserInfoMaps(ctx context.Context, userIds ...int) (map[int]*user_model.UserInfo, error) {
 
 	maps := make(map[int]*user_model.UserInfo)
