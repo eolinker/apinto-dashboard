@@ -90,7 +90,7 @@ export class IframeHttpService {
           }
         }
         console.log(breadcrumbOption)
-        this.navigation.reqFlashBreadcrumb(breadcrumbOption)
+        this.navigation.reqFlashBreadcrumb(breadcrumbOption, 'iframe')
         resolve(true)
       })
     },
@@ -453,7 +453,7 @@ export class IframeHttpService {
     },
     noticeChannels: () => {
       return new Promise((resolve) => {
-        this.api.get('warn/channels').subscribe((resp:any) => {
+        this.api.get('channels').subscribe((resp:any) => {
           resolve(resp)
         })
       })
