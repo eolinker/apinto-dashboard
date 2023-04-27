@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core'
+import { Component, ElementRef, HostListener, OnInit, SimpleChange, SimpleChanges, ViewChild } from '@angular/core'
 import { IframeHttpService } from '../../service/iframe-http.service'
 import { ApiService } from '../../service/api.service'
 import { EoNgNavigationService } from '../../service/eo-ng-navigation.service'
@@ -81,7 +81,6 @@ export class IframePageComponent implements OnInit {
         }
       })
     }
-    console.log(iframe)
     if ((iframe as any).attachEvent) {
       (iframe as any).attachEvent('onload', onLoadCallback)
     } else {
@@ -94,6 +93,7 @@ export class IframePageComponent implements OnInit {
     panel?.appendChild(iframe)
 
     function createIframe (id: string, url: string) {
+      console.log(url)
       const iframe = document.createElement('iframe')
       iframe.id = id
       iframe.width = '100%'
@@ -269,26 +269,28 @@ export class IframePageComponent implements OnInit {
   }
 
   ngOnInit (): void {
+    console.log('init')
     this.moduleName = this.baseInfo.allParamsInfo.moduleName
-    // this.subscription = this.router.events.subscribe((event) => {
-    //   if (event instanceof NavigationEnd) {
-    //     console.log(this.router.url)
-    //     this.moduleName = this.baseInfo.allParamsInfo.moduleName
-    //     this.getPath()
-    //   }
-    // })
+    this.subscription = this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        console.log(this.router.url)
+        this.moduleName = this.baseInfo.allParamsInfo.moduleName
+        this.iframeService.moduleName = this.moduleName
+        // this.getPath()
+      }
+    })
     // this.getPath()
   }
 
   ngAfterViewInit () {
-    window.onload = () => {
-      console.log('waw')
-      this.showIframe('test', 'http://localhost:4444', {})
-    }
+    // this.showIframe('test', 'http://localhost:4444', {})
+    this.showIframe('test', `agent/${this.moduleName}`, {})
   }
 
   ngOnDestroy () {
+    console.log('ngOnDestroy')
     this.subscription.unsubscribe()
+    this.iframeService.subscription.unsubscribe()
   }
 
   getPath () {
