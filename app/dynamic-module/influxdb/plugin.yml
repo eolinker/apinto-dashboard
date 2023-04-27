@@ -1,7 +1,7 @@
 id: "influxdb.apinto.com"
 name: "influxdb"
 cname: "InfluxDB配置"
-resume: ""
+resume: "配置InfluxDB v2服务端信息，InfluxDB是监控告警的数据源之一。"
 version: "v1.0.0"
 icon: "监控告警.png"
 driver: "dynamic.apinto.com"
@@ -24,7 +24,7 @@ define:  # 动态模块定义
     - name: description
       title: 描述
   render:
-    influxdb-v2: |
+    influxdbv2: |
       {
           "type":"object",
           "properties":{
