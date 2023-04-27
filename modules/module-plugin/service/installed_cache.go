@@ -24,5 +24,4 @@ func newIInstalledCache(client *redis.ClusterClient) IInstalledCache {
 	return &installedCache{
 		IRedisCache: cache.CreateRedisCache[model.PluginInstalledStatus](client),
 	}
-
 }
