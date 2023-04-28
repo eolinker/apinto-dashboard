@@ -1,8 +1,8 @@
 id: "strategy-fuse.apinto.com"
 name: "fuse"
 cname: "熔断"
-resume: ""
-version: "v1.0.3"
+resume: 用API的"出错比例"来表示这个API的健康状态，，当这个比例值高于设定的阈值，API自动抛出异常，终止服务。
+version: "v1.0.0"
 icon: "熔断.png"
 driver: "strategy-fuse.apinto.com"
 type: 2 #0为框架模块 1为核心模块 2为内置模块 3为非内置
