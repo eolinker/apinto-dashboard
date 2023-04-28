@@ -30,10 +30,10 @@ export class DeployPluginListComponent implements OnInit {
     private modalService: EoNgFeedbackModalService,
     private api: ApiService,
     public router: Router,
-    private appConfigService: EoNgNavigationService,
+    private navigationService: EoNgNavigationService,
     private service:DeployService
   ) {
-    this.appConfigService.reqFlashBreadcrumb([{ title: '插件管理' }])
+    this.navigationService.reqFlashBreadcrumb([{ title: '插件管理' }])
   }
 
   ngOnInit (): void {

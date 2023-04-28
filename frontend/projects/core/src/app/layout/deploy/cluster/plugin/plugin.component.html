@@ -8,6 +8,7 @@
         eo-ng-button
         eoNgUserAccess="deploy/cluster"
         (click)="openDrawer('publish')"
+        (disabledEdit)="disabledEdit($event)"
       >
         发布
       </button>

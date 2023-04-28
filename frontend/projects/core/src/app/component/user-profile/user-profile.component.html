@@ -43,9 +43,8 @@
       <input
         class="w-INPUT_NORMAL"
         eo-ng-input
-        formControlName="userNickName"
+        formControlName="nickName"
         placeholder="请输入名称"
-        [eoNgUserAccess]="accessLink"
       />
     </nz-form-control>
   </nz-form-item>
@@ -58,7 +57,6 @@
         eo-ng-input
         formControlName="email"
         placeholder="请输入邮箱"
-        [eoNgUserAccess]="accessLink"
       />
     </nz-form-control>
   </nz-form-item>
@@ -71,13 +69,11 @@
         eo-ng-input
         formControlName="noticeUserId"
         placeholder="请输入"
-        [disabled]="nzDisabled"
-        [eoNgUserAccess]="accessLink"
       />
     </nz-form-control>
   </nz-form-item>
 
-  <nz-form-item>
+  <nz-form-item *ngIf="type !== 'editCurrentUser'">
     <nz-form-label [nzSpan]="6">角色：</nz-form-label>
     <nz-form-control [nzSpan]="13">
       <eo-ng-select
@@ -85,7 +81,7 @@
         [nzOptions]="rolesList"
         formControlName="role"
         nzPlaceHolder="请选择"
-        [nzDisabled]="type === 'editCurrentUser' || nzDisabled"
+        [nzDisabled]="type === 'editCurrentUser'"
       ></eo-ng-select>
     </nz-form-control>
   </nz-form-item>
@@ -98,7 +94,6 @@
         eo-ng-input
         formControlName="desc"
         placeholder="请输入"
-        [eoNgUserAccess]="accessLink"
       ></textarea>
     </nz-form-control>
   </nz-form-item>

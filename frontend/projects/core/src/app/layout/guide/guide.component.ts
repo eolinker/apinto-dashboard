@@ -32,9 +32,9 @@ export class GuideComponent implements OnInit {
   tutorialsList:Array<TutorialItem> = [...TutorialsList]
   btnLoading:boolean = true
 
-  constructor (private appConfigService:EoNgNavigationService, private api:ApiService, private router:Router) {}
+  constructor (private navigationService:EoNgNavigationService, private api:ApiService, private router:Router) {}
   ngOnInit (): void {
-    this.appConfigService.reqFlashBreadcrumb([])
+    this.navigationService.reqFlashBreadcrumb([])
     this.getStepStatus()
   }
 

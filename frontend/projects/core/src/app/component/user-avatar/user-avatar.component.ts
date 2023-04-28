@@ -23,7 +23,7 @@ import { MODAL_SMALL_SIZE } from '../../constant/app.config'
 })
 export class UserAvatarComponent implements OnInit {
   userMenu: Array<any> = []
-  userNickName: string = ''
+  nickName: string = ''
   userName: string = ''
   drawerRef:NzModalRef | undefined
   // eslint-disable-next-line no-useless-constructor
@@ -56,9 +56,9 @@ export class UserAvatarComponent implements OnInit {
   getCurrentUserProfile () {
     this.apiService.get('my/profile').subscribe((resp:any) => {
       if (resp.code === 0) {
-        this.userNickName = resp.data.profile.nick_name
-        this.userName = resp.data.profile.user_name
-        this.appService.setUserRoleId(resp.data.profile.role_ids ? resp.data.profile.role_ids[0] : '')
+        this.nickName = resp.data.profile.nickName
+        this.userName = resp.data.profile.userName
+        resp.data.profile.roleIds?.length && this.appService.setUserRoleId(resp.data.profile.roleIds[0])
         this.appService.setUserId(resp.data.profile.id)
       } else {
         this.message.error(resp.msg || '获取用户信息失败!')
