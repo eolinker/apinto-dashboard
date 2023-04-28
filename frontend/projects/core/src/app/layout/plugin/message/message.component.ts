@@ -289,7 +289,8 @@ export class PluginMessageComponent implements OnInit {
                   validateForm: this.fb.group({
                     name: [params.name, [Validators.required]],
                     server: [params.server, [Validators.required]]
-                  })
+                  }),
+                  closeModal:()=>{this.modalRef?.close()}
                 },
                 nzOkText: '确定',
                 nzCancelText: '取消',
