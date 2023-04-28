@@ -193,11 +193,11 @@ func (u *UserController) ssoLogin(ginCtx *gin.Context) {
 	}
 	info, err := u.userInfo.GetUserInfoByName(ginCtx, loginInfo.Username)
 	if err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("get user info fail. err:%s", err.Error()))
+		ginCtx.JSON(http.StatusOK, controller.NewLoginInvalidError(controller.CodeLoginUserNoExistent, "登录失效"))
 		return
 	}
 	if common.Md5(loginInfo.Password) != info.Password {
-		controller.ErrorJson(ginCtx, http.StatusOK, "用户名或密码错误")
+		ginCtx.JSON(http.StatusOK, controller.NewLoginInvalidError(controller.CodeLoginPwdErr, "登录失效"))
 		return
 	}
 	now := time.Now()
@@ -256,28 +256,28 @@ func (u *UserController) ssoLogout(ginCtx *gin.Context) {
 func (u *UserController) ssoLoginCheck(ginCtx *gin.Context) {
 	cookie, err := ginCtx.Cookie(controller.Session)
 	if err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
+		ginCtx.JSON(http.StatusOK, controller.NewLoginInvalidError(controller.CodeLoginInvalid, "登录失效"))
 		return
 	}
 
 	session, _ := u.sessionCache.Get(ginCtx, cookie)
 	if session == nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, "登录失效")
+		ginCtx.JSON(http.StatusOK, controller.NewLoginInvalidError(controller.CodeLoginInvalid, "登录失效"))
 		return
 	}
 	uc, err := common.JWTDecode(session.Jwt, jwtSecret)
 	if err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, "登录失效")
+		ginCtx.JSON(http.StatusOK, controller.NewLoginInvalidError(controller.CodeLoginInvalid, "登录失效"))
 		return
 	}
 
 	info, err := u.userInfo.GetUserInfo(ginCtx, uc.Id)
 	if err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, "登录失效")
+		ginCtx.JSON(http.StatusOK, controller.NewLoginInvalidError(controller.CodeLoginInvalid, "登录失效"))
 		return
 	}
 	if info.LastLoginTime.Format("2006-01-02 15:04:05") != uc.LoginTime || info.UserName != uc.Uname {
-		controller.ErrorJson(ginCtx, http.StatusOK, "登录失效")
+		ginCtx.JSON(http.StatusOK, controller.NewLoginInvalidError(controller.CodeLoginInvalid, "登录失效"))
 		return
 	}
 
