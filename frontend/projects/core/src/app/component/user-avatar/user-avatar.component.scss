@@ -1,4 +1,4 @@
-eo-ng-apinto-user-avatar {
+:host ::ng-deep {
   eo-ng-dropdown button {
     border: none !important;
     background-color: transparent !important;
@@ -6,13 +6,13 @@ eo-ng-apinto-user-avatar {
     height: 28px !important;
     line-height: 28px !important;
   }
-}
 
-.name-width {
-  height: 0;
-  margin-left: 48px;
-}
+  .name-width {
+    height: 0;
+    margin-left: 48px;
+  }
 
-.avatar {
-  color: var(--MAIN_THEME_BG);
+  .avatar {
+    color: var(--MAIN_THEME_BG);
+  }
 }
