@@ -22,7 +22,7 @@ import { EoNgNavigationService } from '../../service/eo-ng-navigation.service'
 export class LoginComponent implements OnInit {
   private subscription: Subscription = new Subscription()
   constructor (
-    private appConfigService: EoNgNavigationService,
+    private navigationService: EoNgNavigationService,
     private api: ApiService,
     private router: Router,
     private message: EoNgFeedbackMessageService
@@ -31,10 +31,10 @@ export class LoginComponent implements OnInit {
   ngOnInit () {
     this.api.checkAuth().subscribe((resp: any) => {
       if (resp.code === 0) {
-        this.subscription = this.appConfigService
+        this.subscription = this.navigationService
           .getMenuList()
           .subscribe(() => {
-            this.router.navigate([this.appConfigService.getPageRoute()])
+            this.router.navigate([this.navigationService.getPageRoute()])
           })
       }
     })

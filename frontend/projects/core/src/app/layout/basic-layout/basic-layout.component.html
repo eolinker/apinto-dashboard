@@ -19,6 +19,15 @@
     </div>
     <div class="flex h-[49px] items-center justify-between">
       <eo-ng-breadcrumb [nzOptions]="breadcrumbOptions"></eo-ng-breadcrumb>
+      <ng-template
+        #breadcrumbTitleTpl
+        let-data="data"
+        let-option
+        let-url="url"
+        let-title="title"
+      >
+        <a (click)="clickIframeBreadcrumb(url)">{{ title }}</a>
+      </ng-template>
       <div>
         <button eo-ng-button class="mr-btnrbase" (click)="goToHelp()">
           帮助文档

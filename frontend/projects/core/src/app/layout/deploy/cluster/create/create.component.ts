@@ -40,7 +40,7 @@ export class DeployClusterCreateComponent implements OnInit {
     private api: ApiService,
     private router: Router,
     private fb: UntypedFormBuilder,
-    private appConfigService: EoNgNavigationService) {
+    private navigationService: EoNgNavigationService) {
     this.validateForm = this.fb.group({
       clusterName: ['', [Validators.required, Validators.pattern('^[a-zA-Z][a-zA-Z0-9_]*')]],
       envValue: ['', [Validators.required]],
@@ -48,7 +48,7 @@ export class DeployClusterCreateComponent implements OnInit {
       clusterAddr: ['', [this.clusterAddrVadidator]]
     })
 
-    this.appConfigService.reqFlashBreadcrumb([{ title: '网关集群', routerLink: 'deploy/cluster' }, { title: '新建集群' }])
+    this.navigationService.reqFlashBreadcrumb([{ title: '网关集群', routerLink: 'deploy/cluster' }, { title: '新建集群' }])
   }
 
   ngOnInit (): void {

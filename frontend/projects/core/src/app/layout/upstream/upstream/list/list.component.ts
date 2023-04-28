@@ -21,8 +21,8 @@ export class UpstreamListComponent implements OnInit {
                 private modalService:EoNgFeedbackModalService,
                 private api:ApiService,
                 private router:Router,
-                private appConfigService:EoNgNavigationService) {
-    this.appConfigService.reqFlashBreadcrumb([{ title: '上游管理', routerLink: 'upstream/upstream' }])
+                private navigationService:EoNgNavigationService) {
+    this.navigationService.reqFlashBreadcrumb([{ title: '上游管理', routerLink: 'upstream/upstream' }])
   }
 
  nzDisabled:boolean = false

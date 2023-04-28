@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http'
 import { Inject, Injectable } from '@angular/core'
-import { Observable, Subscriber, Subscription, take } from 'rxjs'
+import { Observable, Subject, Subscriber, Subscription, take } from 'rxjs'
 import { API_URL, ApiService } from './api.service'
 import { NavigationEnd, Router } from '@angular/router'
 import { EoNgNavigationService } from './eo-ng-navigation.service'
@@ -65,6 +65,7 @@ export class IframeHttpService {
       })
     },
     changeRouter: async (url:string) => {
+      console.log(url)
       return new Promise((resolve) => {
         let newRouterArr:Array<string> = this.router.url.split('#')
         if (this.router.url.includes('#')) {
@@ -84,12 +85,6 @@ export class IframeHttpService {
     },
     changeBreadcrumb: async (breadcrumbOption:Array<any>) => {
       return new Promise((resolve) => {
-        for (const breadcrumb of breadcrumbOption) {
-          if (breadcrumb.routerLink !== undefined) {
-            breadcrumb.routerLink = `${this.navigation.iframePrefix}/${this.moduleName}/${breadcrumb.routerLink}`
-          }
-        }
-        console.log(breadcrumbOption)
         this.navigation.reqFlashBreadcrumb(breadcrumbOption, 'iframe')
         resolve(true)
       })
@@ -101,7 +96,7 @@ export class IframeHttpService {
           resolve({
             userId: this.navigation.getUserId(),
             userRoleId: this.navigation.getUserRoleId(),
-            userModuleAccess: this.navigation.originAccessData[this.moduleName]
+            userModuleAccess: this.navigation.accessMap.get(this.moduleName)
           })
         })
       })
@@ -111,12 +106,12 @@ export class IframeHttpService {
         console.log({
           userId: this.navigation.getUserId(),
           userRoleId: this.navigation.getUserRoleId(),
-          userModuleAccess: this.navigation.originAccessData[this.moduleName]
+          userModuleAccess: this.navigation.accessMap.get(this.moduleName)
         })
         resolve({
           userId: this.navigation.getUserId(),
           userRoleId: this.navigation.getUserRoleId(),
-          userModuleAccess: this.navigation.originAccessData[this.moduleName]
+          userModuleAccess: this.navigation.accessMap.get(this.moduleName)
         })
       })
     },
@@ -197,6 +192,13 @@ export class IframeHttpService {
         })
       })
     },
+    deleteUsers: async (idsList:string[]) => {
+      return new Promise((resolve) => {
+        return this.api.post('user/delete', { ids: idsList }).subscribe((resp:any) => {
+          resolve(resp)
+        })
+      })
+    },
     rolesList: async () => {
       return new Promise((resolve) => {
         return this.api.get('role/options').subscribe((resp:any) => {
@@ -221,13 +223,6 @@ export class IframeHttpService {
     rolesGroupList: async () => {
       return new Promise((resolve) => {
         return this.api.get('roles').subscribe((resp:any) => {
-          resolve(resp)
-        })
-      })
-    },
-    deleteUsers: async (idsList:string[]) => {
-      return new Promise((resolve) => {
-        return this.api.post('user/delete', { ids: idsList }).subscribe((resp:any) => {
           resolve(resp)
         })
       })
@@ -410,7 +405,6 @@ export class IframeHttpService {
     },
     clusterList: async () => {
       return new Promise((resolve) => {
-        console.log('clusterList')
         return this.api.get('cluster/enum').subscribe((resp:any) => {
           resolve(resp)
         })
@@ -483,5 +477,15 @@ export class IframeHttpService {
         }
       }
     })
+  }
+
+  private changeIframe: Subject<string> = new Subject<string>()
+
+  reqFlashIframe (url:string) {
+    this.changeIframe.next(url)
+  }
+
+  repFlashIframe () {
+    return this.changeIframe.asObservable()
   }
 }

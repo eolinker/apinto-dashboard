@@ -15,6 +15,7 @@ import { defaultAutoTips } from '../../constant/conf'
 import { ApiService } from '../../service/api.service'
 import { EoNgNavigationService } from '../../service/app-config.service'
 import { UserData } from '../../constant/type'
+import { setFormValue } from '../../constant/form'
 
 @Component({
   selector: 'eo-ng-apinto-user-profile',
@@ -39,7 +40,7 @@ export class UserProfileComponent implements OnInit {
     const { required, email } = EoNgMyValidators
     this.validateForm = this.fb.group({
       userName: ['', [required, Validators.pattern('^[a-zA-Z][a-zA-Z0-9/_]*')]],
-      userNickName: ['', [required]],
+      nickName: ['', [required]],
       noticeUserId: [''],
       email: ['', [required, email]],
       role: [''],
@@ -54,7 +55,6 @@ export class UserProfileComponent implements OnInit {
         this.getCurrentUserProfile()
         this.validateForm.controls['userName'].disable()
         this.validateForm.controls['role'].disable()
-        this.getRolesList(true)
         break
       case 'editUser':
         this.getOtherUserProfile(this.userId)
@@ -73,13 +73,9 @@ export class UserProfileComponent implements OnInit {
   getCurrentUserProfile () {
     this.apiService.get('my/profile').subscribe((resp:any) => {
       if (resp.code === 0) {
-        this.validateForm.controls['userName'].setValue(resp.data.profile.user_name)
-        this.validateForm.controls['userNickName'].setValue(resp.data.profile.nick_name)
-        this.validateForm.controls['noticeUserId'].setValue(resp.data.profile.notice_user_id)
-        this.validateForm.controls['email'].setValue(resp.data.profile.email)
-        this.validateForm.controls['role'].setValue(resp.data.profile.role_ids[0])
-        this.validateForm.controls['desc'].setValue(resp.data.profile.desc)
-        this.appService.setUserRoleId(resp.data.profile.role_ids[0])
+        console.log(resp)
+        setFormValue(this.validateForm, resp.data.profile)
+        this.validateForm.controls['desc'].setValue(resp.data.describe)
         this.appService.setUserId(resp.data.profile.id)
       } else {
         this.message.error(resp.msg || '获取用户信息失败!')
@@ -91,7 +87,7 @@ export class UserProfileComponent implements OnInit {
     this.apiService.get('user/profile', { id: id || '' }).subscribe((resp:{code:number, data:{profile:UserData}, msg:string}) => {
       if (resp.code === 0) {
         this.validateForm.controls['userName'].setValue(resp.data.profile.user_name)
-        this.validateForm.controls['userNickName'].setValue(resp.data.profile.nick_name)
+        this.validateForm.controls['nickName'].setValue(resp.data.profile.nick_name)
         this.validateForm.controls['noticeUserId'].setValue(resp.data.profile.notice_user_id)
         this.validateForm.controls['email'].setValue(resp.data.profile.email)
         this.validateForm.controls['role'].setValue(resp.data.profile.role_ids[0])
@@ -134,7 +130,7 @@ export class UserProfileComponent implements OnInit {
       switch (this.type) {
         case 'editCurrentUser':
           this.apiService.put('my/profile', {
-            nick_name: this.validateForm.value.userNickName,
+            nick_name: this.validateForm.value.nickName,
             notice_user_id: this.validateForm.value.noticeUserId,
             email: this.validateForm.value.email,
             desc: this.validateForm.value.desc || ''
@@ -150,7 +146,7 @@ export class UserProfileComponent implements OnInit {
         case 'addUser':
           this.apiService.post('user/profile', {
             user_name: this.validateForm.value.userName,
-            nick_name: this.validateForm.value.userNickName,
+            nick_name: this.validateForm.value.nickName,
             notice_user_id: this.validateForm.value.noticeUserId,
             email: this.validateForm.value.email,
             desc: this.validateForm.value.desc || '',
@@ -167,7 +163,7 @@ export class UserProfileComponent implements OnInit {
         case 'editUser':
           this.apiService.put('user/profile', {
             user_name: this.validateForm.controls['userName'].value,
-            nick_name: this.validateForm.value.userNickName,
+            nick_name: this.validateForm.value.nickName,
             notice_user_id: this.validateForm.value.noticeUserId,
             email: this.validateForm.value.email,
             desc: this.validateForm.value.desc || '',
