@@ -43,9 +43,9 @@ export class ApplicationManagementListComponent implements OnInit {
     private modalService:EoNgFeedbackModalService,
     private api:ApiService,
     private router:Router,
-    private appConfigService:EoNgNavigationService
+    private navigationService:EoNgNavigationService
   ) {
-    this.appConfigService.reqFlashBreadcrumb([{ title: '应用管理', routerLink: 'application' }])
+    this.navigationService.reqFlashBreadcrumb([{ title: '应用管理', routerLink: 'application' }])
   }
 
   ngOnInit (): void {

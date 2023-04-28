@@ -24,8 +24,8 @@ export class ExternalAppListComponent implements OnInit {
   appsList:Array<any> = []
 
   constructor (private router:Router, private message: EoNgFeedbackMessageService, private modalService:EoNgFeedbackModalService, private api:ApiService,
-    private appConfigService: EoNgNavigationService) {
-    this.appConfigService.reqFlashBreadcrumb([
+    private navigationService: EoNgNavigationService) {
+    this.navigationService.reqFlashBreadcrumb([
       { title: '外部应用' }
     ])
   }

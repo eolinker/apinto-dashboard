@@ -1121,7 +1121,7 @@ describe('ListComponent test', () => {
 
   it('##strategyConf and getBreadcrumb test', fakeAsync(() => {
     // @ts-ignore
-    const spyReqFlashBreadcrumb = jest.spyOn(component.appConfigService, 'reqFlashBreadcrumb'
+    const spyReqFlashBreadcrumb = jest.spyOn(component.navigationService, 'reqFlashBreadcrumb'
     )
     expect(spyReqFlashBreadcrumb).not.toHaveBeenCalled()
 

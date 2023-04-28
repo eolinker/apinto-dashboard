@@ -22,6 +22,7 @@ export class IntelligentPluginPublishComponent implements OnInit {
   selectedClusters:Array<string> = []
   moduleName:string = ''
   closeModal:any
+  nzDisabled:boolean = false
   constructor (
     private message: EoNgFeedbackMessageService,
     private service:IntelligentPluginService,

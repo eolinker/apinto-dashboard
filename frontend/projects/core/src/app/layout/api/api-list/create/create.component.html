@@ -66,7 +66,11 @@
         nzValidatingTip="Validating..."
         [nzErrorTip]="nameErrorTpl"
       >
-        <eo-ng-input-group nzPrefix="/" class="w-INPUT_LARGE">
+        <eo-ng-input-group
+          nzPrefix="/"
+          class="w-INPUT_LARGE"
+          [ngClass]="{ 'bg-DISABLE_BG': nzDisabled }"
+        >
           <input
             style="height: unset !important"
             eo-ng-input

@@ -33,7 +33,11 @@ func (p *ProxyAPi) CreateApi(name, method, path string, config PathConfig) apint
 	if routerPath == "" {
 		routerPath = fmt.Sprintf("/api/module/%s/%s", p.module, strings.TrimPrefix(path, "/"))
 	}
-	return p.createApi(name, method, routerPath, to, mergeLabel(apinto_module.RouterLabelApi, config.Label))
+	label := config.Label
+	if len(label) == 0 {
+		label = apinto_module.RouterLabelApi
+	}
+	return p.createApi(name, method, routerPath, to, label)
 }
 func (p *ProxyAPi) CreateOpenApi(name, method, path string, config PathConfig) apinto_module.RouterInfo {
 	to := path
@@ -41,7 +45,11 @@ func (p *ProxyAPi) CreateOpenApi(name, method, path string, config PathConfig) a
 	if routerPath == "" {
 		routerPath = fmt.Sprintf("/ap2/module/%s/%s", p.module, strings.TrimPrefix(path, "/"))
 	}
-	return p.createApi(name, method, routerPath, to, mergeLabel(apinto_module.RouterLabelOpenApi, config.Label))
+	label := config.Label
+	if len(label) == 0 {
+		label = apinto_module.RouterLabelApi
+	}
+	return p.createApi(name, method, routerPath, to, label)
 }
 func (p *ProxyAPi) proxyApiHandler(name, method, path string) gin.HandlerFunc {
 	return func(ginCtx *gin.Context) {
