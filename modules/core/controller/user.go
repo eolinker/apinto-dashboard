@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+	"github.com/eolinker/apinto-dashboard/controller/session"
 	"net/http"
 	"time"
 
@@ -100,7 +101,7 @@ func (u *UserController) setPassword(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("get user info fail. err:%s", err.Error()))
 		return
 	}
-	userJWT, err := controller.JWTEncode(&controller.UserClaim{
+	userJWT, err := session.JWTEncode(&controller.UserClaim{
 		Id:        info.Id,
 		Uname:     info.UserName,
 		LoginTime: info.LastLoginTime.Format("2006-01-02 15:04:05"),
@@ -208,7 +209,7 @@ func (u *UserController) ssoLogin(ginCtx *gin.Context) {
 		return
 	}
 
-	userJWT, err := controller.JWTEncode(&controller.UserClaim{
+	userJWT, err := session.JWTEncode(&controller.UserClaim{
 		Id:        info.Id,
 		Uname:     info.UserName,
 		LoginTime: now.Format("2006-01-02 15:04:05"),
@@ -265,7 +266,7 @@ func (u *UserController) ssoLoginCheck(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, "登录失效")
 		return
 	}
-	uc, err := controller.JWTDecode(session.Jwt)
+	uc, err := session.JWTDecode(session.Jwt)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, "登录失效")
 		return
@@ -337,7 +338,7 @@ func userRouters() apinto_module.RoutersInfo {
 			Method:      http.MethodPost,
 			Path:        "/sso/login",
 			Handler:     "core.sso.login",
-			Labels:      apinto_module.RouterAnonymous,
+			Labels:      apinto_module.RouterLabelAnonymous,
 			HandlerFunc: []apinto_module.HandlerFunc{userController.ssoLogin},
 			Alternative: true,
 		},
@@ -345,14 +346,14 @@ func userRouters() apinto_module.RoutersInfo {
 			Method:      http.MethodPost,
 			Path:        "/sso/login/check",
 			Handler:     "core.sso.login.check",
-			Labels:      apinto_module.RouterAnonymous,
+			Labels:      apinto_module.RouterLabelAnonymous,
 			HandlerFunc: []apinto_module.HandlerFunc{userController.ssoLoginCheck},
 			Alternative: true,
 		}, {
 			Method:      http.MethodPost,
 			Path:        "/sso/logout",
-			Handler:     "core.sso.login",
-			Labels:      apinto_module.RouterAnonymous,
+			Handler:     "core.sso.logout",
+			Labels:      apinto_module.RouterLabelAnonymous,
 			HandlerFunc: []apinto_module.HandlerFunc{userController.ssoLogout},
 			Alternative: true,
 		},
