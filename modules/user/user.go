@@ -13,6 +13,7 @@ type IUserInfoService interface {
 	GetAllUsers(ctx context.Context) ([]*user_model.UserInfo, error)
 	GetUserInfo(ctx context.Context, userId int) (*user_model.UserInfo, error)
 	GetUserInfoMaps(ctx context.Context, userId ...int) (map[int]*user_model.UserInfo, error)
+	CheckPassword(ctx context.Context, name string, password string) (int, bool)
 	GetUserInfoByName(ctx context.Context, userName string) (*user_model.UserInfo, error)
 	GetUserInfoByNames(ctx context.Context, userNames ...string) (map[string]*user_model.UserInfo, error)
 	UpdateMyProfile(ctx context.Context, userId int, req *user_dto.UpdateMyProfileReq) error
