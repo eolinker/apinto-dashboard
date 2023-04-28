@@ -19,7 +19,7 @@ func userCacheKey(userId int) string {
 	return fmt.Sprintf("user_info:id:%d", userId)
 }
 func userCacheName(name string) string {
-	return fmt.Sprintf("user_info:name:%d", name)
+	return fmt.Sprintf("user_info:name:%s", name)
 }
 func newUserInfoIdCache(client *redis.ClusterClient) IUserInfoCacheId {
 	return cache.CreateRedisCache[user_model.UserInfo, int](client, userCacheKey, "apinto", "user-center")
