@@ -1,13 +1,14 @@
 package controller
 
 import (
+	"net/http"
+	"strconv"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
-	"net/http"
-	"strconv"
 )
 
 var jwtSecret = []byte("apintp-dashboard")
@@ -20,14 +21,14 @@ func (u *UserController) LoginCheckApi(ginCtx *gin.Context) {
 
 	session, _ := ginCtx.Cookie(controller.Session)
 	if session == "" {
-		controller.ErrorJson(ginCtx, http.StatusOK, loginError)
+		ginCtx.JSON(http.StatusOK, controller.NewLoginInvalidError(controller.CodeLoginUserNoExistent, loginError))
 		ginCtx.Abort()
 		return
 	}
 
 	tokens, err := u.sessionCache.Get(ginCtx, session)
 	if err == redis.Nil || tokens == nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, loginError)
+		ginCtx.JSON(http.StatusOK, controller.NewLoginInvalidError(controller.CodeLoginUserNoExistent, loginError))
 		ginCtx.Abort()
 		return
 	}
@@ -38,7 +39,7 @@ func (u *UserController) LoginCheckApi(ginCtx *gin.Context) {
 	//1.从ginCtx的header中拿到token，没拿到报错提醒用户重新登录
 	verifyToken, err := common.VerifyToken(token)
 	if err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, loginError)
+		ginCtx.JSON(http.StatusOK, controller.NewLoginInvalidError(controller.CodeLoginUserNoExistent, loginError))
 		ginCtx.Abort()
 		return
 	}
@@ -46,7 +47,7 @@ func (u *UserController) LoginCheckApi(ginCtx *gin.Context) {
 	claims := verifyToken.Claims.(jwt.MapClaims)
 	if err = claims.Valid(); err != nil {
 
-		controller.ErrorJson(ginCtx, http.StatusOK, loginError)
+		ginCtx.JSON(http.StatusOK, controller.NewLoginInvalidError(controller.CodeLoginUserNoExistent, loginError))
 		ginCtx.Abort()
 		return
 	}
