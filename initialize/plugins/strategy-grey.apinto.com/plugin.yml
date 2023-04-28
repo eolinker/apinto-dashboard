@@ -1,8 +1,8 @@
 id: "strategy-grey.apinto.com"
 name: "grey"
 cname: "灰度发布"
-resume: ""
-version: "v1.0.3"
+resume: "灰度发布（又名金丝雀发布）是指在黑与白之间，能够平滑过渡的一种发布方式。当前支持通过流量比例、请求规则对请求进行灰度代理。"
+version: "v1.0.0"
 icon: "灰度发布.png"
 driver: "strategy-grey.apinto.com"
 type: 2 #0为框架模块 1为核心模块 2为内置模块 3为非内置
