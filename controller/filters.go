@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"github.com/dgrijalva/jwt-go"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,10 +17,19 @@ const (
 	AuditKind      = "AuditKind"
 	LogBody        = "LogBody"
 	AuditObject    = "auditObject"
+	UserName       = "userName"
+	NamespaceId    = "namespaceId"
 )
 
 func GetUserId(ginCtx *gin.Context) int {
 	return ginCtx.GetInt(UserId)
+}
+
+type UserClaim struct {
+	Id        int    `json:"id"`
+	Uname     string `json:"username"`
+	LoginTime string `json:"login_time"`
+	jwt.StandardClaims
 }
 
 func GenAccessHandler() gin.HandlerFunc {

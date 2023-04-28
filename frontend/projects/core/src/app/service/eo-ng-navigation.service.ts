@@ -129,6 +129,7 @@ export class EoNgNavigationService {
           this.routerNameMap = new Map()
           this.noAccess = true
           this.originAccessData = resp.data.access
+          console.log(this.originAccessData)
           for (const navigation of resp.data.navigation) {
             const menu = {
               title: navigation.title,
@@ -265,9 +266,13 @@ export class EoNgNavigationService {
     return this.breadcrumbList
   }
 
-  reqFlashBreadcrumb (value: any) {
-    this.breadcrumbList = value
-    this.breadcrumb.next(value)
+  reqFlashBreadcrumb (value: any, type?:string) {
+    if (type && type === 'iframe') {
+      
+    } else {
+      this.breadcrumbList = value
+      this.breadcrumb.next(value)
+    }
   }
 
   repFlashBreadcrumb () {

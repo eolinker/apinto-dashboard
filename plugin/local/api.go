@@ -43,9 +43,9 @@ func (p *ProxyAPi) CreateOpenApi(name, method, path string, config PathConfig) a
 	}
 	return p.createApi(name, method, routerPath, to, mergeLabel(apinto_module.RouterLabelOpenApi, config.Label))
 }
-func (p *ProxyAPi) proxyApiHandler(name, method, targetPath string) gin.HandlerFunc {
+func (p *ProxyAPi) proxyApiHandler(name, method, path string) gin.HandlerFunc {
 	return func(ginCtx *gin.Context) {
-
+		targetPath := path
 		for _, param := range ginCtx.Params {
 			targetPath = strings.Replace(targetPath, fmt.Sprint(":", param.Key), param.Value, -1)
 			targetPath = strings.Replace(targetPath, fmt.Sprint("*", param.Key), param.Value, -1)

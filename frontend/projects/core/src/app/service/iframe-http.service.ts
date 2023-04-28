@@ -85,11 +85,12 @@ export class IframeHttpService {
     changeBreadcrumb: async (breadcrumbOption:Array<any>) => {
       return new Promise((resolve) => {
         for (const breadcrumb of breadcrumbOption) {
-          if (breadcrumb.routerLink) {
+          if (breadcrumb.routerLink !== undefined) {
             breadcrumb.routerLink = `${this.navigation.iframePrefix}/${this.moduleName}/${breadcrumb.routerLink}`
           }
         }
-        this.navigation.reqFlashBreadcrumb(breadcrumbOption)
+        console.log(breadcrumbOption)
+        this.navigation.reqFlashBreadcrumb(breadcrumbOption, 'iframe')
         resolve(true)
       })
     },
@@ -107,6 +108,11 @@ export class IframeHttpService {
     },
     getCurrentUserInfo: async () => {
       return new Promise((resolve) => {
+        console.log({
+          userId: this.navigation.getUserId(),
+          userRoleId: this.navigation.getUserRoleId(),
+          userModuleAccess: this.navigation.originAccessData[this.moduleName]
+        })
         resolve({
           userId: this.navigation.getUserId(),
           userRoleId: this.navigation.getUserRoleId(),
@@ -441,6 +447,13 @@ export class IframeHttpService {
     userList: () => {
       return new Promise((resolve) => {
         this.api.get('user/enum').subscribe((resp:any) => {
+          resolve(resp)
+        })
+      })
+    },
+    noticeChannels: () => {
+      return new Promise((resolve) => {
+        this.api.get('channels').subscribe((resp:any) => {
           resolve(resp)
         })
       })
