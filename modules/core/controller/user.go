@@ -191,26 +191,24 @@ func (u *UserController) ssoLogin(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("bind login param fail. err:%s", err.Error()))
 		return
 	}
-	info, err := u.userInfo.GetUserInfoByName(ginCtx, loginInfo.Username)
-	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewLoginInvalidError(controller.CodeLoginUserNoExistent, "登录失效"))
+
+	id, success := u.userInfo.CheckPassword(ginCtx, loginInfo.Username, loginInfo.Password)
+	if !success {
+		ginCtx.JSON(http.StatusOK, controller.NewLoginInvalidError(controller.CodeLoginPwdErr, "登录失败，用户名或密码错误"))
 		return
 	}
-	if common.Md5(loginInfo.Password) != info.Password {
-		ginCtx.JSON(http.StatusOK, controller.NewLoginInvalidError(controller.CodeLoginPwdErr, "登录失效"))
-		return
-	}
+
 	now := time.Now()
 	// 成功登录，更新登录时间
-	err = u.userInfo.UpdateLastLoginTime(ginCtx, info.Id, &now)
+	err = u.userInfo.UpdateLastLoginTime(ginCtx, id, &now)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, "登录失败")
 		return
 	}
 
 	userJWT, err := common.JWTEncode(&controller.UserClaim{
-		Id:        info.Id,
-		Uname:     info.UserName,
+		Id:        id,
+		Uname:     loginInfo.Username,
 		LoginTime: now.Format("2006-01-02 15:04:05"),
 	}, jwtSecret)
 	if err != nil {
@@ -230,7 +228,7 @@ func (u *UserController) ssoLogin(ginCtx *gin.Context) {
 
 	//每次登陆都把之前的token清除掉
 	{
-		userIdCookieKey := fmt.Sprintf("userId:%d", info.Id)
+		userIdCookieKey := fmt.Sprintf("userId:%d", id)
 		oldCookie, _ := u.commonCache.Get(ginCtx, userIdCookieKey)
 		_ = u.sessionCache.Delete(ginCtx, string(oldCookie))
 		_ = u.commonCache.Set(ginCtx, userIdCookieKey, []byte(cookieValue), time.Hour*24*7)
