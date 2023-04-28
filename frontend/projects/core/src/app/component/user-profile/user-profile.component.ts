@@ -73,7 +73,6 @@ export class UserProfileComponent implements OnInit {
   getCurrentUserProfile () {
     this.apiService.get('my/profile').subscribe((resp:any) => {
       if (resp.code === 0) {
-        console.log(resp)
         setFormValue(this.validateForm, resp.data.profile)
         this.validateForm.controls['desc'].setValue(resp.data.describe)
         this.appService.setUserId(resp.data.profile.id)

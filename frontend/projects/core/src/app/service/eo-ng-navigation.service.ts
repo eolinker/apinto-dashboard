@@ -120,7 +120,6 @@ export class EoNgNavigationService {
             this.noAccess = false
           }
         }
-        console.log(this)
         observer.next(this.menuList)
 
         this.reqFlashMenu()

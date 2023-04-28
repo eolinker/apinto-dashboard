@@ -76,7 +76,6 @@ export class IntelligentPluginService {
   }
 
   createPluginThead (component:IntelligentPluginPublishComponent):THEAD_TYPE[] {
-    console.log(component.nzDisabled)
     const thead:THEAD_TYPE[] =
     [{
       type: 'checkbox',
