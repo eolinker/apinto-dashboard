@@ -15,7 +15,6 @@ import { ResetPswComponent } from '../reset-psw/reset-psw.component'
 import { ApiService } from '../../service/api.service'
 import { EoNgNavigationService } from '../../service/eo-ng-navigation.service'
 import { MODAL_SMALL_SIZE } from '../../constant/app.config'
-import { setFormValue } from '../../constant/form'
 
 @Component({
   selector: 'eo-ng-apinto-user-avatar',

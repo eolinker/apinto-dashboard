@@ -113,12 +113,10 @@ export class EoNgNavigationService {
       })),
       this.api.get('my/access')]).subscribe((resp:Array<any>) => {
         this.accessMap = new Map()
-        const accessListBackend = resp[1].data.access
-        this.count++
-        for (const key of Object.keys(accessListBackend)) {
-        // accessMap 存的是router-access
-          this.accessMap.set(key, accessListBackend[key])
-          if (accessListBackend[key] && this.noAccess) {
+        const accessListBackend:Array<{name:string, access:string}> = resp[1].data.access
+        for (const access of accessListBackend) {
+          this.accessMap.set(access.name, access.access)
+          if (access.access && this.noAccess) {
             this.noAccess = false
           }
         }
@@ -128,7 +126,8 @@ export class EoNgNavigationService {
         this.reqFlashMenu()
         this.reqUpdateRightList()
       })
-    })
+    }
+    )
   }
 
   generateMenuList (resp:any) {
@@ -184,6 +183,9 @@ export class EoNgNavigationService {
         }
         if (navigation.name && navigation.path) {
           this.routerNameMap.set(navigation.path, navigation.name)
+        }
+        if ((menu as any).routerLink && !this.routerNameMap.get((menu as any).routerLink)) {
+          this.routerNameMap.set((menu as any).routerLink, (menu as any).name)
         }
         this.menuList.push(menu)
       }
