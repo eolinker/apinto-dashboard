@@ -1,8 +1,8 @@
 id: "strategy-traffic.apinto.com"
 name: "traffic"
 cname: "流量限制"
-resume: ""
-version: "v1.0.3"
+resume: "限制单位时间内请求API的次数或数据大小，当达到限制条件时返回预设的信息。可用于限制特定用户的API调用量，或者避免上游服务因为流量过大而崩溃。"
+version: "v1.0.0"
 icon: "流量限制.png"
 driver: "strategy-traffic.apinto.com"
 type: 2 #0为框架模块 1为核心模块 2为内置模块 3为非内置
