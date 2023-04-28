@@ -14,7 +14,6 @@ type UserInfo struct {
 	Phone         string     `json:"phone,omitempty"`          //手机号
 	Avatar        string     `json:"avatar,omitempty"`         //头像
 	LastLoginTime *time.Time `json:"login_time,omitempty"`     //最近登录时间
-	Password      string     `json:"password"`                 //密码
 }
 type UserBase struct {
 	Sex          int    `json:"sex,omitempty"`            //0未知 1男2女
