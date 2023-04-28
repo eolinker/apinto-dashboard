@@ -72,7 +72,8 @@ func run() {
 	}
 	// Create a cmux.
 	m := cmux.New(listener)
-	grpcL := m.Match(cmux.HTTP2HeaderField("content-type", "application/grpc"))
+	grpcL := m.MatchWithWriters(cmux.HTTP2MatchHeaderFieldPrefixSendSettings("content-type", "application/grpc"))
+
 	httpL := m.Match(cmux.HTTP1Fast())
 
 	httpServer := &http.Server{Handler: coreService}

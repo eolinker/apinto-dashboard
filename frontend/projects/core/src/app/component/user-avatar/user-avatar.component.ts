@@ -58,7 +58,7 @@ export class UserAvatarComponent implements OnInit {
       if (resp.code === 0) {
         this.userNickName = resp.data.profile.nick_name
         this.userName = resp.data.profile.user_name
-        this.appService.setUserRoleId(resp.data.profile.role_ids[0])
+        this.appService.setUserRoleId(resp.data.profile.role_ids ? resp.data.profile.role_ids[0] : '')
         this.appService.setUserId(resp.data.profile.id)
       } else {
         this.message.error(resp.msg || '获取用户信息失败!')
