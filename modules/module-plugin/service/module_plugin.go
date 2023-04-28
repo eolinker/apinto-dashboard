@@ -61,16 +61,15 @@ func (m *modulePlugin) GetEnabledPlugins(ctx context.Context) ([]*model.EnabledP
 }
 
 func (m *modulePlugin) GetNavigationModules(ctx context.Context) ([]*model.NavigationModuleInfo, error) {
-	key := m.navigationModulesCache.Key()
 
-	moduleInfos, err := m.navigationModulesCache.GetAll(ctx, key)
+	moduleInfos, err := m.navigationModulesCache.GetAll(ctx)
 	if err != nil || len(moduleInfos) == 0 {
 		moduleInfos, err = m.pluginStore.GetNavigationModules(ctx)
 		if err != nil {
 			return nil, err
 		}
 		//缓存
-		_ = m.navigationModulesCache.SetAll(ctx, key, moduleInfos, 10*time.Minute)
+		_ = m.navigationModulesCache.SetAll(ctx, moduleInfos, 10*time.Minute)
 	}
 
 	list := make([]*model.NavigationModuleInfo, 0, len(moduleInfos))

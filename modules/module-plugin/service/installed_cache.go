@@ -8,20 +8,19 @@ import (
 )
 
 type IInstalledCache interface {
-	cache.IRedisCache[model.PluginInstalledStatus]
-	Key(pluginID string) string
+	cache.IRedisCache[model.PluginInstalledStatus, string]
 }
 
 type installedCache struct {
-	cache.IRedisCache[model.PluginInstalledStatus]
+	cache.IRedisCache[model.PluginInstalledStatus, string]
 }
 
-func (i *installedCache) Key(pluginID string) string {
+func installedCacheKey(pluginID string) string {
 	return fmt.Sprintf("plugin_installed_%s", pluginID)
 }
 
 func newIInstalledCache(client *redis.ClusterClient) IInstalledCache {
 	return &installedCache{
-		IRedisCache: cache.CreateRedisCache[model.PluginInstalledStatus](client),
+		IRedisCache: cache.CreateRedisCache[model.PluginInstalledStatus, string](client, installedCacheKey),
 	}
 }

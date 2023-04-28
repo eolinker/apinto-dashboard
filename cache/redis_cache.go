@@ -8,23 +8,31 @@ import (
 	"time"
 )
 
-type IRedisCache[T any] interface {
-	Get(ctx context.Context, key string) (*T, error)
-	Set(ctx context.Context, key string, t *T, expiration time.Duration) error
-	SetAll(ctx context.Context, key string, t []*T, expiration time.Duration) error
-	GetAll(ctx context.Context, key string) ([]*T, error)
-	Delete(ctx context.Context, keys ...string) error
+type IRedisCache[T any, K comparable] interface {
+	Get(ctx context.Context, k K) (*T, error)
+	Set(ctx context.Context, k K, t *T, expiration time.Duration) error
+
+	Delete(ctx context.Context, keys ...K) error
+}
+type IRedisCacheNoKey[T any] interface {
+	SetAll(ctx context.Context, t []*T, expiration time.Duration) error
+	GetAll(ctx context.Context) ([]*T, error)
+}
+type redisCache[T any, K comparable] struct {
+	client        *redis.ClusterClient
+	keyPrefix     string
+	formatHandler func(K) string
+}
+type redisCacheNoKey[T any] struct {
+	client        *redis.ClusterClient
+	keyPrefix     string
+	formatHandler func() string
 }
 
-type redisCache[T any] struct {
-	client    *redis.ClusterClient
-	keyPrefix string
-}
+func (r *redisCache[T, K]) Get(ctx context.Context, k K) (*T, error) {
+	kv := r.keyPrefix + r.formatHandler(k)
 
-func (r *redisCache[T]) Get(ctx context.Context, key string) (*T, error) {
-	key = r.keyPrefix + key
-
-	bytes, err := r.client.Get(ctx, key).Bytes()
+	bytes, err := r.client.Get(ctx, kv).Bytes()
 	if err != nil {
 		return nil, err
 	}
@@ -33,21 +41,21 @@ func (r *redisCache[T]) Get(ctx context.Context, key string) (*T, error) {
 
 }
 
-func (r *redisCache[T]) Set(ctx context.Context, key string, t *T, expiration time.Duration) error {
+func (r *redisCache[T, K]) Set(ctx context.Context, k K, t *T, expiration time.Duration) error {
 
-	key = r.keyPrefix + key
+	kv := r.keyPrefix + r.formatHandler(k)
 
-	bytes, err := r.structToBytes(t)
+	bytes, err := structToBytes(t)
 	if err != nil {
 		return err
 	}
 
-	return r.client.Set(ctx, key, bytes, expiration).Err()
+	return r.client.Set(ctx, kv, bytes, expiration).Err()
 }
 
-func (r *redisCache[T]) Delete(ctx context.Context, keys ...string) error {
-	for _, key := range keys {
-		key = r.keyPrefix + key
+func (r *redisCache[T, K]) Delete(ctx context.Context, ks ...K) error {
+	for _, k := range ks {
+		key := r.keyPrefix + r.formatHandler(k)
 		if err := r.client.Del(ctx, key).Err(); err != nil {
 			return err
 		}
@@ -56,42 +64,54 @@ func (r *redisCache[T]) Delete(ctx context.Context, keys ...string) error {
 	return nil
 }
 
-func (r *redisCache[T]) GetAll(ctx context.Context, key string) ([]*T, error) {
-	key = r.keyPrefix + key
+func (r *redisCacheNoKey[T]) GetAll(ctx context.Context) ([]*T, error) {
+	key := r.keyPrefix + r.formatHandler()
 
 	bytes, err := r.client.Get(ctx, key).Bytes()
 	if err != nil {
 		return nil, err
 	}
 
-	return r.toMyStructAll(bytes)
+	return toMyStructAll[T](bytes)
 
 }
 
-func (r *redisCache[T]) SetAll(ctx context.Context, key string, t []*T, expiration time.Duration) error {
+func (r *redisCacheNoKey[T]) SetAll(ctx context.Context, t []*T, expiration time.Duration) error {
 
-	key = r.keyPrefix + key
+	key := r.keyPrefix + r.formatHandler()
 
-	bytes, err := r.structToBytesAll(t)
+	bytes, err := structToBytesAll(t)
 	if err != nil {
 		return err
 	}
 
 	return r.client.Set(ctx, key, bytes, expiration).Err()
 }
-
-func CreateRedisCache[T any](client *redis.ClusterClient, key ...string) IRedisCache[T] {
+func CreateRedisCacheNoKey[T any](client *redis.ClusterClient, format func() string, key ...string) IRedisCacheNoKey[T] {
 	keyPrefix := "apinto-dashboard:"
 	if len(key) > 0 {
-		keyPrefix = strings.Join(key, ":")
+		keyPrefix = strings.Join(key, "-")
 	}
-	return &redisCache[T]{
-		client:    client,
-		keyPrefix: keyPrefix,
+	return &redisCacheNoKey[T]{
+		client:        client,
+		keyPrefix:     keyPrefix,
+		formatHandler: format,
 	}
 }
 
-func (r *redisCache[T]) structToBytes(t *T) ([]byte, error) {
+func CreateRedisCache[T any, K comparable](client *redis.ClusterClient, format func(k K) string, key ...string) IRedisCache[T, K] {
+	keyPrefix := "apinto-dashboard:"
+	if len(key) > 0 {
+		keyPrefix = strings.Join(key, "-")
+	}
+	return &redisCache[T, K]{
+		client:        client,
+		keyPrefix:     keyPrefix,
+		formatHandler: format,
+	}
+}
+
+func structToBytes[T any](t *T) ([]byte, error) {
 
 	bytes, err := json.Marshal(t)
 	if err != nil {
@@ -102,7 +122,7 @@ func (r *redisCache[T]) structToBytes(t *T) ([]byte, error) {
 
 }
 
-func (r *redisCache[T]) toMyStruct(bytes []byte) (*T, error) {
+func (r *redisCache[T, K]) toMyStruct(bytes []byte) (*T, error) {
 
 	t := new(T)
 	err := json.Unmarshal(bytes, t)
@@ -113,7 +133,7 @@ func (r *redisCache[T]) toMyStruct(bytes []byte) (*T, error) {
 	return t, nil
 }
 
-func (r *redisCache[T]) structToBytesAll(t []*T) ([]byte, error) {
+func structToBytesAll[T any](t []*T) ([]byte, error) {
 
 	bytes, err := json.Marshal(t)
 	if err != nil {
@@ -124,7 +144,7 @@ func (r *redisCache[T]) structToBytesAll(t []*T) ([]byte, error) {
 
 }
 
-func (r *redisCache[T]) toMyStructAll(bytes []byte) ([]*T, error) {
+func toMyStructAll[T any](bytes []byte) ([]*T, error) {
 
 	t := make([]*T, 0)
 	err := json.Unmarshal(bytes, &t)

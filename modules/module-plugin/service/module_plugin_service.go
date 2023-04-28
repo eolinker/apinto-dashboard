@@ -323,7 +323,7 @@ func (m *modulePluginService) InstallPlugin(ctx context.Context, userID int, plu
 		return err
 	}
 	//缓存
-	_ = m.installedCache.Set(ctx, m.installedCache.Key(pluginYml.ID), &model.PluginInstalledStatus{
+	_ = m.installedCache.Set(ctx, pluginYml.ID, &model.PluginInstalledStatus{
 		Installed: true,
 	}, time.Hour)
 
@@ -390,7 +390,7 @@ func (m *modulePluginService) UninstallPlugin(ctx context.Context, userID int, p
 		return err
 	}
 
-	_ = m.installedCache.Set(ctx, m.installedCache.Key(pluginID), &model.PluginInstalledStatus{
+	_ = m.installedCache.Set(ctx, pluginID, &model.PluginInstalledStatus{
 		Installed: false,
 	}, time.Hour)
 
@@ -529,8 +529,8 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 		log.Errorf(err.Error())
 		return nil
 	}
-	key := m.navigationModulesCache.Key()
-	_ = m.navigationModulesCache.SetAll(ctx, key, enableModules, 10*time.Minute)
+
+	_ = m.navigationModulesCache.SetAll(ctx, enableModules, 10*time.Minute)
 
 	return nil
 }
@@ -588,8 +588,8 @@ func (m *modulePluginService) DisablePlugin(ctx context.Context, userID int, plu
 		log.Errorf(err.Error())
 		return nil
 	}
-	key := m.navigationModulesCache.Key()
-	_ = m.navigationModulesCache.SetAll(ctx, key, enableModules, 10*time.Minute)
+
+	_ = m.navigationModulesCache.SetAll(ctx, enableModules, 10*time.Minute)
 
 	return nil
 }
@@ -650,7 +650,7 @@ func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml 
 		return err
 	}
 	//缓存
-	_ = m.installedCache.Set(ctx, m.installedCache.Key(pluginYml.ID), &model.PluginInstalledStatus{
+	_ = m.installedCache.Set(ctx, pluginYml.ID, &model.PluginInstalledStatus{
 		Installed: true,
 	}, time.Hour)
 
@@ -710,7 +710,7 @@ func (m *modulePluginService) UpdateInnerPlugin(ctx context.Context, pluginYml *
 func (m *modulePluginService) CheckPluginInstalled(ctx context.Context, pluginID string) (bool, error) {
 	isInstalled := false
 
-	key := m.installedCache.Key(pluginID)
+	key := pluginID
 	value, err := m.installedCache.Get(ctx, key)
 	if err != nil && err != redis.Nil {
 		return false, err
