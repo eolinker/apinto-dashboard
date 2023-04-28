@@ -19,8 +19,9 @@
       [nzTbody]="publishTableBody"
       [nzThead]="publishTableHeadName"
       [nzData]="publishList"
-      [nzTrClick]="tableClick"
+      [nzTrClick]="nzDisabled ? null : tableClick"
       [nzNoScroll]="true"
+      [nzDisabled]="nzDisabled"
     >
     </eo-ng-apinto-table>
   </div>

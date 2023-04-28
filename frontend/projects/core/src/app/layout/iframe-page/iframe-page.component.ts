@@ -10,7 +10,7 @@ import { Subscription } from 'rxjs'
   selector: 'eo-ng-iframe-page',
   template: `
   <nz-spin class="iframe-spin" [nzSpinning]="!start">
-  <div  *ngIf="start" #iframe id="iframePanel" style="height: 100%;display: block"></div>
+  <div  #iframe id="iframePanel" style="height: 100%;display: block"></div>
   </nz-spin>
   `,
   styles: [
@@ -49,7 +49,7 @@ export class IframePageComponent implements OnInit {
 
    listenMessage =async (event:any) => {
      if (event && event.data.apinto && event.data.type === 'request') {
-       console.log(event)
+       this.start = true
        const handler = this.proxyHandler[event.data.path as any]
        if (typeof handler === 'function') {
          const args = event.data.data
@@ -73,14 +73,35 @@ export class IframePageComponent implements OnInit {
      }
    }
 
-  showIframe = (id: any, url: any, initData: any) => {
-    console.log(this)
-    this.iframe = createIframe('iframe', url)
+   // changeUrl=true时，表示传入的url是已经处理好的，不需要再根据router.url拼接。暂时用在面包屑场景
+  showIframe = (id: any, url: any, initData: any, noChangeUrl?:boolean) => {
+    const createIframe = (id: string, url: string) => {
+      console.log(url)
+      const iframe = document.createElement('iframe')
+      console.log(iframe)
+      iframe.id = id
+      iframe.width = '100%'
+      iframe.height = '100%'
+      iframe.src = url
+      iframe.onload = () => {
+        this.start = true
+      }
+
+      return iframe
+    }
+
+    if (noChangeUrl) {
+      this.iframe.src = url
+      return
+    }
+    this.iframe = createIframe('iframe', `${url}${this.router.url.includes('#') ? this.router.url.split('#')[1] : ''}`)
     const onLoadCallback = () => {
-      console.log(this.iframe)
+      console.log('load-iframe')
+      this.start = true
       ;(this.iframe as any).contentWindow.postMessage({ apinto: true, type: 'initialize', data: initData }, '*')
       window.addEventListener('message', this.listenMessage)
     }
+    console.log(this.iframe)
     if ((this.iframe as any).attachEvent) {
       (this.iframe as any).attachEvent('onload', onLoadCallback)
     } else {
@@ -91,24 +112,12 @@ export class IframePageComponent implements OnInit {
       panel?.firstChild && panel.removeChild(panel?.firstChild)
     }
     panel?.appendChild(this.iframe)
-
-    function createIframe (id: string, url: string) {
-      console.log(url)
-      const iframe = document.createElement('iframe')
-      iframe.id = id
-      iframe.width = '100%'
-      iframe.height = '100%'
-      iframe.src = url
-
-      return iframe
-    }
   }
 
   // 当组件销毁时需要通知iframe注销
   stopIframe () {
     window.removeEventListener('message', this.listenMessage)
-    console.log(this.iframe)
-    ;(this.iframe as any).contentWindow.postMessage({
+    ;(this.iframe as any).contentWindow?.postMessage({
       type: 'stopConnection',
       apinto: true
     }, '*')
@@ -116,30 +125,38 @@ export class IframePageComponent implements OnInit {
 
   path:string =''
 
-  start:boolean = true
+  start:boolean = false
   iframeSrc:string = ''
   iframeDom:Window|null = null
   moduleName:string = ''
   initMessage:object|null = null
   private subscription: Subscription = new Subscription()
+  private subscription2: Subscription = new Subscription()
 
   constructor (private iframeService:IframeHttpService, private api:ApiService,
     private navigation:EoNgNavigationService, private router:Router,
     private baseInfo:BaseInfoService) {}
 
   ngOnInit (): void {
-    console.log('init')
     this.moduleName = this.baseInfo.allParamsInfo.moduleName
+    console.log(this.router.url)
+    // 此处监听的是切换module事件，需要判断moduleName是否变化
     this.subscription = this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
         console.log(this.router.url)
-        this.moduleName = this.baseInfo.allParamsInfo.moduleName
-        this.iframeService.moduleName = this.moduleName
-        this.subscription.unsubscribe()
-        this.iframeService.subscription.unsubscribe()
-        this.showIframe('test', `http://172.18.166.219:8080/agent/${this.moduleName}`, {})
+        if (this.moduleName !== this.baseInfo.allParamsInfo.moduleName) {
+          this.moduleName = this.baseInfo.allParamsInfo.moduleName
+          this.iframeService.moduleName = this.moduleName
+          this.subscription.unsubscribe()
+          this.iframeService.subscription.unsubscribe()
+          this.showIframe('test', `http://172.18.166.219:8080/agent/${this.moduleName}`, {})
+        }
         // this.getPath()
       }
+    })
+
+    this.subscription2 = this.iframeService.repFlashIframe().subscribe((event) => {
+      this.showIframe('test', `http://172.18.166.219:8080/agent/${this.moduleName}${event ? `/${event}` : ''}`, {}, true)
     })
     // this.getPath()
   }
@@ -150,9 +167,9 @@ export class IframePageComponent implements OnInit {
 
   ngOnDestroy () {
     this.stopIframe()
-    console.log('ngOnDestroy')
     this.subscription.unsubscribe()
     this.iframeService.subscription.unsubscribe()
+    this.subscription2.unsubscribe()
   }
 
   getPath () {

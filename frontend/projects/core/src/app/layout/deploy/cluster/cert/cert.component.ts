@@ -35,8 +35,8 @@ export class DeployClusterCertComponent implements OnInit {
                 private api:ApiService,
                 private baseInfo:BaseInfoService,
                 private router:Router,
-                private appConfigService:EoNgNavigationService) {
-    this.appConfigService.reqFlashBreadcrumb([{ title: '网关集群', routerLink: 'deploy/cluster' }, { title: '证书管理' }])
+                private navigationService:EoNgNavigationService) {
+    this.navigationService.reqFlashBreadcrumb([{ title: '网关集群', routerLink: 'deploy/cluster' }, { title: '证书管理' }])
   }
 
   ngOnInit (): void {

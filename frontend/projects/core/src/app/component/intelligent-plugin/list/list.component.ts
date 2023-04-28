@@ -51,7 +51,7 @@ export class IntelligentPluginListComponent implements OnInit {
     private api:ApiService,
     private router:Router,
     private baseInfo:BaseInfoService,
-    private appConfigService: EoNgNavigationService) {
+    private navigationService: EoNgNavigationService) {
 
   }
 
@@ -147,8 +147,7 @@ export class IntelligentPluginListComponent implements OnInit {
     this.driverOptions = data.drivers.map((driver:DynamicDriverData) => {
       return { label: driver.title, value: driver.name }
     })
-    console.log(data)
-    this.appConfigService.reqFlashBreadcrumb([
+    this.navigationService.reqFlashBreadcrumb([
       { title: data.title }
     ])
   }
@@ -251,7 +250,8 @@ export class IntelligentPluginListComponent implements OnInit {
         id: value.data.id,
         desc: value.data.description,
         moduleName: this.moduleName,
-        closeModal: this.closeModal
+        closeModal: this.closeModal,
+        nzDisabled: this.nzDisabled
       },
       nzFooter: [{
         label: '取消',
@@ -265,6 +265,9 @@ export class IntelligentPluginListComponent implements OnInit {
         danger: true,
         onClick: (context:IntelligentPluginPublishComponent) => {
           context.offline()
+        },
+        disabled: () => {
+          return this.nzDisabled
         }
       },
       {
@@ -272,6 +275,9 @@ export class IntelligentPluginListComponent implements OnInit {
         type: 'primary',
         onClick: (context:IntelligentPluginPublishComponent) => {
           context.online()
+        },
+        disabled: () => {
+          return this.nzDisabled
         }
       }]
     })

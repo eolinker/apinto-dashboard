@@ -27,8 +27,8 @@ export class SystemWebhookListComponent implements OnInit {
   constructor (private message: EoNgMessageService,
     private modalService:EoNgFeedbackModalService,
      private api:ApiService,
-     private appConfigService:EoNgNavigationService) {
-    this.appConfigService.reqFlashBreadcrumb([{ title: 'Webhook管理', routerLink: 'system/webhook' }])
+     private navigationService:EoNgNavigationService) {
+    this.navigationService.reqFlashBreadcrumb([{ title: 'Webhook管理', routerLink: 'system/webhook' }])
   }
 
   ngOnInit (): void {

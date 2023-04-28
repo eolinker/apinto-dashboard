@@ -28,10 +28,10 @@ export class GroupComponent implements OnInit {
     private baseInfo:BaseInfoService,
     private api: ApiService,
     private router: Router,
-    private appConfigService:EoNgNavigationService,
+    private navigationService:EoNgNavigationService,
     public service:EoNgPluginService
   ) {
-    this.appConfigService.reqFlashBreadcrumb([{ title: '企业插件' }])
+    this.navigationService.reqFlashBreadcrumb([{ title: '企业插件' }])
   }
 
   ngOnInit (): void {
