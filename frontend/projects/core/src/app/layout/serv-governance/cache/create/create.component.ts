@@ -46,7 +46,7 @@ export class CacheCreateComponent implements OnInit {
     private api: ApiService,
     private router:Router,
     private fb: UntypedFormBuilder,
-    private appConfigService: EoNgNavigationService
+    private navigationService: EoNgNavigationService
   ) {
     this.validateForm = this.fb.group({
       name: [
@@ -57,7 +57,7 @@ export class CacheCreateComponent implements OnInit {
       priority: [null, [EoNgMyValidators.priority]],
       validTime: [null, [Validators.required]]
     })
-    this.appConfigService.reqFlashBreadcrumb([
+    this.navigationService.reqFlashBreadcrumb([
       { title: '缓存策略', routerLink: 'serv-governance/cache' },
       { title: '新建缓存策略' }
     ])
@@ -87,7 +87,7 @@ export class CacheCreateComponent implements OnInit {
           msg: string
         }) => {
           if (resp.code === 0) {
-            this.appConfigService.reqFlashBreadcrumb([
+            this.navigationService.reqFlashBreadcrumb([
               {
                 title: '缓存策略',
                 routerLink: 'serv-governance/cache'
@@ -125,7 +125,6 @@ export class CacheCreateComponent implements OnInit {
   saveStrategy () {
     if (this.validateForm.valid) {
       delete this.createStrategyForm['extender']
-
       this.createStrategyForm.filters = []
       for (const index in this.filterShowList) {
         this.createStrategyForm.filters.push({

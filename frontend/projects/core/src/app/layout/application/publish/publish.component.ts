@@ -33,9 +33,9 @@ export class ApplicationPublishComponent implements OnInit {
                 public api:ApiService,
                 private baseInfo:BaseInfoService,
                 private router:Router,
-                private appConfigService:EoNgNavigationService,
+                private navigationService:EoNgNavigationService,
                 private publishFailModal:PublishFailService) {
-    this.appConfigService.reqFlashBreadcrumb([{ title: '应用管理', routerLink: 'application' }, { title: '上线管理' }])
+    this.navigationService.reqFlashBreadcrumb([{ title: '应用管理', routerLink: 'application' }, { title: '上线管理' }])
   }
 
   ngOnInit (): void {

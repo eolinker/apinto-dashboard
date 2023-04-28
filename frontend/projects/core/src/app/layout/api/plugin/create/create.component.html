@@ -40,6 +40,7 @@
           formControlName="desc"
           placeholder="请输入"
           eoNgUserAccess="router/plugin-template"
+          (disabledEdit)="disabledEdit($event)"
         ></textarea>
       </nz-form-control>
     </nz-form-item>

@@ -77,7 +77,7 @@ export class GreyCreateComponent implements OnInit {
     private message: EoNgFeedbackMessageService,
     private api: ApiService,
     private fb: UntypedFormBuilder,
-    private appConfigService: EoNgNavigationService,
+    private navigationService: EoNgNavigationService,
     private router:Router
   ) {
     this.validateForm = this.fb.group({
@@ -93,7 +93,7 @@ export class GreyCreateComponent implements OnInit {
       percent2: [99]
     })
 
-    this.appConfigService.reqFlashBreadcrumb([
+    this.navigationService.reqFlashBreadcrumb([
       { title: '灰度策略', routerLink: 'serv-governance/grey' },
       { title: '新建灰度策略' }
     ])
@@ -159,7 +159,7 @@ export class GreyCreateComponent implements OnInit {
           msg: string
         }) => {
           if (resp.code === 0) {
-            this.appConfigService.reqFlashBreadcrumb([
+            this.navigationService.reqFlashBreadcrumb([
               {
                 title: '灰度策略',
                 routerLink: 'serv-governance/grey'

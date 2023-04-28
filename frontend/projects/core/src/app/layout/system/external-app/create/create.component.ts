@@ -24,9 +24,9 @@ export class ExternalAppCreateComponent implements OnInit {
     private api: ApiService,
     private router: Router,
     private fb: UntypedFormBuilder,
-    private appConfigService: EoNgNavigationService
+    private navigationService: EoNgNavigationService
   ) {
-    this.appConfigService.reqFlashBreadcrumb([
+    this.navigationService.reqFlashBreadcrumb([
       { title: '外部应用' },
       { title: '新建外部应用' }
 
@@ -45,7 +45,7 @@ export class ExternalAppCreateComponent implements OnInit {
   ngOnInit (): void {
     if (this.editPage) {
       this.getApplicationMessage()
-      this.appConfigService.reqFlashBreadcrumb([
+      this.navigationService.reqFlashBreadcrumb([
         { title: '外部应用' },
         { title: '外部应用详情' }
       ])

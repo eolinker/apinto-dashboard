@@ -64,19 +64,19 @@ export class ServiceDiscoveryCreateComponent implements OnInit {
     private api: ApiService,
     private router: Router,
     private fb: UntypedFormBuilder,
-    private appConfigService: EoNgNavigationService
+    private navigationService: EoNgNavigationService
   ) {
     this.validateForm = this.fb.group({
       name: ['', [Validators.required, Validators.pattern('^[a-zA-Z][a-zA-Z0-9/_]*')]],
       desc: [''],
       driver: ['nacos', [Validators.required]]
     })
-    this.appConfigService.reqFlashBreadcrumb([{ title: '服务发现', routerLink: 'upstream/discovery' }, { title: '新建服务' }])
+    this.navigationService.reqFlashBreadcrumb([{ title: '服务发现', routerLink: 'upstream/discovery' }, { title: '新建服务' }])
   }
 
   ngOnInit (): void {
     if (this.editPage) {
-      this.appConfigService.reqFlashBreadcrumb([{ title: '服务发现', routerLink: 'upstream/discovery' }, { title: '服务信息' }])
+      this.navigationService.reqFlashBreadcrumb([{ title: '服务发现', routerLink: 'upstream/discovery' }, { title: '服务信息' }])
       this.validateForm.controls['driver'].disable()
       this.validateForm.controls['name'].disable()
       this.getServiceMessage()

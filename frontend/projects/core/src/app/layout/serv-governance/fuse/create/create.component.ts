@@ -77,7 +77,7 @@ export class FuseCreateComponent implements OnInit {
     private message: EoNgFeedbackMessageService,
     private api: ApiService,
     private fb: UntypedFormBuilder,
-    private appConfigService: EoNgNavigationService,
+    private navigationService: EoNgNavigationService,
     private router:Router
   ) {
     this.validateForm = this.fb.group({
@@ -104,7 +104,7 @@ export class FuseCreateComponent implements OnInit {
       body: ['']
     })
 
-    this.appConfigService.reqFlashBreadcrumb([
+    this.navigationService.reqFlashBreadcrumb([
       { title: '熔断策略', routerLink: 'serv-governance/fuse' },
       { title: '新建熔断策略' }
     ])
@@ -134,7 +134,7 @@ export class FuseCreateComponent implements OnInit {
           msg: string
         }) => {
           if (resp.code === 0) {
-            this.appConfigService.reqFlashBreadcrumb([
+            this.navigationService.reqFlashBreadcrumb([
               {
                 title: '熔断策略',
                 routerLink: 'serv-governance/fuse'
