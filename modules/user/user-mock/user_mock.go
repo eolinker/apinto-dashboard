@@ -8,7 +8,6 @@ import (
 	context "context"
 	reflect "reflect"
 
-	access "github.com/eolinker/apinto-dashboard/access"
 	user_model "github.com/eolinker/apinto-dashboard/modules/user/user-model"
 	gomock "github.com/golang/mock/gomock"
 )
@@ -34,21 +33,6 @@ func NewMockIUserInfoService(ctrl *gomock.Controller) *MockIUserInfoService {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockIUserInfoService) EXPECT() *MockIUserInfoServiceMockRecorder {
 	return m.recorder
-}
-
-// GetAccessInfo mocks base method.
-func (m *MockIUserInfoService) GetAccessInfo(ctx context.Context, userId int) (map[access.Access]struct{}, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAccessInfo", ctx, userId)
-	ret0, _ := ret[0].(map[access.Access]struct{})
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetAccessInfo indicates an expected call of GetAccessInfo.
-func (mr *MockIUserInfoServiceMockRecorder) GetAccessInfo(ctx, userId interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccessInfo", reflect.TypeOf((*MockIUserInfoService)(nil).GetAccessInfo), ctx, userId)
 }
 
 // GetUserInfo mocks base method.
