@@ -11,9 +11,11 @@ func init() {
 	bean.Injection(&infoService)
 
 	cache.RegisterCacheInitHandler(func(client *redis.ClusterClient) {
-		userInfo := newUserInfoCache(client)
+		userInfo := newUserInfoIdCache(client)
+		userNameInfo := newUserInfoNameCache(client)
 		session := newSessionCache(client)
 		bean.Injection(&userInfo)
+		bean.Injection(&userNameInfo)
 		bean.Injection(&session)
 	})
 }
