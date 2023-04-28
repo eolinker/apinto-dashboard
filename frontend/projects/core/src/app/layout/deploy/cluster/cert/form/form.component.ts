@@ -75,12 +75,12 @@ export class DeployClusterCertFormComponent implements OnInit {
     private message: EoNgFeedbackMessageService,
     public api:ApiService,
     private fb: UntypedFormBuilder,
-    private appConfigService:EoNgNavigationService) {
+    private navigationService:EoNgNavigationService) {
     this.validateForm = this.fb.group({
       key: ['', [Validators.required]],
       pem: ['', [Validators.required]]
     })
-    this.appConfigService.reqFlashBreadcrumb([{ title: '网关集群', routerLink: 'deploy/cluster' }, { title: '证书管理' }])
+    this.navigationService.reqFlashBreadcrumb([{ title: '网关集群', routerLink: 'deploy/cluster' }, { title: '证书管理' }])
   }
 
   ngOnInit (): void {

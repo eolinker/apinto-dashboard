@@ -58,8 +58,8 @@ export class NavigationComponent implements OnInit {
   modalRef:NzModalRef|undefined
 
   constructor (private modalService:EoNgFeedbackModalService, private api:ApiService, private message:EoNgMessageService,
-    private appConfigService: EoNgNavigationService) {
-    this.appConfigService.reqFlashBreadcrumb([
+    private navigationService: EoNgNavigationService) {
+    this.navigationService.reqFlashBreadcrumb([
       { title: '导航管理' }
     ])
   }

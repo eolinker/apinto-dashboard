@@ -82,12 +82,12 @@ export class ApiCreateComponent implements OnInit {
   constructor (private message: EoNgFeedbackMessageService,
     private baseInfo:BaseInfoService,
     private api:ApiService,
-    private appConfigService:EoNgNavigationService,
+    private navigationService:EoNgNavigationService,
     private fb: UntypedFormBuilder,
     private router: Router,
     private modalService: EoNgFeedbackModalService
   ) {
-    this.appConfigService.reqFlashBreadcrumb([
+    this.navigationService.reqFlashBreadcrumb([
       { title: 'API管理', routerLink: 'router/api/group/list' },
       { title: '新建API' }
     ])
@@ -110,7 +110,7 @@ export class ApiCreateComponent implements OnInit {
     this.getServiceList()
     this.getPluginTemplateList()
     if (this.baseInfo.allParamsInfo.apiId) {
-      this.appConfigService.reqFlashBreadcrumb([
+      this.navigationService.reqFlashBreadcrumb([
         { title: 'API管理', routerLink: 'router/api/group/list' },
         { title: 'API信息' }
       ])

@@ -1,14 +1,12 @@
 package controller
 
 import (
-	"net/http"
-	"strconv"
-
 	"github.com/dgrijalva/jwt-go"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
+	"net/http"
 )
 
 var jwtSecret = []byte("apintp-dashboard")
@@ -21,14 +19,14 @@ func (u *UserController) LoginCheckApi(ginCtx *gin.Context) {
 
 	session, _ := ginCtx.Cookie(controller.Session)
 	if session == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewLoginInvalidError(controller.CodeLoginUserNoExistent, loginError))
+		controller.ErrorJsonWithCode(ginCtx, http.StatusOK, controller.CodeLoginInvalid, loginError)
 		ginCtx.Abort()
 		return
 	}
 
 	tokens, err := u.sessionCache.Get(ginCtx, session)
 	if err == redis.Nil || tokens == nil {
-		ginCtx.JSON(http.StatusOK, controller.NewLoginInvalidError(controller.CodeLoginUserNoExistent, loginError))
+		controller.ErrorJsonWithCode(ginCtx, http.StatusOK, controller.CodeLoginInvalid, loginError)
 		ginCtx.Abort()
 		return
 	}
@@ -36,26 +34,16 @@ func (u *UserController) LoginCheckApi(ginCtx *gin.Context) {
 	token := tokens.Jwt
 	rToken := tokens.RJwt
 
-	//1.从ginCtx的header中拿到token，没拿到报错提醒用户重新登录
-	verifyToken, err := common.VerifyToken(token)
+	uc, err := common.JWTDecode(token, jwtSecret)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewLoginInvalidError(controller.CodeLoginUserNoExistent, loginError))
-		ginCtx.Abort()
-		return
-	}
-	//1.1拿到用户ID和过期时间 过期了重新登录
-	claims := verifyToken.Claims.(jwt.MapClaims)
-	if err = claims.Valid(); err != nil {
-
-		ginCtx.JSON(http.StatusOK, controller.NewLoginInvalidError(controller.CodeLoginUserNoExistent, loginError))
-		ginCtx.Abort()
+		controller.ErrorJsonWithCode(ginCtx, http.StatusOK, controller.CodeLoginInvalid, loginError)
 		return
 	}
 
 	ginCtx.Writer.Header().Set(controller.Authorization, token)
 	ginCtx.Writer.Header().Set(controller.RAuthorization, rToken)
 
-	userId, _ := strconv.Atoi(claims[controller.UserId].(string))
+	userId := uc.Id
 
 	ginCtx.Set(controller.UserId, userId)
 	ginCtx.Set(controller.Session, session)

@@ -43,13 +43,13 @@ export class ApiPublishComponent implements OnInit {
     private router:Router,
     private publishFailModal:PublishFailService,
     private baseInfo:BaseInfoService,
-    private appConfigService:EoNgNavigationService
+    private navigationService:EoNgNavigationService
   ) {
     this.apiUuid = this.baseInfo.allParamsInfo.apiId
     if (!this.apiUuid) {
       this.router.navigate(['/', 'router', 'api', 'group'])
     }
-    this.appConfigService.reqFlashBreadcrumb([{ title: 'API管理', routerLink: 'router/api/group/list' }, { title: '上线管理' }])
+    this.navigationService.reqFlashBreadcrumb([{ title: 'API管理', routerLink: 'router/api/group/list' }, { title: '上线管理' }])
   }
 
   ngOnInit (): void {

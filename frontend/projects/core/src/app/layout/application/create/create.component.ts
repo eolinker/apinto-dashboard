@@ -55,9 +55,9 @@ export class ApplicationCreateComponent implements OnInit {
     private api: ApiService,
     private router: Router,
     private fb: UntypedFormBuilder,
-    private appConfigService: EoNgNavigationService
+    private navigationService: EoNgNavigationService
   ) {
-    this.appConfigService.reqFlashBreadcrumb([
+    this.navigationService.reqFlashBreadcrumb([
       { title: '应用管理', routerLink: 'application' },
       { title: '新建应用' }
     ])
@@ -73,7 +73,7 @@ export class ApplicationCreateComponent implements OnInit {
     this.initTable()
     if (this.editPage) {
       this.getApplicationMessage()
-      this.appConfigService.reqFlashBreadcrumb([
+      this.navigationService.reqFlashBreadcrumb([
         { title: '应用管理', routerLink: 'application' },
         { title: '应用信息' }
       ])

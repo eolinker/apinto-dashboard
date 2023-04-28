@@ -18,7 +18,7 @@ export class ErrorInterceptor implements HttpInterceptor {
   private loadingMessageId:string = ''
   constructor (
     private router: Router,
-    private appConfigService: EoNgNavigationService,
+    private navigationService: EoNgNavigationService,
     private modalService:NzModalService,
     private message: EoNgFeedbackMessageService) {}
 
@@ -89,9 +89,9 @@ export class ErrorInterceptor implements HttpInterceptor {
       nzOkText: '确定',
       nzCancelText: '取消',
       nzOnOk: () => {
-        const mainPageUrl = this.appConfigService.getPageRoute()
+        const mainPageUrl = this.navigationService.getPageRoute()
         if (mainPageUrl) {
-          this.router.navigate([this.appConfigService.getPageRoute()])
+          this.router.navigate([this.navigationService.getPageRoute()])
         }
       }
     })

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core'
 import { MenuOptions } from 'eo-ng-menu'
-import { Subject, Observable } from 'rxjs'
+import { Subject, Observable, forkJoin, map } from 'rxjs'
 import { ApiService } from './api.service'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -15,7 +15,7 @@ export class EoNgNavigationService {
   dataUpdated: boolean = false // 是否获取过数据，避免组件在ngOnChanges时读取空数组
   private userRoleId: string = '' // 当前用户角色id
   private userId: string = '' // 当前用户id
-  private accessMap: Map<string, Array<string>> = new Map()
+  accessMap: Map<string, string> = new Map()
   constructor (public api: ApiService) {}
   iframePrefix:string = 'module' // 与后端约定好的，所有iframe打开的页面都要加该前缀
   setUserRoleId (val: string) {
@@ -65,30 +65,17 @@ export class EoNgNavigationService {
     return this.flashFlag.asObservable()
   }
 
-  private userUpdeteRightList: Subject<Array<string>> = new Subject<
-    Array<string>
+  private userUpdeteRightList: Subject<boolean> = new Subject<
+    boolean
   >()
 
   reqUpdateRightList () {
-    this.userUpdeteRightList.next(this.updateRightsRouterList)
+    this.userUpdeteRightList.next(true)
     this.dataUpdated = true
   }
 
   repUpdateRightList () {
     return this.userUpdeteRightList.asObservable()
-  }
-
-  private userViewUpdeteRightList: Subject<Array<string>> = new Subject<
-    Array<string>
-  >()
-
-  reqViewRightList () {
-    this.userViewUpdeteRightList.next(this.viewRightsRouterList)
-    this.dataUpdated = true
-  }
-
-  repViewRightList () {
-    return this.userViewUpdeteRightList.asObservable()
   }
 
   getUpdateRightsRouter () {
@@ -117,92 +104,95 @@ export class EoNgNavigationService {
   findFirstModulesId: boolean = false
   noAccess: boolean = true
   originAccessData:{[k:string]:string} = {} // 从接口获取的access数据
+  count:number = 0
   // 获得最新的权限列表和菜单
   getRightsList (): Observable<MenuOptions[]> {
     return new Observable((observer) => {
-      this.api.get('system/modules').subscribe((resp: any) => {
-        if (resp.code === 0) {
-          this.mainPageRouter = ''
-          this.modulesMap = new Map()
-          this.menuList = []
-          this.accessMap = new Map()
-          this.routerNameMap = new Map()
-          this.noAccess = true
-          this.originAccessData = resp.data.access
-          console.log(this.originAccessData)
-          for (const navigation of resp.data.navigation) {
-            const menu = {
-              title: navigation.title,
-              titleString: navigation.title,
-              menu: true,
-              key: uuidv4(),
-              icon: navigation.icon || 'daohang',
-              ...(navigation.modules?.length > 0 && !navigation.default
-                ? {
-                    children: navigation.modules.map((module: any) => {
-                      this.routerNameMap.set(module.name, module.path)
-                      return {
-                        title: module.title,
-                        titleString: navigation.title,
-                        name: module.name,
-                        type: module.type,
-                        routerLink: module.path,
-                        matchRouter: true,
-                        matchRouterExact: false
-                      }
-                    })
-                  }
-                : navigation.modules?.length > 0 &&
-                  this.getDefaultModule(navigation).path
-                  ? {
-                      name: this.getDefaultModule(navigation).name,
-                      routerLink: this.getDefaultModule(navigation).path,
-                      matchRouter: true,
-                      matchRouterExact: false,
-                      type: this.getDefaultModule(navigation).type
-                    }
-                  : (navigation.modules?.length > 0
-                      ? { // TODO似乎没用，后续排查
-                          routerLink: 'iframe',
-                          matchRouter: true,
-                          matchRouterExact: false
-                        }
-                      : {
-                          children: [{
-                            menu: true,
-                            group: true,
-                            title: '暂无内容',
-                            menuTitleClassName: 'menu-no-content'
-                          }]
-                        }))
-            }
-            if (navigation.name && navigation.path) {
-              this.routerNameMap.set(navigation.name, navigation.path)
-            }
-            this.menuList.push(menu)
+      forkJoin([this.api.get('system/modules').pipe(map((resp:any) => {
+        this.generateMenuList(resp)
+      })),
+      this.api.get('my/access')]).subscribe((resp:Array<any>) => {
+        this.accessMap = new Map()
+        const accessListBackend:Array<{name:string, access:string}> = resp[1].data.access
+        for (const access of accessListBackend) {
+          this.accessMap.set(access.name, access.access)
+          if (access.access && this.noAccess) {
+            this.noAccess = false
           }
-
-          for (const acc of Object.keys(resp.data.access)) {
-            // accessMap 存的是router-access
-            this.accessMap.set(
-              this.routerNameMap.get(acc) || acc,
-              resp.data.access[acc]
-            )
-            if (resp.data.access[acc]?.length > 0 && this.noAccess) {
-              this.noAccess = false
-            }
-          }
-
-          if (!this.mainPageRouter) {
-            this.findMainPage()
-          }
-
-          observer.next(this.menuList)
-          this.reqFlashMenu()
-          this.reqUpdateRightList()
         }
+        observer.next(this.menuList)
+
+        this.reqFlashMenu()
+        this.reqUpdateRightList()
       })
-    })
+    }
+    )
+  }
+
+  generateMenuList (resp:any) {
+    if (resp.code === 0) {
+      this.mainPageRouter = ''
+      this.modulesMap = new Map()
+      this.menuList = []
+      this.routerNameMap = new Map()
+      this.noAccess = true
+      this.originAccessData = resp.data.access
+      for (const navigation of resp.data.navigation) {
+        const menu = {
+          title: navigation.title,
+          titleString: navigation.title,
+          menu: true,
+          key: uuidv4(),
+          icon: navigation.icon || 'daohang',
+          ...(navigation.modules?.length > 0 && !navigation.default
+            ? {
+                children: navigation.modules.map((module: any) => {
+                  this.routerNameMap.set(module.path, module.name)
+                  return {
+                    title: module.title,
+                    titleString: navigation.title,
+                    name: module.name,
+                    type: module.type,
+                    routerLink: module.path,
+                    matchRouter: true,
+                    matchRouterExact: false
+                  }
+                })
+              }
+            : navigation.modules?.length > 0 &&
+              this.getDefaultModule(navigation).path
+              ? {
+                  name: this.getDefaultModule(navigation).name,
+                  routerLink: this.getDefaultModule(navigation).path,
+                  matchRouter: true,
+                  matchRouterExact: false,
+                  type: this.getDefaultModule(navigation).type
+                }
+              : (navigation.modules?.length > 0
+                  ? { // TODO似乎没用，后续排查
+                    }
+                  : {
+                      children: [{
+                        menu: true,
+                        group: true,
+                        title: '暂无内容',
+                        menuTitleClassName: 'menu-no-content'
+                      }]
+                    }))
+        }
+        if (navigation.name && navigation.path) {
+          this.routerNameMap.set(navigation.path, navigation.name)
+        }
+        if ((menu as any).routerLink && !this.routerNameMap.get((menu as any).routerLink)) {
+          this.routerNameMap.set((menu as any).routerLink, (menu as any).name)
+        }
+        this.menuList.push(menu)
+      }
+
+      if (!this.mainPageRouter) {
+        this.findMainPage()
+      }
+    }
   }
 
   getDefaultModule (nav: any): { name: string; path: string; type: string } {
@@ -239,26 +229,26 @@ export class EoNgNavigationService {
   }
 
   // 检查用户是否有编辑该路由页面下内容的权限,若有返回true
-  checkUpdateRight (menuRouter: string) {
-    return new Observable((observer) => {
-      if (this.updateRightsRouterList?.length === 0) {
-        this.getMenuList().subscribe(() => {
-          observer.next(
-            this.accessMap.get(menuRouter)?.filter((x) => {
-              return x.includes('edit')
-            }).length
-          )
-        })
-      } else {
-        observer.next(
-          this.accessMap.get(menuRouter)?.filter((x) => {
-            return x.includes('edit')
-          }).length
-        )
-        // return of(this.updateRightsRouterList.indexOf(menuRouter) !== -1)
-      }
-    })
-  }
+  // checkUpdateRight (menuRouter: string) {
+  //   return new Observable((observer) => {
+  //     if (this.updateRightsRouterList?.length === 0) {
+  //       this.getMenuList().subscribe(() => {
+  //         observer.next(
+  //           this.accessMap.get(menuRouter)?.filter((x) => {
+  //             return x.includes('edit')
+  //           }).length
+  //         )
+  //       })
+  //     } else {
+  //       observer.next(
+  //         this.accessMap.get(menuRouter)?.filter((x) => {
+  //           return x.includes('edit')
+  //         }).length
+  //       )
+  //       // return of(this.updateRightsRouterList.indexOf(menuRouter) !== -1)
+  //     }
+  //   })
+  // }
 
   private breadcrumb: Subject<any> = new Subject<any>()
   private breadcrumbList: MenuOptions[] = []
@@ -268,11 +258,10 @@ export class EoNgNavigationService {
 
   reqFlashBreadcrumb (value: any, type?:string) {
     if (type && type === 'iframe') {
-      
-    } else {
-      this.breadcrumbList = value
-      this.breadcrumb.next(value)
+      value[0].iframe = true
     }
+    this.breadcrumbList = value
+    this.breadcrumb.next(value)
   }
 
   repFlashBreadcrumb () {
