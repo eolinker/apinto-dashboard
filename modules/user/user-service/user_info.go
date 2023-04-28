@@ -245,6 +245,15 @@ func (u *userInfoService) GetUserInfo(ctx context.Context, userID int) (*user_mo
 	return userModel, nil
 }
 
+func (u *userInfoService) CheckPassword(ctx context.Context, name string, password string) (int, bool) {
+	//var userModel *user_model.UserInfo
+	info, err := u.userInfoStore.GetByUserName(ctx, name)
+	if err != nil {
+		return 0, false
+	}
+	return info.Id, common.Md5(password) != info.Password
+}
+
 func (u *userInfoService) GetUserInfoByName(ctx context.Context, userName string) (*user_model.UserInfo, error) {
 
 	userModel, err := u.userNameCache.Get(ctx, userName)
@@ -365,7 +374,6 @@ func entryToModule(info *user_entry.UserInfo) *user_model.UserInfo {
 		Phone:         info.Phone,
 		Avatar:        info.Avatar,
 		LastLoginTime: info.LastLoginTime,
-		Password:      info.Password,
 	}
 }
 
