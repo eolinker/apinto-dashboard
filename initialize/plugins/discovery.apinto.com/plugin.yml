@@ -1,8 +1,8 @@
 id: "discovery.apinto.com"
 name: "discovery"
 cname: "服务发现"
-resume: ""
-version: "v1.0.3"
+resume: "使用一个注册中心来记录分布式系统中的全部服务的信息，以便其他服务能够快速的找到这些已注册的服务。"
+version: "v1.0.0"
 icon: "服务发现.png"
 driver: "discovery.apinto.com"
 type: 1 #0为框架模块 1为核心模块 2为内置模块 3为非内置

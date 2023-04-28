@@ -1,7 +1,7 @@
 id: "api.apinto.com"
 name: "api"
 cname: "API管理"
-resume: "管理和配置API转发信息，支持配置多协议接口，包括HTTP/HTTPS、Webservice、Restful、SOAP等多种请求协议，支持从Apikit、Postcat、Swagger等API管理工具中一键同步API。"
+resume: "管理和配置API转发信息，支持配置多协议接口，包括HTTP/HTTPS、Webservice、Restful、SOAP等多种请求协议。"
 version: "v1.0.0"
 icon: "API 访问限制.png"
 driver: "api.apinto.com"
