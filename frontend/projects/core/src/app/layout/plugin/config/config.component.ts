@@ -40,6 +40,7 @@ export class PluginConfigComponent implements OnInit {
 
   modalRef:NzModalRef|undefined
   refreshPage:Function|undefined
+  closeModal:any = null
   constructor (private fb: UntypedFormBuilder, private api:ApiService, private message:EoNgMessageService,
     private navService:EoNgNavigationService) {
     this.validateForm = this.fb.group({
@@ -91,6 +92,7 @@ export class PluginConfigComponent implements OnInit {
             subscription.unsubscribe()
           })
           this.refreshPage && this.refreshPage()
+          this.closeModal && this.closeModal()
         }
       })
     }
