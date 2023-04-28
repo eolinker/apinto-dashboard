@@ -1,8 +1,8 @@
 id: "webhook.apinto.com"
 name: "webhook"
-cname: "webhook"
-resume: ""
-version: "v1.0.3"
+cname: "Webhook"
+resume: "自定义Webhook规则，当监控触发告警事件时，监控程序将会根据Webhook规则，推送信息到目标地址，实时发送告警信息。支持对接企业微信、飞书、钉钉等常用办公软件等消息通知API。"
+version: "v1.0.1"
 icon: "webhook设置.png"
 driver: "webhook.apinto.com"
 type: 2 #0为框架模块 1为核心模块 2为内置模块 3为非内置
