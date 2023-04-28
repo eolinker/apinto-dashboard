@@ -23,7 +23,7 @@ export class SystemEmailConfigComponent implements OnInit {
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
   listOfProtocols:SelectOption[] = [...protocolsList]
   constructor (private fb: UntypedFormBuilder,
-    private appConfigService: EoNgNavigationService,
+    private navigationService: EoNgNavigationService,
     private api: ApiService,
     private message: EoNgMessageService) {
     this.validateForm = this.fb.group({
@@ -35,7 +35,7 @@ export class SystemEmailConfigComponent implements OnInit {
       password: ['']
     })
 
-    this.appConfigService.reqFlashBreadcrumb([
+    this.navigationService.reqFlashBreadcrumb([
       { title: '邮箱设置' }
     ])
   }

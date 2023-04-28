@@ -27,10 +27,10 @@ export class ApiPluginTemplateListComponent implements OnInit {
     private modalService: EoNgFeedbackModalService,
     private api: ApiService,
     public router: Router,
-    private appConfigService: EoNgNavigationService,
+    private navigationService: EoNgNavigationService,
     private service:RouterService
   ) {
-    this.appConfigService.reqFlashBreadcrumb([{ title: '插件模板' }])
+    this.navigationService.reqFlashBreadcrumb([{ title: '插件模板' }])
   }
 
   ngOnInit (): void {

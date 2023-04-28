@@ -81,6 +81,9 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
 
   getThead () {
     for (const index in this.nzThead) {
+      if (this.nzThead[index].type === 'checkbox' && this.nzDisabled) {
+        this.nzThead[index].disabled = true
+      }
       if (this.nzThead[index].title === '操作') {
         this.nzThead[index].right = true
         this.nzThead[index].width = (this.nzMaxOperatorButton && !this.nzThead[index].width) ? (this.nzMaxOperatorButton > 3 ? this.nzMaxOperatorButton * 26 + 10 + 10 : 3 * 26 + 20) : (this.nzThead[index].width > 50 ? this.nzThead[index].width : 50)

@@ -32,7 +32,7 @@ export class GroupComponent implements OnInit {
     private baseInfo:BaseInfoService,
     private api: ApiService,
     private router: Router,
-    private appConfigService:EoNgNavigationService
+    private navigationService:EoNgNavigationService
   ) {
     this.strategyType = this.router.url.split('/')[2]
     this.getBreadcrumb()
@@ -152,22 +152,22 @@ export class GroupComponent implements OnInit {
   getBreadcrumb () {
     switch (this.strategyType) {
       case 'traffic':
-        this.appConfigService.reqFlashBreadcrumb([{ title: '流量策略' }])
+        this.navigationService.reqFlashBreadcrumb([{ title: '流量策略' }])
         break
       case 'grey':
-        this.appConfigService.reqFlashBreadcrumb([{ title: '灰度策略' }])
+        this.navigationService.reqFlashBreadcrumb([{ title: '灰度策略' }])
         break
       case 'fuse':
-        this.appConfigService.reqFlashBreadcrumb([{ title: '熔断策略' }])
+        this.navigationService.reqFlashBreadcrumb([{ title: '熔断策略' }])
         break
       case 'cache':
-        this.appConfigService.reqFlashBreadcrumb([{ title: '缓存策略' }])
+        this.navigationService.reqFlashBreadcrumb([{ title: '缓存策略' }])
         break
       case 'visit':
-        this.appConfigService.reqFlashBreadcrumb([{ title: '访问策略' }])
+        this.navigationService.reqFlashBreadcrumb([{ title: '访问策略' }])
         break
       default:
-        this.appConfigService.reqFlashBreadcrumb([{ title: '流量策略' }])
+        this.navigationService.reqFlashBreadcrumb([{ title: '流量策略' }])
     }
   }
 }

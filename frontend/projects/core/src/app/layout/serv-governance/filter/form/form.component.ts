@@ -5,7 +5,7 @@ import { CascaderOption } from 'eo-ng-cascader'
 import { CheckBoxOptionInterface } from 'eo-ng-checkbox'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { SelectOption } from 'eo-ng-select'
-import { THEAD_TYPE } from 'eo-ng-table'
+import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { ApiGroup } from 'projects/core/src/app/constant/type'
 import { ApiService } from '../../../../service/api.service'
 import { FilterForm, FilterOption, FilterRemoteOption, RemoteApiItem, RemoteAppItem, RemoteServiceItem } from '../../types/types'
@@ -76,7 +76,6 @@ export class FilterFormComponent implements OnInit {
   @Output() remoteSelectNameListChange:EventEmitter<string[]> = new EventEmitter()
   @Output() staticsListChange:EventEmitter<CheckBoxOptionInterface[]> = new EventEmitter()
   @Output() filterTypeChange:EventEmitter<string> = new EventEmitter()
-
   filterTypeMap: Map<string, any> = new Map() // 筛选条件值与类型的映射
   remoteList: RemoteAppItem[] | RemoteApiItem[] | RemoteServiceItem[] = []
   _remoteSelectList: string[] = [] // 穿梭框内被勾选的选项uuid
@@ -90,7 +89,7 @@ export class FilterFormComponent implements OnInit {
   searchGroup: string[] = []
   showFilterError: boolean = false
   strategyType: string = ''
-  nzDisabled: boolean = false
+  @Input() nzDisabled: boolean = false
   _filterForm: FilterForm = {
     name: '',
     title: '',
@@ -113,7 +112,7 @@ export class FilterFormComponent implements OnInit {
     }
   ]
 
-  filterTbody: THEAD_TYPE[] = [
+  filterTbody: TBODY_TYPE[] = [
     {
       key: 'checked',
       type: 'checkbox'
@@ -219,6 +218,9 @@ export class FilterFormComponent implements OnInit {
               type: 'checkbox',
               click: () => {
                 this.getNewRemotesStatus()
+              },
+              disabledFn: () => {
+                return this.nzDisabled
               }
 
             }
@@ -228,7 +230,8 @@ export class FilterFormComponent implements OnInit {
               type: 'checkbox',
               click: () => {
                 this.getNewRemotesStatus()
-              }
+              },
+              disabled: this.nzDisabled
 
             }
           ]

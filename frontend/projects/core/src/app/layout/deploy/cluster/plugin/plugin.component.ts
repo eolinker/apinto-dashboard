@@ -47,9 +47,9 @@ export class DeployClusterPluginComponent implements OnInit {
           private modalService:EoNgFeedbackModalService,
           private api:ApiService,
           private router:Router,
-          private appConfigService:EoNgNavigationService,
+          private navigationService:EoNgNavigationService,
           private service:DeployService) {
-    this.appConfigService.reqFlashBreadcrumb([{ title: '网关集群', routerLink: 'deploy/cluster' }, { title: '插件管理' }])
+    this.navigationService.reqFlashBreadcrumb([{ title: '网关集群', routerLink: 'deploy/cluster' }, { title: '插件管理' }])
   }
 
   ngOnInit (): void {
@@ -114,7 +114,7 @@ export class DeployClusterPluginComponent implements OnInit {
           nzTitle: '编辑配置',
           nzWidth: MODAL_NORMAL_SIZE,
           nzContent: DeployClusterPluginConfigFormComponent,
-          nzComponentParams: { clusterName: this.clusterName, editData: data, closeModal: this.closeModal },
+          nzComponentParams: { clusterName: this.clusterName, editData: data, closeModal: this.closeModal, nzDisabled: this.nzDisabled },
           nzOkDisabled: this.nzDisabled,
           nzOkText: '提交',
           nzOnOk: (component:DeployClusterPluginConfigFormComponent) => {

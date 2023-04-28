@@ -9,7 +9,7 @@
  * @FilePath: /apinto/src/app/basic-layout/basic-layout.component.ts
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
-import { Component, OnInit } from '@angular/core'
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core'
 import { Router } from '@angular/router'
 import { EoNgBreadcrumbOptions } from 'eo-ng-breadcrumb'
 import { MenuOptions } from 'eo-ng-menu'
@@ -19,6 +19,8 @@ import { MODAL_SMALL_SIZE } from '../../constant/app.config'
 import { ApiService } from '../../service/api.service'
 import { EoNgNavigationService } from '../../service/eo-ng-navigation.service'
 import { AuthInfoDetailComponent } from '../auth/info/detail/detail.component'
+import { BaseInfoService } from '../../service/base-info.service'
+import { IframeHttpService } from '../../service/iframe-http.service'
 
 @Component({
   selector: 'basic-layout',
@@ -26,6 +28,8 @@ import { AuthInfoDetailComponent } from '../auth/info/detail/detail.component'
   styleUrls: ['./basic-layout.component.scss']
 })
 export class BasicLayoutComponent implements OnInit {
+  @ViewChild('breadcrumbTitleTpl', { static: true }) breadcrumbTitleTpl!: ElementRef
+
   sideMenuOptions: MenuOptions[] = []
   breadcrumbOptions: EoNgBreadcrumbOptions[] = []
   currentRouter: string = '' // 当前路由
@@ -60,11 +64,21 @@ export class BasicLayoutComponent implements OnInit {
     private router: Router,
     private api: ApiService,
     private navigationService: EoNgNavigationService,
-    private modalService: NzModalService
+    private modalService: NzModalService,
+    private baseInfo:BaseInfoService,
+    private iframeService:IframeHttpService
   ) {
     this.subscription1 = this.navigationService
       .repFlashBreadcrumb()
       .subscribe((data: any) => {
+        console.log(data)
+        // data[0].iframe=true时面包屑是iframe的导航，需要特殊处理路由
+        if (data && data[0] && data[0].iframe) {
+          for (const bc of data) {
+            bc.nzContext = { url: bc.routerLink, title: bc.title }
+            bc.title = this.breadcrumbTitleTpl
+          }
+        }
         this.breadcrumbOptions = data
       })
 
@@ -95,6 +109,13 @@ export class BasicLayoutComponent implements OnInit {
     this.subscription2.unsubscribe()
     this.subscription3.unsubscribe()
     this.subscription4.unsubscribe()
+  }
+
+  clickIframeBreadcrumb (url:string) {
+    console.log(url)
+    const moduleName:string = this.baseInfo.allParamsInfo.moduleName
+    window.location.href = `module/${moduleName}#/${url}`
+    this.iframeService.reqFlashIframe(url)
   }
 
   getSideMenu () {
