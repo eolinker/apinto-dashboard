@@ -36,7 +36,7 @@ func (u *UserController) LoginCheckApi(ginCtx *gin.Context) {
 	rToken := tokens.RJwt
 
 	//1.从ginCtx的header中拿到token，没拿到报错提醒用户重新登录
-	verifyToken, err := common.VerifyToken(token)
+	verifyToken, err := common.VerifyToken(token, jwtSecret)
 	if err != nil {
 		controller.ErrorJsonWithCode(ginCtx, http.StatusOK, controller.CodeLoginInvalid, loginError)
 		ginCtx.Abort()
