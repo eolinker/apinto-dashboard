@@ -816,7 +816,7 @@ func (a *apiService) DeleteAPI(ctx context.Context, namespaceId, operator int, u
 
 func (a *apiService) BatchOnline(ctx context.Context, namespaceId int, operator int, onlineToken string) ([]*apimodel.BatchListItem, error) {
 	//判断uuid和operator是一致的
-	key := a.batchApiCache.Key(onlineToken)
+	key := onlineToken
 	task, err := a.batchApiCache.Get(ctx, key)
 	//篡改审计日志的请求body
 	if err != nil {
@@ -1457,7 +1457,7 @@ func (a *apiService) BatchOnlineCheck(ctx context.Context, namespaceId int, oper
 			Token:    onlineToken,
 			Data:     data,
 		}
-		key := a.batchApiCache.Key(onlineToken)
+		key := onlineToken
 		if err := a.batchApiCache.Set(ctx, key, task, time.Hour*8); err != nil {
 			return nil, "", err
 		}
@@ -2057,7 +2057,7 @@ func (a *apiService) GetImportCheckList(ctx context.Context, namespaceId int, fi
 
 	token := uuid.New()
 	//数据存储到缓存
-	key := a.importApiCache.Key(token)
+	key := token
 
 	importAPIRedisData := &apimodel.ImportAPIRedisData{
 		Apis:        redisDataItems,
@@ -2074,7 +2074,7 @@ func (a *apiService) GetImportCheckList(ctx context.Context, namespaceId int, fi
 
 func (a *apiService) ImportAPI(ctx context.Context, namespaceId, operator int, input *api_dto.ImportAPIInfos) error {
 
-	key := a.importApiCache.Key(input.Token)
+	key := input.Token
 	apiData, err := a.importApiCache.Get(ctx, key)
 	if err != nil {
 		return err

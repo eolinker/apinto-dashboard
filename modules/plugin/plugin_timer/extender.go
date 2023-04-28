@@ -189,7 +189,7 @@ func (e *extender) getExtenderMaps(ctx context.Context) (map[string]*plugin_mode
 
 	log.DebugF("当前最新扩展ID列表 extenders=%v", extenders)
 	if len(extenderInfos) > 0 {
-		if err = e.extenderCache.SetAll(ctx, e.extenderCache.Key(), extenderInfos, time.Minute*5); err != nil {
+		if err = e.extenderCache.SetAll(ctx, extenderInfos, time.Minute*5); err != nil {
 			log.Errorf("扩展ID插入缓存失败 err=%s", err.Error())
 			return nil, err
 		}

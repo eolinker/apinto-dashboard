@@ -21,6 +21,5 @@ type IUserInfoService interface {
 }
 
 type ISessionCache interface {
-	cache.IRedisCache[user_model.Session]
-	Key(string) string
+	cache.IRedisCache[user_model.Session, string]
 }
