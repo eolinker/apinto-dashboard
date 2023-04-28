@@ -12,15 +12,15 @@ import (
 )
 
 type sessionCache struct {
-	cache.IRedisCache[user_model.Session]
+	cache.IRedisCache[user_model.Session, string]
 }
 
-func (sessionCache) Key(session string) string {
+func sessionCacheKey(session string) string {
 	return fmt.Sprintf("session:%s", session)
 }
 
 func newSessionCache(client *redis.ClusterClient) user.ISessionCache {
 	return sessionCache{
-		IRedisCache: cache.CreateRedisCache[user_model.Session](client, "apinto", "session"),
+		IRedisCache: cache.CreateRedisCache[user_model.Session](client, sessionCacheKey, "apinto", "session"),
 	}
 }
