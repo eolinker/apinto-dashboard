@@ -2,9 +2,9 @@ package controller
 
 import (
 	"fmt"
+	"github.com/eolinker/apinto-dashboard/controller/session"
 	"net/http"
 
-	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/eosc/common/bean"
 
 	namespace_controller "github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
@@ -82,7 +82,7 @@ func NewModule() *Module {
 		{
 			Name:    "userID",
 			Rule:    apinto_module.MiddlewareRule(apinto_module.RouterLabelApi),
-			Handler: controller.SetUser,
+			Handler: session.SetUser,
 		},
 	}
 	m := &Module{
