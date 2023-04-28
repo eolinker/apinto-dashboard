@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
 	"net/http"
-	"strconv"
 )
 
 var jwtSecret = []byte("apintp-dashboard")
@@ -35,26 +34,16 @@ func (u *UserController) LoginCheckApi(ginCtx *gin.Context) {
 	token := tokens.Jwt
 	rToken := tokens.RJwt
 
-	//1.从ginCtx的header中拿到token，没拿到报错提醒用户重新登录
-	verifyToken, err := common.VerifyToken(token, jwtSecret)
+	uc, err := common.JWTDecode(token, jwtSecret)
 	if err != nil {
 		controller.ErrorJsonWithCode(ginCtx, http.StatusOK, controller.CodeLoginInvalid, loginError)
-		ginCtx.Abort()
-		return
-	}
-	//1.1拿到用户ID和过期时间 过期了重新登录
-	claims := verifyToken.Claims.(jwt.MapClaims)
-	if err = claims.Valid(); err != nil {
-
-		controller.ErrorJsonWithCode(ginCtx, http.StatusOK, controller.CodeLoginInvalid, loginError)
-		ginCtx.Abort()
 		return
 	}
 
 	ginCtx.Writer.Header().Set(controller.Authorization, token)
 	ginCtx.Writer.Header().Set(controller.RAuthorization, rToken)
 
-	userId, _ := strconv.Atoi(claims[controller.UserId].(string))
+	userId := uc.Id
 
 	ginCtx.Set(controller.UserId, userId)
 	ginCtx.Set(controller.Session, session)
