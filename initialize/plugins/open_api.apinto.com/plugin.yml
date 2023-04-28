@@ -1,9 +1,9 @@
 id: "open_api.apinto.com"
 name: "open_api"
 cname: "open-api"
-resume: ""
-version: "v1.0.1"
-icon: "inner-plugin.png"
+resume: "利用该插件的提供的OpenAPI，将内容进行重新搭配，从而制作出独特的、具有新价值的新应用/产品。"
+version: "v1.0.3"
+icon: "OpenAPI.png"
 driver: "open_api.apinto.com"
 type: 0 #0为框架模块 1为核心模块 2为内置模块 3为非内置
 auto: true
