@@ -185,7 +185,7 @@ func (p *pluginController) delPlugin(ginCtx *gin.Context) {
 
 // 插件的扩展ID列表
 func (p *pluginController) pluginExtendeds(ginCtx *gin.Context) {
-	extenderList, err := p.extenderCache.GetAll(ginCtx, p.extenderCache.Key())
+	extenderList, err := p.extenderCache.GetAll(ginCtx)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return

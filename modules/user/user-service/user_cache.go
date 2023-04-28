@@ -8,21 +8,24 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
-type IUserInfoCache interface {
-	cache.IRedisCache[user_model.UserInfo]
-	Key(token int) string
+type IUserInfoCacheId interface {
+	cache.IRedisCache[user_model.UserInfo, int]
+}
+type IUserInfoCacheName interface {
+	cache.IRedisCache[user_model.UserInfo, string]
 }
 
-type userCache struct {
-	cache.IRedisCache[user_model.UserInfo]
+func userCacheKey(userId int) string {
+	return fmt.Sprintf("user_info:id:%d", userId)
 }
-
-func (userCache) Key(userId int) string {
-	return fmt.Sprintf("user_info:%d", userId)
+func userCacheName(name string) string {
+	return fmt.Sprintf("user_info:name:%d", name)
 }
+func newUserInfoIdCache(client *redis.ClusterClient) IUserInfoCacheId {
+	return cache.CreateRedisCache[user_model.UserInfo, int](client, userCacheKey, "apinto", "user-center")
 
-func newUserInfoCache(client *redis.ClusterClient) IUserInfoCache {
-	return &userCache{
-		IRedisCache: cache.CreateRedisCache[user_model.UserInfo](client, "apinto", "user-center"),
-	}
+}
+func newUserInfoNameCache(client *redis.ClusterClient) IUserInfoCacheName {
+	return cache.CreateRedisCache[user_model.UserInfo, string](client, userCacheName, "apinto", "user-center")
+
 }
