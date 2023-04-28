@@ -71,7 +71,6 @@ export class BasicLayoutComponent implements OnInit {
     this.subscription1 = this.navigationService
       .repFlashBreadcrumb()
       .subscribe((data: any) => {
-        console.log(data)
         // data[0].iframe=true时面包屑是iframe的导航，需要特殊处理路由
         if (data && data[0] && data[0].iframe) {
           for (const bc of data) {
@@ -112,7 +111,6 @@ export class BasicLayoutComponent implements OnInit {
   }
 
   clickIframeBreadcrumb (url:string) {
-    console.log(url)
     const moduleName:string = this.baseInfo.allParamsInfo.moduleName
     window.location.href = `module/${moduleName}#/${url}`
     this.iframeService.reqFlashIframe(url)

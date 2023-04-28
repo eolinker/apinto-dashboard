@@ -42,7 +42,6 @@ export class UserAccessDirective implements OnInit {
     if (this.navigationService.dataUpdated) {
       const moduleName = this.navigationService.routerNameMap.get(this.eoNgUserAccess) || this.eoNgUserAccess
       this.userRight = this.viewAccess ? !!this.navigationService.accessMap.get(moduleName) : this.navigationService.accessMap.get(moduleName) === 'edit'
-      console.log(moduleName, this.viewAccess, this.userRight)
       if (!this.userRight) {
         if (this.el.nativeElement.localName === 'eo-ng-dropdown' || this.el.nativeElement.localName === 'a') {
           this.renderer.setStyle(this.el.nativeElement, 'visibility', 'hidden')
