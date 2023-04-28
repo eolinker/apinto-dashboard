@@ -8,21 +8,14 @@ import (
 )
 
 type IExtenderCache interface {
-	cache.IRedisCache[plugin_model.ExtenderInfo]
-	Key() string
+	cache.IRedisCacheNoKey[plugin_model.ExtenderInfo]
 }
 
-type extenderCache struct {
-	cache.IRedisCache[plugin_model.ExtenderInfo]
-}
-
-func (i *extenderCache) Key() string {
+func extenderCacheKey() string {
 	return fmt.Sprintf("extender")
 }
 
 func newIExtenderCache(client *redis.ClusterClient) IExtenderCache {
-	return &extenderCache{
-		IRedisCache: cache.CreateRedisCache[plugin_model.ExtenderInfo](client),
-	}
+	return cache.CreateRedisCacheNoKey[plugin_model.ExtenderInfo](client, extenderCacheKey)
 
 }

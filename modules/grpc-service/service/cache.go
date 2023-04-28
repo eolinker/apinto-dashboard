@@ -7,20 +7,19 @@ import (
 )
 
 type INavigationModulesCache interface {
-	cache.IRedisCache[grpc_service.NavigationModulesResp]
-	Key() string
+	cache.IRedisCache[grpc_service.NavigationModulesResp, string]
 }
 
 type navigationModulesCache struct {
-	cache.IRedisCache[grpc_service.NavigationModulesResp]
+	cache.IRedisCache[grpc_service.NavigationModulesResp, string]
 }
 
-func (i *navigationModulesCache) Key() string {
+func navigationModulesCacheKey(string) string {
 	return "navigation_modules"
 }
 
 func newNavigationModulesCache(client *redis.ClusterClient) INavigationModulesCache {
 	return &navigationModulesCache{
-		IRedisCache: cache.CreateRedisCache[grpc_service.NavigationModulesResp](client),
+		IRedisCache: cache.CreateRedisCache[grpc_service.NavigationModulesResp](client, navigationModulesCacheKey),
 	}
 }
