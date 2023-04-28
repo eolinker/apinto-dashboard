@@ -641,14 +641,6 @@ eo-ng-upstream {
   color: var(--primary-color);
 }
 
-// .block {
-//   display: flex;
-//   flex-wrap: nowrap;
-//   justify-content: flex-start;
-//   overflow-y: hidden;
-//   max-height: calc(100vh - 50px);
-// }
-
 .floatR {
   float: right;
 }
@@ -1415,13 +1407,6 @@ eo-ng-audit-log-list {
   }
 }
 
-eo-ng-apinto-user-avatar {
-  .iconfont {
-    font-size: 32px;
-    color: #dadadb;
-  }
-}
-
 .divide_line_ldcc {
   border-right: 1px solid #e8e8e8;
   right: 0;
@@ -1571,12 +1556,6 @@ nz-upload.ant-btn-primary {
   }
 }
 
-.import-drawer-wrap {
-  eo-ng-table input.ant-input {
-    // background-color: transparent;
-  }
-}
-
 .ant-input-group.ant-input-group-compact
   .ant-cascader-picker-focused
   .ant-input,
@@ -1600,36 +1579,6 @@ nz-upload.ant-btn-primary {
     border-top-right-radius: var(--border-radius) !important;
     border-bottom-right-radius: var(--border-radius) !important;
   }
-}
-
-.monitor-alarm-tabset.ant-tabs-card {
-  .ant-tabs-nav-wrap {
-    height: 42px;
-  }
-  > eo-ng-tabs-nav {
-    background-color: #f5f5f5;
-    margin-bottom: 0px;
-    .ant-tabs-tab {
-      font-size: 12px;
-      line-height: 20px;
-      padding: 6px 16px !important;
-      height: 42px;
-      border: none !important;
-      border-radius: 0px !important;
-      transition: none;
-    }
-
-    .ant-tabs-tab:not(.ant-tabs-tab-active) {
-      background-color: transparent;
-    }
-
-    .ant-tabs-tab-active {
-      border-top: 2px solid var(--primary-color) !important;
-    }
-  }
-}
-.monitor-alarm-tabset.ant-tabs-card > .ant-tabs-nav::before {
-  border-bottom: none !important;
 }
 
 // modal
@@ -1682,177 +1631,6 @@ eo-ng-radio-group.date-picker-button-group
 .ant-picker.date-picker-button-group {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
-}
-
-.monitor-table .ant-dropdown-menu-item {
-  padding: 0 !important;
-}
-
-eo-ng-tabset.eo-ng-monitor-tabs-hidden > .ant-tabs-nav,
-eo-ng-tabs.eo-ng-monitor-tabs-hidden
-  > eo-ng-tabset
-  > eo-ng-tabs-nav.ant-tabs-nav {
-  display: none;
-}
-
-eo-ng-monitor-alarm-area {
-  .p-title {
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 22px;
-    color: #333333;
-    margin-top: 20px;
-    margin-left: 12px;
-    margin-bottom: 8px !important;
-  }
-  .ant-picker-suffix {
-    display: none;
-  }
-  .monitor-table-block {
-    position: relative;
-  }
-  .group-search-large {
-    padding: var(--LAYOUT_MARGIN);
-    padding-top: 0px;
-    padding-left: 0px;
-    white-space: nowrap;
-  }
-  .group-search-large:last-child {
-    padding-bottom: 0px;
-  }
-  .list-content {
-    padding-bottom: 4px;
-  }
-  .line-block {
-    border: 1px solid #e8e8e8;
-    padding: 16px 0 0 0;
-    margin: var(--LAYOUT_MARGIN);
-    margin-top: 0px;
-  }
-  .table-block {
-    border: 1px solid #e8e8e8;
-    margin: var(--LAYOUT_MARGIN);
-  }
-
-  .pie-area {
-    display: flex;
-  }
-  .pie-block {
-    border: 1px solid #e8e8e8;
-    width: 50%;
-    padding: 16px;
-    position: relative;
-    color: #666666;
-  }
-  .pie-static-block {
-    width: 30%;
-    display: flex;
-    white-space: nowrap;
-    font-size: 14px;
-  }
-  .pie-static-total {
-    position: absolute;
-    left: 40%;
-    top: 66px;
-    font-size: 14px;
-    line-height: 22px;
-    color: #666666;
-  }
-  .pie-value {
-    width: 50px;
-    text-align: right;
-    display: inline-block;
-    margin-left: 10px;
-  }
-  .pie-static {
-    display: flex;
-    align-items: center;
-    position: absolute;
-    top: calc(31% + 1px);
-    color: #999999;
-    border-left: 1px solid #d8d8d8;
-    line-height: 22px;
-    ul {
-      list-style: none;
-      padding-inline-start: 10px;
-    }
-    li {
-      margin-top: 16px;
-    }
-    li:first-child {
-      margin-top: 0px;
-    }
-  }
-
-  .chart-title {
-    font-size: 16px;
-    font-weight: 500;
-    color: #666666;
-  }
-}
-eo-ng-monitor-alarm-api-table,
-eo-ng-monitor-alarm-app-table,
-eo-ng-monitor-alarm-upstream-table,
-eo-ng-monitor-alarm-ip-table,
-eo-ng-monitor-alarm-path-table,
-eo-ng-monitor-alarm-node-table,
-eo-ng-monitor-alarm-proxy-path-table,
-eo-ng-monitor-alarm-api-proxy-table,
-eo-ng-monitor-alarm-strategy {
-  .group-search-large.inside-tab {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    margin-top: 16px;
-    margin-bottom: 6px;
-    margin-left: 10px;
-  }
-  eo-ng-dropdown button.ant-btn {
-    width: 16px;
-    height: 16px;
-    padding: 0px;
-  }
-}
-eo-ng-monitor-alarm-api-table,
-eo-ng-monitor-alarm-app-table {
-  .group-search-large.inside-tab {
-    justify-content: space-between;
-  }
-}
-
-.monitor-table {
-  .list-content {
-    padding: 0px;
-  }
-}
-
-.monitor-modal.ant-modal {
-  width: 1000px !important;
-}
-
-.monitor-total-content {
-  height: calc(100vh - 139px);
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-.ant-divider-horizontal {
-  margin: 20px 0;
-}
-
-eo-ng-monitor-conditional-query {
-  td eo-ng-select.ant-select {
-    width: 196px !important;
-  }
-  .arrayItem .ant-table-tbody > tr > td {
-    padding-bottom: var(--LAYOUT_MARGIN) !important;
-  }
-}
-
-eo-ng-monitor-alarm-strategy-config {
-  .ant-input-prefix {
-    margin-right: 16px;
-  }
 }
 
 .cluster-node-addr-btn .deploy-node-copy-btn {
