@@ -8,21 +8,20 @@ import (
 )
 
 type IImportApiCache interface {
-	cache.IRedisCache[apimodel.ImportAPIRedisData]
-	Key(token string) string
+	cache.IRedisCache[apimodel.ImportAPIRedisData, string]
 }
 
 type importApiCache struct {
-	cache.IRedisCache[apimodel.ImportAPIRedisData]
+	cache.IRedisCache[apimodel.ImportAPIRedisData, string]
 }
 
-func (i *importApiCache) Key(token string) string {
+func importKey(token string) string {
 	return fmt.Sprintf("import_api_token:%s", token)
 }
 
 func newImportCache(client *redis.ClusterClient) IImportApiCache {
 	cacheInfo := &importApiCache{
-		IRedisCache: cache.CreateRedisCache[apimodel.ImportAPIRedisData](client),
+		IRedisCache: cache.CreateRedisCache[apimodel.ImportAPIRedisData, string](client, importKey),
 	}
 	return cacheInfo
 

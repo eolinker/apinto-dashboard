@@ -8,22 +8,21 @@ import (
 )
 
 type IBatchOnlineApiTaskCache interface {
-	cache.IRedisCache[apimodel.BatchOnlineCheckTask]
-	Key(token string) string
+	cache.IRedisCache[apimodel.BatchOnlineCheckTask, string]
 }
 
 type batchOnlineApiTaskCache struct {
-	cache.IRedisCache[apimodel.BatchOnlineCheckTask]
+	cache.IRedisCache[apimodel.BatchOnlineCheckTask, string]
 }
 
-func (i *batchOnlineApiTaskCache) Key(token string) string {
+func formatKey(token string) string {
 	return fmt.Sprintf("batch_online_api_token:%s", token)
 }
 
 func newBatchOnlineTaskCache(client *redis.ClusterClient) IBatchOnlineApiTaskCache {
 
 	return &batchOnlineApiTaskCache{
-		IRedisCache: cache.CreateRedisCache[apimodel.BatchOnlineCheckTask](client),
+		IRedisCache: cache.CreateRedisCache[apimodel.BatchOnlineCheckTask](client, formatKey),
 	}
 
 }

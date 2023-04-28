@@ -36,6 +36,5 @@ type IModulePlugin interface {
 }
 
 type INavigationModulesCache interface {
-	cache.IRedisCache[entry.EnabledModule]
-	Key() string
+	cache.IRedisCacheNoKey[entry.EnabledModule]
 }
