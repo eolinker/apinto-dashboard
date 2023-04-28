@@ -34,7 +34,7 @@ export class DeployEnvironmentCreateComponent implements OnInit {
     private api: ApiService,
     private fb: UntypedFormBuilder,
     private router: Router,
-    private appConfigService: EoNgNavigationService
+    private navigationService: EoNgNavigationService
   ) {
     this.validateForm = this.fb.group({
       key: [
@@ -43,7 +43,7 @@ export class DeployEnvironmentCreateComponent implements OnInit {
       ],
       desc: ['']
     })
-    this.appConfigService.reqFlashBreadcrumb([
+    this.navigationService.reqFlashBreadcrumb([
       { title: '环境变量', routerLink: 'deploy/variable' },
       { title: '新建配置' }
     ])

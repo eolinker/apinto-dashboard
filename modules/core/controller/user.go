@@ -256,28 +256,28 @@ func (u *UserController) ssoLogout(ginCtx *gin.Context) {
 func (u *UserController) ssoLoginCheck(ginCtx *gin.Context) {
 	cookie, err := ginCtx.Cookie(controller.Session)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewLoginInvalidError(controller.CodeLoginInvalid, "登录失效"))
+		controller.ErrorJsonWithCode(ginCtx, http.StatusOK, controller.CodeLoginInvalid, loginError)
 		return
 	}
 
 	session, _ := u.sessionCache.Get(ginCtx, cookie)
 	if session == nil {
-		ginCtx.JSON(http.StatusOK, controller.NewLoginInvalidError(controller.CodeLoginInvalid, "登录失效"))
+		controller.ErrorJsonWithCode(ginCtx, http.StatusOK, controller.CodeLoginInvalid, loginError)
 		return
 	}
 	uc, err := common.JWTDecode(session.Jwt, jwtSecret)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewLoginInvalidError(controller.CodeLoginInvalid, "登录失效"))
+		controller.ErrorJsonWithCode(ginCtx, http.StatusOK, controller.CodeLoginInvalid, loginError)
 		return
 	}
 
 	info, err := u.userInfo.GetUserInfo(ginCtx, uc.Id)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewLoginInvalidError(controller.CodeLoginInvalid, "登录失效"))
+		controller.ErrorJsonWithCode(ginCtx, http.StatusOK, controller.CodeLoginInvalid, loginError)
 		return
 	}
 	if info.LastLoginTime.Format("2006-01-02 15:04:05") != uc.LoginTime || info.UserName != uc.Uname {
-		ginCtx.JSON(http.StatusOK, controller.NewLoginInvalidError(controller.CodeLoginInvalid, "登录失效"))
+		controller.ErrorJsonWithCode(ginCtx, http.StatusOK, controller.CodeLoginInvalid, loginError)
 		return
 	}
 

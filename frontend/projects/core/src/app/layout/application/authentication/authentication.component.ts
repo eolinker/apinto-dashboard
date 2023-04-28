@@ -54,8 +54,8 @@ export class ApplicationAuthenticationComponent implements OnInit {
                private baseInfo:BaseInfoService,
                private modalService:EoNgFeedbackModalService,
                private router:Router,
-               private appConfigService:EoNgNavigationService) {
-    this.appConfigService.reqFlashBreadcrumb([{ title: '应用管理', routerLink: 'application' }, { title: '鉴权管理' }])
+               private navigationService:EoNgNavigationService) {
+    this.navigationService.reqFlashBreadcrumb([{ title: '应用管理', routerLink: 'application' }, { title: '鉴权管理' }])
   }
 
   ngOnInit (): void {

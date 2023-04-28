@@ -62,8 +62,8 @@ export class ApiManagementListComponent implements OnInit {
     private api:ApiService,
     private router:Router,
     private baseInfo:BaseInfoService,
-    private appConfigService:EoNgNavigationService) {
-    this.appConfigService.reqFlashBreadcrumb([{ title: 'API管理', routerLink: 'router/api/group/list' }])
+    private navigationService:EoNgNavigationService) {
+    this.navigationService.reqFlashBreadcrumb([{ title: 'API管理', routerLink: 'router/api/group/list' }])
   }
 
   ngOnInit (): void {

@@ -33,12 +33,12 @@ export class ApiPluginTemplateCreateComponent implements OnInit {
   constructor (private message: EoNgFeedbackMessageService,
     private baseInfo:BaseInfoService,
     private api:ApiService,
-    private appConfigService:EoNgNavigationService,
+    private navigationService:EoNgNavigationService,
     private fb: UntypedFormBuilder,
     private router: Router,
     private jsonService:EoNgJsonService
   ) {
-    this.appConfigService.reqFlashBreadcrumb([
+    this.navigationService.reqFlashBreadcrumb([
       { title: '插件模板', routerLink: 'router/plugin-template' },
       { title: '新建模板' }
     ])
@@ -51,7 +51,7 @@ export class ApiPluginTemplateCreateComponent implements OnInit {
 
   ngOnInit (): void {
     if (this.baseInfo.allParamsInfo.pluginTemplateId) {
-      this.appConfigService.reqFlashBreadcrumb([
+      this.navigationService.reqFlashBreadcrumb([
         { title: '插件模板', routerLink: 'router/plugin-template' },
         { title: '编辑模板' }
       ])

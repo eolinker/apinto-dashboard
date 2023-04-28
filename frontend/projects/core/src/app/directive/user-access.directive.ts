@@ -14,21 +14,17 @@ export class UserAccessDirective implements OnInit {
   @Output() disabledEdit:EventEmitter<any> = new EventEmitter()
   oldAccessRouter:string = ''
   private userRight:boolean = false // 默认用户无权限或查看编辑
-  private userRightList:Array<string> = [] // 用户编辑或查看权限路由列表
   private subscription: Subscription = new Subscription()
   private subscription1: Subscription = new Subscription()
   constructor (
-    private appConfigService:EoNgNavigationService,
+    private navigationService:EoNgNavigationService,
     private el:ElementRef,
     private renderer:Renderer2,
     private router:Router) {
   }
 
   ngOnInit (): void {
-    this.subscription = this.appConfigService.repUpdateRightList().subscribe(() => {
-      this.disableEdit()
-    })
-    this.subscription1 = this.appConfigService.repViewRightList().subscribe(() => {
+    this.subscription = this.navigationService.repUpdateRightList().subscribe(() => {
       this.disableEdit()
     })
   }
@@ -43,28 +39,22 @@ export class UserAccessDirective implements OnInit {
   }
 
   disableEdit () {
-    if (this.appConfigService.dataUpdated) {
-      this.userRightList = this.viewAccess ? this.appConfigService.getViewRightsRouter() : this.appConfigService.getUpdateRightsRouter()
-      this.userRight = this.userRightList.indexOf(this.eoNgUserAccess) !== -1
-      // if (!this.userRight) {
-      //   if (this.el.nativeElement.localName === 'eo-ng-dropdown' || this.el.nativeElement.localName === 'a') {
-      //     this.renderer.setStyle(this.el.nativeElement, 'visibility', 'hidden')
-      //   } else {
-      //     this.disabledEdit.emit(true)
-      //     this.renderer.setProperty(this.el.nativeElement, 'disabled', true)
-      //   }
-      // } else {
-      //   if (this.el.nativeElement.localName === 'eo-ng-dropdown' || this.el.nativeElement.localName === 'a') {
-      //     this.renderer.setStyle(this.el.nativeElement, 'visibility', 'none')
-      //   } else {
-      //     this.disabledEdit.emit(false)
-      //   }
-      // }
-
-      if (this.el.nativeElement.localName === 'eo-ng-dropdown' || this.el.nativeElement.localName === 'a') {
-        this.renderer.setStyle(this.el.nativeElement, 'visibility', 'none')
+    if (this.navigationService.dataUpdated) {
+      const moduleName = this.navigationService.routerNameMap.get(this.eoNgUserAccess) || this.eoNgUserAccess
+      this.userRight = this.viewAccess ? !!this.navigationService.accessMap.get(moduleName) : this.navigationService.accessMap.get(moduleName) === 'edit'
+      if (!this.userRight) {
+        if (this.el.nativeElement.localName === 'eo-ng-dropdown' || this.el.nativeElement.localName === 'a') {
+          this.renderer.setStyle(this.el.nativeElement, 'visibility', 'hidden')
+        } else {
+          this.disabledEdit.emit(true)
+          this.renderer.setProperty(this.el.nativeElement, 'disabled', true)
+        }
       } else {
-        this.disabledEdit.emit(false)
+        if (this.el.nativeElement.localName === 'eo-ng-dropdown' || this.el.nativeElement.localName === 'a') {
+          this.renderer.setStyle(this.el.nativeElement, 'visibility', 'none')
+        } else {
+          this.disabledEdit.emit(false)
+        }
       }
     }
   }

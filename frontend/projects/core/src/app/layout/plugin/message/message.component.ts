@@ -57,6 +57,7 @@ import { UntypedFormBuilder, Validators } from '@angular/forms'
             *ngIf="!enable"
             class="ml-btnybase ant-btn-primary"
             eo-ng-button
+        eoNgUserAccess="module-plugin"
             (click)="enablePlugin()"
           >
             启用
@@ -65,6 +66,7 @@ import { UntypedFormBuilder, Validators } from '@angular/forms'
             *ngIf="enable && canDisable"
             class="ml-btnybase"
             eo-ng-button
+        eoNgUserAccess="module-plugin"
             (click)="disablePluginModal(false)"
           >
             停用
@@ -73,6 +75,7 @@ import { UntypedFormBuilder, Validators } from '@angular/forms'
             *ngIf="!enable && uninstall"
             class="ml-btnybase"
             eo-ng-button
+        eoNgUserAccess="module-plugin"
             (click)="disablePluginModal(true)"
           >
             卸载
@@ -116,13 +119,13 @@ export class PluginMessageComponent implements OnInit {
     private modalService: EoNgFeedbackModalService,
     private api: ApiService,
     private baseInfo: BaseInfoService,
-    private appConfigService: EoNgNavigationService,
+    private navigationService: EoNgNavigationService,
     private markdownService: MarkdownService,
     private router: Router,
     private fb: UntypedFormBuilder,
     @Inject(API_URL) public urlPrefix: string
   ) {
-    this.appConfigService.reqFlashBreadcrumb([
+    this.navigationService.reqFlashBreadcrumb([
       { title: '企业插件', routerLink: ['/', 'module-plugin', 'group', 'list', ''] },
       { title: '插件详情' }
     ])
@@ -233,7 +236,7 @@ export class PluginMessageComponent implements OnInit {
         (resp: { code: number; data: PluginInstallData; msg: string }) => {
           if (resp.code === 30001) {
             this.message.success(resp.msg || '启用插件成功')
-            const subscription = this.appConfigService
+            const subscription = this.navigationService
               .getMenuList()
               .subscribe(() => {
                 subscription.unsubscribe()
@@ -305,7 +308,7 @@ export class PluginMessageComponent implements OnInit {
                 .subscribe((resp: EmptyHttpResponse) => {
                   if (resp.code === 0) {
                     this.message.success(resp.msg || '启用插件成功')
-                    const subscription = this.appConfigService
+                    const subscription = this.navigationService
                       .getMenuList()
                       .subscribe(() => {
                         subscription.unsubscribe()
@@ -359,7 +362,7 @@ export class PluginMessageComponent implements OnInit {
       .subscribe((resp: EmptyHttpResponse) => {
         if (resp.code === 0) {
           this.message.success(resp.msg || '禁用成功')
-          const subscription = this.appConfigService
+          const subscription = this.navigationService
             .getMenuList()
             .subscribe(() => {
               subscription.unsubscribe()
@@ -377,7 +380,7 @@ export class PluginMessageComponent implements OnInit {
       .subscribe((resp: EmptyHttpResponse) => {
         if (resp.code === 0) {
           this.message.success(resp.msg || '卸载成功')
-          const subscription = this.appConfigService
+          const subscription = this.navigationService
             .getMenuList()
             .subscribe(() => {
               subscription.unsubscribe()

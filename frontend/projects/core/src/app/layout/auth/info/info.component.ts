@@ -19,7 +19,7 @@ export class AuthInfoComponent implements OnInit {
     private message: EoNgFeedbackMessageService,
     private api:ApiService,
     private router:Router,
-    private appConfigService:EoNgNavigationService) {
+    private navigationService:EoNgNavigationService) {
   }
 
   ngOnInit (): void {
@@ -31,7 +31,7 @@ export class AuthInfoComponent implements OnInit {
       .subscribe((resp:{code:number, data:{infos:Array<{key:string, value:string}>, title:string}, msg:string}) => {
         if (resp.code === 0) {
           this.authInfo = resp.data
-          this.appConfigService.reqFlashBreadcrumb([{ title: resp.data.title }])
+          this.navigationService.reqFlashBreadcrumb([{ title: resp.data.title }])
         }
       })
   }

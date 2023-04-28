@@ -45,7 +45,5 @@ export class Formily2ReactComponent {
   schema:any
   changeSchema () {
     this.schema = JSON.parse(this.renderSchema)
-    // this.schema = this.renderSchema
-    console.log(this.schema)
   }
 }

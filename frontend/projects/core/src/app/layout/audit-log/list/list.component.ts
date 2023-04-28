@@ -65,8 +65,8 @@ export class AuditLogListComponent implements OnInit {
     private message: EoNgFeedbackMessageService,
      private api:ApiService,
      private modalService: EoNgFeedbackModalService,
-     private appConfigService:EoNgNavigationService) {
-    this.appConfigService.reqFlashBreadcrumb([{ title: '审计日志' }])
+     private navigationService:EoNgNavigationService) {
+    this.navigationService.reqFlashBreadcrumb([{ title: '审计日志' }])
   }
 
   ngOnInit (): void {

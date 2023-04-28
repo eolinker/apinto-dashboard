@@ -7,7 +7,7 @@ import * as CryptoJS from 'crypto-js'
 export class CryptoService {
   private key:string = '1e42=7838a1vfc6n'
 
-  // AES加密，登录、修改密码用, 向量默认 1e42=7838a1vfc6n
+  // AES加密，登录、修改密码用, 向量默认 1e42=7838a1vfc6n, inputKey是用户名，inputData是密码
   encryptByEnAES (inputKey:string, inputData:string, inputIv?:string):string {
     const tmpIv = CryptoJS.enc.Latin1.parse(inputIv || this.key)
     const tmpKey = CryptoJS.enc.Latin1.parse(CryptoJS.MD5(inputKey).toString() || '')

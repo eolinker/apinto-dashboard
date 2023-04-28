@@ -31,6 +31,9 @@ export class IntelligentPluginService {
         title: '删除',
         click: (item:any) => {
           component.deleteDataModal(item.data)
+        },
+        disabledFn: () => {
+          return component.nzDisabled
         }
       }
       ]
@@ -78,7 +81,8 @@ export class IntelligentPluginService {
       type: 'checkbox',
       click: () => {
         component.checkAll()
-      }
+      },
+      disabled: component.nzDisabled
     },
     { title: '集群' },
     { title: '状态' },
@@ -93,6 +97,9 @@ export class IntelligentPluginService {
         type: 'checkbox',
         click: () => {
           component.clickData()
+        },
+        disabledFn: () => {
+          return component.nzDisabled
         }
       },
       {

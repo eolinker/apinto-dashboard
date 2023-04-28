@@ -28,8 +28,8 @@ export class ServiceDiscoveryListComponent implements OnInit {
                private modalService:EoNgFeedbackModalService,
                private api:ApiService,
                private router:Router,
-               private appConfigService:EoNgNavigationService) {
-    this.appConfigService.reqFlashBreadcrumb([{ title: '服务发现', routerLink: 'upstream/discovery' }])
+               private navigationService:EoNgNavigationService) {
+    this.navigationService.reqFlashBreadcrumb([{ title: '服务发现', routerLink: 'upstream/discovery' }])
   }
 
   nzDisabled:boolean = false
