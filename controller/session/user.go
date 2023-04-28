@@ -1,7 +1,8 @@
-package controller
+package session
 
 import (
 	"errors"
+	"github.com/eolinker/apinto-dashboard/controller"
 
 	"github.com/eolinker/apinto-dashboard/modules/user"
 	"github.com/eolinker/eosc/common/bean"
@@ -21,7 +22,7 @@ func init() {
 var jwtSecret = []byte("apintp-dashboard")
 
 func SetUser(ginCtx *gin.Context) {
-	cookie, err := ginCtx.Cookie(Session)
+	cookie, err := ginCtx.Cookie(controller.Session)
 	if err != nil {
 		return
 	}
@@ -30,7 +31,7 @@ func SetUser(ginCtx *gin.Context) {
 	if session == nil {
 		return
 	}
-	uc := UserClaim{}
+	uc := controller.UserClaim{}
 	parse, err := jwt.ParseWithClaims(session.Jwt, &uc, func(token *jwt.Token) (interface{}, error) {
 		return jwtSecret, nil
 	})
@@ -38,11 +39,11 @@ func SetUser(ginCtx *gin.Context) {
 		return
 	}
 	if parse.Valid {
-		ginCtx.Set(UserId, uc.Id)
+		ginCtx.Set(controller.UserId, uc.Id)
 	}
 }
 
-func JWTEncode(claim *UserClaim) (string, error) {
+func JWTEncode(claim *controller.UserClaim) (string, error) {
 
 	userClaim := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
 	userJWT, err := userClaim.SignedString(jwtSecret)
@@ -52,8 +53,8 @@ func JWTEncode(claim *UserClaim) (string, error) {
 	return userJWT, nil
 }
 
-func JWTDecode(info string) (*UserClaim, error) {
-	uc := UserClaim{}
+func JWTDecode(info string) (*controller.UserClaim, error) {
+	uc := controller.UserClaim{}
 	parse, err := jwt.ParseWithClaims(info, &uc, func(token *jwt.Token) (interface{}, error) {
 		return jwtSecret, nil
 	})
