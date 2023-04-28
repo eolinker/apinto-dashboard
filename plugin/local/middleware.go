@@ -62,8 +62,16 @@ func doMiddleware(ginCtx *gin.Context, url string, module string) {
 		return
 	}
 	if len(middlewareResponse.Header) > 0 {
-		for k, v := range middlewareResponse.Header {
-			ginCtx.Header(k, v)
+		for k, vs := range middlewareResponse.Header {
+			if len(vs) == 1 {
+				ginCtx.Header(k, vs[0])
+			} else {
+				ginCtx.Writer.Header().Del(k)
+				for _, v := range vs {
+					ginCtx.Writer.Header().Add(k, v)
+				}
+			}
+
 		}
 	}
 	if len(middlewareResponse.Keys) > 0 {
