@@ -20,14 +20,14 @@ func (u *UserController) LoginCheckApi(ginCtx *gin.Context) {
 
 	session, _ := ginCtx.Cookie(controller.Session)
 	if session == "" {
-		controller.ErrorJson(ginCtx, http.StatusOK, loginError)
+		controller.ErrorJsonWithCode(ginCtx, http.StatusOK, controller.CodeLoginInvalid, loginError)
 		ginCtx.Abort()
 		return
 	}
 
 	tokens, err := u.sessionCache.Get(ginCtx, session)
 	if err == redis.Nil || tokens == nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, loginError)
+		controller.ErrorJsonWithCode(ginCtx, http.StatusOK, controller.CodeLoginInvalid, loginError)
 		ginCtx.Abort()
 		return
 	}
@@ -38,7 +38,7 @@ func (u *UserController) LoginCheckApi(ginCtx *gin.Context) {
 	//1.从ginCtx的header中拿到token，没拿到报错提醒用户重新登录
 	verifyToken, err := common.VerifyToken(token)
 	if err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, loginError)
+		controller.ErrorJsonWithCode(ginCtx, http.StatusOK, controller.CodeLoginInvalid, loginError)
 		ginCtx.Abort()
 		return
 	}
@@ -46,7 +46,7 @@ func (u *UserController) LoginCheckApi(ginCtx *gin.Context) {
 	claims := verifyToken.Claims.(jwt.MapClaims)
 	if err = claims.Valid(); err != nil {
 
-		controller.ErrorJson(ginCtx, http.StatusOK, loginError)
+		controller.ErrorJsonWithCode(ginCtx, http.StatusOK, controller.CodeLoginInvalid, loginError)
 		ginCtx.Abort()
 		return
 	}
