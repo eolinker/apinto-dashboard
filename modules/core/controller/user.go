@@ -2,7 +2,6 @@ package controller
 
 import (
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/controller/session"
 	"net/http"
 	"time"
 
@@ -101,11 +100,11 @@ func (u *UserController) setPassword(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("get user info fail. err:%s", err.Error()))
 		return
 	}
-	userJWT, err := session.JWTEncode(&controller.UserClaim{
+	userJWT, err := common.JWTEncode(&controller.UserClaim{
 		Id:        info.Id,
 		Uname:     info.UserName,
 		LoginTime: info.LastLoginTime.Format("2006-01-02 15:04:05"),
-	})
+	}, jwtSecret)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, "登录失效")
 		return
@@ -116,7 +115,7 @@ func (u *UserController) setPassword(ginCtx *gin.Context) {
 		RJwt: common.Md5(userJWT),
 	}
 
-	if err = u.sessionCache.Set(ginCtx, u.sessionCache.Key(cookieValue), session, time.Hour*24*7); err != nil {
+	if err = u.sessionCache.Set(ginCtx, cookieValue, session, time.Hour*24*7); err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
@@ -125,7 +124,7 @@ func (u *UserController) setPassword(ginCtx *gin.Context) {
 	{
 		userIdCookieKey := fmt.Sprintf("userId:%d", info.Id)
 		oldCookie, _ := u.commonCache.Get(ginCtx, userIdCookieKey)
-		_ = u.sessionCache.Delete(ginCtx, u.sessionCache.Key(string(oldCookie)))
+		_ = u.sessionCache.Delete(ginCtx, string(oldCookie))
 		_ = u.commonCache.Set(ginCtx, userIdCookieKey, []byte(cookieValue), time.Hour*24*7)
 	}
 
@@ -209,11 +208,11 @@ func (u *UserController) ssoLogin(ginCtx *gin.Context) {
 		return
 	}
 
-	userJWT, err := session.JWTEncode(&controller.UserClaim{
+	userJWT, err := common.JWTEncode(&controller.UserClaim{
 		Id:        info.Id,
 		Uname:     info.UserName,
 		LoginTime: now.Format("2006-01-02 15:04:05"),
-	})
+	}, jwtSecret)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, "登录失败")
 		return
@@ -224,7 +223,7 @@ func (u *UserController) ssoLogin(ginCtx *gin.Context) {
 		RJwt: common.Md5(userJWT),
 	}
 
-	if err = u.sessionCache.Set(ginCtx, u.sessionCache.Key(cookieValue), session, time.Hour*24*7); err != nil {
+	if err = u.sessionCache.Set(ginCtx, cookieValue, session, time.Hour*24*7); err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
@@ -233,7 +232,7 @@ func (u *UserController) ssoLogin(ginCtx *gin.Context) {
 	{
 		userIdCookieKey := fmt.Sprintf("userId:%d", info.Id)
 		oldCookie, _ := u.commonCache.Get(ginCtx, userIdCookieKey)
-		_ = u.sessionCache.Delete(ginCtx, u.sessionCache.Key(string(oldCookie)))
+		_ = u.sessionCache.Delete(ginCtx, string(oldCookie))
 		_ = u.commonCache.Set(ginCtx, userIdCookieKey, []byte(cookieValue), time.Hour*24*7)
 	}
 
@@ -247,7 +246,7 @@ func (u *UserController) ssoLogout(ginCtx *gin.Context) {
 		return
 	}
 
-	u.sessionCache.Delete(ginCtx, u.sessionCache.Key(cookie))
+	u.sessionCache.Delete(ginCtx, cookie)
 	defer func() {
 		ginCtx.SetCookie(controller.Session, cookie, -1, "", "", false, true)
 	}()
@@ -261,12 +260,12 @@ func (u *UserController) ssoLoginCheck(ginCtx *gin.Context) {
 		return
 	}
 
-	session, _ := u.sessionCache.Get(ginCtx, u.sessionCache.Key(cookie))
+	session, _ := u.sessionCache.Get(ginCtx, cookie)
 	if session == nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, "登录失效")
 		return
 	}
-	uc, err := session.JWTDecode(session.Jwt)
+	uc, err := common.JWTDecode(session.Jwt, jwtSecret)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, "登录失效")
 		return

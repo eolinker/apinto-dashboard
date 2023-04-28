@@ -2,7 +2,6 @@ package controller
 
 import (
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/controller/session"
 	"net/http"
 
 	"github.com/eolinker/eosc/common/bean"
@@ -73,6 +72,7 @@ func (m *Module) provider(context *gin.Context) {
 
 }
 func NewModule() *Module {
+	userController := newUserController()
 	middlewareHandler := []apinto_module.MiddlewareHandler{
 		{
 			Name:    "namespace",
@@ -82,7 +82,15 @@ func NewModule() *Module {
 		{
 			Name:    "userID",
 			Rule:    apinto_module.MiddlewareRule(apinto_module.RouterLabelApi),
-			Handler: session.SetUser,
+			Handler: userController.SetUser,
+		}, {
+			Name:    "login-api",
+			Rule:    apinto_module.MiddlewareRule(apinto_module.RouterLabelApi),
+			Handler: userController.LoginCheckApi,
+		}, {
+			Name:    "login-api",
+			Rule:    apinto_module.MiddlewareRule(apinto_module.RouterLabelApi),
+			Handler: userController.LoginCheckApi,
 		},
 	}
 	m := &Module{

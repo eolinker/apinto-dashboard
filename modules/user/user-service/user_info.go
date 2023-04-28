@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/eolinker/apinto-dashboard/common"
@@ -22,13 +21,15 @@ const defaultPwd = "12345678"
 
 type userInfoService struct {
 	userInfoStore user_store.IUserInfoStore
-	cache         IUserInfoCache
+	userIdCache   IUserInfoCacheId
+	userNameCache IUserInfoCacheName
 }
 
 func newUserInfoService() user.IUserInfoService {
 	u := &userInfoService{}
 	bean.Autowired(&u.userInfoStore)
-	bean.Autowired(&u.cache)
+	bean.Autowired(&u.userIdCache)
+	bean.Autowired(&u.userNameCache)
 	apinto_module.RegisterEventHandler("login", u.loginHandler)
 	return u
 }
@@ -44,11 +45,11 @@ func (u *userInfoService) save(ctx context.Context, info *user_entry.UserInfo) e
 		if err != nil {
 			return err
 		}
-		err = u.cache.Set(ctx, fmt.Sprintf("apinto:userinfo-name:%s", userModel.UserName), userModel, time.Hour)
+		err = u.userNameCache.Set(ctx, userModel.UserName, userModel, time.Hour)
 		if err != nil {
 			return err
 		}
-		return u.cache.Set(ctx, fmt.Sprintf("apinto:userinfo-id:%d", userModel.Id), userModel, time.Hour)
+		return u.userIdCache.Set(ctx, userModel.Id, userModel, time.Hour)
 	})
 }
 
@@ -174,8 +175,8 @@ func (u *userInfoService) GetUserInfoMaps(ctx context.Context, userIds ...int) (
 					tempMaps[userInfo.Id] = userModel
 					delete(userSet, userInfo.Id)
 				}
-				u.cache.Set(ctx, fmt.Sprintf("apinto:userinfo-id:%d", userModel.Id), userModel, time.Hour)
-				u.cache.Set(ctx, fmt.Sprintf("apinto:userinfo-name:%s", userModel.UserName), userModel, time.Hour)
+				u.userIdCache.Set(ctx, userModel.Id, userModel, time.Hour)
+				u.userNameCache.Set(ctx, userModel.UserName, userModel, time.Hour)
 			}
 			//补全传入的userIds中数据库不存在的数据
 			for userID := range userSet {
@@ -190,7 +191,7 @@ func (u *userInfoService) GetUserInfoMaps(ctx context.Context, userIds ...int) (
 					Avatar:        "",
 					LastLoginTime: nil,
 				}
-				u.cache.Set(ctx, fmt.Sprintf("apinto:userinfo-id:%d", userModel.Id), userModel, time.Hour)
+				u.userIdCache.Set(ctx, userModel.Id, userModel, time.Hour)
 				tempMaps[userID] = userModel
 			}
 			maps = tempMaps
@@ -201,8 +202,7 @@ func (u *userInfoService) GetUserInfoMaps(ctx context.Context, userIds ...int) (
 }
 
 func (u *userInfoService) getCache(ctx context.Context, userID int) (*user_model.UserInfo, bool) {
-	key := fmt.Sprintf("apinto:userinfo-id:%d", userID)
-	userModel, err := u.cache.Get(ctx, key)
+	userModel, err := u.userIdCache.Get(ctx, userID)
 	if err != nil {
 		return nil, false
 	}
@@ -210,8 +210,7 @@ func (u *userInfoService) getCache(ctx context.Context, userID int) (*user_model
 }
 
 func (u *userInfoService) getCacheByName(ctx context.Context, userName string) (*user_model.UserInfo, bool) {
-	key := fmt.Sprintf("apinto:userinfo-name:%s", userName)
-	userModel, err := u.cache.Get(ctx, key)
+	userModel, err := u.userNameCache.Get(ctx, userName)
 	if err != nil {
 		return nil, false
 	}
@@ -220,8 +219,7 @@ func (u *userInfoService) getCacheByName(ctx context.Context, userName string) (
 
 // GetUserInfo 获取不到用户信息记录错误即可，不必返回error
 func (u *userInfoService) GetUserInfo(ctx context.Context, userID int) (*user_model.UserInfo, error) {
-	key := fmt.Sprintf("apinto:userinfo-id:%d", userID)
-	userModel, err := u.cache.Get(ctx, key)
+	userModel, err := u.userIdCache.Get(ctx, userID)
 	if err == nil {
 		return userModel, nil
 	}
@@ -241,15 +239,15 @@ func (u *userInfoService) GetUserInfo(ctx context.Context, userID int) (*user_mo
 		}
 	} else {
 		userModel = entryToModule(userInfo)
-		u.cache.Set(ctx, fmt.Sprintf("apinto:userinfo-name:%s", userModel.UserName), userModel, time.Hour)
+		u.userNameCache.Set(ctx, userModel.UserName, userModel, time.Hour)
 	}
-	u.cache.Set(ctx, key, userModel, time.Hour)
+	u.userIdCache.Set(ctx, userID, userModel, time.Hour)
 	return userModel, nil
 }
 
 func (u *userInfoService) GetUserInfoByName(ctx context.Context, userName string) (*user_model.UserInfo, error) {
-	key := fmt.Sprintf("apinto:userinfo-name:%s", userName)
-	userModel, err := u.cache.Get(ctx, key)
+
+	userModel, err := u.userNameCache.Get(ctx, userName)
 	if err == nil {
 		return userModel, nil
 	}
@@ -269,9 +267,9 @@ func (u *userInfoService) GetUserInfoByName(ctx context.Context, userName string
 		}
 	} else {
 		userModel = entryToModule(userInfo)
-		u.cache.Set(ctx, fmt.Sprintf("apinto:userinfo-id:%d", userModel.Id), userModel, time.Hour)
+		u.userIdCache.Set(ctx, userModel.Id, userModel, time.Hour)
 	}
-	u.cache.Set(ctx, key, userModel, time.Hour)
+	u.userNameCache.Set(ctx, userName, userModel, time.Hour)
 	return userModel, nil
 }
 
@@ -329,8 +327,8 @@ func (u *userInfoService) GetUserInfoByNames(ctx context.Context, userNames ...s
 					tempMaps[userInfo.UserName] = userModel
 					delete(userSet, userInfo.UserName)
 				}
-				u.cache.Set(ctx, fmt.Sprintf("apinto:userinfo-id:%d", userModel.Id), userModel, time.Hour)
-				u.cache.Set(ctx, fmt.Sprintf("apinto:userinfo-name:%s", userModel.UserName), userModel, time.Hour)
+				u.userIdCache.Set(ctx, userModel.Id, userModel, time.Hour)
+				u.userNameCache.Set(ctx, userModel.UserName, userModel, time.Hour)
 			}
 			//补全传入的userIds中数据库不存在的数据
 			for userName := range userSet {
@@ -345,7 +343,7 @@ func (u *userInfoService) GetUserInfoByNames(ctx context.Context, userNames ...s
 					Avatar:        "",
 					LastLoginTime: nil,
 				}
-				u.cache.Set(ctx, fmt.Sprintf("apinto:userinfo-name:%d", userModel.UserName), userModel, time.Hour)
+				u.userNameCache.Set(ctx, userModel.UserName, userModel, time.Hour)
 				tempMaps[userName] = userModel
 			}
 			maps = tempMaps

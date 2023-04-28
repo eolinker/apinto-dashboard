@@ -242,7 +242,7 @@ func (p *pluginService) Create(ctx context.Context, namespaceId, operator int, i
 		return errors.New("插件名称重复")
 	}
 
-	extender, err := p.extenderCache.GetAll(ctx, p.extenderCache.Key())
+	extender, err := p.extenderCache.GetAll(ctx)
 	if err != nil {
 		return err
 	}
