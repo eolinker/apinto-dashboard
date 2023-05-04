@@ -1,0 +1,50 @@
+id: "monitor.apinto.com"
+name: "monitor"
+cname: "监控告警"
+resume: ""
+version: "v1.0.0"
+icon: "monitor.png"
+driver: "local"
+front:
+navigation: "navigation.gauge-panel"
+group_id: "monitor"
+define:  
+  router: 
+    home: / 
+    frontend:
+      - "/assets"
+      - "/frontend"
+    api:
+      /partitions:
+        GET:
+      /partition:
+        GET:
+        POST:
+        PUT:
+        DELETE:
+      /overview/summary:
+        POST:
+      /overview/invoke:
+        POST:
+      /overview/message:
+        POST:
+      /overview/top:
+        POST:
+      "/:dataType":
+        POST:
+      "/:dataType/details":
+        POST:
+      "/:dataType/details/:detailsType":
+        POST:
+      "/:dataType/details/:detailsType/trend":
+        POST:
+      /strategys:
+        GET:
+      /strategy:
+        GET:
+        POST:
+        PUT:
+        PATCH:
+        DELETE:
+      /history:
+        GET:
