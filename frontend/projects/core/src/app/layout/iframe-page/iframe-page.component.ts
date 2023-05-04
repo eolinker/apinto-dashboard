@@ -54,7 +54,14 @@ export class IframePageComponent implements OnInit {
        if (typeof handler === 'function') {
          const args = event.data.data
          const result = await handler(...args)
-        ;(this.iframe as any).contentWindow.postMessage({
+         try {
+           result.data = this.api.underline(result.data)
+         } catch {
+           console.warn('转化接口数据命名法出现问题')
+         }
+         console.log('=----', result)
+
+         ;(this.iframe as any).contentWindow.postMessage({
            requestId: event.data.requestId,
            magic: 'apinto',
            type: 'response',
@@ -82,7 +89,7 @@ export class IframePageComponent implements OnInit {
       iframe.id = id
       iframe.width = '100%'
       iframe.height = '100%'
-      iframe.src = url
+      iframe.src = 'http://localhost:5555' || url
       iframe.onload = () => {
         this.start = true
       }
@@ -149,20 +156,20 @@ export class IframePageComponent implements OnInit {
           this.iframeService.moduleName = this.moduleName
           this.subscription.unsubscribe()
           this.iframeService.subscription.unsubscribe()
-          this.showIframe('test', `http://172.18.166.219:8080/agent/${this.moduleName}`, {})
+          this.showIframe('test', `agent/${this.moduleName}`, {})
         }
         // this.getPath()
       }
     })
 
     this.subscription2 = this.iframeService.repFlashIframe().subscribe((event) => {
-      this.showIframe('test', `http://172.18.166.219:8080/agent/${this.moduleName}${event ? `/${event}` : ''}`, {}, true)
+      this.showIframe('test', `agent/${this.moduleName}${event ? `/${event}` : ''}`, {}, true)
     })
     // this.getPath()
   }
 
   ngAfterViewInit () {
-    this.showIframe('test', `http://172.18.166.219:8080/agent/${this.moduleName}`, {})
+    this.showIframe('test', `agent/${this.moduleName}`, {})
   }
 
   ngOnDestroy () {
