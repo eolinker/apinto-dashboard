@@ -2,6 +2,7 @@ package group_controller
 
 import (
 	"github.com/eolinker/apinto-dashboard/controller"
+	"github.com/eolinker/apinto-dashboard/controller/users"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/group"
 	"github.com/eolinker/apinto-dashboard/modules/group/group-dto"
@@ -94,7 +95,7 @@ func (c *commonGroupController) UpdateGroup(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	groupType := ginCtx.Param("group_type")
 	uuid := ginCtx.Param("uuid")
-	operator := controller.GetUserId(ginCtx)
+	operator := users.GetUserId(ginCtx)
 	input := new(group_dto.CommonGroupInput)
 
 	if err := ginCtx.BindJSON(input); err != nil {
@@ -134,7 +135,7 @@ func (c *commonGroupController) DelGroup(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	groupType := ginCtx.Param("group_type")
 	uuid := ginCtx.Param("uuid")
-	operator := controller.GetUserId(ginCtx)
+	operator := users.GetUserId(ginCtx)
 
 	if err := c.commonGroupService.DeleteGroup(ginCtx, namespaceId, operator, groupType, uuid); err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
@@ -149,7 +150,7 @@ func (c *commonGroupController) CreateGroup(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	groupType := ginCtx.Param("group_type")
 	tagName := ginCtx.Query("tag_name")
-	operator := controller.GetUserId(ginCtx)
+	operator := users.GetUserId(ginCtx)
 	input := new(group_dto.CommonGroupInput)
 
 	if err := ginCtx.BindJSON(input); err != nil {

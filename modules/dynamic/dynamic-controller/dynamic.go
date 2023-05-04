@@ -3,6 +3,7 @@ package dynamic_controller
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/eolinker/apinto-dashboard/controller/users"
 	"net/http"
 	"strconv"
 
@@ -172,7 +173,7 @@ func (c *dynamicController) online(ctx *gin.Context) {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
 		return
 	}
-	userId := controller.GetUserId(ctx)
+	userId := users.GetUserId(ctx)
 	success, fail, err := c.dynamicService.Online(ctx, namespaceID, c.Profession, uuid, tmp.Cluster, userId)
 	if err != nil {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
@@ -197,7 +198,7 @@ func (c *dynamicController) offline(ctx *gin.Context) {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
 		return
 	}
-	userId := controller.GetUserId(ctx)
+	userId := users.GetUserId(ctx)
 	success, fail, err := c.dynamicService.Offline(ctx, namespaceID, c.Profession, uuid, tmp.Cluster, userId)
 	if err != nil {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
@@ -312,7 +313,7 @@ func (c *dynamicController) create(ctx *gin.Context) {
 		return
 	}
 	body, _ := json.Marshal(worker.Append)
-	err = c.dynamicService.Create(ctx, namespaceID, c.Profession, worker.Title, worker.Id, worker.Driver, worker.Description, string(body), controller.GetUserId(ctx))
+	err = c.dynamicService.Create(ctx, namespaceID, c.Profession, worker.Title, worker.Id, worker.Driver, worker.Description, string(body), users.GetUserId(ctx))
 	if err != nil {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
 		return
@@ -330,7 +331,7 @@ func (c *dynamicController) save(ctx *gin.Context) {
 		return
 	}
 	body, _ := json.Marshal(worker.Append)
-	err = c.dynamicService.Save(ctx, namespaceID, c.Profession, worker.Title, uuid, worker.Description, string(body), controller.GetUserId(ctx))
+	err = c.dynamicService.Save(ctx, namespaceID, c.Profession, worker.Title, uuid, worker.Description, string(body), users.GetUserId(ctx))
 	if err != nil {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
 		return

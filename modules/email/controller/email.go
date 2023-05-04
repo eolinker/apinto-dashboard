@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/eolinker/apinto-dashboard/controller"
+	"github.com/eolinker/apinto-dashboard/controller/users"
 	namespace_controller "github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/email/dto"
 	"github.com/eolinker/apinto-dashboard/modules/notice"
@@ -65,7 +66,7 @@ func (w *emailController) getEmail(ginCtx *gin.Context) {
 func (w *emailController) createEmail(ginCtx *gin.Context) {
 
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	emailInput := new(dto.EmailInput)
 
 	if err := ginCtx.BindJSON(emailInput); err != nil {
@@ -108,7 +109,7 @@ func (w *emailController) createEmail(ginCtx *gin.Context) {
 // updateEmail 修改通知邮箱
 func (w *emailController) updateEmail(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	emailInput := new(dto.EmailInput)
 
 	if err := ginCtx.BindJSON(emailInput); err != nil {

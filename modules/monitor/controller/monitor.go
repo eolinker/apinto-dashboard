@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
+	"github.com/eolinker/apinto-dashboard/controller/users"
 	"github.com/eolinker/apinto-dashboard/modules/api"
 	api_model "github.com/eolinker/apinto-dashboard/modules/api/model"
 	"github.com/eolinker/apinto-dashboard/modules/application"
@@ -104,7 +105,7 @@ func (m *monitorController) getPartitionInfo(ginCtx *gin.Context) {
 
 func (m *monitorController) createPartition(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 
 	inputProxy := new(monitor_dto.MonitorPartitionInfoProxy)
 	if err := ginCtx.BindJSON(inputProxy); err != nil {
@@ -132,7 +133,7 @@ func (m *monitorController) createPartition(ginCtx *gin.Context) {
 
 func (m *monitorController) editPartition(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	uuid := ginCtx.Query("uuid")
 
 	inputProxy := new(monitor_dto.MonitorPartitionInfoProxy)

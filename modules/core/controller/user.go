@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+	"github.com/eolinker/apinto-dashboard/controller/users"
 	"net/http"
 	"time"
 
@@ -30,7 +31,7 @@ type UserController struct {
 }
 
 func (u *UserController) myProfile(ginCtx *gin.Context) {
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 
 	userInfo, err := u.userInfo.GetUserInfo(ginCtx, userId)
 	if err != nil {
@@ -64,7 +65,7 @@ func (u *UserController) myProfile(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
 }
 func (u *UserController) myProfileUpdate(ginCtx *gin.Context) {
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 
 	req := &user_dto.UpdateMyProfileReq{}
 	err := ginCtx.BindJSON(req)
@@ -81,7 +82,7 @@ func (u *UserController) myProfileUpdate(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 func (u *UserController) setPassword(ginCtx *gin.Context) {
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 
 	req := &user_dto.UpdateMyPasswordReq{}
 	err := ginCtx.BindJSON(req)

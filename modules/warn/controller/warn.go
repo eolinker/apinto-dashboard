@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
+	"github.com/eolinker/apinto-dashboard/controller/users"
 	service "github.com/eolinker/apinto-dashboard/modules/api"
 	api_model "github.com/eolinker/apinto-dashboard/modules/api/model"
 	namespace_controller "github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
@@ -353,7 +354,7 @@ func (w *warnController) deleteStrategy(ginCtx *gin.Context) {
 // createStrategy 创建告警策略
 func (w *warnController) createStrategy(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 
 	strategy := &warn_dto.WarnStrategyInput{}
 
@@ -389,7 +390,7 @@ func (w *warnController) createStrategy(ginCtx *gin.Context) {
 func (w *warnController) updateStrategy(ginCtx *gin.Context) {
 
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 
 	strategy := &warn_dto.WarnStrategyInput{}
 
