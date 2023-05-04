@@ -1,6 +1,6 @@
 // eslint-disable-next-line no-use-before-define
 import * as React from 'react'
-
+import { action } from '@formily/reactive'
 import {
   FormItem,
   Space,
@@ -48,6 +48,8 @@ import {
 } from '@formily/react'
 import { CustomCodeboxComponent } from './component/codebox/CustomCodeboxComponent'
 import { CustomEnvVariableComponent } from './component/editable-env-table/CustomEnvVariableComponent'
+import axios from 'axios'
+import { SimpleMapComponent } from './component/simple-map/SimpleMapComponent'
 
 const DynamicRender = observer(() => {
   const field = useField()
@@ -106,7 +108,8 @@ const SchemaField = createSchemaField({
     Upload,
     DynamicRender,
     CustomCodeboxComponent,
-    CustomEnvVariableComponent
+    CustomEnvVariableComponent,
+    SimpleMapComponent
   }
 })
 
@@ -205,47 +208,34 @@ export const IntelligentPluginEditComponent = React.forwardRef(
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const loadData = async (field: any) => {
-      const linkage = field.query('linkage').get('value')
-      if (!linkage) return []
+    const getDiscovery = async () => {
       return new Promise((resolve) => {
-        setTimeout(() => {
-          if (linkage === 1) {
-            resolve([
-              {
-                label: 'AAA',
-                value: 'aaa'
-              },
-              {
-                label: 'BBB',
-                value: 'ccc'
-              }
-            ])
-          } else if (linkage === 2) {
-            resolve([
-              {
-                label: 'CCC',
-                value: 'ccc'
-              },
-              {
-                label: 'DDD',
-                value: 'ddd'
-              }
-            ])
+        axios.get('discovery/enum').then((resp) => {
+          if (resp.data.code === 0) {
+            const dataList: Array<{ label: string; value: string }> =
+              resp.data.discoveries.map((item: any) => {
+                return {
+                  label: `${item.name}[${item.driver}]`,
+                  value: item.name
+                }
+              })
+            resolve(dataList)
           }
-        }, 1500)
+        })
       })
     }
 
-    // const useAsyncDataSource = (service) => (field) => {
-    //   field.loading = true
-    //   service(field).then(
-    //     action.bound((data) => {
-    //       field.dataSource = data
-    //       field.loading = false
-    //     })
-    //   )
-    // }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const useAsyncDataSource = (service: any) => (field: any) => {
+      field.loading = true
+      service(field).then(
+        action.bound &&
+          action.bound((data: any) => {
+            field.dataSource = data
+            field.loading = false
+          })
+      )
+    }
     return (
       <FormProvider form={form} layout="vertical">
         <SchemaField schema={demo ? demoSchema : pluginEditSchema} />
