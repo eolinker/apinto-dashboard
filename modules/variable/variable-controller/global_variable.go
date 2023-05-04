@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
+	"github.com/eolinker/apinto-dashboard/controller/users"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/variable"
@@ -119,7 +120,7 @@ func (e *variablesController) post(ginCtx *gin.Context) {
 	}
 
 	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	_, err := e.globalVariableService.Create(ginCtx, namespaceID, userId, input.Key, input.Desc)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Create GlobalVariable fail. err:%s", err.Error()))
@@ -138,7 +139,7 @@ func (e *variablesController) del(ginCtx *gin.Context) {
 	}
 
 	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
-	userID := controller.GetUserId(ginCtx)
+	userID := users.GetUserId(ginCtx)
 	err := e.globalVariableService.Delete(ginCtx, namespaceID, userID, key)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Delete GlobalVariable fail. err:%s", err.Error()))

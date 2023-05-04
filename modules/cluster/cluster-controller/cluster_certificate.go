@@ -3,6 +3,7 @@ package cluster_controller
 import (
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
+	"github.com/eolinker/apinto-dashboard/controller/users"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/cluster"
 	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-dto"
@@ -58,7 +59,7 @@ func (c *clusterCertificateController) gets(ginCtx *gin.Context) {
 func (c *clusterCertificateController) post(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Param("cluster_name")
-	operator := controller.GetUserId(ginCtx)
+	operator := users.GetUserId(ginCtx)
 	input := &cluster_dto.ClusterCertificateInput{}
 	err := ginCtx.BindJSON(input)
 	if err != nil {
@@ -87,7 +88,7 @@ func (c *clusterCertificateController) put(ginCtx *gin.Context) {
 	clusterName := ginCtx.Param("cluster_name")
 	certificateIdStr := ginCtx.Param("certificate_id")
 	certificateId, _ := strconv.Atoi(certificateIdStr)
-	operator := controller.GetUserId(ginCtx)
+	operator := users.GetUserId(ginCtx)
 	if certificateId <= 0 {
 		controller.ErrorJson(ginCtx, http.StatusOK, "certificate_id is 0")
 		return

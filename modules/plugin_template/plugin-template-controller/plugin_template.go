@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
+	"github.com/eolinker/apinto-dashboard/controller/users"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/online/online-dto"
@@ -89,7 +90,7 @@ func (p *pluginTemplateController) templateEnum(ginCtx *gin.Context) {
 // 新增插件模板
 func (p *pluginTemplateController) createTemplate(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 
 	input := new(plugin_template_dto.PluginTemplateInput)
 	if err := ginCtx.BindJSON(input); err != nil {
@@ -143,7 +144,7 @@ func (p *pluginTemplateController) createTemplate(ginCtx *gin.Context) {
 // 修改插件模板
 func (p *pluginTemplateController) updateTemplate(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 
 	input := new(plugin_template_dto.PluginTemplateInput)
 	if err := ginCtx.BindJSON(input); err != nil {
@@ -192,7 +193,7 @@ func (p *pluginTemplateController) updateTemplate(ginCtx *gin.Context) {
 // 删除插件模板
 func (p *pluginTemplateController) delTemplate(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 
 	uuid := ginCtx.Query("uuid")
 
@@ -271,7 +272,7 @@ func (p *pluginTemplateController) onlines(ginCtx *gin.Context) {
 // 上线管理-上线/更新
 func (p *pluginTemplateController) online(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	uuid := ginCtx.Query("uuid")
 	if uuid == "" {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("uuid can't be nil"))
@@ -310,7 +311,7 @@ func (p *pluginTemplateController) online(ginCtx *gin.Context) {
 // 下线
 func (p *pluginTemplateController) offline(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	uuid := ginCtx.Query("uuid")
 	if uuid == "" {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("uuid can't be nil"))

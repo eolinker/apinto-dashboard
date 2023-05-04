@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/controller"
+	"github.com/eolinker/apinto-dashboard/controller/users"
 	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	apintoModule "github.com/eolinker/apinto-module"
@@ -38,7 +39,7 @@ func (a *auditLogController) Handler(ginCtx *gin.Context) {
 	}
 	end := time.Now()
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 
 	//获取ip
 	ip := ""

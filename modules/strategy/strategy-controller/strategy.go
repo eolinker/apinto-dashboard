@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
+	"github.com/eolinker/apinto-dashboard/controller/users"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/strategy"
@@ -109,7 +110,7 @@ func (s *strategyController[T, K]) create(ginCtx *gin.Context) {
 		return
 	}
 
-	operator := controller.GetUserId(ginCtx)
+	operator := users.GetUserId(ginCtx)
 
 	//校验参数
 	if err := s.strategyService.CheckInput(input); err != nil {
@@ -146,7 +147,7 @@ func (s *strategyController[T, K]) update(ginCtx *gin.Context) {
 	}
 	input.Uuid = uuid
 
-	operator := controller.GetUserId(ginCtx)
+	operator := users.GetUserId(ginCtx)
 
 	//校验参数
 	if err := s.strategyService.CheckInput(input); err != nil {
@@ -176,7 +177,7 @@ func (s *strategyController[T, K]) del(ginCtx *gin.Context) {
 		return
 	}
 
-	userID := controller.GetUserId(ginCtx)
+	userID := users.GetUserId(ginCtx)
 	err := s.strategyService.DeleteStrategy(ginCtx, namespaceID, userID, clusterName, uuid)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("DeleteStrategy fail. err:%s", err.Error()))
@@ -199,7 +200,7 @@ func (s *strategyController[T, K]) restore(ginCtx *gin.Context) {
 		return
 	}
 
-	userID := controller.GetUserId(ginCtx)
+	userID := users.GetUserId(ginCtx)
 	err := s.strategyService.RestoreStrategy(ginCtx, namespaceID, userID, clusterName, uuid)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("RestoreStrategy fail. err:%s", err.Error()))
@@ -220,7 +221,7 @@ func (s *strategyController[T, K]) updateStop(ginCtx *gin.Context) {
 		return
 	}
 
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	err := s.strategyService.UpdateStop(ginCtx, namespaceId, userId, uuid, clusterName, input.IsStop)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
@@ -274,7 +275,7 @@ func (s *strategyController[T, K]) publish(ginCtx *gin.Context) {
 		return
 	}
 
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	if err := s.strategyService.Publish(ginCtx, namespaceId, userId, clusterName, input); err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
@@ -365,7 +366,7 @@ func (s *strategyController[T, K]) changePriority(ginCtx *gin.Context) {
 		return
 	}
 
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	if err := s.strategyService.ChangePriority(ginCtx, namespaceId, userId, clusterName, maps); err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return

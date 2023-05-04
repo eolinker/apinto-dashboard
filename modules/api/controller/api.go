@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
+	"github.com/eolinker/apinto-dashboard/controller/users"
 	"github.com/eolinker/apinto-dashboard/enum"
 	service "github.com/eolinker/apinto-dashboard/modules/api"
 	"github.com/eolinker/apinto-dashboard/modules/api/api-dto"
@@ -250,7 +251,7 @@ func (a *apiController) getInfo(ginCtx *gin.Context) {
 // create 新建注册中心
 func (a *apiController) create(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 
 	input := new(api_dto.APIInfo)
 	if err := ginCtx.BindJSON(input); err != nil {
@@ -284,7 +285,7 @@ func (a *apiController) create(ginCtx *gin.Context) {
 // alter 修改注册中心
 func (a *apiController) update(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	apiUUID := ginCtx.Query("uuid")
 	if apiUUID == "" {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("UpdateApi fail. err: uuid can't be nil"))
@@ -330,7 +331,7 @@ func (a *apiController) delete(ginCtx *gin.Context) {
 		return
 	}
 
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	err := a.apiService.DeleteAPI(ginCtx, namespaceId, userId, apiUUID)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("DeleteApi fail. err:%s", err.Error()))
@@ -343,7 +344,7 @@ func (a *apiController) delete(ginCtx *gin.Context) {
 // batchOnline 批量上线
 func (a *apiController) batchOnline(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 
 	input := &api_dto.ApiBatchInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
@@ -384,7 +385,7 @@ func (a *apiController) batchOnline(ginCtx *gin.Context) {
 // batchOnline 批量下线
 func (a *apiController) batchOffline(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 
 	input := &api_dto.ApiBatchInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
@@ -425,7 +426,7 @@ func (a *apiController) batchOffline(ginCtx *gin.Context) {
 // batchOnline 批量上线检测
 func (a *apiController) batchOnlineCheck(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 
 	input := &api_dto.ApiBatchInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
@@ -470,7 +471,7 @@ func (a *apiController) batchOnlineCheck(ginCtx *gin.Context) {
 // online 上线
 func (a *apiController) online(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	apiUUID := ginCtx.Query("uuid")
 	if apiUUID == "" {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("uuid can't be nil"))
@@ -509,7 +510,7 @@ func (a *apiController) online(ginCtx *gin.Context) {
 // online 下线
 func (a *apiController) offline(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	apiUUID := ginCtx.Query("uuid")
 	if apiUUID == "" {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("uuid can't be nil"))
@@ -531,7 +532,7 @@ func (a *apiController) offline(ginCtx *gin.Context) {
 // enableAPI 启用API
 func (a *apiController) enableAPI(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	apiUUID := ginCtx.Query("uuid")
 	if apiUUID == "" {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("uuid can't be nil"))
@@ -553,7 +554,7 @@ func (a *apiController) enableAPI(ginCtx *gin.Context) {
 // disableAPI 禁用API
 func (a *apiController) disableAPI(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	apiUUID := ginCtx.Query("uuid")
 	if apiUUID == "" {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("uuid can't be nil"))
@@ -683,7 +684,7 @@ func (a *apiController) getImportCheckList(ginCtx *gin.Context) {
 // importAPI 导入Swagger文档
 func (a *apiController) importAPI(ginCtx *gin.Context) {
 	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 
 	input := new(api_dto.ImportAPIInfos)
 	if err := ginCtx.BindJSON(input); err != nil {

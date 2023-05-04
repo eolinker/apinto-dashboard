@@ -5,6 +5,7 @@ import (
 	plugin2 "github.com/eolinker/apinto-dashboard/client/v1/initialize/plugin"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
+	"github.com/eolinker/apinto-dashboard/controller/users"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/plugin"
 	"github.com/eolinker/apinto-dashboard/modules/plugin/plugin-dto"
@@ -108,7 +109,7 @@ func (p *pluginController) basicInfoPlugins(ginCtx *gin.Context) {
 // 新增插件
 func (p *pluginController) createPlugin(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	input := new(plugin_dto.PluginInput)
 
 	if err := ginCtx.BindJSON(input); err != nil {
@@ -140,7 +141,7 @@ func (p *pluginController) createPlugin(ginCtx *gin.Context) {
 // 修改插件
 func (p *pluginController) updatePlugin(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	input := new(plugin_dto.PluginInput)
 
 	if err := ginCtx.BindJSON(input); err != nil {
@@ -172,7 +173,7 @@ func (p *pluginController) updatePlugin(ginCtx *gin.Context) {
 // 删除插件
 func (p *pluginController) delPlugin(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	name := ginCtx.Query("name")
 
 	if err := p.pluginService.Delete(ginCtx, namespaceId, userId, name); err != nil {
@@ -212,7 +213,7 @@ func (p *pluginController) pluginExtendeds(ginCtx *gin.Context) {
 // 修改插件顺序
 func (p *pluginController) pluginSort(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 
 	pluginSort := new(plugin_dto.PluginSort)
 

@@ -3,6 +3,7 @@ package application_controller
 import (
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
+	"github.com/eolinker/apinto-dashboard/controller/users"
 	"github.com/eolinker/apinto-dashboard/modules/upstream/upstream-dto"
 	"sync"
 
@@ -79,7 +80,7 @@ func (a *applicationController) lists(ginCtx *gin.Context) {
 	}
 
 	name := ginCtx.Query("name")
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	list, count, err := a.applicationService.AppList(ginCtx, namespaceId, userId, pageNum, pageSize, name)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
@@ -167,7 +168,7 @@ func (a *applicationController) info(ginCtx *gin.Context) {
 
 func (a *applicationController) createApp(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	input := new(application_dto.ApplicationInput)
 	if err := ginCtx.BindJSON(input); err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
@@ -188,7 +189,7 @@ func (a *applicationController) createApp(ginCtx *gin.Context) {
 
 func (a *applicationController) updateApp(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 
 	input := new(application_dto.ApplicationInput)
 	if err := ginCtx.BindJSON(input); err != nil {
@@ -211,7 +212,7 @@ func (a *applicationController) updateApp(ginCtx *gin.Context) {
 func (a *applicationController) deleteApp(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	id := ginCtx.Query("app_id")
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	if err := a.applicationService.DelApp(ginCtx, namespaceId, userId, id); err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
@@ -250,7 +251,7 @@ func (a *applicationController) onlines(ginCtx *gin.Context) {
 
 func (a *applicationController) online(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	id := ginCtx.Query("app_id")
 	input := &online_dto.UpdateOnlineStatusInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
@@ -266,7 +267,7 @@ func (a *applicationController) online(ginCtx *gin.Context) {
 
 func (a *applicationController) offline(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	id := ginCtx.Query("app_id")
 	input := &online_dto.UpdateOnlineStatusInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
@@ -282,7 +283,7 @@ func (a *applicationController) offline(ginCtx *gin.Context) {
 
 func (a *applicationController) enable(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	id := ginCtx.Query("app_id")
 	input := &online_dto.UpdateOnlineStatusInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
@@ -298,7 +299,7 @@ func (a *applicationController) enable(ginCtx *gin.Context) {
 
 func (a *applicationController) disable(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	id := ginCtx.Query("app_id")
 	input := &online_dto.UpdateOnlineStatusInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
@@ -363,7 +364,7 @@ func (a *applicationController) auths(ginCtx *gin.Context) {
 func (a *applicationController) createAuth(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	appId := ginCtx.Query("app_id")
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 
 	input := &application_dto.ApplicationAuthInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
@@ -387,7 +388,7 @@ func (a *applicationController) updateAuth(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	appId := ginCtx.Query("app_id")
 	uuid := ginCtx.Query("uuid")
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 
 	input := &application_dto.ApplicationAuthInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
@@ -406,7 +407,7 @@ func (a *applicationController) updateAuth(ginCtx *gin.Context) {
 func (a *applicationController) delAuth(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	uuid := ginCtx.Query("uuid")
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 
 	err := a.applicationAuthService.Delete(ginCtx, namespaceId, userId, uuid)
 	if err != nil {
