@@ -72,12 +72,17 @@
                 'bg-guide_final':
                   step.status === 'doing' && step.name === 'final',
                 'text-theme': step.status === 'done',
-                'border-theme':step.status === 'done',
-                'text-guide_cluster': step.status === 'doing' && step.name === 'cluster',
-                'text-guide_upstream': step.status === 'doing' && step.name === 'upstream',
-                'text-guide_api': step.status === 'doing' && step.name === 'api',
-                'text-guide_publishApi': step.status === 'doing' && step.name === 'publishApi',
-                'text-guide_final': step.status === 'doing' && step.name === 'final',
+                'border-theme': step.status === 'done',
+                'text-guide_cluster':
+                  step.status === 'doing' && step.name === 'cluster',
+                'text-guide_upstream':
+                  step.status === 'doing' && step.name === 'upstream',
+                'text-guide_api':
+                  step.status === 'doing' && step.name === 'api',
+                'text-guide_publishApi':
+                  step.status === 'doing' && step.name === 'publishApi',
+                'text-guide_final':
+                  step.status === 'doing' && step.name === 'final'
               }"
             >
               <svg *ngIf="step.status === 'done'" class="iconpark-icon">
@@ -86,12 +91,18 @@
               <span
                 *ngIf="step.status !== 'done'"
                 [ngClass]="{
-                  'text-MAIN_BG':step.status === 'doing',
-                'text-guide_cluster':  step.status !== 'doing'  && step.name === 'cluster',
-                'text-guide_upstream':  step.status !== 'doing'  && step.name === 'upstream',
-                'text-guide_api':   step.status !== 'doing'  && step.name === 'api',
-                'text-guide_publishApi': step.status !== 'doing'  &&  step.name === 'publishApi',
-                'text-guide_final':  step.status !== 'doing'  &&  step.name === 'final',}"
+                  'text-MAIN_BG': step.status === 'doing',
+                  'text-guide_cluster':
+                    step.status !== 'doing' && step.name === 'cluster',
+                  'text-guide_upstream':
+                    step.status !== 'doing' && step.name === 'upstream',
+                  'text-guide_api':
+                    step.status !== 'doing' && step.name === 'api',
+                  'text-guide_publishApi':
+                    step.status !== 'doing' && step.name === 'publishApi',
+                  'text-guide_final':
+                    step.status !== 'doing' && step.name === 'final'
+                }"
                 >{{ index + 1 }}</span
               >
             </div>
