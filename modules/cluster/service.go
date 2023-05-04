@@ -39,7 +39,7 @@ type IClusterService interface {
 	QueryListByNamespaceId(ctx context.Context, namespaceId int) ([]*cluster_model2.Cluster, error)
 
 	DeleteByNamespaceIdByName(ctx context.Context, namespaceId, userId int, name string) error
-	UpdateDesc(ctx context.Context, namespaceId, userId int, name, desc string) error
+	Update(ctx context.Context, namespaceId, userId int, name string, clusterInput *cluster_dto.ClusterInput) error
 	UpdateAddr(ctx context.Context, userId, clusterId int, addr, uuid string) error
 	ClusterCount(ctx context.Context, namespaceId int) (int64, error)
 }

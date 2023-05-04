@@ -129,9 +129,9 @@ func (c *Module) initRouter() {
 		},
 		{
 			Method:      http.MethodPut,
-			Path:        "/api/cluster/:cluster_name/desc",
+			Path:        "/api/cluster/:cluster_name",
 			Handler:     "cluster.desc.edit",
-			HandlerFunc: []apinto_module.HandlerFunc{clrController.putDesc},
+			HandlerFunc: []apinto_module.HandlerFunc{clrController.update},
 		},
 		{
 			Method:      http.MethodGet,
