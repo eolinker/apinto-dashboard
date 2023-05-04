@@ -3,14 +3,14 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
 # Compiled output
-/tmp
-/out-tsc
-/bazel-out
+/frontend/tmp
+/frontend/out-tsc
+/frontend/bazel-out
 
 # Node
-/node_modules
+/frontend/node_modules
 npm-debug.log
-yarn-error.log
+/frontend/yarn-error.log
 
 # IDEs and editors
 .idea/
@@ -30,7 +30,7 @@ yarn-error.log
 .history/*
 
 # Miscellaneous
-/.angular/cache
+/frontend/.angular/cache
 .sass-cache/
 /connect.lock
 /coverage
@@ -43,8 +43,8 @@ testem.log
 Thumbs.db
 
 # 单元测试
-unit_coverage
-dist
+/frontend/unit_coverage
+/frontend/dist
 
 #端到端测试
 e2e_coverage
