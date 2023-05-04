@@ -251,7 +251,7 @@ func (u *userInfoService) CheckPassword(ctx context.Context, name string, passwo
 	if err != nil {
 		return 0, false
 	}
-	return info.Id, common.Md5(password) != info.Password
+	return info.Id, common.Md5(password) == info.Password
 }
 
 func (u *userInfoService) GetUserInfoByName(ctx context.Context, userName string) (*user_model.UserInfo, error) {
