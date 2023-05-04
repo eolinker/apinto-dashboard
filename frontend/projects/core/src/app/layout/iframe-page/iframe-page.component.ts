@@ -89,7 +89,7 @@ export class IframePageComponent implements OnInit {
       iframe.id = id
       iframe.width = '100%'
       iframe.height = '100%'
-      iframe.src = 'http://localhost:5555' || url
+      iframe.src = url
       iframe.onload = () => {
         this.start = true
       }
