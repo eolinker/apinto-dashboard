@@ -6,29 +6,21 @@ import (
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/api"
-	"github.com/eolinker/apinto-dashboard/modules/api/api-dto"
+	api_dto "github.com/eolinker/apinto-dashboard/modules/api/api-dto"
 	api_entry "github.com/eolinker/apinto-dashboard/modules/api/api-entry"
 	"net/textproto"
 	"strings"
 )
 
-type apiHTTP struct {
+type apiWebsocket struct {
 	apintoDriverName string
 }
 
-func (a *apiHTTP) CheckInput(input *api_dto.APIInfo) error {
-	for _, m := range input.Method {
-		switch m {
-		case enum.MethodGET, enum.MethodPOST, enum.MethodPUT, enum.MethodDELETE, enum.MethodPATCH, enum.MethodHEAD, enum.MethodOPTIONS:
-		default:
-			return fmt.Errorf("method %s is illegal. ", m)
-		}
-	}
-
+func (a *apiWebsocket) CheckInput(input *api_dto.APIInfo) error {
 	return checkInput(input)
 }
 
-func (a *apiHTTP) ToApinto(name, desc string, disable bool, method []string, requestPath, requestPathLabel, proxyPath, serviceName string, timeout, retry int, enableWebsocket bool, match []*api_entry.MatchConf, header []*api_entry.ProxyHeader, templateUUID string) *v1.RouterConfig {
+func (a *apiWebsocket) ToApinto(name, desc string, disable bool, method []string, requestPath, requestPathLabel, proxyPath, serviceName string, timeout, retry int, enableWebsocket bool, match []*api_entry.MatchConf, header []*api_entry.ProxyHeader, templateUUID string) *v1.RouterConfig {
 
 	rewriteHeaders := make(map[string]string)
 	for _, ph := range header {
@@ -140,6 +132,6 @@ func (a *apiHTTP) ToApinto(name, desc string, disable bool, method []string, req
 	}
 }
 
-func CreateAPIHttp(apintoDriverName string) api.IAPIDriver {
-	return &apiHTTP{apintoDriverName: apintoDriverName}
+func CreateAPIWebsocket(apintoDriverName string) api.IAPIDriver {
+	return &apiWebsocket{apintoDriverName: apintoDriverName}
 }
