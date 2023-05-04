@@ -4,6 +4,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
+	"github.com/eolinker/apinto-dashboard/controller/users"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
 	"net/http"
@@ -43,13 +44,11 @@ func (u *UserController) LoginCheckApi(ginCtx *gin.Context) {
 	ginCtx.Writer.Header().Set(controller.Authorization, token)
 	ginCtx.Writer.Header().Set(controller.RAuthorization, rToken)
 
-	userId := uc.Id
-
-	ginCtx.Set(controller.UserId, userId)
+	ginCtx.Set(controller.UserName, uc.Uname)
 	ginCtx.Set(controller.Session, session)
 }
 func (u *UserController) SetUser(ginCtx *gin.Context) {
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	if userId != 0 {
 		return
 	}
@@ -72,6 +71,6 @@ func (u *UserController) SetUser(ginCtx *gin.Context) {
 		return
 	}
 	if parse.Valid {
-		ginCtx.Set(controller.UserId, uc.Id)
+		ginCtx.Set(controller.UserName, uc.Uname)
 	}
 }

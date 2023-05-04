@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
+	"github.com/eolinker/apinto-dashboard/controller/users"
 	"github.com/eolinker/apinto-dashboard/modules/discovery/discovery-serivce"
 	"github.com/eolinker/apinto-dashboard/modules/upstream/upstream-dto"
 	"sync"
@@ -118,7 +119,7 @@ func (d *discoveryController) getInfo(ginCtx *gin.Context) {
 // create 新建注册中心
 func (d *discoveryController) create(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	operator := controller.GetUserId(ginCtx)
+	operator := users.GetUserId(ginCtx)
 
 	input := new(discover_dto.DiscoveryInfoProxy)
 	if err := ginCtx.BindJSON(input); err != nil {
@@ -156,7 +157,7 @@ func (d *discoveryController) update(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("UpdateDiscovery Info fail. err: discoveryName can't be nil"))
 		return
 	}
-	operator := controller.GetUserId(ginCtx)
+	operator := users.GetUserId(ginCtx)
 
 	input := new(discover_dto.DiscoveryInfoProxy)
 	if err := ginCtx.BindJSON(input); err != nil {
@@ -184,7 +185,7 @@ func (d *discoveryController) delete(ginCtx *gin.Context) {
 		return
 	}
 
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	err := d.discoveryService.DeleteDiscovery(ginCtx, namespaceId, userId, discoveryName)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("DeleteDiscovery fail. err:%s", err.Error()))
@@ -241,7 +242,7 @@ func (d *discoveryController) online(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	discoveryName := ginCtx.Param("discovery_name")
 	input := &online_dto.UpdateOnlineStatusInput{}
-	operator := controller.GetUserId(ginCtx)
+	operator := users.GetUserId(ginCtx)
 
 	if err := ginCtx.BindJSON(input); err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
@@ -276,7 +277,7 @@ func (d *discoveryController) offline(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	discoveryName := ginCtx.Param("discovery_name")
 	input := &online_dto.UpdateOnlineStatusInput{}
-	operator := controller.GetUserId(ginCtx)
+	operator := users.GetUserId(ginCtx)
 
 	if err := ginCtx.BindJSON(input); err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
