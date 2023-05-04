@@ -25,7 +25,7 @@ func (p *ProxyAPi) CreateMiddleware(name, path, life string, rule [][]string) ap
 			Rule: apinto_module.CreateMiddlewareRules(rule),
 			Handler: func(ginCtx *gin.Context) {
 				ginCtx.Next()
-				doMiddleware(ginCtx, url, p.module)
+				doMiddleware(ginCtx, url)
 			},
 		}
 	case MiddlewarePre:
@@ -36,12 +36,12 @@ func (p *ProxyAPi) CreateMiddleware(name, path, life string, rule [][]string) ap
 		Rule: apinto_module.CreateMiddlewareRules(rule),
 		Handler: func(ginCtx *gin.Context) {
 
-			doMiddleware(ginCtx, url, p.module)
+			doMiddleware(ginCtx, url)
 		},
 	}
 }
-func doMiddleware(ginCtx *gin.Context, url string, module string) {
-	request := apinto_module.CreateMiddlewareRequest(ginCtx, module)
+func doMiddleware(ginCtx *gin.Context, url string) {
+	request := apinto_module.CreateMiddlewareRequest(ginCtx)
 	marshal, _ := json.Marshal(request)
 	buf := bytes.NewReader(marshal)
 	response, err := http.Post(url, "application/json", buf)
