@@ -64,7 +64,7 @@ func (p *ProxyAPi) CreateHome(path string) []apinto_module.RouterInfo {
 		if bytes.Index(body, []byte(`<base href="/">`)) > 0 {
 			body = bytes.Replace(body, []byte(`<base href="/">`), baseHtml, 1)
 		} else {
-			body = bytes.Replace(body, []byte(`</head>`), bytes.Join([][]byte{baseHtml, []byte(`</head>`)}, []byte("\n")), 1)
+			body = bytes.Replace(body, []byte(`<head>`), bytes.Join([][]byte{[]byte(`<head>`), baseHtml}, []byte("\n")), 1)
 		}
 
 		ginCtx.Data(statusCode, contentType, body)
