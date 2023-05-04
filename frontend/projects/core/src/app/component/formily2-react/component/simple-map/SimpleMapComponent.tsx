@@ -3,7 +3,12 @@ import * as React from 'react'
 import { Input } from '@formily/antd'
 export const SimpleMapComponent = React.forwardRef(
   (props: { [k: string]: any }, ref) => {
-    const { onChange, value, placeholderKey, placeholderValue } = props
+    const {
+      onChange,
+      value,
+      placeholderKey = '请输入Key',
+      placeholderValue = '请输入Value'
+    } = props
 
     const [kvList, setKvList] = React.useState(
       value && Object.keys(value).length > 0
@@ -14,6 +19,8 @@ export const SimpleMapComponent = React.forwardRef(
           ]
         : [{ key: '', value: '' }]
     )
+
+    console.log(placeholderKey, placeholderValue)
 
     React.useImperativeHandle(ref, () => ({}))
     console.log(kvList)
@@ -67,7 +74,7 @@ export const SimpleMapComponent = React.forwardRef(
                 onChange={(e: any) => {
                   changeInputValue(e.target.value, index, 'key')
                 }}
-                placeHolder={{ placeholderKey }}
+                placeholder={placeholderKey}
               />
               <Input
                 className=" ml-[8px]"
@@ -76,7 +83,7 @@ export const SimpleMapComponent = React.forwardRef(
                 onChange={(e: any) => {
                   changeInputValue(e.target.value, index, 'value')
                 }}
-                placeHolder={{ placeholderValue }}
+                placeholder={placeholderValue}
               />
               <a
                 className="array_item_addition ml-[10px] ant-btn-text anticon"
