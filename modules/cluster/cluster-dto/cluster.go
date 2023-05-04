@@ -5,6 +5,7 @@ import "github.com/eolinker/apinto-dashboard/enum"
 type ClusterInput struct {
 	Id     int    `json:"id"`
 	Name   string `json:"name,omitempty"`
+	Title  string `json:"title"`
 	Env    string `json:"env,omitempty"`
 	Desc   string `json:"desc,omitempty"`
 	Addr   string `json:"addr,omitempty"`
@@ -15,6 +16,7 @@ type ClusterInput struct {
 type ClusterOut struct {
 	Id         int                `json:"id,omitempty"`
 	Name       string             `json:"name,omitempty"`
+	Title      string             `json:"title"`
 	Env        string             `json:"env,omitempty"`
 	Status     enum.ClusterStatus `json:"status,omitempty"`
 	UUID       string             `json:"uuid,omitempty"`

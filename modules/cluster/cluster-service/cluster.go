@@ -351,15 +351,17 @@ func (c *clusterService) initGlobalPlugin(ctx context.Context, id int, addr stri
 }
 
 // UpdateDesc 修改集群描述
-func (c *clusterService) UpdateDesc(ctx context.Context, namespaceId, userId int, name, desc string) error {
+func (c *clusterService) Update(ctx context.Context, namespaceId, userId int, name string, info *cluster_dto.ClusterInput) error {
 	clusterId, err := c.CheckByNamespaceByName(ctx, namespaceId, name)
 	if err != nil {
 		return err
 	}
 
 	clusterInfo := &cluster_entry2.Cluster{
-		Id:   clusterId,
-		Desc: desc,
+		Id:    clusterId,
+		Title: info.Title,
+		Env:   info.Env,
+		Desc:  info.Desc,
 	}
 	oldCluster, err := c.clusterStore.Get(ctx, clusterId)
 	if err != nil {
