@@ -203,6 +203,49 @@ export const IntelligentPluginEditComponent = React.forwardRef(
     const submit = (value: any) => {
       console.log(value)
     }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const loadData = async (field: any) => {
+      const linkage = field.query('linkage').get('value')
+      if (!linkage) return []
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          if (linkage === 1) {
+            resolve([
+              {
+                label: 'AAA',
+                value: 'aaa'
+              },
+              {
+                label: 'BBB',
+                value: 'ccc'
+              }
+            ])
+          } else if (linkage === 2) {
+            resolve([
+              {
+                label: 'CCC',
+                value: 'ccc'
+              },
+              {
+                label: 'DDD',
+                value: 'ddd'
+              }
+            ])
+          }
+        }, 1500)
+      })
+    }
+
+    // const useAsyncDataSource = (service) => (field) => {
+    //   field.loading = true
+    //   service(field).then(
+    //     action.bound((data) => {
+    //       field.dataSource = data
+    //       field.loading = false
+    //     })
+    //   )
+    // }
     return (
       <FormProvider form={form} layout="vertical">
         <SchemaField schema={demo ? demoSchema : pluginEditSchema} />
