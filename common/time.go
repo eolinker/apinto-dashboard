@@ -15,3 +15,7 @@ func StrToTime(t string) time.Time {
 	location, _ := time.ParseInLocation(formatTime, t, time.Local)
 	return location
 }
+
+func GenVersion(now time.Time) string {
+	return now.Format("20060102150405")
+}

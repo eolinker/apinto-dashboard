@@ -7,6 +7,7 @@ type Dynamic struct {
 	NamespaceId int       `gorm:"column:namespace"`
 	Name        string    `gorm:"column:name"`
 	Title       string    `gorm:"column:title"`
+	Skill       string    `gorm:"column:skill"`
 	Driver      string    `gorm:"column:driver"`
 	Description string    `gorm:"column:description"`
 	Version     string    `gorm:"column:version"`
