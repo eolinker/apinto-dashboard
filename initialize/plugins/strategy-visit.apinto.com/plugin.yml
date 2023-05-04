@@ -1,8 +1,8 @@
 id: "strategy-visit.apinto.com"
 name: "visit"
-cname: "API访问"
-resume: ""
-version: "v1.0.3"
+cname: "API访问权限"
+resume: "保证API接口的安全性和稳定性，防止未经授权的用户、IP、API对API接口进行恶意访问或者滥用资源导致系统宕机或故障。"
+version: "v1.0.0"
 icon: "API 访问限制.png"
 driver: "strategy-visit.apinto.com"
 type: 2 #0为框架模块 1为核心模块 2为内置模块 3为非内置
