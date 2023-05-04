@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
+	"github.com/eolinker/apinto-dashboard/controller/users"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/openapp"
 	"github.com/eolinker/apinto-dashboard/modules/openapp/open-app-dto"
@@ -84,7 +85,7 @@ func (e *externalApplicationController) getInfo(ginCtx *gin.Context) {
 
 func (e *externalApplicationController) create(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 
 	input := new(open_app_dto.ExternalAppInfoInput)
 	if err := ginCtx.BindJSON(input); err != nil {
@@ -113,7 +114,7 @@ func (e *externalApplicationController) create(ginCtx *gin.Context) {
 
 func (e *externalApplicationController) edit(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	uuid := ginCtx.Query("id")
 
 	input := new(open_app_dto.ExternalAppInfoInput)
@@ -139,7 +140,7 @@ func (e *externalApplicationController) edit(ginCtx *gin.Context) {
 
 func (e *externalApplicationController) delete(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	uuid := ginCtx.Query("id")
 
 	err := e.extAppService.DelApp(ginCtx, namespaceId, userId, uuid)
@@ -153,7 +154,7 @@ func (e *externalApplicationController) delete(ginCtx *gin.Context) {
 
 func (e *externalApplicationController) enable(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	uuid := ginCtx.Query("id")
 
 	err := e.extAppService.Enable(ginCtx, namespaceId, userId, uuid)
@@ -167,7 +168,7 @@ func (e *externalApplicationController) enable(ginCtx *gin.Context) {
 
 func (e *externalApplicationController) disable(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	uuid := ginCtx.Query("id")
 
 	err := e.extAppService.Disable(ginCtx, namespaceId, userId, uuid)
@@ -181,7 +182,7 @@ func (e *externalApplicationController) disable(ginCtx *gin.Context) {
 
 func (e *externalApplicationController) flushToken(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	uuid := ginCtx.Query("id")
 
 	err := e.extAppService.FlushToken(ginCtx, namespaceId, userId, uuid)

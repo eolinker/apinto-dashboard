@@ -3,6 +3,7 @@ package cluster_controller
 import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/controller"
+	"github.com/eolinker/apinto-dashboard/controller/users"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/cluster"
 	"github.com/eolinker/eosc/common/bean"
@@ -57,7 +58,7 @@ func (c *clusterConfigController) edit(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Param("cluster_name")
 	configType := ginCtx.Param("type")
-	operator := controller.GetUserId(ginCtx)
+	operator := users.GetUserId(ginCtx)
 
 	if !c.configService.IsConfigTypeExist(configType) {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("edit %s fail. err: %s doesn't exist. ", configType, configType))
@@ -88,7 +89,7 @@ func (c *clusterConfigController) enable(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Param("cluster_name")
 	configType := ginCtx.Param("type")
-	operator := controller.GetUserId(ginCtx)
+	operator := users.GetUserId(ginCtx)
 
 	if !c.configService.IsConfigTypeExist(configType) {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("enable %s fail. err: %s doesn't exist. ", configType, configType))
@@ -108,7 +109,7 @@ func (c *clusterConfigController) disable(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Param("cluster_name")
 	configType := ginCtx.Param("type")
-	operator := controller.GetUserId(ginCtx)
+	operator := users.GetUserId(ginCtx)
 
 	if !c.configService.IsConfigTypeExist(configType) {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("disable %s fail. err: %s doesn't exist. ", configType, configType))

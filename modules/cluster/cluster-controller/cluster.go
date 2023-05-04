@@ -3,6 +3,7 @@ package cluster_controller
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/eolinker/apinto-dashboard/controller/users"
 	"net/http"
 	"sort"
 
@@ -177,7 +178,7 @@ func (c *clusterController) create(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, "parameter error")
 		return
 	}
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	if err := c.clusterService.Insert(ginCtx, namespaceId, userId, input); err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
@@ -196,7 +197,7 @@ func (c *clusterController) del(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, "Delete cluster fail. err: cluster_name can't be nil.")
 		return
 	}
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	if err := c.clusterService.DeleteByNamespaceIdByName(ginCtx, namespaceId, userId, clusterName); err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
@@ -217,7 +218,7 @@ func (c *clusterController) putDesc(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	if err = c.clusterService.UpdateDesc(ginCtx, namespaceId, userId, clusterName, clusterInput.Desc); err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
