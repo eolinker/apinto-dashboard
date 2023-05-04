@@ -1,1 +1,0 @@
-# InfluxDB v2
