@@ -3,9 +3,10 @@ package dynamic_controller
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/controller/users"
 	"net/http"
 	"strconv"
+
+	"github.com/eolinker/apinto-dashboard/controller/users"
 
 	cluster_model "github.com/eolinker/apinto-dashboard/modules/cluster/cluster-model"
 
@@ -164,6 +165,19 @@ func (c *dynamicController) info(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, controller.NewSuccessResult(info))
 }
 
+func (c *dynamicController) getBySkill(ctx *gin.Context) {
+	namespaceID := namespace_controller.GetNamespaceId(ctx)
+	list, err := c.dynamicService.GetBySkill(ctx, namespaceID, ctx.Query("skill"))
+	if err != nil {
+		controller.ErrorJson(ctx, http.StatusOK, err.Error())
+		return
+	}
+	ctx.JSON(http.StatusOK, controller.NewSuccessResult(map[string]interface{}{
+		"skill": c.Skill,
+		"list":  list,
+	}))
+}
+
 func (c *dynamicController) online(ctx *gin.Context) {
 	namespaceID := namespace_controller.GetNamespaceId(ctx)
 	uuid := ctx.Param("uuid")
@@ -313,7 +327,7 @@ func (c *dynamicController) create(ctx *gin.Context) {
 		return
 	}
 	body, _ := json.Marshal(worker.Append)
-	err = c.dynamicService.Create(ctx, namespaceID, c.Profession, worker.Title, worker.Id, worker.Driver, worker.Description, string(body), users.GetUserId(ctx))
+	err = c.dynamicService.Create(ctx, namespaceID, c.Profession, c.Skill, worker.Title, worker.Id, worker.Driver, worker.Description, string(body), users.GetUserId(ctx))
 	if err != nil {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
 		return

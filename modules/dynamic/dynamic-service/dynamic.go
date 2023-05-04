@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/eolinker/apinto-dashboard/common"
+
 	cluster_model "github.com/eolinker/apinto-dashboard/modules/cluster/cluster-model"
 	"github.com/eolinker/apinto-dashboard/modules/user"
 
@@ -39,6 +41,26 @@ type dynamicService struct {
 	dynamicStore        dynamic_store.IDynamicStore
 	publishHistoryStore dynamic_store.IDynamicPublishHistoryStore
 	publishVersionStore dynamic_store.IDynamicPublishVersionStore
+}
+
+func (d *dynamicService) GetBySkill(ctx context.Context, namespaceId int, skill string) ([]*dynamic_model.DynamicBasicInfo, error) {
+	list, err := d.dynamicStore.List(ctx, map[string]interface{}{
+		"namespace": namespaceId,
+		"skill":     skill,
+	})
+	if err != nil {
+		return nil, err
+	}
+	data := make([]*dynamic_model.DynamicBasicInfo, 0, len(list))
+	for _, l := range list {
+		data = append(data, &dynamic_model.DynamicBasicInfo{
+			ID:          l.Skill,
+			Title:       l.Title,
+			Driver:      l.Driver,
+			Description: l.Description,
+		})
+	}
+	return data, nil
 }
 
 func (d *dynamicService) Info(ctx context.Context, namespaceId int, profession string, name string) (*v2.WorkerInfo[dynamic_model.DynamicBasicInfo], error) {
@@ -124,7 +146,6 @@ func (d *dynamicService) ClusterStatuses(ctx context.Context, namespaceId int, p
 	var clusters []*cluster_model.Cluster
 	all := len(names) < 1
 	if all {
-
 		clusters, err = d.clusterService.GetAllCluster(ctx)
 		names = make([]string, 0, len(clusters))
 	} else {
@@ -385,15 +406,16 @@ func (d *dynamicService) ClusterStatus(ctx context.Context, namespaceId int, pro
 	}, result, nil
 }
 
-func (d *dynamicService) Create(ctx context.Context, namespaceId int, profession string, title string, name string, driver string, description string, body string, updater int) error {
+func (d *dynamicService) Create(ctx context.Context, namespaceId int, profession string, skill string, title string, name string, driver string, description string, body string, updater int) error {
 	now := time.Now()
 	info := &dynamic_entry.Dynamic{
 		NamespaceId: namespaceId,
 		Name:        name,
 		Title:       title,
+		Skill:       skill,
 		Driver:      driver,
 		Description: description,
-		Version:     genVersion(now),
+		Version:     common.GenVersion(now),
 		Config:      body,
 		Profession:  profession,
 		Updater:     updater,
@@ -423,7 +445,7 @@ func (d *dynamicService) Save(ctx context.Context, namespaceId int, profession s
 	info.Description = description
 	info.Config = body
 	info.Updater = updater
-	info.Version = genVersion(now)
+	info.Version = common.GenVersion(now)
 	info.UpdateTime = now
 
 	return d.dynamicStore.Save(ctx, info)
@@ -478,8 +500,4 @@ func newDynamicService() dynamic.IDynamicService {
 	bean.Autowired(&d.publishVersionStore)
 	bean.Autowired(&d.publishHistoryStore)
 	return d
-}
-
-func genVersion(now time.Time) string {
-	return now.Format("20060102150405")
 }
