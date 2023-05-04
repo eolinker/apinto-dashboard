@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/controller/users"
+	random_controller "github.com/eolinker/apinto-dashboard/modules/base/random-controller"
 	"net/http"
 	"time"
 
@@ -290,7 +291,18 @@ func newUserController() *UserController {
 	bean.Autowired(&u.moduleService)
 	return u
 }
-
+func randomRouters() apinto_module.RoutersInfo {
+	r := random_controller.NewRandomController()
+	return apinto_module.RoutersInfo{
+		{
+			Method:      http.MethodGet,
+			Path:        "/api/random/:template/id",
+			Handler:     "core.random.id",
+			Labels:      apinto_module.RouterLabelApi,
+			HandlerFunc: []apinto_module.HandlerFunc{r.GET},
+			Alternative: false,
+		}}
+}
 func userRouters() apinto_module.RoutersInfo {
 	userController := newUserController()
 	return apinto_module.RoutersInfo{
