@@ -28,12 +28,13 @@ type APIInfo struct {
 	UUID             string                   `json:"uuid"`
 	GroupUUID        string                   `json:"group_uuid"`
 	Desc             string                   `json:"desc"`
-	Driver           string                   `json:"driver"`
+	Scheme           string                   `json:"scheme"`
 	RequestPath      string                   `json:"request_path"`
 	RequestPathLabel string                   `json:"-"` //前端不传这个，后端存字段会使用
 	ServiceName      string                   `json:"service"`
 	Method           []string                 `json:"method"`
 	ProxyPath        string                   `json:"proxy_path"`
+	Hosts            []string                 `json:"hosts"`
 	Timeout          int                      `json:"timeout"`
 	Retry            int                      `json:"retry"`
 	EnableWebsocket  bool                     `json:"enable_websocket"`

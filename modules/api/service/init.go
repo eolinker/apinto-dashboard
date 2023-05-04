@@ -17,7 +17,9 @@ func init() {
 	store.RegisterStore(api_store.InitStoreDB)
 	apiDriverManager := newAPIDriverManager()
 	apiHttp := driver.CreateAPIHttp("http")
+	apiWebsocket := driver.CreateAPIWebsocket("websocket")
 	apiDriverManager.RegisterDriver(DriverApiHTTP, apiHttp)
+	apiDriverManager.RegisterDriver(DriverWebsocket, apiWebsocket)
 	bean.Injection(&apiDriverManager)
 	cache.RegisterCacheInitHandler(func(client *redis.ClusterClient) {
 		importCache := newImportCache(client)
