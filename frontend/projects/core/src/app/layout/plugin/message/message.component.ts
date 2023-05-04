@@ -174,7 +174,7 @@ export class PluginMessageComponent implements OnInit {
     }
   }
 
-  getPluginDetail () {
+  getPluginDetail = () => {
     this.api
       .get('system/plugin/info', { id: this.pluginId })
       .subscribe(
@@ -290,7 +290,7 @@ export class PluginMessageComponent implements OnInit {
                     name: [params.name, [Validators.required]],
                     server: [params.server, [Validators.required]]
                   }),
-                  closeModal:()=>{this.modalRef?.close()}
+                  closeModal: () => { this.modalRef?.close() }
                 },
                 nzOkText: '确定',
                 nzCancelText: '取消',
