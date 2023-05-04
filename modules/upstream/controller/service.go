@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
+	"github.com/eolinker/apinto-dashboard/controller/users"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/discovery"
@@ -113,7 +114,7 @@ func (s *upstreamController) getInfo(ginCtx *gin.Context) {
 // create 新增服务
 func (s *upstreamController) create(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	operator := controller.GetUserId(ginCtx)
+	operator := users.GetUserId(ginCtx)
 
 	inputProxy := new(upstream_dto.ServiceInfoProxy)
 	if err := ginCtx.BindJSON(inputProxy); err != nil {
@@ -170,7 +171,7 @@ func (s *upstreamController) alter(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("UpdateService Info fail. err: serviceName can't be nil"))
 		return
 	}
-	operator := controller.GetUserId(ginCtx)
+	operator := users.GetUserId(ginCtx)
 	backgroundCtx := ginCtx
 	inputProxy := new(upstream_dto.ServiceInfoProxy)
 	if err := ginCtx.BindJSON(inputProxy); err != nil {
@@ -221,7 +222,7 @@ func (s *upstreamController) del(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("DeleteService Info fail. err: serviceName can't be nil"))
 		return
 	}
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 
 	err := s.service.DeleteService(ginCtx, namespaceId, userId, serviceName)
 	if err != nil {
@@ -252,7 +253,7 @@ func (s *upstreamController) online(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	serviceName := ginCtx.Param("service_name")
 	input := &online_dto.UpdateOnlineStatusInput{}
-	operator := controller.GetUserId(ginCtx)
+	operator := users.GetUserId(ginCtx)
 
 	if err := ginCtx.BindJSON(input); err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
@@ -282,7 +283,7 @@ func (s *upstreamController) offline(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	serviceName := ginCtx.Param("service_name")
 	input := &online_dto.UpdateOnlineStatusInput{}
-	operator := controller.GetUserId(ginCtx)
+	operator := users.GetUserId(ginCtx)
 
 	if err := ginCtx.BindJSON(input); err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())

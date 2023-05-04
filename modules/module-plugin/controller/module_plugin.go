@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
+	"github.com/eolinker/apinto-dashboard/controller/users"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/dto"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/model"
@@ -137,7 +138,7 @@ func (p *modulePluginController) getEnableInfo(ginCtx *gin.Context) {
 
 	//若模块名没有冲突，且没有需要填的，直接启用
 	if !render.NameConflict && !render.Internet && len(render.Headers) == 0 && len(render.Querys) == 0 && len(render.Initialize) == 0 {
-		userId := controller.GetUserId(ginCtx)
+		userId := users.GetUserId(ginCtx)
 		err = p.modulePluginService.EnablePlugin(ginCtx, userId, pluginUUID, &dto.PluginEnableInfo{
 			Name:   info.Name,
 			Server: "",
@@ -231,7 +232,7 @@ func (p *modulePluginController) getEnableInfo(ginCtx *gin.Context) {
 }
 
 func (p *modulePluginController) install(ginCtx *gin.Context) {
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	pluginPackage, err := ginCtx.FormFile("plugin")
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("install plugin FormFilefail. err:%s", err.Error()))
@@ -340,7 +341,7 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 }
 
 func (p *modulePluginController) uninstall(ginCtx *gin.Context) {
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	pluginUUID := ginCtx.Query("id")
 
 	err := p.modulePluginService.UninstallPlugin(ginCtx, userId, pluginUUID)
@@ -364,7 +365,7 @@ func (p *modulePluginController) enable(ginCtx *gin.Context) {
 		return
 	}
 
-	err := p.modulePluginService.EnablePlugin(ginCtx, controller.GetUserId(ginCtx), pluginUUID, input)
+	err := p.modulePluginService.EnablePlugin(ginCtx, users.GetUserId(ginCtx), pluginUUID, input)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
@@ -376,7 +377,7 @@ func (p *modulePluginController) disable(ginCtx *gin.Context) {
 
 	pluginUUID := ginCtx.Query("id")
 
-	err := p.modulePluginService.DisablePlugin(ginCtx, controller.GetUserId(ginCtx), pluginUUID)
+	err := p.modulePluginService.DisablePlugin(ginCtx, users.GetUserId(ginCtx), pluginUUID)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Disable plugin fail. err:%s", err.Error()))
 		return

@@ -3,6 +3,7 @@ package cluster_controller
 import (
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
+	"github.com/eolinker/apinto-dashboard/controller/users"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/cluster"
@@ -73,7 +74,7 @@ func (c *clusterNodeController) reset(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, "cluster_add is null or source is null")
 		return
 	}
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	if err := c.clusterNodeService.Reset(ginCtx, namespaceId, userId, clusterName, input.ClusterAddr, input.Source); err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return

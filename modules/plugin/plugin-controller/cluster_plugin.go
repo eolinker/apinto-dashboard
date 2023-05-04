@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
+	"github.com/eolinker/apinto-dashboard/controller/users"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/plugin"
@@ -87,7 +88,7 @@ func (p *pluginClusterController) getPlugin(ginCtx *gin.Context) {
 func (p *pluginClusterController) editPlugin(ginCtx *gin.Context) {
 	clusterName := ginCtx.Param("cluster_name")
 	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 
 	input := new(plugin_dto.ClusterPluginInfoInput)
 	if err := ginCtx.BindJSON(input); err != nil {
@@ -317,7 +318,7 @@ func (p *pluginClusterController) publish(ginCtx *gin.Context) {
 		return
 	}
 
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	if err = p.clusterPluginService.Publish(background, namespaceId, userId, clusterName, input.VersionName, input.Desc, input.Source); err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return

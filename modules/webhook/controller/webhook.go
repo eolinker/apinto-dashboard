@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
+	"github.com/eolinker/apinto-dashboard/controller/users"
 	namespace_controller "github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/notice"
 	notice_model "github.com/eolinker/apinto-dashboard/modules/notice/notice-model"
@@ -34,7 +35,7 @@ func (w *webhookController) delWebhook(ginCtx *gin.Context) {
 	}
 
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 
 	if err := w.noticeChannelService.DeleteNoticeChannel(ginCtx, namespaceId, userId, uid); err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
@@ -127,7 +128,7 @@ func (w *webhookController) webhooks(ginCtx *gin.Context) {
 func (w *webhookController) createWebhook(ginCtx *gin.Context) {
 
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 
 	webhookInput := new(dto.WebhookInput)
 
@@ -173,7 +174,7 @@ func (w *webhookController) createWebhook(ginCtx *gin.Context) {
 // updateWebhook 修改webhook
 func (w *webhookController) updateWebhook(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 
 	webhookInput := new(dto.WebhookInput)
 
