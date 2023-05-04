@@ -232,7 +232,7 @@ func (a *apiController) getInfo(ginCtx *gin.Context) {
 		UUID:            info.Api.UUID,
 		GroupUUID:       info.Api.GroupUUID,
 		Desc:            info.Api.Desc,
-		Driver:          info.Version.Driver,
+		Scheme:          info.Version.Driver,
 		RequestPath:     info.Api.RequestPathLabel,
 		ServiceName:     info.Version.ServiceName,
 		Method:          info.Version.Method,
@@ -248,7 +248,7 @@ func (a *apiController) getInfo(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(map[string]interface{}{"api": apiInfo}))
 }
 
-// create 新建注册中心
+// create 新建
 func (a *apiController) create(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	userId := users.GetUserId(ginCtx)
@@ -259,30 +259,27 @@ func (a *apiController) create(ginCtx *gin.Context) {
 		return
 	}
 
-	//TODO 暂时处理
-	input.Driver = "http"
-
 	//API管理器校验参数
-	driver := a.apiService.GetAPIDriver(input.Driver)
+	driver := a.apiService.GetAPIDriver(input.Scheme)
 	if driver == nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("CreateAPI fail. err: driver is invalid. "))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("创建API失败, 协议类型不存在"))
 		return
 	}
 	if err := driver.CheckInput(input); err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("CreateAPI fail. err:%s", err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("创建API失败. err:%s", err.Error()))
 		return
 	}
 
 	err := a.apiService.CreateAPI(ginCtx, namespaceId, userId, input)
 	if err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("CreateAPI fail. err:%s", err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("创建API失败. err:%s", err.Error()))
 		return
 	}
 
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
-// alter 修改注册中心
+// alter 修改
 func (a *apiController) update(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	userId := users.GetUserId(ginCtx)
@@ -298,11 +295,8 @@ func (a *apiController) update(ginCtx *gin.Context) {
 		return
 	}
 
-	//TODO 暂时处理
-	input.Driver = "http"
-
 	//API管理器校验参数
-	driver := a.apiService.GetAPIDriver(input.Driver)
+	driver := a.apiService.GetAPIDriver(input.Scheme)
 	if driver == nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("UpdateAPI fail. err: driver is invalid. "))
 		return
@@ -322,7 +316,7 @@ func (a *apiController) update(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
-// delete 删除注册中心
+// delete 删除
 func (a *apiController) delete(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	apiUUID := ginCtx.Query("uuid")
