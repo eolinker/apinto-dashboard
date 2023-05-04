@@ -542,7 +542,7 @@ func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator in
 			ApiID:       apiInfo.Id,
 			NamespaceID: namespaceID,
 			APIVersionConfig: apientry.APIVersionConfig{
-				Driver:           input.Driver,
+				Driver:           input.Scheme,
 				RequestPath:      input.RequestPath,
 				RequestPathLabel: input.RequestPathLabel,
 				ServiceID:        serviceID,
@@ -676,7 +676,7 @@ func (a *apiService) UpdateAPI(ctx context.Context, namespaceID int, operator in
 		}
 
 		latestVersionConfig := apientry.APIVersionConfig{
-			Driver:           input.Driver,
+			Driver:           input.Scheme,
 			RequestPath:      input.RequestPath,
 			RequestPathLabel: input.RequestPathLabel,
 			ServiceID:        serviceID,
@@ -971,7 +971,7 @@ func (a *apiService) BatchOnline(ctx context.Context, namespaceId int, operator 
 		//		}
 		//
 		//		//封装router配置
-		//		apiDriverInfo := a.GetAPIDriver(latest.Driver)
+		//		apiDriverInfo := a.GetAPIDriver(latest.Scheme)
 		//		routerConfig := apiDriverInfo.ToApinto(api.UUID, api.Desc, false, latest.Method, latest.RequestPath, latest.RequestPathLabel, latest.ProxyPath, strings.ToLower(latest.ServiceName), latest.Timeout, latest.Retry, latest.EnableWebsocket, latest.Match, latest.Header)
 		//
 		//		//未上线
