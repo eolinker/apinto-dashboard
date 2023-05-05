@@ -54,7 +54,7 @@ export class DeployClusterListComponent implements OnInit {
   clustersList: Array<object> = []
   clustersDisplayList: Array<object> = []
   clustersTableHeadName:THEAD_TYPE[] = [...ClustersThead]
-  clustersTableBody: TBODY_TYPE[] = [...this.service.createClusterTbody(this)]
+  clustersTableBody: TBODY_TYPE[] = []
 
   environmentList: SelectOption[]= []
 
@@ -84,7 +84,7 @@ export class DeployClusterListComponent implements OnInit {
   }
 
   ngAfterViewInit () {
-    this.clustersTableBody[2].title = this.clusterStatusTpl
+    this.clustersTableBody = [...this.service.createClusterTbody(this)]
   }
 
   getClustersData () {

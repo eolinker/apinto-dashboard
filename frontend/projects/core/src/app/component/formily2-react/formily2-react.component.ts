@@ -45,6 +45,10 @@ export class Formily2ReactComponent {
   driverSelectOptions:SelectOption[] = []
   schema:any
   changeSchema () {
+    console.log(this.renderSchema)
+    if (!this.renderSchema) {
+      return
+    }
     this.schema = JSON.parse(this.renderSchema)
   }
 }
