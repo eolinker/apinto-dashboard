@@ -7,9 +7,10 @@ import (
 	"fmt"
 	"time"
 
+	cluster_model "github.com/eolinker/apinto-dashboard/modules/cluster/cluster-model"
+
 	"github.com/eolinker/apinto-dashboard/common"
 
-	cluster_model "github.com/eolinker/apinto-dashboard/modules/cluster/cluster-model"
 	"github.com/eolinker/apinto-dashboard/modules/user"
 
 	"gorm.io/gorm"
@@ -28,12 +29,6 @@ import (
 	"github.com/eolinker/eosc/common/bean"
 )
 
-const (
-	statusOffline = "未发布"
-	statusPre     = "待发布"
-	statusOnline  = "已发布"
-)
-
 type dynamicService struct {
 	userService    user.IUserInfoService
 	clusterService cluster.IClusterService
@@ -41,6 +36,10 @@ type dynamicService struct {
 	dynamicStore        dynamic_store.IDynamicStore
 	publishHistoryStore dynamic_store.IDynamicPublishHistoryStore
 	publishVersionStore dynamic_store.IDynamicPublishVersionStore
+}
+
+func toVersionKey(name string, cluster string) string {
+	return fmt.Sprintf("%s{%s}", name, cluster)
 }
 
 func (d *dynamicService) GetBySkill(ctx context.Context, namespaceId int, skill string) ([]*dynamic_model.DynamicBasicInfo, error) {
@@ -155,48 +154,44 @@ func (d *dynamicService) ClusterStatuses(ctx context.Context, namespaceId int, p
 		return nil, err
 	}
 
-	versionMap := make(map[string]map[string]string)
-
+	result := make(map[string]map[string]string)
+	isInit := false
 	for _, c := range clusters {
-		if all {
-			names = append(names, c.Name)
-		}
-		client := GetClusterClient(c.Name, c.Addr)
-		workers, err := client.List(profession)
+		client, err := v2.GetClusterClient(c.Name, c.Addr)
 		if err != nil {
-			log.Errorf("get worker(%s) list error: %w.", profession, err)
+			log.Error(err)
 			continue
 		}
-		for _, w := range workers {
-			if _, ok := versionMap[w.BasicInfo.Id]; !ok {
-				versionMap[w.BasicInfo.Name] = make(map[string]string)
+		versions, err := client.Versions(profession)
+		if err != nil {
+			log.Errorf("get worker(%s) list error: %w.", profession, err)
+			for _, l := range list {
+				if isInit {
+					result[l.Name] = make(map[string]string)
+				}
+				result[l.Name][c.Name] = v2.StatusOffline
 			}
-			versionMap[w.BasicInfo.Name][c.Name] = w.BasicInfo.Version
+			isInit = true
+			continue
 		}
-	}
-	result := make(map[string]map[string]string)
-	for _, l := range list {
-		hasVersion := true
-		v, ok := versionMap[l.Name]
-		if !ok {
-			hasVersion = false
-		}
-		clusterStatus := map[string]string{}
-		for _, name := range names {
-			version := v[name]
-			if !hasVersion || version == "" {
-				clusterStatus[name] = statusOffline
-				continue
+
+		for _, l := range list {
+			if isInit {
+				result[l.Name] = make(map[string]string)
 			}
-			if l.Version != version {
-				clusterStatus[name] = statusPre
-			} else {
-				clusterStatus[name] = statusOnline
+			result[l.Name][c.Name] = v2.StatusOffline
+			if v, ok := versions[l.Name]; ok {
+				if v != l.Version {
+					result[l.Name][c.Name] = v2.StatusPre
+				} else {
+					result[l.Name][c.Name] = v2.StatusOnline
+				}
 			}
 
 		}
-		result[l.Name] = clusterStatus
+		isInit = true
 	}
+
 	return result, nil
 }
 
@@ -251,7 +246,8 @@ func (d *dynamicService) Online(ctx context.Context, namespaceId int, profession
 			Operator:    updater,
 			CreateTime:  now,
 		}
-		err = d.saveVersion(ctx, version, history, GetClusterClient(c.Name, c.Addr))
+
+		err = d.saveVersion(ctx, version, history, c.Name, c.Addr)
 		if err != nil {
 			log.Errorf("fail to online config in cluster(%s),addr is %s,profession is %s,uuid is %s,config is %s", c.Name, c.Addr, profession, name, info.Config)
 			failClusters = append(failClusters, c.Name)
@@ -317,7 +313,7 @@ func (d *dynamicService) Offline(ctx context.Context, namespaceId int, professio
 			Operator:    updater,
 			CreateTime:  now,
 		}
-		err = d.saveVersion(ctx, version, history, GetClusterClient(c.Name, c.Addr))
+		err = d.saveVersion(ctx, version, history, c.Name, c.Addr)
 		if err != nil {
 			log.Errorf("fail to online config in cluster(%s),addr is %s,profession is %s,uuid is %s,config is %s", c.Name, c.Addr, profession, name, info.Config)
 			failClusters = append(failClusters, c.Name)
@@ -364,25 +360,29 @@ func (d *dynamicService) ClusterStatus(ctx context.Context, namespaceId int, pro
 			result = append(result, &dynamic_model.DynamicCluster{
 				Name:   c.Name,
 				Title:  c.Name,
-				Status: statusOffline,
+				Status: v2.StatusOffline,
 			})
 			continue
 		}
 
-		client := GetClusterClient(c.Name, c.Addr)
-		info, err := client.Info(profession, name)
+		client, err := v2.GetClusterClient(c.Name, c.Addr)
+		if err != nil {
+			log.Errorf("get cluster status error: %w", err)
+			continue
+		}
+		version, err := client.Version(profession, name)
 		if err != nil {
 			result = append(result, &dynamic_model.DynamicCluster{
 				Name:   c.Name,
 				Title:  c.Name,
-				Status: statusOffline,
+				Status: v2.StatusOffline,
 			})
 			continue
 		}
-		status := statusOffline
-		if info.BasicInfo.Version == moduleInfo.Version {
-			status = statusOnline
-			online = true
+		online = true
+		status := v2.StatusPre
+		if version == moduleInfo.Version {
+			status = v2.StatusOnline
 
 		}
 		updater := ""
@@ -460,7 +460,7 @@ func (d *dynamicService) Delete(ctx context.Context, namespaceId int, profession
 	return err
 }
 
-func (d *dynamicService) saveVersion(ctx context.Context, version *dynamic_entry.DynamicPublishVersion, history *dynamic_entry.DynamicPublishHistory, client v2.IClient) error {
+func (d *dynamicService) saveVersion(ctx context.Context, version *dynamic_entry.DynamicPublishVersion, history *dynamic_entry.DynamicPublishHistory, cluster string, addr string) error {
 	return d.publishVersionStore.Transaction(ctx, func(txCtx context.Context) error {
 		var err error
 		if err = d.publishVersionStore.Save(txCtx, version); err != nil {
@@ -473,7 +473,7 @@ func (d *dynamicService) saveVersion(ctx context.Context, version *dynamic_entry
 				return err
 			}
 			if history.OptType == 1 {
-				return client.Set(history.Publish.Profession, history.Publish.Name, &v2.WorkerInfo[v2.BasicInfo]{
+				return v2.Online(cluster, addr, history.Publish.Profession, history.Publish.Name, &v2.WorkerInfo[v2.BasicInfo]{
 					BasicInfo: &v2.BasicInfo{
 						Profession:  version.Publish.BasicInfo.Profession,
 						Name:        version.Publish.BasicInfo.Name,
@@ -484,7 +484,7 @@ func (d *dynamicService) saveVersion(ctx context.Context, version *dynamic_entry
 					Append: version.Publish.Append,
 				})
 			} else if history.OptType == 3 {
-				return client.Delete(history.Publish.Profession, history.Publish.Name)
+				return v2.Offline(cluster, addr, history.Publish.Profession, history.Publish.Name)
 			}
 
 		}
