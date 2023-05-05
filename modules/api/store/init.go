@@ -11,10 +11,12 @@ func InitStoreDB(db store.IDB) {
 	apiRuntime := NewApiRuntimeStore(db)
 	apiVersion := newAPIVersionStore(db)
 	apiHistory := newApiHistoryStore(db)
+	apiPublishHistory := newApiPublishHistoryStore(db)
 
 	bean.Injection(&api)
 	bean.Injection(&apiStat)
 	bean.Injection(&apiRuntime)
 	bean.Injection(&apiVersion)
 	bean.Injection(&apiHistory)
+	bean.Injection(&apiPublishHistory)
 }
