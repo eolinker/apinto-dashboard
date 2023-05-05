@@ -83,13 +83,11 @@ export class IframePageComponent implements OnInit {
    // changeUrl=true时，表示传入的url是已经处理好的，不需要再根据router.url拼接。暂时用在面包屑场景
   showIframe = (id: any, url: any, initData: any, noChangeUrl?:boolean) => {
     const createIframe = (id: string, url: string) => {
-      console.log(url)
       const iframe = document.createElement('iframe')
-      console.log(iframe)
       iframe.id = id
       iframe.width = '100%'
       iframe.height = '100%'
-      iframe.src = 'http://localhost:5555' || url
+      iframe.src = url
       iframe.onload = () => {
         this.start = true
       }
