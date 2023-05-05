@@ -1,7 +1,12 @@
 package dynamic_controller
 
 import (
+	"context"
 	"fmt"
+	v2 "github.com/eolinker/apinto-dashboard/client/v2"
+	"github.com/eolinker/apinto-dashboard/modules/dynamic"
+	"github.com/eolinker/eosc/common/bean"
+	"github.com/eolinker/eosc/log"
 	"net/http"
 
 	"github.com/eolinker/apinto-module"
@@ -53,9 +58,30 @@ func (d *DynamicModulePlugin) CheckConfig(name string, config interface{}) error
 }
 
 type DynamicModule struct {
-	name    string
-	define  interface{}
-	routers apinto_module.RoutersInfo
+	name           string
+	define         interface{}
+	routers        apinto_module.RoutersInfo
+	profession     string
+	skill          string
+	dynamicService dynamic.IDynamicService
+}
+
+func (c *DynamicModule) Provider() map[string]apinto_module.Provider {
+	return map[string]apinto_module.Provider{
+		c.skill: newSkillProvider(c.profession, c.skill),
+	}
+}
+func (c *DynamicModule) Status(key string, namespaceId int, cluster string) apinto_module.CargoStatus {
+	status, err := c.dynamicService.ClusterStatusByClusterName(context.Background(), namespaceId, c.profession, key, cluster)
+	if err != nil {
+		log.Error(err)
+		return apinto_module.None
+	}
+	if status.Status == v2.StatusOnline || status.Status == v2.StatusPre {
+		return apinto_module.Online
+	}
+	return apinto_module.Offline
+
 }
 
 func (c *DynamicModule) Name() string {
@@ -63,7 +89,7 @@ func (c *DynamicModule) Name() string {
 }
 
 func (c *DynamicModule) Support() (apinto_module.ProviderSupport, bool) {
-	return nil, false
+	return c, true
 }
 
 func (c *DynamicModule) Routers() (apinto_module.Routers, bool) {
@@ -76,6 +102,7 @@ func (c *DynamicModule) Middleware() (apinto_module.Middleware, bool) {
 
 func NewDynamicModule(name string, define interface{}) *DynamicModule {
 	dm := &DynamicModule{name: name, define: define}
+	bean.Autowired(&dm.dynamicService)
 	dm.initRouter()
 	return dm
 }
@@ -84,65 +111,67 @@ func (c *DynamicModule) RoutersInfo() apinto_module.RoutersInfo {
 	return c.routers
 }
 func (c *DynamicModule) initRouter() {
-	dynamicController := newDynamicController(c.name, c.define)
+	dc := newDynamicController(c.name, c.define)
+	c.profession = dc.Profession
+	c.skill = dc.Skill
 	c.routers = []apinto_module.RouterInfo{
 		{
 			Method:      http.MethodGet,
 			Path:        fmt.Sprintf("/api/dynamic/%s/list", c.name),
 			Handler:     "dynamic.list",
-			HandlerFunc: []apinto_module.HandlerFunc{dynamicController.list},
+			HandlerFunc: []apinto_module.HandlerFunc{dc.list},
 		},
 		{
 			Method:      http.MethodGet,
 			Path:        fmt.Sprintf("/api/dynamic/%s/info/:uuid", c.name),
 			Handler:     "dynamic.info",
-			HandlerFunc: []apinto_module.HandlerFunc{dynamicController.info},
+			HandlerFunc: []apinto_module.HandlerFunc{dc.info},
 		},
 		{
 			Method:      http.MethodGet,
 			Path:        fmt.Sprintf("/api/dynamic/%s/render", c.name),
 			Handler:     "dynamic.render",
-			HandlerFunc: []apinto_module.HandlerFunc{dynamicController.render},
+			HandlerFunc: []apinto_module.HandlerFunc{dc.render},
 		},
 		{
 			Method:      http.MethodGet,
 			Path:        fmt.Sprintf("/api/dynamic/%s/cluster/:uuid", c.name),
 			Handler:     "dynamic.cluster_status",
-			HandlerFunc: []apinto_module.HandlerFunc{dynamicController.clusterStatus},
+			HandlerFunc: []apinto_module.HandlerFunc{dc.clusterStatus},
 		},
 		{
 			Method:      http.MethodGet,
 			Path:        fmt.Sprintf("/api/dynamic/%s/status", c.name),
 			Handler:     "dynamic.cluster_statuses",
-			HandlerFunc: []apinto_module.HandlerFunc{dynamicController.clusterStatusList},
+			HandlerFunc: []apinto_module.HandlerFunc{dc.clusterStatusList},
 		},
 		{
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("/api/dynamic/%s/batch", c.name),
 			Handler:     "dynamic.delete",
-			HandlerFunc: []apinto_module.HandlerFunc{dynamicController.batchDelete},
+			HandlerFunc: []apinto_module.HandlerFunc{dc.batchDelete},
 		}, {
 			Method:      http.MethodPost,
 			Path:        fmt.Sprintf("/api/dynamic/%s", c.name),
 			Handler:     "dynamic.save",
-			HandlerFunc: []apinto_module.HandlerFunc{dynamicController.create},
+			HandlerFunc: []apinto_module.HandlerFunc{dc.create},
 		}, {
 			Method:      http.MethodPut,
 			Path:        fmt.Sprintf("/api/dynamic/%s/config/:uuid", c.name),
 			Handler:     "dynamic.save",
-			HandlerFunc: []apinto_module.HandlerFunc{dynamicController.save},
+			HandlerFunc: []apinto_module.HandlerFunc{dc.save},
 		},
 		{
 			Method:      http.MethodPut,
 			Path:        fmt.Sprintf("/api/dynamic/%s/online/:uuid", c.name),
 			Handler:     "dynamic.online",
-			HandlerFunc: []apinto_module.HandlerFunc{dynamicController.online},
+			HandlerFunc: []apinto_module.HandlerFunc{dc.online},
 		},
 		{
 			Method:      http.MethodPut,
 			Path:        fmt.Sprintf("/api/dynamic/%s/offline/:uuid", c.name),
 			Handler:     "dynamic.offline",
-			HandlerFunc: []apinto_module.HandlerFunc{dynamicController.offline},
+			HandlerFunc: []apinto_module.HandlerFunc{dc.offline},
 		},
 	}
 }
