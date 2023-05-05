@@ -349,6 +349,8 @@ func (d *dynamicService) ClusterStatus(ctx context.Context, namespaceId int, pro
 	result := make([]*dynamic_model.DynamicCluster, 0, len(clusters))
 	online := false
 	for _, c := range clusters {
+		var operator int
+		var updateTime string
 		v, err := d.publishHistoryStore.First(ctx, map[string]interface{}{
 			"namespace":    namespaceId,
 			"cluster":      c.Id,
@@ -357,12 +359,18 @@ func (d *dynamicService) ClusterStatus(ctx context.Context, namespaceId int, pro
 			"kind":         "dynamic_module",
 		})
 		if err != nil {
-			result = append(result, &dynamic_model.DynamicCluster{
-				Name:   c.Name,
-				Title:  c.Name,
-				Status: v2.StatusOffline,
-			})
-			continue
+			if err != gorm.ErrRecordNotFound {
+				result = append(result, &dynamic_model.DynamicCluster{
+					Name:   c.Name,
+					Title:  c.Name,
+					Status: v2.StatusOffline,
+				})
+				continue
+			}
+			// 可能存在id不相同，但是控制台已经发布的情况
+		} else {
+			operator = v.Operator
+			updateTime = v.CreateTime.Format("2006-01-02 15:04:05")
 		}
 
 		client, err := v2.GetClusterClient(c.Name, c.Addr)
@@ -386,16 +394,19 @@ func (d *dynamicService) ClusterStatus(ctx context.Context, namespaceId int, pro
 
 		}
 		updater := ""
-		u, err := d.userService.GetUserInfo(ctx, v.Operator)
-		if err == nil {
-			updater = u.UserName
+		if operator > 0 {
+			u, err := d.userService.GetUserInfo(ctx, operator)
+			if err == nil {
+				updater = u.UserName
+			}
 		}
+
 		result = append(result, &dynamic_model.DynamicCluster{
 			Name:       c.Name,
 			Title:      c.Name,
 			Status:     status,
 			Updater:    updater,
-			UpdateTime: v.CreateTime.Format("2006-01-02 15:04:05"),
+			UpdateTime: updateTime,
 		})
 	}
 	return &dynamic_model.DynamicBasicInfo{
