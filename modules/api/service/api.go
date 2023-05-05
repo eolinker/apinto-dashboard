@@ -804,10 +804,6 @@ func (a *apiService) DeleteAPI(ctx context.Context, namespaceId, operator int, u
 			return err
 		}
 
-		if _, err = a.apiRuntime.DeleteWhere(txCtx, delMap); err != nil {
-			return err
-		}
-
 		if err = a.apiHistory.HistoryDelete(txCtx, namespaceId, apiInfo.Id, &OldValue, operator); err != nil {
 			return err
 		}
@@ -1843,6 +1839,7 @@ func (a *apiService) GetImportCheckList(ctx context.Context, namespaceId int, fi
 		return items[i].Status > items[j].Status
 	})
 
+	t := time.Now()
 	redisDataItems := make([]*apimodel.ImportAPIRedisDataItem, 0)
 	for i, item := range items {
 		item.Id = i + 1
@@ -1856,6 +1853,8 @@ func (a *apiService) GetImportCheckList(ctx context.Context, namespaceId int, fi
 			UUID:             uuid.New(),
 			GroupUUID:        groupID,
 			Name:             item.Name,
+			Scheme:           DriverApiHTTP,
+			Version:          common.GenVersion(t),
 			RequestPath:      common.ReplaceRestfulPath(item.Path, enum.RestfulLabel),
 			RequestPathLabel: item.Path,
 			SourceType:       enum.SourceImport,
@@ -1985,10 +1984,12 @@ func (a *apiService) ImportAPI(ctx context.Context, namespaceId, operator int, i
 				ApiID:       apiInfo.Id,
 				NamespaceID: namespaceId,
 				APIVersionConfig: apientry.APIVersionConfig{
+					Scheme:           apiInfo.Scheme,
 					RequestPath:      apiInfo.RequestPath,
 					RequestPathLabel: apiInfo.RequestPathLabel,
 					ServiceID:        serviceID,
 					ServiceName:      apiData.ServiceName,
+					Hosts:            []string{},
 					Method:           apiInfo.Method,
 					ProxyPath:        apiInfo.RequestPathLabel,
 					Timeout:          10000,
