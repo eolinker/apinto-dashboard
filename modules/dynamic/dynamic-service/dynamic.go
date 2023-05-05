@@ -341,7 +341,7 @@ func (d *dynamicService) ClusterStatusByClusterName(ctx context.Context, namespa
 	if err != nil {
 		return nil, err
 	}
-	c, err := d.clusterService.GetByNamespaceByName(ctx, namespaceId, name)
+	c, err := d.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
 	if err != nil {
 		return nil, err
 	}
