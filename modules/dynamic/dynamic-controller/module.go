@@ -3,25 +3,31 @@ package dynamic_controller
 import (
 	"context"
 	"fmt"
+	"net/http"
+
 	v2 "github.com/eolinker/apinto-dashboard/client/v2"
 	"github.com/eolinker/apinto-dashboard/modules/dynamic"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
-	"net/http"
 
 	"github.com/eolinker/apinto-module"
 )
 
 type DynamicModuleDriver struct {
+	pluginVisible bool
+	showServer    bool
+	canUninstall  bool
+	canDisable    bool
 }
 
-func NewDynamicModuleDriver() apinto_module.Driver {
-	return &DynamicModuleDriver{}
+func NewDynamicModuleDriver(pluginVisible bool, showServer bool, canUninstall bool, canDisable bool) *DynamicModuleDriver {
+	return &DynamicModuleDriver{pluginVisible: pluginVisible, showServer: showServer, canUninstall: canUninstall, canDisable: canDisable}
 }
 
 func (c *DynamicModuleDriver) CreatePlugin(define interface{}) (apinto_module.Plugin, error) {
 	return &DynamicModulePlugin{
-		define: define,
+		DynamicModuleDriver: c,
+		define:              define,
 	}, nil
 }
 
@@ -30,22 +36,23 @@ func (c *DynamicModulePlugin) GetPluginFrontend(moduleName string) string {
 }
 
 func (c *DynamicModulePlugin) IsPluginVisible() bool {
-	return true
+	return c.pluginVisible
 }
 
 func (c *DynamicModulePlugin) IsShowServer() bool {
-	return false
+	return c.showServer
 }
 
 func (c *DynamicModulePlugin) IsCanUninstall() bool {
-	return true
+	return c.canUninstall
 }
 
 func (c *DynamicModulePlugin) IsCanDisable() bool {
-	return true
+	return c.canDisable
 }
 
 type DynamicModulePlugin struct {
+	*DynamicModuleDriver
 	define interface{}
 }
 
