@@ -2,11 +2,9 @@ package local
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/controller"
 	apinto_module "github.com/eolinker/apinto-module"
-	"github.com/eolinker/eosc/log"
 	"github.com/gin-gonic/gin"
 	"io"
 	"net/http"
@@ -87,30 +85,8 @@ func (p *ProxyAPi) proxyApiHandler(name, method, path string) gin.HandlerFunc {
 		responseData, _ := io.ReadAll(response.Body)
 		response.Body.Close()
 
-		responseHeader := response.Header
+		apinto_module.ReSetHeaderFromProxyResponse(response.Header, ginCtx)
 		contentType := response.Header.Get("content-type")
-		for k, vs := range responseHeader {
-			switch k {
-			case "Apinto-Event":
-				for _, v := range vs {
-					if len(v) > 0 {
-						eventObjs := make(map[string]any)
-						if errError := json.Unmarshal([]byte(v), &eventObjs); errError == nil {
-							for event, ev := range eventObjs {
-								apinto_module.DoEvent(event, ev)
-							}
-						} else {
-							log.Warnf("invalid event for :%s.%s on %s %s", p.module, name, method, targetPath)
-						}
-					}
-				}
-			default:
-				for _, v := range vs {
-					ginCtx.Writer.Header().Add(k, v)
-				}
-
-			}
-		}
 		ginCtx.Data(response.StatusCode, contentType, responseData)
 	}
 }
