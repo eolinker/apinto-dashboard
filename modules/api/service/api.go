@@ -526,6 +526,7 @@ func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator in
 			GroupUUID:        input.GroupUUID,
 			Scheme:           input.Scheme,
 			Name:             input.ApiName,
+			IsDisable:        input.IsDisable,
 			RequestPath:      input.RequestPath,
 			RequestPathLabel: input.RequestPathLabel,
 			SourceType:       enum.SourceSelfBuild,
@@ -547,6 +548,7 @@ func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator in
 			NamespaceID: namespaceID,
 			APIVersionConfig: apientry.APIVersionConfig{
 				Scheme:           input.Scheme,
+				IsDisable:        input.IsDisable,
 				RequestPath:      input.RequestPath,
 				RequestPathLabel: input.RequestPathLabel,
 				ServiceID:        serviceID,
@@ -663,6 +665,7 @@ func (a *apiService) UpdateAPI(ctx context.Context, namespaceID int, operator in
 	apiInfo.Desc = input.Desc
 	apiInfo.GroupUUID = input.GroupUUID
 	apiInfo.Name = input.ApiName
+	apiInfo.IsDisable = input.IsDisable
 	apiInfo.RequestPath = input.RequestPath
 	apiInfo.RequestPathLabel = input.RequestPathLabel
 	apiInfo.Operator = operator
@@ -677,6 +680,7 @@ func (a *apiService) UpdateAPI(ctx context.Context, namespaceID int, operator in
 
 		latestVersionConfig := apientry.APIVersionConfig{
 			Scheme:           input.Scheme,
+			IsDisable:        input.IsDisable,
 			RequestPath:      input.RequestPath,
 			RequestPathLabel: input.RequestPathLabel,
 			ServiceID:        serviceID,
@@ -974,7 +978,7 @@ func (a *apiService) online(ctx context.Context, namespaceId, operator int, api 
 		err = a.apiStore.Transaction(ctx, func(txCtx context.Context) error {
 			//封装router配置
 			apiDriverInfo := a.GetAPIDriver(api.Scheme)
-			routerConfig := apiDriverInfo.ToApinto(api.UUID, api.Desc, false, latest.Method, latest.RequestPath, latest.RequestPathLabel, latest.ProxyPath, strings.ToLower(latest.ServiceName), latest.Timeout, latest.Retry, latest.Hosts, latest.Match, latest.Header, latest.TemplateUUID)
+			routerConfig := apiDriverInfo.ToApinto(api.UUID, api.Desc, api.IsDisable, latest.Method, latest.RequestPath, latest.RequestPathLabel, latest.ProxyPath, strings.ToLower(latest.ServiceName), latest.Timeout, latest.Retry, latest.Hosts, latest.Match, latest.Header, latest.TemplateUUID)
 
 			publishHistory := &apientry.ApiPublishHistory{
 				VersionName:      api.Version,
@@ -1231,7 +1235,7 @@ func (a *apiService) BatchOnlineCheck(ctx context.Context, namespaceId int, oper
 				Status:          true,
 				Solution:        &frontend_model.Router{},
 			}
-
+			//TODO
 			if isOnline := a.service.IsOnline(ctx, clusterInfo.Id, serviceID); !isOnline {
 				isAllOnline = false
 				item.Status = false
@@ -1250,6 +1254,7 @@ func (a *apiService) BatchOnlineCheck(ctx context.Context, namespaceId int, oper
 				Status:          true,
 				Solution:        &frontend_model.Router{},
 			}
+			//TODO
 			isOnline, err := a.pluginTemplateService.IsOnline(ctx, clusterInfo.Id, templateUuid)
 			if err != nil {
 				return nil, "", err
@@ -1442,7 +1447,7 @@ func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, u
 
 		//事务
 		err = a.apiStore.Transaction(ctx, func(txCtx context.Context) error {
-			routerConfig := apiDriverInfo.ToApinto(apiInfo.UUID, apiInfo.Desc, false, latestVersion.Method, latestVersion.RequestPath, latestVersion.RequestPathLabel, latestVersion.ProxyPath, strings.ToLower(latestVersion.ServiceName), latestVersion.Timeout, latestVersion.Retry, latestVersion.Hosts, latestVersion.Match, latestVersion.Header, latestVersion.TemplateUUID)
+			routerConfig := apiDriverInfo.ToApinto(apiInfo.UUID, apiInfo.Desc, apiInfo.IsDisable, latestVersion.Method, latestVersion.RequestPath, latestVersion.RequestPathLabel, latestVersion.ProxyPath, strings.ToLower(latestVersion.ServiceName), latestVersion.Timeout, latestVersion.Retry, latestVersion.Hosts, latestVersion.Match, latestVersion.Header, latestVersion.TemplateUUID)
 			publishHistory := &apientry.ApiPublishHistory{
 				VersionName:      apiInfo.Version,
 				ClusterId:        clusterInfo.Id,
@@ -1985,6 +1990,7 @@ func (a *apiService) ImportAPI(ctx context.Context, namespaceId, operator int, i
 				NamespaceID: namespaceId,
 				APIVersionConfig: apientry.APIVersionConfig{
 					Scheme:           apiInfo.Scheme,
+					IsDisable:        false,
 					RequestPath:      apiInfo.RequestPath,
 					RequestPathLabel: apiInfo.RequestPathLabel,
 					ServiceID:        serviceID,

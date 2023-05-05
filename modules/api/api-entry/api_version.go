@@ -13,6 +13,7 @@ type APIVersion struct {
 
 type APIVersionConfig struct {
 	Scheme           string   `json:"scheme"`
+	IsDisable        bool     `json:"is_disable"`
 	RequestPath      string   `json:"request_path"`
 	RequestPathLabel string   `json:"request_path_label"`
 	ServiceID        int      `json:"service_id"`
