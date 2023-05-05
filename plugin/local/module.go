@@ -7,16 +7,11 @@ import (
 type tModule struct {
 	name              string
 	middlewareHandler []apinto_module.MiddlewareHandler
-	provider          map[string]apinto_module.Provider
 	routersInfo       apinto_module.RoutersInfo
 }
 
 func (m *tModule) RoutersInfo() apinto_module.RoutersInfo {
 	return m.routersInfo
-}
-
-func (m *tModule) Provider() map[string]apinto_module.Provider {
-	return m.provider
 }
 
 func (m *tModule) MiddlewaresInfo() []apinto_module.MiddlewareHandler {
@@ -42,8 +37,7 @@ func (m *tModule) Middleware() (apinto_module.Middleware, bool) {
 }
 
 func (m *tModule) Support() (apinto_module.ProviderSupport, bool) {
-	if len(m.provider) == 0 {
-		return nil, false
-	}
-	return m, true
+
+	return nil, false
+
 }

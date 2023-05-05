@@ -6,7 +6,6 @@ import (
 
 	apinto_module "github.com/eolinker/apinto-module"
 
-	"github.com/eolinker/apinto-dashboard/client/v2"
 	"github.com/eolinker/apinto-dashboard/modules/dynamic"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
@@ -38,17 +37,4 @@ func (s *skillProvider) Provide(namespaceID int) []apinto_module.Cargo {
 		})
 	}
 	return result
-}
-
-func (s *skillProvider) Status(key string, namespaceId int, cluster string) apinto_module.CargoStatus {
-	status, err := s.dynamicService.ClusterStatusByClusterName(context.Background(), namespaceId, s.profession, key, cluster)
-	if err != nil {
-		log.Error(err)
-		return apinto_module.None
-	}
-	if status.Status == v2.StatusOnline || status.Status == v2.StatusPre {
-		return apinto_module.Online
-	}
-	return apinto_module.Offline
-
 }
