@@ -13,6 +13,8 @@ import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { IntelligentPluginEditComponent } from './IntelligentPluginEditComponent'
 import { SelectOption } from 'eo-ng-select'
+import axios from 'axios'
+import { action } from '@formily/reactive'
 
 const containerElementName = 'customReactComponentContainer'
 
@@ -106,6 +108,19 @@ export class CustomReactComponentWrapperComponent {
             wrapperCol: 10
           },
           'x-component': 'Input'
+        },
+        scheme: {
+          title: '请求协议',
+          'x-decorator': 'FormItem',
+          'x-component': 'Select',
+          'x-validator': [],
+          'x-component-props': {},
+          'x-decorator-props': {},
+          required: true,
+          default: 'HTTP',
+          'x-reactions': ['{{useAsyncDataSource(getDiscovery,"service")}}'],
+          name: 'scheme',
+          'x-index': 0
         }
       }
     }
@@ -142,6 +157,7 @@ export class CustomReactComponentWrapperComponent {
   reactComponent: React.RefObject<any> = React.createRef()
   constructor() {
     this.handleDivClicked = this.handleDivClicked.bind(this)
+    console.log(this)
   }
 
   public handleDivClicked() {
