@@ -10,18 +10,17 @@ import (
 	"strings"
 )
 
-type randomController struct {
+type RandomController struct {
 	randomService random.IRandomService
 }
 
-func RegisterRandomRouter(router gin.IRoutes) {
-	r := &randomController{}
+func NewRandomController() *RandomController {
+	r := &RandomController{}
 	bean.Autowired(&r.randomService)
-
-	router.GET("/random/:template/id", r.get)
+	return r
 }
 
-func (r *randomController) get(ginCtx *gin.Context) {
+func (r *RandomController) GET(ginCtx *gin.Context) {
 	template := ginCtx.Param("template")
 	randomStr := r.randomService.RandomStr(template)
 	m := common.Map[string, interface{}]{}
