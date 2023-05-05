@@ -156,10 +156,5 @@ func checkInput(input *api_dto.APIInfo) error {
 		}
 	}
 
-	// websocket是http driver下才用，其它driver置为false
-	if input.Scheme != "http" {
-		input.EnableWebsocket = false
-	}
-
 	return nil
 }
