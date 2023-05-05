@@ -353,7 +353,7 @@ func (a *apiController) batchOnline(ginCtx *gin.Context) {
 
 	batchOnlineList, err := a.apiService.BatchOnline(ginCtx, namespaceId, userId, input.OnlineToken)
 	if err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("BatchOnline Apis fail. err:%s", err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("批量上线失败. err:%s", err.Error()))
 		return
 	}
 
@@ -394,7 +394,7 @@ func (a *apiController) batchOffline(ginCtx *gin.Context) {
 
 	batchOfflineList, err := a.apiService.BatchOffline(ginCtx, namespaceId, userId, input.ApiUUIDs, input.ClusterNames)
 	if err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("BatchOffline Apis fail. err:%s", err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("批量下线API失败. err:%s", err.Error()))
 		return
 	}
 
