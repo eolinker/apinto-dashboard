@@ -54,6 +54,7 @@ import { EoNgCodeboxModule } from 'eo-ng-codebox'
 import { UserAvatarComponent } from './user-avatar/user-avatar.component'
 import { ResetPswComponent } from './reset-psw/reset-psw.component'
 import { UserProfileComponent } from './user-profile/user-profile.component'
+import { SimpleMapComponentWrapperComponent } from './formily2-react/component/simple-map/SimpleMapComponentWrapper'
 @NgModule({
   declarations: [
     EditableEnvTableComponent,
@@ -67,6 +68,7 @@ import { UserProfileComponent } from './user-profile/user-profile.component'
     Formily2ReactComponent,
     CustomReactComponentWrapperComponent,
     CustomCodeboxReactComponentWrapperComponent,
+    SimpleMapComponentWrapperComponent,
     IntelligentPluginLayoutComponent,
     IntelligentPluginListComponent,
     IntelligentPluginPublishComponent,
