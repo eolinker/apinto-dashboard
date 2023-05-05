@@ -39,7 +39,7 @@ type IAPIService interface {
 	BatchOnlineCheck(ctx context.Context, namespaceId int, operator int, apiUUIDs, clusterNames []string) ([]*apimodel.BatchOnlineCheckListItem, string, error)
 
 	OnlineList(ctx context.Context, namespaceId int, uuid string) ([]*apimodel.APIOnlineListItem, error)
-	OnlineAPI(ctx context.Context, namespaceId, operator int, uuid, clusterName string) (*frontend_model.Router, error)
+	OnlineAPI(ctx context.Context, namespaceId, operator int, uuid string, clusterNames []string) (*frontend_model.Router, error)
 	OfflineAPI(ctx context.Context, namespaceId, operator int, uuid, clusterName string) error
 	EnableAPI(ctx context.Context, namespaceId, operator int, uuid, clusterName string) error
 	DisableAPI(ctx context.Context, namespaceId, operator int, uuid, clusterName string) error
