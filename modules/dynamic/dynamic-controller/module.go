@@ -1,7 +1,12 @@
 package dynamic_controller
 
 import (
+	"context"
 	"fmt"
+	v2 "github.com/eolinker/apinto-dashboard/client/v2"
+	"github.com/eolinker/apinto-dashboard/modules/dynamic"
+	"github.com/eolinker/eosc/common/bean"
+	"github.com/eolinker/eosc/log"
 	"net/http"
 
 	"github.com/eolinker/apinto-module"
@@ -53,17 +58,30 @@ func (d *DynamicModulePlugin) CheckConfig(name string, config interface{}) error
 }
 
 type DynamicModule struct {
-	name       string
-	define     interface{}
-	routers    apinto_module.RoutersInfo
-	profession string
-	skill      string
+	name           string
+	define         interface{}
+	routers        apinto_module.RoutersInfo
+	profession     string
+	skill          string
+	dynamicService dynamic.IDynamicService
 }
 
 func (c *DynamicModule) Provider() map[string]apinto_module.Provider {
 	return map[string]apinto_module.Provider{
 		c.skill: newSkillProvider(c.profession, c.skill),
 	}
+}
+func (c *DynamicModule) Status(key string, namespaceId int, cluster string) apinto_module.CargoStatus {
+	status, err := c.dynamicService.ClusterStatusByClusterName(context.Background(), namespaceId, c.profession, key, cluster)
+	if err != nil {
+		log.Error(err)
+		return apinto_module.None
+	}
+	if status.Status == v2.StatusOnline || status.Status == v2.StatusPre {
+		return apinto_module.Online
+	}
+	return apinto_module.Offline
+
 }
 
 func (c *DynamicModule) Name() string {
@@ -84,6 +102,7 @@ func (c *DynamicModule) Middleware() (apinto_module.Middleware, bool) {
 
 func NewDynamicModule(name string, define interface{}) *DynamicModule {
 	dm := &DynamicModule{name: name, define: define}
+	bean.Autowired(&dm.dynamicService)
 	dm.initRouter()
 	return dm
 }
