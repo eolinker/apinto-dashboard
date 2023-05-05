@@ -13,7 +13,7 @@ define:  # 动态模块定义
   drivers:
     - name: redis
       title: Redis
-  skill: Access-Output
+  skill: Cache
   fields:
     - name: title           # 定义从响应中对应字段中获取显示值
       title: 名称
