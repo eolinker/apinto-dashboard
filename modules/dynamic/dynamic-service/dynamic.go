@@ -53,7 +53,7 @@ func (d *dynamicService) GetBySkill(ctx context.Context, namespaceId int, skill 
 	data := make([]*dynamic_model.DynamicBasicInfo, 0, len(list))
 	for _, l := range list {
 		data = append(data, &dynamic_model.DynamicBasicInfo{
-			ID:          l.Skill,
+			ID:          l.Name,
 			Title:       l.Title,
 			Driver:      l.Driver,
 			Description: l.Description,
@@ -332,6 +332,42 @@ func (d *dynamicService) Offline(ctx context.Context, namespaceId int, professio
 	return successClusters, failClusters, nil
 }
 
+func (d *dynamicService) ClusterStatusByClusterName(ctx context.Context, namespaceId int, profession, name string, clusterName string) (*dynamic_model.DynamicCluster, error) {
+	moduleInfo, err := d.dynamicStore.First(ctx, map[string]interface{}{
+		"namespace":  namespaceId,
+		"profession": profession,
+		"name":       name,
+	})
+	if err != nil {
+		return nil, err
+	}
+	c, err := d.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
+	if err != nil {
+		return nil, err
+	}
+	client, err := v2.GetClusterClient(c.Name, c.Addr)
+	if err != nil {
+		return nil, fmt.Errorf("get cluster status error: %w", err)
+	}
+	version, err := client.Version(profession, name)
+	if err != nil {
+		return &dynamic_model.DynamicCluster{
+			Name:   c.Name,
+			Title:  c.Title,
+			Status: v2.StatusOffline,
+		}, err
+	}
+	status := v2.StatusPre
+	if version == moduleInfo.Version {
+		status = v2.StatusOnline
+	}
+	return &dynamic_model.DynamicCluster{
+		Name:   c.Name,
+		Title:  c.Title,
+		Status: status,
+	}, err
+}
+
 func (d *dynamicService) ClusterStatus(ctx context.Context, namespaceId int, profession, name string) (*dynamic_model.DynamicBasicInfo, []*dynamic_model.DynamicCluster, error) {
 	moduleInfo, err := d.dynamicStore.First(ctx, map[string]interface{}{
 		"namespace":  namespaceId,
@@ -362,7 +398,7 @@ func (d *dynamicService) ClusterStatus(ctx context.Context, namespaceId int, pro
 			if err != gorm.ErrRecordNotFound {
 				result = append(result, &dynamic_model.DynamicCluster{
 					Name:   c.Name,
-					Title:  c.Name,
+					Title:  c.Title,
 					Status: v2.StatusOffline,
 				})
 				continue
@@ -382,7 +418,7 @@ func (d *dynamicService) ClusterStatus(ctx context.Context, namespaceId int, pro
 		if err != nil {
 			result = append(result, &dynamic_model.DynamicCluster{
 				Name:   c.Name,
-				Title:  c.Name,
+				Title:  c.Title,
 				Status: v2.StatusOffline,
 			})
 			continue
@@ -403,7 +439,7 @@ func (d *dynamicService) ClusterStatus(ctx context.Context, namespaceId int, pro
 
 		result = append(result, &dynamic_model.DynamicCluster{
 			Name:       c.Name,
-			Title:      c.Name,
+			Title:      c.Title,
 			Status:     status,
 			Updater:    updater,
 			UpdateTime: updateTime,
