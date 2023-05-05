@@ -23,11 +23,11 @@ import { BaseInfoService } from 'projects/core/src/app/service/base-info.service
   ]
 })
 export class DeployClusterContentComponent implements OnInit {
-  @ViewChild('descInput', { read: TemplateRef, static: false }) descInput: TemplateRef<any> | undefined
-  @ViewChild('tab1', { read: TemplateRef, static: true }) tab1: TemplateRef<TabTemplateContext> | string = '环境变量'
-  @ViewChild('tab2', { read: TemplateRef, static: true }) tab2: TemplateRef<TabTemplateContext> | string = '证书管理'
-  @ViewChild('tab3', { read: TemplateRef, static: true }) tab3: TemplateRef<TabTemplateContext> | string = '网关节点'
-  @ViewChild('tab5', { read: TemplateRef, static: true }) tab5: TemplateRef<TabTemplateContext> | string = '插件管理'
+  @ViewChild('tab1', { read: TemplateRef, static: true }) tab1: TemplateRef<TabTemplateContext> | string = '全局变量'
+  @ViewChild('tab2', { read: TemplateRef, static: true }) tab2: TemplateRef<TabTemplateContext> | string = 'SSL证书'
+  @ViewChild('tab3', { read: TemplateRef, static: true }) tab3: TemplateRef<TabTemplateContext> | string = '节点列表'
+  @ViewChild('tab5', { read: TemplateRef, static: true }) tab5: TemplateRef<TabTemplateContext> | string = '节点插件'
+  @ViewChild('tab6', { read: TemplateRef, static: true }) tab6: TemplateRef<TabTemplateContext> | string = '集群管理'
   clusterName:string=''
   clusterDesc:string=''
   _clusterDesc:string=''
@@ -36,8 +36,7 @@ export class DeployClusterContentComponent implements OnInit {
 
   tabOptions:TabsOptions[]=[]
   readonly nowUrl:string = this.router.routerState.snapshot.url
-  constructor (private baseInfo:BaseInfoService,
-     private message: EoNgFeedbackMessageService, private api:ApiService, private router:Router, private activateInfo:ActivatedRoute, private cdRef: ChangeDetectorRef) {
+  constructor (private baseInfo:BaseInfoService, private api:ApiService, private router:Router, private cdRef: ChangeDetectorRef) {
   }
 
   ngOnInit (): void {
@@ -51,6 +50,16 @@ export class DeployClusterContentComponent implements OnInit {
   ngAfterViewInit () {
     this.tabOptions = [
       {
+        title: this.tab3,
+        routerLink: 'nodes',
+        queryParamsHandling: 'merge'
+      },
+      {
+        title: this.tab5,
+        routerLink: 'plugin',
+        queryParamsHandling: 'merge'
+      },
+      {
         title: this.tab1,
         routerLink: '.',
         queryParamsHandling: 'merge'
@@ -61,13 +70,8 @@ export class DeployClusterContentComponent implements OnInit {
         queryParamsHandling: 'merge'
       },
       {
-        title: this.tab3,
-        routerLink: 'nodes',
-        queryParamsHandling: 'merge'
-      },
-      {
-        title: this.tab5,
-        routerLink: 'plugin',
+        title: this.tab6,
+        routerLink: 'message',
         queryParamsHandling: 'merge'
       }
     ]
@@ -96,5 +100,9 @@ export class DeployClusterContentComponent implements OnInit {
       }
     })
     this.disabled = true
+  }
+
+  backToList () {
+    this.router.navigate(['/', 'deploy', 'cluster'])
   }
 }
