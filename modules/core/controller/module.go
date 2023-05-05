@@ -95,20 +95,10 @@ func (m *Module) status(context *gin.Context) {
 		})
 		return
 	}
-	name := context.Param("name")
-	namespaceID := namespace_controller.GetNamespaceId(context)
-	provider, ok := m.providers.Provider(name)
-	if !ok {
-		context.JSON(200, struct {
-			Code string `json:"code"`
-			Msg  string `json:"msg"`
-		}{
-			"200", fmt.Sprintf("not support data for %s", name),
-		})
-		return
-	}
 
-	status := provider.Status(key, namespaceID, cluster)
+	namespaceID := namespace_controller.GetNamespaceId(context)
+
+	status := m.providers.Status(key, namespaceID, cluster)
 
 	context.JSON(200, map[string]interface{}{
 		"code": "00000",
