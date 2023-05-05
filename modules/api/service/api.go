@@ -1138,7 +1138,7 @@ func (a *apiService) online(ctx context.Context, namespaceId, operator int, api 
 
 			//封装router配置
 			apiDriverInfo := a.GetAPIDriver(api.Scheme)
-			routerConfig := apiDriverInfo.ToApinto(api.UUID, api.Desc, false, latest.Method, latest.RequestPath, latest.RequestPathLabel, latest.ProxyPath, strings.ToLower(latest.ServiceName), latest.Timeout, latest.Retry, latest.EnableWebsocket, latest.Match, latest.Header, latest.TemplateUUID)
+			routerConfig := apiDriverInfo.ToApinto(api.UUID, api.Desc, false, latest.Method, latest.RequestPath, latest.RequestPathLabel, latest.ProxyPath, strings.ToLower(latest.ServiceName), latest.Timeout, latest.Retry, latest.Hosts, latest.Match, latest.Header, latest.TemplateUUID)
 
 			//未上线
 			if runtime == nil {
@@ -1550,7 +1550,7 @@ func (a *apiService) OnlineList(ctx context.Context, namespaceId int, uuid strin
 	return list, nil
 }
 
-func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, uuid string, clusterNames []string) (*frontend_model.Router, error) {
+func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, uuid string, clusterNames []string) ([]*frontend_model.Router, error) {
 	apiInfo, err := a.apiStore.GetByUUID(ctx, namespaceId, uuid)
 	if err != nil {
 		return nil, err
@@ -1571,7 +1571,7 @@ func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, u
 	t := time.Now()
 
 	//获取当前集群信息
-	clusterInfo, err := a.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterNames)
+	clusterInfos, err := a.clusterService.GetByNames(ctx, namespaceId, clusterNames)
 	if err != nil {
 		return nil, err
 	}
@@ -1581,96 +1581,77 @@ func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, u
 		return nil, err
 	}
 
-	//TODO 判断上游服务有没有上线
-	if !a.service.IsOnline(ctx, clusterInfo.Id, latestVersion.ServiceID) {
-		return &frontend_model.Router{
-			Name:   frontend_model.RouterNameServiceOnline,
-			Params: map[string]string{"service_name": latestVersion.ServiceName},
-		}, errors.New(fmt.Sprintf("绑定的%s未上线到%s", latestVersion.ServiceName, clusterNames))
-	}
-
-	//TODO 判断插件模板有没有上线
-	if latestVersion.TemplateID != 0 {
-		isTemplateOnline, err := a.pluginTemplateService.IsOnline(ctx, clusterInfo.Id, latestVersion.TemplateUUID)
-		if err != nil {
-			return nil, err
-		}
-		if !isTemplateOnline {
-			return &frontend_model.Router{
-				Name:   frontend_model.RouterNameTemplateOnline,
-				Params: map[string]string{"template_uuid": latestVersion.TemplateUUID},
-			}, errors.New(fmt.Sprintf("绑定的插件模板未上线到%s", clusterNames))
-		}
-	}
-
-	//获取当前运行的版本
-	runtime, err := a.apiRuntime.GetForCluster(ctx, apiID, clusterInfo.Id)
-	if err != nil && err != gorm.ErrRecordNotFound {
-		return nil, err
-	}
-
-	//发布到apinto
-	client, err := a.apintoClient.GetClient(ctx, clusterInfo.Id)
-	if err != nil {
-		return nil, err
-	}
-
 	//编写日志操作对象信息
 	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:        uuid,
 		Name:        apiInfo.Name,
-		ClusterId:   clusterInfo.Id,
 		ClusterName: strings.Join(clusterNames, ","),
 		PublishType: 1,
 	})
+	apiDriverInfo := a.GetAPIDriver(apiInfo.Scheme)
 
-	//事务
-	err = a.apiStore.Transaction(ctx, func(txCtx context.Context) error {
+	routerInfos := make([]*frontend_model.Router, 0, len(clusterInfos))
+	for _, clusterInfo := range clusterInfos {
+		//TODO 判断上游服务有没有上线
+		if !a.service.IsOnline(ctx, clusterInfo.Id, latestVersion.ServiceID) {
+			routerInfos = append(routerInfos, &frontend_model.Router{
+				Name:   frontend_model.RouterNameServiceOnline,
+				Params: map[string]string{"service_name": latestVersion.ServiceName},
+				Msg:    fmt.Sprintf("绑定的%s未上线到%s", latestVersion.ServiceName, clusterInfo.Name),
+			})
+			continue
+		}
 
-		apiDriverInfo := a.GetAPIDriver(apiInfo.Scheme)
-		routerConfig := apiDriverInfo.ToApinto(apiInfo.UUID, apiInfo.Desc, false, latestVersion.Method, latestVersion.RequestPath, latestVersion.RequestPathLabel, latestVersion.ProxyPath, strings.ToLower(latestVersion.ServiceName), latestVersion.Timeout, latestVersion.Retry, latestVersion.EnableWebsocket, latestVersion.Match, latestVersion.Header, latestVersion.TemplateUUID)
-		if runtime == nil {
-			runtime = &apientry.APIRuntime{
-				NamespaceId: namespaceId,
-				ApiID:       apiID,
-				ClusterID:   clusterInfo.Id,
-				VersionID:   latestVersion.Id,
-				IsOnline:    true,
-				Disable:     false,
-				Operator:    operator,
-				CreateTime:  t,
-				UpdateTime:  t,
+		//TODO 判断插件模板有没有上线
+		if latestVersion.TemplateID != 0 {
+			isTemplateOnline, err := a.pluginTemplateService.IsOnline(ctx, clusterInfo.Id, latestVersion.TemplateUUID)
+			if err != nil {
+				return nil, err
+			}
+			if !isTemplateOnline {
+				routerInfos = append(routerInfos, &frontend_model.Router{
+					Name:   frontend_model.RouterNameTemplateOnline,
+					Params: map[string]string{"template_uuid": latestVersion.TemplateUUID},
+					Msg:    fmt.Sprintf("绑定的插件模板未上线到%s", clusterInfo.Name),
+				})
+				continue
+			}
+		}
+
+		//发布到apinto
+		client, err := a.apintoClient.GetClient(ctx, clusterInfo.Id)
+		if err != nil {
+			return nil, err
+		}
+
+		//事务
+		err = a.apiStore.Transaction(ctx, func(txCtx context.Context) error {
+			routerConfig := apiDriverInfo.ToApinto(apiInfo.UUID, apiInfo.Desc, false, latestVersion.Method, latestVersion.RequestPath, latestVersion.RequestPathLabel, latestVersion.ProxyPath, strings.ToLower(latestVersion.ServiceName), latestVersion.Timeout, latestVersion.Retry, latestVersion.Hosts, latestVersion.Match, latestVersion.Header, latestVersion.TemplateUUID)
+			publishHistory := &apientry.ApiPublishHistory{
+				VersionName:      apiInfo.Version,
+				ClusterId:        clusterInfo.Id,
+				NamespaceId:      namespaceId,
+				Desc:             apiInfo.Desc,
+				VersionId:        latestVersion.Id,
+				APIVersionConfig: latestVersion.APIVersionConfig,
+				OptType:          1, //上线
+				Operator:         operator,
+				OptTime:          t,
 			}
 
-			if err = a.apiRuntime.Insert(txCtx, runtime); err != nil {
+			if err = a.apiPublishHistory.Insert(txCtx, publishHistory); err != nil {
 				return err
 			}
 			return client.ForRouter().Create(*routerConfig)
-		} else {
-			//保存旧状态
-			isOnline := runtime.IsOnline
-
-			runtime.IsOnline = true
-			runtime.UpdateTime = t
-			runtime.VersionID = latestVersion.Id
-			runtime.Operator = operator
-
-			routerConfig.Disable = runtime.Disable
-
-			if err = a.apiRuntime.Save(txCtx, runtime); err != nil {
-				return err
-			}
-
-			//若原先是下线状态
-			if !isOnline {
-				return client.ForRouter().Create(*routerConfig)
-			}
-
-			return client.ForRouter().Update(apiInfo.UUID+"@router", *routerConfig)
+		})
+		if err != nil {
+			routerInfos = append(routerInfos, &frontend_model.Router{
+				Msg: fmt.Sprintf("api上线到%s失败, err:%s", clusterInfo.Name, err.Error()),
+			})
 		}
-	})
+	}
 
-	return nil, err
+	return routerInfos, nil
 }
 
 func (a *apiService) ResetOnline(ctx context.Context, _, clusterId int) {
@@ -1701,7 +1682,7 @@ func (a *apiService) ResetOnline(ctx context.Context, _, clusterId int) {
 			log.Errorf("apiService-ResetOnline-getVersion versionId=%d, clusterId=%d,err=%d", runtime.VersionID, clusterId, err.Error())
 			continue
 		}
-		routerConfig := a.GetAPIDriver(apiInfo.Scheme).ToApinto(apiInfo.UUID, apiInfo.Desc, false, version.Method, version.RequestPath, version.RequestPathLabel, version.ProxyPath, strings.ToLower(version.ServiceName), version.Timeout, version.Retry, version.EnableWebsocket, version.Match, version.Header, version.TemplateUUID)
+		routerConfig := a.GetAPIDriver(apiInfo.Scheme).ToApinto(apiInfo.UUID, apiInfo.Desc, false, version.Method, version.RequestPath, version.RequestPathLabel, version.ProxyPath, strings.ToLower(version.ServiceName), version.Timeout, version.Retry, version.Hosts, version.Match, version.Header, version.TemplateUUID)
 
 		if err = client.ForRouter().Create(*routerConfig); err != nil {
 			log.Errorf("apiService-ResetOnline-apintoCreate routerConfig=%d, clusterId=%d,err=%d", routerConfig, clusterId, err.Error())
@@ -1710,71 +1691,85 @@ func (a *apiService) ResetOnline(ctx context.Context, _, clusterId int) {
 	}
 }
 
-func (a *apiService) OfflineAPI(ctx context.Context, namespaceId, operator int, uuid, clusterName string) error {
+func (a *apiService) OfflineAPI(ctx context.Context, namespaceId, operator int, uuid string, clusterNames []string) ([]*apimodel.BatchListItem, error) {
 	apiInfo, err := a.apiStore.GetByUUID(ctx, namespaceId, uuid)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	err = a.lockService.Lock(locker_service.LockNameAPI, apiInfo.Id)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer a.lockService.Unlock(locker_service.LockNameAPI, apiInfo.Id)
 
 	apiInfo, err = a.apiStore.GetByUUID(ctx, namespaceId, uuid)
 	if err != nil {
-		return err
+		return nil, err
+	}
+
+	latestVersion, err := a.GetLatestAPIVersion(ctx, apiInfo.Id)
+	if err != nil {
+		return nil, err
 	}
 
 	//获取当前集群信息
-	clusterInfo, err := a.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
+	clusterInfos, err := a.clusterService.GetByNames(ctx, namespaceId, clusterNames)
 	if err != nil {
-		return err
+		return nil, err
 	}
-
-	//获取当前的版本
-	runtime, err := a.apiRuntime.GetForCluster(ctx, apiInfo.Id, clusterInfo.Id)
-	if err != nil && err != gorm.ErrRecordNotFound {
-		return err
-	}
-
-	if runtime == nil {
-		return errors.New("invalid version")
-	}
-
-	t := time.Now()
 
 	//编写日志操作对象信息
 	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:        uuid,
 		Name:        apiInfo.Name,
-		ClusterId:   clusterInfo.Id,
-		ClusterName: clusterName,
+		ClusterName: strings.Join(clusterNames, ","),
 		PublishType: 2,
 	})
 
-	//事务
-	return a.apiStore.Transaction(ctx, func(txCtx context.Context) error {
-		if !runtime.IsOnline {
-			return errors.New("已下线不可重复下线")
-		}
-		runtime.IsOnline = false
-		runtime.UpdateTime = t
-		runtime.Operator = operator
-		err = a.apiRuntime.Save(txCtx, runtime)
-		if err != nil {
-			return err
-		}
+	offlineInfos := make([]*apimodel.BatchListItem, 0, len(clusterInfos))
 
-		//发布到apinto
-		client, err := a.apintoClient.GetClient(ctx, clusterInfo.Id)
-		if err != nil {
-			return err
-		}
+	t := time.Now()
+	for _, clusterInfo := range clusterInfos {
+		//事务
+		err = a.apiStore.Transaction(ctx, func(txCtx context.Context) error {
+			publishHistory := &apientry.ApiPublishHistory{
+				VersionName:      apiInfo.Version,
+				ClusterId:        clusterInfo.Id,
+				NamespaceId:      namespaceId,
+				Desc:             apiInfo.Desc,
+				VersionId:        latestVersion.Id,
+				APIVersionConfig: latestVersion.APIVersionConfig,
+				OptType:          3, //下线
+				Operator:         operator,
+				OptTime:          t,
+			}
 
-		return common.CheckWorkerNotExist(client.ForRouter().Delete(apiInfo.UUID + "@router"))
-	})
+			if err = a.apiPublishHistory.Insert(txCtx, publishHistory); err != nil {
+				return err
+			}
+
+			//发布到apinto
+			client, err := a.apintoClient.GetClient(ctx, clusterInfo.Id)
+			if err != nil {
+				return err
+			}
+
+			return common.CheckWorkerNotExist(client.ForRouter().Delete(apiInfo.UUID + "@router"))
+		})
+
+		item := &apimodel.BatchListItem{
+			ClusterEnv: fmt.Sprintf("%s_%s", clusterInfo.Name, clusterInfo.Env),
+			Status:     true,
+		}
+		if err != nil {
+			item.Status = false
+			item.Result = err.Error()
+		}
+		offlineInfos = append(offlineInfos, item)
+	}
+
+	return offlineInfos, nil
 }
 
 func (a *apiService) EnableAPI(ctx context.Context, namespaceId, operator int, uuid, clusterName string) error {
