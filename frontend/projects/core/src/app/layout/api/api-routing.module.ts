@@ -6,7 +6,6 @@ import { ApiCreateComponent } from './api-list/create/create.component'
 import { ApiManagementComponent } from './api-list/group/group.component'
 import { ApiManagementListComponent } from './api-list/list/list.component'
 import { ApiMessageComponent } from './api-list/message/message.component'
-import { ApiPublishComponent } from './api-list/publish/single/publish.component'
 import { ApiPluginTemplateContentComponent } from './plugin/content/content.component'
 import { ApiPluginTemplateCreateComponent } from './plugin/create/create.component'
 import { ApiPluginTemplateListComponent } from './plugin/list/list.component'
@@ -65,10 +64,6 @@ const routes: Routes = [{
             {
               path: '',
               component: ApiMessageComponent
-            },
-            {
-              path: 'publish',
-              component: ApiPublishComponent
             }
           ]
         }
@@ -86,6 +81,7 @@ const routes: Routes = [{
           path: 'create',
           component: ApiPluginTemplateCreateComponent
         },
+
         {
           path: 'content/:pluginTemplateId',
           component: ApiPluginTemplateContentComponent,

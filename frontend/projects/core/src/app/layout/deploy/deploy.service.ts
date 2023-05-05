@@ -198,7 +198,10 @@ export class DeployService {
         key: 'desc'
       },
       { key: 'env' },
-      { key: 'status' },
+      {
+        key: 'status',
+        title: context.clusterStatusTpl
+      },
       {
         type: 'btn',
         right: true,
