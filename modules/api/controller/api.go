@@ -477,7 +477,7 @@ func (a *apiController) online(ginCtx *gin.Context) {
 		return
 	}
 
-	router, err := a.apiService.OnlineAPI(ginCtx, namespaceId, userId, apiUUID, input.ClusterName)
+	router, err := a.apiService.OnlineAPI(ginCtx, namespaceId, userId, apiUUID, input.ClusterNames)
 	if err != nil && router == nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
@@ -516,7 +516,7 @@ func (a *apiController) offline(ginCtx *gin.Context) {
 		return
 	}
 
-	if err := a.apiService.OfflineAPI(ginCtx, namespaceId, userId, apiUUID, input.ClusterName); err != nil {
+	if err := a.apiService.OfflineAPI(ginCtx, namespaceId, userId, apiUUID, input.ClusterNames); err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
