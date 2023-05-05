@@ -48,15 +48,15 @@ func (m *Module) Support() (apinto_module.ProviderSupport, bool) {
 }
 
 func (m *Module) provider(context *gin.Context) {
-	name := context.Param("name")
+	skill := context.Param("skill")
 	namespaceID := namespace_controller.GetNamespaceId(context)
-	provider, ok := m.providers.Provider(name)
+	provider, ok := m.providers.Provider(skill)
 	if !ok {
 		context.JSON(200, struct {
 			Code string `json:"code"`
 			Msg  string `json:"msg"`
 		}{
-			"200", fmt.Sprintf("not support data for %s", name),
+			"200", fmt.Sprintf("not support data for %s", skill),
 		})
 		return
 	}
@@ -68,7 +68,7 @@ func (m *Module) provider(context *gin.Context) {
 	context.JSON(200, map[string]interface{}{
 		"code": "00000",
 		"data": map[string]interface{}{
-			name: result,
+			skill: result,
 		},
 	})
 
@@ -137,7 +137,7 @@ func NewModule() *Module {
 	routers := apinto_module.RoutersInfo{
 		{
 			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("/api/common/provider/:name"),
+			Path:        fmt.Sprintf("/api/common/provider/:skill"),
 			Handler:     "core.provider",
 			HandlerFunc: []apinto_module.HandlerFunc{m.provider},
 			Labels:      apinto_module.RouterLabelAssets,
