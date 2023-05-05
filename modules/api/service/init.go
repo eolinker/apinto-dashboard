@@ -17,7 +17,7 @@ func init() {
 	store.RegisterStore(api_store.InitStoreDB)
 	apiDriverManager := newAPIDriverManager()
 	apiHttp := driver.CreateAPIHttp("http")
-	apiWebsocket := driver.CreateAPIWebsocket("websocket")
+	apiWebsocket := driver.CreateAPIWebsocket("http")
 	apiDriverManager.RegisterDriver(DriverApiHTTP, apiHttp)
 	apiDriverManager.RegisterDriver(DriverWebsocket, apiWebsocket)
 	bean.Injection(&apiDriverManager)
