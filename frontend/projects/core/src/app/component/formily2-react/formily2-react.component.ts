@@ -6,6 +6,7 @@ import { SelectOption } from 'eo-ng-select'
   template: `
   <div id="myReactComponentContainer">
     <div>
+
   schema：<eo-ng-codebox
         style="display: block"
         [(code)]="renderSchema"
