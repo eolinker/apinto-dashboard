@@ -37,7 +37,6 @@ type APIInfo struct {
 	Hosts            []string                 `json:"hosts"`
 	Timeout          int                      `json:"timeout"`
 	Retry            int                      `json:"retry"`
-	EnableWebsocket  bool                     `json:"enable_websocket"`
 	Match            []*api_entry.MatchConf   `json:"match"`
 	Header           []*api_entry.ProxyHeader `json:"proxy_header"`
 	TemplateUUID     string                   `json:"template_uuid"`
