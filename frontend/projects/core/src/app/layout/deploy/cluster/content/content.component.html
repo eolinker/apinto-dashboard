@@ -8,85 +8,40 @@
 -->
 <div class="">
   <div
-    class="cluster-desc-block bg-bar-theme pl-btnbase pr-btnrbase py-btnybase"
+    class="pl-btnbase pr-btnrbase py-btnybase border-[0px] border-b-[1px] border-solid border-BORDER"
   >
     <section>
-      <span class="cluster-desc-title">{{ clusterName }}:</span>
-      <div
-        style="overflow: 'hidden'"
-        [ngStyle]="{ 'min-width': disabled ? 'unset' : '400px' }"
+      <button
+        eo-ng-button
+        type="default"
+        class="mr-btnbase"
+        (click)="backToList()"
       >
-        <span
-          class="cluster-desc-content"
-          [ngStyle]="{
-            visibility: disabled ? 'unset' : 'hidden',
-            height: disabled ? '32px' : '0px'
-          }"
-        >
-          <span
-            eoNgFeedbackTooltip
-            [nzTooltipTitle]="_clusterDesc"
-            nzTooltipPlacement="bottom"
-            [nzTooltipVisible]="false"
-            nzTooltipTrigger="hover"
-            class="cluster-desc-text"
-            >{{ clusterDesc }}</span
-          >
-          <button
-            eo-ng-button
-            nzType="text"
-            eoNgUserAccess="deploy/cluster"
-            *ngIf="disabled"
-            (click)="disabled = false"
-          >
-            <svg class="iconpark-icon"><use href="#edit"></use></svg>
-          </button>
-        </span>
-        <section>
-          <input
-            class="cluster-desc-content"
-            *ngIf="!disabled"
-            eo-ng-input
-            [(ngModel)]="_clusterDesc"
-            (keyup.enter)="save()"
-          />
-          <button
-            eo-ng-button
-            nzType="text"
-            eoNgUserAccess="deploy/cluster"
-            *ngIf="!disabled"
-            (click)="save()"
-          >
-            <svg class="iconpark-icon"><use href="#check"></use></svg>
-          </button>
-          <button
-            eo-ng-button
-            nzType="text"
-            *ngIf="!disabled"
-            (click)="_clusterDesc = clusterDesc; disabled = true"
-          >
-            <svg class="iconpark-icon"><use href="#close"></use></svg>
-          </button>
-        </section>
-      </div>
+        返回
+      </button>
+      <span class="font-bold">{{ clusterName }} ： {{ clusterDesc }}</span>
     </section>
   </div>
 
   <eo-ng-tabs [nzLinkRouter]="true" [nzOptions]="tabOptions"></eo-ng-tabs>
   <ng-template #tab1>
-    <span>环境变量</span>
+    <span>全局变量</span>
   </ng-template>
 
   <ng-template #tab2>
-    <span>证书管理</span>
+    <span>SSL证书</span>
   </ng-template>
 
   <ng-template #tab3>
-    <span>网关节点</span>
+    <span>节点列表</span>
   </ng-template>
 
   <ng-template #tab5>
-    <span>插件管理</span>
+    <span>节点插件</span>
+  </ng-template>
+
+  <ng-template #tab6>
+    <span>集群管理</span>
   </ng-template>
   <router-outlet></router-outlet>
 </div>
