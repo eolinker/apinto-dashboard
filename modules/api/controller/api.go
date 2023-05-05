@@ -507,7 +507,7 @@ func (a *apiController) offline(ginCtx *gin.Context) {
 	userId := users.GetUserId(ginCtx)
 	apiUUID := ginCtx.Query("uuid")
 	if apiUUID == "" {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("uuid can't be nil"))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("uuid 不可以为空"))
 		return
 	}
 	input := &online_dto.UpdateOnlineStatusInput{}
@@ -516,7 +516,7 @@ func (a *apiController) offline(ginCtx *gin.Context) {
 		return
 	}
 
-	if err := a.apiService.OfflineAPI(ginCtx, namespaceId, userId, apiUUID, input.ClusterNames); err != nil {
+	if _, err := a.apiService.OfflineAPI(ginCtx, namespaceId, userId, apiUUID, input.ClusterNames); err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}

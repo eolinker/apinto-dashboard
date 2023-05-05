@@ -39,8 +39,8 @@ type IAPIService interface {
 	BatchOnlineCheck(ctx context.Context, namespaceId int, operator int, apiUUIDs, clusterNames []string) ([]*apimodel.BatchOnlineCheckListItem, string, error)
 
 	OnlineList(ctx context.Context, namespaceId int, uuid string) ([]*apimodel.APIOnlineListItem, error)
-	OnlineAPI(ctx context.Context, namespaceId, operator int, uuid string, clusterNames []string) (*frontend_model.Router, error)
-	OfflineAPI(ctx context.Context, namespaceId, operator int, uuid, clusterName string) error
+	OnlineAPI(ctx context.Context, namespaceId, operator int, uuid string, clusterNames []string) ([]*frontend_model.Router, error)
+	OfflineAPI(ctx context.Context, namespaceId, operator int, uuid string, clusterNames []string) ([]*apimodel.BatchListItem, error)
 	EnableAPI(ctx context.Context, namespaceId, operator int, uuid, clusterName string) error
 	DisableAPI(ctx context.Context, namespaceId, operator int, uuid, clusterName string) error
 
@@ -72,5 +72,5 @@ type APIDriverInfo struct {
 
 type IAPIDriver interface {
 	CheckInput(input *api_dto.APIInfo) error
-	ToApinto(name, desc string, disable bool, method []string, requestPath, requestPathLabel, proxyPath, serviceName string, timeout, retry int, enableWebsocket bool, match []*api_entry.MatchConf, header []*api_entry.ProxyHeader, templateUUID string) *v1.RouterConfig
+	ToApinto(name, desc string, disable bool, method []string, requestPath, requestPathLabel, proxyPath, serviceName string, timeout, retry int, hosts []string, match []*api_entry.MatchConf, header []*api_entry.ProxyHeader, templateUUID string) *v1.RouterConfig
 }
