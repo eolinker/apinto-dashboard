@@ -64,6 +64,7 @@ func (o *OpenAPI3) FormatAPI(data []byte, namespaceID, appID int, groupID, prefi
 					SourceLabel:      label,
 					Scheme:           "http",
 					Version:          version,
+					IsDisable:        false,
 					Desc:             info.Description,
 					Operator:         0,
 					CreateTime:       t,

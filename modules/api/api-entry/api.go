@@ -11,6 +11,7 @@ type API struct {
 	GroupUUID        string    `gorm:"size:36;column:group_uuid;comment:api所在分组的UUID;index:group_uuid" json:"group_uuid,omitempty"`
 	Name             string    `gorm:"size:255;column:name;comment:api名称" json:"name,omitempty"`
 	Scheme           string    `gorm:"size:36;column:scheme;comment:协议" json:"scheme,omitempty"`
+	IsDisable        bool      `gorm:"type:tinyint(1);size:1;not null;column:is_disable;comment:是否拦截"`
 	RequestPath      string    `gorm:"size:255;request_path;comment:api请求路径" json:"request_path,omitempty"`
 	RequestPathLabel string    `gorm:"size:255;request_path_label;comment:api请求路径Label" json:"request_path_label,omitempty"`
 	SourceType       string    `gorm:"size:255;source_type;comment:来源类型" json:"source_type,omitempty"`

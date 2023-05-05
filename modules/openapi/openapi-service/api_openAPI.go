@@ -214,6 +214,7 @@ func (a *apiOpenAPIService) SyncImport(ctx context.Context, namespaceID, appID i
 				NamespaceID: namespaceID,
 				APIVersionConfig: api_entry.APIVersionConfig{
 					Scheme:           apiInfo.Scheme,
+					IsDisable:        apiInfo.IsDisable,
 					RequestPath:      apiInfo.RequestPath,
 					RequestPathLabel: apiInfo.RequestPathLabel,
 					ServiceID:        serviceID,

@@ -7,15 +7,21 @@ import (
 )
 
 type APIListItem struct {
-	GroupUUID   string   `json:"group_uuid"`
-	APIUUID     string   `json:"uuid"`
-	APIName     string   `json:"name"`
-	Method      []string `json:"method"`
-	ServiceName string   `json:"service"`
-	RequestPath string   `json:"request_path"`
-	Source      string   `json:"source"`
-	UpdateTime  string   `json:"update_time"`
-	IsDelete    bool     `json:"is_delete"`
+	GroupUUID   string                `json:"group_uuid"`
+	APIUUID     string                `json:"uuid"`
+	APIName     string                `json:"name"`
+	Method      []string              `json:"method"`
+	ServiceName string                `json:"service"`
+	RequestPath string                `json:"request_path"`
+	Publish     []*APIListItemPublish `json:"publish"`
+	Source      string                `json:"source"`
+	UpdateTime  string                `json:"update_time"`
+	IsDelete    bool                  `json:"is_delete"`
+}
+
+type APIListItemPublish struct {
+	Name   string            `json:"name"`
+	Status enum.OnlineStatus `json:"status"`
 }
 
 type APIEnum struct {
@@ -28,6 +34,7 @@ type APIInfo struct {
 	UUID             string                   `json:"uuid"`
 	GroupUUID        string                   `json:"group_uuid"`
 	Desc             string                   `json:"desc"`
+	IsDisable        bool                     `json:"is_disable"`
 	Scheme           string                   `json:"scheme"`
 	RequestPath      string                   `json:"request_path"`
 	RequestPathLabel string                   `json:"-"` //前端不传这个，后端存字段会使用
