@@ -11,7 +11,6 @@ import { ChangeDetectorRef, Component, ElementRef, OnInit, Renderer2, TemplateRe
 import { Router } from '@angular/router'
 import { TabTemplateContext } from 'ng-zorro-antd/tabs'
 import { TabsOptions } from 'eo-ng-tabs'
-import { Subscription } from 'rxjs'
 import { BaseInfoService } from 'projects/core/src/app/service/base-info.service'
 
 @Component({
@@ -29,7 +28,6 @@ export class ApiContentComponent implements OnInit {
   tabOptions:TabsOptions[]=[]
   selectedIndex:number = 0
   readonly nowUrl:string = this.router.routerState.snapshot.url
-  private subscription: Subscription = new Subscription()
 
   constructor (
      private baseInfo:BaseInfoService,
@@ -47,27 +45,26 @@ export class ApiContentComponent implements OnInit {
   }
 
   ngAfterViewInit () {
-    this.tabOptions = [
-      {
-        title: this.tab1,
-        routerLink: '.',
-        queryParamsHandling: 'merge'
-      },
-      {
-        title: this.tab2,
-        routerLink: 'publish',
-        queryParamsHandling: 'merge'
-      }
-    ]
-    this.cdRef.detectChanges()
+    // this.tabOptions = [
+    //   {
+    //     title: this.tab1,
+    //     routerLink: '.',
+    //     queryParamsHandling: 'merge'
+    //   },
+    //   {
+    //     title: this.tab2,
+    //     routerLink: 'publish',
+    //     queryParamsHandling: 'merge'
+    //   }
+    // ]
+    // this.cdRef.detectChanges()
   }
 
   ngAfterViewChecked () {
-    const element = this.elem.nativeElement.querySelector('[nz-tabs-ink-bar]')
-    this.renderer.removeAttribute(element, 'hidden')
+    // const element = this.elem.nativeElement.querySelector('[nz-tabs-ink-bar]')
+    // this.renderer.removeAttribute(element, 'hidden')
   }
 
   ngOnDestroy () {
-    this.subscription.unsubscribe()
   }
 }
