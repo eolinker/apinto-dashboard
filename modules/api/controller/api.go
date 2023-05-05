@@ -525,50 +525,6 @@ func (a *apiController) offline(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
-// enableAPI 启用API
-func (a *apiController) enableAPI(ginCtx *gin.Context) {
-	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := users.GetUserId(ginCtx)
-	apiUUID := ginCtx.Query("uuid")
-	if apiUUID == "" {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("uuid can't be nil"))
-		return
-	}
-	input := &online_dto.UpdateOnlineStatusInput{}
-	if err := ginCtx.BindJSON(input); err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
-		return
-	}
-
-	if err := a.apiService.EnableAPI(ginCtx, namespaceId, userId, apiUUID, input.ClusterName); err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
-		return
-	}
-	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
-}
-
-// disableAPI 禁用API
-func (a *apiController) disableAPI(ginCtx *gin.Context) {
-	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := users.GetUserId(ginCtx)
-	apiUUID := ginCtx.Query("uuid")
-	if apiUUID == "" {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("uuid can't be nil"))
-		return
-	}
-	input := &online_dto.UpdateOnlineStatusInput{}
-	if err := ginCtx.BindJSON(input); err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
-		return
-	}
-
-	if err := a.apiService.DisableAPI(ginCtx, namespaceId, userId, apiUUID, input.ClusterName); err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
-		return
-	}
-	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
-}
-
 // getOnlineList 上线管理列表
 func (a *apiController) getOnlineList(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
