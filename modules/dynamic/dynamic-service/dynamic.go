@@ -166,7 +166,7 @@ func (d *dynamicService) ClusterStatuses(ctx context.Context, namespaceId int, p
 		if err != nil {
 			log.Errorf("get worker(%s) list error: %w.", profession, err)
 			for _, l := range list {
-				if isInit {
+				if !isInit {
 					result[l.Name] = make(map[string]string)
 				}
 				result[l.Name][c.Name] = v2.StatusOffline
@@ -176,7 +176,7 @@ func (d *dynamicService) ClusterStatuses(ctx context.Context, namespaceId int, p
 		}
 
 		for _, l := range list {
-			if isInit {
+			if !isInit {
 				result[l.Name] = make(map[string]string)
 			}
 			result[l.Name][c.Name] = v2.StatusOffline
