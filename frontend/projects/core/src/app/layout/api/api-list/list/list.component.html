@@ -13,13 +13,23 @@
     <div>
       <button
         eo-ng-button
+        eo-ng-dropdown
         class="ant-btn-primary"
         eoNgUserAccess="router/api"
         (disabledEdit)="disabledEdit($event)"
         (click)="addApi()"
+        [nzDropdownMenu]="menu"
       >
         新建API
       </button>
+
+      <eo-ng-dropdown-menu #menu="nzDropdownMenu">
+        <ul nz-menu>
+          <li nz-menu-item>HTTP</li>
+          <li nz-menu-item>Websocket</li>
+        </ul>
+      </eo-ng-dropdown-menu>
+
       <eo-ng-api-import (flashList)="getApisData()"></eo-ng-api-import>
       <eo-ng-api-batch-publish
         [(apisSet)]="apisSet"
@@ -96,4 +106,8 @@
       ></eo-ng-api-method-tag>
     </ng-container>
   </ng-template>
+</ng-template>
+
+<ng-template #clusterStatusTpl let-item="item" let-rowItem="rowItem">
+  <eo-ng-table-status [status]="item[rowItem.key]"></eo-ng-table-status>
 </ng-template>

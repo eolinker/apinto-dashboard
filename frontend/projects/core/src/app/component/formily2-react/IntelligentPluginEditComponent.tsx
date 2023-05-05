@@ -208,14 +208,14 @@ export const IntelligentPluginEditComponent = React.forwardRef(
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const getDiscovery = async () => {
+    const getDiscovery = async (skill: string) => {
       return new Promise((resolve) => {
-        axios.get('discovery/enum').then((resp) => {
-          if (resp.data.code === 0) {
+        axios.get(`api/common/provider/${skill}`).then((resp) => {
+          if (resp.data.data.code === 0) {
             const dataList: Array<{ label: string; value: string }> =
-              resp.data.discoveries.map((item: any) => {
+              resp.data.data[skill].map((item: any) => {
                 return {
-                  label: `${item.name}[${item.driver}]`,
+                  label: item.title,
                   value: item.name
                 }
               })
@@ -226,19 +226,23 @@ export const IntelligentPluginEditComponent = React.forwardRef(
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const useAsyncDataSource = (service: any) => (field: any) => {
-      field.loading = true
-      service(field).then(
-        action.bound &&
-          action.bound((data: any) => {
-            field.dataSource = data
-            field.loading = false
-          })
-      )
-    }
+    const useAsyncDataSource =
+      (service: any, skill: string) => (field: any) => {
+        field.loading = true
+        service(skill).then(
+          action.bound &&
+            action.bound((data: any) => {
+              field.dataSource = data
+              field.loading = false
+            })
+        )
+      }
     return (
       <FormProvider form={form} layout="vertical">
-        <SchemaField schema={demo ? demoSchema : pluginEditSchema} />
+        <SchemaField
+          schema={demo ? demoSchema : pluginEditSchema}
+          scope={{ useAsyncDataSource, getDiscovery }}
+        />
         {demo && demoSchema && (
           <FormButtonGroup>
             <Submit ref={submitRef} onSubmit={submit}>
