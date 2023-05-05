@@ -198,6 +198,7 @@ func (a *apiController) routers(ginCtx *gin.Context) {
 			Method:      item.Method,
 			ServiceName: item.ServiceName,
 			RequestPath: item.RequestPath,
+			Publish:     nil, //TODO
 			Source:      item.Source,
 			UpdateTime:  common.TimeToStr(item.UpdateTime),
 			IsDelete:    item.IsDelete,
@@ -233,6 +234,7 @@ func (a *apiController) getInfo(ginCtx *gin.Context) {
 		GroupUUID:    info.Api.GroupUUID,
 		Desc:         info.Api.Desc,
 		Scheme:       info.Api.Scheme,
+		IsDisable:    info.Api.IsDisable,
 		RequestPath:  info.Api.RequestPathLabel,
 		ServiceName:  info.Version.ServiceName,
 		Method:       info.Version.Method,
