@@ -41,8 +41,6 @@ type IAPIService interface {
 	OnlineList(ctx context.Context, namespaceId int, uuid string) ([]*apimodel.APIOnlineListItem, error)
 	OnlineAPI(ctx context.Context, namespaceId, operator int, uuid string, clusterNames []string) ([]*frontend_model.Router, error)
 	OfflineAPI(ctx context.Context, namespaceId, operator int, uuid string, clusterNames []string) ([]*apimodel.BatchListItem, error)
-	EnableAPI(ctx context.Context, namespaceId, operator int, uuid, clusterName string) error
-	DisableAPI(ctx context.Context, namespaceId, operator int, uuid, clusterName string) error
 
 	GetSource(ctx context.Context) ([]*apimodel.SourceListItem, error)
 	GetImportCheckList(ctx context.Context, namespaceId int, fileData []byte, groupID, serviceName, requestPrefix string) ([]*apimodel.ImportAPIListItem, string, error)
