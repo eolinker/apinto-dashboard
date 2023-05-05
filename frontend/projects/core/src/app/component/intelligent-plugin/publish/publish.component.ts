@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
 import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { IntelligentPluginService } from '../intelligent-plugin.service'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
@@ -12,10 +12,11 @@ import { DynamicPublish, DynamicPublishCluster, DynamicPublishData } from '../ty
   ]
 })
 export class IntelligentPluginPublishComponent implements OnInit {
+  @ViewChild('clusterStatusTpl', { read: TemplateRef, static: true }) clusterStatusTpl: TemplateRef<any> | undefined
   name:string = ''
   id:string = ''
   desc:string = ''
-  publishTableBody:TBODY_TYPE[] = [...this.service.createPluginTbody(this)]
+  publishTableBody:TBODY_TYPE[] = []
   publishTableHeadName:THEAD_TYPE[] = [...this.service.createPluginThead(this)]
   publishList:DynamicPublishCluster[] = []
   selectedNum:number = 0
@@ -30,6 +31,10 @@ export class IntelligentPluginPublishComponent implements OnInit {
 
   ngOnInit (): void {
     this.getPublishList()
+  }
+
+  ngAfterViewInit () {
+    this.publishTableBody = [...this.service.createPluginTbody(this)]
   }
 
   getPublishList () {
