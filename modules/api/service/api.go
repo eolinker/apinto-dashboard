@@ -522,12 +522,14 @@ func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator in
 			NamespaceId:      namespaceID,
 			UUID:             input.UUID,
 			GroupUUID:        input.GroupUUID,
+			Scheme:           input.Scheme,
 			Name:             input.ApiName,
 			RequestPath:      input.RequestPath,
 			RequestPathLabel: input.RequestPathLabel,
 			SourceType:       enum.SourceSelfBuild,
 			SourceID:         -1,
 			SourceLabel:      "",
+			Version:          common.GenVersion(t),
 			Desc:             input.Desc,
 			Operator:         operator,
 			CreateTime:       t,
@@ -542,7 +544,6 @@ func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator in
 			ApiID:       apiInfo.Id,
 			NamespaceID: namespaceID,
 			APIVersionConfig: apientry.APIVersionConfig{
-				Driver:           input.Scheme,
 				RequestPath:      input.RequestPath,
 				RequestPathLabel: input.RequestPathLabel,
 				ServiceID:        serviceID,
@@ -553,7 +554,7 @@ func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator in
 				ProxyPath:        input.ProxyPath,
 				Timeout:          input.Timeout,
 				Retry:            input.Retry,
-				EnableWebsocket:  input.EnableWebsocket,
+				Hosts:            input.Hosts,
 				Match:            input.Match,
 				Header:           input.Header,
 			},
@@ -670,13 +671,8 @@ func (a *apiService) UpdateAPI(ctx context.Context, namespaceID int, operator in
 	})
 
 	return a.apiStore.Transaction(ctx, func(txCtx context.Context) error {
-		//修改基础数据
-		if _, err = a.apiStore.Update(txCtx, apiInfo); err != nil {
-			return err
-		}
 
 		latestVersionConfig := apientry.APIVersionConfig{
-			Driver:           input.Scheme,
 			RequestPath:      input.RequestPath,
 			RequestPathLabel: input.RequestPathLabel,
 			ServiceID:        serviceID,
@@ -687,7 +683,7 @@ func (a *apiService) UpdateAPI(ctx context.Context, namespaceID int, operator in
 			ProxyPath:        input.ProxyPath,
 			Timeout:          input.Timeout,
 			Retry:            input.Retry,
-			EnableWebsocket:  input.EnableWebsocket,
+			Hosts:            input.Hosts,
 			Match:            input.Match,
 			Header:           input.Header,
 		}
@@ -712,6 +708,9 @@ func (a *apiService) UpdateAPI(ctx context.Context, namespaceID int, operator in
 				return err
 			}
 
+			//配置有修改才更改api表的version
+			apiInfo.Version = common.GenVersion(t)
+
 			//更新所引用的插件模板
 			if currentVersion.TemplateID != templateID {
 				if templateID != 0 {
@@ -731,6 +730,11 @@ func (a *apiService) UpdateAPI(ctx context.Context, namespaceID int, operator in
 			if err = a.quoteStore.Set(txCtx, apiInfo.Id, quote_entry.QuoteKindTypeAPI, quote_entry.QuoteTargetKindTypeService, serviceID); err != nil {
 				return err
 			}
+		}
+
+		//修改基础数据
+		if _, err = a.apiStore.Update(txCtx, apiInfo); err != nil {
+			return err
 		}
 
 		newValue := apientry.ApiHistoryInfo{
@@ -1129,7 +1133,7 @@ func (a *apiService) online(ctx context.Context, namespaceId, operator int, api 
 			}
 
 			//封装router配置
-			apiDriverInfo := a.GetAPIDriver(latest.Driver)
+			apiDriverInfo := a.GetAPIDriver(api.Scheme)
 			routerConfig := apiDriverInfo.ToApinto(api.UUID, api.Desc, false, latest.Method, latest.RequestPath, latest.RequestPathLabel, latest.ProxyPath, strings.ToLower(latest.ServiceName), latest.Timeout, latest.Retry, latest.EnableWebsocket, latest.Match, latest.Header, latest.TemplateUUID)
 
 			//未上线
@@ -1619,7 +1623,7 @@ func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, u
 	//事务
 	err = a.apiStore.Transaction(ctx, func(txCtx context.Context) error {
 
-		apiDriverInfo := a.GetAPIDriver(latestVersion.Driver)
+		apiDriverInfo := a.GetAPIDriver(apiInfo.Scheme)
 		routerConfig := apiDriverInfo.ToApinto(apiInfo.UUID, apiInfo.Desc, false, latestVersion.Method, latestVersion.RequestPath, latestVersion.RequestPathLabel, latestVersion.ProxyPath, strings.ToLower(latestVersion.ServiceName), latestVersion.Timeout, latestVersion.Retry, latestVersion.EnableWebsocket, latestVersion.Match, latestVersion.Header, latestVersion.TemplateUUID)
 		if runtime == nil {
 			runtime = &apientry.APIRuntime{
@@ -1693,7 +1697,7 @@ func (a *apiService) ResetOnline(ctx context.Context, _, clusterId int) {
 			log.Errorf("apiService-ResetOnline-getVersion versionId=%d, clusterId=%d,err=%d", runtime.VersionID, clusterId, err.Error())
 			continue
 		}
-		routerConfig := a.GetAPIDriver(version.Driver).ToApinto(apiInfo.UUID, apiInfo.Desc, false, version.Method, version.RequestPath, version.RequestPathLabel, version.ProxyPath, strings.ToLower(version.ServiceName), version.Timeout, version.Retry, version.EnableWebsocket, version.Match, version.Header, version.TemplateUUID)
+		routerConfig := a.GetAPIDriver(apiInfo.Scheme).ToApinto(apiInfo.UUID, apiInfo.Desc, false, version.Method, version.RequestPath, version.RequestPathLabel, version.ProxyPath, strings.ToLower(version.ServiceName), version.Timeout, version.Retry, version.EnableWebsocket, version.Match, version.Header, version.TemplateUUID)
 
 		if err = client.ForRouter().Create(*routerConfig); err != nil {
 			log.Errorf("apiService-ResetOnline-apintoCreate routerConfig=%d, clusterId=%d,err=%d", routerConfig, clusterId, err.Error())
@@ -2162,7 +2166,6 @@ func (a *apiService) ImportAPI(ctx context.Context, namespaceId, operator int, i
 				ApiID:       apiInfo.Id,
 				NamespaceID: namespaceId,
 				APIVersionConfig: apientry.APIVersionConfig{
-					Driver:           "http",
 					RequestPath:      apiInfo.RequestPath,
 					RequestPathLabel: apiInfo.RequestPathLabel,
 					ServiceID:        serviceID,
@@ -2171,7 +2174,6 @@ func (a *apiService) ImportAPI(ctx context.Context, namespaceId, operator int, i
 					ProxyPath:        apiInfo.RequestPathLabel,
 					Timeout:          10000,
 					Retry:            0,
-					EnableWebsocket:  false,
 					Match:            []*apientry.MatchConf{},
 					Header:           []*apientry.ProxyHeader{},
 				},
@@ -2325,7 +2327,7 @@ func (a *apiService) GetLatestAPIVersion(ctx context.Context, apiId int) (*apien
 	return a.apiVersion.Get(ctx, stat.VersionID)
 }
 
-// CheckAPIReduplicative 检测API配置是否重复，不可同名同request_url同method
+// CheckAPIReduplicative TODO 检测API配置是否重复，不可同名同request_url同method
 func (a *apiService) CheckAPIReduplicative(ctx context.Context, namespaceID int, uuid string, input *api_dto.APIInfo) error {
 	//获取相同requestPath的API
 	apiList, err := a.apiStore.GetListByRequestPath(ctx, namespaceID, input.RequestPath)

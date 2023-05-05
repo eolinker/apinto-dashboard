@@ -217,32 +217,32 @@ func (a *apiController) getInfo(ginCtx *gin.Context) {
 	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
 	apiUUID := ginCtx.Query("uuid")
 	if apiUUID == "" {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("GetApiInfo fail. err: uuid can't be nil"))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("获取API信息失败 uuid不能为空"))
 		return
 	}
 
 	info, err := a.apiService.GetAPIVersionInfo(ginCtx, namespaceID, apiUUID)
 	if err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("GetApiInfo fail. err:%s", err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("获取API信息失败 err:%s", err.Error()))
 		return
 	}
 
 	apiInfo := &api_dto.APIInfo{
-		ApiName:         info.Api.Name,
-		UUID:            info.Api.UUID,
-		GroupUUID:       info.Api.GroupUUID,
-		Desc:            info.Api.Desc,
-		Scheme:          info.Version.Driver,
-		RequestPath:     info.Api.RequestPathLabel,
-		ServiceName:     info.Version.ServiceName,
-		Method:          info.Version.Method,
-		ProxyPath:       info.Version.ProxyPath,
-		Timeout:         info.Version.Timeout,
-		Retry:           info.Version.Retry,
-		EnableWebsocket: info.Version.EnableWebsocket,
-		Match:           info.Version.Match,
-		Header:          info.Version.Header,
-		TemplateUUID:    info.Version.TemplateUUID,
+		ApiName:      info.Api.Name,
+		UUID:         info.Api.UUID,
+		GroupUUID:    info.Api.GroupUUID,
+		Desc:         info.Api.Desc,
+		Scheme:       info.Api.Scheme,
+		RequestPath:  info.Api.RequestPathLabel,
+		ServiceName:  info.Version.ServiceName,
+		Method:       info.Version.Method,
+		ProxyPath:    info.Version.ProxyPath,
+		Timeout:      info.Version.Timeout,
+		Retry:        info.Version.Retry,
+		Hosts:        info.Version.Hosts,
+		Match:        info.Version.Match,
+		Header:       info.Version.Header,
+		TemplateUUID: info.Version.TemplateUUID,
 	}
 
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(map[string]interface{}{"api": apiInfo}))
@@ -285,7 +285,7 @@ func (a *apiController) update(ginCtx *gin.Context) {
 	userId := users.GetUserId(ginCtx)
 	apiUUID := ginCtx.Query("uuid")
 	if apiUUID == "" {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("UpdateApi fail. err: uuid can't be nil"))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("更新API失败 err: uuid 不能为空"))
 		return
 	}
 
@@ -298,18 +298,18 @@ func (a *apiController) update(ginCtx *gin.Context) {
 	//API管理器校验参数
 	driver := a.apiService.GetAPIDriver(input.Scheme)
 	if driver == nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("UpdateAPI fail. err: driver is invalid. "))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("更新API失败. 协议无效 "))
 		return
 	}
 	input.UUID = apiUUID
 	if err := driver.CheckInput(input); err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("UpdateAPI fail. err:%s", err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("更新API失败 fail. err:%s", err.Error()))
 		return
 	}
 
 	err := a.apiService.UpdateAPI(ginCtx, namespaceId, userId, input)
 	if err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("UpdateApi fail. err:%s", err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("更新API失败 fail. err:%s", err.Error()))
 		return
 	}
 
