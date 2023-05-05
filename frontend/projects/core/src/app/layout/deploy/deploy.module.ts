@@ -61,6 +61,7 @@ import { DeployClusterPluginConfigFormComponent } from './cluster/plugin/config/
 import { DeployClusterPluginHistoryChangeComponent } from './cluster/plugin/history/change/change.component'
 import { DeployClusterPluginHistoryPublishComponent } from './cluster/plugin/history/publish/publish.component'
 import { DeployClusterPluginPublishComponent } from './cluster/plugin/publish/publish.component'
+import { DeployClusterMessageComponent } from './cluster/message/message.component'
 
 @NgModule({
   declarations: [
@@ -90,7 +91,8 @@ import { DeployClusterPluginPublishComponent } from './cluster/plugin/publish/pu
     DeployClusterPluginConfigFormComponent,
     DeployClusterPluginHistoryChangeComponent,
     DeployClusterPluginHistoryPublishComponent,
-    DeployClusterPluginPublishComponent
+    DeployClusterPluginPublishComponent,
+    DeployClusterMessageComponent
   ],
   imports: [
     EoNgLayoutModule,
