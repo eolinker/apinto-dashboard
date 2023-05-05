@@ -47,12 +47,13 @@ import (
 )
 
 type apiService struct {
-	apiStore   apiStore.IAPIStore
-	apiStat    apiStore.IAPIStatStore
-	apiVersion apiStore.IAPIVersionStore
-	apiRuntime apiStore.IAPIRuntimeStore
-	quoteStore quote_store.IQuoteStore
-	apiHistory apiStore.IApiHistoryStore
+	apiStore          apiStore.IAPIStore
+	apiStat           apiStore.IAPIStatStore
+	apiVersion        apiStore.IAPIVersionStore
+	apiRuntime        apiStore.IAPIRuntimeStore
+	quoteStore        quote_store.IQuoteStore
+	apiHistory        apiStore.IApiHistoryStore
+	apiPublishHistory apiStore.IApiPublishHistoryStore
 
 	service          upstream.IService
 	commonGroup      group.ICommonGroupService
@@ -85,6 +86,7 @@ func NewAPIService() apiservice.IAPIService {
 	bean.Autowired(&as.apintoClient)
 	bean.Autowired(&as.apiManager)
 	bean.Autowired(&as.apiHistory)
+	bean.Autowired(&as.apiPublishHistory)
 	bean.Autowired(&as.userInfoService)
 	bean.Autowired(&as.extAppService)
 
