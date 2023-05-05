@@ -19,13 +19,31 @@
     >
       新建集群
     </button>
+
+    <eo-ng-select
+      class="w-INPUT_NORMAL"
+      [nzMaxTagCount]="3"
+      [nzMaxTagPlaceholder]="tagPlaceHolder"
+      [nzShowCheckAll]="true"
+      nzMode="multiple"
+      nzPlaceHolder="所有环境"
+      [nzDisabled]="nzDisabled"
+      [(ngModel)]="env"
+      (nzOpenChange)="$event ? null : handleEnvChange()"
+      nzAllowClear
+      [nzOptions]="environmentList"
+    ></eo-ng-select>
+
+    <ng-template #tagPlaceHolder let-selectedList
+      >and {{ selectedList.length }} more selected</ng-template
+    >
   </div>
   <div class="list-content">
     <eo-ng-apinto-table
       class=""
       [nzTbody]="clustersTableBody"
       [nzThead]="clustersTableHeadName"
-      [nzData]="clustersList"
+      [nzData]="clustersDisplayList"
       [nzTrClick]="clusterTableClick"
       [nzMaxOperatorButton]="2"
       [nzNoScroll]="true"
