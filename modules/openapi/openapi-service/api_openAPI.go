@@ -213,7 +213,7 @@ func (a *apiOpenAPIService) SyncImport(ctx context.Context, namespaceID, appID i
 				ApiID:       apiInfo.Id,
 				NamespaceID: namespaceID,
 				APIVersionConfig: api_entry.APIVersionConfig{
-					Driver:           "http", //默认
+					Scheme:           apiInfo.Scheme,
 					RequestPath:      apiInfo.RequestPath,
 					RequestPathLabel: apiInfo.RequestPathLabel,
 					ServiceID:        serviceID,
@@ -222,7 +222,7 @@ func (a *apiOpenAPIService) SyncImport(ctx context.Context, namespaceID, appID i
 					ProxyPath:        apiInfo.RequestPathLabel,
 					Timeout:          10000,
 					Retry:            0,
-					EnableWebsocket:  false,
+					Hosts:            []string{},
 					Match:            []*api_entry.MatchConf{},
 					Header:           []*api_entry.ProxyHeader{},
 				},
