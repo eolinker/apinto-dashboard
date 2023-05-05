@@ -46,6 +46,8 @@ func init() {
 
 	apintoModule.Register("email.apinto.com", email_controller.NewEmailDriver())
 	apintoModule.Register("webhook.apinto.com", webhook_controller.NewWebhookDriver())
-	apintoModule.Register("dynamic.apinto.com", dynamic_controller.NewDynamicModuleDriver())
+
+	apintoModule.Register("dynamic.apinto.com", dynamic_controller.NewDynamicModuleDriver(true, false, true, true))
+	apintoModule.Register("upstream-2.apinto.com", dynamic_controller.NewDynamicModuleDriver(true, false, false, false))
 
 }
