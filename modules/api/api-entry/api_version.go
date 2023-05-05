@@ -12,7 +12,7 @@ type APIVersion struct {
 }
 
 type APIVersionConfig struct {
-	//Driver           string         `json:"driver"`
+	Scheme           string   `json:"scheme"`
 	RequestPath      string   `json:"request_path"`
 	RequestPathLabel string   `json:"request_path_label"`
 	ServiceID        int      `json:"service_id"`

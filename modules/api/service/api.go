@@ -544,6 +544,7 @@ func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator in
 			ApiID:       apiInfo.Id,
 			NamespaceID: namespaceID,
 			APIVersionConfig: apientry.APIVersionConfig{
+				Scheme:           input.Scheme,
 				RequestPath:      input.RequestPath,
 				RequestPathLabel: input.RequestPathLabel,
 				ServiceID:        serviceID,
@@ -673,6 +674,7 @@ func (a *apiService) UpdateAPI(ctx context.Context, namespaceID int, operator in
 	return a.apiStore.Transaction(ctx, func(txCtx context.Context) error {
 
 		latestVersionConfig := apientry.APIVersionConfig{
+			Scheme:           input.Scheme,
 			RequestPath:      input.RequestPath,
 			RequestPathLabel: input.RequestPathLabel,
 			ServiceID:        serviceID,
@@ -1546,7 +1548,7 @@ func (a *apiService) OnlineList(ctx context.Context, namespaceId int, uuid strin
 	return list, nil
 }
 
-func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, uuid, clusterName string) (*frontend_model.Router, error) {
+func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, uuid string, clusterNames []string) (*frontend_model.Router, error) {
 	apiInfo, err := a.apiStore.GetByUUID(ctx, namespaceId, uuid)
 	if err != nil {
 		return nil, err
@@ -1567,7 +1569,7 @@ func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, u
 	t := time.Now()
 
 	//获取当前集群信息
-	clusterInfo, err := a.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
+	clusterInfo, err := a.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterNames)
 	if err != nil {
 		return nil, err
 	}
@@ -1577,15 +1579,15 @@ func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, u
 		return nil, err
 	}
 
-	//判断上游服务有没有上线
+	//TODO 判断上游服务有没有上线
 	if !a.service.IsOnline(ctx, clusterInfo.Id, latestVersion.ServiceID) {
 		return &frontend_model.Router{
 			Name:   frontend_model.RouterNameServiceOnline,
 			Params: map[string]string{"service_name": latestVersion.ServiceName},
-		}, errors.New(fmt.Sprintf("绑定的%s未上线到%s", latestVersion.ServiceName, clusterName))
+		}, errors.New(fmt.Sprintf("绑定的%s未上线到%s", latestVersion.ServiceName, clusterNames))
 	}
 
-	//判断插件模板有没有上线
+	//TODO 判断插件模板有没有上线
 	if latestVersion.TemplateID != 0 {
 		isTemplateOnline, err := a.pluginTemplateService.IsOnline(ctx, clusterInfo.Id, latestVersion.TemplateUUID)
 		if err != nil {
@@ -1595,7 +1597,7 @@ func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, u
 			return &frontend_model.Router{
 				Name:   frontend_model.RouterNameTemplateOnline,
 				Params: map[string]string{"template_uuid": latestVersion.TemplateUUID},
-			}, errors.New(fmt.Sprintf("绑定的插件模板未上线到%s", clusterName))
+			}, errors.New(fmt.Sprintf("绑定的插件模板未上线到%s", clusterNames))
 		}
 	}
 
@@ -1616,7 +1618,7 @@ func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, u
 		Uuid:        uuid,
 		Name:        apiInfo.Name,
 		ClusterId:   clusterInfo.Id,
-		ClusterName: clusterName,
+		ClusterName: strings.Join(clusterNames, ","),
 		PublishType: 1,
 	})
 
