@@ -46,9 +46,10 @@ func (m *Module) Middleware() (apinto_module.Middleware, bool) {
 func (m *Module) Support() (apinto_module.ProviderSupport, bool) {
 	return nil, false
 }
+
 func (m *Module) provider(context *gin.Context) {
 	name := context.Param("name")
-
+	namespaceID := namespace_controller.GetNamespaceId(context)
 	provider, ok := m.providers.Provider(name)
 	if !ok {
 		context.JSON(200, struct {
@@ -57,8 +58,9 @@ func (m *Module) provider(context *gin.Context) {
 		}{
 			"200", fmt.Sprintf("not support data for %s", name),
 		})
+		return
 	}
-	cargos := provider.Provide()
+	cargos := provider.Provide(namespaceID)
 	result := make([]*apinto_module.CargoItem, 0, len(cargos))
 	for _, c := range cargos {
 		result = append(result, c.Export())
@@ -67,6 +69,51 @@ func (m *Module) provider(context *gin.Context) {
 		"code": "00000",
 		"data": map[string]interface{}{
 			name: result,
+		},
+	})
+
+}
+
+func (m *Module) status(context *gin.Context) {
+	key := context.Query("name")
+	if key == "" {
+		context.JSON(200, struct {
+			Code string `json:"code"`
+			Msg  string `json:"msg"`
+		}{
+			"200", "empty name",
+		})
+		return
+	}
+	cluster := context.Query("cluster")
+	if key == "" {
+		context.JSON(200, struct {
+			Code string `json:"code"`
+			Msg  string `json:"msg"`
+		}{
+			"200", "empty cluster",
+		})
+		return
+	}
+	name := context.Param("name")
+	namespaceID := namespace_controller.GetNamespaceId(context)
+	provider, ok := m.providers.Provider(name)
+	if !ok {
+		context.JSON(200, struct {
+			Code string `json:"code"`
+			Msg  string `json:"msg"`
+		}{
+			"200", fmt.Sprintf("not support data for %s", name),
+		})
+		return
+	}
+
+	status := provider.Status(key, namespaceID, cluster)
+
+	context.JSON(200, map[string]interface{}{
+		"code": "00000",
+		"data": map[string]interface{}{
+			"status": status,
 		},
 	})
 
@@ -103,6 +150,13 @@ func NewModule() *Module {
 			Path:        fmt.Sprintf("/api/common/provider/:name"),
 			Handler:     "core.provider",
 			HandlerFunc: []apinto_module.HandlerFunc{m.provider},
+			Labels:      apinto_module.RouterLabelAssets,
+		},
+		{
+			Method:      http.MethodGet,
+			Path:        fmt.Sprintf("/api/common/status"),
+			Handler:     "core.provider",
+			HandlerFunc: []apinto_module.HandlerFunc{m.status},
 			Labels:      apinto_module.RouterLabelAssets,
 		},
 	}
