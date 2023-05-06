@@ -49,5 +49,6 @@ func init() {
 
 	apintoModule.Register("dynamic.apinto.com", dynamic_controller.NewDynamicModuleDriver(true, false, true, true))
 	apintoModule.Register("upstream-2.apinto.com", dynamic_controller.NewDynamicModuleDriver(true, false, false, false))
+	apintoModule.Register("discovery-2.apinto.com", dynamic_controller.NewDynamicModuleDriver(true, false, false, false))
 
 }
