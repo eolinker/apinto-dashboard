@@ -13,16 +13,31 @@ import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { IntelligentPluginEditComponent } from './IntelligentPluginEditComponent'
 import { SelectOption } from 'eo-ng-select'
-import axios from 'axios'
-import { action } from '@formily/reactive'
 
 const containerElementName = 'customReactComponentContainer'
 
 @Component({
   selector: 'formily2-react-wrapper',
   template: `<span #${containerElementName}></span>`,
-  // styleUrls: [''],
-  encapsulation: ViewEncapsulation.None
+  styles: [
+    `
+      :host ::ng-deep {
+        .ant-input-affix-wrapper,
+        textarea,
+        .ant-input-number,
+        .ant-formily-array-items,
+        .ant-select {
+          width: 367px;
+          min-height: 32px;
+        }
+
+        .ant-formily-array-items .ant-select {
+          width: unset;
+        }
+
+      }
+    `
+  ]
 })
 export class CustomReactComponentWrapperComponent {
   @ViewChild(containerElementName, { static: true }) containerRef!: ElementRef
