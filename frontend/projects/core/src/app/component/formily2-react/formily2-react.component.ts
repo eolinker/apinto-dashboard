@@ -31,6 +31,7 @@ import { SelectOption } from 'eo-ng-select'
         (onSubmit)="handlerSubmit($event)"
        ></formily2-react-wrapper>
 
+       <dialog-react-wrapper></dialog-react-wrapper>
        <div  class="mt-[50px] " *ngIf="value">
           <p class="font-bold">提交后的数据如下：</p>
           <p class="border-[1px] border-solid border-BORDER">{{value}}
@@ -63,12 +64,10 @@ export class Formily2ReactComponent {
   form:any
   value:any
   handlerSubmit ($event:any) {
-    console.log($event)
     this.value = JSON.stringify($event)
   }
 
   changeSchema () {
-    console.log(this.renderSchema)
     if (!this.renderSchema) {
       return
     }
