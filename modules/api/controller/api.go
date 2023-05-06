@@ -488,10 +488,10 @@ func (a *apiController) online(ginCtx *gin.Context) {
 	}
 
 	router, err := a.apiService.OnlineAPI(ginCtx, namespaceId, userId, apiUUID, input.ClusterNames)
-	if err != nil && router == nil {
+	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
-	} else if err == nil {
+	} else if len(router) == 0 {
 		ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 		return
 	}

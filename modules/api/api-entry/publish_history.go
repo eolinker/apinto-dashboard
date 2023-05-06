@@ -9,6 +9,7 @@ type ApiPublishHistory struct {
 	NamespaceId int
 	Desc        string
 	VersionId   int
+	Target      int
 	APIVersionConfig
 	OptType  int
 	Operator int
