@@ -39,7 +39,7 @@ export class ApiPublishComponent implements OnInit {
   }
 
   getPublishList () {
-    this.api.get('router/online/info').subscribe((resp:{code:number, msg:string, data:{info:ApiData, clusters:ApiPublishItem[]}}) => {
+    this.api.get('router/online/info', { uuid: this.apiUuid }).subscribe((resp:{code:number, msg:string, data:{info:ApiData, clusters:ApiPublishItem[]}}) => {
       if (resp.code === 0) {
         this.apiInfo = resp.data.info
         this.publishList = resp.data.clusters
