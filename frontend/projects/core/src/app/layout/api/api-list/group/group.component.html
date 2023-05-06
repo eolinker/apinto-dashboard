@@ -16,7 +16,6 @@
     >
       <div class="flex items-center justify-between px-[11px] py-btnbase">
         <eo-ng-search-input-group
-          class="w-[calc(100%_-_40px)]"
           [eoInputVal]="queryName"
           [eoNoWidth]="true"
           (eoClick)="queryName = ''"
@@ -29,7 +28,7 @@
           />
         </eo-ng-search-input-group>
 
-        <button
+        <!-- <button
           eo-ng-button
           nzType="default"
           class="p-0 ml-[10px] group-icon"
@@ -37,7 +36,7 @@
           (click)="addGroupModal('root')"
         >
           <svg class="iconpark-icon"><use href="#xinzengfenzu"></use></svg>
-        </button>
+        </button> -->
       </div>
 
       <div
@@ -61,6 +60,18 @@
             [nzTreeTemplate]="nzTreeTpl"
             [nzSearchValue]="queryName"
           ></eo-ng-tree-default>
+        </div>
+
+        <div class="mt-formtop">
+          <a
+            class="ml-[28px] flex items-center"
+            eoNgUserAccess="router/api"
+            (click)="addGroupModal('root')"
+          >
+            <svg class="w-[16px] h-[16px] mr-[2px]">
+              <use href="#tianjia"></use></svg
+            ><span>新增分组</span>
+          </a>
         </div>
         <ng-template #nzTreeTpl let-node let-origin="origin">
           <div class="custom-node">
