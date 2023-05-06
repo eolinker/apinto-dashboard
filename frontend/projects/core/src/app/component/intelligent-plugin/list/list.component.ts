@@ -141,15 +141,15 @@ export class IntelligentPluginListComponent implements OnInit {
 
   // 获取列表渲染配置、表单渲染配置
   getConfig (data:DynamicConfig) {
-    this.pluginName = data.title
-    this.getTableConfig(data.fields) // 获取列表配置
-    this.tableData.data = data.list // 获取列表数据
-    this.driverOptions = data.drivers.map((driver:DynamicDriverData) => {
-      return { label: driver.title, value: driver.name }
-    })
     this.navigationService.reqFlashBreadcrumb([
       { title: data.title }
     ])
+    this.pluginName = data.title
+    this.getTableConfig(data.fields) // 获取列表配置
+    this.tableData.data = data.list // 获取列表数据
+    this.driverOptions = data.drivers?.map((driver:DynamicDriverData) => {
+      return { label: driver.title, value: driver.name }
+    }) || []
   }
 
   refreshTableData (tableData:Array<{[k:string]:any}>, statusData:DynamicListStatus) {

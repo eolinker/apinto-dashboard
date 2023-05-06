@@ -20,10 +20,7 @@ export const SimpleMapComponent = React.forwardRef(
         : [{ key: '', value: '' }]
     )
 
-    console.log(placeholderKey, placeholderValue)
-
     React.useImperativeHandle(ref, () => ({}))
-    console.log(kvList)
 
     const emitNewArr = () => {
       const res: { [k: string]: any } = {}

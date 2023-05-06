@@ -171,7 +171,6 @@ export class CustomReactComponentWrapperComponent {
   reactComponent: React.RefObject<any> = React.createRef()
   constructor() {
     this.handleDivClicked = this.handleDivClicked.bind(this)
-    console.log(this)
   }
 
   public handleDivClicked() {
@@ -195,8 +194,6 @@ export class CustomReactComponentWrapperComponent {
   }
 
   handlerSubmit = (value: any) => {
-    console.log(value)
-    console.log(this?.onSubmit)
     this?.onSubmit && this?.onSubmit?.emit(value)
   }
 

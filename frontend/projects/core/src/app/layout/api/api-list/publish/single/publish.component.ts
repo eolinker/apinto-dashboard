@@ -24,6 +24,7 @@ export class ApiPublishComponent implements OnInit {
   moduleName:string = ''
   closeModal:any
   nzDisabled:boolean = false
+  getApisData:any
   constructor (
     private message: EoNgFeedbackMessageService,
     private service:RouterService,
@@ -42,6 +43,11 @@ export class ApiPublishComponent implements OnInit {
     this.api.get('router/online/info', { uuid: this.apiUuid }).subscribe((resp:{code:number, msg:string, data:{info:ApiData, clusters:ApiPublishItem[]}}) => {
       if (resp.code === 0) {
         this.apiInfo = resp.data.info
+        if (this.apiInfo.scheme === 'websocket') {
+          this.apiInfo.method = '-'
+        } else if (!this.apiInfo.method.length) {
+          this.apiInfo.method = 'ALL'
+        }
         this.publishList = resp.data.clusters
       }
     })
@@ -86,6 +92,7 @@ export class ApiPublishComponent implements OnInit {
       if (resp.code === 0) {
         this.message.success(resp.msg)
         this.closeModal && this.closeModal()
+        this.getApisData && this.getApisData()
       }
     })
   }
@@ -96,10 +103,11 @@ export class ApiPublishComponent implements OnInit {
     }).map((item) => {
       return item.name
     })
-    this.api.put('router/offline', { clusterNames: cluster }, { uuid: this.apiUuid }).subscribe((resp:any) => {
+    this.api.put('router/online', { clusterNames: cluster }, { uuid: this.apiUuid }).subscribe((resp:any) => {
       if (resp.code === 0) {
         this.message.success(resp.msg)
         this.closeModal && this.closeModal()
+        this.getApisData && this.getApisData()
       }
     })
   }
