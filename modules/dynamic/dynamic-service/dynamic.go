@@ -388,11 +388,10 @@ func (d *dynamicService) ClusterStatus(ctx context.Context, namespaceId int, pro
 		var operator int
 		var updateTime string
 		v, err := d.publishHistoryStore.GetLastPublishHistory(ctx, map[string]interface{}{
-			"namespace":    namespaceId,
-			"cluster":      c.Id,
-			"target":       moduleInfo.Id,
-			"version_name": moduleInfo.Version,
-			"kind":         "dynamic_module",
+			"namespace": namespaceId,
+			"cluster":   c.Id,
+			"target":    moduleInfo.Id,
+			"kind":      "dynamic_module",
 		})
 		if err != nil {
 			if err != gorm.ErrRecordNotFound {
