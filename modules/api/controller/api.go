@@ -191,14 +191,23 @@ func (a *apiController) routers(ginCtx *gin.Context) {
 	}
 	apis := make([]*api_dto.APIListItem, 0, len(apiList))
 	for _, item := range apiList {
+		publish := make([]*api_dto.APIListItemPublish, 0, len(item.Publish))
+		for _, p := range item.Publish {
+			publish = append(publish, &api_dto.APIListItemPublish{
+				Name:   p.Name,
+				Status: enum.OnlineStatus(p.Status),
+			})
+		}
 		api := &api_dto.APIListItem{
 			GroupUUID:   item.GroupUUID,
 			APIUUID:     item.APIUUID,
 			APIName:     item.APIName,
+			Scheme:      item.Scheme,
 			Method:      item.Method,
 			ServiceName: item.ServiceName,
 			RequestPath: item.RequestPath,
-			Publish:     nil, //TODO
+			IsDisable:   item.IsDisable,
+			Publish:     publish,
 			Source:      item.Source,
 			UpdateTime:  common.TimeToStr(item.UpdateTime),
 			IsDelete:    item.IsDelete,
