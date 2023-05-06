@@ -254,6 +254,11 @@ func (a *apiService) GetAPIList(ctx context.Context, namespaceID int, groupUUID,
 		return nil, 0, err
 	}
 
+	clusterInfos, err := a.clusterService.GetAllCluster(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
 	for _, api := range apis {
 		version := versionMap[api.Id]
 
@@ -2106,7 +2111,7 @@ func (a *apiService) IsAPIOnline(ctx context.Context, clusterName, clusterAddr s
 		log.Errorf("get cluster status error: %w", err)
 		return false
 	}
-	_, err = client.Version("api", apiInfo.UUID)
+	_, err = client.Version("router", apiInfo.UUID)
 	if err != nil {
 		return false
 	}
@@ -2244,11 +2249,10 @@ func (a *apiService) ClustersStatus(ctx context.Context, namespaceId, apiId int,
 		var operator int
 		var updateTime string
 		v, err := a.apiPublishHistory.GetLastPublishHistory(ctx, map[string]interface{}{
-			"namespace":    namespaceId,
-			"cluster":      c.Id,
-			"target":       apiId,
-			"version_name": apiVersion,
-			"kind":         "api",
+			"namespace": namespaceId,
+			"cluster":   c.Id,
+			"target":    apiId,
+			"kind":      "api",
 		})
 		if err != nil {
 			if err != gorm.ErrRecordNotFound {
@@ -2277,7 +2281,7 @@ func (a *apiService) ClustersStatus(ctx context.Context, namespaceId, apiId int,
 			log.Errorf("get cluster status error: %w", err)
 			continue
 		}
-		version, err := client.Version("api", apiUUID)
+		version, err := client.Version("router", apiUUID)
 		if err != nil {
 			result = append(result, &apimodel.ApiCluster{
 				Name:   c.Name,
@@ -2311,6 +2315,29 @@ func (a *apiService) ClustersStatus(ctx context.Context, namespaceId, apiId int,
 		})
 	}
 	return online, result, nil
+}
+
+func (a *apiService) getApintoClustersVersions(ctx context.Context) (map[string]map[string]string, error) {
+	clusters, err := a.clusterService.GetAllCluster(ctx)
+	if err != nil {
+		return nil, err
+	}
+	results := make(map[string]map[string]string, len(clusters))
+
+	for _, c := range clusters {
+		client, err := v2.GetClusterClient(c.Name, c.Addr)
+		if err != nil {
+			log.Errorf("get cluster %s Client error: %w", c.Name, err)
+			continue
+		}
+		versions, err := client.Versions("router")
+		if err != nil {
+			log.Errorf("get cluster status error: %w", err)
+			continue
+		}
+		results[c.Name] = versions
+	}
+	return results, nil
 }
 
 func (a *apiService) isServiceOnline(namespaceId int, clusterName, serviceName string) bool {

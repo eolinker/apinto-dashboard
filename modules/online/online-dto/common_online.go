@@ -12,5 +12,5 @@ type OnlineOut struct {
 }
 
 type UpdateOnlineStatusInput struct {
-	ClusterNames []string `json:"cluster_names"`
+	ClusterName string `json:"cluster_name"`
 }
