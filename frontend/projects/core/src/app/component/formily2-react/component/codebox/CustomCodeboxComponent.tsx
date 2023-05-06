@@ -47,7 +47,7 @@ export const CustomCodeboxComponent = React.forwardRef(
     }
 
     return (
-      <div>
+      <div className="w-[524px] border-[1px] border-solid border-BORDER">
         <AceEditor
           mode={mode}
           theme={theme}

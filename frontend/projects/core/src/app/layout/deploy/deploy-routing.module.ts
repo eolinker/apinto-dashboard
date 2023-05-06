@@ -15,6 +15,7 @@ import { DeployPluginCreateComponent } from './plugin/create/create.component'
 import { DeployPluginListComponent } from './plugin/list/list.component'
 import { DeployPluginMessageComponent } from './plugin/message/message.component'
 import { DeployClusterPluginComponent } from './cluster/plugin/plugin.component'
+import { DeployClusterMessageComponent } from './cluster/message/message.component'
 const routes: Routes = [{
   path: '',
   component: DeployClusterComponent,
@@ -57,7 +58,12 @@ const routes: Routes = [{
             {
               path: 'plugin',
               component: DeployClusterPluginComponent
+            },
+            {
+              path: 'message',
+              component: DeployClusterMessageComponent
             }
+
           ]
         }]
     },

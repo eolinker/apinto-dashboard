@@ -266,6 +266,7 @@ export const DeployClusterEnvConfigThead:THEAD_TYPE[] = [
 
 export const ClustersThead: THEAD_TYPE[] = [
   { title: '集群名称' },
+  { title: '描述' },
   { title: '环境' },
   { title: '状态' },
   {

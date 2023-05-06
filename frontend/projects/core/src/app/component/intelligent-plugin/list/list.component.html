@@ -21,7 +21,7 @@
         nzMode="multiple"
         nzPlaceHolder="所有集群"
         [(ngModel)]="cluster"
-        (ngModelChange)="getTableData()"
+        (nzOpenChange)="$event ? null : getTableData()"
         [nzOptions]="clusterOptions"
         [nzDisabled]="nzDisabled"
         (disabledEdit)="disabledEdit($event)"

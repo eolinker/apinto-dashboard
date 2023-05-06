@@ -1562,7 +1562,7 @@ nz-upload.ant-btn-primary {
 .ant-input-group.ant-input-group-compact .ant-cascader-picker .ant-input,
 .ant-input-group.ant-input-group-compact .ant-select .ant-select-selector,
 .ant-input-group.ant-input-group-compact input.ant-input {
-  border-radius: 0 !important;
+  // border-radius: 0 !important;
 }
 
 .ant-input-group.ant-input-group-compact
@@ -1672,4 +1672,9 @@ eo-ng-radio-group.date-picker-button-group
 
 .ant-input-affix-wrapper {
   transition: none;
+}
+
+// 动态渲染的react组件中的下拉列表受ng-zorro-antd影响，此处做特殊处理
+.ant-select-dropdown:not(eo-ng-option-container) {
+  position: absolute;
 }

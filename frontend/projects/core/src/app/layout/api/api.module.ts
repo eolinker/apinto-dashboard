@@ -36,8 +36,6 @@ import { EoNgApintoTableModule } from 'projects/eo-ng-apinto-table/src/public-ap
 import { NzUploadModule } from 'ng-zorro-antd/upload'
 import { NzDropDownModule } from 'ng-zorro-antd/dropdown'
 import { ApiListComponent } from './api-list/api-list.component'
-import { ApiContentComponent } from './api-list/content/content.component'
-import { ApiCreateComponent } from './api-list/create/create.component'
 import { ApiManagementComponent } from './api-list/group/group.component'
 import { ApiManagementListComponent } from './api-list/list/list.component'
 import { ApiMessageComponent } from './api-list/message/message.component'
@@ -57,13 +55,16 @@ import { ApiPluginConfigFormComponent } from './plugin/config/form/form.componen
 import { ApiPluginConfigTableComponent } from './plugin/config/table/table.component'
 import { ApiPluginTemplatePublishComponent } from './plugin/publish/publish.component'
 import { EoNgCopyModule } from 'eo-ng-copy'
+import { ApiHttpCreateComponent } from './api-list/create/http-create/http-create.component'
+import { ApiWebsocketCreateComponent } from './api-list/create/websocket-create/websocket-create.component'
+import { NzTypographyModule } from 'ng-zorro-antd/typography'
+import { ApiHttpMessageComponent } from './api-list/message/http-message/http-message.component'
+import { ApiWebsocketMessageComponent } from './api-list/message/websocket-message/websocket-message.component'
 
 @NgModule({
   declarations: [
     ApiManagementComponent,
     ApiManagementListComponent,
-    ApiCreateComponent,
-    ApiContentComponent,
     ApiMessageComponent,
     ApiPublishComponent,
     RouterComponent,
@@ -81,7 +82,11 @@ import { EoNgCopyModule } from 'eo-ng-copy'
     ApiPluginTemplateMessageComponent,
     ApiPluginConfigFormComponent,
     ApiPluginConfigTableComponent,
-    ApiPluginTemplatePublishComponent
+    ApiPluginTemplatePublishComponent,
+    ApiHttpCreateComponent,
+    ApiWebsocketCreateComponent,
+    ApiHttpMessageComponent,
+    ApiWebsocketMessageComponent
   ],
   imports: [
     EoNgLayoutModule,
@@ -120,7 +125,8 @@ import { EoNgCopyModule } from 'eo-ng-copy'
     NzUploadModule,
     NzDropDownModule,
     EoNgCodeboxModule,
-    EoNgCopyModule
+    EoNgCopyModule,
+    NzTypographyModule
   ],
   exports: [
     MatchTableComponent,

@@ -6,28 +6,21 @@
     [formGroup]="validateForm"
   >
     <div
-      class="list-header mt-formtop flex-nowrap items-center justify-between"
+      *ngIf="!nodesTableShow"
+      class="list-header flex-nowrap items-center justify-between"
     >
       <nz-form-item>
         <nz-form-label [nzSpan]="7" nzRequired>集群名称：</nz-form-label>
 
-        <nz-form-control [nzSpan]="12" [nzErrorTip]="nameErrorTpl">
+        <nz-form-control [nzSpan]="12">
           <input
             class="w-INPUT_NORMAL"
             eo-ng-input
             #clusterNameInput
             formControlName="clusterName"
-            placeholder="英文数字下划线组合，首字母必须为英文"
+            placeholder="请输入集群名称"
+            eoNgUserAccess="deploy/cluster"
           />
-
-          <ng-template #nameErrorTpl let-control>
-            <ng-container *ngIf="control.hasError('pattern')"
-              >英文数字下划线任意一种，首字母必须为英文</ng-container
-            >
-            <ng-container *ngIf="control.hasError('required')"
-              >必填项</ng-container
-            ></ng-template
-          >
         </nz-form-control>
       </nz-form-item>
 
@@ -40,6 +33,7 @@
             formControlName="envValue"
             nzAllowClear
             [nzOptions]="environmentList"
+            eoNgUserAccess="deploy/cluster"
           ></eo-ng-select>
         </nz-form-control>
       </nz-form-item>
@@ -54,6 +48,7 @@
             eo-ng-input
             formControlName="clusterDesc"
             placeholder="请输入"
+            eoNgUserAccess="deploy/cluster"
           ></textarea>
         </nz-form-control>
       </nz-form-item>
@@ -62,75 +57,76 @@
         <nz-form-label [nzSpan]="7" nzRequired
           >集群地址(网关节点)：</nz-form-label
         >
-
-        <nz-form-control [nzSpan]="12" [nzErrorTip]="nodeErrorTpl">
-          <div class="flex">
+        <nz-form-control
+          [nzSpan]="12"
+          [nzValidateStatus]="
+            startCheckCluster && validateForm.controls['clusterAddr'].invalid
+              ? 'error'
+              : ''
+          "
+          [nzErrorTip]="nodeErrorTpl"
+        >
+          <eo-ng-input-group nzCompact class="w-INPUT_NORMAL">
+            <eo-ng-select
+              [(ngModel)]="clusterProtocol"
+              [ngModelOptions]="{ standalone: true }"
+              (ngModelChange)="checkClusterError = false"
+              class="w-[25%]"
+            >
+              <eo-ng-option
+                [nzLabel]="'Http'"
+                [nzValue]="'http'"
+              ></eo-ng-option>
+              <eo-ng-option
+                [nzLabel]="'Https'"
+                [nzValue]="'https'"
+              ></eo-ng-option>
+            </eo-ng-select>
             <input
-              class="w-INPUT_NORMAL"
+              class="w-[75%]"
+              type="text"
               eo-ng-input
               formControlName="clusterAddr"
               placeholder="请输入"
             />
-            <button
-              eo-ng-button
-              type="button"
-              class="ant-btn-primary ml-btnybase"
-              (click)="testCluster()"
-              [nzLoading]="testButtonLoading"
-            >
-              测试
-            </button>
-          </div>
-          <ng-template #nodeErrorTpl let-control>
-            <ng-container *ngIf="control.hasError('required')"
+          </eo-ng-input-group>
+
+          <ng-template #nodeErrorTpl>
+            <ng-container
+              *ngIf="validateForm.controls['clusterAddr'].hasError('required')"
               >请输入集群地址</ng-container
             >
-            <ng-container *ngIf="control.hasError('pattern')"
+            <ng-container
+              *ngIf="validateForm.controls['clusterAddr'].hasError('pattern')"
               >集群地址输入错误，请重新输入</ng-container
             >
 
-            <ng-container *ngIf="control.hasError('source')"
-              >集群地址需要通过测试</ng-container
+            <ng-container
+              *ngIf="validateForm.controls['clusterAddr'].hasError('source')"
+              >无法连接该集群，请检查地址是否有误，修改后重试</ng-container
             >
           </ng-template>
         </nz-form-control>
       </nz-form-item>
     </div>
-    <div class="mt-btnybase mb-0" style="padding-bottom: '0px'">
-      <nz-form-item *ngIf="nodesTableShow" class="mb-0">
-        <nz-form-control [nzOffset]="7" [nzSpan]="12">
-          <div style="width: 524px">
-            <eo-ng-apinto-table
-              [nzTbody]="nodesTableBody"
-              [nzThead]="nodesTableHeadName"
-              [nzData]="nodesList"
-              [nzNoScroll]="true"
-              nzTableLayout="fixed"
-            >
-            </eo-ng-apinto-table>
-          </div>
-        </nz-form-control>
-      </nz-form-item>
-    </div>
-    <div class="list-footer">
-      <nz-form-item
-        class="mb-0 sticky bg-white bottom-0 py-mbase z-50"
-        *ngIf="nodesTableShow"
-      >
-        <nz-form-control [nzOffset]="7">
-          <button
-            class="ant-btn-primary"
-            eo-ng-button
-            [nzLoading]="submitButtonLoading"
-            (click)="saveCluster()"
-          >
-            保存
-          </button>
-          <button eo-ng-button class="ml-btnybase" (click)="cancel()">
-            取消
-          </button>
-        </nz-form-control>
-      </nz-form-item>
+    <div
+      *ngIf="nodesTableShow"
+      class="mt-btnybase mb-0"
+      style="padding-bottom: '0px'"
+    >
+      <div style="width: 524px; margin: auto">
+        <p class="font-bold mb-btnybase">
+          检查通过。该集群有{{ nodesList.length || 0 }}个节点
+        </p>
+        <eo-ng-apinto-table
+          [nzTbody]="nodesTableBody"
+          [nzThead]="nodesTableHeadName"
+          [nzData]="nodesList"
+          [nzNoScroll]="true"
+          nzTableLayout="fixed"
+        >
+        </eo-ng-apinto-table>
+      </div>
     </div>
   </form>
 </div>

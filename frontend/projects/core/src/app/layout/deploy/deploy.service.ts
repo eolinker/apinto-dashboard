@@ -191,11 +191,17 @@ export class DeployService {
   createClusterTbody (context:DeployClusterListComponent) {
     return [
       {
-        key: 'name',
+        key: 'title',
         copy: true
       },
+      {
+        key: 'desc'
+      },
       { key: 'env' },
-      { key: 'status' },
+      {
+        key: 'status',
+        title: context.clusterStatusTpl
+      },
       {
         type: 'btn',
         right: true,
