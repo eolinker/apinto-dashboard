@@ -16,7 +16,7 @@ export const CustomEnvVariableComponent = React.forwardRef(
       e.preventDefault()
       const handleChooseEnv = ({ key }: any) => {
         modalRef?.destroy()
-        onChange && onChange(key)
+        onChange && onChange('${' + key + '}')
       }
       modalRef = Modal.confirm({
         title: '添加环境变量',
