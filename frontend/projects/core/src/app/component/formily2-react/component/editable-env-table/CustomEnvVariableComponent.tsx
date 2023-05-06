@@ -22,6 +22,7 @@ export const CustomEnvVariableComponent = React.forwardRef(
         title: '添加环境变量',
         width: '900px',
         icon: '',
+        closable: true,
         footer: null,
         content: (
           <div>
