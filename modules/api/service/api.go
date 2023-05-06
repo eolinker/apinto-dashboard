@@ -51,7 +51,6 @@ type apiService struct {
 	apiStore          apiStore.IAPIStore
 	apiStat           apiStore.IAPIStatStore
 	apiVersion        apiStore.IAPIVersionStore
-	apiRuntime        apiStore.IAPIRuntimeStore
 	quoteStore        quote_store.IQuoteStore
 	apiHistory        apiStore.IApiHistoryStore
 	apiPublishHistory apiStore.IApiPublishHistoryStore
@@ -77,7 +76,6 @@ func NewAPIService() apiservice.IAPIService {
 	bean.Autowired(&as.apiStore)
 	bean.Autowired(&as.apiStat)
 	bean.Autowired(&as.apiVersion)
-	bean.Autowired(&as.apiRuntime)
 	bean.Autowired(&as.quoteStore)
 
 	bean.Autowired(&as.service)
@@ -1331,79 +1329,80 @@ func (a *apiService) BatchOnlineCheck(ctx context.Context, namespaceId int, oper
 }
 
 func (a *apiService) OnlineList(ctx context.Context, namespaceId int, uuid string) ([]*apimodel.APIOnlineListItem, error) {
-	apiInfo, err := a.apiStore.GetByUUID(ctx, namespaceId, uuid)
-	if err != nil {
-		return nil, err
-	}
-
-	//获取工作空间下的所有集群
-	clusters, err := a.clusterService.GetByNamespaceId(ctx, namespaceId)
-	if err != nil {
-		return nil, err
-	}
-	clusterMaps := common.SliceToMap(clusters, func(t *cluster_model.Cluster) int {
-		return t.Id
-	})
-
-	//获取当前服务发现下集群运行的版本
-	runtimes, err := a.apiRuntime.GetByTarget(ctx, apiInfo.Id)
-	if err != nil {
-		return nil, err
-	}
-	runtimeMaps := common.SliceToMap(runtimes, func(t *apientry.APIRuntime) int {
-		return t.ClusterID
-	})
-
-	//获取操作人用户列表
-	operatorList := common.SliceToSliceIds(runtimes, func(t *apientry.APIRuntime) int {
-		return t.Operator
-	})
-
-	userInfoMaps, err := a.userInfoService.GetUserInfoMaps(ctx, operatorList...)
-	if err != nil {
-		return nil, err
-	}
-
-	list := make([]*apimodel.APIOnlineListItem, 0, len(clusters))
-
-	latestVersion, err := a.GetLatestAPIVersion(ctx, apiInfo.Id)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, clusterInfo := range clusterMaps {
-		apiOnline := &apimodel.APIOnlineListItem{
-			ClusterName: clusterInfo.Name,
-			ClusterEnv:  clusterInfo.Env,
-			Status:      1, //默认为未上线状态
-		}
-		if runtime, ok := runtimeMaps[clusterInfo.Id]; ok {
-
-			operator := ""
-			if userInfo, uOk := userInfoMaps[runtime.Operator]; uOk {
-				operator = userInfo.NickName
-			}
-
-			apiOnline.Operator = operator
-			apiOnline.Disable = runtime.Disable
-			apiOnline.UpdateTime = runtime.UpdateTime
-			if runtime.IsOnline {
-				apiOnline.Status = 3 //已上线
-			} else {
-				apiOnline.Status = 2 //已下线
-			}
-			//已上线需要对比是否更新过 服务发现信息
-			if apiOnline.Status == 3 && runtime.VersionID != latestVersion.Id {
-				apiOnline.Status = 4 //待更新
-			}
-		}
-
-		list = append(list, apiOnline)
-	}
-	sort.Slice(list, func(i, j int) bool {
-		return list[i].Status > list[j].Status
-	})
-	return list, nil
+	//apiInfo, err := a.apiStore.GetByUUID(ctx, namespaceId, uuid)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	////获取工作空间下的所有集群
+	//clusters, err := a.clusterService.GetByNamespaceId(ctx, namespaceId)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//clusterMaps := common.SliceToMap(clusters, func(t *cluster_model.Cluster) int {
+	//	return t.Id
+	//})
+	//
+	////获取当前服务发现下集群运行的版本
+	//runtimes, err := a.apiRuntime.GetByTarget(ctx, apiInfo.Id)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//runtimeMaps := common.SliceToMap(runtimes, func(t *apientry.APIRuntime) int {
+	//	return t.ClusterID
+	//})
+	//
+	////获取操作人用户列表
+	//operatorList := common.SliceToSliceIds(runtimes, func(t *apientry.APIRuntime) int {
+	//	return t.Operator
+	//})
+	//
+	//userInfoMaps, err := a.userInfoService.GetUserInfoMaps(ctx, operatorList...)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//list := make([]*apimodel.APIOnlineListItem, 0, len(clusters))
+	//
+	//latestVersion, err := a.GetLatestAPIVersion(ctx, apiInfo.Id)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//for _, clusterInfo := range clusterMaps {
+	//	apiOnline := &apimodel.APIOnlineListItem{
+	//		ClusterName: clusterInfo.Name,
+	//		ClusterEnv:  clusterInfo.Env,
+	//		Status:      1, //默认为未上线状态
+	//	}
+	//	if runtime, ok := runtimeMaps[clusterInfo.Id]; ok {
+	//
+	//		operator := ""
+	//		if userInfo, uOk := userInfoMaps[runtime.Operator]; uOk {
+	//			operator = userInfo.NickName
+	//		}
+	//
+	//		apiOnline.Operator = operator
+	//		apiOnline.Disable = runtime.Disable
+	//		apiOnline.UpdateTime = runtime.UpdateTime
+	//		if runtime.IsOnline {
+	//			apiOnline.Status = 3 //已上线
+	//		} else {
+	//			apiOnline.Status = 2 //已下线
+	//		}
+	//		//已上线需要对比是否更新过 服务发现信息
+	//		if apiOnline.Status == 3 && runtime.VersionID != latestVersion.Id {
+	//			apiOnline.Status = 4 //待更新
+	//		}
+	//	}
+	//
+	//	list = append(list, apiOnline)
+	//}
+	//sort.Slice(list, func(i, j int) bool {
+	//	return list[i].Status > list[j].Status
+	//})
+	//return list, nil
+	return nil, nil
 }
 
 func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, uuid string, clusterNames []string) ([]*frontend_model.Router, error) {
@@ -1507,43 +1506,6 @@ func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, u
 	}
 
 	return routerInfos, nil
-}
-
-func (a *apiService) ResetOnline(ctx context.Context, _, clusterId int) {
-	runtimes, err := a.apiRuntime.GetByCluster(ctx, clusterId)
-	if err != nil {
-		log.Errorf("apiService-ResetOnline-getRuntimes clusterId=%d,err=%d", clusterId, err.Error())
-		return
-	}
-	client, err := a.apintoClient.GetClient(ctx, clusterId)
-	if err != nil {
-		log.Errorf("apiService-ResetOnline-getClient clusterId=%d,err=%d", clusterId, err.Error())
-		return
-	}
-
-	for _, runtime := range runtimes {
-		if !runtime.IsOnline {
-			continue
-		}
-
-		apiInfo, err := a.apiStore.Get(ctx, runtime.ApiID)
-		if err != nil {
-			log.Errorf("apiService-ResetOnline-getApiInfo apiId=%d, clusterId=%d,err=%d", runtime.ApiID, clusterId, err.Error())
-			continue
-		}
-
-		version, err := a.apiVersion.Get(ctx, runtime.VersionID)
-		if err != nil {
-			log.Errorf("apiService-ResetOnline-getVersion versionId=%d, clusterId=%d,err=%d", runtime.VersionID, clusterId, err.Error())
-			continue
-		}
-		routerConfig := a.GetAPIDriver(apiInfo.Scheme).ToApinto(apiInfo.UUID, apiInfo.Desc, false, version.Method, version.RequestPath, version.RequestPathLabel, version.ProxyPath, strings.ToLower(version.ServiceName), version.Timeout, version.Retry, version.Hosts, version.Match, version.Header, version.TemplateUUID)
-
-		if err = client.ForRouter().Create(*routerConfig); err != nil {
-			log.Errorf("apiService-ResetOnline-apintoCreate routerConfig=%d, clusterId=%d,err=%d", routerConfig, clusterId, err.Error())
-			continue
-		}
-	}
 }
 
 func (a *apiService) OfflineAPI(ctx context.Context, namespaceId, operator int, uuid string, clusterNames []string) ([]*apimodel.BatchListItem, error) {
