@@ -55,9 +55,8 @@ type APIOnlineListItem struct {
 	ClusterName string
 	ClusterEnv  string
 	Status      int
-	Disable     bool
 	Operator    string
-	UpdateTime  time.Time
+	UpdateTime  string
 }
 
 // SourceListItem 来源列表项
@@ -106,6 +105,7 @@ type APIBatchConf struct {
 type ApiCluster struct {
 	Name       string
 	Title      string
+	Env        string
 	Status     int
 	Updater    string
 	UpdateTime string

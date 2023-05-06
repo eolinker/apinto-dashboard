@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	v2 "github.com/eolinker/apinto-dashboard/client/v2"
+	apinto_module "github.com/eolinker/apinto-module"
 	"reflect"
 	"sort"
 	"strings"
@@ -65,6 +66,7 @@ type apiService struct {
 	apiManager       apiservice.IAPIDriverManager
 
 	pluginTemplateService plugin_template.IPluginTemplateService
+	providers             apinto_module.IProviders
 
 	lockService    locker_service.IAsynLockService
 	importApiCache IImportApiCache
@@ -93,6 +95,7 @@ func NewAPIService() apiservice.IAPIService {
 	bean.Autowired(&as.importApiCache)
 	bean.Autowired(&as.batchApiCache)
 	bean.Autowired(&as.pluginTemplateService)
+	bean.Autowired(&as.providers)
 
 	return as
 }
@@ -978,8 +981,8 @@ func (a *apiService) online(ctx context.Context, namespaceId, operator int, api 
 			onlineList = append(onlineList, item)
 			continue
 		}
-		//TODO 判断上游服务有没有上线
-		if !a.service.IsOnline(ctx, clusterInfo.Id, latest.ServiceID) {
+		//判断上游服务有没有上线
+		if !a.isServiceOnline(namespaceId, clusterInfo.Name, latest.ServiceName) {
 			item.Status = false
 			item.Result = fmt.Sprintf("绑定的%s未上线到%s", latest.ServiceName, clusterInfo.Name)
 			onlineList = append(onlineList, item)
@@ -1260,7 +1263,7 @@ func (a *apiService) BatchOnlineCheck(ctx context.Context, namespaceId int, oper
 		}
 	}
 
-	for serviceID, serName := range checkServiceMap {
+	for _, serName := range checkServiceMap {
 		for _, clusterInfo := range clusterList {
 			item := &apimodel.BatchOnlineCheckListItem{
 				ServiceTemplate: serName,
@@ -1268,8 +1271,8 @@ func (a *apiService) BatchOnlineCheck(ctx context.Context, namespaceId int, oper
 				Status:          true,
 				Solution:        &frontend_model.Router{},
 			}
-			//TODO
-			if isOnline := a.service.IsOnline(ctx, clusterInfo.Id, serviceID); !isOnline {
+
+			if !a.isServiceOnline(namespaceId, clusterInfo.Name, serName) {
 				isAllOnline = false
 				item.Status = false
 				item.Result = fmt.Sprintf("%s未上线到%s", serName, clusterInfo.Name)
@@ -1326,6 +1329,39 @@ func (a *apiService) BatchOnlineCheck(ctx context.Context, namespaceId int, oper
 	}
 
 	return checkList, onlineToken, nil
+}
+
+func (a *apiService) OnlineInfo(ctx context.Context, namespaceId int, uuid string) (*apimodel.APIVersionInfo, []*apimodel.APIOnlineListItem, error) {
+	api, err := a.apiStore.GetByUUID(ctx, namespaceId, uuid)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	version, err := a.GetLatestAPIVersion(ctx, api.Id)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	info := &apimodel.APIVersionInfo{
+		Api:     api,
+		Version: version,
+	}
+
+	_, clusters, err := a.ClustersStatus(ctx, namespaceId, api.Id, api.UUID, api.Version)
+	if err != nil {
+		return nil, nil, err
+	}
+	items := make([]*apimodel.APIOnlineListItem, 0, len(clusters))
+	for _, clu := range clusters {
+		items = append(items, &apimodel.APIOnlineListItem{
+			ClusterName: clu.Name,
+			ClusterEnv:  clu.Env,
+			Status:      clu.Status,
+			Operator:    clu.Updater,
+			UpdateTime:  clu.UpdateTime,
+		})
+	}
+	return info, items, nil
 }
 
 func (a *apiService) OnlineList(ctx context.Context, namespaceId int, uuid string) ([]*apimodel.APIOnlineListItem, error) {
@@ -1447,8 +1483,8 @@ func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, u
 
 	routerInfos := make([]*frontend_model.Router, 0, len(clusterInfos))
 	for _, clusterInfo := range clusterInfos {
-		//TODO 判断上游服务有没有上线
-		if !a.service.IsOnline(ctx, clusterInfo.Id, latestVersion.ServiceID) {
+		//判断上游服务有没有上线
+		if !!a.isServiceOnline(namespaceId, clusterInfo.Name, latestVersion.ServiceName) {
 			routerInfos = append(routerInfos, &frontend_model.Router{
 				Name:   frontend_model.RouterNameServiceOnline,
 				Params: map[string]string{"service_name": latestVersion.ServiceName},
@@ -2219,6 +2255,7 @@ func (a *apiService) ClustersStatus(ctx context.Context, namespaceId, apiId int,
 				result = append(result, &apimodel.ApiCluster{
 					Name:   c.Name,
 					Title:  c.Name,
+					Env:    c.Env,
 					Status: 1, //未发布
 				})
 				continue
@@ -2234,6 +2271,7 @@ func (a *apiService) ClustersStatus(ctx context.Context, namespaceId, apiId int,
 			result = append(result, &apimodel.ApiCluster{
 				Name:   c.Name,
 				Title:  c.Name,
+				Env:    c.Env,
 				Status: 1, //未发布
 			})
 			log.Errorf("get cluster status error: %w", err)
@@ -2244,6 +2282,7 @@ func (a *apiService) ClustersStatus(ctx context.Context, namespaceId, apiId int,
 			result = append(result, &apimodel.ApiCluster{
 				Name:   c.Name,
 				Title:  c.Name,
+				Env:    c.Env,
 				Status: 1, //未发布
 			})
 			continue
@@ -2265,10 +2304,22 @@ func (a *apiService) ClustersStatus(ctx context.Context, namespaceId, apiId int,
 		result = append(result, &apimodel.ApiCluster{
 			Name:       c.Name,
 			Title:      c.Name,
+			Env:        c.Env,
 			Status:     status,
 			Updater:    updater,
 			UpdateTime: updateTime,
 		})
 	}
 	return online, result, nil
+}
+
+func (a *apiService) isServiceOnline(namespaceId int, clusterName, serviceName string) bool {
+	status := a.providers.Status(fmt.Sprintf("%s@service", serviceName), namespaceId, clusterName)
+	isOnline := false
+	switch status {
+	case apinto_module.None, apinto_module.Offline:
+	case apinto_module.Online:
+		isOnline = true
+	}
+	return isOnline
 }
