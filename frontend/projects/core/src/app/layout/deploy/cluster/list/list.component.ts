@@ -137,6 +137,8 @@ export class DeployClusterListComponent implements OnInit {
 
   clusterTableClick= (item:any) => {
     this.router.navigate(['/', 'deploy', 'cluster', 'content', item.data.name])
+    this.service.clusterName = item.data.title
+    this.service.clusterDesc = item.data.desc
   }
 
   addCluster () {

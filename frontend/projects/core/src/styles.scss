@@ -1678,3 +1678,7 @@ eo-ng-radio-group.date-picker-button-group
 .ant-select-dropdown:not(eo-ng-option-container) {
   position: absolute;
 }
+
+textarea.ant-input {
+  max-width: unset;
+}
