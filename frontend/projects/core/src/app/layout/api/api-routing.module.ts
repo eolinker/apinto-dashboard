@@ -1,12 +1,8 @@
 import { NgModule } from '@angular/core'
 import { RouterModule, Routes } from '@angular/router'
 import { ApiListComponent } from './api-list/api-list.component'
-import { ApiContentComponent } from './api-list/content/content.component'
-import { ApiCreateComponent } from './api-list/create/create.component'
 import { ApiManagementComponent } from './api-list/group/group.component'
 import { ApiManagementListComponent } from './api-list/list/list.component'
-import { ApiMessageComponent } from './api-list/message/message.component'
-import { ApiPublishComponent } from './api-list/publish/single/publish.component'
 import { ApiPluginTemplateContentComponent } from './plugin/content/content.component'
 import { ApiPluginTemplateCreateComponent } from './plugin/create/create.component'
 import { ApiPluginTemplateListComponent } from './plugin/list/list.component'
@@ -14,6 +10,10 @@ import { ApiPluginTemplateMessageComponent } from './plugin/message/message.comp
 import { ApiPluginTemplateComponent } from './plugin/plugin.component'
 import { ApiPluginTemplatePublishComponent } from './plugin/publish/publish.component'
 import { RouterComponent } from './router/router.component'
+import { ApiWebsocketCreateComponent } from './api-list/create/websocket-create/websocket-create.component'
+import { ApiHttpCreateComponent } from './api-list/create/http-create/http-create.component'
+import { ApiHttpMessageComponent } from './api-list/message/http-message/http-message.component'
+import { ApiWebsocketMessageComponent } from './api-list/message/websocket-message/websocket-message.component'
 
 const routes: Routes = [{
   path: '',
@@ -35,42 +35,32 @@ const routes: Routes = [{
                 path: ':apiGroupId',
                 component: ApiManagementListComponent
               }]
-            },
-            {
-              path: 'create',
-              component: ApiCreateComponent,
-              children: [{
-                path: ':apiGroupId',
-                component: ApiCreateComponent
-              }]
-            },
-            {
-              path: 'message/:apiId',
-              component: ApiMessageComponent
             }
           ]
         },
         {
           path: 'create',
-          component: ApiCreateComponent,
+          component: ApiHttpCreateComponent,
           children: [{
             path: ':apiGroupId',
-            component: ApiCreateComponent
+            component: ApiHttpCreateComponent
           }]
         },
         {
-          path: 'content/:apiId',
-          component: ApiContentComponent,
-          children: [
-            {
-              path: '',
-              component: ApiMessageComponent
-            },
-            {
-              path: 'publish',
-              component: ApiPublishComponent
-            }
-          ]
+          path: 'create-ws',
+          component: ApiWebsocketCreateComponent,
+          children: [{
+            path: ':apiGroupId',
+            component: ApiWebsocketCreateComponent
+          }]
+        },
+        {
+          path: 'message/:apiId',
+          component: ApiHttpMessageComponent
+        },
+        {
+          path: 'message-ws/:apiId',
+          component: ApiWebsocketMessageComponent
         }
       ]
     },
@@ -86,6 +76,7 @@ const routes: Routes = [{
           path: 'create',
           component: ApiPluginTemplateCreateComponent
         },
+
         {
           path: 'content/:pluginTemplateId',
           component: ApiPluginTemplateContentComponent,

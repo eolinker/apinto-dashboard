@@ -29,6 +29,10 @@ import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navig
 import { DeployService } from '../../deploy.service'
 import { ClustersThead } from '../types/conf'
 import { MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
+import { NzModalRef } from 'ng-zorro-antd/modal'
+import { DeployClusterCreateComponent } from '../create/create.component'
+import { ClusterEnum } from 'projects/core/src/app/constant/type'
+import { SelectOption } from 'eo-ng-select'
 
 @Component({
   selector: 'eo-ng-deploy-cluster-list',
@@ -48,15 +52,20 @@ export class DeployClusterListComponent implements OnInit {
     | undefined
 
   clustersList: Array<object> = []
+  clustersDisplayList: Array<object> = []
   clustersTableHeadName:THEAD_TYPE[] = [...ClustersThead]
-  clustersTableBody: TBODY_TYPE[] = [...this.service.createClusterTbody(this)]
+  clustersTableBody: TBODY_TYPE[] = []
 
-  environmentList: Array<{ label: string; value: any }> = []
+  environmentList: SelectOption[]= []
 
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
 
   nodesTableShow = false
   clusterCanBeCreated: boolean = false
+  modalRef:NzModalRef|undefined
+
+  env:Array<string> = []
+
   // eslint-disable-next-line no-useless-constructor
   constructor (
     private message: EoNgFeedbackMessageService,
@@ -71,16 +80,28 @@ export class DeployClusterListComponent implements OnInit {
 
   ngOnInit (): void {
     this.getClustersData()
+    this.getEnvList()
   }
 
   ngAfterViewInit () {
-    this.clustersTableBody[2].title = this.clusterStatusTpl
+    this.clustersTableBody = [...this.service.createClusterTbody(this)]
   }
 
   getClustersData () {
     this.api.get('clusters').subscribe((resp) => {
       if (resp.code === 0) {
         this.clustersList = resp.data.clusters
+        this.clustersDisplayList = [...this.clustersList]
+      }
+    })
+  }
+
+  getEnvList () {
+    this.api.get('cluster/enum').subscribe((resp: {code:number, data:{ envs:ClusterEnum[]}, msg:string}) => {
+      if (resp.code === 0) {
+        this.environmentList = resp.data.envs.map((env:ClusterEnum) => {
+          return { label: env.name, value: env.name }
+        })
       }
     })
   }
@@ -118,7 +139,89 @@ export class DeployClusterListComponent implements OnInit {
     this.router.navigate(['/', 'deploy', 'cluster', 'content', item.data.name])
   }
 
-  addCluster (): void {
-    this.router.navigate(['/', 'deploy', 'cluster', 'create'])
+  addCluster () {
+    this.modalRef = this.modalService.create({
+      nzTitle: '新建集群',
+      nzWidth: MODAL_SMALL_SIZE,
+      nzContent: DeployClusterCreateComponent,
+      nzComponentParams: {
+        closeModal: () => { this.modalRef?.close() }
+      },
+      nzOnOk: (component:DeployClusterCreateComponent) => {
+        console.log(component)
+      },
+      nzFooter: [{
+        label: '取消',
+        type: 'default',
+        onClick: () => {
+          this.modalRef?.close()
+        }
+      },
+      {
+        label: '下一步，检查集群',
+        type: 'primary',
+        onClick: (context:DeployClusterCreateComponent) => {
+          context.testCluster()
+        },
+        disabled: () => {
+          return this.nzDisabled
+        },
+        show: (context:any) => {
+          return !context.nodesTableShow && !context.checkClusterError
+        },
+        loading: (context:any) => {
+          return context.testButtonLoading
+        }
+      },
+      {
+        label: '重新检查',
+        type: 'primary',
+        onClick: (context:DeployClusterCreateComponent) => {
+          context.testCluster()
+        },
+        disabled: () => {
+          return this.nzDisabled
+        },
+        show: (context:any) => {
+          return !context.nodesTableShow && context.checkClusterError
+        },
+        loading: (context:any) => {
+          return context.testButtonLoading
+        }
+      },
+      {
+        label: '上一步',
+        type: 'default',
+        onClick: (context:DeployClusterCreateComponent) => {
+          context.cancel()
+        },
+        show: (context:any) => {
+          return context.nodesTableShow
+        }
+      },
+      {
+        label: '完成',
+        type: 'primary',
+        onClick: (context:DeployClusterCreateComponent) => {
+          context.saveCluster()
+        },
+        disabled: () => {
+          return this.nzDisabled
+        },
+        show: (context:any) => {
+          return context.nodesTableShow
+        },
+        loading: (context:any) => {
+          return context.submitButtonLoading
+        }
+      }]
+
+    })
+  }
+
+  handleEnvChange () {
+    this.clustersDisplayList = this.clustersList.filter((cluster:any) => {
+      return this.env.indexOf(cluster.env) !== -1
+    })
   }
 }

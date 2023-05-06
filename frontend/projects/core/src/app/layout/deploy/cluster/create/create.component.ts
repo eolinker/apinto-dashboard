@@ -8,7 +8,7 @@ import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { ApiService } from 'projects/core/src/app/service/api.service'
 import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 import { DeployClusterNodeTbody, DeployClusterNodeThead } from '../types/conf'
-
+import { v4 as uuidv4 } from 'uuid'
 @Component({
   selector: 'eo-ng-cluster-create',
   templateUrl: './create.component.html',
@@ -35,6 +35,14 @@ export class DeployClusterCreateComponent implements OnInit {
   clusterCanBeCreated: boolean = false
   testFlag:boolean = false
   testPassAddr:string = '' // 通过测试的集群地址
+
+  autoTips: Record<string, Record<string, string>> = defaultAutoTips
+  clusterProtocol:string = 'http'
+  startCheckCluster:boolean = false
+  checkClusterError:boolean = false // 接口检查该网关节点无法连接
+  checkClusterErrorAddr:string = ''// 接口检查该网关节点无法连接
+  closeModal:Function|undefined
+  newAddr:string = '' // 拼接后的地址
   constructor (
     private message: EoNgFeedbackMessageService,
     private api: ApiService,
@@ -42,7 +50,7 @@ export class DeployClusterCreateComponent implements OnInit {
     private fb: UntypedFormBuilder,
     private navigationService: EoNgNavigationService) {
     this.validateForm = this.fb.group({
-      clusterName: ['', [Validators.required, Validators.pattern('^[a-zA-Z][a-zA-Z0-9_]*')]],
+      clusterName: ['', [Validators.required]],
       envValue: ['', [Validators.required]],
       clusterDesc: [''],
       clusterAddr: ['', [this.clusterAddrVadidator]]
@@ -58,8 +66,6 @@ export class DeployClusterCreateComponent implements OnInit {
   ngAfterViewInit ():void {
     this.nodesTableBody[3].title = this.nodeStatusTpl
   }
-
-  autoTips: Record<string, Record<string, string>> = defaultAutoTips
 
   getEnvList () {
     this.api.get('enum/envs').subscribe((resp:{code:number, data:{envs:Array<{name:string, value:string}>}, msg:string}) => {
@@ -81,12 +87,22 @@ export class DeployClusterCreateComponent implements OnInit {
   }
 
   testCluster (): void {
-    if (this.validateForm.controls['clusterAddr'].value && (/(\w+):\/\/([a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\.?)(:\d+)/.test(this.validateForm.controls['clusterAddr'].value) || /(\w+):\/\/(((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3})(:\d*)/.test(this.validateForm.controls['clusterAddr'].value))) {
+    this.startCheckCluster = true
+    if (this.validateForm.valid) {
       this.testFlag = true
       this.testButtonLoading = true
+      this.newAddr = this.validateForm.controls['clusterAddr'].value
+      if ((/^(\/\/)/).test(this.validateForm.controls['clusterAddr'].value)) {
+        this.newAddr = `${this.clusterProtocol}:${this.newAddr}`
+      } else if ((/^(\/)/).test(this.validateForm.controls['clusterAddr'].value)) {
+        this.newAddr = `${this.clusterProtocol}:/${this.newAddr}`
+      } else {
+        this.newAddr = `${this.clusterProtocol}://${this.newAddr}`
+      }
+
       this.api
         .get('cluster-test', {
-          clusterAddr: this.validateForm.controls['clusterAddr'].value
+          clusterAddr: this.newAddr
         })
         .subscribe((resp) => {
           this.testButtonLoading = false
@@ -104,13 +120,19 @@ export class DeployClusterCreateComponent implements OnInit {
               onlySelf: true
             })
           } else {
+            this.checkClusterError = true
+            this.checkClusterErrorAddr = this.validateForm.controls['clusterAddr'].value
             this.validateForm.controls['clusterAddr'].markAsDirty()
             this.validateForm.controls['clusterAddr'].updateValueAndValidity({ onlySelf: true })
           }
         })
     } else {
-      this.validateForm.controls['clusterAddr'].markAsDirty()
-      this.validateForm.controls['clusterAddr'].updateValueAndValidity({ onlySelf: true })
+      Object.values(this.validateForm.controls).forEach((control) => {
+        if (control.invalid) {
+          control.markAsDirty()
+          control.updateValueAndValidity({ onlySelf: true })
+        }
+      })
     }
   }
 
@@ -118,9 +140,9 @@ export class DeployClusterCreateComponent implements OnInit {
   clusterAddrVadidator = (control: any): { [s: string]: boolean } => {
     if (!control.value) {
       return { error: true, required: true }
-    } else if (!/(\w+):\/\/([a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\.?)(:\d+)/.test(control.value) && !/(\w+):\/\/(((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3})(:\d*)/.test(control.value)) {
+    } else if (!/([a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\.?)(:\d+)/.test(control.value) && !/(((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3})(:\d*)/.test(control.value)) {
       return { error: true, pattern: true }
-    } else if (this.testFlag && control.value !== this.testPassAddr) {
+    } else if (this.checkClusterError && control.value === this.checkClusterErrorAddr) {
       return { source: true, error: true }
     }
     return {}
@@ -130,10 +152,12 @@ export class DeployClusterCreateComponent implements OnInit {
   saveCluster () {
     this.validateForm.markAllAsTouched()
     if (this.validateForm.valid || this.checkValidForm()) {
+      const name:string = `cluster_${uuidv4().replace(/-/g, '_')}`
       const params = {
-        name: this.validateForm.controls['clusterName'].value,
+        title: this.validateForm.controls['clusterName'].value,
+        name: name,
         desc: this.validateForm.controls['clusterDesc'].value || '',
-        addr: this.validateForm.controls['clusterAddr'].value,
+        addr: this.newAddr,
         source: this.source || '',
         env: this.validateForm.controls['envValue'].value
       }
@@ -141,7 +165,7 @@ export class DeployClusterCreateComponent implements OnInit {
       this.api.post('cluster', params).subscribe((resp) => {
         this.submitButtonLoading = false
         if (resp.code === 0) {
-          this.router.navigate(['/', 'deploy', 'cluster', 'content', this.validateForm.controls['clusterName'].value])
+          this.router.navigate(['/', 'deploy', 'cluster', 'content', name])
         }
       })
     } else {
@@ -165,6 +189,10 @@ export class DeployClusterCreateComponent implements OnInit {
 
   // 取消新建集群
   cancel () {
-    this.router.navigate(['/', 'deploy', 'cluster'])
+    if (this.nodesTableShow) {
+      this.nodesTableShow = false
+    } else {
+      this.closeModal && this.closeModal()
+    }
   }
 }

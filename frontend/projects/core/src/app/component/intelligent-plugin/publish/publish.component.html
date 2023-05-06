@@ -35,3 +35,7 @@
     >
   </div>
 </div>
+
+<ng-template #clusterStatusTpl let-item="item">
+  <eo-ng-table-status [status]="item.status"></eo-ng-table-status>
+</ng-template>

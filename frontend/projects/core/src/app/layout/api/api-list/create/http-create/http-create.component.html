@@ -1,0 +1,304 @@
+<div class="mt-formtop w-[650px] m-auto pb-blockbase">
+  <form
+    nz-form
+    [nzNoColon]="true"
+    [nzAutoTips]="autoTips"
+    [formGroup]="validateForm"
+    autocomplete="off"
+  >
+    <div>
+      <p class="font-bold mb-btnybase">基础信息：</p>
+      <nz-form-item>
+        <nz-form-label [nzSpan]="5" nzRequired
+          >所属分组/API名称：</nz-form-label
+        >
+        <div nz-col [nzSpan]="19">
+          <eo-ng-input-group [nzCompact]="true">
+            <nz-form-control>
+              <eo-ng-tree-select
+                class="w-[202px]"
+                name="header"
+                required
+                formControlName="groupUuid"
+                nzLabelProperty="name"
+                nzValueProperty="uuid"
+                nzPlaceHolder="请选择"
+                eoNgUserAccess="router/api"
+                [nzDisabled]="nzDisabled"
+                (disabledEdit)="disabledEdit($event)"
+                nzDropdownClassName="api-tree-select"
+                [nzNodes]="headerList"
+                nzShowSearch
+                (nzTreeClick)="nzTreeClick($event)"
+              ></eo-ng-tree-select>
+            </nz-form-control>
+            <nz-form-control>
+              <input
+                class="w-[306px]"
+                type="text"
+                eo-ng-input
+                name="name"
+                formControlName="name"
+                placeholder="请输入API名称"
+                required
+                eoNgUserAccess="router/api"
+              />
+            </nz-form-control>
+          </eo-ng-input-group>
+        </div>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label [nzSpan]="5">描述：</nz-form-label>
+        <nz-form-control [nzSpan]="19">
+          <textarea
+            class="w-INPUT_LARGE"
+            name="desc"
+            rows="6"
+            eo-ng-input
+            formControlName="desc"
+            placeholder="请输入"
+            eoNgUserAccess="router/api"
+          ></textarea>
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+
+    <div class="mt-blockbase">
+      <p class="font-bold mb-btnybase">拦截该接口的请求：</p>
+      <p class="font-medium">
+        开启拦截后，网关会拦截所有该路径的请求，相当于防火墙禁用了特定路径的访问。
+      </p>
+
+      <nz-form-item>
+        <nz-form-control>
+          <eo-ng-switch
+            formControlName="isDisable"
+            [nzDisabled]="nzDisabled"
+          ></eo-ng-switch>
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+    <div class="mt-blockbase">
+      <p class="font-bold mb-btnybase">路由匹配规则：</p>
+      <nz-form-item
+        nz-row
+        class="checkbox-group-api"
+        nzSpan="19"
+        [ngClass]="{ 'ant-form-item-has-error': showCheckboxGroupValid }"
+      >
+        <nz-form-label [nzSpan]="5" nzRequired>请求方式：</nz-form-label>
+        <div nz-col [nzSpan]="19" class="min-w-INPUT_LARGE">
+          <label
+            eo-ng-checkbox
+            [nzDisabled]="nzDisabled"
+            name="allChecked"
+            [(ngModel)]="allChecked"
+            (ngModelChange)="updateAllChecked()"
+            [ngModelOptions]="{ standalone: true }"
+          >
+            All
+          </label>
+          <eo-ng-checkbox-group
+            [nzDisabled]="nzDisabled"
+            name="method"
+            [(ngModel)]="methodList"
+            (ngModelChange)="updateSingleChecked()"
+            [ngModelOptions]="{ standalone: true }"
+          ></eo-ng-checkbox-group>
+        </div>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label [nzSpan]="5" nzRequired>请求路径：</nz-form-label>
+        <nz-form-control
+          [nzSpan]="19"
+          nzValidatingTip="Validating..."
+          [nzErrorTip]="nameErrorTpl"
+        >
+          <eo-ng-input-group
+            nzPrefix="/"
+            class="w-INPUT_LARGE"
+            [ngClass]="{ 'bg-DISABLE_BG': nzDisabled }"
+          >
+            <input
+              style="height: unset !important"
+              eo-ng-input
+              name="requestPath"
+              required
+              placeholder="请输入"
+              formControlName="requestPath"
+              (blur)="requestPathChange()"
+              eoNgUserAccess="router/api"
+            />
+          </eo-ng-input-group>
+          <ng-template #nameErrorTpl let-control>
+            <ng-container *ngIf="control.hasError('pattern')"
+              >请求路径不支持含有 ? 的字符串</ng-container
+            >
+            <ng-container *ngIf="control.hasError('required')"
+              >必填项</ng-container
+            ></ng-template
+          >
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label [nzSpan]="5">
+          <span
+            eoNgFeedbackTooltip
+            nzTooltipTitle="匹配应用请求中的请求头参数、cookie、请求参数"
+            nzTooltipPlacement="left"
+            [nzTooltipVisible]="false"
+            nzTooltipTrigger="hover"
+            >高级匹配：
+          </span>
+        </nz-form-label>
+        <nz-form-control [nzSpan]="19">
+          <eo-ng-match-table
+            [(matchList)]="createApiForm.match"
+            [nzDisabled]="nzDisabled"
+          ></eo-ng-match-table>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label [nzSpan]="5"> 访问域名限制： </nz-form-label>
+        <nz-form-control [nzSpan]="19">
+          <eo-ng-apinto-table
+            class="arrayItem hosts"
+            [nzTbody]="hostsTableBody"
+            [nzData]="hostsList"
+            [nzNoScroll]="true"
+          ></eo-ng-apinto-table>
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+    <div class="mt-blockbase">
+      <p class="font-bold mb-btnybase">转发规则：</p>
+      <nz-form-item>
+        <nz-form-label [nzSpan]="5" nzRequired>绑定上游服务：</nz-form-label>
+        <nz-form-control [nzSpan]="19">
+          <eo-ng-select
+            class="w-INPUT_LARGE"
+            name="service"
+            required
+            formControlName="service"
+            [nzOptions]="serviceList"
+            nzPlaceHolder="请选择"
+            [nzDisabled]="nzDisabled"
+          ></eo-ng-select>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label [nzSpan]="5">转发上游路径：</nz-form-label>
+        <nz-form-control [nzSpan]="19">
+          <input
+            class="w-INPUT_LARGE"
+            style="height: unset !important"
+            eo-ng-input
+            placeholder="请输入"
+            name="proxyPath"
+            eoNgUserAccess="router/api"
+            formControlName="proxyPath"
+          />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label [nzSpan]="5" nzRequired>请求超时时间：</nz-form-label>
+        <nz-form-control [nzSpan]="19" nzExtra="单位：ms，最小值：1">
+          <input
+            class="w-INPUT_LARGE"
+            type="number"
+            name="timeout"
+            required
+            eo-ng-input
+            formControlName="timeout"
+            (change)="checkTimeout()"
+            placeholder="请输入"
+            eoNgUserAccess="router/api"
+          />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label [nzSpan]="5" nzRequired>重试次数：</nz-form-label>
+        <nz-form-control [nzSpan]="19">
+          <input
+            class="w-INPUT_LARGE"
+            type="number"
+            eo-ng-input
+            name="retry"
+            placeholder="请输入"
+            formControlName="retry"
+            eoNgUserAccess="router/api"
+          />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item class="mb-0">
+        <nz-form-label [nzSpan]="5">
+          <span
+            eoNgFeedbackTooltip
+            nzTooltipTitle="转发上游请求头新增或改写参数，或删除参数"
+            nzTooltipPlacement="left"
+            [nzTooltipVisible]="false"
+            nzTooltipTrigger="hover"
+            >转发上游请求头：
+          </span>
+        </nz-form-label>
+        <nz-form-control [nzSpan]="19">
+          <div>
+            <button
+              type="button"
+              eoNgUserAccess="router/api"
+              eo-ng-button
+              (click)="openDrawer('proxyHeader')"
+            >
+              添加配置
+            </button>
+          </div>
+          <div
+            *ngIf="createApiForm.proxyHeader.length > 0"
+            class="mt-btnybase w-[524px]"
+          >
+            <eo-ng-apinto-table
+              [nzTbody]="proxyHeaderTableBody"
+              [nzThead]="proxyHeaderTableHeadName"
+              [nzData]="createApiForm.proxyHeader"
+              [nzTrClick]="proxyTableClick"
+              [nzMaxOperatorButton]="2"
+              [nzNoScroll]="true"
+            >
+            </eo-ng-apinto-table>
+          </div>
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+    <div class="mt-blockbase">
+      <p class="font-bold mb-btnybase">API 操作：</p>
+      <nz-form-item>
+        <nz-form-label [nzSpan]="5">绑定插件模板：</nz-form-label>
+        <nz-form-control [nzSpan]="19">
+          <eo-ng-select
+            class="w-INPUT_LARGE"
+            name="templateUuid"
+            formControlName="templateUuid"
+            [nzOptions]="pluginTemplateList"
+            nzPlaceHolder="请选择"
+            [nzDisabled]="nzDisabled"
+            [nzAllowClear]="true"
+          ></eo-ng-select>
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+  </form>
+
+  <ng-template #optTypeTranslateTpl let-item="item">
+    <ng-container [ngSwitch]="item.optType">
+      <span *ngSwitchCase="'ADD'">新增或修改</span>
+      <span *ngSwitchCase="'DELETE'">删除</span>
+    </ng-container>
+  </ng-template>
+</div>
