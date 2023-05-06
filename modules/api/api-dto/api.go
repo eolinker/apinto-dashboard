@@ -10,9 +10,11 @@ type APIListItem struct {
 	GroupUUID   string                `json:"group_uuid"`
 	APIUUID     string                `json:"uuid"`
 	APIName     string                `json:"name"`
+	Scheme      string                `json:"scheme"`
 	Method      []string              `json:"method"`
 	ServiceName string                `json:"service"`
 	RequestPath string                `json:"request_path"`
+	IsDisable   bool                  `json:"is_disable"`
 	Publish     []*APIListItemPublish `json:"publish"`
 	Source      string                `json:"source"`
 	UpdateTime  string                `json:"update_time"`
