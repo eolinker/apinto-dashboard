@@ -11,7 +11,6 @@ import { Component } from '@angular/core'
 import { Router } from '@angular/router'
 import { ApiService } from 'projects/core/src/app/service/api.service'
 import { BaseInfoService } from 'projects/core/src/app/service/base-info.service'
-import { Subscription } from 'rxjs'
 
 @Component({
   selector: 'eo-ng-api-message',
