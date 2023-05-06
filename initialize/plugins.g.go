@@ -24,18 +24,19 @@ var (
 )
 
 type Plugin struct {
-	Id         string `yaml:"id"`
-	Name       string `yaml:"name"`
-	CName      string `yaml:"cname"`
-	Resume     string `yaml:"resume"`
-	Version    string `yaml:"version"`
-	Icon       string `yaml:"icon"`
-	Driver     string `yaml:"driver"`
-	Front      string `yaml:"front"`
-	Navigation string `yaml:"navigation"`
-	GroupID    string `yaml:"group_id"`
-	Type       int    `yaml:"type"`
-	Auto       bool   `yaml:"auto"`
+	Id         string      `yaml:"id"`
+	Name       string      `yaml:"name"`
+	CName      string      `yaml:"cname"`
+	Resume     string      `yaml:"resume"`
+	Version    string      `yaml:"version"`
+	Icon       string      `yaml:"icon"`
+	Driver     string      `yaml:"driver"`
+	Front      string      `yaml:"front"`
+	Navigation string      `yaml:"navigation"`
+	GroupID    string      `yaml:"group_id"`
+	Type       int         `yaml:"type"`
+	Auto       bool        `yaml:"auto"`
+	Define     interface{} `yaml:"define"`
 }
 
 func InitPlugins() error {
@@ -71,6 +72,7 @@ func InitPlugins() error {
 			GroupID:    p.GroupID,
 			Type:       p.Type,
 			Auto:       p.Auto,
+			Define:     p.Define,
 		}
 
 		pluginInfo, has := innerPluginsMap[p.Id]
