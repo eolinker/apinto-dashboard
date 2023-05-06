@@ -10,6 +10,8 @@ import { DeployPluginListComponent } from './plugin/list/list.component'
   providedIn: 'root'
 })
 export class DeployService {
+  clusterName:string = ''
+  clusterDesc:string = ''
   createPluginsTbody = (context:DeployPluginListComponent):EO_TBODY_TYPE[] => {
     return [
       {
@@ -210,6 +212,8 @@ export class DeployService {
             title: '查看',
             click: (item: any) => {
               context.router.navigate(['/', 'deploy', 'cluster', 'content', item.data.name])
+              this.clusterName = item.data.title
+              this.clusterDesc = item.data.desc
             }
           },
           {
