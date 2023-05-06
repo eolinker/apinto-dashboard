@@ -208,10 +208,10 @@ export const IntelligentPluginEditComponent = React.forwardRef(
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const getDiscovery = async (skill: string) => {
+    const getSkillData = async (skill: string) => {
       return new Promise((resolve) => {
         axios.get(`api/common/provider/${skill}`).then((resp) => {
-          if (resp.data.data.code === 0) {
+          if (resp.data.code === 0) {
             const dataList: Array<{ label: string; value: string }> =
               resp.data.data[skill].map((item: any) => {
                 return {
@@ -241,7 +241,7 @@ export const IntelligentPluginEditComponent = React.forwardRef(
       <FormProvider form={form} layout="vertical">
         <SchemaField
           schema={demo ? demoSchema : pluginEditSchema}
-          scope={{ useAsyncDataSource, getDiscovery }}
+          scope={{ useAsyncDataSource, getSkillData }}
         />
         {demo && demoSchema && (
           <FormButtonGroup>
