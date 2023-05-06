@@ -258,6 +258,7 @@ func (a *apiService) GetAPIList(ctx context.Context, namespaceID int, groupUUID,
 	if err != nil {
 		return nil, 0, err
 	}
+	clusterVersions := a.getApintoClustersVersions(clusterInfos)
 
 	for _, api := range apis {
 		version := versionMap[api.Id]
@@ -273,16 +274,37 @@ func (a *apiService) GetAPIList(ctx context.Context, namespaceID int, groupUUID,
 			}
 		}
 
-		isOnline, clusters, err := a.ClustersStatus(ctx, namespaceID, api.Id, api.UUID, api.Version)
-		if err != nil {
-			return nil, 0, err
-		}
+		isOnline := false
 
-		publish := make([]*apimodel.APIListItemPublish, 0, len(clusters))
-		for _, clu := range clusters {
+		publish := make([]*apimodel.APIListItemPublish, 0, len(clusterInfos))
+		for _, clu := range clusterInfos {
+			cluVersions, has := clusterVersions[clu.Name]
+			if !has {
+				publish = append(publish, &apimodel.APIListItemPublish{
+					Name:   clu.Name,
+					Status: 1, //未发布
+				})
+				continue
+			}
+
+			vers, has := cluVersions[api.UUID]
+			if !has {
+				publish = append(publish, &apimodel.APIListItemPublish{
+					Name:   clu.Name,
+					Status: 1, //未发布
+				})
+				continue
+			}
+
+			isOnline = true
+			status := 4 //待更新
+			if vers == api.Version {
+				status = 3 //上线
+			}
+
 			publish = append(publish, &apimodel.APIListItemPublish{
 				Name:   clu.Name,
-				Status: clu.Status,
+				Status: status,
 			})
 		}
 		item := &apimodel.APIListItem{
@@ -1007,15 +1029,6 @@ func (a *apiService) online(ctx context.Context, namespaceId, operator int, api 
 			}
 		}
 
-		//发布到apinto
-		client, err := a.apintoClient.GetClient(ctx, clusterInfo.Id)
-		if err != nil {
-			item.Status = false
-			item.Result = fmt.Sprintf("连接集群失败, err: %s", err.Error())
-			onlineList = append(onlineList, item)
-			continue
-		}
-
 		err = a.apiStore.Transaction(ctx, func(txCtx context.Context) error {
 			//封装router配置
 			apiDriverInfo := a.GetAPIDriver(api.Scheme)
@@ -1027,6 +1040,7 @@ func (a *apiService) online(ctx context.Context, namespaceId, operator int, api 
 				NamespaceId:      namespaceId,
 				Desc:             api.Desc,
 				VersionId:        latest.Id,
+				Target:           api.Id,
 				APIVersionConfig: latest.APIVersionConfig,
 				OptType:          1, //上线
 				Operator:         operator,
@@ -1037,7 +1051,18 @@ func (a *apiService) online(ctx context.Context, namespaceId, operator int, api 
 				return err
 			}
 
-			if err = client.ForRouter().Create(*routerConfig); err != nil {
+			err = v2.Online(clusterInfo.Name, clusterInfo.Addr, "router", api.UUID, &v2.WorkerInfo[v2.BasicInfo]{
+				BasicInfo: &v2.BasicInfo{
+					Profession:  "router",
+					Name:        api.UUID,
+					Driver:      routerConfig.Driver,
+					Description: routerConfig.Description,
+					Version:     api.Version,
+				},
+				Append: routerConfig.Append,
+			})
+
+			if err != nil {
 				item.Status = false
 				item.Result = fmt.Sprintf("发送配置至集群失败, err: %s", err.Error())
 			}
@@ -1167,6 +1192,7 @@ func (a *apiService) offline(ctx context.Context, operator, namespaceId int, api
 				NamespaceId:      namespaceId,
 				Desc:             latestApi.Desc,
 				VersionId:        latest.Id,
+				Target:           api.Id,
 				APIVersionConfig: latest.APIVersionConfig,
 				OptType:          3, //下线
 				Operator:         operator,
@@ -1177,12 +1203,7 @@ func (a *apiService) offline(ctx context.Context, operator, namespaceId int, api
 				return err
 			}
 
-			//发布到apinto
-			client, err := a.apintoClient.GetClient(ctx, clusterInfo.Id)
-			if err != nil {
-				return err
-			}
-			return common.CheckWorkerNotExist(client.ForRouter().Delete(api.UUID + "@router"))
+			return common.CheckWorkerNotExist(v2.Offline(clusterInfo.Name, clusterInfo.Addr, "router", api.UUID))
 		})
 		if err != nil {
 			item.Status = false
@@ -1513,12 +1534,6 @@ func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, u
 			}
 		}
 
-		//发布到apinto
-		client, err := a.apintoClient.GetClient(ctx, clusterInfo.Id)
-		if err != nil {
-			return nil, err
-		}
-
 		//事务
 		err = a.apiStore.Transaction(ctx, func(txCtx context.Context) error {
 			routerConfig := apiDriverInfo.ToApinto(apiInfo.UUID, apiInfo.Desc, apiInfo.IsDisable, latestVersion.Method, latestVersion.RequestPath, latestVersion.RequestPathLabel, latestVersion.ProxyPath, strings.ToLower(latestVersion.ServiceName), latestVersion.Timeout, latestVersion.Retry, latestVersion.Hosts, latestVersion.Match, latestVersion.Header, latestVersion.TemplateUUID)
@@ -1528,6 +1543,7 @@ func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, u
 				NamespaceId:      namespaceId,
 				Desc:             apiInfo.Desc,
 				VersionId:        latestVersion.Id,
+				Target:           apiInfo.Id,
 				APIVersionConfig: latestVersion.APIVersionConfig,
 				OptType:          1, //上线
 				Operator:         operator,
@@ -1537,7 +1553,18 @@ func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, u
 			if err = a.apiPublishHistory.Insert(txCtx, publishHistory); err != nil {
 				return err
 			}
-			return client.ForRouter().Create(*routerConfig)
+
+			return v2.Online(clusterInfo.Name, clusterInfo.Addr, "router", apiInfo.UUID, &v2.WorkerInfo[v2.BasicInfo]{
+				BasicInfo: &v2.BasicInfo{
+					Profession:  "router",
+					Name:        apiInfo.UUID,
+					Driver:      routerConfig.Driver,
+					Description: routerConfig.Description,
+					Version:     apiInfo.Version,
+				},
+				Append: routerConfig.Append,
+			})
+
 		})
 		if err != nil {
 			routerInfos = append(routerInfos, &frontend_model.Router{
@@ -1597,6 +1624,7 @@ func (a *apiService) OfflineAPI(ctx context.Context, namespaceId, operator int, 
 				NamespaceId:      namespaceId,
 				Desc:             apiInfo.Desc,
 				VersionId:        latestVersion.Id,
+				Target:           apiInfo.Id,
 				APIVersionConfig: latestVersion.APIVersionConfig,
 				OptType:          3, //下线
 				Operator:         operator,
@@ -1607,13 +1635,7 @@ func (a *apiService) OfflineAPI(ctx context.Context, namespaceId, operator int, 
 				return err
 			}
 
-			//发布到apinto
-			client, err := a.apintoClient.GetClient(ctx, clusterInfo.Id)
-			if err != nil {
-				return err
-			}
-
-			return common.CheckWorkerNotExist(client.ForRouter().Delete(apiInfo.UUID + "@router"))
+			return common.CheckWorkerNotExist(v2.Offline(clusterInfo.Name, clusterInfo.Addr, "router", uuid))
 		})
 
 		item := &apimodel.BatchListItem{
@@ -2281,13 +2303,23 @@ func (a *apiService) ClustersStatus(ctx context.Context, namespaceId, apiId int,
 			log.Errorf("get cluster status error: %w", err)
 			continue
 		}
+
+		updater := ""
+		if operator > 0 {
+			u, err := a.userInfoService.GetUserInfo(ctx, operator)
+			if err == nil {
+				updater = u.UserName
+			}
+		}
 		version, err := client.Version("router", apiUUID)
 		if err != nil {
 			result = append(result, &apimodel.ApiCluster{
-				Name:   c.Name,
-				Title:  c.Name,
-				Env:    c.Env,
-				Status: 1, //未发布
+				Name:       c.Name,
+				Title:      c.Name,
+				Env:        c.Env,
+				Status:     1, //未发布
+				Updater:    updater,
+				UpdateTime: updateTime,
 			})
 			continue
 		}
@@ -2295,14 +2327,6 @@ func (a *apiService) ClustersStatus(ctx context.Context, namespaceId, apiId int,
 		status := 4 //待更新
 		if version == apiVersion {
 			status = 3 //上线
-
-		}
-		updater := ""
-		if operator > 0 {
-			u, err := a.userInfoService.GetUserInfo(ctx, operator)
-			if err == nil {
-				updater = u.UserName
-			}
 		}
 
 		result = append(result, &apimodel.ApiCluster{
@@ -2317,11 +2341,7 @@ func (a *apiService) ClustersStatus(ctx context.Context, namespaceId, apiId int,
 	return online, result, nil
 }
 
-func (a *apiService) getApintoClustersVersions(ctx context.Context) (map[string]map[string]string, error) {
-	clusters, err := a.clusterService.GetAllCluster(ctx)
-	if err != nil {
-		return nil, err
-	}
+func (a *apiService) getApintoClustersVersions(clusters []*cluster_model.Cluster) map[string]map[string]string {
 	results := make(map[string]map[string]string, len(clusters))
 
 	for _, c := range clusters {
@@ -2337,7 +2357,7 @@ func (a *apiService) getApintoClustersVersions(ctx context.Context) (map[string]
 		}
 		results[c.Name] = versions
 	}
-	return results, nil
+	return results
 }
 
 func (a *apiService) isServiceOnline(namespaceId int, clusterName, serviceName string) bool {
