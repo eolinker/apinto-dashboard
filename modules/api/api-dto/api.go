@@ -105,3 +105,22 @@ type ImportAPIInfoItem struct {
 	Name string `json:"name"`
 	Desc string `json:"desc"`
 }
+
+type ApiPublishInfo struct {
+	Name      string   `json:"name"`
+	ID        string   `json:"id"`
+	Scheme    string   `json:"scheme"`
+	Method    []string `json:"method"`
+	Path      string   `json:"path"`
+	Service   string   `json:"service"`
+	ProxyPath string   `json:"proxy_path"`
+	Desc      string   `json:"desc"`
+}
+
+type ApiPublishCluster struct {
+	Name       string            `json:"name"`
+	Env        string            `json:"env"`
+	Status     enum.OnlineStatus `json:"status"`
+	Operator   string            `json:"operator"`
+	UpdateTime string            `json:"update_time"`
+}
