@@ -165,19 +165,6 @@ func (c *dynamicController) info(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, controller.NewSuccessResult(info))
 }
 
-func (c *dynamicController) getBySkill(ctx *gin.Context) {
-	namespaceID := namespace_controller.GetNamespaceId(ctx)
-	list, err := c.dynamicService.GetBySkill(ctx, namespaceID, ctx.Query("skill"))
-	if err != nil {
-		controller.ErrorJson(ctx, http.StatusOK, err.Error())
-		return
-	}
-	ctx.JSON(http.StatusOK, controller.NewSuccessResult(map[string]interface{}{
-		"skill": c.Skill,
-		"list":  list,
-	}))
-}
-
 func (c *dynamicController) online(ctx *gin.Context) {
 	namespaceID := namespace_controller.GetNamespaceId(ctx)
 	uuid := ctx.Param("uuid")

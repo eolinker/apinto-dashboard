@@ -19,8 +19,25 @@ const containerElementName = 'customReactComponentContainer'
 @Component({
   selector: 'formily2-react-wrapper',
   template: `<span #${containerElementName}></span>`,
-  // styleUrls: [''],
-  encapsulation: ViewEncapsulation.None
+  styles: [
+    `
+      :host ::ng-deep {
+        .ant-input-affix-wrapper,
+        textarea,
+        .ant-input-number,
+        .ant-formily-array-items,
+        .ant-select {
+          width: 367px;
+          min-height: 32px;
+        }
+
+        .ant-formily-array-items .ant-select {
+          width: unset;
+        }
+
+      }
+    `
+  ]
 })
 export class CustomReactComponentWrapperComponent {
   @ViewChild(containerElementName, { static: true }) containerRef!: ElementRef
@@ -106,6 +123,19 @@ export class CustomReactComponentWrapperComponent {
             wrapperCol: 10
           },
           'x-component': 'Input'
+        },
+        scheme: {
+          title: '请求协议',
+          'x-decorator': 'FormItem',
+          'x-component': 'Select',
+          'x-validator': [],
+          'x-component-props': {},
+          'x-decorator-props': {},
+          required: true,
+          default: 'HTTP',
+          'x-reactions': ['{{useAsyncDataSource(getSkillData,"service")}}'],
+          name: 'scheme',
+          'x-index': 0
         }
       }
     }
@@ -142,6 +172,7 @@ export class CustomReactComponentWrapperComponent {
   reactComponent: React.RefObject<any> = React.createRef()
   constructor() {
     this.handleDivClicked = this.handleDivClicked.bind(this)
+    console.log(this)
   }
 
   public handleDivClicked() {

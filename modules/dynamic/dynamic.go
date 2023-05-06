@@ -18,6 +18,7 @@ type IDynamicService interface {
 
 	ClusterStatuses(ctx context.Context, namespaceId int, profession string, names []string, drivers []string, keyword string, page int, pageSize int) (map[string]map[string]string, error)
 	ClusterStatus(ctx context.Context, namespaceId int, profession string, name string) (*dynamic_model.DynamicBasicInfo, []*dynamic_model.DynamicCluster, error)
+	ClusterStatusByClusterName(ctx context.Context, namespaceId int, profession, name string, clusterName string) (*dynamic_model.DynamicCluster, error)
 
 	Create(ctx context.Context, namespaceId int, profession string, skill string, title string, name string, driver string, description string, body string, updater int) error
 	Save(ctx context.Context, namespaceId int, profession string, title string, name string, description string, body string, updater int) error

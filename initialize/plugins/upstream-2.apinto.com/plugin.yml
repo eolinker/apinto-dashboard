@@ -1,0 +1,90 @@
+id: "upstream-2.apinto.com"
+name: "upstream-2"
+cname: "上游服务-2"
+resume: "配置上游服务信息，通过API绑定，实现完整转发流程。支持IP Hash、带权轮询等负载均衡算法，合理分配上游服务压力，保证上游服务稳定性。"
+version: "v1.0.1"
+icon: "上游服务.png"
+driver: "upstream-2.apinto.com"
+type: 1 #0为框架模块 1为核心模块 2为内置模块 3为非内置
+auto: true
+front: upstream
+navigation: "navigation.upstream"
+group_id: "core_module"
+define:  # 动态模块定义
+  profession: service
+  drivers:
+    - name: http
+      title: TCP
+  skill: Upstream
+  fields:
+    - name: title           # 定义从响应中对应字段中获取显示值
+      title: 名称
+    - name: id
+      title: ID
+    - name: driver
+      title: 驱动名称
+    - name: description
+      title: 描述
+  render:
+    http: |
+      {
+          "type": "object",
+          "properties": {
+            "scheme": {
+              "title": "请求协议",
+              "x-decorator": "FormItem",
+              "x-component": "Select",
+              "x-validator": [],
+              "x-component-props": {},
+              "x-decorator-props": {},
+              "required": true,
+              "default": "HTTP",
+              "enum": [
+                {
+                  "children": [],
+                  "label": "HTTP",
+                  "value": "HTTP"
+                },
+                {
+                  "children": [],
+                  "label": "HTTPS",
+                  "value": "HTTPS"
+                }
+              ],
+              "name": "scheme",
+              "x-designable-id": "hymeaqidjqh",
+              "x-index": 0
+            },
+            "balance": {
+              "title": "负载算法",
+              "x-decorator": "FormItem",
+              "x-component": "Select",
+              "x-validator": [],
+              "x-component-props": {},
+              "x-decorator-props": {},
+              "name": "balance",
+              "default": "round-robin",
+              "required": true,
+              "enum": [
+                {
+                  "children": [],
+                  "label": "带权轮询",
+                  "value": "round-robin"
+                },
+                {
+                  "children": [],
+                  "label": "IP-Hash",
+                  "value": "ip-hash"
+                }
+              ],
+              "x-index": 1
+            },
+            "useDiscovery": {
+              "type": "void",
+              "title": "使用服务发现",
+              "x-decorator": "FormItem",
+              "x-component": "Checkbox",
+              "x-index": 2
+            }
+          }
+        }
