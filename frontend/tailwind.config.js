@@ -44,6 +44,7 @@ module.exports = {
         btnrbase: '20px', // 页面最右侧边距20px
         formtop: '20px',
         icon: '5px',
+        blockbase: '40px',
         DEFAULT_BORDER_RADIUS: 'var(--border-radius)'
       },
       borderColor: {
