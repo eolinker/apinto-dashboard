@@ -44,7 +44,7 @@ const routes: Routes = [{
           component: DeployClusterContentComponent,
           children: [
             {
-              path: '',
+              path: 'env',
               component: DeployClusterEnvironmentComponent
             },
             {
@@ -52,7 +52,7 @@ const routes: Routes = [{
               component: DeployClusterCertComponent
             },
             {
-              path: 'nodes',
+              path: '',
               component: DeployClusterNodesComponent
             },
             {

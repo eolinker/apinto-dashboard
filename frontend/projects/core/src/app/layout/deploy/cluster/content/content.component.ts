@@ -9,11 +9,11 @@
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
 import { Component, OnInit, TemplateRef, ViewChild, ChangeDetectorRef } from '@angular/core'
-import { Router, ActivatedRoute } from '@angular/router'
-import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
+import { Router } from '@angular/router'
 import { TabsOptions, TabTemplateContext } from 'eo-ng-tabs'
 import { ApiService } from 'projects/core/src/app/service/api.service'
 import { BaseInfoService } from 'projects/core/src/app/service/base-info.service'
+import { DeployService } from '../../deploy.service'
 
 @Component({
   selector: 'eo-ng-deploy-cluster-content',
@@ -36,7 +36,10 @@ export class DeployClusterContentComponent implements OnInit {
 
   tabOptions:TabsOptions[]=[]
   readonly nowUrl:string = this.router.routerState.snapshot.url
-  constructor (private baseInfo:BaseInfoService, private api:ApiService, private router:Router, private cdRef: ChangeDetectorRef) {
+  constructor (
+    public service:DeployService,
+    private baseInfo:BaseInfoService,
+     private api:ApiService, private router:Router, private cdRef: ChangeDetectorRef) {
   }
 
   ngOnInit (): void {
@@ -44,14 +47,16 @@ export class DeployClusterContentComponent implements OnInit {
     if (!this.clusterName) {
       this.router.navigate(['/'])
     }
-    this.getClustersData()
+    if (!this.router.url.includes('/message')) {
+      this.getClustersData()
+    }
   }
 
   ngAfterViewInit () {
     this.tabOptions = [
       {
         title: this.tab3,
-        routerLink: 'nodes',
+        routerLink: '.',
         queryParamsHandling: 'merge'
       },
       {
@@ -61,7 +66,7 @@ export class DeployClusterContentComponent implements OnInit {
       },
       {
         title: this.tab1,
-        routerLink: '.',
+        routerLink: 'env',
         queryParamsHandling: 'merge'
       },
       {
@@ -83,8 +88,10 @@ export class DeployClusterContentComponent implements OnInit {
   }
 
   getClustersData () {
-    this.api.get('cluster', { clusterName: this.clusterName }).subscribe((resp:{code:number, data:{cluster:{desc:string, [key:string]:any}}, msg:string}) => {
+    this.api.get('cluster', { clusterName: this.clusterName }).subscribe((resp:{code:number, data:{cluster:{desc:string, title:string, [key:string]:any}}, msg:string}) => {
       if (resp.code === 0) {
+        this.service.clusterName = resp.data.cluster.title
+        this.service.clusterDesc = resp.data.cluster.desc
         this.clusterDesc = resp.data.cluster.desc
         this._clusterDesc = resp.data.cluster.desc
       }
