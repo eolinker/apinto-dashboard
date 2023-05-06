@@ -89,7 +89,7 @@ export class ApiWebsocketCreateComponent implements OnInit {
   submitButtonLoading:boolean = false
   constructor (private message: EoNgFeedbackMessageService,
     private baseInfo:BaseInfoService,
-    private api:ApiService,
+    public api:ApiService,
     private navigationService:EoNgNavigationService,
     private fb: UntypedFormBuilder,
     private router: Router,
@@ -116,6 +116,7 @@ export class ApiWebsocketCreateComponent implements OnInit {
   }
 
   ngOnInit (): void {
+    console.log(this)
     this.getServiceList()
     this.getPluginTemplateList()
     if (this.baseInfo.allParamsInfo.apiId) {
@@ -166,25 +167,8 @@ export class ApiWebsocketCreateComponent implements OnInit {
         setFormValue(this.validateForm, resp.data.api)
         this.validateForm.controls['requestPath'].setValue(resp.data.api.requestPath.slice(1))
         this.createApiForm = resp.data.api
-        if (
-          !this.createApiForm.method ||
-          this.createApiForm.method.length === 0
-        ) {
-          this.createApiForm.method = [
-            'POST',
-            'PUT',
-            'GET',
-            'DELETE',
-            'PATCH',
-            'HEAD',
-            'OPTIONS'
-          ]
-          this.allChecked = true
-          this.updateAllChecked()
-        } else {
-          this.initCheckbox()
-        }
         this.getHeaderList()
+        this.hostsList = [...resp.data.hosts?.map((x:string) => ({ key: x })) || [], { key: '' }]
       }
     })
   }

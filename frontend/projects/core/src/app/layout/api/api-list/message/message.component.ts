@@ -14,7 +14,7 @@ import { BaseInfoService } from 'projects/core/src/app/service/base-info.service
 
 @Component({
   selector: 'eo-ng-api-message',
-  templateUrl: './message.component.html',
+  template: '',
   styles: [
   ]
 })
