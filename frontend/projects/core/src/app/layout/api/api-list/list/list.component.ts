@@ -101,7 +101,7 @@ export class ApiManagementListComponent implements OnInit {
   }
 
   apisTableClick= (item:{data:{uuid:string, [k:string]:any}}) => {
-    this.router.navigate(['/', 'router', 'api', 'content', item.data.uuid])
+    this.router.navigate(['/', 'router', 'api', item.data['scheme'] === 'websocket' ? 'message-ws' : 'message', item.data.uuid])
   }
 
   // 根据groupUuid获取新的apis列表

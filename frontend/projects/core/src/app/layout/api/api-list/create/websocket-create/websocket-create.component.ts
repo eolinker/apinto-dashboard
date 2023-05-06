@@ -104,6 +104,7 @@ export class ApiWebsocketCreateComponent implements OnInit {
       groupUuid: ['', [Validators.required]],
       name: ['', [Validators.required]],
       desc: [''],
+      isDisable: [false],
       requestPath: ['', [Validators.required, Validators.pattern('^[^?]*')]],
       service: ['', [Validators.required]],
       proxyPath: [''],
