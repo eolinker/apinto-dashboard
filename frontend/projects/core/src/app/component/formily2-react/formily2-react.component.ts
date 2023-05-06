@@ -20,6 +20,7 @@ import { SelectOption } from 'eo-ng-select'
       ></eo-ng-codebox>
   <button (click)="changeSchema()">生成表单</button>
 </div>
+<div id="render-block">
    <formily2-react-wrapper
         #formily
         [editPage]="true"
@@ -27,8 +28,15 @@ import { SelectOption } from 'eo-ng-select'
         [driverSelectOptions]="driverSelectOptions"
         [demoSchema]="schema"
         [demo]="true"
+        (onSubmit)="handlerSubmit($event)"
        ></formily2-react-wrapper>
 
+       <div  class="mt-[50px] " *ngIf="value">
+          <p class="font-bold">提交后的数据如下：</p>
+          <p class="border-[1px] border-solid border-BORDER">{{value}}
+</p>
+    </div>
+<div>
  </div>
 
   `,
@@ -38,7 +46,7 @@ import { SelectOption } from 'eo-ng-select'
       width:100%;
       height:100%;
     }
-    formily2-react-wrapper{
+    #render-block{
       width:100%;
       border-left:1px solid;
       padding-left:50px;
@@ -53,6 +61,12 @@ export class Formily2ReactComponent {
   driverSelectOptions:SelectOption[] = []
   schema:any
   form:any
+  value:any
+  handlerSubmit ($event:any) {
+    console.log($event)
+    this.value = JSON.stringify($event)
+  }
+
   changeSchema () {
     console.log(this.renderSchema)
     if (!this.renderSchema) {
