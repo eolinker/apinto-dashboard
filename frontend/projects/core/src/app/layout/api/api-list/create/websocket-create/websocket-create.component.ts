@@ -18,7 +18,6 @@ import { ApiService } from 'projects/core/src/app/service/api.service'
 import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 import { UntypedFormBuilder, FormGroup, Validators } from '@angular/forms'
 import { NzModalRef } from 'ng-zorro-antd/modal'
-import { ApiManagementProxyComponent } from '../proxy/proxy.component'
 import { NzTreeNodeOptions } from 'ng-zorro-antd/tree'
 import { SelectOption } from 'eo-ng-select'
 import { CheckBoxOptionInterface } from 'eo-ng-checkbox'
@@ -26,14 +25,15 @@ import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { setFormValue } from 'projects/core/src/app/constant/form'
 import { ApiGroup, ApiGroupsData } from 'projects/core/src/app/constant/type'
 import { BaseInfoService } from 'projects/core/src/app/service/base-info.service'
-import { methodList, proxyHeaderTableHeadName, proxyHeaderTableBody } from '../../types/conf'
-import { APINotFormGroupData } from '../../types/types'
 import { cloneDeep } from 'lodash'
 import { MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
-
+import { ApiManagementProxyComponent } from '../../proxy/proxy.component'
+import { APINotFormGroupData } from '../../../types/types'
+import { methodList, proxyHeaderTableHeadName, proxyHeaderTableBody, hostHeaderTableBody, defaultHostList } from '../../../types/conf'
+import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 @Component({
-  selector: 'eo-ng-api-create',
-  templateUrl: './create.component.html',
+  selector: 'eo-ng-api-websocket-create',
+  templateUrl: './websocket-create.component.html',
   styles: [
     `
       eo-ng-table.ant-table {
@@ -49,10 +49,16 @@ import { MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
       nz-form-item.ant-row.checkbox-group-api.ant-form-item.ant-form-item-has-error {
         margin-bottom: 0 !important;
       }
+
+      :host ::ng-deep{
+        .arrayItem.hosts input{
+          width:508px;
+        }
+      }
     `
   ]
 })
-export class ApiCreateComponent implements OnInit {
+export class ApiWebsocketCreateComponent implements OnInit {
   @ViewChild('optTypeTranslateTpl', { read: TemplateRef, static: true }) optTypeTranslateTpl: TemplateRef<any> | undefined
   @Input() apiUuid:string = ''
   @Input() editPage:boolean = false
@@ -64,8 +70,10 @@ export class ApiCreateComponent implements OnInit {
   methodList:CheckBoxOptionInterface[]= [...cloneDeep(methodList)]
   allChecked:boolean = false
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
-  proxyHeaderTableHeadName:Array<object> = [...proxyHeaderTableHeadName]
-  proxyHeaderTableBody:Array<any> = [...proxyHeaderTableBody]
+  proxyHeaderTableHeadName:THEAD_TYPE[] = [...proxyHeaderTableHeadName]
+  proxyHeaderTableBody:TBODY_TYPE[] = [...proxyHeaderTableBody]
+  hostsTableBody:TBODY_TYPE[] = [...hostHeaderTableBody]
+  hostsList:Array<any> = [...defaultHostList]
   modalRef:NzModalRef | undefined
   proxyEdit:boolean = false
   editData:any = null
@@ -81,7 +89,7 @@ export class ApiCreateComponent implements OnInit {
   submitButtonLoading:boolean = false
   constructor (private message: EoNgFeedbackMessageService,
     private baseInfo:BaseInfoService,
-    private api:ApiService,
+    public api:ApiService,
     private navigationService:EoNgNavigationService,
     private fb: UntypedFormBuilder,
     private router: Router,
@@ -96,6 +104,7 @@ export class ApiCreateComponent implements OnInit {
       groupUuid: ['', [Validators.required]],
       name: ['', [Validators.required]],
       desc: [''],
+      isDisable: [false],
       requestPath: ['', [Validators.required, Validators.pattern('^[^?]*')]],
       service: ['', [Validators.required]],
       proxyPath: [''],
@@ -133,6 +142,13 @@ export class ApiCreateComponent implements OnInit {
     this.proxyHeaderTableBody[3].btns[1].disabledFn = () => {
       return this.nzDisabled
     }
+
+    this.hostsTableBody[0].disabledFn = () => { return this.nzDisabled }
+    this.hostsTableBody[1].showFn = (item: any) => { return item === this.hostsList[0] }
+    this.hostsTableBody[1].btns[0].disabledFn = () => { return this.nzDisabled }
+    this.hostsTableBody[2].showFn = (item: any) => { return item !== this.hostsList[0] }
+    this.hostsTableBody[2].btns[0].disabledFn = () => { return this.nzDisabled }
+    this.hostsTableBody[2].btns[1].disabledFn = () => { return this.nzDisabled }
   }
 
   ngAfterViewInit () {
@@ -150,25 +166,8 @@ export class ApiCreateComponent implements OnInit {
         setFormValue(this.validateForm, resp.data.api)
         this.validateForm.controls['requestPath'].setValue(resp.data.api.requestPath.slice(1))
         this.createApiForm = resp.data.api
-        if (
-          !this.createApiForm.method ||
-          this.createApiForm.method.length === 0
-        ) {
-          this.createApiForm.method = [
-            'POST',
-            'PUT',
-            'GET',
-            'DELETE',
-            'PATCH',
-            'HEAD',
-            'OPTIONS'
-          ]
-          this.allChecked = true
-          this.updateAllChecked()
-        } else {
-          this.initCheckbox()
-        }
         this.getHeaderList()
+        this.hostsList = [...resp.data.hosts?.map((x:string) => ({ key: x })) || [], { key: '' }]
       }
     })
   }
@@ -334,29 +333,26 @@ export class ApiCreateComponent implements OnInit {
 
   // 提交api数据
   saveApi () {
-    if (this.createApiForm.method.length === 0 && !this.allChecked) {
-      this.showCheckboxGroupValid = true
-    } else {
-      this.showCheckboxGroupValid = false
-    }
-    if (this.validateForm.valid && !this.showCheckboxGroupValid) {
+    if (this.validateForm.valid) {
       if (this.allChecked) {
         this.createApiForm.method = []
       }
       this.submitButtonLoading = true
       if (this.editPage) {
         this.api.put('router', {
+          scheme: 'websocket',
           name: this.validateForm.controls['name'].value,
           uuid: this.createApiForm.uuid,
           groupUuid: this.validateForm.controls['groupUuid'].value,
           desc: this.validateForm.controls['desc'].value,
+          isDisable: this.validateForm.controls['isDisable'].value,
           requestPath: '/' + this.validateForm.controls['requestPath'].value,
           service: this.validateForm.controls['service'].value,
           method: this.createApiForm.method,
           proxyPath: this.validateForm.controls['proxyPath'].value,
+          hosts: this.hostsList.filter((host:{key:string}) => { return host.key }).map((host:{key:string}) => host.key),
           timeout: Number(this.validateForm.controls['timeout'].value),
           retry: Number(this.validateForm.controls['retry'].value),
-          enableWebsocket: this.validateForm.controls['enableWebsocket'].value || false,
           templateUuid: this.validateForm.controls['templateUuid'].value || '',
           proxyHeader: this.createApiForm.proxyHeader,
           match: this.createApiForm.match
@@ -369,13 +365,21 @@ export class ApiCreateComponent implements OnInit {
         })
       } else {
         this.api.post('router', {
-          ...this.validateForm.value,
+          scheme: 'websocket',
+          name: this.validateForm.controls['name'].value,
           uuid: this.createApiForm.uuid,
           groupUuid: this.validateForm.controls['groupUuid'].value,
+          desc: this.validateForm.controls['desc'].value,
+          isDisable: this.validateForm.controls['isDisable'].value,
+          requestPath: '/' + this.validateForm.controls['requestPath'].value,
+          service: this.validateForm.controls['service'].value,
           method: this.createApiForm.method,
+          hosts: this.hostsList.filter((host:{key:string}) => { return host.key }).map((host:{key:string}) => host.key),
+          timeout: Number(this.validateForm.controls['timeout'].value),
+          retry: Number(this.validateForm.controls['retry'].value),
+          templateUuid: this.validateForm.controls['templateUuid'].value || '',
           proxyHeader: this.createApiForm.proxyHeader,
           match: this.createApiForm.match,
-          requestPath: '/' + this.validateForm.controls['requestPath'].value,
           proxyPath: '/' + this.validateForm.controls['proxyPath'].value
         }).subscribe(resp => {
           this.submitButtonLoading = false

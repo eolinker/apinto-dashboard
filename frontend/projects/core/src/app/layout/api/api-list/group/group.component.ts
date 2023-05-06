@@ -245,11 +245,7 @@ export class ApiManagementComponent implements OnInit {
 
     this.showAll = false
     data.node!.isExpanded = !data.node!.isExpanded
-    if (data.node!.origin['groupUuid']) {
-      this.router.navigate(['/', 'router', 'api', 'group', 'message', data.node!.origin['uuid']])
-    } else {
-      this.router.navigate(['/', 'router', 'api', 'group', 'list', data.node!.origin['uuid']])
-    }
+    this.router.navigate(['/', 'router', 'api', 'group', 'list', data.node!.origin['uuid']])
     this.activatedNode = data.node!
   }
 
