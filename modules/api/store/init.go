@@ -8,14 +8,14 @@ import (
 func InitStoreDB(db store.IDB) {
 	api := NewAPIStore(db)
 	apiStat := NewAPIStatStore(db)
-	apiRuntime := NewApiRuntimeStore(db)
+	//apiRuntime := NewApiRuntimeStore(db)
 	apiVersion := newAPIVersionStore(db)
 	apiHistory := newApiHistoryStore(db)
 	apiPublishHistory := newApiPublishHistoryStore(db)
 
 	bean.Injection(&api)
 	bean.Injection(&apiStat)
-	bean.Injection(&apiRuntime)
+	//bean.Injection(&apiRuntime)
 	bean.Injection(&apiVersion)
 	bean.Injection(&apiHistory)
 	bean.Injection(&apiPublishHistory)
