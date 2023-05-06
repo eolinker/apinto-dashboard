@@ -387,12 +387,11 @@ func (d *dynamicService) ClusterStatus(ctx context.Context, namespaceId int, pro
 	for _, c := range clusters {
 		var operator int
 		var updateTime string
-		v, err := d.publishHistoryStore.First(ctx, map[string]interface{}{
-			"namespace":    namespaceId,
-			"cluster":      c.Id,
-			"target":       moduleInfo.Id,
-			"version_name": moduleInfo.Version,
-			"kind":         "dynamic_module",
+		v, err := d.publishHistoryStore.GetLastPublishHistory(ctx, map[string]interface{}{
+			"namespace": namespaceId,
+			"cluster":   c.Id,
+			"target":    moduleInfo.Id,
+			"kind":      "dynamic_module",
 		})
 		if err != nil {
 			if err != gorm.ErrRecordNotFound {
@@ -411,15 +410,31 @@ func (d *dynamicService) ClusterStatus(ctx context.Context, namespaceId int, pro
 
 		client, err := v2.GetClusterClient(c.Name, c.Addr)
 		if err != nil {
+			result = append(result, &dynamic_model.DynamicCluster{
+				Name:   c.Name,
+				Title:  c.Name,
+				Status: v2.StatusOffline,
+			})
 			log.Errorf("get cluster status error: %w", err)
 			continue
 		}
+
+		updater := ""
+		if operator > 0 {
+			u, err := d.userService.GetUserInfo(ctx, operator)
+			if err == nil {
+				updater = u.UserName
+			}
+		}
+
 		version, err := client.Version(profession, name)
 		if err != nil {
 			result = append(result, &dynamic_model.DynamicCluster{
-				Name:   c.Name,
-				Title:  c.Title,
-				Status: v2.StatusOffline,
+				Name:       c.Name,
+				Title:      c.Title,
+				Status:     v2.StatusOffline,
+				Updater:    updater,
+				UpdateTime: updateTime,
 			})
 			continue
 		}
@@ -428,13 +443,6 @@ func (d *dynamicService) ClusterStatus(ctx context.Context, namespaceId int, pro
 		if version == moduleInfo.Version {
 			status = v2.StatusOnline
 
-		}
-		updater := ""
-		if operator > 0 {
-			u, err := d.userService.GetUserInfo(ctx, operator)
-			if err == nil {
-				updater = u.UserName
-			}
 		}
 
 		result = append(result, &dynamic_model.DynamicCluster{

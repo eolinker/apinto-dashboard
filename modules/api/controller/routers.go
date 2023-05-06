@@ -76,21 +76,9 @@ func initRouter(name string) apinto_module.RoutersInfo {
 		},
 		{
 			Method:      http.MethodGet,
-			Path:        "/api/router/onlines",
-			Handler:     "api.getOnlineList",
-			HandlerFunc: []apinto_module.HandlerFunc{c.getOnlineList},
-		},
-		{
-			Method:      http.MethodPut,
-			Path:        "/api/router/enable",
-			Handler:     "api.enableAPI",
-			HandlerFunc: []apinto_module.HandlerFunc{c.enableAPI},
-		},
-		{
-			Method:      http.MethodPut,
-			Path:        "/api/router/disable",
-			Handler:     "api.disableAPI",
-			HandlerFunc: []apinto_module.HandlerFunc{c.disableAPI},
+			Path:        "/api/router/online/info",
+			Handler:     "api.getOnlineInfo",
+			HandlerFunc: []apinto_module.HandlerFunc{c.getOnlineInfo},
 		},
 		{
 			Method:      http.MethodGet,

@@ -38,11 +38,10 @@ type IAPIService interface {
 	BatchOffline(ctx context.Context, namespaceId int, operator int, apiUUIDs, clusterNames []string) ([]*apimodel.BatchListItem, error)
 	BatchOnlineCheck(ctx context.Context, namespaceId int, operator int, apiUUIDs, clusterNames []string) ([]*apimodel.BatchOnlineCheckListItem, string, error)
 
+	OnlineInfo(ctx context.Context, namespaceId int, uuid string) (*apimodel.APIVersionInfo, []*apimodel.APIOnlineListItem, error)
 	OnlineList(ctx context.Context, namespaceId int, uuid string) ([]*apimodel.APIOnlineListItem, error)
-	OnlineAPI(ctx context.Context, namespaceId, operator int, uuid, clusterName string) (*frontend_model.Router, error)
-	OfflineAPI(ctx context.Context, namespaceId, operator int, uuid, clusterName string) error
-	EnableAPI(ctx context.Context, namespaceId, operator int, uuid, clusterName string) error
-	DisableAPI(ctx context.Context, namespaceId, operator int, uuid, clusterName string) error
+	OnlineAPI(ctx context.Context, namespaceId, operator int, uuid string, clusterNames []string) ([]*frontend_model.Router, error)
+	OfflineAPI(ctx context.Context, namespaceId, operator int, uuid string, clusterNames []string) ([]*apimodel.BatchListItem, error)
 
 	GetSource(ctx context.Context) ([]*apimodel.SourceListItem, error)
 	GetImportCheckList(ctx context.Context, namespaceId int, fileData []byte, groupID, serviceName, requestPrefix string) ([]*apimodel.ImportAPIListItem, string, error)
@@ -51,12 +50,11 @@ type IAPIService interface {
 	GetAPIListByName(ctx context.Context, namespaceId int, name string) ([]*group_model.CommonGroupApi, error)
 	GetAPIListByServiceName(ctx context.Context, namespaceId int, serviceName []string) ([]*apimodel.APIInfo, error)
 	GetLatestAPIVersion(ctx context.Context, apiId int) (*api_entry.APIVersion, error)
-	IsAPIOnline(ctx context.Context, clusterId, apiID int) bool
+	IsAPIOnline(ctx context.Context, clusterName, clusterAddr string, apiUUID int) bool
 	GetAPIDriver(driverName string) IAPIDriver
 	GetAPINameByID(ctx context.Context, apiID int) (string, error)
 	GetAPIRemoteOptions(ctx context.Context, namespaceId, pageNum, pageSize int, keyword, groupUuid string) ([]*strategy_model.RemoteApis, int, error)
 	GetAPIRemoteByUUIDS(ctx context.Context, namespace int, uuids []string) ([]*strategy_model.RemoteApis, error)
-	ResetOnline(ctx context.Context, namespaceId, clusterId int)
 	APICount(ctx context.Context, namespaceId int) (int64, error)
 	APIOnlineCount(ctx context.Context, namespaceId int) (int64, error)
 }
@@ -72,5 +70,5 @@ type APIDriverInfo struct {
 
 type IAPIDriver interface {
 	CheckInput(input *api_dto.APIInfo) error
-	ToApinto(name, desc string, disable bool, method []string, requestPath, requestPathLabel, proxyPath, serviceName string, timeout, retry int, enableWebsocket bool, match []*api_entry.MatchConf, header []*api_entry.ProxyHeader, templateUUID string) *v1.RouterConfig
+	ToApinto(name, desc string, disable bool, method []string, requestPath, requestPathLabel, proxyPath, serviceName string, timeout, retry int, hosts []string, match []*api_entry.MatchConf, header []*api_entry.ProxyHeader, templateUUID string) *v1.RouterConfig
 }

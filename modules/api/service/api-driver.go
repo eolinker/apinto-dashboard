@@ -6,7 +6,8 @@ import (
 )
 
 const (
-	DriverApiHTTP = "http"
+	DriverApiHTTP   = "http"
+	DriverWebsocket = "websocket"
 )
 
 type apiDriver struct {

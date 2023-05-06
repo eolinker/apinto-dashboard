@@ -2,7 +2,6 @@ package online_service
 
 import (
 	"context"
-	apiService "github.com/eolinker/apinto-dashboard/modules/api"
 	"github.com/eolinker/apinto-dashboard/modules/application"
 	clusterService "github.com/eolinker/apinto-dashboard/modules/cluster"
 	"github.com/eolinker/apinto-dashboard/modules/discovery"
@@ -31,7 +30,7 @@ func newResetOnline() online.IResetOnlineService {
 	var variableService variable.IClusterVariableService
 	var discoveryService discovery.IDiscoveryService
 	var iService upstream.IService
-	var api apiService.IAPIService
+	//var api apiService.IAPIService
 	var applicationService application.IApplicationService
 	var commonStrategy strategy.IStrategyCommonService
 	var clusterPlugin plugin.IClusterPluginService
@@ -39,7 +38,7 @@ func newResetOnline() online.IResetOnlineService {
 
 	bean.Autowired(&clConfig)
 	bean.Autowired(&variableService)
-	bean.Autowired(&api)
+	//bean.Autowired(&api)
 	bean.Autowired(&iService)
 	bean.Autowired(&discoveryService)
 	bean.Autowired(&applicationService)
@@ -47,6 +46,6 @@ func newResetOnline() online.IResetOnlineService {
 	bean.Autowired(&commonStrategy)
 	bean.Autowired(&clusterPlugin)
 	bean.Autowired(&pluginTemplate)
-	onlineService.list = append(onlineService.list, clConfig, variableService, discoveryService, iService, clusterPlugin, pluginTemplate, api, applicationService, commonStrategy)
+	onlineService.list = append(onlineService.list, clConfig, variableService, discoveryService, iService, clusterPlugin, pluginTemplate, applicationService, commonStrategy)
 	return onlineService
 }
