@@ -1,5 +1,5 @@
 import { SelectOption } from 'eo-ng-select'
-import { THEAD_TYPE } from 'eo-ng-table'
+import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { NzCheckBoxOptionInterface } from 'ng-zorro-antd/checkbox'
 import { EO_TBODY_TYPE } from 'projects/eo-ng-apinto-table/src/public-api'
 
@@ -112,6 +112,45 @@ export const proxyHeaderTableBody:EO_TBODY_TYPE[] = [
       },
       {
         title: '删除',
+        action: 'delete'
+      }
+    ]
+  }
+]
+
+export const defaultHostList:Array<{key:string}> = [
+  { key: '' }
+]
+
+export const hostHeaderTableBody:TBODY_TYPE[] = [
+  {
+    key: 'key',
+    type: 'input',
+    placeholder: '请输入域名',
+    checkMode: 'change',
+    check: (item: any) => {
+      return !item || /[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+.?/.test(item)
+    },
+    errorTip: '格式有误'
+  },
+  {
+    type: 'btn',
+    btns: [
+      {
+        title: '添加',
+        action: 'add'
+      }
+    ]
+  },
+  {
+    type: 'btn',
+    btns: [
+      {
+        title: '添加',
+        action: 'add'
+      },
+      {
+        title: '减少',
         action: 'delete'
       }
     ]

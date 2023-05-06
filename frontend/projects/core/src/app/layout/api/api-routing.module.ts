@@ -13,6 +13,7 @@ import { ApiPluginTemplateMessageComponent } from './plugin/message/message.comp
 import { ApiPluginTemplateComponent } from './plugin/plugin.component'
 import { ApiPluginTemplatePublishComponent } from './plugin/publish/publish.component'
 import { RouterComponent } from './router/router.component'
+import { ApiWebsocketCreateComponent } from './api-list/create/websocket-create/websocket-create.component'
 
 const routes: Routes = [{
   path: '',
@@ -56,6 +57,10 @@ const routes: Routes = [{
             path: ':apiGroupId',
             component: ApiCreateComponent
           }]
+        },
+        {
+          path: 'createWs',
+          component: ApiWebsocketCreateComponent
         },
         {
           path: 'content/:apiId',

@@ -57,6 +57,9 @@ import { ApiPluginConfigFormComponent } from './plugin/config/form/form.componen
 import { ApiPluginConfigTableComponent } from './plugin/config/table/table.component'
 import { ApiPluginTemplatePublishComponent } from './plugin/publish/publish.component'
 import { EoNgCopyModule } from 'eo-ng-copy'
+import { ApiHttpCreateComponent } from './api-list/create/http-create/http-create.component'
+import { ApiWebsocketCreateComponent } from './api-list/create/websocket-create/websocket-create.component'
+import { NzTypographyModule } from 'ng-zorro-antd/typography'
 
 @NgModule({
   declarations: [
@@ -81,7 +84,9 @@ import { EoNgCopyModule } from 'eo-ng-copy'
     ApiPluginTemplateMessageComponent,
     ApiPluginConfigFormComponent,
     ApiPluginConfigTableComponent,
-    ApiPluginTemplatePublishComponent
+    ApiPluginTemplatePublishComponent,
+    ApiHttpCreateComponent,
+    ApiWebsocketCreateComponent
   ],
   imports: [
     EoNgLayoutModule,
@@ -120,7 +125,8 @@ import { EoNgCopyModule } from 'eo-ng-copy'
     NzUploadModule,
     NzDropDownModule,
     EoNgCodeboxModule,
-    EoNgCopyModule
+    EoNgCopyModule,
+    NzTypographyModule
   ],
   exports: [
     MatchTableComponent,
