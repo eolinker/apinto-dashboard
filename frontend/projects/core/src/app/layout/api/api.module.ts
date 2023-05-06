@@ -59,7 +59,9 @@ import { ApiPluginTemplatePublishComponent } from './plugin/publish/publish.comp
 import { EoNgCopyModule } from 'eo-ng-copy'
 import { ApiHttpCreateComponent } from './api-list/create/http-create/http-create.component'
 import { ApiWebsocketCreateComponent } from './api-list/create/websocket-create/websocket-create.component'
-import { NzTypographyModule } from 'ng-zorro-antd/typography'
+import { NzTypographyModule } from 'ng-zorro-antd/typography';
+import { ApiHttpMessageComponent } from './api-list/message/http-message/http-message.component';
+import { ApiWebsocketMessageComponent } from './api-list/message/websocket-message/websocket-message.component'
 
 @NgModule({
   declarations: [
@@ -86,7 +88,9 @@ import { NzTypographyModule } from 'ng-zorro-antd/typography'
     ApiPluginConfigTableComponent,
     ApiPluginTemplatePublishComponent,
     ApiHttpCreateComponent,
-    ApiWebsocketCreateComponent
+    ApiWebsocketCreateComponent,
+    ApiHttpMessageComponent,
+    ApiWebsocketMessageComponent
   ],
   imports: [
     EoNgLayoutModule,
