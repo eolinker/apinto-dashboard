@@ -7,15 +7,23 @@ import (
 )
 
 type APIListItem struct {
-	GroupUUID   string   `json:"group_uuid"`
-	APIUUID     string   `json:"uuid"`
-	APIName     string   `json:"name"`
-	Method      []string `json:"method"`
-	ServiceName string   `json:"service"`
-	RequestPath string   `json:"request_path"`
-	Source      string   `json:"source"`
-	UpdateTime  string   `json:"update_time"`
-	IsDelete    bool     `json:"is_delete"`
+	GroupUUID   string                `json:"group_uuid"`
+	APIUUID     string                `json:"uuid"`
+	APIName     string                `json:"name"`
+	Scheme      string                `json:"scheme"`
+	Method      []string              `json:"method"`
+	ServiceName string                `json:"service"`
+	RequestPath string                `json:"request_path"`
+	IsDisable   bool                  `json:"is_disable"`
+	Publish     []*APIListItemPublish `json:"publish"`
+	Source      string                `json:"source"`
+	UpdateTime  string                `json:"update_time"`
+	IsDelete    bool                  `json:"is_delete"`
+}
+
+type APIListItemPublish struct {
+	Name   string            `json:"name"`
+	Status enum.OnlineStatus `json:"status"`
 }
 
 type APIEnum struct {
@@ -28,15 +36,16 @@ type APIInfo struct {
 	UUID             string                   `json:"uuid"`
 	GroupUUID        string                   `json:"group_uuid"`
 	Desc             string                   `json:"desc"`
-	Driver           string                   `json:"driver"`
+	IsDisable        bool                     `json:"is_disable"`
+	Scheme           string                   `json:"scheme"`
 	RequestPath      string                   `json:"request_path"`
 	RequestPathLabel string                   `json:"-"` //前端不传这个，后端存字段会使用
 	ServiceName      string                   `json:"service"`
 	Method           []string                 `json:"method"`
 	ProxyPath        string                   `json:"proxy_path"`
+	Hosts            []string                 `json:"hosts"`
 	Timeout          int                      `json:"timeout"`
 	Retry            int                      `json:"retry"`
-	EnableWebsocket  bool                     `json:"enable_websocket"`
 	Match            []*api_entry.MatchConf   `json:"match"`
 	Header           []*api_entry.ProxyHeader `json:"proxy_header"`
 	TemplateUUID     string                   `json:"template_uuid"`
@@ -64,7 +73,7 @@ type ApiBatchOnlineCheckListItem struct {
 }
 
 type ApiBatchCheckListItem struct {
-	ApiName    string `json:"api"`
+	ApiName    string `json:"api,omitempty"`
 	ClusterEnv string `json:"cluster"`
 	Status     bool   `json:"status"`
 	Result     string `json:"result,omitempty"`
@@ -95,4 +104,27 @@ type ImportAPIInfoItem struct {
 	Id   int    `json:"id"`
 	Name string `json:"name"`
 	Desc string `json:"desc"`
+}
+
+type ApiPublishInfo struct {
+	Name      string   `json:"name"`
+	ID        string   `json:"id"`
+	Scheme    string   `json:"scheme"`
+	Method    []string `json:"method"`
+	Path      string   `json:"path"`
+	Service   string   `json:"service"`
+	ProxyPath string   `json:"proxy_path"`
+	Desc      string   `json:"desc"`
+}
+
+type ApiPublishCluster struct {
+	Name       string            `json:"name"`
+	Env        string            `json:"env"`
+	Status     enum.OnlineStatus `json:"status"`
+	Operator   string            `json:"operator"`
+	UpdateTime string            `json:"update_time"`
+}
+
+type PublishInput struct {
+	ClusterNames []string `json:"cluster_names"`
 }

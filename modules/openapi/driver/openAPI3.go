@@ -35,6 +35,7 @@ func (o *OpenAPI3) FormatAPI(data []byte, namespaceID, appID int, groupID, prefi
 
 	apiList := make([]*apimodel.APIInfo, 0)
 	t := time.Now()
+	version := common.GenVersion(t)
 	for path, pathMap := range openAPI3Config.Paths {
 		//对路径进行转义
 		decodedPath, err := url.PathUnescape(path)
@@ -61,6 +62,9 @@ func (o *OpenAPI3) FormatAPI(data []byte, namespaceID, appID int, groupID, prefi
 					SourceType:       enum.SourceSync,
 					SourceID:         appID,
 					SourceLabel:      label,
+					Scheme:           "http",
+					Version:          version,
+					IsDisable:        false,
 					Desc:             info.Description,
 					Operator:         0,
 					CreateTime:       t,

@@ -13,7 +13,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/group/group-dto"
 	"github.com/eolinker/apinto-dashboard/modules/group/group-model"
-	"github.com/eolinker/apinto-dashboard/modules/online/online-dto"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
 	"github.com/gin-gonic/gin"
@@ -191,13 +190,23 @@ func (a *apiController) routers(ginCtx *gin.Context) {
 	}
 	apis := make([]*api_dto.APIListItem, 0, len(apiList))
 	for _, item := range apiList {
+		publish := make([]*api_dto.APIListItemPublish, 0, len(item.Publish))
+		for _, p := range item.Publish {
+			publish = append(publish, &api_dto.APIListItemPublish{
+				Name:   p.Name,
+				Status: enum.OnlineStatus(p.Status),
+			})
+		}
 		api := &api_dto.APIListItem{
 			GroupUUID:   item.GroupUUID,
 			APIUUID:     item.APIUUID,
 			APIName:     item.APIName,
+			Scheme:      item.Scheme,
 			Method:      item.Method,
 			ServiceName: item.ServiceName,
 			RequestPath: item.RequestPath,
+			IsDisable:   item.IsDisable,
+			Publish:     publish,
 			Source:      item.Source,
 			UpdateTime:  common.TimeToStr(item.UpdateTime),
 			IsDelete:    item.IsDelete,
@@ -217,38 +226,39 @@ func (a *apiController) getInfo(ginCtx *gin.Context) {
 	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
 	apiUUID := ginCtx.Query("uuid")
 	if apiUUID == "" {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("GetApiInfo fail. err: uuid can't be nil"))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("获取API信息失败 uuid不能为空"))
 		return
 	}
 
 	info, err := a.apiService.GetAPIVersionInfo(ginCtx, namespaceID, apiUUID)
 	if err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("GetApiInfo fail. err:%s", err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("获取API信息失败 err:%s", err.Error()))
 		return
 	}
 
 	apiInfo := &api_dto.APIInfo{
-		ApiName:         info.Api.Name,
-		UUID:            info.Api.UUID,
-		GroupUUID:       info.Api.GroupUUID,
-		Desc:            info.Api.Desc,
-		Driver:          info.Version.Driver,
-		RequestPath:     info.Api.RequestPathLabel,
-		ServiceName:     info.Version.ServiceName,
-		Method:          info.Version.Method,
-		ProxyPath:       info.Version.ProxyPath,
-		Timeout:         info.Version.Timeout,
-		Retry:           info.Version.Retry,
-		EnableWebsocket: info.Version.EnableWebsocket,
-		Match:           info.Version.Match,
-		Header:          info.Version.Header,
-		TemplateUUID:    info.Version.TemplateUUID,
+		ApiName:      info.Api.Name,
+		UUID:         info.Api.UUID,
+		GroupUUID:    info.Api.GroupUUID,
+		Desc:         info.Api.Desc,
+		Scheme:       info.Api.Scheme,
+		IsDisable:    info.Api.IsDisable,
+		RequestPath:  info.Api.RequestPathLabel,
+		ServiceName:  info.Version.ServiceName,
+		Method:       info.Version.Method,
+		ProxyPath:    info.Version.ProxyPath,
+		Timeout:      info.Version.Timeout,
+		Retry:        info.Version.Retry,
+		Hosts:        info.Version.Hosts,
+		Match:        info.Version.Match,
+		Header:       info.Version.Header,
+		TemplateUUID: info.Version.TemplateUUID,
 	}
 
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(map[string]interface{}{"api": apiInfo}))
 }
 
-// create 新建注册中心
+// create 新建
 func (a *apiController) create(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	userId := users.GetUserId(ginCtx)
@@ -259,36 +269,33 @@ func (a *apiController) create(ginCtx *gin.Context) {
 		return
 	}
 
-	//TODO 暂时处理
-	input.Driver = "http"
-
 	//API管理器校验参数
-	driver := a.apiService.GetAPIDriver(input.Driver)
+	driver := a.apiService.GetAPIDriver(input.Scheme)
 	if driver == nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("CreateAPI fail. err: driver is invalid. "))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("创建API失败, 协议类型不存在"))
 		return
 	}
 	if err := driver.CheckInput(input); err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("CreateAPI fail. err:%s", err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("创建API失败. err:%s", err.Error()))
 		return
 	}
 
 	err := a.apiService.CreateAPI(ginCtx, namespaceId, userId, input)
 	if err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("CreateAPI fail. err:%s", err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("创建API失败. err:%s", err.Error()))
 		return
 	}
 
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
-// alter 修改注册中心
+// alter 修改
 func (a *apiController) update(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	userId := users.GetUserId(ginCtx)
 	apiUUID := ginCtx.Query("uuid")
 	if apiUUID == "" {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("UpdateApi fail. err: uuid can't be nil"))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("更新API失败 err: uuid 不能为空"))
 		return
 	}
 
@@ -298,31 +305,28 @@ func (a *apiController) update(ginCtx *gin.Context) {
 		return
 	}
 
-	//TODO 暂时处理
-	input.Driver = "http"
-
 	//API管理器校验参数
-	driver := a.apiService.GetAPIDriver(input.Driver)
+	driver := a.apiService.GetAPIDriver(input.Scheme)
 	if driver == nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("UpdateAPI fail. err: driver is invalid. "))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("更新API失败. 协议无效 "))
 		return
 	}
 	input.UUID = apiUUID
 	if err := driver.CheckInput(input); err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("UpdateAPI fail. err:%s", err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("更新API失败 fail. err:%s", err.Error()))
 		return
 	}
 
 	err := a.apiService.UpdateAPI(ginCtx, namespaceId, userId, input)
 	if err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("UpdateApi fail. err:%s", err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("更新API失败 fail. err:%s", err.Error()))
 		return
 	}
 
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
-// delete 删除注册中心
+// delete 删除
 func (a *apiController) delete(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	apiUUID := ginCtx.Query("uuid")
@@ -359,7 +363,7 @@ func (a *apiController) batchOnline(ginCtx *gin.Context) {
 
 	batchOnlineList, err := a.apiService.BatchOnline(ginCtx, namespaceId, userId, input.OnlineToken)
 	if err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("BatchOnline Apis fail. err:%s", err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("批量上线失败. err:%s", err.Error()))
 		return
 	}
 
@@ -400,7 +404,7 @@ func (a *apiController) batchOffline(ginCtx *gin.Context) {
 
 	batchOfflineList, err := a.apiService.BatchOffline(ginCtx, namespaceId, userId, input.ApiUUIDs, input.ClusterNames)
 	if err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("BatchOffline Apis fail. err:%s", err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("批量下线API失败. err:%s", err.Error()))
 		return
 	}
 
@@ -477,17 +481,17 @@ func (a *apiController) online(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("uuid can't be nil"))
 		return
 	}
-	input := &online_dto.UpdateOnlineStatusInput{}
+	input := &api_dto.PublishInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
-	router, err := a.apiService.OnlineAPI(ginCtx, namespaceId, userId, apiUUID, input.ClusterName)
-	if err != nil && router == nil {
+	router, err := a.apiService.OnlineAPI(ginCtx, namespaceId, userId, apiUUID, input.ClusterNames)
+	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
-	} else if err == nil {
+	} else if len(router) == 0 {
 		ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 		return
 	}
@@ -513,100 +517,96 @@ func (a *apiController) offline(ginCtx *gin.Context) {
 	userId := users.GetUserId(ginCtx)
 	apiUUID := ginCtx.Query("uuid")
 	if apiUUID == "" {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("uuid can't be nil"))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("uuid 不可以为空"))
 		return
 	}
-	input := &online_dto.UpdateOnlineStatusInput{}
+	input := &api_dto.PublishInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
-	if err := a.apiService.OfflineAPI(ginCtx, namespaceId, userId, apiUUID, input.ClusterName); err != nil {
+	if _, err := a.apiService.OfflineAPI(ginCtx, namespaceId, userId, apiUUID, input.ClusterNames); err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
-// enableAPI 启用API
-func (a *apiController) enableAPI(ginCtx *gin.Context) {
+func (a *apiController) getOnlineInfo(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := users.GetUserId(ginCtx)
 	apiUUID := ginCtx.Query("uuid")
 	if apiUUID == "" {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("uuid can't be nil"))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("获取发布管理信息失败: uuid 不能为空"))
 		return
 	}
-	input := &online_dto.UpdateOnlineStatusInput{}
-	if err := ginCtx.BindJSON(input); err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
-		return
-	}
-
-	if err := a.apiService.EnableAPI(ginCtx, namespaceId, userId, apiUUID, input.ClusterName); err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
-		return
-	}
-	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
-}
-
-// disableAPI 禁用API
-func (a *apiController) disableAPI(ginCtx *gin.Context) {
-	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := users.GetUserId(ginCtx)
-	apiUUID := ginCtx.Query("uuid")
-	if apiUUID == "" {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("uuid can't be nil"))
-		return
-	}
-	input := &online_dto.UpdateOnlineStatusInput{}
-	if err := ginCtx.BindJSON(input); err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
+	apiInfo, clustersPublish, err := a.apiService.OnlineInfo(ginCtx, namespaceId, apiUUID)
+	if err != nil {
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("获取发布管理信息失败: %s", err.Error()))
 		return
 	}
 
-	if err := a.apiService.DisableAPI(ginCtx, namespaceId, userId, apiUUID, input.ClusterName); err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
-		return
+	info := &api_dto.ApiPublishInfo{
+		Name:      apiInfo.Api.Name,
+		ID:        apiInfo.Api.UUID,
+		Scheme:    apiInfo.Api.Scheme,
+		Method:    apiInfo.Version.Method,
+		Path:      apiInfo.Api.RequestPathLabel,
+		Service:   apiInfo.Version.ServiceName,
+		ProxyPath: apiInfo.Version.ProxyPath,
+		Desc:      apiInfo.Api.Desc,
 	}
-	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
+
+	clusters := make([]*api_dto.ApiPublishCluster, 0, len(clustersPublish))
+	for _, clu := range clustersPublish {
+		clusters = append(clusters, &api_dto.ApiPublishCluster{
+			Name:       clu.ClusterName,
+			Env:        clu.ClusterEnv,
+			Status:     enum.OnlineStatus(clu.Status),
+			Operator:   clu.Operator,
+			UpdateTime: clu.UpdateTime,
+		})
+	}
+	m := make(map[string]interface{})
+	m["info"] = info
+	m["clusters"] = clusters
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
 }
 
 // getOnlineList 上线管理列表
 func (a *apiController) getOnlineList(ginCtx *gin.Context) {
-	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	apiUUID := ginCtx.Query("uuid")
-	if apiUUID == "" {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("DeleteApi fail. err: uuid can't be nil"))
-		return
-	}
-
-	list, err := a.apiService.OnlineList(ginCtx, namespaceId, apiUUID)
-	if err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
-		return
-	}
-
-	resp := make([]*online_dto.OnlineOut, 0, len(list))
-	for _, item := range list {
-		updateTime := ""
-		if !item.UpdateTime.IsZero() {
-			updateTime = common.TimeToStr(item.UpdateTime)
-		}
-		resp = append(resp, &online_dto.OnlineOut{
-			Name:       item.ClusterName,
-			Env:        item.ClusterEnv,
-			Status:     enum.OnlineStatus(item.Status),
-			Disable:    item.Disable,
-			Operator:   item.Operator,
-			UpdateTime: updateTime,
-		})
-	}
-
-	m := make(map[string]interface{})
-	m["clusters"] = resp
-	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
+	//namespaceId := namespace_controller.GetNamespaceId(ginCtx)
+	//apiUUID := ginCtx.Query("uuid")
+	//if apiUUID == "" {
+	//	controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("DeleteApi fail. err: uuid can't be nil"))
+	//	return
+	//}
+	//
+	//list, err := a.apiService.OnlineList(ginCtx, namespaceId, apiUUID)
+	//if err != nil {
+	//	controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
+	//	return
+	//}
+	//
+	//resp := make([]*online_dto.OnlineOut, 0, len(list))
+	//for _, item := range list {
+	//	updateTime := ""
+	//	if !item.UpdateTime.IsZero() {
+	//		updateTime = common.TimeToStr(item.UpdateTime)
+	//	}
+	//	resp = append(resp, &online_dto.OnlineOut{
+	//		Name:       item.ClusterName,
+	//		Env:        item.ClusterEnv,
+	//		Status:     enum.OnlineStatus(item.Status),
+	//		Disable:    item.Disable,
+	//		Operator:   item.Operator,
+	//		UpdateTime: updateTime,
+	//	})
+	//}
+	//
+	//m := make(map[string]interface{})
+	//m["clusters"] = resp
+	//ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
 }
 
 // getSourceList 获取来源列表
