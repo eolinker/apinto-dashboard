@@ -535,7 +535,43 @@ func (a *apiController) offline(ginCtx *gin.Context) {
 }
 
 func (a *apiController) getOnlineInfo(ginCtx *gin.Context) {
+	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
+	apiUUID := ginCtx.Query("uuid")
+	if apiUUID == "" {
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("获取发布管理信息失败: uuid 不能为空"))
+		return
+	}
+	apiInfo, clustersPublish, err := a.apiService.OnlineInfo(ginCtx, namespaceId, apiUUID)
+	if err != nil {
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("获取发布管理信息失败: %s", err.Error()))
+		return
+	}
 
+	info := &api_dto.ApiPublishInfo{
+		Name:      apiInfo.Api.Name,
+		ID:        apiInfo.Api.UUID,
+		Scheme:    apiInfo.Api.Scheme,
+		Method:    apiInfo.Version.Method,
+		Path:      apiInfo.Api.RequestPathLabel,
+		Service:   apiInfo.Version.ServiceName,
+		ProxyPath: apiInfo.Version.ProxyPath,
+		Desc:      apiInfo.Api.Desc,
+	}
+
+	clusters := make([]*api_dto.ApiPublishCluster, 0, len(clustersPublish))
+	for _, clu := range clustersPublish {
+		clusters = append(clusters, &api_dto.ApiPublishCluster{
+			Name:       clu.ClusterName,
+			Env:        clu.ClusterEnv,
+			Status:     enum.OnlineStatus(clu.Status),
+			Operator:   clu.Operator,
+			UpdateTime: clu.UpdateTime,
+		})
+	}
+	m := make(map[string]interface{})
+	m["info"] = info
+	m["clusters"] = clusters
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
 }
 
 // getOnlineList 上线管理列表
