@@ -116,7 +116,6 @@ export class ApiWebsocketCreateComponent implements OnInit {
   }
 
   ngOnInit (): void {
-    console.log(this)
     this.getServiceList()
     this.getPluginTemplateList()
     if (this.baseInfo.allParamsInfo.apiId) {

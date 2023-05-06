@@ -1673,3 +1673,8 @@ eo-ng-radio-group.date-picker-button-group
 .ant-input-affix-wrapper {
   transition: none;
 }
+
+// 动态渲染的react组件中的下拉列表受ng-zorro-antd影响，此处做特殊处理
+.ant-select-dropdown:not(eo-ng-option-container) {
+  position: absolute;
+}
