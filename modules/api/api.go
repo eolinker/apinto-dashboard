@@ -54,7 +54,6 @@ type IAPIService interface {
 	GetAPINameByID(ctx context.Context, apiID int) (string, error)
 	GetAPIRemoteOptions(ctx context.Context, namespaceId, pageNum, pageSize int, keyword, groupUuid string) ([]*strategy_model.RemoteApis, int, error)
 	GetAPIRemoteByUUIDS(ctx context.Context, namespace int, uuids []string) ([]*strategy_model.RemoteApis, error)
-	ResetOnline(ctx context.Context, namespaceId, clusterId int)
 	APICount(ctx context.Context, namespaceId int) (int64, error)
 	APIOnlineCount(ctx context.Context, namespaceId int) (int64, error)
 }
