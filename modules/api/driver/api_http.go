@@ -27,8 +27,8 @@ func (a *apiHTTP) CheckInput(input *api_dto.APIInfo) error {
 
 func (a *apiHTTP) ToApinto(name, desc string, disable bool, method []string, requestPath, requestPathLabel, proxyPath, serviceName string, timeout, retry int, hosts []string, match []*api_entry.MatchConf, header []*api_entry.ProxyHeader, templateUUID string) *v1.RouterConfig {
 	router := toApinto(name, desc, disable, method, requestPath, requestPathLabel, proxyPath, serviceName, timeout, retry, hosts, match, header, templateUUID)
+	router.Append["websocket"] = false
 	router.Driver = a.apintoDriverName
-	router.EnableWebsocket = false
 	return router
 }
 
