@@ -786,7 +786,7 @@ func (p *pluginTemplateService) Offline(ctx context.Context, namespaceId, operat
 
 	for _, apiId := range apiIds {
 		//判断API有没有下线
-		if p.apiService.IsAPIOnline(ctx, clusterInfo.Id, apiId) {
+		if p.apiService.IsAPIOnline(ctx, clusterInfo.Name, clusterInfo.Addr, apiId) {
 			apiInfo, err := p.apiService.GetAPIInfoById(ctx, apiId)
 			if err != nil {
 				return err

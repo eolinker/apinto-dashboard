@@ -351,7 +351,7 @@ func (d *dynamicService) ClusterStatus(ctx context.Context, namespaceId int, pro
 	for _, c := range clusters {
 		var operator int
 		var updateTime string
-		v, err := d.publishHistoryStore.First(ctx, map[string]interface{}{
+		v, err := d.publishHistoryStore.GetLastPublishHistory(ctx, map[string]interface{}{
 			"namespace":    namespaceId,
 			"cluster":      c.Id,
 			"target":       moduleInfo.Id,
@@ -375,6 +375,11 @@ func (d *dynamicService) ClusterStatus(ctx context.Context, namespaceId int, pro
 
 		client, err := v2.GetClusterClient(c.Name, c.Addr)
 		if err != nil {
+			result = append(result, &dynamic_model.DynamicCluster{
+				Name:   c.Name,
+				Title:  c.Name,
+				Status: v2.StatusOffline,
+			})
 			log.Errorf("get cluster status error: %w", err)
 			continue
 		}

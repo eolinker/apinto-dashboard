@@ -824,7 +824,7 @@ func (s *service) OfflineService(ctx context.Context, namespaceId, operator int,
 		switch kindType {
 		case quote_entry.QuoteKindTypeAPI:
 			for _, apiId := range ids {
-				if s.apiService.IsAPIOnline(ctx, clusterInfo.Id, apiId) {
+				if s.apiService.IsAPIOnline(ctx, clusterInfo.Name, clusterInfo.Addr, apiId) {
 					name, err := s.apiService.GetAPINameByID(ctx, apiId)
 					if err != nil {
 						return err
