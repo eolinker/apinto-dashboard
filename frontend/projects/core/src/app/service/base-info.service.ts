@@ -92,6 +92,7 @@ export class BaseInfoService {
             // 路由载入开始时重置参数
             lastParamInfo = Object.entries(this._allParams).length ? this._allParams : lastParamInfo || {}
             this._allParams = {} as RouteParams
+            console.log('---router-', this)
             return
           }
           if (e instanceof GuardsCheckEnd && e.shouldActivate === false) {
