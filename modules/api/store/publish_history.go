@@ -25,7 +25,7 @@ func (s *apiPublishHistoryHandler) Encode(sr *api_entry.ApiPublishHistory) *publ
 		Kind:        s.Kind(),
 		ClusterId:   sr.ClusterId,
 		NamespaceId: sr.NamespaceId,
-		Target:      sr.ClusterId,
+		Target:      sr.Target,
 		VersionId:   sr.VersionId,
 		Data:        string(val),
 		Desc:        sr.Desc,
@@ -43,14 +43,15 @@ func (s *apiPublishHistoryHandler) Decode(r *publish_entry.PublishHistory) *api_
 	history := &api_entry.ApiPublishHistory{
 		Id:               r.Id,
 		VersionName:      r.VersionName,
-		Desc:             r.Desc,
-		NamespaceId:      r.NamespaceId,
 		ClusterId:        r.ClusterId,
+		NamespaceId:      r.NamespaceId,
+		Desc:             r.Desc,
 		VersionId:        r.VersionId,
-		OptTime:          r.OptTime,
-		OptType:          r.OptType,
+		Target:           r.Target,
 		APIVersionConfig: *val,
+		OptType:          r.OptType,
 		Operator:         r.Operator,
+		OptTime:          r.OptTime,
 	}
 	return history
 }
