@@ -9,6 +9,7 @@ import { ApiService } from 'projects/core/src/app/service/api.service'
 import { BaseInfoService } from 'projects/core/src/app/service/base-info.service'
 import { ClusterData } from '../types/types'
 import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
+import { DeployService } from '../../deploy.service'
 
 @Component({
   selector: 'eo-ng-cluster-message',
@@ -29,6 +30,7 @@ export class DeployClusterMessageComponent {
     private api: ApiService,
     private router: Router,
     private fb: UntypedFormBuilder,
+    private service:DeployService,
     private baseInfo:BaseInfoService,
     private navigationService: EoNgNavigationService) {
     this.validateForm = this.fb.group({
@@ -48,6 +50,8 @@ export class DeployClusterMessageComponent {
   getClusterMessage () {
     this.api.get('cluster', { clusterName: this.clusterName }).subscribe((resp:{code:number, data:{cluster:ClusterData}, msg:string}) => {
       if (resp.code === 0) {
+        this.service.clusterDesc = resp.data.cluster.desc
+        this.service.clusterName = resp.data.cluster.title
         setFormValue(this.validateForm, resp.data.cluster)
       }
     })
@@ -83,6 +87,8 @@ export class DeployClusterMessageComponent {
       }).subscribe((resp) => {
         this.submitButtonLoading = false
         if (resp.code === 0) {
+          this.service.clusterDesc = this.validateForm.controls['desc'].value
+          this.service.clusterName = this.validateForm.controls['title'].value
           this.message.success(resp.msg || '修改集群信息成功')
         }
       })

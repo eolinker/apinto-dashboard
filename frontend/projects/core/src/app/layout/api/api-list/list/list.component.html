@@ -25,8 +25,8 @@
 
       <eo-ng-dropdown-menu #menu="nzDropdownMenu">
         <ul nz-menu>
-          <li nz-menu-item>HTTP</li>
-          <li nz-menu-item>Websocket</li>
+          <li nz-menu-item (click)="addApi()">HTTP</li>
+          <li nz-menu-item (click)="addApi('websocket')">Websocket</li>
         </ul>
       </eo-ng-dropdown-menu>
 
@@ -65,6 +65,7 @@
       [(nzPageSize)]="apisForm.pageSize"
       (nzPageIndexChange)="getApisData()"
       (nzPageSizeChange)="getApisData()"
+      [nzLoading]="apiTableLoading"
     >
     </eo-ng-apinto-table>
   </div>
