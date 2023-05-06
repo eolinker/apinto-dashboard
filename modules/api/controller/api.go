@@ -13,7 +13,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/group/group-dto"
 	"github.com/eolinker/apinto-dashboard/modules/group/group-model"
-	"github.com/eolinker/apinto-dashboard/modules/online/online-dto"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
 	"github.com/gin-gonic/gin"
@@ -482,7 +481,7 @@ func (a *apiController) online(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("uuid can't be nil"))
 		return
 	}
-	input := &online_dto.UpdateOnlineStatusInput{}
+	input := &api_dto.PublishInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
@@ -521,7 +520,7 @@ func (a *apiController) offline(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("uuid 不可以为空"))
 		return
 	}
-	input := &online_dto.UpdateOnlineStatusInput{}
+	input := &api_dto.PublishInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
