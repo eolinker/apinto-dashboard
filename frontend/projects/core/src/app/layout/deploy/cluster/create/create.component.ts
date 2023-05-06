@@ -55,8 +55,6 @@ export class DeployClusterCreateComponent implements OnInit {
       clusterDesc: [''],
       clusterAddr: ['', [this.clusterAddrVadidator]]
     })
-
-    this.navigationService.reqFlashBreadcrumb([{ title: '网关集群', routerLink: 'deploy/cluster' }, { title: '新建集群' }])
   }
 
   ngOnInit (): void {

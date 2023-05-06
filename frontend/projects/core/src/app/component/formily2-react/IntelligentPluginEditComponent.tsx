@@ -123,7 +123,8 @@ export const IntelligentPluginEditComponent = React.forwardRef(
       driverSelectOptions,
       demo,
       demoSchema,
-      editPage = false
+      editPage = false,
+      onSubmit
     } = props
     React.useImperativeHandle(ref, () => ({ form, submitRef }))
 
@@ -204,7 +205,8 @@ export const IntelligentPluginEditComponent = React.forwardRef(
     }
 
     const submit = (value: any) => {
-      console.log(value)
+      console.log(value, onSubmit)
+      onSubmit && onSubmit(value)
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

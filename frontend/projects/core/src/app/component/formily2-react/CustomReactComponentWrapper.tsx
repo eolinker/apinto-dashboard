@@ -5,8 +5,7 @@ import {
   Input,
   Output,
   SimpleChanges,
-  ViewChild,
-  ViewEncapsulation
+  ViewChild
 } from '@angular/core'
 // eslint-disable-next-line no-use-before-define
 import * as React from 'react'
@@ -34,7 +33,6 @@ const containerElementName = 'customReactComponentContainer'
         .ant-formily-array-items .ant-select {
           width: unset;
         }
-
       }
     `
   ]
@@ -43,6 +41,7 @@ export class CustomReactComponentWrapperComponent {
   @ViewChild(containerElementName, { static: true }) containerRef!: ElementRef
 
   @Output() public componentClick = new EventEmitter<void>()
+  @Output() onSubmit = new EventEmitter<any>()
 
   // 动态渲染区域的render语句，目前后端接口传来的是对象，可以直接用，无需前端处理
 
@@ -195,6 +194,12 @@ export class CustomReactComponentWrapperComponent {
     ReactDOM.unmountComponentAtNode(this.containerRef.nativeElement)
   }
 
+  handlerSubmit = (value: any) => {
+    console.log(value)
+    console.log(this?.onSubmit)
+    this?.onSubmit && this?.onSubmit?.emit(value)
+  }
+
   private render() {
     ReactDOM.render(
       <React.StrictMode>
@@ -207,6 +212,7 @@ export class CustomReactComponentWrapperComponent {
             editPage={this.editPage}
             demoSchema={this.demoSchema}
             demo={this.demo}
+            onSubmit={this.handlerSubmit}
           />
         </div>
       </React.StrictMode>,
