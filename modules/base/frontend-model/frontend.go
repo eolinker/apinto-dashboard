@@ -13,4 +13,5 @@ var (
 type Router struct {
 	Name   RouterName        `json:"name"`
 	Params map[string]string `json:"params"`
+	Msg    string            `json:"msg,omitempty"`
 }

@@ -436,48 +436,38 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 		return errors.New("已有同名的插件")
 	}
 
-	var config []byte
-	var checkConfig *model.PluginEnableCfgMap
-	var define interface{}
-	//若为内置插件
-	if IsInnerPlugin(pluginInfo.Type) {
-		checkConfig = nil
-		config = []byte{}
-		define = nil
-	} else {
-		//若为非内置插件
-		headers := make([]*model.ExtendParams, 0, len(enableInfo.Header))
-		querys := make([]*model.ExtendParams, 0, len(enableInfo.Query))
-		initializes := make([]*model.ExtendParams, 0, len(enableInfo.Initialize))
-		for _, h := range enableInfo.Header {
-			headers = append(headers, &model.ExtendParams{
-				Name:  h.Name,
-				Value: h.Value,
-			})
-		}
-		for _, q := range enableInfo.Query {
-			querys = append(querys, &model.ExtendParams{
-				Name:  q.Name,
-				Value: q.Value,
-			})
-		}
-		for _, i := range enableInfo.Initialize {
-			initializes = append(initializes, &model.ExtendParams{
-				Name:  i.Name,
-				Value: i.Value,
-			})
-		}
-		enableCfg := &model.PluginEnableCfg{
-			Server:     enableInfo.Server,
-			Header:     headers,
-			Query:      querys,
-			Initialize: initializes,
-		}
-		config, _ = json.Marshal(enableCfg)
-		checkConfig = enabledCfgListToMap(enableCfg)
-
-		define = pluginInfo.Details
+	headers := make([]*model.ExtendParams, 0, len(enableInfo.Header))
+	querys := make([]*model.ExtendParams, 0, len(enableInfo.Query))
+	initializes := make([]*model.ExtendParams, 0, len(enableInfo.Initialize))
+	for _, h := range enableInfo.Header {
+		headers = append(headers, &model.ExtendParams{
+			Name:  h.Name,
+			Value: h.Value,
+		})
 	}
+	for _, q := range enableInfo.Query {
+		querys = append(querys, &model.ExtendParams{
+			Name:  q.Name,
+			Value: q.Value,
+		})
+	}
+	for _, i := range enableInfo.Initialize {
+		initializes = append(initializes, &model.ExtendParams{
+			Name:  i.Name,
+			Value: i.Value,
+		})
+	}
+	enableCfg := &model.PluginEnableCfg{
+		Server:     enableInfo.Server,
+		Header:     headers,
+		Query:      querys,
+		Initialize: initializes,
+	}
+	config, _ := json.Marshal(enableCfg)
+	checkConfig := enabledCfgListToMap(enableCfg)
+
+	define := pluginInfo.Details
+
 	err = m.coreService.CheckNewModule(pluginInfo.UUID, enableInfo.Name, pluginInfo.Driver, define, checkConfig)
 	if err != nil {
 		return err
@@ -599,13 +589,17 @@ func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml 
 	if !has {
 		panic(fmt.Errorf("not find driver:%s", pluginYml.Driver))
 	}
-	plugin, err := driver.CreatePlugin(nil)
+
+	plugin, err := driver.CreatePlugin(pluginYml.Define)
 	if err != nil {
 		panic(fmt.Errorf("create plugin %s error:%s", pluginYml.Name, err.Error()))
 	}
 
 	err = m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
 		t := time.Now()
+
+		details, _ := json.Marshal(pluginYml.Define)
+
 		pluginInfo := &entry.ModulePlugin{
 			UUID:       pluginYml.ID,
 			Name:       pluginYml.Name,
@@ -617,7 +611,7 @@ func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml 
 			ICon:       pluginYml.ICon,
 			Type:       pluginYml.Type,
 			Driver:     pluginYml.Driver,
-			Details:    []byte{},
+			Details:    details,
 			Operator:   0,
 			CreateTime: t,
 			UpdateTime: t,
@@ -675,11 +669,14 @@ func (m *modulePluginService) UpdateInnerPlugin(ctx context.Context, pluginYml *
 	pluginInfo.Driver = pluginYml.Driver
 	pluginInfo.UpdateTime = t
 
+	details, _ := json.Marshal(pluginYml.Define)
+	pluginInfo.Details = details
+
 	driver, has := apinto_module.GetDriver(pluginYml.Driver)
 	if !has {
 		panic(fmt.Errorf("not find driver:%s", pluginYml.Driver))
 	}
-	plugin, err := driver.CreatePlugin(nil)
+	plugin, err := driver.CreatePlugin(pluginYml.Define)
 	if err != nil {
 		panic(fmt.Errorf("create plugin %s error:%s", pluginYml.Name, err.Error()))
 	}

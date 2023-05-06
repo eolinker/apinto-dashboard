@@ -383,21 +383,10 @@ func (PluginExtraParamsConfig) PluginId() string {
 // router model
 
 type RouterConfig struct {
-	Name            string             `json:"name,omitempty"`
-	Description     string             `json:"description"` //描述
-	Driver          string             `json:"driver"`      //http
-	Disable         bool               `json:"disable"`     //是否禁用
-	Listen          int                `json:"listen"`
-	Method          []string           `json:"method"`
-	Host            []string           `json:"host"`     //域名
-	RequestPath     string             `json:"location"` //请求路径
-	Rules           []*RouterRule      `json:"rules"`    //路由规则
-	Service         string             `json:"service"`  //目标服务  xxx@service
-	Template        string             `json:"template"` //插件模板id
-	Retry           int                `json:"retry"`
-	EnableWebsocket bool               `json:"websocket"` //是否启用websocket
-	Timeout         int                `json:"time_out"`
-	Plugins         map[string]*Plugin `json:"plugins,omitempty"` //插件
+	Name        string `json:"name,omitempty"`
+	Description string `json:"description"` //描述
+	Driver      string `json:"driver"`      //http
+	Append      map[string]interface{}
 }
 
 type RouterRule struct {

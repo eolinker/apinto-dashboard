@@ -23,7 +23,7 @@ const (
 	SchemeIPPortExp = `^[a-zA-z]+://((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3}:[0-9]+$`
 	// CIDRIpv4Exp IPV4或者IPV4的CIDR
 	CIDRIpv4Exp = `^(?:(?:[0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}(?:[0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([1-9]|[1-2]\d|3[0-2]))?$`
-	//CheckPathIPPortExp (scheme://)?ip:port
+	// CheckPathIPPortExp (scheme://)?ip:port
 	CheckPathIPPortExp = `([a-zA-z]+://)?((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3}:[0-9]+`
 )
 
@@ -125,7 +125,7 @@ func ReplaceRestfulPath(path, replaceStr string) string {
 	return restfulPathMatchRegexp.ReplaceAllString(path, replaceStr)
 }
 
-//CheckPathContainsIPPort 检查路径中是否包含xxx://ip:port
+// CheckPathContainsIPPort 检查路径中是否包含xxx://ip:port
 func CheckPathContainsIPPort(path string) bool {
 	return checkIPPortRegexp.MatchString(path)
 }
