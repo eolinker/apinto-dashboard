@@ -43,6 +43,8 @@ func newDynamicController(name string, define interface{}) *dynamicController {
 	//tmp, _ := json.Marshal(define)
 	var cfg DynamicDefine
 	json.Unmarshal(define.([]byte), &cfg)
+	v, ok := define.([]byte)
+	log.Error(name, string(v), ok)
 	render := make(map[string]Render)
 	for key, value := range cfg.Render {
 		r := make(Render)
