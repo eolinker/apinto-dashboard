@@ -16,6 +16,14 @@ type APIListItem struct {
 	Source      string
 	UpdateTime  time.Time
 	IsDelete    bool
+	Scheme      string
+	Publish     []*APIListItemPublish
+	IsDisable   bool
+}
+
+type APIListItemPublish struct {
+	Name   string
+	Status int
 }
 
 type APIInfo struct {
@@ -92,4 +100,13 @@ type BatchOnlineCheckTask struct {
 type APIBatchConf struct {
 	ApiUUIDs     []string `json:"api_uuids"`
 	ClusterNames []string `json:"cluster_names"`
+}
+
+// ApiCluster 集群信息
+type ApiCluster struct {
+	Name       string
+	Title      string
+	Status     int
+	Updater    string
+	UpdateTime string
 }

@@ -49,7 +49,7 @@ type IAPIService interface {
 	GetAPIListByName(ctx context.Context, namespaceId int, name string) ([]*group_model.CommonGroupApi, error)
 	GetAPIListByServiceName(ctx context.Context, namespaceId int, serviceName []string) ([]*apimodel.APIInfo, error)
 	GetLatestAPIVersion(ctx context.Context, apiId int) (*api_entry.APIVersion, error)
-	IsAPIOnline(ctx context.Context, clusterId, apiID int) bool
+	IsAPIOnline(ctx context.Context, clusterName, clusterAddr string, apiUUID int) bool
 	GetAPIDriver(driverName string) IAPIDriver
 	GetAPINameByID(ctx context.Context, apiID int) (string, error)
 	GetAPIRemoteOptions(ctx context.Context, namespaceId, pageNum, pageSize int, keyword, groupUuid string) ([]*strategy_model.RemoteApis, int, error)

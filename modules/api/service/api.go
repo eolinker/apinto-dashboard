@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	v2 "github.com/eolinker/apinto-dashboard/client/v2"
 	"reflect"
 	"sort"
 	"strings"
@@ -114,7 +115,16 @@ func (a *apiService) APICount(ctx context.Context, namespaceId int) (int64, erro
 }
 
 func (a *apiService) APIOnlineCount(ctx context.Context, namespaceId int) (int64, error) {
-	return a.apiRuntime.OnlineCountByKind(ctx)
+	list, err := a.apiPublishHistory.List(ctx, map[string]interface{}{
+		"namespace": namespaceId,
+		"opt_type":  1,
+		"kind":      "api",
+	})
+	if err != nil {
+		return 0, err
+	}
+	count := len(list)
+	return int64(count), nil
 }
 
 func (a *apiService) GetGroups(ctx context.Context, namespaceId int, parentUuid, queryName string) (*group_model.CommonGroupRoot, []*group_model.CommonGroupApi, error) {
@@ -257,8 +267,18 @@ func (a *apiService) GetAPIList(ctx context.Context, namespaceID int, groupUUID,
 			}
 		}
 
-		isDelete, _ := a.isApiCanDelete(ctx, api.Id)
+		isOnline, clusters, err := a.ClustersStatus(ctx, namespaceID, api.Id, api.UUID, api.Version)
+		if err != nil {
+			return nil, 0, err
+		}
 
+		publish := make([]*apimodel.APIListItemPublish, 0, len(clusters))
+		for _, clu := range clusters {
+			publish = append(publish, &apimodel.APIListItemPublish{
+				Name:   clu.Name,
+				Status: clu.Status,
+			})
+		}
 		item := &apimodel.APIListItem{
 			GroupUUID:   api.GroupUUID,
 			APIUUID:     api.UUID,
@@ -268,7 +288,10 @@ func (a *apiService) GetAPIList(ctx context.Context, namespaceID int, groupUUID,
 			RequestPath: version.RequestPathLabel,
 			Source:      source,
 			UpdateTime:  api.UpdateTime,
-			IsDelete:    isDelete,
+			IsDelete:    !isOnline,
+			Scheme:      api.Scheme,
+			Publish:     publish,
+			IsDisable:   api.IsDisable,
 		}
 
 		apiList = append(apiList, item)
@@ -741,7 +764,7 @@ func (a *apiService) UpdateAPI(ctx context.Context, namespaceID int, operator in
 		}
 
 		//修改基础数据
-		if _, err = a.apiStore.Update(txCtx, apiInfo); err != nil {
+		if err = a.apiStore.Save(txCtx, apiInfo); err != nil {
 			return err
 		}
 
@@ -773,7 +796,7 @@ func (a *apiService) DeleteAPI(ctx context.Context, namespaceId, operator int, u
 		return err
 	}
 
-	isDel, err := a.isApiCanDelete(ctx, apiInfo.Id)
+	isDel, err := a.isApiCanDelete(ctx, namespaceId, apiInfo.Id, apiInfo.UUID, apiInfo.Version)
 	if err != nil {
 		return err
 	}
@@ -964,7 +987,19 @@ func (a *apiService) online(ctx context.Context, namespaceId, operator int, api 
 			onlineList = append(onlineList, item)
 			continue
 		}
-		//TODO 判断模板有没有上线
+
+		if latest.TemplateUUID != "" {
+			isTemplateOnline, err := a.pluginTemplateService.IsOnline(ctx, clusterInfo.Id, latest.TemplateUUID)
+			if err != nil {
+				return nil, err
+			}
+			if !isTemplateOnline {
+				item.Status = false
+				item.Result = fmt.Sprintf("绑定的插件模板未上线到%s", clusterInfo.Name)
+				onlineList = append(onlineList, item)
+				continue
+			}
+		}
 
 		//发布到apinto
 		client, err := a.apintoClient.GetClient(ctx, clusterInfo.Id)
@@ -1254,7 +1289,7 @@ func (a *apiService) BatchOnlineCheck(ctx context.Context, namespaceId int, oper
 				Status:          true,
 				Solution:        &frontend_model.Router{},
 			}
-			//TODO
+
 			isOnline, err := a.pluginTemplateService.IsOnline(ctx, clusterInfo.Id, templateUuid)
 			if err != nil {
 				return nil, "", err
@@ -1423,7 +1458,6 @@ func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, u
 			continue
 		}
 
-		//TODO 判断插件模板有没有上线
 		if latestVersion.TemplateID != 0 {
 			isTemplateOnline, err := a.pluginTemplateService.IsOnline(ctx, clusterInfo.Id, latestVersion.TemplateUUID)
 			if err != nil {
@@ -2005,17 +2039,12 @@ func (a *apiService) GetAPIListByServiceName(ctx context.Context, namespaceId in
 	return apis, nil
 }
 
-func (a *apiService) isApiCanDelete(ctx context.Context, apiId int) (bool, error) {
-	count, err := a.apiRuntime.OnlineCount(ctx, apiId)
+func (a *apiService) isApiCanDelete(ctx context.Context, namespaceId, apiId int, apiUUID, apiVersion string) (bool, error) {
+	isOnline, _, err := a.ClustersStatus(ctx, namespaceId, apiId, apiUUID, apiVersion)
 	if err != nil {
 		return false, err
 	}
-
-	if count > 0 {
-		return false, nil
-	}
-
-	return true, nil
+	return !isOnline, nil
 }
 
 func (a *apiService) GetLatestAPIVersion(ctx context.Context, apiId int) (*apientry.APIVersion, error) {
@@ -2069,12 +2098,21 @@ func (a *apiService) CheckAPIReduplicative(ctx context.Context, namespaceID int,
 	return nil
 }
 
-func (a *apiService) IsAPIOnline(ctx context.Context, clusterId, apiID int) bool {
-	runtime, err := a.apiRuntime.GetForCluster(ctx, apiID, clusterId)
+func (a *apiService) IsAPIOnline(ctx context.Context, clusterName, clusterAddr string, apiID int) bool {
+	apiInfo, err := a.apiStore.Get(ctx, apiID)
 	if err != nil {
 		return false
 	}
-	return runtime.IsOnline
+	client, err := v2.GetClusterClient(clusterName, clusterAddr)
+	if err != nil {
+		log.Errorf("get cluster status error: %w", err)
+		return false
+	}
+	_, err = client.Version("api", apiInfo.UUID)
+	if err != nil {
+		return false
+	}
+	return true
 }
 
 func (a *apiService) isAPIVersionConfChange(latest apientry.APIVersionConfig, current apientry.APIVersionConfig) bool {
@@ -2195,4 +2233,80 @@ func (a *apiService) GetAPIRemoteByUUIDS(ctx context.Context, namespace int, uui
 	}
 
 	return apiList, nil
+}
+
+func (a *apiService) ClustersStatus(ctx context.Context, namespaceId, apiId int, apiUUID, apiVersion string) (bool, []*apimodel.ApiCluster, error) {
+	clusters, err := a.clusterService.GetAllCluster(ctx)
+	if err != nil {
+		return false, nil, err
+	}
+	result := make([]*apimodel.ApiCluster, 0, len(clusters))
+	online := false
+	for _, c := range clusters {
+		var operator int
+		var updateTime string
+		v, err := a.apiPublishHistory.GetLastPublishHistory(ctx, map[string]interface{}{
+			"namespace":    namespaceId,
+			"cluster":      c.Id,
+			"target":       apiId,
+			"version_name": apiVersion,
+			"kind":         "api",
+		})
+		if err != nil {
+			if err != gorm.ErrRecordNotFound {
+				result = append(result, &apimodel.ApiCluster{
+					Name:   c.Name,
+					Title:  c.Name,
+					Status: 1, //未发布
+				})
+				continue
+			}
+			// 可能存在id不相同，但是控制台已经发布的情况
+		} else {
+			operator = v.Operator
+			updateTime = v.OptTime.Format("2006-01-02 15:04:05")
+		}
+
+		client, err := v2.GetClusterClient(c.Name, c.Addr)
+		if err != nil {
+			result = append(result, &apimodel.ApiCluster{
+				Name:   c.Name,
+				Title:  c.Name,
+				Status: 1, //未发布
+			})
+			log.Errorf("get cluster status error: %w", err)
+			continue
+		}
+		version, err := client.Version("api", apiUUID)
+		if err != nil {
+			result = append(result, &apimodel.ApiCluster{
+				Name:   c.Name,
+				Title:  c.Name,
+				Status: 1, //未发布
+			})
+			continue
+		}
+		online = true
+		status := 4 //待更新
+		if version == apiVersion {
+			status = 3 //上线
+
+		}
+		updater := ""
+		if operator > 0 {
+			u, err := a.userInfoService.GetUserInfo(ctx, operator)
+			if err == nil {
+				updater = u.UserName
+			}
+		}
+
+		result = append(result, &apimodel.ApiCluster{
+			Name:       c.Name,
+			Title:      c.Name,
+			Status:     status,
+			Updater:    updater,
+			UpdateTime: updateTime,
+		})
+	}
+	return online, result, nil
 }
