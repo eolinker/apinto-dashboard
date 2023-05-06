@@ -66,7 +66,7 @@ func (m *Module) provider(context *gin.Context) {
 		result = append(result, c.Export())
 	}
 	context.JSON(200, map[string]interface{}{
-		"code": "00000",
+		"code": 0,
 		"data": map[string]interface{}{
 			skill: result,
 		},
@@ -101,7 +101,7 @@ func (m *Module) status(context *gin.Context) {
 	status := m.providers.Status(key, namespaceID, cluster)
 
 	context.JSON(200, map[string]interface{}{
-		"code": "00000",
+		"code": 0,
 		"data": map[string]interface{}{
 			"status": status,
 		},
