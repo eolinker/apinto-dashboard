@@ -144,8 +144,8 @@ export class ApiManagementListComponent implements OnInit {
     })
   }
 
-  addApi () {
-    const url:Array<string> = ['/', 'router', 'api', 'create']
+  addApi (type?:string) {
+    const url:Array<string> = ['/', 'router', 'api', type && type === 'websocket' ? 'create-ws' : 'create']
     if (this.apisForm.groupUuid) {
       url.push(this.apisForm.groupUuid)
     }
