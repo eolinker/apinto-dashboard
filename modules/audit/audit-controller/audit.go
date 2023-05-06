@@ -33,9 +33,15 @@ func (a *auditLogController) Handler(ginCtx *gin.Context) {
 	ginCtx.Next()
 
 	kind := ginCtx.GetString(apintoModule.ApintoModuleName)
-	operate := ginCtx.GetInt(controller.Operate)
-	if operate == 0 {
+	operateStr := ginCtx.GetString(controller.Operate)
+	operate := audit_model.LogOperateTypeNone
+	if operateStr == "" {
 		operate = switchMethod(ginCtx.Request.Method)
+	} else {
+		operate = audit_model.GetLogOperateIndex(operateStr)
+	}
+	if operate == audit_model.LogOperateTypeNone {
+		return
 	}
 	end := time.Now()
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
@@ -61,19 +67,19 @@ func (a *auditLogController) Handler(ginCtx *gin.Context) {
 
 	url := fmt.Sprintf("%s %s", ginCtx.Request.Method, ginCtx.Request.RequestURI)
 
-	a.auditLogService.Log(namespaceId, userId, operate, kind, url, ginCtx.GetString("auditObject"), ip, userAgent, ginCtx.GetString(controller.LogBody), errInfo, start, end)
+	a.auditLogService.Log(namespaceId, userId, int(operate), kind, url, ginCtx.GetString("auditObject"), ip, userAgent, ginCtx.GetString(controller.LogBody), errInfo, start, end)
 
 }
-func switchMethod(method string) int {
+func switchMethod(method string) audit_model.LogOperateType {
 	switch method {
 	case http.MethodGet:
-		return int(audit_model.LogOperateTypeNone)
+		return audit_model.LogOperateTypeNone
 	case http.MethodPost:
-		return int(audit_model.LogOperateTypeCreate)
+		return audit_model.LogOperateTypeCreate
 	case http.MethodPut, http.MethodPatch:
-		return int(audit_model.LogOperateTypeEdit)
+		return audit_model.LogOperateTypeEdit
 	case http.MethodDelete:
-		return int(audit_model.LogOperateTypeDelete)
+		return audit_model.LogOperateTypeDelete
 	}
-	return int(audit_model.LogOperateTypeNone)
+	return audit_model.LogOperateTypeNone
 }

@@ -1,5 +1,5 @@
 import { SelectOption } from 'eo-ng-select'
-import { THEAD_TYPE } from 'eo-ng-table'
+import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { NzCheckBoxOptionInterface } from 'ng-zorro-antd/checkbox'
 import { EO_TBODY_TYPE } from 'projects/eo-ng-apinto-table/src/public-api'
 
@@ -118,88 +118,41 @@ export const proxyHeaderTableBody:EO_TBODY_TYPE[] = [
   }
 ]
 
-// api列表页
-export const apisTableHeadName:THEAD_TYPE[] = [
-  {
-    type: 'checkbox',
-    resizeable: false
-  },
-  {
-    title: 'API名称'
-  },
-  {
-    title: '协议/方法',
-    width: 140,
-    resizeable: false
-  },
-  {
-    title: '上游服务名称'
-  },
-  {
-    title: '请求路径'
-  },
-  {
-    title: '来源',
-    filterMultiple: true,
-    filterOpts: [{
-      text: '自建',
-      value: 'build'
-    },
-    {
-      text: '导入',
-      value: 'import'
-    }
-    ],
-    filterFn: () => {
-      return true
-    }
-  },
-  {
-    title: '更新时间'
-  },
-  {
-    title: '操作',
-    right: true
-  }
+export const defaultHostList:Array<{key:string}> = [
+  { key: '' }
 ]
 
-export const apisTableBody:EO_TBODY_TYPE[] = [
+export const hostHeaderTableBody:TBODY_TYPE[] = [
   {
-    key: 'checked',
-    type: 'checkbox'
-  },
-  {
-    key: 'name',
-    copy: true
-  },
-  {
-    key: 'method'
-  },
-  {
-    key: 'service'
-  },
-  {
-    key: 'requestPath',
-    copy: true
-  },
-  {
-    key: 'source'
-  },
-  {
-    key: 'updateTime'
+    key: 'key',
+    type: 'input',
+    placeholder: '请输入域名',
+    checkMode: 'change',
+    check: (item: any) => {
+      return !item || /[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+.?/.test(item)
+    },
+    errorTip: '格式有误'
   },
   {
     type: 'btn',
-    right: true,
-    btns: [{
-      title: '上线管理'
-    },
-    {
-      title: '查看'
-    },
-    {
-      title: '删除'
-    }
+    btns: [
+      {
+        title: '添加',
+        action: 'add'
+      }
+    ]
+  },
+  {
+    type: 'btn',
+    btns: [
+      {
+        title: '添加',
+        action: 'add'
+      },
+      {
+        title: '减少',
+        action: 'delete'
+      }
     ]
   }
 ]

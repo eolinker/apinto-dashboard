@@ -1,0 +1,29 @@
+id: "discovery-2.apinto.com"
+name: "discovery-2"
+cname: "服务发现-2"
+resume: "使用一个注册中心来记录分布式系统中的全部服务的信息，以便其他服务能够快速的找到这些已注册的服务。"
+version: "v1.0.0"
+icon: "服务发现.png"
+driver: "discovery-2.apinto.com"
+type: 1 #0为框架模块 1为核心模块 2为内置模块 3为非内置
+auto: true
+front: upstream
+navigation: "navigation.infrastructure"
+group_id: "core_module"
+define:  # 动态模块定义
+  profession: service
+  drivers:
+    - name: http
+      title: TCP
+  skill: Upstream
+  fields:
+    - name: title           # 定义从响应中对应字段中获取显示值
+      title: 名称
+    - name: id
+      title: ID
+    - name: driver
+      title: 驱动名称
+    - name: description
+      title: 描述
+  render:
+    http:

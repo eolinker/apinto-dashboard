@@ -99,3 +99,15 @@ export type ClusterPluginPublishHistoryItem = {
   total:number
   isExpand?:boolean
 }
+
+export type ClusterStatus = 'NORMAL' | 'PARTIALLY_NORMAL'|'ABNORMAL'
+
+export type ClusterData = {
+  env:string
+  status:ClusterStatus
+  desc:string
+  name:string
+  title:string
+  createTime:string
+  updateTime:string
+}
