@@ -124,3 +124,7 @@ type ApiPublishCluster struct {
 	Operator   string            `json:"operator"`
 	UpdateTime string            `json:"update_time"`
 }
+
+type PublishInput struct {
+	ClusterNames []string `json:"cluster_names"`
+}
