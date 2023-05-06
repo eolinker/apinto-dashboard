@@ -118,7 +118,7 @@ export class CustomReactComponentWrapperComponent {
           'x-decorator-props': {},
           required: true,
           default: 'HTTP',
-          'x-reactions': ['{{useAsyncDataSource(getDiscovery,"service")}}'],
+          'x-reactions': ['{{useAsyncDataSource(getSkillData,"service")}}'],
           name: 'scheme',
           'x-index': 0
         }
