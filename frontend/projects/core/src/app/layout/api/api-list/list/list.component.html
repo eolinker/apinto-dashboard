@@ -65,6 +65,7 @@
       [(nzPageSize)]="apisForm.pageSize"
       (nzPageIndexChange)="getApisData()"
       (nzPageSizeChange)="getApisData()"
+      [nzLoading]="apiTableLoading"
     >
     </eo-ng-apinto-table>
   </div>

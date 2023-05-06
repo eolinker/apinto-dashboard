@@ -45,7 +45,7 @@ export class ApiManagementListComponent implements OnInit {
   nzDisabled:boolean = false
   sourcesList:Array<{text:string, value:any, [key:string]:any}> = []
   apiNameForSear:string = ''
-
+  apiTableLoading:boolean = false
   apisForm: {apis:ApiListItem[], total:number, pageNum:number, pageSize:number, groupUuid:string, sourceIds:Array<string>} = {
     apis: [],
     total: 0,
@@ -106,6 +106,7 @@ export class ApiManagementListComponent implements OnInit {
 
   // 根据groupUuid获取新的apis列表
   getApisData () {
+    this.apiTableLoading = true
     this.api.get('routers', { groupUuid: (this.apisForm.groupUuid || this.groupUuid), searchName: this.apiNameForSear, sourceIds: this.apisForm.sourceIds.join(','), pageNum: this.apisForm.pageNum, pageSize: this.apisForm.pageSize })
       .subscribe((resp:{code:number, data:{apis:ApiListItem[], total:number, pageNum:number, pageSize:number}, msg:string}) => {
         if (resp.code === 0) {
@@ -129,6 +130,7 @@ export class ApiManagementListComponent implements OnInit {
           this.apisForm.pageNum = resp.data.pageNum || this.apisForm.pageNum
           this.apisForm.pageSize = resp.data.pageSize || this.apisForm.pageSize
         }
+        this.apiTableLoading = false
       })
   }
 

@@ -149,11 +149,10 @@ export class IframePageComponent implements OnInit {
     // 此处监听的是切换module事件，需要判断moduleName是否变化
     this.subscription = this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
-        console.log(this.router.url)
+        console.log(this.router.url, this.moduleName, this.baseInfo.allParamsInfo.moduleName)
         if (this.moduleName !== this.baseInfo.allParamsInfo.moduleName) {
           this.moduleName = this.baseInfo.allParamsInfo.moduleName
           this.iframeService.moduleName = this.moduleName
-          this.subscription.unsubscribe()
           this.iframeService.subscription.unsubscribe()
           this.showIframe('test', `agent/${this.moduleName}`, {})
         }
