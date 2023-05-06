@@ -215,6 +215,7 @@ export class ApiManagementListComponent implements OnInit {
       nzComponentParams: {
         apiUuid: uuid,
         closeModal: () => { this.modalRef?.close() },
+        getApisData: () => { this.getApisData() },
         nzDisabled: this.nzDisabled
       },
       nzFooter: [{

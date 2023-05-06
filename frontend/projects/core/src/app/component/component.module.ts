@@ -55,6 +55,7 @@ import { UserAvatarComponent } from './user-avatar/user-avatar.component'
 import { ResetPswComponent } from './reset-psw/reset-psw.component'
 import { UserProfileComponent } from './user-profile/user-profile.component'
 import { SimpleMapComponentWrapperComponent } from './formily2-react/component/simple-map/SimpleMapComponentWrapper'
+import { CustomDialogReactComponentWrapperComponent } from './formily2-react/component/dialog/CustomDialogComponentWrapper'
 @NgModule({
   declarations: [
     EditableEnvTableComponent,
@@ -74,6 +75,7 @@ import { SimpleMapComponentWrapperComponent } from './formily2-react/component/s
     IntelligentPluginPublishComponent,
     IntelligentPluginCreateComponent,
     CustomEnvVariableReactComponentWrapperComponent,
+    CustomDialogReactComponentWrapperComponent,
     UserAvatarComponent,
     ResetPswComponent,
     UserProfileComponent
