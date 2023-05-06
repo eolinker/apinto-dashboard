@@ -534,40 +534,44 @@ func (a *apiController) offline(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
+func (a *apiController) getOnlineInfo(ginCtx *gin.Context) {
+
+}
+
 // getOnlineList 上线管理列表
 func (a *apiController) getOnlineList(ginCtx *gin.Context) {
-	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	apiUUID := ginCtx.Query("uuid")
-	if apiUUID == "" {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("DeleteApi fail. err: uuid can't be nil"))
-		return
-	}
-
-	list, err := a.apiService.OnlineList(ginCtx, namespaceId, apiUUID)
-	if err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
-		return
-	}
-
-	resp := make([]*online_dto.OnlineOut, 0, len(list))
-	for _, item := range list {
-		updateTime := ""
-		if !item.UpdateTime.IsZero() {
-			updateTime = common.TimeToStr(item.UpdateTime)
-		}
-		resp = append(resp, &online_dto.OnlineOut{
-			Name:       item.ClusterName,
-			Env:        item.ClusterEnv,
-			Status:     enum.OnlineStatus(item.Status),
-			Disable:    item.Disable,
-			Operator:   item.Operator,
-			UpdateTime: updateTime,
-		})
-	}
-
-	m := make(map[string]interface{})
-	m["clusters"] = resp
-	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
+	//namespaceId := namespace_controller.GetNamespaceId(ginCtx)
+	//apiUUID := ginCtx.Query("uuid")
+	//if apiUUID == "" {
+	//	controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("DeleteApi fail. err: uuid can't be nil"))
+	//	return
+	//}
+	//
+	//list, err := a.apiService.OnlineList(ginCtx, namespaceId, apiUUID)
+	//if err != nil {
+	//	controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
+	//	return
+	//}
+	//
+	//resp := make([]*online_dto.OnlineOut, 0, len(list))
+	//for _, item := range list {
+	//	updateTime := ""
+	//	if !item.UpdateTime.IsZero() {
+	//		updateTime = common.TimeToStr(item.UpdateTime)
+	//	}
+	//	resp = append(resp, &online_dto.OnlineOut{
+	//		Name:       item.ClusterName,
+	//		Env:        item.ClusterEnv,
+	//		Status:     enum.OnlineStatus(item.Status),
+	//		Disable:    item.Disable,
+	//		Operator:   item.Operator,
+	//		UpdateTime: updateTime,
+	//	})
+	//}
+	//
+	//m := make(map[string]interface{})
+	//m["clusters"] = resp
+	//ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
 }
 
 // getSourceList 获取来源列表
