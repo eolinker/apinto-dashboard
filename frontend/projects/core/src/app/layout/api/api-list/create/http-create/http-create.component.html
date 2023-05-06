@@ -1,0 +1,29 @@
+<eo-ng-api-websocket-create>
+  <nz-form-item
+    nz-row
+    class="checkbox-group-api"
+    nzSpan="19"
+    [ngClass]="{ 'ant-form-item-has-error': showCheckboxGroupValid }"
+  >
+    <nz-form-label [nzSpan]="7" nzRequired>请求方式：</nz-form-label>
+    <div nz-col [nzSpan]="12" class="min-w-INPUT_LARGE">
+      <label
+        eo-ng-checkbox
+        [nzDisabled]="nzDisabled"
+        name="allChecked"
+        [(ngModel)]="allChecked"
+        (ngModelChange)="updateAllChecked()"
+        [ngModelOptions]="{ standalone: true }"
+      >
+        All
+      </label>
+      <eo-ng-checkbox-group
+        [nzDisabled]="nzDisabled"
+        name="method"
+        [(ngModel)]="methodList"
+        (ngModelChange)="updateSingleChecked()"
+        [ngModelOptions]="{ standalone: true }"
+      ></eo-ng-checkbox-group>
+    </div>
+  </nz-form-item>
+</eo-ng-api-websocket-create>
