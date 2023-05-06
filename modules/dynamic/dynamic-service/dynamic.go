@@ -418,12 +418,23 @@ func (d *dynamicService) ClusterStatus(ctx context.Context, namespaceId int, pro
 			log.Errorf("get cluster status error: %w", err)
 			continue
 		}
+
+		updater := ""
+		if operator > 0 {
+			u, err := d.userService.GetUserInfo(ctx, operator)
+			if err == nil {
+				updater = u.UserName
+			}
+		}
+
 		version, err := client.Version(profession, name)
 		if err != nil {
 			result = append(result, &dynamic_model.DynamicCluster{
-				Name:   c.Name,
-				Title:  c.Title,
-				Status: v2.StatusOffline,
+				Name:       c.Name,
+				Title:      c.Title,
+				Status:     v2.StatusOffline,
+				Updater:    updater,
+				UpdateTime: updateTime,
 			})
 			continue
 		}
@@ -432,13 +443,6 @@ func (d *dynamicService) ClusterStatus(ctx context.Context, namespaceId int, pro
 		if version == moduleInfo.Version {
 			status = v2.StatusOnline
 
-		}
-		updater := ""
-		if operator > 0 {
-			u, err := d.userService.GetUserInfo(ctx, operator)
-			if err == nil {
-				updater = u.UserName
-			}
 		}
 
 		result = append(result, &dynamic_model.DynamicCluster{

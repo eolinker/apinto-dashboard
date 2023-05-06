@@ -254,24 +254,27 @@ func toApinto(name, desc string, disable bool, method []string, requestPath, req
 		hosts = []string{}
 	}
 
+	appendData := make(map[string]interface{}, 12)
+	appendData["disable"] = disable
+	appendData["listen"] = 0
+	appendData["method"] = method
+	appendData["host"] = hosts
+	appendData["location"] = requestPath
+	appendData["rules"] = rules
+	appendData["service"] = fmt.Sprintf("%s@service", serviceName)
+	appendData["template"] = templateID
+	appendData["retry"] = retry
+	appendData["time_out"] = timeout
+	appendData["plugins"] = map[string]*v1.Plugin{
+		"proxy_rewrite": { //插件名写死
+			Disable: false,
+			Config:  rewritePlugin,
+		},
+	}
+
 	return &v1.RouterConfig{
 		Name:        name,
 		Description: desc,
-		Disable:     disable,
-		Listen:      0,
-		Method:      method,
-		Host:        hosts,
-		RequestPath: requestPath,
-		Rules:       rules,
-		Service:     fmt.Sprintf("%s@service", serviceName),
-		Template:    templateID,
-		Retry:       retry,
-		Timeout:     timeout,
-		Plugins: map[string]*v1.Plugin{
-			"proxy_rewrite": { //插件名写死
-				Disable: false,
-				Config:  rewritePlugin,
-			},
-		},
+		Append:      appendData,
 	}
 }
