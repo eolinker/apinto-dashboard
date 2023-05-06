@@ -116,7 +116,7 @@ export class RouterService {
         {
           title: '查看',
           click: (item:any) => {
-            context.router.navigate(['/', 'router', 'api', 'content', item.data.uuid])
+            context.router.navigate(['/', 'router', 'api', item.data.scheme === 'websocket' ? 'message-ws' : 'message', item.data.uuid])
           }
         },
         {
