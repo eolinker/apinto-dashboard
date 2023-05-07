@@ -117,16 +117,14 @@ func partitionInfo(clusterNames []string) *monitor_model.MonPartitionInfo {
 func userInfoAll(userId []int) map[int]*user_model.UserInfo {
 	maps := make(map[int]*user_model.UserInfo)
 	for _, id := range userId {
-		maps[id] = &user_model.UserInfo{
-			UserInfo: &user_entry.UserInfo{
-				Id:           id,
-				Sex:          1,
-				UserName:     "zzy",
-				NoticeUserId: "1324204490",
-				NickName:     "张泽意",
-				Email:        "1324204490@qq.com",
-			},
-		}
+		maps[id] = user_model.CreateUserInfo(&user_entry.UserInfo{
+			Id:           id,
+			Sex:          1,
+			UserName:     "zzy",
+			NoticeUserId: "1324204490",
+			NickName:     "张泽意",
+			Email:        "1324204490@qq.com",
+		})
 	}
 	return maps
 }
