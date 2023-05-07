@@ -38,7 +38,6 @@ export class IframePageComponent implements OnInit {
      ...this.iframeService.apinto2PluginApi,
      test: function (params:any) {
        const response = params
-       console.log('-----测试是否调用到父窗口')
        return new Promise(resolve => {
          setTimeout(function () {
            resolve('this is response for call test("' + response + '")')
@@ -59,7 +58,6 @@ export class IframePageComponent implements OnInit {
          } catch {
            console.warn('转化接口数据命名法出现问题')
          }
-         console.log('=----', result)
 
          ;(this.iframe as any).contentWindow.postMessage({
            requestId: event.data.requestId,
@@ -101,12 +99,10 @@ export class IframePageComponent implements OnInit {
     }
     this.iframe = createIframe('iframe', `${url}${this.router.url.includes('#') ? this.router.url.split('#')[1] : ''}`)
     const onLoadCallback = () => {
-      console.log('load-iframe')
       this.start = true
       ;(this.iframe as any).contentWindow.postMessage({ apinto: true, type: 'initialize', data: initData }, '*')
       window.addEventListener('message', this.listenMessage)
     }
-    console.log(this.iframe)
     if ((this.iframe as any).attachEvent) {
       (this.iframe as any).attachEvent('onload', onLoadCallback)
     } else {
@@ -143,13 +139,10 @@ export class IframePageComponent implements OnInit {
     private baseInfo:BaseInfoService) {}
 
   ngOnInit (): void {
-    console.log('------------20230504')
     this.moduleName = this.baseInfo.allParamsInfo.moduleName
-    console.log(this.router.url)
     // 此处监听的是切换module事件，需要判断moduleName是否变化
     this.subscription = this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
-        console.log(this.router.url, this.moduleName, this.baseInfo.allParamsInfo.moduleName)
         if (this.moduleName !== this.baseInfo.allParamsInfo.moduleName) {
           this.moduleName = this.baseInfo.allParamsInfo.moduleName
           this.iframeService.moduleName = this.moduleName
