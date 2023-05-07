@@ -217,7 +217,7 @@ export class ApiWebsocketCreateComponent implements OnInit {
 
   // 获取上游服务列表
   getServiceList () {
-    this.api.get('common/provider/Service').subscribe((resp: any) => {
+    this.api.get('common/enum/Service').subscribe((resp: any) => {
       if (resp.code === 0) {
         this.serviceList = []
         for (const item of resp.data.Service) {

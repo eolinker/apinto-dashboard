@@ -65,7 +65,7 @@ export const SimpleMapComponent = React.forwardRef(
               style={{ marginTop: index === 0 ? '0px' : '16px' }}
             >
               <Input
-                className="ml-[8px]"
+                className="mr-[8px]"
                 style={{ width: '174px' }}
                 value={n.key}
                 onChange={(e: any) => {
@@ -74,7 +74,7 @@ export const SimpleMapComponent = React.forwardRef(
                 placeholder={placeholderKey}
               />
               <Input
-                className=" ml-[8px]"
+                className=" mr-[8px]"
                 style={{ width: '164px' }}
                 value={n.value}
                 onChange={(e: any) => {
