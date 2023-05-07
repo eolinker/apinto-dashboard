@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/eolinker/eosc/common/bean"
 
@@ -72,6 +73,37 @@ func (m *Module) provider(context *gin.Context) {
 		},
 	})
 
+}
+
+func (m *Module) enum(context *gin.Context) {
+	skill := context.Param("skill")
+	namespaceID := namespace_controller.GetNamespaceId(context)
+	provider, ok := m.providers.Provider(skill)
+	if !ok {
+		context.JSON(200, struct {
+			Code string `json:"code"`
+			Msg  string `json:"msg"`
+		}{
+			"200", fmt.Sprintf("not support data for %s", skill),
+		})
+		return
+	}
+	cargos := provider.Provide(namespaceID)
+	result := make([]*apinto_module.CargoItem, 0, len(cargos))
+	for _, c := range cargos {
+		export := c.Export()
+		index := strings.LastIndex(export.Value, "@")
+		if index > 0 {
+			export.Value = export.Value[:index]
+		}
+		result = append(result, export)
+	}
+	context.JSON(200, map[string]interface{}{
+		"code": 0,
+		"data": map[string]interface{}{
+			skill: result,
+		},
+	})
 }
 
 func (m *Module) status(context *gin.Context) {
@@ -147,6 +179,12 @@ func NewModule() *Module {
 			Path:        fmt.Sprintf("/api/common/status"),
 			Handler:     "core.provider",
 			HandlerFunc: []apinto_module.HandlerFunc{m.status},
+			Labels:      apinto_module.RouterLabelAssets,
+		}, {
+			Method:      http.MethodGet,
+			Path:        fmt.Sprintf("/api/common/enum/:skill"),
+			Handler:     "core.provider",
+			HandlerFunc: []apinto_module.HandlerFunc{m.enum},
 			Labels:      apinto_module.RouterLabelAssets,
 		},
 	}
