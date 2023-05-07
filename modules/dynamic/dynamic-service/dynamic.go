@@ -222,6 +222,7 @@ func (d *dynamicService) Online(ctx context.Context, namespaceId int, profession
 	publishConfig.BasicInfo.Id = fmt.Sprintf("%s@%s", name, profession)
 	publishConfig.BasicInfo.Name = name
 	publishConfig.BasicInfo.Driver = info.Driver
+	publishConfig.BasicInfo.Profession = profession
 	publishConfig.BasicInfo.Description = info.Description
 	publishConfig.BasicInfo.Version = info.Version
 	publishConfig.BasicInfo.Create = info.CreateTime.Format("2006-01-02 15:04:05")
@@ -288,6 +289,7 @@ func (d *dynamicService) Offline(ctx context.Context, namespaceId int, professio
 	}
 	publishConfig.BasicInfo.Id = fmt.Sprintf("%s@%s", name, profession)
 	publishConfig.BasicInfo.Name = name
+	publishConfig.BasicInfo.Profession = profession
 	publishConfig.BasicInfo.Driver = info.Driver
 	publishConfig.BasicInfo.Description = info.Description
 	publishConfig.BasicInfo.Version = info.Version
@@ -532,7 +534,7 @@ func (d *dynamicService) saveVersion(ctx context.Context, version *dynamic_entry
 					BasicInfo: &v2.BasicInfo{
 						Profession:  version.Publish.BasicInfo.Profession,
 						Name:        version.Publish.BasicInfo.Name,
-						Driver:      version.Publish.BasicInfo.Name,
+						Driver:      version.Publish.BasicInfo.Driver,
 						Description: version.Publish.BasicInfo.Description,
 						Version:     history.Publish.BasicInfo.Version,
 					},
