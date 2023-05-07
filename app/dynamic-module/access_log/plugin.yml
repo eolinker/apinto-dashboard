@@ -19,8 +19,8 @@ define:  # 动态模块定义
       title: NSQD
     - name: syslog_output
       title: Syslog
-    - name: kafka_output
-      title: Kafka
+#    - name: kafka_output
+#      title: Kafka
   skill: Access-Output
   fields:
     - name: title           # 定义从响应中对应字段中获取显示值
@@ -151,7 +151,7 @@ define:  # 动态模块定义
                   
                   ],
                   "label":"天",
-                  "value":"hour"
+                  "value":"day"
                 }
               ],
               "default":"hour",
@@ -756,6 +756,4 @@ define:  # 动态模块定义
                   "x-index": 5
               }
           }
-      }
-    kafka_output: |
-      
+      }   

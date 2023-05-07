@@ -3,8 +3,8 @@ package upstream
 import (
 	"context"
 
-	"github.com/eolinker/apinto-dashboard/modules/base/frontend-model"
-	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-model"
+	frontend_model "github.com/eolinker/apinto-dashboard/modules/base/frontend-model"
+	strategy_model "github.com/eolinker/apinto-dashboard/modules/strategy/strategy-model"
 	upstream_model "github.com/eolinker/apinto-dashboard/modules/upstream/model"
 	upstream_dto "github.com/eolinker/apinto-dashboard/modules/upstream/upstream-dto"
 	upstream_entry2 "github.com/eolinker/apinto-dashboard/modules/upstream/upstream-entry"

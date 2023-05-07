@@ -52,7 +52,7 @@ import axios from 'axios'
 import { SimpleMapComponent } from './component/simple-map/SimpleMapComponent'
 import { CustomDialogComponent } from './component/dialog/CustomDialogComponent'
 
-const DynamicRender = observer(() => {
+export const DynamicRender = observer(() => {
   const field = useField()
   const form = useForm()
   const [schema, setSchema] = React.useState({})
@@ -149,7 +149,7 @@ export const IntelligentPluginEditComponent = React.forwardRef(
           },
           'x-component': 'Input',
           'x-component-props': {
-            placeholder: 'ID'
+            placeholder: '请输入ID'
           }
         },
         title: {
@@ -163,7 +163,7 @@ export const IntelligentPluginEditComponent = React.forwardRef(
           },
           'x-component': 'Input',
           'x-component-props': {
-            placeholder: '名称'
+            placeholder: '请输入名称'
           }
         },
         driver: {
@@ -184,7 +184,6 @@ export const IntelligentPluginEditComponent = React.forwardRef(
         },
         description: {
           type: 'string',
-          required: true,
           title: '描述',
           'x-decorator': 'FormItem',
           'x-decorator-props': {
@@ -193,7 +192,7 @@ export const IntelligentPluginEditComponent = React.forwardRef(
           },
           'x-component': 'Input.TextArea',
           'x-component-props': {
-            placeholder: 'ID'
+            placeholder: '请输入描述'
           }
         },
         container: {
