@@ -149,9 +149,6 @@ export class DeployClusterListComponent implements OnInit {
       nzComponentParams: {
         closeModal: () => { this.modalRef?.close() }
       },
-      nzOnOk: (component:DeployClusterCreateComponent) => {
-        console.log(component)
-      },
       nzFooter: [{
         label: '取消',
         type: 'default',
