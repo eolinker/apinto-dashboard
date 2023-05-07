@@ -1,12 +1,85 @@
 import * as React from 'react'
-import { FormDialog, FormItem, FormLayout, Input } from '@formily/antd'
-import { createSchemaField } from '@formily/react'
+import { Stringify, createSchemaField } from '@formily/react'
 import { Button } from 'antd'
+import {
+  FormItem,
+  Space,
+  ArrayItems,
+  DatePicker,
+  Editable,
+  FormButtonGroup,
+  Input,
+  Radio,
+  Select,
+  Submit,
+  Cascader,
+  Form,
+  FormGrid,
+  FormLayout,
+  Upload,
+  ArrayCollapse,
+  ArrayTable,
+  ArrayTabs,
+  Checkbox,
+  FormCollapse,
+  FormDialog,
+  FormDrawer,
+  FormStep,
+  FormTab,
+  NumberPicker,
+  Password,
+  PreviewText,
+  Reset,
+  SelectTable,
+  Switch,
+  TimePicker,
+  Transfer,
+  TreeSelect,
+  ArrayCards
+} from '@formily/antd'
+import { CustomCodeboxComponent } from '../codebox/CustomCodeboxComponent'
+import { CustomEnvVariableComponent } from '../editable-env-table/CustomEnvVariableComponent'
+import { SimpleMapComponent } from '../simple-map/SimpleMapComponent'
 
 const SchemaField = createSchemaField({
   components: {
+    ArrayCards,
+    ArrayCollapse,
+    ArrayItems,
+    ArrayTable,
+    ArrayTabs,
+    Cascader,
+    Checkbox,
+    DatePicker,
+    Editable,
+    Form,
+    FormButtonGroup,
+    FormCollapse,
+    FormDialog,
+    FormDrawer,
+    FormGrid,
     FormItem,
-    Input
+    FormLayout,
+    FormStep,
+    FormTab,
+    Input,
+    NumberPicker,
+    Password,
+    PreviewText,
+    Radio,
+    Reset,
+    Select,
+    SelectTable,
+    Space,
+    Submit,
+    Switch,
+    TimePicker,
+    Transfer,
+    TreeSelect,
+    Upload,
+    CustomCodeboxComponent,
+    CustomEnvVariableComponent,
+    SimpleMapComponent
   }
 })
 
@@ -14,7 +87,7 @@ export const CustomDialogComponent = React.forwardRef(
   (props: { [k: string]: any }, ref) => {
     const { onChange, title, value, render } = props
     React.useImperativeHandle(ref, () => ({}))
-    console.log(value)
+    console.log(value, render)
     let editPage: boolean = false
     try {
       editPage = Object.keys(JSON.parse(JSON.stringify(value))).length > 0
@@ -30,7 +103,7 @@ export const CustomDialogComponent = React.forwardRef(
               () => {
                 return (
                   <FormLayout labelCol={6} wrapperCol={10} form={value}>
-                    <SchemaField schema={render} />
+                    <SchemaField schema={JSON.parse(render)} />
                   </FormLayout>
                 )
               }
