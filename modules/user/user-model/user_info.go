@@ -1,6 +1,7 @@
 package user_model
 
 import (
+	user_entry "github.com/eolinker/apinto-dashboard/modules/user/user-entry"
 	"time"
 )
 
@@ -23,4 +24,18 @@ type UserBase struct {
 	Email        string `json:"email,omitempty"`          //邮箱
 	Phone        string `json:"phone,omitempty"`          //手机号
 	Avatar       string `json:"avatar,omitempty"`         //头像
+}
+
+func CreateUserInfo(info *user_entry.UserInfo) *UserInfo {
+	return &UserInfo{
+		Id:            info.Id,
+		Sex:           info.Sex,
+		UserName:      info.UserName,
+		NoticeUserId:  info.NoticeUserId,
+		NickName:      info.NickName,
+		Email:         info.Email,
+		Phone:         info.Phone,
+		Avatar:        info.Avatar,
+		LastLoginTime: info.LastLoginTime,
+	}
 }
