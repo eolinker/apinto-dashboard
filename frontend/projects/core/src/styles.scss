@@ -1682,3 +1682,20 @@ eo-ng-radio-group.date-picker-button-group
 textarea.ant-input {
   max-width: unset;
 }
+
+.ant-modal-root .ant-modal-content {
+  width: 700px;
+
+  .ant-input-affix-wrapper,
+  textarea,
+  .ant-input-number,
+  .ant-formily-array-items,
+  .ant-select {
+    width: 346px;
+    min-height: 32px;
+  }
+
+  .ant-formily-array-items .ant-select {
+    width: unset;
+  }
+}
