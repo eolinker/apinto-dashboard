@@ -73,8 +73,14 @@ export class ErrorInterceptor implements HttpInterceptor {
         }, 1000)
         break
       default:
-        if (code !== undefined && !(responseBody.url.includes('sso/login/check')) && !(requestMethod === 'PUT' && responseBody.url.split('?')[0].split('/')[responseBody.url.split('?')[0].split('/').length - 1] === 'online') && code !== 0 && code !== 30001) {
-          this.message.error(responseBody.body.msg || '操作失败！')
+        if (code !== undefined && !(responseBody.url.includes('sso/login/check')) && code !== 0 && code !== 30001) {
+          let msg = responseBody.body.msg
+          if (responseBody.url.includes('router/online') && requestMethod === 'PUT') {
+            msg = responseBody.body.data.router.map((data:any) => {
+              return data.msg
+            }).join('  ')
+          }
+          this.message.error(msg || '操作失败！')
         }
     }
   }

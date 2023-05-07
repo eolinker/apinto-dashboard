@@ -72,32 +72,39 @@
 </div>
 
 <ng-template #methodTpl let-item="item">
-  <div *ngIf="item.method.length < 3">
-    <ng-container *ngFor="let methodItem of item.method">
-      <eo-ng-api-method-tag [methodItem]="methodItem"></eo-ng-api-method-tag>
-    </ng-container>
-    <eo-ng-api-method-tag
-      *ngIf="!item.method || item.method.length === 0"
-      methodItem="ALL"
-    ></eo-ng-api-method-tag>
-  </div>
-
-  <span
-    eoNgFeedbackTooltip
-    *ngIf="item.method.length >= 3"
-    nzTooltipPlacement="top"
-    [nzTooltipTrigger]="'hover'"
-    [nzTooltipTitle]="methodLongTpl"
-    nzTooltipColor="#fff"
-    nzTooltipOverlayClassName="method-tooltip"
-  >
-    <ng-container *ngFor="let methodItem of item.method; let index = index">
-      <ng-container *ngIf="index < 2">
+  <ng-container *ngIf="item.scheme === 'websocket'">
+    <span>-</span>
+  </ng-container>
+  <ng-container *ngIf="item.scheme === 'http'">
+    <div *ngIf="item.method.length < 3">
+      <ng-container *ngFor="let methodItem of item.method">
         <eo-ng-api-method-tag [methodItem]="methodItem"></eo-ng-api-method-tag>
       </ng-container>
-    </ng-container>
-    ...
-  </span>
+      <eo-ng-api-method-tag
+        *ngIf="!item.method || item.method.length === 0"
+        methodItem="ALL"
+      ></eo-ng-api-method-tag>
+    </div>
+
+    <span
+      eoNgFeedbackTooltip
+      *ngIf="item.method.length >= 3"
+      nzTooltipPlacement="top"
+      [nzTooltipTrigger]="'hover'"
+      [nzTooltipTitle]="methodLongTpl"
+      nzTooltipColor="#fff"
+      nzTooltipOverlayClassName="method-tooltip"
+    >
+      <ng-container *ngFor="let methodItem of item.method; let index = index">
+        <ng-container *ngIf="index < 2">
+          <eo-ng-api-method-tag
+            [methodItem]="methodItem"
+          ></eo-ng-api-method-tag>
+        </ng-container>
+      </ng-container>
+      ...
+    </span>
+  </ng-container>
 
   <ng-template #methodLongTpl>
     <ng-container *ngFor="let methodItem of item.method">

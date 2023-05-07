@@ -65,7 +65,6 @@ export class IframeHttpService {
       })
     },
     changeRouter: async (url:string) => {
-      console.log(url)
       return new Promise((resolve) => {
         let newRouterArr:Array<string> = this.router.url.split('#')
         if (this.router.url.includes('#')) {
@@ -103,11 +102,6 @@ export class IframeHttpService {
     },
     getCurrentUserInfo: async () => {
       return new Promise((resolve) => {
-        console.log({
-          userId: this.navigation.getUserId(),
-          userRoleId: this.navigation.getUserRoleId(),
-          userModuleAccess: this.navigation.accessMap.get(this.moduleName)
-        })
         resolve({
           userId: this.navigation.getUserId(),
           userRoleId: this.navigation.getUserRoleId(),
