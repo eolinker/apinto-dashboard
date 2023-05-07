@@ -50,6 +50,7 @@ import { CustomCodeboxComponent } from './component/codebox/CustomCodeboxCompone
 import { CustomEnvVariableComponent } from './component/editable-env-table/CustomEnvVariableComponent'
 import axios from 'axios'
 import { SimpleMapComponent } from './component/simple-map/SimpleMapComponent'
+import { CustomDialogComponent } from './component/dialog/CustomDialogComponent'
 
 const DynamicRender = observer(() => {
   const field = useField()
@@ -109,7 +110,8 @@ const SchemaField = createSchemaField({
     DynamicRender,
     CustomCodeboxComponent,
     CustomEnvVariableComponent,
-    SimpleMapComponent
+    SimpleMapComponent,
+    CustomDialogComponent
   }
 })
 
@@ -198,14 +200,13 @@ export const IntelligentPluginEditComponent = React.forwardRef(
           type: 'void',
           'x-component': 'DynamicRender',
           'x-component-props': {
-            schema: schema
+            schema: JSON.stringify(schema)
           }
         }
       }
     }
 
     const submit = (value: any) => {
-      console.log(value, onSubmit)
       onSubmit && onSubmit(value)
     }
 
