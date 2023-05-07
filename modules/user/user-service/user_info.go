@@ -31,6 +31,9 @@ func newUserInfoService() user.IUserInfoService {
 	bean.Autowired(&u.userIdCache)
 	bean.Autowired(&u.userNameCache)
 	apinto_module.RegisterEventHandler("login", u.loginHandler)
+	apinto_module.RegisterEventHandler("user-create", u.userUpdate)
+	apinto_module.RegisterEventHandler("user-update", u.userUpdate)
+	apinto_module.RegisterEventHandler("user-delete", u.userDelete)
 	return u
 }
 
@@ -40,7 +43,7 @@ func decode(v any) (*user_model.UserBase, error) {
 
 func (u *userInfoService) save(ctx context.Context, info *user_entry.UserInfo) error {
 	return u.userInfoStore.Transaction(ctx, func(txCtx context.Context) error {
-		userModel := entryToModule(info)
+		userModel := user_model.CreateUserInfo(info)
 		err := u.userInfoStore.Save(ctx, info)
 		if err != nil {
 			return err
@@ -94,6 +97,41 @@ func (u *userInfoService) loginHandler(login string, v any) {
 	}
 	u.userInfoStore.Save(context.Background(), userEntry)
 }
+func (u *userInfoService) userUpdate(event string, v any) {
+	userBase, err := decode(v)
+	if err != nil {
+		return
+	}
+	userEntry, err := u.userInfoStore.GetByUserName(context.Background(), userBase.UserName)
+	if err != nil {
+		now := time.Now()
+		userEntry = &user_entry.UserInfo{
+			Id:            0,
+			Sex:           userBase.Sex,
+			UserName:      userBase.UserName,
+			NoticeUserId:  userBase.NoticeUserId,
+			NickName:      userBase.NickName,
+			Email:         userBase.Email,
+			Phone:         userBase.Phone,
+			Avatar:        userBase.Avatar,
+			LastLoginTime: &now,
+		}
+		u.userInfoStore.Save(context.Background(), userEntry)
+		return
+	}
+	userEntry.Sex = userBase.Sex
+	userEntry.Email = userBase.Email
+	userEntry.NickName = userBase.NickName
+	userEntry.NoticeUserId = userBase.NoticeUserId
+	userEntry.Avatar = userBase.Avatar
+	userEntry.Phone = userBase.Phone
+	u.userInfoStore.Update(context.Background(), userEntry)
+	u.userNameCache.Set(context.Background(), userEntry.UserName, user_model.CreateUserInfo(userEntry), time.Minute*30)
+
+}
+func (u *userInfoService) userDelete(e string, v any) {
+	return
+}
 
 func (u *userInfoService) GetAllUsers(ctx context.Context) ([]*user_model.UserInfo, error) {
 	infos, err := u.userInfoStore.GetAll(ctx)
@@ -104,17 +142,7 @@ func (u *userInfoService) GetAllUsers(ctx context.Context) ([]*user_model.UserIn
 	resList := make([]*user_model.UserInfo, 0, len(infos))
 
 	for _, info := range infos {
-		resList = append(resList, &user_model.UserInfo{
-			Id:            info.Id,
-			Sex:           info.Sex,
-			UserName:      info.UserName,
-			NoticeUserId:  info.NoticeUserId,
-			NickName:      info.NickName,
-			Email:         info.Email,
-			Phone:         info.Phone,
-			Avatar:        info.Avatar,
-			LastLoginTime: info.LastLoginTime,
-		})
+		resList = append(resList, user_model.CreateUserInfo(info))
 	}
 
 	return resList, nil
@@ -170,7 +198,7 @@ func (u *userInfoService) GetUserInfoMaps(ctx context.Context, userIds ...int) (
 			}
 			tempMaps := make(map[int]*user_model.UserInfo, len(userIds))
 			for _, userInfo := range userList {
-				userModel := entryToModule(userInfo)
+				userModel := user_model.CreateUserInfo(userInfo)
 				if _, has := userSet[userInfo.Id]; has {
 					tempMaps[userInfo.Id] = userModel
 					delete(userSet, userInfo.Id)
@@ -238,7 +266,7 @@ func (u *userInfoService) GetUserInfo(ctx context.Context, userID int) (*user_mo
 			LastLoginTime: nil,
 		}
 	} else {
-		userModel = entryToModule(userInfo)
+		userModel = user_model.CreateUserInfo(userInfo)
 		u.userNameCache.Set(ctx, userModel.UserName, userModel, time.Hour)
 	}
 	u.userIdCache.Set(ctx, userID, userModel, time.Hour)
@@ -275,7 +303,7 @@ func (u *userInfoService) GetUserInfoByName(ctx context.Context, userName string
 			LastLoginTime: nil,
 		}
 	} else {
-		userModel = entryToModule(userInfo)
+		userModel = user_model.CreateUserInfo(userInfo)
 		u.userIdCache.Set(ctx, userModel.Id, userModel, time.Hour)
 	}
 	u.userNameCache.Set(ctx, userName, userModel, time.Hour)
@@ -331,7 +359,7 @@ func (u *userInfoService) GetUserInfoByNames(ctx context.Context, userNames ...s
 			}
 			tempMaps := make(map[string]*user_model.UserInfo, len(userNames))
 			for _, userInfo := range userList {
-				userModel := entryToModule(userInfo)
+				userModel := user_model.CreateUserInfo(userInfo)
 				if _, has := userSet[userInfo.UserName]; has {
 					tempMaps[userInfo.UserName] = userModel
 					delete(userSet, userInfo.UserName)
@@ -360,21 +388,6 @@ func (u *userInfoService) GetUserInfoByNames(ctx context.Context, userNames ...s
 	}
 
 	return maps, nil
-}
-
-func entryToModule(info *user_entry.UserInfo) *user_model.UserInfo {
-
-	return &user_model.UserInfo{
-		Id:            info.Id,
-		Sex:           info.Sex,
-		UserName:      info.UserName,
-		NoticeUserId:  info.NoticeUserId,
-		NickName:      info.NickName,
-		Email:         info.Email,
-		Phone:         info.Phone,
-		Avatar:        info.Avatar,
-		LastLoginTime: info.LastLoginTime,
-	}
 }
 
 func (u *userInfoService) UpdateMyProfile(ctx context.Context, userId int, req *user_dto.UpdateMyProfileReq) error {
