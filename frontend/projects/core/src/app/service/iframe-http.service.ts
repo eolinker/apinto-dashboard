@@ -427,7 +427,7 @@ export class IframeHttpService {
     },
     appsSimpleList: () => {
       return new Promise((resolve) => {
-        return this.api.get('application/enum').subscribe((resp:any) => {
+        return this.api.get('common/provider/Application').subscribe((resp:any) => {
           resolve(resp)
         })
       })
