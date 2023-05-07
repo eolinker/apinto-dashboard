@@ -48,7 +48,6 @@ e2e_coverage
 .nyc_output
 
 #根据后端项目组需求，暂时不上传新的angular.json文件（仓库文件中含有deployurl）
-dist
 package-lock.json
 yarn.lock
 /test-results/

@@ -420,14 +420,14 @@ export class IframeHttpService {
     },
     serviceSimpleList: () => {
       return new Promise((resolve) => {
-        return this.api.get('service/enum').subscribe((resp:any) => {
+        return this.api.get('common/provider/Service').subscribe((resp:any) => {
           resolve(resp)
         })
       })
     },
     appsSimpleList: () => {
       return new Promise((resolve) => {
-        return this.api.get('application/enum').subscribe((resp:any) => {
+        return this.api.get('common/provider/Application').subscribe((resp:any) => {
           resolve(resp)
         })
       })
