@@ -133,6 +133,7 @@ export class FilterFormComponent implements OnInit {
 
   ngOnInit (): void {
     this.getFilterNamesList(!!this.editFilter)
+    console.log(this)
   }
 
   // 获取筛选条件中属性名称的可选选项
@@ -236,7 +237,7 @@ export class FilterFormComponent implements OnInit {
             }
           ]
           for (const index in resp.data.titles) {
-            this.filterTbody.push({ key: resp.data.titles[index].field })
+            this.filterTbody.push({ key: (resp.data.titles[index].field).replace(/_([a-z])/g, (p, m) => m.toUpperCase()) })
             this.filterThead.push({ title: resp.data.titles[index].title })
           }
           this.filterTypeMap.get(this.filterForm.name).total = resp.data.total
@@ -279,6 +280,7 @@ export class FilterFormComponent implements OnInit {
         this.apiGroupList = []
         this.apiGroupList = resp.data.root.groups
         this.apiGroupList = this.transferHeader(this.apiGroupList)
+        console.log(this.apiGroupList)
       }
     })
   }
@@ -408,6 +410,8 @@ export class FilterFormComponent implements OnInit {
 
   transferHeader (header: CascaderOption[]) {
     for (const index in header) {
+      header[index].label = header[index]['name']
+      header[index].value = header[index]['uuid']
       if (!header[index].children || header[index].children!.length === 0) {
         header[index].isLeaf = true
       } else {
