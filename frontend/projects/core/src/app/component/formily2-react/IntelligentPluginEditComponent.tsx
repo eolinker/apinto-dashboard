@@ -200,7 +200,7 @@ export const IntelligentPluginEditComponent = React.forwardRef(
           type: 'void',
           'x-component': 'DynamicRender',
           'x-component-props': {
-            schema: schema
+            schema: JSON.stringify(schema)
           }
         }
       }
