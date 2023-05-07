@@ -1,13 +1,13 @@
-id: "upstream-2.apinto.com"
+id: "service.apinto.com"
 name: "service"
 cname: "上游服务-2"
 resume: "配置上游服务信息，通过API绑定，实现完整转发流程。支持IP Hash、带权轮询等负载均衡算法，合理分配上游服务压力，保证上游服务稳定性。"
-version: "v1.0.0"
+version: "v1.0.5"
 icon: "上游服务.png"
 driver: "upstream-2.apinto.com"
 type: 1 #0为框架模块 1为核心模块 2为内置模块 3为非内置
 auto: true
-front: upstream
+front: template
 navigation: "navigation.upstream"
 group_id: "core_module"
 define:  # 动态模块定义
@@ -15,7 +15,7 @@ define:  # 动态模块定义
   drivers:
     - name: http
       title: TCP
-  skill: Upstream
+  skill: Service
   fields:
     - name: title           # 定义从响应中对应字段中获取显示值
       title: 名称
@@ -36,7 +36,10 @@ define:  # 动态模块定义
                   "x-component": "Select",
                   "x-validator": [],
                   "x-component-props": {},
-                  "x-decorator-props": {},
+                  "x-decorator-props": {
+                      "labelCol": 6,
+                      "wrapperCol": 10
+                  },
                   "required": true,
                   "default": "HTTP",
                   "enum": [
@@ -60,7 +63,10 @@ define:  # 动态模块定义
                   "x-component": "Select",
                   "x-validator": [],
                   "x-component-props": {},
-                  "x-decorator-props": {},
+                  "x-decorator-props": {
+                      "labelCol": 6,
+                      "wrapperCol": 10
+                  },
                   "name": "balance",
                   "default": "round-robin",
                   "required": true,
@@ -84,6 +90,10 @@ define:  # 动态模块定义
                   "x-decorator": "FormItem",
                   "x-component": "Checkbox",
                   "x-index": 2,
+                  "x-decorator-props": {
+                      "labelCol": 6,
+                      "wrapperCol": 10
+                  },
                   "name": "useDiscovery"
               },
               "discovery": {
@@ -92,11 +102,14 @@ define:  # 动态模块定义
                   "x-component": "Select",
                   "x-validator": [],
                   "x-component-props": {},
-                  "x-decorator-props": {},
+                  "x-decorator-props": {
+                      "labelCol": 6,
+                      "wrapperCol": 10
+                  },
                   "name": "discovery",
                   "required": true,
                   "x-reactions": [
-                      "{{useAsyncDataSource(getSkillData,\"Access-Output\")}}",
+                      "{{useAsyncDataSource(getSkillData,\"Discovery\")}}",
                       {
                           "dependencies": [
                               "use_discovery"
@@ -123,7 +136,10 @@ define:  # 动态模块定义
                   "x-component": "Input",
                   "x-validator": [],
                   "x-component-props": {},
-                  "x-decorator-props": {},
+                  "x-decorator-props": {
+                      "labelCol": 6,
+                      "wrapperCol": 10
+                  },
                   "required": true,
                   "x-reactions": [
                       {
@@ -150,6 +166,10 @@ define:  # 动态模块定义
                   "type": "void",
                   "title": "目标节点",
                   "x-decorator": "FormItem",
+                  "x-decorator-props": {
+                      "labelCol": 6,
+                      "wrapperCol": 10
+                  },
                   "properties": {
                       "use_variable": {
                           "type": "number",
@@ -164,7 +184,8 @@ define:  # 动态模块定义
                                   "label": "引用环境变量",
                                   "value": 1
                               }
-                          ]
+                          ],
+                          "x-index": 0
                       },
                       "variable": {
                           "type": "void",
@@ -195,6 +216,7 @@ define:  # 动态模块定义
                                   "x-component-props": {}
                               }
                           },
+                          "x-index": 1,
                           "x-reactions": [
                               {
                                   "dependencies": [
@@ -231,17 +253,20 @@ define:  # 动态模块定义
                                   "sort": {
                                       "type": "void",
                                       "x-decorator": "FormItem",
-                                      "x-component": "ArrayItems.SortHandle"
+                                      "x-component": "ArrayItems.SortHandle",
+                                      "x-index": 0
                                   },
                                   "addr": {
                                       "type": "string",
                                       "x-decorator": "FormItem",
-                                      "x-component": "Input"
+                                      "x-component": "Input",
+                                      "x-index": 1
                                   },
                                   "remove": {
                                       "type": "void",
                                       "x-decorator": "FormItem",
-                                      "x-component": "ArrayItems.Remove"
+                                      "x-component": "ArrayItems.Remove",
+                                      "x-index": 2
                                   }
                               }
                           },
@@ -327,7 +352,10 @@ define:  # 动态模块定义
                       }
                   ],
                   "x-component-props": {},
-                  "x-decorator-props": {},
+                  "x-decorator-props": {
+                      "labelCol": 6,
+                      "wrapperCol": 10
+                  },
                   "required": true,
                   "default": 1000,
                   "name": "timeout",

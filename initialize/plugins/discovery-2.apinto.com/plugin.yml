@@ -2,7 +2,7 @@ id: "discovery-2.apinto.com"
 name: "discovery-2"
 cname: "服务发现"
 resume: "使用一个注册中心来记录分布式系统中的全部服务的信息，以便其他服务能够快速的找到这些已注册的服务。"
-version: "v1.0.0"
+version: "v1.0.3"
 icon: "服务发现.png"
 driver: "discovery-2.apinto.com"
 type: 1 #0为框架模块 1为核心模块 2为内置模块 3为非内置
@@ -10,3 +10,584 @@ auto: true
 front: upstream
 navigation: "navigation.infrastructure"
 group_id: "core_module"
+define:  # 动态模块定义
+  profession: discovery
+  drivers:
+    - name: consul
+      title: Consul
+    - name: eureka
+      title: Eureka
+    - name: nacos
+      title: Nacos
+  skill: Discovery
+  fields:
+    - name: title           # 定义从响应中对应字段中获取显示值
+      title: 名称
+    - name: id
+      title: ID
+    - name: driver
+      title: 驱动名称
+    - name: description
+      title: 描述
+  render:
+    consul: |
+      {
+          "type": "object",
+          "properties": {
+              "config": {
+                  "type": "object",
+                  "properties": {
+                      "address": {
+                          "type": "void",
+                          "title": "Consul服务地址",
+                          "x-decorator": "FormItem",
+                          "properties": {
+                              "use_variable": {
+                                  "type": "number",
+                                  "x-decorator": "FormItem",
+                                  "x-component": "Checkbox.Group",
+                                  "x-validator": [],
+                                  "x-component-props": {},
+                                  "x-decorator-props": {},
+                                  "enum": [
+                                      {
+                                          "children": [],
+                                          "label": "引用环境变量",
+                                          "value": 1
+                                      }
+                                  ],
+                                  "x-index": 0
+                              },
+                              "variable": {
+                                  "type": "void",
+                                  "x-decorator": "FormItem",
+                                  "x-component": "Space",
+                                  "properties": {
+                                      "input": {
+                                          "type": "string",
+                                          "x-decorator": "FormItem",
+                                          "x-component": "Input",
+                                          "readOnly": true,
+                                          "x-reactions": {
+                                              "dependencies": [
+                                                  ".quote"
+                                              ],
+                                              "fulfill": {
+                                                  "state": {
+                                                      "value": "{{$deps[0]}}"
+                                                  }
+                                              }
+                                          }
+                                      },
+                                      "quote": {
+                                          "type": "string",
+                                          "x-decorator": "FormItem",
+                                          "x-decorator-props": {},
+                                          "x-component": "CustomEnvVariableComponent",
+                                          "x-component-props": {}
+                                      }
+                                  },
+                                  "x-reactions": [
+                                      {
+                                          "dependencies": [
+                                              ".use_variable"
+                                          ],
+                                          "when": "{{$deps[0] == 1}}",
+                                          "fulfill": {
+                                              "state": {
+                                                  "visible": true
+                                              }
+                                          },
+                                          "otherwise": {
+                                              "state": {
+                                                  "visible": false
+                                              }
+                                          }
+                                      }
+                                  ],
+                                  "x-index": 0
+                              },
+                              "address": {
+                                  "type": "array",
+                                  "title": "",
+                                  "x-decorator": "FormItem",
+                                  "x-component": "ArrayItems",
+                                  "items": {
+                                      "type": "void",
+                                      "x-decorator": "FormItem",
+                                      "x-component": "Space",
+                                      "x-decorator-props": {
+                                          "asterisk": true,
+                                          "feedbackLayout": "none"
+                                      },
+                                      "properties": {
+                                          "sort": {
+                                              "type": "void",
+                                              "x-decorator": "FormItem",
+                                              "x-component": "ArrayItems.SortHandle"
+                                          },
+                                          "addr": {
+                                              "type": "string",
+                                              "x-decorator": "FormItem",
+                                              "x-component": "Input",
+                                              "x-component-props": {
+                                                  "placeholder": "请输入协议+主机名或IP+端口"
+                                              }
+                                          },
+                                          "remove": {
+                                              "type": "void",
+                                              "x-decorator": "FormItem",
+                                              "x-component": "ArrayItems.Remove"
+                                          }
+                                      }
+                                  },
+                                  "properties": {
+                                      "add": {
+                                          "type": "void",
+                                          "title": "添加地址信息",
+                                          "x-component": "ArrayItems.Addition",
+                                          "x-reactions": [
+                                              {
+                                                  "dependencies": [
+                                                      "../use_variable"
+                                                  ],
+                                                  "when": "{{$deps[0] == 1}}",
+                                                  "fulfill": {
+                                                      "state": {
+                                                          "visible": false
+                                                      }
+                                                  },
+                                                  "otherwise": {
+                                                      "state": {
+                                                          "visible": true
+                                                      }
+                                                  }
+                                              }
+                                          ],
+                                          "x-component-props": {}
+                                      }
+                                  },
+                                  "x-reactions": [
+                                      {
+                                          "dependencies": [
+                                              ".use_variable"
+                                          ],
+                                          "when": "{{$deps[0] == 1}}",
+                                          "fulfill": {
+                                              "state": {
+                                                  "visible": false
+                                              }
+                                          },
+                                          "otherwise": {
+                                              "state": {
+                                                  "visible": true
+                                              }
+                                          }
+                                      }
+                                  ],
+                                  "x-validator": [],
+                                  "x-component-props": {},
+                                  "x-decorator-props": {}
+                              },
+                              "x-index": 2
+                          },
+                          "x-decorator-props": {
+                              "labelCol": 6,
+                              "wrapperCol": 10
+                          },
+                          "x-index": 0
+                      },
+                      "params": {
+                          "type": "string",
+                          "title": "参数",
+                          "x-decorator": "FormItem",
+                          "x-component": "SimpleMapComponent",
+                          "x-validator": [],
+                          "x-component-props": {
+                              "placeholderKey": "请输入参数名",
+                              "placeholderValue": "请输入参数值"
+                          },
+                          "x-decorator-props": {
+                              "labelCol": 6,
+                              "wrapperCol": 10
+                          },
+                          "x-index": 1
+                      }
+                  }
+              }
+          }
+      }
+    nacos: |
+      {
+          "type": "object",
+          "properties": {
+              "config": {
+                  "type": "object",
+                  "properties": {
+                      "address": {
+                          "type": "void",
+                          "title": "Nacos服务地址",
+                          "x-decorator": "FormItem",
+                          "properties": {
+                              "use_variable": {
+                                  "type": "number",
+                                  "x-decorator": "FormItem",
+                                  "x-component": "Checkbox.Group",
+                                  "x-validator": [],
+                                  "x-component-props": {},
+                                  "x-decorator-props": {},
+                                  "enum": [
+                                      {
+                                          "children": [],
+                                          "label": "引用环境变量",
+                                          "value": 1
+                                      }
+                                  ],
+                                  "x-index": 0
+                              },
+                              "variable": {
+                                  "type": "void",
+                                  "x-decorator": "FormItem",
+                                  "x-component": "Space",
+                                  "properties": {
+                                      "input": {
+                                          "type": "string",
+                                          "x-decorator": "FormItem",
+                                          "x-component": "Input",
+                                          "readOnly": true,
+                                          "x-reactions": {
+                                              "dependencies": [
+                                                  ".quote"
+                                              ],
+                                              "fulfill": {
+                                                  "state": {
+                                                      "value": "{{$deps[0]}}"
+                                                  }
+                                              }
+                                          }
+                                      },
+                                      "quote": {
+                                          "type": "string",
+                                          "x-decorator": "FormItem",
+                                          "x-decorator-props": {},
+                                          "x-component": "CustomEnvVariableComponent",
+                                          "x-component-props": {}
+                                      }
+                                  },
+                                  "x-reactions": [
+                                      {
+                                          "dependencies": [
+                                              ".use_variable"
+                                          ],
+                                          "when": "{{$deps[0] == 1}}",
+                                          "fulfill": {
+                                              "state": {
+                                                  "visible": true
+                                              }
+                                          },
+                                          "otherwise": {
+                                              "state": {
+                                                  "visible": false
+                                              }
+                                          }
+                                      }
+                                  ],
+                                  "x-index": 0
+                              },
+                              "address": {
+                                  "type": "array",
+                                  "title": "",
+                                  "x-decorator": "FormItem",
+                                  "x-component": "ArrayItems",
+                                  "items": {
+                                      "type": "void",
+                                      "x-decorator": "FormItem",
+                                      "x-component": "Space",
+                                      "x-decorator-props": {
+                                          "asterisk": true,
+                                          "feedbackLayout": "none"
+                                      },
+                                      "properties": {
+                                          "sort": {
+                                              "type": "void",
+                                              "x-decorator": "FormItem",
+                                              "x-component": "ArrayItems.SortHandle"
+                                          },
+                                          "addr": {
+                                              "type": "string",
+                                              "x-decorator": "FormItem",
+                                              "x-component": "Input",
+                                              "x-component-props": {
+                                                  "placeholder": "请输入协议+主机名或IP+端口"
+                                              }
+                                          },
+                                          "remove": {
+                                              "type": "void",
+                                              "x-decorator": "FormItem",
+                                              "x-component": "ArrayItems.Remove"
+                                          }
+                                      }
+                                  },
+                                  "properties": {
+                                      "add": {
+                                          "type": "void",
+                                          "title": "添加地址信息",
+                                          "x-component": "ArrayItems.Addition",
+                                          "x-reactions": [
+                                              {
+                                                  "dependencies": [
+                                                      "../use_variable"
+                                                  ],
+                                                  "when": "{{$deps[0] == 1}}",
+                                                  "fulfill": {
+                                                      "state": {
+                                                          "visible": false
+                                                      }
+                                                  },
+                                                  "otherwise": {
+                                                      "state": {
+                                                          "visible": true
+                                                      }
+                                                  }
+                                              }
+                                          ],
+                                          "x-component-props": {}
+                                      }
+                                  },
+                                  "x-reactions": [
+                                      {
+                                          "dependencies": [
+                                              ".use_variable"
+                                          ],
+                                          "when": "{{$deps[0] == 1}}",
+                                          "fulfill": {
+                                              "state": {
+                                                  "visible": false
+                                              }
+                                          },
+                                          "otherwise": {
+                                              "state": {
+                                                  "visible": true
+                                              }
+                                          }
+                                      }
+                                  ],
+                                  "x-validator": [],
+                                  "x-component-props": {},
+                                  "x-decorator-props": {}
+                              },
+                              "x-index": 2
+                          },
+                          "x-decorator-props": {
+                              "labelCol": 6,
+                              "wrapperCol": 10
+                          },
+                          "x-index": 0
+                      },
+                      "params": {
+                          "type": "string",
+                          "title": "参数",
+                          "x-decorator": "FormItem",
+                          "x-component": "SimpleMapComponent",
+                          "x-validator": [],
+                          "x-component-props": {
+                              "placeholderKey": "请输入参数名",
+                              "placeholderValue": "请输入参数值"
+                          },
+                          "x-decorator-props": {
+                              "labelCol": 6,
+                              "wrapperCol": 10
+                          },
+                          "x-index": 1
+                      }
+                  }
+              }
+          }
+      }
+    eureka: |
+      {
+          "type": "object",
+          "properties": {
+              "config": {
+                  "type": "object",
+                  "properties": {
+                      "address": {
+                          "type": "void",
+                          "title": "Eureka服务地址",
+                          "x-decorator": "FormItem",
+                          "properties": {
+                              "use_variable": {
+                                  "type": "number",
+                                  "x-decorator": "FormItem",
+                                  "x-component": "Checkbox.Group",
+                                  "x-validator": [],
+                                  "x-component-props": {},
+                                  "x-decorator-props": {},
+                                  "enum": [
+                                      {
+                                          "children": [],
+                                          "label": "引用环境变量",
+                                          "value": 1
+                                      }
+                                  ],
+                                  "x-index": 0
+                              },
+                              "variable": {
+                                  "type": "void",
+                                  "x-decorator": "FormItem",
+                                  "x-component": "Space",
+                                  "properties": {
+                                      "input": {
+                                          "type": "string",
+                                          "x-decorator": "FormItem",
+                                          "x-component": "Input",
+                                          "readOnly": true,
+                                          "x-reactions": {
+                                              "dependencies": [
+                                                  ".quote"
+                                              ],
+                                              "fulfill": {
+                                                  "state": {
+                                                      "value": "{{$deps[0]}}"
+                                                  }
+                                              }
+                                          }
+                                      },
+                                      "quote": {
+                                          "type": "string",
+                                          "x-decorator": "FormItem",
+                                          "x-decorator-props": {},
+                                          "x-component": "CustomEnvVariableComponent",
+                                          "x-component-props": {}
+                                      }
+                                  },
+                                  "x-reactions": [
+                                      {
+                                          "dependencies": [
+                                              ".use_variable"
+                                          ],
+                                          "when": "{{$deps[0] == 1}}",
+                                          "fulfill": {
+                                              "state": {
+                                                  "visible": true
+                                              }
+                                          },
+                                          "otherwise": {
+                                              "state": {
+                                                  "visible": false
+                                              }
+                                          }
+                                      }
+                                  ],
+                                  "x-index": 0
+                              },
+                              "address": {
+                                  "type": "array",
+                                  "title": "",
+                                  "x-decorator": "FormItem",
+                                  "x-component": "ArrayItems",
+                                  "items": {
+                                      "type": "void",
+                                      "x-decorator": "FormItem",
+                                      "x-component": "Space",
+                                      "x-decorator-props": {
+                                          "asterisk": true,
+                                          "feedbackLayout": "none"
+                                      },
+                                      "properties": {
+                                          "sort": {
+                                              "type": "void",
+                                              "x-decorator": "FormItem",
+                                              "x-component": "ArrayItems.SortHandle"
+                                          },
+                                          "addr": {
+                                              "type": "string",
+                                              "x-decorator": "FormItem",
+                                              "x-component": "Input",
+                                              "x-component-props": {
+                                                  "placeholder": "请输入协议+主机名或IP+端口"
+                                              }
+                                          },
+                                          "remove": {
+                                              "type": "void",
+                                              "x-decorator": "FormItem",
+                                              "x-component": "ArrayItems.Remove"
+                                          }
+                                      }
+                                  },
+                                  "properties": {
+                                      "add": {
+                                          "type": "void",
+                                          "title": "添加地址信息",
+                                          "x-component": "ArrayItems.Addition",
+                                          "x-reactions": [
+                                              {
+                                                  "dependencies": [
+                                                      "../use_variable"
+                                                  ],
+                                                  "when": "{{$deps[0] == 1}}",
+                                                  "fulfill": {
+                                                      "state": {
+                                                          "visible": false
+                                                      }
+                                                  },
+                                                  "otherwise": {
+                                                      "state": {
+                                                          "visible": true
+                                                      }
+                                                  }
+                                              }
+                                          ],
+                                          "x-component-props": {}
+                                      }
+                                  },
+                                  "x-reactions": [
+                                      {
+                                          "dependencies": [
+                                              ".use_variable"
+                                          ],
+                                          "when": "{{$deps[0] == 1}}",
+                                          "fulfill": {
+                                              "state": {
+                                                  "visible": false
+                                              }
+                                          },
+                                          "otherwise": {
+                                              "state": {
+                                                  "visible": true
+                                              }
+                                          }
+                                      }
+                                  ],
+                                  "x-validator": [],
+                                  "x-component-props": {},
+                                  "x-decorator-props": {}
+                              },
+                              "x-index": 2
+                          },
+                          "x-decorator-props": {
+                              "labelCol": 6,
+                              "wrapperCol": 10
+                          },
+                          "x-index": 0
+                      },
+                      "params": {
+                          "type": "string",
+                          "title": "参数",
+                          "x-decorator": "FormItem",
+                          "x-component": "SimpleMapComponent",
+                          "x-validator": [],
+                          "x-component-props": {
+                              "placeholderKey": "请输入参数名",
+                              "placeholderValue": "请输入参数值"
+                          },
+                          "x-decorator-props": {
+                              "labelCol": 6,
+                              "wrapperCol": 10
+                          },
+                          "x-index": 1
+                      }
+                  }
+              }
+          }
+      }
