@@ -137,11 +137,11 @@ export class ApiImportComponent implements OnInit {
 
   // 获取上游服务列表
   getUpstreamList () {
-    this.api.get('service/enum').subscribe((resp:{code:number, data:{list:Array<string>}, msg:string}) => {
+    this.api.get('common/provider/Service').subscribe((resp:any) => {
       if (resp.code === 0) {
         this.upstreamList = []
-        for (const item of resp.data.list) {
-          this.upstreamList = [...this.upstreamList, { label: item, value: item }]
+        for (const item of resp.data.Service) {
+          this.upstreamList = [...this.upstreamList, { label: item.title, value: item.name }]
         }
       }
     })
