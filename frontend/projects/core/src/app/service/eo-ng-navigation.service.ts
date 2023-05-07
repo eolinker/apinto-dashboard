@@ -112,18 +112,20 @@ export class EoNgNavigationService {
         this.generateMenuList(resp)
       })),
       this.api.get('my/access')]).subscribe((resp:Array<any>) => {
-        this.accessMap = new Map()
-        const accessListBackend:Array<{name:string, access:string}> = resp[1].data.access
-        for (const access of accessListBackend) {
-          this.accessMap.set(access.name, access.access)
-          if (access.access && this.noAccess) {
-            this.noAccess = false
+        if (resp[1].code === 0) {
+          this.accessMap = new Map()
+          const accessListBackend:Array<{name:string, access:string}> = resp[1].data.access
+          for (const access of accessListBackend) {
+            this.accessMap.set(access.name, access.access)
+            if (access.access && this.noAccess) {
+              this.noAccess = false
+            }
           }
-        }
-        observer.next(this.menuList)
+          observer.next(this.menuList)
 
-        this.reqFlashMenu()
-        this.reqUpdateRightList()
+          this.reqFlashMenu()
+          this.reqUpdateRightList()
+        }
       })
     }
     )
