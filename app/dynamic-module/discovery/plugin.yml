@@ -11,7 +11,7 @@ front: upstream
 navigation: "navigation.infrastructure"
 group_id: "core_module"
 define:  # 动态模块定义
-  profession: service
+  profession: discovery
   drivers:
     - name: consul
       title: Consul
