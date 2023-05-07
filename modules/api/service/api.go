@@ -1510,7 +1510,7 @@ func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, u
 	routerInfos := make([]*frontend_model.Router, 0, len(clusterInfos))
 	for _, clusterInfo := range clusterInfos {
 		//判断上游服务有没有上线
-		if !!a.isServiceOnline(namespaceId, clusterInfo.Name, latestVersion.ServiceName) {
+		if !a.isServiceOnline(namespaceId, clusterInfo.Name, latestVersion.ServiceName) {
 			routerInfos = append(routerInfos, &frontend_model.Router{
 				Name:   frontend_model.RouterNameServiceOnline,
 				Params: map[string]string{"service_name": latestVersion.ServiceName},

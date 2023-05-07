@@ -67,6 +67,11 @@ func (c *Module) Routers() (apinto_module.Routers, bool) {
 }
 
 func (c *Module) Middleware() (apinto_module.Middleware, bool) {
+	if !c.isInit {
+		c.routers, c.middleware = initRouter(c.name)
+
+		c.isInit = true
+	}
 	return c, true
 }
 

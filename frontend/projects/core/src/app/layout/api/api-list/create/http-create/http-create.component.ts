@@ -57,7 +57,8 @@ export class ApiHttpCreateComponent extends ApiWebsocketCreateComponent {
           this.initCheckbox()
         }
         this.getHeaderList()
-        this.hostsList = [...resp.data.hosts?.map((x:string) => ({ key: x })) || [], { key: '' }]
+        this.hostsList = [...resp.data.api.hosts?.map((x:string) => ({ key: x })) || [], { key: '' }]
+        console.log(this, resp)
       }
     })
   }
