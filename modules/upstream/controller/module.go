@@ -1,9 +1,7 @@
 package upstream_controller
 
 import (
-	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-module"
-	"net/http"
 )
 
 type UpstreamDriver struct {
@@ -81,62 +79,63 @@ func (c *UpstreamModule) RoutersInfo() apinto_module.RoutersInfo {
 }
 
 func (c *UpstreamModule) initRouter() {
-	upstreamCtl := newUpstreamController()
-
-	c.routers = []apinto_module.RouterInfo{
-		{
-			Method:      http.MethodGet,
-			Path:        "/api/services",
-			Handler:     "upstream.getList",
-			HandlerFunc: []apinto_module.HandlerFunc{upstreamCtl.getList},
-		},
-		{
-			Method:      http.MethodGet,
-			Path:        "/api/service",
-			Handler:     "upstream.getInfo",
-			HandlerFunc: []apinto_module.HandlerFunc{upstreamCtl.getInfo},
-		},
-		{
-			Method:      http.MethodPut,
-			Path:        "/api/service",
-			Handler:     "upstream.alter",
-			HandlerFunc: []apinto_module.HandlerFunc{upstreamCtl.alter},
-		},
-		{
-			Method:      http.MethodPost,
-			Path:        "/api/service",
-			Handler:     "upstream.create",
-			HandlerFunc: []apinto_module.HandlerFunc{upstreamCtl.create},
-		},
-		{
-			Method:      http.MethodDelete,
-			Path:        "/api/service",
-			Handler:     "upstream.del",
-			HandlerFunc: []apinto_module.HandlerFunc{upstreamCtl.del},
-		},
-		{
-			Method:      http.MethodGet,
-			Path:        "/api/service/enum",
-			Handler:     "upstream.getEnum",
-			HandlerFunc: []apinto_module.HandlerFunc{upstreamCtl.getEnum},
-		},
-		{
-			Method:      http.MethodPut,
-			Path:        "/api/service/:service_name/online",
-			Handler:     "upstream.online",
-			HandlerFunc: []apinto_module.HandlerFunc{upstreamCtl.online},
-		},
-		{
-			Method:      http.MethodPut,
-			Path:        "/api/service/:service_name/offline",
-			Handler:     "upstream.offline",
-			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypePublish.Handler, upstreamCtl.offline},
-		},
-		{
-			Method:      http.MethodGet,
-			Path:        "/api/service/:service_name/onlines",
-			Handler:     "upstream.getOnlineList",
-			HandlerFunc: []apinto_module.HandlerFunc{upstreamCtl.getOnlineList},
-		},
-	}
+	c.routers = []apinto_module.RouterInfo{}
+	//upstreamCtl := newUpstreamController()
+	//
+	//c.routers = []apinto_module.RouterInfo{
+	//	{
+	//		Method:      http.MethodGet,
+	//		Path:        "/api/services",
+	//		Handler:     "upstream.getList",
+	//		HandlerFunc: []apinto_module.HandlerFunc{upstreamCtl.getList},
+	//	},
+	//	{
+	//		Method:      http.MethodGet,
+	//		Path:        "/api/service",
+	//		Handler:     "upstream.getInfo",
+	//		HandlerFunc: []apinto_module.HandlerFunc{upstreamCtl.getInfo},
+	//	},
+	//	{
+	//		Method:      http.MethodPut,
+	//		Path:        "/api/service",
+	//		Handler:     "upstream.alter",
+	//		HandlerFunc: []apinto_module.HandlerFunc{upstreamCtl.alter},
+	//	},
+	//	{
+	//		Method:      http.MethodPost,
+	//		Path:        "/api/service",
+	//		Handler:     "upstream.create",
+	//		HandlerFunc: []apinto_module.HandlerFunc{upstreamCtl.create},
+	//	},
+	//	{
+	//		Method:      http.MethodDelete,
+	//		Path:        "/api/service",
+	//		Handler:     "upstream.del",
+	//		HandlerFunc: []apinto_module.HandlerFunc{upstreamCtl.del},
+	//	},
+	//	{
+	//		Method:      http.MethodGet,
+	//		Path:        "/api/service/enum",
+	//		Handler:     "upstream.getEnum",
+	//		HandlerFunc: []apinto_module.HandlerFunc{upstreamCtl.getEnum},
+	//	},
+	//	{
+	//		Method:      http.MethodPut,
+	//		Path:        "/api/service/:service_name/online",
+	//		Handler:     "upstream.online",
+	//		HandlerFunc: []apinto_module.HandlerFunc{upstreamCtl.online},
+	//	},
+	//	{
+	//		Method:      http.MethodPut,
+	//		Path:        "/api/service/:service_name/offline",
+	//		Handler:     "upstream.offline",
+	//		HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypePublish.Handler, upstreamCtl.offline},
+	//	},
+	//	{
+	//		Method:      http.MethodGet,
+	//		Path:        "/api/service/:service_name/onlines",
+	//		Handler:     "upstream.getOnlineList",
+	//		HandlerFunc: []apinto_module.HandlerFunc{upstreamCtl.getOnlineList},
+	//	},
+	//}
 }
