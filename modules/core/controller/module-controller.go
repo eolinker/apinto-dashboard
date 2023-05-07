@@ -5,6 +5,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/core"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 type ModuleController struct {
@@ -24,6 +25,10 @@ func (m *ModuleController) HandleModule(ginCtx *gin.Context) {
 	if hasModule {
 		frontend.IndexHtml(ginCtx)
 	} else {
+		if module == "api" || module == "api2" {
+			http.NotFound(ginCtx.Writer, ginCtx.Request)
+			return
+		}
 		//ginCtx.Redirect(302, "/")
 		frontend.IndexHtml(ginCtx)
 	}

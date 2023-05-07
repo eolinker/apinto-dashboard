@@ -2,7 +2,7 @@ id: "discovery-2.apinto.com"
 name: "discovery-2"
 cname: "服务发现"
 resume: "使用一个注册中心来记录分布式系统中的全部服务的信息，以便其他服务能够快速的找到这些已注册的服务。"
-version: "v1.0.1"
+version: "v1.0.3"
 icon: "服务发现.png"
 driver: "discovery-2.apinto.com"
 type: 1 #0为框架模块 1为核心模块 2为内置模块 3为非内置
@@ -55,7 +55,8 @@ define:  # 动态模块定义
                                           "label": "引用环境变量",
                                           "value": 1
                                       }
-                                  ]
+                                  ],
+                                  "x-index": 0
                               },
                               "variable": {
                                   "type": "void",
@@ -103,7 +104,8 @@ define:  # 动态模块定义
                                               }
                                           }
                                       }
-                                  ]
+                                  ],
+                                  "x-index": 0
                               },
                               "address": {
                                   "type": "array",
@@ -186,7 +188,8 @@ define:  # 动态模块定义
                                   "x-validator": [],
                                   "x-component-props": {},
                                   "x-decorator-props": {}
-                              }
+                              },
+                              "x-index": 2
                           },
                           "x-decorator-props": {
                               "labelCol": 6,
@@ -239,7 +242,8 @@ define:  # 动态模块定义
                                           "label": "引用环境变量",
                                           "value": 1
                                       }
-                                  ]
+                                  ],
+                                  "x-index": 0
                               },
                               "variable": {
                                   "type": "void",
@@ -287,7 +291,8 @@ define:  # 动态模块定义
                                               }
                                           }
                                       }
-                                  ]
+                                  ],
+                                  "x-index": 0
                               },
                               "address": {
                                   "type": "array",
@@ -370,7 +375,8 @@ define:  # 动态模块定义
                                   "x-validator": [],
                                   "x-component-props": {},
                                   "x-decorator-props": {}
-                              }
+                              },
+                              "x-index": 2
                           },
                           "x-decorator-props": {
                               "labelCol": 6,
@@ -423,7 +429,8 @@ define:  # 动态模块定义
                                           "label": "引用环境变量",
                                           "value": 1
                                       }
-                                  ]
+                                  ],
+                                  "x-index": 0
                               },
                               "variable": {
                                   "type": "void",
@@ -471,7 +478,8 @@ define:  # 动态模块定义
                                               }
                                           }
                                       }
-                                  ]
+                                  ],
+                                  "x-index": 0
                               },
                               "address": {
                                   "type": "array",
@@ -554,7 +562,8 @@ define:  # 动态模块定义
                                   "x-validator": [],
                                   "x-component-props": {},
                                   "x-decorator-props": {}
-                              }
+                              },
+                              "x-index": 2
                           },
                           "x-decorator-props": {
                               "labelCol": 6,
