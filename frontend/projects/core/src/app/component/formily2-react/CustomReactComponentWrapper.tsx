@@ -25,11 +25,26 @@ const containerElementName = 'customReactComponentContainer'
         textarea,
         .ant-input-number,
         .ant-formily-array-items,
+        ant-picker,
         .ant-select {
-          width: 367px;
+          width: 346px;
           min-height: 32px;
         }
 
+        .ant-formily-array-table {
+          width: 524px;
+          margin-bottom: 22px;
+
+          .ant-input-affix-wrapper,
+          textarea,
+          .ant-input-number,
+          .ant-formily-array-items,
+          ant-picker,
+          .ant-select {
+            width: 100%;
+            min-height: 32px;
+          }
+        }
         .ant-formily-array-items .ant-select {
           width: unset;
         }
