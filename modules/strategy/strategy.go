@@ -20,21 +20,14 @@ type IStrategyService[T any, K any] interface {
 
 	ChangePriority(ctx context.Context, namespaceId, userId int, clusterName string, maps map[string]int) error
 	CheckInput(input *strategy_dto.StrategyInfoInput[T]) error
-
-	//checkPriorityReduplicative(ctx context.Context, clusterID, priority int, strategyType, uuid string) (int, error)
-	//getLatestStrategyVersion(ctx context.Context, strategyID int) (*strategy_entry.StrategyVersion, error)
-	//toApinto(name, desc string, isStop bool, priority int, filters []strategy_entry.StrategyFiltersConfig, conf T) map[string]interface{}
-	//encodeConfig(config *T) string
-	//decodeConfig(config string) *T
-	//online.IResetOnlineService
 }
-
+type IStrategyRemoteOptionHandle interface {
+	Title() string
+	Get(namespaceId int, keyword, groupUUID string, pageNum, pageSize int)
+}
 type IStrategyCommonService interface {
 	GetFilterOptions(ctx context.Context, namespaceId int) ([]*strategy_model.FilterOptionsItem, error)
 	GetFilterRemote(ctx context.Context, namespaceId int, targetType, keyword, groupUUID string, pageNum, pageSize int) (*strategy_model.FilterRemoteOutput, int, error)
-	GetMetricsOptions() ([]*strategy_model.MetricsOptionsItem, error)
-	//AddHandler(onlineService online.IResetOnlineService)
-	//online.IResetOnlineService
 }
 
 type IStrategyHandler[T any, K any] interface {

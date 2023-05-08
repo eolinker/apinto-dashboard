@@ -63,6 +63,19 @@ type FilterOptionsItem struct {
 	Pattern string
 	Options []string
 }
+type FilterOptionsItems []*FilterOptionsItem
+
+func (fs FilterOptionsItems) Len() int {
+	return len(fs)
+}
+
+func (fs FilterOptionsItems) Less(i, j int) bool {
+	return fs[i].Title < fs[j].Title
+}
+
+func (fs FilterOptionsItems) Swap(i, j int) {
+	fs[i], fs[j] = fs[j], fs[i]
+}
 
 type MetricsOptionsItem struct {
 	Name  string
@@ -99,8 +112,8 @@ type RemoteServices struct {
 
 type RemoteApplications struct {
 	Name string `json:"name"`
-	Uuid string `json:"uuid"`
 	Desc string `json:"desc"`
+	Uuid string `json:"uuid"`
 }
 
 // VisitInfoOutputConf 访问策略信息输出配置
