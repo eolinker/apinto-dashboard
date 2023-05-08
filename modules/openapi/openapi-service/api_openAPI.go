@@ -88,6 +88,7 @@ func (a *apiOpenAPIService) SyncImport(ctx context.Context, namespaceID, appID i
 
 	//检查服务，没有就用server创建，服务名使用data.ServiceName
 	serviceNotExit := false
+	//TODO service
 	serviceID, err := a.service.GetServiceIDByName(ctx, namespaceID, data.ServiceName)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
