@@ -81,18 +81,13 @@ func (s *strategyCommonController) FilterRemote(ginCtx *gin.Context) {
 }
 
 func (s *strategyCommonController) MetricsOptions(ginCtx *gin.Context) {
-
-	options, err := s.strategyService.GetMetricsOptions()
-	if err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
-		return
-	}
+	metrics := config.StrategyMetrics()
 
 	resList := make([]*strategy_dto.MetricsOptionsItem, 0)
-	for _, option := range options {
+	for _, option := range metrics {
 		resList = append(resList, &strategy_dto.MetricsOptionsItem{
-			Name:  option.Name,
-			Title: option.Title,
+			Name:  option.Name(),
+			Title: option.Title(),
 		})
 	}
 
