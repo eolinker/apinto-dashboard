@@ -7,7 +7,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/controller/users"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
-	"github.com/eolinker/apinto-dashboard/modules/online/online-dto"
 	"github.com/eolinker/apinto-dashboard/modules/plugin_template"
 	"github.com/eolinker/apinto-dashboard/modules/plugin_template/plugin-template-dto"
 	"github.com/eolinker/apinto-dashboard/modules/plugin_template/plugin-template-entry"
@@ -248,13 +247,13 @@ func (p *pluginTemplateController) onlines(ginCtx *gin.Context) {
 		return
 	}
 
-	resp := make([]*online_dto.OnlineOut, 0, len(list))
+	resp := make([]*plugin_template_dto.OnlineOut, 0, len(list))
 	for _, item := range list {
 		updateTime := ""
 		if !item.UpdateTime.IsZero() {
 			updateTime = common.TimeToStr(item.UpdateTime)
 		}
-		resp = append(resp, &online_dto.OnlineOut{
+		resp = append(resp, &plugin_template_dto.OnlineOut{
 			Name:       item.ClusterName,
 			Env:        item.ClusterEnv,
 			Status:     enum.OnlineStatus(item.Status),
@@ -278,7 +277,7 @@ func (p *pluginTemplateController) online(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("uuid can't be nil"))
 		return
 	}
-	input := &online_dto.UpdateOnlineStatusInput{}
+	input := &plugin_template_dto.OnlineInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
@@ -317,7 +316,7 @@ func (p *pluginTemplateController) offline(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("uuid can't be nil"))
 		return
 	}
-	input := &online_dto.UpdateOnlineStatusInput{}
+	input := &plugin_template_dto.OnlineInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
