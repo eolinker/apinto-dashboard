@@ -38,6 +38,64 @@ type dynamicService struct {
 	publishVersionStore dynamic_store.IDynamicPublishVersionStore
 }
 
+func (d *dynamicService) Count(ctx context.Context, namespaceID int, profession string, addition map[string]interface{}) (int, error) {
+	params := map[string]interface{}{
+		"namespace":  namespaceID,
+		"profession": profession,
+	}
+	for key, value := range addition {
+		params[key] = value
+	}
+
+	return d.dynamicStore.Count(ctx, params)
+}
+
+func (d *dynamicService) ListByNames(ctx context.Context, namespaceID int, profession string, names []string) ([]*dynamic_model.DynamicBasicInfo, error) {
+	list, err := d.dynamicStore.ListByKeyword(ctx, map[string]interface{}{
+		"namespace":  namespaceID,
+		"profession": profession,
+	}, names, "")
+	if err != nil {
+		return nil, err
+	}
+	items := make([]*dynamic_model.DynamicBasicInfo, 0, len(list))
+	for _, l := range list {
+
+		item := &dynamic_model.DynamicBasicInfo{
+			ID:          l.Name,
+			Title:       l.Title,
+			Driver:      l.Driver,
+			Description: l.Description,
+		}
+
+		items = append(items, item)
+	}
+	return items, nil
+}
+
+func (d *dynamicService) ListByKeyword(ctx context.Context, namespaceID int, profession string, keyword string) ([]*dynamic_model.DynamicBasicInfo, error) {
+	list, err := d.dynamicStore.ListByKeyword(ctx, map[string]interface{}{
+		"namespace":  namespaceID,
+		"profession": profession,
+	}, nil, keyword)
+	if err != nil {
+		return nil, err
+	}
+	items := make([]*dynamic_model.DynamicBasicInfo, 0, len(list))
+	for _, l := range list {
+
+		item := &dynamic_model.DynamicBasicInfo{
+			ID:          l.Name,
+			Title:       l.Title,
+			Driver:      l.Driver,
+			Description: l.Description,
+		}
+
+		items = append(items, item)
+	}
+	return items, nil
+}
+
 func (d *dynamicService) GetIDByName(ctx context.Context, namespaceId int, profession string, name string) (int, error) {
 	info, err := d.dynamicStore.First(ctx, map[string]interface{}{
 		"namespace":  namespaceId,
