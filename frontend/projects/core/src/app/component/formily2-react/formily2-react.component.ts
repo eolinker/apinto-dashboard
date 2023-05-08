@@ -31,7 +31,6 @@ import { SelectOption } from 'eo-ng-select'
         (onSubmit)="handlerSubmit($event)"
        ></formily2-react-wrapper>
 
-       <dialog-react-wrapper></dialog-react-wrapper>
        <div  class="mt-[50px] " *ngIf="value">
           <p class="font-bold">提交后的数据如下：</p>
           <p class="border-[1px] border-solid border-BORDER">{{value}}

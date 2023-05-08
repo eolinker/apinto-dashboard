@@ -36,7 +36,7 @@ export class ApiPluginTemplatePublishComponent implements OnInit {
     private router:Router,
     private navigationService:EoNgNavigationService,
     private publishFailModal:PublishFailService) {
-    this.navigationService.reqFlashBreadcrumb([{ title: '插件模板', routerLink: 'router/plugin-template' }, { title: '上线管理' }])
+    this.navigationService.reqFlashBreadcrumb([{ title: 'API操作模板', routerLink: 'router/plugin-template' }, { title: '上线管理' }])
   }
 
   ngOnInit (): void {

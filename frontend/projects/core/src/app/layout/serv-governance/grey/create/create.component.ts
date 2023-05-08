@@ -94,8 +94,8 @@ export class GreyCreateComponent implements OnInit {
     })
 
     this.navigationService.reqFlashBreadcrumb([
-      { title: '灰度策略', routerLink: 'serv-governance/grey' },
-      { title: '新建灰度策略' }
+      { title: '灰度发布', routerLink: 'serv-governance/grey' },
+      { title: '新建灰度发布策略' }
     ])
   }
 
@@ -161,7 +161,7 @@ export class GreyCreateComponent implements OnInit {
           if (resp.code === 0) {
             this.navigationService.reqFlashBreadcrumb([
               {
-                title: '灰度策略',
+                title: '灰度发布',
                 routerLink: 'serv-governance/grey'
               },
               { title: resp.data.strategy!.name }

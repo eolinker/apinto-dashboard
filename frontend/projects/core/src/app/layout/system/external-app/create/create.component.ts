@@ -27,8 +27,8 @@ export class ExternalAppCreateComponent implements OnInit {
     private navigationService: EoNgNavigationService
   ) {
     this.navigationService.reqFlashBreadcrumb([
-      { title: '外部应用' },
-      { title: '新建外部应用' }
+      { title: 'OpenAPI', routerLink: 'system/ext-app' },
+      { title: '新建OpenAPI' }
 
     ])
 
@@ -46,8 +46,8 @@ export class ExternalAppCreateComponent implements OnInit {
     if (this.editPage) {
       this.getApplicationMessage()
       this.navigationService.reqFlashBreadcrumb([
-        { title: '外部应用' },
-        { title: '外部应用详情' }
+        { title: 'OpenAPI', routerLink: 'system/ext-app' },
+        { title: 'OpenAPI详情' }
       ])
     } else {
       this.getApplicationId()

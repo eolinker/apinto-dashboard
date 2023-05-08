@@ -31,7 +31,7 @@ export class GroupComponent implements OnInit {
     private navigationService:EoNgNavigationService,
     public service:EoNgPluginService
   ) {
-    this.navigationService.reqFlashBreadcrumb([{ title: '企业插件' }])
+    this.navigationService.reqFlashBreadcrumb([{ title: '插件市场' }])
   }
 
   ngOnInit (): void {
