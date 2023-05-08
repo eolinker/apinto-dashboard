@@ -47,7 +47,7 @@ export class DeployClusterNodesComponent implements OnInit {
                 private message: EoNgFeedbackMessageService,
                 private api:ApiService, private router:Router,
                 private navigationService:EoNgNavigationService) {
-    this.navigationService.reqFlashBreadcrumb([{ title: '网关集群', routerLink: 'deploy/cluster' }, { title: '网关节点' }])
+    this.navigationService.reqFlashBreadcrumb([{ title: '网关集群', routerLink: 'deploy/cluster' }, { title: '节点列表' }])
   }
 
   ngOnInit (): void {

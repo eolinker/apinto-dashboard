@@ -89,6 +89,8 @@ export class FilterFormComponent implements OnInit {
   searchGroup: string[] = []
   showFilterError: boolean = false
   strategyType: string = ''
+
+  valueName:string = 'uuid' // 数据keyName，由接口传入，如果接口未传入则默认为uuid
   @Input() nzDisabled: boolean = false
   _filterForm: FilterForm = {
     name: '',
@@ -133,7 +135,6 @@ export class FilterFormComponent implements OnInit {
 
   ngOnInit (): void {
     this.getFilterNamesList(!!this.editFilter)
-    console.log(this)
   }
 
   // 获取筛选条件中属性名称的可选选项
@@ -196,21 +197,23 @@ export class FilterFormComponent implements OnInit {
           this.remoteList = []
           this.remoteSelectList = []
           this.remoteSelectNameList = []
-          for (const index in resp.data[resp.data.target]) {
-            resp.data[resp.data.target][index].checked = this.editFilter && this.filterForm.name === this.editFilter.name
+          // @ts-ignore // TODO 等待接口修改的兼容处理，接口修改后则删除
+          const list = resp.data.target ? resp.data[resp.data.target] : resp.data.list
+          for (const index in list) {
+            list[index].checked = this.editFilter && this.filterForm.name === this.editFilter.name
               ? !!(!!this.editFilter.values?.includes(
-                  resp.data[resp.data.target][index].uuid
+                  list[index][this.valueName]
                 ) || this.editFilter.values[0] === 'ALL')
               : false
-            if (resp.data[resp.data.target][index].checked) {
+            if (list[index].checked) {
               this.remoteSelectList.push(
-                resp.data[resp.data.target][index].uuid
+                list[index][this.valueName]
               )
               this.remoteSelectNameList.push(
-                resp.data[resp.data.target][index].name
+                list[index].name
               )
             }
-            this.remoteList.push(resp.data[resp.data.target][index] as any)
+            this.remoteList.push(list[index] as any)
           }
           this.originRemoteList = [...this.remoteList]
           this.filterTbody = [
@@ -257,13 +260,17 @@ export class FilterFormComponent implements OnInit {
     setTimeout(() => {
       for (const item of this.remoteList) {
         if (item.checked) {
-          if (this._remoteSelectList.indexOf(item.uuid) === -1) {
-            this._remoteSelectList.push(item.uuid)
+          // @ts-ignore // TODO 等待接口修改的兼容处理，接口修改后则删除
+          if (this._remoteSelectList.indexOf(item[this.valueName]) === -1) {
+          // @ts-ignore // TODO 等待接口修改的兼容处理，接口修改后则删除
+            this._remoteSelectList.push(item[this.valueName])
             this._remoteSelectNameList.push(item.name)
           }
         } else {
-          if (this._remoteSelectList.indexOf(item.uuid) !== -1) {
-            this._remoteSelectList.splice(this._remoteSelectList.indexOf(item.uuid), 1)
+          // @ts-ignore // TODO 等待接口修改的兼容处理，接口修改后则删除
+          if (this._remoteSelectList.indexOf(item[this.valueName]) !== -1) {
+          // @ts-ignore // TODO 等待接口修改的兼容处理，接口修改后则删除
+            this._remoteSelectList.splice(this._remoteSelectList.indexOf(item[this.valueName]), 1)
             this._remoteSelectNameList.splice(this._remoteSelectNameList.indexOf(item.name), 1)
           }
         }
@@ -280,7 +287,6 @@ export class FilterFormComponent implements OnInit {
         this.apiGroupList = []
         this.apiGroupList = resp.data.root.groups
         this.apiGroupList = this.transferHeader(this.apiGroupList)
-        console.log(this.apiGroupList)
       }
     })
   }
@@ -301,7 +307,8 @@ export class FilterFormComponent implements OnInit {
       })
       .subscribe((resp: {code:number, data:FilterRemoteOption, msg:string}) => {
         if (resp.code === 0) {
-          this.remoteList = resp.data[resp.data.target]
+          // @ts-ignore // TODO 等待接口修改的兼容处理，接口修改后则删除
+          this.remoteList = resp.data.target ? resp.data[resp.data.target] : resp.data.list
         }
       })
   }
