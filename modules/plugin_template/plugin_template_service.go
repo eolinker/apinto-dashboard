@@ -19,5 +19,4 @@ type IPluginTemplateService interface {
 	Online(ctx context.Context, namespaceId, operator int, uuid, clusterName string) (*frontend_model.Router, error)
 	IsOnline(ctx context.Context, clusterId int, uuid string) (bool, error)
 	Offline(ctx context.Context, namespaceId, operator int, uuid, clusterName string) error
-	ResetOnline(ctx context.Context, namespaceId, clusterId int)
 }
