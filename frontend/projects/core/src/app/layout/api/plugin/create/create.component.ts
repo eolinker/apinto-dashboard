@@ -39,7 +39,7 @@ export class ApiPluginTemplateCreateComponent implements OnInit {
     private jsonService:EoNgJsonService
   ) {
     this.navigationService.reqFlashBreadcrumb([
-      { title: '插件模板', routerLink: 'router/plugin-template' },
+      { title: 'API操作模板', routerLink: 'router/plugin-template' },
       { title: '新建模板' }
     ])
 
@@ -52,7 +52,7 @@ export class ApiPluginTemplateCreateComponent implements OnInit {
   ngOnInit (): void {
     if (this.baseInfo.allParamsInfo.pluginTemplateId) {
       this.navigationService.reqFlashBreadcrumb([
-        { title: '插件模板', routerLink: 'router/plugin-template' },
+        { title: 'API操作模板', routerLink: 'router/plugin-template' },
         { title: '编辑模板' }
       ])
     }

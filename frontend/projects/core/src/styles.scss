@@ -1699,3 +1699,16 @@ textarea.ant-input {
     width: unset;
   }
 }
+
+.ant-formily-array-base-config {
+  height: 16px;
+  cursor: pointer;
+  display: inline-block;
+  margin-left: 6px;
+  text-align: center;
+  vertical-align: -0.125em;
+}
+.ant-formily-array-base-config:hover {
+  color: #1677ff;
+  height: 16px;
+}

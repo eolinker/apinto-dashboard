@@ -1,6 +1,5 @@
 import * as React from 'react'
-import { Stringify, createSchemaField } from '@formily/react'
-import { Button } from 'antd'
+import { createSchemaField } from '@formily/react'
 import {
   FormItem,
   Space,
@@ -87,7 +86,6 @@ export const CustomDialogComponent = React.forwardRef(
   (props: { [k: string]: any }, ref) => {
     const { onChange, title, value, render } = props
     React.useImperativeHandle(ref, () => ({}))
-    console.log(value, render)
     let editPage: boolean = false
     try {
       editPage = Object.keys(JSON.parse(JSON.stringify(value))).length > 0
@@ -95,8 +93,8 @@ export const CustomDialogComponent = React.forwardRef(
 
     return (
       <FormDialog.Portal>
-        <Button
-          type="text"
+        <span
+          className="ant-formily-array-base-config"
           onClick={() => {
             const dialog = FormDialog(
               editPage ? `编辑${title || ''}` : `新建${title || ''}`,
@@ -127,7 +125,7 @@ export const CustomDialogComponent = React.forwardRef(
           <svg style={{ width: '16px', height: '16px' }}>
             <use href="#tool"></use>
           </svg>
-        </Button>
+        </span>
       </FormDialog.Portal>
     )
   }

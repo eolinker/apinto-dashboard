@@ -133,7 +133,6 @@ export class FilterFormComponent implements OnInit {
 
   ngOnInit (): void {
     this.getFilterNamesList(!!this.editFilter)
-    console.log(this)
   }
 
   // 获取筛选条件中属性名称的可选选项
@@ -280,7 +279,6 @@ export class FilterFormComponent implements OnInit {
         this.apiGroupList = []
         this.apiGroupList = resp.data.root.groups
         this.apiGroupList = this.transferHeader(this.apiGroupList)
-        console.log(this.apiGroupList)
       }
     })
   }
