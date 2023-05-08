@@ -66,15 +66,13 @@ flags="-X 'github.com/eolinker/apinto-dashboard/app/apserver/version.Version=${V
 
 
 # -ldflags="-w -s" means omit DWARF symbol table and the symbol table and debug information
-CGO_ENABLED=0 go build --tags "release,mysql" -ldflags "-w -s $flags" -o ${OUTPUT_BINARY} ./app/apserver
+GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build --tags "release,mysql" -ldflags "-w -s $flags" -o ${OUTPUT_BINARY} ./app/apserver
 
 mkdir -p apserver_${VERSION}
 #cp ./scripts/resource/config.yml.tpl ${OUTPUT_DIR}/config.yml
 
-cp ./scripts/resource/config.yml.tpl ./apserver_${VERSION}
+cp ./scripts/resource/* ./apserver_${VERSION}
 cp ${OUTPUT_BINARY} ./apserver_${VERSION}
-cp ./scripts/resource/install.sh ./apserver_${VERSION}
-cp ./scripts/resource/run.sh ./apserver_${VERSION}
 
 echo "Completed building apinto dashboard backend."
 
