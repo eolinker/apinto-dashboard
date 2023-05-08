@@ -12,6 +12,7 @@ import (
 	store2 "github.com/eolinker/apinto-dashboard/modules/api/store"
 	"github.com/eolinker/apinto-dashboard/modules/base/quote-entry"
 	"github.com/eolinker/apinto-dashboard/modules/base/quote-store"
+	"github.com/eolinker/apinto-dashboard/modules/dynamic"
 	"github.com/eolinker/apinto-dashboard/modules/group"
 	"github.com/eolinker/apinto-dashboard/modules/group/group-model"
 	"github.com/eolinker/apinto-dashboard/modules/openapi"
@@ -29,11 +30,12 @@ import (
 )
 
 type apiOpenAPIService struct {
-	apiStore   store2.IAPIStore
-	apiStat    store2.IAPIStatStore
-	apiVersion store2.IAPIVersionStore
-	quoteStore quote_store.IQuoteStore
-	apiHistory store2.IApiHistoryStore
+	apiStore       store2.IAPIStore
+	apiStat        store2.IAPIStatStore
+	apiVersion     store2.IAPIVersionStore
+	quoteStore     quote_store.IQuoteStore
+	apiHistory     store2.IApiHistoryStore
+	dynamicService dynamic.IDynamicService
 
 	apiService           api.IAPIService
 	service              upstream.IService
@@ -48,6 +50,7 @@ func newAPIOpenAPIService() openapi.IAPIOpenAPIService {
 	bean.Autowired(&as.apiStat)
 	bean.Autowired(&as.apiVersion)
 	bean.Autowired(&as.quoteStore)
+	bean.Autowired(&as.dynamicService)
 
 	bean.Autowired(&as.apiService)
 	bean.Autowired(&as.service)
@@ -88,8 +91,7 @@ func (a *apiOpenAPIService) SyncImport(ctx context.Context, namespaceID, appID i
 
 	//检查服务，没有就用server创建，服务名使用data.ServiceName
 	serviceNotExit := false
-	//TODO service
-	serviceID, err := a.service.GetServiceIDByName(ctx, namespaceID, data.ServiceName)
+	serviceID, err := a.dynamicService.GetIDByName(ctx, namespaceID, "service", data.ServiceName)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}
