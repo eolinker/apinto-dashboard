@@ -23,4 +23,5 @@ type IDynamicService interface {
 	Create(ctx context.Context, namespaceId int, profession string, skill string, title string, name string, driver string, description string, body string, updater int) error
 	Save(ctx context.Context, namespaceId int, profession string, title string, name string, description string, body string, updater int) error
 	Delete(ctx context.Context, namespaceId int, profession string, name string) error
+	GetIDByName(ctx context.Context, namespaceId int, profession string, name string) (int, error)
 }
