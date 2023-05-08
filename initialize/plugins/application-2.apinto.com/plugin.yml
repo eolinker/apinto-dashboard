@@ -2,7 +2,7 @@ id: "application-2.apinto.com"
 name: "app"
 cname: "应用管理-2"
 resume: "应用管理统一管理应用在各个集群的生命周期。应用作为业务通讯的发起者，贯穿整个调用链。"
-version: "v1.0.3"
+version: "v1.0.4"
 icon: "应用管理.png"
 driver: "application-2.apinto.com"
 type: 1 #0为框架模块 1为核心模块 2为内置模块 3为非内置
@@ -79,42 +79,13 @@ define:
             "items": {
               "type": "object",
               "properties": {
-                "column1": {
-                  "type": "void",
-                  "x-component": "ArrayTable.Column",
-                  "x-component-props": {
-                    "width": 50,
-                    "title": "Sort",
-                    "align": "center"
-                  },
-                  "properties": {
-                    "sort": {
-                      "type": "void",
-                      "x-component": "ArrayTable.SortHandle"
-                    }
-                  }
-                },
-                "column2": {
-                  "type": "void",
-                  "x-component": "ArrayTable.Column",
-                  "x-component-props": {
-                    "width": 80,
-                    "title": "Index",
-                    "align": "center"
-                  },
-                  "properties": {
-                    "index": {
-                      "type": "void",
-                      "x-component": "ArrayTable.Index"
-                    }
-                  }
-                },
                 "column3": {
                   "type": "void",
                   "x-component": "ArrayTable.Column",
                   "x-component-props": {
-                    "width": 200,
-                    "title": "参数名"
+                    "width": 100,
+                    "title": "参数名",
+                    "fixed": "left"
                   },
                   "properties": {
                     "config.key": {
@@ -127,7 +98,7 @@ define:
                   "type": "void",
                   "x-component": "ArrayTable.Column",
                   "x-component-props": {
-                    "width": 200,
+                    "width": 100,
                     "title": "参数值"
                   },
                   "properties": {
@@ -141,7 +112,7 @@ define:
                   "type": "void",
                   "x-component": "ArrayTable.Column",
                   "x-component-props": {
-                    "width": 200,
+                    "width": 100,
                     "title": "参数位置"
                   },
                   "properties": {
@@ -169,7 +140,7 @@ define:
                   "x-component-props": {
                     "title": "操作",
                     "dataIndex": "operations",
-                    "width": 200,
+                    "width": 98,
                     "fixed": "right"
                   },
                   "properties": {
@@ -230,42 +201,13 @@ define:
             "items": {
               "type": "object",
               "properties": {
-                "column1": {
-                  "type": "void",
-                  "x-component": "ArrayTable.Column",
-                  "x-component-props": {
-                    "width": 50,
-                    "title": "Sort",
-                    "align": "center"
-                  },
-                  "properties": {
-                    "sort": {
-                      "type": "void",
-                      "x-component": "ArrayTable.SortHandle"
-                    }
-                  }
-                },
-                "column2": {
-                  "type": "void",
-                  "x-component": "ArrayTable.Column",
-                  "x-component-props": {
-                    "width": 80,
-                    "title": "Index",
-                    "align": "center"
-                  },
-                  "properties": {
-                    "index": {
-                      "type": "void",
-                      "x-component": "ArrayTable.Index"
-                    }
-                  }
-                },
                 "column3": {
                   "type": "void",
                   "x-component": "ArrayTable.Column",
                   "x-component-props": {
-                    "width": 200,
-                    "title": "鉴权类型"
+                    "width": 100,
+                    "title": "鉴权类型",
+                    "fixed": "left"
                   },
                   "properties": {
                     "config.driver": {
@@ -278,7 +220,7 @@ define:
                   "type": "void",
                   "x-component": "ArrayTable.Column",
                   "x-component-props": {
-                    "width": 200,
+                    "width": 100,
                     "title": "参数位置"
                   },
                   "properties": {
@@ -288,11 +230,11 @@ define:
                     }
                   }
                 },
-                "column8": {
+                "column5": {
                   "type": "void",
                   "x-component": "ArrayTable.Column",
                   "x-component-props": {
-                    "width": 200,
+                    "width": 100,
                     "title": "参数名"
                   },
                   "properties": {
@@ -302,11 +244,11 @@ define:
                     }
                   }
                 },
-                "column5": {
+                "column6": {
                   "type": "void",
                   "x-component": "ArrayTable.Column",
                   "x-component-props": {
-                    "width": 200,
+                    "width": 100,
                     "title": "参数信息"
                   },
                   "properties": {
@@ -316,31 +258,31 @@ define:
                     }
                   }
                 },
-                "column6": {
+                "column7": {
                   "type": "void",
                   "x-component": "ArrayTable.Column",
                   "x-component-props": {
-                    "width": 200,
+                    "width": 100,
                     "title": "过期时间"
                   },
                   "properties": {
                     "config.expire_time": {
                       "type": "string",
-                      "x-component": "Input"
+                      "x-component": "DatePicker"
                     }
                   }
                 },
-                "column7": {
+                "column8": {
                   "type": "void",
                   "x-component": "ArrayTable.Column",
                   "x-component-props": {
-                    "width": 200,
+                    "width": 120,
                     "title": "隐藏鉴权信息"
                   },
                   "properties": {
                     "config.is_transparent": {
                       "type": "string",
-                      "x-component": "Input"
+                      "x-component": "Switch"
                     }
                   }
                 },
@@ -350,7 +292,7 @@ define:
                   "x-component-props": {
                     "title": "操作",
                     "dataIndex": "operations",
-                    "width": 200,
+                    "width": 98,
                     "fixed": "right"
                   },
                   "properties": {
@@ -388,6 +330,19 @@ define:
               "wrapperCol": 10
             },
             "x-index": 3
+          },
+          "custom_attr_list": {
+            "type": "object",
+            "title": "自定义属性",
+            "x-decorator": "FormItem",
+            "x-component": "SimpleMapComponent",
+            "x-validator": [],
+            "x-component-props": {},
+            "x-decorator-props": {
+              "labelCol": 6,
+              "wrapperCol": 10
+            },
+            "name": "custom_attr_list"
           }
         }
       }
