@@ -6,24 +6,27 @@ import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/grpc-service"
 	"github.com/eolinker/apinto-dashboard/modules/api"
-	"github.com/eolinker/apinto-dashboard/modules/application"
+	"github.com/eolinker/apinto-dashboard/modules/dynamic"
 	module_plugin "github.com/eolinker/apinto-dashboard/modules/module-plugin"
 	"github.com/eolinker/apinto-dashboard/modules/namespace"
 	navigation_service "github.com/eolinker/apinto-dashboard/modules/navigation"
-	"github.com/eolinker/apinto-dashboard/modules/upstream"
 	"github.com/eolinker/eosc/common/bean"
 	"gorm.io/gorm"
 )
 
 var _ grpc_service.GetConsoleInfoServer = (*consoleInfoService)(nil)
 
+const (
+	professionService = "service"
+	professionApp     = "app"
+)
+
 type consoleInfoService struct {
 	namespaceService    namespace.INamespaceService
 	apiService          api.IAPIService
-	upstreamService     upstream.IService
-	appService          application.IApplicationService
 	modulePluginService module_plugin.IModulePlugin
 	navigationService   navigation_service.INavigationService
+	dynamicService      dynamic.IDynamicService
 
 	modulesCache INavigationModulesCache
 }
@@ -32,10 +35,9 @@ func NewConsoleInfoService() grpc_service.GetConsoleInfoServer {
 	c := &consoleInfoService{}
 	bean.Autowired(&c.namespaceService)
 	bean.Autowired(&c.apiService)
-	bean.Autowired(&c.upstreamService)
-	bean.Autowired(&c.appService)
 	bean.Autowired(&c.modulePluginService)
 	bean.Autowired(&c.navigationService)
+	bean.Autowired(&c.dynamicService)
 
 	bean.Autowired(&c.modulesCache)
 	return c
@@ -122,15 +124,15 @@ func (c *consoleInfoService) GetApisByServices(ctx context.Context, req *grpc_se
 }
 
 func (c *consoleInfoService) GetAllServices(ctx context.Context, req *grpc_service.GetServicesReq) (*grpc_service.ServicesResp, error) {
-	services, err := c.upstreamService.GetServiceListAll(ctx, int(req.NamespaceId), req.Name)
+	basicInfos, err := c.dynamicService.ListByKeyword(ctx, int(req.NamespaceId), professionService, req.Name)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, fmt.Errorf("获取Service列表报错. err: %s", err)
 	}
-	items := make([]*grpc_service.ServicesItem, 0, len(services))
-	for _, info := range services {
+	items := make([]*grpc_service.ServicesItem, 0, len(basicInfos))
+	for _, info := range basicInfos {
 		items = append(items, &grpc_service.ServicesItem{
-			Name: info.Name,
-			Desc: info.Desc,
+			Name: info.ID,
+			Desc: info.Description,
 		})
 	}
 	return &grpc_service.ServicesResp{
@@ -139,15 +141,15 @@ func (c *consoleInfoService) GetAllServices(ctx context.Context, req *grpc_servi
 }
 
 func (c *consoleInfoService) GetAllServicesByNames(ctx context.Context, req *grpc_service.GetServicesByNamesReq) (*grpc_service.ServicesResp, error) {
-	services, err := c.upstreamService.GetServiceListByNames(ctx, int(req.NamespaceId), req.Names)
+	basicInfos, err := c.dynamicService.ListByNames(ctx, int(req.NamespaceId), professionService, req.Names)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, fmt.Errorf("获取Service列表报错. err: %s", err)
 	}
-	items := make([]*grpc_service.ServicesItem, 0, len(services))
-	for _, info := range services {
+	items := make([]*grpc_service.ServicesItem, 0, len(basicInfos))
+	for _, info := range basicInfos {
 		items = append(items, &grpc_service.ServicesItem{
-			Name: info.Name,
-			Desc: info.Desc,
+			Name: info.ID,
+			Desc: info.Description,
 		})
 	}
 	return &grpc_service.ServicesResp{
@@ -156,16 +158,16 @@ func (c *consoleInfoService) GetAllServicesByNames(ctx context.Context, req *grp
 }
 
 func (c *consoleInfoService) GetAllApps(ctx context.Context, req *grpc_service.GetAppsReq) (*grpc_service.AppsResp, error) {
-	apps, err := c.appService.AppListAll(ctx, int(req.NamespaceId))
+	basicInfos, err := c.dynamicService.ListByKeyword(ctx, int(req.NamespaceId), professionApp, "")
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, fmt.Errorf("获取应用列表报错. err: %s", err)
 	}
-	items := make([]*grpc_service.AppsItem, 0, len(apps))
-	for _, info := range apps {
+	items := make([]*grpc_service.AppsItem, 0, len(basicInfos))
+	for _, info := range basicInfos {
 		items = append(items, &grpc_service.AppsItem{
-			Uuid: info.IdStr,
-			Name: info.Name,
-			Desc: info.Desc,
+			Uuid: info.ID,
+			Name: info.Title,
+			Desc: info.Description,
 		})
 	}
 	return &grpc_service.AppsResp{
@@ -174,16 +176,16 @@ func (c *consoleInfoService) GetAllApps(ctx context.Context, req *grpc_service.G
 }
 
 func (c *consoleInfoService) GetAppsByUuids(ctx context.Context, req *grpc_service.GetAppsByUuidsReq) (*grpc_service.AppsResp, error) {
-	apps, err := c.appService.AppListByUUIDS(ctx, int(req.NamespaceId), req.Uuids)
+	basicInfos, err := c.dynamicService.ListByNames(ctx, int(req.NamespaceId), professionApp, req.Uuids)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, fmt.Errorf("获取应用列表报错. err: %s", err)
 	}
-	items := make([]*grpc_service.AppsItem, 0, len(apps))
-	for _, info := range apps {
+	items := make([]*grpc_service.AppsItem, 0, len(basicInfos))
+	for _, info := range basicInfos {
 		items = append(items, &grpc_service.AppsItem{
-			Uuid: info.IdStr,
-			Name: info.Name,
-			Desc: info.Desc,
+			Uuid: info.ID,
+			Name: info.Title,
+			Desc: info.Description,
 		})
 	}
 	return &grpc_service.AppsResp{
