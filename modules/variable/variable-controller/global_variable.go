@@ -63,7 +63,7 @@ func (e *variablesController) gets(ginCtx *gin.Context) {
 		resp = append(resp, data)
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["variables"] = resp
 	data["total"] = total
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
@@ -94,7 +94,7 @@ func (e *variablesController) get(ginCtx *gin.Context) {
 		list = append(list, data)
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["variables"] = list
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }

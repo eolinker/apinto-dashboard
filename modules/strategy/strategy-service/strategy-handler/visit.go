@@ -10,6 +10,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/api"
 	"github.com/eolinker/apinto-dashboard/modules/application"
 	"github.com/eolinker/apinto-dashboard/modules/strategy"
+	strategyConfig "github.com/eolinker/apinto-dashboard/modules/strategy/config"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-dto"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-entry"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-model"
@@ -27,9 +28,9 @@ type visitHandler struct {
 
 func (t *visitHandler) GetListLabel(conf *strategy_entry.StrategyVisitConfig) string {
 	switch conf.VisitRule {
-	case enum.VisitRuleAllow:
+	case strategyConfig.VisitRuleAllow:
 		return "允许访问"
-	case enum.VisitRuleRefuse:
+	case strategyConfig.VisitRuleRefuse:
 		return "拒绝访问"
 	default:
 		return ""
@@ -37,16 +38,16 @@ func (t *visitHandler) GetListLabel(conf *strategy_entry.StrategyVisitConfig) st
 }
 
 func (t *visitHandler) GetType() string {
-	return enum.StrategyVisit
+	return strategyConfig.StrategyVisit
 }
 
 func (t *visitHandler) GetConfName() string {
-	return enum.StrategyVisitApintoConfName
+	return strategyConfig.StrategyVisitApintoConfName
 }
 
 // GetBatchSettingName 获取往apinto发送批量操作策略时 url所需要的路径名 /setting/xxx
 func (t *visitHandler) GetBatchSettingName() string {
-	return enum.StrategyVisitBatchName
+	return strategyConfig.StrategyVisitBatchName
 }
 
 func (t *visitHandler) CheckInput(input *strategy_dto.StrategyInfoInput[strategy_entry.StrategyVisitConfig]) error {
@@ -67,12 +68,12 @@ func (t *visitHandler) CheckInput(input *strategy_dto.StrategyInfoInput[strategy
 	}
 
 	if input.Config == nil {
-		return errors.New("config can't be null. ")
+		return errors.New("strategyConfig can't be null. ")
 	}
 
 	//检查生效规则
 	switch input.Config.VisitRule {
-	case enum.VisitRuleAllow, enum.VisitRuleRefuse:
+	case strategyConfig.VisitRuleAllow, strategyConfig.VisitRuleRefuse:
 	default:
 		return fmt.Errorf("visit_rule %s is illegal. ", input.Config.VisitRule)
 	}
@@ -81,7 +82,7 @@ func (t *visitHandler) CheckInput(input *strategy_dto.StrategyInfoInput[strategy
 	filterNameSet := make(map[string]struct{})
 	for _, influence := range input.Config.InfluenceSphere {
 		switch influence.Name {
-		case enum.FilterApplication, enum.FilterApi, enum.FilterPath, enum.FilterService, enum.FilterMethod, enum.FilterIP:
+		case strategyConfig.FilterApplication, strategyConfig.FilterApi, strategyConfig.FilterPath, strategyConfig.FilterService, strategyConfig.FilterMethod, strategyConfig.FilterIP:
 		default:
 			if !common.IsMatchFilterAppKey(influence.Name) {
 				return fmt.Errorf("influence_sphere.Name %s is illegal. ", influence.Name)
@@ -144,10 +145,10 @@ func (t *visitHandler) FormatOut(ctx context.Context, namespaceID int, input *st
 			continue
 		}
 		switch filter.Name {
-		case enum.FilterApplication:
-			filter.Type = enum.FilterTypeRemote
+		case strategyConfig.FilterApplication:
+			filter.Type = strategyConfig.FilterTypeRemote
 			filter.Title = "应用"
-			if f.Values[0] == enum.FilterValuesALL {
+			if f.Values[0] == strategyConfig.FilterValuesALL {
 				filter.Label = "所有应用"
 			} else {
 				apps, _ := t.applicationService.AppListByUUIDS(ctx, namespaceID, f.Values)
@@ -165,10 +166,10 @@ func (t *visitHandler) FormatOut(ctx context.Context, namespaceID int, input *st
 				}
 				filter.Label = strings.Join(labels, ",")
 			}
-		case enum.FilterApi:
-			filter.Type = enum.FilterTypeRemote
+		case strategyConfig.FilterApi:
+			filter.Type = strategyConfig.FilterTypeRemote
 			filter.Title = "API"
-			if f.Values[0] == enum.FilterValuesALL {
+			if f.Values[0] == strategyConfig.FilterValuesALL {
 				filter.Label = "所有API"
 			} else {
 				apis, _ := t.apiService.GetAPIRemoteByUUIDS(ctx, namespaceID, f.Values)
@@ -182,14 +183,14 @@ func (t *visitHandler) FormatOut(ctx context.Context, namespaceID int, input *st
 				}
 				filter.Label = strings.Join(labels, ",")
 			}
-		case enum.FilterPath:
-			filter.Type = enum.FilterTypePattern
+		case strategyConfig.FilterPath:
+			filter.Type = strategyConfig.FilterTypePattern
 			filter.Title = "API路径"
 			filter.Label = f.Values[0]
-		case enum.FilterService:
-			filter.Type = enum.FilterTypeRemote
+		case strategyConfig.FilterService:
+			filter.Type = strategyConfig.FilterTypeRemote
 			filter.Title = "上游服务"
-			if f.Values[0] == enum.FilterValuesALL {
+			if f.Values[0] == strategyConfig.FilterValuesALL {
 				filter.Label = "所有上游服务"
 			} else {
 				services, _ := t.service.GetServiceRemoteByNames(ctx, namespaceID, f.Values)
@@ -203,22 +204,22 @@ func (t *visitHandler) FormatOut(ctx context.Context, namespaceID int, input *st
 				}
 				filter.Label = strings.Join(labels, ",")
 			}
-		case enum.FilterMethod:
-			filter.Type = enum.FilterTypeStatic
+		case strategyConfig.FilterMethod:
+			filter.Type = strategyConfig.FilterTypeStatic
 			filter.Title = "API请求方式"
 			if f.Values[0] == enum.HttpALL {
 				filter.Label = "所有API请求方式"
 			} else {
 				filter.Label = strings.Join(f.Values, ",")
 			}
-		case enum.FilterIP:
-			filter.Type = enum.FilterTypePattern
+		case strategyConfig.FilterIP:
+			filter.Type = strategyConfig.FilterTypePattern
 			filter.Title = "IP"
 			filter.Label = strings.Join(f.Values, ",")
 		default: //KEY(应用)
-			filter.Type = enum.FilterTypeStatic
+			filter.Type = strategyConfig.FilterTypeStatic
 			filter.Title = fmt.Sprintf("%s(应用)", common.GetFilterAppKey(filter.Name))
-			if f.Values[0] == enum.FilterValuesALL {
+			if f.Values[0] == strategyConfig.FilterValuesALL {
 				filter.Label = fmt.Sprintf("%s(应用)所有值", common.GetFilterAppKey(filter.Name))
 			} else {
 				filter.Label = strings.Join(f.Values, ",")

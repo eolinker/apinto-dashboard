@@ -1,28 +1,28 @@
 package strategy_dto
 
 import (
-	"github.com/eolinker/apinto-dashboard/enum"
+	"github.com/eolinker/apinto-dashboard/modules/strategy/config"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-model"
 )
 
 type StrategyListOut struct {
-	UUID       string                    `json:"uuid,omitempty"`
-	Name       string                    `json:"name,omitempty"`
-	Priority   int                       `json:"priority,omitempty"`
-	IsStop     bool                      `json:"is_stop"`
-	IsDelete   bool                      `json:"is_deleted"`
-	Status     enum.StrategyOnlineStatus `json:"status"`
-	Filters    string                    `json:"filters,omitempty"`
-	Conf       string                    `json:"conf,omitempty"`
-	Operator   string                    `json:"operator,omitempty"`
-	UpdateTime string                    `json:"update_time,omitempty"`
+	UUID       string                      `json:"uuid,omitempty"`
+	Name       string                      `json:"name,omitempty"`
+	Priority   int                         `json:"priority,omitempty"`
+	IsStop     bool                        `json:"is_stop"`
+	IsDelete   bool                        `json:"is_deleted"`
+	Status     config.StrategyOnlineStatus `json:"status"`
+	Filters    string                      `json:"filters,omitempty"`
+	Conf       string                      `json:"conf,omitempty"`
+	Operator   string                      `json:"operator,omitempty"`
+	UpdateTime string                      `json:"update_time,omitempty"`
 }
 
 type StrategyToPublishListOut struct {
-	Name     string                    `json:"name"`
-	Priority int                       `json:"priority"`
-	Status   enum.StrategyOnlineStatus `json:"status"`
-	OptTime  string                    `json:"opt_time"`
+	Name     string                      `json:"name"`
+	Priority int                         `json:"priority"`
+	Status   config.StrategyOnlineStatus `json:"status"`
+	OptTime  string                      `json:"opt_time"`
 }
 
 type StrategyPublish struct {
@@ -99,8 +99,8 @@ type StrategyPublishHistory struct {
 }
 
 type StrategyPublishHistoryDetails struct {
-	Name       string                    `json:"name"`
-	Priority   int                       `json:"priority"`
-	Status     enum.StrategyOnlineStatus `json:"status"`
-	CreateTime string                    `json:"opt_time"`
+	Name       string                      `json:"name"`
+	Priority   int                         `json:"priority"`
+	Status     config.StrategyOnlineStatus `json:"status"`
+	CreateTime string                      `json:"opt_time"`
 }

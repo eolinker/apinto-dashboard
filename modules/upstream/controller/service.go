@@ -67,7 +67,7 @@ func (s *upstreamController) getList(ginCtx *gin.Context) {
 		services = append(services, li)
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["services"] = services
 	data["total"] = total
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
@@ -268,7 +268,7 @@ func (s *upstreamController) online(ginCtx *gin.Context) {
 		return
 	}
 
-	m := common.Map[string, interface{}]{}
+	m := common.Map{}
 	m["router"] = router
 	ginCtx.JSON(http.StatusOK, controller.Result{
 		Code: -1,
@@ -323,7 +323,7 @@ func (s *upstreamController) getOnlineList(ginCtx *gin.Context) {
 		})
 	}
 
-	m := common.Map[string, interface{}]{}
+	m := common.Map{}
 	m["clusters"] = resp
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
 }
@@ -339,7 +339,7 @@ func (s *upstreamController) getOnlineList(ginCtx *gin.Context) {
 //		return
 //	}
 //
-//	m := common.Map[string, interface{}]{}
+//	m := common.Map{}
 //	m["api"] = &dto.ServiceApiOut{
 //		Method:     dto.ServiceApiMethod(api.Method),
 //		Uri:        api.Uri,
@@ -377,7 +377,7 @@ func (s *upstreamController) getOnlineList(ginCtx *gin.Context) {
 //			Config:     api.Config,
 //		})
 //	}
-//	m := common.Map[string, interface{}]{}
+//	m := common.Map{}
 //	m["apis"] = list
 //	ginCtx.JSON(http.StatusOK, dto.NewSuccessResult(m))
 //}
