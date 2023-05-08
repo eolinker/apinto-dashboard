@@ -7,9 +7,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/discovery"
 	"github.com/eolinker/apinto-dashboard/modules/online"
 	"github.com/eolinker/apinto-dashboard/modules/plugin"
-	"github.com/eolinker/apinto-dashboard/modules/plugin_template"
 	"github.com/eolinker/apinto-dashboard/modules/strategy"
-	"github.com/eolinker/apinto-dashboard/modules/upstream"
 	"github.com/eolinker/apinto-dashboard/modules/variable"
 	"github.com/eolinker/eosc/common/bean"
 )
@@ -29,23 +27,23 @@ func newResetOnline() online.IResetOnlineService {
 	var clConfig clusterService.IClusterConfigService
 	var variableService variable.IClusterVariableService
 	var discoveryService discovery.IDiscoveryService
-	var iService upstream.IService
+	//var iService upstream.IService
 	//var api apiService.IAPIService
 	var applicationService application.IApplicationService
 	var commonStrategy strategy.IStrategyCommonService
 	var clusterPlugin plugin.IClusterPluginService
-	var pluginTemplate plugin_template.IPluginTemplateService
+	//var pluginTemplate plugin_template.IPluginTemplateService
 
 	bean.Autowired(&clConfig)
 	bean.Autowired(&variableService)
 	//bean.Autowired(&api)
-	bean.Autowired(&iService)
+	//bean.Autowired(&iService)
 	bean.Autowired(&discoveryService)
 	bean.Autowired(&applicationService)
 	//bean.Autowired(&strategy)
 	bean.Autowired(&commonStrategy)
 	bean.Autowired(&clusterPlugin)
-	bean.Autowired(&pluginTemplate)
-	onlineService.list = append(onlineService.list, clConfig, variableService, discoveryService, iService, clusterPlugin, pluginTemplate, applicationService, commonStrategy)
+	//bean.Autowired(&pluginTemplate)
+	onlineService.list = append(onlineService.list, clConfig, variableService, discoveryService, clusterPlugin, applicationService, commonStrategy)
 	return onlineService
 }
