@@ -12,10 +12,13 @@ func init() {
 		templateStore := newPluginTemplateStore(db)
 		statStore := newPluginTemplateStatStore(db)
 		versionStore := newPluginTemplateVersionStore(db)
+		publishHistory := newPluginTemplatePublishHistoryStore(db)
+
 		bean.Injection(&runtimeStore)
 		bean.Injection(&historyStore)
 		bean.Injection(&templateStore)
 		bean.Injection(&statStore)
 		bean.Injection(&versionStore)
+		bean.Injection(&publishHistory)
 	})
 }
