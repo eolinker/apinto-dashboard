@@ -38,6 +38,18 @@ type dynamicService struct {
 	publishVersionStore dynamic_store.IDynamicPublishVersionStore
 }
 
+func (d *dynamicService) GetIDByName(ctx context.Context, namespaceId int, profession string, name string) (int, error) {
+	info, err := d.dynamicStore.First(ctx, map[string]interface{}{
+		"namespace":  namespaceId,
+		"profession": profession,
+		"name":       name,
+	})
+	if err != nil {
+		return 0, err
+	}
+	return info.Id, nil
+}
+
 func toVersionKey(name string, cluster string) string {
 	return fmt.Sprintf("%s{%s}", name, cluster)
 }
