@@ -1557,15 +1557,6 @@ nz-upload.ant-btn-primary {
 }
 
 .ant-input-group.ant-input-group-compact
-  .ant-cascader-picker-focused
-  .ant-input,
-.ant-input-group.ant-input-group-compact .ant-cascader-picker .ant-input,
-.ant-input-group.ant-input-group-compact .ant-select .ant-select-selector,
-.ant-input-group.ant-input-group-compact input.ant-input {
-  // border-radius: 0 !important;
-}
-
-.ant-input-group.ant-input-group-compact
   > :first-child
   .ant-select
   .ant-select-selector {
@@ -1674,29 +1665,77 @@ eo-ng-radio-group.date-picker-button-group
   transition: none;
 }
 
-// 动态渲染的react组件中的下拉列表受ng-zorro-antd影响，此处做特殊处理
+// 动态渲染的react组件中的下拉列表、dialog受ng-zorro-antd影响，此处做特殊处理
 .ant-select-dropdown:not(eo-ng-option-container):not(.ant-cascader-dropdown) {
   position: absolute;
+
+  .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
+    background-color: var(--select-item-selected-background-color);
+    color: var(--select-item-selected-text-color);
+  }
 }
 
 textarea.ant-input {
   max-width: unset;
 }
 
-.ant-modal-root .ant-modal-content {
-  width: 700px;
-
-  .ant-input-affix-wrapper,
-  textarea,
-  .ant-input-number,
-  .ant-formily-array-items,
-  .ant-select {
-    width: 346px;
-    min-height: 32px;
+.ant-modal-root {
+  .ant-modal {
+    width: 900px !important;
   }
 
-  .ant-formily-array-items .ant-select {
-    width: unset;
+  .ant-modal-content {
+    border-radius: var(--border-radius);
+    padding: 0px;
+
+    .ant-modal-close:focus,
+    .ant-modal-close {
+      color: var(--icon-color);
+      .ant-modal-close-x {
+        width: unset;
+        height: unset;
+      }
+    }
+    .ant-modal-header {
+      margin-bottom: 0px;
+
+      .ant-modal-title {
+        color: var(--modal-header-text-color);
+        font-weight: 500;
+        font-size: 16px;
+        line-height: 22px;
+      }
+    }
+
+    .ant-modal-footer {
+      margin-top: 0px;
+    }
+
+    .ant-input-affix-wrapper,
+    textarea,
+    .ant-input-number,
+    .ant-formily-array-items,
+    .ant-select {
+      width: 346px;
+      min-height: 32px;
+    }
+
+    .ant-formily-array-items .ant-select {
+      width: unset;
+    }
+
+    .ant-btn-default:not(:disabled):hover,
+    .ant-btn-dashed:not(:disabled):hover {
+      color: var(--button-default-hover-text-color);
+      border-color: var(--button-default-hover-border-color);
+      background-color: var(--button-default-hover-background-color);
+    }
+
+    .ant-btn-primary:not(:disabled):hover {
+      color: var(--button-primary-text-color);
+      border-color: var(--button-primary-hover-border-color);
+      background-color: var(--button-primary-hover-background-color);
+    }
   }
 }
 
@@ -1713,7 +1752,8 @@ textarea.ant-input {
   margin-left: 6px;
 }
 
-.ant-formily-array-base-config:hover {
-  color: #1677ff;
+.ant-formily-array-base-config:hover,
+.ant-formily-array-base-remove :hover {
+  color: var(--primary-color);
   height: 16px;
 }
