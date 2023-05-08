@@ -217,8 +217,6 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
         scrollY = this.el.nativeElement.classList.contains('drawer-table')
           ? (this.scrHeight > 660 ? 660 - drawerHeaderHeight - drawerFooterHeight - drawerPagationHeight - 40 - 40 - 20 - 63 - drawerButtonAreaHeight : 660 - drawerHeaderHeight - drawerFooterHeight - drawerPagationHeight - 40 - 40 - 14 - 63 - 69 - 150)
           : (this.scrHeight - navTop - headerHeight - footerHeight - pagationHeight - clusterDescHeight - 40 - 4)
-
-        console.log(this.el.nativeElement.classList.contains('drawer-table'), this.scrHeight, navTop, headerHeight, footerHeight, pagationHeight, clusterDescHeight, scrollY)
       }
     }
 
