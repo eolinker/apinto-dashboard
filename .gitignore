@@ -44,7 +44,6 @@ Thumbs.db
 
 # 单元测试
 /frontend/unit_coverage
-/frontend/dist
 
 #端到端测试
 e2e_coverage
