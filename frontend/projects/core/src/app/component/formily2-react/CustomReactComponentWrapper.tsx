@@ -33,7 +33,6 @@ const containerElementName = 'customReactComponentContainer'
 
         .ant-formily-array-table {
           width: 524px;
-          margin-bottom: 22px;
 
           .ant-input-affix-wrapper,
           textarea,
