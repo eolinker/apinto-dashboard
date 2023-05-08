@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/client/v1"
+	v2 "github.com/eolinker/apinto-dashboard/client/v2"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/modules/api"
@@ -24,19 +25,22 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/plugin_template/plugin-template-model"
 	"github.com/eolinker/apinto-dashboard/modules/plugin_template/plugin-template-store"
 	"github.com/eolinker/apinto-dashboard/modules/user"
+	apinto_module "github.com/eolinker/apinto-module"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/go-basic/uuid"
 	"gorm.io/gorm"
 	"sort"
+	"strconv"
 	"time"
 )
 
 type pluginTemplateService struct {
 	pluginTemplateStore        plugin_template_store.IPluginTemplateStore
 	pluginTemplateStatStore    plugin_template_store.IPluginTemplateStatStore
-	pluginTemplateRuntimeStore plugin_template_store.IPluginTemplateRuntimeStore
 	pluginTemplateHistoryStore plugin_template_store.IPluginTemplateHistoryStore
 	pluginTemplateVersionStore plugin_template_store.IPluginTemplateVersionStore
+	publishHistoryStore        plugin_template_store.IPluginTemplatePublishHistoryStore
+	providers                  apinto_module.IProviders
 	quoteStore                 quote_store.IQuoteStore
 
 	userInfoService      user.IUserInfoService
@@ -54,8 +58,9 @@ func newPluginTemplateService() plugin_template.IPluginTemplateService {
 	bean.Autowired(&n.pluginTemplateStore)
 	bean.Autowired(&n.pluginTemplateStatStore)
 	bean.Autowired(&n.pluginTemplateHistoryStore)
-	bean.Autowired(&n.pluginTemplateRuntimeStore)
 	bean.Autowired(&n.pluginTemplateVersionStore)
+	bean.Autowired(&n.publishHistoryStore)
+	bean.Autowired(&n.providers)
 	bean.Autowired(&n.quoteStore)
 
 	bean.Autowired(&n.userInfoService)
@@ -95,7 +100,7 @@ func (p *pluginTemplateService) GetList(ctx context.Context, namespaceId int) ([
 			pluginTemplate.OperatorStr = userInfo.NickName
 		}
 
-		isDelete, _ := p.isDelete(ctx, clusters, template)
+		isDelete, _ := p.isDelete(ctx, namespaceId, clusters, template)
 
 		pluginTemplate.IsDelete = isDelete
 		resultList = append(resultList, pluginTemplate)
@@ -108,9 +113,9 @@ func (p *pluginTemplateService) GetList(ctx context.Context, namespaceId int) ([
 	return resultList, nil
 }
 
-func (p *pluginTemplateService) isDelete(ctx context.Context, clusters []*cluster_model.Cluster, pluginTemplate *plugin_template_entry.PluginTemplate) (bool, error) {
+func (p *pluginTemplateService) isDelete(ctx context.Context, namespaceId int, clusters []*cluster_model.Cluster, pluginTemplate *plugin_template_entry.PluginTemplate) (bool, error) {
 	for _, clusterInfo := range clusters {
-		isOnline, _ := p.IsOnline(ctx, clusterInfo.Id, pluginTemplate.UUID)
+		isOnline := p.IsOnline(ctx, namespaceId, clusterInfo.Name, pluginTemplate.UUID)
 		if isOnline {
 			return false, errors.New(fmt.Sprintf("插件模板已在%s集群上线,不可删除", clusterInfo.Name))
 		}
@@ -128,22 +133,15 @@ func (p *pluginTemplateService) isDelete(ctx context.Context, clusters []*cluste
 	return true, err
 }
 
-func (p *pluginTemplateService) IsOnline(ctx context.Context, clusterId int, uuid string) (bool, error) {
-
-	pluginTemplate, err := p.pluginTemplateStore.GetByUUID(ctx, uuid)
-	if err != nil {
-		return false, err
+func (p *pluginTemplateService) IsOnline(ctx context.Context, namespace int, clusterName string, uuid string) bool {
+	status := p.providers.Status(fmt.Sprintf("%s@template", uuid), namespace, clusterName)
+	isOnline := false
+	switch status {
+	case apinto_module.None, apinto_module.Offline:
+	case apinto_module.Online:
+		isOnline = true
 	}
-
-	//获取当前运行的版本
-	runtime, err := p.pluginTemplateRuntimeStore.GetForCluster(ctx, pluginTemplate.Id, clusterId)
-	if err != nil && err != gorm.ErrRecordNotFound {
-		return false, err
-	}
-	if runtime != nil && runtime.IsOnline {
-		return true, nil
-	}
-	return false, nil
+	return isOnline
 }
 
 // GetUsableList 获取模板可用列表
@@ -378,7 +376,7 @@ func (p *pluginTemplateService) Delete(ctx context.Context, namespaceId, operato
 		return err
 	}
 
-	_, err = p.isDelete(ctx, clusters, pluginTemplate)
+	_, err = p.isDelete(ctx, namespaceId, clusters, pluginTemplate)
 	if err != nil {
 		return err
 	}
@@ -407,10 +405,6 @@ func (p *pluginTemplateService) Delete(ctx context.Context, namespaceId, operato
 			}
 
 			if _, err = p.pluginTemplateVersionStore.DeleteWhere(txCtx, delMap); err != nil {
-				return err
-			}
-
-			if _, err = p.pluginTemplateRuntimeStore.DeleteWhere(txCtx, delMap); err != nil {
 				return err
 			}
 		}
@@ -509,25 +503,6 @@ func (p *pluginTemplateService) OnlineList(ctx context.Context, namespaceId int,
 		return t.Id
 	})
 
-	//获取当前服务发现下集群运行的版本
-	runtimes, err := p.pluginTemplateRuntimeStore.GetByTarget(ctx, pluginTemplate.Id)
-	if err != nil {
-		return nil, err
-	}
-	runtimeMaps := common.SliceToMap(runtimes, func(t *plugin_template_entry.PluginTemplateRuntime) int {
-		return t.ClusterID
-	})
-
-	//获取操作人用户列表
-	operatorList := common.SliceToSliceIds(runtimes, func(t *plugin_template_entry.PluginTemplateRuntime) int {
-		return t.Operator
-	})
-
-	userInfoMaps, err := p.userInfoService.GetUserInfoMaps(ctx, operatorList...)
-	if err != nil {
-		return nil, err
-	}
-
 	list := make([]*plugin_template_model.PluginTemplateOnlineItem, 0, len(clusters))
 
 	latestVersion, err := p.getPluginTemplateVersion(ctx, pluginTemplate.Id)
@@ -541,26 +516,54 @@ func (p *pluginTemplateService) OnlineList(ctx context.Context, namespaceId int,
 			ClusterEnv:  clusterInfo.Env,
 			Status:      1, //默认为未上线状态
 		}
-		if runtime, ok := runtimeMaps[clusterInfo.Id]; ok {
 
-			operator := ""
-			if userInfo, uOk := userInfoMaps[runtime.Operator]; uOk {
-				operator = userInfo.NickName
+		var operator int
+		var updateTime time.Time
+		v, err := p.publishHistoryStore.GetLastPublishHistory(ctx, map[string]interface{}{
+			"namespace": namespaceId,
+			"cluster":   clusterInfo.Id,
+			"target":    pluginTemplate.Id,
+			"kind":      "plugin_template",
+		})
+		if err != nil {
+			if err != gorm.ErrRecordNotFound {
+				list = append(list, onlineItem)
+				continue
 			}
+			// 可能存在id不相同，但是控制台已经发布的情况
+		} else {
+			operator = v.Operator
+			updateTime = v.OptTime
+		}
 
-			onlineItem.Operator = operator
-			onlineItem.Disable = runtime.Disable
-			onlineItem.UpdateTime = runtime.UpdateTime
-			if runtime.IsOnline {
-				onlineItem.Status = 3 //已上线
-			} else {
-				onlineItem.Status = 2 //已下线
-			}
-			//已上线需要对比是否更新过 服务发现信息
-			if onlineItem.Status == 3 && runtime.VersionID != latestVersion.Id {
-				onlineItem.Status = 4 //待更新
+		client, err := v2.GetClusterClient(clusterInfo.Name, clusterInfo.Addr)
+		if err != nil {
+			list = append(list, onlineItem)
+			log.Errorf("get cluster status error: %w", err)
+			continue
+		}
+
+		updater := ""
+		if operator > 0 {
+			u, err := p.userInfoService.GetUserInfo(ctx, operator)
+			if err == nil {
+				updater = u.UserName
 			}
 		}
+		onlineItem.Operator = updater
+		onlineItem.UpdateTime = updateTime
+
+		version, err := client.Version("template", pluginTemplate.UUID)
+		if err != nil {
+			list = append(list, onlineItem)
+			continue
+		}
+
+		status := 4 //待更新
+		if version == strconv.Itoa(latestVersion.Id) {
+			status = 3 //上线
+		}
+		onlineItem.Status = status
 
 		list = append(list, onlineItem)
 	}
@@ -612,12 +615,6 @@ func (p *pluginTemplateService) Online(ctx context.Context, namespaceId, operato
 
 	}
 
-	//获取当前运行的版本
-	runtime, err := p.pluginTemplateRuntimeStore.GetForCluster(ctx, pluginTemplateId, clusterInfo.Id)
-	if err != nil && err != gorm.ErrRecordNotFound {
-		return nil, err
-	}
-
 	//发布到apinto
 	client, err := p.apintoClient.GetClient(ctx, clusterInfo.Id)
 	if err != nil {
@@ -653,44 +650,24 @@ func (p *pluginTemplateService) Online(ctx context.Context, namespaceId, operato
 
 	//事务
 	err = p.pluginTemplateStore.Transaction(ctx, func(txCtx context.Context) error {
-
-		if runtime == nil {
-			runtime = &plugin_template_entry.PluginTemplateRuntime{
-				NamespaceId:      namespaceId,
-				PluginTemplateID: pluginTemplateId,
-				ClusterID:        clusterInfo.Id,
-				VersionID:        latestVersion.Id,
-				IsOnline:         true,
-				Disable:          false,
-				Operator:         operator,
-				CreateTime:       t,
-				UpdateTime:       t,
-			}
-
-			if err = p.pluginTemplateRuntimeStore.Insert(txCtx, runtime); err != nil {
-				return err
-			}
-			return client.ForPluginTemplate().Create(pluginTemplateConfig)
-		} else {
-			//保存旧状态
-			isOnline := runtime.IsOnline
-
-			runtime.IsOnline = true
-			runtime.UpdateTime = t
-			runtime.VersionID = latestVersion.Id
-			runtime.Operator = operator
-
-			if err = p.pluginTemplateRuntimeStore.Save(txCtx, runtime); err != nil {
-				return err
-			}
-
-			//若原先是下线状态
-			if !isOnline {
-				return client.ForPluginTemplate().Create(pluginTemplateConfig)
-			}
-
-			return client.ForPluginTemplate().Update(pluginTemplate.UUID, pluginTemplateConfig)
+		publishHistory := &plugin_template_entry.PluginTemplatePublishHistory{
+			VersionName:                 strconv.Itoa(latestVersion.Id),
+			ClusterId:                   clusterInfo.Id,
+			NamespaceId:                 namespaceId,
+			Desc:                        pluginTemplate.Desc,
+			VersionId:                   latestVersion.Id,
+			Target:                      pluginTemplate.Id,
+			PluginTemplateVersionConfig: latestVersion.PluginTemplateVersionConfig,
+			OptType:                     1, //上线
+			Operator:                    operator,
+			OptTime:                     t,
 		}
+
+		if err = p.publishHistoryStore.Insert(txCtx, publishHistory); err != nil {
+			return err
+		}
+
+		return client.ForPluginTemplate().Create(pluginTemplateConfig)
 	})
 
 	return nil, err
@@ -713,16 +690,6 @@ func (p *pluginTemplateService) Offline(ctx context.Context, namespaceId, operat
 		return err
 	}
 
-	//获取当前的版本
-	runtime, err := p.pluginTemplateRuntimeStore.GetForCluster(ctx, pluginTemplate.Id, clusterInfo.Id)
-	if err != nil && err != gorm.ErrRecordNotFound {
-		return err
-	}
-
-	if runtime == nil {
-		return errors.New("invalid version")
-	}
-
 	quote, err := p.quoteStore.GetTargetQuote(ctx, pluginTemplate.Id, quote_entry.QuoteTargetKindTypePluginTemplate)
 	if err != nil {
 		return err
@@ -740,7 +707,11 @@ func (p *pluginTemplateService) Offline(ctx context.Context, namespaceId, operat
 		}
 	}
 
-	t := time.Now()
+	latestVersion, err := p.getPluginTemplateVersion(ctx, pluginTemplate.Id)
+	if err != nil {
+		return err
+	}
+
 	//编写日志操作对象信息
 	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:        uuid,
@@ -752,14 +723,20 @@ func (p *pluginTemplateService) Offline(ctx context.Context, namespaceId, operat
 
 	//事务
 	return p.pluginTemplateStore.Transaction(ctx, func(txCtx context.Context) error {
-		if !runtime.IsOnline {
-			return errors.New("已下线不可重复下线")
+		publishHistory := &plugin_template_entry.PluginTemplatePublishHistory{
+			VersionName:                 strconv.Itoa(latestVersion.Id),
+			ClusterId:                   clusterInfo.Id,
+			NamespaceId:                 namespaceId,
+			Desc:                        pluginTemplate.Desc,
+			VersionId:                   latestVersion.Id,
+			Target:                      pluginTemplate.Id,
+			PluginTemplateVersionConfig: latestVersion.PluginTemplateVersionConfig,
+			OptType:                     3, //下线
+			Operator:                    operator,
+			OptTime:                     time.Now(),
 		}
-		runtime.IsOnline = false
-		runtime.UpdateTime = t
-		runtime.Operator = operator
-		err = p.pluginTemplateRuntimeStore.Save(txCtx, runtime)
-		if err != nil {
+
+		if err = p.publishHistoryStore.Insert(txCtx, publishHistory); err != nil {
 			return err
 		}
 
