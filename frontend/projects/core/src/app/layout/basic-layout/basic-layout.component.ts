@@ -121,6 +121,7 @@ export class BasicLayoutComponent implements OnInit {
       .getMenuList()
       .subscribe((res: MenuOptions[]) => {
         this.sideMenuOptions = [this.guideMenu, ...res]
+        this.checkOpenMenu()
         // for (const index in this.sideMenuOptions) {
         //   this.sideMenuOptions[index].openChange = (value:MenuOptions) => {
         //     this.openHandler(value['key']!)
@@ -128,6 +129,18 @@ export class BasicLayoutComponent implements OnInit {
         // }
         this.getAccess()
       })
+  }
+
+  checkOpenMenu () {
+    for (const sideMenu of this.sideMenuOptions) {
+      if (sideMenu?.children?.length) {
+        if (sideMenu.children?.filter((menu:any) => {
+          return this.router.url.includes(menu.routerLink) && this.router.url.substring(1, menu.routerLink.length + 1) === menu.routerLink
+        }).length > 0) {
+          this.openMap[sideMenu['titleString']] = true
+        }
+      }
+    }
   }
 
   getAuthInfo () {

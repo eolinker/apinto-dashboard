@@ -36,6 +36,12 @@ import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
   templateUrl: './websocket-create.component.html',
   styles: [
     `
+    :host {
+          overflow:hidden;
+          display:block;
+          height:100%;
+        }
+
       eo-ng-table.ant-table {
         min-width: 508px !important;
       }

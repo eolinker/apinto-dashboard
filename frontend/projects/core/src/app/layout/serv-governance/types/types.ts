@@ -58,10 +58,9 @@ export type RemoteServiceItem = {
 export interface FilterRemoteOption{
   target: 'apis'|'services'|'applications'
   titles: Array<{title:string, field:string, [k:string]:any}>
-  apis:Array<RemoteApiItem>
-  services: Array<RemoteServiceItem>
-  applications: Array<RemoteAppItem>
-  total: number
+  list:Array<RemoteApiItem|RemoteServiceItem|RemoteAppItem>
+  total: number,
+  value:string
 }
 
 export interface CacheStrategyData {
