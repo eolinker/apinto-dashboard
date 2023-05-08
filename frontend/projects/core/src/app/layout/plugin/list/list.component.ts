@@ -53,7 +53,7 @@ export class PluginListComponent implements OnInit {
     private baseInfo: BaseInfoService,
     public service: EoNgPluginService
   ) {
-    this.navigationService.reqFlashBreadcrumb([{ title: '企业插件' }])
+    this.navigationService.reqFlashBreadcrumb([{ title: '插件市场' }])
   }
 
   ngOnInit (): void {

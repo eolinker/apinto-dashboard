@@ -182,7 +182,7 @@ export class IntelligentPluginListComponent implements OnInit {
           {
             title: this.loadingTpl,
             showFn: (item:any) => {
-              return item.name === this.tableData.data[0].name && this.tableLoading
+              return item.id === this.tableData.data[0].id && this.tableLoading
             },
             seRowspan: () => {
               return this.tableData.data.length
@@ -200,7 +200,10 @@ export class IntelligentPluginListComponent implements OnInit {
                 filterMultiple: true,
                 filterOpts: field.enum.map((item:string) => {
                   return { text: item, value: item }
-                })
+                }),
+                filterFn: (list: string[], item: any) => {
+                  return list.some((name) => item.data[field.name].indexOf(name) !== -1)
+                }
               }
             : {}),
           ...(field.attr === 'status'
