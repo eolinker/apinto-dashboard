@@ -1,26 +1,21 @@
-# 名称：apinto镜像，携带了部署k8s集群所需要的脚本
+# 名称：apinto通用镜像
 # 创建时间：2022-10-25
 FROM centos:7.9.2009
-MAINTAINER apinto-dashboard
+MAINTAINER liujian
 
 ENV TZ=Asia/Shanghai
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-#声明端口
-EXPOSE 8080
+ARG APP
+ARG VERSION
+ARG DIR
 
-ARG Version
+RUN mkdir -p /${APP}
 
-#定义数据卷
-VOLUME /var/lib/apinto-dashboard
+COPY ${DIR}/${APP}_${VERSION}_linux_amd64.tar.gz /${APP}
 
-RUN mkdir "apinto-dashboard"
+RUN cd /${APP} && tar -zxvf ${APP}_${VERSION}_linux_amd64.tar.gz && rm -rf ${APP}_${VERSION}_linux_amd64.tar.gz && ln -snF ${APP}_${VERSION} ${APP}
 
-COPY apserver_v${Version}_linux_amd64.tar.gz /apinto-dashboard
+WORKDIR /$APP/$APP
 
-RUN cd /apinto-dashboard && tar -zxvf apserver_v${Version}_linux_amd64.tar.gz && rm -rf apserver_v${Version}_linux_amd64.tar.gz && ln -sfT apserver_v${Version} apserver
-
-WORKDIR /apinto-dashboard/apserver
-
-#容器启动命令
 CMD sh docker_run.sh
