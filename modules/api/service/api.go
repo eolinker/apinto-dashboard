@@ -555,6 +555,7 @@ func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator in
 		return fmt.Errorf("group doesn't. group_uuid:%s ", input.GroupUUID)
 	}
 
+	//TODO service
 	serviceID, err := a.service.GetServiceIDByName(ctx, namespaceID, input.ServiceName)
 	if err != nil {
 		return err
@@ -683,6 +684,7 @@ func (a *apiService) UpdateAPI(ctx context.Context, namespaceID int, operator in
 		return err
 	}
 
+	//TODO service
 	serviceID, err := a.service.GetServiceIDByName(ctx, namespaceID, input.ServiceName)
 	if err != nil {
 		return err
@@ -849,7 +851,7 @@ func (a *apiService) DeleteAPI(ctx context.Context, namespaceId, operator int, u
 			return err
 		}
 		delMap := make(map[string]interface{})
-		delMap["`kind`"] = "apiService"
+		delMap["`kind`"] = "api"
 		delMap["`target`"] = apiInfo.Id
 		if _, err = a.apiStat.DeleteWhere(txCtx, delMap); err != nil {
 			return err
@@ -1017,10 +1019,7 @@ func (a *apiService) online(ctx context.Context, namespaceId, operator int, api 
 		}
 
 		if latest.TemplateUUID != "" {
-			isTemplateOnline, err := a.pluginTemplateService.IsOnline(ctx, clusterInfo.Id, latest.TemplateUUID)
-			if err != nil {
-				return nil, err
-			}
+			isTemplateOnline := a.pluginTemplateService.IsOnline(ctx, namespaceId, clusterInfo.Name, latest.TemplateUUID)
 			if !isTemplateOnline {
 				item.Status = false
 				item.Result = fmt.Sprintf("绑定的插件模板未上线到%s", clusterInfo.Name)
@@ -1317,10 +1316,7 @@ func (a *apiService) BatchOnlineCheck(ctx context.Context, namespaceId int, oper
 				Solution:        &frontend_model.Router{},
 			}
 
-			isOnline, err := a.pluginTemplateService.IsOnline(ctx, clusterInfo.Id, templateUuid)
-			if err != nil {
-				return nil, "", err
-			}
+			isOnline := a.pluginTemplateService.IsOnline(ctx, namespaceId, clusterInfo.Name, templateUuid)
 			if !isOnline {
 				isAllOnline = false
 				item.Status = false
@@ -1520,10 +1516,7 @@ func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, u
 		}
 
 		if latestVersion.TemplateID != 0 {
-			isTemplateOnline, err := a.pluginTemplateService.IsOnline(ctx, clusterInfo.Id, latestVersion.TemplateUUID)
-			if err != nil {
-				return nil, err
-			}
+			isTemplateOnline := a.pluginTemplateService.IsOnline(ctx, namespaceId, clusterInfo.Name, latestVersion.TemplateUUID)
 			if !isTemplateOnline {
 				routerInfos = append(routerInfos, &frontend_model.Router{
 					Name:   frontend_model.RouterNameTemplateOnline,
@@ -1706,7 +1699,7 @@ func (a *apiService) GetImportCheckList(ctx context.Context, namespaceId int, fi
 	if !isExist {
 		return nil, "", errors.New("分组不存在")
 	}
-
+	//TODO service 通过服务名判断服务存不存在
 	if _, err = a.service.GetServiceIDByName(ctx, namespaceId, serviceName); err != nil {
 		return nil, "", errors.New("上游服务不存在")
 	}
@@ -1847,7 +1840,7 @@ func (a *apiService) ImportAPI(ctx context.Context, namespaceId, operator int, i
 		return errors.New("分组不存在,请重新导入")
 	}
 
-	//判断服务是否存在
+	//TODO service 判断服务是否存在
 	serviceID, err := a.service.GetServiceIDByName(ctx, namespaceId, apiData.ServiceName)
 	if err != nil {
 		return err
@@ -2021,7 +2014,7 @@ func (a *apiService) GetAPIListByServiceName(ctx context.Context, namespaceId in
 			if strings.TrimSpace(serviceName) == "" {
 				continue
 			}
-
+			//TODO service
 			target, err := a.service.GetServiceIDByName(ctx, namespaceId, serviceName)
 			if err != nil {
 				continue
