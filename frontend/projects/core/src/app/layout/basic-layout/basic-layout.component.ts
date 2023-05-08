@@ -101,6 +101,7 @@ export class BasicLayoutComponent implements OnInit {
 
   ngOnInit () {
     this.getSideMenu()
+    console.log(this)
   }
 
   ngOnDestroy () {
