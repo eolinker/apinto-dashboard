@@ -33,7 +33,7 @@ export class DeployPluginListComponent implements OnInit {
     private navigationService: EoNgNavigationService,
     private service:DeployService
   ) {
-    this.navigationService.reqFlashBreadcrumb([{ title: '插件管理' }])
+    this.navigationService.reqFlashBreadcrumb([{ title: '节点插件' }])
   }
 
   ngOnInit (): void {

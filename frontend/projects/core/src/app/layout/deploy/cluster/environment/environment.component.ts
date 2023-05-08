@@ -66,7 +66,7 @@ export class DeployClusterEnvironmentComponent implements OnInit {
           private router:Router,
           private navigationService:EoNgNavigationService,
           private service:DeployService) {
-    this.navigationService.reqFlashBreadcrumb([{ title: '网关集群', routerLink: 'deploy/cluster' }, { title: '环境变量' }])
+    this.navigationService.reqFlashBreadcrumb([{ title: '网关集群', routerLink: 'deploy/cluster' }, { title: '全局变量' }])
   }
 
   ngOnInit (): void {
