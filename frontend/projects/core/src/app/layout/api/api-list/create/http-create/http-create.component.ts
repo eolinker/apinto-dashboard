@@ -7,6 +7,12 @@ import { setFormValue } from 'projects/core/src/app/constant/form'
   templateUrl: './http-create.component.html',
   styles: [
     `
+    :host {
+              overflow:hidden;
+              display:block;
+          height:100%;
+            }
+
       eo-ng-table.ant-table {
         min-width: 508px !important;
       }

@@ -77,7 +77,6 @@ export const SimpleMapComponent = React.forwardRef(
                 placeholder={placeholderKey}
               />
               <Input
-                className=" mr-[8px]"
                 style={{ width: '164px' }}
                 value={n.value}
                 onChange={(e: any) => {
