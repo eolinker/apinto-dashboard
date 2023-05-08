@@ -45,7 +45,7 @@ func (c *clusterNodeController) nodes(ginCtx *gin.Context) {
 		})
 	}
 
-	m := common.Map[string, interface{}]{}
+	m := common.Map{}
 	m["nodes"] = list
 	m["is_update"] = isUpdate
 

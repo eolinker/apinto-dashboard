@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
-	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/strategy"
+	"github.com/eolinker/apinto-dashboard/modules/strategy/config"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-dto"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-entry"
 	"strings"
@@ -20,15 +20,15 @@ func (t *trafficHandler) GetListLabel(conf *strategy_entry.StrategyTrafficLimitC
 	limits := make([]string, 0)
 	for _, v := range conf.Metrics {
 		switch v {
-		case enum.MetricsIP:
+		case config.MetricsIP:
 			limits = append(limits, "IP")
-		case enum.MetricsAPP:
+		case config.MetricsAPP:
 			limits = append(limits, "应用")
-		case enum.MetricsAPI:
+		case config.MetricsAPI:
 			limits = append(limits, "API")
-		case enum.MetricsService:
+		case config.MetricsService:
 			limits = append(limits, "上游服务")
-		case enum.MetricsStrategy:
+		case config.MetricsStrategy:
 			limits = append(limits, "策略")
 		}
 	}
@@ -36,16 +36,16 @@ func (t *trafficHandler) GetListLabel(conf *strategy_entry.StrategyTrafficLimitC
 }
 
 func (t *trafficHandler) GetType() string {
-	return enum.StrategyTraffic
+	return config.StrategyTraffic
 }
 
 func (t *trafficHandler) GetConfName() string {
-	return enum.StrategyTrafficApintoConfName
+	return config.StrategyTrafficApintoConfName
 }
 
 // GetBatchSettingName 获取往apinto发送批量操作策略时 url所需要的路径名 /setting/xxx
 func (t *trafficHandler) GetBatchSettingName() string {
-	return enum.StrategyTrafficBatchName
+	return config.StrategyTrafficBatchName
 }
 
 func (t *trafficHandler) CheckInput(input *strategy_dto.StrategyInfoInput[strategy_entry.StrategyTrafficLimitConfig]) error {
@@ -71,7 +71,7 @@ func (t *trafficHandler) CheckInput(input *strategy_dto.StrategyInfoInput[strate
 
 	for _, metric := range input.Config.Metrics {
 		switch metric {
-		case enum.MetricsIP, enum.MetricsAPI, enum.MetricsService, enum.MetricsAPP, enum.MetricsStrategy:
+		case config.MetricsIP, config.MetricsAPI, config.MetricsService, config.MetricsAPP, config.MetricsStrategy:
 		default:
 			return fmt.Errorf("Metric %s is illegal. ", metric)
 		}

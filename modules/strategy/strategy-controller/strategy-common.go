@@ -3,11 +3,10 @@ package strategy_controller
 import (
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
-	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/strategy"
+	"github.com/eolinker/apinto-dashboard/modules/strategy/config"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-dto"
-	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-service/strategy-handler"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -44,7 +43,7 @@ func (s *strategyCommonController) FilterOptions(ginCtx *gin.Context) {
 		})
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["options"] = resList
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
@@ -97,23 +96,23 @@ func (s *strategyCommonController) MetricsOptions(ginCtx *gin.Context) {
 		})
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["options"] = resList
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
 
 func (s *strategyCommonController) ContentType(ginCtx *gin.Context) {
 
-	items := strategy_handler.GetContentTypeList()
-	data := common.Map[string, interface{}]{}
+	items := config.GetContentTypeList()
+	data := common.Map{}
 	data["items"] = items
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
 
 func (s *strategyCommonController) Charset(ginCtx *gin.Context) {
 
-	items := enum.GetStrategyCharsetList()
-	data := common.Map[string, interface{}]{}
+	items := config.GetStrategyCharsetList()
+	data := common.Map{}
 	data["items"] = items
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }

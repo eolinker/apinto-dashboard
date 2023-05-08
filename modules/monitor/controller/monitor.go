@@ -75,7 +75,7 @@ func (m *monitorController) getPartitionList(ginCtx *gin.Context) {
 		return
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["partitions"] = list
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
@@ -98,7 +98,7 @@ func (m *monitorController) getPartitionInfo(ginCtx *gin.Context) {
 		ClusterNames: info.ClusterNames,
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["info"] = respInfo
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
@@ -126,7 +126,7 @@ func (m *monitorController) createPartition(ginCtx *gin.Context) {
 		return
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["info"] = info
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
@@ -155,7 +155,7 @@ func (m *monitorController) editPartition(ginCtx *gin.Context) {
 		return
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["info"] = info
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
