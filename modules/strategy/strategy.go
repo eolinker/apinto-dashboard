@@ -2,7 +2,6 @@ package strategy
 
 import (
 	"context"
-	"github.com/eolinker/apinto-dashboard/modules/online"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-dto"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-model"
 )
@@ -27,15 +26,15 @@ type IStrategyService[T any, K any] interface {
 	//toApinto(name, desc string, isStop bool, priority int, filters []strategy_entry.StrategyFiltersConfig, conf T) map[string]interface{}
 	//encodeConfig(config *T) string
 	//decodeConfig(config string) *T
-	online.IResetOnlineService
+	//online.IResetOnlineService
 }
 
 type IStrategyCommonService interface {
 	GetFilterOptions(ctx context.Context, namespaceId int) ([]*strategy_model.FilterOptionsItem, error)
 	GetFilterRemote(ctx context.Context, namespaceId int, targetType, keyword, groupUUID string, pageNum, pageSize int) (*strategy_model.FilterRemoteOutput, int, error)
 	GetMetricsOptions() ([]*strategy_model.MetricsOptionsItem, error)
-	AddHandler(onlineService online.IResetOnlineService)
-	online.IResetOnlineService
+	//AddHandler(onlineService online.IResetOnlineService)
+	//online.IResetOnlineService
 }
 
 type IStrategyHandler[T any, K any] interface {

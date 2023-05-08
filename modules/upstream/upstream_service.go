@@ -28,6 +28,6 @@ type IService interface {
 	IsOnline(ctx context.Context, clusterId, serviceId int) bool
 	GetServiceRemoteOptions(ctx context.Context, namespaceID, pageNum, pageSize int, keyword string) ([]*strategy_model.RemoteServices, int, error)
 	GetServiceRemoteByNames(ctx context.Context, namespaceID int, uuids []string) ([]*strategy_model.RemoteServices, error)
-	ResetOnline(ctx context.Context, namespaceId, clusterId int)
+
 	UpstreamCount(ctx context.Context, namespaceId int) (int64, error)
 }

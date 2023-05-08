@@ -1,3 +1,3 @@
 package common
 
-type Map[K comparable, V any] map[K]V
+type Map map[string]any

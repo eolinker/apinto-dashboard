@@ -17,7 +17,6 @@ type IClusterPluginService interface {
 
 	DeleteAll(ctx context.Context, clusterId int) error
 	GetPublishVersion(ctx context.Context, clusterId int) (*plugin_model.ClusterPluginPublishVersion, error)
-	ResetOnline(ctx context.Context, namespaceId, clusterId int)
 
 	IsOnlineByName(ctx context.Context, namespaceID int, clusterName, pluginName string) (bool, error)
 	IsDelete(ctx context.Context, namespaceID int, clusterName, pluginName string) (bool, error)
