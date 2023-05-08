@@ -26,7 +26,6 @@ import { EoNgTableModule } from 'eo-ng-table'
 import { NzConfig, NZ_CONFIG } from 'ng-zorro-antd/core/config'
 import { registerLocaleData } from '@angular/common'
 import zh from '@angular/common/locales/en-GB'
-import { NgxEchartsModule } from 'ngx-echarts'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { ChangeWordColorPipe } from './pipe/change-word-color.pipe'
 import { MarkdownModule, MarkedOptions, MarkedRenderer } from 'ngx-markdown'
@@ -74,9 +73,6 @@ export function markedOptionsFactory (): MarkedOptions {
     ComponentModule,
     NzTransferModule,
     AppRoutingModule,
-    NgxEchartsModule.forRoot({
-      echarts: () => import('echarts')
-    }),
     NzSpinModule,
     MarkdownModule.forRoot({
       loader: HttpClient,
