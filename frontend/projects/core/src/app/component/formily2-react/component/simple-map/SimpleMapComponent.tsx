@@ -39,6 +39,9 @@ export const SimpleMapComponent = React.forwardRef(
       newArr[index][type] = newValue
       setKvList(newArr)
       emitNewArr()
+      if (index === kvList.length - 1) {
+        setKvList([...newArr, { key: '', value: '' }])
+      }
     }
 
     const addLine = (index: number) => {
@@ -74,7 +77,6 @@ export const SimpleMapComponent = React.forwardRef(
                 placeholder={placeholderKey}
               />
               <Input
-                className=" mr-[8px]"
                 style={{ width: '164px' }}
                 value={n.value}
                 onChange={(e: any) => {

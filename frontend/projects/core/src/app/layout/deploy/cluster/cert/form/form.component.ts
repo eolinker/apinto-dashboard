@@ -80,7 +80,7 @@ export class DeployClusterCertFormComponent implements OnInit {
       key: ['', [Validators.required]],
       pem: ['', [Validators.required]]
     })
-    this.navigationService.reqFlashBreadcrumb([{ title: '网关集群', routerLink: 'deploy/cluster' }, { title: '证书管理' }])
+    this.navigationService.reqFlashBreadcrumb([{ title: '网关集群', routerLink: 'deploy/cluster' }, { title: 'SSL证书' }])
   }
 
   ngOnInit (): void {

@@ -65,8 +65,8 @@ export class VisitCreateComponent implements OnInit {
       continue: [false, [Validators.required]]
     })
     this.navigationService.reqFlashBreadcrumb([
-      { title: '访问策略', routerLink: 'serv-governance/visit' },
-      { title: '新建访问策略' }
+      { title: 'API访问权限', routerLink: 'serv-governance/visit' },
+      { title: '新建API访问权限策略' }
     ])
   }
 
@@ -96,7 +96,7 @@ export class VisitCreateComponent implements OnInit {
           if (resp.code === 0) {
             this.navigationService.reqFlashBreadcrumb([
               {
-                title: '访问策略',
+                title: 'API访问权限',
                 routerLink: 'serv-governance/visit'
               },
               { title: resp.data.strategy!.name }

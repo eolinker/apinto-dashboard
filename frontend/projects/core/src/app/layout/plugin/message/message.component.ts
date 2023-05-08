@@ -126,7 +126,7 @@ export class PluginMessageComponent implements OnInit {
     @Inject(API_URL) public urlPrefix: string
   ) {
     this.navigationService.reqFlashBreadcrumb([
-      { title: '企业插件', routerLink: ['/', 'module-plugin', 'group', 'list', ''] },
+      { title: '插件市场', routerLink: ['/', 'module-plugin', 'group', 'list', ''] },
       { title: '插件详情' }
     ])
   }

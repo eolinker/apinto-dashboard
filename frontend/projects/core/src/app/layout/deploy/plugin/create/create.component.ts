@@ -39,7 +39,7 @@ export class DeployPluginCreateComponent implements OnInit {
       desc: ['']
     })
 
-    this.navigationService.reqFlashBreadcrumb([{ title: '插件管理', routerLink: 'deploy/plugin' }, { title: '新建插件' }])
+    this.navigationService.reqFlashBreadcrumb([{ title: '节点插件', routerLink: 'deploy/plugin' }, { title: '新建插件' }])
   }
 
   ngOnInit (): void {
@@ -75,7 +75,7 @@ export class DeployPluginCreateComponent implements OnInit {
           if (resp.code === 0) {
             this.navigationService.reqFlashBreadcrumb([
               {
-                title: '插件管理',
+                title: '节点插件',
                 routerLink: 'deploy/plugin'
               },
               { title: '编辑插件' }
