@@ -19,18 +19,8 @@ type trafficHandler struct {
 func (t *trafficHandler) GetListLabel(conf *strategy_entry.StrategyTrafficLimitConfig) string {
 	limits := make([]string, 0)
 	for _, v := range conf.Metrics {
-		switch v {
-		case config.MetricsIP:
-			limits = append(limits, "IP")
-		case config.MetricsAPP:
-			limits = append(limits, "应用")
-		case config.MetricsAPI:
-			limits = append(limits, "API")
-		case config.MetricsService:
-			limits = append(limits, "上游服务")
-		case config.MetricsStrategy:
-			limits = append(limits, "策略")
-		}
+		limits = append(limits, config.Metrics(v).Title())
+
 	}
 	return strings.Join(limits, ",")
 }
@@ -70,7 +60,7 @@ func (t *trafficHandler) CheckInput(input *strategy_dto.StrategyInfoInput[strate
 	}
 
 	for _, metric := range input.Config.Metrics {
-		switch metric {
+		switch config.Metrics(metric) {
 		case config.MetricsIP, config.MetricsAPI, config.MetricsService, config.MetricsAPP, config.MetricsStrategy:
 		default:
 			return fmt.Errorf("Metric %s is illegal. ", metric)

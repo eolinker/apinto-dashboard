@@ -17,14 +17,8 @@ type fuseHandler struct {
 }
 
 func (t *fuseHandler) GetListLabel(conf *strategy_entry.StrategyFuseConfig) string {
-	switch conf.Metric {
-	case config.MetricsAPI:
-		return "API"
-	case config.MetricsService:
-		return "上游服务"
-	default:
-		return ""
-	}
+	return config.Metrics(conf.Metric).Title()
+
 }
 
 func (t *fuseHandler) GetType() string {
@@ -62,7 +56,7 @@ func (t *fuseHandler) CheckInput(input *strategy_dto.StrategyInfoInput[strategy_
 	}
 
 	//校验熔断维度
-	switch input.Config.Metric {
+	switch config.Metrics(input.Config.Metric) {
 	case config.MetricsAPI, config.MetricsService:
 	default:
 		return fmt.Errorf("Metric %s is illegal. ", input.Config.Metric)
