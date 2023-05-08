@@ -11,14 +11,60 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/strategy/config"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-model"
 	"github.com/eolinker/apinto-dashboard/modules/upstream"
+	apinto_module "github.com/eolinker/apinto-module"
 	"github.com/eolinker/eosc/common/bean"
 	"sort"
+	"sync"
+)
+
+var (
+	_             apinto_module.IFilterOptionHandlerManager = (*strategyCommonService)(nil)
+	staticOptions                                           = []*strategy_model.FilterOptionsItem{
+		{
+			Name:    config.FilterMethod,
+			Title:   "API请求方式",
+			Type:    config.FilterTypeStatic,
+			Options: []string{enum.HttpALL, enum.HttpGET, enum.HttpPOST, enum.HttpPUT, enum.HttpDELETE, enum.HttpPATCH, enum.HttpHEADER, enum.HttpOPTIONS},
+		}, {
+			Name:    config.FilterPath,
+			Title:   "API路径",
+			Type:    config.FilterTypePattern,
+			Pattern: config.ApiPathRegexp,
+		}, {
+			Name:    config.FilterIP,
+			Title:   "IP",
+			Type:    config.FilterTypePattern,
+			Pattern: common.CIDRIpv4Exp,
+		},
+	}
 )
 
 type strategyCommonService struct {
 	applicationService application.IApplicationService
 	apiService         api.IAPIService
 	service            upstream.IService
+
+	lock                sync.RWMutex
+	options             []*strategy_model.FilterOptionsItem
+	remoteOptionHandler map[string]strategy.IStrategyRemoteOptionHandle
+}
+
+func (s *strategyCommonService) ResetFilterOptionHandlers(handlers map[string]apinto_module.IFilterOptionHandler) {
+	options := staticOptions
+	if handlers != nil {
+		for _, h := range handlers {
+			optionConfig := h.Config()
+			options = append(options, &strategy_model.FilterOptionsItem{
+				Name:  optionConfig.Name,
+				Title: optionConfig.Title,
+				Type:  config.FilterTypeRemote,
+			})
+		}
+	}
+	sort.Sort(strategy_model.FilterOptionsItems(options))
+	s.lock.Lock()
+	defer s.lock.Unlock()
+	s.options = options
 }
 
 func newStrategyCommonService() strategy.IStrategyCommonService {
@@ -26,66 +72,71 @@ func newStrategyCommonService() strategy.IStrategyCommonService {
 	bean.Autowired(&s.applicationService)
 	bean.Autowired(&s.service)
 	bean.Autowired(&s.apiService)
+	var fm apinto_module.IFilterOptionHandlerManager = s
+	bean.Injection(&fm)
+	s.ResetFilterOptionHandlers(nil)
 	return s
 }
 
 func (s *strategyCommonService) GetFilterOptions(ctx context.Context, namespaceId int) ([]*strategy_model.FilterOptionsItem, error) {
-
-	getAppKeys, err := s.applicationService.GetAppKeys(ctx, namespaceId)
-	if err != nil {
-		return nil, err
-	}
-
-	resList := make([]*strategy_model.FilterOptionsItem, 0)
-	resList = append(resList, &strategy_model.FilterOptionsItem{
-		Name:  config.FilterApplication,
-		Title: "应用",
-		Type:  config.FilterTypeRemote,
-	}, &strategy_model.FilterOptionsItem{
-		Name:  config.FilterApi,
-		Title: "API",
-		Type:  config.FilterTypeRemote,
-	}, &strategy_model.FilterOptionsItem{
-		Name:    config.FilterPath,
-		Title:   "API路径",
-		Type:    config.FilterTypePattern,
-		Pattern: config.ApiPathRegexp,
-	}, &strategy_model.FilterOptionsItem{
-		Name:  config.FilterService,
-		Title: "上游服务",
-		Type:  config.FilterTypeRemote,
-	}, &strategy_model.FilterOptionsItem{
-		Name:    config.FilterIP,
-		Title:   "IP",
-		Type:    config.FilterTypePattern,
-		Pattern: common.CIDRIpv4Exp,
-	})
-
-	method := &strategy_model.FilterOptionsItem{
-		Name:  config.FilterMethod,
-		Title: "API请求方式",
-		Type:  config.FilterTypeStatic,
-	}
-
-	method.Options = append(method.Options, enum.HttpALL, enum.HttpGET, enum.HttpPOST, enum.HttpPUT, enum.HttpDELETE, enum.HttpPATCH, enum.HttpHEADER, enum.HttpOPTIONS)
-	resList = append(resList, method)
-
-	appKeysList := make([]*strategy_model.FilterOptionsItem, 0)
-	for _, key := range getAppKeys {
-		appKeysList = append(appKeysList, &strategy_model.FilterOptionsItem{
-			Name:    common.SetFilterAppKey(key.Key),
-			Title:   key.KeyName,
-			Type:    config.FilterTypeStatic,
-			Options: key.Values,
-		})
-	}
-
-	sort.Slice(appKeysList, func(i, j int) bool {
-		return appKeysList[i].Name > appKeysList[j].Name
-	})
-
-	resList = append(resList, appKeysList...)
-	return resList, nil
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+	return s.options, nil
+	//getAppKeys, err := s.applicationService.GetAppKeys(ctx, namespaceId)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//resList := make([]*strategy_model.FilterOptionsItem, 0)
+	//resList = append(resList, &strategy_model.FilterOptionsItem{
+	//	Name:  config.FilterApplication,
+	//	Title: "应用",
+	//	Type:  config.FilterTypeRemote,
+	//}, &strategy_model.FilterOptionsItem{
+	//	Name:  config.FilterApi,
+	//	Title: "API",
+	//	Type:  config.FilterTypeRemote,
+	//}, &strategy_model.FilterOptionsItem{
+	//	Name:    config.FilterPath,
+	//	Title:   "API路径",
+	//	Type:    config.FilterTypePattern,
+	//	Pattern: config.ApiPathRegexp,
+	//}, &strategy_model.FilterOptionsItem{
+	//	Name:  config.FilterService,
+	//	Title: "上游服务",
+	//	Type:  config.FilterTypeRemote,
+	//}, &strategy_model.FilterOptionsItem{
+	//	Name:    config.FilterIP,
+	//	Title:   "IP",
+	//	Type:    config.FilterTypePattern,
+	//	Pattern: common.CIDRIpv4Exp,
+	//})
+	//
+	//method := &strategy_model.FilterOptionsItem{
+	//	Name:  config.FilterMethod,
+	//	Title: "API请求方式",
+	//	Type:  config.FilterTypeStatic,
+	//}
+	//
+	//method.Options = append(method.Options, enum.HttpALL, enum.HttpGET, enum.HttpPOST, enum.HttpPUT, enum.HttpDELETE, enum.HttpPATCH, enum.HttpHEADER, enum.HttpOPTIONS)
+	//resList = append(resList, method)
+	//
+	//appKeysList := make([]*strategy_model.FilterOptionsItem, 0)
+	//for _, key := range getAppKeys {
+	//	appKeysList = append(appKeysList, &strategy_model.FilterOptionsItem{
+	//		Name:    common.SetFilterAppKey(key.Key),
+	//		Title:   key.KeyName,
+	//		Type:    config.FilterTypeStatic,
+	//		Options: key.Values,
+	//	})
+	//}
+	//
+	//sort.Slice(appKeysList, func(i, j int) bool {
+	//	return appKeysList[i].Name > appKeysList[j].Name
+	//})
+	//
+	//resList = append(resList, appKeysList...)
+	//return resList, nil
 }
 
 func (s *strategyCommonService) GetFilterRemote(ctx context.Context, namespaceId int, targetType, keyword, groupUUID string, pageNum, pageSize int) (*strategy_model.FilterRemoteOutput, int, error) {
@@ -177,25 +228,4 @@ func (s *strategyCommonService) GetFilterRemote(ctx context.Context, namespaceId
 	default:
 		return nil, 0, errors.New("param error")
 	}
-}
-
-func (s *strategyCommonService) GetMetricsOptions() ([]*strategy_model.MetricsOptionsItem, error) {
-	resList := make([]*strategy_model.MetricsOptionsItem, 0)
-	resList = append(resList, &strategy_model.MetricsOptionsItem{
-		Name:  config.MetricsAPP,
-		Title: "应用",
-	}, &strategy_model.MetricsOptionsItem{
-		Name:  config.MetricsAPI,
-		Title: "API",
-	}, &strategy_model.MetricsOptionsItem{
-		Name:  config.MetricsService,
-		Title: "上游服务",
-	}, &strategy_model.MetricsOptionsItem{
-		Name:  config.MetricsStrategy,
-		Title: "策略",
-	}, &strategy_model.MetricsOptionsItem{
-		Name:  config.MetricsIP,
-		Title: "IP",
-	})
-	return resList, nil
 }
