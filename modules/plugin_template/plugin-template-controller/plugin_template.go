@@ -59,7 +59,7 @@ func (p *pluginTemplateController) templates(ginCtx *gin.Context) {
 		resultList = append(resultList, pluginTemplate)
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["templates"] = resultList
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
@@ -82,7 +82,7 @@ func (p *pluginTemplateController) templateEnum(ginCtx *gin.Context) {
 		resultList = append(resultList, pluginTemplate)
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["templates"] = resultList
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
@@ -231,7 +231,7 @@ func (p *pluginTemplateController) template(ginCtx *gin.Context) {
 		Plugins: plugins,
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["template"] = pluginTemplateOutput
 
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))

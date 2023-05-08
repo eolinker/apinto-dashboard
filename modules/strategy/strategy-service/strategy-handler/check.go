@@ -3,7 +3,7 @@ package strategy_handler
 import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
-	"github.com/eolinker/apinto-dashboard/enum"
+	"github.com/eolinker/apinto-dashboard/modules/strategy/config"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-dto"
 )
 
@@ -11,7 +11,7 @@ func checkFilters(fileters []*strategy_dto.FilterInput) error {
 	filterNameSet := make(map[string]struct{})
 	for _, filter := range fileters {
 		switch filter.Name {
-		case enum.FilterApplication, enum.FilterApi, enum.FilterPath, enum.FilterService, enum.FilterMethod, enum.FilterIP:
+		case config.FilterApplication, config.FilterApi, config.FilterPath, config.FilterService, config.FilterMethod, config.FilterIP:
 		default:
 			if !common.IsMatchFilterAppKey(filter.Name) {
 				return fmt.Errorf("filter.Name %s is illegal. ", filter.Name)
@@ -48,7 +48,7 @@ func checkStatusCode(codes ...int) error {
 
 func checkCharset(charset string) error {
 	switch charset {
-	case enum.CharsetUTF8, enum.CharsetGBK, enum.CharsetASCII:
+	case config.CharsetUTF8, config.CharsetGBK, config.CharsetASCII:
 	default:
 		return fmt.Errorf("charset %s is illegal. ", charset)
 	}

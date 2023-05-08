@@ -26,7 +26,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/variable/variable-entry"
 	variable_model "github.com/eolinker/apinto-dashboard/modules/variable/variable-model"
 	"github.com/eolinker/eosc/common/bean"
-	"github.com/eolinker/eosc/log"
 	"github.com/go-basic/uuid"
 	"gorm.io/gorm"
 	"sort"
@@ -594,51 +593,6 @@ func (d *discoveryService) OnlineDiscovery(ctx context.Context, namespaceId, ope
 	})
 
 	return nil, err
-}
-
-func (d *discoveryService) ResetOnline(ctx context.Context, namespaceId, clusterId int) {
-	runtimes, err := d.discoveryRuntimeStore.GetByCluster(ctx, clusterId)
-	if err != nil {
-		log.Errorf("discoveryService-ResetOnline-getRuntimes clusterId=%d err=%s", clusterId, err.Error())
-		return
-	}
-	client, err := d.apintoClient.GetClient(ctx, clusterId)
-	if err != nil {
-		log.Errorf("discoveryService-ResetOnline-getClient clusterId=%d err=%s", clusterId, err.Error())
-		return
-	}
-
-	namespaceInfo, err := d.namespaceService.GetById(namespaceId)
-	if err != nil {
-		log.Errorf("discoveryService-ResetOnline-getNamespace clusterId=%d err=%s", clusterId, err.Error())
-		return
-	}
-
-	for _, runtime := range runtimes {
-		if !runtime.IsOnline {
-			continue
-		}
-
-		discoveryInfo, err := d.discoveryStore.Get(ctx, runtime.DiscoveryID)
-		if err != nil {
-			log.Errorf("discoveryService-ResetOnline-getDiscovery clusterId=%d discoveryId=%d err=%s", clusterId, runtime.DiscoveryID, err.Error())
-			continue
-		}
-
-		version, err := d.discoveryVersionStore.Get(ctx, runtime.VersionID)
-		if err != nil {
-			log.Errorf("discoveryService-ResetOnline-getVersion clusterId=%d versionId=%d err=%s", clusterId, runtime.VersionID, err.Error())
-			continue
-		}
-		driverManager := d.discoveryManager.GetDriver(discoveryInfo.Driver)
-
-		discoveryConfig := driverManager.ToApinto(namespaceInfo.Name, strings.ToLower(discoveryInfo.Name), discoveryInfo.Desc, []byte(version.Config))
-
-		if err = client.ForDiscovery().Create(*discoveryConfig); err != nil {
-			log.Errorf("discoveryService-ResetOnline-apinto clusterId=%d discoveryConfig=%v err=%s", clusterId, discoveryConfig, err.Error())
-			continue
-		}
-	}
 }
 
 func (d *discoveryService) OfflineDiscovery(ctx context.Context, namespaceId, operator int, discoveryName, clusterName string) error {

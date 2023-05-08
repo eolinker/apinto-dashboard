@@ -25,7 +25,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/plugin_template/plugin-template-store"
 	"github.com/eolinker/apinto-dashboard/modules/user"
 	"github.com/eolinker/eosc/common/bean"
-	"github.com/eolinker/eosc/log"
 	"github.com/go-basic/uuid"
 	"gorm.io/gorm"
 	"sort"
@@ -571,60 +570,6 @@ func (p *pluginTemplateService) OnlineList(ctx context.Context, namespaceId int,
 	return list, nil
 }
 
-func (p *pluginTemplateService) ResetOnline(ctx context.Context, _, clusterId int) {
-	runtimes, err := p.pluginTemplateRuntimeStore.GetByCluster(ctx, clusterId)
-	if err != nil {
-		log.Errorf("pluginTemplateService-ResetOnline-getRuntimes clusterId=%d err=%s", clusterId, err.Error())
-		return
-	}
-	client, err := p.apintoClient.GetClient(ctx, clusterId)
-	if err != nil {
-		log.Errorf("pluginTemplateService-ResetOnline-getClient clusterId=%d err=%s", clusterId, err.Error())
-		return
-	}
-
-	for _, runtime := range runtimes {
-		if !runtime.IsOnline {
-			continue
-		}
-
-		pluginTemplate, err := p.pluginTemplateStore.Get(ctx, runtime.PluginTemplateID)
-		if err != nil {
-			log.Errorf("pluginTemplateService-ResetOnline-getPluginTemplate clusterId=%d pluginTemplateId=%d err=%s", clusterId, runtime.PluginTemplateID, err.Error())
-			continue
-		}
-
-		version, err := p.pluginTemplateVersionStore.Get(ctx, runtime.VersionID)
-		if err != nil {
-			log.Errorf("pluginTemplateService-ResetOnline-getVersion clusterId=%d versionId=%d err=%s", clusterId, runtime.VersionID, err.Error())
-			continue
-		}
-
-		pluginMaps := make(map[string]*v1.Plugin, 0)
-		for _, plugin := range version.Plugins {
-			var config interface{}
-			if err = json.Unmarshal([]byte(plugin.Config), &config); err != nil {
-				log.Errorf("pluginTemplateService-ResetOnline-json.Unmarshal err=%s", err.Error())
-				return
-			}
-			pluginMaps[plugin.Name] = &v1.Plugin{
-				Disable: plugin.Disable,
-				Config:  config,
-			}
-		}
-		pluginTemplateConfig := v1.PluginTemplateConfig{
-			Plugins:     pluginMaps,
-			Name:        pluginTemplate.UUID,
-			Driver:      "plugin_template",
-			Description: pluginTemplate.Desc,
-		}
-
-		if err = client.ForPluginTemplate().Create(pluginTemplateConfig); err != nil {
-			log.Errorf("pluginTemplateService-ResetOnline-apinto clusterId=%d pluginTemplateConfig=%v err=%s", clusterId, pluginTemplateConfig, err.Error())
-			continue
-		}
-	}
-}
 func (p *pluginTemplateService) Online(ctx context.Context, namespaceId, operator int, uuid, clusterName string) (*frontend_model.Router, error) {
 	pluginTemplate, err := p.pluginTemplateStore.GetByUUID(ctx, uuid)
 	if err != nil {
