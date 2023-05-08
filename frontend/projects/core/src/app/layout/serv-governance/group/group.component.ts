@@ -152,22 +152,22 @@ export class GroupComponent implements OnInit {
   getBreadcrumb () {
     switch (this.strategyType) {
       case 'traffic':
-        this.navigationService.reqFlashBreadcrumb([{ title: '流量策略' }])
+        this.navigationService.reqFlashBreadcrumb([{ title: '流量限制' }])
         break
       case 'grey':
-        this.navigationService.reqFlashBreadcrumb([{ title: '灰度策略' }])
+        this.navigationService.reqFlashBreadcrumb([{ title: '灰度发布' }])
         break
       case 'fuse':
         this.navigationService.reqFlashBreadcrumb([{ title: '熔断策略' }])
         break
       case 'cache':
-        this.navigationService.reqFlashBreadcrumb([{ title: '缓存策略' }])
+        this.navigationService.reqFlashBreadcrumb([{ title: '数据缓存' }])
         break
       case 'visit':
-        this.navigationService.reqFlashBreadcrumb([{ title: '访问策略' }])
+        this.navigationService.reqFlashBreadcrumb([{ title: 'API访问权限' }])
         break
       default:
-        this.navigationService.reqFlashBreadcrumb([{ title: '流量策略' }])
+        this.navigationService.reqFlashBreadcrumb([{ title: '流量限制' }])
     }
   }
 }

@@ -58,7 +58,6 @@ export class ApiHttpCreateComponent extends ApiWebsocketCreateComponent {
         }
         this.getHeaderList()
         this.hostsList = [...resp.data.api.hosts?.map((x:string) => ({ key: x })) || [], { key: '' }]
-        console.log(this, resp)
       }
     })
   }

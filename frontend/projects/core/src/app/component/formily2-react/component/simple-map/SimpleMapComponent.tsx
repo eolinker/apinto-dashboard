@@ -39,6 +39,9 @@ export const SimpleMapComponent = React.forwardRef(
       newArr[index][type] = newValue
       setKvList(newArr)
       emitNewArr()
+      if (index === kvList.length - 1) {
+        setKvList([...newArr, { key: '', value: '' }])
+      }
     }
 
     const addLine = (index: number) => {
