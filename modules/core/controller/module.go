@@ -130,7 +130,7 @@ func (m *Module) status(context *gin.Context) {
 
 	namespaceID := namespace_controller.GetNamespaceId(context)
 
-	status := m.providers.Status(key, namespaceID, cluster)
+	status, _ := m.providers.Status(key, namespaceID, cluster)
 
 	context.JSON(200, map[string]interface{}{
 		"code": 0,
