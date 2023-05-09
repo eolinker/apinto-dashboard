@@ -19,7 +19,7 @@ func newFilterOption() *FilterOption {
 		Title: "API",
 		Titles: []apinto_module.OptionTitle{
 			{
-				Field: "name",
+				Field: "title",
 				Title: "API名称",
 			},
 			{
@@ -67,7 +67,7 @@ func (f *FilterOption) Labels(namespaceId int, values ...string) []string {
 
 	rs := make([]string, 0, len(infos))
 	for _, v := range infos {
-		rs = append(rs, v.Name)
+		rs = append(rs, v.Title)
 	}
 	return rs
 }

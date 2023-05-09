@@ -2193,8 +2193,8 @@ func (a *apiService) GetAPIRemoteOptions(ctx context.Context, namespaceID, pageN
 		a.commonGroup.ParentGroupName(api.GroupUUID, groupUUIDMap, groupIdMap, parentGroupName)
 
 		item := &strategy_model.RemoteApis{
-			Uuid: api.UUID,
-			Name: api.Name,
+			Uuid:  api.UUID,
+			Title: api.Name,
 			//Service:     version.ServiceName,
 			Group:       strings.Join(*parentGroupName, "/"), //TODO
 			RequestPath: api.RequestPathLabel,
@@ -2243,8 +2243,8 @@ func (a *apiService) GetAPIRemoteByUUIDS(ctx context.Context, namespace int, uui
 		a.commonGroup.ParentGroupName(api.GroupUUID, groupUUIDMap, groupIdMap, parentGroupName)
 
 		item := &strategy_model.RemoteApis{
-			Uuid: api.UUID,
-			Name: api.Name,
+			Uuid:  api.UUID,
+			Title: api.Name,
 			//Service:     version.ServiceName,
 			Group:       strings.Join(*parentGroupName, "/"), //TODO
 			RequestPath: api.RequestPathLabel,
