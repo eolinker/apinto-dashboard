@@ -82,8 +82,8 @@ export const monitorAlarmHistoryTableBody:EO_TBODY_TYPE[] = [
 
 // webhook列表参数
 export const webhooksTableHead:THEAD_TYPE[] = [
-  { title: 'webhook名称' },
-  { title: '通知url' },
+  { title: 'Webhook名称' },
+  { title: '通知Url' },
   { title: '请求方式' },
   { title: '参数类型' },
   { title: '更新者' },

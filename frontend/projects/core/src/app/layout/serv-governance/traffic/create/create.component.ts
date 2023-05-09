@@ -100,8 +100,8 @@ export class TrafficCreateComponent implements OnInit {
     })
 
     this.navigationService.reqFlashBreadcrumb([
-      { title: '流量策略', routerLink: 'serv-governance/traffic' },
-      { title: '新建流量策略' }
+      { title: '流量限制', routerLink: 'serv-governance/traffic' },
+      { title: '新建流量限制策略' }
     ])
   }
 
@@ -132,7 +132,7 @@ export class TrafficCreateComponent implements OnInit {
           if (resp.code === 0) {
             this.navigationService.reqFlashBreadcrumb([
               {
-                title: '流量策略',
+                title: '流量限制',
                 routerLink: 'serv-governance/traffic'
               },
               { title: resp.data.strategy!.name }
