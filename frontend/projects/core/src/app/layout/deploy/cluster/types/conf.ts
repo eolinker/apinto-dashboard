@@ -276,10 +276,10 @@ export const ClustersThead: THEAD_TYPE[] = [
 ]
 
 export const DeployClusterPluginThead:THEAD_TYPE[] = [
-  { title: '插件名称' },
+  { title: '插件名称', width: 150 },
   { title: '发布状态' },
   { title: '状态' },
-  { title: '配置' },
+  { title: '配置', width: 200 },
   { title: '更新时间' },
   {
     title: '操作',
