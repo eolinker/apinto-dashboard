@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
-	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/strategy"
+	"github.com/eolinker/apinto-dashboard/modules/strategy/config"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-dto"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-entry"
 	"strings"
@@ -17,27 +17,21 @@ type fuseHandler struct {
 }
 
 func (t *fuseHandler) GetListLabel(conf *strategy_entry.StrategyFuseConfig) string {
-	switch conf.Metric {
-	case enum.MetricsAPI:
-		return "API"
-	case enum.MetricsService:
-		return "上游服务"
-	default:
-		return ""
-	}
+	return config.Metrics(conf.Metric).Title()
+
 }
 
 func (t *fuseHandler) GetType() string {
-	return enum.StrategyFuse
+	return config.StrategyFuse
 }
 
 func (t *fuseHandler) GetConfName() string {
-	return enum.StrategyFuseApintoConfName
+	return config.StrategyFuseApintoConfName
 }
 
 // GetBatchSettingName 获取往apinto发送批量操作策略时 url所需要的路径名 /setting/xxx
 func (t *fuseHandler) GetBatchSettingName() string {
-	return enum.StrategyFuseBatchName
+	return config.StrategyFuseBatchName
 }
 
 func (t *fuseHandler) CheckInput(input *strategy_dto.StrategyInfoInput[strategy_entry.StrategyFuseConfig]) error {
@@ -62,8 +56,8 @@ func (t *fuseHandler) CheckInput(input *strategy_dto.StrategyInfoInput[strategy_
 	}
 
 	//校验熔断维度
-	switch input.Config.Metric {
-	case enum.MetricsAPI, enum.MetricsService:
+	switch config.Metrics(input.Config.Metric) {
+	case config.MetricsAPI, config.MetricsService:
 	default:
 		return fmt.Errorf("Metric %s is illegal. ", input.Config.Metric)
 	}

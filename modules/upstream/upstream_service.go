@@ -24,10 +24,11 @@ type IService interface {
 	OfflineService(ctx context.Context, namespaceId, operator int, serviceName, clusterName string) error
 	GetServiceIDByName(ctx context.Context, namespaceId int, serviceName string) (int, error) //TODO service
 	GetLatestServiceVersion(ctx context.Context, serviceID int) (*upstream_entry2.ServiceVersion, error)
+
 	GetServiceSchemaInfo(ctx context.Context, serviceID int) (*upstream_entry2.Service, error)                                                      //TODO service
 	IsOnline(ctx context.Context, clusterId, serviceId int) bool                                                                                    //TODO service
 	GetServiceRemoteOptions(ctx context.Context, namespaceID, pageNum, pageSize int, keyword string) ([]*strategy_model.RemoteServices, int, error) //TODO service
 	GetServiceRemoteByNames(ctx context.Context, namespaceID int, uuids []string) ([]*strategy_model.RemoteServices, error)                         //TODO service
-	ResetOnline(ctx context.Context, namespaceId, clusterId int)
-	UpstreamCount(ctx context.Context, namespaceId int) (int64, error) //TODO service
+	UpstreamCount(ctx context.Context, namespaceId int) (int64, error)                                                                              //TODO service
+
 }

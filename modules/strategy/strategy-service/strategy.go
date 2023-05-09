@@ -7,22 +7,18 @@ import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
-	"github.com/eolinker/apinto-dashboard/enum"
-	"github.com/eolinker/apinto-dashboard/modules/api"
-	"github.com/eolinker/apinto-dashboard/modules/application"
 	"github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-dashboard/modules/base/locker-service"
 	"github.com/eolinker/apinto-dashboard/modules/cluster"
 	"github.com/eolinker/apinto-dashboard/modules/strategy"
+	"github.com/eolinker/apinto-dashboard/modules/strategy/config"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-dto"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-entry"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-model"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-store"
-	"github.com/eolinker/apinto-dashboard/modules/upstream"
 	"github.com/eolinker/apinto-dashboard/modules/user"
 	"github.com/eolinker/apinto-dashboard/store"
 	"github.com/eolinker/eosc/common/bean"
-	"github.com/eolinker/eosc/log"
 	"github.com/go-basic/uuid"
 	"gorm.io/gorm"
 	"reflect"
@@ -42,11 +38,11 @@ type strategyService[T any, K any] struct {
 	strategyRuntimeStore strategy_store.IStrategyRuntimeStore
 	strategyHistory      strategy_store.IStrategyHistoryStore
 	lock                 locker_service.IAsynLockService
-	applicationService   application.IApplicationService
-	apiService           api.IAPIService
-	service              upstream.IService
-	userInfoService      user.IUserInfoService
-
+	//applicationService   application.IApplicationService
+	//apiService           api.IAPIService
+	//service              upstream.IService
+	userInfoService user.IUserInfoService
+	commonService   strategy.IStrategyCommonService
 	//strategyManager driver_manager.IStrategyDriverManager
 	strategyHandler strategy.IStrategyHandler[T, K]
 }
@@ -60,9 +56,8 @@ func NewStrategyService[T any, K any](handler strategy.IStrategyHandler[T, K], r
 	bean.Autowired(&s.strategyHistory)
 	bean.Autowired(&s.apintoClient)
 	bean.Autowired(&s.clusterService)
-	bean.Autowired(&s.applicationService)
-	bean.Autowired(&s.service)
-	bean.Autowired(&s.apiService)
+	bean.Autowired(&s.commonService)
+
 	bean.Autowired(&s.lock)
 	bean.Autowired(&s.userInfoService)
 
@@ -75,9 +70,7 @@ func NewStrategyService[T any, K any](handler strategy.IStrategyHandler[T, K], r
 
 	var strategyCommon strategy.IStrategyCommonService
 	bean.Autowired(&strategyCommon)
-	bean.AddInitializingBeanFunc(func() {
-		strategyCommon.AddHandler(s)
-	})
+
 	return s
 }
 
@@ -110,22 +103,22 @@ func (s *strategyService[T, K]) GetList(ctx context.Context, namespaceId int, cl
 			return nil, err
 		}
 
-		status := enum.StrategyOnlineStatusNOTGOONLINE //默认未上线
+		status := config.StrategyOnlineStatusNOTGOONLINE //默认未上线
 		if publish, ok := publishMaps[strategyInfo.Id]; ok {
-			status = enum.StrategyOnlineStatusGOONLINE //在发布记录中表示已上线
+			status = config.StrategyOnlineStatusGOONLINE //在发布记录中表示已上线
 			if publish.StrategyVersion.Id != version.Id {
-				status = enum.StrategyOnlineStatusTOUPDATE //有变更为待更新
+				status = config.StrategyOnlineStatusTOUPDATE //有变更为待更新
 			}
 			if publish.StrategyVersion.IsStop != strategyInfo.IsStop {
-				status = enum.StrategyOnlineStatusTOUPDATE
+				status = config.StrategyOnlineStatusTOUPDATE
 			}
 			if publish.StrategyVersion.Priority != strategyInfo.Priority {
-				status = enum.StrategyOnlineStatusTOUPDATE
+				status = config.StrategyOnlineStatusTOUPDATE
 			}
 		}
 		//上线了 并且被删除了 为待删除状态
-		if status != enum.StrategyOnlineStatusNOTGOONLINE && strategyInfo.IsDelete {
-			status = enum.StrategyOnlineStatusTODELETE
+		if status != config.StrategyOnlineStatusNOTGOONLINE && strategyInfo.IsDelete {
+			status = config.StrategyOnlineStatusTODELETE
 		}
 
 		filters, err := s.getFiltersStr(ctx, namespaceId, version)
@@ -152,22 +145,16 @@ func (s *strategyService[T, K]) GetList(ctx context.Context, namespaceId int, cl
 	return resList, nil
 }
 
-func (s *strategyService[T, K]) GetInfo(ctx context.Context, namespaceId int, uuid string) (*strategy_model.StrategyInfoOutput[K], *strategy_model.ExtenderData, error) {
+func (s *strategyService[T, K]) GetInfo(ctx context.Context, namespaceId int, uuid string) (*strategy_model.StrategyInfoOutput[K], error) {
 	strategyInfo, err := s.strategyStore.GetByUUID(ctx, uuid)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	version, err := s.getLatestStrategyVersion(ctx, strategyInfo.Id)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	//拼装筛选条件所需要的信息
-	extenderData := &strategy_model.ExtenderData{
-		Api:         make(map[string]*strategy_model.RemoteApis),
-		Service:     make(map[string]*strategy_model.RemoteServices),
-		Application: make(map[string]*strategy_model.RemoteApplications),
-	}
 	filters := make([]*strategy_model.FilterOutput, 0, len(version.Filters))
 	for _, f := range version.Filters {
 		filter := &strategy_model.FilterOutput{
@@ -177,97 +164,10 @@ func (s *strategyService[T, K]) GetInfo(ctx context.Context, namespaceId int, uu
 		if len(f.Values) == 0 {
 			continue
 		}
-		switch filter.Name {
-		case enum.FilterApplication:
-			filter.Type = enum.FilterTypeRemote
-			filter.Title = "应用"
-			if f.Values[0] == enum.FilterValuesALL {
-				filter.Label = "所有应用"
-			} else {
-				apps, err := s.applicationService.AppListByUUIDS(ctx, namespaceId, f.Values)
-				if err != nil {
-					return nil, nil, err
-				}
-				if len(apps) == 0 {
-					continue
-				}
-				labels := make([]string, len(apps))
-				for i, app := range apps {
-					extenderData.Application[app.IdStr] = &strategy_model.RemoteApplications{
-						Name: app.Name,
-						Uuid: app.IdStr,
-						Desc: app.Desc,
-					}
-					labels[i] = app.Name
-				}
-				filter.Label = strings.Join(labels, ",")
-			}
-		case enum.FilterApi:
-			filter.Type = enum.FilterTypeRemote
-			filter.Title = "API"
-			if f.Values[0] == enum.FilterValuesALL {
-				filter.Label = "所有API"
-			} else {
-				apis, err := s.apiService.GetAPIRemoteByUUIDS(ctx, namespaceId, f.Values)
-				if err != nil {
-					return nil, nil, err
-				}
-				if len(apis) == 0 {
-					continue
-				}
-				labels := make([]string, len(apis))
-				for i, apiInfo := range apis {
-					extenderData.Api[apiInfo.Uuid] = apiInfo
-					labels[i] = apiInfo.Name
-				}
-				filter.Label = strings.Join(labels, ",")
-			}
-		case enum.FilterPath:
-			filter.Type = enum.FilterTypePattern
-			filter.Title = "API路径"
-			filter.Label = f.Values[0]
-		case enum.FilterService:
-			filter.Type = enum.FilterTypeRemote
-			filter.Title = "上游服务"
-			if f.Values[0] == enum.FilterValuesALL {
-				filter.Label = "所有上游服务"
-			} else {
-				services, err := s.service.GetServiceRemoteByNames(ctx, namespaceId, f.Values)
-				if err != nil {
-					return nil, nil, err
-				}
-				if len(services) == 0 {
-					continue
-				}
-				labels := make([]string, len(services))
-				for i, sv := range services {
-					extenderData.Service[sv.Uuid] = sv
-					labels[i] = sv.Name
-				}
-				filter.Label = strings.Join(labels, ",")
-			}
-		case enum.FilterMethod:
-			filter.Type = enum.FilterTypeStatic
-			filter.Title = "API请求方式"
-			if f.Values[0] == enum.HttpALL {
-				filter.Label = "所有API请求方式"
-			} else {
-				filter.Label = strings.Join(f.Values, ",")
-			}
-		case enum.FilterIP:
-			filter.Type = enum.FilterTypePattern
-			filter.Title = "IP"
-			filter.Label = strings.Join(f.Values, ",")
-		default: //KEY(应用)
-			filter.Type = enum.FilterTypeStatic
-			filter.Title = fmt.Sprintf("%s(应用)", common.GetFilterAppKey(filter.Name))
-			if f.Values[0] == enum.FilterValuesALL {
-				filter.Label = fmt.Sprintf("%s(应用)所有值", common.GetFilterAppKey(filter.Name))
-			} else {
-				filter.Label = strings.Join(f.Values, ",")
-			}
+		filter.Title, filter.Label, filter.Type = s.commonService.GetFilterLabel(ctx, namespaceId, filter.Name, filter.Values)
+		if filter.Label == "" {
+			continue
 		}
-
 		filters = append(filters, filter)
 	}
 	input := &strategy_model.StrategyInfoOutput[T]{
@@ -277,7 +177,7 @@ func (s *strategyService[T, K]) GetInfo(ctx context.Context, namespaceId int, uu
 
 	input.Config = s.decodeConfig(version.StrategyConfigInfo.StrategyVersionConfig.Config)
 
-	return s.strategyHandler.FormatOut(ctx, namespaceId, input), extenderData, nil
+	return s.strategyHandler.FormatOut(ctx, namespaceId, input), nil
 }
 
 func (s *strategyService[T, K]) CreateStrategy(ctx context.Context, namespaceId int, operator int, clusterName string, input *strategy_dto.StrategyInfoInput[T]) error {
@@ -613,7 +513,7 @@ func (s *strategyService[T, K]) ToPublish(ctx context.Context, namespaceId int, 
 	resList := make([]*strategy_model.StrategyToPublish[T], 0)
 	for _, strategyInfo := range strategies {
 		//已上线的状态过滤掉
-		if strategyInfo.Status == enum.StrategyOnlineStatusGOONLINE {
+		if strategyInfo.Status == config.StrategyOnlineStatusGOONLINE {
 			continue
 		}
 		resList = append(resList, &strategy_model.StrategyToPublish[T]{
@@ -721,36 +621,6 @@ func (s *strategyService[T, K]) UpdateStop(ctx context.Context, namespaceId, ope
 
 }
 
-func (s *strategyService[T, K]) ResetOnline(ctx context.Context, _, clusterId int) {
-
-	client, err := s.apintoClient.GetClient(ctx, clusterId)
-	if err != nil {
-		return
-	}
-
-	//查询上个版本发布的策略信息
-	runtime, publishMaps, err := s.getRuntimePublishMaps(ctx, clusterId)
-	if err != nil {
-		log.Errorf("strategyService-ResetOnline-GetRuntime clusterId=%d,err=%s", clusterId, err.Error())
-		return
-	}
-	if len(publishMaps) == 0 {
-		return
-	}
-	strategyInfos := make([]interface{}, 0)
-
-	for _, publish := range publishMaps {
-		conf := s.decodeConfig(publish.StrategyVersion.StrategyConfigInfo.Config)
-		strategyInfo := s.toApinto(publish.Strategy.UUID, publish.Strategy.Desc, publish.Strategy.IsStop, publish.Strategy.Priority, publish.StrategyVersion.Filters, *conf)
-		strategyInfos = append(strategyInfos, &strategyInfo)
-	}
-	if err = client.ForStrategy().Batch(s.strategyHandler.GetBatchSettingName(), strategyInfos); err != nil {
-		log.Errorf("strategyService-ResetOnline-Batch clusterId=%d,runtimeId=%d,versionId=%d,err=%s", clusterId, runtime.Id, runtime.VersionId, err.Error())
-		return
-	}
-
-}
-
 func (s *strategyService[T, K]) Publish(ctx context.Context, namespaceId, operator int, clusterName string, input *strategy_dto.StrategyPublish) error {
 
 	clusterInfo, err := s.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
@@ -801,7 +671,7 @@ func (s *strategyService[T, K]) Publish(ctx context.Context, namespaceId, operat
 
 	strategyPublishHistoryInfo := make([]*strategy_entry.StrategyPublishConfigInfo, 0)
 	//需要物理删除的策略
-	deleteStrategyMaps := common.Map[int, *strategy_model.StrategyToPublish[T]]{}
+	deleteStrategyMaps := map[int]*strategy_model.StrategyToPublish[T]{}
 
 	for _, publish := range publishes {
 
@@ -820,7 +690,7 @@ func (s *strategyService[T, K]) Publish(ctx context.Context, namespaceId, operat
 		}
 
 		strategyPublishHistoryInfo = append(strategyPublishHistoryInfo, publishMaps[publish.Strategy.Id])
-		if publish.Status == enum.StrategyOnlineStatusTODELETE {
+		if publish.Status == config.StrategyOnlineStatusTODELETE {
 			deleteStrategyMaps[publish.Strategy.Id] = publish
 			delete(publishMaps, publish.Strategy.Id)
 		}
@@ -1022,7 +892,7 @@ func (s *strategyService[T, K]) getRuntimePublishMaps(ctx context.Context, clust
 	}
 
 	//查询当前发布的版本
-	publishMaps := common.Map[int, *strategy_entry.StrategyPublishConfigInfo]{}
+	publishMaps := map[int]*strategy_entry.StrategyPublishConfigInfo{}
 	if runtime != nil {
 		publishVersion, err := s.publishVersionStore.Get(ctx, runtime.VersionId)
 		if err != nil {
@@ -1080,114 +950,13 @@ func (s *strategyService[T, K]) isStrategyVersionConfChange(latest *strategy_ent
 
 func (s *strategyService[T, K]) getFiltersStr(ctx context.Context, namespaceId int, version *strategy_entry.StrategyVersion) (string, error) {
 	//filters := ""
-	filterList := make([]string, 0)
+	filterList := make([]string, 0, len(version.Filters))
 	for _, filter := range version.Filters {
-		switch filter.Name {
-		case enum.FilterApplication:
-			if len(filter.Values) > 0 {
-				if filter.Values[0] == enum.FilterValuesALL {
-					filters := "[应用：全部应用]"
-					filterList = append(filterList, filters)
-				} else {
-					applications, err := s.applicationService.AppListByUUIDS(ctx, namespaceId, filter.Values)
-					if err != nil {
-						return "", err
-					}
-					filters := "[应用："
-					for i, applicationInfo := range applications {
-						if i == len(applications)-1 {
-							filters += applicationInfo.Name + "]"
-						} else {
-							filters += applicationInfo.Name + ","
-						}
-					}
-					filterList = append(filterList, filters)
-				}
-			}
-		case enum.FilterApi:
-			if len(filter.Values) > 0 {
-				if filter.Values[0] == enum.FilterValuesALL {
-					filters := "[API：全部API]"
-					filterList = append(filterList, filters)
-				} else {
-					apis, err := s.apiService.GetAPIRemoteByUUIDS(ctx, namespaceId, filter.Values)
-					if err != nil {
-						return "", err
-					}
-					filters := "[API："
-					for i, apiInfo := range apis {
-						if i == len(apis)-1 {
-							filters += apiInfo.Name + "]"
-						} else {
-							filters += apiInfo.Name + ","
-						}
-					}
-					filterList = append(filterList, filters)
-				}
-			}
-		case enum.FilterService:
-			if len(filter.Values) > 0 {
-				if filter.Values[0] == enum.FilterValuesALL {
-					filters := "[上游服务：全部上游服务]"
-					filterList = append(filterList, filters)
-				} else {
-					services, err := s.service.GetServiceRemoteByNames(ctx, namespaceId, filter.Values)
-					if err != nil {
-						return "", err
-					}
-					filters := "[上游服务："
-					for i, val := range services {
-						if i == len(services)-1 {
-							filters += val.Name + "]"
-						} else {
-							filters += val.Name + ","
-						}
-					}
-					filterList = append(filterList, filters)
-				}
-			}
-		case enum.FilterMethod:
-			if len(filter.Values) > 0 {
-				if filter.Values[0] == enum.FilterValuesALL {
-					filters := "[API请求方式：全部请求方式]"
-					filterList = append(filterList, filters)
-				} else {
-					filters := fmt.Sprintf("[API请求方式：%s]", strings.Join(filter.Values, ","))
-					filterList = append(filterList, filters)
-				}
-			}
-		case enum.FilterPath:
-			if len(filter.Values) > 0 {
-				filters := fmt.Sprintf("[API路径：%s]", filter.Values[0])
-				filterList = append(filterList, filters)
-			}
-		case enum.FilterIP:
-			if len(filter.Values) > 0 {
-				filters := fmt.Sprintf("[IP：%s]", strings.Join(filter.Values, ","))
-				filterList = append(filterList, filters)
-			}
-		default:
-			//appKey
-			key := common.GetFilterAppKey(filter.Name)
-			if filter.Name != key {
-				if len(filter.Values) > 0 {
-					if filter.Values[0] == enum.FilterValuesALL {
-						filters := fmt.Sprintf("[%s(应用)：全部数据]", key)
-						filterList = append(filterList, filters)
-					} else {
-						filters := fmt.Sprintf("[%s(应用)：", key)
-						for i, val := range filter.Values {
-							if i == len(filter.Values)-1 {
-								filters += val + "]"
-							} else {
-								filters += val + ","
-							}
-						}
-						filterList = append(filterList, filters)
-					}
-				}
-			}
+		title, values, _ := s.commonService.GetFilterLabel(ctx, namespaceId, filter.Name, filter.Values)
+		if values == "" {
+			continue
 		}
+		filterList = append(filterList, fmt.Sprintf("[%s:%s]", title, values))
 	}
 	return strings.Join(filterList, ";"), nil
 }
