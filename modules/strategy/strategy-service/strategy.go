@@ -165,6 +165,9 @@ func (s *strategyService[T, K]) GetInfo(ctx context.Context, namespaceId int, uu
 			continue
 		}
 		filter.Title, filter.Label, filter.Type = s.commonService.GetFilterLabel(ctx, namespaceId, filter.Name, filter.Values)
+		if filter.Label == "" {
+			continue
+		}
 		filters = append(filters, filter)
 	}
 	input := &strategy_model.StrategyInfoOutput[T]{
@@ -950,6 +953,9 @@ func (s *strategyService[T, K]) getFiltersStr(ctx context.Context, namespaceId i
 	filterList := make([]string, 0, len(version.Filters))
 	for _, filter := range version.Filters {
 		title, values, _ := s.commonService.GetFilterLabel(ctx, namespaceId, filter.Name, filter.Values)
+		if values == "" {
+			continue
+		}
 		filterList = append(filterList, fmt.Sprintf("[%s:%s]", title, values))
 	}
 	return strings.Join(filterList, ";"), nil
