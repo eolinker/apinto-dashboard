@@ -85,8 +85,8 @@ func initRouter(name string) apinto_module.RoutersInfo {
 			Path:        "/api/router/groups",
 			Handler:     "api.groups",
 			HandlerFunc: []apinto_module.HandlerFunc{c.groups},
+			Labels:      apinto_module.RouterLabelAnonymous,
 		},
-
 		{
 			Method:      http.MethodGet,
 			Path:        "/api/router/source",
