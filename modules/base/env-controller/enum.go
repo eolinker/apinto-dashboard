@@ -30,7 +30,7 @@ func (e *enumController) GetEnv(context *gin.Context) {
 			Value: value,
 		})
 	}
-	m := common.Map[string, interface{}]{}
+	m := common.Map{}
 	m["envs"] = list
 	context.JSON(http.StatusOK, controller.NewSuccessResult(m))
 }

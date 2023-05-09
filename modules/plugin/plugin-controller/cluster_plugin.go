@@ -153,7 +153,7 @@ func (p *pluginClusterController) updateHistory(ginCtx *gin.Context) {
 		})
 	}
 
-	m := common.Map[string, interface{}]{}
+	m := common.Map{}
 	m["histories"] = list
 	m["total"] = total
 
@@ -212,7 +212,7 @@ func (p *pluginClusterController) publishHistory(ginCtx *gin.Context) {
 		})
 	}
 
-	m := common.Map[string, interface{}]{}
+	m := common.Map{}
 	m["histories"] = histories
 	m["total"] = total
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
@@ -260,7 +260,7 @@ func (p *pluginClusterController) toPublish(ginCtx *gin.Context) {
 		return
 	}
 
-	m := common.Map[string, interface{}]{}
+	m := common.Map{}
 
 	defectPlugins := make([]string, 0)
 	for _, pluginInfo := range plugins {

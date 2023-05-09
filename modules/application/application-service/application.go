@@ -7,7 +7,6 @@ import (
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
-	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/application"
 	"github.com/eolinker/apinto-dashboard/modules/application/application-dto"
 	"github.com/eolinker/apinto-dashboard/modules/application/application-entry"
@@ -18,9 +17,9 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/cluster"
 	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-model"
 	"github.com/eolinker/apinto-dashboard/modules/random"
+	"github.com/eolinker/apinto-dashboard/modules/strategy/config"
 	"github.com/eolinker/apinto-dashboard/modules/user"
 	"github.com/eolinker/eosc/common/bean"
-	"github.com/eolinker/eosc/log"
 	"golang.org/x/exp/slices"
 	"gorm.io/gorm"
 	"sort"
@@ -841,67 +840,6 @@ func (a *applicationService) AppInfo(ctx context.Context, namespaceId int, id st
 	return res, nil
 }
 
-func (a *applicationService) ResetOnline(ctx context.Context, namespaceId, clusterId int) {
-	runtimes, err := a.applicationRuntimeStore.GetByCluster(ctx, clusterId)
-	if err != nil {
-		log.Errorf("applicationService-ResetOnline-getRuntimes clusterId=%d, err=%s", clusterId, err.Error())
-		return
-	}
-
-	client, err := a.apintoClient.GetClient(ctx, clusterId)
-	if err != nil {
-		log.Errorf("applicationService-ResetOnline-getClient clusterId=%d, err=%s", clusterId, err.Error())
-		return
-	}
-
-	for _, runtime := range runtimes {
-		if !runtime.IsOnline {
-			continue
-		}
-
-		applicationInfo, err := a.applicationStore.Get(ctx, runtime.ApplicationId)
-		if err != nil {
-			log.Errorf("applicationService-ResetOnline-getApplication appId=%d,clusterId=%d, err=%s", runtime.ApplicationId, clusterId, err.Error())
-			continue
-		}
-
-		version, err := a.applicationVersionStore.Get(ctx, runtime.VersionId)
-		if err != nil {
-			log.Errorf("applicationService-ResetOnline-getVersion versionId=%d,clusterId=%d, err=%s", runtime.VersionId, clusterId, err.Error())
-			continue
-		}
-
-		//上线鉴权信息
-		authList, err := a.applicationAuthService.GetList(ctx, namespaceId, applicationInfo.IdStr)
-		if err != nil {
-			log.Errorf("applicationService-ResetOnline-getAuthList appIds=%s, err=%s", applicationInfo.IdStr, err.Error())
-			continue
-		}
-		auths := make([]v1.ApplicationAuth, 0)
-		for _, auth := range authList {
-			auths = append(auths, a.applicationAuthService.GetDriver(auth.Driver).ToApinto(auth.ExpireTime, auth.Position, auth.TokenName, []byte(auth.Config), auth.IsTransparent))
-		}
-
-		labels := make(map[string]string)
-		for _, attr := range version.CustomAttrList {
-			labels[attr.Key] = attr.Value
-		}
-
-		appConfig := &v1.ApplicationConfig{
-			Name:        applicationInfo.IdStr,
-			Driver:      "app",
-			Auth:        auths,
-			Labels:      labels,
-			Description: applicationInfo.Desc,
-			Additional:  a.getApplicationAdditional(version.ExtraParamList),
-		}
-		if err = client.ForApp().Create(*appConfig); err != nil {
-			log.Errorf("applicationService-ResetOnline-apinto appConfig=%v, clusterId=%d  err=%s", appConfig, clusterId, err.Error())
-			continue
-		}
-	}
-}
-
 func (a *applicationService) GetAppVersion(ctx context.Context, appId int) (*application_model.ApplicationVersion, error) {
 	var err error
 
@@ -928,7 +866,7 @@ func (a *applicationService) GetAppKeys(ctx context.Context, namespaceId int) ([
 
 	list := make([]*application_model.ApplicationKeys, 0)
 
-	keys := common.Map[string, []string]{}
+	keys := map[string][]string{}
 
 	for _, applicationInfo := range applications {
 
@@ -950,7 +888,7 @@ func (a *applicationService) GetAppKeys(ctx context.Context, namespaceId int) ([
 	for k, v := range keys {
 
 		newValues := make([]string, 0)
-		newValues = append(newValues, enum.FilterValuesALL)
+		newValues = append(newValues, config.FilterValuesALL)
 		newValues = append(newValues, v...)
 
 		list = append(list, &application_model.ApplicationKeys{

@@ -54,7 +54,7 @@ func (c *clusterController) clusters(ginCtx *gin.Context) {
 		})
 	}
 
-	m := common.Map[string, interface{}]{}
+	m := common.Map{}
 
 	m["clusters"] = list
 
@@ -87,7 +87,7 @@ func (c *clusterController) clusterEnum(ginCtx *gin.Context) {
 	}
 
 	envCluster := make([]*cluster_dto.EnvCluster, 0)
-	clusterMap := common.Map[string, []*cluster_model.Cluster]{}
+	clusterMap := map[string][]*cluster_model.Cluster{}
 
 	for _, clusterInfo := range list {
 		clusterMap[clusterInfo.Env] = append(clusterMap[clusterInfo.Env], clusterInfo)
@@ -112,7 +112,7 @@ func (c *clusterController) clusterEnum(ginCtx *gin.Context) {
 	sort.Slice(envCluster, func(i, j int) bool {
 		return envCluster[i].Name > envCluster[j].Name
 	})
-	m := common.Map[string, interface{}]{}
+	m := common.Map{}
 	m["envs"] = envCluster
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
 }
@@ -133,7 +133,7 @@ func (c *clusterController) cluster(ginCtx *gin.Context) {
 		return
 	}
 
-	m := common.Map[string, interface{}]{}
+	m := common.Map{}
 	m["cluster"] = &cluster_dto.ClusterOut{
 		Name:       clusterInfo.Name,
 		Title:      clusterInfo.Title,
@@ -268,7 +268,7 @@ func (c *clusterController) test(context *gin.Context) {
 	bytes, _ := json.Marshal(nodes)
 	source := common.Base64Encode(bytes)
 
-	m := common.Map[string, interface{}]{}
+	m := common.Map{}
 	m["nodes"] = list
 	m["source"] = source
 	m["is_update"] = isUpdate

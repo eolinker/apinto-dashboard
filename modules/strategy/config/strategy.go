@@ -1,4 +1,4 @@
-package enum
+package config
 
 const (
 	StrategyTraffic = "traffic"
@@ -40,12 +40,6 @@ const (
 	FilterValuesALL = "ALL"
 	ApiPathRegexp   = `^\*?[\w-/]+\*?$`
 
-	MetricsAPP      = "{application}"
-	MetricsAPI      = "{api}"
-	MetricsService  = "{service}"
-	MetricsStrategy = "{strategy}"
-	MetricsIP       = "{ip}"
-
 	//灰度策略分配方式
 	GreyDistributionPercent = "percent"
 	GreyDistributionMatch   = "match"
@@ -60,6 +54,10 @@ const (
 	CharsetASCII = "ASCII"
 )
 
+var (
+	strategyCharsets = []string{CharsetUTF8, CharsetGBK, CharsetASCII}
+)
+
 func GetStrategyCharsetList() []string {
-	return []string{CharsetUTF8, CharsetGBK, CharsetASCII}
+	return strategyCharsets
 }

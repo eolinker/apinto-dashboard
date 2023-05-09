@@ -7,14 +7,12 @@ import (
 
 	"github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/modules/cluster"
-	"github.com/eolinker/apinto-dashboard/modules/online"
 	"github.com/eolinker/eosc/common/bean"
 )
 
 type apintoClientService struct {
 	clusterNodeService cluster.IClusterNodeService
 	clusterService     cluster.IClusterService
-	resetOnline        online.IResetOnlineService
 	lock               *sync.Mutex
 	clientMap          map[int]v1.IClient
 }
@@ -24,7 +22,6 @@ func (c *apintoClientService) SetClient(namespaceId, clusterId int) {
 	defer c.lock.Unlock()
 	delete(c.clientMap, clusterId)
 	//重新上线
-	go c.resetOnline.ResetOnline(context.Background(), namespaceId, clusterId)
 }
 
 func newApintoClientService() cluster.IApintoClient {
@@ -34,7 +31,7 @@ func newApintoClientService() cluster.IApintoClient {
 	}
 	bean.Autowired(&s.clusterService)
 	bean.Autowired(&s.clusterNodeService)
-	bean.Autowired(&s.resetOnline)
+	//bean.Autowired(&s.resetOnline)
 	return s
 }
 

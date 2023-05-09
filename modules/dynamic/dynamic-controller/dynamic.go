@@ -39,14 +39,10 @@ type dynamicController struct {
 	Render     map[string]Render
 }
 
-func newDynamicController(name string, define interface{}) *dynamicController {
-	//tmp, _ := json.Marshal(define)
-	var cfg DynamicDefine
-	json.Unmarshal(define.([]byte), &cfg)
-	v, ok := define.([]byte)
-	log.Error(name, string(v), ok)
+func newDynamicController(name string, define *DynamicDefine) *dynamicController {
+
 	render := make(map[string]Render)
-	for key, value := range cfg.Render {
+	for key, value := range define.Render {
 		r := make(Render)
 		err := json.Unmarshal([]byte(value), &r)
 		if err != nil {
@@ -55,17 +51,17 @@ func newDynamicController(name string, define interface{}) *dynamicController {
 		}
 		render[key] = r
 	}
-	drivers := make([]string, 0, len(cfg.Drivers))
-	for _, driver := range cfg.Drivers {
+	drivers := make([]string, 0, len(define.Drivers))
+	for _, driver := range define.Drivers {
 		drivers = append(drivers, driver.Name)
 	}
 	d := &dynamicController{
 		moduleName: name,
 		drivers:    drivers,
-		Profession: cfg.Profession,
-		Drivers:    cfg.Drivers,
-		Fields:     cfg.Fields,
-		Skill:      cfg.Skill,
+		Profession: define.Profession,
+		Drivers:    define.Drivers,
+		Fields:     define.Fields,
+		Skill:      define.Skill,
 		Render:     render,
 	}
 	bean.Autowired(&d.dynamicService)
