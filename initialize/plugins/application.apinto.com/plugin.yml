@@ -100,7 +100,10 @@ define:
                   "properties": {
                     "config.key": {
                       "type": "string",
-                      "x-component": "Input"
+                      "x-decorator": "FormItem",
+                      "x-component": "Input",
+                      "required": true,
+                      "x-disabled":true
                     }
                   }
                 },
@@ -114,7 +117,10 @@ define:
                   "properties": {
                     "config.value": {
                       "type": "string",
-                      "x-component": "Input"
+                      "x-decorator": "FormItem",
+                      "x-component": "Input",
+                      "required": true,
+                      "x-disabled":true
                     }
                   }
                 },
@@ -122,13 +128,16 @@ define:
                   "type": "void",
                   "x-component": "ArrayTable.Column",
                   "x-component-props": {
-                    "width": 100,
+                    "width": 120,
                     "title": "参数位置"
                   },
                   "properties": {
                     "config.position": {
                       "type": "string",
+                      "x-decorator": "FormItem",
                       "x-component": "Select",
+                      "required": true,
+                      "x-disabled":true,
                       "enum": [
                         {
                           "children": [],
@@ -148,6 +157,38 @@ define:
                   "type": "void",
                   "x-component": "ArrayTable.Column",
                   "x-component-props": {
+                    "width": 120,
+                    "title": "参数替换规则"
+                  },
+                  "properties": {
+                    "config.conflict": {
+                      "type": "string",
+                      "x-decorator": "FormItem",
+                      "x-component": "Select",
+                      "required": true,
+                      "x-disabled":true,
+                      "enum": [
+                        {
+                          "children": [],
+                          "label": "convert",
+                          "value": "convert"
+                        }, {
+                          "children": [],
+                          "label": "origin",
+                          "value": "origin"
+                        }, {
+                          "children": [],
+                          "label": "error",
+                          "value": "error"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "column7": {
+                  "type": "void",
+                  "x-component": "ArrayTable.Column",
+                  "x-component-props": {
                     "title": "操作",
                     "dataIndex": "operations",
                     "width": 98,
@@ -159,7 +200,8 @@ define:
                       "properties": {
                         "remove": {
                           "type": "void",
-                          "x-component": "ArrayTable.Remove"
+                          "x-component": "ArrayTable.Remove",
+                          "x-index":1
                         },
                         "config": {
                           "type": "object",
@@ -167,7 +209,8 @@ define:
                           "x-component-props": {
                             "render": "{\"type\":\"object\",\"properties\":{\"key\":{\"type\":\"string\",\"title\":\"参数名\",\"required\":true,\"x-decorator\":\"FormItem\",\"x-component\":\"Input\"},\"position\":{\"type\":\"string\",\"title\":\"参数位置\",\"required\":true,\"x-decorator\":\"FormItem\",\"x-component\":\"Select\",\"enum\":[{\"children\":[],\"label\":\"请求头部\",\"value\":\"header\"},{\"children\":[],\"label\":\"Query\",\"value\":\"query\"}],\"default\":\"header\"},\"value\":{\"type\":\"string\",\"title\":\"参数值\",\"required\":true,\"x-decorator\":\"FormItem\",\"x-component\":\"Input\"},\"conflict\":{\"type\":\"string\",\"title\":\"参数存在替换规则\",\"required\":true,\"x-decorator\":\"FormItem\",\"x-component\":\"Select\",\"enum\":[{\"children\":[],\"label\":\"convert\",\"value\":\"convert\"},{\"children\":[],\"label\":\"origin\",\"value\":\"origin\"},{\"children\":[],\"label\":\"error\",\"value\":\"error\"}],\"default\":\"convert\"},\"labels\":{\"type\":\"string\",\"title\":\"Labels\",\"x-decorator\":\"FormItem\",\"x-component\":\"SimpleMapComponent\",\"x-validator\":[],\"x-component-props\":{\"placeholderKey\":\"请输入Key\",\"placeholderValue\":\"请输入Value\"},\"x-decorator-props\":{\"labelCol\":6,\"wrapperCol\":10}}}}",
                             "title": "额外参数"
-                          }
+                          },
+                          "x-index":0
                         }
                       }
                     }
@@ -186,7 +229,8 @@ define:
                 "x-component-props": {
                   "defaultValue": {
                     "config": {
-                      "position": "header"
+                      "position": "header",
+                      "conflict":"convert"
                     }
                   }
                 },
@@ -222,7 +266,27 @@ define:
                   "properties": {
                     "config.driver": {
                       "type": "string",
-                      "x-component": "Input"
+                      "x-decorator": "FormItem",
+                      "x-component": "Select",
+                      "required": true,
+                      "x-disabled":true,
+                      "enum": [{
+                        "children": [],
+                        "label": "Basic",
+                        "value": "basic"
+                      }, {
+                        "children": [],
+                        "label": "ApiKey",
+                        "value": "apikey"
+                      }, {
+                        "children": [],
+                        "label": "AkSk",
+                        "value": "aksk"
+                      }, {
+                        "children": [],
+                        "label": "Jwt",
+                        "value": "jwt"
+                      }]
                     }
                   }
                 },
@@ -230,13 +294,25 @@ define:
                   "type": "void",
                   "x-component": "ArrayTable.Column",
                   "x-component-props": {
-                    "width": 100,
+                    "width": 120,
                     "title": "参数位置"
                   },
                   "properties": {
-                    "config.param_position": {
+                    "config.position": {
                       "type": "string",
-                      "x-component": "Input"
+                      "x-decorator": "FormItem",
+                      "x-component": "Select",
+                      "required": true,
+                      "x-disabled":true,
+                      "enum": [{
+                        "children": [],
+                        "label": "Header",
+                        "value": "header"
+                      }, {
+                        "children": [],
+                        "label": "Query",
+                        "value": "query"
+                      }]
                     }
                   }
                 },
@@ -248,8 +324,11 @@ define:
                     "title": "参数名"
                   },
                   "properties": {
-                    "config.param_name": {
+                    "config.token_name": {
                       "type": "string",
+                      "required": true,
+                      "x-disabled":true,
+                      "x-decorator": "FormItem",
                       "x-component": "Input"
                     }
                   }
@@ -258,13 +337,30 @@ define:
                   "type": "void",
                   "x-component": "ArrayTable.Column",
                   "x-component-props": {
-                    "width": 100,
+                    "width": 200,
                     "title": "参数信息"
                   },
                   "properties": {
                     "config.param_info": {
                       "type": "string",
-                      "x-component": "Input"
+                      "x-component": "Input",
+                      "x-read-pretty": true,
+                      "x-decorator": "FormItem",
+                      "x-reactions":[
+                        {"dependencies":[".param_info"],
+                      "when":"{{$deps[0]}}",
+                    "fulfill":{
+                      "schema":{
+                        "x-visible":true
+                      }
+                    },
+                    "otherwise":{
+                      "schema":{
+                        "x-visible":false
+                      }
+                    }
+                  }
+                      ]
                     }
                   }
                 },
@@ -272,13 +368,14 @@ define:
                   "type": "void",
                   "x-component": "ArrayTable.Column",
                   "x-component-props": {
-                    "width": 100,
+                    "width": 150,
                     "title": "过期时间"
                   },
                   "properties": {
                     "config.expire_time": {
                       "type": "string",
-                      "x-component": "DatePicker"
+                      "x-component": "DatePicker",
+                      "x-disabled":true
                     }
                   }
                 },
@@ -292,7 +389,8 @@ define:
                   "properties": {
                     "config.is_transparent": {
                       "type": "string",
-                      "x-component": "Switch"
+                      "x-component": "Switch",
+                      "x-disabled":true
                     }
                   }
                 },
@@ -317,7 +415,7 @@ define:
                           "type": "object",
                           "x-component": "CustomDialogComponent",
                           "x-component-props": {
-                            "render": "{\"type\":\"object\",\"properties\":{\"is_transparent\":{\"type\":\"string\",\"title\":\"隐藏鉴权信息\",\"required\":true,\"x-decorator\":\"FormItem\",\"x-component\":\"Switch\"},\"driver\":{\"type\":\"string\",\"title\":\"鉴权类型\",\"required\":true,\"x-decorator\":\"FormItem\",\"x-component\":\"Select\",\"enum\":[{\"children\":[],\"label\":\"Basic\",\"value\":\"basic\"},{\"children\":[],\"label\":\"ApiKey\",\"value\":\"apikey\"},{\"children\":[],\"label\":\"AkSk\",\"value\":\"aksk\"},{\"children\":[],\"label\":\"Jwt\",\"value\":\"jwt\"}],\"default\":\"header\"},\"position\":{\"type\":\"string\",\"title\":\"参数位置\",\"required\":true,\"x-decorator\":\"FormItem\",\"x-component\":\"Select\",\"enum\":[{\"children\":[],\"label\":\"Header\",\"value\":\"header\"},{\"children\":[],\"label\":\"Query\",\"value\":\"query\"}]},\"token_name\":{\"type\":\"string\",\"title\":\"参数名称\",\"required\":true,\"x-decorator\":\"FormItem\",\"x-component\":\"Input\"},\"user_name\":{\"type\":\"string\",\"title\":\"用户名\",\"required\":true,\"x-decorator\":\"FormItem\",\"x-component\":\"Input\",\"x-component-props\":{\"placeholder\":\"英文数字下划线任意一种，首字母必须为英文\"},\"x-reactions\":{\"dependencies\":[\".driver\"],\"when\":\"{{$deps[0] === 'basic'}}\",\"fulfill\":{\"state\":{\"visible\":true}},\"otherwise\":{\"state\":{\"visible\":false}}}},\"password\":{\"type\":\"string\",\"title\":\"密码\",\"required\":true,\"x-decorator\":\"FormItem\",\"x-component\":\"Input\",\"x-component-props\":{\"placeholder\":\"请输入\"},\"x-reactions\":{\"dependencies\":[\".driver\"],\"when\":\"{{$deps[0] === 'basic'}}\",\"fulfill\":{\"state\":{\"visible\":true}},\"otherwise\":{\"state\":{\"visible\":false}}}},\"apikey\":{\"type\":\"string\",\"title\":\"Apikey\",\"required\":true,\"x-decorator\":\"FormItem\",\"x-component\":\"Input\",\"x-component-props\":{\"placeholder\":\"请输入\"},\"x-reactions\":{\"dependencies\":[\".driver\"],\"when\":\"{{$deps[0] === 'apikey'}}\",\"fulfill\":{\"state\":{\"visible\":true}},\"otherwise\":{\"state\":{\"visible\":false}}}},\"ak\":{\"type\":\"string\",\"title\":\"AK\",\"required\":true,\"x-decorator\":\"FormItem\",\"x-component\":\"Input\",\"x-component-props\":{\"placeholder\":\"请输入\"},\"x-reactions\":{\"dependencies\":[\".driver\"],\"when\":\"{{$deps[0] === 'aksk'}}\",\"fulfill\":{\"state\":{\"visible\":true}},\"otherwise\":{\"state\":{\"visible\":false}}}},\"sk\":{\"type\":\"string\",\"title\":\"SK\",\"required\":true,\"x-decorator\":\"FormItem\",\"x-component\":\"Input\",\"x-component-props\":{\"placeholder\":\"请输入\"},\"x-reactions\":{\"dependencies\":[\".driver\"],\"when\":\"{{$deps[0] === 'aksk'}}\",\"fulfill\":{\"state\":{\"visible\":true}},\"otherwise\":{\"state\":{\"visible\":false}}}},\"iss\":{\"type\":\"string\",\"title\":\"Iss\",\"required\":true,\"x-decorator\":\"FormItem\",\"x-component\":\"Input\",\"x-component-props\":{\"placeholder\":\"请输入\"},\"x-reactions\":{\"dependencies\":[\".driver\"],\"when\":\"{{$deps[0] === 'jwt'}}\",\"fulfill\":{\"state\":{\"visible\":true}},\"otherwise\":{\"state\":{\"visible\":false}}}},\"algorithm\":{\"type\":\"string\",\"title\":\"签名算法\",\"required\":true,\"x-decorator\":\"FormItem\",\"x-component\":\"Select\",\"enum\":[\"HS256\",\"HS384\",\"HS512\",\"RS256\",\"RS384\",\"RS512\",\"ES256\",\"ES384\",\"ES512\"],\"default\":\"HS256\"},\"secret\":{\"type\":\"string\",\"title\":\"Secret\",\"required\":true,\"x-decorator\":\"FormItem\",\"x-component\":\"Input\",\"x-component-props\":{\"placeholder\":\"请输入\"},\"x-reactions\":{\"dependencies\":[\".driver\",\".algorithm\"],\"when\":\"{{$deps[0] === 'jwt' && $deps[1]!=='HS256' &&  $deps[1]!=='HS384'  && $deps[1]!=='HS512' }}\",\"fulfill\":{\"state\":{\"visible\":true}},\"otherwise\":{\"state\":{\"visible\":false}}}},\"public_key\":{\"type\":\"string\",\"title\":\"RSA公钥\",\"required\":true,\"x-decorator\":\"FormItem\",\"x-component\":\"Input\",\"x-component-props\":{\"placeholder\":\"请输入\"},\"x-reactions\":{\"dependencies\":[\".driver\",\".algorithm\"],\"when\":\"{{$deps[0] === 'jwt' && $deps[1]!=='HS256' &&  $deps[1]!=='HS384'  && $deps[1]!=='HS512'\",\"fulfill\":{\"state\":{\"visible\":true}},\"otherwise\":{\"state\":{\"visible\":false}}}},\"user\":{\"type\":\"string\",\"title\":\"用户名\",\"required\":true,\"x-decorator\":\"FormItem\",\"x-component\":\"Input\",\"x-component-props\":{\"placeholder\":\"请输入\"},\"x-reactions\":{\"dependencies\":[\".driver\"],\"when\":\"{{$deps[0] === 'jwt'}}\",\"fulfill\":{\"state\":{\"visible\":true}},\"otherwise\":{\"state\":{\"visible\":false}}}},\"user_path\":{\"type\":\"string\",\"title\":\"用户名JsonPath\",\"required\":true,\"x-decorator\":\"FormItem\",\"x-component\":\"Input\",\"x-component-props\":{\"placeholder\":\"请输入\"},\"x-reactions\":{\"dependencies\":[\".driver\"],\"when\":\"{{$deps[0] === 'jwt'}}\",\"fulfill\":{\"state\":{\"visible\":true}},\"otherwise\":{\"state\":{\"visible\":false}}}},\"claims_to_verify\":{\"type\":\"string\",\"title\":\"校验字段\",\"required\":true,\"x-decorator\":\"FormItem\",\"x-component\":\"Select\",\"x-component-props\":{\"mode\":\"multiple\",\"placeholder\":\"请输入\"},\"enum\":[\"exp\",\"nbf\"],\"x-reactions\":{\"dependencies\":[\".driver\"],\"when\":\"{{$deps[0] === 'aksk'}}\",\"fulfill\":{\"state\":{\"visible\":true}},\"otherwise\":{\"state\":{\"visible\":false}}}},\"labels\":{\"type\":\"string\",\"title\":\"Labels\",\"x-decorator\":\"FormItem\",\"x-component\":\"SimpleMapComponent\",\"x-validator\":[],\"x-component-props\":{\"placeholderKey\":\"请输入Key\",\"placeholderValue\":\"请输入Value\"}},\"expire_time\":{\"type\":\"string\",\"title\":\"过期时间\",\"x-decorator\":\"FormItem\",\"x-component\":\"DatePicker\",\"x-validator\":[],\"x-component-props\":{\"placeholderKey\":\"请输入Key\",\"placeholderValue\":\"请输入Value\"}}}}",
+                            "render": "{\"type\":\"object\",\"properties\":{\"is_transparent\":{\"type\":\"string\",\"title\":\"隐藏鉴权信息\",\"x-decorator\":\"FormItem\",\"x-component\":\"Switch\"},\"driver\":{\"type\":\"string\",\"title\":\"鉴权类型\",\"required\":true,\"x-decorator\":\"FormItem\",\"x-component\":\"Select\",\"enum\":[{\"label\":\"Basic\",\"value\":\"basic\"},{\"label\":\"ApiKey\",\"value\":\"apikey\"},{\"label\":\"AkSk\",\"value\":\"aksk\"},{\"children\":[],\"label\":\"Jwt\",\"value\":\"jwt\"}],\"default\":\"basic\"},\"position\":{\"type\":\"string\",\"title\":\"参数位置\",\"required\":true,\"x-decorator\":\"FormItem\",\"x-component\":\"Select\",\"enum\":[{\"children\":[],\"label\":\"Header\",\"value\":\"header\"},{\"children\":[],\"label\":\"Query\",\"value\":\"query\"}],\"default\":\"header\"},\"token_name\":{\"type\":\"string\",\"title\":\"参数名称\",\"required\":true,\"x-decorator\":\"FormItem\",\"x-component\":\"Input\",\"x-component-props\":{\"placeholder\":\"请输入\"}},\"user_name\":{\"type\":\"string\",\"title\":\"用户名\",\"required\":true,\"pattern\":\"^[a-zA-Z][a-zA-Z0-9-_]*$\",\"x-decorator\":\"FormItem\",\"x-component\":\"Input\",\"x-component-props\":{\"placeholder\":\"英文数字下划线任意一种，首字母必须为英文\"},\"x-reactions\":{\"dependencies\":[\".driver\"],\"when\":\"{{$deps[0] === 'basic'}}\",\"fulfill\":{\"state\":{\"visible\":true}},\"otherwise\":{\"state\":{\"visible\":false}}},\"default\":\"Authorization\"},\"password\":{\"type\":\"string\",\"title\":\"密码\",\"required\":true,\"x-decorator\":\"FormItem\",\"x-component\":\"Input\",\"x-component-props\":{\"placeholder\":\"请输入\"},\"x-reactions\":{\"dependencies\":[\".driver\"],\"when\":\"{{$deps[0] === 'basic'}}\",\"fulfill\":{\"state\":{\"visible\":true}},\"otherwise\":{\"state\":{\"visible\":false}}}},\"apikey\":{\"type\":\"string\",\"title\":\"Apikey\",\"required\":true,\"x-decorator\":\"FormItem\",\"x-component\":\"Input\",\"x-component-props\":{\"placeholder\":\"请输入\"},\"x-reactions\":{\"dependencies\":[\".driver\"],\"when\":\"{{$deps[0] === 'apikey'}}\",\"fulfill\":{\"state\":{\"visible\":true}},\"otherwise\":{\"state\":{\"visible\":false}}}},\"ak\":{\"type\":\"string\",\"title\":\"AK\",\"required\":true,\"x-decorator\":\"FormItem\",\"x-component\":\"Input\",\"x-component-props\":{\"placeholder\":\"请输入\"},\"x-reactions\":{\"dependencies\":[\".driver\"],\"when\":\"{{$deps[0] === 'aksk'}}\",\"fulfill\":{\"state\":{\"visible\":true}},\"otherwise\":{\"state\":{\"visible\":false}}}},\"sk\":{\"type\":\"string\",\"title\":\"SK\",\"required\":true,\"x-decorator\":\"FormItem\",\"x-component\":\"Input\",\"x-component-props\":{\"placeholder\":\"请输入\"},\"x-reactions\":{\"dependencies\":[\".driver\"],\"when\":\"{{$deps[0] === 'aksk'}}\",\"fulfill\":{\"state\":{\"visible\":true}},\"otherwise\":{\"state\":{\"visible\":false}}}},\"iss\":{\"type\":\"string\",\"title\":\"Iss\",\"required\":true,\"x-decorator\":\"FormItem\",\"x-component\":\"Input\",\"x-component-props\":{\"placeholder\":\"请输入\"},\"x-reactions\":{\"dependencies\":[\".driver\"],\"when\":\"{{$deps[0] === 'jwt'}}\",\"fulfill\":{\"state\":{\"visible\":true}},\"otherwise\":{\"state\":{\"visible\":false}}}},\"algorithm\":{\"type\":\"string\",\"title\":\"签名算法\",\"required\":true,\"x-decorator\":\"FormItem\",\"x-component\":\"Select\",\"enum\":[\"HS256\",\"HS384\",\"HS512\",\"RS256\",\"RS384\",\"RS512\",\"ES256\",\"ES384\",\"ES512\"],\"default\":\"HS256\",\"x-reactions\":{\"dependencies\":[\".driver\"],\"when\":\"{{$deps[0] === 'jwt'}}\",\"fulfill\":{\"state\":{\"visible\":true}},\"otherwise\":{\"state\":{\"visible\":false}}}},\"secret\":{\"type\":\"string\",\"title\":\"Secret\",\"required\":true,\"x-decorator\":\"FormItem\",\"x-component\":\"Input\",\"x-component-props\":{\"placeholder\":\"请输入\"},\"x-reactions\":{\"dependencies\":[\".driver\",\".algorithm\"],\"when\":\"{{$deps[0] === 'jwt' && ( $deps[1]==='HS256' ||  $deps[1]==='HS384'  || $deps[1]==='HS512') }}\",\"fulfill\":{\"state\":{\"visible\":true}},\"otherwise\":{\"state\":{\"visible\":false}}}},\"public_key\":{\"type\":\"string\",\"title\":\"RSA公钥\",\"required\":true,\"x-decorator\":\"FormItem\",\"x-component\":\"Input\",\"x-component-props\":{\"placeholder\":\"请输入\"},\"x-reactions\":{\"dependencies\":[\".driver\",\".algorithm\"],\"when\":\"{{$deps[0] === 'jwt' && $deps[1]!=='HS256' &&  $deps[1]!=='HS384'  && $deps[1]!=='HS512' }}\",\"fulfill\":{\"state\":{\"visible\":true}},\"otherwise\":{\"state\":{\"visible\":false}}}},\"user\":{\"type\":\"string\",\"title\":\"用户名\",\"x-decorator\":\"FormItem\",\"x-component\":\"Input\",\"x-component-props\":{\"placeholder\":\"请输入\"},\"x-reactions\":{\"dependencies\":[\".driver\"],\"when\":\"{{$deps[0] === 'jwt'}}\",\"fulfill\":{\"state\":{\"visible\":true}},\"otherwise\":{\"state\":{\"visible\":false}}}},\"user_path\":{\"type\":\"string\",\"title\":\"用户名JsonPath\",\"x-decorator\":\"FormItem\",\"x-component\":\"Input\",\"x-component-props\":{\"placeholder\":\"请输入\"},\"x-reactions\":{\"dependencies\":[\".driver\"],\"when\":\"{{$deps[0] === 'jwt'}}\",\"fulfill\":{\"state\":{\"visible\":true}},\"otherwise\":{\"state\":{\"visible\":false}}}},\"claims_to_verify\":{\"type\":\"string\",\"title\":\"校验字段\",\"x-decorator\":\"FormItem\",\"x-component\":\"Select\",\"x-component-props\":{\"mode\":\"multiple\",\"placeholder\":\"请输入\"},\"enum\":[\"exp\",\"nbf\"],\"x-reactions\":{\"dependencies\":[\".driver\"],\"when\":\"{{$deps[0] === 'jwt'}}\",\"fulfill\":{\"state\":{\"visible\":true}},\"otherwise\":{\"state\":{\"visible\":false}}}},\"signature_is_base64\":{\"type\":\"boolean\",\"title\":\"是否Base64加密\",\"x-decorator\":\"FormItem\",\"x-component\":\"Switch\",\"x-reactions\":{\"dependencies\":[\".driver\",\".algorithm\"],\"when\":\"{{$deps[0] === 'jwt' &&( $deps[1]==='HS256' ||  $deps[1]==='HS384'  || $deps[1]==='HS512' )}}\",\"fulfill\":{\"state\":{\"visible\":true}},\"otherwise\":{\"state\":{\"visible\":false}}}},\"labels\":{\"type\":\"string\",\"title\":\"Labels\",\"x-decorator\":\"FormItem\",\"x-component\":\"SimpleMapComponent\",\"x-validator\":[],\"x-component-props\":{\"placeholderKey\":\"请输入Key\",\"placeholderValue\":\"请输入Value\"}},\"expire_time\":{\"type\":\"string\",\"title\":\"过期时间\",\"x-decorator\":\"FormItem\",\"x-component\":\"DatePicker\",\"x-validator\":[],\"x-component-props\":{\"placeholderKey\":\"请输入Key\",\"placeholderValue\":\"请输入Value\"}}}}",
                             "title": "鉴权"
                           }
                         }
@@ -331,13 +429,33 @@ define:
               "add": {
                 "type": "void",
                 "x-component": "ArrayTable.Addition",
-                "x-component-props": {},
+                "x-component-props": {
+                  "defaultValue": {
+                    "config": {
+                      "driver": "basic",
+                      "position":"header"
+                    }
+                  }},
                 "title": "添加条目"
               }
             },
             "x-decorator-props": {
               "labelCol": 6,
               "wrapperCol": 10
+            },
+            "x-reactions":{
+              "dependencies":[".anonymous"],
+              "when": "{{$deps[0]}}",
+      				"fulfill": {
+      					"state": {
+      						"visible": false
+      					}
+      				},
+      				"otherwise": {
+      					"state": {
+      						"visible": true
+      					}
+      				}
             },
             "x-index": 3
           },
