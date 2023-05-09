@@ -4,6 +4,7 @@ import (
 	"fmt"
 	grpc_service "github.com/eolinker/apinto-dashboard/grpc-service"
 	"github.com/eolinker/apinto-dashboard/modules/grpc-service/service"
+	"github.com/eolinker/apinto-dashboard/modules/notice"
 	apinto_module "github.com/eolinker/apinto-module"
 	"github.com/soheilhy/cmux"
 	"google.golang.org/grpc"
@@ -66,6 +67,9 @@ func run() {
 	coreService.ReloadModule()
 	go plugin_timer.ExtenderTimer()
 
+	//初始化通知渠道驱动
+	initNoticeChannelDriver()
+
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", GetPort()))
 	if err != nil {
 		panic(err)
@@ -116,4 +120,13 @@ func (f *Front) CreateEngine() *gin.Engine {
 	engine := gin.Default()
 	engine.Use(apinto_module.SetRepeatReader)
 	return engine
+}
+
+func initNoticeChannelDriver() {
+	var noticeChannelService notice.INoticeChannelService
+	bean.Autowired(&noticeChannelService)
+	err := noticeChannelService.InitChannelDriver()
+	if err != nil {
+		panic(err)
+	}
 }
