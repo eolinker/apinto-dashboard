@@ -43,11 +43,11 @@ type StrategyInfoOutput[T any] struct {
 	Config  *T
 }
 
-type ExtenderData struct {
-	Api         map[string]*RemoteApis         `json:"api"`
-	Service     map[string]*RemoteServices     `json:"service"`
-	Application map[string]*RemoteApplications `json:"application"`
-}
+//type ExtenderData struct {
+//	Api         map[string]*RemoteApis         `json:"api"`
+//	Service     map[string]*RemoteServices     `json:"service"`
+//	Application map[string]*RemoteApplications `json:"application"`
+//}
 
 type FilterOutput struct {
 	Name   string   `json:"name"`
@@ -121,5 +121,5 @@ type VisitInfoOutputConf struct {
 	VisitRule       string          `json:"visit_rule"`
 	InfluenceSphere []*FilterOutput `json:"influence_sphere"`
 	Continue        bool            `json:"continue"`
-	Extender        *ExtenderData   `json:"extender"`
+	//Extender        *ExtenderData   `json:"extender"`
 }
