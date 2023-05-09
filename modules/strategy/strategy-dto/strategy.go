@@ -1,28 +1,29 @@
 package strategy_dto
 
 import (
-	"github.com/eolinker/apinto-dashboard/enum"
+	"github.com/eolinker/apinto-dashboard/modules/strategy/config"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-model"
+	apinto_module "github.com/eolinker/apinto-module"
 )
 
 type StrategyListOut struct {
-	UUID       string                    `json:"uuid,omitempty"`
-	Name       string                    `json:"name,omitempty"`
-	Priority   int                       `json:"priority,omitempty"`
-	IsStop     bool                      `json:"is_stop"`
-	IsDelete   bool                      `json:"is_deleted"`
-	Status     enum.StrategyOnlineStatus `json:"status"`
-	Filters    string                    `json:"filters,omitempty"`
-	Conf       string                    `json:"conf,omitempty"`
-	Operator   string                    `json:"operator,omitempty"`
-	UpdateTime string                    `json:"update_time,omitempty"`
+	UUID       string                      `json:"uuid,omitempty"`
+	Name       string                      `json:"name,omitempty"`
+	Priority   int                         `json:"priority,omitempty"`
+	IsStop     bool                        `json:"is_stop"`
+	IsDelete   bool                        `json:"is_deleted"`
+	Status     config.StrategyOnlineStatus `json:"status"`
+	Filters    string                      `json:"filters,omitempty"`
+	Conf       string                      `json:"conf,omitempty"`
+	Operator   string                      `json:"operator,omitempty"`
+	UpdateTime string                      `json:"update_time,omitempty"`
 }
 
 type StrategyToPublishListOut struct {
-	Name     string                    `json:"name"`
-	Priority int                       `json:"priority"`
-	Status   enum.StrategyOnlineStatus `json:"status"`
-	OptTime  string                    `json:"opt_time"`
+	Name     string                      `json:"name"`
+	Priority int                         `json:"priority"`
+	Status   config.StrategyOnlineStatus `json:"status"`
+	OptTime  string                      `json:"opt_time"`
 }
 
 type StrategyPublish struct {
@@ -79,14 +80,27 @@ type MetricsOptionsItem struct {
 	Name  string `json:"name"`
 	Title string `json:"title"`
 }
+type RemoteOptionTitle struct {
+	Title string `json:"title"`
+	Field string `json:"field"`
+}
+
+func CreateRemoteOptionTitleFromOption(input []apinto_module.OptionTitle) []RemoteOptionTitle {
+	r := make([]RemoteOptionTitle, len(input))
+	for i := range input {
+		r[i].Field, r[i].Title = input[i].Field, input[i].Title
+	}
+	return r
+}
 
 type FilterRemoteOutput struct {
-	Target       string                               `json:"target"`
-	Titles       []*strategy_model.RemoteTitles       `json:"titles"`
-	Apis         []*strategy_model.RemoteApis         `json:"apis"`
-	Services     []*strategy_model.RemoteServices     `json:"services"`
-	Applications []*strategy_model.RemoteApplications `json:"applications"`
-	Total        int                                  `json:"total"`
+	Target string              `json:"target"`
+	Titles []RemoteOptionTitle `json:"titles"`
+	//Apis         []*strategy_model.RemoteApis         `json:"apis"`
+	//Services     []*strategy_model.RemoteServices     `json:"services"`
+	//Applications []*strategy_model.RemoteApplications `json:"applications"`
+	List  []any `json:"list"`
+	Total int   `json:"total"`
 }
 
 type StrategyPublishHistory struct {
@@ -99,8 +113,8 @@ type StrategyPublishHistory struct {
 }
 
 type StrategyPublishHistoryDetails struct {
-	Name       string                    `json:"name"`
-	Priority   int                       `json:"priority"`
-	Status     enum.StrategyOnlineStatus `json:"status"`
-	CreateTime string                    `json:"opt_time"`
+	Name       string                      `json:"name"`
+	Priority   int                         `json:"priority"`
+	Status     config.StrategyOnlineStatus `json:"status"`
+	CreateTime string                      `json:"opt_time"`
 }

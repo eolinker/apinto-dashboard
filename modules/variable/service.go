@@ -3,7 +3,6 @@ package variable
 import (
 	"context"
 	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-dto"
-	"github.com/eolinker/apinto-dashboard/modules/online"
 	"github.com/eolinker/apinto-dashboard/modules/variable/variable-model"
 )
 
@@ -29,5 +28,5 @@ type IClusterVariableService interface {
 	GetSyncConf(ctx context.Context, namespaceId int, clusterName string) (*variable_model.ClustersVariables, error)
 	PublishHistory(ctx context.Context, namespaceId, pageNum, pageSize int, clusterName string) ([]*variable_model.VariablePublish, int, error)
 	GetPublishVersion(ctx context.Context, clusterId int) (*variable_model.VariablePublishVersion, error)
-	online.IResetOnlineService
+	//online.IResetOnlineService
 }

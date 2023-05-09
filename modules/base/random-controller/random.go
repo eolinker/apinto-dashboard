@@ -23,7 +23,7 @@ func NewRandomController() *RandomController {
 func (r *RandomController) GET(ginCtx *gin.Context) {
 	template := ginCtx.Param("template")
 	randomStr := r.randomService.RandomStr(template)
-	m := common.Map[string, interface{}]{}
+	m := common.Map{}
 
 	m["id"] = strings.ToLower(randomStr)
 

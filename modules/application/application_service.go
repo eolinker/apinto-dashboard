@@ -6,7 +6,6 @@ import (
 	driverInfo "github.com/eolinker/apinto-dashboard/driver"
 	application_dto2 "github.com/eolinker/apinto-dashboard/modules/application/application-dto"
 	application_model2 "github.com/eolinker/apinto-dashboard/modules/application/application-model"
-	"github.com/eolinker/apinto-dashboard/modules/online"
 )
 
 type IApplicationService interface {
@@ -25,7 +24,7 @@ type IApplicationService interface {
 	OnlineList(ctx context.Context, namespaceId int, id string) ([]*application_model2.ApplicationOnline, error)
 	GetAppKeys(ctx context.Context, namespaceId int) ([]*application_model2.ApplicationKeys, error)
 	GetAppVersion(ctx context.Context, appId int) (*application_model2.ApplicationVersion, error)
-	online.IResetOnlineService
+	//online.IResetOnlineService
 }
 
 type IApplicationAuthService interface {
