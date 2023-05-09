@@ -174,7 +174,7 @@ func (c *dynamicController) online(ctx *gin.Context) {
 		return
 	}
 	userId := users.GetUserId(ctx)
-	success, fail, err := c.dynamicService.Online(ctx, namespaceID, c.Profession, uuid, tmp.Cluster, userId)
+	success, fail, err := c.dynamicService.Online(ctx, namespaceID, c.Profession, c.moduleName, uuid, tmp.Cluster, userId)
 	if err != nil {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
 		return
@@ -199,7 +199,7 @@ func (c *dynamicController) offline(ctx *gin.Context) {
 		return
 	}
 	userId := users.GetUserId(ctx)
-	success, fail, err := c.dynamicService.Offline(ctx, namespaceID, c.Profession, uuid, tmp.Cluster, userId)
+	success, fail, err := c.dynamicService.Offline(ctx, namespaceID, c.Profession, c.moduleName, uuid, tmp.Cluster, userId)
 	if err != nil {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
 		return
@@ -287,7 +287,7 @@ func (c *dynamicController) batchDelete(ctx *gin.Context) {
 			fail = append(fail, uuid)
 			continue
 		}
-		err = c.dynamicService.Delete(ctx, namespaceID, c.Profession, uuid)
+		err = c.dynamicService.Delete(ctx, namespaceID, c.Profession, c.moduleName, uuid)
 		if err != nil {
 			fail = append(fail, uuid)
 		} else {
@@ -313,7 +313,7 @@ func (c *dynamicController) create(ctx *gin.Context) {
 		return
 	}
 	body, _ := json.Marshal(worker.Append)
-	err = c.dynamicService.Create(ctx, namespaceID, c.Profession, c.Skill, worker.Title, worker.Id, worker.Driver, worker.Description, string(body), users.GetUserId(ctx))
+	err = c.dynamicService.Create(ctx, namespaceID, c.Profession, c.moduleName, c.Skill, worker.Title, worker.Id, worker.Driver, worker.Description, string(body), users.GetUserId(ctx))
 	if err != nil {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
 		return
@@ -331,7 +331,7 @@ func (c *dynamicController) save(ctx *gin.Context) {
 		return
 	}
 	body, _ := json.Marshal(worker.Append)
-	err = c.dynamicService.Save(ctx, namespaceID, c.Profession, worker.Title, uuid, worker.Description, string(body), users.GetUserId(ctx))
+	err = c.dynamicService.Save(ctx, namespaceID, c.Profession, c.moduleName, worker.Title, uuid, worker.Description, string(body), users.GetUserId(ctx))
 	if err != nil {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
 		return
