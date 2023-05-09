@@ -21,7 +21,7 @@ func (p *ProviderService) Status(key string, namespaceId int, cluster string) (a
 	if ps == nil || *ps == nil {
 		return apinto_module.None, ""
 	}
-	return (*ps).Status(key, namespaceId, cluster), ""
+	return (*ps).Status(key, namespaceId, cluster)
 }
 
 func NewProviderService() IProviderService {
