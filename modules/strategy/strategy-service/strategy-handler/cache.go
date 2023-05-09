@@ -59,7 +59,7 @@ func (t *cacheHandler) CheckInput(input *strategy_dto.StrategyInfoInput[strategy
 	}
 
 	//校验筛选条件
-	return checkFilters(input.Filters)
+	return checkFilters(input.Filters, "filter")
 }
 
 func (t *cacheHandler) ToApintoConfig(conf strategy_entry.StrategyCacheConfig) interface{} {
