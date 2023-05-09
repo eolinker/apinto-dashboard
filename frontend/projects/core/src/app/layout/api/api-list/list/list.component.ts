@@ -140,7 +140,11 @@ export class ApiManagementListComponent implements OnInit {
       if (resp.code === 0) {
         for (const index in resp.data.list) {
           this.sourcesList.push({ text: resp.data.list[index].title, value: resp.data.list[index].id })
-          this.apisTableHeadName[5].filterOpts = this.sourcesList
+          for (const head of this.apisTableHeadName) {
+            if (head.title === '来源') {
+              head.filterOpts = this.sourcesList
+            }
+          }
         }
       }
     })

@@ -142,6 +142,7 @@ export const IntelligentPluginEditComponent = React.forwardRef(
           type: 'string',
           title: 'ID',
           required: true,
+          pattern: /^[a-zA-Z][a-zA-Z0-9-_]*$/,
           'x-decorator': 'FormItem',
           'x-decorator-props': {
             labelCol: 6,
@@ -149,7 +150,7 @@ export const IntelligentPluginEditComponent = React.forwardRef(
           },
           'x-component': 'Input',
           'x-component-props': {
-            placeholder: '请输入ID'
+            placeholder: '支持字母开头、英文数字中横线下划线组合'
           }
         },
         title: {

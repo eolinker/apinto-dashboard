@@ -10,7 +10,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/notice"
 	notice_model "github.com/eolinker/apinto-dashboard/modules/notice/notice-model"
 	"github.com/eolinker/apinto-dashboard/modules/user"
-	warn_model "github.com/eolinker/apinto-dashboard/modules/warn/warn-model"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
 	"github.com/go-basic/uuid"
@@ -73,7 +72,7 @@ func (n *noticeSendService) Send(ctx context.Context, req *grpc_service.NoticeSe
 	//发送失败的次数和需要发送的次数做对比
 	var sendFail = new(int64)
 	noticeErrGroup, _ := errgroup.WithContext(ctx)
-	sendMsgErrors := make([]*warn_model.SendMsgError, 0)
+	sendMsgErrors := make([]*SendMsgError, 0)
 
 	for channelUuid, noticeMsg := range req.Notices {
 		//利用协程快速发送通知消息
@@ -84,7 +83,7 @@ func (n *noticeSendService) Send(ctx context.Context, req *grpc_service.NoticeSe
 				return errors.New("渠道通知获取失败")
 			}
 			sendMsgErrorUuid := uuid.New()
-			sendMsgError := &warn_model.SendMsgError{
+			sendMsgError := &SendMsgError{
 				UUID:              sendMsgErrorUuid,
 				NoticeChannelUUID: channelUuid,
 			}
