@@ -46,6 +46,12 @@ func (f *FilterOption) GetOptions(namespaceId int, keyword, groupUUID string, pa
 }
 
 func (f *FilterOption) Labels(namespaceId int, values ...string) []string {
+	if len(values) == 0 {
+		return nil
+	}
+	if len(values) == 1 {
+		return []string{f.Label(namespaceId, values[0])}
+	}
 	infos, err := f.dynamicService.ListByNames(context.Background(), namespaceId, f.profession, values)
 	if err != nil {
 		return nil

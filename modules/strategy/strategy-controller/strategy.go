@@ -73,7 +73,7 @@ func (s *strategyController[T, K]) get(ginCtx *gin.Context) {
 		return
 	}
 
-	info, extender, err := s.strategyService.GetInfo(ginCtx, namespaceID, uuid)
+	info, err := s.strategyService.GetInfo(ginCtx, namespaceID, uuid)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("GetStrategyInfo fail. err:%s", err.Error()))
 		return
@@ -90,7 +90,7 @@ func (s *strategyController[T, K]) get(ginCtx *gin.Context) {
 
 	data := make(map[string]interface{})
 	data["strategy"] = strategy
-	data["extender"] = extender
+	//data["extender"] = extender
 
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
