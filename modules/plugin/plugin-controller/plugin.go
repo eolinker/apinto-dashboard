@@ -39,7 +39,7 @@ func (p *pluginController) plugin(ginCtx *gin.Context) {
 		return
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["plugin"] = plugin_dto.PluginItem{
 		Name:     pluginInfo.Name,
 		Extended: pluginInfo.Extended,
@@ -77,7 +77,7 @@ func (p *pluginController) plugins(ginCtx *gin.Context) {
 		})
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["plugins"] = resultList
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
@@ -101,7 +101,7 @@ func (p *pluginController) basicInfoPlugins(ginCtx *gin.Context) {
 		})
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["plugins"] = resultList
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
@@ -205,7 +205,7 @@ func (p *pluginController) pluginExtendeds(ginCtx *gin.Context) {
 		names = append(names, extender.Id)
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["extendeds"] = names
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
@@ -256,7 +256,7 @@ func (p *pluginController) pluginEnum(ginCtx *gin.Context) {
 		})
 
 	}
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["plugins"] = resultList
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
@@ -279,7 +279,7 @@ func (p *pluginController) pluginRender(ginCtx *gin.Context) {
 		})
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["plugins"] = resultList
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }

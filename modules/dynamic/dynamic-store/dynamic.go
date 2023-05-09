@@ -22,7 +22,7 @@ type dynamicStore struct {
 
 func (d *dynamicStore) Count(ctx context.Context, params map[string]interface{}) (int, error) {
 	var count int64
-	err := d.DB(ctx).Where(params).Count(&count).Error
+	err := d.DB(ctx).Model(dynamic_entry.Dynamic{}).Where(params).Count(&count).Error
 	return int(count), err
 }
 

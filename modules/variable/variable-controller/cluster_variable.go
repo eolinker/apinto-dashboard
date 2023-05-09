@@ -167,7 +167,7 @@ func (c *clusterVariableController) updateHistory(ginCtx *gin.Context) {
 		})
 	}
 
-	m := common.Map[string, interface{}]{}
+	m := common.Map{}
 	m["historys"] = list
 	m["total"] = total
 
@@ -232,7 +232,7 @@ func (c *clusterVariableController) toPublishs(ginCtx *gin.Context) {
 		return
 	}
 
-	m := common.Map[string, interface{}]{}
+	m := common.Map{}
 
 	defectKeys := make([]string, 0)
 	for _, variableInfo := range globalVariables {
@@ -343,7 +343,7 @@ func (c *clusterVariableController) publishHistory(ginCtx *gin.Context) {
 		})
 	}
 
-	m := common.Map[string, interface{}]{}
+	m := common.Map{}
 	m["historys"] = historys
 	m["total"] = total
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
@@ -375,7 +375,7 @@ func (c *clusterVariableController) getSyncConf(ginCtx *gin.Context) {
 			UpdateTime: common.TimeToStr(variableInfo.UpdateTime),
 		})
 	}
-	m := common.Map[string, interface{}]{}
+	m := common.Map{}
 	m["info"] = syncConf
 
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))

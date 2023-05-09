@@ -50,7 +50,7 @@ func (c *clusterCertificateController) gets(ginCtx *gin.Context) {
 			UpdateTime:   common.TimeToStr(val.UpdateTime),
 		})
 	}
-	m := common.Map[string, interface{}]{}
+	m := common.Map{}
 	m["certificates"] = dtoList
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
 }
