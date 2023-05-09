@@ -52,6 +52,7 @@ e2e_coverage
 .vscode
 deploy.gitlab-ci.yml
 #根据后端项目组需求，暂时不上传新的angular.json文件（仓库文件中含有deployurl）
+/frontend/dist
 /apinto-build/
 /app/work
 /.pnpm-debug.log
