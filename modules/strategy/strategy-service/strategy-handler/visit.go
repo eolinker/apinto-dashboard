@@ -132,7 +132,9 @@ func (t *visitHandler) FormatOut(ctx context.Context, namespaceID int, input *st
 			continue
 		}
 		filter.Title, filter.Label, filter.Type = t.commonService.GetFilterLabel(ctx, namespaceID, filter.Name, filter.Values)
-
+		if filter.Label == "" {
+			continue
+		}
 		filters = append(filters, filter)
 	}
 
