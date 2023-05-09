@@ -33,8 +33,6 @@ const containerElementName = 'customReactComponentContainer'
 
         .ant-formily-array-table {
           width: 524px;
-          margin-bottom: 22px;
-
           .ant-input-affix-wrapper,
           textarea,
           .ant-input-number,
@@ -47,6 +45,31 @@ const containerElementName = 'customReactComponentContainer'
         }
         .ant-formily-array-items .ant-select {
           width: unset;
+        }
+
+        .ant-btn {
+          box-shadow: none !important;
+          transition: none !important;
+          animation: none !important;
+          outline: none !important;
+        }
+        .ant-btn::after {
+          border: 0 none;
+          opacity: 0;
+          animation: none 0 ease 0 1 normal;
+          transition: none !important;
+        }
+        .ant-btn-default:not(:disabled):hover,
+        .ant-btn-dashed:not(:disabled):hover {
+          color: var(--button-default-hover-text-color);
+          border-color: var(--button-default-hover-border-color);
+          background-color: var(--button-default-hover-background-color);
+        }
+
+        .ant-btn-primary:not(:disabled):hover {
+          color: var(--button-primary-text-color);
+          border-color: var(--button-primary-hover-border-color);
+          background-color: var(--button-primary-hover-background-color);
         }
       }
     `
