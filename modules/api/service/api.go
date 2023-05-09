@@ -2152,7 +2152,7 @@ func (a *apiService) GetAPINameByID(ctx context.Context, apiID int) (string, err
 	return info.Name, nil
 }
 
-func (a *apiService) GetAPIRemoteOptions(ctx context.Context, namespaceID, pageNum, pageSize int, keyword, groupUuid string) ([]*strategy_model.RemoteApis, int, error) {
+func (a *apiService) GetAPIRemoteOptions(ctx context.Context, namespaceID, pageNum, pageSize int, keyword, groupUuid string) ([]any, int, error) {
 	groupList := make([]string, 0)
 	var err error
 	//获取传入的groupUUID下包括子分组的所有UUID
@@ -2174,7 +2174,7 @@ func (a *apiService) GetAPIRemoteOptions(ctx context.Context, namespaceID, pageN
 	if err != nil {
 		return nil, 0, err
 	}
-	apiList := make([]*strategy_model.RemoteApis, 0, len(apis))
+	apiList := make([]any, 0, len(apis))
 
 	groupUUIDMap := common.SliceToMap(groups, func(t *group_entry.CommonGroup) string {
 		return t.Uuid
@@ -2230,24 +2230,24 @@ func (a *apiService) GetAPIRemoteByUUIDS(ctx context.Context, namespace int, uui
 		apiIds = append(apiIds, api.Id)
 	}
 
-	versionMap, err := a.getAPIVersions(ctx, apiIds)
-	if err != nil {
-		return nil, err
-	}
+	//versionMap, err := a.getAPIVersions(ctx, apiIds)
+	//if err != nil {
+	//	return nil, err
+	//}
 
 	apiList := make([]*strategy_model.RemoteApis, 0, len(apis))
 	for _, api := range apis {
-		version := versionMap[api.Id]
+		//version := versionMap[api.Id]
 
 		parentGroupName := &[]string{}
 		a.commonGroup.ParentGroupName(api.GroupUUID, groupUUIDMap, groupIdMap, parentGroupName)
 
 		item := &strategy_model.RemoteApis{
-			Uuid:        api.UUID,
-			Name:        api.Name,
-			Service:     version.ServiceName,
+			Uuid: api.UUID,
+			Name: api.Name,
+			//Service:     version.ServiceName,
 			Group:       strings.Join(*parentGroupName, "/"), //TODO
-			RequestPath: version.RequestPathLabel,
+			RequestPath: api.RequestPathLabel,
 		}
 
 		apiList = append(apiList, item)
