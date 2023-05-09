@@ -1,0 +1,46 @@
+<form
+  nz-form
+  [nzNoColon]="true"
+  [nzAutoTips]="autoTips"
+  [formGroup]="validateConfigForm"
+  autocomplete="off"
+>
+  <nz-form-item>
+    <nz-form-label [nzSpan]="6" nzRequired>选择插件：</nz-form-label>
+    <nz-form-control [nzSpan]="14">
+      <eo-ng-select
+        class="w-INPUT_NORMAL"
+        required
+        formControlName="name"
+        [nzOptions]="pluginsList"
+        nzPlaceHolder="请选择"
+        [nzDisabled]="nzDisabled"
+        (ngModelChange)="changePluginChange()"
+        eoNgUserAccess="router/plugin-template"
+        (disabledEdit)="disabledEdit($event)"
+      ></eo-ng-select>
+    </nz-form-control>
+  </nz-form-item>
+</form>
+<div nz-row>
+  <div nz-col class="text-right" nzSpan="6">
+    <label class="label table-label"
+      ><span class="required-symbol">*</span>插件配置：</label
+    >
+  </div>
+  <div nz-col nzSpan="14">
+    <eo-ng-codebox
+      style="display: block"
+      mode="typescript"
+      [oprBtns]="['format', 'reset', 'copy', 'search', 'replace']"
+      name="config"
+      [(code)]="code"
+      (codeChange)="codeChange()"
+      [autoFormat]="true"
+      [readonly]="nzDisabled"
+    ></eo-ng-codebox>
+    <div *ngIf="showValid" class="red">
+      {{ code ? 'JSON格式有误' : '必填项' }}
+    </div>
+  </div>
+</div>

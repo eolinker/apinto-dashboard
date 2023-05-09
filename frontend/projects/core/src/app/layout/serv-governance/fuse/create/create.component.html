@@ -1,0 +1,319 @@
+<div class="mt-formtop">
+  <form
+    nz-form
+    [nzNoColon]="true"
+    [nzAutoTips]="autoTips"
+    [formGroup]="validateForm"
+    autocomplete="off"
+  >
+    <nz-form-item>
+      <nz-form-label [nzSpan]="6" nzRequired>策略名称：</nz-form-label>
+      <nz-form-control [nzSpan]="13" [nzErrorTip]="nameErrorTpl">
+        <input
+          type="text"
+          eo-ng-input
+          name="name"
+          class="w-INPUT_NORMAL"
+          formControlName="name"
+          placeholder="请输入首字母为英文，英文数字下划线任意一种组合"
+          required
+          eoNgUserAccess="serv-governance/fuse"
+        />
+        <ng-template #nameErrorTpl let-control>
+          <ng-container *ngIf="control.hasError('required')"
+            >必填项</ng-container
+          >
+          <ng-container *ngIf="control.hasError('pattern')"
+            >请输入首字母为英文，英文数字下划线任意一种组合</ng-container
+          >
+        </ng-template>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="6">描述：</nz-form-label>
+      <nz-form-control [nzSpan]="13">
+        <textarea
+          name="desc"
+          class="w-INPUT_NORMAL"
+          rows="6"
+          eo-ng-input
+          formControlName="desc"
+          placeholder="请输入"
+          eoNgUserAccess="serv-governance/fuse"
+        ></textarea>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="6">
+        <span
+          eoNgFeedbackTooltip
+          nzTooltipTitle="提交时自动分配优先级最低值+1 ，1代表优先级最高，依次可排到999"
+          nzTooltipPlacement="left"
+          [nzTooltipVisible]="false"
+          nzTooltipTrigger="hover"
+          >优先级：</span
+        ></nz-form-label
+      >
+      <nz-form-control
+        [nzSpan]="13"
+        nzErrorTip="优先级范围需在1-999之间，且为整数"
+      >
+        <input
+          eo-ng-input
+          name="priority"
+          class="w-INPUT_NORMAL"
+          placeholder="请输入"
+          formControlName="priority"
+          [nzStatus]="validatePriority ? '' : 'error'"
+          eoNgUserAccess="serv-governance/fuse"
+        />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="6">筛选流量：</nz-form-label>
+      <nz-form-control [nzSpan]="13">
+        <eo-ng-filter-table
+          [(filterShowList)]="filterShowList"
+          [filterNamesSet]="filterNamesSet"
+        ></eo-ng-filter-table>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="6" nzRequired>熔断维度：</nz-form-label>
+      <nz-form-control [nzSpan]="13">
+        <eo-ng-select
+          class="limit-select"
+          name="metric"
+          class="w-INPUT_NORMAL"
+          required
+          [(ngModel)]="createStrategyForm.config.metric"
+          [nzOptions]="metricsList"
+          nzPlaceHolder="请选择"
+          [ngModelOptions]="{ standalone: true }"
+          eoNgUserAccess="serv-governance/fuse"
+          [nzDisabled]="nzDisabled"
+          (disabledEdit)="disabledEdit($event)"
+        ></eo-ng-select>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="6" nzRequired>熔断规则：</nz-form-label>
+      <section class="limit-bg">
+        <nz-form-control [nzSpan]="19" [nzDisableAutoTips]="true">
+          <div>
+            <nz-form-item>
+              <label class="label" style="width: 138px"
+                ><span class="required-symbol">*</span>
+
+                <span
+                  eoNgFeedbackTooltip
+                  nzTooltipTitle="默认500，多个状态码以逗号分隔"
+                  nzTooltipPlacement="left"
+                  [nzTooltipVisible]="false"
+                  nzTooltipTrigger="hover"
+                  >失败HTTP状态码：</span
+                >
+              </label>
+              <nz-form-control
+                [nzValidateStatus]="showFuseStatusCodeError ? 'error' : ''"
+                [nzErrorTip]="
+                  createStrategyForm.config.fuseCondition.statusCodes.length ===
+                  0
+                    ? '必填项'
+                    : '状态码为不超过3位数的纯数字'
+                "
+              >
+                <eo-ng-select
+                  class="w-INPUT_NORMAL"
+                  [(ngModel)]="
+                    createStrategyForm.config.fuseCondition.statusCodes
+                  "
+                  [nzOpen]="false"
+                  (ngModelChange)="checkStatusCode('fuse')"
+                  nzMode="tags"
+                  [nzTokenSeparators]="[',', '，', '、']"
+                  [ngModelOptions]="{ standalone: true }"
+                  nzDropdownClassName="no-show-dropdown"
+                  nzPlaceHolder="请输入"
+                  [nzOptionHeightPx]="0"
+                  [nzDisabled]="nzDisabled"
+                >
+                </eo-ng-select>
+              </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item>
+              <label class="label" style="width: 138px"
+                ><span class="required-symbol">*</span>
+                <span
+                  eoNgFeedbackTooltip
+                  nzTooltipTitle="默认3次，在1秒内达到设置的失败数进入熔断期"
+                  nzTooltipPlacement="left"
+                  [nzTooltipVisible]="false"
+                  nzTooltipTrigger="hover"
+                  >失败数：</span
+                >
+              </label>
+              <nz-form-control>
+                <input
+                  class="w-INPUT_NORMAL"
+                  type="number"
+                  eo-ng-input
+                  required
+                  class=""
+                  placeholder="请输入"
+                  formControlName="configFuseCount"
+                  eoNgUserAccess="serv-governance/fuse"
+                />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <label class="label" style="width: 138px"
+                ><span class="required-symbol">*</span>
+                <span
+                  eoNgFeedbackTooltip
+                  nzTooltipTitle="默认2秒为基准，乘以连续熔断次数，第1次熔断时间为2秒，连续第2次熔断时间为2秒乘以２为４秒，以此类推"
+                  nzTooltipPlacement="left"
+                  [nzTooltipVisible]="false"
+                  nzTooltipTrigger="hover"
+                  >熔断持续时间：</span
+                ></label
+              >
+              <nz-form-control nzExtra="单位：s，最小值：1">
+                <eo-ng-input-group nzSuffix="乘连续熔断次数">
+                  <input
+                    class="w-INPUT_NORMAL"
+                    [nzBorderless]="true"
+                    type="number"
+                    eo-ng-input
+                    required
+                    placeholder="请输入"
+                    formControlName="configFuseTime"
+                    eoNgUserAccess="serv-governance/fuse"
+                  />
+                </eo-ng-input-group>
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <label class="label" style="width: 138px"
+                ><span class="required-symbol">*</span>
+                <span
+                  eoNgFeedbackTooltip
+                  nzTooltipTitle="默认300秒，可设置，以２秒为基准为例，熔断时间最大为300秒"
+                  nzTooltipPlacement="left"
+                  [nzTooltipVisible]="false"
+                  nzTooltipTrigger="hover"
+                  >熔断最大持续时间：</span
+                ></label
+              >
+              <nz-form-control nzExtra="单位：s，最小值：1">
+                <input
+                  class="w-INPUT_NORMAL"
+                  type="number"
+                  eo-ng-input
+                  required
+                  placeholder="请输入"
+                  formControlName="configFuseMaxTime"
+                  eoNgUserAccess="serv-governance/fuse"
+                />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <label class="label" style="width: 138px"
+                ><span class="required-symbol">*</span> 成功HTTP状态码：</label
+              >
+              <nz-form-control
+                [nzValidateStatus]="showRecoverStatusCodeError ? 'error' : ''"
+                [nzErrorTip]="
+                  createStrategyForm.config.recoverCondition.statusCodes
+                    .length === 0
+                    ? '必填项'
+                    : '状态码为不超过3位数的纯数字'
+                "
+              >
+                <eo-ng-select
+                  class="w-INPUT_NORMAL"
+                  [(ngModel)]="
+                    createStrategyForm.config.recoverCondition.statusCodes
+                  "
+                  (ngModelChange)="checkStatusCode('recover')"
+                  nzMode="tags"
+                  [nzTokenSeparators]="[',', '，', '、']"
+                  nzDropdownClassName="no-show-dropdown"
+                  [ngModelOptions]="{ standalone: true }"
+                  nzPlaceHolder="请输入"
+                  [nzOptionHeightPx]="0"
+                  [nzDisabled]="nzDisabled"
+                >
+                </eo-ng-select>
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <label class="label" style="width: 138px"
+                ><span class="required-symbol">*</span>
+                <span
+                  eoNgFeedbackTooltip
+                  nzTooltipTitle="默认３次，连续成功请求次数达到设置值可恢复健康状态"
+                  nzTooltipPlacement="left"
+                  [nzTooltipVisible]="false"
+                  nzTooltipTrigger="hover"
+                  >成功数：</span
+                ></label
+              >
+              <nz-form-control>
+                <input
+                  class="w-INPUT_NORMAL"
+                  type="number"
+                  eo-ng-input
+                  required
+                  placeholder="请输入"
+                  eoNgUserAccess="serv-governance/fuse"
+                  formControlName="configRecoverCount"
+                />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </nz-form-control>
+      </section>
+    </nz-form-item>
+
+    <nz-form-item class="mb-0">
+      <nz-form-label [nzSpan]="6" nzRequired>响应内容：</nz-form-label>
+      <section class="limit-bg">
+        <nz-form-control [nzSpan]="19" [nzDisableAutoTips]="true">
+          <div>
+            <eo-ng-response-form
+              [(responseForm)]="responseForm"
+              [disabled]="nzDisabled"
+              [(responseHeaderList)]="responseHeaderList"
+              [editPage]="editPage"
+            ></eo-ng-response-form>
+          </div>
+        </nz-form-control>
+      </section>
+    </nz-form-item>
+  </form>
+
+  <nz-form-item class="mb-0 sticky bg-white bottom-0 py-mbase z-50">
+    <nz-form-control [nzOffset]="6" [nzSpan]="18">
+      <button
+        class="ant-btn-primary"
+        eoNgUserAccess="serv-governance/fuse"
+        type="submit"
+        eo-ng-button
+        (click)="saveStrategy()"
+        [nzLoading]="submitButtonLoading"
+      >
+        {{ editPage ? '提交' : '保存' }}
+      </button>
+      <button eo-ng-button class="ml-btnybase" (click)="backToList()">
+        取消
+      </button>
+    </nz-form-control>
+  </nz-form-item>
+</div>

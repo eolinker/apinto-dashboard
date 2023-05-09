@@ -1,0 +1,82 @@
+.blue {
+  color: blue;
+}
+.modal-header {
+  margin-top: 24px;
+}
+.block_rl {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 49px;
+}
+eo-ng-breadcrumb {
+  margin-left: var(--LAYOUT_PADDING);
+}
+eo-ng-apinto-user-avatar.avatar {
+  display: inline-block;
+  width: auto;
+  height: 49px;
+  color: var(--primary-color);
+}
+eo-ng-apinto-user-avatar.avatar span {
+  font-weight: bolder;
+}
+
+span.logo-title {
+  font-size: 16px;
+  margin-left: 5px;
+  font-weight: bolder;
+}
+
+.total-content {
+  position: fixed;
+}
+
+.content-without-sider {
+  // min-width: 1170px;
+  width: calc(100vw - 196px) !important;
+  height: calc(100vh - 50px) !important;
+  overflow: auto;
+}
+
+.auth-box {
+  display: block;
+  position: absolute;
+  bottom: 0px;
+  width: 100%;
+  height: 68px;
+  background-color: #fff;
+  color: #999999;
+  font-size: 12px;
+  line-height: 20px;
+  text-align: center;
+  padding: 12px 8px 12px 8px;
+}
+
+:host ::ng-deep {
+  .inside-menu-scroll eo-ng-menu-default {
+    overflow-x: hidden;
+    overflow-y: auto;
+    height: 100%;
+    display: block;
+  }
+  .inside-menu-scroll eo-ng-menu-default::-webkit-scrollbar {
+    width: 0px;
+  }
+
+  div.item-selected {
+    background-color: var(--menu-item-active-background-color);
+  }
+
+  li.menu-icon-hidden > svg {
+    display: none;
+  }
+  .ant-menu-sub.ant-menu-inline {
+    li.menu-no-content {
+      .ant-menu-item-group-title {
+        padding-left: 42px !important;
+      }
+    }
+  }
+}

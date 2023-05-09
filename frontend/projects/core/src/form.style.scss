@@ -1,0 +1,187 @@
+.ant-form-item {
+  margin-bottom: var(--FORM_SPAN);
+}
+
+@media (min-width: 575px) {
+  .ant-modal-body .ant-row {
+    flex-flow: nowrap;
+  }
+}
+
+.ant-modal-body {
+  max-height: 640px;
+  overflow-y: auto;
+
+  textarea {
+    height: 68px;
+  }
+
+  .vertical_checkbox {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .vertical_checkbox label {
+    margin-bottom: var(--PAGINATION_MARGIN_TOP);
+  }
+}
+
+.monitor-modal .ant-modal-body {
+  max-height: unset;
+}
+
+form label,
+form .label,
+form .ant-form-item-label > label {
+  color: var(--LABEL_COLOR);
+}
+
+eo-ng-flow-control-create .limit-bg {
+  .ant-form-item-explain-error {
+    margin-left: 16px;
+  }
+}
+
+.drawer-list-content.ant-form-item {
+  margin-bottom: 0px !important;
+}
+.ant-form-item-label > label {
+  height: 32px;
+  color: var(--LABEL_COLOR);
+}
+
+.ant-form-item-explain-error {
+  color: #ff4d4f;
+  font-size: 12px !important;
+  min-height: 20px;
+  margin-top: 2px;
+  word-break: break-all;
+}
+
+.ant-form-item-label > label::after {
+  margin: 0 !important;
+  content: '';
+}
+
+.ant-drawer-body .ant-form-item-label > label::after {
+  margin: 0 !important;
+}
+
+.limit-bg {
+  .ant-form-item {
+    margin-bottom: 16px !important;
+  }
+  .arrayItem .ant-table-tbody tr {
+    height: 44px !important;
+    padding-bottom: 12px !important;
+    td {
+      vertical-align: top;
+      border: none;
+
+      padding-bottom: 12px !important;
+    }
+  }
+
+  .arrayItem .ant-table-tbody tr:last-child {
+    height: 32px !important;
+    padding-bottom: 0px !important;
+    td {
+      padding-bottom: 0px !important;
+    }
+  }
+}
+
+.dynamic_inline_block
+  .dynamic_block
+  > div
+  :last-child
+  > div
+  > div:not(:last-child)
+  .ant-form-item-with-help
+  .margin-dynamic-row {
+  height: 16px;
+}
+.dynamic_area
+  .dynamic_inline_block
+  .dynamic_block
+  > div:last-child
+  > div
+  > nz-space:last-child
+  .ant-form-item-with-help
+  .margin-dynamic-row,
+.dynamic_area
+  .dynamic_inline_block
+  .dynamic_block
+  > div:last-child
+  > div
+  > div:last-child
+  .ant-form-item-with-help
+  .margin-dynamic-row {
+  height: 16px;
+}
+eo-ng-upstream-create {
+  .dynamic_inline_block label[eo-ng-checkbox] {
+    margin-bottom: 4px;
+  }
+}
+
+.authDrawer {
+  .ant-form-row {
+    align-items: center;
+  }
+  .form-input.auth-compact {
+    width: 564px !important;
+    display: flex;
+  }
+
+  .dynamic_inline_block
+    .dynamic_block
+    > div:last-child
+    .ant-form-item-with-help
+    .margin-dynamic-row {
+    height: 20px;
+  }
+
+  .dynamic_inline_block
+    .dynamic_block
+    > div:not(:last-child)
+    .ant-form-item-with-help
+    .margin-dynamic-row {
+    height: 16px !important;
+  }
+}
+
+.ant-form-item-with-help .ant-form-item-explain {
+  min-height: 16px;
+}
+.ant-form-item-explain,
+.ant-form-item-extra {
+  font-size: 12px !important;
+  color: #999999;
+  min-height: 0px;
+  line-height: 20px;
+  margin-top: 2px;
+}
+
+eo-ng-service-governance {
+  .limit-bg {
+    .form-input {
+      width: 360px !important;
+    }
+    .ant-form-item-extra,
+    .ant-form-item-explain-error {
+      margin-left: var(--LAYOUT_PADDING);
+    }
+  }
+  .form-input.flow_checkbox {
+    width: auto !important;
+  }
+
+  .form-row {
+    flex-flow: row nowrap;
+  }
+
+  .form-input.transfer-section {
+    width: 1200px !important;
+  }
+}

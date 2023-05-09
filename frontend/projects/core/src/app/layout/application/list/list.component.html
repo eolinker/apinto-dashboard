@@ -1,0 +1,56 @@
+<!--
+ * @Author: MengjieYang yangmengjie@eolink.com
+ * @Date: 2022-08-23 23:38:27
+ * @LastEditors: MengjieYang yangmengjie@eolink.com
+ * @LastEditTime: 2022-08-24 00:21:43
+ * @FilePath: /apinto/src/app/layout/application/application-management-list/application-management-list.component.html
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+-->
+<div class="w-[100%] overflow-x-hidden">
+  <div
+    class="list-header pl-btnbase pr-btnrbase py-btnybase flex flex-nowrap items-center justify-between"
+  >
+    <button
+      eo-ng-button
+      class="ant-btn-primary"
+      eoNgUserAccess="application"
+      (disabledEdit)="disabledEdit($event)"
+      (click)="addApplication()"
+    >
+      新建应用
+    </button>
+
+    <eo-ng-search-input-group
+      [eoInputVal]="applicationNameForSear"
+      (eoClick)="applicationNameForSear = ''; getApplicationsList()"
+    >
+      <input
+        type="text"
+        eo-ng-input
+        placeholder="搜索应用名称"
+        [(ngModel)]="applicationNameForSear"
+        (keyup.enter)="getApplicationsList()"
+      />
+    </eo-ng-search-input-group>
+  </div>
+
+  <div class="list-content pb-[4px]">
+    <eo-ng-apinto-table
+      class=""
+      [nzTbody]="applicationsTableBody"
+      [nzThead]="applicationsTableHeadName"
+      [nzData]="applicationsForm.applications"
+      [nzTrClick]="applicationsTableClick"
+      [nzMaxOperatorButton]="2"
+      [nzNoScroll]="true"
+      [nzShowPagination]="true"
+      [nzFrontPagination]="false"
+      [nzTotal]="applicationsForm.total"
+      [(nzPageIndex)]="applicationsForm.pageNum"
+      [(nzPageSize)]="applicationsForm.pageSize"
+      (nzPageIndexChange)="getApplicationsList()"
+      (nzPageSizeChange)="getApplicationsList()"
+    >
+    </eo-ng-apinto-table>
+  </div>
+</div>
