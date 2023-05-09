@@ -69,12 +69,10 @@ func (s *strategyCommonController) FilterRemote(ginCtx *gin.Context) {
 	}
 
 	res := strategy_dto.FilterRemoteOutput{
-		Target:       remote.Target,
-		Titles:       remote.Titles,
-		Apis:         remote.Apis,
-		Services:     remote.Services,
-		Applications: remote.Applications,
-		Total:        count,
+		Target: remote.Target,
+		Titles: strategy_dto.CreateRemoteOptionTitleFromOption(remote.Titles),
+		List:   remote.List,
+		Total:  count,
 	}
 
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(res))
