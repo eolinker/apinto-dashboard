@@ -63,8 +63,6 @@ func (f *FilterOption) Labels(namespaceId int, values ...string) []string {
 	for _, v := range values {
 		if i, has := infoMap[v]; has {
 			rs = append(rs, i.Title)
-		} else {
-			rs = append(rs, "")
 		}
 	}
 	return rs
