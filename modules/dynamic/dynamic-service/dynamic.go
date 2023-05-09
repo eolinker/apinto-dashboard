@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"time"
 
+	apinto_module "github.com/eolinker/apinto-module"
+
 	cluster_model "github.com/eolinker/apinto-dashboard/modules/cluster/cluster-model"
 
 	"github.com/eolinker/apinto-dashboard/common"
@@ -36,6 +38,8 @@ type dynamicService struct {
 	dynamicStore        dynamic_store.IDynamicStore
 	publishHistoryStore dynamic_store.IDynamicPublishHistoryStore
 	publishVersionStore dynamic_store.IDynamicPublishVersionStore
+
+	provider apinto_module.IProviders
 }
 
 func (d *dynamicService) Count(ctx context.Context, namespaceID int, profession string, addition map[string]interface{}) (int, error) {
@@ -106,10 +110,6 @@ func (d *dynamicService) GetIDByName(ctx context.Context, namespaceId int, profe
 		return 0, err
 	}
 	return info.Id, nil
-}
-
-func toVersionKey(name string, cluster string) string {
-	return fmt.Sprintf("%s{%s}", name, cluster)
 }
 
 func (d *dynamicService) GetBySkill(ctx context.Context, namespaceId int, skill string) ([]*dynamic_model.DynamicBasicInfo, error) {
@@ -265,7 +265,7 @@ func (d *dynamicService) ClusterStatuses(ctx context.Context, namespaceId int, p
 	return result, nil
 }
 
-func (d *dynamicService) Online(ctx context.Context, namespaceId int, profession string, name string, names []string, updater int) ([]string, []string, error) {
+func (d *dynamicService) Online(ctx context.Context, namespaceId int, profession string, name string, names []string, updater int, depend ...string) ([]string, []string, error) {
 	info, err := d.dynamicStore.First(ctx, map[string]interface{}{
 		"namespace":  namespaceId,
 		"profession": profession,
@@ -336,7 +336,7 @@ func (d *dynamicService) Online(ctx context.Context, namespaceId int, profession
 	return successClusters, failClusters, nil
 }
 
-func (d *dynamicService) Offline(ctx context.Context, namespaceId int, profession, name string, names []string, updater int) ([]string, []string, error) {
+func (d *dynamicService) Offline(ctx context.Context, namespaceId int, profession, name string, names []string, updater int, depend ...string) ([]string, []string, error) {
 	info, err := d.dynamicStore.First(ctx, map[string]interface{}{
 		"namespace":  namespaceId,
 		"profession": profession,
@@ -533,7 +533,7 @@ func (d *dynamicService) ClusterStatus(ctx context.Context, namespaceId int, pro
 	}, result, nil
 }
 
-func (d *dynamicService) Create(ctx context.Context, namespaceId int, profession string, skill string, title string, name string, driver string, description string, body string, updater int) error {
+func (d *dynamicService) Create(ctx context.Context, namespaceId int, profession string, skill string, title string, name string, module string, driver string, description string, body string, updater int, depend ...string) error {
 	now := time.Now()
 	info := &dynamic_entry.Dynamic{
 		NamespaceId: namespaceId,
@@ -552,7 +552,7 @@ func (d *dynamicService) Create(ctx context.Context, namespaceId int, profession
 	return d.dynamicStore.Insert(ctx, info)
 }
 
-func (d *dynamicService) Save(ctx context.Context, namespaceId int, profession string, title string, name string, description string, body string, updater int) error {
+func (d *dynamicService) Save(ctx context.Context, namespaceId int, profession string, title string, name string, description string, body string, updater int, depend ...string) error {
 
 	info, err := d.dynamicStore.First(ctx, map[string]interface{}{
 		"namespace":  namespaceId,
@@ -578,7 +578,7 @@ func (d *dynamicService) Save(ctx context.Context, namespaceId int, profession s
 	return d.dynamicStore.Save(ctx, info)
 }
 
-func (d *dynamicService) Delete(ctx context.Context, namespaceId int, profession string, name string) error {
+func (d *dynamicService) Delete(ctx context.Context, namespaceId int, profession string, name string, depend ...string) error {
 	_, err := d.dynamicStore.DeleteWhere(ctx, map[string]interface{}{
 		"namespace":  namespaceId,
 		"profession": profession,
