@@ -72,6 +72,8 @@ func (s *strategyCommonController) FilterRemote(ginCtx *gin.Context) {
 		Target: remote.Target,
 		Titles: strategy_dto.CreateRemoteOptionTitleFromOption(remote.Titles),
 		List:   remote.List,
+		Key:    remote.Key,
+		Value:  remote.Key,
 		Total:  count,
 	}
 
