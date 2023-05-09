@@ -54,10 +54,10 @@ func (s *strategyCommonService) ResetFilterOptionHandlers(handlers map[string]ap
 	options := make([]*strategy_model.FilterOptionsItem, 0, len(staticOptions)+len(handlers))
 	options = append(options, staticOptions...)
 	if handlers != nil {
-		for _, h := range handlers {
+		for name, h := range handlers {
 			optionConfig := h.Config()
 			options = append(options, &strategy_model.FilterOptionsItem{
-				Name:  optionConfig.Name,
+				Name:  name,
 				Title: optionConfig.Title,
 				Type:  config.FilterTypeRemote,
 			})
@@ -102,7 +102,7 @@ func (s *strategyCommonService) GetFilterRemote(ctx context.Context, namespaceId
 	values, total := h.GetOptions(namespaceId, keyword, groupUUID, pageNum, pageSize)
 	optionConfig := h.Config()
 	return &strategy_model.FilterRemoteOutput{
-		Target: "",
+		Target: "list",
 		Titles: optionConfig.Titles,
 		Key:    optionConfig.Key,
 		List:   values,
