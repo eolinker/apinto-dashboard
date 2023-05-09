@@ -3,6 +3,7 @@ package strategy_service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/api"
@@ -14,6 +15,7 @@ import (
 	apinto_module "github.com/eolinker/apinto-module"
 	"github.com/eolinker/eosc/common/bean"
 	"sort"
+	"strings"
 )
 
 var (
@@ -41,6 +43,8 @@ var (
 type strategyFilterOptions struct {
 	options             []*strategy_model.FilterOptionsItem
 	remoteOptionHandler map[string]apinto_module.IFilterOptionHandler
+	titleConfigs        map[string]string
+	typeConfigs         map[string]string
 }
 type strategyCommonService struct {
 	applicationService application.IApplicationService
@@ -50,9 +54,50 @@ type strategyCommonService struct {
 	filterOptions *strategyFilterOptions
 }
 
+func (s *strategyCommonService) GetFilterLabel(ctx context.Context, namespaceId int, name string, values []string) (string, string, string) {
+	title, has := s.filterOptions.titleConfigs[name]
+	if has {
+		if len(values) > 0 {
+			if values[0] == config.FilterValuesALL {
+				return title, fmt.Sprintf("全部%s", title), ""
+			}
+
+			handler := s.filterOptions.remoteOptionHandler[name]
+			return title, strings.Join(handler.Labels(namespaceId, values...), ","), ""
+		}
+		return "", "", ""
+	}
+
+	switch name {
+
+	case config.FilterMethod:
+		if len(values) > 0 {
+			if values[0] == config.FilterValuesALL {
+				return "API请求方式", "全部请求方式", ""
+
+			} else {
+				return "API请求方式", strings.Join(values, ","), ""
+
+			}
+		}
+	case config.FilterPath:
+		if len(values) > 0 {
+			return "API路径", values[0], ""
+
+		}
+	case config.FilterIP:
+		if len(values) > 0 {
+			return "IP", strings.Join(values, ","), ""
+		}
+	}
+	return "", "", ""
+}
+
 func (s *strategyCommonService) ResetFilterOptionHandlers(handlers map[string]apinto_module.IFilterOptionHandler) {
 	options := make([]*strategy_model.FilterOptionsItem, 0, len(staticOptions)+len(handlers))
+	configs := map[string]string{}
 	options = append(options, staticOptions...)
+
 	if handlers != nil {
 		for name, h := range handlers {
 			optionConfig := h.Config()
@@ -61,7 +106,7 @@ func (s *strategyCommonService) ResetFilterOptionHandlers(handlers map[string]ap
 				Title: optionConfig.Title,
 				Type:  config.FilterTypeRemote,
 			})
-
+			configs[name] = optionConfig.Title
 		}
 	}
 	sort.Sort(strategy_model.FilterOptionsItems(options))
@@ -69,6 +114,10 @@ func (s *strategyCommonService) ResetFilterOptionHandlers(handlers map[string]ap
 	s.filterOptions = &strategyFilterOptions{
 		options:             options,
 		remoteOptionHandler: handlers,
+		titleConfigs:        configs,
+		typeConfigs: common.SliceToMapO(options, func(t *strategy_model.FilterOptionsItem) (string, string) {
+			return t.Name, t.Type
+		}),
 	}
 
 }
@@ -107,91 +156,5 @@ func (s *strategyCommonService) GetFilterRemote(ctx context.Context, namespaceId
 		Key:    optionConfig.Key,
 		List:   values,
 	}, total, nil
-	//result := &strategy_model.FilterRemoteOutput{}
-	//
-	//switch targetType {
-	//case config.FilterApplication:
-	//	applications, count, err := s.applicationService.AppListFilter(ctx, namespaceId, pageNum, pageSize, keyword)
-	//	if err != nil {
-	//		return nil, 0, err
-	//	}
-	//
-	//	for _, applicationInfo := range applications {
-	//		result.Applications = append(result.Applications, &strategy_model.RemoteApplications{
-	//			Name: applicationInfo.Name,
-	//			Uuid: applicationInfo.IdStr,
-	//			Desc: applicationInfo.Desc,
-	//		})
-	//	}
-	//	result.Titles = append(result.Titles, &strategy_model.RemoteTitles{
-	//		Title: "应用名称",
-	//		Field: "name",
-	//	}, &strategy_model.RemoteTitles{
-	//		Title: "应用ID",
-	//		Field: "uuid",
-	//	}, &strategy_model.RemoteTitles{
-	//		Title: "应用描述",
-	//		Field: "desc",
-	//	})
-	//
-	//	result.Target = "applications"
-	//	return result, count, nil
-	//case config.FilterApi:
-	//	remoteApis, count, err := s.apiService.GetAPIRemoteOptions(ctx, namespaceId, pageNum, pageSize, keyword, groupUUID)
-	//	if err != nil {
-	//		return nil, 0, err
-	//	}
-	//
-	//	for _, apiInfo := range remoteApis {
-	//		result.Apis = append(result.Apis, &strategy_model.RemoteApis{
-	//			Uuid:        apiInfo.Uuid,
-	//			Name:        apiInfo.Name,
-	//			Service:     apiInfo.Service,
-	//			Group:       apiInfo.Group,
-	//			RequestPath: apiInfo.RequestPath,
-	//		})
-	//	}
-	//	result.Titles = append(result.Titles, &strategy_model.RemoteTitles{
-	//		Title: "API名称",
-	//		Field: "name",
-	//	}, &strategy_model.RemoteTitles{
-	//		Title: "所属目录",
-	//		Field: "group",
-	//	}, &strategy_model.RemoteTitles{
-	//		Title: "请求路径",
-	//		Field: "request_path",
-	//	})
-	//
-	//	result.Target = "apis"
-	//	return result, count, nil
-	//case config.FilterService:
-	//	remoteServices, count, err := s.service.GetServiceRemoteOptions(ctx, namespaceId, pageNum, pageSize, keyword)
-	//	if err != nil {
-	//		return nil, 0, err
-	//	}
-	//
-	//	for _, remoteService := range remoteServices {
-	//		result.Services = append(result.Services, &strategy_model.RemoteServices{
-	//			Uuid:   remoteService.Uuid,
-	//			Name:   remoteService.Name,
-	//			Scheme: remoteService.Scheme,
-	//			Desc:   remoteService.Desc,
-	//		})
-	//	}
-	//	result.Titles = append(result.Titles, &strategy_model.RemoteTitles{
-	//		Title: "上游服务名称",
-	//		Field: "name",
-	//	}, &strategy_model.RemoteTitles{
-	//		Title: "协议类型",
-	//		Field: "scheme",
-	//	}, &strategy_model.RemoteTitles{
-	//		Title: "描述",
-	//		Field: "desc",
-	//	})
-	//
-	//	result.Target = "services"
-	//	return result, count, nil
-	//default:
-	//	return nil, 0, errors.New("param error")
-	//}
+
 }
