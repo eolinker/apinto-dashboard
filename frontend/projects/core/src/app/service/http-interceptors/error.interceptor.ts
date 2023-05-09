@@ -15,7 +15,6 @@ import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
-  private loadingMessageId:string = ''
   constructor (
     private router: Router,
     private navigationService: EoNgNavigationService,
