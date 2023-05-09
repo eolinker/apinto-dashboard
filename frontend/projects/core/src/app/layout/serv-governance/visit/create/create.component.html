@@ -7,8 +7,8 @@
     autocomplete="off"
   >
     <nz-form-item>
-      <nz-form-label [nzSpan]="7" nzRequired>策略名称：</nz-form-label>
-      <nz-form-control [nzSpan]="12" [nzErrorTip]="nameErrorTpl">
+      <nz-form-label [nzSpan]="6" nzRequired>策略名称：</nz-form-label>
+      <nz-form-control [nzSpan]="13" [nzErrorTip]="nameErrorTpl">
         <input
           type="text"
           eo-ng-input
@@ -31,8 +31,8 @@
     </nz-form-item>
 
     <nz-form-item>
-      <nz-form-label [nzSpan]="7">描述：</nz-form-label>
-      <nz-form-control [nzSpan]="12">
+      <nz-form-label [nzSpan]="6">描述：</nz-form-label>
+      <nz-form-control [nzSpan]="13">
         <textarea
           name="desc"
           class="w-INPUT_NORMAL"
@@ -45,7 +45,7 @@
     </nz-form-item>
 
     <nz-form-item>
-      <nz-form-label [nzSpan]="7">
+      <nz-form-label [nzSpan]="6">
         <span
           eoNgFeedbackTooltip
           nzTooltipTitle="提交时自动分配优先级最低值+1 ，1代表优先级最高，依次可排到999"
@@ -56,7 +56,7 @@
         ></nz-form-label
       >
       <nz-form-control
-        [nzSpan]="12"
+        [nzSpan]="13"
         nzErrorTip="优先级范围需在1-999之间，且为整数"
       >
         <input
@@ -71,7 +71,7 @@
     </nz-form-item>
 
     <nz-form-item>
-      <nz-form-label [nzSpan]="7">
+      <nz-form-label [nzSpan]="6">
         <span
           eoNgFeedbackTooltip
           nzTooltipTitle="根据单个条件或多个条件组合，筛选出符合条件的请求，作为访问策略将要处理的流量池"
@@ -81,7 +81,7 @@
           >筛选流量：</span
         >
       </nz-form-label>
-      <nz-form-control [nzSpan]="12">
+      <nz-form-control [nzSpan]="13">
         <eo-ng-filter-table
           [(filterShowList)]="filterShowList"
           [filterNamesSet]="filterNamesSet"
@@ -90,7 +90,7 @@
     </nz-form-item>
 
     <nz-form-item>
-      <nz-form-label [nzSpan]="7" nzRequired
+      <nz-form-label [nzSpan]="6" nzRequired
         ><span
           eoNgFeedbackTooltip
           nzTooltipTitle="根据单个条件或多个条件组合，从流量池里生效全部或部分流量，继而执行允许或拒绝规则"
@@ -100,7 +100,7 @@
           >访问规则：</span
         ></nz-form-label
       >
-      <nz-form-control [nzSpan]="12">
+      <nz-form-control [nzSpan]="13">
         <eo-ng-select
           required
           class="w-INPUT_NORMAL"
@@ -116,7 +116,7 @@
     </nz-form-item>
 
     <nz-form-item>
-      <nz-form-label [nzSpan]="7">
+      <nz-form-label [nzSpan]="6">
         <span
           eoNgFeedbackTooltip
           nzTooltipTitle="若访问规则为允许，不添加生效范围，筛选流量默认放行；若访问规则为拒绝，不添加生效范围，筛选流量默认为拒绝"
@@ -126,7 +126,7 @@
           >生效范围：</span
         ></nz-form-label
       >
-      <nz-form-control [nzSpan]="12" class="influence-control">
+      <nz-form-control [nzSpan]="13" class="influence-control">
         <eo-ng-filter-table
           [(filterShowList)]="influenceShowList"
           [filterNamesSet]="filterNamesSet"
@@ -137,10 +137,10 @@
     </nz-form-item>
 
     <nz-form-item class="mb-0">
-      <nz-form-label [nzSpan]="7" nzRequired
+      <nz-form-label [nzSpan]="6" nzRequired
         >继续匹配其他访问策略：</nz-form-label
       >
-      <nz-form-control [nzSpan]="12">
+      <nz-form-control [nzSpan]="13">
         <eo-ng-switch
           formControlName="continue"
           eoNgUserAccess="serv-governance/visit"
@@ -153,7 +153,7 @@
   </form>
 
   <nz-form-item class="mb-0 sticky bg-white bottom-0 py-mbase z-50">
-    <nz-form-control [nzOffset]="7" [nzSpan]="18">
+    <nz-form-control [nzOffset]="6" [nzSpan]="18">
       <button
         class="ant-btn-primary"
         eoNgUserAccess="serv-governance/visit"
