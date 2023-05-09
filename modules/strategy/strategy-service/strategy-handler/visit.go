@@ -6,24 +6,18 @@ import (
 	"fmt"
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/common"
-	"github.com/eolinker/apinto-dashboard/enum"
-	"github.com/eolinker/apinto-dashboard/modules/api"
-	"github.com/eolinker/apinto-dashboard/modules/application"
 	"github.com/eolinker/apinto-dashboard/modules/strategy"
 	strategyConfig "github.com/eolinker/apinto-dashboard/modules/strategy/config"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-dto"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-entry"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-model"
-	"github.com/eolinker/apinto-dashboard/modules/upstream"
 	"github.com/eolinker/eosc/common/bean"
 	"strings"
 )
 
 type visitHandler struct {
-	applicationService application.IApplicationService
-	apiService         api.IAPIService
-	service            upstream.IService
-	apintoDriverName   string
+	commonService    strategy.IStrategyCommonService
+	apintoDriverName string
 }
 
 func (t *visitHandler) GetListLabel(conf *strategy_entry.StrategyVisitConfig) string {
@@ -126,15 +120,8 @@ func (t *visitHandler) FormatOut(ctx context.Context, namespaceID int, input *st
 		VisitRule:       input.Config.VisitRule,
 		InfluenceSphere: nil,
 		Continue:        input.Config.Continue,
-		Extender:        nil,
 	}
 
-	//拼装生效范围以及extender
-	extenderData := &strategy_model.ExtenderData{
-		Api:         make(map[string]*strategy_model.RemoteApis),
-		Service:     make(map[string]*strategy_model.RemoteServices),
-		Application: make(map[string]*strategy_model.RemoteApplications),
-	}
 	filters := make([]*strategy_model.FilterOutput, 0, len(input.Filters))
 	for _, f := range input.Config.InfluenceSphere {
 		filter := &strategy_model.FilterOutput{
@@ -144,92 +131,14 @@ func (t *visitHandler) FormatOut(ctx context.Context, namespaceID int, input *st
 		if len(f.Values) == 0 {
 			continue
 		}
-		switch filter.Name {
-		case strategyConfig.FilterApplication:
-			filter.Type = strategyConfig.FilterTypeRemote
-			filter.Title = "应用"
-			if f.Values[0] == strategyConfig.FilterValuesALL {
-				filter.Label = "所有应用"
-			} else {
-				apps, _ := t.applicationService.AppListByUUIDS(ctx, namespaceID, f.Values)
-				if len(apps) == 0 {
-					continue
-				}
-				labels := make([]string, len(apps))
-				for i, app := range apps {
-					extenderData.Application[app.IdStr] = &strategy_model.RemoteApplications{
-						Name: app.Name,
-						Uuid: app.IdStr,
-						Desc: app.Desc,
-					}
-					labels[i] = app.Name
-				}
-				filter.Label = strings.Join(labels, ",")
-			}
-		case strategyConfig.FilterApi:
-			filter.Type = strategyConfig.FilterTypeRemote
-			filter.Title = "API"
-			if f.Values[0] == strategyConfig.FilterValuesALL {
-				filter.Label = "所有API"
-			} else {
-				apis, _ := t.apiService.GetAPIRemoteByUUIDS(ctx, namespaceID, f.Values)
-				if len(apis) == 0 {
-					continue
-				}
-				labels := make([]string, len(apis))
-				for i, apiInfo := range apis {
-					extenderData.Api[apiInfo.Uuid] = apiInfo
-					labels[i] = apiInfo.Name
-				}
-				filter.Label = strings.Join(labels, ",")
-			}
-		case strategyConfig.FilterPath:
-			filter.Type = strategyConfig.FilterTypePattern
-			filter.Title = "API路径"
-			filter.Label = f.Values[0]
-		case strategyConfig.FilterService:
-			filter.Type = strategyConfig.FilterTypeRemote
-			filter.Title = "上游服务"
-			if f.Values[0] == strategyConfig.FilterValuesALL {
-				filter.Label = "所有上游服务"
-			} else {
-				services, _ := t.service.GetServiceRemoteByNames(ctx, namespaceID, f.Values)
-				if len(services) == 0 {
-					continue
-				}
-				labels := make([]string, len(services))
-				for i, sv := range services {
-					extenderData.Service[sv.Uuid] = sv
-					labels[i] = sv.Name
-				}
-				filter.Label = strings.Join(labels, ",")
-			}
-		case strategyConfig.FilterMethod:
-			filter.Type = strategyConfig.FilterTypeStatic
-			filter.Title = "API请求方式"
-			if f.Values[0] == enum.HttpALL {
-				filter.Label = "所有API请求方式"
-			} else {
-				filter.Label = strings.Join(f.Values, ",")
-			}
-		case strategyConfig.FilterIP:
-			filter.Type = strategyConfig.FilterTypePattern
-			filter.Title = "IP"
-			filter.Label = strings.Join(f.Values, ",")
-		default: //KEY(应用)
-			filter.Type = strategyConfig.FilterTypeStatic
-			filter.Title = fmt.Sprintf("%s(应用)", common.GetFilterAppKey(filter.Name))
-			if f.Values[0] == strategyConfig.FilterValuesALL {
-				filter.Label = fmt.Sprintf("%s(应用)所有值", common.GetFilterAppKey(filter.Name))
-			} else {
-				filter.Label = strings.Join(f.Values, ",")
-			}
+		filter.Title, filter.Label, filter.Type = t.commonService.GetFilterLabel(ctx, namespaceID, filter.Name, filter.Values)
+		if filter.Label == "" {
+			continue
 		}
 		filters = append(filters, filter)
 	}
 
 	config.InfluenceSphere = filters
-	config.Extender = extenderData
 
 	output.Config = config
 	return output
@@ -239,9 +148,7 @@ func NewStrategyVisitHandler(apintoDriverName string) strategy.IStrategyHandler[
 	h := &visitHandler{
 		apintoDriverName: apintoDriverName,
 	}
-	bean.Autowired(&h.service)
-	bean.Autowired(&h.apiService)
-	bean.Autowired(&h.applicationService)
+	bean.Autowired(&h.commonService)
 
 	return h
 }
