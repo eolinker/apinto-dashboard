@@ -1,0 +1,49 @@
+<!--
+ * @Author: MengjieYang yangmengjie@eolink.com
+ * @Date: 2022-07-28 22:12:29
+ * @LastEditors: MengjieYang yangmengjie@eolink.com
+ * @LastEditTime: 2022-07-29 02:55:07
+ * @FilePath: /apinto/src/app/layout/deploy/deploy-cluster-content/deploy-cluster-content.component.html
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+-->
+<div class="overflow-hidden">
+  <div
+    class="pl-btnbase pr-btnrbase py-btnybase border-[0px] border-b-[1px] border-solid border-BORDER"
+  >
+    <section>
+      <button
+        eo-ng-button
+        type="default"
+        class="mr-btnbase"
+        (click)="backToList()"
+      >
+        返回
+      </button>
+      <span class="font-bold"
+        >{{ service.clusterName }} ： {{ service.clusterDesc }}</span
+      >
+    </section>
+  </div>
+
+  <eo-ng-tabs [nzLinkRouter]="true" [nzOptions]="tabOptions"></eo-ng-tabs>
+  <ng-template #tab1>
+    <span>全局变量</span>
+  </ng-template>
+
+  <ng-template #tab2>
+    <span>SSL证书</span>
+  </ng-template>
+
+  <ng-template #tab3>
+    <span>节点列表</span>
+  </ng-template>
+
+  <ng-template #tab5>
+    <span>节点插件</span>
+  </ng-template>
+
+  <ng-template #tab6>
+    <span>集群管理</span>
+  </ng-template>
+  <router-outlet></router-outlet>
+</div>

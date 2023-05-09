@@ -1,0 +1,12 @@
+id: "application.apinto.com"
+name: "application"
+cname: "应用管理"
+resume: "应用管理统一管理应用在各个集群的生命周期。应用作为业务通讯的发起者，贯穿整个调用链。"
+version: "v1.0.0"
+icon: "应用管理.png"
+driver: "application.apinto.com"
+type: 1 #0为框架模块 1为核心模块 2为内置模块 3为非内置
+auto: true
+front:
+navigation: "navigation.application"
+group_id: "core_module"

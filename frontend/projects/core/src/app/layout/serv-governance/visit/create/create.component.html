@@ -1,0 +1,172 @@
+<div class="mt-formtop">
+  <form
+    nz-form
+    [nzNoColon]="true"
+    [nzAutoTips]="autoTips"
+    [formGroup]="validateForm"
+    autocomplete="off"
+  >
+    <nz-form-item>
+      <nz-form-label [nzSpan]="7" nzRequired>策略名称：</nz-form-label>
+      <nz-form-control [nzSpan]="12" [nzErrorTip]="nameErrorTpl">
+        <input
+          type="text"
+          eo-ng-input
+          name="name"
+          class="w-INPUT_NORMAL"
+          formControlName="name"
+          placeholder="请输入首字母为英文，英文数字下划线任意一种组合"
+          required
+          eoNgUserAccess="serv-governance/visit"
+        />
+        <ng-template #nameErrorTpl let-control>
+          <ng-container *ngIf="control.hasError('required')"
+            >必填项</ng-container
+          >
+          <ng-container *ngIf="control.hasError('pattern')"
+            >请输入首字母为英文，英文数字下划线任意一种组合</ng-container
+          >
+        </ng-template>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="7">描述：</nz-form-label>
+      <nz-form-control [nzSpan]="12">
+        <textarea
+          name="desc"
+          class="w-INPUT_NORMAL"
+          eo-ng-input
+          formControlName="desc"
+          placeholder="请输入"
+          eoNgUserAccess="serv-governance/visit"
+        ></textarea>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="7">
+        <span
+          eoNgFeedbackTooltip
+          nzTooltipTitle="提交时自动分配优先级最低值+1 ，1代表优先级最高，依次可排到999"
+          nzTooltipPlacement="left"
+          [nzTooltipVisible]="false"
+          nzTooltipTrigger="hover"
+          >优先级：</span
+        ></nz-form-label
+      >
+      <nz-form-control
+        [nzSpan]="12"
+        nzErrorTip="优先级范围需在1-999之间，且为整数"
+      >
+        <input
+          class="w-INPUT_NORMAL"
+          eo-ng-input
+          name="priority"
+          placeholder="请输入"
+          formControlName="priority"
+          eoNgUserAccess="serv-governance/visit"
+        />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="7">
+        <span
+          eoNgFeedbackTooltip
+          nzTooltipTitle="根据单个条件或多个条件组合，筛选出符合条件的请求，作为访问策略将要处理的流量池"
+          nzTooltipPlacement="left"
+          [nzTooltipVisible]="false"
+          nzTooltipTrigger="hover"
+          >筛选流量：</span
+        >
+      </nz-form-label>
+      <nz-form-control [nzSpan]="12">
+        <eo-ng-filter-table
+          [(filterShowList)]="filterShowList"
+          [filterNamesSet]="filterNamesSet"
+        ></eo-ng-filter-table>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="7" nzRequired
+        ><span
+          eoNgFeedbackTooltip
+          nzTooltipTitle="根据单个条件或多个条件组合，从流量池里生效全部或部分流量，继而执行允许或拒绝规则"
+          nzTooltipPlacement="left"
+          [nzTooltipVisible]="false"
+          nzTooltipTrigger="hover"
+          >访问规则：</span
+        ></nz-form-label
+      >
+      <nz-form-control [nzSpan]="12">
+        <eo-ng-select
+          required
+          class="w-INPUT_NORMAL"
+          [(ngModel)]="createStrategyForm.config.visitRule"
+          [nzOptions]="visitRuleList"
+          nzPlaceHolder="请选择"
+          [ngModelOptions]="{ standalone: true }"
+          eoNgUserAccess="serv-governance/visit"
+          [nzDisabled]="nzDisabled"
+          (disabledEdit)="disabledEdit($event)"
+        ></eo-ng-select>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="7">
+        <span
+          eoNgFeedbackTooltip
+          nzTooltipTitle="若访问规则为允许，不添加生效范围，筛选流量默认放行；若访问规则为拒绝，不添加生效范围，筛选流量默认为拒绝"
+          nzTooltipPlacement="left"
+          [nzTooltipVisible]="false"
+          nzTooltipTrigger="hover"
+          >生效范围：</span
+        ></nz-form-label
+      >
+      <nz-form-control [nzSpan]="12" class="influence-control">
+        <eo-ng-filter-table
+          [(filterShowList)]="influenceShowList"
+          [filterNamesSet]="filterNamesSet"
+          drawerTitle="生效范围"
+          filterTableTip="注意：若访问规则为允许，不添加生效范围，筛选流量默认放行；若访问规则为拒绝，不添加生效范围，筛选流量默认为拒绝"
+        ></eo-ng-filter-table>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item class="mb-0">
+      <nz-form-label [nzSpan]="7" nzRequired
+        >继续匹配其他访问策略：</nz-form-label
+      >
+      <nz-form-control [nzSpan]="12">
+        <eo-ng-switch
+          formControlName="continue"
+          eoNgUserAccess="serv-governance/visit"
+          nzCheckedChildren="是"
+          nzUnCheckedChildren="否"
+          [nzDisabled]="nzDisabled"
+        ></eo-ng-switch>
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+
+  <nz-form-item class="mb-0 sticky bg-white bottom-0 py-mbase z-50">
+    <nz-form-control [nzOffset]="7" [nzSpan]="18">
+      <button
+        class="ant-btn-primary"
+        eoNgUserAccess="serv-governance/visit"
+        type="submit"
+        eo-ng-button
+        (click)="saveStrategy()"
+        [nzLoading]="submitButtonLoading"
+      >
+        {{ editPage ? '提交' : '保存' }}
+      </button>
+      <button eo-ng-button class="ml-btnybase" (click)="backToList()">
+        取消
+      </button>
+    </nz-form-control>
+  </nz-form-item>
+</div>

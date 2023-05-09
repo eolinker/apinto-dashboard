@@ -1,0 +1,55 @@
+<form
+  nz-form
+  [nzNoColon]="true"
+  [nzAutoTips]="autoTips"
+  [formGroup]="validateForm"
+>
+  <nz-form-item class="mb-mbase">
+    <nz-form-label [nzSpan]="4" nzRequired>密钥：</nz-form-label>
+
+    <nz-form-control [nzSpan]="15">
+      <p>
+        <label class="ant-btn" [ngClass]="{ 'ant-btn-disabled': nzDisabled }"
+          ><span>上传密钥</span
+          ><input
+            type="file"
+            eo-ng-button
+            eoNgUserAccess="deploy/cluster"
+            (change)="readSingleFile($event, 'key')"
+        /></label>
+      </p>
+      <textarea
+        class="mt-btnybase cert_textarea"
+        rows="3"
+        eo-ng-input
+        formControlName="key"
+        placeholder="密钥文件的后缀名一般为.key的文件内容"
+        eoNgUserAccess="deploy/cluster"
+      ></textarea>
+    </nz-form-control>
+  </nz-form-item>
+  <nz-form-item class="mb-0">
+    <nz-form-label [nzSpan]="4" nzRequired>证书：</nz-form-label>
+
+    <nz-form-control [nzSpan]="15">
+      <p>
+        <label class="ant-btn" [ngClass]="{ 'ant-btn-disabled': nzDisabled }"
+          ><span>上传证书</span
+          ><input
+            type="file"
+            eo-ng-button
+            (change)="readSingleFile($event, 'pem')"
+            eoNgUserAccess="deploy/cluster"
+        /></label>
+      </p>
+      <textarea
+        class="mt-btnybase cert_textarea"
+        rows="3"
+        eo-ng-input
+        formControlName="pem"
+        placeholder="证书文件的后缀名一般为.crt或.pem的文件内容"
+        eoNgUserAccess="deploy/cluster"
+      ></textarea>
+    </nz-form-control>
+  </nz-form-item>
+</form>
