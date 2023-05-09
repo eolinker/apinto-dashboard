@@ -6,9 +6,9 @@ import (
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/controller/users"
-	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/strategy"
+	"github.com/eolinker/apinto-dashboard/modules/strategy/config"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-dto"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -51,7 +51,7 @@ func (s *strategyController[T, K]) list(ginCtx *gin.Context) {
 			Priority:   strategy.Strategy.Priority,
 			IsStop:     strategy.Strategy.IsStop,
 			IsDelete:   strategy.Strategy.IsDelete,
-			Status:     enum.StrategyOnlineStatus(strategy.Status),
+			Status:     config.StrategyOnlineStatus(strategy.Status),
 			Filters:    strategy.Filters,
 			Conf:       strategy.Conf,
 			Operator:   strategy.OperatorStr,
@@ -59,7 +59,7 @@ func (s *strategyController[T, K]) list(ginCtx *gin.Context) {
 		})
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["strategies"] = resList
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 
@@ -228,7 +228,7 @@ func (s *strategyController[T, K]) updateStop(ginCtx *gin.Context) {
 		return
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 
 }
@@ -248,7 +248,7 @@ func (s *strategyController[T, K]) toPublish(ginCtx *gin.Context) {
 		resList = append(resList, &strategy_dto.StrategyToPublishListOut{
 			Name:     publish.Strategy.Name,
 			Priority: publish.Strategy.Priority,
-			Status:   enum.StrategyOnlineStatus(publish.Status),
+			Status:   config.StrategyOnlineStatus(publish.Status),
 			OptTime:  common.TimeToStr(publish.Strategy.UpdateTime),
 		})
 	}
@@ -256,7 +256,7 @@ func (s *strategyController[T, K]) toPublish(ginCtx *gin.Context) {
 	bytes, _ := json.Marshal(list)
 	source := common.Base64Encode(bytes)
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["is_publish"] = len(resList) > 0
 	data["source"] = source
 	data["strategies"] = resList
@@ -311,7 +311,7 @@ func (s *strategyController[T, K]) publishHistory(ginCtx *gin.Context) {
 			details = append(details, &strategy_dto.StrategyPublishHistoryDetails{
 				Name:       detail.Name,
 				Priority:   detail.Priority,
-				Status:     enum.StrategyOnlineStatus(detail.Status),
+				Status:     config.StrategyOnlineStatus(detail.Status),
 				CreateTime: common.TimeToStr(detail.OptTime),
 			})
 		}
@@ -325,7 +325,7 @@ func (s *strategyController[T, K]) publishHistory(ginCtx *gin.Context) {
 		})
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["historys"] = resList
 	data["total"] = total
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
@@ -335,14 +335,14 @@ func (s *strategyController[T, K]) changePriority(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Query("cluster_name")
 
-	maps := common.Map[string, int]{}
+	maps := map[string]int{}
 
 	if err := ginCtx.BindJSON(&maps); err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
-	priorityMap := common.Map[int, int]{}
+	priorityMap := map[int]int{}
 	for _, priority := range maps {
 		if priority == 0 {
 			controller.ErrorJson(ginCtx, http.StatusOK, "优先级不可填空")

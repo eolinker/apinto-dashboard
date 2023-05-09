@@ -18,4 +18,4 @@ RUN cd /${APP} && tar -zxvf ${APP}_${VERSION}_linux_amd64.tar.gz && rm -rf ${APP
 
 WORKDIR /$APP/$APP
 
-CMD sh docker_run.sh
+CMD ./docker_run.sh

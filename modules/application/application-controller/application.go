@@ -100,7 +100,7 @@ func (a *applicationController) lists(ginCtx *gin.Context) {
 		})
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["applications"] = resList
 	data["total"] = count
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
@@ -122,7 +122,7 @@ func (a *applicationController) enum(ginCtx *gin.Context) {
 		})
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["applications"] = resList
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
@@ -161,7 +161,7 @@ func (a *applicationController) info(ginCtx *gin.Context) {
 		ExtraParamList: extraParamList,
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["application"] = res
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
@@ -244,7 +244,7 @@ func (a *applicationController) onlines(ginCtx *gin.Context) {
 		})
 	}
 
-	m := common.Map[string, interface{}]{}
+	m := common.Map{}
 	m["clusters"] = resp
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
 }
@@ -324,7 +324,7 @@ func (a *applicationController) drivers(ginCtx *gin.Context) {
 		}
 		drivers = append(drivers, d)
 	}
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["drivers"] = drivers
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
@@ -356,7 +356,7 @@ func (a *applicationController) auths(ginCtx *gin.Context) {
 		resList = append(resList, authInfo)
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["auths"] = resList
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
@@ -439,7 +439,7 @@ func (a *applicationController) getAuth(ginCtx *gin.Context) {
 		IsTransparent: auth.IsTransparent,
 		Config:        application_dto.AuthConfigProxy(auth.Config),
 	}
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["auth"] = resAuth
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
