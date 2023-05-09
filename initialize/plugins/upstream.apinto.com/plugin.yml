@@ -35,6 +35,8 @@ define:  # 动态模块定义
       title: 驱动名称
     - name: description
       title: 描述
+  depend:
+    - $.discovery
   render:
     http: |
       {
