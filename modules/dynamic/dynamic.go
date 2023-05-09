@@ -23,4 +23,11 @@ type IDynamicService interface {
 	Create(ctx context.Context, namespaceId int, profession string, skill string, title string, name string, driver string, description string, body string, updater int) error
 	Save(ctx context.Context, namespaceId int, profession string, title string, name string, description string, body string, updater int) error
 	Delete(ctx context.Context, namespaceId int, profession string, name string) error
+
+	GetIDByName(ctx context.Context, namespaceId int, profession string, name string) (int, error)
+
+	ListByNames(ctx context.Context, namespaceID int, profession string, names []string) ([]*dynamic_model.DynamicBasicInfo, error)
+	ListByKeyword(ctx context.Context, namespaceID int, profession string, keyword string) ([]*dynamic_model.DynamicBasicInfo, error)
+
+	Count(ctx context.Context, namespaceID int, profession string, addition map[string]interface{}) (int, error)
 }

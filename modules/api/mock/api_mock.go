@@ -532,18 +532,6 @@ func (mr *MockIAPIServiceMockRecorder) OnlineList(ctx, namespaceId, uuid interfa
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OnlineList", reflect.TypeOf((*MockIAPIService)(nil).OnlineList), ctx, namespaceId, uuid)
 }
 
-// ResetOnline mocks base method.
-func (m *MockIAPIService) ResetOnline(ctx context.Context, namespaceId, clusterId int) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "ResetOnline", ctx, namespaceId, clusterId)
-}
-
-// ResetOnline indicates an expected call of ResetOnline.
-func (mr *MockIAPIServiceMockRecorder) ResetOnline(ctx, namespaceId, clusterId interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResetOnline", reflect.TypeOf((*MockIAPIService)(nil).ResetOnline), ctx, namespaceId, clusterId)
-}
-
 // UpdateAPI mocks base method.
 func (m *MockIAPIService) UpdateAPI(ctx context.Context, namespaceID, operator int, input *api_dto.APIInfo) error {
 	m.ctrl.T.Helper()

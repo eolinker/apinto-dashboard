@@ -31,7 +31,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/variable/variable-entry"
 	variable_model "github.com/eolinker/apinto-dashboard/modules/variable/variable-model"
 	"github.com/eolinker/eosc/common/bean"
-	"github.com/eolinker/eosc/log"
 	"github.com/go-basic/uuid"
 	"gorm.io/gorm"
 )
@@ -739,64 +738,6 @@ func (s *service) OnlineService(ctx context.Context, namespaceId, operator int, 
 
 		return client.ForService().Create(*serviceConfig)
 	})
-}
-
-func (s *service) ResetOnline(ctx context.Context, namespaceId, clusterId int) {
-	runtimes, err := s.serviceRuntimeStore.GetByCluster(ctx, clusterId)
-	if err != nil {
-		log.Errorf("service-ResetOnline-getRuntimes clusterId=%d err=%s", clusterId, err.Error())
-		return
-	}
-	client, err := s.apintoClient.GetClient(ctx, clusterId)
-	if err != nil {
-		log.Errorf("service-ResetOnline-getClient clusterId=%d err=%s", clusterId, err.Error())
-		return
-	}
-	namespaceInfo, err := s.namespaceService.GetById(namespaceId)
-	if err != nil {
-		return
-	}
-
-	for _, runtime := range runtimes {
-		if !runtime.IsOnline {
-			continue
-		}
-
-		discoveryName := ""
-		version, err := s.serviceVersionStore.Get(ctx, runtime.VersionId)
-		if err != nil {
-			log.Errorf("service-ResetOnline-getVersion versionId=%d, clusterId=%d, err=%s", runtime.VersionId, clusterId, err.Error())
-			continue
-		}
-		discoveryId := version.DiscoveryId
-
-		if version.DiscoveryId > 0 {
-			discoveryName, err = s.discoveryService.GetDiscoveryName(ctx, discoveryId)
-			if err != nil {
-				log.Errorf("service-ResetOnline-getDiscoveryName discoveryId=%d, clusterId=%d, err=%s", discoveryId, clusterId, err.Error())
-				continue
-			}
-		}
-
-		_, _, driverInfo, err := s.discoveryService.GetServiceDiscoveryDriverByID(ctx, discoveryId)
-		if err != nil {
-			log.Errorf("service-ResetOnline-getDriverInfo discoveryId=%d clusterId=%d err=%s", discoveryId, clusterId, err.Error())
-			continue
-		}
-
-		serviceInfo, err := s.serviceStore.Get(ctx, runtime.ServiceId)
-		if err != nil {
-			log.Errorf("service-ResetOnline-getService serviceId=%d clusterId=%d err=%s", runtime.ServiceId, clusterId, err.Error())
-			continue
-		}
-
-		versionConfig := version.ServiceVersionConfig
-		serviceConfig := driverInfo.ToApinto(strings.ToLower(serviceInfo.Name), namespaceInfo.Name, serviceInfo.Desc, versionConfig.Scheme, versionConfig.Balance, strings.ToLower(discoveryName), "http", versionConfig.Timeout, []byte(versionConfig.Config))
-		if err = client.ForService().Create(*serviceConfig); err != nil {
-			log.Errorf("service-ResetOnline-apintoCreate serviceConfig=%v clusterId=%d err=%s", serviceConfig, clusterId, err.Error())
-			continue
-		}
-	}
 }
 
 // OfflineService 下线服务

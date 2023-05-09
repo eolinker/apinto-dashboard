@@ -1,11 +1,11 @@
-package strategy_handler
+package config
 
 import (
 	_ "embed"
 	"gopkg.in/yaml.v3"
 )
 
-//go:embed config/content-type.yml
+//go:embed content-type.yml
 var contentTypeData []byte
 var (
 	contentTypeList []ContentTypeItem

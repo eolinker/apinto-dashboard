@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
-	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/strategy"
+	"github.com/eolinker/apinto-dashboard/modules/strategy/config"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-dto"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-entry"
 	"strings"
@@ -21,16 +21,16 @@ func (t *cacheHandler) GetListLabel(conf *strategy_entry.StrategyCacheConfig) st
 }
 
 func (t *cacheHandler) GetType() string {
-	return enum.StrategyCache
+	return config.StrategyCache
 }
 
 func (t *cacheHandler) GetConfName() string {
-	return enum.StrategyCacheApintoConfName
+	return config.StrategyCacheApintoConfName
 }
 
 // GetBatchSettingName 获取往apinto发送批量操作策略时 url所需要的路径名 /setting/xxx
 func (t *cacheHandler) GetBatchSettingName() string {
-	return enum.StrategyCacheBatchName
+	return config.StrategyCacheBatchName
 }
 
 func (t *cacheHandler) CheckInput(input *strategy_dto.StrategyInfoInput[strategy_entry.StrategyCacheConfig]) error {
