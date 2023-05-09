@@ -54,6 +54,11 @@ type strategyCommonService struct {
 	filterOptions *strategyFilterOptions
 }
 
+func (s *strategyCommonService) FilterNameCheck(name string) bool {
+	_, has := s.filterOptions.typeConfigs[name]
+	return has
+}
+
 func (s *strategyCommonService) GetFilterLabel(ctx context.Context, namespaceId int, name string, values []string) (string, string, string) {
 	title, has := s.filterOptions.titleConfigs[name]
 	if has {
