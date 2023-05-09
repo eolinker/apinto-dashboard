@@ -7,9 +7,6 @@ import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
-	"github.com/eolinker/apinto-dashboard/enum"
-	"github.com/eolinker/apinto-dashboard/modules/api"
-	"github.com/eolinker/apinto-dashboard/modules/application"
 	"github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-dashboard/modules/base/locker-service"
 	"github.com/eolinker/apinto-dashboard/modules/cluster"
@@ -19,7 +16,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-entry"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-model"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-store"
-	"github.com/eolinker/apinto-dashboard/modules/upstream"
 	"github.com/eolinker/apinto-dashboard/modules/user"
 	"github.com/eolinker/apinto-dashboard/store"
 	"github.com/eolinker/eosc/common/bean"
@@ -42,11 +38,11 @@ type strategyService[T any, K any] struct {
 	strategyRuntimeStore strategy_store.IStrategyRuntimeStore
 	strategyHistory      strategy_store.IStrategyHistoryStore
 	lock                 locker_service.IAsynLockService
-	applicationService   application.IApplicationService
-	apiService           api.IAPIService
-	service              upstream.IService
-	userInfoService      user.IUserInfoService
-
+	//applicationService   application.IApplicationService
+	//apiService           api.IAPIService
+	//service              upstream.IService
+	userInfoService user.IUserInfoService
+	commonService   strategy.IStrategyCommonService
 	//strategyManager driver_manager.IStrategyDriverManager
 	strategyHandler strategy.IStrategyHandler[T, K]
 }
@@ -60,9 +56,8 @@ func NewStrategyService[T any, K any](handler strategy.IStrategyHandler[T, K], r
 	bean.Autowired(&s.strategyHistory)
 	bean.Autowired(&s.apintoClient)
 	bean.Autowired(&s.clusterService)
-	bean.Autowired(&s.applicationService)
-	bean.Autowired(&s.service)
-	bean.Autowired(&s.apiService)
+	bean.Autowired(&s.commonService)
+
 	bean.Autowired(&s.lock)
 	bean.Autowired(&s.userInfoService)
 
@@ -150,22 +145,16 @@ func (s *strategyService[T, K]) GetList(ctx context.Context, namespaceId int, cl
 	return resList, nil
 }
 
-func (s *strategyService[T, K]) GetInfo(ctx context.Context, namespaceId int, uuid string) (*strategy_model.StrategyInfoOutput[K], *strategy_model.ExtenderData, error) {
+func (s *strategyService[T, K]) GetInfo(ctx context.Context, namespaceId int, uuid string) (*strategy_model.StrategyInfoOutput[K], error) {
 	strategyInfo, err := s.strategyStore.GetByUUID(ctx, uuid)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	version, err := s.getLatestStrategyVersion(ctx, strategyInfo.Id)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	//拼装筛选条件所需要的信息
-	extenderData := &strategy_model.ExtenderData{
-		Api:         make(map[string]*strategy_model.RemoteApis),
-		Service:     make(map[string]*strategy_model.RemoteServices),
-		Application: make(map[string]*strategy_model.RemoteApplications),
-	}
 	filters := make([]*strategy_model.FilterOutput, 0, len(version.Filters))
 	for _, f := range version.Filters {
 		filter := &strategy_model.FilterOutput{
@@ -175,97 +164,7 @@ func (s *strategyService[T, K]) GetInfo(ctx context.Context, namespaceId int, uu
 		if len(f.Values) == 0 {
 			continue
 		}
-		switch filter.Name {
-		case config.FilterApplication:
-			filter.Type = config.FilterTypeRemote
-			filter.Title = "应用"
-			if f.Values[0] == config.FilterValuesALL {
-				filter.Label = "所有应用"
-			} else {
-				apps, err := s.applicationService.AppListByUUIDS(ctx, namespaceId, f.Values)
-				if err != nil {
-					return nil, nil, err
-				}
-				if len(apps) == 0 {
-					continue
-				}
-				labels := make([]string, len(apps))
-				for i, app := range apps {
-					extenderData.Application[app.IdStr] = &strategy_model.RemoteApplications{
-						Name: app.Name,
-						Uuid: app.IdStr,
-						Desc: app.Desc,
-					}
-					labels[i] = app.Name
-				}
-				filter.Label = strings.Join(labels, ",")
-			}
-		case config.FilterApi:
-			filter.Type = config.FilterTypeRemote
-			filter.Title = "API"
-			if f.Values[0] == config.FilterValuesALL {
-				filter.Label = "所有API"
-			} else {
-				apis, err := s.apiService.GetAPIRemoteByUUIDS(ctx, namespaceId, f.Values)
-				if err != nil {
-					return nil, nil, err
-				}
-				if len(apis) == 0 {
-					continue
-				}
-				labels := make([]string, len(apis))
-				for i, apiInfo := range apis {
-					extenderData.Api[apiInfo.Uuid] = apiInfo
-					labels[i] = apiInfo.Name
-				}
-				filter.Label = strings.Join(labels, ",")
-			}
-		case config.FilterPath:
-			filter.Type = config.FilterTypePattern
-			filter.Title = "API路径"
-			filter.Label = f.Values[0]
-		case config.FilterService:
-			filter.Type = config.FilterTypeRemote
-			filter.Title = "上游服务"
-			if f.Values[0] == config.FilterValuesALL {
-				filter.Label = "所有上游服务"
-			} else {
-				services, err := s.service.GetServiceRemoteByNames(ctx, namespaceId, f.Values)
-				if err != nil {
-					return nil, nil, err
-				}
-				if len(services) == 0 {
-					continue
-				}
-				labels := make([]string, len(services))
-				for i, sv := range services {
-					extenderData.Service[sv.Uuid] = sv
-					labels[i] = sv.Name
-				}
-				filter.Label = strings.Join(labels, ",")
-			}
-		case config.FilterMethod:
-			filter.Type = config.FilterTypeStatic
-			filter.Title = "API请求方式"
-			if f.Values[0] == enum.HttpALL {
-				filter.Label = "所有API请求方式"
-			} else {
-				filter.Label = strings.Join(f.Values, ",")
-			}
-		case config.FilterIP:
-			filter.Type = config.FilterTypePattern
-			filter.Title = "IP"
-			filter.Label = strings.Join(f.Values, ",")
-		default: //KEY(应用)
-			filter.Type = config.FilterTypeStatic
-			filter.Title = fmt.Sprintf("%s(应用)", common.GetFilterAppKey(filter.Name))
-			if f.Values[0] == config.FilterValuesALL {
-				filter.Label = fmt.Sprintf("%s(应用)所有值", common.GetFilterAppKey(filter.Name))
-			} else {
-				filter.Label = strings.Join(f.Values, ",")
-			}
-		}
-
+		filter.Title, filter.Label, filter.Type = s.commonService.GetFilterLabel(ctx, namespaceId, filter.Name, filter.Values)
 		filters = append(filters, filter)
 	}
 	input := &strategy_model.StrategyInfoOutput[T]{
@@ -275,7 +174,7 @@ func (s *strategyService[T, K]) GetInfo(ctx context.Context, namespaceId int, uu
 
 	input.Config = s.decodeConfig(version.StrategyConfigInfo.StrategyVersionConfig.Config)
 
-	return s.strategyHandler.FormatOut(ctx, namespaceId, input), extenderData, nil
+	return s.strategyHandler.FormatOut(ctx, namespaceId, input), nil
 }
 
 func (s *strategyService[T, K]) CreateStrategy(ctx context.Context, namespaceId int, operator int, clusterName string, input *strategy_dto.StrategyInfoInput[T]) error {
@@ -1048,114 +947,10 @@ func (s *strategyService[T, K]) isStrategyVersionConfChange(latest *strategy_ent
 
 func (s *strategyService[T, K]) getFiltersStr(ctx context.Context, namespaceId int, version *strategy_entry.StrategyVersion) (string, error) {
 	//filters := ""
-	filterList := make([]string, 0)
+	filterList := make([]string, 0, len(version.Filters))
 	for _, filter := range version.Filters {
-		switch filter.Name {
-		case config.FilterApplication:
-			if len(filter.Values) > 0 {
-				if filter.Values[0] == config.FilterValuesALL {
-					filters := "[应用：全部应用]"
-					filterList = append(filterList, filters)
-				} else {
-					applications, err := s.applicationService.AppListByUUIDS(ctx, namespaceId, filter.Values)
-					if err != nil {
-						return "", err
-					}
-					filters := "[应用："
-					for i, applicationInfo := range applications {
-						if i == len(applications)-1 {
-							filters += applicationInfo.Name + "]"
-						} else {
-							filters += applicationInfo.Name + ","
-						}
-					}
-					filterList = append(filterList, filters)
-				}
-			}
-		case config.FilterApi:
-			if len(filter.Values) > 0 {
-				if filter.Values[0] == config.FilterValuesALL {
-					filters := "[API：全部API]"
-					filterList = append(filterList, filters)
-				} else {
-					apis, err := s.apiService.GetAPIRemoteByUUIDS(ctx, namespaceId, filter.Values)
-					if err != nil {
-						return "", err
-					}
-					filters := "[API："
-					for i, apiInfo := range apis {
-						if i == len(apis)-1 {
-							filters += apiInfo.Name + "]"
-						} else {
-							filters += apiInfo.Name + ","
-						}
-					}
-					filterList = append(filterList, filters)
-				}
-			}
-		case config.FilterService:
-			if len(filter.Values) > 0 {
-				if filter.Values[0] == config.FilterValuesALL {
-					filters := "[上游服务：全部上游服务]"
-					filterList = append(filterList, filters)
-				} else {
-					services, err := s.service.GetServiceRemoteByNames(ctx, namespaceId, filter.Values)
-					if err != nil {
-						return "", err
-					}
-					filters := "[上游服务："
-					for i, val := range services {
-						if i == len(services)-1 {
-							filters += val.Name + "]"
-						} else {
-							filters += val.Name + ","
-						}
-					}
-					filterList = append(filterList, filters)
-				}
-			}
-		case config.FilterMethod:
-			if len(filter.Values) > 0 {
-				if filter.Values[0] == config.FilterValuesALL {
-					filters := "[API请求方式：全部请求方式]"
-					filterList = append(filterList, filters)
-				} else {
-					filters := fmt.Sprintf("[API请求方式：%s]", strings.Join(filter.Values, ","))
-					filterList = append(filterList, filters)
-				}
-			}
-		case config.FilterPath:
-			if len(filter.Values) > 0 {
-				filters := fmt.Sprintf("[API路径：%s]", filter.Values[0])
-				filterList = append(filterList, filters)
-			}
-		case config.FilterIP:
-			if len(filter.Values) > 0 {
-				filters := fmt.Sprintf("[IP：%s]", strings.Join(filter.Values, ","))
-				filterList = append(filterList, filters)
-			}
-		default:
-			//appKey
-			key := common.GetFilterAppKey(filter.Name)
-			if filter.Name != key {
-				if len(filter.Values) > 0 {
-					if filter.Values[0] == config.FilterValuesALL {
-						filters := fmt.Sprintf("[%s(应用)：全部数据]", key)
-						filterList = append(filterList, filters)
-					} else {
-						filters := fmt.Sprintf("[%s(应用)：", key)
-						for i, val := range filter.Values {
-							if i == len(filter.Values)-1 {
-								filters += val + "]"
-							} else {
-								filters += val + ","
-							}
-						}
-						filterList = append(filterList, filters)
-					}
-				}
-			}
-		}
+		title, values, _ := s.commonService.GetFilterLabel(ctx, namespaceId, filter.Name, filter.Values)
+		filterList = append(filterList, fmt.Sprintf("[%s:%s]", title, values))
 	}
 	return strings.Join(filterList, ";"), nil
 }
