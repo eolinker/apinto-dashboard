@@ -99,8 +99,10 @@ type FilterRemoteOutput struct {
 	//Apis         []*strategy_model.RemoteApis         `json:"apis"`
 	//Services     []*strategy_model.RemoteServices     `json:"services"`
 	//Applications []*strategy_model.RemoteApplications `json:"applications"`
-	List  []any `json:"list"`
-	Total int   `json:"total"`
+	List  []any  `json:"list"`
+	Key   string `json:"key"`
+	Value string `json:"value"`
+	Total int    `json:"total"`
 }
 
 type StrategyPublishHistory struct {
