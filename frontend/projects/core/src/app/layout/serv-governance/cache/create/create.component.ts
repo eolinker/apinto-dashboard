@@ -58,8 +58,8 @@ export class CacheCreateComponent implements OnInit {
       validTime: [null, [Validators.required]]
     })
     this.navigationService.reqFlashBreadcrumb([
-      { title: '缓存策略', routerLink: 'serv-governance/cache' },
-      { title: '新建缓存策略' }
+      { title: '数据缓存', routerLink: 'serv-governance/cache' },
+      { title: '新建数据缓存策略' }
     ])
   }
 
@@ -89,7 +89,7 @@ export class CacheCreateComponent implements OnInit {
           if (resp.code === 0) {
             this.navigationService.reqFlashBreadcrumb([
               {
-                title: '缓存策略',
+                title: '数据缓存',
                 routerLink: 'serv-governance/cache'
               },
               { title: resp.data.strategy!.name }
