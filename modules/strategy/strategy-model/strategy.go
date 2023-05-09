@@ -2,6 +2,7 @@ package strategy_model
 
 import (
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-entry"
+	apinto_module "github.com/eolinker/apinto-module"
 	"time"
 )
 
@@ -83,11 +84,10 @@ type MetricsOptionsItem struct {
 }
 
 type FilterRemoteOutput struct {
-	Target       string
-	Titles       []*RemoteTitles
-	Apis         []*RemoteApis
-	Services     []*RemoteServices
-	Applications []*RemoteApplications
+	Target string
+	Titles []apinto_module.OptionTitle
+	Key    string
+	List   []any
 }
 
 type RemoteTitles struct {
