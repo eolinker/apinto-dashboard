@@ -18,8 +18,7 @@ import (
 )
 
 var (
-	_ core.ICore                                = (*coreService)(nil)
-	_ apinto_module.IFilterOptionHandlerManager = (*coreService)(nil)
+	_ core.ICore = (*coreService)(nil)
 )
 
 const (
@@ -47,11 +46,8 @@ type coreService struct {
 	once                sync.Once
 
 	coreModule apinto_module.CoreModule
-}
 
-func (c *coreService) ResetFilterOptionHandlers(handlers map[string]apinto_module.IFilterOptionHandler) {
-	//TODO implement me
-	panic("implement me")
+	filterOptionHandlerManager apinto_module.IFilterOptionHandlerManager
 }
 
 func (c *coreService) SetCoreModule(module apinto_module.CoreModule) {
@@ -207,7 +203,7 @@ func (c *coreService) rebuild() error {
 		return err
 	}
 	modulesData := newTModulesData()
-	builder := apinto_module.NewModuleBuilder(c.engineCreate.CreateEngine(), c.coreModule, c)
+	builder := apinto_module.NewModuleBuilder(c.engineCreate.CreateEngine(), c.coreModule, c.filterOptionHandlerManager)
 	for _, module := range modules {
 		driver, has := apinto_module.GetDriver(module.Driver)
 		if !has {
@@ -249,6 +245,7 @@ func NewService(providerService IProviderService) core.ICore {
 		providerService: providerService,
 		coreModule:      controller.NewModule(),
 	}
+	bean.Autowired(&c.filterOptionHandlerManager)
 	bean.Autowired(&c.modulePluginService)
 	bean.Autowired(&c.engineCreate)
 	bean.Autowired(&c.cacheCommon)
