@@ -2,7 +2,6 @@ package openapi_service
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
@@ -19,14 +18,14 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/openapi/openapi-dto"
 	"github.com/eolinker/apinto-dashboard/modules/openapi/openapi-model"
 	"github.com/eolinker/apinto-dashboard/modules/openapp"
-	"github.com/eolinker/apinto-dashboard/modules/upstream"
-	upstream_dto "github.com/eolinker/apinto-dashboard/modules/upstream/upstream-dto"
 	"github.com/eolinker/eosc/common/bean"
-	"github.com/go-basic/uuid"
 	"gorm.io/gorm"
 	"sort"
-	"strings"
 	"time"
+)
+
+const (
+	professionService = "service"
 )
 
 type apiOpenAPIService struct {
@@ -37,8 +36,8 @@ type apiOpenAPIService struct {
 	apiHistory     store2.IApiHistoryStore
 	dynamicService dynamic.IDynamicService
 
-	apiService           api.IAPIService
-	service              upstream.IService
+	apiService api.IAPIService
+	//service              upstream.IService
 	commonGroup          group.ICommonGroupService
 	extAppService        openapp.IExternalApplicationService
 	apiSyncFormatManager openapi.IAPISyncFormatManager
@@ -53,7 +52,7 @@ func newAPIOpenAPIService() openapi.IAPIOpenAPIService {
 	bean.Autowired(&as.dynamicService)
 
 	bean.Autowired(&as.apiService)
-	bean.Autowired(&as.service)
+	//bean.Autowired(&as.service)
 	bean.Autowired(&as.commonGroup)
 	bean.Autowired(&as.apiHistory)
 	bean.Autowired(&as.extAppService)
@@ -91,12 +90,15 @@ func (a *apiOpenAPIService) SyncImport(ctx context.Context, namespaceID, appID i
 
 	//检查服务，没有就用server创建，服务名使用data.ServiceName
 	serviceNotExit := false
-	serviceID, err := a.dynamicService.GetIDByName(ctx, namespaceID, "service", data.ServiceName)
+	serviceID, err := a.dynamicService.GetIDByName(ctx, namespaceID, professionService, data.ServiceName)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}
 	if err == gorm.ErrRecordNotFound {
 		serviceNotExit = true
+		//暂时不能创建Service
+		return nil, fmt.Errorf("不能创建服务")
+
 		if data.Server == nil {
 			return nil, fmt.Errorf("Server can't be null when service doesn't exist. ")
 		}
@@ -142,8 +144,8 @@ func (a *apiOpenAPIService) SyncImport(ctx context.Context, namespaceID, appID i
 		//判断路径和method是否冲突
 		if apis, ok := apiMap[importAPI.RequestPath]; ok {
 		A:
-			for _, api := range apis {
-				for _, method := range api.Version.Method {
+			for _, tempApi := range apis {
+				for _, method := range tempApi.Version.Method {
 					if method == apiMethod {
 						item.Status = 2 //冲突
 						break A
@@ -171,39 +173,39 @@ func (a *apiOpenAPIService) SyncImport(ctx context.Context, namespaceID, appID i
 	return items, a.apiStore.Transaction(ctx, func(txCtx context.Context) error {
 		//若服务不存在则创建
 		if serviceNotExit {
-			staticAddrs := make([]string, 0, len(data.Server.Nodes))
-			staticConf := make([]*openapi_model.ServiceStaticConf, 0, len(data.Server.Nodes))
-			for _, node := range data.Server.Nodes {
-				if node.Weight == 0 {
-					node.Weight = 1
-				}
-				staticAddrs = append(staticAddrs, fmt.Sprintf("%s weight=%d", strings.TrimSpace(node.Url), node.Weight))
-				staticConf = append(staticConf, &openapi_model.ServiceStaticConf{
-					Addr:   strings.TrimSpace(node.Url),
-					Weight: node.Weight,
-				})
-			}
-			config := &openapi_model.ServiceStaticDriverConf{
-				UseVariable: false,
-				StaticConf:  staticConf,
-			}
-			configData, _ := json.Marshal(config)
-
-			serviceID, err = a.service.CreateService(txCtx, namespaceID, 0, &upstream_dto.ServiceInfo{
-				Name:        data.ServiceName,
-				UUID:        uuid.New(),
-				Desc:        "",
-				Scheme:      data.Server.Scheme,
-				DiscoveryID: 0,
-				DriverName:  "static", //静态
-				FormatAddr:  strings.Join(staticAddrs, ","),
-				Config:      string(configData),
-				Timeout:     1000,
-				Balance:     "round-robin", // 默认
-			}, nil)
-			if err != nil {
-				return err
-			}
+			//staticAddrs := make([]string, 0, len(data.Server.Nodes))
+			//staticConf := make([]*openapi_model.ServiceStaticConf, 0, len(data.Server.Nodes))
+			//for _, node := range data.Server.Nodes {
+			//	if node.Weight == 0 {
+			//		node.Weight = 1
+			//	}
+			//	staticAddrs = append(staticAddrs, fmt.Sprintf("%s weight=%d", strings.TrimSpace(node.Url), node.Weight))
+			//	staticConf = append(staticConf, &openapi_model.ServiceStaticConf{
+			//		Addr:   strings.TrimSpace(node.Url),
+			//		Weight: node.Weight,
+			//	})
+			//}
+			//config := &openapi_model.ServiceStaticDriverConf{
+			//	UseVariable: false,
+			//	StaticConf:  staticConf,
+			//}
+			//configData, _ := json.Marshal(config)
+			//
+			//serviceID, err = a.service.CreateService(txCtx, namespaceID, 0, &upstream_dto.ServiceInfo{
+			//	Name:        data.ServiceName,
+			//	UUID:        uuid.New(),
+			//	Desc:        "",
+			//	Scheme:      data.Server.Scheme,
+			//	DiscoveryID: 0,
+			//	DriverName:  "static", //静态
+			//	FormatAddr:  strings.Join(staticAddrs, ","),
+			//	Config:      string(configData),
+			//	Timeout:     1000,
+			//	Balance:     "round-robin", // 默认
+			//}, nil)
+			//if err != nil {
+			//	return err
+			//}
 		}
 
 		//插入api
@@ -287,16 +289,16 @@ func (a *apiOpenAPIService) GetSyncImportInfo(ctx context.Context, namespaceID i
 	}
 
 	//组装服务列表
-	services, st, err := a.service.GetServiceRemoteOptions(ctx, namespaceID, 0, 0, "")
+	dynamicInfos, err := a.dynamicService.ListByKeyword(ctx, namespaceID, professionService, "")
 	if err != nil {
 		return nil, nil, nil, err
 	}
 
-	serviceList := make([]*openapi_model.ApiOpenAPIService, 0, st)
-	for _, s := range services {
+	serviceList := make([]*openapi_model.ApiOpenAPIService, 0, len(dynamicInfos))
+	for _, d := range dynamicInfos {
 		item := &openapi_model.ApiOpenAPIService{
-			Name: s.Name,
-			Desc: s.Desc,
+			Name: d.ID,
+			Desc: d.Description,
 		}
 		serviceList = append(serviceList, item)
 	}

@@ -6,7 +6,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/base/frontend-model"
 	"github.com/eolinker/apinto-dashboard/modules/discovery/discover-dto"
 	"github.com/eolinker/apinto-dashboard/modules/discovery/discovery-model"
-	"github.com/eolinker/apinto-dashboard/modules/online"
 	"github.com/eolinker/apinto-dashboard/modules/upstream"
 )
 
@@ -32,5 +31,5 @@ type IDiscoveryService interface {
 	//通过服务名获取配置上游服务时所需要的discoveryDriver
 	GetServiceDiscoveryDriver(ctx context.Context, namespaceID int, discoveryName string) (int, string, upstream.IServiceDriver, error)
 	GetServiceDiscoveryDriverByID(ctx context.Context, discoveryID int) (string, string, upstream.IServiceDriver, error)
-	online.IResetOnlineService
+	//online.IResetOnlineService
 }
