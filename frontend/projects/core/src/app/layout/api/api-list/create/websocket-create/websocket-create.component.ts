@@ -173,7 +173,7 @@ export class ApiWebsocketCreateComponent implements OnInit {
         this.validateForm.controls['requestPath'].setValue(resp.data.api.requestPath.slice(1))
         this.createApiForm = resp.data.api
         this.getHeaderList()
-        this.hostsList = [...resp.data.hosts?.map((x:string) => ({ key: x })) || [], { key: '' }]
+        this.hostsList = [...resp.data.api.hosts?.map((x:string) => ({ key: x })) || [], { key: '' }]
       }
     })
   }
