@@ -1,0 +1,48 @@
+<div
+  class="flex flex-nowrap justify-start w-[100%] overflow-hidden max-h-[calc(100vh_-_50px)]"
+  *ngIf="nodesList.length > 0; else emptyTpl"
+>
+  <div>
+    <div
+      class="inline-block relative min-w-GROUP min-h-[calc(100vh_-_50px)] spreed-content"
+      style="width: 240px"
+    >
+      <div class="h-[100%] absolute overflow-x-hidden overflow-y-auto w-[100%]">
+        <div class="group-title non-click">
+          <svg class="iconpark-icon mr5 fs18">
+            <use href="#list"></use>
+          </svg>
+          <span class="">所有集群</span>
+        </div>
+        <div>
+          <eo-ng-tree-default
+            class="tree"
+            nzBlockNode
+            #eoNgTreeDefault
+            [nzData]="nodesList"
+            (nzClick)="activeNode($event)"
+          ></eo-ng-tree-default>
+        </div>
+
+        <!-- 拖动条 -->
+        <div
+          class="divide_line_ldcc"
+          maxWidth="450"
+          minWidth="200"
+          eo-ng-tree-drag
+        ></div>
+      </div>
+    </div>
+  </div>
+  <div class="min-w-[0px]">
+    <router-outlet></router-outlet>
+  </div>
+</div>
+
+<div
+  class="flex flex-nowrap justify-start overflow-hidden max-h-[calc(100vh_-_50px)]"
+>
+  <ng-template #emptyTpl class="w-[100%]">
+    <eo-ng-empty nzMainTitle="暂无数据" nzInputImage="simple"></eo-ng-empty>
+  </ng-template>
+</div>

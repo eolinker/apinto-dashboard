@@ -1,0 +1,58 @@
+<form
+  class="mt-formtop"
+  nz-form
+  [nzNoColon]="true"
+  [nzAutoTips]="autoTips"
+  [formGroup]="validateForm"
+>
+  <nz-form-item>
+    <nz-form-label [nzSpan]="7" nzRequired>KEY：</nz-form-label>
+    <nz-form-control [nzSpan]="12" [nzErrorTip]="nameErrorTpl">
+      <input
+        eo-ng-input
+        class="w-INPUT_NORMAL"
+        formControlName="key"
+        placeholder="英文数字下划线任意一种，首字母必须为英文"
+        eoNgUserAccess="deploy/variable"
+      />
+
+      <ng-template #nameErrorTpl let-control>
+        <ng-container *ngIf="control.hasError('pattern')"
+          >英文数字下划线任意一种，首字母必须为英文</ng-container
+        >
+        <ng-container *ngIf="control.hasError('required')"
+          >必填项</ng-container
+        ></ng-template
+      >
+    </nz-form-control>
+  </nz-form-item>
+  <nz-form-item class="mb-0">
+    <nz-form-label [nzSpan]="7">描述：</nz-form-label>
+    <nz-form-control [nzSpan]="12">
+      <textarea
+        class="w-INPUT_NORMAL"
+        eo-ng-input
+        formControlName="desc"
+        placeholder="请输入"
+        eoNgUserAccess="deploy/variable"
+      ></textarea>
+    </nz-form-control>
+  </nz-form-item>
+
+  <nz-form-item class="mb-0 sticky bg-white bottom-0 py-mbase z-50">
+    <nz-form-control [nzOffset]="7" [nzSpan]="12">
+      <button
+        eo-ng-button
+        class="ant-btn-primary"
+        eoNgUserAccess="deploy/variable"
+        (click)="save()"
+        [nzLoading]="submitButtonLoading"
+      >
+        保存
+      </button>
+      <button eo-ng-button class="ml-btnybase" (click)="backToList()">
+        取消
+      </button>
+    </nz-form-control>
+  </nz-form-item>
+</form>

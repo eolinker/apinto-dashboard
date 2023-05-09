@@ -1,0 +1,60 @@
+<div class="w-[100%] overflow-x-hidden">
+  <section class="drawer-list-header mb-formtop">
+    <div>
+      <label class="label inline-block text-right">名称：</label
+      ><span>{{ apiInfo?.name || '' }}</span>
+    </div>
+    <div>
+      <label class="label inline-block text-right">ID：</label
+      ><span>{{ apiInfo?.id || '' }}</span>
+    </div>
+    <div>
+      <label class="label inline-block text-right">协议：</label
+      ><span>{{ apiInfo?.scheme || '' }}</span>
+    </div>
+    <div>
+      <label class="label inline-block text-right">方法：</label
+      ><span>{{ apiInfo?.method }}</span>
+    </div>
+    <div>
+      <label class="label inline-block text-right">请求路径：</label
+      ><span>{{ apiInfo?.path || '' }}</span>
+    </div>
+    <div>
+      <label class="label inline-block text-right">转发服务、路径：</label
+      ><span class="border-[1px] boreder-[solid] border-BORDER">{{
+        apiInfo?.service || ''
+      }}</span
+      ><span>{{ apiInfo?.proxyPath || '' }}</span>
+    </div>
+    <div>
+      <label class="label inline-block text-right">描述：</label
+      ><span>{{ apiInfo?.desc || '' }}</span>
+    </div>
+  </section>
+  <div class="drawer-list-content">
+    <eo-ng-apinto-table
+      class=""
+      [nzTbody]="publishTableBody"
+      [nzThead]="publishTableHeadName"
+      [nzData]="publishList"
+      [nzTrClick]="nzDisabled ? null : tableClick"
+      [nzNoScroll]="true"
+      [nzDisabled]="nzDisabled"
+    >
+    </eo-ng-apinto-table>
+  </div>
+  <div class="drawer-list-footer mt-formtop flex justify-end">
+    <span
+      >已选择{{ selectedNum }}项
+      <ng-container *ngIf="selectedNum">：</ng-container
+      ><ng-container *ngFor="let item of selectedClusters; let last = last"
+        >{{ item }}{{ last ? '' : '，' }}</ng-container
+      ></span
+    >
+  </div>
+</div>
+
+<ng-template #clusterStatusTpl let-item="item">
+  <eo-ng-table-status [status]="item.status"></eo-ng-table-status>
+</ng-template>

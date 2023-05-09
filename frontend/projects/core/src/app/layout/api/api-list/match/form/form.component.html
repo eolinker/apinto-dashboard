@@ -1,0 +1,83 @@
+<form
+  nz-form
+  [nzNoColon]="true"
+  [nzAutoTips]="autoTips"
+  [formGroup]="validateMatchForm"
+  autocomplete="off"
+>
+  <nz-form-item>
+    <nz-form-label [nzSpan]="6" nzRequired>参数位置：</nz-form-label>
+    <nz-form-control [nzSpan]="14">
+      <eo-ng-select
+        class="w-INPUT_NORMAL"
+        name="position"
+        required
+        formControlName="position"
+        [nzOptions]="positionList"
+        nzPlaceHolder="请选择"
+        [nzDisabled]="nzDisabled"
+      ></eo-ng-select>
+    </nz-form-control>
+  </nz-form-item>
+
+  <nz-form-item>
+    <nz-form-label [nzSpan]="6" nzRequired>参数名：</nz-form-label>
+    <nz-form-control [nzSpan]="14" [nzErrorTip]="matchKeyErrorTpl">
+      <input
+        eo-ng-input
+        required
+        class="w-INPUT_NORMAL"
+        name="key"
+        placeholder="支持字母开头、英文数字中横线下划线组合"
+        formControlName="key"
+        [eoNgUserAccess]="accessUrl"
+        (disabledEdit)="disabledEdit($event)"
+      />
+      <ng-template #matchKeyErrorTpl let-control>
+        <ng-container *ngIf="control.hasError('pattern')"
+          >参数名需以字母开头，支持英文、数字、中横线、下划线组合</ng-container
+        >
+        <ng-container *ngIf="control.hasError('required')"
+          >必填项</ng-container
+        ></ng-template
+      >
+    </nz-form-control>
+  </nz-form-item>
+
+  <nz-form-item>
+    <nz-form-label [nzSpan]="6" nzRequired>匹配类型：</nz-form-label>
+    <nz-form-control [nzSpan]="14">
+      <eo-ng-select
+        class="w-INPUT_NORMAL"
+        name="matchType"
+        required
+        formControlName="matchType"
+        [nzOptions]="matchTypeList"
+        nzPlaceHolder="请选择"
+        [nzDisabled]="nzDisabled"
+      ></eo-ng-select>
+    </nz-form-control>
+  </nz-form-item>
+
+  <nz-form-item
+    *ngIf="
+      validateMatchForm.controls['matchType'].value !== 'NULL' &&
+      validateMatchForm.controls['matchType'].value !== 'EXIST' &&
+      validateMatchForm.controls['matchType'].value !== 'UNEXIST' &&
+      validateMatchForm.controls['matchType'].value !== 'ANY'
+    "
+  >
+    <nz-form-label [nzSpan]="6" nzRequired>参数值：</nz-form-label>
+    <nz-form-control [nzSpan]="14">
+      <input
+        eo-ng-input
+        required
+        class="w-INPUT_NORMAL"
+        name="pattern"
+        placeholder="请输入"
+        formControlName="pattern"
+        [eoNgUserAccess]="accessUrl"
+      />
+    </nz-form-control>
+  </nz-form-item>
+</form>

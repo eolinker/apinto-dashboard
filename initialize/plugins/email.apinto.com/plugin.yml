@@ -1,0 +1,12 @@
+id: "email.apinto.com"
+name: "email"
+cname: "邮箱设置"
+resume: "配置系统邮件服务器信息，系统内邮件（如告警邮件）将会使用该邮件服务器发送。"
+version: "v1.0.0"
+icon: "邮箱设置.png"
+driver: "email.apinto.com"
+type: 2 #0为框架模块 1为核心模块 2为内置模块 3为非内置
+auto: true
+front: system
+navigation: "navigation.system"
+group_id: ""

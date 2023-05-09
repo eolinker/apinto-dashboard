@@ -1,141 +1,433 @@
 # Apinto Dashboard
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/eolinker/apinto-dashboard)](https://goreportcard.com/report/github.com/eolinker/apinto-dashboard) [![Releases](https://img.shields.io/github/release/eolinker/apinto-dashboard/all.svg?style=flat-square)](https://github.com/eolinker/apinto-dashboard/releases) [![LICENSE](https://img.shields.io/github/license/eolinker/Apinto-dashboard.svg?style=flat-square)](https://github.com/eolinker/apinto-dashboard/blob/main/LICENSE) ![](https://shields.io/github/downloads/eolinker/apinto-dashboard/total)
 
-* **Apinto Dashboard**项目**main**分支与**Apinto**项目**main**分支同步更新
+![](http://data.eolinker.com/course/eaC48Js3400ffd03c21e36b3eea434dce22d7877a3194f6.png)
 
-* 当前**Apinto Dashboard**最新版本为**v1.1.3-beta**，**Apinto**要求版本不低于**v0.8.4**
+Apinto Dashboad主版本应与 Apinto主版本一起使用。
+最新发布的Apinto Dashboad版本是2.0.0，可与Apinto0.12.4以上版本兼容。
 
-注意：main分支为开发主要分支，频繁更新可能导致使用不稳定，若需要使用稳定版本，请查看[release](https://github.com/eolinker/apinto-dashboard/releases)
+## Demo 
+体验地址：[demo-dashboard.apinto.com](https://demo-dashboard.apinto.com/)
 
 
-### 什么是Apinto Dashboard
+## 什么是Apinto Dashboad V2.0.0
 
-**Apinto Dashboard**是开源网关[**Apinto**](https://github.com/eolinker/apinto)的可视化UI项目。
+Apinto Dashboard V2.0.0 是一个可视化控制台项目，基于开源网关 Apinto，并满足企业级 API 网关需求场景。通过 Dashboard，可以管理集群、上游、应用和 API 等模块，并以集群维度管理各个模块的生命周期。该项目具有出色的用户操作体验，配置流程简短，上手难度低。
 
-此后，大家将告别繁琐复杂的命令行Curl命令，只需在**Dashboard**上轻轻一点，便可实现与开源网关**Apinto**的交互，极大地简化了Apinto的配置流程，降低了学习及使用成本。
+Apinto Dashboard与Apinto交互流程如下图所示：
+<img width="1664" alt="img_v2_22590d84-f8a4-4d3a-9c67-b481ecfdf1fg" src="https://user-images.githubusercontent.com/18322454/228448391-160153ff-86b8-494c-9a1d-00afb34876a1.png">
 
-**Apinto Dashboard**与**Apinto**交互流程如下图所示
 
-![Apinto Dashboard与Apinto交互流程图](https://user-images.githubusercontent.com/14105999/175314303-4df9bfad-2abc-4e4a-9f24-30a8e3b64802.jpg)
+集群管理：管理各个环境的集群，给集群配置证书、配置并发布该集群下的环境变量、监控并管理集群下各个网关节点、配置管理等。
 
-### 编译
+上游服务：上游管理和服务发现。服务发现支持consul、eureka、nacos注册中心；上游管理是管理所有提供API调用的后端系统，都需要上线到指定的集群才生效；
 
-1. 进入**build/cmd**文件夹，执行编译脚本
+API管理：支持业务域分组，管理所有后端系统提供的API及其生命周期，根据业务上下线到相应的集群。
 
-```
-cd builds/cmd && ./build.sh {版本号}
-```
+应用管理：管理所有调用方，配置请求网关的鉴权，以及支持转发后端的额外参数鉴权，上下线到指定集群生效。
 
-2. 编译后的文件存放在 **out/apinto-dashboard-{版本号}** 文件夹中
+服务治理：针对不同集群配置并上线限流、访问、熔断、灰度、缓存等策略，保障网关集群以及后端系统稳定工作。
+
+网关插件：即将开放，管理Apinto插件，Apinto内置几十个插件，同时支持自定义添加插件。
+
+企业插件：即将提供并支持自定义业务型企业插件，供用户安装使用，业务型企业插件如：用户角色、监控告警、日志、API文档、开放平台、安全防护、数据分析、调用链、mock、在线调测、安全测试、国密、多协议……
+
+系统管理：配置邮箱，配置告警模板等。
+
+## 迭代计划
+![image](https://user-images.githubusercontent.com/18322454/226301033-c270f690-4c50-4841-b919-a2f2655d9ed7.png)
+
+如果您是个人开发者，可基于API网关相关的业务场景开发有价值的网关插件或企业级插件，并且愿意分享给Apinto，您将会成为Apinto的杰出贡献者或得到一定的收益。
+如果您是企业，可基于Apinto网关开发企业级插件，成为Apinto的合作伙伴。
 
 ### 部署
 
-1. 启动**Apinto**开源网关，Apinto启动教程请[点击](https://github.com/eolinker/apinto/#get-start)
+<details>
+<summary>安装包部署</summary>
+<br>
+安装前，需要确保已经安装了Mysql 5.7.x或以上版本、Redis 5.0-6.2.7，并且Redis使用Cluster模式启动。若未安装，可参考下文的`安装Redis及Mysql`教程
+<br>
+<br>
+1、下载最新版本`apinto-dashboard`
 
-2. 下载并解压安装包
-
-```
-wget https://github.com/eolinker/apinto-dashboard/releases/download/${version}/apinto-dashboard_${version}_linux_amd64.tar.gz && tar -zxvf apinto-dashboard_${version}_linux_amd64.tar.gz && cd apinto-dashboard
-```
-
-上述命令中的 **${version}** 为 **Apinto dashboard**的版本号，需要根据 **Apinto** 版本部署对应的 **Apinto Dashboard** 版本
-
-下表为Apinto和Apinto Dashboard的版本联系
-
-| Apinto版本   | Apinto Dashboard版本 |
-| ------------ | -------------------- |
-| 0.8.x        | v1.1.3-beta          |
-| v0.6.x-0.7.x | v1.0.4-beta          |
-
-
-下列示例命令以Apinto Dashboard v1.1.3-beta版本为例
+以`apinto-dashboard v2.0.1`版本示例
 
 ```
-wget https://github.com/eolinker/apinto-dashboard/releases/download/v1.2.0-beta/apinto-dashboard_v1.2.0-beta_linux_amd64.tar.gz && tar -zxvf apinto-dashboard_v1.2.0-beta_linux_amd64.tar.gz && cd apinto-dashboard
+wget https://github.com/eolinker/apinto-dashboard/releases/download/v2.0.1/apserver_v2.0.1_linux_amd64.tar.gz
 ```
 
-apinto-dashboard支持在arm64、i386、amd64架构上运行，请根据需要下载对应架构及系统的安装包，安装包下载请[点击](https://github.com/eolinker/apinto-dashboard/releases)跳转
+安装包支持Linux、Darwin系统，AMD64、ARM64架构，使用者可以按需到[Release页面](https://github.com/eolinker/apinto-dashboard/releases/tag)进行下载。
 
-3. 编辑配置文件config.yml
-
-```yaml
-zone: zh_cn # 时区，根据时区获取当地语言的前端渲染页面，可选项：zh_cn｜ja_jp｜ en_us，当前版本仅支持zh_cn
-default: monitor
-apinto:		# Apinto openAPI地址列表，若有多个节点，可填写多个节点的openAPI地址
-  - "http://127.0.0.1:9400"   
-port: 8081    # dashboard监听端口
-user_details:	# 用户账号获取渠道
-  type: file	# 文件，当前版本只支持读取文件
-  file: ./account.yml	# 文件名称
-professions:    # 流程阶段，下面配置中的name和profession为dashboard在apinto的映射名称，下述配置内容将会在dashboard导航栏中展现
-  - name: services    # dashboard模块：服务
-    profession: service # apinto模块：服务
-    i18n_name:    # 国际化语言名称
-      zh_cn: 上游服务   # 中文描述
-      en_us: upstream services  # 英文描述
-  - name: templates  # dashboard模块：插件模版
-    profession: template # apinto模块：插件模版
-    i18n_name:
-      zh_cn: 模版
-      en_us: template
-  - name: discoveries    # dashboard模块：服务发现
-    profession: discovery    # apinto模块：服务发现
-    i18n_name:
-      zh_cn: 服务发现
-      en_us: discoveries
-  - name: outputs        # dashboard模块：输出器
-    profession: output    # apinto模块：输出器
-    i18n_name:
-      zh_cn: 输出
-      en_us: outputs
-```
-
-用户账号、密码默认均为**admin**。如若需要修改账号密码信息，可编辑**account.yml**文件，语法遵从**yaml**语法，配置详细说明如下：
-
-```yaml
-account_list: # 账号列表
-- user_name: admin	# 账号
-  password: admin		# 密码
-  info:							# 基本信息
-    desc: admin用户		# 描述
-```
-
-4. 启动程序
-
-（1） 在当前窗口运行，该方式启动的程序，当窗口关闭，进程也会关闭
+2、解压安装包，并进入对应目录
 
 ```
-./apinto-dashboard
+tar -zxvf apserver_v2.0.1_linux_amd64.tar.gz && cd apserver_v2.0.1
 ```
 
-（2）在后台运行
+3、安装程序
 
-``` 
-nohup ./apinto-dashboard > logs/stdout_apinto-dashboard_"$(date ‘+%Y%m%d-%H%M%S‘)".log 2>&1 &
+```
+./install.sh
 ```
 
-5. 浏览器打开**Apinto Dashboard**地址，本示例在本地部署，因此ip为127.0.0.1，端口为8081
+执行过程中，我们可以选择安装的目录，若无需更改，输入`y`即可
 
-![image-20220616181447371](https://user-images.githubusercontent.com/14105999/174442723-1fe42ac5-012c-4f60-b1ec-e147d8d8ca9b.png)
+![](http://data.eolinker.com/course/d6WQ1Kka72b01f32dd0fb930264706eed96a11631b197d7.png)
 
-6. 在浏览器中输入账号密码登录即可
+4、编辑配置文件`config.yml`
 
-至此，部署启用教程已结束，如需了解更多使用教程，请点击[更多](https://help.apinto.com/docs/dashboard/)
+```
+port: 服务监听的端口号
+mysql:
+  user_name: "数据库用户名"
+  password: "数据库密码"
+  ip: "数据库IP地址"
+  port: 端口号
+  db: "数据库DB"
+error_log:
+  dir: work/logs               # 日志放置目录, 仅支持绝对路径, 不填则默认为执行程序上一层目录的work/logs. 若填写的值不为绝对路径，则以上一层目录为相对路径的根目录，比如填写 work/test/logs， 则目录为可执行程序所在目录的 ../work/test/logs
+  file_name: error.log         # 错误日志文件名
+  log_level: warning            # 错误日志等级,可选:panic,fatal,error,warning,info,debug,trace 不填或者非法则为info
+  log_expire: 7d                # 错误日志过期时间，默认单位为天，d|天，h|小时, 不合法配置默认为7d
+  log_period: day               # 错误日志切割周期，仅支持day、hour
+redis:
+  user_name: "redis集群密码"
+  password: "redis集群密码"
+  addr:
+   - 192.168.128.198:7201
+   - 192.168.128.198:7202
+```
 
-### 联系我们
+示例配置
 
-- **帮助文档**：[https://help.apinto.com](https://help.apinto.com/)
+```
+port: 18080
+mysql:
+  user_name: "root"
+  password: "123456"
+  ip: "127.0.0.1"
+  port: 33306
+  db: "apinto"
+error_log:
+  dir: work/logs               # 日志放置目录, 仅支持绝对路径, 不填则默认为执行程序上一层目录的work/logs. 若填写的值不为绝对路径，则以>上一层目录为相对路径的根目录，比如填写 work/test/logs， 则目录为可执行程序所在目录的 ../work/test/logs
+  file_name: error.log         # 错误日志文件名
+  log_level: warning            # 错误日志等级,可选:panic,fatal,error,warning,info,debug,trace 不填或者非法则为info
+  log_expire: 7d                # 错误日志过期时间，默认单位为天，d|天，h|小时, 不合法配置默认为7d
+  log_period: day               # 错误日志切割周期，仅支持day、hour
+redis:
+  user_name: ""
+  password: "123456"
+  addr:
+   - 172.100.0.1:7201
+   - 172.100.0.1:7202
+```
+
+5、启动控制台
+
+```
+./run.sh start
+```
+</details>
+
+<details>
+<summary>Docker部署</summary>
+<br>
+安装前，需要确保已经安装了Mysql 5.7.x或以上版本、Redis 5.0-6.2.7，并且Redis使用Cluster模式启动。若未安装，可参考下文的`安装Redis及Mysql`教程
+<br>
+<br>
+1、安装`Apinto-Dashboard`
+
+```shell
+docker run -dt --name apinto-dashboard --restart=always \
+-p 18080:8080 -v /var/log/apinto/apinto-dashboard/work:/apinto-dashboard/work \
+--network=apinto --privileged=true \
+-e MYSQL_USER_NAME=root -e MYSQL_IP=apinto_mysql \
+-e MYSQL_PWD={MYSQL_PWD} -e MYSQL_PORT=3306 -e MYSQL_DB=apinto \
+-e REDIS_ADDR=172.100.0.1:7201,172.100.0.1:7202,172.100.0.1:7203 \
+-e REDIS_PWD={REDIS_PWD} eolinker/apinto-dashboard
+```
+
+上述配置中，使用 "{}" 包裹的均为变量，相关变量说明如下：
+
+- MYSQL_PWD：Mysql数据库root用户的密码
+- REDIS_PWD：Redis数据库密码
+
+示例命令：
+
+```shell
+docker run -dt --name apinto-dashboard --restart=always \
+-p 18080:8080 -v /var/log/apinto/apinto-dashboard/work:/apinto-dashboard/work \
+--network=apinto --privileged=true \
+-e MYSQL_USER_NAME=root -e MYSQL_IP=apinto_mysql \
+-e MYSQL_PWD=123456 -e MYSQL_PORT=3306 -e MYSQL_DB=apinto \
+-e REDIS_ADDR=172.100.0.1:7201,172.100.0.1:7202,172.100.0.1:7203 \
+-e REDIS_PWD=123456 eolinker/apinto-dashboard
+```
+
+</details>
+<details>
+<summary>安装Redis及Mysql</summary>
+<br>
+1、新建docker网段
+
+```shell
+docker network create --driver bridge --subnet=172.100.0.0/24 --gateway=172.100.0.1 apinto
+```
+
+2、安装`Mysql`
+
+```shell
+docker run -dt --name apinto_mysql -p {PORT}:3306 \
+-v /var/lib/apinto/mysql:/var/lib/mysql \
+--network=apinto --privileged=true --restart=always \
+-e MYSQL_ROOT_PASSWORD={PASSWORD} -e MYSQL_DATABASE=apinto \
+mysql:5.7.21
+```
+
+上述命令中，使用`{}`包裹的为可修改变量，变量说明如下
+
+* PORT：宿主机映射端口号
+* PASSWORD：Mysql数据库root用户的密码
+
+示例命令：
+
+```shell
+docker run -dt --name apinto_mysql -p 33306:3306 \
+-v /var/lib/apinto/mysql:/var/lib/mysql \
+--network=apinto --privileged=true \
+-e MYSQL_ROOT_PASSWORD=123456 -e MYSQL_DATABASE=apinto \
+mysql:5.7.21
+```
+
+3、安装`Redis`
+
+```shell
+docker run -dt --name redis_cluster --restart=always \
+-v /var/lib/apinto/redis-cluster/data:/usr/local/cluster_redis/data \
+-e REDIS_PWD={PASSWORD} -e HOST={HOST} -e PORT=7201 \
+--net=host eolinker/cluster-redis:6.2.7
+```
+
+上述命令中，使用`{}`包裹的为可修改变量，变量说明如下
+
+* PASSWORD：Redis数据库密码
+* HOST：Redis广播IP，可设置宿主机的局域网IP/外网IP，建议此处设置宿主机的局域网IP。
+
+查看宿主机IP方法如下：
+
+```Shell
+ip route
+```
+
+执行后得到下列IP列表，从下表可以看到，宿主机默认局域网`ip`是`172.18.31.253`
+
+![](http://data.eolinker.com/course/RaGBZly2702d3bae33e4b66eed674ce65d0e4b0dbf27ab0.png)
+
+示例命令：
+
+```shell
+docker run -dt --name redis_cluster --restart=always \
+-v /var/lib/apinto/redis-cluster/data:/usr/local/cluster_redis/data \
+-e REDIS_PWD=123456 -e HOST=172.18.31.253 -e PORT=7201 \
+--net=host eolinker/cluster-redis:6.2.7
+```
+</details>
+<details>
+<summary>Docker-Compose一键部署</summary>
+<br>
+使用该方式部署，会将Mysql、Redis也一并安装启动。
+<br>
+<br>
+1、编辑`docker-compose.yml`文件
+
+```Shell
+vi docker-compose.yml
+```
+
+2、修改文件配置
+
+```Shell
+version: '3'
+services:
+  mysql:
+    image: mysql:5.7.21
+    privileged: true
+    restart: always
+    container_name: apinto_mysql
+    hostname: apinto_mysql
+    ports:
+      - "33306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD={MYSQL_PWD}
+      - MYSQL_DATABASE=apinto
+    volumes:
+      - /var/lib/apinto/mysql:/var/lib/mysql
+    networks:
+      - apinto
+  apinto-dashboard:
+    image: eolinker/apinto-dashboard
+    container_name: apinto-dashboard
+    privileged: true
+    restart: always
+    networks:
+      - apinto
+    ports:
+      - "18080:8080"
+    depends_on:
+      - mysql
+      - redis_cluster
+    environment:
+      - MYSQL_USER_NAME=root
+      - MYSQL_PWD={MYSQL_PWD}
+      - MYSQL_IP=apinto_mysql
+      - MYSQL_PORT=3306                 #mysql端口
+      - MYSQL_DB="apinto"
+      - ERROR_DIR=/apinto-dashboard/work/logs  # 日志放置目录
+      - ERROR_FILE_NAME=error.log          # 错误日志文件名
+      - ERROR_LOG_LEVEL=info               # 错误日志等级,可选:panic,fatal,error,warning,info,debug,trace 不填或者非法则为info
+      - ERROR_EXPIRE=7d                    # 错误日志过期时间，默认单位为天，d|天，h|小时, 不合法配置默认为7d
+      - ERROR_PERIOD=day                  # 错误日志切割周期，仅支持day、hour
+      - REDIS_ADDR=172.100.0.1:7201,172.100.0.1:7202,172.100.0.1:7203,172.100.0.1:7204,172.100.0.1:7205,172.100.0.1:7206 #Redis集群地址 多个用,隔开
+      - REDIS_PWD={REDIS_PWD}                         # Redis密码
+    volumes:
+      - /var/log/apinto/apinto-dashboard/work:/apinto-dashboard/work   #挂载log到主机目录
+  redis_cluster:
+    container_name: redis_cluster
+    image: eolinker/cluster-redis:6.2.7
+    hostname: redis_cluster
+    privileged: true
+    restart: always
+    environment:
+      - REDIS_PWD={REDIS_PWD}
+      - PORT=7201
+      - HOST={HOST}
+    volumes: 
+      - /var/lib/apinto/redis-cluster/data:/usr/local/cluster_redis/data
+    network_mode: host
+networks:
+  apinto:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.100.0.0/24
+```
+
+上述配置中，使用 "{}" 包裹的均为变量，相关变量说明如下：
+
+- MYSQL_PWD：mysql数据库root用户初始化密码
+- REDIS_PWD：redis密码
+- HOST：Redis广播IP，可设置宿主机的局域网IP/外网IP，建议此处设置宿主机的局域网IP。
+
+查看宿主机IP方法如下：
+
+```Shell
+ip route
+```
+
+执行后得到下列IP列表，从下表可以看到，宿主机默认局域网`ip`是`172.18.31.253`
+
+![](http://data.eolinker.com/course/RaGBZly2702d3bae33e4b66eed674ce65d0e4b0dbf27ab0.png)
+
+替换后配置示例如下：
+
+```Shell
+version: '3'
+services:
+  mysql:
+    image: mysql:5.7.21
+    privileged: true
+    restart: always
+    container_name: apinto_mysql
+    hostname: apinto_mysql
+    ports:
+      - "33306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_DATABASE=apinto
+    volumes:
+      - /var/lib/apinto/mysql:/var/lib/mysql
+    networks:
+      - apinto
+  apinto-dashboard:
+    image: eolinker/apinto-dashboard
+    container_name: apinto-dashboard
+    privileged: true
+    restart: always
+    networks:
+      - apinto
+    ports:
+      - "18080:8080"
+    depends_on:
+      - mysql
+      - redis_cluster
+    environment:
+      - MYSQL_USER_NAME=root
+      - MYSQL_PWD=123456
+      - MYSQL_IP=apinto_mysql
+      - MYSQL_PORT=3306                 #mysql端口
+      - MYSQL_DB="apinto"
+      - ERROR_DIR=/apinto-dashboard/work/logs  # 日志放置目录
+      - ERROR_FILE_NAME=error.log          # 错误日志文件名
+      - ERROR_LOG_LEVEL=info               # 错误日志等级,可选:panic,fatal,error,warning,info,debug,trace 不填或者非法则为info
+      - ERROR_EXPIRE=7d                    # 错误日志过期时间，默认单位为天，d|天，h|小时, 不合法配置默认为7d
+      - ERROR_PERIOD=day                  # 错误日志切割周期，仅支持day、hour
+      - REDIS_ADDR=172.100.0.1:7201,172.100.0.1:7202,172.100.0.1:7203,172.100.0.1:7204,172.100.0.1:7205,172.100.0.1:7206 #Redis集群地址 多个用,隔开
+      - REDIS_PWD=123456                         # Redis密码
+    volumes:
+      - /var/log/apinto/apinto-dashboard/work:/apinto-dashboard/work   #挂载log到主机目录
+  redis_cluster:
+    container_name: redis_cluster
+    image: eolinker/cluster-redis:6.2.7
+    hostname: redis_cluster
+    privileged: true
+    restart: always
+    environment:
+      - REDIS_PWD=123456
+      - PORT=7201
+      - HOST=172.18.31.253
+    volumes: 
+      - /var/lib/apinto/redis-cluster/data:/usr/local/cluster_redis/data
+    network_mode: host
+networks:
+  apinto:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.100.0.0/24
+```
+
+3、启动程序
+
+在`docker-compose.yml`文件所在目录下执行下列命令，即可一键完成部署。
+
+```Shell
+docker-compose up -d
+```
+
+部署完成结果如下图
+
+![](http://data.eolinker.com/course/gqrr8iz6b7b95319074a48041548c59f786a853804b9e6b.png)
+</details>
+
+### 浏览器访问
+
+部署完成后，在浏览器输入地址：http://{ip或域名}:{端口号}，访问控制台页面
+
+![](http://data.eolinker.com/course/cvYVZfEe75da267b31d873df0fdb7bf00e14f63b41bed9d.png)
+
+- ### **联系我们**
+
+
+* **帮助文档**：[https://help.apinto.com](https://help.apinto.com/docs)
+
 - **QQ群**: 725853895
+
 - **Slack**：[加入我们](https://join.slack.com/t/slack-zer6755/shared_invite/zt-u7wzqp1u-aNA0XK9Bdb3kOpN03jRmYQ)
+
 - **官网**：[https://www.apinto.com](https://www.apinto.com/)
 - **论坛**：[https://community.apinto.com](https://community.apinto.com/)
-- **微信群**：[![img](https://user-images.githubusercontent.com/25589530/149860447-5879437b-3cda-4833-aee3-69a2e538e85d.png)](https://user-images.githubusercontent.com/25589530/149860447-5879437b-3cda-4833-aee3-69a2e538e85d.png)
+- **微信群**：<img src="https://user-images.githubusercontent.com/25589530/149860447-5879437b-3cda-4833-aee3-69a2e538e85d.png" style="width:150px" />
 
-### 关于我们
 
-EOLINK 是领先的 API 管理服务供应商，为全球超过3000家企业提供专业的 API 研发管理、API自动化测试、API监控、API网关等服务。是首家为ITSS（中国电子工业标准化技术协会）制定API研发管理行业规范的企业。
-
-官方网站：[https://www.eolink.com](https://www.eolink.com/)
-
-免费下载PC桌面端：https://www.eolink.com/pc/

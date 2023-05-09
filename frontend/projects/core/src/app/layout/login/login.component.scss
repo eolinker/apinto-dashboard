@@ -1,0 +1,134 @@
+:host ::ng-deep {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  background-color: #f5f7fa;
+  align-items: center;
+  overflow: auto;
+  min-height: 490px;
+}
+
+eo-ng-apinto:host {
+  display: inline-block;
+  width: 100vw;
+  height: 100vh;
+}
+
+h2.ant-typography {
+  margin-bottom: 44px !important;
+  font-size: 32px;
+  font-family: 'Helvetica Neue', 'Helvetica', 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', 'Noto Sans CJK SC', 'WenQuanYi Micro Hei', 'Arial',
+    sans-serif;
+  font-weight: 400 !important;
+}
+
+nz-layout,
+nz-header,
+nz-footer,
+.ant-layout-content {
+  background-color: transparent !important;
+}
+
+nz-layout {
+  height: 100%;
+  nz-sider {
+    .side-bg,
+    .side-bg-mask {
+      width: 100%;
+      height: 100%;
+    }
+    .side-bg {
+      background-size: cover;
+      background-image: url('/assets/side_bg.jpg');
+      &-mask {
+        background: linear-gradient(
+          -180deg,
+          rgba(255, 255, 255, 0.05) 0%,
+          rgba(0, 0, 0, 0.5) 100%
+        );
+      }
+      nz-footer {
+        color: var(--button-primary-text-color);
+      }
+    }
+  }
+}
+
+nz-divider {
+  width: 0;
+}
+
+.icon {
+  font-size: 24px;
+}
+
+.oauth-btn {
+  background-color: #eaeaea;
+}
+
+.tip-text {
+  font-size: 14px;
+  color: #8c8c8c;
+}
+
+.login-container {
+  height: 100%;
+
+  ::ng-deep .ant-menu-horizontal {
+    line-height: 32px;
+  }
+  ::ng-deep .ant-menu-horizontal > .ant-menu-item-selected a {
+    font-weight: bolder;
+  }
+  .tab {
+    margin-left: -20px;
+    &-title {
+      font-size: 16px;
+    }
+  }
+}
+
+.ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-item:hover,
+.ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-submenu:hover,
+.ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-item-active,
+.ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-submenu-active,
+.ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-item-open,
+.ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-submenu-open,
+.ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-item-selected,
+.ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-submenu-selected,
+.ant-menu-horizontal > .ant-menu-item-selected a {
+  color: #7371fc !important;
+}
+
+.ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-item:hover::after,
+.ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-submenu:hover::after,
+.ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-item-active::after,
+.ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-submenu-active::after,
+.ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-item-open::after,
+.ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-submenu-open::after,
+.ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-item-selected::after,
+.ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-submenu-selected::after {
+  border-bottom-color: #7371fc;
+}
+
+.ant-menu-horizontal {
+  border-bottom: none;
+}
+
+::selection {
+  background: #7371fc;
+}
+
+a {
+  font-family: 'Helvetica Neue', 'Helvetica', 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', 'Noto Sans CJK SC', 'WenQuanYi Micro Hei', 'Arial',
+    sans-serif;
+}
+
+.login-tab {
+  width: 96px;
+  font-size: 16px;
+  color: var(--primary-color);
+  border-bottom: 1px solid var(--primary-color);
+}
