@@ -108,7 +108,11 @@ func (a *apiStore) GetByUUIDs(ctx context.Context, namespaceID int, uuids []stri
 
 func (a *apiStore) GetByPath(ctx context.Context, namespaceID int, path string) ([]*api_entry.API, error) {
 	apis := make([]*api_entry.API, 0)
-	err := a.DB(ctx).Where("`namespace` = ? and `request_path_label` like ?", namespaceID, "%"+path+"%").Find(&apis).Error
+	db := a.DB(ctx).Where("`namespace` = ? ", namespaceID)
+	if path != "" {
+		db = db.Where("`request_path_label` like ?", "%"+path+"%")
+	}
+	err := db.Find(&apis).Error
 	return apis, err
 }
 

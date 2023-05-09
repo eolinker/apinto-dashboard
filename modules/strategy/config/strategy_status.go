@@ -1,4 +1,4 @@
-package enum
+package config
 
 import "fmt"
 

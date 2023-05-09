@@ -11,7 +11,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-store"
 	"github.com/eolinker/apinto-dashboard/modules/user"
 	"github.com/eolinker/eosc/common/bean"
-	"github.com/eolinker/eosc/log"
 	"gorm.io/gorm"
 	"time"
 )
@@ -293,24 +292,5 @@ func (c *clusterConfigService) OfflineApinto(client v1.IClient, name, configType
 		return common.CheckWorkerNotExist(client.ForOutput().Delete(name))
 	default:
 		return errors.New("configType doesn't exist. ")
-	}
-}
-
-func (c *clusterConfigService) ResetOnline(ctx context.Context, _, clusterId int) {
-	//获取apinto client
-	client, err := c.apintoClient.GetClient(ctx, clusterId)
-	if err != nil {
-		log.Errorf("Get Apinto Client fail. clusterId:%d ", clusterId)
-		return
-	}
-
-	configList, _ := c.configStore.GetConfigsByClusterID(ctx, clusterId)
-	for _, conf := range configList {
-		if conf.IsEnable {
-			err = c.ToApinto(client, conf.Type, conf.Type, conf.Data)
-			if err != nil {
-				log.Errorf("Publish Cluster Config %s to Apinto fail. clusterId: %d. err: %s ", conf.Type, clusterId, err)
-			}
-		}
 	}
 }
