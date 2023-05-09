@@ -5,6 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sort"
+	"strconv"
+	"time"
+
 	"github.com/eolinker/apinto-dashboard/client/v1"
 	v2 "github.com/eolinker/apinto-dashboard/client/v2"
 	"github.com/eolinker/apinto-dashboard/common"
@@ -30,9 +34,6 @@ import (
 	"github.com/eolinker/eosc/log"
 	"github.com/go-basic/uuid"
 	"gorm.io/gorm"
-	"sort"
-	"strconv"
-	"time"
 )
 
 type pluginTemplateService struct {
@@ -135,7 +136,7 @@ func (p *pluginTemplateService) isDelete(ctx context.Context, namespaceId int, c
 }
 
 func (p *pluginTemplateService) IsOnline(ctx context.Context, namespace int, clusterName string, uuid string) bool {
-	status := p.providers.Status(fmt.Sprintf("%s@template", uuid), namespace, clusterName)
+	status, _ := p.providers.Status(fmt.Sprintf("%s@template", uuid), namespace, clusterName)
 	isOnline := false
 	switch status {
 	case apinto_module.None, apinto_module.Offline:

@@ -37,6 +37,7 @@ type dynamicController struct {
 	Fields     []*Basic
 	Skill      string
 	Render     map[string]Render
+	Depend     []string
 }
 
 func newDynamicController(name string, define *DynamicDefine) *dynamicController {

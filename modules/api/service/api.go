@@ -6,13 +6,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	v2 "github.com/eolinker/apinto-dashboard/client/v2"
-	"github.com/eolinker/apinto-dashboard/modules/dynamic"
-	apinto_module "github.com/eolinker/apinto-module"
 	"reflect"
 	"sort"
 	"strings"
 	"time"
+
+	v2 "github.com/eolinker/apinto-dashboard/client/v2"
+	"github.com/eolinker/apinto-dashboard/modules/dynamic"
+	apinto_module "github.com/eolinker/apinto-module"
 
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
@@ -2356,7 +2357,7 @@ func (a *apiService) getApintoClustersVersions(clusters []*cluster_model.Cluster
 }
 
 func (a *apiService) isServiceOnline(namespaceId int, clusterName, serviceName string) bool {
-	status := a.providers.Status(fmt.Sprintf("%s@service", serviceName), namespaceId, clusterName)
+	status, _ := a.providers.Status(fmt.Sprintf("%s@service", serviceName), namespaceId, clusterName)
 	isOnline := false
 	switch status {
 	case apinto_module.None, apinto_module.Offline:
