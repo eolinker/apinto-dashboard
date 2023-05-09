@@ -22,7 +22,6 @@ type IStrategyService[T any, K any] interface {
 	CheckInput(input *strategy_dto.StrategyInfoInput[T]) error
 }
 type IStrategyRemoteOptionHandle interface {
-	Title() string
 	Get(namespaceId int, keyword, groupUUID string, pageNum, pageSize int)
 }
 type IStrategyCommonService interface {
