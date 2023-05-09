@@ -3,8 +3,9 @@ package dynamic_controller
 import (
 	"context"
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/common"
 	"net/http"
+
+	"github.com/eolinker/apinto-dashboard/common"
 
 	v2 "github.com/eolinker/apinto-dashboard/client/v2"
 	"github.com/eolinker/apinto-dashboard/modules/dynamic"
@@ -89,16 +90,18 @@ func (c *DynamicModule) Provider() map[string]apinto_module.Provider {
 		c.skill: newSkillProvider(c.profession, c.skill),
 	}
 }
-func (c *DynamicModule) Status(key string, namespaceId int, cluster string) apinto_module.CargoStatus {
+
+func (c *DynamicModule) Status(key string, namespaceId int, cluster string) (apinto_module.CargoStatus, string) {
 	status, err := c.dynamicService.ClusterStatusByClusterName(context.Background(), namespaceId, c.profession, key, cluster)
 	if err != nil {
 		log.Error(err)
-		return apinto_module.None
+		return apinto_module.None, ""
 	}
+	id := fmt.Sprintf("%s@%s", status.Name, c.profession)
 	if status.Status == v2.StatusOnline || status.Status == v2.StatusPre {
-		return apinto_module.Online
+		return apinto_module.Online, id
 	}
-	return apinto_module.Offline
+	return apinto_module.Offline, id
 
 }
 
