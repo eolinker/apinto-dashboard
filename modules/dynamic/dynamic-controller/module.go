@@ -3,6 +3,7 @@ package dynamic_controller
 import (
 	"context"
 	"fmt"
+	"github.com/eolinker/apinto-dashboard/common"
 	"net/http"
 
 	v2 "github.com/eolinker/apinto-dashboard/client/v2"
@@ -25,9 +26,13 @@ func NewDynamicModuleDriver(pluginVisible bool, showServer bool, canUninstall bo
 }
 
 func (c *DynamicModuleDriver) CreatePlugin(define interface{}) (apinto_module.Plugin, error) {
+	v, err := apinto_module.DecodeFor[DynamicDefine](define)
+	if err != nil {
+		return nil, err
+	}
 	return &DynamicModulePlugin{
 		DynamicModuleDriver: c,
-		define:              define,
+		define:              v,
 	}, nil
 }
 
@@ -53,10 +58,11 @@ func (c *DynamicModulePlugin) IsCanDisable() bool {
 
 type DynamicModulePlugin struct {
 	*DynamicModuleDriver
-	define interface{}
+	define *DynamicDefine
 }
 
 func (d *DynamicModulePlugin) CreateModule(name string, config interface{}) (apinto_module.Module, error) {
+
 	return NewDynamicModule(name, d.define), nil
 }
 
@@ -65,12 +71,17 @@ func (d *DynamicModulePlugin) CheckConfig(name string, config interface{}) error
 }
 
 type DynamicModule struct {
-	name           string
-	define         interface{}
-	routers        apinto_module.RoutersInfo
-	profession     string
-	skill          string
-	dynamicService dynamic.IDynamicService
+	name                 string
+	define               *DynamicDefine
+	routers              apinto_module.RoutersInfo
+	profession           string
+	skill                string
+	dynamicService       dynamic.IDynamicService
+	filterOptionHandlers []apinto_module.IFilterOptionHandler
+}
+
+func (c *DynamicModule) FilterOptionHandler() []apinto_module.IFilterOptionHandler {
+	return c.filterOptionHandlers
 }
 
 func (c *DynamicModule) Provider() map[string]apinto_module.Provider {
@@ -107,10 +118,12 @@ func (c *DynamicModule) Middleware() (apinto_module.Middleware, bool) {
 	return nil, false
 }
 
-func NewDynamicModule(name string, define interface{}) *DynamicModule {
+func NewDynamicModule(name string, define *DynamicDefine) *DynamicModule {
 	dm := &DynamicModule{name: name, define: define}
+
 	bean.Autowired(&dm.dynamicService)
 	dm.initRouter()
+	dm.initFilter()
 	return dm
 }
 
@@ -180,5 +193,28 @@ func (c *DynamicModule) initRouter() {
 			Handler:     "dynamic.offline",
 			HandlerFunc: []apinto_module.HandlerFunc{dc.offline},
 		},
+	}
+}
+func (c *DynamicModule) initFilter() {
+	if c.define.FilterOptions == nil {
+		return
+	}
+	cf := c.define.FilterOptions
+	c.filterOptionHandlers = []apinto_module.IFilterOptionHandler{
+		NewFilterOption(cf.Name, apinto_module.FilterOptionConfig{
+
+			Title: cf.Title,
+			Titles: common.SliceToSlice(cf.Titles, func(s OptionTitle) apinto_module.OptionTitle {
+				return apinto_module.OptionTitle{
+					Title: s.Title,
+					Field: s.Field,
+				}
+			}),
+			Key: "id",
+		}, common.SliceToSlice(c.define.Fields, func(s *Basic) string {
+			return s.Name
+		}), c.profession, common.SliceToSlice(c.define.Drivers, func(s *Basic) string {
+			return s.Name
+		})),
 	}
 }

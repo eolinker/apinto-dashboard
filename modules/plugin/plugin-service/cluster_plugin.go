@@ -20,7 +20,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/plugin/plugin-store"
 	"github.com/eolinker/apinto-dashboard/modules/user"
 	"github.com/eolinker/eosc/common/bean"
-	"github.com/eolinker/eosc/log"
 	"gorm.io/gorm"
 	"sort"
 	"strings"
@@ -810,33 +809,6 @@ func (c *clusterPluginService) GetPublishVersion(ctx context.Context, clusterId 
 	}
 
 	return &plugin_model.ClusterPluginPublishVersion{ClusterPluginPublishVersion: currentVersion}, nil
-}
-
-func (c *clusterPluginService) ResetOnline(ctx context.Context, _, clusterId int) {
-	runtime, err := c.clusterPluginRuntimeStore.GetForCluster(ctx, clusterId, clusterId)
-	if err != nil {
-		log.Errorf("clusterPluginService-ResetOnline-GetRuntime clusterId=%d,err=%s", clusterId, err.Error())
-		return
-	}
-
-	if runtime.IsOnline {
-		version, err := c.clusterPluginPublishVersionStore.Get(ctx, runtime.VersionId)
-		if err != nil {
-			return
-		}
-
-		client, err := c.apintoClient.GetClient(ctx, clusterId)
-		if err != nil {
-			return
-		}
-
-		plugins, err := getToSendPlugins(version.PublishedPluginsList)
-		if err != nil {
-			return
-		}
-		//发布插件
-		_ = client.ForGlobalPlugin().Set(plugins)
-	}
 }
 
 func (c *clusterPluginService) IsOnlineByName(ctx context.Context, namespaceID int, clusterName, pluginName string) (bool, error) {

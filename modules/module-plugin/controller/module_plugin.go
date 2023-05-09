@@ -72,7 +72,7 @@ func (p *modulePluginController) plugins(ginCtx *gin.Context) {
 		})
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["plugins"] = plugins
 	data["groups"] = groups
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
@@ -87,7 +87,7 @@ func (p *modulePluginController) getPluginInfo(ginCtx *gin.Context) {
 		return
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	info := &dto.PluginInfo{
 		Id:         pluginInfo.UUID,
 		Name:       pluginInfo.Name,
@@ -117,7 +117,7 @@ func (p *modulePluginController) getGroupsEnum(ginCtx *gin.Context) {
 		})
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["groups"] = groups
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
@@ -225,7 +225,7 @@ func (p *modulePluginController) getEnableInfo(ginCtx *gin.Context) {
 		Initialize: renderInitialize,
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["module"] = enableInfo
 	data["render"] = enableRender
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))

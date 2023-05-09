@@ -8,7 +8,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-dto"
 	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-entry"
 	cluster_model2 "github.com/eolinker/apinto-dashboard/modules/cluster/cluster-model"
-	"github.com/eolinker/apinto-dashboard/modules/online"
 )
 
 const (
@@ -54,7 +53,6 @@ type IClusterConfigService interface {
 	FormatOutput(configType string, operator string, config *cluster_entry.ClusterConfig) interface{}
 	ToApinto(client v1.IClient, name, configType string, config []byte) error
 	OfflineApinto(client v1.IClient, name, configType string) error
-	online.IResetOnlineService
 }
 
 type IClusterNodeService interface {

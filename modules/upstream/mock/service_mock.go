@@ -278,18 +278,6 @@ func (mr *MockIServiceMockRecorder) OnlineService(ctx, namespaceId, operator, se
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OnlineService", reflect.TypeOf((*MockIService)(nil).OnlineService), ctx, namespaceId, operator, serviceName, clusterName)
 }
 
-// ResetOnline mocks base method.
-func (m *MockIService) ResetOnline(ctx context.Context, namespaceId, clusterId int) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "ResetOnline", ctx, namespaceId, clusterId)
-}
-
-// ResetOnline indicates an expected call of ResetOnline.
-func (mr *MockIServiceMockRecorder) ResetOnline(ctx, namespaceId, clusterId interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResetOnline", reflect.TypeOf((*MockIService)(nil).ResetOnline), ctx, namespaceId, clusterId)
-}
-
 // UpdateService mocks base method.
 func (m *MockIService) UpdateService(ctx context.Context, namespaceID, userId int, input *dto.ServiceInfo, variableList []string) error {
 	m.ctrl.T.Helper()

@@ -2,11 +2,10 @@ package controller
 
 import (
 	"github.com/eolinker/apinto-dashboard/modules/core"
+	"github.com/eolinker/apinto-dashboard/modules/dynamic"
 	"net/http"
 
 	namespace_controller "github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
-
-	"github.com/eolinker/apinto-dashboard/modules/upstream"
 
 	"github.com/eolinker/apinto-dashboard/modules/api"
 
@@ -24,7 +23,7 @@ type System struct {
 	navigationService core.INavigationService
 	clusterService    cluster.IClusterService
 	apiService        api.IAPIService
-	upstreamService   upstream.IService
+	dynamicService    dynamic.IDynamicService
 
 	routers apinto_module.RoutersInfo
 }
@@ -35,7 +34,7 @@ func newSystem() *System {
 	bean.Autowired(&s.navigationService)
 	bean.Autowired(&s.clusterService)
 	bean.Autowired(&s.apiService)
-	bean.Autowired(&s.upstreamService)
+	bean.Autowired(&s.dynamicService)
 	return s
 }
 
@@ -79,7 +78,7 @@ func (s *System) quickStepInfo(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
-	upstreamCount, err := s.upstreamService.UpstreamCount(ctx, namespaceId)
+	upstreamCount, err := s.dynamicService.Count(ctx, namespaceId, "service", nil)
 	if err != nil {
 		ctx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return

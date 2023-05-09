@@ -7,6 +7,14 @@ func SliceToMap[K comparable, T any](list []T, f func(T) K) map[K]T {
 	}
 	return m
 }
+func SliceToMapO[K comparable, T, D any](list []T, f func(T) (K, D)) map[K]D {
+	m := make(map[K]D)
+	for _, t := range list {
+		k, v := f(t)
+		m[k] = v
+	}
+	return m
+}
 
 func SliceToMapArray[K comparable, T any](list []T, f func(T) K) map[K][]T {
 	m := make(map[K][]T)
@@ -23,7 +31,13 @@ func SliceToSliceIds[K comparable, T any](list []T, f func(T) K) []K {
 	}
 	return ids
 }
-
+func SliceToSlice[S, D any](list []S, f func(S) D) []D {
+	ids := make([]D, 0)
+	for _, t := range list {
+		ids = append(ids, f(t))
+	}
+	return ids
+}
 func CopyMaps[K comparable, T any](maps map[K]T) map[K]T {
 
 	temp := make(map[K]T, len(maps))

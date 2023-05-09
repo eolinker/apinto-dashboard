@@ -2,6 +2,7 @@ package strategy_model
 
 import (
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-entry"
+	apinto_module "github.com/eolinker/apinto-module"
 	"time"
 )
 
@@ -42,11 +43,11 @@ type StrategyInfoOutput[T any] struct {
 	Config  *T
 }
 
-type ExtenderData struct {
-	Api         map[string]*RemoteApis         `json:"api"`
-	Service     map[string]*RemoteServices     `json:"service"`
-	Application map[string]*RemoteApplications `json:"application"`
-}
+//type ExtenderData struct {
+//	Api         map[string]*RemoteApis         `json:"api"`
+//	Service     map[string]*RemoteServices     `json:"service"`
+//	Application map[string]*RemoteApplications `json:"application"`
+//}
 
 type FilterOutput struct {
 	Name   string   `json:"name"`
@@ -63,6 +64,19 @@ type FilterOptionsItem struct {
 	Pattern string
 	Options []string
 }
+type FilterOptionsItems []*FilterOptionsItem
+
+func (fs FilterOptionsItems) Len() int {
+	return len(fs)
+}
+
+func (fs FilterOptionsItems) Less(i, j int) bool {
+	return fs[i].Title < fs[j].Title
+}
+
+func (fs FilterOptionsItems) Swap(i, j int) {
+	fs[i], fs[j] = fs[j], fs[i]
+}
 
 type MetricsOptionsItem struct {
 	Name  string
@@ -70,11 +84,10 @@ type MetricsOptionsItem struct {
 }
 
 type FilterRemoteOutput struct {
-	Target       string
-	Titles       []*RemoteTitles
-	Apis         []*RemoteApis
-	Services     []*RemoteServices
-	Applications []*RemoteApplications
+	Target string
+	Titles []apinto_module.OptionTitle
+	Key    string
+	List   []any
 }
 
 type RemoteTitles struct {
@@ -99,8 +112,8 @@ type RemoteServices struct {
 
 type RemoteApplications struct {
 	Name string `json:"name"`
-	Uuid string `json:"uuid"`
 	Desc string `json:"desc"`
+	Uuid string `json:"uuid"`
 }
 
 // VisitInfoOutputConf 访问策略信息输出配置
@@ -108,5 +121,5 @@ type VisitInfoOutputConf struct {
 	VisitRule       string          `json:"visit_rule"`
 	InfluenceSphere []*FilterOutput `json:"influence_sphere"`
 	Continue        bool            `json:"continue"`
-	Extender        *ExtenderData   `json:"extender"`
+	//Extender        *ExtenderData   `json:"extender"`
 }

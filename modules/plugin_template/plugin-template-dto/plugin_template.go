@@ -1,5 +1,7 @@
 package plugin_template_dto
 
+import "github.com/eolinker/apinto-dashboard/enum"
+
 type PluginTemplate struct {
 	UUID       string `json:"uuid"`
 	Name       string `json:"name"`
@@ -27,4 +29,17 @@ type PluginTemplateOutput struct {
 	Name    string        `json:"name"`
 	Desc    string        `json:"desc"`
 	Plugins []*PluginInfo `json:"plugins"`
+}
+
+type OnlineOut struct {
+	Name       string            `json:"name"`
+	Status     enum.OnlineStatus `json:"status"`
+	Env        string            `json:"env"`
+	Disable    bool              `json:"disable"`
+	Operator   string            `json:"operator"`
+	UpdateTime string            `json:"update_time"`
+}
+
+type OnlineInput struct {
+	ClusterName string `json:"cluster_name"`
 }

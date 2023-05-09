@@ -480,17 +480,8 @@ func (mr *MockIClusterConfigServiceMockRecorder) OfflineApinto(client, name, con
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OfflineApinto", reflect.TypeOf((*MockIClusterConfigService)(nil).OfflineApinto), client, name, configType)
 }
 
-// ResetOnline mocks base method.
-func (m *MockIClusterConfigService) ResetOnline(ctx context.Context, namespaceId, clusterId int) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "ResetOnline", ctx, namespaceId, clusterId)
-}
 
-// ResetOnline indicates an expected call of ResetOnline.
-func (mr *MockIClusterConfigServiceMockRecorder) ResetOnline(ctx, namespaceId, clusterId interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResetOnline", reflect.TypeOf((*MockIClusterConfigService)(nil).ResetOnline), ctx, namespaceId, clusterId)
-}
+
 
 // ToApinto mocks base method.
 func (m *MockIClusterConfigService) ToApinto(client v1.IClient, name, configType string, config []byte) error {

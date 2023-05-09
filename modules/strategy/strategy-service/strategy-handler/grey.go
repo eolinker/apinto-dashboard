@@ -7,6 +7,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/strategy"
+	"github.com/eolinker/apinto-dashboard/modules/strategy/config"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-dto"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-entry"
 	"net/textproto"
@@ -20,9 +21,9 @@ type greyHandler struct {
 
 func (t *greyHandler) GetListLabel(conf *strategy_entry.StrategyGreyConfig) string {
 	switch conf.Distribution {
-	case enum.GreyDistributionPercent:
+	case config.GreyDistributionPercent:
 		return "按百分比"
-	case enum.GreyDistributionMatch:
+	case config.GreyDistributionMatch:
 		return "按规则"
 	default:
 		return ""
@@ -30,16 +31,16 @@ func (t *greyHandler) GetListLabel(conf *strategy_entry.StrategyGreyConfig) stri
 }
 
 func (t *greyHandler) GetType() string {
-	return enum.StrategyGrey
+	return config.StrategyGrey
 }
 
 func (t *greyHandler) GetConfName() string {
-	return enum.StrategyGreyApintoConfName
+	return config.StrategyGreyApintoConfName
 }
 
 // GetBatchSettingName 获取往apinto发送批量操作策略时 url所需要的路径名 /setting/xxx
 func (t *greyHandler) GetBatchSettingName() string {
-	return enum.StrategyGreyBatchName
+	return config.StrategyGreyBatchName
 }
 
 func (t *greyHandler) CheckInput(input *strategy_dto.StrategyInfoInput[strategy_entry.StrategyGreyConfig]) error {
@@ -83,7 +84,7 @@ func (t *greyHandler) CheckInput(input *strategy_dto.StrategyInfoInput[strategy_
 
 	//校验分配方式
 	switch input.Config.Distribution {
-	case enum.GreyDistributionPercent, enum.GreyDistributionMatch:
+	case config.GreyDistributionPercent, config.GreyDistributionMatch:
 	default:
 		return fmt.Errorf("distribution %s is illegal. ", input.Config.Distribution)
 	}

@@ -83,7 +83,7 @@ func (d *discoveryController) getList(ginCtx *gin.Context) {
 		discoveries = append(discoveries, discoveryInfo)
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["discoveries"] = discoveries
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
@@ -214,7 +214,7 @@ func (d *discoveryController) getEnum(ginCtx *gin.Context) {
 		discoveries = append(discoveries, discoveryInfo)
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["discoveries"] = discoveries
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
@@ -232,7 +232,7 @@ func (d *discoveryController) getDrivers(ginCtx *gin.Context) {
 		drivers = append(drivers, d)
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["drivers"] = drivers
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
@@ -262,7 +262,7 @@ func (d *discoveryController) online(ginCtx *gin.Context) {
 		msg = err.Error()
 	}
 
-	m := common.Map[string, interface{}]{}
+	m := common.Map{}
 	m["router"] = router
 	ginCtx.JSON(http.StatusOK, controller.Result{
 		Code: -1,
@@ -320,7 +320,7 @@ func (d *discoveryController) getOnlineList(ginCtx *gin.Context) {
 		})
 	}
 
-	m := common.Map[string, interface{}]{}
+	m := common.Map{}
 	m["clusters"] = resp
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
 }
