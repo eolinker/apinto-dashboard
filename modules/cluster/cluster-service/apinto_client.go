@@ -13,9 +13,8 @@ import (
 type apintoClientService struct {
 	clusterNodeService cluster.IClusterNodeService
 	clusterService     cluster.IClusterService
-	//resetOnline        online.IResetOnlineService
-	lock      *sync.Mutex
-	clientMap map[int]v1.IClient
+	lock               *sync.Mutex
+	clientMap          map[int]v1.IClient
 }
 
 func (c *apintoClientService) SetClient(namespaceId, clusterId int) {

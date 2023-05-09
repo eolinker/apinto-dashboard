@@ -8,7 +8,7 @@ import (
 
 type IStrategyService[T any, K any] interface {
 	GetList(ctx context.Context, namespaceId int, clusterName string) ([]*strategy_model.Strategy, error)
-	GetInfo(ctx context.Context, namespaceId int, uuid string) (*strategy_model.StrategyInfoOutput[K], *strategy_model.ExtenderData, error)
+	GetInfo(ctx context.Context, namespaceId int, uuid string) (*strategy_model.StrategyInfoOutput[K], error)
 	CreateStrategy(ctx context.Context, namespaceId int, operator int, clusterName string, input *strategy_dto.StrategyInfoInput[T]) error
 	UpdateStrategy(ctx context.Context, namespaceId int, operator int, clusterName string, input *strategy_dto.StrategyInfoInput[T]) error
 	DeleteStrategy(ctx context.Context, namespaceId, operator int, clusterName, uuid string) error
@@ -27,6 +27,8 @@ type IStrategyRemoteOptionHandle interface {
 type IStrategyCommonService interface {
 	GetFilterOptions(ctx context.Context, namespaceId int) ([]*strategy_model.FilterOptionsItem, error)
 	GetFilterRemote(ctx context.Context, namespaceId int, targetType, keyword, groupUUID string, pageNum, pageSize int) (*strategy_model.FilterRemoteOutput, int, error)
+
+	GetFilterLabel(ctx context.Context, namespaceId int, name string, value []string) (string, string, string)
 }
 
 type IStrategyHandler[T any, K any] interface {
