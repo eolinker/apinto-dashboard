@@ -80,10 +80,16 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
   }
 
   getThead () {
+    let nameCol:boolean = false
     for (const index in this.nzThead) {
       if (this.nzThead[index].type === 'checkbox' && this.nzDisabled) {
         this.nzThead[index].disabled = true
+        this.nzThead[index].left = true
+      } else if (!nameCol) {
+        this.nzThead[index].left = true
+        nameCol = true
       }
+
       if (this.nzThead[index].title === '操作') {
         this.nzThead[index].right = true
         this.nzThead[index].width = (this.nzMaxOperatorButton && !this.nzThead[index].width) ? (this.nzMaxOperatorButton > 3 ? this.nzMaxOperatorButton * 26 + 10 + 10 : 3 * 26 + 20) : (this.nzThead[index].width > 50 ? this.nzThead[index].width : 50)
@@ -99,7 +105,16 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
   }
 
   getTbody (): void {
+    let nameCol:boolean = false
+
     for (const body of this.nzTbody) {
+      if (body.type === 'checkbox' && this.nzDisabled) {
+        body.left = true
+      } else if (!nameCol) {
+        body.left = true
+        nameCol = true
+      }
+
       if (!body.title && !body.type) {
         body.title = this.tbodyTpl
       }
