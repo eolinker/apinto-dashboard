@@ -1,0 +1,76 @@
+<div class="">
+  <div class="list-header pl-btnbase pr-btnrbase py-btnybase">
+    <div class="group-search-large">
+      <label class="">操作类型：</label>
+      <eo-ng-select
+        [(ngModel)]="searchData.operateType"
+        [nzOptions]="listOfType"
+        [nzAllowClear]="true"
+        nzPlaceHolder="请选择"
+      ></eo-ng-select>
+      <label class="ml-btnybase label">操作对象：</label>
+      <eo-ng-select
+        [(ngModel)]="searchData.kind"
+        [nzOptions]="listOfKind"
+        [nzAllowClear]="true"
+        nzPlaceHolder="请选择"
+      ></eo-ng-select>
+
+      <label class="ml-btnybase label">搜索内容：</label>
+
+      <eo-ng-search-input-group
+        class="inline-block"
+        [eoSingle]="false"
+        [eoInputVal]="searchData.keyword"
+        (eoClick)="searchData.keyword = ''; getLogList()"
+      >
+        <input
+          class="search"
+          type="text"
+          eo-ng-input
+          placeholder="请输入用户名或请求IP"
+          [(ngModel)]="searchData.keyword"
+        />
+      </eo-ng-search-input-group>
+    </div>
+
+    <div class="group-search-large">
+      <label>操作时间：</label>
+      <nz-range-picker
+        [nzShowTime]="true"
+        [(ngModel)]="date"
+        nzFormat="MM/dd HH:mm:ss"
+        (ngModelChange)="onDateRangeChange($event)"
+      ></nz-range-picker>
+
+      <button class="ml-btnybase" eo-ng-button (click)="clearSearch()">
+        重置
+      </button>
+      <button
+        class="ant-btn-primary ml-btnybase"
+        eo-ng-button
+        (click)="getLogList()"
+      >
+        查询
+      </button>
+    </div>
+  </div>
+  <div class="list-content pb-[4px]">
+    <eo-ng-apinto-table
+      class=""
+      [nzTbody]="logsTableBody"
+      [nzThead]="logsTableHeadName"
+      [nzData]="logsList"
+      [nzTrClick]="logsTableClick"
+      [nzMaxOperatorButton]="1"
+      [nzShowPagination]="true"
+      [nzFrontPagination]="false"
+      [nzTotal]="searchData.total"
+      [(nzPageIndex)]="searchData.pageNum"
+      [(nzPageSize)]="searchData.pageSize"
+      (nzPageIndexChange)="getLogList()"
+      (nzPageSizeChange)="getLogList()"
+    >
+    </eo-ng-apinto-table>
+  </div>
+</div>

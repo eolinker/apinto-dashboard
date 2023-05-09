@@ -1,0 +1,15 @@
+<div style="line-height: 50px" class="mr-[12px]">
+  <eo-ng-dropdown
+    [title]="userAvatarTpl"
+    [menus]="userMenu"
+    trigger="hover"
+  ></eo-ng-dropdown>
+</div>
+<ng-template #userAvatarTpl>
+  <div style="display: 'flex'">
+    <div class="flex items-center h-[49px] leading-[49px] mt-[-4px]">
+      <img src="../../assets/avatar.svg" class="iconfont" alt="用户头像" />
+      <span class="ml-btnybase avatar">{{ nickName }}</span>
+    </div>
+  </div>
+</ng-template>

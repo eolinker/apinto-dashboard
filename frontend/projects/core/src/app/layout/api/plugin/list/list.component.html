@@ -1,0 +1,25 @@
+<div class="">
+  <div
+    class="list-header pl-btnbase pr-btnrbase py-btnybase flex flex-nowrap items-center justify-between"
+  >
+    <button
+      eo-ng-button
+      class="ant-btn-primary"
+      eoNgUserAccess="router/plugin-template"
+      (disabledEdit)="disabledEdit($event)"
+      (click)="addPluginTemplate()"
+    >
+      新建模板
+    </button>
+  </div>
+  <div class="list-content">
+    <eo-ng-apinto-table
+      [nzTbody]="pluginsTableBody"
+      [nzThead]="pluginsTableHeadName"
+      [nzData]="pluginsList"
+      [nzTrClick]="pluginTableClick"
+      [nzMaxOperatorButton]="2"
+    >
+    </eo-ng-apinto-table>
+  </div>
+</div>

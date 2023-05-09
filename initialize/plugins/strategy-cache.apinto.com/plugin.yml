@@ -1,0 +1,12 @@
+id: "strategy-cache.apinto.com"
+name: "cache"
+cname: "数据缓存"
+resume: "通过缓存上游服务的静态资源，如：图片、静态页面等资源，减少于上游服务器的交互，加快接口/页面访问速度，减小服务器的压力。"
+version: "v1.0.0"
+icon: "数据缓存.png"
+driver: "strategy-cache.apinto.com"
+type: 2 #0为框架模块 1为核心模块 2为内置模块 3为非内置
+auto: true
+front: serv-governance
+navigation: "navigation.strategy"
+group_id: "strategy"
