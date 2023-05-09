@@ -51,7 +51,6 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
 
   override ngOnInit (): void {
     super.ngOnInit()
-
     this.getThead()
     this.getTbody()
     !this.nzNoScroll && !this.nzScroll.x && this.calculateScroll()
@@ -85,9 +84,11 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
       if (this.nzThead[index].type === 'checkbox' && this.nzDisabled) {
         this.nzThead[index].disabled = true
         this.nzThead[index].left = true
-      } else if (!nameCol) {
+      }
+
+      if (!nameCol) {
         this.nzThead[index].left = true
-        nameCol = true
+        nameCol = this.nzThead[index].type !== 'checkbox'
       }
 
       if (this.nzThead[index].title === '操作') {
@@ -110,9 +111,11 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
     for (const body of this.nzTbody) {
       if (body.type === 'checkbox' && this.nzDisabled) {
         body.left = true
-      } else if (!nameCol) {
+      }
+
+      if (!nameCol) {
         body.left = true
-        nameCol = true
+        nameCol = body.type !== 'checkbox'
       }
 
       if (!body.title && !body.type) {
