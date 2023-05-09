@@ -96,8 +96,8 @@ type RemoteTitles struct {
 }
 
 type RemoteApis struct {
-	Uuid string `json:"uuid"`
-	Name string `json:"name"`
+	Uuid  string `json:"uuid"`
+	Title string `json:"title"`
 	//Service     string `json:"service"`
 	Group       string `json:"group"`
 	RequestPath string `json:"request_path"`

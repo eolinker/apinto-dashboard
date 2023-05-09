@@ -71,30 +71,18 @@ func (t *visitHandler) CheckInput(input *strategy_dto.StrategyInfoInput[strategy
 	default:
 		return fmt.Errorf("visit_rule %s is illegal. ", input.Config.VisitRule)
 	}
-
-	//检查生效范围
-	filterNameSet := make(map[string]struct{})
-	for _, influence := range input.Config.InfluenceSphere {
-		switch influence.Name {
-		case strategyConfig.FilterApplication, strategyConfig.FilterApi, strategyConfig.FilterPath, strategyConfig.FilterService, strategyConfig.FilterMethod, strategyConfig.FilterIP:
-		default:
-			if !common.IsMatchFilterAppKey(influence.Name) {
-				return fmt.Errorf("influence_sphere.Name %s is illegal. ", influence.Name)
-			}
+	err := checkFilters(common.SliceToSlice(input.Config.InfluenceSphere, func(s strategy_entry.StrategyFiltersConfig) *strategy_dto.FilterInput {
+		return &strategy_dto.FilterInput{
+			Name:   s.Name,
+			Values: s.Values,
 		}
-
-		if len(influence.Values) == 0 {
-			return fmt.Errorf("influence_sphere.Options can't be null. influence_sphere.Name:%s ", influence.Name)
-		}
-
-		if _, has := filterNameSet[influence.Name]; has {
-			return fmt.Errorf("influenceName %s is reduplicative. ", influence.Name)
-		}
-		filterNameSet[influence.Name] = struct{}{}
+	}), "influence_sphere")
+	if err != nil {
+		return err
 	}
 
 	//校验筛选条件
-	return checkFilters(input.Filters)
+	return checkFilters(input.Filters, "filter")
 }
 
 func (t *visitHandler) ToApintoConfig(conf strategy_entry.StrategyVisitConfig) interface{} {
