@@ -80,7 +80,7 @@ func (t *trafficHandler) CheckInput(input *strategy_dto.StrategyInfoInput[strate
 	}
 
 	//校验筛选条件
-	return checkFilters(input.Filters)
+	return checkFilters(input.Filters, "filter")
 }
 
 func (t *trafficHandler) ToApintoConfig(conf strategy_entry.StrategyTrafficLimitConfig) interface{} {
