@@ -57,7 +57,7 @@ func (e *externalApplicationController) getList(ginCtx *gin.Context) {
 		return
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["apps"] = list
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
@@ -78,7 +78,7 @@ func (e *externalApplicationController) getInfo(ginCtx *gin.Context) {
 		Desc: info.Desc,
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["info"] = app
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
