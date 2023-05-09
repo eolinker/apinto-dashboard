@@ -1,0 +1,12 @@
+id: "ext_app.apinto.com"
+name: "ext-app"
+cname: "OpenAPI"
+resume: "利用该插件的提供的OpenAPI，将内容进行重新搭配，从而制作出独特的、具有新价值的新应用/产品。"
+version: "v1.0.0"
+icon: "OpenAPI.png"
+driver: "ext_app.apinto.com"
+type: 2 #0为框架模块 1为核心模块 2为内置模块 3为非内置
+auto: true
+front: system
+navigation: "navigation.system"
+group_id: "devops"

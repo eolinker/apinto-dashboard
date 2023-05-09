@@ -1,0 +1,108 @@
+<div class="mt-formtop">
+  <form
+    nz-form
+    [nzNoColon]="true"
+    [nzAutoTips]="autoTips"
+    [formGroup]="validateForm"
+    autocomplete="off"
+  >
+    <nz-form-item>
+      <nz-form-label [nzSpan]="7" nzRequired>应用名称：</nz-form-label>
+      <nz-form-control [nzSpan]="12">
+        <input
+          eo-ng-input
+          required
+          name="name"
+          class="w-INPUT_NORMAL"
+          placeholder="请输入"
+          formControlName="name"
+          eoNgUserAccess="application"
+          (disabledEdit)="disabledEdit($event)"
+        />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="7" nzRequired>应用ID：</nz-form-label>
+      <nz-form-control [nzSpan]="12">
+        <input
+          class="w-INPUT_NORMAL"
+          eo-ng-input
+          required
+          placeholder="请输入"
+          formControlName="id"
+          eoNgUserAccess="application"
+        />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="7">
+        <span
+          eoNgFeedbackTooltip
+          nzTooltipTitle="用于应用调用统计指标或策略匹配"
+          nzTooltipPlacement="left"
+          [nzTooltipVisible]="false"
+          nzTooltipTrigger="hover"
+          >自定义属性：
+        </span>
+      </nz-form-label>
+      <nz-form-control [nzSpan]="5">
+        <eo-ng-apinto-table
+          class="arrayItem custom"
+          [nzTbody]="customAttrTableBody"
+          [nzData]="customAttrList"
+          [nzNoScroll]="true"
+        >
+        </eo-ng-apinto-table>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="7">描述：</nz-form-label>
+      <nz-form-control [nzSpan]="12">
+        <textarea
+          class="w-INPUT_NORMAL"
+          name="desc"
+          rows="3"
+          eo-ng-input
+          formControlName="desc"
+          placeholder="请输入"
+          eoNgUserAccess="application"
+        ></textarea>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item class="mb-0">
+      <nz-form-label [nzSpan]="7">Header额外参数：</nz-form-label>
+      <nz-form-control [nzSpan]="5" nzExtra="用于转发上游系统鉴权">
+        <eo-ng-apinto-table
+          class="arrayItem header"
+          [nzTbody]="extraHeaderTableBody"
+          [nzData]="extraHeaderList"
+          eoNgUserAccess="application"
+          [nzNoScroll]="true"
+        >
+        </eo-ng-apinto-table>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item class="mb-0 sticky bg-white bottom-0 py-mbase z-50">
+      <nz-form-control [nzOffset]="7" [nzSpan]="12">
+        <button
+          class="ant-btn-primary"
+          type="submit"
+          eo-ng-button
+          eoNgUserAccess="application"
+          (click)="saveApplication()"
+          [nzLoading]="submitButtonLoading"
+        >
+          {{ editPage ? '提交' : '保存' }}
+        </button>
+        <button eo-ng-button class="ml-btnybase" (click)="backToList()">
+          取消
+        </button>
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+</div>

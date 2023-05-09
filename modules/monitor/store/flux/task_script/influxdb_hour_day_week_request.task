@@ -1,0 +1,547 @@
+option task = {name: "hour_request", cron: "0 * * * *", offset: 1m}
+//option task = {name: "day_request", cron: "0 0 * * *", offset: 2m}
+//option task = {name: "week_request", cron: "0 0 * * 1", offset: 3m}
+
+from(bucket: "apinto/minute")
+    |> range(start: -1h)
+    // |> range(start: -1d)
+    // |> range(start: -1w)
+    |> filter(fn: (r) => r._measurement == "request")
+    |> filter(fn:(r)=>r._field == "total")
+    |> group(
+        columns: [
+            "api",
+            "app",
+            "upstream",
+            "method",
+            "node",
+            "cluster",
+        ],
+    )
+    |> sum()
+    |> set(key: "_measurement", value: "request_1")
+    |> set(key:"_field",value:"total")
+    |> to(
+        bucket: "apinto/hour",
+        //bucket: "apinto/day",
+        //bucket: "apinto/week",
+        timeColumn: "_start",
+          tagColumns: [
+            "api",
+            "app",
+            "method",
+            "upstream",
+            "node",
+            "cluster",
+        ],
+    )
+
+from(bucket: "apinto/minute")
+    |> range(start: -1h)
+    // |> range(start: -1d)
+    // |> range(start: -1w)
+    |> filter(fn: (r) => r._measurement == "request")
+    |> filter(fn:(r)=>r._field == "success")
+    |> group(
+        columns: [
+            "api",
+            "app",
+            "upstream",
+            "method",
+            "node",
+            "cluster",
+        ],
+    )
+    |> sum()
+    |> set(key: "_measurement", value: "request_1")
+    |> set(key:"_field",value:"success")
+    |> to(
+        bucket: "apinto/hour",
+        //bucket: "apinto/day",
+        //bucket: "apinto/week",
+        timeColumn: "_start",
+          tagColumns: [
+            "api",
+            "app",
+            "method",
+            "upstream",
+            "node",
+            "cluster",
+        ],
+    )
+
+from(bucket: "apinto/minute")
+    |> range(start: -1h)
+    // |> range(start: -1d)
+    // |> range(start: -1w)
+    |> filter(fn: (r) => r._measurement == "request")
+    |> filter(fn:(r)=>r._field == "s4xx")
+    |> group(
+        columns: [
+            "api",
+            "app",
+            "upstream",
+            "method",
+            "node",
+            "cluster",
+        ],
+    )
+    |> sum()
+    |> set(key: "_measurement", value: "request_1")
+    |> set(key:"_field",value:"s4xx")
+    |> to(
+        bucket: "apinto/hour",
+        //bucket: "apinto/day",
+        //bucket: "apinto/week",
+        timeColumn: "_start",
+          tagColumns: [
+            "api",
+            "app",
+            "method",
+            "upstream",
+            "node",
+            "cluster",
+        ],
+    )
+
+from(bucket: "apinto/minute")
+    |> range(start: -1h)
+    // |> range(start: -1d)
+    // |> range(start: -1w)
+    |> filter(fn: (r) => r._measurement == "request")
+    |> filter(fn:(r)=>r._field == "s5xx")
+    |> group(
+        columns: [
+            "api",
+            "app",
+            "upstream",
+            "method",
+            "node",
+            "cluster",
+        ],
+    )
+    |> sum()
+    |> set(key: "_measurement", value: "request_1")
+    |> set(key:"_field",value:"s5xx")
+    |> to(
+        bucket: "apinto/hour",
+        //bucket: "apinto/day",
+        //bucket: "apinto/week",
+        timeColumn: "_start",
+          tagColumns: [
+            "api",
+            "app",
+            "method",
+            "upstream",
+            "node",
+            "cluster",
+        ],
+    )
+
+from(bucket: "apinto/minute")
+    |> range(start: -1h)
+    // |> range(start: -1d)
+    // |> range(start: -1w)
+    |> filter(fn: (r) => r._measurement == "request")
+    |> filter(fn:(r)=>r._field == "timing")
+    |> group(
+        columns: [
+            "api",
+            "app",
+            "upstream",
+            "method",
+            "node",
+            "cluster",
+        ],
+    )
+    |> sum()
+    |> set(key: "_measurement", value: "request_1")
+    |> set(key:"_field",value:"timing")
+    |> to(
+        bucket: "apinto/hour",
+        //bucket: "apinto/day",
+        //bucket: "apinto/week",
+        timeColumn: "_start",
+          tagColumns: [
+            "api",
+            "app",
+            "method",
+            "upstream",
+            "node",
+            "cluster",
+        ],
+    )
+
+from(bucket: "apinto/minute")
+    |> range(start: -1h)
+    // |> range(start: -1d)
+    // |> range(start: -1w)
+    |> filter(fn: (r) => r._measurement == "request")
+    |> filter(fn:(r)=>r._field == "timing_max")
+    |> group(
+        columns: [
+            "api",
+            "app",
+            "upstream",
+            "method",
+            "node",
+            "cluster",
+        ],
+    )
+    |> max()
+    |> set(key: "_measurement", value: "request_1")
+    |> set(key:"_field",value:"timing_max")
+    |> to(
+        bucket: "apinto/hour",
+        //bucket: "apinto/day",
+        //bucket: "apinto/week",
+        timeColumn: "_start",
+          tagColumns: [
+            "api",
+            "app",
+            "method",
+            "upstream",
+            "node",
+            "cluster",
+        ],
+    )
+
+from(bucket: "apinto/minute")
+    |> range(start: -1h)
+    // |> range(start: -1d)
+    // |> range(start: -1w)
+    |> filter(fn: (r) => r._measurement == "request")
+    |> filter(fn:(r)=>r._field == "timing_min")
+    |> group(
+        columns: [
+            "api",
+            "app",
+            "upstream",
+            "method",
+            "node",
+            "cluster",
+        ],
+    )
+    |> min()
+    |> set(key: "_measurement", value: "request_1")
+    |> set(key:"_field",value:"timing_min")
+    |> to(
+        bucket: "apinto/hour",
+        //bucket: "apinto/day",
+        //bucket: "apinto/week",
+        timeColumn: "_start",
+          tagColumns: [
+            "api",
+            "app",
+            "method",
+            "upstream",
+            "node",
+            "cluster",
+        ],
+    )
+
+from(bucket: "apinto/minute")
+    |> range(start: -1h)
+    // |> range(start: -1d)
+    // |> range(start: -1w)
+    |> filter(fn: (r) => r._measurement == "request")
+    |> filter(fn:(r)=>r._field == "request_1")
+    |> group(
+        columns: [
+            "api",
+            "app",
+            "upstream",
+            "method",
+            "node",
+            "cluster",
+        ],
+    )
+    |> sum()
+    |> set(key: "_measurement", value: "request")
+    |> set(key:"_field",value:"request_1")
+    |> to(
+        bucket: "apinto/hour",
+        //bucket: "apinto/day",
+        //bucket: "apinto/week",
+        timeColumn: "_start",
+          tagColumns: [
+            "api",
+            "app",
+            "method",
+            "upstream",
+            "node",
+            "cluster",
+        ],
+    )
+
+from(bucket: "apinto/minute")
+    |> range(start: -1h)
+    // |> range(start: -1d)
+    // |> range(start: -1w)
+    |> filter(fn: (r) => r._measurement == "request")
+    |> filter(fn:(r)=>r._field == "request_max")
+    |> group(
+        columns: [
+            "api",
+            "app",
+            "upstream",
+            "method",
+            "node",
+            "cluster",
+        ],
+    )
+    |> max()
+    |> set(key: "_measurement", value: "request_1")
+    |> set(key:"_field",value:"request_max")
+    |> to(
+        bucket: "apinto/hour",
+        //bucket: "apinto/day",
+        //bucket: "apinto/week",
+        timeColumn: "_start",
+          tagColumns: [
+            "api",
+            "app",
+            "method",
+            "upstream",
+            "node",
+            "cluster",
+        ],
+    )
+
+from(bucket: "apinto/minute")
+    |> range(start: -1h)
+    // |> range(start: -1d)
+    // |> range(start: -1w)
+    |> filter(fn: (r) => r._measurement == "request")
+    |> filter(fn:(r)=>r._field == "request_min")
+    |> group(
+        columns: [
+            "api",
+            "app",
+            "upstream",
+            "method",
+            "node",
+            "cluster",
+        ],
+    )
+    |> min()
+    |> set(key: "_measurement", value: "request_1")
+    |> set(key:"_field",value:"request_min")
+    |> to(
+        bucket: "apinto/hour",
+        //bucket: "apinto/day",
+        //bucket: "apinto/week",
+        timeColumn: "_start",
+          tagColumns: [
+            "api",
+            "app",
+            "method",
+            "upstream",
+            "node",
+            "cluster",
+        ],
+    )
+
+from(bucket: "apinto/minute")
+    |> range(start: -1h)
+    // |> range(start: -1d)
+    // |> range(start: -1w)
+    |> filter(fn: (r) => r._measurement == "request")
+    |> filter(fn:(r)=>r._field == "response")
+    |> group(
+        columns: [
+            "api",
+            "app",
+            "upstream",
+            "method",
+            "node",
+            "cluster",
+        ],
+    )
+    |> sum()
+    |> set(key: "_measurement", value: "request_1")
+    |> set(key:"_field",value:"response")
+    |> to(
+        bucket: "apinto/hour",
+        //bucket: "apinto/day",
+        //bucket: "apinto/week",
+        timeColumn: "_start",
+          tagColumns: [
+            "api",
+            "app",
+            "method",
+            "upstream",
+            "node",
+            "cluster",
+        ],
+    )
+
+from(bucket: "apinto/minute")
+    |> range(start: -1h)
+    // |> range(start: -1d)
+    // |> range(start: -1w)
+    |> filter(fn: (r) => r._measurement == "request")
+    |> filter(fn:(r)=>r._field == "response_max")
+    |> group(
+        columns: [
+            "api",
+            "app",
+            "upstream",
+            "method",
+            "node",
+            "cluster",
+        ],
+    )
+    |> max()
+    |> set(key: "_measurement", value: "request_1")
+    |> set(key:"_field",value:"response_max")
+    |> to(
+        bucket: "apinto/hour",
+        //bucket: "apinto/day",
+        //bucket: "apinto/week",
+        timeColumn: "_start",
+          tagColumns: [
+            "api",
+            "app",
+            "method",
+            "upstream",
+            "node",
+            "cluster",
+        ],
+    )
+
+from(bucket: "apinto/minute")
+    |> range(start: -1h)
+    // |> range(start: -1d)
+    // |> range(start: -1w)
+    |> filter(fn: (r) => r._measurement == "request")
+    |> filter(fn:(r)=>r._field == "response_min")
+    |> group(
+        columns: [
+            "api",
+            "app",
+            "upstream",
+            "method",
+            "node",
+            "cluster",
+        ],
+    )
+    |> min()
+    |> set(key: "_measurement", value: "request_1")
+    |> set(key:"_field",value:"response_min")
+    |> to(
+        bucket: "apinto/hour",
+        //bucket: "apinto/day",
+        //bucket: "apinto/week",
+        timeColumn: "_start",
+          tagColumns: [
+            "api",
+            "app",
+            "method",
+            "upstream",
+            "node",
+            "cluster",
+        ],
+    )
+
+from(bucket: "apinto/minute")
+    |> range(start: -1h)
+    // |> range(start: -1d)
+    // |> range(start: -1w)
+    |> filter(fn: (r) => r._measurement == "request")
+    |> filter(fn:(r)=>r._field == "retry")
+    |> group(
+        columns: [
+            "api",
+            "app",
+            "upstream",
+            "method",
+            "node",
+            "cluster",
+        ],
+    )
+    |> sum()
+    |> set(key: "_measurement", value: "request_1")
+    |> set(key:"_field",value:"retry")
+    |> to(
+        bucket: "apinto/hour",
+        //bucket: "apinto/day",
+        //bucket: "apinto/week",
+        timeColumn: "_start",
+          tagColumns: [
+            "api",
+            "app",
+            "method",
+            "upstream",
+            "node",
+            "cluster",
+        ],
+    )
+
+from(bucket: "apinto/minute")
+    |> range(start: -1h)
+    // |> range(start: -1d)
+    // |> range(start: -1w)
+    |> filter(fn: (r) => r._measurement == "request")
+    |> filter(fn:(r)=>r._field == "retry_max")
+    |> group(
+        columns: [
+            "api",
+            "app",
+            "upstream",
+            "method",
+            "node",
+            "cluster",
+        ],
+    )
+    |> max()
+    |> set(key: "_measurement", value: "request_1")
+    |> set(key:"_field",value:"retry_max")
+    |> to(
+        bucket: "apinto/hour",
+        //bucket: "apinto/day",
+        //bucket: "apinto/week",
+        timeColumn: "_start",
+          tagColumns: [
+            "api",
+            "app",
+            "method",
+            "upstream",
+            "node",
+            "cluster",
+        ],
+    )
+
+from(bucket: "apinto/minute")
+    |> range(start: -1h)
+    // |> range(start: -1d)
+    // |> range(start: -1w)
+    |> filter(fn: (r) => r._measurement == "request")
+    |> filter(fn:(r)=>r._field == "retry_min")
+    |> group(
+        columns: [
+            "api",
+            "app",
+            "upstream",
+            "method",
+            "node",
+            "cluster",
+        ],
+    )
+    |> min()
+    |> set(key: "_measurement", value: "request_1")
+    |> set(key:"_field",value:"retry_min")
+    |> to(
+        bucket: "apinto/hour",
+        //bucket: "apinto/day",
+        //bucket: "apinto/week",
+        timeColumn: "_start",
+          tagColumns: [
+            "api",
+            "app",
+            "method",
+            "upstream",
+            "node",
+            "cluster",
+        ],
+    )

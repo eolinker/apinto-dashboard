@@ -1,0 +1,60 @@
+<!--
+ * @Author: MengjieYang yangmengjie@eolink.com
+ * @Date: 2022-07-20 23:25:07
+ * @LastEditors: MengjieYang yangmengjie@eolink.com
+ * @LastEditTime: 2022-09-27 23:15:26
+ * @FilePath: /apinto/src/app/layout/deploy/deploy-cluster-list/deploy-cluster-list.component.html
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+-->
+<div class="">
+  <div
+    class="list-header pl-btnbase pr-btnrbase py-btnybase flex flex-nowrap items-center justify-between"
+  >
+    <button
+      eo-ng-button
+      class="ant-btn-primary"
+      eoNgUserAccess="deploy/cluster"
+      (disabledEdit)="disabledEdit($event)"
+      (click)="addCluster()"
+    >
+      新建集群
+    </button>
+
+    <eo-ng-select
+      class="w-INPUT_NORMAL"
+      [nzMaxTagCount]="3"
+      [nzMaxTagPlaceholder]="tagPlaceHolder"
+      [nzShowCheckAll]="true"
+      nzMode="multiple"
+      nzPlaceHolder="所有环境"
+      [nzDisabled]="nzDisabled"
+      [(ngModel)]="env"
+      (nzOpenChange)="$event ? null : handleEnvChange()"
+      nzAllowClear
+      [nzOptions]="environmentList"
+    ></eo-ng-select>
+
+    <ng-template #tagPlaceHolder let-selectedList
+      >and {{ selectedList.length }} more selected</ng-template
+    >
+  </div>
+  <div class="list-content">
+    <eo-ng-apinto-table
+      class=""
+      [nzTbody]="clustersTableBody"
+      [nzThead]="clustersTableHeadName"
+      [nzData]="clustersDisplayList"
+      [nzTrClick]="clusterTableClick"
+      [nzMaxOperatorButton]="2"
+    >
+    </eo-ng-apinto-table>
+  </div>
+</div>
+
+<ng-template #clusterStatusTpl let-item="item">
+  <ng-container [ngSwitch]="item.status">
+    <span *ngSwitchCase="'ABNORMAL'" class="red-bold">异常</span>
+    <span *ngSwitchCase="'NORMAL'" class="green-bold">正常</span>
+    <span *ngSwitchCase="'PARTIALLY_NORMAL'" class="orange-bold">部分正常</span>
+  </ng-container>
+</ng-template>

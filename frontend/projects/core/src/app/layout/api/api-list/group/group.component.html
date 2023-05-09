@@ -1,0 +1,150 @@
+<!--
+ * @Author: MengjieYang yangmengjie@eolink.com
+ * @Date: 2022-09-01 23:11:27
+ * @LastEditors: MengjieYang yangmengjie@eolink.com
+ * @LastEditTime: 2022-09-20 23:03:23
+ * @FilePath: /apinto/src/app/layout/api/api-management/api-management.component.html
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+-->
+<div
+  class="flex flex-nowrap justify-start overflow-hidden max-h-[calc(100vh_-_50px)]"
+>
+  <div>
+    <div
+      class="block-inline-block relative min-w-GROUP min-h-[calc(100vh_-_50px)] spreed-content"
+      style="width: 240px"
+    >
+      <div class="flex items-center justify-between px-[11px] py-btnbase">
+        <eo-ng-search-input-group
+          class="w-[100%]"
+          [eoInputVal]="queryName"
+          [eoNoWidth]="true"
+          (eoClick)="queryName = ''"
+        >
+          <input
+            type="text"
+            eo-ng-input
+            placeholder="搜索"
+            [(ngModel)]="queryName"
+          />
+        </eo-ng-search-input-group>
+
+        <!-- <button
+          eo-ng-button
+          nzType="default"
+          class="p-0 ml-[10px] group-icon"
+          eoNgUserAccess="router/api"
+          (click)="addGroupModal('root')"
+        >
+          <svg class="iconpark-icon"><use href="#xinzengfenzu"></use></svg>
+        </button> -->
+      </div>
+
+      <div
+        class="h-[calc(100%_-_56px)] absolute overflow-x-hidden overflow-y-auto w-[100%]"
+        #groupComponent
+      >
+        <div
+          class="group-title"
+          [ngClass]="{ 'group-title-selected': showAll }"
+          (click)="viewAllApis()"
+        >
+          <svg class="iconpark-icon mr5 fs18"><use href="#suoyou"></use></svg>
+          <span>所有API</span>
+        </div>
+        <div>
+          <eo-ng-tree-default
+            nzBlockNode
+            #eoNgTreeDefault
+            [nzData]="nodesList"
+            (nzClick)="activeNode($event)"
+            [nzTreeTemplate]="nzTreeTpl"
+            [nzSearchValue]="queryName"
+          ></eo-ng-tree-default>
+        </div>
+
+        <div class="mt-formtop">
+          <a
+            class="ml-[28px] flex items-center"
+            eoNgUserAccess="router/api"
+            (click)="addGroupModal('root')"
+          >
+            <svg class="w-[16px] h-[16px] mr-[2px]">
+              <use href="#tianjia"></use></svg
+            ><span>新增分组</span>
+          </a>
+        </div>
+        <ng-template #nzTreeTpl let-node let-origin="origin">
+          <div class="custom-node">
+            <div class="f-row-js-ac" *ngIf="!node.isLeaf">
+              <div style="overflow: hidden; text-overflow: ellipsis">
+                <span
+                  style="
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                  "
+                  class="folder-name"
+                  [innerHTML]="
+                    node.title | nzHighlight : queryName : 'i' : 'highlight'
+                  "
+                ></span>
+              </div>
+              <button
+                eo-ng-dropdown
+                eo-ng-button
+                [nzDropdownMenu]="menu"
+                eoNgUserAccess="router/api"
+                nzPlacement="bottomRight"
+                nzTrigger="click"
+                nzOverlayClassName="eo-ng-tree-default-dropdown-container"
+                style="cursor: pointer"
+                (click)="$event.stopPropagation()"
+              >
+                <svg class="iconpark-icon">
+                  <use href="#more"></use>
+                </svg>
+              </button>
+
+              <eo-ng-dropdown-menu #menu="nzDropdownMenu">
+                <ul nz-menu>
+                  <li nz-menu-item (click)="addApi(origin.uuid)">添加 API</li>
+                  <li nz-menu-item (click)="addGroupModal(origin.uuid)">
+                    添加子分组
+                  </li>
+                  <li
+                    nz-menu-item
+                    (click)="editGroupModal(origin.uuid, origin.name)"
+                  >
+                    编辑
+                  </li>
+                  <li
+                    nz-menu-item
+                    [nzDisabled]="!origin.isDelete"
+                    (click)="
+                      origin.isDelete
+                        ? deleteGroupModal(origin.name, origin.uuid)
+                        : $event.stopPropagation()
+                    "
+                  >
+                    删除
+                  </li>
+                </ul>
+              </eo-ng-dropdown-menu>
+            </div>
+          </div>
+        </ng-template>
+      </div>
+      <!-- 拖动条 -->
+      <div
+        class="divide_line_ldcc"
+        maxWidth="450"
+        minWidth="200"
+        eo-ng-tree-drag
+      ></div>
+    </div>
+  </div>
+  <div class="min-w-[0px]">
+    <router-outlet></router-outlet>
+  </div>
+</div>

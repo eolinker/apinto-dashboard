@@ -1,0 +1,65 @@
+<!--
+ * @Author: MengjieYang yangmengjie@eolink.com
+ * @Date: 2022-07-28 22:12:29
+ * @LastEditors: MengjieYang yangmengjie@eolink.com
+ * @LastEditTime: 2022-07-29 01:36:57
+ * @FilePath: /apinto/src/app/layout/deploy/deploy-cluster-nodes/deploy-cluster-nodes.component.html
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+-->
+<div class="">
+  <div
+    class="list-header pl-btnbase pr-btnrbase py-btnybase flex flex-nowrap items-center justify-between"
+  >
+    <button
+      type="button"
+      eo-ng-button
+      class="ant-btn-primary"
+      (click)="updateNodes()"
+      [disabled]="!nodesForms.isUpdate || nzDisabled"
+    >
+      更新配置
+    </button>
+    <button
+      type="button"
+      eo-ng-button
+      class="ml-btnybase"
+      eoNgUserAccess="deploy/cluster"
+      (click)="openDrawer('resetNodes')"
+      (disabledEdit)="disabledEdit($event)"
+    >
+      重置配置
+    </button>
+  </div>
+  <div class="list-content">
+    <eo-ng-apinto-table
+      class=""
+      [nzTbody]="nodesTableBody"
+      [nzThead]="nodesTableHeadName"
+      [nzData]="nodesForms.nodes"
+      [nzNoScroll]="true"
+      nzTableLayout="fixed"
+    >
+    </eo-ng-apinto-table>
+  </div>
+</div>
+
+<ng-template #nodeStatusTpl let-item="item">
+  <ng-container [ngSwitch]="item.status">
+    <span *ngSwitchCase="'NOTRUNNING'" class="red-bold">未运行</span>
+    <span *ngSwitchCase="'RUNNING'" class="green-bold">运行中</span>
+  </ng-container>
+</ng-template>
+
+<ng-template #adminAddrTpl let-item="item">
+  <eo-ng-copy-addr-list
+    [addrItem]="item"
+    keyName="adminAddr"
+  ></eo-ng-copy-addr-list>
+</ng-template>
+
+<ng-template #serviceAddrTpl let-item="item">
+  <eo-ng-copy-addr-list
+    [addrItem]="item"
+    keyName="serviceAddr"
+  ></eo-ng-copy-addr-list>
+</ng-template>

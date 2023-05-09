@@ -1,21 +1,61 @@
-# Binaries for programs and plugins
-*.exe
-*.exe~
-*.dll
-*.so
-*.dylib
-
-# Test binary, built with `go test -c`
-*.test
-
-# Output of the go coverage tool, specifically when used with LiteIDE
-*.out
-
-# Dependency directories (remove the comment below to include it)
-# vendor/
 /.idea/
-/vendor/
+
+# See http://help.github.com/ignore-files/ for more about ignoring files.
+
+# Compiled output
+/frontend/tmp
+/frontend/out-tsc
+/frontend/bazel-out
+
+# Node
+/frontend/node_modules
+npm-debug.log
+/frontend/yarn-error.log
+
+# IDEs and editors
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/*
+
+# Miscellaneous
+/frontend/.angular/cache
+.sass-cache/
+/connect.lock
+/coverage
+/libpeerconnection.log
+testem.log
+/typings
+
+# System files
+.DS_Store
+Thumbs.db
+
+# 单元测试
+/frontend/unit_coverage
+
+#端到端测试
+e2e_coverage
+.nyc_output
+.scannerwork
+.vscode
+deploy.gitlab-ci.yml
+#根据后端项目组需求，暂时不上传新的angular.json文件（仓库文件中含有deployurl）
+/frontend/dist
+/apinto-build/
+/app/work
+/.pnpm-debug.log
+vender
 /out/
-/builds/sqlite.db
-*.DS_Store
-/dist/
+*.gitlab-ci.yml

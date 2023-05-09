@@ -1,0 +1,139 @@
+<div class="">
+  <form
+    nz-form
+    [nzNoColon]="true"
+    [nzAutoTips]="autoTips"
+    [formGroup]="validateForm"
+  >
+    <div
+      *ngIf="!nodesTableShow"
+      class="list-header flex-nowrap items-center justify-between"
+    >
+      <nz-form-item>
+        <nz-form-label [nzSpan]="7" nzRequired>集群名称：</nz-form-label>
+
+        <nz-form-control [nzSpan]="12">
+          <input
+            class="w-INPUT_NORMAL"
+            eo-ng-input
+            #clusterNameInput
+            formControlName="clusterName"
+            placeholder="请输入集群名称"
+            eoNgUserAccess="deploy/cluster"
+          />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label [nzSpan]="7" nzRequired>环境：</nz-form-label>
+
+        <nz-form-control [nzSpan]="12">
+          <eo-ng-select
+            class="w-INPUT_NORMAL"
+            formControlName="envValue"
+            nzAllowClear
+            [nzOptions]="environmentList"
+            eoNgUserAccess="deploy/cluster"
+          ></eo-ng-select>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label [nzSpan]="7">描述：</nz-form-label>
+
+        <nz-form-control [nzSpan]="12">
+          <textarea
+            class="w-INPUT_NORMAL"
+            rows="6"
+            eo-ng-input
+            formControlName="clusterDesc"
+            placeholder="请输入"
+            eoNgUserAccess="deploy/cluster"
+          ></textarea>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item class="mb-0">
+        <nz-form-label [nzSpan]="7" nzRequired
+          >集群地址(网关节点)：</nz-form-label
+        >
+        <nz-form-control
+          [nzSpan]="12"
+          [nzValidateStatus]="
+            startCheckCluster && validateForm.controls['clusterAddr'].invalid
+              ? 'error'
+              : ''
+          "
+          [nzErrorTip]="nodeErrorTpl"
+        >
+          <eo-ng-input-group nzCompact class="w-INPUT_NORMAL">
+            <eo-ng-select
+              [(ngModel)]="clusterProtocol"
+              [ngModelOptions]="{ standalone: true }"
+              (ngModelChange)="checkClusterError = false"
+              class="w-[25%]"
+            >
+              <eo-ng-option
+                [nzLabel]="'Http'"
+                [nzValue]="'http'"
+              ></eo-ng-option>
+              <eo-ng-option
+                [nzLabel]="'Https'"
+                [nzValue]="'https'"
+              ></eo-ng-option>
+            </eo-ng-select>
+            <input
+              class="w-[75%]"
+              type="text"
+              eo-ng-input
+              formControlName="clusterAddr"
+              placeholder="请输入"
+            />
+          </eo-ng-input-group>
+
+          <ng-template #nodeErrorTpl>
+            <ng-container
+              *ngIf="validateForm.controls['clusterAddr'].hasError('required')"
+              >请输入集群地址</ng-container
+            >
+            <ng-container
+              *ngIf="validateForm.controls['clusterAddr'].hasError('pattern')"
+              >集群地址输入错误，请重新输入</ng-container
+            >
+
+            <ng-container
+              *ngIf="validateForm.controls['clusterAddr'].hasError('source')"
+              >无法连接该集群，请检查地址是否有误，修改后重试</ng-container
+            >
+          </ng-template>
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+    <div
+      *ngIf="nodesTableShow"
+      class="mt-btnybase mb-0"
+      style="padding-bottom: '0px'"
+    >
+      <div style="width: 524px; margin: auto">
+        <p class="font-bold mb-btnybase">
+          检查通过。该集群有{{ nodesList.length || 0 }}个节点
+        </p>
+        <eo-ng-apinto-table
+          [nzTbody]="nodesTableBody"
+          [nzThead]="nodesTableHeadName"
+          [nzData]="nodesList"
+          [nzNoScroll]="true"
+          nzTableLayout="fixed"
+        >
+        </eo-ng-apinto-table>
+      </div>
+    </div>
+  </form>
+</div>
+
+<ng-template #nodeStatusTpl let-item="item">
+  <ng-container [ngSwitch]="item.status">
+    <span *ngSwitchCase="'NOTRUNNING'" class="red-bold">未运行</span>
+    <span *ngSwitchCase="'RUNNING'" class="green-bold">运行中</span>
+  </ng-container>
+</ng-template>
