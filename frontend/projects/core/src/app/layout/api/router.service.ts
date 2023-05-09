@@ -43,15 +43,17 @@ export class RouterService {
       {
         title: '来源',
         filterMultiple: true,
-        filterOpts: [{
-          text: '自建',
-          value: 'build'
-        },
-        {
-          text: '导入',
-          value: 'import'
-        }
-        ],
+        filterOpts: context.sourcesList.length > 0
+          ? [...context.sourcesList]
+          : [{
+              text: '自建',
+              value: 'build'
+            },
+            {
+              text: '导入',
+              value: 'import'
+            }
+            ],
         filterFn: () => {
           return true
         }
