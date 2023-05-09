@@ -27,6 +27,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/user"
 	apinto_module "github.com/eolinker/apinto-module"
 	"github.com/eolinker/eosc/common/bean"
+	"github.com/eolinker/eosc/log"
 	"github.com/go-basic/uuid"
 	"gorm.io/gorm"
 	"sort"
