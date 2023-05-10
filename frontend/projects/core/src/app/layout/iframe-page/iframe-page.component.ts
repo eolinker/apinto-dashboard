@@ -85,7 +85,7 @@ export class IframePageComponent implements OnInit {
       iframe.id = id
       iframe.width = '100%'
       iframe.height = '100%'
-      iframe.src = url
+      iframe.src = 'http://localhost:4444' || url
       iframe.onload = () => {
         this.start = true
       }
@@ -140,6 +140,7 @@ export class IframePageComponent implements OnInit {
 
   ngOnInit (): void {
     this.moduleName = this.baseInfo.allParamsInfo.moduleName
+    this.iframeService.moduleName = this.moduleName
     // 此处监听的是切换module事件，需要判断moduleName是否变化
     this.subscription = this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
@@ -154,6 +155,7 @@ export class IframePageComponent implements OnInit {
     })
 
     this.subscription2 = this.iframeService.repFlashIframe().subscribe((event) => {
+      this.showIframe('test', `agent/${this.moduleName}`, {})
       this.showIframe('test', `agent/${this.moduleName}${event ? `/${event}` : ''}`, {}, true)
     })
     // this.getPath()
@@ -161,6 +163,8 @@ export class IframePageComponent implements OnInit {
 
   ngAfterViewInit () {
     this.showIframe('test', `agent/${this.moduleName}`, {})
+    this.moduleName = this.baseInfo.allParamsInfo.moduleName
+    this.iframeService.moduleName = this.moduleName
   }
 
   ngOnDestroy () {
