@@ -52,11 +52,12 @@ type BatchListItem struct {
 }
 
 type APIOnlineListItem struct {
-	ClusterName string
-	ClusterEnv  string
-	Status      int
-	Operator    string
-	UpdateTime  string
+	ClusterName  string
+	ClusterEnv   string
+	ClusterTitle string
+	Status       int
+	Operator     string
+	UpdateTime   string
 }
 
 // SourceListItem 来源列表项
