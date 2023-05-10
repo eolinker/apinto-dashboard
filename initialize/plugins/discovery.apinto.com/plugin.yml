@@ -2,7 +2,7 @@ id: "discovery.apinto.com"
 name: "discovery"
 cname: "服务发现"
 resume: "使用一个注册中心来记录分布式系统中的全部服务的信息，以便其他服务能够快速的找到这些已注册的服务。"
-version: "v1.0.6"
+version: "v1.0.2"
 icon: "服务发现.png"
 driver: "discovery.apinto.com"
 type: 1 #0为框架模块 1为核心模块 2为内置模块 3为非内置
@@ -60,31 +60,36 @@ define:  # 动态模块定义
                               },
                               "variable": {
                                   "type": "void",
-                                  "x-decorator": "FormItem",
-                                  "x-component": "Space",
                                   "properties": {
-                                      "input": {
-                                          "type": "string",
+                                      "address_variable":{
+                                          "type": "array",
                                           "x-decorator": "FormItem",
-                                          "x-component": "Input",
-                                          "readOnly": true,
-                                          "x-reactions": {
-                                              "dependencies": [
-                                                  ".quote"
-                                              ],
-                                              "fulfill": {
-                                                  "state": {
-                                                      "value": "{{$deps[0]}}"
+                                          "maxItems": 3,
+                                          "x-component": "ArrayItems",
+                                          "items": {
+                                              "type": "void",
+                                              "x-component": "Space",
+                                              "properties": {
+                                                  "input": {
+                                                      "type": "string",
+                                                      "x-decorator": "FormItem",
+                                                      "x-decorator-props":{
+                                                          "feedbackLayout":"none"
+                                                      },
+                                                      "x-component": "Input",
+                                                      "x-disabled":true
+                                                  },
+                                                  "quote": {
+                                                      "type": "string",
+                                                      "x-decorator": "FormItem",
+                                                      "x-decorator-props":{
+                                                          "feedbackLayout":"none"
+                                                      },
+                                                      "x-component": "CustomEnvVariableComponent"
                                                   }
                                               }
-                                          }
-                                      },
-                                      "quote": {
-                                          "type": "string",
-                                          "x-decorator": "FormItem",
-                                          "x-decorator-props": {},
-                                          "x-component": "CustomEnvVariableComponent",
-                                          "x-component-props": {}
+                                          },
+                                          "default":[""]
                                       }
                                   },
                                   "x-reactions": [
@@ -105,9 +110,9 @@ define:  # 动态模块定义
                                           }
                                       }
                                   ],
-                                  "x-index": 0
+                                  "x-index": 1
                               },
-                              "address": {
+                              "address_static": {
                                   "type": "array",
                                   "title": "",
                                   "x-decorator": "FormItem",
@@ -130,6 +135,7 @@ define:  # 动态模块定义
                                               "type": "string",
                                               "x-decorator": "FormItem",
                                               "x-component": "Input",
+                                              "required":true,
                                               "x-component-props": {
                                                   "placeholder": "请输入协议+主机名或IP+端口"
                                               }
@@ -189,7 +195,27 @@ define:  # 动态模块定义
                                   "x-component-props": {},
                                   "x-decorator-props": {}
                               },
-                              "x-index": 2
+                              "address":{
+                                  "type":"array",
+                                  "x-visible":"false",
+                                  "x-reactions":{
+                                      "dependencies": [
+                                          ".use_variable",".address_variable",".address_static"
+                                      ],
+                                      "when": "{{$deps[0]?.length}}",
+                                      "fulfill": {
+                                          "state": {
+                                              "value": "{{$deps[1]}}"
+                                          }
+                                      },
+                                      "otherwise": {
+                                          "state": {
+                                              "value": "{{$deps[2]}}"
+                                          }
+                                      }
+                                  }
+
+                              }
                           },
                           "x-decorator-props": {
                               "labelCol": 6,
@@ -247,31 +273,36 @@ define:  # 动态模块定义
                               },
                               "variable": {
                                   "type": "void",
-                                  "x-decorator": "FormItem",
-                                  "x-component": "Space",
                                   "properties": {
-                                      "input": {
-                                          "type": "string",
+                                      "address_variable":{
+                                          "type": "array",
                                           "x-decorator": "FormItem",
-                                          "x-component": "Input",
-                                          "readOnly": true,
-                                          "x-reactions": {
-                                              "dependencies": [
-                                                  ".quote"
-                                              ],
-                                              "fulfill": {
-                                                  "state": {
-                                                      "value": "{{$deps[0]}}"
+                                          "maxItems": 3,
+                                          "x-component": "ArrayItems",
+                                          "items": {
+                                              "type": "void",
+                                              "x-component": "Space",
+                                              "properties": {
+                                                  "input": {
+                                                      "type": "string",
+                                                      "x-decorator": "FormItem",
+                                                      "x-decorator-props":{
+                                                          "feedbackLayout":"none"
+                                                      },
+                                                      "x-component": "Input",
+                                                      "x-disabled":true
+                                                  },
+                                                  "quote": {
+                                                      "type": "string",
+                                                      "x-decorator": "FormItem",
+                                                      "x-decorator-props":{
+                                                          "feedbackLayout":"none"
+                                                      },
+                                                      "x-component": "CustomEnvVariableComponent"
                                                   }
                                               }
-                                          }
-                                      },
-                                      "quote": {
-                                          "type": "string",
-                                          "x-decorator": "FormItem",
-                                          "x-decorator-props": {},
-                                          "x-component": "CustomEnvVariableComponent",
-                                          "x-component-props": {}
+                                          },
+                                          "default":[""]
                                       }
                                   },
                                   "x-reactions": [
@@ -292,9 +323,9 @@ define:  # 动态模块定义
                                           }
                                       }
                                   ],
-                                  "x-index": 0
+                                  "x-index": 1
                               },
-                              "address": {
+                              "address_static": {
                                   "type": "array",
                                   "title": "",
                                   "x-decorator": "FormItem",
@@ -317,6 +348,7 @@ define:  # 动态模块定义
                                               "type": "string",
                                               "x-decorator": "FormItem",
                                               "x-component": "Input",
+                                              "required":true,
                                               "x-component-props": {
                                                   "placeholder": "请输入协议+主机名或IP+端口"
                                               }
@@ -376,7 +408,27 @@ define:  # 动态模块定义
                                   "x-component-props": {},
                                   "x-decorator-props": {}
                               },
-                              "x-index": 2
+                              "address":{
+                                  "type":"array",
+                                  "x-visible":"false",
+                                  "x-reactions":{
+                                      "dependencies": [
+                                          ".use_variable",".address_variable",".address_static"
+                                      ],
+                                      "when": "{{$deps[0]?.length}}",
+                                      "fulfill": {
+                                          "state": {
+                                              "value": "{{$deps[1]}}"
+                                          }
+                                      },
+                                      "otherwise": {
+                                          "state": {
+                                              "value": "{{$deps[2]}}"
+                                          }
+                                      }
+                                  }
+
+                              }
                           },
                           "x-decorator-props": {
                               "labelCol": 6,
@@ -434,31 +486,36 @@ define:  # 动态模块定义
                               },
                               "variable": {
                                   "type": "void",
-                                  "x-decorator": "FormItem",
-                                  "x-component": "Space",
                                   "properties": {
-                                      "input": {
-                                          "type": "string",
+                                      "address_variable":{
+                                          "type": "array",
                                           "x-decorator": "FormItem",
-                                          "x-component": "Input",
-                                          "readOnly": true,
-                                          "x-reactions": {
-                                              "dependencies": [
-                                                  ".quote"
-                                              ],
-                                              "fulfill": {
-                                                  "state": {
-                                                      "value": "{{$deps[0]}}"
+                                          "maxItems": 3,
+                                          "x-component": "ArrayItems",
+                                          "items": {
+                                              "type": "void",
+                                              "x-component": "Space",
+                                              "properties": {
+                                                  "input": {
+                                                      "type": "string",
+                                                      "x-decorator": "FormItem",
+                                                      "x-decorator-props":{
+                                                          "feedbackLayout":"none"
+                                                      },
+                                                      "x-component": "Input",
+                                                      "x-disabled":true
+                                                  },
+                                                  "quote": {
+                                                      "type": "string",
+                                                      "x-decorator": "FormItem",
+                                                      "x-decorator-props":{
+                                                          "feedbackLayout":"none"
+                                                      },
+                                                      "x-component": "CustomEnvVariableComponent"
                                                   }
                                               }
-                                          }
-                                      },
-                                      "quote": {
-                                          "type": "string",
-                                          "x-decorator": "FormItem",
-                                          "x-decorator-props": {},
-                                          "x-component": "CustomEnvVariableComponent",
-                                          "x-component-props": {}
+                                          },
+                                          "default":[""]
                                       }
                                   },
                                   "x-reactions": [
@@ -479,9 +536,9 @@ define:  # 动态模块定义
                                           }
                                       }
                                   ],
-                                  "x-index": 0
+                                  "x-index": 1
                               },
-                              "address": {
+                              "address_static": {
                                   "type": "array",
                                   "title": "",
                                   "x-decorator": "FormItem",
@@ -504,6 +561,7 @@ define:  # 动态模块定义
                                               "type": "string",
                                               "x-decorator": "FormItem",
                                               "x-component": "Input",
+                                              "required":true,
                                               "x-component-props": {
                                                   "placeholder": "请输入协议+主机名或IP+端口"
                                               }
@@ -563,7 +621,27 @@ define:  # 动态模块定义
                                   "x-component-props": {},
                                   "x-decorator-props": {}
                               },
-                              "x-index": 2
+                              "address":{
+                                  "type":"array",
+                                  "x-visible":"false",
+                                  "x-reactions":{
+                                      "dependencies": [
+                                          ".use_variable",".address_variable",".address_static"
+                                      ],
+                                      "when": "{{$deps[0]?.length}}",
+                                      "fulfill": {
+                                          "state": {
+                                              "value": "{{$deps[1]}}"
+                                          }
+                                      },
+                                      "otherwise": {
+                                          "state": {
+                                              "value": "{{$deps[2]}}"
+                                          }
+                                      }
+                                  }
+
+                              }
                           },
                           "x-decorator-props": {
                               "labelCol": 6,
