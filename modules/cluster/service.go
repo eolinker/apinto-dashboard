@@ -60,6 +60,7 @@ type IClusterNodeService interface {
 	QueryByClusterIds(ctx context.Context, clusterIds ...int) ([]*cluster_model2.ClusterNode, error)
 	Reset(ctx context.Context, namespaceId, userId int, clusterName, clusterAddr, source string) error
 	Update(ctx context.Context, namespaceId int, clusterName string) error
+	Delete(ctx context.Context, namespaceId int, clusterId int) error
 	NodeRepeatContrast(ctx context.Context, namespaceId, clusterId int, newList []*cluster_model2.ClusterNode) error
 	Insert(ctx context.Context, nodes []*cluster_model2.ClusterNode) error
 	GetNodesByUrl(addr string) ([]*cluster_model2.ClusterNode, error)

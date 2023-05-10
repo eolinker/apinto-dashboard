@@ -2,7 +2,12 @@
   class="py-btnybase w-[100%] border-[0px] border-b-[1px] border-solid border-b-BORDER sticky t-[0px] bg-MAIN_BG z-[9999]"
 >
   <button eo-ng-button class="mx-btnbase" (click)="backToList()">返回</button>
-  <button eo-ng-button nzType="primary" class="mr-btnrbase" (click)="saveApi()">
+  <button
+    eo-ng-button
+    nzType="primary"
+    class="mr-btnrbase"
+    (click)="saveApi('websocket')"
+  >
     保存
   </button>
 </div>

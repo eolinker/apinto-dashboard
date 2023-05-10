@@ -2,28 +2,35 @@ package strategy_handler
 
 import (
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/common"
+	"github.com/eolinker/apinto-dashboard/modules/strategy"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/config"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-dto"
+	"github.com/eolinker/eosc/common/bean"
 )
 
-func checkFilters(fileters []*strategy_dto.FilterInput) error {
+var (
+	strategyCommonService strategy.IStrategyCommonService
+)
+
+func init() {
+	bean.Autowired(&strategyCommonService)
+}
+func checkFilters(fileters []*strategy_dto.FilterInput, dsec string) error {
 	filterNameSet := make(map[string]struct{})
 	for _, filter := range fileters {
-		switch filter.Name {
-		case config.FilterApplication, config.FilterApi, config.FilterPath, config.FilterService, config.FilterMethod, config.FilterIP:
-		default:
-			if !common.IsMatchFilterAppKey(filter.Name) {
-				return fmt.Errorf("filter.Name %s is illegal. ", filter.Name)
-			}
+		if !strategyCommonService.FilterNameCheck(filter.Name) {
+			//if !common.IsMatchFilterAppKey(filter.Name) {
+			//	return fmt.Errorf("filter.Name %s is illegal. ", filter.Name)
+			//}
+			return fmt.Errorf("%s.Name %s is illegal. ", dsec, filter.Name)
 		}
 
 		if len(filter.Values) == 0 {
-			return fmt.Errorf("filter.Options can't be null. filter.Name:%s ", filter.Name)
+			return fmt.Errorf("%s.Options can't be null. filter.Name:%s ", dsec, filter.Name)
 		}
 
 		if _, has := filterNameSet[filter.Name]; has {
-			return fmt.Errorf("filterName %s is reduplicative. ", filter.Name)
+			return fmt.Errorf("%s.Name %s is reduplicative. ", dsec, filter.Name)
 		}
 		filterNameSet[filter.Name] = struct{}{}
 	}

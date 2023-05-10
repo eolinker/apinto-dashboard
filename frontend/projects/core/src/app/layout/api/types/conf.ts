@@ -129,7 +129,7 @@ export const hostHeaderTableBody:TBODY_TYPE[] = [
     placeholder: '请输入域名',
     checkMode: 'change',
     check: (item: any) => {
-      return !item || /[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+.?/.test(item)
+      return !item || /[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})*.?/.test(item)
     },
     errorTip: '格式有误'
   },
