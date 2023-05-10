@@ -74,6 +74,7 @@ export interface ClustersData{
   env: string,
   status: 'NORMAL'|'PARTIALLY_NORMAL'|'ABNORMAL',
   desc: string,
+  title:string,
   name: string,
   createTime: string,
   updateTime: string

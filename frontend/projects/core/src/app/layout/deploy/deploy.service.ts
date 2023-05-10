@@ -74,7 +74,7 @@ export class DeployService {
         }
       },
       {
-        key: 'name',
+        key: 'title',
         copy: true
       },
       {

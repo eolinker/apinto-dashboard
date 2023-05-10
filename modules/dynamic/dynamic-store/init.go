@@ -12,9 +12,11 @@ var (
 func init() {
 	store.RegisterStore(func(db store.IDB) {
 		dynamic := newDynamicStore(db)
+		dynamicQuote := newDynamicQuoteStore(db)
 		dynamicPublishHistory := NewDynamicPublishHistoryStore(db, kind)
 		dynamicPublishVersion := NewDynamicPublishVersionStore(db, kind)
 		bean.Injection(&dynamic)
+		bean.Injection(&dynamicQuote)
 		bean.Injection(&dynamicPublishHistory)
 		bean.Injection(&dynamicPublishVersion)
 	})

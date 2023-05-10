@@ -103,7 +103,7 @@ export class IntelligentPluginService {
         }
       },
       {
-        key: 'name'
+        key: 'title'
       },
       { key: 'status', title: component.clusterStatusTpl },
       { key: 'updater' },

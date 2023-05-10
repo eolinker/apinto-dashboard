@@ -165,6 +165,7 @@ func (c *clusterService) Insert(ctx context.Context, namespaceId, userId int, cl
 		Env:         clusterInput.Env,
 		Addr:        clusterInput.Addr,
 		UUID:        clusterInfo.Cluster,
+		Title:       clusterInput.Title,
 		CreateTime:  t,
 		UpdateTime:  t,
 	}
@@ -325,7 +326,11 @@ func (c *clusterService) DeleteByNamespaceIdByName(ctx context.Context, namespac
 		if err = c.clusterVariableService.DeleteAll(txCtx, namespaceId, clusterId, userId); err != nil {
 			return err
 		}
-
+		//删除集群下的环境变量
+		err := c.clusterNodeService.Delete(txCtx, namespaceId, clusterId)
+		if err != nil {
+			return err
+		}
 		return nil
 	})
 

@@ -361,9 +361,10 @@ func (c *clusterVariableController) getSyncConf(ginCtx *gin.Context) {
 	syncConf := new(cluster_dto.SyncConf)
 	for _, cluster := range conf.Clusters {
 		syncConf.Clusters = append(syncConf.Clusters, &cluster_dto.ClusterInput{
-			Name: cluster.Name,
-			Env:  cluster.Env,
-			Id:   cluster.Id,
+			Name:  cluster.Name,
+			Env:   cluster.Env,
+			Id:    cluster.Id,
+			Title: cluster.Title,
 		})
 	}
 	for _, variableInfo := range conf.Variables {

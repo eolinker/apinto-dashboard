@@ -199,6 +199,7 @@ export class FilterFormComponent implements OnInit {
           this.remoteSelectNameList = []
           // @ts-ignore // TODO 等待接口修改的兼容处理，接口修改后则删除
           const list = resp.data.target ? resp.data[resp.data.target] : resp.data.list
+          this.valueName = resp.data.key
           for (const index in list) {
             list[index].checked = this.editFilter && this.filterForm.name === this.editFilter.name
               ? !!(!!this.editFilter.values?.includes(
@@ -210,7 +211,7 @@ export class FilterFormComponent implements OnInit {
                 list[index][this.valueName]
               )
               this.remoteSelectNameList.push(
-                list[index].name
+                list[index].title
               )
             }
             this.remoteList.push(list[index] as any)
@@ -264,14 +265,14 @@ export class FilterFormComponent implements OnInit {
           if (this._remoteSelectList.indexOf(item[this.valueName]) === -1) {
           // @ts-ignore // TODO 等待接口修改的兼容处理，接口修改后则删除
             this._remoteSelectList.push(item[this.valueName])
-            this._remoteSelectNameList.push(item.name)
+            this._remoteSelectNameList.push(item.title)
           }
         } else {
           // @ts-ignore // TODO 等待接口修改的兼容处理，接口修改后则删除
           if (this._remoteSelectList.indexOf(item[this.valueName]) !== -1) {
           // @ts-ignore // TODO 等待接口修改的兼容处理，接口修改后则删除
             this._remoteSelectList.splice(this._remoteSelectList.indexOf(item[this.valueName]), 1)
-            this._remoteSelectNameList.splice(this._remoteSelectNameList.indexOf(item.name), 1)
+            this._remoteSelectNameList.splice(this._remoteSelectNameList.indexOf(item.title), 1)
           }
         }
       }
@@ -307,8 +308,13 @@ export class FilterFormComponent implements OnInit {
       })
       .subscribe((resp: {code:number, data:FilterRemoteOption, msg:string}) => {
         if (resp.code === 0) {
+          this.valueName = resp.data.key
           // @ts-ignore // TODO 等待接口修改的兼容处理，接口修改后则删除
           this.remoteList = resp.data.target ? resp.data[resp.data.target] : resp.data.list
+          this.remoteList = this.remoteList.map((item:any) => {
+            item.checked = this._remoteSelectList.indexOf(item.uuid) !== -1
+            return item
+          })
         }
       })
   }
@@ -316,7 +322,7 @@ export class FilterFormComponent implements OnInit {
   // 搜索远程数据（不调接口
   searchRemoteList () {
     this.remoteList = this.originRemoteList.filter((item:any) => {
-      return item.name.includes(this.searchWord)
+      return item.title.includes(this.searchWord)
     })
   }
 
