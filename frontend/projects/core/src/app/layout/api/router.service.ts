@@ -35,6 +35,10 @@ export class RouterService {
       {
         title: '请求路径'
       },
+      {
+        title: '拦截请求',
+        width: 80
+      },
       ...(publishList?.length
         ? publishList.map((p) => {
           return { title: `状态：${p.name}`, tooltip: `状态：${p.name}`, titleString: `状态：${p.name}` }
@@ -43,15 +47,17 @@ export class RouterService {
       {
         title: '来源',
         filterMultiple: true,
-        filterOpts: [{
-          text: '自建',
-          value: 'build'
-        },
-        {
-          text: '导入',
-          value: 'import'
-        }
-        ],
+        filterOpts: context.sourcesList.length > 0
+          ? [...context.sourcesList]
+          : [{
+              text: '自建',
+              value: 'build'
+            },
+            {
+              text: '导入',
+              value: 'import'
+            }
+            ],
         filterFn: () => {
           return true
         }
@@ -92,6 +98,10 @@ export class RouterService {
       {
         key: 'requestPath',
         copy: true
+      },
+      {
+        key: 'isDisable',
+        title: context.clusterStatusTpl
       },
       ...(publishList?.length
         ? publishList.map((p) => {
@@ -200,7 +210,7 @@ export class RouterService {
         }
       },
       {
-        key: 'name'
+        key: 'title'
       },
       { key: 'status', title: component.clusterStatusTpl },
       { key: 'operator' },
