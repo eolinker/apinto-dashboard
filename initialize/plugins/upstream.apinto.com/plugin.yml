@@ -12,7 +12,7 @@ navigation: "navigation.upstream"
 group_id: "core_module"
 define:  # 动态模块定义
   options:
-    name: upstream
+    name: service
     title: 上游服务
     titles:
       - field: title
