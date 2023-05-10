@@ -12,6 +12,7 @@ require (
 	github.com/goccy/go-json v0.10.0
 	github.com/golang/mock v1.6.0
 	github.com/influxdata/influxdb-client-go/v2 v2.12.1
+	github.com/ohler55/ojg v1.18.5
 	github.com/soheilhy/cmux v0.1.5
 	github.com/stretchr/testify v1.8.1
 	github.com/urfave/cli/v2 v2.23.4

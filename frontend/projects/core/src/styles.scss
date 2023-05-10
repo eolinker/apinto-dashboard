@@ -1714,10 +1714,14 @@ textarea.ant-input {
     .ant-input-affix-wrapper,
     textarea,
     .ant-input-number,
-    .ant-formily-array-items,
+    .ant-picker,
     .ant-select {
       width: 346px;
       min-height: 32px;
+    }
+
+    .ant-formily-array-items {
+      width: 400px;
     }
 
     .ant-formily-array-items .ant-select {
@@ -1735,6 +1739,23 @@ textarea.ant-input {
       color: var(--button-primary-text-color);
       border-color: var(--button-primary-hover-border-color);
       background-color: var(--button-primary-hover-background-color);
+    }
+  }
+
+  .ant-switch {
+    width: 28px;
+    height: 16px;
+    min-width: 28px;
+    .ant-switch-handle {
+      height: 12px;
+      width: 12px;
+    }
+    &.ant-switch-checked,
+    &.ant-switch-checked:hover:not(.ant-switch-disabled) {
+      background: var(--primary-color);
+    }
+    &.ant-switch-checked .ant-switch-handle {
+      inset-inline-start: calc(100% - 14px);
     }
   }
 }
@@ -1756,4 +1777,25 @@ textarea.ant-input {
 .ant-formily-array-base-remove :hover {
   color: var(--primary-color);
   height: 16px;
+}
+
+formily2-react-wrapper > span > div > .ant-formily-item-feedback-layout-loose {
+  .ant-formily-item-feedback-layout-loose:last-child {
+    margin-bottom: 0px;
+  }
+
+  .ant-space-item > .ant-formily-item-feedback-layout-loose {
+    margin-bottom: 22px !important;
+  }
+
+  .ant-formily-array-table
+    .ant-table
+    td
+    .ant-formily-item:not(.ant-formily-item-feedback-layout-popover)
+    .ant-formily-item-help {
+    position: relative;
+    top: 0px;
+    box-shadow: none;
+    background-color: transparent;
+  }
 }
