@@ -371,10 +371,10 @@ func (a *apiController) batchOnline(ginCtx *gin.Context) {
 
 	for _, item := range batchOnlineList {
 		checkItem := &api_dto.ApiBatchCheckListItem{
-			ApiName:    item.APIName,
-			ClusterEnv: item.ClusterEnv,
-			Status:     item.Status,
-			Result:     item.Result,
+			ApiName:     item.APIName,
+			ClusterName: item.ClusterEnv,
+			Status:      item.Status,
+			Result:      item.Result,
 		}
 
 		outputList = append(outputList, checkItem)
@@ -412,10 +412,10 @@ func (a *apiController) batchOffline(ginCtx *gin.Context) {
 
 	for _, item := range batchOfflineList {
 		checkItem := &api_dto.ApiBatchCheckListItem{
-			ApiName:    item.APIName,
-			ClusterEnv: item.ClusterEnv,
-			Status:     item.Status,
-			Result:     item.Result,
+			ApiName:     item.APIName,
+			ClusterName: item.ClusterEnv,
+			Status:      item.Status,
+			Result:      item.Result,
 		}
 
 		outputList = append(outputList, checkItem)
