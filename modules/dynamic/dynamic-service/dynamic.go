@@ -246,7 +246,7 @@ func (d *dynamicService) ClusterStatuses(ctx context.Context, namespaceId int, p
 		}
 		versions, err := client.Versions(profession)
 		if err != nil {
-			log.Errorf("get worker(%s) list error: %w.", profession, err)
+			log.Errorf("get worker(%s) list error: %v.", profession, err)
 			for _, l := range list {
 				if !isInit {
 					result[l.Name] = make(map[string]string)
@@ -599,7 +599,7 @@ func (d *dynamicService) ClusterStatus(ctx context.Context, namespaceId int, pro
 				Title:  c.Name,
 				Status: v2.StatusOffline,
 			})
-			log.Errorf("get cluster status error: %w", err)
+			log.Errorf("get cluster status error: %v", err)
 			continue
 		}
 
