@@ -105,6 +105,7 @@ export type ApiData = {
 export type ApiPublishItem = {
     checked?:boolean
     name:string
+    title:string
     env:string
     status:'GOONLINE'|'OFFLINE'|'NOTGOONLINE'|'TOUPDATE'
     operator:string
