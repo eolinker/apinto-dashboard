@@ -29,10 +29,11 @@ type PluginInfo struct {
 }
 
 type PluginTemplateOnlineItem struct {
-	ClusterName string
-	ClusterEnv  string
-	Status      int
-	Disable     bool
-	Operator    string
-	UpdateTime  time.Time
+	ClusterName  string
+	ClusterEnv   string
+	ClusterTitle string
+	Status       int
+	Disable      bool
+	Operator     string
+	UpdateTime   time.Time
 }
