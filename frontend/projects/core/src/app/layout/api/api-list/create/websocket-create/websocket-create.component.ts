@@ -338,15 +338,15 @@ export class ApiWebsocketCreateComponent implements OnInit {
   }
 
   // 提交api数据
-  saveApi () {
-    if (this.validateForm.valid) {
+  saveApi (type:'websocket'|'http') {
+    if (this.validateForm.valid && !this.showCheckboxGroupValid) {
       if (this.allChecked) {
         this.createApiForm.method = []
       }
       this.submitButtonLoading = true
       if (this.editPage) {
         this.api.put('router', {
-          scheme: 'websocket',
+          scheme: type,
           name: this.validateForm.controls['name'].value,
           uuid: this.createApiForm.uuid,
           groupUuid: this.validateForm.controls['groupUuid'].value,
@@ -371,7 +371,7 @@ export class ApiWebsocketCreateComponent implements OnInit {
         })
       } else {
         this.api.post('router', {
-          scheme: 'websocket',
+          scheme: type,
           name: this.validateForm.controls['name'].value,
           uuid: this.createApiForm.uuid,
           groupUuid: this.validateForm.controls['groupUuid'].value,

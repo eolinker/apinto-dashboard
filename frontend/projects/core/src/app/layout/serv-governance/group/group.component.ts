@@ -114,7 +114,6 @@ export class GroupComponent implements OnInit {
     const res: any = []
     for (const index in data) {
       data[index].key = `${data[index].name}_${env}`
-      data[index].title = data[index].name
       data[index].isLeaf = true
       res.push(data[index])
     }
