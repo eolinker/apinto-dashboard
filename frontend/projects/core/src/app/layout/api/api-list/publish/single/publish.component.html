@@ -22,9 +22,9 @@
     </div>
     <div>
       <label class="label inline-block text-right">转发服务、路径：</label
-      ><span class="border-[1px] boreder-[solid] border-BORDER">{{
-        apiInfo?.service || ''
-      }}</span
+      ><span
+        class="border-[1px] border-solid border-BORDER rounded px-[8px] mr-[4px]"
+        >{{ apiInfo?.service || '' }}</span
       ><span>{{ apiInfo?.proxyPath || '' }}</span>
     </div>
     <div>
@@ -43,6 +43,7 @@
       [nzDisabled]="nzDisabled"
     >
     </eo-ng-apinto-table>
+    {{ unpublishMsg }}
   </div>
   <div class="drawer-list-footer mt-formtop flex justify-end">
     <span

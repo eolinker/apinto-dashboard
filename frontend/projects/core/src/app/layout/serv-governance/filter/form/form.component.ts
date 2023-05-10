@@ -311,6 +311,10 @@ export class FilterFormComponent implements OnInit {
           this.valueName = resp.data.key
           // @ts-ignore // TODO 等待接口修改的兼容处理，接口修改后则删除
           this.remoteList = resp.data.target ? resp.data[resp.data.target] : resp.data.list
+          this.remoteList = this.remoteList.map((item:any) => {
+            item.checked = this._remoteSelectList.indexOf(item.uuid) !== -1
+            return item
+          })
         }
       })
   }

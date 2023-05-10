@@ -35,6 +35,10 @@ export class RouterService {
       {
         title: '请求路径'
       },
+      {
+        title: '拦截请求',
+        width: 80
+      },
       ...(publishList?.length
         ? publishList.map((p) => {
           return { title: `状态：${p.name}`, tooltip: `状态：${p.name}`, titleString: `状态：${p.name}` }
@@ -94,6 +98,10 @@ export class RouterService {
       {
         key: 'requestPath',
         copy: true
+      },
+      {
+        key: 'isDisable',
+        title: context.clusterStatusTpl
       },
       ...(publishList?.length
         ? publishList.map((p) => {
@@ -202,7 +210,7 @@ export class RouterService {
         }
       },
       {
-        key: 'name'
+        key: 'title'
       },
       { key: 'status', title: component.clusterStatusTpl },
       { key: 'operator' },
