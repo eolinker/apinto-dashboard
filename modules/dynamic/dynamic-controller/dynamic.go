@@ -47,7 +47,7 @@ func newDynamicController(name string, define *DynamicDefine) *dynamicController
 		r := make(Render)
 		err := json.Unmarshal([]byte(value), &r)
 		if err != nil {
-			log.Errorf("dynamic define parse error: %w,body is %s", err, value)
+			log.Errorf("dynamic define parse error: %v,body is %s", err, value)
 			continue
 		}
 		render[key] = r
