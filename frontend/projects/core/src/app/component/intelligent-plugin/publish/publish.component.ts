@@ -66,8 +66,9 @@ export class IntelligentPluginPublishComponent implements OnInit {
       this.selectedClusters = this.publishList.filter((item:any) => {
         return item.checked
       }).map((item) => {
-        return item.name
+        return item.title
       })
+      console.log(this.selectedClusters)
       this.selectedNum = this.selectedClusters.length
       this.publishList = [...this.publishList] // 表头的勾选状态需要重载数据才能刷新
     }, 0
