@@ -42,6 +42,7 @@ CREATE TABLE `cluster`
 (
     `id`          int(11) NOT NULL AUTO_INCREMENT COMMENT '集群ID',
     `namespace`   int(11) NOT NULL COMMENT '工作空间',
+    `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '集群名称',
     `name`        varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '集群名称',
     `desc`        varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '描述',
     `addr`        varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '集群地址',
