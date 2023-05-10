@@ -41,7 +41,7 @@ export class RouterService {
       },
       ...(publishList?.length
         ? publishList.map((p) => {
-          return { title: `状态：${p.name}`, tooltip: `状态：${p.name}`, titleString: `状态：${p.name}` }
+          return { title: `状态：${p.title}`, tooltip: `状态：${p.title}`, titleString: `状态：${p.title}` }
         })
         : []),
       {
