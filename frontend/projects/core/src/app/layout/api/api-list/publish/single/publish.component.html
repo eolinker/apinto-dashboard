@@ -43,7 +43,9 @@
       [nzDisabled]="nzDisabled"
     >
     </eo-ng-apinto-table>
-    {{ unpublishMsg }}
+    <p class="text-red-500" *ngIf="unpublishMsg">
+      {{ unpublishMsg }}
+    </p>
   </div>
   <div class="drawer-list-footer mt-formtop flex justify-end">
     <span
