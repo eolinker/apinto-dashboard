@@ -325,7 +325,7 @@ func (m *modulePluginService) InstallPlugin(ctx context.Context, userID int, plu
 	//缓存
 	_ = m.installedCache.Set(ctx, pluginYml.ID, &model.PluginInstalledStatus{
 		Installed: true,
-	}, time.Hour)
+	})
 
 	return nil
 }
@@ -392,7 +392,7 @@ func (m *modulePluginService) UninstallPlugin(ctx context.Context, userID int, p
 
 	_ = m.installedCache.Set(ctx, pluginID, &model.PluginInstalledStatus{
 		Installed: false,
-	}, time.Hour)
+	})
 
 	return nil
 }
@@ -520,7 +520,7 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 		return nil
 	}
 
-	_ = m.navigationModulesCache.SetAll(ctx, enableModules, 10*time.Minute)
+	_ = m.navigationModulesCache.SetAll(ctx, enableModules)
 
 	return nil
 }
@@ -579,7 +579,7 @@ func (m *modulePluginService) DisablePlugin(ctx context.Context, userID int, plu
 		return nil
 	}
 
-	_ = m.navigationModulesCache.SetAll(ctx, enableModules, 10*time.Minute)
+	_ = m.navigationModulesCache.SetAll(ctx, enableModules)
 
 	return nil
 }
@@ -646,7 +646,7 @@ func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml 
 	//缓存
 	_ = m.installedCache.Set(ctx, pluginYml.ID, &model.PluginInstalledStatus{
 		Installed: true,
-	}, time.Hour)
+	})
 
 	return nil
 }
@@ -729,7 +729,7 @@ func (m *modulePluginService) CheckPluginInstalled(ctx context.Context, pluginID
 		//缓存
 		m.installedCache.Set(ctx, key, &model.PluginInstalledStatus{
 			Installed: isInstalled,
-		}, time.Hour)
+		})
 	}
 
 	return isInstalled, nil
