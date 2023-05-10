@@ -1403,11 +1403,12 @@ func (a *apiService) OnlineInfo(ctx context.Context, namespaceId int, uuid strin
 	items := make([]*apimodel.APIOnlineListItem, 0, len(clusters))
 	for _, clu := range clusters {
 		items = append(items, &apimodel.APIOnlineListItem{
-			ClusterName: clu.Name,
-			ClusterEnv:  clu.Env,
-			Status:      clu.Status,
-			Operator:    clu.Updater,
-			UpdateTime:  clu.UpdateTime,
+			ClusterName:  clu.Name,
+			ClusterEnv:   clu.Env,
+			ClusterTitle: clu.Title,
+			Status:       clu.Status,
+			Operator:     clu.Updater,
+			UpdateTime:   clu.UpdateTime,
 		})
 	}
 	return info, items, nil
