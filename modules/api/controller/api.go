@@ -562,6 +562,7 @@ func (a *apiController) getOnlineInfo(ginCtx *gin.Context) {
 		clusters = append(clusters, &api_dto.ApiPublishCluster{
 			Name:       clu.ClusterName,
 			Env:        clu.ClusterEnv,
+			Title:      clu.ClusterTitle,
 			Status:     enum.OnlineStatus(clu.Status),
 			Operator:   clu.Operator,
 			UpdateTime: clu.UpdateTime,
