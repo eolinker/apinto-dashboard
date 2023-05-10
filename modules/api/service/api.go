@@ -288,6 +288,7 @@ func (a *apiService) GetAPIList(ctx context.Context, namespaceID int, groupUUID,
 			if !has {
 				publish = append(publish, &apimodel.APIListItemPublish{
 					Name:   clu.Name,
+					Title:  clu.Title,
 					Status: 1, //未发布
 				})
 				continue
@@ -297,6 +298,7 @@ func (a *apiService) GetAPIList(ctx context.Context, namespaceID int, groupUUID,
 			if !has {
 				publish = append(publish, &apimodel.APIListItemPublish{
 					Name:   clu.Name,
+					Title:  clu.Title,
 					Status: 1, //未发布
 				})
 				continue
@@ -310,6 +312,7 @@ func (a *apiService) GetAPIList(ctx context.Context, namespaceID int, groupUUID,
 
 			publish = append(publish, &apimodel.APIListItemPublish{
 				Name:   clu.Name,
+				Title:  clu.Title,
 				Status: status,
 			})
 		}
