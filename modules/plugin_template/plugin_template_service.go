@@ -17,6 +17,8 @@ type IPluginTemplateService interface {
 	GetBasicInfoByID(ctx context.Context, id int) (*plugin_template_model.PluginTemplateBasicInfo, error)
 	OnlineList(ctx context.Context, namespaceId int, uuid string) ([]*plugin_template_model.PluginTemplateOnlineItem, error)
 	Online(ctx context.Context, namespaceId, operator int, uuid, clusterName string) (*frontend_model.Router, error)
-	IsOnline(ctx context.Context, namespace int, clusterName string, uuid string) bool
+	IsOnline(clusterName, clusterAddr, uuid string) bool
 	Offline(ctx context.Context, namespaceId, operator int, uuid, clusterName string) error
+	//GetApintoTemplateVersions 获取插件模板在各个apinto集群的上线状态
+	GetApintoTemplateVersions(ctx context.Context, namespaceID int) (map[string]map[string]string, error)
 }
