@@ -5,6 +5,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/cache"
 	apimodel "github.com/eolinker/apinto-dashboard/modules/api/model"
 	"github.com/go-redis/redis/v8"
+	"time"
 )
 
 type IBatchOnlineApiTaskCache interface {
@@ -22,7 +23,7 @@ func formatKey(token string) string {
 func newBatchOnlineTaskCache(client *redis.ClusterClient) IBatchOnlineApiTaskCache {
 
 	return &batchOnlineApiTaskCache{
-		IRedisCache: cache.CreateRedisCache[apimodel.BatchOnlineCheckTask](client, formatKey),
+		IRedisCache: cache.CreateRedisCache[apimodel.BatchOnlineCheckTask](client, time.Hour*8, formatKey),
 	}
 
 }
