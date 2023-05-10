@@ -1037,7 +1037,7 @@ func (a *apiService) online(ctx context.Context, namespaceId, operator int, api 
 		//判断上游服务有没有上线
 		if !isOnline {
 			item.Status = false
-			item.Result = fmt.Sprintf("绑定的%s未上线到%s", latest.ServiceName, clusterInfo.Name)
+			item.Result = fmt.Sprintf("绑定的%s未上线到%s", latest.ServiceName, clusterInfo.Title)
 			onlineList = append(onlineList, item)
 			continue
 		}
@@ -1046,7 +1046,7 @@ func (a *apiService) online(ctx context.Context, namespaceId, operator int, api 
 			//若插件模板未上线到集群
 			if _, has := templateClustersVersions[clusterInfo.Name][latest.TemplateUUID]; !has {
 				item.Status = false
-				item.Result = fmt.Sprintf("绑定的插件模板未上线到%s", clusterInfo.Name)
+				item.Result = fmt.Sprintf("绑定的插件模板未上线到%s", clusterInfo.Title)
 				onlineList = append(onlineList, item)
 				continue
 			}
@@ -1542,7 +1542,7 @@ func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, u
 			routerInfos = append(routerInfos, &frontend_model.Router{
 				Name:   frontend_model.RouterNameServiceOnline,
 				Params: map[string]string{"service_name": latestVersion.ServiceName},
-				Msg:    fmt.Sprintf("绑定的%s未上线到%s", latestVersion.ServiceName, clusterInfo.Name),
+				Msg:    fmt.Sprintf("绑定的%s未上线到%s", latestVersion.ServiceName, clusterInfo.Title),
 			})
 			continue
 		}
@@ -1553,7 +1553,7 @@ func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, u
 				routerInfos = append(routerInfos, &frontend_model.Router{
 					Name:   frontend_model.RouterNameTemplateOnline,
 					Params: map[string]string{"template_uuid": latestVersion.TemplateUUID},
-					Msg:    fmt.Sprintf("绑定的插件模板未上线到%s", clusterInfo.Name),
+					Msg:    fmt.Sprintf("绑定的插件模板未上线到%s", clusterInfo.Title),
 				})
 				continue
 			}
