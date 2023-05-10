@@ -37,7 +37,7 @@ type dynamicController struct {
 	Fields     []*Basic
 	Skill      string
 	Render     map[string]Render
-	Depend     []string
+	Depends    []string
 }
 
 func newDynamicController(name string, define *DynamicDefine) *dynamicController {
@@ -63,6 +63,7 @@ func newDynamicController(name string, define *DynamicDefine) *dynamicController
 		Drivers:    define.Drivers,
 		Fields:     define.Fields,
 		Skill:      define.Skill,
+		Depends:    define.Depends,
 		Render:     render,
 	}
 	bean.Autowired(&d.dynamicService)
@@ -174,7 +175,7 @@ func (c *dynamicController) online(ctx *gin.Context) {
 		return
 	}
 	userId := users.GetUserId(ctx)
-	success, fail, err := c.dynamicService.Online(ctx, namespaceID, c.Profession, c.moduleName, uuid, tmp.Cluster, userId)
+	success, fail, err := c.dynamicService.Online(ctx, namespaceID, c.Profession, c.moduleName, uuid, tmp.Cluster, userId, c.Depends...)
 	if err != nil {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
 		return
@@ -313,7 +314,7 @@ func (c *dynamicController) create(ctx *gin.Context) {
 		return
 	}
 	body, _ := json.Marshal(worker.Append)
-	err = c.dynamicService.Create(ctx, namespaceID, c.Profession, c.moduleName, c.Skill, worker.Title, worker.Id, worker.Driver, worker.Description, string(body), users.GetUserId(ctx))
+	err = c.dynamicService.Create(ctx, namespaceID, c.Profession, c.moduleName, c.Skill, worker.Title, worker.Id, worker.Driver, worker.Description, string(body), users.GetUserId(ctx), c.Depends...)
 	if err != nil {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
 		return
@@ -331,7 +332,7 @@ func (c *dynamicController) save(ctx *gin.Context) {
 		return
 	}
 	body, _ := json.Marshal(worker.Append)
-	err = c.dynamicService.Save(ctx, namespaceID, c.Profession, c.moduleName, worker.Title, uuid, worker.Description, string(body), users.GetUserId(ctx))
+	err = c.dynamicService.Save(ctx, namespaceID, c.Profession, c.moduleName, worker.Title, uuid, worker.Description, string(body), users.GetUserId(ctx), c.Depends...)
 	if err != nil {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
 		return
