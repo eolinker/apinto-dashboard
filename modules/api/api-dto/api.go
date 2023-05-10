@@ -23,6 +23,7 @@ type APIListItem struct {
 
 type APIListItemPublish struct {
 	Name   string            `json:"name"`
+	Title  string            `json:"title"`
 	Status enum.OnlineStatus `json:"status"`
 }
 
