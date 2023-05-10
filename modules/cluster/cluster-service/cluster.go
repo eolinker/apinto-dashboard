@@ -161,6 +161,7 @@ func (c *clusterService) Insert(ctx context.Context, namespaceId, userId int, cl
 	entryCluster := &cluster_entry2.Cluster{
 		NamespaceId: namespaceId,
 		Name:        clusterInput.Name,
+		Title:       clusterInput.Title,
 		Desc:        clusterInput.Desc,
 		Env:         clusterInput.Env,
 		Addr:        clusterInput.Addr,
