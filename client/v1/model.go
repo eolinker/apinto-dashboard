@@ -561,6 +561,7 @@ type PluginTemplateConfig struct {
 	Name        string             `json:"name"`
 	Driver      string             `json:"driver"`
 	Description string             `json:"description"`
+	Version     string             `json:"version"`
 }
 
 type PluginTemplateInfo struct {

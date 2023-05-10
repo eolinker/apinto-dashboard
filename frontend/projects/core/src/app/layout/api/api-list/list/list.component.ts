@@ -119,6 +119,7 @@ export class ApiManagementListComponent implements OnInit {
                 item[`cluster_${p.name}`] = p.status
               }
             }
+            item.isDisable = item.isDisable ? '拦截' : '放行'
             return item
           })
           if (resp.data.apis.length > 0) {

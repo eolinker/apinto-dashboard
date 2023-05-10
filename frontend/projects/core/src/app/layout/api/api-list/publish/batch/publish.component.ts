@@ -65,7 +65,7 @@ export class ApiBatchPublishComponent implements OnInit {
       if (resp.code === 0) {
         this.clustersList = []
         for (const index in resp.data.clusters) {
-          this.clustersList.push({ label: `${resp.data.clusters[index].name}_${resp.data.clusters[index].env}`, value: resp.data.clusters[index].name, checked: (resp.data.clusters.length === 1 && resp.data.clusters[index].status !== 'ABNORMAL'), disabled: resp.data.clusters[index].status === 'ABNORMAL', template: resp.data.clusters[index].status === 'ABNORMAL' ? this.disabledCheckboxTpl : undefined })
+          this.clustersList.push({ label: `${resp.data.clusters[index].title}_${resp.data.clusters[index].env}`, value: resp.data.clusters[index].name, checked: (resp.data.clusters.length === 1 && resp.data.clusters[index].status !== 'ABNORMAL'), disabled: resp.data.clusters[index].status === 'ABNORMAL', template: resp.data.clusters[index].status === 'ABNORMAL' ? this.disabledCheckboxTpl : undefined })
           if (resp.data.clusters.length === 1 && resp.data.clusters[index].status !== 'ABNORMAL') {
             this.clustersSet.add(resp.data.clusters[index].name)
           }

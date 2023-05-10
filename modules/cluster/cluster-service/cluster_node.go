@@ -25,6 +25,18 @@ type clusterNodeService struct {
 	apintoClient     cluster.IApintoClient
 }
 
+func (c *clusterNodeService) Delete(ctx context.Context, namespaceId int, clusterId int) error {
+
+	_, err := c.clusterNodeStore.DeleteWhere(ctx, map[string]interface{}{
+		"namespace": namespaceId,
+		"cluster":   clusterId,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func newClusterNodeService() cluster.IClusterNodeService {
 	s := &clusterNodeService{}
 	bean.Autowired(&s.clusterNodeStore)
