@@ -34,6 +34,7 @@ type PluginTemplateOutput struct {
 type OnlineOut struct {
 	Name       string            `json:"name"`
 	Status     enum.OnlineStatus `json:"status"`
+	Title      string            `json:"title"`
 	Env        string            `json:"env"`
 	Disable    bool              `json:"disable"`
 	Operator   string            `json:"operator"`

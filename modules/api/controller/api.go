@@ -454,7 +454,7 @@ func (a *apiController) batchOnlineCheck(ginCtx *gin.Context) {
 	for _, item := range batchOnlineList {
 		checkItem := &api_dto.ApiBatchOnlineCheckListItem{
 			ServiceTemplate: item.ServiceTemplate,
-			ClusterEnv:      item.ClusterEnv,
+			ClusterTitle:    item.ClusterEnv,
 			Status:          item.Status,
 			Result:          item.Result,
 			Solution:        item.Solution,
