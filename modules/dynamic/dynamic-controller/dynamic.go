@@ -120,7 +120,7 @@ func (c *dynamicController) list(ctx *gin.Context) {
 	for _, cc := range cs {
 		fields = append(fields, &Basic{
 			Name:  cc.Name,
-			Title: fmt.Sprintf("状态：%s", cc.Name),
+			Title: fmt.Sprintf("状态：%s", cc.Title),
 			Attr:  "status",
 			Enum: []string{
 				"已发布",
