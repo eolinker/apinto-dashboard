@@ -139,7 +139,6 @@ export class IframePageComponent implements OnInit {
     private baseInfo:BaseInfoService) {}
 
   ngOnInit (): void {
-    console.log(this.moduleName)
     this.moduleName = this.baseInfo.allParamsInfo.moduleName
     // 此处监听的是切换module事件，需要判断moduleName是否变化
     this.subscription = this.router.events.subscribe((event) => {

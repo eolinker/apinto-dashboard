@@ -69,13 +69,12 @@ export class ApiHttpCreateComponent extends ApiWebsocketCreateComponent {
   }
 
   // 提交api数据
-  override saveApi () {
+  override saveApi (type:'http'|'websocket') {
     if (this.createApiForm.method.length === 0 && !this.allChecked) {
       this.showCheckboxGroupValid = true
-      return
     } else {
       this.showCheckboxGroupValid = false
     }
-    super.saveApi()
+    super.saveApi(type)
   }
 }
