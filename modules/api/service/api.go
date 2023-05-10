@@ -560,8 +560,12 @@ func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator in
 	if !isExist {
 		return fmt.Errorf("group doesn't. group_uuid:%s ", input.GroupUUID)
 	}
-
-	serviceID, err := a.dynamicService.GetIDByName(ctx, namespaceID, professionService, input.ServiceName)
+	idx := strings.LastIndex(input.ServiceName, "@")
+	service := input.ServiceName
+	if idx > -1 {
+		service = service[:idx]
+	}
+	serviceID, err := a.dynamicService.GetIDByName(ctx, namespaceID, professionService, service)
 	if err != nil {
 		return err
 	}
@@ -689,7 +693,12 @@ func (a *apiService) UpdateAPI(ctx context.Context, namespaceID int, operator in
 		return err
 	}
 
-	serviceID, err := a.dynamicService.GetIDByName(ctx, namespaceID, professionService, input.ServiceName)
+	idx := strings.LastIndex(input.ServiceName, "@")
+	service := input.ServiceName
+	if idx > -1 {
+		service = service[:idx]
+	}
+	serviceID, err := a.dynamicService.GetIDByName(ctx, namespaceID, professionService, service)
 	if err != nil {
 		return err
 	}
@@ -1020,8 +1029,10 @@ func (a *apiService) online(ctx context.Context, namespaceId, operator int, api 
 			onlineList = append(onlineList, item)
 			continue
 		}
+
+		isOnline, serviceID := a.isServiceOnline(namespaceId, clusterInfo.Name, latest.ServiceName)
 		//判断上游服务有没有上线
-		if !a.isServiceOnline(namespaceId, clusterInfo.Name, latest.ServiceName) {
+		if !isOnline {
 			item.Status = false
 			item.Result = fmt.Sprintf("绑定的%s未上线到%s", latest.ServiceName, clusterInfo.Name)
 			onlineList = append(onlineList, item)
@@ -1041,7 +1052,7 @@ func (a *apiService) online(ctx context.Context, namespaceId, operator int, api 
 		err = a.apiStore.Transaction(ctx, func(txCtx context.Context) error {
 			//封装router配置
 			apiDriverInfo := a.GetAPIDriver(api.Scheme)
-			routerConfig := apiDriverInfo.ToApinto(api.UUID, api.Desc, api.IsDisable, latest.Method, latest.RequestPath, latest.RequestPathLabel, latest.ProxyPath, strings.ToLower(latest.ServiceName), latest.Timeout, latest.Retry, latest.Hosts, latest.Match, latest.Header, latest.TemplateUUID)
+			routerConfig := apiDriverInfo.ToApinto(api.UUID, api.Desc, api.IsDisable, latest.Method, latest.RequestPath, latest.RequestPathLabel, latest.ProxyPath, serviceID, latest.Timeout, latest.Retry, latest.Hosts, latest.Match, latest.Header, latest.TemplateUUID)
 
 			publishHistory := &apientry.ApiPublishHistory{
 				VersionName:      api.Version,
@@ -1307,7 +1318,7 @@ func (a *apiService) BatchOnlineCheck(ctx context.Context, namespaceId int, oper
 				Solution:        &frontend_model.Router{},
 			}
 
-			if !a.isServiceOnline(namespaceId, clusterInfo.Name, serName) {
+			if isOnline, _ := a.isServiceOnline(namespaceId, clusterInfo.Name, serName); !isOnline {
 				isAllOnline = false
 				item.Status = false
 				item.Result = fmt.Sprintf("%s未上线到%s", serName, clusterInfo.Name)
@@ -1392,11 +1403,12 @@ func (a *apiService) OnlineInfo(ctx context.Context, namespaceId int, uuid strin
 	items := make([]*apimodel.APIOnlineListItem, 0, len(clusters))
 	for _, clu := range clusters {
 		items = append(items, &apimodel.APIOnlineListItem{
-			ClusterName: clu.Name,
-			ClusterEnv:  clu.Env,
-			Status:      clu.Status,
-			Operator:    clu.Updater,
-			UpdateTime:  clu.UpdateTime,
+			ClusterName:  clu.Name,
+			ClusterEnv:   clu.Env,
+			ClusterTitle: clu.Title,
+			Status:       clu.Status,
+			Operator:     clu.Updater,
+			UpdateTime:   clu.UpdateTime,
 		})
 	}
 	return info, items, nil
@@ -1522,7 +1534,8 @@ func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, u
 	routerInfos := make([]*frontend_model.Router, 0, len(clusterInfos))
 	for _, clusterInfo := range clusterInfos {
 		//判断上游服务有没有上线
-		if !a.isServiceOnline(namespaceId, clusterInfo.Name, latestVersion.ServiceName) {
+		isOnline, serviceID := a.isServiceOnline(namespaceId, clusterInfo.Name, latestVersion.ServiceName)
+		if !isOnline {
 			routerInfos = append(routerInfos, &frontend_model.Router{
 				Name:   frontend_model.RouterNameServiceOnline,
 				Params: map[string]string{"service_name": latestVersion.ServiceName},
@@ -1545,7 +1558,7 @@ func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, u
 
 		//事务
 		err = a.apiStore.Transaction(ctx, func(txCtx context.Context) error {
-			routerConfig := apiDriverInfo.ToApinto(apiInfo.UUID, apiInfo.Desc, apiInfo.IsDisable, latestVersion.Method, latestVersion.RequestPath, latestVersion.RequestPathLabel, latestVersion.ProxyPath, strings.ToLower(latestVersion.ServiceName), latestVersion.Timeout, latestVersion.Retry, latestVersion.Hosts, latestVersion.Match, latestVersion.Header, latestVersion.TemplateUUID)
+			routerConfig := apiDriverInfo.ToApinto(apiInfo.UUID, apiInfo.Desc, apiInfo.IsDisable, latestVersion.Method, latestVersion.RequestPath, latestVersion.RequestPathLabel, latestVersion.ProxyPath, serviceID, latestVersion.Timeout, latestVersion.Retry, latestVersion.Hosts, latestVersion.Match, latestVersion.Header, latestVersion.TemplateUUID)
 			publishHistory := &apientry.ApiPublishHistory{
 				VersionName:      apiInfo.Version,
 				ClusterId:        clusterInfo.Id,
@@ -1716,7 +1729,12 @@ func (a *apiService) GetImportCheckList(ctx context.Context, namespaceId int, fi
 		return nil, "", errors.New("分组不存在")
 	}
 
-	if _, err = a.dynamicService.GetIDByName(ctx, namespaceId, professionService, serviceName); err != nil {
+	idx := strings.LastIndex(serviceName, "@")
+	service := serviceName
+	if idx > -1 {
+		service = service[:idx]
+	}
+	if _, err = a.dynamicService.GetIDByName(ctx, namespaceId, professionService, service); err != nil {
 		return nil, "", errors.New("上游服务不存在")
 	}
 
@@ -1856,7 +1874,12 @@ func (a *apiService) ImportAPI(ctx context.Context, namespaceId, operator int, i
 		return errors.New("分组不存在,请重新导入")
 	}
 
-	serviceID, err := a.dynamicService.GetIDByName(ctx, namespaceId, professionService, apiData.ServiceName)
+	idx := strings.LastIndex(apiData.ServiceName, "@")
+	service := apiData.ServiceName
+	if idx > -1 {
+		service = service[:idx]
+	}
+	serviceID, err := a.dynamicService.GetIDByName(ctx, namespaceId, professionService, service)
 	if err != nil {
 		return err
 	}
@@ -2030,7 +2053,12 @@ func (a *apiService) GetAPIListByServiceName(ctx context.Context, namespaceId in
 				continue
 			}
 
-			target, err := a.dynamicService.GetIDByName(ctx, namespaceId, professionService, serviceName)
+			idx := strings.LastIndex(serviceName, "@")
+			service := serviceName
+			if idx > -1 {
+				service = service[:idx]
+			}
+			target, err := a.dynamicService.GetIDByName(ctx, namespaceId, professionService, service)
 			if err != nil {
 				continue
 			}
@@ -2368,13 +2396,13 @@ func (a *apiService) getApintoAPIVersions(clusters []*cluster_model.Cluster) map
 	return results
 }
 
-func (a *apiService) isServiceOnline(namespaceId int, clusterName, serviceName string) bool {
-	status, _ := a.providers.Status(fmt.Sprintf("%s@upstream", serviceName), namespaceId, clusterName)
+func (a *apiService) isServiceOnline(namespaceId int, clusterName, serviceName string) (bool, string) {
+	status, serviceID := a.providers.Status(serviceName, namespaceId, clusterName)
 	isOnline := false
 	switch status {
 	case apinto_module.None, apinto_module.Offline:
 	case apinto_module.Online:
 		isOnline = true
 	}
-	return isOnline
+	return isOnline, serviceID
 }
