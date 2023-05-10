@@ -299,7 +299,7 @@ func getDependIDs(body []byte, depend []string) ([]string, error) {
 	return arr, nil
 }
 
-func (d *dynamicService) replaceDepend(namespaceID int, org string, clusters []string, depends ...string) (string, error) {
+func (d *dynamicService) replaceDepend(namespaceID int, org string, depends ...string) (string, error) {
 	param, err := oj.Parse([]byte(org))
 	if err != nil {
 		return "", err
@@ -313,14 +313,8 @@ func (d *dynamicService) replaceDepend(namespaceID int, org string, clusters []s
 		for _, r := range result {
 			v, ok := r.(string)
 			if ok {
-				for _, clusterName := range clusters {
-					status, id := d.provider.Status(v, namespaceID, clusterName)
-					if status != apinto_module.None {
-						x.Set(param, id)
-						break
-					}
-				}
-
+				_, id := d.provider.Status(v, namespaceID, "")
+				x.Set(param, id)
 			}
 		}
 	}
@@ -352,7 +346,7 @@ func (d *dynamicService) Online(ctx context.Context, namespaceId int, profession
 			clusterNames = append(clusterNames, c.Name)
 		}
 	}
-	config, err := d.replaceDepend(namespaceId, info.Config, clusterNames, depend...)
+	config, err := d.replaceDepend(namespaceId, info.Config, depend...)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -416,7 +410,7 @@ func (d *dynamicService) Online(ctx context.Context, namespaceId int, profession
 
 		err = d.saveVersion(ctx, version, history, c.Name, c.Addr)
 		if err != nil {
-			errInfo := fmt.Sprintf("fail to online config in cluster(%s),addr is %s,profession is %s,uuid is %s,config is %s", c.Name, c.Addr, profession, name, info.Config)
+			errInfo := fmt.Sprintf("fail to online config in cluster(%s),addr is %s,profession is %s,uuid is %s,config is %s", c.Name, c.Addr, profession, name, config)
 			log.Error(errInfo)
 			failClusters = append(failClusters, errInfo)
 			continue
