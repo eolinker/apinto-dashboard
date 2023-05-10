@@ -23,6 +23,7 @@ type APIListItem struct {
 
 type APIListItemPublish struct {
 	Name   string
+	Title  string
 	Status int
 }
 

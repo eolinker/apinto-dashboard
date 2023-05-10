@@ -141,12 +141,12 @@ func (p *pluginTemplateService) isDelete(ctx context.Context, clusters []*cluste
 func (p *pluginTemplateService) IsOnline(clusterName, clusterAddr, uuid string) bool {
 	client, err := v2.GetClusterClient(clusterName, clusterAddr)
 	if err != nil {
-		log.Errorf("get cluster %s Client error: %w", clusterName, err)
+		log.Errorf("get cluster %s Client error: %v", clusterName, err)
 		return false
 	}
 	_, err = client.Version(professionTemplate, uuid)
 	if err != nil {
-		log.Errorf("get cluster status error: %w", err)
+		log.Errorf("get cluster status error: %v", err)
 		return false
 	}
 	return true
@@ -520,9 +520,10 @@ func (p *pluginTemplateService) OnlineList(ctx context.Context, namespaceId int,
 
 	for _, clusterInfo := range clusterMaps {
 		onlineItem := &plugin_template_model.PluginTemplateOnlineItem{
-			ClusterName: clusterInfo.Name,
-			ClusterEnv:  clusterInfo.Env,
-			Status:      1, //默认为未上线状态
+			ClusterName:  clusterInfo.Name,
+			ClusterEnv:   clusterInfo.Env,
+			ClusterTitle: clusterInfo.Title,
+			Status:       1, //默认为未上线状态
 		}
 
 		var operator int
@@ -547,7 +548,7 @@ func (p *pluginTemplateService) OnlineList(ctx context.Context, namespaceId int,
 		client, err := v2.GetClusterClient(clusterInfo.Name, clusterInfo.Addr)
 		if err != nil {
 			list = append(list, onlineItem)
-			log.Errorf("get cluster status error: %w", err)
+			log.Errorf("get cluster status error: %v", err)
 			continue
 		}
 
@@ -765,12 +766,12 @@ func (p *pluginTemplateService) getApintoTemplateVersions(clusters []*cluster_mo
 	for _, c := range clusters {
 		client, err := v2.GetClusterClient(c.Name, c.Addr)
 		if err != nil {
-			log.Errorf("get cluster %s Client error: %w", c.Name, err)
+			log.Errorf("get cluster %s Client error: %v", c.Name, err)
 			continue
 		}
 		versions, err := client.Versions(professionTemplate)
 		if err != nil {
-			log.Errorf("get cluster status error: %w", err)
+			log.Errorf("get cluster status error: %v", err)
 			continue
 		}
 		results[c.Name] = versions

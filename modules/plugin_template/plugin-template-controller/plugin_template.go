@@ -255,8 +255,9 @@ func (p *pluginTemplateController) onlines(ginCtx *gin.Context) {
 		}
 		resp = append(resp, &plugin_template_dto.OnlineOut{
 			Name:       item.ClusterName,
-			Env:        item.ClusterEnv,
 			Status:     enum.OnlineStatus(item.Status),
+			Title:      item.ClusterTitle,
+			Env:        item.ClusterEnv,
 			Disable:    item.Disable,
 			Operator:   item.Operator,
 			UpdateTime: updateTime,
