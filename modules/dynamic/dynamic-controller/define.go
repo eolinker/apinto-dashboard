@@ -16,6 +16,7 @@ type DynamicDefine struct {
 	Skill         string              `json:"skill"`
 	FilterOptions *FilterOptionConfig `json:"options"`
 	Render        map[string]string   `json:"render"`
+	Depends       []string            `json:"depend"`
 }
 
 type Render map[string]interface{}
