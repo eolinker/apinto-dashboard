@@ -165,6 +165,7 @@ func (c *clusterService) Insert(ctx context.Context, namespaceId, userId int, cl
 		Env:         clusterInput.Env,
 		Addr:        clusterInput.Addr,
 		UUID:        clusterInfo.Cluster,
+		Title:       clusterInput.Title,
 		CreateTime:  t,
 		UpdateTime:  t,
 	}
