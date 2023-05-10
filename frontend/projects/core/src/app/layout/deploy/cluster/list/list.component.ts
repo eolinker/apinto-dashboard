@@ -220,7 +220,7 @@ export class DeployClusterListComponent implements OnInit {
 
   handleEnvChange () {
     this.clustersDisplayList = this.clustersList.filter((cluster:any) => {
-      return this.env.indexOf(cluster.env) !== -1
+      return this.env.indexOf(cluster.env) !== -1 || this.env.length === 0
     })
   }
 }

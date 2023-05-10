@@ -75,7 +75,7 @@ export class ApiPublishComponent implements OnInit {
       this.selectedClusters = this.publishList.filter((item:any) => {
         return item.checked
       }).map((item) => {
-        return item.name
+        return item.title
       })
       this.selectedNum = this.selectedClusters.length
       this.publishList = [...this.publishList] // 表头的勾选状态需要重载数据才能刷新
@@ -91,10 +91,14 @@ export class ApiPublishComponent implements OnInit {
     })
     this.api.put('router/offline', { clusterNames: cluster }, { uuid: this.apiUuid }).subscribe((resp:any) => {
       if (resp.code === 0) {
-        this.unpublishMsg = resp.msg
+        this.unpublishMsg = ''
         this.message.success(resp.msg)
         this.closeModal && this.closeModal()
         this.getApisData && this.getApisData()
+      } else {
+        this.unpublishMsg = '下线失败' + resp.data.router.map((item:any) => {
+          return item.msg
+        }).join('，')
       }
     })
   }
@@ -107,10 +111,14 @@ export class ApiPublishComponent implements OnInit {
     })
     this.api.put('router/online', { clusterNames: cluster }, { uuid: this.apiUuid }).subscribe((resp:any) => {
       if (resp.code === 0) {
-        this.unpublishMsg = resp.msg
+        this.unpublishMsg = ''
         this.message.success(resp.msg)
         this.closeModal && this.closeModal()
         this.getApisData && this.getApisData()
+      } else {
+        this.unpublishMsg = '上线失败：' + resp.data.router.map((item:any) => {
+          return item.msg
+        }).join('，')
       }
     })
   }
