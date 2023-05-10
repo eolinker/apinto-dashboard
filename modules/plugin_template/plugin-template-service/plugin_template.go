@@ -520,9 +520,10 @@ func (p *pluginTemplateService) OnlineList(ctx context.Context, namespaceId int,
 
 	for _, clusterInfo := range clusterMaps {
 		onlineItem := &plugin_template_model.PluginTemplateOnlineItem{
-			ClusterName: clusterInfo.Name,
-			ClusterEnv:  clusterInfo.Env,
-			Status:      1, //默认为未上线状态
+			ClusterName:  clusterInfo.Name,
+			ClusterEnv:   clusterInfo.Env,
+			ClusterTitle: clusterInfo.Title,
+			Status:       1, //默认为未上线状态
 		}
 
 		var operator int
