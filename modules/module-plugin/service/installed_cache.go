@@ -5,13 +5,10 @@ import (
 	"github.com/eolinker/apinto-dashboard/cache"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/model"
 	"github.com/go-redis/redis/v8"
+	"time"
 )
 
 type IInstalledCache interface {
-	cache.IRedisCache[model.PluginInstalledStatus, string]
-}
-
-type installedCache struct {
 	cache.IRedisCache[model.PluginInstalledStatus, string]
 }
 
@@ -20,7 +17,5 @@ func installedCacheKey(pluginID string) string {
 }
 
 func newIInstalledCache(client *redis.ClusterClient) IInstalledCache {
-	return &installedCache{
-		IRedisCache: cache.CreateRedisCache[model.PluginInstalledStatus, string](client, installedCacheKey),
-	}
+	return cache.CreateRedisCache[model.PluginInstalledStatus, string](client, time.Hour, installedCacheKey)
 }

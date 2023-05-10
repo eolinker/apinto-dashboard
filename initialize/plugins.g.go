@@ -120,7 +120,7 @@ func loadPlugins(dir string, target string) ([]*Plugin, error) {
 			p := new(Plugin)
 			err = yaml.Unmarshal(s, p)
 			if err != nil {
-				log.Errorf("parse file(%s) error: %w")
+				log.Errorf("parse file(%s) error: %v", nextFile, err)
 				return nil, err
 			}
 			plugins = append(plugins, p)

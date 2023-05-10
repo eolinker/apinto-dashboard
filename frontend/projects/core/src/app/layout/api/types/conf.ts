@@ -272,7 +272,7 @@ export const apiBatchOnlineVerifyTableBody :EO_TBODY_TYPE[] = [
     copy: true
   },
   {
-    key: 'cluster',
+    key: 'clusterName',
     styleFn: (item:any) => {
       if (!item.status) {
         return 'color:#ff3b30'
@@ -310,9 +310,7 @@ export const apiBatchOnlineVerifyTableBody :EO_TBODY_TYPE[] = [
       click: (item:any) => {
         let routerS:string = '/' + item.data.solution.name
         const routerSArr:Array<string> = routerS.split('/')
-        if (item.data.solution.params.serviceName) {
-          routerSArr.splice(-1, 0, item.data.solution.params.serviceName)
-        } else {
+        if (routerSArr.indexOf('content') !== -1) {
           routerSArr.push(item.data.solution.params.templateUuid)
         }
         routerS = routerSArr.join('/')
@@ -352,7 +350,7 @@ export const apiBatchPublishResultTableBody:EO_TBODY_TYPE[] = [
     copy: true
   },
   {
-    key: 'cluster',
+    key: 'clusterName',
     styleFn: (item:any) => {
       if (!item.status) {
         return 'color:#ff3b30'
@@ -435,7 +433,7 @@ export const PluginTemplatePublishThead:THEAD_TYPE[] = [
 
 export const PluginTemplatePublishTbody:EO_TBODY_TYPE[] = [
   {
-    key: 'name',
+    key: 'title',
     copy: true
   },
   {
