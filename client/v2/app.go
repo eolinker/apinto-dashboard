@@ -3,7 +3,7 @@ package v2
 func dealAPPAppend(data map[string]interface{}) map[string]interface{} {
 	result := make(map[string]interface{})
 	for key, value := range data {
-		if key == "additional" || key == "auths" {
+		if key == "additional" || key == "auth" {
 			vs, ok := value.([]interface{})
 			if !ok {
 				continue
