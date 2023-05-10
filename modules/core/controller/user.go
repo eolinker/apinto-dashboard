@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/controller/users"
+	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	random_controller "github.com/eolinker/apinto-dashboard/modules/base/random-controller"
 	"net/http"
 	"time"
@@ -67,7 +68,7 @@ func (u *UserController) myProfile(ginCtx *gin.Context) {
 }
 func (u *UserController) myProfileUpdate(ginCtx *gin.Context) {
 	userId := users.GetUserId(ginCtx)
-
+	ginCtx.Set(controller.Operate, audit_model.LogOperateTypeNone.String())
 	req := &user_dto.UpdateMyProfileReq{}
 	err := ginCtx.BindJSON(req)
 	if err != nil {
@@ -84,7 +85,7 @@ func (u *UserController) myProfileUpdate(ginCtx *gin.Context) {
 }
 func (u *UserController) setPassword(ginCtx *gin.Context) {
 	userId := users.GetUserId(ginCtx)
-
+	ginCtx.Set(controller.Operate, audit_model.LogOperateTypeNone.String())
 	req := &user_dto.UpdateMyPasswordReq{}
 	err := ginCtx.BindJSON(req)
 	if err != nil {
@@ -187,6 +188,7 @@ func (u *UserController) access(ginCtx *gin.Context) {
 }
 
 func (u *UserController) ssoLogin(ginCtx *gin.Context) {
+	ginCtx.Set(controller.Operate, audit_model.LogOperateTypeNone.String())
 	var loginInfo user_dto.UserLogin
 	err := ginCtx.BindJSON(&loginInfo)
 	if err != nil {
@@ -240,6 +242,7 @@ func (u *UserController) ssoLogin(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 func (u *UserController) ssoLogout(ginCtx *gin.Context) {
+	ginCtx.Set(controller.Operate, audit_model.LogOperateTypeNone.String())
 	cookie, err := ginCtx.Cookie(controller.Session)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
@@ -254,6 +257,8 @@ func (u *UserController) ssoLogout(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 func (u *UserController) ssoLoginCheck(ginCtx *gin.Context) {
+	ginCtx.Set(controller.Operate, audit_model.LogOperateTypeNone.String())
+
 	cookie, err := ginCtx.Cookie(controller.Session)
 	if err != nil {
 		controller.ErrorJsonWithCode(ginCtx, http.StatusOK, controller.CodeLoginInvalid, loginError)
