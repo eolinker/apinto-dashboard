@@ -1372,7 +1372,7 @@ func (a *apiService) BatchOnlineCheck(ctx context.Context, namespaceId int, oper
 			Data:     data,
 		}
 		key := onlineToken
-		if err := a.batchApiCache.Set(ctx, key, task, time.Hour*8); err != nil {
+		if err := a.batchApiCache.Set(ctx, key, task); err != nil {
 			return nil, "", err
 		}
 	}
@@ -1851,7 +1851,7 @@ func (a *apiService) GetImportCheckList(ctx context.Context, namespaceId int, fi
 		GroupID:     groupID,
 	}
 
-	if err = a.importApiCache.Set(ctx, key, importAPIRedisData, time.Hour*8); err != nil {
+	if err = a.importApiCache.Set(ctx, key, importAPIRedisData); err != nil {
 		return nil, "", err
 	}
 
