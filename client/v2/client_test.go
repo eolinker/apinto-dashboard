@@ -25,6 +25,30 @@ func TestClient(t *testing.T) {
 	fmt.Println(string(data))
 }
 
+func TestVariable(t *testing.T) {
+	var data = `{"config":{"address":["${consul_addr}"],"address_variable":["${consul_addr}"],"use_variable":[1]},"create":"","description":"","driver":"consul","id":"","name":"test_consul","profession":"discovery","update":"","version":"20230510230425"}`
+	client := NewClient("http://127.0.0.1:9400")
+	var info WorkerInfo[BasicInfo]
+	json.Unmarshal([]byte(data), &info)
+	err := client.Set("discovery", "aaa", &info)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+}
+
+func TestSetClient(t *testing.T) {
+	var data = `{"config":{"address":["${consul_addr}"],"address_variable":["${consul_addr}"],"use_variable":[1]},"create":"","description":"","driver":"consul","id":"","name":"test_consul","profession":"discovery","update":"","version":"20230510230425"}`
+	client := NewClient("http://172.18.189.43:31194")
+	var info WorkerInfo[BasicInfo]
+	json.Unmarshal([]byte(data), &info)
+	err := client.Set("service", "aaa", &info)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+}
+
 func TestVersionClient(t *testing.T) {
 	client := NewClient("http://172.18.189.43:31194")
 	result, err := client.Versions("service")
