@@ -98,8 +98,9 @@ func (c *clusterController) clusterEnum(ginCtx *gin.Context) {
 
 		for _, clusterInfo := range clusters {
 			clusterOuts = append(clusterOuts, &cluster_dto.ClusterOut{
-				Name: clusterInfo.Name,
-				UUID: clusterInfo.UUID,
+				Name:  clusterInfo.Name,
+				Title: clusterInfo.Title,
+				UUID:  clusterInfo.UUID,
 			})
 		}
 
