@@ -73,10 +73,10 @@ type ApiBatchOnlineCheckListItem struct {
 }
 
 type ApiBatchCheckListItem struct {
-	ApiName    string `json:"api,omitempty"`
-	ClusterEnv string `json:"cluster"`
-	Status     bool   `json:"status"`
-	Result     string `json:"result,omitempty"`
+	ApiName     string `json:"api,omitempty"`
+	ClusterName string `json:"cluster_name"`
+	Status      bool   `json:"status"`
+	Result      string `json:"result,omitempty"`
 }
 
 type ApiBatchInput struct {
