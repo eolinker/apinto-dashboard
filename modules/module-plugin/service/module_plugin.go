@@ -11,7 +11,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/store"
 	"github.com/eolinker/eosc/common/bean"
 	"gorm.io/gorm"
-	"time"
 )
 
 type modulePlugin struct {
@@ -69,7 +68,7 @@ func (m *modulePlugin) GetNavigationModules(ctx context.Context) ([]*model.Navig
 			return nil, err
 		}
 		//缓存
-		_ = m.navigationModulesCache.SetAll(ctx, moduleInfos, 10*time.Minute)
+		_ = m.navigationModulesCache.SetAll(ctx, moduleInfos)
 	}
 
 	list := make([]*model.NavigationModuleInfo, 0, len(moduleInfos))
