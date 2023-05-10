@@ -9,13 +9,12 @@ import {
 } from '@angular/common/http'
 import { tap, Observable } from 'rxjs'
 import { Router } from '@angular/router'
-import { EoNgNavigationService } from '../app-config.service'
 import { NzModalService } from 'ng-zorro-antd/modal'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
+import { EoNgNavigationService } from '../eo-ng-navigation.service'
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
-  private loadingMessageId:string = ''
   constructor (
     private router: Router,
     private navigationService: EoNgNavigationService,

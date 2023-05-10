@@ -263,7 +263,7 @@ func (a *apiService) GetAPIList(ctx context.Context, namespaceID int, groupUUID,
 	if err != nil {
 		return nil, 0, err
 	}
-	clusterVersions := a.getApintoAPIVersions(clusterInfos)
+	clusterVersions := a.getApintoClustersVersions(clusterInfos)
 
 	for _, api := range apis {
 		version := versionMap[api.Id]
@@ -944,16 +944,10 @@ func (a *apiService) BatchOnline(ctx context.Context, namespaceId int, operator 
 		return nil, err
 	}
 
-	//获取插件模板在各个集群的上线情况
-	templateClustersVersions, err := a.pluginTemplateService.GetApintoTemplateVersions(ctx, namespaceId)
-	if err != nil {
-		return nil, err
-	}
 	//逐个处理api上线
 	onlineList := make([]*apimodel.BatchListItem, 0, len(apiList)*len(clusterList))
-
 	for _, api := range apiList {
-		online, err := a.online(ctx, namespaceId, operator, api, clusterList, templateClustersVersions)
+		online, err := a.online(ctx, namespaceId, operator, api, clusterList)
 		if err != nil && len(online) == 0 {
 			return nil, err
 		}
@@ -979,7 +973,7 @@ func (a *apiService) BatchOnline(ctx context.Context, namespaceId int, operator 
 	return onlineList, nil
 }
 
-func (a *apiService) online(ctx context.Context, namespaceId, operator int, api *apientry.API, clusterList []*cluster_model.Cluster, templateClustersVersions map[string]map[string]string) ([]*apimodel.BatchListItem, error) {
+func (a *apiService) online(ctx context.Context, namespaceId, operator int, api *apientry.API, clusterList []*cluster_model.Cluster) ([]*apimodel.BatchListItem, error) {
 	t := time.Now()
 	onlineList := make([]*apimodel.BatchListItem, 0)
 	err := a.lockService.Lock(locker_service.LockNameAPI, api.Id)
@@ -1028,8 +1022,8 @@ func (a *apiService) online(ctx context.Context, namespaceId, operator int, api 
 		}
 
 		if latest.TemplateUUID != "" {
-			//若插件模板未上线到集群
-			if _, has := templateClustersVersions[clusterInfo.Name][latest.TemplateUUID]; !has {
+			isTemplateOnline := a.pluginTemplateService.IsOnline(ctx, namespaceId, clusterInfo.Name, latest.TemplateUUID)
+			if !isTemplateOnline {
 				item.Status = false
 				item.Result = fmt.Sprintf("绑定的插件模板未上线到%s", clusterInfo.Name)
 				onlineList = append(onlineList, item)
@@ -1316,12 +1310,6 @@ func (a *apiService) BatchOnlineCheck(ctx context.Context, namespaceId int, oper
 			checkList = append(checkList, item)
 		}
 	}
-
-	templateClustersVersions, err := a.pluginTemplateService.GetApintoTemplateVersions(ctx, namespaceId)
-	if err != nil {
-		return nil, "", err
-	}
-
 	for templateUuid, templateName := range checkTemplateMap {
 		for _, clusterInfo := range clusterList {
 			item := &apimodel.BatchOnlineCheckListItem{
@@ -1331,8 +1319,8 @@ func (a *apiService) BatchOnlineCheck(ctx context.Context, namespaceId int, oper
 				Solution:        &frontend_model.Router{},
 			}
 
-			//判断插件模板在该集群是否上线
-			if _, has := templateClustersVersions[clusterInfo.Name][templateUuid]; !has {
+			isOnline := a.pluginTemplateService.IsOnline(ctx, namespaceId, clusterInfo.Name, templateUuid)
+			if !isOnline {
 				isAllOnline = false
 				item.Status = false
 				item.Result = fmt.Sprintf("%s未上线到%s", templateName, clusterInfo.Name)
@@ -1531,7 +1519,7 @@ func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, u
 		}
 
 		if latestVersion.TemplateID != 0 {
-			isTemplateOnline := a.pluginTemplateService.IsOnline(clusterInfo.Name, clusterInfo.Addr, latestVersion.TemplateUUID)
+			isTemplateOnline := a.pluginTemplateService.IsOnline(ctx, namespaceId, clusterInfo.Name, latestVersion.TemplateUUID)
 			if !isTemplateOnline {
 				routerInfos = append(routerInfos, &frontend_model.Router{
 					Name:   frontend_model.RouterNameTemplateOnline,
@@ -2348,7 +2336,7 @@ func (a *apiService) ClustersStatus(ctx context.Context, namespaceId, apiId int,
 	return online, result, nil
 }
 
-func (a *apiService) getApintoAPIVersions(clusters []*cluster_model.Cluster) map[string]map[string]string {
+func (a *apiService) getApintoClustersVersions(clusters []*cluster_model.Cluster) map[string]map[string]string {
 	results := make(map[string]map[string]string, len(clusters))
 
 	for _, c := range clusters {

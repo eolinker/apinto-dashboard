@@ -25,6 +25,7 @@ export class ApiPublishComponent implements OnInit {
   closeModal:any
   nzDisabled:boolean = false
   getApisData:any
+  unpublishMsg:string = ''
   constructor (
     private message: EoNgFeedbackMessageService,
     private service:RouterService,
@@ -90,6 +91,7 @@ export class ApiPublishComponent implements OnInit {
     })
     this.api.put('router/offline', { clusterNames: cluster }, { uuid: this.apiUuid }).subscribe((resp:any) => {
       if (resp.code === 0) {
+        this.unpublishMsg = resp.msg
         this.message.success(resp.msg)
         this.closeModal && this.closeModal()
         this.getApisData && this.getApisData()
@@ -105,6 +107,7 @@ export class ApiPublishComponent implements OnInit {
     })
     this.api.put('router/online', { clusterNames: cluster }, { uuid: this.apiUuid }).subscribe((resp:any) => {
       if (resp.code === 0) {
+        this.unpublishMsg = resp.msg
         this.message.success(resp.msg)
         this.closeModal && this.closeModal()
         this.getApisData && this.getApisData()

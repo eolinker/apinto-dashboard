@@ -24,11 +24,45 @@ const containerElementName = 'customReactComponentContainer'
         .ant-input-affix-wrapper,
         textarea,
         .ant-input-number,
-        .ant-formily-array-items,
         ant-picker,
         .ant-select {
           width: 346px;
           min-height: 32px;
+        }
+
+        .ant-formily-array-items {
+          width: 400px;
+        }
+
+        .ant-input-affix-wrapper-disabled,
+        .ant-input-affix-wrapper-disabled > .ant-input {
+          background: var(--disabled-background-color);
+          cursor: not-allowed;
+        }
+
+        .ant-input-affix-wrapper-disabled {
+          border-color: var(--disabled-border-color);
+        }
+
+        .ant-picker-disabled:hover {
+          border-color: var(--disabled-border-color);
+        }
+
+        .ant-switch {
+          width: 28px;
+          height: 16px;
+          min-width: 28px;
+          .ant-switch-handle {
+            height: 12px;
+            width: 12px;
+          }
+          &.ant-switch-checked,
+          &.ant-switch-checked:hover:not(.ant-switch-disabled) {
+            background: var(--primary-color);
+          }
+          &.ant-switch-checked .ant-switch-handle {
+            inset-inline-start: calc(100% - 14px);
+          }
         }
 
         .ant-formily-array-table {

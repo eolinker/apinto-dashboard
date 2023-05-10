@@ -138,7 +138,7 @@ export class DeployClusterCreateComponent implements OnInit {
   clusterAddrVadidator = (control: any): { [s: string]: boolean } => {
     if (!control.value) {
       return { error: true, required: true }
-    } else if (!/([a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\.?)(:\d+)/.test(control.value) && !/(((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3})(:\d*)/.test(control.value)) {
+    } else if (!/([a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})*\.?)*(:\d+)/.test(control.value) && !/(((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3})(:\d*)/.test(control.value)) {
       return { error: true, pattern: true }
     } else if (this.checkClusterError && control.value === this.checkClusterErrorAddr) {
       return { source: true, error: true }
@@ -163,6 +163,7 @@ export class DeployClusterCreateComponent implements OnInit {
       this.api.post('cluster', params).subscribe((resp) => {
         this.submitButtonLoading = false
         if (resp.code === 0) {
+          this.closeModal && this.closeModal()
           this.router.navigate(['/', 'deploy', 'cluster', 'content', name])
         }
       })

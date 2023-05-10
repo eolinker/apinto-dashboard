@@ -87,6 +87,7 @@ export type ApiListItem = {
     source:string
     updateTime:string
     isDelete:boolean
+    isDisable:boolean|string
     [k:string]:any
 }
 
