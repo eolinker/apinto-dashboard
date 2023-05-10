@@ -5,7 +5,7 @@
     <button
       eo-ng-button
       class="ant-btn-primary"
-      eoNgUserAccess="application"
+      [eoNgUserAccess]="moduleName"
       (disabledEdit)="disabledEdit($event)"
       (click)="addData()"
     >
