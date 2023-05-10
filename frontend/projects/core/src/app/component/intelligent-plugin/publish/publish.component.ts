@@ -68,7 +68,6 @@ export class IntelligentPluginPublishComponent implements OnInit {
       }).map((item) => {
         return item.title
       })
-      console.log(this.selectedClusters)
       this.selectedNum = this.selectedClusters.length
       this.publishList = [...this.publishList] // 表头的勾选状态需要重载数据才能刷新
     }, 0
