@@ -235,7 +235,6 @@ export class IntelligentPluginListComponent implements OnInit {
     }
     this.tableBody = [...newTableBodyConfig, ...this.service.createTbody(this, 'btn')]
     this.tableHeadName = [...newTableHeadConfig, { title: '操作', right: true }]
-    console.log(this)
   }
 
   getTdTpl (attr:string) {
