@@ -118,7 +118,7 @@ func (u *UserController) setPassword(ginCtx *gin.Context) {
 		RJwt: common.Md5(userJWT),
 	}
 
-	if err = u.sessionCache.Set(ginCtx, cookieValue, session, time.Hour*24*7); err != nil {
+	if err = u.sessionCache.Set(ginCtx, cookieValue, session); err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
@@ -225,7 +225,7 @@ func (u *UserController) ssoLogin(ginCtx *gin.Context) {
 		RJwt: common.Md5(userJWT),
 	}
 
-	if err = u.sessionCache.Set(ginCtx, cookieValue, session, time.Hour*24*7); err != nil {
+	if err = u.sessionCache.Set(ginCtx, cookieValue, session); err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
