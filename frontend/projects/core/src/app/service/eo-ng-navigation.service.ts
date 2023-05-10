@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core'
 import { MenuOptions } from 'eo-ng-menu'
-import { Subject, Observable, forkJoin, map } from 'rxjs'
+import { Subject, Observable, forkJoin } from 'rxjs'
 import { ApiService } from './api.service'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -107,12 +107,12 @@ export class EoNgNavigationService {
   count:number = 0
   // 获得最新的权限列表和菜单
   getRightsList (): Observable<MenuOptions[]> {
+    this.noAccess = true
+
     return new Observable((observer) => {
-      forkJoin([this.api.get('system/modules').pipe(map((resp:any) => {
-        this.generateMenuList(resp)
-      })),
-      this.api.get('my/access')]).subscribe((resp:Array<any>) => {
-        if (resp[1].code === 0) {
+      forkJoin([this.api.get('system/modules'),
+        this.api.get('my/access')]).subscribe((resp:Array<any>) => {
+        if (resp[0].code === 0 && resp[1].code === 0) {
           this.accessMap = new Map()
           const accessListBackend:Array<{name:string, access:string}> = resp[1].data.access
           for (const access of accessListBackend) {
@@ -121,6 +121,8 @@ export class EoNgNavigationService {
               this.noAccess = false
             }
           }
+          this.generateMenuList(resp[0])
+
           observer.next(this.menuList)
 
           this.reqFlashMenu()
@@ -137,10 +139,9 @@ export class EoNgNavigationService {
       this.modulesMap = new Map()
       this.menuList = []
       this.routerNameMap = new Map()
-      this.noAccess = true
       this.originAccessData = resp.data.access
       for (const navigation of resp.data.navigation) {
-        const menu = {
+        const menu:any = {
           title: navigation.title,
           titleString: navigation.title,
           menu: true,
@@ -148,7 +149,9 @@ export class EoNgNavigationService {
           icon: navigation.icon || 'daohang',
           ...(navigation.modules?.length > 0 && !navigation.default
             ? {
-                children: navigation.modules.map((module: any) => {
+                children: navigation.modules.filter((module:any) => {
+                  return this.accessMap.get(module.name)
+                }).map((module: any) => {
                   this.routerNameMap.set(module.path, module.name)
                   return {
                     title: module.title,
@@ -188,7 +191,9 @@ export class EoNgNavigationService {
         if ((menu as any).routerLink && !this.routerNameMap.get((menu as any).routerLink)) {
           this.routerNameMap.set((menu as any).routerLink, (menu as any).name)
         }
-        this.menuList.push(menu)
+        if (!menu.name || this.accessMap.get(menu.name)) {
+          this.menuList.push(menu)
+        }
       }
 
       if (!this.mainPageRouter) {
