@@ -3,6 +3,7 @@ package cache
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/go-redis/redis/v8"
 	"strings"
 	"time"
@@ -10,23 +11,24 @@ import (
 
 type IRedisCache[T any, K comparable] interface {
 	Get(ctx context.Context, k K) (*T, error)
-	Set(ctx context.Context, k K, t *T, expiration time.Duration) error
+	Set(ctx context.Context, k K, t *T) error
 
 	Delete(ctx context.Context, keys ...K) error
 }
 type IRedisCacheNoKey[T any] interface {
-	SetAll(ctx context.Context, t []*T, expiration time.Duration) error
+	SetAll(ctx context.Context, t []*T) error
 	GetAll(ctx context.Context) ([]*T, error)
 }
 type redisCache[T any, K comparable] struct {
 	client        *redis.ClusterClient
 	keyPrefix     string
 	formatHandler func(K) string
+	expiration    time.Duration
 }
 type redisCacheNoKey[T any] struct {
-	client        *redis.ClusterClient
-	keyPrefix     string
-	formatHandler func() string
+	client     *redis.ClusterClient
+	key        string
+	expiration time.Duration
 }
 
 func (r *redisCache[T, K]) Get(ctx context.Context, k K) (*T, error) {
@@ -41,7 +43,7 @@ func (r *redisCache[T, K]) Get(ctx context.Context, k K) (*T, error) {
 
 }
 
-func (r *redisCache[T, K]) Set(ctx context.Context, k K, t *T, expiration time.Duration) error {
+func (r *redisCache[T, K]) Set(ctx context.Context, k K, t *T) error {
 
 	kv := r.keyPrefix + r.formatHandler(k)
 
@@ -50,7 +52,7 @@ func (r *redisCache[T, K]) Set(ctx context.Context, k K, t *T, expiration time.D
 		return err
 	}
 
-	return r.client.Set(ctx, kv, bytes, expiration).Err()
+	return r.client.Set(ctx, kv, bytes, r.expiration).Err()
 }
 
 func (r *redisCache[T, K]) Delete(ctx context.Context, ks ...K) error {
@@ -65,9 +67,8 @@ func (r *redisCache[T, K]) Delete(ctx context.Context, ks ...K) error {
 }
 
 func (r *redisCacheNoKey[T]) GetAll(ctx context.Context) ([]*T, error) {
-	key := r.keyPrefix + r.formatHandler()
 
-	bytes, err := r.client.Get(ctx, key).Bytes()
+	bytes, err := r.client.Get(ctx, r.key).Bytes()
 	if err != nil {
 		return nil, err
 	}
@@ -76,30 +77,28 @@ func (r *redisCacheNoKey[T]) GetAll(ctx context.Context) ([]*T, error) {
 
 }
 
-func (r *redisCacheNoKey[T]) SetAll(ctx context.Context, t []*T, expiration time.Duration) error {
-
-	key := r.keyPrefix + r.formatHandler()
+func (r *redisCacheNoKey[T]) SetAll(ctx context.Context, t []*T) error {
 
 	bytes, err := structToBytesAll(t)
 	if err != nil {
 		return err
 	}
 
-	return r.client.Set(ctx, key, bytes, expiration).Err()
+	return r.client.Set(ctx, r.key, bytes, r.expiration).Err()
 }
-func CreateRedisCacheNoKey[T any](client *redis.ClusterClient, format func() string, key ...string) IRedisCacheNoKey[T] {
-	keyPrefix := "apinto-dashboard:"
+func CreateRedisCacheNoKey[T any](client *redis.ClusterClient, expiration time.Duration, key string, prefix ...string) IRedisCacheNoKey[T] {
+	keyPrefix := "apinto-dashboard"
 	if len(key) > 0 {
-		keyPrefix = strings.Join(key, "-")
+		keyPrefix = strings.Join(prefix, "-")
 	}
 	return &redisCacheNoKey[T]{
-		client:        client,
-		keyPrefix:     keyPrefix,
-		formatHandler: format,
+		client:     client,
+		key:        fmt.Sprintf(keyPrefix, ":", key),
+		expiration: expiration,
 	}
 }
 
-func CreateRedisCache[T any, K comparable](client *redis.ClusterClient, format func(k K) string, key ...string) IRedisCache[T, K] {
+func CreateRedisCache[T any, K comparable](client *redis.ClusterClient, expiration time.Duration, format func(k K) string, key ...string) IRedisCache[T, K] {
 	keyPrefix := "apinto-dashboard:"
 	if len(key) > 0 {
 		keyPrefix = strings.Join(key, "-")
@@ -108,6 +107,7 @@ func CreateRedisCache[T any, K comparable](client *redis.ClusterClient, format f
 		client:        client,
 		keyPrefix:     keyPrefix,
 		formatHandler: format,
+		expiration:    expiration,
 	}
 }
 
