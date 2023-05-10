@@ -2,6 +2,7 @@ package namespace_store
 
 import (
 	"context"
+	"github.com/eolinker/apinto-dashboard/cache"
 	"github.com/eolinker/apinto-dashboard/modules/namespace/namespace-entry"
 	"github.com/eolinker/apinto-dashboard/store"
 )
@@ -11,6 +12,7 @@ type INamespaceStore interface {
 	GetByName(ctx context.Context, name string) (*namespace_entry.Namespace, error)
 	GetAll(ctx context.Context) ([]*namespace_entry.Namespace, error)
 }
+type INamespaceCache cache.IRedisCache[namespace_entry.Namespace, string]
 
 type namespaceStore struct {
 	*store.BaseStore[namespace_entry.Namespace]
