@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/eolinker/apinto-dashboard/common"
 
@@ -92,12 +93,16 @@ func (c *DynamicModule) Provider() map[string]apinto_module.Provider {
 }
 
 func (c *DynamicModule) Status(key string, namespaceId int, cluster string) (apinto_module.CargoStatus, string) {
+	id := fmt.Sprintf("%s@%s", strings.ToLower(key), c.profession)
+	if cluster == "" {
+		return apinto_module.None, id
+	}
 	status, err := c.dynamicService.ClusterStatusByClusterName(context.Background(), namespaceId, c.profession, key, cluster)
 	if err != nil {
 		log.Error(err)
-		return apinto_module.None, ""
+		return apinto_module.None, id
 	}
-	id := fmt.Sprintf("%s@%s", key, c.profession)
+
 	if status.Status == v2.StatusOnline || status.Status == v2.StatusPre {
 		return apinto_module.Online, id
 	}
