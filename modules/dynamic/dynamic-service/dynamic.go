@@ -766,9 +766,11 @@ func (d *dynamicService) saveVersion(ctx context.Context, version *dynamic_entry
 func newDynamicService() dynamic.IDynamicService {
 	d := &dynamicService{}
 	bean.Autowired(&d.dynamicStore)
+	bean.Autowired(&d.dynamicQuoteStore)
 	bean.Autowired(&d.userService)
 	bean.Autowired(&d.clusterService)
 	bean.Autowired(&d.publishVersionStore)
 	bean.Autowired(&d.publishHistoryStore)
+	bean.Autowired(&d.provider)
 	return d
 }
