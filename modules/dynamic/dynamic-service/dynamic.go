@@ -299,7 +299,35 @@ func getDependIDs(body []byte, depend []string) ([]string, error) {
 	return arr, nil
 }
 
-func (d *dynamicService) Online(ctx context.Context, namespaceId int, profession string, module string, name string, names []string, updater int) ([]string, []string, error) {
+func (d *dynamicService) replaceDepend(namespaceID int, org string, clusters []string, depends ...string) (string, error) {
+	param, err := oj.Parse([]byte(org))
+	if err != nil {
+		return "", err
+	}
+	for _, dep := range depends {
+		x, err := jp.ParseString(dep)
+		if err != nil {
+			return "", err
+		}
+		result := x.Get(param)
+		for _, r := range result {
+			v, ok := r.(string)
+			if ok {
+				for _, clusterName := range clusters {
+					status, id := d.provider.Status(v, namespaceID, clusterName)
+					if status != apinto_module.None {
+						x.Set(param, id)
+						break
+					}
+				}
+
+			}
+		}
+	}
+	return oj.JSON(param), nil
+}
+
+func (d *dynamicService) Online(ctx context.Context, namespaceId int, profession string, module string, name string, names []string, updater int, depend ...string) ([]string, []string, error) {
 	info, err := d.dynamicStore.First(ctx, map[string]interface{}{
 		"namespace":  namespaceId,
 		"profession": profession,
@@ -311,6 +339,24 @@ func (d *dynamicService) Online(ctx context.Context, namespaceId int, profession
 		}
 		return nil, nil, err
 	}
+
+	clusters, err := d.clusterService.GetByNames(ctx, namespaceId, names)
+	if err != nil {
+		return nil, nil, err
+	}
+	clusterNames := make([]string, 0, len(clusters))
+	if len(names) > 0 {
+		clusterNames = names
+	} else {
+		for _, c := range clusters {
+			clusterNames = append(clusterNames, c.Name)
+		}
+	}
+	config, err := d.replaceDepend(namespaceId, info.Config, clusterNames, depend...)
+	if err != nil {
+		return nil, nil, err
+	}
+
 	key := fmt.Sprintf("%s@%s", name, module)
 	targets, err := d.dynamicQuoteStore.List(ctx, map[string]interface{}{
 		"namespace": namespaceId,
@@ -319,16 +365,11 @@ func (d *dynamicService) Online(ctx context.Context, namespaceId int, profession
 	if err != nil {
 		return nil, nil, err
 	}
-
-	clusters, err := d.clusterService.GetByNames(ctx, namespaceId, names)
-	if err != nil {
-		return nil, nil, err
-	}
 	successClusters := make([]string, 0, len(clusters))
 	failClusters := make([]string, 0, len(clusters))
 	now := time.Now()
 	var publishConfig v2.WorkerInfo[dynamic_entry.BasicInfo]
-	err = json.Unmarshal([]byte(info.Config), &publishConfig)
+	err = json.Unmarshal([]byte(config), &publishConfig)
 	if err != nil {
 		return nil, nil, err
 	}
