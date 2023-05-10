@@ -107,9 +107,9 @@ export class EoNgNavigationService {
   count:number = 0
   // 获得最新的权限列表和菜单
   getRightsList (): Observable<MenuOptions[]> {
-    this.noAccess = true
-
     return new Observable((observer) => {
+      this.noAccess = true
+
       forkJoin([this.api.get('system/modules'),
         this.api.get('my/access')]).subscribe((resp:Array<any>) => {
         if (resp[0].code === 0 && resp[1].code === 0) {

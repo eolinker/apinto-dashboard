@@ -32,9 +32,13 @@ const routes: Routes = [
   },
   {
     path: '',
+    pathMatch: 'full',
+    component: LoginComponent
+  },
+  {
+    path: '',
     component: BasicLayoutComponent,
     children: [
-
       {
         path: 'guide',
         component: GuideComponent

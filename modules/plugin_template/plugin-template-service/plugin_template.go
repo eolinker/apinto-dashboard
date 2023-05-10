@@ -5,10 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"sort"
-	"strconv"
-	"time"
-
 	"github.com/eolinker/apinto-dashboard/client/v1"
 	v2 "github.com/eolinker/apinto-dashboard/client/v2"
 	"github.com/eolinker/apinto-dashboard/common"
@@ -34,6 +30,13 @@ import (
 	"github.com/eolinker/eosc/log"
 	"github.com/go-basic/uuid"
 	"gorm.io/gorm"
+	"sort"
+	"strconv"
+	"time"
+)
+
+const (
+	professionTemplate = "template"
 )
 
 type pluginTemplateService struct {
@@ -102,7 +105,7 @@ func (p *pluginTemplateService) GetList(ctx context.Context, namespaceId int) ([
 			pluginTemplate.OperatorStr = userInfo.NickName
 		}
 
-		isDelete, _ := p.isDelete(ctx, namespaceId, clusters, template)
+		isDelete, _ := p.isDelete(ctx, clusters, template)
 
 		pluginTemplate.IsDelete = isDelete
 		resultList = append(resultList, pluginTemplate)
@@ -115,10 +118,10 @@ func (p *pluginTemplateService) GetList(ctx context.Context, namespaceId int) ([
 	return resultList, nil
 }
 
-func (p *pluginTemplateService) isDelete(ctx context.Context, namespaceId int, clusters []*cluster_model.Cluster, pluginTemplate *plugin_template_entry.PluginTemplate) (bool, error) {
+func (p *pluginTemplateService) isDelete(ctx context.Context, clusters []*cluster_model.Cluster, pluginTemplate *plugin_template_entry.PluginTemplate) (bool, error) {
+	templateVersions := p.getApintoTemplateVersions(clusters)
 	for _, clusterInfo := range clusters {
-		isOnline := p.IsOnline(ctx, namespaceId, clusterInfo.Name, pluginTemplate.UUID)
-		if isOnline {
+		if _, has := templateVersions[clusterInfo.Name][pluginTemplate.UUID]; !has {
 			return false, errors.New(fmt.Sprintf("插件模板已在%s集群上线,不可删除", clusterInfo.Name))
 		}
 	}
@@ -135,15 +138,18 @@ func (p *pluginTemplateService) isDelete(ctx context.Context, namespaceId int, c
 	return true, err
 }
 
-func (p *pluginTemplateService) IsOnline(ctx context.Context, namespace int, clusterName string, uuid string) bool {
-	status, _ := p.providers.Status(fmt.Sprintf("%s@template", uuid), namespace, clusterName)
-	isOnline := false
-	switch status {
-	case apinto_module.None, apinto_module.Offline:
-	case apinto_module.Online:
-		isOnline = true
+func (p *pluginTemplateService) IsOnline(clusterName, clusterAddr, uuid string) bool {
+	client, err := v2.GetClusterClient(clusterName, clusterAddr)
+	if err != nil {
+		log.Errorf("get cluster %s Client error: %w", clusterName, err)
+		return false
 	}
-	return isOnline
+	_, err = client.Version(professionTemplate, uuid)
+	if err != nil {
+		log.Errorf("get cluster status error: %w", err)
+		return false
+	}
+	return true
 }
 
 // GetUsableList 获取模板可用列表
@@ -378,7 +384,7 @@ func (p *pluginTemplateService) Delete(ctx context.Context, namespaceId, operato
 		return err
 	}
 
-	_, err = p.isDelete(ctx, namespaceId, clusters, pluginTemplate)
+	_, err = p.isDelete(ctx, clusters, pluginTemplate)
 	if err != nil {
 		return err
 	}
@@ -555,7 +561,7 @@ func (p *pluginTemplateService) OnlineList(ctx context.Context, namespaceId int,
 		onlineItem.Operator = updater
 		onlineItem.UpdateTime = updateTime
 
-		version, err := client.Version("template", pluginTemplate.UUID)
+		version, err := client.Version(professionTemplate, pluginTemplate.UUID)
 		if err != nil {
 			list = append(list, onlineItem)
 			continue
@@ -617,12 +623,6 @@ func (p *pluginTemplateService) Online(ctx context.Context, namespaceId, operato
 
 	}
 
-	//发布到apinto
-	client, err := p.apintoClient.GetClient(ctx, clusterInfo.Id)
-	if err != nil {
-		return nil, err
-	}
-
 	//编写日志操作对象信息
 	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:        uuid,
@@ -642,12 +642,6 @@ func (p *pluginTemplateService) Online(ctx context.Context, namespaceId, operato
 			Disable: pluginInfo.Disable,
 			Config:  config,
 		}
-	}
-	pluginTemplateConfig := v1.PluginTemplateConfig{
-		Plugins:     pluginMaps,
-		Name:        pluginTemplate.UUID,
-		Driver:      "plugin_template",
-		Description: pluginTemplate.Desc,
 	}
 
 	//事务
@@ -669,7 +663,18 @@ func (p *pluginTemplateService) Online(ctx context.Context, namespaceId, operato
 			return err
 		}
 
-		return client.ForPluginTemplate().Create(pluginTemplateConfig)
+		return v2.Online(clusterInfo.Name, clusterInfo.Addr, professionTemplate, pluginTemplate.UUID, &v2.WorkerInfo[v2.BasicInfo]{
+			BasicInfo: &v2.BasicInfo{
+				Profession:  professionTemplate,
+				Name:        pluginTemplate.UUID,
+				Driver:      "plugin_template",
+				Description: pluginTemplate.Desc,
+				Version:     strconv.Itoa(latestVersion.Id),
+			},
+			Append: map[string]interface{}{
+				"plugins": pluginMaps,
+			},
+		})
 	})
 
 	return nil, err
@@ -742,13 +747,33 @@ func (p *pluginTemplateService) Offline(ctx context.Context, namespaceId, operat
 			return err
 		}
 
-		//发布到apinto
-		client, err := p.apintoClient.GetClient(ctx, clusterInfo.Id)
-		if err != nil {
-			return err
-		}
-
-		return common.CheckWorkerNotExist(client.ForPluginTemplate().Delete(pluginTemplate.UUID))
+		return common.CheckWorkerNotExist(v2.Offline(clusterInfo.Name, clusterInfo.Addr, professionTemplate, uuid))
 	})
 
+}
+
+func (p *pluginTemplateService) GetApintoTemplateVersions(ctx context.Context, namespaceID int) (map[string]map[string]string, error) {
+	clusters, err := p.clusterService.GetByNamespaceId(ctx, namespaceID)
+	if err != nil {
+		return nil, err
+	}
+	return p.getApintoTemplateVersions(clusters), nil
+}
+
+func (p *pluginTemplateService) getApintoTemplateVersions(clusters []*cluster_model.Cluster) map[string]map[string]string {
+	results := make(map[string]map[string]string, len(clusters))
+	for _, c := range clusters {
+		client, err := v2.GetClusterClient(c.Name, c.Addr)
+		if err != nil {
+			log.Errorf("get cluster %s Client error: %w", c.Name, err)
+			continue
+		}
+		versions, err := client.Versions(professionTemplate)
+		if err != nil {
+			log.Errorf("get cluster status error: %w", err)
+			continue
+		}
+		results[c.Name] = versions
+	}
+	return results
 }
