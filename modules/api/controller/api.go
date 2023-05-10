@@ -194,6 +194,7 @@ func (a *apiController) routers(ginCtx *gin.Context) {
 		for _, p := range item.Publish {
 			publish = append(publish, &api_dto.APIListItemPublish{
 				Name:   p.Name,
+				Title:  p.Title,
 				Status: enum.OnlineStatus(p.Status),
 			})
 		}
