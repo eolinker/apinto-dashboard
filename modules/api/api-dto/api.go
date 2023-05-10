@@ -120,6 +120,7 @@ type ApiPublishInfo struct {
 type ApiPublishCluster struct {
 	Name       string            `json:"name"`
 	Env        string            `json:"env"`
+	Title      string            `json:"title"`
 	Status     enum.OnlineStatus `json:"status"`
 	Operator   string            `json:"operator"`
 	UpdateTime string            `json:"update_time"`
