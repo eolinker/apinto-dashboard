@@ -8,8 +8,26 @@ import (
 )
 
 func TestClient(t *testing.T) {
-	client := NewClient("http://127.0.0.1:9400")
-	result, err := client.List("router")
+	client := NewClient("http://172.18.189.43:31194")
+	result, err := client.List("service")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	for _, r := range result {
+		fmt.Println(r)
+	}
+	data, err := json.Marshal(result)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	fmt.Println(string(data))
+}
+
+func TestVersionClient(t *testing.T) {
+	client := NewClient("http://172.18.189.43:31194")
+	result, err := client.Versions("service")
 	if err != nil {
 		t.Error(err)
 		return
