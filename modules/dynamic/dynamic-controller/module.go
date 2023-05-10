@@ -97,7 +97,7 @@ func (c *DynamicModule) Status(key string, namespaceId int, cluster string) (api
 		log.Error(err)
 		return apinto_module.None, ""
 	}
-	id := fmt.Sprintf("%s@%s", status.Name, c.profession)
+	id := fmt.Sprintf("%s@%s", key, c.profession)
 	if status.Status == v2.StatusOnline || status.Status == v2.StatusPre {
 		return apinto_module.Online, id
 	}
