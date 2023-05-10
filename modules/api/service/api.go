@@ -1005,7 +1005,7 @@ func (a *apiService) online(ctx context.Context, namespaceId, operator int, api 
 		for _, clusterInfo := range clusterList {
 			item := &apimodel.BatchListItem{
 				APIName:    api.Name,
-				ClusterEnv: fmt.Sprintf("%s_%s", clusterInfo.Name, clusterInfo.Env),
+				ClusterEnv: fmt.Sprintf("%s_%s", clusterInfo.Title, clusterInfo.Env),
 				Status:     false,
 				Result:     err.Error(),
 			}
@@ -1017,7 +1017,7 @@ func (a *apiService) online(ctx context.Context, namespaceId, operator int, api 
 	for _, clusterInfo := range clusterList {
 		item := &apimodel.BatchListItem{
 			APIName:    api.Name,
-			ClusterEnv: fmt.Sprintf("%s_%s", clusterInfo.Name, clusterInfo.Env),
+			ClusterEnv: fmt.Sprintf("%s_%s", clusterInfo.Title, clusterInfo.Env),
 			Status:     true,
 			Result:     "",
 		}
@@ -1192,7 +1192,7 @@ func (a *apiService) offline(ctx context.Context, operator, namespaceId int, api
 	for _, clusterInfo := range clusterList {
 		item := &apimodel.BatchListItem{
 			APIName:    latestApi.Name,
-			ClusterEnv: fmt.Sprintf("%s_%s", clusterInfo.Name, clusterInfo.Env),
+			ClusterEnv: fmt.Sprintf("%s_%s", clusterInfo.Title, clusterInfo.Env),
 			Status:     true,
 			Result:     "",
 		}
