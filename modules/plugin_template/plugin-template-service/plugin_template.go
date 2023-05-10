@@ -766,7 +766,7 @@ func (p *pluginTemplateService) getApintoTemplateVersions(clusters []*cluster_mo
 	for _, c := range clusters {
 		client, err := v2.GetClusterClient(c.Name, c.Addr)
 		if err != nil {
-			log.Errorf("get cluster %s Client error: %w", c.Name, err)
+			log.Errorf("get cluster %s Client error: %v", c.Name, err)
 			continue
 		}
 		versions, err := client.Versions(professionTemplate)
