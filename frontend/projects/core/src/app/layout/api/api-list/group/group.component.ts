@@ -262,7 +262,7 @@ export class ApiManagementComponent implements OnInit {
   }
 
   // 右侧页面切换至新建API的页面
-  addApi = (uuid:string) => {
-    this.router.navigate(['/', 'router', 'api', 'create', uuid])
+  addApi = (uuid:string, type:'http'|'websocket') => {
+    this.router.navigate(['/', 'router', 'api', type === 'websocket' ? 'create-ws' : 'create', uuid])
   }
 }

@@ -105,7 +105,7 @@ func (t *fuseHandler) CheckInput(input *strategy_dto.StrategyInfoInput[strategy_
 	}
 
 	//校验筛选条件
-	return checkFilters(input.Filters)
+	return checkFilters(input.Filters, "filter")
 }
 
 func (t *fuseHandler) ToApintoConfig(conf strategy_entry.StrategyFuseConfig) interface{} {
