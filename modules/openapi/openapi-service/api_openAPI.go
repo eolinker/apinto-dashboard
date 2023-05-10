@@ -18,14 +18,17 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/openapi/openapi-dto"
 	"github.com/eolinker/apinto-dashboard/modules/openapi/openapi-model"
 	"github.com/eolinker/apinto-dashboard/modules/openapp"
+	apinto_module "github.com/eolinker/apinto-module"
 	"github.com/eolinker/eosc/common/bean"
 	"gorm.io/gorm"
 	"sort"
+	"strings"
 	"time"
 )
 
 const (
-	professionService = "service"
+	professionService    = "service"
+	providerServiceSkill = "Service"
 )
 
 type apiOpenAPIService struct {
@@ -35,6 +38,7 @@ type apiOpenAPIService struct {
 	quoteStore     quote_store.IQuoteStore
 	apiHistory     store2.IApiHistoryStore
 	dynamicService dynamic.IDynamicService
+	provider       apinto_module.IProviders
 
 	apiService api.IAPIService
 	//service              upstream.IService
@@ -50,6 +54,7 @@ func newAPIOpenAPIService() openapi.IAPIOpenAPIService {
 	bean.Autowired(&as.apiVersion)
 	bean.Autowired(&as.quoteStore)
 	bean.Autowired(&as.dynamicService)
+	bean.Autowired(&as.provider)
 
 	bean.Autowired(&as.apiService)
 	//bean.Autowired(&as.service)
@@ -90,7 +95,12 @@ func (a *apiOpenAPIService) SyncImport(ctx context.Context, namespaceID, appID i
 
 	//检查服务，没有就用server创建，服务名使用data.ServiceName
 	serviceNotExit := false
-	serviceID, err := a.dynamicService.GetIDByName(ctx, namespaceID, professionService, data.ServiceName)
+	idx := strings.LastIndex(data.ServiceName, "@")
+	serviceName := data.ServiceName
+	if idx > -1 {
+		serviceName = serviceName[:idx]
+	}
+	serviceID, err := a.dynamicService.GetIDByName(ctx, namespaceID, professionService, serviceName)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}
@@ -289,16 +299,17 @@ func (a *apiOpenAPIService) GetSyncImportInfo(ctx context.Context, namespaceID i
 	}
 
 	//组装服务列表
-	dynamicInfos, err := a.dynamicService.ListByKeyword(ctx, namespaceID, professionService, "")
-	if err != nil {
-		return nil, nil, nil, err
+	provider, has := a.provider.Provider(providerServiceSkill)
+	if !has {
+		return nil, nil, nil, fmt.Errorf("provider %s not exist.", providerServiceSkill)
 	}
+	provider.Provide(namespaceID)
 
-	serviceList := make([]*openapi_model.ApiOpenAPIService, 0, len(dynamicInfos))
-	for _, d := range dynamicInfos {
+	serviceList := make([]*openapi_model.ApiOpenAPIService, 0, len(provider.Provide(namespaceID)))
+	for _, d := range provider.Provide(namespaceID) {
 		item := &openapi_model.ApiOpenAPIService{
-			Name: d.ID,
-			Desc: d.Description,
+			Name: d.Value,
+			Desc: "",
 		}
 		serviceList = append(serviceList, item)
 	}
