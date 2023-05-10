@@ -194,6 +194,7 @@ func (a *apiController) routers(ginCtx *gin.Context) {
 		for _, p := range item.Publish {
 			publish = append(publish, &api_dto.APIListItemPublish{
 				Name:   p.Name,
+				Title:  p.Title,
 				Status: enum.OnlineStatus(p.Status),
 			})
 		}
@@ -371,10 +372,10 @@ func (a *apiController) batchOnline(ginCtx *gin.Context) {
 
 	for _, item := range batchOnlineList {
 		checkItem := &api_dto.ApiBatchCheckListItem{
-			ApiName:    item.APIName,
-			ClusterEnv: item.ClusterEnv,
-			Status:     item.Status,
-			Result:     item.Result,
+			ApiName:     item.APIName,
+			ClusterName: item.ClusterEnv,
+			Status:      item.Status,
+			Result:      item.Result,
 		}
 
 		outputList = append(outputList, checkItem)
@@ -412,10 +413,10 @@ func (a *apiController) batchOffline(ginCtx *gin.Context) {
 
 	for _, item := range batchOfflineList {
 		checkItem := &api_dto.ApiBatchCheckListItem{
-			ApiName:    item.APIName,
-			ClusterEnv: item.ClusterEnv,
-			Status:     item.Status,
-			Result:     item.Result,
+			ApiName:     item.APIName,
+			ClusterName: item.ClusterEnv,
+			Status:      item.Status,
+			Result:      item.Result,
 		}
 
 		outputList = append(outputList, checkItem)
@@ -454,7 +455,7 @@ func (a *apiController) batchOnlineCheck(ginCtx *gin.Context) {
 	for _, item := range batchOnlineList {
 		checkItem := &api_dto.ApiBatchOnlineCheckListItem{
 			ServiceTemplate: item.ServiceTemplate,
-			ClusterEnv:      item.ClusterEnv,
+			ClusterTitle:    item.ClusterEnv,
 			Status:          item.Status,
 			Result:          item.Result,
 			Solution:        item.Solution,

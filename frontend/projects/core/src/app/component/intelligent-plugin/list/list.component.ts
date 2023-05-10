@@ -16,6 +16,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { BaseInfoService } from '../../../service/base-info.service'
 import { NavigationEnd, Router } from '@angular/router'
 import { EoNgNavigationService } from '../../../service/eo-ng-navigation.service'
+import { EO_THEAD_TYPE } from 'projects/eo-ng-apinto-table/src/public-api'
 
 @Component({
   selector: 'eo-ng-intelligent-plugin-list',
@@ -164,7 +165,7 @@ export class IntelligentPluginListComponent implements OnInit {
 
   // table需要设置为loading状态
   private getTableConfig (fields:DynamicField[]) {
-    const newTableHeadConfig:THEAD_TYPE[] = []
+    const newTableHeadConfig:EO_THEAD_TYPE[] = []
     const newTableBodyConfig:TBODY_TYPE[] = []
     let statusColFlag:boolean = true
     for (const field of fields) {
@@ -234,6 +235,7 @@ export class IntelligentPluginListComponent implements OnInit {
     }
     this.tableBody = [...newTableBodyConfig, ...this.service.createTbody(this, 'btn')]
     this.tableHeadName = [...newTableHeadConfig, { title: '操作', right: true }]
+    console.log(this)
   }
 
   getTdTpl (attr:string) {
