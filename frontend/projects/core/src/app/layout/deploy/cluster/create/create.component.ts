@@ -163,6 +163,7 @@ export class DeployClusterCreateComponent implements OnInit {
       this.api.post('cluster', params).subscribe((resp) => {
         this.submitButtonLoading = false
         if (resp.code === 0) {
+          this.closeModal && this.closeModal()
           this.router.navigate(['/', 'deploy', 'cluster', 'content', name])
         }
       })
