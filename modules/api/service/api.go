@@ -2166,7 +2166,7 @@ func (a *apiService) IsAPIOnline(ctx context.Context, clusterName, clusterAddr s
 	}
 	client, err := v2.GetClusterClient(clusterName, clusterAddr)
 	if err != nil {
-		log.Errorf("get cluster status error: %w", err)
+		log.Errorf("get cluster status error: %v", err)
 		return false
 	}
 	_, err = client.Version(professionRouter, apiInfo.UUID)
@@ -2336,7 +2336,7 @@ func (a *apiService) ClustersStatus(ctx context.Context, namespaceId, apiId int,
 				Env:    c.Env,
 				Status: 1, //未发布
 			})
-			log.Errorf("get cluster status error: %w", err)
+			log.Errorf("get cluster status error: %v", err)
 			continue
 		}
 
@@ -2383,12 +2383,12 @@ func (a *apiService) getApintoAPIVersions(clusters []*cluster_model.Cluster) map
 	for _, c := range clusters {
 		client, err := v2.GetClusterClient(c.Name, c.Addr)
 		if err != nil {
-			log.Errorf("get cluster %s Client error: %w", c.Name, err)
+			log.Errorf("get cluster %s Client error: %v", c.Name, err)
 			continue
 		}
 		versions, err := client.Versions(professionRouter)
 		if err != nil {
-			log.Errorf("get cluster status error: %w", err)
+			log.Errorf("get cluster status error: %v", err)
 			continue
 		}
 		results[c.Name] = versions
