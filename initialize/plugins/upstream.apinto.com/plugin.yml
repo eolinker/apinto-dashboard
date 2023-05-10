@@ -201,31 +201,36 @@ define:  # 动态模块定义
                       },
                       "variable": {
                           "type": "void",
-                          "x-decorator": "FormItem",
-                          "x-component": "Space",
                           "properties": {
-                              "input": {
-                                  "type": "string",
+                              "nodes_variable":{
+                                  "type": "array",
                                   "x-decorator": "FormItem",
-                                  "x-component": "Input",
-                                  "readOnly": true,
-                                  "x-reactions": {
-                                      "dependencies": [
-                                          ".quote"
-                                      ],
-                                      "fulfill": {
-                                          "state": {
-                                              "value": "{{$deps[0]}}"
+                                  "maxItems": 3,
+                                  "x-component": "ArrayItems",
+                                  "items": {
+                                      "type": "void",
+                                      "x-component": "Space",
+                                      "properties": {
+                                          "input": {
+                                              "type": "string",
+                                              "x-decorator": "FormItem",
+                                              "x-decorator-props":{
+                                                  "feedbackLayout":"none"
+                                              },
+                                              "x-component": "Input",
+                                              "x-disabled":true
+                                          },
+                                          "quote": {
+                                              "type": "string",
+                                              "x-decorator": "FormItem",
+                                              "x-decorator-props":{
+                                                  "feedbackLayout":"none"
+                                              },
+                                              "x-component": "CustomEnvVariableComponent"
                                           }
                                       }
-                                  }
-                              },
-                              "quote": {
-                                  "type": "string",
-                                  "x-decorator": "FormItem",
-                                  "x-decorator-props": {},
-                                  "x-component": "CustomEnvVariableComponent",
-                                  "x-component-props": {}
+                                  },
+                                  "default":[""]
                               }
                           },
                           "x-index": 1,
@@ -248,7 +253,7 @@ define:  # 动态模块定义
                               }
                           ]
                       },
-                      "nodes": {
+                      "nodes_static": {
                           "type": "array",
                           "title": "",
                           "x-decorator": "FormItem",
@@ -272,7 +277,8 @@ define:  # 动态模块定义
                                       "type": "string",
                                       "x-decorator": "FormItem",
                                       "x-component": "Input",
-                                      "x-index": 1
+                                      "x-index": 1,
+                                      "required":true
                                   },
                                   "remove": {
                                       "type": "void",
@@ -286,34 +292,15 @@ define:  # 动态模块定义
                               "add": {
                                   "type": "void",
                                   "title": "添加节点",
-                                  "x-component": "ArrayItems.Addition",
-                                  "x-reactions": [
-                                      {
-                                          "dependencies": [
-                                              "../use_variable"
-                                          ],
-                                          "when": "{{$deps[0] == 1}}",
-                                          "fulfill": {
-                                              "state": {
-                                                  "visible": false
-                                              }
-                                          },
-                                          "otherwise": {
-                                              "state": {
-                                                  "visible": true
-                                              }
-                                          }
-                                      }
-                                  ],
-                                  "x-component-props": {}
+                                  "x-component": "ArrayItems.Addition"
                               }
                           },
                           "x-reactions": [
                               {
                                   "dependencies": [
-                                      "use_variable"
+                                      ".use_variable"
                                   ],
-                                  "when": "{{$deps[0] == 1}}",
+                                  "when": "{{$deps[0]?.length}}",
                                   "fulfill": {
                                       "state": {
                                           "visible": false
@@ -329,6 +316,27 @@ define:  # 动态模块定义
                           "x-validator": [],
                           "x-component-props": {},
                           "x-decorator-props": {}
+                      },
+                      "nodes":{
+                          "type":"array",
+                          "x-visible":"false",
+                          "x-reactions":{
+                              "dependencies": [
+                                  ".use_variable",".nodes_variable",".nodes_static"
+                              ],
+                              "when": "{{$deps[0]?.length}}",
+                              "fulfill": {
+                                  "state": {
+                                      "value": "{{$deps[1]}}"
+                                  }
+                              },
+                              "otherwise": {
+                                  "state": {
+                                      "value": "{{$deps[2]}}"
+                                  }
+                              }
+                          }
+
                       }
                   },
                   "required": true,
