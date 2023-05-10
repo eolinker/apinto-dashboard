@@ -1,1 +1,0 @@
-ALTER TABLE `cluster` ADD COLUMN `title` varchar(255) NOT NULL DEFAULT "" AFTER `name`;
