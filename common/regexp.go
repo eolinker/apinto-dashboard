@@ -16,7 +16,7 @@ const (
 	// UUIDExp UUID正则 数字字母横杠下划线任意组合
 	UUIDExp = `^[a-zA-Z0-9-_]+$`
 	// DomainPortExp 域名或者域名:端口
-	DomainPortExp = `^[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\.?(:[0-9]+)?$`
+	DomainPortExp = `^[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.?[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\.?(:[0-9]+)?$`
 	// IPPortExp IP:PORT
 	IPPortExp = `^((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3}:[0-9]+$`
 	// SchemeIPPortExp scheme://IP:PORT

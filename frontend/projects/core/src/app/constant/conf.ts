@@ -152,7 +152,7 @@ export const CommonPublishTableBody:EO_TBODY_TYPE[] = [
 export const PublishTableBody:EO_TBODY_TYPE[] = [
 
   {
-    key: 'name',
+    key: 'title',
     copy: true
   },
   {

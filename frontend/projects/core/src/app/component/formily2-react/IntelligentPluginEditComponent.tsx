@@ -151,7 +151,8 @@ export const IntelligentPluginEditComponent = React.forwardRef(
           'x-component': 'Input',
           'x-component-props': {
             placeholder: '支持字母开头、英文数字中横线下划线组合'
-          }
+          },
+          'x-disabled': editPage
         },
         title: {
           type: 'string',

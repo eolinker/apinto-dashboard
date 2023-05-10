@@ -288,6 +288,7 @@ func (a *apiService) GetAPIList(ctx context.Context, namespaceID int, groupUUID,
 			if !has {
 				publish = append(publish, &apimodel.APIListItemPublish{
 					Name:   clu.Name,
+					Title:  clu.Title,
 					Status: 1, //未发布
 				})
 				continue
@@ -297,6 +298,7 @@ func (a *apiService) GetAPIList(ctx context.Context, namespaceID int, groupUUID,
 			if !has {
 				publish = append(publish, &apimodel.APIListItemPublish{
 					Name:   clu.Name,
+					Title:  clu.Title,
 					Status: 1, //未发布
 				})
 				continue
@@ -310,6 +312,7 @@ func (a *apiService) GetAPIList(ctx context.Context, namespaceID int, groupUUID,
 
 			publish = append(publish, &apimodel.APIListItemPublish{
 				Name:   clu.Name,
+				Title:  clu.Title,
 				Status: status,
 			})
 		}
@@ -1005,7 +1008,7 @@ func (a *apiService) online(ctx context.Context, namespaceId, operator int, api 
 		for _, clusterInfo := range clusterList {
 			item := &apimodel.BatchListItem{
 				APIName:    api.Name,
-				ClusterEnv: fmt.Sprintf("%s_%s", clusterInfo.Name, clusterInfo.Env),
+				ClusterEnv: fmt.Sprintf("%s_%s", clusterInfo.Title, clusterInfo.Env),
 				Status:     false,
 				Result:     err.Error(),
 			}
@@ -1017,7 +1020,7 @@ func (a *apiService) online(ctx context.Context, namespaceId, operator int, api 
 	for _, clusterInfo := range clusterList {
 		item := &apimodel.BatchListItem{
 			APIName:    api.Name,
-			ClusterEnv: fmt.Sprintf("%s_%s", clusterInfo.Name, clusterInfo.Env),
+			ClusterEnv: fmt.Sprintf("%s_%s", clusterInfo.Title, clusterInfo.Env),
 			Status:     true,
 			Result:     "",
 		}
@@ -1192,7 +1195,7 @@ func (a *apiService) offline(ctx context.Context, operator, namespaceId int, api
 	for _, clusterInfo := range clusterList {
 		item := &apimodel.BatchListItem{
 			APIName:    latestApi.Name,
-			ClusterEnv: fmt.Sprintf("%s_%s", clusterInfo.Name, clusterInfo.Env),
+			ClusterEnv: fmt.Sprintf("%s_%s", clusterInfo.Title, clusterInfo.Env),
 			Status:     true,
 			Result:     "",
 		}
@@ -1313,7 +1316,7 @@ func (a *apiService) BatchOnlineCheck(ctx context.Context, namespaceId int, oper
 		for _, clusterInfo := range clusterList {
 			item := &apimodel.BatchOnlineCheckListItem{
 				ServiceTemplate: serName,
-				ClusterEnv:      fmt.Sprintf("%s%s", clusterInfo.Name, clusterInfo.Env),
+				ClusterEnv:      fmt.Sprintf("%s%s", clusterInfo.Title, clusterInfo.Env),
 				Status:          true,
 				Solution:        &frontend_model.Router{},
 			}
@@ -1321,7 +1324,7 @@ func (a *apiService) BatchOnlineCheck(ctx context.Context, namespaceId int, oper
 			if isOnline, _ := a.isServiceOnline(namespaceId, clusterInfo.Name, serName); !isOnline {
 				isAllOnline = false
 				item.Status = false
-				item.Result = fmt.Sprintf("%s未上线到%s", serName, clusterInfo.Name)
+				item.Result = fmt.Sprintf("%s未上线到%s集群", serName, clusterInfo.Title)
 				item.Solution.Name = frontend_model.RouterNameServiceOnline
 				item.Solution.Params = map[string]string{"cluster_name": clusterInfo.Name, "service_name": serName}
 			}
@@ -1338,7 +1341,7 @@ func (a *apiService) BatchOnlineCheck(ctx context.Context, namespaceId int, oper
 		for _, clusterInfo := range clusterList {
 			item := &apimodel.BatchOnlineCheckListItem{
 				ServiceTemplate: templateName,
-				ClusterEnv:      fmt.Sprintf("%s%s", clusterInfo.Name, clusterInfo.Env),
+				ClusterEnv:      fmt.Sprintf("%s%s", clusterInfo.Title, clusterInfo.Env),
 				Status:          true,
 				Solution:        &frontend_model.Router{},
 			}
@@ -1347,7 +1350,7 @@ func (a *apiService) BatchOnlineCheck(ctx context.Context, namespaceId int, oper
 			if _, has := templateClustersVersions[clusterInfo.Name][templateUuid]; !has {
 				isAllOnline = false
 				item.Status = false
-				item.Result = fmt.Sprintf("%s未上线到%s", templateName, clusterInfo.Name)
+				item.Result = fmt.Sprintf("%s未上线到%s集群", templateName, clusterInfo.Title)
 				item.Solution.Name = frontend_model.RouterNameTemplateOnline
 				item.Solution.Params = map[string]string{"cluster_name": clusterInfo.Name, "template_uuid": templateUuid}
 			}
@@ -1372,7 +1375,7 @@ func (a *apiService) BatchOnlineCheck(ctx context.Context, namespaceId int, oper
 			Data:     data,
 		}
 		key := onlineToken
-		if err := a.batchApiCache.Set(ctx, key, task, time.Hour*8); err != nil {
+		if err := a.batchApiCache.Set(ctx, key, task); err != nil {
 			return nil, "", err
 		}
 	}
@@ -1851,7 +1854,7 @@ func (a *apiService) GetImportCheckList(ctx context.Context, namespaceId int, fi
 		GroupID:     groupID,
 	}
 
-	if err = a.importApiCache.Set(ctx, key, importAPIRedisData, time.Hour*8); err != nil {
+	if err = a.importApiCache.Set(ctx, key, importAPIRedisData); err != nil {
 		return nil, "", err
 	}
 
@@ -2166,7 +2169,7 @@ func (a *apiService) IsAPIOnline(ctx context.Context, clusterName, clusterAddr s
 	}
 	client, err := v2.GetClusterClient(clusterName, clusterAddr)
 	if err != nil {
-		log.Errorf("get cluster status error: %w", err)
+		log.Errorf("get cluster status error: %v", err)
 		return false
 	}
 	_, err = client.Version(professionRouter, apiInfo.UUID)
@@ -2316,7 +2319,7 @@ func (a *apiService) ClustersStatus(ctx context.Context, namespaceId, apiId int,
 			if err != gorm.ErrRecordNotFound {
 				result = append(result, &apimodel.ApiCluster{
 					Name:   c.Name,
-					Title:  c.Name,
+					Title:  c.Title,
 					Env:    c.Env,
 					Status: 1, //未发布
 				})
@@ -2332,11 +2335,11 @@ func (a *apiService) ClustersStatus(ctx context.Context, namespaceId, apiId int,
 		if err != nil {
 			result = append(result, &apimodel.ApiCluster{
 				Name:   c.Name,
-				Title:  c.Name,
+				Title:  c.Title,
 				Env:    c.Env,
 				Status: 1, //未发布
 			})
-			log.Errorf("get cluster status error: %w", err)
+			log.Errorf("get cluster status error: %v", err)
 			continue
 		}
 
@@ -2351,7 +2354,7 @@ func (a *apiService) ClustersStatus(ctx context.Context, namespaceId, apiId int,
 		if err != nil {
 			result = append(result, &apimodel.ApiCluster{
 				Name:       c.Name,
-				Title:      c.Name,
+				Title:      c.Title,
 				Env:        c.Env,
 				Status:     1, //未发布
 				Updater:    updater,
@@ -2367,7 +2370,7 @@ func (a *apiService) ClustersStatus(ctx context.Context, namespaceId, apiId int,
 
 		result = append(result, &apimodel.ApiCluster{
 			Name:       c.Name,
-			Title:      c.Name,
+			Title:      c.Title,
 			Env:        c.Env,
 			Status:     status,
 			Updater:    updater,
@@ -2383,12 +2386,12 @@ func (a *apiService) getApintoAPIVersions(clusters []*cluster_model.Cluster) map
 	for _, c := range clusters {
 		client, err := v2.GetClusterClient(c.Name, c.Addr)
 		if err != nil {
-			log.Errorf("get cluster %s Client error: %w", c.Name, err)
+			log.Errorf("get cluster %s Client error: %v", c.Name, err)
 			continue
 		}
 		versions, err := client.Versions(professionRouter)
 		if err != nil {
-			log.Errorf("get cluster status error: %w", err)
+			log.Errorf("get cluster status error: %v", err)
 			continue
 		}
 		results[c.Name] = versions
