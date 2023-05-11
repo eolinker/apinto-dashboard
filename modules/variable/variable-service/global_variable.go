@@ -133,7 +133,7 @@ func (g *globalVariableService) GetInfo(ctx context.Context, namespaceID int, ke
 		detail := &variable_model.GlobalVariableDetails{
 			ClusterVariable: cVariable,
 			Status:          status,
-			ClusterName:     clusterInfo.Name,
+			ClusterName:     clusterInfo.Title, //这里用title是因为显示需要集群名称，之前是名称是用name的
 			Environment:     clusterInfo.Env,
 		}
 		variableDetails = append(variableDetails, detail)
