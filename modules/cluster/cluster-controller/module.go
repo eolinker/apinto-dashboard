@@ -83,7 +83,7 @@ func (c *Module) RoutersInfo() apinto_module.RoutersInfo {
 func (c *Module) initRouter() {
 	clrController := newClusterController()
 	nodeController := newClusterNodeController()
-	configController := newClusterConfigController()
+	//configController := newClusterConfigController()
 	certificateController := newClusterCertificateController()
 	c.routers = []apinto_module.RouterInfo{
 		{
@@ -151,30 +151,30 @@ func (c *Module) initRouter() {
 			Handler:     "cluster.nodes.edit",
 			HandlerFunc: []apinto_module.HandlerFunc{nodeController.put},
 		},
-		{
-			Method:      http.MethodGet,
-			Path:        "/api/cluster/:cluster_name/configuration/:type",
-			Handler:     "cluster.config",
-			HandlerFunc: []apinto_module.HandlerFunc{configController.get},
-		},
-		{
-			Method:      http.MethodPut,
-			Path:        "/api/cluster/:cluster_name/configuration/:type",
-			Handler:     "cluster.config.edit",
-			HandlerFunc: []apinto_module.HandlerFunc{configController.edit},
-		},
-		{
-			Method:      http.MethodPut,
-			Path:        "/api/cluster/:cluster_name/configuration/:type/enable",
-			Handler:     "cluster.config.enable",
-			HandlerFunc: []apinto_module.HandlerFunc{configController.enable},
-		},
-		{
-			Method:      http.MethodPut,
-			Path:        "/api/cluster/:cluster_name/configuration/:type/disable",
-			Handler:     "cluster.config.disable",
-			HandlerFunc: []apinto_module.HandlerFunc{configController.disable},
-		},
+		//{
+		//	Method:      http.MethodGet,
+		//	Path:        "/api/cluster/:cluster_name/configuration/:type",
+		//	Handler:     "cluster.config",
+		//	HandlerFunc: []apinto_module.HandlerFunc{configController.get},
+		//},
+		//{
+		//	Method:      http.MethodPut,
+		//	Path:        "/api/cluster/:cluster_name/configuration/:type",
+		//	Handler:     "cluster.config.edit",
+		//	HandlerFunc: []apinto_module.HandlerFunc{configController.edit},
+		//},
+		//{
+		//	Method:      http.MethodPut,
+		//	Path:        "/api/cluster/:cluster_name/configuration/:type/enable",
+		//	Handler:     "cluster.config.enable",
+		//	HandlerFunc: []apinto_module.HandlerFunc{configController.enable},
+		//},
+		//{
+		//	Method:      http.MethodPut,
+		//	Path:        "/api/cluster/:cluster_name/configuration/:type/disable",
+		//	Handler:     "cluster.config.disable",
+		//	HandlerFunc: []apinto_module.HandlerFunc{configController.disable},
+		//},
 
 		{
 			Method:      http.MethodPost,
