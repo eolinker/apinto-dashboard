@@ -97,6 +97,7 @@ func (p *pluginTemplateService) GetList(ctx context.Context, namespaceId int) ([
 
 	userInfoMaps, _ := p.userInfoService.GetUserInfoMaps(ctx, userIds...)
 
+	templateVersions := p.getApintoTemplateVersions(clusters)
 	resultList := make([]*plugin_template_model.PluginTemplate, 0, len(pluginTemplates))
 	for _, template := range pluginTemplates {
 
@@ -105,7 +106,7 @@ func (p *pluginTemplateService) GetList(ctx context.Context, namespaceId int) ([
 			pluginTemplate.OperatorStr = userInfo.NickName
 		}
 
-		isDelete, _ := p.isDelete(ctx, clusters, template)
+		isDelete, _ := p.isDelete(ctx, clusters, template, templateVersions)
 
 		pluginTemplate.IsDelete = isDelete
 		resultList = append(resultList, pluginTemplate)
@@ -118,10 +119,9 @@ func (p *pluginTemplateService) GetList(ctx context.Context, namespaceId int) ([
 	return resultList, nil
 }
 
-func (p *pluginTemplateService) isDelete(ctx context.Context, clusters []*cluster_model.Cluster, pluginTemplate *plugin_template_entry.PluginTemplate) (bool, error) {
-	templateVersions := p.getApintoTemplateVersions(clusters)
+func (p *pluginTemplateService) isDelete(ctx context.Context, clusters []*cluster_model.Cluster, pluginTemplate *plugin_template_entry.PluginTemplate, templateVersions map[string]map[string]string) (bool, error) {
 	for _, clusterInfo := range clusters {
-		if _, has := templateVersions[clusterInfo.Name][pluginTemplate.UUID]; !has {
+		if _, has := templateVersions[clusterInfo.Name][pluginTemplate.UUID]; has {
 			return false, errors.New(fmt.Sprintf("插件模板已在%s集群上线,不可删除", clusterInfo.Name))
 		}
 	}
@@ -384,7 +384,8 @@ func (p *pluginTemplateService) Delete(ctx context.Context, namespaceId, operato
 		return err
 	}
 
-	_, err = p.isDelete(ctx, clusters, pluginTemplate)
+	templateVersions := p.getApintoTemplateVersions(clusters)
+	_, err = p.isDelete(ctx, clusters, pluginTemplate, templateVersions)
 	if err != nil {
 		return err
 	}

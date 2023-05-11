@@ -47,7 +47,7 @@ func (d *dynamicStore) ListPageByKeyword(ctx context.Context, params map[string]
 		builder.WriteString(fmt.Sprintf(" AND `driver` IN (\"%s\")", strings.Join(drivers, "\",\"")))
 	}
 
-	return d.ListPage(ctx, builder.String(), page, pageSize, args, "update_time")
+	return d.ListPage(ctx, builder.String(), page, pageSize, args, "update_time desc")
 }
 
 func (d *dynamicStore) ListByKeyword(ctx context.Context, params map[string]interface{}, names []string, keyword string) ([]*dynamic_entry.Dynamic, error) {
