@@ -40,7 +40,7 @@ frontend-builder: # 前端构建
   script:
     - sed -i '/replace github.com\/eolinker\/eosc => */d' go.mod
     - go mod tidy
-    - ./scripts/build.sh $BUILD_DIR all ${VERSION} ${        BUILD_TYPE}
+    - ./scripts/build.sh $BUILD_DIR all ${VERSION} ${BUILD_TYPE}
 
 golang-builder:
   stage: build
