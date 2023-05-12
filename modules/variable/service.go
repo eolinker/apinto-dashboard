@@ -19,6 +19,8 @@ type IGlobalVariableService interface {
 	QuoteVariables(ctx context.Context, namespaceID, sourceID int, quoteType quote_entry.QuoteKindType, variableKeys []string) error
 	//CheckQuotedVariablesOnline 检查Source引用的环境变量是否在目标集群已上线
 	CheckQuotedVariablesOnline(ctx context.Context, clusterID int, clusterName string, sourceID int, quoteType quote_entry.QuoteKindType) error
+	//DeleteVariableQuote 删除source的环境变量引用关系
+	DeleteVariableQuote(ctx context.Context, sourceID int, quoteType quote_entry.QuoteKindType) error
 }
 
 type IClusterVariableService interface {
