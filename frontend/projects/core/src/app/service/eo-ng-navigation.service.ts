@@ -3,6 +3,7 @@ import { MenuOptions } from 'eo-ng-menu'
 import { Subject, Observable, forkJoin } from 'rxjs'
 import { ApiService } from './api.service'
 import { v4 as uuidv4 } from 'uuid'
+import { environment } from '../../environments/environment'
 
 @Injectable({
   providedIn: 'root'
@@ -18,6 +19,7 @@ export class EoNgNavigationService {
   accessMap: Map<string, string> = new Map()
   constructor (public api: ApiService) {}
   iframePrefix:string = 'module' // 与后端约定好的，所有iframe打开的页面都要加该前缀
+  isBusiness:boolean = environment.isBusiness
   setUserRoleId (val: string) {
     this.userRoleId = val
   }
@@ -41,7 +43,7 @@ export class EoNgNavigationService {
 
   // 获取首页路由地址
   getPageRoute (): string {
-    return '/guide'
+    return (this.isBusiness ? '/router/api' : '/guide')
     // return this.mainPageRouter
   }
 
