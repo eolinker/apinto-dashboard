@@ -19,6 +19,8 @@ if [[ "$3" != "" ]];then
   VERSION=$3
 fi
 
+BUILD_TYPE=$4
+
 GO_VERSION=`go version | { read _ _ v _; echo ${v#go}; }`
 
 if [ "$(version ${GO_VERSION})" -lt "$(version 1.18)" ];
@@ -44,7 +46,7 @@ if [[ "$BUILD_MODE" == "all" || ! -d "frontend/dist" ]];then
       echo "cd frontend && yarn install --registry https://registry.npmmirror.com --legacy-peer-deps "
       cd frontend && yarn install --registry https://registry.npmmirror.com --legacy-peer-deps
       echo "yarn build"
-      yarn build
+      yarn build ${BUILD_TYPE}
       cd ../
   else
       npm --prefix ./frontend run build
