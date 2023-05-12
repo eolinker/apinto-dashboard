@@ -131,6 +131,22 @@ func (c *clusterService) GetByNames(ctx context.Context, namespaceId int, names 
 	return list, nil
 }
 
+func (c *clusterService) GetByUUIDs(ctx context.Context, namespaceId int, uuids []string) ([]*cluster_model2.Cluster, error) {
+	clusters, err := c.clusterStore.GetByNamespaceByUUIDs(ctx, namespaceId, uuids)
+	if err != nil {
+		return nil, err
+	}
+	list := make([]*cluster_model2.Cluster, 0, len(clusters))
+	for _, clusterInfo := range clusters {
+		value := &cluster_model2.Cluster{
+			Cluster: clusterInfo,
+		}
+		list = append(list, value)
+	}
+
+	return list, nil
+}
+
 // Insert 新增集群
 func (c *clusterService) Insert(ctx context.Context, namespaceId, userId int, clusterInput *cluster_dto.ClusterInput) error {
 	clusterId, _ := c.CheckByNamespaceByName(ctx, namespaceId, clusterInput.Name)
