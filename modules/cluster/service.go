@@ -33,6 +33,7 @@ type IClusterService interface {
 	GetByNamespaceByName(ctx context.Context, namespaceId int, name string) (*cluster_model2.Cluster, error)
 	GetByNamespaceId(ctx context.Context, namespaceId int) ([]*cluster_model2.Cluster, error)
 	GetByNames(ctx context.Context, namespaceId int, names []string) ([]*cluster_model2.Cluster, error)
+	GetByUUIDs(ctx context.Context, namespaceId int, uuids []string) ([]*cluster_model2.Cluster, error)
 	Insert(ctx context.Context, namespaceId, userId int, clusterInput *cluster_dto.ClusterInput) error
 	QueryByNamespaceId(ctx context.Context, namespaceId int, clusterName string) (*cluster_model2.Cluster, error)
 	QueryListByNamespaceId(ctx context.Context, namespaceId int) ([]*cluster_model2.Cluster, error)
