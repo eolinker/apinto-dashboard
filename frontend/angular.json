@@ -117,6 +117,27 @@
               ],
               "outputHashing": "all"
             },
+            "business": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "500kb",
+                  "maximumError": "5mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "4kb",
+                  "maximumError": "8kb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "projects/core/src/environments/environment.ts",
+                  "with": "projects/core/src/environments/environment.business.prod.ts"
+                }
+              ],
+              "outputHashing": "all"
+            },
             "development": {
               "buildOptimizer": false,
               "optimization": false,
@@ -124,6 +145,20 @@
               "extractLicenses": false,
               "sourceMap": true,
               "namedChunks": true
+            },
+            "businessDevelopment": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true,
+              "fileReplacements": [
+                {
+                  "replace": "projects/core/src/environments/environment.ts",
+                  "with": "projects/core/src/environments/environment.business.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -134,8 +169,14 @@
             "production": {
               "browserTarget": "apinto:build:production"
             },
+            "business": {
+              "browserTarget": "apinto:build:business"
+            },
             "development": {
               "browserTarget": "apinto:build:development"
+            },
+            "businessDevelopment": {
+              "browserTarget": "apinto:build:businessDevelopment"
             }
           },
           "defaultConfiguration": "development"
@@ -163,7 +204,13 @@
             "production": {
               "tsConfig": "projects/eo-ng-apinto-table/tsconfig.lib.prod.json"
             },
+            "business": {
+              "tsConfig": "projects/eo-ng-apinto-table/tsconfig.lib.prod.json"
+            },
             "development": {
+              "tsConfig": "projects/eo-ng-apinto-table/tsconfig.lib.json"
+            },
+            "businessDevelopment": {
               "tsConfig": "projects/eo-ng-apinto-table/tsconfig.lib.json"
             }
           },

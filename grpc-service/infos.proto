@@ -96,6 +96,24 @@ message ModuleItem {
   string navigation_id = 3;
 }
 
+message GetClustersReq{
+  int32 namespace_id = 1;
+  repeated string names = 2;
+  repeated string uuids = 3;
+}
+
+message ClusterInfoResp{
+  repeated ClusterInfo items = 1;
+}
+
+message ClusterInfo{
+  string name = 1;
+  string title = 2;
+  string uuid = 3;
+  string env = 4;
+  string desc = 5;
+}
+
 service GetConsoleInfo {
   rpc GetAllNamespaces (EmptyRequest) returns (NamespacesListResp) {}
 
@@ -110,4 +128,8 @@ service GetConsoleInfo {
   rpc GetAppsByUuids(GetAppsByUuidsReq) returns (AppsResp) {}
 
   rpc GetNavigationModules(EmptyRequest) returns (NavigationModulesResp) {}
+
+  rpc GetClusters(GetClustersReq) returns(ClusterInfoResp) {}
+  rpc GetClustersByNames(GetClustersReq) returns(ClusterInfoResp) {}
+  rpc GetClustersByUUIDs(GetClustersReq) returns(ClusterInfoResp) {}
 }
