@@ -21,7 +21,7 @@ import { EoNgNavigationService } from '../../service/eo-ng-navigation.service'
 import { AuthInfoDetailComponent } from '../auth/info/detail/detail.component'
 import { BaseInfoService } from '../../service/base-info.service'
 import { IframeHttpService } from '../../service/iframe-http.service'
-
+import { environment } from '../../../environments/environment'
 @Component({
   selector: 'basic-layout',
   templateUrl: './basic-layout.component.html',
@@ -54,6 +54,7 @@ export class BasicLayoutComponent implements OnInit {
   }
 
   userAvatar:boolean = false // 是否显示用户头像，取决于是否开启用户权限插件
+  isBusiness:boolean = environment.isBusiness
 
   private subscription1: Subscription = new Subscription()
   private subscription2: Subscription = new Subscription()
@@ -83,7 +84,7 @@ export class BasicLayoutComponent implements OnInit {
 
     this.subscription2 = this.navigationService.repFlashMenu().subscribe(() => {
       this.sideMenuOptions = [
-        this.guideMenu,
+        ...(this.isBusiness ? [] : [this.guideMenu]),
         ...this.navigationService.getCurrentMenuList()
       ]
       for (const menu of this.sideMenuOptions) {
@@ -194,7 +195,7 @@ export class BasicLayoutComponent implements OnInit {
         this.router.routerState.snapshot.url === '/login'
       ) {
         // this.router.navigate([this.navigationService.getPageRoute()])
-        this.router.navigate(['/', 'guide'])
+        this.router.navigate(['/', ...(this.isBusiness ? ['router', 'api'] : ['guide'])])
       }
 
       // if (this.router.url !== this.currentRouter) {
