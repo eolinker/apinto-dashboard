@@ -4,6 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
@@ -17,8 +20,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/variable/variable-store"
 	"github.com/eolinker/eosc/common/bean"
 	"gorm.io/gorm"
-	"strings"
-	"time"
 )
 
 type globalVariableService struct {
@@ -289,21 +290,21 @@ func (g *globalVariableService) QuoteVariables(ctx context.Context, namespaceID 
 	return g.quoteStore.Set(ctx, sourceID, quoteType, quote_entry.QuoteTargetKindTypeVariable, variablesIDs...)
 }
 
-func (g *globalVariableService) CheckQuotedVariablesOnline(ctx context.Context, clusterID int, clusterName string, sourceID int, quoteType quote_entry.QuoteKindType) (bool, error) {
+func (g *globalVariableService) CheckQuotedVariablesOnline(ctx context.Context, clusterID int, clusterName string, sourceID int, quoteType quote_entry.QuoteKindType) error {
 	//服务引用的环境变量
 	quoteMaps, err := g.quoteStore.GetSourceQuote(ctx, sourceID, quoteType)
 	if err != nil {
-		return false, fmt.Errorf("获取目标引用的环境变量失败:%w", err)
+		return fmt.Errorf("获取目标引用的环境变量失败:%w", err)
 	}
 	variableIds := quoteMaps[quote_entry.QuoteTargetKindTypeVariable]
 	if len(variableIds) > 0 {
 		//获取集群正在运行的环境变量版本
 		variablePublishVersion, err := g.clusterVariableService.GetPublishVersion(ctx, clusterID)
 		if err != nil {
-			return false, fmt.Errorf("获取环境变量发布状态失败:%w", err)
+			return fmt.Errorf("获取环境变量发布状态失败:%w", err)
 		}
 		if variablePublishVersion == nil {
-			return false, errors.New("环境变量尚未发布")
+			return errors.New("环境变量尚未发布")
 		}
 
 		//已发布的环境变量
@@ -315,12 +316,12 @@ func (g *globalVariableService) CheckQuotedVariablesOnline(ctx context.Context, 
 			if _, ok := toMap[variableId]; !ok {
 				globalVariable, err := g.GetById(ctx, variableId)
 				if err != nil {
-					return false, err
+					return err
 				}
-				return false, errors.New(fmt.Sprintf("${%s}未上线到{%s}，上线/更新失败", globalVariable.Key, clusterName))
+				return errors.New(fmt.Sprintf("${%s}未上线到{%s}，上线/更新失败", globalVariable.Key, clusterName))
 			}
 		}
 	}
 
-	return true, nil
+	return nil
 }
