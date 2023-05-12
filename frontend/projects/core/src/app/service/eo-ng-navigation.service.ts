@@ -43,7 +43,7 @@ export class EoNgNavigationService {
 
   // 获取首页路由地址
   getPageRoute (): string {
-    return (this.isBusiness ? 'router/api' : 'guide')
+    return (this.isBusiness ? '/router/api' : '/guide')
     // return this.mainPageRouter
   }
 
