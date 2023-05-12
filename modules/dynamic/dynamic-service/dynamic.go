@@ -394,7 +394,7 @@ func (d *dynamicService) Online(ctx context.Context, namespaceId int, profession
 			failClusters = append(failClusters, fmt.Sprintf(onlineErrMsg, c.Name, fmt.Errorf("%s need %s", key, strings.Join(depends, ","))))
 			continue
 		}
-		err = d.variableService.CheckQuotedVariablesOnline(ctx, c.Id, c.Name, info.Id, quote_entry.QuoteKindTypeDynamic)
+		err = d.variableService.CheckQuotedVariablesOnline(ctx, c.Id, c.Title, info.Id, quote_entry.QuoteKindTypeDynamic)
 		if err != nil {
 			failClusters = append(failClusters, fmt.Sprintf(onlineErrMsg, c.Name, err))
 			continue
