@@ -325,3 +325,7 @@ func (g *globalVariableService) CheckQuotedVariablesOnline(ctx context.Context, 
 
 	return nil
 }
+
+func (g *globalVariableService) DeleteVariableQuote(ctx context.Context, sourceID int, quoteType quote_entry.QuoteKindType) error {
+	return g.quoteStore.DelSourceTarget(ctx, sourceID, quoteType, quote_entry.QuoteTargetKindTypeVariable)
+}
