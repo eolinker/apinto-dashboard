@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/grpc-service"
 	"github.com/eolinker/apinto-dashboard/modules/api"
+	"github.com/eolinker/apinto-dashboard/modules/cluster"
 	"github.com/eolinker/apinto-dashboard/modules/dynamic"
 	module_plugin "github.com/eolinker/apinto-dashboard/modules/module-plugin"
 	"github.com/eolinker/apinto-dashboard/modules/namespace"
@@ -27,6 +28,7 @@ type consoleInfoService struct {
 	modulePluginService module_plugin.IModulePlugin
 	navigationService   navigation_service.INavigationService
 	dynamicService      dynamic.IDynamicService
+	clusterService      cluster.IClusterService
 
 	modulesCache INavigationModulesCache
 }
@@ -38,6 +40,7 @@ func NewConsoleInfoService() grpc_service.GetConsoleInfoServer {
 	bean.Autowired(&c.modulePluginService)
 	bean.Autowired(&c.navigationService)
 	bean.Autowired(&c.dynamicService)
+	bean.Autowired(&c.clusterService)
 
 	bean.Autowired(&c.modulesCache)
 	return c
@@ -218,5 +221,65 @@ func (c *consoleInfoService) GetNavigationModules(ctx context.Context, req *grpc
 	return &grpc_service.NavigationModulesResp{
 		NavigationItems: navigationItems,
 		ModulesItems:    modulesItems,
+	}, nil
+}
+
+func (c *consoleInfoService) GetClusters(ctx context.Context, req *grpc_service.GetClustersReq) (*grpc_service.ClusterInfoResp, error) {
+	clusters, err := c.clusterService.GetByNamespaceId(ctx, int(req.NamespaceId))
+	if err != nil {
+		return nil, errors.New("获取集群列表失败")
+	}
+	items := make([]*grpc_service.ClusterInfo, 0, len(clusters))
+	for _, clu := range clusters {
+		items = append(items, &grpc_service.ClusterInfo{
+			Name:  clu.Name,
+			Title: clu.Title,
+			Uuid:  clu.UUID,
+			Env:   clu.Env,
+			Desc:  clu.Desc,
+		})
+	}
+	return &grpc_service.ClusterInfoResp{
+		Items: items,
+	}, nil
+}
+
+func (c *consoleInfoService) GetClustersByNames(ctx context.Context, req *grpc_service.GetClustersReq) (*grpc_service.ClusterInfoResp, error) {
+	clusters, err := c.clusterService.GetByNames(ctx, int(req.NamespaceId), req.Names)
+	if err != nil {
+		return nil, errors.New("获取集群列表失败")
+	}
+	items := make([]*grpc_service.ClusterInfo, 0, len(clusters))
+	for _, clu := range clusters {
+		items = append(items, &grpc_service.ClusterInfo{
+			Name:  clu.Name,
+			Title: clu.Title,
+			Uuid:  clu.UUID,
+			Env:   clu.Env,
+			Desc:  clu.Desc,
+		})
+	}
+	return &grpc_service.ClusterInfoResp{
+		Items: items,
+	}, nil
+}
+
+func (c *consoleInfoService) GetClustersByUUIDs(ctx context.Context, req *grpc_service.GetClustersReq) (*grpc_service.ClusterInfoResp, error) {
+	clusters, err := c.clusterService.GetByUUIDs(ctx, int(req.NamespaceId), req.Uuids)
+	if err != nil {
+		return nil, errors.New("获取集群列表失败")
+	}
+	items := make([]*grpc_service.ClusterInfo, 0, len(clusters))
+	for _, clu := range clusters {
+		items = append(items, &grpc_service.ClusterInfo{
+			Name:  clu.Name,
+			Title: clu.Title,
+			Uuid:  clu.UUID,
+			Env:   clu.Env,
+			Desc:  clu.Desc,
+		})
+	}
+	return &grpc_service.ClusterInfoResp{
+		Items: items,
 	}, nil
 }
