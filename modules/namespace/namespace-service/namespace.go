@@ -35,6 +35,7 @@ func (n *namespaceService) GetByName(name string) (*namespace_model.Namespace, e
 	}
 	namespaceInfo = &namespace_model.Namespace{Namespace: namespaceEntry}
 	n.namespaceCacheByName.Set(context.Background(), name, namespaceInfo)
+	n.namespaceCacheById.Set(context.Background(), namespaceInfo.Id, namespaceInfo)
 	return namespaceInfo, nil
 }
 
@@ -53,6 +54,7 @@ func (n *namespaceService) GetById(id int) (*namespace_model.Namespace, error) {
 	}
 	namespaceInfo = &namespace_model.Namespace{Namespace: namespaceEntry}
 	n.namespaceCacheById.Set(context.Background(), id, namespaceInfo)
+	n.namespaceCacheByName.Set(context.Background(), namespaceInfo.Name, namespaceInfo)
 	return namespaceInfo, nil
 }
 
