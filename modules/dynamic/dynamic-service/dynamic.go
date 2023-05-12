@@ -765,23 +765,41 @@ func (d *dynamicService) Save(ctx context.Context, namespaceId int, profession, 
 }
 
 func (d *dynamicService) Delete(ctx context.Context, namespaceId int, profession string, module string, name string) error {
-	_, err := d.dynamicQuoteStore.First(ctx, map[string]interface{}{
-		"namespace": namespaceId,
-		"target":    fmt.Sprintf("%s@%s", name, module),
-	})
-	if err != gorm.ErrRecordNotFound {
+	return d.dynamicStore.Transaction(ctx, func(txCtx context.Context) error {
+		info, err := d.dynamicStore.First(ctx, map[string]interface{}{
+			"namespace":  namespaceId,
+			"profession": profession,
+			"name":       name,
+		})
+		if err != nil {
+			if err != gorm.ErrRecordNotFound {
+				return err
+			}
+			return nil
+		}
+
+		_, err = d.dynamicQuoteStore.First(txCtx, map[string]interface{}{
+			"namespace": namespaceId,
+			"target":    fmt.Sprintf("%s@%s", name, module),
+		})
+		if err != gorm.ErrRecordNotFound {
+			if err != nil {
+				return err
+			}
+			// 被依赖就不能删
+			return fmt.Errorf("%s@%s is needed", name, module)
+		}
+		_, err = d.dynamicStore.DeleteWhere(txCtx, map[string]interface{}{
+			"namespace":  namespaceId,
+			"profession": profession,
+			"name":       name,
+		})
 		if err != nil {
 			return err
 		}
-		// 被依赖就不能删
-		return fmt.Errorf("%s@%s is needed", name, module)
-	}
-	_, err = d.dynamicStore.DeleteWhere(ctx, map[string]interface{}{
-		"namespace":  namespaceId,
-		"profession": profession,
-		"name":       name,
+		return d.variableService.DeleteVariableQuote(txCtx, info.Id, quote_entry.QuoteKindTypeDynamic)
 	})
-	return err
+
 }
 
 func (d *dynamicService) saveVersion(ctx context.Context, version *dynamic_entry.DynamicPublishVersion, history *dynamic_entry.DynamicPublishHistory, cluster string, addr string) error {
