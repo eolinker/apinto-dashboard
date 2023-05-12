@@ -8,6 +8,7 @@ var (
 	QuoteKindTypeAPI            QuoteKindType = "api"
 	QuoteKindTypeWarnStrategy   QuoteKindType = "warn_strategy"
 	QuoteKindTypePluginTemplate QuoteKindType = "plugin_template"
+	QuoteKindTypeDynamic        QuoteKindType = "dynamic"
 )
 
 type QuoteTargetKindType string
