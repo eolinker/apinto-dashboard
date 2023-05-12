@@ -2,6 +2,7 @@ package variable
 
 import (
 	"context"
+
 	quote_entry "github.com/eolinker/apinto-dashboard/modules/base/quote-entry"
 	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-dto"
 	"github.com/eolinker/apinto-dashboard/modules/variable/variable-model"
@@ -17,7 +18,7 @@ type IGlobalVariableService interface {
 	//QuoteVariables 引用环境变量
 	QuoteVariables(ctx context.Context, namespaceID, sourceID int, quoteType quote_entry.QuoteKindType, variableKeys []string) error
 	//CheckQuotedVariablesOnline 检查Source引用的环境变量是否在目标集群已上线
-	CheckQuotedVariablesOnline(ctx context.Context, clusterID int, clusterName string, sourceID int, quoteType quote_entry.QuoteKindType) (bool, error)
+	CheckQuotedVariablesOnline(ctx context.Context, clusterID int, clusterName string, sourceID int, quoteType quote_entry.QuoteKindType) error
 }
 
 type IClusterVariableService interface {
