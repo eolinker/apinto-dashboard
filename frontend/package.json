@@ -4,7 +4,9 @@
   "scripts": {
     "ng": "ng",
     "start": "set NODE_OPTIONS=--max_old_space_size=8192 & ng  serve  --proxy-config proxy.config.json ",
-    "build": "set NODE_OPTIONS=--max_old_space_size=8192 & ng build --configuration production --aot",
+    "start:business": "set NODE_OPTIONS=--max_old_space_size=8192 & ng  serve  --configuration=businessDevelopment --proxy-config proxy.config.json ",
+    "build": "set NODE_OPTIONS=--max_old_space_size=8192 & ng build --configuration=business --aot",
+    "build:business": "set NODE_OPTIONS=--max_old_space_size=8192 & ng build --configuration production --aot",
     "watch": "ng build --watch --configuration development",
     "test": "jest -c jest.config.ts",
     "eslint": "eslint --fix projects --ext .ts",
