@@ -9,6 +9,7 @@ import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { ApiService } from '../../../service/api.service'
 import { EoNgNavigationService } from '../../../service/eo-ng-navigation.service'
 import { CryptoService } from '../../../service/crypto.service'
+import { environment } from 'projects/core/src/environments/environment'
 
 @Component({
   selector: 'eo-ng-password',
@@ -24,6 +25,8 @@ export class PasswordComponent implements OnInit {
   isShowTooltip!: boolean
   // @ts-ignore
   routeQuery = this.route.queryParams.value
+  isBusiness = environment.isBusiness
+
   @ViewChild('needAutoFocus') autoFocusInput!: ElementRef
   constructor (
     private api: ApiService,
@@ -69,7 +72,7 @@ export class PasswordComponent implements OnInit {
                 this.router.navigate([callbackUrl])
               }
               else {
-                this.router.navigate(['/', 'guide'])
+                this.router.navigate(['/', ...(this.isBusiness ? ['router', 'api'] : ['guide'])])
               }
             }
           })
