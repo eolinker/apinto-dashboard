@@ -3,12 +3,12 @@ module github.com/eolinker/apinto-dashboard
 go 1.18
 
 require (
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
- 	github.com/eolinker/eosc v0.12.1
+	github.com/eolinker/eosc v0.12.1
 	github.com/gin-gonic/gin v1.9.0
 	github.com/go-basic/uuid v1.0.0
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/goccy/go-json v0.10.0
+	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/golang/mock v1.6.0
 	github.com/influxdata/influxdb-client-go/v2 v2.12.1
 	github.com/ohler55/ojg v1.18.5
@@ -17,6 +17,7 @@ require (
 	github.com/urfave/cli/v2 v2.23.4
 	github.com/xeipuuv/gojsonschema v1.2.0
 	golang.org/x/exp v0.0.0-20220915210609-840b3808d824
+	golang.org/x/net v0.7.0
 	golang.org/x/sync v0.0.0-20220819030929-7fc1605a5dde
 	google.golang.org/grpc v1.50.1
 	google.golang.org/protobuf v1.28.1
@@ -63,14 +64,10 @@ require (
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	golang.org/x/arch v0.0.0-20210923205945-b76863e36670 // indirect
 	golang.org/x/crypto v0.5.0 // indirect
-	golang.org/x/net v0.7.0 // indirect
 	golang.org/x/sys v0.5.0 // indirect
 	golang.org/x/text v0.7.0 // indirect
 	google.golang.org/genproto v0.0.0-20210602131652-f16073e35f0c // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 )
 
-replace (
-
-	github.com/eolinker/eosc => ../eosc
-)
+replace github.com/eolinker/eosc => ../eosc
