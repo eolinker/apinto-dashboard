@@ -89,9 +89,10 @@ func (rs RoutersInfo) Find(method, path string) (*RouterInfo, bool) {
 }
 
 type MiddlewareHandler struct {
-	Name    string
-	Rule    MiddlewareChecker
-	Handler HandlerFunc
+	Name        string
+	Rule        MiddlewareChecker
+	Handler     HandlerFunc
+	Alternative bool
 }
 
 func (m *MiddlewareHandler) checkRouter(router RouterInfo) bool {
