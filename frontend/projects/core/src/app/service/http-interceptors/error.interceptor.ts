@@ -63,7 +63,7 @@ export class ErrorInterceptor implements HttpInterceptor {
         break
       case -3:
         setTimeout(() => {
-          this.router.navigate(['/', 'login'])
+          this.router.navigate(['/', 'login'], { queryParamsHandling: 'merge' })
         }, 1000)
         break
       case -7:
