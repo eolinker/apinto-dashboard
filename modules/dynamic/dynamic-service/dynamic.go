@@ -8,6 +8,10 @@ import (
 	"strings"
 	"time"
 
+	quote_entry "github.com/eolinker/apinto-dashboard/modules/base/quote-entry"
+
+	"github.com/eolinker/apinto-dashboard/modules/variable"
+
 	"github.com/ohler55/ojg/jp"
 
 	apinto_module "github.com/eolinker/apinto-dashboard/module"
@@ -43,8 +47,9 @@ var (
 )
 
 type dynamicService struct {
-	userService    user.IUserInfoService
-	clusterService cluster.IClusterService
+	userService     user.IUserInfoService
+	clusterService  cluster.IClusterService
+	variableService variable.IGlobalVariableService
 
 	dynamicStore        dynamic_store.IDynamicStore
 	dynamicQuoteStore   dynamic_store.IDynamicQuoteStore
@@ -389,6 +394,11 @@ func (d *dynamicService) Online(ctx context.Context, namespaceId int, profession
 			failClusters = append(failClusters, fmt.Sprintf(onlineErrMsg, c.Name, fmt.Errorf("%s need %s", key, strings.Join(depends, ","))))
 			continue
 		}
+		err = d.variableService.CheckQuotedVariablesOnline(ctx, c.Id, c.Title, info.Id, quote_entry.QuoteKindTypeDynamic)
+		if err != nil {
+			failClusters = append(failClusters, fmt.Sprintf(onlineErrMsg, c.Name, err))
+			continue
+		}
 
 		version := &dynamic_entry.DynamicPublishVersion{
 			ClusterId:   c.Id,
@@ -670,6 +680,10 @@ func (d *dynamicService) Create(ctx context.Context, namespaceId int, profession
 		if err != nil {
 			return err
 		}
+		err = d.variableService.QuoteVariables(txCtx, namespaceId, info.Id, quote_entry.QuoteKindTypeDynamic, parseVariables(info.Config))
+		if err != nil {
+			return err
+		}
 		source := fmt.Sprintf("%s@%s", name, module)
 		_, err = d.dynamicQuoteStore.DeleteWhere(txCtx, map[string]interface{}{
 			"namespace": namespaceId,
@@ -724,6 +738,10 @@ func (d *dynamicService) Save(ctx context.Context, namespaceId int, profession, 
 		if err != nil {
 			return err
 		}
+		err = d.variableService.QuoteVariables(txCtx, namespaceId, info.Id, quote_entry.QuoteKindTypeDynamic, parseVariables(info.Config))
+		if err != nil {
+			return err
+		}
 		source := fmt.Sprintf("%s@%s", name, module)
 		_, err = d.dynamicQuoteStore.DeleteWhere(txCtx, map[string]interface{}{
 			"namespace": namespaceId,
@@ -747,27 +765,46 @@ func (d *dynamicService) Save(ctx context.Context, namespaceId int, profession, 
 }
 
 func (d *dynamicService) Delete(ctx context.Context, namespaceId int, profession string, module string, name string) error {
-	_, err := d.dynamicQuoteStore.First(ctx, map[string]interface{}{
-		"namespace": namespaceId,
-		"target":    fmt.Sprintf("%s@%s", name, module),
-	})
-	if err != gorm.ErrRecordNotFound {
+	return d.dynamicStore.Transaction(ctx, func(txCtx context.Context) error {
+		info, err := d.dynamicStore.First(ctx, map[string]interface{}{
+			"namespace":  namespaceId,
+			"profession": profession,
+			"name":       name,
+		})
+		if err != nil {
+			if err != gorm.ErrRecordNotFound {
+				return err
+			}
+			return nil
+		}
+
+		_, err = d.dynamicQuoteStore.First(txCtx, map[string]interface{}{
+			"namespace": namespaceId,
+			"target":    fmt.Sprintf("%s@%s", name, module),
+		})
+		if err != gorm.ErrRecordNotFound {
+			if err != nil {
+				return err
+			}
+			// 被依赖就不能删
+			return fmt.Errorf("%s@%s is needed", name, module)
+		}
+		_, err = d.dynamicStore.DeleteWhere(txCtx, map[string]interface{}{
+			"namespace":  namespaceId,
+			"profession": profession,
+			"name":       name,
+		})
 		if err != nil {
 			return err
 		}
-		// 被依赖就不能删
-		return fmt.Errorf("%s@%s is needed", name, module)
-	}
-	_, err = d.dynamicStore.DeleteWhere(ctx, map[string]interface{}{
-		"namespace":  namespaceId,
-		"profession": profession,
-		"name":       name,
+		return d.variableService.DeleteVariableQuote(txCtx, info.Id, quote_entry.QuoteKindTypeDynamic)
 	})
-	return err
+
 }
 
 func (d *dynamicService) saveVersion(ctx context.Context, version *dynamic_entry.DynamicPublishVersion, history *dynamic_entry.DynamicPublishHistory, cluster string, addr string) error {
 	return d.publishVersionStore.Transaction(ctx, func(txCtx context.Context) error {
+
 		var err error
 		if err = d.publishVersionStore.Save(txCtx, version); err != nil {
 			return err
@@ -804,6 +841,7 @@ func newDynamicService() dynamic.IDynamicService {
 	bean.Autowired(&d.dynamicQuoteStore)
 	bean.Autowired(&d.userService)
 	bean.Autowired(&d.clusterService)
+	bean.Autowired(&d.variableService)
 	bean.Autowired(&d.publishVersionStore)
 	bean.Autowired(&d.publishHistoryStore)
 	bean.Autowired(&d.provider)
