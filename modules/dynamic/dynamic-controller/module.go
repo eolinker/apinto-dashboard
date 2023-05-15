@@ -13,7 +13,7 @@ import (
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
 
-	"github.com/eolinker/apinto-module"
+	"github.com/eolinker/apinto-dashboard/module"
 )
 
 type DynamicModuleDriver struct {

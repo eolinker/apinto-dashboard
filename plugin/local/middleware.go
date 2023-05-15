@@ -3,7 +3,7 @@ package local
 import (
 	"bytes"
 	"fmt"
-	apinto_module "github.com/eolinker/apinto-module"
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
 	"github.com/gin-gonic/gin"
 	"github.com/goccy/go-json"
 	"io"

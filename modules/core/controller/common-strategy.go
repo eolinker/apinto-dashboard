@@ -1,8 +1,8 @@
 package controller
 
 import (
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
 	strategy_controller "github.com/eolinker/apinto-dashboard/modules/strategy/strategy-controller"
-	apinto_module "github.com/eolinker/apinto-module"
 	"net/http"
 )
 

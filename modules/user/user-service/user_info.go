@@ -7,12 +7,12 @@ import (
 
 	"github.com/eolinker/apinto-dashboard/common"
 
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
 	"github.com/eolinker/apinto-dashboard/modules/user"
 	user_dto "github.com/eolinker/apinto-dashboard/modules/user/user-dto"
 	user_entry "github.com/eolinker/apinto-dashboard/modules/user/user-entry"
 	user_model "github.com/eolinker/apinto-dashboard/modules/user/user-model"
 	user_store "github.com/eolinker/apinto-dashboard/modules/user/user-store"
-	apinto_module "github.com/eolinker/apinto-module"
 	"github.com/eolinker/eosc/common/bean"
 )
 

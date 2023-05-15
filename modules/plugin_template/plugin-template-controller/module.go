@@ -1,8 +1,8 @@
 package plugin_template_controller
 
 import (
+	"github.com/eolinker/apinto-dashboard/module"
 	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
-	"github.com/eolinker/apinto-module"
 	"net/http"
 )
 
