@@ -106,6 +106,10 @@ func (b *ModuleBuilder) createMiddleware() []MiddlewareHandler {
 	}
 	rs := make([]MiddlewareHandler, 0, len(cms)+len(b.middlewaresAppend))
 	for _, m := range b.coreMiddleware {
+		if !m.Alternative {
+			rs = append(rs, m)
+			continue
+		}
 		if _, has := cms[m.Name]; has {
 			rs = append(rs, m)
 		}
