@@ -3,9 +3,9 @@ package dynamic_controller
 import (
 	"context"
 	"github.com/eolinker/apinto-dashboard/common"
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
 	"github.com/eolinker/apinto-dashboard/modules/dynamic"
 	dynamic_model "github.com/eolinker/apinto-dashboard/modules/dynamic/dynamic-model"
-	apinto_module "github.com/eolinker/apinto-module"
 	"github.com/eolinker/eosc/common/bean"
 )
 

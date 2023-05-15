@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	apinto_module "github.com/eolinker/apinto-module"
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
 	"github.com/gin-gonic/gin"
 	"io"
 	"net/http"

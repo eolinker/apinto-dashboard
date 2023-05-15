@@ -2,8 +2,8 @@ package core
 
 import (
 	"context"
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
 	"github.com/eolinker/apinto-dashboard/modules/core/model"
-	apinto_module "github.com/eolinker/apinto-module"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
