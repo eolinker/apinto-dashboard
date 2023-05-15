@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 	grpc_service "github.com/eolinker/apinto-dashboard/grpc-service"
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
 	"github.com/eolinker/apinto-dashboard/modules/grpc-service/service"
 	"github.com/eolinker/apinto-dashboard/modules/notice"
-	apinto_module "github.com/eolinker/apinto-module"
 	"github.com/soheilhy/cmux"
 	"google.golang.org/grpc"
 	"net"

@@ -12,8 +12,8 @@ import (
 	"time"
 
 	v2 "github.com/eolinker/apinto-dashboard/client/v2"
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
 	"github.com/eolinker/apinto-dashboard/modules/dynamic"
-	apinto_module "github.com/eolinker/apinto-module"
 
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"

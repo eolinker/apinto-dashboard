@@ -1,8 +1,8 @@
 package strategy_model
 
 import (
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-entry"
-	apinto_module "github.com/eolinker/apinto-module"
 	"time"
 )
 

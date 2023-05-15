@@ -3,7 +3,7 @@ package service
 import (
 	"sync/atomic"
 
-	apinto_module "github.com/eolinker/apinto-module"
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
 )
 
 var _ IProviderService = (*ProviderService)(nil)

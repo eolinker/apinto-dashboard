@@ -3,7 +3,7 @@ package cluster_controller
 import (
 	"net/http"
 
-	"github.com/eolinker/apinto-module"
+	"github.com/eolinker/apinto-dashboard/module"
 )
 
 type ClusterPluginDriver struct {
