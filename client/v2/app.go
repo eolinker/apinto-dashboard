@@ -103,6 +103,7 @@ func dealAPPAppend(data map[string]interface{}) map[string]interface{} {
 			result[key] = params
 			continue
 		}
+		result[key] = value
 	}
 	return result
 }
