@@ -149,17 +149,19 @@ func NewModule() *Module {
 			Handler: namespace_controller.MustNamespace,
 		},
 		{
+			Name:        "login-module",
+			Rule:        apinto_module.MiddlewareRule(apinto_module.RouterLabelModule),
+			Handler:     userController.LoginCheckModule,
+			Alternative: true,
+		}, {
+			Name:        "login-api",
+			Rule:        apinto_module.MiddlewareRule(apinto_module.RouterLabelApi),
+			Handler:     userController.LoginCheckApi,
+			Alternative: true,
+		}, {
 			Name:    "userID",
 			Rule:    apinto_module.MiddlewareRule(apinto_module.RouterLabelApi),
 			Handler: userController.SetUser,
-		}, {
-			Name:    "login-api",
-			Rule:    apinto_module.MiddlewareRule(apinto_module.RouterLabelApi),
-			Handler: userController.LoginCheckApi,
-		}, {
-			Name:    "login-api",
-			Rule:    apinto_module.MiddlewareRule(apinto_module.RouterLabelApi),
-			Handler: userController.LoginCheckApi,
 		},
 	}
 	m := &Module{
