@@ -1,12 +1,12 @@
 package controller
 
 import (
-	"github.com/dgrijalva/jwt-go"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/controller/users"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
+	"github.com/golang-jwt/jwt/v5"
 	"net/http"
 )
 
