@@ -3,8 +3,8 @@ package common
 import (
 	"errors"
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/eolinker/apinto-dashboard/controller"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 func VerifyToken(tokenStr string, secret interface{}) (*jwt.Token, error) {
