@@ -40,6 +40,11 @@ func moduleRouters() apinto_module.RoutersInfo {
 			Path:        "/:module",
 			Labels:      apinto_module.RouterLabelModule,
 			HandlerFunc: []apinto_module.HandlerFunc{mc.HandleModule},
+		}, {
+			Method:      http.MethodGet,
+			Path:        "/login",
+			Labels:      apinto_module.RouterLabelAssets,
+			HandlerFunc: []apinto_module.HandlerFunc{mc.HandleModule},
 		},
 	}
 }

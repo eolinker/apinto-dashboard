@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	apinto_module "github.com/eolinker/apinto-dashboard/module"
+	"github.com/eolinker/eosc/log"
 	"github.com/gin-gonic/gin"
 	"github.com/goccy/go-json"
 	"io"
@@ -35,8 +36,9 @@ func (p *ProxyAPi) CreateMiddleware(name, path, life string, rule [][]string) ap
 		Name: name,
 		Rule: apinto_module.CreateMiddlewareRules(rule),
 		Handler: func(ginCtx *gin.Context) {
-
+			log.Debug("middleware proxy:", ginCtx.Request.RequestURI)
 			doMiddleware(ginCtx, url)
+
 		},
 	}
 }
