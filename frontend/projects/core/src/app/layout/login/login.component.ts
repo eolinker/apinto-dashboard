@@ -34,7 +34,7 @@ export class LoginComponent implements OnInit {
         this.subscription = this.navigationService
           .getMenuList()
           .subscribe(() => {
-            this.router.navigate([this.navigationService.getPageRoute()])
+            this.router.navigate([this.navigationService.getPageRoute()], { queryParamsHandling: 'merge' })
           })
       }
     })
