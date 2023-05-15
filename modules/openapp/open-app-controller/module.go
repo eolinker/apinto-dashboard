@@ -1,7 +1,7 @@
 package open_app_controller
 
 import (
-	"github.com/eolinker/apinto-module"
+	"github.com/eolinker/apinto-dashboard/module"
 )
 
 type PluginDriver struct {

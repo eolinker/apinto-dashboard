@@ -2,7 +2,7 @@ package controller
 
 import (
 	"github.com/eolinker/apinto-dashboard/frontend"
-	apinto_module "github.com/eolinker/apinto-module"
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"path"

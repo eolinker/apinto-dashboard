@@ -1,6 +1,7 @@
 package main
 
 import (
+	apintoModule "github.com/eolinker/apinto-dashboard/module"
 	apiController "github.com/eolinker/apinto-dashboard/modules/api/controller"
 	auditController "github.com/eolinker/apinto-dashboard/modules/audit/audit-controller"
 	clusterController "github.com/eolinker/apinto-dashboard/modules/cluster/cluster-controller"
@@ -16,7 +17,6 @@ import (
 	variable_controller "github.com/eolinker/apinto-dashboard/modules/variable/variable-controller"
 	webhook_controller "github.com/eolinker/apinto-dashboard/modules/webhook/controller"
 	"github.com/eolinker/apinto-dashboard/plugin/local"
-	apintoModule "github.com/eolinker/apinto-module"
 )
 
 func init() {
