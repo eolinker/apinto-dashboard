@@ -1,9 +1,9 @@
 package controller
 
 import (
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
 	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	group_controller "github.com/eolinker/apinto-dashboard/modules/group/group-controller"
-	apinto_module "github.com/eolinker/apinto-module"
 	"net/http"
 )
 

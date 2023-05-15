@@ -7,9 +7,9 @@ import (
 
 	"github.com/eolinker/eosc/common/bean"
 
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
 	namespace_controller "github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	notice_controller "github.com/eolinker/apinto-dashboard/modules/notice/controller"
-	apinto_module "github.com/eolinker/apinto-module"
 	"github.com/gin-gonic/gin"
 )
 

@@ -10,7 +10,7 @@ import (
 
 	"github.com/ohler55/ojg/jp"
 
-	apinto_module "github.com/eolinker/apinto-module"
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
 
 	cluster_model "github.com/eolinker/apinto-dashboard/modules/cluster/cluster-model"
 

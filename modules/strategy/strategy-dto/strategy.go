@@ -1,9 +1,9 @@
 package strategy_dto
 
 import (
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/config"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-model"
-	apinto_module "github.com/eolinker/apinto-module"
 )
 
 type StrategyListOut struct {

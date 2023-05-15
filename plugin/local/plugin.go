@@ -3,7 +3,7 @@ package local
 import (
 	"encoding/json"
 	"fmt"
-	apinto_module "github.com/eolinker/apinto-module"
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
 	"strings"
 )
 

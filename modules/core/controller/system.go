@@ -16,7 +16,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/cluster"
 	"github.com/gin-gonic/gin"
 
-	apinto_module "github.com/eolinker/apinto-module"
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
 )
 
 type System struct {

@@ -1,7 +1,7 @@
 package local
 
 import (
-	apinto_module "github.com/eolinker/apinto-module"
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
 )
 
 type tDriver struct {
