@@ -3,7 +3,7 @@ module github.com/eolinker/apinto-dashboard
 go 1.18
 
 require (
-	github.com/eolinker/apinto-business v0.0.0-00010101000000-000000000000
+ 
 	github.com/eolinker/eosc v0.12.1
 	github.com/gin-gonic/gin v1.9.0
 	github.com/go-basic/uuid v1.0.0
@@ -73,4 +73,3 @@ require (
 
 replace github.com/eolinker/eosc => ../eosc
 
-replace github.com/eolinker/apinto-business => ../apinto-business
