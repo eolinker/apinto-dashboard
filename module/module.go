@@ -40,7 +40,7 @@ type RouterInfo struct {
 	Handler     string
 	Labels      []string
 	HandlerFunc []HandlerFunc
-	Alternative bool
+	Replaceable bool
 	labels      map[string]struct{}
 }
 
@@ -92,7 +92,7 @@ type MiddlewareHandler struct {
 	Name        string
 	Rule        MiddlewareChecker
 	Handler     HandlerFunc
-	Alternative bool
+	Replaceable bool
 }
 
 func (m *MiddlewareHandler) checkRouter(router RouterInfo) bool {

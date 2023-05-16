@@ -305,7 +305,7 @@ func randomRouters() apinto_module.RoutersInfo {
 			Handler:     "core.random.id",
 			Labels:      apinto_module.RouterLabelApi,
 			HandlerFunc: []apinto_module.HandlerFunc{r.GET},
-			Alternative: false,
+			Replaceable: false,
 		}}
 }
 func userRouters() apinto_module.RoutersInfo {
@@ -317,7 +317,7 @@ func userRouters() apinto_module.RoutersInfo {
 			Handler:     "core.my.profile",
 			Labels:      apinto_module.RouterLabelApi,
 			HandlerFunc: []apinto_module.HandlerFunc{userController.myProfile},
-			Alternative: true,
+			Replaceable: true,
 		},
 		{
 			Method:      http.MethodPut,
@@ -325,14 +325,14 @@ func userRouters() apinto_module.RoutersInfo {
 			Handler:     "core.my.profile.reset",
 			Labels:      apinto_module.RouterLabelApi,
 			HandlerFunc: []apinto_module.HandlerFunc{userController.myProfileUpdate},
-			Alternative: true,
+			Replaceable: true,
 		}, {
 			Method:      http.MethodPost,
 			Path:        "/api/my/password",
 			Handler:     "core.my.password",
 			Labels:      apinto_module.RouterLabelApi,
 			HandlerFunc: []apinto_module.HandlerFunc{userController.setPassword},
-			Alternative: true,
+			Replaceable: true,
 		},
 		{
 			Method:      http.MethodGet,
@@ -340,14 +340,14 @@ func userRouters() apinto_module.RoutersInfo {
 			Handler:     "core.my.access",
 			Labels:      apinto_module.RouterLabelApi,
 			HandlerFunc: []apinto_module.HandlerFunc{userController.access},
-			Alternative: true,
+			Replaceable: true,
 		}, {
 			Method:      http.MethodGet,
 			Path:        "/api/user/enum",
 			Handler:     "core.user.enum",
 			Labels:      apinto_module.RouterLabelApi,
 			HandlerFunc: []apinto_module.HandlerFunc{userController.userEnum},
-			Alternative: true,
+			Replaceable: true,
 		},
 		{
 			Method:      http.MethodPost,
@@ -355,7 +355,7 @@ func userRouters() apinto_module.RoutersInfo {
 			Handler:     "core.sso.login",
 			Labels:      apinto_module.RouterLabelAnonymous,
 			HandlerFunc: []apinto_module.HandlerFunc{userController.ssoLogin},
-			Alternative: true,
+			Replaceable: true,
 		},
 		{
 			Method:      http.MethodPost,
@@ -363,14 +363,14 @@ func userRouters() apinto_module.RoutersInfo {
 			Handler:     "core.sso.login.check",
 			Labels:      apinto_module.RouterLabelAnonymous,
 			HandlerFunc: []apinto_module.HandlerFunc{userController.ssoLoginCheck},
-			Alternative: true,
+			Replaceable: true,
 		}, {
 			Method:      http.MethodPost,
 			Path:        "/sso/logout",
 			Handler:     "core.sso.logout",
 			Labels:      apinto_module.RouterLabelAnonymous,
 			HandlerFunc: []apinto_module.HandlerFunc{userController.ssoLogout},
-			Alternative: true,
+			Replaceable: true,
 		},
 	}
 }
