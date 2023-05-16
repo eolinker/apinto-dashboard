@@ -114,6 +114,7 @@ export const strategiesTableHeadName:THEAD_TYPE[] = [
   },
   {
     title: '更新时间',
+    key: 'updateTime',
     showSort: true
   },
   {
