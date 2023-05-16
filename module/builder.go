@@ -9,6 +9,14 @@ import (
 	"sync"
 )
 
+var (
+	systemMiddlewares []MiddlewareHandler
+)
+
+func AddSystemMiddleware(handler MiddlewareHandler) {
+	systemMiddlewares = append(systemMiddlewares, handler)
+}
+
 type ModuleBuilder struct {
 	lock              sync.Mutex
 	modules           map[string]Module
@@ -48,8 +56,14 @@ func NewModuleBuilder(engine *gin.Engine, core CoreModule, filterOptionManager .
 		b.filterOptionManager = nil
 	}
 	if middleware, has := core.Middleware(); has {
+		midCore := middleware.MiddlewaresInfo()
+		mds := make([]MiddlewareHandler, 0, len(systemMiddlewares)+len(midCore))
+		if len(systemMiddlewares) > 0 {
+			mds = append(mds, systemMiddlewares...)
+		}
+		mds = append(mds, midCore...)
+		b.coreMiddleware = mds
 
-		b.coreMiddleware = middleware.MiddlewaresInfo()
 	}
 	if providerSupport, has := core.Support(); has {
 		b.providerBuilder.Append(core.Name(), providerSupport)
@@ -83,13 +97,19 @@ func (b *ModuleBuilder) Append(module ...Module) *ModuleBuilder {
 func (b *ModuleBuilder) createMiddleware() []MiddlewareHandler {
 	cms := make(map[string]struct{})
 	for _, m := range b.coreMiddleware {
-		cms[m.Name] = struct{}{}
+		if m.Alternative {
+			cms[m.Name] = struct{}{}
+		}
 	}
 	for _, m := range b.middlewaresAppend {
 		delete(cms, m.Name)
 	}
 	rs := make([]MiddlewareHandler, 0, len(cms)+len(b.middlewaresAppend))
 	for _, m := range b.coreMiddleware {
+		if !m.Alternative {
+			rs = append(rs, m)
+			continue
+		}
 		if _, has := cms[m.Name]; has {
 			rs = append(rs, m)
 		}
