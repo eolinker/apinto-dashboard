@@ -152,12 +152,12 @@ func NewModule() *Module {
 			Name:        "login-module",
 			Rule:        apinto_module.MiddlewareRule(apinto_module.RouterLabelModule),
 			Handler:     userController.LoginCheckModule,
-			Alternative: true,
+			Replaceable: true,
 		}, {
 			Name:        "login-api",
 			Rule:        apinto_module.MiddlewareRule(apinto_module.RouterLabelApi),
 			Handler:     userController.LoginCheckApi,
-			Alternative: true,
+			Replaceable: true,
 		}, {
 			Name:    "userID",
 			Rule:    apinto_module.MiddlewareRule(apinto_module.RouterLabelApi),
