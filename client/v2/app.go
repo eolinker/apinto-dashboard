@@ -6,7 +6,7 @@ import (
 )
 
 type Config struct {
-	Driver    string            `json:"driver"`
+	Type      string            `json:"type"`
 	Position  string            `json:"position"`
 	Users     *User             `json:"users"`
 	TokenName string            `json:"token_name"`
@@ -18,7 +18,7 @@ func (c *Config) MarshalJSON() ([]byte, error) {
 	if c.Users != nil {
 		c.Users.Labels = c.Labels
 	}
-	tmp["driver"] = c.Driver
+	tmp["type"] = c.Type
 	tmp["position"] = c.Position
 	tmp["token_name"] = c.TokenName
 	tmp["users"] = []*User{
