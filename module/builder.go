@@ -26,7 +26,7 @@ type ModuleBuilder struct {
 	providerBuilder    *ProviderBuilder
 	engine             *gin.Engine
 	core               CoreModule
-	alternativeRouters map[string]RouterInfo
+	ReplaceableRouters map[string]RouterInfo
 
 	middlewares []MiddlewareHandler
 
@@ -97,7 +97,7 @@ func (b *ModuleBuilder) Append(module ...Module) *ModuleBuilder {
 func (b *ModuleBuilder) createMiddleware() []MiddlewareHandler {
 	cms := make(map[string]struct{})
 	for _, m := range b.coreMiddleware {
-		if m.Alternative {
+		if m.Replaceable {
 			cms[m.Name] = struct{}{}
 		}
 	}
@@ -106,7 +106,7 @@ func (b *ModuleBuilder) createMiddleware() []MiddlewareHandler {
 	}
 	rs := make([]MiddlewareHandler, 0, len(cms)+len(b.middlewaresAppend))
 	for _, m := range b.coreMiddleware {
-		if !m.Alternative {
+		if !m.Replaceable {
 			rs = append(rs, m)
 			continue
 		}
@@ -126,10 +126,10 @@ func (b *ModuleBuilder) initCore() error {
 		return errors.New("core must routers")
 	}
 	routersInfo := routers.RoutersInfo()
-	b.alternativeRouters = make(map[string]RouterInfo, len(routersInfo))
+	b.ReplaceableRouters = make(map[string]RouterInfo, len(routersInfo))
 	for _, r := range routersInfo {
-		if r.Alternative {
-			b.alternativeRouters[fmt.Sprintf("%s:%s", r.Method, r.Path)] = r
+		if r.Replaceable {
+			b.ReplaceableRouters[fmt.Sprintf("%s:%s", r.Method, r.Path)] = r
 		}
 	}
 	b.middlewares = b.createMiddleware()
@@ -164,8 +164,8 @@ func (b *ModuleBuilder) Build() (httpHandler http.Handler, iproviders IProviders
 			}
 		}
 	}
-	log.Debug("handler: alternativeRouters")
-	for _, r := range b.alternativeRouters {
+	log.Debug("handler: ReplaceableRouters")
+	for _, r := range b.ReplaceableRouters {
 		errCore := b.handleRouter(r)
 		if errCore != nil {
 			return nil, nil, errCore
@@ -177,14 +177,14 @@ func (b *ModuleBuilder) Build() (httpHandler http.Handler, iproviders IProviders
 func (b *ModuleBuilder) handleModule(routers RoutersInfo, moduleNameHandler ...gin.HandlerFunc) (errResult error) {
 
 	for i, routerInfo := range routers {
-		if routerInfo.Alternative {
+		if routerInfo.Replaceable {
 			log.DebugF("skip:%s %s %d\n", routerInfo.Method, routerInfo.Path, i)
 			continue
 		}
 
 		key := fmt.Sprintf("%s:%s", routerInfo.Method, routerInfo.Path)
-		if d, has := b.alternativeRouters[key]; has {
-			delete(b.alternativeRouters, key)
+		if d, has := b.ReplaceableRouters[key]; has {
+			delete(b.ReplaceableRouters, key)
 			routerInfo.Labels = d.Labels
 		}
 		err := b.handleRouter(routerInfo, moduleNameHandler...)
