@@ -1,12 +1,11 @@
 /* eslint-disable dot-notation */
 import { Component, Input, OnInit } from '@angular/core'
 import { FormGroup, UntypedFormBuilder, Validators } from '@angular/forms'
-import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { ApiService } from 'projects/core/src/app/service/api.service'
-import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 import { Buffer } from 'buffer'
 import { EmptyHttpResponse } from 'projects/core/src/app/constant/type'
+import { DeployCertData } from '../../types/types'
 
 @Component({
   selector: 'eo-ng-deploy-cluster-cert-form',
@@ -65,6 +64,7 @@ import { EmptyHttpResponse } from 'projects/core/src/app/constant/type'
 })
 export class DeployClusterCertFormComponent implements OnInit {
   @Input() closeModal?:(value?:any)=>void
+  @Input() editPage:boolean = false
   validateForm:FormGroup = new FormGroup({})
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
   clusterName:string = ''
@@ -72,18 +72,30 @@ export class DeployClusterCertFormComponent implements OnInit {
   nzDisabled:boolean = false
 
   constructor (
-    private message: EoNgFeedbackMessageService,
     public api:ApiService,
-    private fb: UntypedFormBuilder,
-    private navigationService:EoNgNavigationService) {
+    private fb: UntypedFormBuilder) {
     this.validateForm = this.fb.group({
       key: ['', [Validators.required]],
       pem: ['', [Validators.required]]
     })
-    this.navigationService.reqFlashBreadcrumb([{ title: '网关集群', routerLink: 'deploy/cluster' }, { title: 'SSL证书' }])
   }
 
   ngOnInit (): void {
+    if(this.editPage){
+      this.getCertMessage()
+    }
+  }
+
+  getCertMessage(){
+    this.api.get(`cluster/${this.clusterName}/certificate/${this.certId}`)
+      .subscribe((resp:{code:number, data:{certificate:DeployCertData}, msg:string}) => {
+        if (resp.code === 0) {
+          this.validateForm.patchValue({
+            key:this.decode(resp.data.certificate.key),
+            pem:this.decode(resp.data.certificate.cert)
+          })
+        }
+      })
   }
 
   disabledEdit (value: any) {
@@ -146,5 +158,9 @@ export class DeployClusterCertFormComponent implements OnInit {
   // 字符串转base64
   encode (str:string) {
     return Buffer.from(str).toString('base64')
+  }
+
+  decode (str:string){
+    return Buffer.from(str, 'base64').toString('utf8')
   }
 }
