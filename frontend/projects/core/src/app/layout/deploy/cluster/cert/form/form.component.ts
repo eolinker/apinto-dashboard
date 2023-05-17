@@ -6,6 +6,7 @@ import { ApiService } from 'projects/core/src/app/service/api.service'
 import { Buffer } from 'buffer'
 import { EmptyHttpResponse } from 'projects/core/src/app/constant/type'
 import { DeployCertData } from '../../types/types'
+import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 
 @Component({
   selector: 'eo-ng-deploy-cluster-cert-form',
@@ -72,6 +73,7 @@ export class DeployClusterCertFormComponent implements OnInit {
   nzDisabled:boolean = false
 
   constructor (
+    private message: EoNgFeedbackMessageService,
     public api:ApiService,
     private fb: UntypedFormBuilder) {
     this.validateForm = this.fb.group({
@@ -109,6 +111,7 @@ export class DeployClusterCertFormComponent implements OnInit {
           this.api.post('cluster/' + this.clusterName + '/certificate', { key: this.encode(this.validateForm.controls['key'].value), pem: this.encode(this.validateForm.controls['pem'].value) || '' })
             .subscribe((resp:EmptyHttpResponse) => {
               if (resp.code === 0) {
+                this.message.success(resp.msg || '新增成功')
                 this.closeModal && this.closeModal()
               }
             })
@@ -117,6 +120,7 @@ export class DeployClusterCertFormComponent implements OnInit {
           this.api.put('cluster/' + this.clusterName + '/certificate/' + this.certId, { key: this.encode(this.validateForm.controls['key'].value), pem: this.encode(this.validateForm.controls['pem'].value) || '' })
             .subscribe((resp:EmptyHttpResponse) => {
               if (resp.code === 0) {
+                this.message.success(resp.msg || '修改成功')
                 this.closeModal && this.closeModal()
               }
             })
