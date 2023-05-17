@@ -92,7 +92,7 @@ export class DeployClusterCertFormComponent implements OnInit {
         if (resp.code === 0) {
           this.validateForm.patchValue({
             key: this.decode(resp.data.certificate.key),
-            pem: this.decode(resp.data.certificate.cert)
+            pem: this.decode(resp.data.certificate.pem)
           })
         }
       })
