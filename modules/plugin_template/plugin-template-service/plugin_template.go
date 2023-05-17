@@ -175,6 +175,14 @@ func (p *pluginTemplateService) Create(ctx context.Context, namespaceId, operato
 		input.UUID = uuid.New()
 	}
 
+	extenders, err := p.pluginService.GetExtendersCache(ctx, namespaceId)
+	if err != nil {
+		return err
+	}
+	extendersMap := common.SliceToMap(extenders, func(t *plugin_model.ExtenderInfo) string {
+		return t.Id
+	})
+
 	plugins := make([]*plugin_model.Plugin, 0, len(input.Plugins))
 	for _, pluginInfo := range input.Plugins {
 
@@ -187,7 +195,12 @@ func (p *pluginTemplateService) Create(ctx context.Context, namespaceId, operato
 
 		bytes, _ := json.Marshal(pluginInfo.Config)
 		//检测JsonSchema格式是否正确
-		if err = common.JsonSchemaValid(modelPlugin.Schema, string(bytes)); err != nil {
+		schema := modelPlugin.Schema
+		extenderInfo, has := extendersMap[modelPlugin.Extended]
+		if has {
+			schema = extenderInfo.Schema
+		}
+		if err = common.JsonSchemaValid(schema, string(bytes)); err != nil {
 			return errors.New(fmt.Sprintf("插件名为%s的config配置格式错误 err=%s", modelPlugin.Name, err.Error()))
 		}
 
@@ -270,6 +283,14 @@ func (p *pluginTemplateService) Create(ctx context.Context, namespaceId, operato
 // Update 修改插件模板
 func (p *pluginTemplateService) Update(ctx context.Context, namespaceId, operator int, input *plugin_template_model.PluginTemplateDetail) error {
 
+	extenders, err := p.pluginService.GetExtendersCache(ctx, namespaceId)
+	if err != nil {
+		return err
+	}
+	extendersMap := common.SliceToMap(extenders, func(t *plugin_model.ExtenderInfo) string {
+		return t.Id
+	})
+
 	plugins := make([]*plugin_model.Plugin, 0, len(input.Plugins))
 	for _, pluginInfo := range input.Plugins {
 		modelPlugin, err := p.pluginService.GetByName(ctx, namespaceId, pluginInfo.Name)
@@ -281,8 +302,13 @@ func (p *pluginTemplateService) Update(ctx context.Context, namespaceId, operato
 		plugins = append(plugins, modelPlugin)
 
 		bytes, _ := json.Marshal(pluginInfo.Config)
-		//检测JsonSchema格式是否正确
-		if err = common.JsonSchemaValid(modelPlugin.Schema, string(bytes)); err != nil {
+		//检测JsonSchema格式是否正确, 优先使用缓存里的schema
+		schema := modelPlugin.Schema
+		extenderInfo, has := extendersMap[modelPlugin.Extended]
+		if has {
+			schema = extenderInfo.Schema
+		}
+		if err = common.JsonSchemaValid(schema, string(bytes)); err != nil {
 			return errors.New(fmt.Sprintf("插件名为%s的config配置格式错误 err=%s", modelPlugin.Name, err.Error()))
 		}
 	}
