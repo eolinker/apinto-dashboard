@@ -12,7 +12,7 @@ export interface DeployCertData{
   name:string
   validTime:string
   key:string
-  cert:string
+  pem:string
 }
 
 export interface RedisData{
