@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	dynamic_model "github.com/eolinker/apinto-dashboard/modules/dynamic/dynamic-model"
 	"reflect"
 	"sort"
 	"strings"
@@ -1288,7 +1289,8 @@ func (a *apiService) BatchOnlineCheck(ctx context.Context, namespaceId int, oper
 	}
 
 	isAllOnline := true
-	checkServiceMap := make(map[int]string)     //serviceId集合，用于对检查列表的去重
+	checkServiceMap := make(map[string]string) //serviceId集合，用于对检查列表的去重
+	checkServiceSlice := make([]string, 0, 5)
 	checkTemplateMap := make(map[string]string) //插件模板ID集合，用于对检查列表的去重
 	checkList := make([]*apimodel.BatchOnlineCheckListItem, 0, len(apiList)*len(clusterList))
 
@@ -1300,8 +1302,11 @@ func (a *apiService) BatchOnlineCheck(ctx context.Context, namespaceId int, oper
 	//确认每个api对应的cluster所配置的serviceID和模板的上线情况
 	for _, api := range apiList {
 		version := versionMap[api.Id]
-		if _, has := checkServiceMap[version.ServiceID]; !has {
-			checkServiceMap[version.ServiceID] = version.ServiceName
+		idx := strings.LastIndex(version.ServiceName, "@")
+		serName := version.ServiceName[:idx]
+		if _, has := checkServiceMap[serName]; !has {
+			checkServiceMap[serName] = version.ServiceName //有@后缀的
+			checkServiceSlice = append(checkServiceSlice, serName)
 		}
 		if _, has := checkTemplateMap[version.TemplateUUID]; !has && version.TemplateUUID != "" {
 			templateInfo, err := a.pluginTemplateService.GetBasicInfoByUUID(ctx, version.TemplateUUID)
@@ -1311,22 +1316,30 @@ func (a *apiService) BatchOnlineCheck(ctx context.Context, namespaceId int, oper
 			checkTemplateMap[version.TemplateUUID] = templateInfo.Name
 		}
 	}
+	serviceList, err := a.dynamicService.ListByNames(ctx, namespaceId, professionService, checkServiceSlice)
+	if err != nil {
+		return nil, "", err
+	}
+	serviceMap := common.SliceToMap(serviceList, func(t *dynamic_model.DynamicBasicInfo) string {
+		return t.ID //不包含@后缀的
+	})
 
-	for _, serName := range checkServiceMap {
+	for serName, serID := range checkServiceMap {
 		for _, clusterInfo := range clusterList {
+			serviceTitle := serviceMap[serName].Title
 			item := &apimodel.BatchOnlineCheckListItem{
-				ServiceTemplate: serName,
+				ServiceTemplate: serviceTitle,
 				ClusterEnv:      fmt.Sprintf("%s%s", clusterInfo.Title, clusterInfo.Env),
 				Status:          true,
 				Solution:        &frontend_model.Router{},
 			}
 
-			if isOnline, _ := a.isServiceOnline(namespaceId, clusterInfo.Name, serName); !isOnline {
+			if isOnline, _ := a.isServiceOnline(namespaceId, clusterInfo.Name, serID); !isOnline {
 				isAllOnline = false
 				item.Status = false
-				item.Result = fmt.Sprintf("%s未上线到%s集群", serName, clusterInfo.Title)
+				item.Result = fmt.Sprintf("%s未上线到%s集群", serviceTitle, clusterInfo.Title)
 				item.Solution.Name = frontend_model.RouterNameServiceOnline
-				item.Solution.Params = map[string]string{"cluster_name": clusterInfo.Name, "service_name": serName}
+				item.Solution.Params = map[string]string{"cluster_name": clusterInfo.Name, "service_name": serID}
 			}
 			checkList = append(checkList, item)
 		}
