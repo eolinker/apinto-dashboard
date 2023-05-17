@@ -7,6 +7,14 @@ export interface DeployCertListData{
     updateTime:string
 }
 
+export interface DeployCertData{
+  id:string
+  name:string
+  validTime:string
+  key:string
+  cert:string
+}
+
 export interface RedisData{
     addrs:string,
     username:string,

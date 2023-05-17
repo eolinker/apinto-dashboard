@@ -90,7 +90,7 @@ export class DeployClusterCertComponent implements OnInit {
       nzTitle: usage === 'addCert' ? '新建证书' : '修改证书',
       nzWidth: MODAL_SMALL_SIZE,
       nzContent: DeployClusterCertFormComponent,
-      nzComponentParams: { certId: data?.id, clusterName: this.clusterName, closeModal: this.closeModal },
+      nzComponentParams: { certId: data?.id, clusterName: this.clusterName, editPage:usage === 'editCert',closeModal: this.closeModal },
       nzOkText: usage === 'addCert' ? '保存' : '提交',
       nzOnOk: (component:DeployClusterCertFormComponent) => {
         component.save(usage)
