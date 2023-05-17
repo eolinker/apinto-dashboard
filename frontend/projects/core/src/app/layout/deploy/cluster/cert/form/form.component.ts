@@ -81,18 +81,18 @@ export class DeployClusterCertFormComponent implements OnInit {
   }
 
   ngOnInit (): void {
-    if(this.editPage){
+    if (this.editPage) {
       this.getCertMessage()
     }
   }
 
-  getCertMessage(){
+  getCertMessage () {
     this.api.get(`cluster/${this.clusterName}/certificate/${this.certId}`)
       .subscribe((resp:{code:number, data:{certificate:DeployCertData}, msg:string}) => {
         if (resp.code === 0) {
           this.validateForm.patchValue({
-            key:this.decode(resp.data.certificate.key),
-            pem:this.decode(resp.data.certificate.cert)
+            key: this.decode(resp.data.certificate.key),
+            pem: this.decode(resp.data.certificate.cert)
           })
         }
       })
@@ -157,10 +157,10 @@ export class DeployClusterCertFormComponent implements OnInit {
 
   // 字符串转base64
   encode (str:string) {
-    return Buffer.from(str).toString('base64')
+    return str ? Buffer.from(str).toString('base64') : ''
   }
 
-  decode (str:string){
-    return Buffer.from(str, 'base64').toString('utf8')
+  decode (str:string) {
+    return str ? Buffer.from(str, 'base64').toString('utf8') : ''
   }
 }
