@@ -243,9 +243,22 @@ func (c *clusterPluginService) EditPlugin(ctx context.Context, namespaceID int, 
 		return errors.New("Can't Edit Inner Plugin. ")
 	}
 
+	extenders, err := c.pluginService.GetExtendersCache(ctx, namespaceID)
+	if err != nil {
+		return err
+	}
+	extendersMap := common.SliceToMap(extenders, func(t *plugin_model.ExtenderInfo) string {
+		return t.Id
+	})
+
 	pluginConfig, _ := json.Marshal(config)
 	//检测JsonSchema格式是否正确
-	if err = common.JsonSchemaValid(globalPlugin.Schema, string(pluginConfig)); err != nil {
+	schema := globalPlugin.Schema
+	extenderInfo, has := extendersMap[globalPlugin.Extended]
+	if has {
+		schema = extenderInfo.Schema
+	}
+	if err = common.JsonSchemaValid(schema, string(pluginConfig)); err != nil {
 		return errors.New(fmt.Sprintf("插件配置格式错误 err=%s", err.Error()))
 	}
 

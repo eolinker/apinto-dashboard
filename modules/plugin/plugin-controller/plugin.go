@@ -233,7 +233,7 @@ func (p *pluginController) pluginSort(ginCtx *gin.Context) {
 // 获取作为选项的插件列表（剔除掉黑名单）
 func (p *pluginController) pluginEnum(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	plugins, err := p.pluginService.GetList(ginCtx, namespaceId)
+	plugins, err := p.pluginService.GetEnumList(ginCtx, namespaceId)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
@@ -264,16 +264,16 @@ func (p *pluginController) pluginEnum(ginCtx *gin.Context) {
 // 插件配置信息
 func (p *pluginController) pluginRender(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	plugins, err := p.pluginService.GetList(ginCtx, namespaceId)
+	plugins, err := p.pluginService.GetEnumList(ginCtx, namespaceId)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
-	resultList := make([]plugin_dto.PluginListItem, 0, len(plugins))
+	resultList := make([]plugin_dto.PluginEnum, 0, len(plugins))
 
 	for _, pluginInfo := range plugins {
-		resultList = append(resultList, plugin_dto.PluginListItem{
+		resultList = append(resultList, plugin_dto.PluginEnum{
 			Name:   pluginInfo.Name,
 			Config: pluginInfo.Schema,
 		})
