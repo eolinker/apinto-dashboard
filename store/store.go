@@ -69,7 +69,7 @@ func CreateStore[T any](db IDB) *BaseStore[T] {
 	for i := 0; i < modelType.NumField(); i++ {
 		if fieldStruct := modelType.Field(i); ast.IsExported(fieldStruct.Name) {
 			tagSetting := schema.ParseTagSetting(fieldStruct.Tag.Get("gorm"), ";")
-			if _, ok := tagSetting["DBUNIQUEINDEX"]; ok {
+			if _, ok := tagSetting["UNIQUEINDEX"]; ok {
 				b.UniqueList = append(b.UniqueList, tagSetting["COLUMN"])
 			}
 		}
