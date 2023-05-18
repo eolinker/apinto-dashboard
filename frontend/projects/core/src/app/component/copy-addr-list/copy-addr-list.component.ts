@@ -7,7 +7,7 @@ import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
   template: `
   <span
   *ngIf="!addrItem.expand || !addrItem[keyName].includes(','); else expandTpl"
-  class="cluster-node-addr-btn overflow-ellipsis w-[100%] inline-block overflow-hidden align-middle"
+  class="overflow-ellipsis w-[100%] inline-block overflow-hidden align-middle"
   eoNgFeedbackTooltip
   [nzTooltipTitle]="tooltipTpl"
   [nzTooltipTitleContext]="{ addrLong: addrItem[keyName] }"
@@ -26,7 +26,7 @@ import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
       eo-ng-button
       nzType="primary"
       nzGhost
-      class="deploy-node-copy-btn ant-btn-text border-transparent h-[22px]"
+      class="opacity-0 text-table_text ant-btn-text border-transparent h-[22px]"
       [copyText]="addrItem[keyName]"
       (copyCallback)="copyCallback()"
     >
@@ -52,7 +52,7 @@ import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
             eo-ng-button
             nzType="primary"
             nzGhost
-            class="ml-[8px] border-transparent h-[22px]"
+            class="ml-[8px] border-transparent h-[22px] text-table_text"
             [copyText]="addr"
             (copyCallback)="copyCallback()"
           >
