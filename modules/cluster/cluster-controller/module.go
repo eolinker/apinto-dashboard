@@ -183,6 +183,12 @@ func (c *Module) initRouter() {
 			HandlerFunc: []apinto_module.HandlerFunc{certificateController.post},
 		},
 		{
+			Method:      http.MethodGet,
+			Path:        "/api/cluster/:cluster_name/certificate/:certificate_id",
+			Handler:     "cluster.certificates.get",
+			HandlerFunc: []apinto_module.HandlerFunc{certificateController.get},
+		},
+		{
 			Method:      http.MethodPut,
 			Path:        "/api/cluster/:cluster_name/certificate/:certificate_id",
 			Handler:     "cluster.certificates.put",
