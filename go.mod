@@ -3,15 +3,15 @@ module github.com/eolinker/apinto-dashboard
 go 1.18
 
 require (
+
 	github.com/eolinker/apinto-business v0.0.0-00010101000000-000000000000
-	github.com/eolinker/eosc v0.12.1
+ 	github.com/eolinker/eosc v0.12.1
 	github.com/gin-gonic/gin v1.9.0
 	github.com/go-basic/uuid v1.0.0
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/goccy/go-json v0.10.0
 	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/golang/mock v1.6.0
-	github.com/influxdata/influxdb-client-go/v2 v2.12.1
 	github.com/ohler55/ojg v1.18.5
 	github.com/soheilhy/cmux v0.1.5
 	github.com/stretchr/testify v1.8.1
