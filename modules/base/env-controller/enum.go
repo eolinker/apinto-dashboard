@@ -18,7 +18,7 @@ func NewEnumController() *enumController {
 func (e *enumController) GetEnv(context *gin.Context) {
 	//enums, err := e.enumService.GetByType(entry.EnvType)
 	//if err != nil {
-	//	context.JSON(http.StatusOK, dto.NewErrorResult(err.Error()))
+	//	context.JSON(http.StatusOK, dto.NewErrorResult(err.Logger()))
 	//	return
 	//}
 	enums := env_model.EnumValueList
