@@ -13,25 +13,15 @@ type Table interface {
 	schema.Tabler
 	IdValue() int
 }
+type DBInfo struct {
+	Addr string
+	User string
+	DB   string
+}
 type IDB interface {
 	DB(ctx context.Context) *gorm.DB
 	IsTxCtx(ctx context.Context) bool
-}
-type myDB struct {
-	db *gorm.DB
-}
-
-func (m *myDB) DB(ctx context.Context) *gorm.DB {
-	if tx, ok := ctx.Value(txContextKey{}).(*gorm.DB); ok {
-		return tx
-	}
-	return m.db.WithContext(ctx)
-}
-func (m *myDB) IsTxCtx(ctx context.Context) bool {
-	if _, ok := ctx.Value(txContextKey{}).(*gorm.DB); ok {
-		return ok
-	}
-	return false
+	Info() DBInfo
 }
 
 type IBaseStore[T any] interface {
