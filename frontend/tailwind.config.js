@@ -34,7 +34,8 @@ module.exports = {
         guide_upstream: '#f9a429',
         guide_api: '#71d24d',
         guide_publishApi: '#5884ff',
-        guide_final: '#915bf9'
+        guide_final: '#915bf9',
+        table_text: 'var(--table-text-color)'
       },
       spacing: {
         mbase: '20px',
