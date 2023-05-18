@@ -3,6 +3,7 @@ import { EO_TBODY_TYPE, EO_THEAD_TYPE } from 'projects/eo-ng-apinto-table/src/pu
 
 export const deployCertsTableHeadName: THEAD_TYPE[] = [
   { title: '证书' },
+  { title: '绑定域名' },
   { title: '证书有效期' },
   { title: '更新者' },
   { title: '更新时间' },
@@ -16,6 +17,9 @@ export const deployCertsTableBody: EO_TBODY_TYPE[] = [
   {
     key: 'name',
     copy: true
+  },
+  {
+    key: 'dnsName',
   },
   { key: 'validTime' },
   { key: 'operator' },

@@ -1624,12 +1624,6 @@ eo-ng-radio-group.date-picker-button-group
   border-bottom-left-radius: 0;
 }
 
-.cluster-node-addr-btn .deploy-node-copy-btn {
-  opacity: 0;
-}
-.cluster-node-addr-btn:hover .deploy-node-copy-btn {
-  opacity: 1;
-}
 .ant-modal-footer .ant-btn + .ant-btn:not(.ant-dropdown-trigger),
 .ant-modal-confirm .ant-modal-confirm-btns .ant-btn + .ant-btn {
   margin-left: 16px;
