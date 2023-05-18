@@ -2,6 +2,8 @@ package cluster_service
 
 import (
 	"context"
+	"time"
+
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/modules/cluster"
@@ -11,7 +13,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/user"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/go-basic/uuid"
-	"time"
 )
 
 type clusterCertificateService struct {
@@ -19,6 +20,34 @@ type clusterCertificateService struct {
 	clusterService          cluster.IClusterService
 	userInfoService         user.IUserInfoService
 	apintoClient            cluster.IApintoClient
+}
+
+func (c *clusterCertificateService) Info(ctx context.Context, namespaceId, certificateId int, clusterName string) (*cluster_model.Certificate, error) {
+	clusterId, err := c.clusterService.CheckByNamespaceByName(ctx, namespaceId, clusterName)
+	if err != nil {
+		return nil, err
+	}
+	info, err := c.clusterCertificateStore.First(ctx, map[string]interface{}{
+		"namespace": namespaceId,
+		"id":        certificateId,
+		"cluster":   clusterId,
+	})
+	if err != nil {
+		return nil, err
+	}
+	cert, err := common.ParseCert(info.Key, info.Pem)
+	if err != nil {
+		return nil, err
+	}
+
+	return &cluster_model.Certificate{
+		ID:        info.Id,
+		Name:      cert.Leaf.Subject.CommonName,
+		DnsName:   cert.Leaf.DNSNames,
+		Key:       common.Base64Encode([]byte(info.Key)),
+		Pem:       common.Base64Encode([]byte(info.Pem)),
+		ValidTime: common.TimeToStr(cert.Leaf.NotAfter),
+	}, nil
 }
 
 func newClusterCertificateService() cluster.IClusterCertificateService {

@@ -63,7 +63,9 @@ export class ErrorInterceptor implements HttpInterceptor {
         break
       case -3:
         setTimeout(() => {
-          this.router.navigate(['/', 'login'])
+          if (!this.router.url.includes('/login')) {
+            this.router.navigate(['/', 'login'], { queryParams: { callback: this.router.url }, queryParamsHandling: 'merge' })
+          }
         }, 1000)
         break
       case -7:

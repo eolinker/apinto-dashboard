@@ -33,7 +33,7 @@ import { v4 as uuidv4 } from 'uuid'
       nzType="primary"
       type="button"
       nzGhost
-      class="deploy-node-copy-btn ant-btn-text border-transparent h-[22px]"
+      class=" ant-btn-text border-transparent h-[22px]"
       [copyText]="uuid"
       (copyCallback)="copyCallback()"
     >
