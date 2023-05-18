@@ -643,7 +643,7 @@ func (c *clusterPluginService) Publish(ctx context.Context, namespaceId, userId 
 	//	}
 	//	gp := globalPluginsMap[p.PluginName]
 	//	if err = common.JsonSchemaValid(gp.Schema, p.NoReleasedConfig.Config); err != nil {
-	//		return errors.New(fmt.Sprintf("插件%s配置格式错误 err=%s", p.PluginName, err.Error()))
+	//		return errors.New(fmt.Sprintf("插件%s配置格式错误 err=%s", p.PluginName, err.Logger()))
 	//	}
 	//}
 

@@ -1,5 +1,12 @@
 package common
 
+func MapToSlice[K comparable, T any, D any](m map[K]T, f func(k K, t T) D) []D {
+	r := make([]D, 0, len(m))
+	for k, v := range m {
+		r = append(r, f(k, v))
+	}
+	return r
+}
 func SliceToMap[K comparable, T any](list []T, f func(T) K) map[K]T {
 	m := make(map[K]T)
 	for _, t := range list {
