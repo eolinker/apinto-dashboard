@@ -93,7 +93,7 @@ func CreateRedisCacheNoKey[T any](client *redis.ClusterClient, expiration time.D
 	}
 	return &redisCacheNoKey[T]{
 		client:     client,
-		key:        fmt.Sprintf(keyPrefix, ":", key),
+		key:        fmt.Sprint(keyPrefix, ":", key),
 		expiration: expiration,
 	}
 }
