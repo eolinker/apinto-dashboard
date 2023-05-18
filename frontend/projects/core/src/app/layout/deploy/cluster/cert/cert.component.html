@@ -33,7 +33,7 @@
   </div>
 </div>
 <ng-template #dnsNameTpl let-item="item">
-  <div class="flex items-center cluster-node-addr-btn">
+  <div class="flex items-center">
     <div
       eoNgFeedbackTooltip
       nzTooltipPlacement="top"
@@ -49,7 +49,7 @@
       eo-ng-button
       nzType="primary"
       nzGhost
-      class="deploy-node-copy-btn ant-btn-text border-transparent h-[22px]"
+      class="opacity-0 text-table_text ant-btn-text border-transparent h-[22px]"
       [copyText]="item.dnsName.join(' ')"
       (copyCallback)="copyCallback($event)"
       (click)="$event.stopPropagation()"
