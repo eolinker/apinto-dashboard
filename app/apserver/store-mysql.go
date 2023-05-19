@@ -3,6 +3,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/db_migrator"
 	_ "github.com/eolinker/apinto-dashboard/initialize"
@@ -30,6 +31,44 @@ func initDB() {
 	sqlDb.SetMaxOpenConns(200)
 	sqlDb.SetMaxIdleConns(200)
 	db_migrator.InitSql(db)
-	store.InitStoreDB(db)
+	store.InitStoreDB(&myDB{
+		db: db,
+		info: store.DBInfo{
+			Addr: fmt.Sprintf("%s:%s", GetDBIp(), GetDBPort()),
+			User: GetDBUserName(),
+			DB:   GetDbName(),
+		},
+	})
 
+}
+
+var (
+	_ store.IDB = (*myDB)(nil)
+)
+
+type myDB struct {
+	db   *gorm.DB
+	info store.DBInfo
+}
+
+var txContextKey = _TxContextKey{}
+
+type _TxContextKey struct {
+}
+
+func (m *myDB) Info() store.DBInfo {
+	return m.info
+}
+
+func (m *myDB) DB(ctx context.Context) *gorm.DB {
+	if tx, ok := ctx.Value(txContextKey).(*gorm.DB); ok {
+		return tx
+	}
+	return m.db.WithContext(ctx)
+}
+func (m *myDB) IsTxCtx(ctx context.Context) bool {
+	if _, ok := ctx.Value(txContextKey).(*gorm.DB); ok {
+		return ok
+	}
+	return false
 }
