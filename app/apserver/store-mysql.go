@@ -32,7 +32,7 @@ func initDB() {
 	sqlDb.SetMaxIdleConns(200)
 	db_migrator.InitSql(db)
 	store.InitStoreDB(store_mysql.NewMyDB(db, store.DBInfo{
-		Addr: fmt.Sprintf("%s:%s", GetDBIp(), GetDBPort()),
+		Addr: fmt.Sprintf("%s:%d", GetDBIp(), GetDBPort()),
 		User: GetDBUserName(),
 		DB:   GetDbName(),
 	}))
