@@ -42,7 +42,7 @@ type IBaseStore[T any] interface {
 	Transaction(ctx context.Context, f func(txCtx context.Context) error) error
 }
 
-type txContextKey struct{}
+var TxContextKey = struct{}{}
 
 type BaseStore[T any] struct {
 	IDB
@@ -207,7 +207,7 @@ func (b *BaseStore[T]) ListPage(ctx context.Context, where string, pageNum, page
 // Transaction 执行事务
 func (b *BaseStore[T]) Transaction(ctx context.Context, f func(context.Context) error) error {
 	return b.DB(ctx).Transaction(func(tx *gorm.DB) error {
-		txCtx := context.WithValue(ctx, txContextKey{}, tx)
+		txCtx := context.WithValue(ctx, TxContextKey, tx)
 		return f(txCtx)
 	})
 }
