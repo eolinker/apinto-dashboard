@@ -48,7 +48,13 @@ func (c *clusterService) ClusterCount(ctx context.Context, namespaceId int) (int
 		"namespace": namespaceId,
 	})
 }
-
+func (c *clusterService) Count(ctx context.Context) (int, error) {
+	count, err := c.clusterStore.ClusterCount(ctx, map[string]interface{}{})
+	if err != nil {
+		return 0, err
+	}
+	return int(count), nil
+}
 func (c *clusterService) GetAllCluster(ctx context.Context) ([]*cluster_model2.Cluster, error) {
 	clusters, err := c.clusterStore.GetAll(ctx)
 	if err != nil {
