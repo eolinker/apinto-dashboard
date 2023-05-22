@@ -1,16 +1,12 @@
 package application_dto
 
-import (
-	"github.com/eolinker/apinto-dashboard/modules/discovery/discover-dto"
-)
-
 type ApplicationAuthInput struct {
-	Driver        string                   `json:"driver"`
-	IsTransparent bool                     `json:"is_transparent"`
-	TokenName     string                   `json:"token_name"`
-	Position      string                   `json:"position"`
-	ExpireTime    int64                    `json:"expire_time"`
-	Config        discover_dto.ConfigProxy `json:"config"`
+	Driver        string          `json:"driver"`
+	IsTransparent bool            `json:"is_transparent"`
+	TokenName     string          `json:"token_name"`
+	Position      string          `json:"position"`
+	ExpireTime    int64           `json:"expire_time"`
+	Config        AuthConfigProxy `json:"config"`
 }
 
 type ApplicationAuthListOut struct {
@@ -40,6 +36,10 @@ type ApplicationAuthOut struct {
 
 type AuthConfigProxy []byte
 
+func (c *AuthConfigProxy) String() string {
+	return string(*c)
+}
+
 func (c *AuthConfigProxy) MarshalJSON() ([]byte, error) {
 	return *c, nil
 }
@@ -47,4 +47,15 @@ func (c *AuthConfigProxy) MarshalJSON() ([]byte, error) {
 func (c *AuthConfigProxy) UnmarshalJSON(bytes []byte) error {
 	*c = bytes
 	return nil
+}
+
+type AuthDriversItem struct {
+	Name   string `json:"name"`
+	Render Render `json:"render"`
+}
+
+type Render []byte
+
+func (r *Render) MarshalJSON() ([]byte, error) {
+	return *r, nil
 }

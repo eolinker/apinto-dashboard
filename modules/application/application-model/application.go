@@ -1,13 +1,12 @@
 package application_model
 
 import (
-	"github.com/eolinker/apinto-dashboard/modules/application/application-entry"
 	"time"
 )
 
 const anonymousName = "匿名应用"
 
-type ApplicationList []*Application
+type ApplicationList []*ApplicationListItem
 
 func (a ApplicationList) Len() int {
 	return len(a)
@@ -27,12 +26,54 @@ func (a ApplicationList) Swap(i, j int) {
 	a[i], a[j] = a[j], a[i]
 }
 
-type Application struct {
-	*application_entry.Application
+type ApplicationListItem struct {
+	Uuid         string
+	Name         string
+	Desc         string
+	UpdateTime   time.Time
 	OperatorName string
 	IsDelete     bool
-	CustomAttr   []ApplicationCustomAttr
-	ExtraParam   []ApplicationExtraParam
+	Publish      []*APPListItemPublish
+}
+
+type ApplicationInfo struct {
+	Name       string
+	Uuid       string
+	Desc       string
+	CustomAttr []ApplicationCustomAttr
+}
+
+type ApplicationBasicInfo struct {
+	Uuid       string
+	Name       string
+	Desc       string
+	UpdateTime time.Time
+}
+
+type ApplicationBasicInfoList []*ApplicationBasicInfo
+
+func (a ApplicationBasicInfoList) Len() int {
+	return len(a)
+}
+
+func (a ApplicationBasicInfoList) Less(i, j int) bool {
+	if a[i].Name == anonymousName {
+		return true
+	} else if a[j].Name == anonymousName {
+		return false
+	} else {
+		return a[i].UpdateTime.After(a[j].UpdateTime)
+	}
+}
+
+func (a ApplicationBasicInfoList) Swap(i, j int) {
+	a[i], a[j] = a[j], a[i]
+}
+
+type APPListItemPublish struct {
+	Name   string
+	Title  string
+	Status int
 }
 
 type ApplicationExtraParam struct {
@@ -63,4 +104,12 @@ type ApplicationKeys struct {
 	KeyName string
 }
 
-type ApplicationVersion application_entry.ApplicationVersion
+// AppCluster 集群信息
+type AppCluster struct {
+	Name       string
+	Title      string
+	Env        string
+	Status     int
+	Updater    string
+	UpdateTime string
+}
