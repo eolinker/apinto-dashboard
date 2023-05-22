@@ -1,16 +1,16 @@
 package application_controller
 
 import (
-	"github.com/eolinker/apinto-module"
+	module "github.com/eolinker/apinto-dashboard/module"
 )
 
 type PluginDriver struct {
 }
 
-func NewPluginDriver() apinto_module.Driver {
+func NewPluginDriver() module.Driver {
 	return &PluginDriver{}
 }
-func (c *PluginDriver) CreatePlugin(define interface{}) (apinto_module.Plugin, error) {
+func (c *PluginDriver) CreatePlugin(define interface{}) (module.Plugin, error) {
 	return c, nil
 }
 
@@ -35,7 +35,7 @@ func (c *PluginDriver) IsCanDisable() bool {
 }
 
 // plugin
-func (c *PluginDriver) CreateModule(name string, config interface{}) (apinto_module.Module, error) {
+func (c *PluginDriver) CreateModule(name string, config interface{}) (module.Module, error) {
 	return NewModule(name), nil
 }
 
@@ -46,22 +46,22 @@ func (c *PluginDriver) CheckConfig(name string, config interface{}) error {
 type Module struct {
 	isInit  bool
 	name    string
-	routers apinto_module.RoutersInfo
+	routers module.RoutersInfo
 }
 
 func (c *Module) Name() string {
 	return c.name
 }
 
-func (c *Module) Support() (apinto_module.ProviderSupport, bool) {
+func (c *Module) Support() (module.ProviderSupport, bool) {
 	return nil, false
 }
 
-func (c *Module) Routers() (apinto_module.Routers, bool) {
+func (c *Module) Routers() (module.Routers, bool) {
 	return c, true
 }
 
-func (c *Module) Middleware() (apinto_module.Middleware, bool) {
+func (c *Module) Middleware() (module.Middleware, bool) {
 	return nil, false
 }
 
@@ -70,7 +70,7 @@ func NewModule(name string) *Module {
 	return &Module{name: name}
 }
 
-func (c *Module) RoutersInfo() apinto_module.RoutersInfo {
+func (c *Module) RoutersInfo() module.RoutersInfo {
 	if !c.isInit {
 		c.routers = initRouter(c.name)
 		c.isInit = true

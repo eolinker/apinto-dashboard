@@ -261,7 +261,7 @@ func (a *apiService) GetAPIList(ctx context.Context, namespaceID int, groupUUID,
 		return nil, 0, err
 	}
 
-	clusterInfos, err := a.clusterService.GetAllCluster(ctx)
+	clusterInfos, err := a.clusterService.GetByNamespaceId(ctx, namespaceID)
 	if err != nil {
 		return nil, 0, err
 	}
