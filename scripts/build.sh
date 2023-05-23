@@ -46,7 +46,7 @@ if [[ "$BUILD_MODE" == "all" || ! -d "frontend/dist" ]];then
       echo "cd frontend && yarn install --registry https://registry.npmmirror.com --legacy-peer-deps "
       cd frontend && yarn install --registry https://registry.npmmirror.com --legacy-peer-deps
       echo "yarn build"
-      yarn build ${BUILD_TYPE}
+      yarn build:${BUILD_TYPE}
       cd ../
   else
       npm --prefix ./frontend run build
