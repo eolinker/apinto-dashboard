@@ -11,6 +11,7 @@ import { defaultAutoTips } from '../../../constant/conf'
 import { ArrayItemData, EmptyHttpResponse, RandomId } from '../../../constant/type'
 import { customAttrTableBody, extraHeaderTableBody } from '../types/conf'
 import { ApplicationData } from '../types/types'
+import { EoNgApplicationService } from '../application.service'
 
 @Component({
   selector: 'eo-ng-application-create',
@@ -34,10 +35,8 @@ export class ApplicationCreateComponent implements OnInit {
 
   createApplicationForm: {
     customAttrList: ArrayItemData[]
-    extraParamList: ArrayItemData[]
   } = {
-    customAttrList: [],
-    extraParamList: []
+    customAttrList: []
   }
 
   customAttrList:ArrayItemData[] = [
@@ -55,7 +54,8 @@ export class ApplicationCreateComponent implements OnInit {
     private api: ApiService,
     private router: Router,
     private fb: UntypedFormBuilder,
-    private navigationService: EoNgNavigationService
+    private navigationService: EoNgNavigationService,
+    private service:EoNgApplicationService
   ) {
     this.navigationService.reqFlashBreadcrumb([
       { title: '应用管理', routerLink: 'application' },
@@ -123,14 +123,12 @@ export class ApplicationCreateComponent implements OnInit {
             this.validateForm.controls['name'].disable()
           }
           this.validateForm.controls['id'].disable()
+          this.service.appName = resp.data.application.name
+          this.service.appDesc = resp.data.application.desc
 
           this.customAttrList =
             this.createApplicationForm?.customAttrList?.length > 0
               ? this.createApplicationForm.customAttrList
-              : [{ key: '', value: '', disabled: false }]
-          this.extraHeaderList =
-            this.createApplicationForm?.extraParamList?.length > 0
-              ? this.createApplicationForm.extraParamList
               : [{ key: '', value: '', disabled: false }]
         }
       })
@@ -202,15 +200,10 @@ export class ApplicationCreateComponent implements OnInit {
   // 保存鉴权，editPage = true时，表示页面为编辑页，false为新建页
   // custom_attr是创建和编辑鉴权时都会有的数据，需要将object转化为map发给后端
   // extra_header是编辑鉴权时才会有的数据，也需从Object转为map发送给后端
+  // @ts-ignore TODO待修改
   saveApplication () {
     if (this.validateForm.valid) {
       this.createApplicationForm.customAttrList = this.customAttrList.filter(
-        (item: ArrayItemData) => {
-          return item.key && item.value
-        }
-      )
-
-      this.createApplicationForm.extraParamList = this.extraHeaderList.filter(
         (item: ArrayItemData) => {
           return item.key && item.value
         }
@@ -227,7 +220,9 @@ export class ApplicationCreateComponent implements OnInit {
             this.submitButtonLoading = false
             if (resp.code === 0) {
               this.message.success(resp.msg || '添加成功', { nzDuration: 1000 })
-              this.backToList()
+              return true
+            } else {
+              return false
             }
           })
       } else {
@@ -240,7 +235,9 @@ export class ApplicationCreateComponent implements OnInit {
             this.submitButtonLoading = false
             if (resp.code === 0) {
               this.message.success(resp.msg || '修改成功', { nzDuration: 1000 })
-              this.backToList()
+              return true
+            } else {
+              return false
             }
           })
       }
@@ -251,6 +248,7 @@ export class ApplicationCreateComponent implements OnInit {
           control.updateValueAndValidity({ onlySelf: true })
         }
       })
+      return false
     }
   }
 
