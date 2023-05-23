@@ -51,7 +51,6 @@ golang-builder:
   script:
     - sed -i '/replace github.com\/eolinker\/eosc => */d' go.mod
     - go mod tidy
-    - export GOTAG=business
     - ./scripts/build.sh $BUILD_DIR backend ${VERSION} ${BUILD_TYPE}
 deployer:
   stage: publish
