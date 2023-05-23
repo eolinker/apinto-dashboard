@@ -11,7 +11,7 @@ import { DynamicPublishData, DynamicPublish } from '../../../component/intellige
 })
 export class ApplicationPublishComponent extends IntelligentPluginPublishComponent implements OnInit {
   override getPublishList () {
-    this.api.get(`dynamic/${this.moduleName}/cluster/${this.id}`).subscribe((resp:{code:number, msg:string, data:DynamicPublishData}) => {
+    this.api.get('router/onlines', { uuid: this.id }).subscribe((resp:{code:number, msg:string, data:DynamicPublishData}) => {
       if (resp.code === 0) {
         this.publishList = resp.data.clusters
       }
@@ -26,7 +26,7 @@ export class ApplicationPublishComponent extends IntelligentPluginPublishCompone
       }).map((item) => {
         return item.name
       })
-      this.api.put(`dynamic/${this.moduleName}/offline/${this.id}`, { cluster: cluster }).subscribe((resp:DynamicPublish) => {
+      this.api.put('application/offline', { clusterNames: cluster }, { appId: this.id }).subscribe((resp:DynamicPublish) => {
         if (resp.code === 0) {
           this.message.success(resp.msg)
           return true
@@ -47,7 +47,7 @@ export class ApplicationPublishComponent extends IntelligentPluginPublishCompone
       }).map((item) => {
         return item.name
       })
-      this.api.put(`dynamic/${this.moduleName}/online/${this.id}`, { cluster: cluster }).subscribe((resp:DynamicPublish) => {
+      this.api.put('application/online', { clusterNames: cluster }, { appId: this.id }).subscribe((resp:DynamicPublish) => {
         if (resp.code === 0) {
           this.message.success(resp.msg)
           return true

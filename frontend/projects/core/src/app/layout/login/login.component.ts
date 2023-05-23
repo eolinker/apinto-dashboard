@@ -13,6 +13,7 @@ import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { Subscription } from 'rxjs'
 import { ApiService } from '../../service/api.service'
 import { EoNgNavigationService } from '../../service/eo-ng-navigation.service'
+import { environment } from 'projects/core/src/environments/environment'
 
 @Component({
   selector: 'eo-ng-login',
@@ -20,12 +21,12 @@ import { EoNgNavigationService } from '../../service/eo-ng-navigation.service'
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent implements OnInit {
+  isBusiness:boolean = environment.isBusiness
   private subscription: Subscription = new Subscription()
   constructor (
     private navigationService: EoNgNavigationService,
     private api: ApiService,
-    private router: Router,
-    private message: EoNgFeedbackMessageService
+    private router: Router
   ) {}
 
   ngOnInit () {

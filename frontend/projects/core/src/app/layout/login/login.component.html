@@ -2,7 +2,11 @@
   <div class="mx-auto">
     <span class="flex items-center justify-center"
       ><img
-        src="../../../assets/apinto.svg"
+      [src]="
+      isBusiness
+        ? '../../../assets/apinto-pro.svg'
+        : '../../../assets/apinto.svg'
+    "
         alt="apinto"
         style="height: 40px; margin-right: 8px"
       /><span class="text-[24px] font-semibold text-[#101010]"

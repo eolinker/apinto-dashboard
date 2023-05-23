@@ -1,3 +1,5 @@
+import { PublishStatus } from '../../../constant/type'
+
 export interface RouterEnum{
     apiId:string
     name:string
@@ -73,8 +75,6 @@ export type PluginTemplateData = {
     plugins:PluginTemplateConfigItem[]
 }
 
-export type ApiPublishStatus = 'GOONLINE'|'OFFLINE'|'NOTGOONLINE'|'TOUPDATE'
-
 export type ApiListItem = {
     checked?:boolean
     groupUuid:string
@@ -83,7 +83,7 @@ export type ApiListItem = {
     scheme:'http'|'websocket'
     method:string
     requestPath:string
-    publish:Array<{name:string, status:ApiPublishStatus}>
+    publish:Array<{name:string, status:PublishStatus}>
     source:string
     updateTime:string
     isDelete:boolean
