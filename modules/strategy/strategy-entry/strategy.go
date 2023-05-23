@@ -5,7 +5,7 @@ import "time"
 // Strategy 策略表
 type Strategy struct {
 	Id          int       `gorm:"type:int(11);size:11;not null;auto_increment;primary_key;column:id;comment:主键ID" json:"id,omitempty"`
-	UUID        string    `gorm:"size:36;not null;column:uuid;dbUniqueIndex:uuid;uniqueIndex:uuid;comment:uuid"  json:"uuid,omitempty"`
+	UUID        string    `gorm:"size:36;not null;column:uuid;uniqueIndex:uuid;comment:uuid"  json:"uuid,omitempty"`
 	NamespaceId int       `gorm:"type:int(11);size:11;not null;column:namespace;comment:工作空间" json:"namespace_id,omitempty"`
 	ClusterId   int       `gorm:"type:int(11);size:11;not null;column:cluster;index:cluster_priority_type;comment:集群ID" json:"cluster_id,omitempty"`
 	Type        string    `gorm:"size:50;default null;column:type;index:cluster_priority_type;comment:策略类型" json:"type,omitempty"`
