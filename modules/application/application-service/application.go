@@ -701,6 +701,22 @@ func (a *applicationService) AppInfoDetails(ctx context.Context, namespaceId int
 	return res, nil
 }
 
+func (a *applicationService) GetAppRemoteOptions(ctx context.Context, namespaceId, pageNum, pageSize int, keyword string) ([]any, error) {
+	list, total, err := a.applicationStore.GetListPage(ctx, namespaceId, pageNum, pageSize, keyword)
+	if err != nil {
+		return nil, err
+	}
+	applications := make([]any, 0, total)
+	for _, item := range list {
+		applications = append(applications, application_model.ApplicationBasicInfo{
+			Uuid: item.IdStr,
+			Name: item.Name,
+			Desc: item.Desc,
+		})
+	}
+	return applications, nil
+}
+
 func (a *applicationService) AppInfo(ctx context.Context, namespaceId int, id string) (*application_model.ApplicationEntire, error) {
 	applicationInfo, err := a.applicationStore.GetByIdStr(ctx, namespaceId, id)
 	if err != nil {
@@ -780,6 +796,18 @@ func (a *applicationService) AppListByUUIDS(ctx context.Context, namespaceId int
 	}
 
 	return applications, nil
+}
+
+func (a *applicationService) AppBasicInfo(ctx context.Context, namespaceId int, uuid string) (*application_model.ApplicationBasicInfo, error) {
+	info, err := a.applicationStore.GetByIdStr(ctx, namespaceId, uuid)
+	if err != nil {
+		return nil, err
+	}
+	return &application_model.ApplicationBasicInfo{
+		Uuid: info.IdStr,
+		Name: info.Name,
+		Desc: info.Desc,
+	}, nil
 }
 
 func (a *applicationService) getApplicationAdditional(extraHeader []application_entry.ApplicationExtraParam) []v1.ApplicationAdditional {
