@@ -11,6 +11,7 @@ import { AuthListData, ExtraListData } from '../types/types'
 import { extraTableHeadName, extraTableBody } from '../types/conf'
 import { ApplicationExtraFormComponent } from './form/form.component'
 import { EmptyHttpResponse } from '../../../constant/type'
+import { EoNgApplicationService } from '../application.service'
 
 @Component({
   selector: 'eo-ng-application-extra',
@@ -23,7 +24,6 @@ export class ApplicationExtraComponent {
   nzDisabled:boolean = false
   extraTableHeadName:THEAD_TYPE[] = [...extraTableHeadName]
   extraTableBody:TBODY_TYPE[] = [...extraTableBody]
-  extraList:ExtraListData[] = []
   modalRef:NzModalRef | undefined
 
   constructor (
@@ -32,7 +32,8 @@ export class ApplicationExtraComponent {
                private baseInfo:BaseInfoService,
                private modalService:EoNgFeedbackModalService,
                private router:Router,
-               private navigationService:EoNgNavigationService) {
+               private navigationService:EoNgNavigationService,
+               public service:EoNgApplicationService) {
     this.navigationService.reqFlashBreadcrumb([{ title: '应用管理', routerLink: 'application' }, { title: '额外参数' }])
   }
 
@@ -42,7 +43,6 @@ export class ApplicationExtraComponent {
     if (!this.appId) {
       this.router.navigate(['/', 'application'])
     }
-    this.getExtrasData()
   }
 
   initTable () {
@@ -65,7 +65,7 @@ export class ApplicationExtraComponent {
       nzWidth: MODAL_SMALL_SIZE,
       nzContent: ApplicationExtraFormComponent,
       nzComponentParams: {
-        extraList: this.extraList,
+        extraList: this.service.appData?.params,
         data: data,
         nzDisabled: this.nzDisabled
       },
@@ -73,15 +73,16 @@ export class ApplicationExtraComponent {
       nzOnOk: (component: ApplicationExtraFormComponent) => {
         (component as ApplicationExtraFormComponent).saveParam()
         return new Promise((resolve, reject) => {
-          this.api.put('application/params', { params: component.extraList }, { appId: this.appId }).subscribe((resp:EmptyHttpResponse) => {
-            if (resp.code === 0) {
-              this.getExtrasData()
-              resolve()
-              this.message.success(resp.msg || '操作成功!')
-            } else {
-              reject(new Error())
-            }
-          })
+          this.api.put('application', { ...this.service.appData, params: component.extraList })
+            .subscribe((resp:EmptyHttpResponse) => {
+              if (resp.code === 0) {
+                resolve()
+                this.message.success(resp.msg || '操作成功!')
+                this.service.getApplicationData(this.appId)
+              } else {
+                reject(new Error())
+              }
+            })
         })
       }
     })
@@ -100,18 +101,9 @@ export class ApplicationExtraComponent {
         this.api.delete('application/auth', { uuid: item.uuid }).subscribe(resp => {
           if (resp.code === 0) {
             this.message.success(resp.msg || '删除成功!')
-            this.getExtrasData()
+            this.service.getApplicationData(this.appId)
           }
         })
-      }
-    })
-  }
-
-  // 获取鉴权列表
-  getExtrasData () {
-    this.api.get('application/params', { appId: this.appId }).subscribe((resp:{code:number, data:{params:ExtraListData[]}, msg:string}) => {
-      if (resp.code === 0) {
-        this.extraList = resp.data.params
       }
     })
   }

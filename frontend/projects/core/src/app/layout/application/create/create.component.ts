@@ -111,6 +111,10 @@ export class ApplicationCreateComponent implements OnInit {
       .get('application', { appId: this.appId })
       .subscribe((resp: {code:number, data:{application:ApplicationData}, msg:string}) => {
         if (resp.code === 0) {
+          this.service.appData = resp.data.application
+          this.service.appName = resp.data.application.name
+          this.service.appDesc = resp.data.application.desc
+
           this.createApplicationForm = resp.data.application
           this.validateForm.controls['name'].setValue(
             resp.data.application.name

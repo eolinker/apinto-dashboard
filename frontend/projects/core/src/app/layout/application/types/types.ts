@@ -1,4 +1,4 @@
-import { ArrayItemData } from '../../../constant/type'
+import { ArrayItemData, PublishStatus } from '../../../constant/type'
 
 /* eslint-disable camelcase */
 export interface ApplicationEnum{
@@ -13,13 +13,22 @@ export interface ApplicationListData{
     operator:string
     updateTime:string
     isDelete:boolean
+    publish:Array<{name:string, title:string, status:PublishStatus}>
+    [k:string]:any
 }
 
+export type ApplicationParamData = {
+    key:string
+    value:string
+    conflict:string
+    position:string
+}
 export interface ApplicationData{
     name:string
     id:string
     desc:string
     customAttrList:ArrayItemData[]
+    params?:ApplicationParamData[]
 }
 
 export interface ApplicationAuthForm{
