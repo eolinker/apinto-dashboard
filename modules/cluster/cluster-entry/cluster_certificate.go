@@ -10,7 +10,7 @@ type ClusterCertificate struct {
 	Operator    int       `gorm:"type:int(11);size:11;default:null;column:operator;comment:更新人/操作人"`
 	Key         string    `gorm:"type:text;not null;column:key"`
 	Pem         string    `gorm:"type:text;not null;column:pem"`
-	UUID        string    `gorm:"size:36;not null;column:uuid;dbUniqueIndex:uuid;uniqueIndex:uuid;comment:uuid"`
+	UUID        string    `gorm:"size:36;not null;column:uuid;uniqueIndex:uuid;comment:uuid"`
 	CreateTime  time.Time `gorm:"type:timestamp;NOT NULL;DEFAULT:CURRENT_TIMESTAMP;column:create_time;comment:创建时间"`
 	UpdateTime  time.Time `gorm:"type:timestamp;NOT NULL;DEFAULT:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;column:update_time;comment:修改时间"`
 }

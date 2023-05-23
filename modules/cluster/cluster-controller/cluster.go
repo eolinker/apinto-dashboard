@@ -228,12 +228,12 @@ func (c *clusterController) update(ginCtx *gin.Context) {
 //	clusterInput := &cluster_dto.ClusterInput{}
 //	err := ginCtx.BindJSON(clusterInput)
 //	if err != nil {
-//		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
+//		controller.ErrorJson(ginCtx, http.StatusOK, err.Logger())
 //		return
 //	}
 //	userId := users.GetUserId(ginCtx)
 //	if err = c.clusterService.UpdateDesc(ginCtx, namespaceId, userId, clusterName, clusterInput.Desc); err != nil {
-//		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
+//		controller.ErrorJson(ginCtx, http.StatusOK, err.Logger())
 //		return
 //	}
 //	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
