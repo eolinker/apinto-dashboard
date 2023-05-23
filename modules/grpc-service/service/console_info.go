@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/grpc-service"
 	"github.com/eolinker/apinto-dashboard/modules/api"
+	"github.com/eolinker/apinto-dashboard/modules/application"
 	"github.com/eolinker/apinto-dashboard/modules/cluster"
 	"github.com/eolinker/apinto-dashboard/modules/dynamic"
 	module_plugin "github.com/eolinker/apinto-dashboard/modules/module-plugin"
@@ -27,6 +28,7 @@ type consoleInfoService struct {
 	apiService          api.IAPIService
 	modulePluginService module_plugin.IModulePlugin
 	navigationService   navigation_service.INavigationService
+	applicationService  application.IApplicationService
 	dynamicService      dynamic.IDynamicService
 	clusterService      cluster.IClusterService
 
@@ -40,6 +42,7 @@ func NewConsoleInfoService() grpc_service.GetConsoleInfoServer {
 	bean.Autowired(&c.modulePluginService)
 	bean.Autowired(&c.navigationService)
 	bean.Autowired(&c.dynamicService)
+	bean.Autowired(&c.applicationService)
 	bean.Autowired(&c.clusterService)
 
 	bean.Autowired(&c.modulesCache)
@@ -161,16 +164,16 @@ func (c *consoleInfoService) GetAllServicesByNames(ctx context.Context, req *grp
 }
 
 func (c *consoleInfoService) GetAllApps(ctx context.Context, req *grpc_service.GetAppsReq) (*grpc_service.AppsResp, error) {
-	basicInfos, err := c.dynamicService.ListByKeyword(ctx, int(req.NamespaceId), professionApp, "")
+	basicInfos, err := c.applicationService.AllApp(ctx, int(req.NamespaceId))
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, fmt.Errorf("获取应用列表报错. err: %s", err)
 	}
 	items := make([]*grpc_service.AppsItem, 0, len(basicInfos))
 	for _, info := range basicInfos {
 		items = append(items, &grpc_service.AppsItem{
-			Uuid: info.ID,
-			Name: info.Title,
-			Desc: info.Description,
+			Uuid: info.Uuid,
+			Name: info.Name,
+			Desc: info.Desc,
 		})
 	}
 	return &grpc_service.AppsResp{
@@ -179,16 +182,16 @@ func (c *consoleInfoService) GetAllApps(ctx context.Context, req *grpc_service.G
 }
 
 func (c *consoleInfoService) GetAppsByUuids(ctx context.Context, req *grpc_service.GetAppsByUuidsReq) (*grpc_service.AppsResp, error) {
-	basicInfos, err := c.dynamicService.ListByNames(ctx, int(req.NamespaceId), professionApp, req.Uuids)
+	basicInfos, err := c.applicationService.AppListByUUIDS(ctx, int(req.NamespaceId), req.Uuids)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, fmt.Errorf("获取应用列表报错. err: %s", err)
 	}
 	items := make([]*grpc_service.AppsItem, 0, len(basicInfos))
 	for _, info := range basicInfos {
 		items = append(items, &grpc_service.AppsItem{
-			Uuid: info.ID,
-			Name: info.Title,
-			Desc: info.Description,
+			Uuid: info.Uuid,
+			Name: info.Name,
+			Desc: info.Desc,
 		})
 	}
 	return &grpc_service.AppsResp{
