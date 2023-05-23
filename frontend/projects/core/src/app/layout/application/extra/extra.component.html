@@ -1,0 +1,29 @@
+
+<div class="">
+    <div
+      class="list-header pl-btnbase pr-btnrbase py-btnybase flex flex-nowrap items-center justify-between"
+    >
+      <button
+        eo-ng-button
+        class="ant-btn-primary"
+        eoNgUserAccess="application"
+        (disabledEdit)="disabledEdit($event)"
+        (click)="openDrawer()"
+      >
+        添加参数
+      </button>
+    </div>
+    <div class="list-content">
+      <eo-ng-apinto-table
+        class=""
+        [nzTbody]="extraTableBody"
+        [nzThead]="extraTableHeadName"
+        [nzData]="extraList"
+        [nzTrClick]="authTableClick"
+        [nzMaxOperatorButton]="2"
+        [nzNoScroll]="true"
+      >
+      </eo-ng-apinto-table>
+    </div>
+  </div>
+  
