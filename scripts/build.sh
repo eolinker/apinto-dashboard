@@ -66,9 +66,12 @@ flags="-X 'github.com/eolinker/apinto-dashboard/app/apserver/version.Version=${V
 -X 'github.com/eolinker/apinto-dashboard/app/apserver/version.buildtime=$(date -u +"%Y-%m-%dT%H:%M:%SZ")'
 -X 'github.com/eolinker/apinto-dashboard/app/apserver/version.builduser=$(id -u -n)'"
 
-
+TAGS="release,mysql"
+if [[ "${BUILD_TYPE}" != "" ]] ;then
+   TAGS="release,mysql,${BUILD_TYPE}"
+fi
 # -ldflags="-w -s" means omit DWARF symbol table and the symbol table and debug information
-GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build --tags "release,mysql" -ldflags "-w -s $flags" -o ${OUTPUT_BINARY} ./app/apserver
+GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build --tags "${TAGS}" -ldflags "-w -s $flags" -o ${OUTPUT_BINARY} ./app/apserver
 
 mkdir -p apserver_${VERSION}
 #cp ./scripts/resource/config.yml.tpl ${OUTPUT_DIR}/config.yml
