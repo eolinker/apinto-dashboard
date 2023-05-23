@@ -4,8 +4,8 @@ import "time"
 
 type Plugin struct {
 	Id          int       `gorm:"type:int(11);size:11;not null;auto_increment;primary_key;column:id;comment:主键ID" json:"id,omitempty"`
-	NamespaceId int       `gorm:"type:int(11);size:11;not null;column:namespace;dbUniqueIndex:namespace_name_index;uniqueIndex:namespace_name_index;comment:工作空间" json:"namespace_id,omitempty"`
-	Name        string    `gorm:"size:36;not null;column:name;dbUniqueIndex:namespace_name_index;uniqueIndex:namespace_name_index;comment:插件名称" json:"name,omitempty"`
+	NamespaceId int       `gorm:"type:int(11);size:11;not null;column:namespace;uniqueIndex:namespace_name_index;comment:工作空间" json:"namespace_id,omitempty"`
+	Name        string    `gorm:"size:36;not null;column:name;uniqueIndex:namespace_name_index;comment:插件名称" json:"name,omitempty"`
 	Extended    string    `gorm:"size:255;column:extended;comment:扩展ID" json:"extended,omitempty"`
 	Desc        string    `gorm:"size:255;column:desc;comment:描述" json:"desc,omitempty"`
 	Schema      string    `gorm:"column:schema;comment:jsonSchema" json:"schema,omitempty"`

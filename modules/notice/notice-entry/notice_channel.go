@@ -4,8 +4,8 @@ import "time"
 
 type NoticeChannel struct {
 	Id          int       `gorm:"type:int(11);size:11;not null;auto_increment;primary_key;column:id;comment:主键ID"`
-	NamespaceID int       `gorm:"type:int(11);size:11;not null;column:namespace;dbUniqueIndex:namespace_name;uniqueIndex:namespace_name;comment:工作空间"`
-	Name        string    `gorm:"size:36;not null;column:name;dbUniqueIndex:namespace_name;uniqueIndex:namespace_name;comment:名称"`
+	NamespaceID int       `gorm:"type:int(11);size:11;not null;column:namespace;uniqueIndex:namespace_name;comment:工作空间"`
+	Name        string    `gorm:"size:36;not null;column:name;uniqueIndex:namespace_name;comment:名称"`
 	Title       string    `gorm:"size:255;not null;column:title;comment:标题"`
 	Type        int       `gorm:"type:int(11);size:11;column:type;comment:1.webhook 2.email"`
 	Operator    int       `gorm:"type:int(11);size:11;column:operator;comment:更新人/操作人"`
