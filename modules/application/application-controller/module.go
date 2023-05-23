@@ -44,9 +44,10 @@ func (c *PluginDriver) CheckConfig(name string, config interface{}) error {
 }
 
 type Module struct {
-	isInit  bool
-	name    string
-	routers module.RoutersInfo
+	isInit               bool
+	name                 string
+	routers              module.RoutersInfo
+	filterOptionHandlers []module.IFilterOptionHandler
 }
 
 func (c *Module) Name() string {
@@ -76,4 +77,14 @@ func (c *Module) RoutersInfo() module.RoutersInfo {
 		c.isInit = true
 	}
 	return c.routers
+}
+
+func (c *Module) FilterOptionHandler() []module.IFilterOptionHandler {
+	return c.filterOptionHandlers
+}
+
+func (c *Module) initFilter() {
+	c.filterOptionHandlers = []module.IFilterOptionHandler{
+		newFilterOption(),
+	}
 }
