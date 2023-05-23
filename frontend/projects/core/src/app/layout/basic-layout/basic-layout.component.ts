@@ -164,18 +164,19 @@ export class BasicLayoutComponent implements OnInit {
   }
 
   openAuthDialog () {
-    this.modalRef = this.modalService.create({
-      nzWrapClassName: 'auth-modal-header',
-      nzTitle: `${this.authInfo.title}授权`,
-      nzContent: AuthInfoDetailComponent,
-      nzComponentParams: {
-        eoInfos: this.authInfo.infos,
-        updateAuth: this.updateAuth
-      },
-      nzClosable: true,
-      nzFooter: null,
-      nzWidth: MODAL_SMALL_SIZE
-    })
+    // this.modalRef = this.modalService.create({
+    //   nzWrapClassName: 'auth-modal-header',
+    //   nzTitle: `${this.authInfo.title}授权`,
+    //   nzContent: AuthInfoDetailComponent,
+    //   nzComponentParams: {
+    //     eoInfos: this.authInfo.infos,
+    //     updateAuth: this.updateAuth
+    //   },
+    //   nzClosable: true,
+    //   nzFooter: null,
+    //   nzWidth: MODAL_SMALL_SIZE
+    // })
+    this.router.navigate(['/', 'auth-info'])
   }
 
   updateAuth = () => {
