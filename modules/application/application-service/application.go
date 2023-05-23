@@ -662,15 +662,13 @@ func (a *applicationService) AppEnumList(ctx context.Context, namespaceId int) (
 	return applications, nil
 }
 
-func (a *applicationService) AppListFilter(ctx context.Context, namespaceId, pageNum, pageSize int, queryName string) ([]*application_model.ApplicationBasicInfo, int, error) {
-
-	list, count, err := a.applicationStore.GetListPage(ctx, namespaceId, pageNum, pageSize, queryName)
+func (a *applicationService) AllApp(ctx context.Context, namespaceId int) ([]*application_model.ApplicationBasicInfo, error) {
+	list, err := a.applicationStore.GetListByNamespace(ctx, namespaceId)
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 
 	applications := make([]*application_model.ApplicationBasicInfo, 0, len(list))
-
 	for _, item := range list {
 		applications = append(applications, &application_model.ApplicationBasicInfo{
 			Uuid: item.IdStr,
@@ -679,7 +677,7 @@ func (a *applicationService) AppListFilter(ctx context.Context, namespaceId, pag
 		})
 	}
 
-	return applications, count, nil
+	return applications, nil
 }
 
 func (a *applicationService) AppInfoDetails(ctx context.Context, namespaceId int, id string) (*application_model.ApplicationInfo, error) {

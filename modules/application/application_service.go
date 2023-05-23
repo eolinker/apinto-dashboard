@@ -14,7 +14,7 @@ type IApplicationService interface {
 	DelApp(ctx context.Context, namespaceId, userId int, id string) error
 	AppList(ctx context.Context, namespaceId, userId, pageNum, pageSize int, queryName string, clusters []string) ([]*application_model.ApplicationListItem, int, error)
 	AppEnumList(ctx context.Context, namespaceId int) ([]*application_model.ApplicationBasicInfo, error)
-	AppListFilter(ctx context.Context, namespaceId, pageNum, pageSize int, queryName string) ([]*application_model.ApplicationBasicInfo, int, error)
+	AllApp(ctx context.Context, namespaceId int) ([]*application_model.ApplicationBasicInfo, error)
 	AppListByUUIDS(ctx context.Context, namespaceId int, uuids []string) ([]*application_model.ApplicationBasicInfo, error)
 	AppInfoDetails(ctx context.Context, namespaceId int, id string) (*application_model.ApplicationInfo, error)
 	AppInfo(ctx context.Context, namespaceId int, id string) (*application_model.ApplicationEntire, error)
