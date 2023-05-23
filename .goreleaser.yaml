@@ -23,6 +23,7 @@ builds:
     tags:
       - release
       - mysql
+      - business
     dir: ./app/apserver
     main: ./
     binary: apserver
