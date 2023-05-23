@@ -12,6 +12,8 @@ import { Router } from '@angular/router'
 import { TabTemplateContext } from 'ng-zorro-antd/tabs'
 import { TabsOptions } from 'eo-ng-tabs'
 import { BaseInfoService } from '../../../service/base-info.service'
+import { EoNgApplicationService } from '../application.service'
+import { ApiService } from '../../../service/api.service'
 
 @Component({
   selector: 'eo-ng-application-content',
@@ -20,44 +22,55 @@ import { BaseInfoService } from '../../../service/base-info.service'
   ]
 })
 export class ApplicationContentComponent implements OnInit {
-  @ViewChild('tab1Tpl', { read: TemplateRef, static: true }) tab1Tpl: TemplateRef<TabTemplateContext> | string = '上线管理'
-  @ViewChild('tab2Tpl', { read: TemplateRef, static: true }) tab2Tpl: TemplateRef<TabTemplateContext> | string = '应用信息'
-  @ViewChild('tab3Tpl', { read: TemplateRef, static: true }) tab3Tpl: TemplateRef<TabTemplateContext> | string = '鉴权管理'
+  @ViewChild('tab1Tpl', { read: TemplateRef, static: true }) tab1Tpl: TemplateRef<TabTemplateContext> | string = '额外参数'
+  @ViewChild('tab2Tpl', { read: TemplateRef, static: true }) tab2Tpl: TemplateRef<TabTemplateContext> | string = '应用设置'
+  @ViewChild('tab3Tpl', { read: TemplateRef, static: true }) tab3Tpl: TemplateRef<TabTemplateContext> | string = '访问鉴权'
   appId:string=''
   options:Array<any>=[]
 
   tabOptions:TabsOptions[]=[]
-
+  appName:string=''
+  appDesc:string=''
+  showTopBlank:boolean = false // 是否显示表单上方空隙
   constructor (
     private baseInfo:BaseInfoService,
     private router:Router,
     private cdRef: ChangeDetectorRef,
     private elem: ElementRef,
-    private renderer: Renderer2) {
+    private renderer: Renderer2,
+    private service:EoNgApplicationService,
+    private api:ApiService) {
   }
 
   ngOnInit (): void {
     this.appId = this.baseInfo.allParamsInfo.appId
+    console.log(this)
     if (!this.appId) {
       this.router.navigate(['/', 'application'])
+    }
+    if (!this.router.url.includes('/message')) {
+      this.showTopBlank = false
+      this.getAppData()
+    } else {
+      this.showTopBlank = true
     }
   }
 
   ngAfterViewInit () {
     this.tabOptions = [
       {
+        title: this.tab3Tpl,
+        routerLink: 'authentication',
+        queryParamsHandling: 'merge'
+      },
+      {
         title: this.tab1Tpl,
-        routerLink: '.',
+        routerLink: 'extra',
         queryParamsHandling: 'merge'
       },
       {
         title: this.tab2Tpl,
         routerLink: 'message',
-        queryParamsHandling: 'merge'
-      },
-      {
-        title: this.tab3Tpl,
-        routerLink: 'authentication',
         queryParamsHandling: 'merge'
       }
     ]
@@ -71,5 +84,19 @@ export class ApplicationContentComponent implements OnInit {
   ngAfterViewChecked () {
     const element = this.elem.nativeElement.querySelector('[nz-tabs-ink-bar]')
     this.renderer.removeAttribute(element, 'hidden')
+  }
+
+  getAppData () {
+    // TODO
+    this.api.get('cluster', { appName: this.appName }).subscribe((resp:{code:number, data:{cluster:{desc:string, title:string, [key:string]:any}}, msg:string}) => {
+      if (resp.code === 0) {
+        this.service.appName = resp.data.cluster.title
+        this.service.appDesc = resp.data.cluster.desc
+      }
+    })
+  }
+
+  backToList () {
+    this.router.navigate(['/', 'application'])
   }
 }

@@ -11,8 +11,12 @@
     <div class="logo">
       <img
         [ngClass]="{ 'h-[32px]': isBusiness, 'h-[26px]': !isBusiness }"
-        src="../../../assets/apinto.svg"
-        alt="apinto"
+        [src]="
+          isBusiness
+            ? '../../../assets/apinto-pro.svg'
+            : '../../../assets/apinto.svg'
+        "
+        [alt]="isBusiness ? 'apinto-pro' : 'apinto'"
       />
       <a
         *ngIf="!isBusiness"
