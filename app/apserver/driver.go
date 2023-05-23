@@ -3,6 +3,7 @@ package main
 import (
 	apintoModule "github.com/eolinker/apinto-dashboard/module"
 	apiController "github.com/eolinker/apinto-dashboard/modules/api/controller"
+	appController "github.com/eolinker/apinto-dashboard/modules/application/application-controller"
 	auditController "github.com/eolinker/apinto-dashboard/modules/audit/audit-controller"
 	clusterController "github.com/eolinker/apinto-dashboard/modules/cluster/cluster-controller"
 	_ "github.com/eolinker/apinto-dashboard/modules/core/controller"
@@ -22,6 +23,7 @@ import (
 func init() {
 
 	apintoModule.Register("api.apinto.com", apiController.NewPluginDriver())
+	apintoModule.Register("application.apinto.com", appController.NewPluginDriver())
 	apintoModule.Register("audit.apinto.com", auditController.NewDriver())
 	apintoModule.Register("cluster.apinto.com", clusterController.NewClusterPlugin())
 	apintoModule.Register("ext_app.apinto.com", open_app_controller.NewPluginDriver())
@@ -44,6 +46,6 @@ func init() {
 	apintoModule.Register("dynamic.apinto.com", dynamic_controller.NewDynamicModuleDriver(true, false, true, true))
 	apintoModule.Register("upstream.apinto.com", dynamic_controller.NewDynamicModuleDriver(true, false, false, false))
 	apintoModule.Register("discovery.apinto.com", dynamic_controller.NewDynamicModuleDriver(true, false, false, false))
-	apintoModule.Register("application.apinto.com", dynamic_controller.NewDynamicModuleDriver(true, false, false, false))
+	//apintoModule.Register("application.apinto.com", dynamic_controller.NewDynamicModuleDriver(true, false, false, false))
 
 }
