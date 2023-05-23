@@ -50,7 +50,7 @@ export class ApplicationContentComponent implements OnInit {
     }
     if (!this.router.url.includes('/message')) {
       this.showTopBlank = false
-      this.getAppData()
+      this.service.getApplicationData(this.appId)
     } else {
       this.showTopBlank = true
     }
@@ -86,14 +86,8 @@ export class ApplicationContentComponent implements OnInit {
     this.renderer.removeAttribute(element, 'hidden')
   }
 
-  getAppData () {
-    // TODO
-    this.api.get('cluster', { appName: this.appName }).subscribe((resp:{code:number, data:{cluster:{desc:string, title:string, [key:string]:any}}, msg:string}) => {
-      if (resp.code === 0) {
-        this.service.appName = resp.data.cluster.title
-        this.service.appDesc = resp.data.cluster.desc
-      }
-    })
+  ngOnDestroy () {
+    this.service.clearData()
   }
 
   backToList () {
