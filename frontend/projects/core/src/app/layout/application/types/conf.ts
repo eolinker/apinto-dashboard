@@ -229,7 +229,7 @@ export const extraTableBody:EO_TBODY_TYPE[] = [
   },
   { key: 'value' },
   {
-    key: 'conflictString'
+    key: 'conflict'
   },
   {
     type: 'btn',
