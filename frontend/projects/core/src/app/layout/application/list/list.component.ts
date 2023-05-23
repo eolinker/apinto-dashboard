@@ -7,17 +7,23 @@
  * @FilePath: /apinto/src/app/layout/application/application-management-list/application-management-list.component.ts
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
-import { Component, OnInit } from '@angular/core'
-import { NavigationEnd } from '@angular/router'
-import { MODAL_NORMAL_SIZE } from '../../../constant/app.config'
-import { EmptyHttpResponse } from '../../../constant/type'
-import { forkJoin, map } from 'rxjs'
-import { IntelligentPluginDefaultThead } from '../../../component/intelligent-plugin/types/conf'
-import { DynamicConfig, DynamicDriverData } from '../../../component/intelligent-plugin/types/types'
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
+import { NavigationEnd, Router } from '@angular/router'
+import { MODAL_NORMAL_SIZE, MODAL_SMALL_SIZE } from '../../../constant/app.config'
+import { ClusterSimpleOption, EmptyHttpResponse } from '../../../constant/type'
+import { Subscription } from 'rxjs'
 import { v4 as uuidv4 } from 'uuid'
-import { IntelligentPluginListComponent } from '../../../component/intelligent-plugin/list/list.component'
 import { ApplicationPublishComponent } from '../publish/publish.component'
 import { ApplicationCreateComponent } from '../create/create.component'
+import { ApplicationListData } from '../types/types'
+import { EoNgApplicationService } from '../application.service'
+import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feedback'
+import { SelectOption } from 'eo-ng-select'
+import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
+import { NzModalRef } from 'ng-zorro-antd/modal'
+import { ApiService } from '../../../service/api.service'
+import { EoNgNavigationService } from '../../../service/app-config.service'
+import { BaseInfoService } from '../../../service/base-info.service'
 
 @Component({
   selector: 'eo-ng-application-management-list',
@@ -25,21 +31,49 @@ import { ApplicationCreateComponent } from '../create/create.component'
   styles: [
   ]
 })
-export class ApplicationManagementListComponent extends IntelligentPluginListComponent implements OnInit {
-  override pluginName:string = ''
+export class ApplicationManagementListComponent implements OnInit {
+  @ViewChild('clusterStatusTpl', { read: TemplateRef, static: true }) clusterStatusTpl: TemplateRef<any> | undefined
+  @ViewChild('loadingTpl', { read: TemplateRef, static: true }) loadingTpl: TemplateRef<any> | undefined
+  moduleName:string = ''
+  pluginName:string = '应用'
+  keyword:string = ''
+  nzDisabled:boolean = false
+  cluster:any = []
+  clusterOptions:SelectOption[] = []
+  tableBody:TBODY_TYPE[] = []
+  tableHeadName:THEAD_TYPE[] = [...this.service.createApiListThead(this)]
+  tableData:{data:any[], pagination:boolean, total:number, pageNum:number, pageSize:number}
+  = { data: [], pagination: true, total: 1, pageSize: 20, pageNum: 1 }
 
-  override ngOnInit (): void {
+  driverOptions:SelectOption[] = []
+  renderSchema:any = {} // 动态渲染数据，是json schema
+  modalRef:NzModalRef|undefined
+  statusMap:{[k:string]:any} = {}
+  tableLoading:boolean = true
+  subscription: Subscription = new Subscription()
+
+  constructor (
+    public message: EoNgFeedbackMessageService,
+    public service:EoNgApplicationService,
+    public modalService:EoNgFeedbackModalService,
+    public api:ApiService,
+    public router:Router,
+    private baseInfo:BaseInfoService,
+    public navigationService: EoNgNavigationService) {
+
+  }
+
+  ngOnInit (): void {
     this.navigationService.reqFlashBreadcrumb([
       { title: '应用管理' }
     ])
     this.subscription = this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
-        this.pluginName = ''
         this.keyword = ''
         this.cluster = []
         this.clusterOptions = []
-        this.tableBody = [...this.service.createTbody(this)]
-        this.tableHeadName = [...IntelligentPluginDefaultThead]
+        this.tableBody = [...this.service.createApiListTbody(this)]
+        this.tableHeadName = [...this.service.createApiListThead(this)]
         this.tableData = { data: [], pagination: true, total: 1, pageSize: 20, pageNum: 1 }
 
         this.driverOptions = []
@@ -55,44 +89,54 @@ export class ApplicationManagementListComponent extends IntelligentPluginListCom
     this.getTableData()
   }
 
-  override getTableData () {
-    this.tableLoading = true
-    // 表格内的其他数据与状态数据是分别获取的，如果list先返回，需要先展示除了状态数据以外的其他数据
-    // TODO 修改接口
-    forkJoin([this.api.get('dynamic/application/list', {
-      page: this.tableData.pageNum,
-      pageSize: this.tableData.pageSize,
-      keyword: this.keyword,
-      cluster: JSON.stringify(this.cluster)
-    }).pipe(
-      map(res => {
-        if (res.code === 0) {
-          this.getConfig(res.data)
-        }
-        return res
-      })),
-    // TODO 修改接口
-    this.api.get('dynamic/application/status', {
-      page: this.tableData.pageNum,
-      pageSize: this.tableData.pageSize,
-      keyword: this.keyword,
-      cluster: JSON.stringify(this.cluster)
-    })]).subscribe((val:Array<any>) => {
-      this.refreshTableData(this.tableData.data, val[1].data)
+  getClusters () {
+    this.api.get('clusters/simple').subscribe((resp:{code:number, msg:string, data:{clusters:ClusterSimpleOption[]}}) => {
+      if (resp.code === 0) {
+        this.clusterOptions = resp.data.clusters.map((cluster:ClusterSimpleOption) => {
+          return { label: cluster.title, value: cluster.name }
+        })
+        this.cluster = this.clusterOptions.map((cluster:SelectOption) => {
+          return cluster.value
+        })
+      }
     })
   }
 
-  // 获取列表渲染配置、表单渲染配置
-  override getConfig (data:DynamicConfig) {
-    this.pluginName = data.title
-    this.getTableConfig(data.fields) // 获取列表配置
-    this.tableData.data = data.list // 获取列表数据
-    this.driverOptions = data.drivers?.map((driver:DynamicDriverData) => {
-      return { label: driver.title, value: driver.name }
-    }) || []
+  getTableData () {
+    this.tableLoading = true
+    this.api.get('applications', {
+      name: this.keyword,
+      pageNum: this.tableData.pageNum,
+      pageSize: this.tableData.pageSize,
+      clusters: this.cluster
+    }).subscribe((resp:{code:number, data:{applications:ApplicationListData[], total:number, pageNum:number, pageSize:number}}) => {
+      if (resp.code === 0) {
+        this.tableData.data = resp.data.applications.map((item:ApplicationListData) => {
+          if (item.publish?.length > 0) {
+            for (const p of item.publish) {
+              item[`cluster_${p.name}`] = p.status
+            }
+          }
+          return item
+        })
+        if (resp.data.applications.length > 0) {
+          this.tableBody = this.service.createApiListTbody(this, resp.data.applications[0].publish)
+          this.tableHeadName = this.service.createApiListThead(this, resp.data.applications[0].publish)
+        }
+
+        this.tableData.total = resp.data.total || this.tableData.total
+        this.tableData.pageNum = resp.data.pageNum || this.tableData.pageNum
+        this.tableData.pageSize = resp.data.pageSize || this.tableData.pageSize
+      }
+      this.tableLoading = false
+    })
   }
 
-  override publish (value:any) {
+  disabledEdit (value:any) {
+    this.nzDisabled = value
+  }
+
+  publish (value:any) {
     this.modalRef = this.modalService.create({
       nzTitle: `${value.data.title}上线管理`,
       nzWidth: MODAL_NORMAL_SIZE,
@@ -102,7 +146,7 @@ export class ApplicationManagementListComponent extends IntelligentPluginListCom
         id: value.data.id,
         desc: value.data.description,
         moduleName: this.moduleName,
-        closeModal: this.closeModal,
+        closeModal: () => { this.modalRef?.close() },
         nzDisabled: this.nzDisabled
       },
       nzFooter: [{
@@ -139,7 +183,7 @@ export class ApplicationManagementListComponent extends IntelligentPluginListCom
     })
   }
 
-  override addData () {
+  addData () {
     this.modalRef = this.modalService.create({
       nzTitle: `新建${this.pluginName}`,
       nzWidth: MODAL_NORMAL_SIZE,
@@ -155,55 +199,33 @@ export class ApplicationManagementListComponent extends IntelligentPluginListCom
     })
   }
 
-  override editData (value:any) {
+  editData (value:any) {
     console.log(value)
     this.router.navigate(['/', 'application', 'content', value.data.id, 'message'])
-    // this.modalRef = this.modalService.create({
-    //   nzTitle: `编辑${this.pluginName}`,
-    //   nzWidth: MODAL_NORMAL_SIZE,
-    //   nzContent: ApplicationCreateComponent,
-    //   nzComponentParams: {
-    //     editPage: true,
-    //     appId: value.data.id
-    //   },
-    //   nzOnOk: (component:ApplicationCreateComponent) => {
-    //     return new Promise((resolve, reject) => {
-    //       component.saveApplication() ? resolve() : reject(new Error())
-    //     })
-    //   }
-    // })
   }
 
-  override saveData (form:{[k:string]:any}, id:string = uuidv4(), editPage?:boolean) {
-    if (editPage) {
-      // TODO
-      this.api.put(`dynamic/application/config/${id}`, { ...form }).subscribe((resp:EmptyHttpResponse) => {
-        if (resp.code === 0) {
-          this.message.success(resp.msg || '操作成功')
-          this.getTableData()
-          this.modalRef?.close()
-        }
-      })
-    } else {
-      // TODO
-      this.api.post('dynamic/application', { ...form }).subscribe((resp:EmptyHttpResponse) => {
-        if (resp.code === 0) {
-          this.message.success(resp.msg || '操作成功')
-          this.getTableData()
-          this.modalRef?.close()
-        }
-      })
-    }
-  }
-
-  // 删除单条数据
-  override deleteData = (items:{id:string, [k:string]:any}) => {
-    // TODO
-    this.api.delete('dynamic/batch', { uuids: JSON.stringify([items.id]) }).subscribe((resp:any) => {
-      if (resp.code === 0) {
-        this.message.success(resp.msg || '删除成功!')
-        this.getTableData()
+  deleteDataModal (items:{id:string, [k:string]:any}) {
+    this.modalService.create({
+      nzTitle: '删除',
+      nzContent: '该数据删除后将无法找回，请确认是否删除？',
+      nzClosable: true,
+      nzClassName: 'delete-modal',
+      nzWidth: MODAL_SMALL_SIZE,
+      nzOkDanger: true,
+      nzOnOk: () => {
+        this.deleteData(items)
       }
     })
   }
+
+  // 删除单条数据
+   deleteData = (items:{id:string, [k:string]:any}) => {
+     // TODO
+     this.api.delete('application', { appId: items.id }).subscribe((resp:any) => {
+       if (resp.code === 0) {
+         this.message.success(resp.msg || '删除成功!')
+         this.getTableData()
+       }
+     })
+   }
 }
