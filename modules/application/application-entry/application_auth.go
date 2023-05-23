@@ -8,6 +8,7 @@ import (
 type ApplicationAuth struct {
 	Id            int       `gorm:"type:int(11);size:11;not null;auto_increment;primary_key;column:id;comment:主键ID" json:"id,omitempty"`
 	Uuid          string    `gorm:"size:36;not null;column:uuid;uniqueIndex:uuid;comment:uuid" json:"uuid,omitempty"`
+	Title         string    `gorm:"size:255;not null;column:title;comment:鉴权名称" json:"title,omitempty"`
 	Namespace     int       `gorm:"type:int(11);size:11;not null;column:namespace;comment:工作空间" json:"namespace,omitempty"`
 	Application   int       `gorm:"type:int(11);size:11;not null;index:application;column:application;comment:应用ID" json:"application,omitempty"`
 	IsTransparent bool      `gorm:"type:tinyint(1);size:1;not null;default:0;column:is_transparent;comment:隐藏鉴权" json:"is_transparent,omitempty"`
@@ -15,6 +16,7 @@ type ApplicationAuth struct {
 	Position      string    `gorm:"size:30;not null;column:position;comment:header,query" json:"position,omitempty"`
 	TokenName     string    `gorm:"size:255;not null;column:token_name;comment:tokenName" json:"token_name,omitempty"`
 	ExpireTime    int64     `gorm:"type:int(11);size:11;not null;default:0;column:expire_time;comment:过期时间" json:"expire_time,omitempty"`
+	Config        string    `gorm:"type:text;not null;column:config;comment:配置信息json"`
 	Operator      int       `gorm:"type:int(11);size:11;column:operator;comment:更新人/操作人" json:"operator,omitempty"`
 	CreateTime    time.Time `gorm:"type:timestamp;NOT NULL;DEFAULT:CURRENT_TIMESTAMP;column:create_time;comment:创建时间" json:"create_time"`
 	UpdateTime    time.Time `gorm:"type:timestamp;NOT NULL;DEFAULT:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;column:update_time;comment:修改时间" json:"update_time"`
@@ -69,8 +71,8 @@ func (a *ApplicationAuthRuntime) SetRuntimeId(id int) {
 }
 
 type ApplicationAuthHistoryInfo struct {
-	Auth   ApplicationAuth              `json:"auth,omitempty"`
-	Config ApplicationAuthVersionConfig `json:"config,omitempty"`
+	Auth   ApplicationAuth `json:"auth,omitempty"`
+	Config string          `json:"config,omitempty"`
 }
 
 type ApplicationAuthHistory struct {

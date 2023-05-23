@@ -2,6 +2,7 @@ package application_controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/controller/users"
@@ -24,8 +25,7 @@ var (
 )
 
 type applicationController struct {
-	applicationService     application.IApplicationService
-	applicationAuthService application.IApplicationAuthService
+	applicationService application.IApplicationService
 }
 
 func newApplicationController() *applicationController {
@@ -35,26 +35,9 @@ func newApplicationController() *applicationController {
 		if controllerInstance == nil {
 			controllerInstance = &applicationController{}
 			bean.Autowired(&controllerInstance.applicationService)
-			bean.Autowired(&controllerInstance.applicationAuthService)
 		}
 	}
 	return controllerInstance
-}
-
-func RegisterApplicationRouter(router gin.IRoutes) {
-	c := &applicationController{}
-	bean.Autowired(&c.applicationService)
-	bean.Autowired(&c.applicationAuthService)
-
-	router.GET("/application/onlines", c.onlines)
-	router.PUT("/application/online", c.online)
-	router.PUT("/application/offline", c.offline)
-	router.GET("/application/drivers", c.drivers)
-	router.GET("/application/auths", c.auths)
-	router.GET("/application/auth", c.getAuth)
-	router.POST("/application/auth", c.createAuth)
-	router.PUT("/application/auth", c.updateAuth)
-	router.DELETE("/application/auth", c.delAuth)
 }
 
 func (a *applicationController) lists(ginCtx *gin.Context) {
@@ -149,10 +132,19 @@ func (a *applicationController) info(ginCtx *gin.Context) {
 	}
 
 	customAttrList := make([]application_dto.ApplicationCustomAttr, 0, len(info.CustomAttr))
+	paramList := make([]application_dto.ExtraParam, 0, len(info.Params))
 	for _, attr := range info.CustomAttr {
 		customAttrList = append(customAttrList, application_dto.ApplicationCustomAttr{
 			Key:   attr.Key,
 			Value: attr.Value,
+		})
+	}
+	for _, param := range info.Params {
+		paramList = append(paramList, application_dto.ExtraParam{
+			Key:      param.Key,
+			Value:    param.Value,
+			Conflict: param.Conflict,
+			Position: param.Position,
 		})
 	}
 
@@ -161,6 +153,7 @@ func (a *applicationController) info(ginCtx *gin.Context) {
 		Id:             info.Uuid,
 		Desc:           info.Desc,
 		CustomAttrList: customAttrList,
+		Params:         paramList,
 	}
 
 	data := common.Map{}
@@ -222,35 +215,6 @@ func (a *applicationController) deleteApp(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
-func (a *applicationController) onlines(ginCtx *gin.Context) {
-	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	id := ginCtx.Query("app_id")
-	list, err := a.applicationService.OnlineList(ginCtx, namespaceId, id)
-	if err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
-		return
-	}
-	resp := make([]*online_dto.OnlineOut, 0, len(list))
-	for _, online := range list {
-		updateTime := ""
-		if !online.UpdateTime.IsZero() {
-			updateTime = common.TimeToStr(online.UpdateTime)
-		}
-		resp = append(resp, &online_dto.OnlineOut{
-			Name:       online.ClusterName,
-			Status:     enum.OnlineStatus(online.Status),
-			Disable:    online.Disable,
-			Env:        online.Env,
-			Operator:   online.Operator,
-			UpdateTime: updateTime,
-		})
-	}
-
-	m := common.Map{}
-	m["clusters"] = resp
-	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
-}
-
 func (a *applicationController) online(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	userId := users.GetUserId(ginCtx)
@@ -260,7 +224,7 @@ func (a *applicationController) online(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
-	if err := a.applicationService.Online(ginCtx, namespaceId, userId, id, input.ClusterName); err != nil {
+	if err := a.applicationService.Online(ginCtx, namespaceId, userId, id, input.ClusterNames); err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
@@ -276,15 +240,51 @@ func (a *applicationController) offline(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
-	if err := a.applicationService.Offline(ginCtx, namespaceId, userId, id, input.ClusterName); err != nil {
+	if err := a.applicationService.Offline(ginCtx, namespaceId, userId, id, input.ClusterNames); err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
+func (a *applicationController) getOnlineInfo(ginCtx *gin.Context) {
+	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
+	apiUUID := ginCtx.Query("uuid")
+	if apiUUID == "" {
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("获取发布管理信息失败: uuid 不能为空"))
+		return
+	}
+	appInfo, clustersPublish, err := a.applicationService.OnlineInfo(ginCtx, namespaceId, apiUUID)
+	if err != nil {
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("获取发布管理信息失败: %s", err.Error()))
+		return
+	}
+
+	info := &application_dto.AppPublishInfo{
+		Name: appInfo.Name,
+		ID:   appInfo.Uuid,
+		Desc: appInfo.Desc,
+	}
+
+	clusters := make([]*application_dto.AppPublishCluster, 0, len(clustersPublish))
+	for _, clu := range clustersPublish {
+		clusters = append(clusters, &application_dto.AppPublishCluster{
+			Name:       clu.Name,
+			Env:        clu.Env,
+			Title:      clu.Title,
+			Status:     enum.OnlineStatus(clu.Status),
+			Operator:   clu.Updater,
+			UpdateTime: clu.UpdateTime,
+		})
+	}
+	m := make(map[string]interface{})
+	m["info"] = info
+	m["clusters"] = clusters
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
+}
+
 func (a *applicationController) drivers(ginCtx *gin.Context) {
-	driverList := a.applicationAuthService.GetDriversRender()
+	driverList := a.applicationService.GetDriversRender()
 
 	drivers := make([]*application_dto.AuthDriversItem, 0, len(driverList))
 	for _, driver := range driverList {
@@ -302,7 +302,7 @@ func (a *applicationController) drivers(ginCtx *gin.Context) {
 func (a *applicationController) auths(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	appId := ginCtx.Query("app_id")
-	list, err := a.applicationAuthService.GetList(ginCtx, namespaceId, appId)
+	list, err := a.applicationService.GetAuthList(ginCtx, namespaceId, appId)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
@@ -312,16 +312,12 @@ func (a *applicationController) auths(ginCtx *gin.Context) {
 
 	for _, auth := range list {
 		authInfo := &application_dto.ApplicationAuthListOut{
-			Uuid:          auth.Uuid,
-			Driver:        auth.Driver,
-			ParamPosition: auth.ParamPosition,
-			ParamName:     auth.ParamName,
-			ParamInfo:     auth.ParamInfo,
-			ExpireTime:    auth.ExpireTime,
-			Operator:      auth.Operator,
-			UpdateTime:    common.TimeToStr(auth.UpdateTime),
-			RuleInfo:      auth.RuleInfo,
-			IsTransparent: auth.IsTransparent,
+			Uuid:           auth.UUID,
+			Driver:         auth.Driver,
+			ExpireTime:     auth.ExpireTime,
+			Operator:       auth.Operator,
+			UpdateTime:     common.TimeToStr(auth.UpdateTime),
+			HideCredential: auth.HideCredential,
 		}
 		resList = append(resList, authInfo)
 	}
@@ -345,7 +341,7 @@ func (a *applicationController) createAuth(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, "参数位置必填")
 		return
 	}
-	err := a.applicationAuthService.Create(ginCtx, namespaceId, userId, appId, input)
+	err := a.applicationService.CreateAuth(ginCtx, namespaceId, userId, appId, input)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
@@ -365,7 +361,7 @@ func (a *applicationController) updateAuth(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
-	err := a.applicationAuthService.Update(ginCtx, namespaceId, userId, appId, uuid, input)
+	err := a.applicationService.UpdateAuth(ginCtx, namespaceId, userId, appId, uuid, input)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
@@ -379,7 +375,7 @@ func (a *applicationController) delAuth(ginCtx *gin.Context) {
 	uuid := ginCtx.Query("uuid")
 	userId := users.GetUserId(ginCtx)
 
-	err := a.applicationAuthService.Delete(ginCtx, namespaceId, userId, uuid)
+	err := a.applicationService.DeleteAuth(ginCtx, namespaceId, userId, uuid)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
@@ -393,23 +389,39 @@ func (a *applicationController) getAuth(ginCtx *gin.Context) {
 	appId := ginCtx.Query("app_id")
 	uuid := ginCtx.Query("uuid")
 
-	auth, err := a.applicationAuthService.Info(ginCtx, namespaceId, appId, uuid)
+	auth, err := a.applicationService.AuthInfo(ginCtx, namespaceId, appId, uuid)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	resAuth := &application_dto.ApplicationAuthOut{
-		Uuid:          auth.Uuid,
-		Driver:        auth.Driver,
-		ExpireTime:    auth.ExpireTime,
-		Operator:      auth.Operator,
-		Position:      auth.Position,
-		TokenName:     auth.TokenName,
-		UpdateTime:    common.TimeToStr(auth.UpdateTime),
-		IsTransparent: auth.IsTransparent,
-		Config:        application_dto.AuthConfigProxy(auth.Config),
+		Uuid:           auth.Uuid,
+		Driver:         auth.Driver,
+		ExpireTime:     auth.ExpireTime,
+		Operator:       auth.Operator,
+		Position:       auth.Position,
+		TokenName:      auth.TokenName,
+		UpdateTime:     common.TimeToStr(auth.UpdateTime),
+		HideCredential: auth.IsTransparent,
+		Config:         application_dto.AuthConfigProxy(auth.Config),
 	}
 	data := common.Map{}
 	data["auth"] = resAuth
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
+}
+
+func (a *applicationController) getAuthDetails(ginCtx *gin.Context) {
+	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
+	appId := ginCtx.Query("app_id")
+	uuid := ginCtx.Query("uuid")
+
+	result, err := a.applicationService.AuthDetails(ginCtx, namespaceId, appId, uuid)
+	if err != nil {
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
+		return
+	}
+
+	data := common.Map{}
+	data["details"] = result
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
