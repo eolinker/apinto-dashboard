@@ -20,10 +20,10 @@ export interface ApplicationData{
     id:string
     desc:string
     customAttrList:ArrayItemData[]
-    extraParamList:Array<{key:string, value:string, position:string, conflict:string}>
 }
 
 export interface ApplicationAuthForm{
+    name:string
     position:string
     uuid?:string
     tokenName:string
@@ -51,6 +51,7 @@ export interface ApplicationAuthForm{
 }
 
 export interface AuthData{
+    name:string
     driver:'basic' | 'apikey' | 'aksk' | 'jwt'
     isTransparent:boolean
     expireTime:number
@@ -87,4 +88,12 @@ export interface AuthListData{
     operator:string
     updateTime:string
     ruleInfo:string
+}
+
+export interface ExtraListData{
+    key:string
+    value:string
+    conflict:string
+    position:string
+    conflictString?:string
 }
