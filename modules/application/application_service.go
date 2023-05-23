@@ -16,12 +16,14 @@ type IApplicationService interface {
 	AppEnumList(ctx context.Context, namespaceId int) ([]*application_model.ApplicationBasicInfo, error)
 	AllApp(ctx context.Context, namespaceId int) ([]*application_model.ApplicationBasicInfo, error)
 	AppListByUUIDS(ctx context.Context, namespaceId int, uuids []string) ([]*application_model.ApplicationBasicInfo, error)
+	AppBasicInfo(ctx context.Context, namespaceId int, uuid string) (*application_model.ApplicationBasicInfo, error)
 	AppInfoDetails(ctx context.Context, namespaceId int, id string) (*application_model.ApplicationInfo, error)
 	AppInfo(ctx context.Context, namespaceId int, id string) (*application_model.ApplicationEntire, error)
 	Online(ctx context.Context, namespaceId, userId int, id string, clusterNames []string) error
 	Offline(ctx context.Context, namespaceId, userId int, id string, clusterNames []string) error
 	OnlineInfo(ctx context.Context, namespaceId int, uuid string) (*application_model.ApplicationBasicInfo, []*application_model.AppCluster, error)
 	GetAppKeys(ctx context.Context, namespaceId int) ([]*application_model.ApplicationKeys, error)
+	GetAppRemoteOptions(ctx context.Context, namespaceId, pageNum, pageSize int, keyword string) ([]any, error)
 	//online.IResetOnlineService
 
 	GetAuthList(ctx context.Context, namespaceId int, appId string) ([]*application_model.AppAuthItem, error)
