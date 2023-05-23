@@ -28,6 +28,7 @@ func (a *Application) IdValue() int {
 type ApplicationVersionConfig struct {
 	CustomAttrList []ApplicationCustomAttr `json:"custom_attr_list"`
 	ExtraParamList []ApplicationExtraParam `json:"extra_param_list"`
+	AuthList       []*ApplicationAuth      `json:"auth_list"`
 }
 
 type ApplicationCustomAttr struct {
