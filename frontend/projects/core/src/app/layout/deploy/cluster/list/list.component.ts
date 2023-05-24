@@ -31,9 +31,9 @@ import { ClustersThead } from '../types/conf'
 import { MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
 import { NzModalRef } from 'ng-zorro-antd/modal'
 import { DeployClusterCreateComponent } from '../create/create.component'
-import { ClusterEnum } from 'projects/core/src/app/constant/type'
+import { ClusterEnum, EmptyHttpResponse } from 'projects/core/src/app/constant/type'
 import { SelectOption } from 'eo-ng-select'
-
+import { environment } from 'projects/core/src/environments/environment'
 @Component({
   selector: 'eo-ng-deploy-cluster-list',
   templateUrl: './list.component.html',
@@ -43,6 +43,7 @@ export class DeployClusterListComponent implements OnInit {
   @ViewChild('clusterStatusTpl', { read: TemplateRef, static: true })
   clusterStatusTpl: TemplateRef<any> | undefined
 
+  addBtnLoading:boolean = false
   readonly nowUrl: string = this.router.routerState.snapshot.url
   nzDisabled:boolean = false
   validateForm: FormGroup = new FormGroup({})
@@ -66,7 +67,6 @@ export class DeployClusterListComponent implements OnInit {
 
   env:Array<string> = []
 
-  // eslint-disable-next-line no-useless-constructor
   constructor (
     private message: EoNgFeedbackMessageService,
     private modalService: EoNgFeedbackModalService,
@@ -142,79 +142,97 @@ export class DeployClusterListComponent implements OnInit {
   }
 
   addCluster () {
-    this.modalRef = this.modalService.create({
-      nzTitle: '新建集群',
-      nzWidth: MODAL_SMALL_SIZE,
-      nzContent: DeployClusterCreateComponent,
-      nzComponentParams: {
-        closeModal: () => { this.modalRef?.close() }
-      },
-      nzFooter: [{
-        label: '取消',
-        type: 'default',
-        onClick: () => {
-          this.modalRef?.close()
-        }
-      },
-      {
-        label: '下一步，检查集群',
-        type: 'primary',
-        onClick: (context:DeployClusterCreateComponent) => {
-          context.testCluster()
-        },
-        disabled: () => {
-          return this.nzDisabled
-        },
-        show: (context:any) => {
-          return !context.nodesTableShow && !context.checkClusterError
-        },
-        loading: (context:any) => {
-          return context.testButtonLoading
-        }
-      },
-      {
-        label: '重新检查',
-        type: 'primary',
-        onClick: (context:DeployClusterCreateComponent) => {
-          context.testCluster()
-        },
-        disabled: () => {
-          return this.nzDisabled
-        },
-        show: (context:any) => {
-          return !context.nodesTableShow && context.checkClusterError
-        },
-        loading: (context:any) => {
-          return context.testButtonLoading
-        }
-      },
-      {
-        label: '上一步',
-        type: 'default',
-        onClick: (context:DeployClusterCreateComponent) => {
-          context.cancel()
-        },
-        show: (context:any) => {
-          return context.nodesTableShow
-        }
-      },
-      {
-        label: '完成',
-        type: 'primary',
-        onClick: (context:DeployClusterCreateComponent) => {
-          context.saveCluster()
-        },
-        disabled: () => {
-          return this.nzDisabled
-        },
-        show: (context:any) => {
-          return context.nodesTableShow
-        },
-        loading: (context:any) => {
-          return context.submitButtonLoading
-        }
-      }]
+    this.addBtnLoading = true
+    this.api.get('clusters/create_check').subscribe((resp:EmptyHttpResponse) => {
+      this.addBtnLoading = false
+      if (resp.code === 0) {
+        this.modalRef = this.modalService.create({
+          nzTitle: '新建集群',
+          nzWidth: MODAL_SMALL_SIZE,
+          nzContent: DeployClusterCreateComponent,
+          nzComponentParams: {
+            closeModal: () => { this.modalRef?.close() }
+          },
+          nzFooter: [{
+            label: '取消',
+            type: 'default',
+            onClick: () => {
+              this.modalRef?.close()
+            }
+          },
+          {
+            label: '下一步，检查集群',
+            type: 'primary',
+            onClick: (context:DeployClusterCreateComponent) => {
+              context.testCluster()
+            },
+            disabled: () => {
+              return this.nzDisabled
+            },
+            show: (context:any) => {
+              return !context.nodesTableShow && !context.checkClusterError
+            },
+            loading: (context:any) => {
+              return context.testButtonLoading
+            }
+          },
+          {
+            label: '重新检查',
+            type: 'primary',
+            onClick: (context:DeployClusterCreateComponent) => {
+              context.testCluster()
+            },
+            disabled: () => {
+              return this.nzDisabled
+            },
+            show: (context:any) => {
+              return !context.nodesTableShow && context.checkClusterError
+            },
+            loading: (context:any) => {
+              return context.testButtonLoading
+            }
+          },
+          {
+            label: '上一步',
+            type: 'default',
+            onClick: (context:DeployClusterCreateComponent) => {
+              context.cancel()
+            },
+            show: (context:any) => {
+              return context.nodesTableShow
+            }
+          },
+          {
+            label: '完成',
+            type: 'primary',
+            onClick: (context:DeployClusterCreateComponent) => {
+              context.saveCluster()
+            },
+            disabled: () => {
+              return this.nzDisabled
+            },
+            show: (context:any) => {
+              return context.nodesTableShow
+            },
+            loading: (context:any) => {
+              return context.submitButtonLoading
+            }
+          }]
 
+        })
+      } else {
+        this.modalRef = this.modalService.create({
+          nzTitle: '提示',
+          nzContent: '已经达到集群授权数量限制，请联系客服人员增加更多授权',
+          nzClosable: true,
+          nzWidth: MODAL_SMALL_SIZE,
+          nzOkText: '查看授权',
+          nzOnOk: () => {
+            this.modalRef?.close()
+            this.router.navigate(['/', environment.isBusiness ? 'auth-info' : 'auth'])
+          }
+        })
+      }
     })
   }
 
