@@ -33,7 +33,7 @@ export class EoNgApplicationService {
     this.appData = null
   }
 
-  createApiListThead (context:ApplicationManagementListComponent, publishList?:Array<any>):THEAD_TYPE[] {
+  createAppListThead (context:ApplicationManagementListComponent, publishList?:Array<any>):THEAD_TYPE[] {
     return [
       {
         title: '名称'
@@ -59,7 +59,7 @@ export class EoNgApplicationService {
     ]
   }
 
-  createApiListTbody (context:ApplicationManagementListComponent, publishList?:Array<any>):EO_TBODY_TYPE[] {
+  createAppListTbody (context:ApplicationManagementListComponent, publishList?:Array<any>):EO_TBODY_TYPE[] {
     return [
       {
         key: 'name',
@@ -85,13 +85,13 @@ export class EoNgApplicationService {
         btns: [{
           title: '上线管理',
           click: (item:any) => {
-            context.publish(item.data.uuid)
+            context.publish(item)
           }
         },
         {
           title: '查看',
           click: (item:any) => {
-            context.router.navigate(['/', 'router', 'api', item.data.scheme === 'websocket' ? 'message-ws' : 'message', item.data.uuid])
+            context.router.navigate(['/', 'application', 'content', item.data.id, 'message'])
           }
         },
         {
