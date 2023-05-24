@@ -30,7 +30,7 @@ import { AuditLogDetail, AuditLogsData } from '../types/types'
      eo-ng-select.ant-select,
     eo-ng-select-top-control.ant-select-selector,
     nz-range-picker,
-    .group-search-large eo-ng-input-group{
+    eo-ng-search-input-group{
       width:254px !important;
     border-radius: var(--border-radius);
       min-height:32px;
