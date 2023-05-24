@@ -7,8 +7,8 @@ import (
 type ClusterPlugin struct {
 	Id          int       `gorm:"type:int(11);size:11;not null;auto_increment;primary_key;column:id;comment:主键ID" json:"id,omitempty"`
 	NamespaceId int       `gorm:"type:int(11);size:11;not null;column:namespace;comment:工作空间" json:"namespace,omitempty"`
-	ClusterId   int       `gorm:"type:int(11);size:11;not null;column:cluster;dbUniqueIndex:cluster_plugin;comment:集群ID" json:"cluster,omitempty"`
-	PluginName  string    `gorm:"size:255;not null;column:plugin_name;dbUniqueIndex:cluster_plugin;comment:插件名称" json:"plugin_name,omitempty"`
+	ClusterId   int       `gorm:"type:int(11);size:11;not null;column:cluster;comment:集群ID" json:"cluster,omitempty"`
+	PluginName  string    `gorm:"size:255;not null;column:plugin_name;comment:插件名称" json:"plugin_name,omitempty"`
 	Status      int       `gorm:"type:tinyint(2);not null;column:status;comment:插件状态" json:"status,omitempty"` //1禁用 2启用 3全局启用
 	Config      string    `gorm:"type:text;column:config;comment:插件配置信息" json:"config,omitempty"`
 	Operator    int       `gorm:"type:int(11);size:11;column:operator;comment:更新人/操作人" json:"operator,omitempty"`

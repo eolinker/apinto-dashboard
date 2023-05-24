@@ -1,7 +1,6 @@
 package apinto_module
 
 import (
-	"errors"
 	"fmt"
 	"github.com/eolinker/eosc/log"
 	"github.com/gin-gonic/gin"
@@ -10,30 +9,94 @@ import (
 )
 
 var (
-	systemMiddlewares []MiddlewareHandler
+	systemModules []Module
 )
 
-func AddSystemMiddleware(handler MiddlewareHandler) {
-	systemMiddlewares = append(systemMiddlewares, handler)
+func AddSystemModule(m Module) {
+	systemModules = append(systemModules, m)
 }
 
 type ModuleBuilder struct {
-	lock              sync.Mutex
-	modules           map[string]Module
-	middlewaresAppend []MiddlewareHandler
-	coreMiddleware    []MiddlewareHandler
+	lock    sync.Mutex
+	modules map[string]Module
 
-	providerBuilder    *ProviderBuilder
-	engine             *gin.Engine
-	core               CoreModule
-	ReplaceableRouters map[string]RouterInfo
-
-	middlewares []MiddlewareHandler
+	engine *gin.Engine
 
 	filterOptionManager IFilterOptionHandlerManager
 }
+type builderHandler struct {
+	ReplaceableRouters map[string]RouterInfo
+	middlewares        []MiddlewareHandler
+	engine             *gin.Engine
+	providerBuilder    *ProviderBuilder
+}
 
-func NewModuleBuilder(engine *gin.Engine, core CoreModule, filterOptionManager ...IFilterOptionHandlerManager) *ModuleBuilder {
+func (b *ModuleBuilder) newBuilderHandler() *builderHandler {
+	middlewares, providerBuilder, replaceableRouters := initSystem(b.modules)
+	hs := &builderHandler{
+		engine:             b.engine,
+		middlewares:        middlewares,
+		ReplaceableRouters: replaceableRouters,
+		providerBuilder:    providerBuilder,
+	}
+
+	return hs
+}
+
+func initSystem(modules map[string]Module) ([]MiddlewareHandler, *ProviderBuilder, map[string]RouterInfo) {
+	provider := NewProviderBuilder()
+	systemMiddlewares := make([]MiddlewareHandler, 0)
+	cms := make(map[string]struct{})
+	ReplaceableRouters := make(map[string]RouterInfo)
+
+	for _, m := range systemModules {
+		if rs, ok := m.Routers(); ok {
+			for _, r := range rs.RoutersInfo() {
+				if r.Replaceable {
+					ReplaceableRouters[fmt.Sprintf("%s:%s", r.Method, r.Path)] = r
+				}
+			}
+		}
+		if md, ok := m.Middleware(); ok {
+
+			for _, mdl := range md.MiddlewaresInfo() {
+				if mdl.Replaceable {
+					cms[mdl.Name] = struct{}{}
+				}
+				systemMiddlewares = append(systemMiddlewares, mdl)
+			}
+		}
+		if p, ok := m.Support(); ok {
+			provider.Append(m.Name(), p)
+		}
+	}
+
+	mdappend := make([]MiddlewareHandler, 0)
+	for _, m := range modules {
+		if md, ok := m.Middleware(); ok {
+			for _, mdh := range md.MiddlewaresInfo() {
+				delete(cms, mdh.Name)
+				mdappend = append(mdappend, mdh)
+			}
+		}
+		if p, ok := m.Support(); ok {
+			provider.Append(m.Name(), p)
+		}
+	}
+	mdws := make([]MiddlewareHandler, 0, len(cms)+len(mdappend))
+	for _, sm := range systemMiddlewares {
+		if !sm.Replaceable {
+			mdws = append(mdws, sm)
+			continue
+		}
+		if _, has := cms[sm.Name]; has {
+			mdws = append(mdws, sm)
+		}
+	}
+	mdws = append(mdws, mdappend...)
+	return mdws, provider, ReplaceableRouters
+}
+func NewModuleBuilder(engine *gin.Engine, filterOptionManager ...IFilterOptionHandlerManager) *ModuleBuilder {
 
 	routes := engine.Routes()
 	if len(routes) > 0 {
@@ -43,31 +106,27 @@ func NewModuleBuilder(engine *gin.Engine, core CoreModule, filterOptionManager .
 		panic("unknown")
 	}
 	b := &ModuleBuilder{
-		engine:          engine,
-		modules:         make(map[string]Module),
-		middlewares:     nil,
-		providerBuilder: NewProviderBuilder(),
-		core:            core,
-		coreMiddleware:  nil,
+		engine:  engine,
+		modules: make(map[string]Module),
 	}
 	if len(filterOptionManager) > 0 {
 		b.filterOptionManager = filterOptionManager[0]
 	} else {
 		b.filterOptionManager = nil
 	}
-	if middleware, has := core.Middleware(); has {
-		midCore := middleware.MiddlewaresInfo()
-		mds := make([]MiddlewareHandler, 0, len(systemMiddlewares)+len(midCore))
-		if len(systemMiddlewares) > 0 {
-			mds = append(mds, systemMiddlewares...)
-		}
-		mds = append(mds, midCore...)
-		b.coreMiddleware = mds
-
-	}
-	if providerSupport, has := core.Support(); has {
-		b.providerBuilder.Append(core.Name(), providerSupport)
-	}
+	//if middleware, has := core.Middleware(); has {
+	//	midCore := middleware.MiddlewaresInfo()
+	//	mds := make([]MiddlewareHandler, 0, len(systemMiddlewares)+len(midCore))
+	//	if len(systemMiddlewares) > 0 {
+	//		mds = append(mds, systemMiddlewares...)
+	//	}
+	//	mds = append(mds, midCore...)
+	//	b.coreMiddleware = mds
+	//
+	//}
+	//if providerSupport, has := core.Support(); has {
+	//	b.providerBuilder.Append(core.Name(), providerSupport)
+	//}
 	return b
 }
 
@@ -80,60 +139,19 @@ func (b *ModuleBuilder) Append(module ...Module) *ModuleBuilder {
 			moduleName := m.Name()
 			b.modules[moduleName] = m
 
-			if middleware, has := m.Middleware(); has {
-				for _, mid := range middleware.MiddlewaresInfo() {
-					b.middlewaresAppend = append(b.middlewaresAppend, mid)
-				}
-			}
-			if providerSupport, has := m.Support(); has {
-				b.providerBuilder.Append(moduleName, providerSupport)
-			}
+			//if middleware, has := m.Middleware(); has {
+			//	for _, mid := range middleware.MiddlewaresInfo() {
+			//		b.middlewaresAppend = append(b.middlewaresAppend, mid)
+			//	}
+			//}
+			//if providerSupport, has := m.Support(); has {
+			//	b.providerBuilder.Append(moduleName, providerSupport)
+			//}
 
 		}
 
 	}
 	return b
-}
-func (b *ModuleBuilder) createMiddleware() []MiddlewareHandler {
-	cms := make(map[string]struct{})
-	for _, m := range b.coreMiddleware {
-		if m.Replaceable {
-			cms[m.Name] = struct{}{}
-		}
-	}
-	for _, m := range b.middlewaresAppend {
-		delete(cms, m.Name)
-	}
-	rs := make([]MiddlewareHandler, 0, len(cms)+len(b.middlewaresAppend))
-	for _, m := range b.coreMiddleware {
-		if !m.Replaceable {
-			rs = append(rs, m)
-			continue
-		}
-		if _, has := cms[m.Name]; has {
-			rs = append(rs, m)
-		}
-	}
-	rs = append(rs, b.middlewaresAppend...)
-	return rs
-}
-func (b *ModuleBuilder) initCore() error {
-	if b.core == nil {
-		return nil
-	}
-	routers, ok := b.core.Routers()
-	if !ok {
-		return errors.New("core must routers")
-	}
-	routersInfo := routers.RoutersInfo()
-	b.ReplaceableRouters = make(map[string]RouterInfo, len(routersInfo))
-	for _, r := range routersInfo {
-		if r.Replaceable {
-			b.ReplaceableRouters[fmt.Sprintf("%s:%s", r.Method, r.Path)] = r
-		}
-	}
-	b.middlewares = b.createMiddleware()
-	return nil
 }
 
 // Build 构建模块路由、providers等
@@ -146,35 +164,39 @@ func (b *ModuleBuilder) Build() (httpHandler http.Handler, iproviders IProviders
 	b.lock.Lock()
 	defer b.lock.Unlock()
 
-	err := b.initCore()
-	if err != nil {
-		return nil, nil, err
+	bh := b.newBuilderHandler()
+	for _, m := range systemModules {
+
+		if rs, ok := m.Routers(); ok {
+			log.Debug("handler: ", m.Name())
+			err := bh.handleModule(rs.RoutersInfo(), ModuleNameHandler(m.Name()))
+			if err != nil {
+				return nil, nil, err
+			}
+		}
 	}
 
-	routerInfo, _ := b.core.Routers()
-	log.Debug("handler: core")
-	b.handleModule(routerInfo.RoutersInfo())
 	for _, m := range b.modules {
 		if rs, has := m.Routers(); has {
 			log.Debug("handler: ", m.Name())
 
-			errHandler := b.handleModule(rs.RoutersInfo(), ModuleNameHandler(m.Name()))
+			errHandler := bh.handleModule(rs.RoutersInfo(), ModuleNameHandler(m.Name()))
 			if errHandler != nil {
 				return nil, nil, errHandler
 			}
 		}
 	}
 	log.Debug("handler: ReplaceableRouters")
-	for _, r := range b.ReplaceableRouters {
-		errCore := b.handleRouter(r)
+	for _, r := range bh.ReplaceableRouters {
+		errCore := bh.handleRouter(r)
 		if errCore != nil {
 			return nil, nil, errCore
 		}
 	}
 	b.resetFiltersHandler()
-	return b.engine.Handler(), b.providerBuilder.Build(), nil
+	return bh.engine.Handler(), bh.providerBuilder.Build(), nil
 }
-func (b *ModuleBuilder) handleModule(routers RoutersInfo, moduleNameHandler ...gin.HandlerFunc) (errResult error) {
+func (b *builderHandler) handleModule(routers RoutersInfo, moduleNameHandler ...gin.HandlerFunc) (errResult error) {
 
 	for i, routerInfo := range routers {
 		if routerInfo.Replaceable {
@@ -195,7 +217,7 @@ func (b *ModuleBuilder) handleModule(routers RoutersInfo, moduleNameHandler ...g
 	return nil
 }
 
-func (b *ModuleBuilder) handleRouter(routerInfo RouterInfo, moduleNameHandler ...gin.HandlerFunc) (errResult error) {
+func (b *builderHandler) handleRouter(routerInfo RouterInfo, moduleNameHandler ...gin.HandlerFunc) (errResult error) {
 	defer func() {
 		if e := recover(); e != nil {
 			errResult = fmt.Errorf("%v for handler %s:%s %s ", e, routerInfo.Handler, routerInfo.Method, routerInfo.Path)
@@ -221,9 +243,11 @@ func (b *ModuleBuilder) resetFiltersHandler() {
 	}
 	handlers := make(map[string]IFilterOptionHandler)
 
-	if hs, ok := b.core.(IFilterOptionHandlerSupport); ok {
-		for _, h := range hs.FilterOptionHandler() {
-			handlers[h.Name()] = h
+	for _, m := range systemModules {
+		if hs, ok := m.(IFilterOptionHandlerSupport); ok {
+			for _, h := range hs.FilterOptionHandler() {
+				handlers[h.Name()] = h
+			}
 		}
 	}
 	for _, m := range b.modules {

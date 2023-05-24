@@ -194,6 +194,16 @@ export class EoNgNavigationService {
           this.routerNameMap.set((menu as any).routerLink, (menu as any).name)
         }
         if (!menu.name || this.accessMap.get(menu.name)) {
+          if (menu.title === '系统管理' && environment.isBusiness) {
+            menu.children.unshift({
+              name: 'auth',
+              routerLink: 'auth-info',
+              title: '授权管理',
+              titleString: '授权管理',
+              matchRouter: true,
+              matchRouterExact: false
+            })
+          }
           this.menuList.push(menu)
         }
       }

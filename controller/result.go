@@ -7,7 +7,7 @@ const (
 	CodeLoginUserNoExistent = -4 //找不到用户
 	CodeLoginPwdErr         = -5 //密码错误
 	CodeLoginCodeErr        = -6 //验证校验失败
-	codeCertExceedErr       = -7 //证书过期
+	CodeCertExceedErr       = -7 //证书过期
 )
 
 type Result struct {
@@ -41,13 +41,6 @@ func NewResult(Code int, data interface{}, Msg string) *Result {
 func NewNoAccessError(msg string) *Result {
 	return &Result{
 		Code: AccessCode,
-		Msg:  msg,
-	}
-}
-
-func NewCertExceedError(msg string) *Result {
-	return &Result{
-		Code: codeCertExceedErr,
 		Msg:  msg,
 	}
 }
