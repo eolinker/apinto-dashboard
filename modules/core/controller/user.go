@@ -303,7 +303,7 @@ func randomRouters() apinto_module.RoutersInfo {
 			Method:      http.MethodGet,
 			Path:        "/api/random/:template/id",
 			Handler:     "core.random.id",
-			Labels:      apinto_module.RouterLabelAnonymous,
+			Labels:      apinto_module.RouterLabelApi,
 			HandlerFunc: []apinto_module.HandlerFunc{r.GET},
 			Replaceable: false,
 		}}
