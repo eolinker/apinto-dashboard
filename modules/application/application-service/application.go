@@ -32,7 +32,7 @@ import (
 
 const (
 	anonymousIds          = "anonymous"
-	professionApplication = "application"
+	professionApplication = "app"
 )
 
 var _ application.IApplicationService = (*applicationService)(nil)
@@ -177,7 +177,7 @@ func (a *applicationService) Online(ctx context.Context, namespaceId, userId int
 			if err = a.publishHistoryStore.Insert(txCtx, publishHistory); err != nil {
 				return err
 			}
-			appConfig := &v1.ApplicationConfig{
+			appConfig := v1.ApplicationConfig{
 				Name:        applicationInfo.IdStr,
 				Driver:      "app",
 				Auth:        auths,
@@ -186,8 +186,9 @@ func (a *applicationService) Online(ctx context.Context, namespaceId, userId int
 				Labels:      labels,
 				Additional:  a.getApplicationAdditional(latestVersion.ExtraParamList),
 				Anonymous:   anonymous,
+				Version:     applicationInfo.Version,
 			}
-			return client.ForApp().Create(*appConfig)
+			return client.ForApp().Create(appConfig)
 		})
 	}
 
@@ -1272,7 +1273,7 @@ func (a *applicationService) AuthDetails(ctx context.Context, namespaceId int, a
 	}
 	//TODO 临时处理, 前端没时间
 	cfgItems := driver.GetCfgDetails([]byte(auth.Config))
-	details := make([]application_model.AuthDetailItem, 6+len(cfgItems))
+	details := make([]application_model.AuthDetailItem, 0, 6+len(cfgItems))
 	details = append(details, application_model.AuthDetailItem{Key: "名称", Value: auth.Title})
 	details = append(details, application_model.AuthDetailItem{Key: "鉴权类型", Value: auth.Driver})
 	details = append(details, application_model.AuthDetailItem{Key: "参数位置", Value: auth.Position})
