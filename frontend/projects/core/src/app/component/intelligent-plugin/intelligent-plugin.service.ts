@@ -3,6 +3,7 @@ import { IntelligentPluginListComponent } from './list/list.component'
 import { EO_TBODY_TYPE } from 'projects/eo-ng-apinto-table/src/public-api'
 import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { IntelligentPluginPublishComponent } from './publish/publish.component'
+import { ApplicationManagementListComponent } from '../../layout/application/list/list.component'
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +11,6 @@ import { IntelligentPluginPublishComponent } from './publish/publish.component'
 export class IntelligentPluginService {
   createTbody (component:IntelligentPluginListComponent, key?:string):TBODY_TYPE[] {
     const btnConfig:EO_TBODY_TYPE[] = [{
-
       type: 'btn',
       right: true,
       showFn: () => {

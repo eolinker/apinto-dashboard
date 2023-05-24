@@ -28,6 +28,7 @@ type IClusterCertificateService interface {
 
 type IClusterService interface {
 	GetAllCluster(ctx context.Context) ([]*cluster_model.Cluster, error)
+	Count(ctx context.Context) (int, error)
 	SimpleCluster(ctx context.Context, namespaceId int) ([]*cluster_model.ClusterSimple, error)
 	CheckByNamespaceByName(ctx context.Context, namespaceId int, name string) (int, error)
 	GetByClusterId(ctx context.Context, clusterId int) (*cluster_model.Cluster, error)

@@ -80,6 +80,8 @@ export interface ClustersData{
   updateTime: string
 }
 
+export type PublishStatus = 'GOONLINE'|'OFFLINE'|'NOTGOONLINE'|'TOUPDATE'
+
 // 简易集群列表，即将集群名与环境名组合在一起的一级目录
 export type ClusterSimpleOption = {
   id:string
