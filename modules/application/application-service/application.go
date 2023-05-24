@@ -394,14 +394,6 @@ func (a *applicationService) UpdateApp(ctx context.Context, namespaceId, userId 
 			AuthList:       latestVersion.AuthList,
 		}
 
-		applicationVersion := &application_entry.ApplicationVersion{
-			ApplicationID:            applicationInfo.Id,
-			NamespaceID:              namespaceId,
-			ApplicationVersionConfig: versionConfig,
-			Operator:                 userId,
-			CreateTime:               t,
-		}
-
 		if err = a.applicationHistoryStore.HistoryEdit(txCtx, namespaceId, applicationInfo.Id, &application_entry.ApplicationHistoryInfo{
 			Application:              oldApplication,
 			ApplicationVersionConfig: latestVersion.ApplicationVersionConfig,
@@ -414,6 +406,14 @@ func (a *applicationService) UpdateApp(ctx context.Context, namespaceId, userId 
 
 		if isUpdateVersion {
 			applicationInfo.Version = common.GenVersion(t)
+
+			applicationVersion := &application_entry.ApplicationVersion{
+				ApplicationID:            applicationInfo.Id,
+				NamespaceID:              namespaceId,
+				ApplicationVersionConfig: versionConfig,
+				Operator:                 userId,
+				CreateTime:               t,
+			}
 			if err = a.applicationVersionStore.Save(txCtx, applicationVersion); err != nil {
 				return err
 			}
@@ -421,7 +421,10 @@ func (a *applicationService) UpdateApp(ctx context.Context, namespaceId, userId 
 				ApplicationID: applicationVersion.ApplicationID,
 				VersionID:     applicationVersion.Id,
 			}
-			return a.applicationStatStore.Save(txCtx, stat)
+			err = a.applicationStatStore.Save(txCtx, stat)
+			if err != nil {
+				return err
+			}
 		}
 
 		return a.applicationStore.Save(txCtx, applicationInfo)
