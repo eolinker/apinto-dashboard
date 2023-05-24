@@ -13,10 +13,11 @@ export class EoNgApplicationService {
   appDesc:string = ''
 
   appData:ApplicationData|null = null
-
+  loading:boolean = true
   constructor (private api:ApiService) {}
 
   getApplicationData (appId:string) {
+    this.loading = true
     this.appData = null
     this.api.get('application', { appId }).subscribe((resp:{code:number, data:{application:ApplicationData}, msg:string}) => {
       if (resp.code === 0) {
@@ -24,6 +25,8 @@ export class EoNgApplicationService {
         this.appName = this.appData.name
         this.appDesc = this.appData.desc
       }
+      this.loading = false
+      console.log(this)
     })
   }
 
