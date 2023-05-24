@@ -7,6 +7,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/db_migrator"
 	_ "github.com/eolinker/apinto-dashboard/initialize"
 	"github.com/eolinker/apinto-dashboard/store"
+	"github.com/eolinker/apinto-dashboard/store/store_mysql"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -30,6 +31,10 @@ func initDB() {
 	sqlDb.SetMaxOpenConns(200)
 	sqlDb.SetMaxIdleConns(200)
 	db_migrator.InitSql(db)
-	store.InitStoreDB(db)
+	store.InitStoreDB(store_mysql.NewMyDB(db, store.DBInfo{
+		Addr: fmt.Sprintf("%s:%d", GetDBIp(), GetDBPort()),
+		User: GetDBUserName(),
+		DB:   GetDbName(),
+	}))
 
 }

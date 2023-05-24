@@ -51,6 +51,7 @@ import { CustomEnvVariableComponent } from './component/editable-env-table/Custo
 import axios from 'axios'
 import { SimpleMapComponent } from './component/simple-map/SimpleMapComponent'
 import { CustomDialogComponent } from './component/dialog/CustomDialogComponent'
+import { ArrayItemBlankComponent } from './component/array-item-blank/ArrayItemBlankComponent'
 
 export const DynamicRender = observer(() => {
   const field = useField()
@@ -111,7 +112,8 @@ const SchemaField = createSchemaField({
     CustomCodeboxComponent,
     CustomEnvVariableComponent,
     SimpleMapComponent,
-    CustomDialogComponent
+    CustomDialogComponent,
+    ArrayItemBlankComponent
   }
 })
 
