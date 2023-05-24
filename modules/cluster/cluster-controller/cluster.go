@@ -62,6 +62,13 @@ func (c *clusterController) clusters(ginCtx *gin.Context) {
 
 }
 
+// createClusterCheck 获取简易集群列表
+func (c *clusterController) createClusterCheck(ginCtx *gin.Context) {
+
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
+
+}
+
 // simpleClusters 获取简易集群列表
 func (c *clusterController) simpleClusters(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
