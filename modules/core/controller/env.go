@@ -12,7 +12,6 @@ func envEnumRouters() apinto_module.RoutersInfo {
 		{
 			Method:      http.MethodGet,
 			Path:        "/api/enum/envs",
-			Labels:      apinto_module.RouterLabelModule,
 			HandlerFunc: []apinto_module.HandlerFunc{ec.GetEnv},
 		},
 	}
