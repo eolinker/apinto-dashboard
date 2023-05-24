@@ -5,10 +5,10 @@ import { ApiService } from 'projects/core/src/app/service/api.service'
   selector: 'eo-ng-application-authentication-view',
   template: `
       <div class="w-[100%] overflow-x-hidden">
-          <section class=" mb-formtop">
+          <section >
             <ng-container *ngFor="let detail of detailList">
-              <div>
-                <label class="label inline-blockw-[42px] text-right">{{detail.key}}：</label
+              <div *ngIf="detail.key" >
+                <label class="label inline-block w-[120px] text-right font-bold">{{detail.key}}：</label
                 ><span>{{ detail.value }}</span>
               </div>
             </ng-container>
@@ -21,6 +21,7 @@ import { ApiService } from 'projects/core/src/app/service/api.service'
 export class ApplicationAuthenticationViewComponent implements OnInit {
   detailList:Array<{key:string, value:string}> = []
   authId:string = ''
+  appId:string = ''
   constructor (private api:ApiService) {}
 
   ngOnInit (): void {
@@ -28,7 +29,7 @@ export class ApplicationAuthenticationViewComponent implements OnInit {
   }
 
   getAuthData () {
-    this.api.get('application/auth/details')
+    this.api.get('application/auth/details', { uuid: this.authId, appId: this.appId })
       .subscribe((resp:{code:number, data:{details:Array<{key:string, value:string}>}, msg:string}) => {
         if (resp.code === 0) {
           this.detailList = resp.data.details
