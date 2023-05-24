@@ -86,7 +86,7 @@ func (a *applicationController) lists(ginCtx *gin.Context) {
 			Name:       item.Name,
 			Id:         item.Uuid,
 			Desc:       item.Desc,
-			Publish:    nil,
+			Publish:    publish,
 			Operator:   item.OperatorName,
 			UpdateTime: common.TimeToStr(item.UpdateTime),
 			IsDelete:   item.IsDelete,
