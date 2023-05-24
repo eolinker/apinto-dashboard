@@ -16,7 +16,8 @@ export const algorithmList:SelectOption[] = [
 
 export const positionList:SelectOption[] = [
   { label: 'Header', value: 'header' },
-  { label: 'Query', value: 'query' }
+  { label: 'Query', value: 'query' },
+  { label: 'Body', value: 'body' }
 ]
 
 export const verifyList:SelectOption[] = [
@@ -114,13 +115,13 @@ export const authenticationTableHeadName:THEAD_TYPE[] = [
 
 export const authenticationTableBody:EO_TBODY_TYPE[] = [
   {
-    key: 'paramName',
+    key: 'title',
     copy: true
   },
   {
     key: 'driver'
   },
-  { key: 'isTransparent' },
+  { key: 'hideCredential' },
   {
     key: 'expireTimeString'
   },

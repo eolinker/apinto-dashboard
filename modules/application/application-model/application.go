@@ -1,6 +1,7 @@
 package application_model
 
 import (
+	application_entry "github.com/eolinker/apinto-dashboard/modules/application/application-entry"
 	"time"
 )
 
@@ -41,6 +42,7 @@ type ApplicationInfo struct {
 	Uuid       string
 	Desc       string
 	CustomAttr []ApplicationCustomAttr
+	Params     []ApplicationExtraParam
 }
 
 type ApplicationBasicInfo struct {
@@ -48,6 +50,10 @@ type ApplicationBasicInfo struct {
 	Name       string
 	Desc       string
 	UpdateTime time.Time
+}
+
+type ApplicationEntire struct {
+	*application_entry.Application
 }
 
 type ApplicationBasicInfoList []*ApplicationBasicInfo
@@ -86,16 +92,6 @@ type ApplicationExtraParam struct {
 type ApplicationCustomAttr struct {
 	Key   string
 	Value string
-}
-
-type ApplicationOnline struct {
-	ClusterID   int
-	ClusterName string
-	Env         string
-	Status      int //1.未上线 2.已下线 3.已上线  4.待更新
-	Disable     bool
-	Operator    string
-	UpdateTime  time.Time
 }
 
 type ApplicationKeys struct {
