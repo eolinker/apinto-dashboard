@@ -32,7 +32,7 @@ import (
 
 const (
 	anonymousIds          = "anonymous"
-	professionApplication = "application"
+	professionApplication = "app"
 )
 
 var _ application.IApplicationService = (*applicationService)(nil)
@@ -177,7 +177,7 @@ func (a *applicationService) Online(ctx context.Context, namespaceId, userId int
 			if err = a.publishHistoryStore.Insert(txCtx, publishHistory); err != nil {
 				return err
 			}
-			appConfig := &v1.ApplicationConfig{
+			appConfig := v1.ApplicationConfig{
 				Name:        applicationInfo.IdStr,
 				Driver:      "app",
 				Auth:        auths,
@@ -186,8 +186,9 @@ func (a *applicationService) Online(ctx context.Context, namespaceId, userId int
 				Labels:      labels,
 				Additional:  a.getApplicationAdditional(latestVersion.ExtraParamList),
 				Anonymous:   anonymous,
+				Version:     applicationInfo.Version,
 			}
-			return client.ForApp().Create(*appConfig)
+			return client.ForApp().Create(appConfig)
 		})
 	}
 
@@ -333,8 +334,8 @@ func (a *applicationService) UpdateApp(ctx context.Context, namespaceId, userId 
 	}
 	defer a.lockService.Unlock(locker_service.LockNameApplication, applicationInfo.Id)
 
-	applicationInfo, _ = a.applicationStore.GetByName(ctx, namespaceId, input.Name)
-	if applicationInfo != nil && applicationInfo.IdStr != input.Id {
+	tmpApplicationInfo, _ := a.applicationStore.GetByName(ctx, namespaceId, input.Name)
+	if tmpApplicationInfo != nil && tmpApplicationInfo.IdStr != input.Id {
 		return errors.New("应用名重复")
 	}
 
@@ -364,11 +365,11 @@ func (a *applicationService) UpdateApp(ctx context.Context, namespaceId, userId 
 
 	oldExtraMaps := make(map[string]string)
 	for _, extra := range latestVersion.ExtraParamList {
-		oldExtraMaps[extra.Key] = extra.Value
+		oldExtraMaps[extra.Key] = fmt.Sprintf("%s-%s-%s", extra.Value, extra.Position, extra.Conflict)
 	}
 	newExtraMaps := make(map[string]string)
 	for _, extra := range input.Params {
-		newExtraMaps[extra.Key] = extra.Value
+		newExtraMaps[extra.Key] = fmt.Sprintf("%s-%s-%s", extra.Value, extra.Position, extra.Conflict)
 	}
 
 	if !common.DiffMap(oldExtraMaps, newExtraMaps) {
@@ -621,7 +622,7 @@ func (a *applicationService) AppList(ctx context.Context, namespaceId, userId, p
 		item := &application_model.ApplicationListItem{
 			Uuid:         applicationInfo.IdStr,
 			Name:         applicationInfo.Name,
-			Desc:         applicationInfo.Name,
+			Desc:         applicationInfo.Desc,
 			UpdateTime:   applicationInfo.UpdateTime,
 			OperatorName: operatorName,
 			IsDelete:     !isOnline,
@@ -708,10 +709,10 @@ func (a *applicationService) GetAppRemoteOptions(ctx context.Context, namespaceI
 	}
 	applications := make([]any, 0, total)
 	for _, item := range list {
-		applications = append(applications, application_model.ApplicationBasicInfo{
-			Uuid: item.IdStr,
-			Name: item.Name,
-			Desc: item.Desc,
+		applications = append(applications, application_model.ApplicationRemoteOption{
+			Uuid:  item.IdStr,
+			Title: item.Name,
+			Desc:  item.Desc,
 		})
 	}
 	return applications, nil
@@ -1272,7 +1273,7 @@ func (a *applicationService) AuthDetails(ctx context.Context, namespaceId int, a
 	}
 	//TODO 临时处理, 前端没时间
 	cfgItems := driver.GetCfgDetails([]byte(auth.Config))
-	details := make([]application_model.AuthDetailItem, 6+len(cfgItems))
+	details := make([]application_model.AuthDetailItem, 0, 6+len(cfgItems))
 	details = append(details, application_model.AuthDetailItem{Key: "名称", Value: auth.Title})
 	details = append(details, application_model.AuthDetailItem{Key: "鉴权类型", Value: auth.Driver})
 	details = append(details, application_model.AuthDetailItem{Key: "参数位置", Value: auth.Position})
