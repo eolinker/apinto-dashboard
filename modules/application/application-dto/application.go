@@ -13,10 +13,7 @@ type ApplicationInput struct {
 	Id             string                  `json:"id"`
 	Desc           string                  `json:"desc"`
 	CustomAttrList []ApplicationCustomAttr `json:"custom_attr_list"`
-}
-
-type ApplicationExtraParamsEdit struct {
-	Params []ExtraParam `json:"params"`
+	Params         []ExtraParam            `json:"params"`
 }
 
 type ExtraParam struct {
@@ -55,11 +52,8 @@ func (a *ApplicationInput) Check() error {
 			return errors.New(fmt.Sprintf("自定义属性 key(%s) 重复", key))
 		}
 	}
-	return nil
-}
 
-func (a *ApplicationExtraParamsEdit) Check() error {
-	tempMap := make(map[string]int)
+	tempMap = make(map[string]int)
 
 	for _, extra := range a.Params {
 		if extra.Key == "" || extra.Value == "" {
@@ -119,4 +113,20 @@ type ApplicationInfoOut struct {
 	Id             string                  `json:"id"`
 	Desc           string                  `json:"desc"`
 	CustomAttrList []ApplicationCustomAttr `json:"custom_attr_list"`
+	Params         []ExtraParam            `json:"params"`
+}
+
+type AppPublishInfo struct {
+	Name string `json:"name"`
+	ID   string `json:"id"`
+	Desc string `json:"desc"`
+}
+
+type AppPublishCluster struct {
+	Name       string            `json:"name"`
+	Env        string            `json:"env"`
+	Title      string            `json:"title"`
+	Status     enum.OnlineStatus `json:"status"`
+	Operator   string            `json:"operator"`
+	UpdateTime string            `json:"update_time"`
 }
