@@ -22,6 +22,8 @@ export type ApplicationParamData = {
     value:string
     conflict:string
     position:string
+    eoKey?:string
+    conflictString?:string
 }
 export interface ApplicationData{
     name:string
@@ -97,12 +99,4 @@ export interface AuthListData{
     operator:string
     updateTime:string
     ruleInfo:string
-}
-
-export interface ExtraListData{
-    key:string
-    value:string
-    conflict:string
-    position:string
-    conflictString?:string
 }
