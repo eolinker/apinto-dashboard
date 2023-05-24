@@ -97,7 +97,8 @@ export class ApplicationAuthenticationComponent implements OnInit {
           nzWidth: MODAL_SMALL_SIZE,
           nzContent: ApplicationAuthenticationViewComponent,
           nzComponentParams: {
-            authId: authId
+            authId: authId,
+            appId: this.appId
           },
           nzOkDisabled: this.nzDisabled,
           nzOnOk: () => {
@@ -158,7 +159,7 @@ export class ApplicationAuthenticationComponent implements OnInit {
       if (resp.code === 0) {
         for (const index in resp.data.auths) {
           resp.data.auths[index].driver = this.getAuthDriver(resp.data.auths[index].driver)
-          resp.data.auths[index].isTransparent = resp.data.auths[index].isTransparent ? '是' : '否'
+          resp.data.auths[index].hideCredential = resp.data.auths[index].hideCredential ? '是' : '否'
           resp.data.auths[index].expireTimeString = resp.data.auths[index].expireTime === 0 ? '永不过期' : this.getDateInList(resp.data.auths[index].expireTime)
         }
         this.authenticationList = resp.data.auths
