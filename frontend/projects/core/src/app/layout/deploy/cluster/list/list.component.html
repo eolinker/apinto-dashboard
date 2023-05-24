@@ -16,6 +16,7 @@
       eoNgUserAccess="deploy/cluster"
       (disabledEdit)="disabledEdit($event)"
       (click)="addCluster()"
+      [nzLoading]="addBtnLoading"
     >
       新建集群
     </button>
