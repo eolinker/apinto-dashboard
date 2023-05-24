@@ -333,8 +333,8 @@ func (a *applicationService) UpdateApp(ctx context.Context, namespaceId, userId 
 	}
 	defer a.lockService.Unlock(locker_service.LockNameApplication, applicationInfo.Id)
 
-	applicationInfo, _ = a.applicationStore.GetByName(ctx, namespaceId, input.Name)
-	if applicationInfo != nil && applicationInfo.IdStr != input.Id {
+	tmpApplicationInfo, _ := a.applicationStore.GetByName(ctx, namespaceId, input.Name)
+	if tmpApplicationInfo != nil && tmpApplicationInfo.IdStr != input.Id {
 		return errors.New("应用名重复")
 	}
 
@@ -364,11 +364,11 @@ func (a *applicationService) UpdateApp(ctx context.Context, namespaceId, userId 
 
 	oldExtraMaps := make(map[string]string)
 	for _, extra := range latestVersion.ExtraParamList {
-		oldExtraMaps[extra.Key] = extra.Value
+		oldExtraMaps[extra.Key] = fmt.Sprintf("%s-%s-%s", extra.Value, extra.Position, extra.Conflict)
 	}
 	newExtraMaps := make(map[string]string)
 	for _, extra := range input.Params {
-		newExtraMaps[extra.Key] = extra.Value
+		newExtraMaps[extra.Key] = fmt.Sprintf("%s-%s-%s", extra.Value, extra.Position, extra.Conflict)
 	}
 
 	if !common.DiffMap(oldExtraMaps, newExtraMaps) {
@@ -621,7 +621,7 @@ func (a *applicationService) AppList(ctx context.Context, namespaceId, userId, p
 		item := &application_model.ApplicationListItem{
 			Uuid:         applicationInfo.IdStr,
 			Name:         applicationInfo.Name,
-			Desc:         applicationInfo.Name,
+			Desc:         applicationInfo.Desc,
 			UpdateTime:   applicationInfo.UpdateTime,
 			OperatorName: operatorName,
 			IsDelete:     !isOnline,
