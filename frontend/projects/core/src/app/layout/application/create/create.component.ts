@@ -12,6 +12,7 @@ import { ArrayItemData, EmptyHttpResponse, RandomId } from '../../../constant/ty
 import { customAttrTableBody, extraHeaderTableBody } from '../types/conf'
 import { ApplicationData } from '../types/types'
 import { EoNgApplicationService } from '../application.service'
+import { Observable, of } from 'rxjs'
 
 @Component({
   selector: 'eo-ng-application-create',
@@ -32,7 +33,7 @@ export class ApplicationCreateComponent implements OnInit {
   customAttrTableBody: EO_TBODY_TYPE[] = [...customAttrTableBody]
   extraHeaderTableBody:EO_TBODY_TYPE[]= [...extraHeaderTableBody]
   submitButtonLoading:boolean = false
-
+  of = of
   createApplicationForm: {
     customAttrList: ArrayItemData[]
   } = {
@@ -204,56 +205,65 @@ export class ApplicationCreateComponent implements OnInit {
   // 保存鉴权，editPage = true时，表示页面为编辑页，false为新建页
   // custom_attr是创建和编辑鉴权时都会有的数据，需要将object转化为map发给后端
   // extra_header是编辑鉴权时才会有的数据，也需从Object转为map发送给后端
-  // @ts-ignore TODO待修改
   saveApplication () {
-    if (this.validateForm.valid) {
-      this.createApplicationForm.customAttrList = this.customAttrList.filter(
-        (item: ArrayItemData) => {
-          return item.key && item.value
-        }
-      )
+    return new Observable((observer) => {
+      console.log(this)
+      if (this.validateForm.valid) {
+        this.createApplicationForm.customAttrList = this.customAttrList.filter(
+          (item: ArrayItemData) => {
+            return item.key && item.value
+          }
+        )
 
-      this.submitButtonLoading = true
-      if (!this.editPage) {
-        this.api
-          .post('application', {
-            ...this.createApplicationForm,
-            ...this.validateForm.value
-          })
-          .subscribe((resp: EmptyHttpResponse) => {
-            this.submitButtonLoading = false
-            if (resp.code === 0) {
-              this.message.success(resp.msg || '添加成功', { nzDuration: 1000 })
-              return true
-            } else {
-              return false
-            }
-          })
-      } else {
-        this.api
-          .put('application', {
-            ...this.createApplicationForm,
-            ...this.validateForm.value
-          })
-          .subscribe((resp: EmptyHttpResponse) => {
-            this.submitButtonLoading = false
-            if (resp.code === 0) {
-              this.message.success(resp.msg || '修改成功', { nzDuration: 1000 })
-              return true
-            } else {
-              return false
-            }
-          })
-      }
-    } else {
-      Object.values(this.validateForm.controls).forEach((control) => {
-        if (control.invalid) {
-          control.markAsDirty()
-          control.updateValueAndValidity({ onlySelf: true })
+        this.submitButtonLoading = true
+        if (!this.editPage) {
+          this.api
+            .post('application', {
+              ...this.createApplicationForm,
+              ...this.validateForm.value
+            })
+            .subscribe((resp: EmptyHttpResponse) => {
+              this.submitButtonLoading = false
+              if (resp.code === 0) {
+                this.message.success(resp.msg || '添加成功', { nzDuration: 1000 })
+                observer.next(true)
+              } else {
+                observer.next(false)
+              }
+            })
+        } else {
+          this.api
+            .put('application', {
+              ...this.createApplicationForm,
+              ...this.validateForm.value
+            })
+            .subscribe((resp: EmptyHttpResponse) => {
+              this.submitButtonLoading = false
+              if (resp.code === 0) {
+                this.message.success(resp.msg || '修改成功', { nzDuration: 1000 })
+                this.service.getApplicationData(this.appId)
+                observer.next(true)
+              } else {
+                observer.next(false)
+              }
+            })
         }
-      })
-      return false
-    }
+      } else {
+        Object.values(this.validateForm.controls).forEach((control) => {
+          if (control.invalid) {
+            control.markAsDirty()
+            control.updateValueAndValidity({ onlySelf: true })
+          }
+        })
+        observer.next(false)
+      }
+    })
+  }
+
+  editApplication () {
+    this.saveApplication().subscribe((resp) => {
+      console.log(resp)
+    })
   }
 
   backToList () {

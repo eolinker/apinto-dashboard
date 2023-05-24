@@ -1,4 +1,4 @@
-import { Component } from '@angular/core'
+import { Component, TemplateRef, ViewChild } from '@angular/core'
 import { Router } from '@angular/router'
 import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feedback'
 import { THEAD_TYPE, TBODY_TYPE } from 'eo-ng-table'
@@ -7,11 +7,11 @@ import { MODAL_SMALL_SIZE } from '../../../constant/app.config'
 import { ApiService } from '../../../service/api.service'
 import { EoNgNavigationService } from '../../../service/app-config.service'
 import { BaseInfoService } from '../../../service/base-info.service'
-import { AuthListData, ExtraListData } from '../types/types'
 import { extraTableHeadName, extraTableBody } from '../types/conf'
 import { ApplicationExtraFormComponent } from './form/form.component'
 import { EmptyHttpResponse } from '../../../constant/type'
 import { EoNgApplicationService } from '../application.service'
+import { ApplicationParamData } from '../types/types'
 
 @Component({
   selector: 'eo-ng-application-extra',
@@ -20,6 +20,7 @@ import { EoNgApplicationService } from '../application.service'
   ]
 })
 export class ApplicationExtraComponent {
+  @ViewChild('conflictTpl', { read: TemplateRef, static: true }) conflictTpl: TemplateRef<any> | undefined
   appId:string = ''
   nzDisabled:boolean = false
   extraTableHeadName:THEAD_TYPE[] = [...extraTableHeadName]
@@ -43,15 +44,17 @@ export class ApplicationExtraComponent {
     if (!this.appId) {
       this.router.navigate(['/', 'application'])
     }
+    console.log(this)
   }
 
   initTable () {
+    this.extraTableBody[3].title = this.conflictTpl
     this.extraTableBody[4].btns[0].click = (item:any) => { this.openDrawer(item.data) }
     this.extraTableBody[4].btns[1].disabledFn = () => { return this.nzDisabled }
     this.extraTableBody[4].btns[1].click = (item:any) => { this.delete(item.data) }
   }
 
-  authTableClick = (item:{data:ExtraListData}) => {
+  authTableClick = (item:{data:ApplicationParamData}) => {
     this.openDrawer(item.data)
   }
 
@@ -59,7 +62,7 @@ export class ApplicationExtraComponent {
     this.nzDisabled = value
   }
 
-  openDrawer (data?:ExtraListData) {
+  openDrawer (data?:ApplicationParamData) {
     this.modalRef = this.modalService.create({
       nzTitle: `${data ? '编辑' : '添加'}参数`,
       nzWidth: MODAL_SMALL_SIZE,
@@ -71,24 +74,43 @@ export class ApplicationExtraComponent {
       },
       nzOkDisabled: this.nzDisabled,
       nzOnOk: (component: ApplicationExtraFormComponent) => {
-        (component as ApplicationExtraFormComponent).saveParam()
+        const param = [...this.service.appData!.params as ApplicationParamData[]]
+        console.log(param, component)
         return new Promise((resolve, reject) => {
-          this.api.put('application', { ...this.service.appData, params: component.extraList })
-            .subscribe((resp:EmptyHttpResponse) => {
-              if (resp.code === 0) {
-                resolve()
-                this.message.success(resp.msg || '操作成功!')
-                this.service.getApplicationData(this.appId)
-              } else {
-                reject(new Error())
+          if (component.validateParamForm.valid) {
+            if (data) {
+              for (const index in param) {
+                if (param[index].eoKey === component.data!.eoKey) {
+                  param.splice(Number(index), 1)
+                  break
+                }
+              }
+            }
+            param.unshift(component.validateParamForm.value as ApplicationParamData)
+            this.api.put('application', { ...this.service.appData, params: param })
+              .subscribe((resp:EmptyHttpResponse) => {
+                if (resp.code === 0) {
+                  resolve()
+                  this.message.success(resp.msg || '操作成功!')
+                  this.service.getApplicationData(this.appId)
+                } else {
+                  reject(new Error())
+                }
+              })
+          } else {
+            Object.values(component.validateParamForm.controls).forEach(control => {
+              if (control.invalid) {
+                control.markAsDirty()
+                control.updateValueAndValidity({ onlySelf: true })
               }
             })
+          }
         })
       }
     })
   }
 
-  delete (item:AuthListData, e?:Event) {
+  delete (item:ApplicationParamData, e?:Event) {
     e?.stopPropagation()
     this.modalService.create({
       nzTitle: '删除',
@@ -98,12 +120,16 @@ export class ApplicationExtraComponent {
       nzWidth: MODAL_SMALL_SIZE,
       nzOkDanger: true,
       nzOnOk: () => {
-        this.api.delete('application/auth', { uuid: item.uuid }).subscribe(resp => {
-          if (resp.code === 0) {
-            this.message.success(resp.msg || '删除成功!')
-            this.service.getApplicationData(this.appId)
-          }
+        const newParams = this.service.appData!.params!.filter((p:ApplicationParamData) => {
+          return !(item.key === p.key && item.conflict === p.conflict && item.value === p.value && item.position === p.position)
         })
+        this.api.put('application', { ...this.service.appData, params: newParams })
+          .subscribe((resp:EmptyHttpResponse) => {
+            if (resp.code === 0) {
+              this.message.success(resp.msg || '操作成功!')
+              this.service.getApplicationData(this.appId)
+            }
+          })
       }
     })
   }
