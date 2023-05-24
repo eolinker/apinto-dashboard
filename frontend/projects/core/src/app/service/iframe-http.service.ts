@@ -428,7 +428,7 @@ export class IframeHttpService {
     },
     appsSimpleList: () => {
       return new Promise((resolve) => {
-        return this.api.get('common/enum/Application').subscribe((resp:any) => {
+        return this.api.get('application/enum').subscribe((resp:any) => {
           if (resp.code === 0) {
             resp.data.Application = resp.data.applications.map((app:{id:string, title:string}) => {
               return { name: app.id, title: app.title }

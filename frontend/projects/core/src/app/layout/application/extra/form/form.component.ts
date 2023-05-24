@@ -5,7 +5,7 @@ import { Router } from '@angular/router'
 import { SelectOption } from 'eo-ng-select'
 import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { extraConflictList, positionList } from '../../types/conf'
-import { ExtraListData } from '../../types/types'
+import { ApplicationParamData } from '../../types/types'
 
 @Component({
   selector: 'eo-ng-application-extra-form',
@@ -15,7 +15,6 @@ import { ExtraListData } from '../../types/types'
 })
 export class ApplicationExtraFormComponent {
   @Input() validateParamForm:FormGroup = new FormGroup({})
-  @Input() editData?:ExtraListData
   @Input()
   set extraList (val) {
     this._extraList = val
@@ -27,14 +26,15 @@ export class ApplicationExtraFormComponent {
   }
 
   @Output() eoNgCloseDrawer: EventEmitter<string> = new EventEmitter()
-  @Output() extraListChange : EventEmitter<ExtraListData[]> = new EventEmitter()
+  @Output() extraListChange : EventEmitter<ApplicationParamData[]> = new EventEmitter()
 
-  _extraList:ExtraListData[] = []
+  _extraList:ApplicationParamData[] = []
+  resExtraList:ApplicationParamData[] = []
   positionList:SelectOption[] =[...positionList]
   conflictList:SelectOption[] =[...extraConflictList]
   matchHeaderSet:Set<string> = new Set()
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
-  data:ExtraListData|undefined
+  data:ApplicationParamData|undefined
   nzDisabled:boolean = false
   closeModal: Function | null = null
 
@@ -54,35 +54,37 @@ export class ApplicationExtraFormComponent {
     this.nzDisabled = value
   }
 
-  saveParam () {
-    if (this.validateParamForm.valid) {
-      if (!this.data) {
-        if (this.matchHeaderSet.has(this.validateParamForm.controls['key'].value)) {
-          for (const index in this.extraList) {
-            if (this.extraList[index].key === this.validateParamForm.controls['key'].value && this.extraList[index].position === this.validateParamForm.controls['position'].value) {
-              this.extraList.splice(Number(index), 1)
-              break
-            }
-          }
-        }
-      } else {
-        for (const index in this.extraList) {
-          if (this.extraList[index].key === this.editData!.key && this.extraList[index].position === this.editData!.position && this.extraList[index].value === this.editData!.value && this.extraList[index].conflict === this.editData!.conflict) {
-            this.extraList.splice(Number(index), 1)
-            break
-          }
-        }
-      }
-      if (this.validateParamForm.controls['position'].value === 'HEADER') { this.matchHeaderSet.add(this.validateParamForm.controls['key'].value) }
-      this.extraList = [{ position: this.validateParamForm.controls['position'].value, key: this.validateParamForm.controls['key'].value, value: this.validateParamForm.controls['value'].value, conflict: this.validateParamForm.controls['conflict'].value }, ...this.extraList]
-      this.closeModal && this.closeModal()
-    } else {
-      Object.values(this.validateParamForm.controls).forEach(control => {
-        if (control.invalid) {
-          control.markAsDirty()
-          control.updateValueAndValidity({ onlySelf: true })
-        }
-      })
-    }
-  }
+  // saveParam () {
+  //   console.log(this)
+  //   if (this.validateParamForm.valid) {
+  //     if (this.data) {
+  //       if (this.matchHeaderSet.has(this.validateParamForm.controls['key'].value)) {
+  //         for (const index in this.extraList) {
+  //           if (this.extraList[index].key === this.validateParamForm.controls['key'].value && this.extraList[index].position === this.validateParamForm.controls['position'].value) {
+  //             this.extraList.splice(Number(index), 1)
+  //             break
+  //           }
+  //         }
+  //       }
+  //     } else {
+  //       for (const index in this.extraList) {
+  //         console.log(this.extraList, this)
+  //         if (this.extraList[index].key === this.data!.key && this.extraList[index].position === this.data!.position && this.extraList[index].value === this.data!.value && this.extraList[index].conflict === this.data!.conflict) {
+  //           this.extraList.splice(Number(index), 1)
+  //           break
+  //         }
+  //       }
+  //     }
+  //     if (this.validateParamForm.controls['position'].value === 'HEADER') { this.matchHeaderSet.add(this.validateParamForm.controls['key'].value) }
+  //     this.extraList = [{ position: this.validateParamForm.controls['position'].value, key: this.validateParamForm.controls['key'].value, value: this.validateParamForm.controls['value'].value, conflict: this.validateParamForm.controls['conflict'].value }, ...this.extraList]
+  //     this.closeModal && this.closeModal()
+  //   } else {
+  //     Object.values(this.validateParamForm.controls).forEach(control => {
+  //       if (control.invalid) {
+  //         control.markAsDirty()
+  //         control.updateValueAndValidity({ onlySelf: true })
+  //       }
+  //     })
+  //   }
+  // }
 }
