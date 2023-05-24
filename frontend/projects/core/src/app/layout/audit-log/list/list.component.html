@@ -22,6 +22,7 @@
         class="inline-block"
         [eoSingle]="false"
         [eoInputVal]="searchData.keyword"
+        [eoNoWidth]="true"
         (eoClick)="searchData.keyword = ''; getLogList()"
       >
         <input

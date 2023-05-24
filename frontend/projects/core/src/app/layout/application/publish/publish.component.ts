@@ -1,7 +1,7 @@
 /* eslint-disable dot-notation */
 import { Component, OnInit } from '@angular/core'
 import { IntelligentPluginPublishComponent } from '../../../component/intelligent-plugin/publish/publish.component'
-import { DynamicPublishData, DynamicPublish } from '../../../component/intelligent-plugin/types/types'
+import { DynamicPublish, DynamicPublishCluster } from '../../../component/intelligent-plugin/types/types'
 
 @Component({
   selector: 'eo-ng-application-publish',
@@ -11,9 +11,12 @@ import { DynamicPublishData, DynamicPublish } from '../../../component/intellige
 })
 export class ApplicationPublishComponent extends IntelligentPluginPublishComponent implements OnInit {
   override getPublishList () {
-    this.api.get('router/onlines', { uuid: this.id }).subscribe((resp:{code:number, msg:string, data:DynamicPublishData}) => {
+    this.api.get('application/onlines', { uuid: this.id }).subscribe((resp:{code:number, msg:string, data:{info:{id:string, name:string, desc:string}, clusters:DynamicPublishCluster[]}}) => {
       if (resp.code === 0) {
         this.publishList = resp.data.clusters
+        this.name = resp.data.info.name
+        this.id = resp.data.info.id
+        this.desc = resp.data.info.desc
       }
     })
   }

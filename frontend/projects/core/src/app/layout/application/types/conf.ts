@@ -16,7 +16,8 @@ export const algorithmList:SelectOption[] = [
 
 export const positionList:SelectOption[] = [
   { label: 'Header', value: 'header' },
-  { label: 'Query', value: 'query' }
+  { label: 'Query', value: 'query' },
+  { label: 'Body', value: 'body' }
 ]
 
 export const verifyList:SelectOption[] = [
