@@ -19,7 +19,7 @@ func newFilterOption() *FilterOption {
 		Title: "应用",
 		Titles: []apinto_module.OptionTitle{
 			{
-				Field: "name",
+				Field: "title",
 				Title: "应用名称",
 			},
 			{
