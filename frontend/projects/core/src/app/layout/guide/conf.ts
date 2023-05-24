@@ -30,8 +30,8 @@ export const GuideStepList:Array<StepItem> = [
     title: '添加转发目标 （上游）',
     desc: ['添加上游服务器或动态服务发现，接收网关节点转发的流量'],
     status: 'undo',
-    toDoUrl: 'upstream/upstream/create',
-    doneUrl: 'upstream/upstream',
+    toDoUrl: 'template/upstream',
+    doneUrl: 'template/upstream',
     color: '#f9a429'
   },
   {
