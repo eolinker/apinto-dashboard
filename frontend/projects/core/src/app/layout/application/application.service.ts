@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core'
 import { ApplicationManagementListComponent } from './list/list.component'
 import { EO_TBODY_TYPE } from 'projects/eo-ng-apinto-table/src/public-api'
-import { THEAD_TYPE } from 'eo-ng-table'
+import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { ApplicationData } from './types/types'
 import { ApiService } from '../../service/api.service'
+import { ApplicationPublishComponent } from './publish/publish.component'
 
 @Injectable({
   providedIn: 'root'
@@ -109,5 +110,26 @@ export class EoNgApplicationService {
         ]
       }
     ]
+  }
+
+  createApplicationPublicTbody (component:ApplicationPublishComponent):TBODY_TYPE[] {
+    const tbody:EO_TBODY_TYPE[] = [
+      {
+        type: 'checkbox',
+        click: () => {
+          component.clickData()
+        },
+        disabledFn: () => {
+          return component.nzDisabled
+        }
+      },
+      {
+        key: 'title'
+      },
+      { key: 'status', title: component.clusterStatusTpl },
+      { key: 'operator' },
+      { key: 'updateTime' }
+    ]
+    return tbody
   }
 }
