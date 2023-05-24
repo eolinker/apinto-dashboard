@@ -35,11 +35,11 @@ export class ApplicationAuthenticationFormComponent implements OnInit {
 
   // eslint-disable-next-line camelcase
   createAuthForm:ApplicationAuthForm = {
-    name: '',
+    title: '',
     position: 'header',
     uuid: '',
     tokenName: 'Authorization',
-    isTransparent: false,
+    hideCredential: false,
     expireTime: 0,
     expireTimeDate: null,
     driver: 'basic',
@@ -61,9 +61,9 @@ export class ApplicationAuthenticationFormComponent implements OnInit {
     public api:ApiService,
     private fb: UntypedFormBuilder) {
     this.validateForm = this.fb.group({
-      name: ['', [Validators.required]],
+      title: ['', [Validators.required]],
       driver: ['basic', [Validators.required]],
-      isTransparent: [false],
+      hideCredential: [false],
       position: ['header'],
       tokenName: ['Authorization'],
       expireTimeDate: [''],
@@ -219,17 +219,18 @@ export class ApplicationAuthenticationFormComponent implements OnInit {
         this.createAuthForm.config.secret = this.createAuthForm.config.secret === null ? '' : this.createAuthForm.config.secret
         body = {
           ...this.createAuthForm as AuthData,
+          title: this.validateForm.controls['title'].value,
           driver: this.validateForm.controls['driver'].value,
-          isTransparent: this.validateForm.controls['isTransparent'].value,
+          hideCredential: this.validateForm.controls['hideCredential'].value,
           expireTime: this.validateForm.controls['expireTimeDate'].value ? Math.floor(new Date(this.validateForm.controls['expireTimeDate'].value.setHours(23, 59, 59)).getTime() / 1000) : 0,
           position: this.validateForm.controls['position'].value,
           tokenName: this.validateForm.controls['tokenName'].value
         }
       } else {
         body = {
-          name: this.validateForm.controls['name'].value,
+          title: this.validateForm.controls['title'].value,
           driver: this.validateForm.controls['driver'].value,
-          isTransparent: this.validateForm.controls['isTransparent'].value,
+          hideCredential: this.validateForm.controls['hideCredential'].value,
           expireTime: this.validateForm.controls['expireTimeDate'].value ? Math.floor(new Date(this.validateForm.controls['expireTimeDate'].value.setHours(23, 59, 59)).getTime() / 1000) : 0,
           position: this.validateForm.controls['position'].value,
           tokenName: this.validateForm.controls['tokenName'].value,
