@@ -100,6 +100,12 @@ func (c *Module) initRouter() {
 		},
 		{
 			Method:      http.MethodGet,
+			Path:        "/api/clusters/create_check",
+			Handler:     "cluster.simple_list",
+			HandlerFunc: []apinto_module.HandlerFunc{clrController.createClusterCheck},
+		},
+		{
+			Method:      http.MethodGet,
 			Path:        "/api/cluster/enum",
 			Handler:     "cluster.enum",
 			HandlerFunc: []apinto_module.HandlerFunc{clrController.clusterEnum},
