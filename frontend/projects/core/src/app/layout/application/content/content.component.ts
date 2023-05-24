@@ -30,7 +30,6 @@ export class ApplicationContentComponent implements OnInit {
   tabOptions:TabsOptions[]=[]
   showTopBlank:boolean = false // 是否显示表单上方空隙
 
-  loading:boolean = false
   constructor (
     private baseInfo:BaseInfoService,
     private router:Router,
@@ -42,7 +41,6 @@ export class ApplicationContentComponent implements OnInit {
 
   ngOnInit (): void {
     this.appId = this.baseInfo.allParamsInfo.appId
-    console.log(this)
     if (!this.appId) {
       this.router.navigate(['/', 'application'])
     }
