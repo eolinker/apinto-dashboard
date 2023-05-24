@@ -21,6 +21,7 @@ type ApplicationAuthListOut struct {
 }
 
 type ApplicationAuthOut struct {
+	Title          string          `json:"title"`
 	Uuid           string          `json:"uuid"`
 	Driver         string          `json:"driver"`
 	ExpireTime     int64           `json:"expire_time"`

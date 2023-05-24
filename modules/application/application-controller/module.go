@@ -67,8 +67,9 @@ func (c *Module) Middleware() (module.Middleware, bool) {
 }
 
 func NewModule(name string) *Module {
-
-	return &Module{name: name}
+	m := &Module{name: name}
+	m.initFilter()
+	return m
 }
 
 func (c *Module) RoutersInfo() module.RoutersInfo {
