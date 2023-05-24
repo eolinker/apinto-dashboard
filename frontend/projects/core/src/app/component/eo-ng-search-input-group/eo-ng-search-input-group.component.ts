@@ -4,6 +4,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core'
   selector: 'eo-ng-search-input-group',
   template: `
       <eo-ng-input-group
+      id="inputGroup"
       [ngClass]="{'rounded-SEARCH_RADIUS':eoSingle, 'w-SEARCH':eoSingle && !eoNoWidth,'w-INPUT_NORMAL':!eoSingle&& !eoNoWidth,'bg-DISABLE_BG':nzDisabled}"
       [nzPrefix]="prefixTpl"
       [nzSuffix]="inputClearTpl"
@@ -29,5 +30,6 @@ export class EoNgSearchInputGroupComponent {
   @Input() eoNoWidth:boolean = false
   @Input() eoInputVal:string|number|undefined // input组件绑定的value
   @Input() nzDisabled:boolean = false
+  @Input() eoInputWidth:string = ''
   @Output() eoClick:EventEmitter<any> = new EventEmitter()
 }

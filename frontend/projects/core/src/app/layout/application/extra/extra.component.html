@@ -25,7 +25,7 @@
     </eo-ng-apinto-table>
   </div>
 
-  <ng-template #conflictTpl let-item>
+  <ng-template #conflictTpl let-item="item">
     <ng-container [ngSwitch]="item.conflict">
       <span *ngSwitchCase="'convert'">替换原参数值</span>
       <span *ngSwitchCase="'origin'">原参数值不存在时，添加额外参数</span>

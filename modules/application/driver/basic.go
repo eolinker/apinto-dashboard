@@ -8,6 +8,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/application"
+	application_model "github.com/eolinker/apinto-dashboard/modules/application/application-model"
 	"strings"
 )
 
@@ -44,6 +45,14 @@ func (b *Basic) GetAuthListInfo(config []byte) string {
 	_ = json.Unmarshal(config, authConfig)
 	secret := fmt.Sprintf("%s:%s", authConfig.UserName, authConfig.Password)
 	return common.Base64Encode([]byte(secret))
+}
+
+func (b *Basic) GetCfgDetails(config []byte) []application_model.AuthDetailItem {
+	basicConfig := new(BasicConfig)
+	if err := json.Unmarshal(config, basicConfig); err != nil {
+		return []application_model.AuthDetailItem{}
+	}
+	return []application_model.AuthDetailItem{{Key: "用户名", Value: basicConfig.UserName}, {Key: "密码", Value: basicConfig.Password}}
 }
 
 func (b *Basic) ToApinto(expire int64, position string, tokenName string, config []byte, hideCredential bool) v1.ApplicationAuth {
