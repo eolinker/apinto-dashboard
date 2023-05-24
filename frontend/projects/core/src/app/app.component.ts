@@ -32,7 +32,7 @@ export class AppComponent {
       this.titleDom.innerHTML = this.title
     }
     if (this.iconDom) {
-      this.iconDom.href = environment.isBusiness ? 'favicon-pro.ico' : 'favicon.ico'
+      this.iconDom.href = environment.isBusiness ? '../assets/favicon-pro.ico' : 'favicon.ico'
     }
   }
 }
