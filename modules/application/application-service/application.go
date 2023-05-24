@@ -155,11 +155,6 @@ func (a *applicationService) Online(ctx context.Context, namespaceId, userId int
 	t := time.Now()
 
 	for _, clu := range clusterInfos {
-		client, err := a.apintoClient.GetClient(ctx, clu.Id)
-		if err != nil {
-			return err
-		}
-
 		err = a.applicationStore.Transaction(ctx, func(txCtx context.Context) error {
 			publishHistory := &application_entry.AppPublishHistory{
 				VersionName:              applicationInfo.Version,
@@ -177,18 +172,22 @@ func (a *applicationService) Online(ctx context.Context, namespaceId, userId int
 			if err = a.publishHistoryStore.Insert(txCtx, publishHistory); err != nil {
 				return err
 			}
-			appConfig := v1.ApplicationConfig{
-				Name:        applicationInfo.IdStr,
-				Driver:      "app",
-				Auth:        auths,
-				Disable:     false,
-				Description: applicationInfo.Desc,
-				Labels:      labels,
-				Additional:  a.getApplicationAdditional(latestVersion.ExtraParamList),
-				Anonymous:   anonymous,
-				Version:     applicationInfo.Version,
-			}
-			return client.ForApp().Create(appConfig)
+
+			return v2.Online(clu.Name, clu.Addr, professionApplication, applicationInfo.IdStr, &v2.WorkerInfo[v2.BasicInfo]{
+				BasicInfo: &v2.BasicInfo{
+					Profession:  professionApplication,
+					Name:        applicationInfo.IdStr,
+					Driver:      "app",
+					Description: applicationInfo.Desc,
+					Version:     applicationInfo.Version,
+				},
+				Append: map[string]interface{}{
+					"auth":       auths,
+					"labels":     labels,
+					"additional": a.getApplicationAdditional(latestVersion.ExtraParamList),
+					"anonymous":  anonymous,
+				},
+			})
 		})
 	}
 
@@ -226,10 +225,6 @@ func (a *applicationService) Offline(ctx context.Context, namespaceId, userId in
 	})
 	t := time.Now()
 	for _, clu := range clusterInfos {
-		client, err := a.apintoClient.GetClient(ctx, clu.Id)
-		if err != nil {
-			return err
-		}
 		err = a.applicationStore.Transaction(ctx, func(txCtx context.Context) error {
 			publishHistory := &application_entry.AppPublishHistory{
 				VersionName:              applicationInfo.Version,
@@ -247,7 +242,7 @@ func (a *applicationService) Offline(ctx context.Context, namespaceId, userId in
 			if err = a.publishHistoryStore.Insert(txCtx, publishHistory); err != nil {
 				return err
 			}
-			return common.CheckWorkerNotExist(client.ForApp().Delete(applicationInfo.IdStr))
+			return common.CheckWorkerNotExist(v2.Offline(clu.Name, clu.Addr, professionApplication, applicationInfo.IdStr))
 		})
 	}
 	return nil
