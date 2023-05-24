@@ -20,7 +20,6 @@ func init() {
 	bean.Injection(&authDriverManager)
 
 	application := newApplicationService()
-	applicationAuth := newApplicationAuth()
+
 	bean.Injection(&application)
-	bean.Injection(&applicationAuth)
 }

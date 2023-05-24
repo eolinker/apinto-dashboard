@@ -7,6 +7,7 @@ import (
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/application"
+	application_model "github.com/eolinker/apinto-dashboard/modules/application/application-model"
 	"strings"
 )
 
@@ -27,7 +28,6 @@ func (a *AkSk) GetAuthListInfo(config []byte) string {
 }
 
 func (a *AkSk) CheckInput(config []byte) error {
-
 	akSkConfig := new(AkSkConfig)
 
 	if err := json.Unmarshal(config, akSkConfig); err != nil {
@@ -42,8 +42,15 @@ func (a *AkSk) CheckInput(config []byte) error {
 			return errors.New(fmt.Sprintf("标签信息中的%s为系统关键字", key))
 		}
 	}
-
 	return nil
+}
+
+func (a *AkSk) GetCfgDetails(config []byte) []application_model.AuthDetailItem {
+	akSkConfig := new(AkSkConfig)
+	if err := json.Unmarshal(config, akSkConfig); err != nil {
+		return []application_model.AuthDetailItem{}
+	}
+	return []application_model.AuthDetailItem{{Key: "AK", Value: akSkConfig.Ak}, {Key: "SK", Value: akSkConfig.Sk}}
 }
 
 func (a *AkSk) ToApinto(expire int64, position string, tokenName string, config []byte, hideCredential bool) v1.ApplicationAuth {
