@@ -49,7 +49,7 @@ func initRouter(name string) apinto_module.RoutersInfo {
 			Method:      http.MethodGet,
 			Path:        "/api/application/onlines",
 			Handler:     "applications.onlines",
-			HandlerFunc: []apinto_module.HandlerFunc{c.onlines},
+			HandlerFunc: []apinto_module.HandlerFunc{c.getOnlineInfo},
 		},
 		{
 			Method:      http.MethodPut,
@@ -80,6 +80,12 @@ func initRouter(name string) apinto_module.RoutersInfo {
 			Path:        "/api/application/auth",
 			Handler:     "applications.getAuth",
 			HandlerFunc: []apinto_module.HandlerFunc{c.getAuth},
+		},
+		{
+			Method:      http.MethodGet,
+			Path:        "/api/application/auth/details",
+			Handler:     "applications.getAuthDetails",
+			HandlerFunc: []apinto_module.HandlerFunc{c.getAuthDetails},
 		},
 		{
 			Method:      http.MethodPost,

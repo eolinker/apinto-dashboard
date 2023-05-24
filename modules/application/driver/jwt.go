@@ -6,6 +6,7 @@ import (
 	"fmt"
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/modules/application"
+	application_model "github.com/eolinker/apinto-dashboard/modules/application/application-model"
 	"strings"
 )
 
@@ -59,6 +60,34 @@ func (j *Jwt) CheckInput(config []byte) error {
 	}
 
 	return nil
+}
+
+func (j *Jwt) GetCfgDetails(config []byte) []application_model.AuthDetailItem {
+	jwtConfig := new(JwtConfig)
+	if err := json.Unmarshal(config, jwtConfig); err != nil {
+		return []application_model.AuthDetailItem{}
+	}
+	items := []application_model.AuthDetailItem{
+		{Key: "Iss", Value: jwtConfig.Iss},
+		{Key: "签名算法", Value: jwtConfig.Algorithm},
+		{Key: "用户名", Value: jwtConfig.User},
+		{Key: "用户名JsonPath", Value: jwtConfig.UserPath},
+		{Key: "校验字段", Value: strings.Join(jwtConfig.ClaimsToVerify, ",")},
+	}
+
+	switch jwtConfig.Algorithm {
+	case "HS256", "HS384", "HS512":
+		items = append(items, application_model.AuthDetailItem{Key: "Secret", Value: jwtConfig.Secret})
+		base64 := "false"
+		if jwtConfig.SignatureIsBase64 {
+			base64 = "true"
+		}
+		items = append(items, application_model.AuthDetailItem{Key: "Secret", Value: base64})
+	default:
+		items = append(items, application_model.AuthDetailItem{Key: "RSA公钥", Value: jwtConfig.PublicKey})
+	}
+
+	return items
 }
 
 func (j *Jwt) GetAuthListInfo(config []byte) string {
