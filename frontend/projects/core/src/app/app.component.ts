@@ -9,6 +9,7 @@
 import { Component } from '@angular/core'
 import { CookieService } from 'ngx-cookie-service'
 import { BaseInfoService } from './service/base-info.service'
+import { environment } from '../environments/environment'
 @Component({
   selector: 'app-root',
   template: `
@@ -17,9 +18,21 @@ import { BaseInfoService } from './service/base-info.service'
   styles: []
 })
 export class AppComponent {
-  title = 'apinto';
+  title = environment.isBusiness ? 'Apinto Pro' : 'Apinto';
+  titleDom:HTMLElement|null = document.querySelector('#appTitle')
+  iconDom:HTMLLinkElement |null= document.querySelector('#appIcon')
+
   constructor (baseInfoService: BaseInfoService, private cookieService: CookieService) {
     const time: number = 200 * 60 * 60 * 1000// cookie过期时间200个小时 200*60*60*1000
     this.cookieService.set('namespace', 'default', new Date(new Date().getTime() + time))
+  }
+
+  ngAfterViewInit () {
+    if (this.titleDom) {
+      this.titleDom.innerHTML = this.title
+    }
+    if (this.iconDom) {
+      this.iconDom.href = environment.isBusiness ? 'favicon-pro.ico' : 'favicon.ico'
+    }
   }
 }

@@ -586,7 +586,7 @@ func (a *apiController) getOnlineList(ginCtx *gin.Context) {
 	//
 	//list, err := a.apiService.OnlineList(ginCtx, namespaceId, apiUUID)
 	//if err != nil {
-	//	controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
+	//	controller.ErrorJson(ginCtx, http.StatusOK, err.Logger())
 	//	return
 	//}
 	//
