@@ -34,11 +34,11 @@ export interface ApplicationData{
 }
 
 export interface ApplicationAuthForm{
-    name:string
+    title:string
     position:string
     uuid?:string
     tokenName:string
-    isTransparent:boolean
+    hideCredential:boolean
     expireTime:number
     expireTimeDate:Date|null
     driver:string
@@ -62,9 +62,9 @@ export interface ApplicationAuthForm{
 }
 
 export interface AuthData{
-    name:string
+    title:string
     driver:'basic' | 'apikey' | 'aksk' | 'jwt'
-    isTransparent:boolean
+    hideCredential:boolean
     expireTime:number
     position:string
     tokenName:string
@@ -90,7 +90,7 @@ export interface AuthData{
 export interface AuthListData{
     uuid:string
     driver:string
-    isTransparent:boolean|string
+    hideCredential:boolean|string
     expireTime:number
     expireTimeString?:string,
     paramPosition:string

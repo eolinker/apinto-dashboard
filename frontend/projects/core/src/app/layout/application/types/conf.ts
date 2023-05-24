@@ -115,13 +115,13 @@ export const authenticationTableHeadName:THEAD_TYPE[] = [
 
 export const authenticationTableBody:EO_TBODY_TYPE[] = [
   {
-    key: 'paramName',
+    key: 'title',
     copy: true
   },
   {
     key: 'driver'
   },
-  { key: 'isTransparent' },
+  { key: 'hideCredential' },
   {
     key: 'expireTimeString'
   },
