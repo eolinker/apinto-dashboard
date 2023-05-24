@@ -2,6 +2,7 @@
 import { Component, OnInit } from '@angular/core'
 import { IntelligentPluginPublishComponent } from '../../../component/intelligent-plugin/publish/publish.component'
 import { DynamicPublish, DynamicPublishCluster } from '../../../component/intelligent-plugin/types/types'
+import { Observable } from 'rxjs'
 
 @Component({
   selector: 'eo-ng-application-publish',
@@ -23,7 +24,7 @@ export class ApplicationPublishComponent extends IntelligentPluginPublishCompone
 
   // @ts-ignore
   override offline () {
-    try {
+    return new Observable((observer) => {
       const cluster:Array<string> = this.publishList.filter((item) => {
         return item.checked
       }).map((item) => {
@@ -32,19 +33,17 @@ export class ApplicationPublishComponent extends IntelligentPluginPublishCompone
       this.api.put('application/offline', { clusterNames: cluster }, { appId: this.id }).subscribe((resp:DynamicPublish) => {
         if (resp.code === 0) {
           this.message.success(resp.msg)
-          return true
+          observer.next(true)
         } else {
-          return false
+          observer.next(false)
         }
       })
-    } catch {
-      return false
-    }
+    })
   }
 
   // @ts-ignore
   override online () {
-    try {
+    return new Observable((observer) => {
       const cluster:Array<string> = this.publishList.filter((item) => {
         return item.checked
       }).map((item) => {
@@ -53,13 +52,11 @@ export class ApplicationPublishComponent extends IntelligentPluginPublishCompone
       this.api.put('application/online', { clusterNames: cluster }, { appId: this.id }).subscribe((resp:DynamicPublish) => {
         if (resp.code === 0) {
           this.message.success(resp.msg)
-          return true
+          observer.next(true)
         } else {
-          return false
+          observer.next(false)
         }
       })
-    } catch {
-      return false
-    }
+    })
   }
 }
