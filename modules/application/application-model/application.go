@@ -52,6 +52,12 @@ type ApplicationBasicInfo struct {
 	UpdateTime time.Time
 }
 
+type ApplicationRemoteOption struct {
+	Uuid  string `json:"uuid,omitempty"`
+	Title string `json:"title,omitempty"`
+	Desc  string `json:"desc,omitempty"`
+}
+
 type ApplicationEntire struct {
 	*application_entry.Application
 }

@@ -708,10 +708,10 @@ func (a *applicationService) GetAppRemoteOptions(ctx context.Context, namespaceI
 	}
 	applications := make([]any, 0, total)
 	for _, item := range list {
-		applications = append(applications, application_model.ApplicationBasicInfo{
-			Uuid: item.IdStr,
-			Name: item.Name,
-			Desc: item.Desc,
+		applications = append(applications, application_model.ApplicationRemoteOption{
+			Uuid:  item.IdStr,
+			Title: item.Name,
+			Desc:  item.Desc,
 		})
 	}
 	return applications, nil
