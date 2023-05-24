@@ -8,11 +8,10 @@
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
-import { NavigationEnd, Router } from '@angular/router'
+import { Router } from '@angular/router'
 import { MODAL_NORMAL_SIZE, MODAL_SMALL_SIZE } from '../../../constant/app.config'
-import { ClusterSimpleOption, EmptyHttpResponse } from '../../../constant/type'
+import { ClusterSimpleOption } from '../../../constant/type'
 import { Subscription } from 'rxjs'
-import { v4 as uuidv4 } from 'uuid'
 import { ApplicationPublishComponent } from '../publish/publish.component'
 import { ApplicationCreateComponent } from '../create/create.component'
 import { ApplicationListData } from '../types/types'
@@ -41,7 +40,7 @@ export class ApplicationManagementListComponent implements OnInit {
   cluster:any = []
   clusterOptions:SelectOption[] = []
   tableBody:TBODY_TYPE[] = []
-  tableHeadName:THEAD_TYPE[] = [...this.service.createApiListThead(this)]
+  tableHeadName:THEAD_TYPE[] = [...this.service.createAppListThead(this)]
   tableData:{data:any[], pagination:boolean, total:number, pageNum:number, pageSize:number}
   = { data: [], pagination: true, total: 1, pageSize: 20, pageNum: 1 }
 
@@ -67,24 +66,6 @@ export class ApplicationManagementListComponent implements OnInit {
     this.navigationService.reqFlashBreadcrumb([
       { title: '应用管理' }
     ])
-    this.subscription = this.router.events.subscribe((event) => {
-      if (event instanceof NavigationEnd) {
-        this.keyword = ''
-        this.cluster = []
-        this.clusterOptions = []
-        this.tableBody = [...this.service.createApiListTbody(this)]
-        this.tableHeadName = [...this.service.createApiListThead(this)]
-        this.tableData = { data: [], pagination: true, total: 1, pageSize: 20, pageNum: 1 }
-
-        this.driverOptions = []
-        this.renderSchema = {} // 动态渲染数据，是json schema
-        this.modalRef = undefined
-        this.statusMap = {}
-        this.tableLoading = true
-        this.getClusters()
-        this.getTableData()
-      }
-    })
     this.getClusters()
     this.getTableData()
   }
@@ -108,7 +89,7 @@ export class ApplicationManagementListComponent implements OnInit {
       name: this.keyword,
       pageNum: this.tableData.pageNum,
       pageSize: this.tableData.pageSize,
-      clusters: this.cluster
+      clusters: JSON.stringify(this.cluster)
     }).subscribe((resp:{code:number, data:{applications:ApplicationListData[], total:number, pageNum:number, pageSize:number}}) => {
       if (resp.code === 0) {
         this.tableData.data = resp.data.applications.map((item:ApplicationListData) => {
@@ -120,8 +101,8 @@ export class ApplicationManagementListComponent implements OnInit {
           return item
         })
         if (resp.data.applications.length > 0) {
-          this.tableBody = this.service.createApiListTbody(this, resp.data.applications[0].publish)
-          this.tableHeadName = this.service.createApiListThead(this, resp.data.applications[0].publish)
+          this.tableBody = this.service.createAppListTbody(this, resp.data.applications[0].publish)
+          this.tableHeadName = this.service.createAppListThead(this, resp.data.applications[0].publish)
         }
 
         this.tableData.total = resp.data.total || this.tableData.total
@@ -193,7 +174,14 @@ export class ApplicationManagementListComponent implements OnInit {
       },
       nzOnOk: (component:ApplicationCreateComponent) => {
         return new Promise((resolve, reject) => {
-          component.saveApplication() ? resolve() : reject(new Error())
+          component.saveApplication()?.subscribe((resp) => {
+            if (resp) {
+              resolve()
+              this.getTableData()
+            } else {
+              reject(new Error())
+            }
+          })
         })
       }
     })

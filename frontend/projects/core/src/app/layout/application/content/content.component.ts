@@ -13,7 +13,6 @@ import { TabTemplateContext } from 'ng-zorro-antd/tabs'
 import { TabsOptions } from 'eo-ng-tabs'
 import { BaseInfoService } from '../../../service/base-info.service'
 import { EoNgApplicationService } from '../application.service'
-import { ApiService } from '../../../service/api.service'
 
 @Component({
   selector: 'eo-ng-application-content',
@@ -29,17 +28,16 @@ export class ApplicationContentComponent implements OnInit {
   options:Array<any>=[]
 
   tabOptions:TabsOptions[]=[]
-  appName:string=''
-  appDesc:string=''
   showTopBlank:boolean = false // 是否显示表单上方空隙
+
+  loading:boolean = false
   constructor (
     private baseInfo:BaseInfoService,
     private router:Router,
     private cdRef: ChangeDetectorRef,
     private elem: ElementRef,
     private renderer: Renderer2,
-    private service:EoNgApplicationService,
-    private api:ApiService) {
+    public service:EoNgApplicationService) {
   }
 
   ngOnInit (): void {
@@ -75,7 +73,7 @@ export class ApplicationContentComponent implements OnInit {
       }
     ]
     if (this.appId === 'anonymous') {
-      this.tabOptions.pop()
+      this.tabOptions.shift()
     }
 
     this.cdRef.detectChanges()
