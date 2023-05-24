@@ -7,6 +7,7 @@ import (
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/application"
+	application_model "github.com/eolinker/apinto-dashboard/modules/application/application-model"
 	"strings"
 )
 
@@ -41,6 +42,14 @@ func (a *Apikey) CheckInput(config []byte) error {
 	}
 
 	return nil
+}
+
+func (a *Apikey) GetCfgDetails(config []byte) []application_model.AuthDetailItem {
+	apiKeyConfig := new(ApikeyConfig)
+	if err := json.Unmarshal(config, apiKeyConfig); err != nil {
+		return []application_model.AuthDetailItem{}
+	}
+	return []application_model.AuthDetailItem{{Key: "Apikey", Value: apiKeyConfig.Apikey}}
 }
 
 func (a *Apikey) ToApinto(expire int64, position string, tokenName string, config []byte, hideCredential bool) v1.ApplicationAuth {
