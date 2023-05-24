@@ -411,6 +411,7 @@ type ApplicationAdditional struct {
 	Key      string `json:"key,omitempty"`
 	Value    string `json:"value,omitempty"`
 	Position string `json:"position,omitempty"` //header,query,body
+	Conflict string `json:"conflict,omitempty"`
 }
 
 type ApplicationAuth struct {
