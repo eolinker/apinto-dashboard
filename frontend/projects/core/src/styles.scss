@@ -1449,11 +1449,6 @@ eo-ng-audit-log-list {
 }
 
 .activation-block {
-  width: 760px;
-  background: var(--bar-background-color);
-  margin: auto;
-  margin-top: 10vh;
-  padding: 54px 0 54px 0;
   display: flex;
   flex-direction: column;
 
@@ -1476,9 +1471,6 @@ eo-ng-audit-log-list {
     display: block;
     margin: auto;
     margin-top: 40px;
-    color: #333333;
-    font-size: 14px;
-    font-weight: 500;
     line-height: 26px;
     list-style-type: none;
     padding-inline-start: 0px;
@@ -1487,10 +1479,6 @@ eo-ng-audit-log-list {
   ol {
     list-style: none;
     padding-inline-start: 0;
-  }
-
-  .activation-info {
-    color: #666666;
   }
 
   .li-num {

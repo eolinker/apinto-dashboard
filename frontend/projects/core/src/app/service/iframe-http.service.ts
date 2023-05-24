@@ -5,6 +5,7 @@ import { API_URL, ApiService } from './api.service'
 import { NavigationEnd, Router } from '@angular/router'
 import { EoNgNavigationService } from './eo-ng-navigation.service'
 import { BaseInfoService } from './base-info.service'
+import { stringify } from 'querystring'
 
 @Injectable({
   providedIn: 'root'
@@ -428,6 +429,11 @@ export class IframeHttpService {
     appsSimpleList: () => {
       return new Promise((resolve) => {
         return this.api.get('common/enum/Application').subscribe((resp:any) => {
+          if (resp.code === 0) {
+            resp.data.Application = resp.data.applications.map((app:{id:string, title:string}) => {
+              return { name: app.id, title: app.title }
+            })
+          }
           resolve(resp)
         })
       })

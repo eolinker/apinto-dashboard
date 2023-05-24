@@ -25,9 +25,9 @@ export class IntelligentPluginPublishComponent implements OnInit {
   closeModal:any
   nzDisabled:boolean = false
   constructor (
-    private message: EoNgFeedbackMessageService,
+    public message: EoNgFeedbackMessageService,
     private service:IntelligentPluginService,
-    private api:ApiService) {}
+    public api:ApiService) {}
 
   ngOnInit (): void {
     this.getPublishList()

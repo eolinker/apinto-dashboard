@@ -2,13 +2,7 @@
   <div
     class="list-header pl-btnbase pr-btnrbase py-btnybase flex flex-nowrap items-center justify-between"
   >
-    <button
-      eo-ng-button
-      class="ant-btn-primary"
-      [eoNgUserAccess]="moduleName"
-      (disabledEdit)="disabledEdit($event)"
-      (click)="addData()"
-    >
+    <button eo-ng-button class="ant-btn-primary" (click)="addData()">
       新建{{ pluginName }}
     </button>
 

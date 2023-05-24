@@ -20,36 +20,57 @@
       新建应用
     </button>
 
-    <eo-ng-search-input-group
-      [eoInputVal]="applicationNameForSear"
-      (eoClick)="applicationNameForSear = ''; getApplicationsList()"
-    >
-      <input
-        type="text"
-        eo-ng-input
-        placeholder="搜索应用名称"
-        [(ngModel)]="applicationNameForSear"
-        (keyup.enter)="getApplicationsList()"
-      />
-    </eo-ng-search-input-group>
+    <div>
+      <eo-ng-select
+        class="w-INPUT_NORMAL"
+        [nzMaxTagCount]="3"
+        [nzMaxTagPlaceholder]="tagPlaceHolder"
+        [nzShowCheckAll]="true"
+        nzMode="multiple"
+        nzPlaceHolder="所有集群"
+        [(ngModel)]="cluster"
+        (nzOpenChange)="$event ? null : getTableData()"
+        [nzOptions]="clusterOptions"
+        [nzDisabled]="nzDisabled"
+        (disabledEdit)="disabledEdit($event)"
+      >
+      </eo-ng-select>
+      <ng-template #tagPlaceHolder let-selectedList
+        >and {{ selectedList.length }} more selected</ng-template
+      >
+
+      <eo-ng-search-input-group
+        class="ml-btnybase"
+        [eoInputVal]="keyword"
+        (eoClick)="keyword = ''; getTableData()"
+      >
+        <input
+          type="text"
+          eo-ng-input
+          [placeholder]="'搜索应用名称'"
+          [(ngModel)]="keyword"
+          (keyup.enter)="getTableData()"
+        />
+      </eo-ng-search-input-group>
+    </div>
+  </div>
   </div>
 
   <div class="list-content pb-[4px]">
     <eo-ng-apinto-table
       class=""
-      [nzTbody]="applicationsTableBody"
-      [nzThead]="applicationsTableHeadName"
-      [nzData]="applicationsForm.applications"
+      [nzTbody]="tableBody"
+      [nzThead]="tableHeadName"
+      [nzData]="tableData.data"
       [nzTrClick]="applicationsTableClick"
-      [nzMaxOperatorButton]="2"
-      [nzNoScroll]="true"
-      [nzShowPagination]="true"
-      [nzFrontPagination]="false"
-      [nzTotal]="applicationsForm.total"
-      [(nzPageIndex)]="applicationsForm.pageNum"
-      [(nzPageSize)]="applicationsForm.pageSize"
-      (nzPageIndexChange)="getApplicationsList()"
-      (nzPageSizeChange)="getApplicationsList()"
+      [nzMaxOperatorButton]="3"
+      [nzShowPagination]="tableData.pagination"
+      [nzFrontPagination]="!tableData.pagination"
+      [nzTotal]="tableData.total"
+      [(nzPageIndex)]="tableData.pageNum"
+      [(nzPageSize)]="tableData.pageSize"
+      (nzPageIndexChange)="getTableData()"
+      (nzPageSizeChange)="getTableData()"
     >
     </eo-ng-apinto-table>
   </div>

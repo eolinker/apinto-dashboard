@@ -43,16 +43,16 @@ export class IntelligentPluginListComponent implements OnInit {
   modalRef:NzModalRef|undefined
   statusMap:{[k:string]:any} = {}
   tableLoading:boolean = true
-  private subscription: Subscription = new Subscription()
+  subscription: Subscription = new Subscription()
 
   constructor (
-    private message: EoNgFeedbackMessageService,
-    private service:IntelligentPluginService,
-    private modalService:EoNgFeedbackModalService,
-    private api:ApiService,
-    private router:Router,
+    public message: EoNgFeedbackMessageService,
+    public service:IntelligentPluginService,
+    public modalService:EoNgFeedbackModalService,
+    public api:ApiService,
+    public router:Router,
     private baseInfo:BaseInfoService,
-    private navigationService: EoNgNavigationService) {
+    public navigationService: EoNgNavigationService) {
 
   }
 
@@ -164,7 +164,7 @@ export class IntelligentPluginListComponent implements OnInit {
   }
 
   // table需要设置为loading状态
-  private getTableConfig (fields:DynamicField[]) {
+  getTableConfig (fields:DynamicField[]) {
     const newTableHeadConfig:EO_THEAD_TYPE[] = []
     const newTableBodyConfig:TBODY_TYPE[] = []
     let statusColFlag:boolean = true
