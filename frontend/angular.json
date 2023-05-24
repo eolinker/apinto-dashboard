@@ -50,7 +50,6 @@
             "inlineStyleLanguage": "scss",
             "assets": [
               "projects/core/src/favicon.ico",
-              "projects/core/src/favicon-pro.ico",
               "projects/core/src/assets",
               {
                 "glob": "**/*",
