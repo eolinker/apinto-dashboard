@@ -100,7 +100,7 @@ func Unzip(src *zip.Reader, dst string) error {
 			// 配置输出目标路径
 			filename := filepath.Join(dst, decodeName)
 			// 创建目标路径所在文件夹
-			e := os.MkdirAll(filepath.Dir(filename), 0755)
+			e := os.MkdirAll(filepath.Dir(filename), 0666)
 			if e != nil {
 				return e
 			}
