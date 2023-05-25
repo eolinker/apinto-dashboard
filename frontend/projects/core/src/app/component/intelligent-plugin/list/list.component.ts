@@ -17,6 +17,7 @@ import { BaseInfoService } from '../../../service/base-info.service'
 import { NavigationEnd, Router } from '@angular/router'
 import { EoNgNavigationService } from '../../../service/eo-ng-navigation.service'
 import { EO_THEAD_TYPE } from 'projects/eo-ng-apinto-table/src/public-api'
+import { debounce } from 'lodash-es'
 
 @Component({
   selector: 'eo-ng-intelligent-plugin-list',
@@ -44,6 +45,7 @@ export class IntelligentPluginListComponent implements OnInit {
   statusMap:{[k:string]:any} = {}
   tableLoading:boolean = true
   subscription: Subscription = new Subscription()
+  debounce = debounce
 
   constructor (
     public message: EoNgFeedbackMessageService,
@@ -88,7 +90,7 @@ export class IntelligentPluginListComponent implements OnInit {
     this.subscription.unsubscribe()
   }
 
-  getTableData () {
+  getTableData = () => {
     this.tableLoading = true
     // 表格内的其他数据与状态数据是分别获取的，如果list先返回，需要先展示除了状态数据以外的其他数据
     forkJoin([this.api.get(`dynamic/${this.moduleName}/list`, {
@@ -198,6 +200,9 @@ export class IntelligentPluginListComponent implements OnInit {
           ...(newTableHeadConfig.length === 0 ? { left: true } : {}),
           ...(field.enum?.length > 0
             ? {
+                title: field.title,
+                tooltip: field.title,
+                titleString: field.title,
                 filterMultiple: true,
                 filterOpts: field.enum.map((item:string) => {
                   return { text: item, value: item }

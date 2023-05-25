@@ -108,9 +108,11 @@ export class ApplicationCreateComponent implements OnInit {
   }
 
   getApplicationMessage () {
+    this.service.loading = true
     this.api
       .get('application', { appId: this.appId })
       .subscribe((resp: {code:number, data:{application:ApplicationData}, msg:string}) => {
+        this.service.loading = false
         if (resp.code === 0) {
           this.service.appData = resp.data.application
           this.service.appName = resp.data.application.name
@@ -207,7 +209,6 @@ export class ApplicationCreateComponent implements OnInit {
   // extra_header是编辑鉴权时才会有的数据，也需从Object转为map发送给后端
   saveApplication () {
     return new Observable((observer) => {
-      console.log(this)
       if (this.validateForm.valid) {
         this.createApplicationForm.customAttrList = this.customAttrList.filter(
           (item: ArrayItemData) => {
@@ -262,7 +263,6 @@ export class ApplicationCreateComponent implements OnInit {
 
   editApplication () {
     this.saveApplication().subscribe((resp) => {
-      console.log(resp)
     })
   }
 

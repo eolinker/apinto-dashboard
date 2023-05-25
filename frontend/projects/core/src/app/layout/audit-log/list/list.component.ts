@@ -36,6 +36,10 @@ import { AuditLogDetail, AuditLogsData } from '../types/types'
       min-height:32px;
     }
 
+    label{
+      width:70px;
+    }
+
     `
   ]
 })
