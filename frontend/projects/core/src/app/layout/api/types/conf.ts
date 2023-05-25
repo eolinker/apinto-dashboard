@@ -539,3 +539,4 @@ export const PluginTemplatePublishTbody:EO_TBODY_TYPE[] = [
     ]
   }
 ]
+

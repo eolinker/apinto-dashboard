@@ -119,14 +119,13 @@ export class ApplicationManagementListComponent implements OnInit {
 
   publish (value:any) {
     this.modalRef = this.modalService.create({
-      nzTitle: `${value.data.title}上线管理`,
+      nzTitle: `${value.data.name}上线管理`,
       nzWidth: MODAL_NORMAL_SIZE,
       nzContent: ApplicationPublishComponent,
       nzComponentParams: {
-        name: value.data.title,
+        name: value.data.name,
         id: value.data.id,
-        desc: value.data.description,
-        moduleName: this.moduleName,
+        desc: value.data.desc,
         closeModal: () => { this.modalRef?.close() },
         nzDisabled: this.nzDisabled
       },
@@ -142,7 +141,15 @@ export class ApplicationManagementListComponent implements OnInit {
         danger: true,
         onClick: (context:ApplicationPublishComponent) => {
           return new Promise((resolve, reject) => {
-            context.offline() ? resolve(true) : reject(new Error())
+            context.offline().subscribe((resp) => {
+              if (resp) {
+                this.modalRef?.close()
+                resolve(true)
+                this.getTableData()
+              } else {
+                reject(new Error())
+              }
+            })
           })
         },
         disabled: () => {
@@ -154,7 +161,15 @@ export class ApplicationManagementListComponent implements OnInit {
         type: 'primary',
         onClick: (context:ApplicationPublishComponent) => {
           return new Promise((resolve, reject) => {
-            context.online() ? resolve(true) : reject(new Error())
+            context.online().subscribe((resp) => {
+              if (resp) {
+                resolve(true)
+                this.modalRef?.close()
+                this.getTableData()
+              } else {
+                reject(new Error())
+              }
+            })
           })
         },
         disabled: () => {
@@ -188,7 +203,6 @@ export class ApplicationManagementListComponent implements OnInit {
   }
 
   editData (value:any) {
-    console.log(value)
     this.router.navigate(['/', 'application', 'content', value.data.id, 'message'])
   }
 

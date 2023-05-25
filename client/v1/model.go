@@ -405,6 +405,7 @@ type ApplicationConfig struct {
 	Labels      map[string]string       `json:"labels,omitempty"`
 	Additional  []ApplicationAdditional `json:"additional,omitempty"` //额外参数
 	Anonymous   bool                    `json:"anonymous"`            //是否匿名
+	Version     string                  `json:"version"`
 }
 
 type ApplicationAdditional struct {

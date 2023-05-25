@@ -313,11 +313,12 @@ func (a *applicationController) auths(ginCtx *gin.Context) {
 	for _, auth := range list {
 		authInfo := &application_dto.ApplicationAuthListOut{
 			Uuid:           auth.UUID,
+			Title:          auth.Title,
 			Driver:         auth.Driver,
+			HideCredential: auth.HideCredential,
 			ExpireTime:     auth.ExpireTime,
 			Operator:       auth.Operator,
 			UpdateTime:     common.TimeToStr(auth.UpdateTime),
-			HideCredential: auth.HideCredential,
 		}
 		resList = append(resList, authInfo)
 	}
@@ -395,6 +396,7 @@ func (a *applicationController) getAuth(ginCtx *gin.Context) {
 		return
 	}
 	resAuth := &application_dto.ApplicationAuthOut{
+		Title:          auth.Title,
 		Uuid:           auth.Uuid,
 		Driver:         auth.Driver,
 		ExpireTime:     auth.ExpireTime,

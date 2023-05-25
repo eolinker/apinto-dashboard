@@ -128,10 +128,10 @@ func (c *Client) Info(profession string, name string) (*WorkerInfo[BasicInfo], e
 func (c *Client) Set(profession string, name string, info *WorkerInfo[BasicInfo]) error {
 	header := http.Header{}
 	header.Set("content-type", "application/json")
-	if info.BasicInfo.Profession == "app" {
-		// 临时处理APP相关配置
-		info.Append = dealAPPAppend(info.Append)
-	}
+	//if info.BasicInfo.Profession == "app" {
+	//	// 临时处理APP相关配置
+	//	info.Append = dealAPPAppend(info.Append)
+	//}
 	body, _ := json.Marshal(info)
 	_, err := sendTo(c.client, http.MethodPost, fmt.Sprintf("%s/api/%s/%s", c.addr, profession, name), header, string(body), []int{200})
 	return err
