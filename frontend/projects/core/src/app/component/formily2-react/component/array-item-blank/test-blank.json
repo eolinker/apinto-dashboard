@@ -220,7 +220,7 @@
                     "x-component-props":{
                         "dataFormat":[
                             {"key":"ip", "hideName":true, "placeholder":"请输入IP地址","width":"174px", "required":true},
-                            {"key":"weight" ,"width":"164px"}
+                            {"key":"weight" ,"width":"164px", "type":"number"}
                         ]
                     },
                     "x-reactions": [

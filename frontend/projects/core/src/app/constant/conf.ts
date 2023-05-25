@@ -202,3 +202,10 @@ export const PublishTableBody:EO_TBODY_TYPE[] = [
   }
 
 ]
+
+export const FilterOpts = [
+  { text: '已上线', value: 'GOONLINE' },
+  { text: '待更新', value: 'TOUPDATE' },
+  { text: '已下线', value: 'OFFLINE' },
+  { text: '未上线', value: 'NOTGOONLINE' }
+]
