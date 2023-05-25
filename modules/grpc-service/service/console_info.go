@@ -137,8 +137,9 @@ func (c *consoleInfoService) GetAllServices(ctx context.Context, req *grpc_servi
 	items := make([]*grpc_service.ServicesItem, 0, len(basicInfos))
 	for _, info := range basicInfos {
 		items = append(items, &grpc_service.ServicesItem{
-			Name: info.ID,
-			Desc: info.Description,
+			Name:  info.ID,
+			Title: info.Title,
+			Desc:  info.Description,
 		})
 	}
 	return &grpc_service.ServicesResp{
@@ -154,8 +155,9 @@ func (c *consoleInfoService) GetAllServicesByNames(ctx context.Context, req *grp
 	items := make([]*grpc_service.ServicesItem, 0, len(basicInfos))
 	for _, info := range basicInfos {
 		items = append(items, &grpc_service.ServicesItem{
-			Name: info.ID,
-			Desc: info.Description,
+			Name:  info.ID,
+			Title: info.Title,
+			Desc:  info.Description,
 		})
 	}
 	return &grpc_service.ServicesResp{
