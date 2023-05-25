@@ -29,9 +29,20 @@ export const ArrayItemBlankComponent = React.forwardRef(
                   if (dataFormat[index]?.hideName) {
                     newValue[dataFormat[index].key] = vTmp.split(' ')[index]
                   } else {
-                    const vTmp2 = vTmp?.split(' ')[index]?.split('=')
-                    vTmp2.splice(1)
-                    newValue[dataFormat[index].key] = vTmp2.join('=')
+                    const vTmp2: string | string[] | undefined =
+                      vTmp.indexOf(' ') === -1
+                        ? vTmp
+                        : vTmp.split(' ')[index]
+                        ? vTmp.split(' ')[index].indexOf('=') === -1
+                          ? ''
+                          : vTmp.split(' ')[index].split('=')
+                        : ''
+
+                    if (vTmp2 && vTmp2 instanceof Array && vTmp2.length > 0) {
+                      vTmp2.shift()
+                    }
+                    newValue[dataFormat[index].key] =
+                      vTmp2 instanceof Array ? vTmp2?.join('=') : vTmp2
                   }
                 }
                 return newValue
@@ -115,6 +126,7 @@ export const ArrayItemBlankComponent = React.forwardRef(
                     }}
                     placeholder={data.placeholder || `请输入${data.key}`}
                     status={n.status}
+                    type={data.type || 'text'}
                   />
                 )
               })}

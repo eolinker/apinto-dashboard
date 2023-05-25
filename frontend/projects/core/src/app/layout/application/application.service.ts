@@ -5,6 +5,7 @@ import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { ApplicationData } from './types/types'
 import { ApiService } from '../../service/api.service'
 import { ApplicationPublishComponent } from './publish/publish.component'
+import { FilterOpts } from '../../constant/conf'
 
 @Injectable({
   providedIn: 'root'
@@ -27,7 +28,6 @@ export class EoNgApplicationService {
         this.appDesc = this.appData.desc
       }
       this.loading = false
-      console.log(this)
     })
   }
 
@@ -50,7 +50,16 @@ export class EoNgApplicationService {
       },
       ...(publishList?.length
         ? publishList.map((p) => {
-          return { title: `状态：${p.title}`, tooltip: `状态：${p.title}`, titleString: `状态：${p.title}` }
+          return {
+            title: `状态：${p.title}`,
+            tooltip: `状态：${p.title}`,
+            titleString: `状态：${p.title}`,
+            filterMultiple: true,
+            filterOpts: [...FilterOpts],
+            filterFn: (list: string[], item: any) => {
+              return list.some((name) => item.data[`cluster_${p.name}`] === name)
+            }
+          }
         })
         : []),
       {

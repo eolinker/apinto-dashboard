@@ -205,10 +205,16 @@ export class ApiManagementListComponent implements OnInit {
     })
   }
 
-  // 过滤器内选择的value变化时的回调
+  // 过滤器内选择的value变化时的回调，仅来源的检索需要调接口
   apisFilterChange (value:any) {
-    this.apisForm.sourceIds = value.keys
-    this.getApisData()
+    if (value.col.title === '来源') {
+      this.apisForm.sourceIds = value.keys
+      this.sourcesList.map((source:any) => {
+        source.byDefault = value.keys.indexOf(source.value) !== -1
+        return source
+      })
+      this.getApisData()
+    }
   }
 
   modalRef:NzModalRef|undefined
