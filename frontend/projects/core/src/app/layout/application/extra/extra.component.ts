@@ -44,7 +44,6 @@ export class ApplicationExtraComponent {
     if (!this.appId) {
       this.router.navigate(['/', 'application'])
     }
-    console.log(this)
   }
 
   initTable () {
@@ -75,7 +74,6 @@ export class ApplicationExtraComponent {
       nzOkDisabled: this.nzDisabled,
       nzOnOk: (component: ApplicationExtraFormComponent) => {
         const param = [...this.service.appData!.params as ApplicationParamData[]]
-        console.log(param, component)
         return new Promise((resolve, reject) => {
           if (component.validateParamForm.valid) {
             if (data) {

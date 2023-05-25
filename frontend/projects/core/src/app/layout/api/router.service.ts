@@ -4,6 +4,7 @@ import { ApiPluginTemplateListComponent } from './plugin/list/list.component'
 import { THEAD_TYPE } from 'eo-ng-table'
 import { ApiManagementListComponent } from './api-list/list/list.component'
 import { ApiPublishComponent } from './api-list/publish/single/publish.component'
+import { FilterOpts } from '../../constant/conf'
 
 @Injectable({
   providedIn: 'root'
@@ -41,7 +42,16 @@ export class RouterService {
       },
       ...(publishList?.length
         ? publishList.map((p) => {
-          return { title: `状态：${p.title}`, tooltip: `状态：${p.title}`, titleString: `状态：${p.title}` }
+          return {
+            title: `状态：${p.title}`,
+            tooltip: `状态：${p.title}`,
+            titleString: `状态：${p.title}`,
+            filterMultiple: true,
+            filterOpts: [...FilterOpts],
+            filterFn: (list: string[], item: any) => {
+              return list.some((name) => item.data[`cluster_${p.name}`] === name)
+            }
+          }
         })
         : []),
       {
