@@ -263,7 +263,6 @@ export class ApplicationCreateComponent implements OnInit {
 
   editApplication () {
     this.saveApplication().subscribe((resp) => {
-      console.log(resp)
     })
   }
 

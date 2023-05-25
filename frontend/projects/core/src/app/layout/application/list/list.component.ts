@@ -203,7 +203,6 @@ export class ApplicationManagementListComponent implements OnInit {
   }
 
   editData (value:any) {
-    console.log(value)
     this.router.navigate(['/', 'application', 'content', value.data.id, 'message'])
   }
 
