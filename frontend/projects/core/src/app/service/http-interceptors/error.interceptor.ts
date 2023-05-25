@@ -10,7 +10,7 @@ import {
 import { tap, Observable } from 'rxjs'
 import { Router } from '@angular/router'
 import { NzModalService } from 'ng-zorro-antd/modal'
-import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
+import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feedback'
 import { EoNgNavigationService } from '../eo-ng-navigation.service'
 
 @Injectable()
@@ -19,6 +19,7 @@ export class ErrorInterceptor implements HttpInterceptor {
     private router: Router,
     private navigationService: EoNgNavigationService,
     private modalService:NzModalService,
+    private eoModalService:EoNgFeedbackModalService,
     private message: EoNgFeedbackMessageService) {}
 
   intercept (request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
@@ -59,6 +60,7 @@ export class ErrorInterceptor implements HttpInterceptor {
     switch (code) {
       case -2:
         this.modalService.closeAll()
+        this.eoModalService.closeAll()
         this.openAccessModal()
         break
       case -3:
@@ -69,8 +71,12 @@ export class ErrorInterceptor implements HttpInterceptor {
         }, 1000)
         break
       case -7:
+        this.eoModalService.closeAll()
+        this.modalService.closeAll()
         setTimeout(() => {
-          this.router.navigate(['/', 'auth'])
+          if (!responseBody.url.includes('create_check')) {
+            this.router.navigate(['/', 'auth'])
+          }
         }, 1000)
         break
       default:

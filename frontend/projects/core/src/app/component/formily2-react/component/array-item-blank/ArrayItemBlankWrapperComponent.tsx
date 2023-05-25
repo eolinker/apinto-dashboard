@@ -30,9 +30,7 @@ export class ArrayItemBlankWrapperComponent {
 
   @Input() properties: any = {}
 
-  ngOnInit() {
-    console.log(this)
-  }
+  ngOnInit() {}
 
   ngOnChanges(): void {
     this.render()

@@ -48,6 +48,8 @@
     </div>
   </ng-template>
   <div [ngClass]="{ 'mb-formTop': showTopBlank }">
-    <router-outlet></router-outlet>
+    <nz-spin [nzSpinning]="service.loading">
+      <router-outlet></router-outlet>
+    </nz-spin>
   </div>
 </div>
