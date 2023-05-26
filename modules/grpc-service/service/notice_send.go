@@ -76,19 +76,22 @@ func (n *noticeSendService) Send(ctx context.Context, req *grpc_service.NoticeSe
 
 	for channelUuid, noticeMsg := range req.Notices {
 		//利用协程快速发送通知消息
+		channelID := channelUuid
+		title := noticeMsg.Title
+		msg := noticeMsg.Msg
 		noticeErrGroup.Go(func() error {
-			noticeChannelDriver := n.noticeChannelDriver.GetDriver(channelUuid)
+			noticeChannelDriver := n.noticeChannelDriver.GetDriver(channelID)
 			if noticeChannelDriver == nil {
-				log.Errorf("获取不到通知渠道 渠道uuid：%s", channelUuid)
+				log.Errorf("获取不到通知渠道 渠道uuid：%s", channelID)
 				return errors.New("渠道通知获取失败")
 			}
 			sendMsgErrorUuid := uuid.New()
 			sendMsgError := &SendMsgError{
 				UUID:              sendMsgErrorUuid,
-				NoticeChannelUUID: channelUuid,
+				NoticeChannelUUID: channelID,
 			}
 
-			if channel, ok := noticeChannelMap[channelUuid]; ok {
+			if channel, ok := noticeChannelMap[channelID]; ok {
 				sends := make([]string, 0)
 				if channel.Type == 2 {
 					if len(userEmailStr) == 0 {
@@ -108,10 +111,10 @@ func (n *noticeSendService) Send(ctx context.Context, req *grpc_service.NoticeSe
 					}
 					sends = noticeUserId
 				}
-				if err = noticeChannelDriver.SendTo(sends, noticeMsg.Title, noticeMsg.Msg); err != nil {
+				if err = noticeChannelDriver.SendTo(sends, title, msg); err != nil {
 					sendMsgError.Msg = err.Error()
 					sendMsgErrors = append(sendMsgErrors, sendMsgError)
-					log.Errorf("告警消息发送失败 sendMsgErrorUuid=%s channelUuid=%s users=%v err=%s", sendMsgErrorUuid, channelUuid, sends, err.Error())
+					log.Errorf("告警消息发送失败 sendMsgErrorUuid=%s channelUuid=%s users=%v err=%s", sendMsgErrorUuid, channelID, sends, err.Error())
 					atomic.AddInt64(sendFail, 1)
 					return err
 				}
