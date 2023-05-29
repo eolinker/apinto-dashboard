@@ -541,7 +541,7 @@ func (a *apiService) GetAPIVersionInfo(ctx context.Context, namespaceID int, uui
 
 func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator int, input *api_dto.APIInfo) error {
 
-	if err := a.CheckAPIReduplicative(ctx, namespaceID, "", input); err != nil {
+	if err := a.CheckAPIReduplicative(ctx, namespaceID, input.UUID, input); err != nil {
 		return err
 	}
 
@@ -583,9 +583,13 @@ func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator in
 		templateID = templateInfo.Id
 	}
 
-	return a.apiStore.Transaction(ctx, func(txCtx context.Context) error {
-		t := time.Now()
-		apiInfo := &apientry.API{
+	t := time.Now()
+	apiInfo, err := a.apiStore.GetByUUID(ctx, namespaceID, input.UUID)
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return err
+	}
+	if apiInfo == nil {
+		apiInfo = &apientry.API{
 			NamespaceId:      namespaceID,
 			UUID:             input.UUID,
 			GroupUUID:        input.GroupUUID,
@@ -603,6 +607,20 @@ func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator in
 			CreateTime:       t,
 			UpdateTime:       t,
 		}
+	} else {
+		apiInfo.GroupUUID = input.GroupUUID
+		apiInfo.Scheme = input.Scheme
+		apiInfo.Name = input.ApiName
+		apiInfo.IsDisable = input.IsDisable
+		apiInfo.RequestPath = input.RequestPath
+		apiInfo.RequestPathLabel = input.RequestPathLabel
+		apiInfo.Version = common.GenVersion(t)
+		apiInfo.Desc = input.Desc
+		apiInfo.Operator = operator
+		apiInfo.UpdateTime = t
+	}
+
+	return a.apiStore.Transaction(ctx, func(txCtx context.Context) error {
 		if err = a.apiStore.Save(txCtx, apiInfo); err != nil {
 			return err
 		}
@@ -656,6 +674,11 @@ func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator in
 		//更新所引用的插件模板
 		if templateID != 0 {
 			err = a.quoteStore.Set(txCtx, apiInfo.Id, quote_entry.QuoteKindTypeAPI, quote_entry.QuoteTargetKindTypePluginTemplate, templateID)
+			if err != nil {
+				return err
+			}
+		} else {
+			err = a.quoteStore.DelSourceTarget(txCtx, apiInfo.Id, quote_entry.QuoteKindTypeAPI, quote_entry.QuoteTargetKindTypePluginTemplate)
 			if err != nil {
 				return err
 			}
