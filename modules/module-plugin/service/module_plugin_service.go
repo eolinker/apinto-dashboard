@@ -228,6 +228,7 @@ func (m *modulePluginService) GetPluginEnableRender(ctx context.Context, pluginU
 
 	switch pluginInfo.Driver {
 	case pluginDriverRemote:
+		//忽略Header
 	case pluginDriverLocal:
 		renderCfg.Headers = pluginDefine.Headers
 		//renderCfg.Invisible = localDefine.Invisible
