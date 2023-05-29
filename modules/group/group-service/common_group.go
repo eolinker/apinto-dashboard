@@ -444,10 +444,10 @@ func (c *commonGroupService) SubGroupUUIDS(groups map[int][]*group_entry.CommonG
 	}
 }
 
-func (c *commonGroupService) CreateGroup(ctx context.Context, namespaceId, operator int, groupType, tagName, groupName, uuidStr, parentUuid string) (int, error) {
+func (c *commonGroupService) CreateGroup(ctx context.Context, namespaceId, operator int, groupType, tagName, groupName, uuidStr, parentUuid string) (string, error) {
 	tagId := c.getTagId(ctx, namespaceId, groupType, tagName)
 	if tagId == -1 {
-		return 0, errors.New("params error")
+		return "", errors.New("params error")
 	}
 	t := time.Now()
 	var err error
@@ -456,7 +456,7 @@ func (c *commonGroupService) CreateGroup(ctx context.Context, namespaceId, opera
 	if parentUuid != "" {
 		parentServiceGroup, err = c.commonGroupStore.GetByUUID(ctx, parentUuid)
 		if err != nil && err != gorm.ErrRecordNotFound {
-			return 0, err
+			return "", err
 		}
 	}
 
@@ -468,10 +468,10 @@ func (c *commonGroupService) CreateGroup(ctx context.Context, namespaceId, opera
 	// 判断要创建的目录下有没有重名的， 有则返回报错
 	isRepeated, err := c.CheckGroupNameReduplicated(ctx, groupName, parentId)
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 	if isRepeated {
-		return 0, fmt.Errorf("groupName %s is reduplicated. ", groupName)
+		return "", fmt.Errorf("groupName %s is reduplicated. ", groupName)
 	}
 
 	if uuidStr == "" {
@@ -480,7 +480,7 @@ func (c *commonGroupService) CreateGroup(ctx context.Context, namespaceId, opera
 
 	maxSort, err := c.commonGroupStore.GetMaxSort(ctx, namespaceId, groupType, tagId, parentId)
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 	groupInfo := &group_entry.CommonGroup{
 		Uuid:        uuidStr,
@@ -502,10 +502,10 @@ func (c *commonGroupService) CreateGroup(ctx context.Context, namespaceId, opera
 	})
 	err = c.commonGroupStore.Save(ctx, groupInfo)
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 
-	return groupInfo.Id, nil
+	return uuidStr, nil
 
 }
 
