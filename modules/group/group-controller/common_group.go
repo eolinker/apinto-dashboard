@@ -169,3 +169,32 @@ func (c *commonGroupController) CreateGroup(ginCtx *gin.Context) {
 	data["uuid"] = uuid
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
+
+func (c *commonGroupController) CheckGroupExist(ginCtx *gin.Context) {
+	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
+	groupType := ginCtx.Param("group_type")
+
+	input := &group_dto.CommonGroupCheckExist{}
+	if err := ginCtx.BindJSON(input); err != nil {
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
+		return
+	}
+
+	groupInfo, err := c.commonGroupService.GetGroupByName(ginCtx, namespaceId, groupType, input.Name, input.ParentUuid)
+	if err != nil {
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
+		return
+	}
+
+	data := common.Map{}
+	info := &group_dto.CommonGroupCheckExistOutput{
+		IsExist: false,
+		UUID:    "",
+	}
+	if groupInfo != nil {
+		info.IsExist = true
+		info.UUID = groupInfo.Uuid
+	}
+	data["info"] = info
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
+}
