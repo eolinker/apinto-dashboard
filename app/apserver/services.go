@@ -19,6 +19,7 @@ import (
 	_ "github.com/eolinker/apinto-dashboard/modules/plugin/plugin-service"
 	_ "github.com/eolinker/apinto-dashboard/modules/plugin_template/plugin-template-service"
 	_ "github.com/eolinker/apinto-dashboard/modules/random/random-service"
+	_ "github.com/eolinker/apinto-dashboard/modules/remote_storage/service"
 	_ "github.com/eolinker/apinto-dashboard/modules/strategy/strategy-service"
 	_ "github.com/eolinker/apinto-dashboard/modules/user/user-service"
 	_ "github.com/eolinker/apinto-dashboard/modules/variable/variable-service"
