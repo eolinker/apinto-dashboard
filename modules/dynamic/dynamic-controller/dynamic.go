@@ -3,6 +3,7 @@ package dynamic_controller
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/eolinker/apinto-dashboard/common"
 	"net/http"
 	"strconv"
 
@@ -314,12 +315,14 @@ func (c *dynamicController) create(ctx *gin.Context) {
 		return
 	}
 	body, _ := json.Marshal(worker.Append)
-	err = c.dynamicService.Create(ctx, namespaceID, c.Profession, c.moduleName, c.Skill, worker.Title, worker.Id, worker.Driver, worker.Description, string(body), users.GetUserId(ctx), c.Depends...)
+	sourceName, err := c.dynamicService.Create(ctx, namespaceID, c.Profession, c.moduleName, c.Skill, worker.Title, worker.Id, worker.Driver, worker.Description, string(body), users.GetUserId(ctx), c.Depends...)
 	if err != nil {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
 		return
 	}
-	ctx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
+	data := common.Map{}
+	data["source_name"] = sourceName
+	ctx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
 
 func (c *dynamicController) save(ctx *gin.Context) {
