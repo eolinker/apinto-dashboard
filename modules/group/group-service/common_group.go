@@ -520,15 +520,33 @@ func (c *commonGroupService) IsGroupExist(ctx context.Context, uuid string) (boo
 	return true, nil
 }
 
-func (c *commonGroupService) GetGroupByName(ctx context.Context, groupName string, parentID int) (*group_entry.CommonGroup, error) {
-	list, err := c.commonGroupStore.GetByNameParentID(ctx, groupName, parentID)
+func (c *commonGroupService) GetGroupByName(ctx context.Context, namespaceId int, groupType string, groupName string, parentUUID string) (*group_model.CommonGroupBasic, error) {
+	parentID := 0
+	if parentUUID != "" {
+		parentInfo, err := c.commonGroupStore.GetByUUID(ctx, parentUUID)
+		if err != nil && err != gorm.ErrRecordNotFound {
+			return nil, err
+		}
+		if parentInfo != nil {
+			parentID = parentInfo.ParentId
+		}
+	}
+	groupInfo, err := c.commonGroupStore.GetByTypeNameParent(ctx, 0, groupType, groupName, parentID)
 	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
 		return nil, err
 	}
-	if len(list) == 0 {
-		return nil, gorm.ErrRecordNotFound
-	}
-	return list[0], nil
+
+	return &group_model.CommonGroupBasic{
+		Uuid:     groupInfo.Uuid,
+		Type:     groupInfo.Type,
+		TagID:    groupInfo.TagID,
+		Name:     groupInfo.Name,
+		ParentId: groupInfo.ParentId,
+		Sort:     groupInfo.Sort,
+	}, nil
 }
 
 // CheckGroupNameReduplicated 检测分组名是否重复
