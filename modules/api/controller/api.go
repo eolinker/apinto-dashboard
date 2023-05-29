@@ -704,3 +704,21 @@ func (a *apiController) importAPI(ginCtx *gin.Context) {
 
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
+
+func (a *apiController) checkApiExist(ginCtx *gin.Context) {
+	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
+	uuid := ginCtx.Query("uuid")
+	apiInfo, err := a.apiService.GetAPIInfo(ginCtx, namespaceID, uuid)
+	if err != nil {
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("CheckApiExist fail. err: %s. ", err))
+		return
+	}
+
+	isExist := false
+	if apiInfo != nil {
+		isExist = true
+	}
+	data := common.Map{}
+	data["is_exist"] = isExist
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
+}
