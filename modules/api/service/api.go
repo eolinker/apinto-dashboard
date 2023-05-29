@@ -341,6 +341,9 @@ func (a *apiService) GetAPIList(ctx context.Context, namespaceID int, groupUUID,
 func (a *apiService) GetAPIInfo(ctx context.Context, namespaceID int, uuid string) (*apimodel.APIInfo, error) {
 	api, err := a.apiStore.GetByUUID(ctx, namespaceID, uuid)
 	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
 		log.Errorf("GetAPIInfo-apiStore.GetByUUID namespaceId:%d,uuid:%s,err=%s", namespaceID, uuid, err.Error())
 		return nil, err
 	}
