@@ -1,6 +1,7 @@
 package group_controller
 
 import (
+	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/controller/users"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
@@ -158,10 +159,13 @@ func (c *commonGroupController) CreateGroup(ginCtx *gin.Context) {
 		return
 	}
 
-	if _, err := c.commonGroupService.CreateGroup(ginCtx, namespaceId, operator, groupType, tagName, input.Name, input.UUID, input.ParentUUID); err != nil {
+	uuid, err := c.commonGroupService.CreateGroup(ginCtx, namespaceId, operator, groupType, tagName, input.Name, input.UUID, input.ParentUUID)
+	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
+	data := common.Map{}
+	data["uuid"] = uuid
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }

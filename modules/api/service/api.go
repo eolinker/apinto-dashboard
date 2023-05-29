@@ -539,30 +539,30 @@ func (a *apiService) GetAPIVersionInfo(ctx context.Context, namespaceID int, uui
 	return info, nil
 }
 
-func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator int, input *api_dto.APIInfo) error {
-
-	if err := a.CheckAPIReduplicative(ctx, namespaceID, input.UUID, input); err != nil {
-		return err
+func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator int, input *api_dto.APIInfo) (string, error) {
+	uid := input.UUID
+	if err := a.CheckAPIReduplicative(ctx, namespaceID, uid, input); err != nil {
+		return "", err
 	}
 
-	if input.UUID == "" {
-		input.UUID = uuid.New()
+	if uid == "" {
+		uid = uuid.New()
 	}
 
-	input.UUID = strings.ToLower(input.UUID)
+	uid = strings.ToLower(uid)
 
 	//编写日志操作对象信息
 	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
-		Uuid: input.UUID,
+		Uuid: uid,
 		Name: input.ApiName,
 	})
 
 	isExist, err := a.commonGroup.IsGroupExist(ctx, input.GroupUUID)
 	if err != nil {
-		return err
+		return "", err
 	}
 	if !isExist {
-		return fmt.Errorf("group doesn't. group_uuid:%s ", input.GroupUUID)
+		return "", fmt.Errorf("group doesn't. group_uuid:%s ", input.GroupUUID)
 	}
 	idx := strings.LastIndex(input.ServiceName, "@")
 	service := input.ServiceName
@@ -571,27 +571,27 @@ func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator in
 	}
 	serviceID, err := a.dynamicService.GetIDByName(ctx, namespaceID, professionService, service)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	var templateID int
 	if input.TemplateUUID != "" {
 		templateInfo, err := a.pluginTemplateService.GetByUUID(ctx, namespaceID, input.TemplateUUID)
 		if err != nil {
-			return err
+			return "", err
 		}
 		templateID = templateInfo.Id
 	}
 
 	t := time.Now()
-	apiInfo, err := a.apiStore.GetByUUID(ctx, namespaceID, input.UUID)
+	apiInfo, err := a.apiStore.GetByUUID(ctx, namespaceID, uid)
 	if err != nil && err != gorm.ErrRecordNotFound {
-		return err
+		return "", err
 	}
 	if apiInfo == nil {
 		apiInfo = &apientry.API{
 			NamespaceId:      namespaceID,
-			UUID:             input.UUID,
+			UUID:             uid,
 			GroupUUID:        input.GroupUUID,
 			Scheme:           input.Scheme,
 			Name:             input.ApiName,
@@ -620,7 +620,7 @@ func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator in
 		apiInfo.UpdateTime = t
 	}
 
-	return a.apiStore.Transaction(ctx, func(txCtx context.Context) error {
+	return uid, a.apiStore.Transaction(ctx, func(txCtx context.Context) error {
 		if err = a.apiStore.Save(txCtx, apiInfo); err != nil {
 			return err
 		}

@@ -281,13 +281,15 @@ func (a *apiController) create(ginCtx *gin.Context) {
 		return
 	}
 
-	err := a.apiService.CreateAPI(ginCtx, namespaceId, userId, input)
+	uuid, err := a.apiService.CreateAPI(ginCtx, namespaceId, userId, input)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("创建API失败. err:%s", err.Error()))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
+	data := common.Map{}
+	data["uuid"] = uuid
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
 
 // alter 修改
