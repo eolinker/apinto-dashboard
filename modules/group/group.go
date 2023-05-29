@@ -8,7 +8,7 @@ import (
 )
 
 type ICommonGroupService interface {
-	CreateGroup(ctx context.Context, namespaceId, operator int, groupType, tagName, groupName, uuid, parentUuid string) (int, error)
+	CreateGroup(ctx context.Context, namespaceId, operator int, groupType, tagName, groupName, uuidStr, parentUuid string) (string, error)
 	UpdateGroup(ctx context.Context, namespaceId int, operator int, groupType, name, uuid string) error
 	DeleteGroup(ctx context.Context, namespaceId int, operator int, groupType, uuid string) error
 	GroupList(ctx context.Context, namespaceId int, groupType, tagName, parentUuid, queryName string) (*group_model.CommonGroupRoot, []*group_model.CommonGroupApi, error)
