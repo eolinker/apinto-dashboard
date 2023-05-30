@@ -33,6 +33,7 @@ type PluginEnableInfo struct {
 
 type PluginEnableRender struct {
 	Internet     bool
+	Server       string //define里的server
 	NameConflict bool
 	//Invisible  bool
 	Headers    []ExtendParamsRender

@@ -151,6 +151,11 @@ func (p *modulePluginController) getEnableInfo(ginCtx *gin.Context) {
 		return
 	}
 
+	//第一次启动时需要配置server, 则显示插件配置define里的server
+	enableServer := info.Server
+	if enableServer == "" && render.Server != "" && render.Internet {
+		enableServer = render.Server
+	}
 	infoHeader := make([]dto.ExtendParams, 0, len(info.Header))
 	infoQuery := make([]dto.ExtendParams, 0, len(info.Query))
 	infoInitialize := make([]dto.ExtendParams, 0, len(info.Initialize))
@@ -174,7 +179,7 @@ func (p *modulePluginController) getEnableInfo(ginCtx *gin.Context) {
 	}
 	enableInfo := &dto.PluginEnableInfo{
 		Name:       info.Name,
-		Server:     info.Server,
+		Server:     enableServer,
 		Header:     infoHeader,
 		Query:      infoQuery,
 		Initialize: infoInitialize,
