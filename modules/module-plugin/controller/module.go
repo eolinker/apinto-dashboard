@@ -1,8 +1,8 @@
 package controller
 
 import (
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
 	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
-	apinto_module "github.com/eolinker/apinto-module"
 	"net/http"
 )
 
@@ -23,6 +23,26 @@ func (c *ModulePluginDriver) CheckConfig(name string, config interface{}) error 
 
 func (c *ModulePluginDriver) CreatePlugin(define interface{}) (apinto_module.Plugin, error) {
 	return c, nil
+}
+
+func (c *ModulePluginDriver) GetPluginFrontend(moduleName string) string {
+	return "module-plugin"
+}
+
+func (c *ModulePluginDriver) IsPluginVisible() bool {
+	return true
+}
+
+func (c *ModulePluginDriver) IsShowServer() bool {
+	return false
+}
+
+func (c *ModulePluginDriver) IsCanUninstall() bool {
+	return false
+}
+
+func (c *ModulePluginDriver) IsCanDisable() bool {
+	return false
 }
 
 type ModulePluginModule struct {

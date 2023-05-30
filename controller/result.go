@@ -1,13 +1,13 @@
 package controller
 
 const (
-	ordinaryCode            = -1 //常规错误(参数错误、sql错误、业务逻辑错误等)
-	accessCode              = -2 //没有权限
+	OrdinaryCode            = -1 //常规错误(参数错误、sql错误、业务逻辑错误等)
+	AccessCode              = -2 //没有权限
 	CodeLoginInvalid        = -3 //无效token(需要重新登录)
 	CodeLoginUserNoExistent = -4 //找不到用户
 	CodeLoginPwdErr         = -5 //密码错误
 	CodeLoginCodeErr        = -6 //验证校验失败
-	codeCertExceedErr       = -7 //证书过期
+	CodeCertExceedErr       = -7 //证书过期
 )
 
 type Result struct {
@@ -25,7 +25,7 @@ func NewSuccessResult(data interface{}) *Result {
 
 func NewErrorResult(msg string) *Result {
 	return &Result{
-		Code: ordinaryCode,
+		Code: OrdinaryCode,
 		Msg:  msg,
 	}
 }
@@ -40,14 +40,7 @@ func NewResult(Code int, data interface{}, Msg string) *Result {
 
 func NewNoAccessError(msg string) *Result {
 	return &Result{
-		Code: accessCode,
-		Msg:  msg,
-	}
-}
-
-func NewCertExceedError(msg string) *Result {
-	return &Result{
-		Code: codeCertExceedErr,
+		Code: AccessCode,
 		Msg:  msg,
 	}
 }

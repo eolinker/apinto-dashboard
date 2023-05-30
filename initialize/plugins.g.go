@@ -4,6 +4,7 @@ import (
 	"context"
 	"embed"
 	"fmt"
+	"github.com/eolinker/apinto-dashboard/common"
 	"io/fs"
 	"net/http"
 	"path"
@@ -11,8 +12,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/model"
 	"github.com/eolinker/eosc/common/bean"
 	"gopkg.in/yaml.v3"
-
-	"gorm.io/gorm"
 
 	"github.com/eolinker/eosc/log"
 
@@ -25,18 +24,19 @@ var (
 )
 
 type Plugin struct {
-	Id         string `yaml:"id"`
-	Name       string `yaml:"name"`
-	CName      string `yaml:"cname"`
-	Resume     string `yaml:"resume"`
-	Version    string `yaml:"version"`
-	Icon       string `yaml:"icon"`
-	Driver     string `yaml:"driver"`
-	Front      string `yaml:"front"`
-	Navigation string `yaml:"navigation"`
-	GroupID    string `yaml:"group_id"`
-	Type       int    `yaml:"type"`
-	Auto       bool   `yaml:"auto"`
+	Id         string      `yaml:"id"`
+	Name       string      `yaml:"name"`
+	CName      string      `yaml:"cname"`
+	Resume     string      `yaml:"resume"`
+	Version    string      `yaml:"version"`
+	Icon       string      `yaml:"icon"`
+	Driver     string      `yaml:"driver"`
+	Front      string      `yaml:"front"`
+	Navigation string      `yaml:"navigation"`
+	GroupID    string      `yaml:"group_id"`
+	Type       int         `yaml:"type"`
+	Auto       bool        `yaml:"auto"`
+	Define     interface{} `yaml:"define"`
 }
 
 func InitPlugins() error {
@@ -48,6 +48,14 @@ func InitPlugins() error {
 	if err != nil {
 		return err
 	}
+
+	innerPlugins, err := service.GetInnerPluginList(ctx)
+	if err != nil {
+		return err
+	}
+	innerPluginsMap := common.SliceToMap(innerPlugins, func(t *model.ModulePluginInfo) string {
+		return t.UUID
+	})
 	for _, p := range plugins {
 		//TODO 校验内置插件
 
@@ -64,25 +72,24 @@ func InitPlugins() error {
 			GroupID:    p.GroupID,
 			Type:       p.Type,
 			Auto:       p.Auto,
+			Define:     p.Define,
 		}
 
-		pluginInfo, err := service.GetPluginInfo(ctx, p.Id)
-		if err != nil {
-			if err != gorm.ErrRecordNotFound {
-				return err
-			}
+		pluginInfo, has := innerPluginsMap[p.Id]
+		if !has {
 			// 插入安装记录
 			err = service.InstallInnerPlugin(ctx, pluginCfg)
 			if err != nil {
 				return err
 			}
 			continue
-		}
-		//判断version有没改变，有则更新
-		if pluginInfo.Version != p.Version {
-			err = service.UpdateInnerPlugin(ctx, pluginCfg)
-			if err != nil {
-				return err
+		} else {
+			//判断version有没改变，有则更新
+			if pluginInfo.Version != p.Version {
+				err = service.UpdateInnerPlugin(ctx, pluginCfg)
+				if err != nil {
+					return err
+				}
 			}
 		}
 	}
@@ -113,7 +120,7 @@ func loadPlugins(dir string, target string) ([]*Plugin, error) {
 			p := new(Plugin)
 			err = yaml.Unmarshal(s, p)
 			if err != nil {
-				log.Errorf("parse file(%s) error: %w")
+				log.Errorf("parse file(%s) error: %v", nextFile, err)
 				return nil, err
 			}
 			plugins = append(plugins, p)

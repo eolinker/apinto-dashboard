@@ -1,7 +1,7 @@
 package strategy_controller
 
 import (
-	"github.com/eolinker/apinto-dashboard/enum"
+	"github.com/eolinker/apinto-dashboard/modules/strategy/config"
 	strategy_entry "github.com/eolinker/apinto-dashboard/modules/strategy/strategy-entry"
 	strategy_model "github.com/eolinker/apinto-dashboard/modules/strategy/strategy-model"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-service"
@@ -9,7 +9,7 @@ import (
 )
 
 func newStrategyVisitController() *strategyController[strategy_entry.StrategyVisitConfig, strategy_model.VisitInfoOutputConf] {
-	strategyService := strategy_service.NewStrategyService(strategy_handler.NewStrategyVisitHandler("strategy-visit"), enum.StrategyVisitRuntimeKind)
+	strategyService := strategy_service.NewStrategyService(strategy_handler.NewStrategyVisitHandler("strategy-visit"), config.StrategyVisitRuntimeKind)
 
 	c := newStrategyController(strategyService)
 	return c

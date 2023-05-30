@@ -1,59 +1,91 @@
 package application_controller
 
 import (
-	"github.com/eolinker/apinto-module"
+	module "github.com/eolinker/apinto-dashboard/module"
 )
 
 type PluginDriver struct {
 }
 
-func NewPluginDriver() apinto_module.Driver {
+func NewPluginDriver() module.Driver {
 	return &PluginDriver{}
 }
-func (c *PluginDriver) CreatePlugin(define interface{}) (apinto_module.Plugin, error) {
+func (c *PluginDriver) CreatePlugin(define interface{}) (module.Plugin, error) {
 	return c, nil
 }
 
+func (c *PluginDriver) GetPluginFrontend(moduleName string) string {
+	return "application"
+}
+
+func (c *PluginDriver) IsPluginVisible() bool {
+	return true
+}
+
+func (c *PluginDriver) IsShowServer() bool {
+	return false
+}
+
+func (c *PluginDriver) IsCanUninstall() bool {
+	return false
+}
+
+func (c *PluginDriver) IsCanDisable() bool {
+	return false
+}
+
 // plugin
-func (c *PluginDriver) CreateModule(name string, config interface{}) (apinto_module.Module, error) {
-	return NewClusterModule(name), nil
+func (c *PluginDriver) CreateModule(name string, config interface{}) (module.Module, error) {
+	return NewModule(name), nil
 }
 
 func (c *PluginDriver) CheckConfig(name string, config interface{}) error {
 	return nil
 }
 
-type ClusterModule struct {
-	isInit  bool
-	name    string
-	routers apinto_module.RoutersInfo
+type Module struct {
+	isInit               bool
+	name                 string
+	routers              module.RoutersInfo
+	filterOptionHandlers []module.IFilterOptionHandler
 }
 
-func (c *ClusterModule) Name() string {
+func (c *Module) Name() string {
 	return c.name
 }
 
-func (c *ClusterModule) Support() (apinto_module.ProviderSupport, bool) {
+func (c *Module) Support() (module.ProviderSupport, bool) {
 	return nil, false
 }
 
-func (c *ClusterModule) Routers() (apinto_module.Routers, bool) {
+func (c *Module) Routers() (module.Routers, bool) {
 	return c, true
 }
 
-func (c *ClusterModule) Middleware() (apinto_module.Middleware, bool) {
+func (c *Module) Middleware() (module.Middleware, bool) {
 	return nil, false
 }
 
-func NewClusterModule(name string) *ClusterModule {
-
-	return &ClusterModule{name: name}
+func NewModule(name string) *Module {
+	m := &Module{name: name}
+	m.initFilter()
+	return m
 }
 
-func (c *ClusterModule) RoutersInfo() apinto_module.RoutersInfo {
+func (c *Module) RoutersInfo() module.RoutersInfo {
 	if !c.isInit {
 		c.routers = initRouter(c.name)
 		c.isInit = true
 	}
 	return c.routers
+}
+
+func (c *Module) FilterOptionHandler() []module.IFilterOptionHandler {
+	return c.filterOptionHandlers
+}
+
+func (c *Module) initFilter() {
+	c.filterOptionHandlers = []module.IFilterOptionHandler{
+		newFilterOption(),
+	}
 }

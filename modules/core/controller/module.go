@@ -3,57 +3,25 @@ package controller
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
-	namespace_controller "github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
-	apinto_module "github.com/eolinker/apinto-module"
 	"github.com/eolinker/eosc/common/bean"
+
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
+	namespace_controller "github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
+	notice_controller "github.com/eolinker/apinto-dashboard/modules/notice/controller"
 	"github.com/gin-gonic/gin"
 )
 
 var (
-	_ apinto_module.Driver = (*Plugin)(nil)
-	_ apinto_module.Plugin = (*Plugin)(nil)
 	_ apinto_module.Module = (*Module)(nil)
 )
 
-type Plugin struct {
-	middlewareHandler []apinto_module.MiddlewareHandler
-	providers         apinto_module.IProviders
-}
-
-func NewCoreDriver() *Plugin {
-
-	middlewareHandler := []apinto_module.MiddlewareHandler{
-		{
-			Name:    "namespace",
-			Rule:    apinto_module.MiddlewareRule(apinto_module.RouterLabelApi),
-			Handler: namespace_controller.MustNamespace,
-		},
-	}
-	p := &Plugin{
-		middlewareHandler: middlewareHandler,
-	}
-
-	bean.Autowired(&p.providers)
-	return p
-}
-
-func (p *Plugin) CreateModule(name string, config interface{}) (apinto_module.Module, error) {
-	return p.NewModule(name), nil
-}
-
-func (p *Plugin) CheckConfig(name string, config interface{}) error {
-	return nil
-}
-
-func (p *Plugin) CreatePlugin(define interface{}) (apinto_module.Plugin, error) {
-	return p, nil
-}
-
 type Module struct {
-	name              string
 	middlewareHandler []apinto_module.MiddlewareHandler
 	routers           apinto_module.RoutersInfo
+
+	providers apinto_module.IProviders
 }
 
 func (m *Module) RoutersInfo() apinto_module.RoutersInfo {
@@ -65,7 +33,7 @@ func (m *Module) MiddlewaresInfo() []apinto_module.MiddlewareHandler {
 }
 
 func (m *Module) Name() string {
-	return m.name
+	return "core"
 }
 
 func (m *Module) Routers() (apinto_module.Routers, bool) {
@@ -79,39 +47,146 @@ func (m *Module) Middleware() (apinto_module.Middleware, bool) {
 func (m *Module) Support() (apinto_module.ProviderSupport, bool) {
 	return nil, false
 }
-func (p *Plugin) provider(context *gin.Context) {
-	name := context.Param("name")
 
-	provider, ok := p.providers.Provider(name)
+func (m *Module) provider(context *gin.Context) {
+	skill := context.Param("skill")
+	namespaceID := namespace_controller.GetNamespaceId(context)
+	provider, ok := m.providers.Provider(skill)
 	if !ok {
 		context.JSON(200, struct {
 			Code string `json:"code"`
 			Msg  string `json:"msg"`
 		}{
-			"200", fmt.Sprintf("not support data for %s", name),
+			"200", fmt.Sprintf("not support data for %s", skill),
 		})
+		return
 	}
-	cargos := provider.Provide()
+	cargos := provider.Provide(namespaceID)
 	result := make([]*apinto_module.CargoItem, 0, len(cargos))
 	for _, c := range cargos {
 		result = append(result, c.Export())
 	}
 	context.JSON(200, map[string]interface{}{
-		"code": "00000",
+		"code": 0,
 		"data": map[string]interface{}{
-			name: result,
+			skill: result,
 		},
 	})
 
 }
-func (p *Plugin) NewModule(name string) *Module {
 
+func (m *Module) enum(context *gin.Context) {
+	skill := context.Param("skill")
+	namespaceID := namespace_controller.GetNamespaceId(context)
+	provider, ok := m.providers.Provider(skill)
+	if !ok {
+		context.JSON(200, struct {
+			Code string `json:"code"`
+			Msg  string `json:"msg"`
+		}{
+			"200", fmt.Sprintf("not support data for %s", skill),
+		})
+		return
+	}
+	cargos := provider.Provide(namespaceID)
+	result := make([]*apinto_module.CargoItem, 0, len(cargos))
+	for _, c := range cargos {
+		export := c.Export()
+		index := strings.LastIndex(export.Value, "@")
+		if index > 0 {
+			export.Value = export.Value[:index]
+		}
+		result = append(result, export)
+	}
+	context.JSON(200, map[string]interface{}{
+		"code": 0,
+		"data": map[string]interface{}{
+			skill: result,
+		},
+	})
+}
+
+func (m *Module) status(context *gin.Context) {
+	key := context.Query("name")
+	if key == "" {
+		context.JSON(200, struct {
+			Code string `json:"code"`
+			Msg  string `json:"msg"`
+		}{
+			"200", "empty name",
+		})
+		return
+	}
+	cluster := context.Query("cluster")
+	if key == "" {
+		context.JSON(200, struct {
+			Code string `json:"code"`
+			Msg  string `json:"msg"`
+		}{
+			"200", "empty cluster",
+		})
+		return
+	}
+
+	namespaceID := namespace_controller.GetNamespaceId(context)
+
+	status, _ := m.providers.Status(key, namespaceID, cluster)
+
+	context.JSON(200, map[string]interface{}{
+		"code": 0,
+		"data": map[string]interface{}{
+			"status": status,
+		},
+	})
+
+}
+func NewModule() *Module {
+	userController := newUserController()
+	middlewareHandler := []apinto_module.MiddlewareHandler{
+		{
+			Name:    "namespace",
+			Rule:    apinto_module.MiddlewareRule(apinto_module.RouterLabelApi),
+			Handler: namespace_controller.MustNamespace,
+		},
+		{
+			Name:        "login-module",
+			Rule:        apinto_module.MiddlewareRule(apinto_module.RouterLabelModule),
+			Handler:     userController.LoginCheckModule,
+			Replaceable: true,
+		}, {
+			Name:        "login-api",
+			Rule:        apinto_module.MiddlewareRule(apinto_module.RouterLabelApi),
+			Handler:     userController.LoginCheckApi,
+			Replaceable: true,
+		}, {
+			Name:    "userID",
+			Rule:    apinto_module.MiddlewareRule(apinto_module.RouterLabelApi),
+			Handler: userController.SetUser,
+		},
+	}
+	m := &Module{
+
+		middlewareHandler: middlewareHandler,
+	}
 	routers := apinto_module.RoutersInfo{
 		{
 			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("/api/common/provider/:name"),
+			Path:        fmt.Sprintf("/api/common/provider/:skill"),
 			Handler:     "core.provider",
-			HandlerFunc: []apinto_module.HandlerFunc{p.provider},
+			HandlerFunc: []apinto_module.HandlerFunc{m.provider},
+			Labels:      apinto_module.RouterLabelAssets,
+		},
+		{
+			Method:      http.MethodGet,
+			Path:        fmt.Sprintf("/api/common/status"),
+			Handler:     "core.provider",
+			HandlerFunc: []apinto_module.HandlerFunc{m.status},
+			Labels:      apinto_module.RouterLabelAssets,
+		}, {
+			Method:      http.MethodGet,
+			Path:        fmt.Sprintf("/api/common/enum/:skill"),
+			Handler:     "core.provider",
+			HandlerFunc: []apinto_module.HandlerFunc{m.enum},
 			Labels:      apinto_module.RouterLabelAssets,
 		},
 	}
@@ -129,9 +204,11 @@ func (p *Plugin) NewModule(name string) *Module {
 	systemRouter := newSystem()
 	routers = append(routers, systemRouter.RoutersInfo()...)
 	routers = append(routers, envEnumRouters()...)
-	return &Module{
-		name:              name,
-		middlewareHandler: p.middlewareHandler,
-		routers:           routers,
-	}
+	routers = append(routers, notice_controller.InitRouter()...)
+	routers = append(routers, userRouters()...)
+	routers = append(routers, randomRouters()...)
+	m.routers = routers
+
+	bean.Autowired(&m.providers)
+	return m
 }

@@ -1,8 +1,8 @@
 package application_controller
 
 import (
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
 	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
-	apinto_module "github.com/eolinker/apinto-module"
 	"net/http"
 )
 
@@ -18,8 +18,8 @@ func initRouter(name string) apinto_module.RoutersInfo {
 		{
 			Method:      http.MethodGet,
 			Path:        "/api/application/enum",
-			Handler:     "applications.lists",
-			HandlerFunc: []apinto_module.HandlerFunc{c.lists},
+			Handler:     "applications.enum",
+			HandlerFunc: []apinto_module.HandlerFunc{c.enum},
 		},
 		{
 			Method:      http.MethodPost,
@@ -49,7 +49,7 @@ func initRouter(name string) apinto_module.RoutersInfo {
 			Method:      http.MethodGet,
 			Path:        "/api/application/onlines",
 			Handler:     "applications.onlines",
-			HandlerFunc: []apinto_module.HandlerFunc{c.onlines},
+			HandlerFunc: []apinto_module.HandlerFunc{c.getOnlineInfo},
 		},
 		{
 			Method:      http.MethodPut,
@@ -62,18 +62,6 @@ func initRouter(name string) apinto_module.RoutersInfo {
 			Path:        "/api/application/offline",
 			Handler:     "applications.offline",
 			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypePublish.Handler, c.offline},
-		},
-		{
-			Method:      http.MethodPut,
-			Path:        "/api/application/enable",
-			Handler:     "applications.enable",
-			HandlerFunc: []apinto_module.HandlerFunc{c.enable},
-		},
-		{
-			Method:      http.MethodPut,
-			Path:        "/api/application/disable",
-			Handler:     "applications.disable",
-			HandlerFunc: []apinto_module.HandlerFunc{c.disable},
 		},
 		{
 			Method:      http.MethodGet,
@@ -92,6 +80,12 @@ func initRouter(name string) apinto_module.RoutersInfo {
 			Path:        "/api/application/auth",
 			Handler:     "applications.getAuth",
 			HandlerFunc: []apinto_module.HandlerFunc{c.getAuth},
+		},
+		{
+			Method:      http.MethodGet,
+			Path:        "/api/application/auth/details",
+			Handler:     "applications.getAuthDetails",
+			HandlerFunc: []apinto_module.HandlerFunc{c.getAuthDetails},
 		},
 		{
 			Method:      http.MethodPost,

@@ -80,7 +80,7 @@ describe('LoginComponent test', () => {
     // @ts-ignore
     const spyService = jest.spyOn(component.api, 'checkAuth').mockReturnValue(of({ code: 0, data: { } }))
     // @ts-ignore
-    const spyGetMenuList = jest.spyOn(component.appConfigService, 'getMenuList')
+    const spyGetMenuList = jest.spyOn(component.navigationService, 'getMenuList')
     // @ts-ignore
     const spyMessageSuccess = jest.spyOn(component.message, 'success')
     // @ts-ignore
@@ -101,7 +101,7 @@ describe('LoginComponent test', () => {
     // @ts-ignore
     const spyService = jest.spyOn(component.api, 'checkAuth').mockReturnValue(of({ code: -1, data: { } }))
     // @ts-ignore
-    const spyGetMenuList = jest.spyOn(component.appConfigService, 'getMenuList')
+    const spyGetMenuList = jest.spyOn(component.navigationService, 'getMenuList')
     // @ts-ignore
     const spyMessageSuccess = jest.spyOn(component.message, 'success')
     // @ts-ignore

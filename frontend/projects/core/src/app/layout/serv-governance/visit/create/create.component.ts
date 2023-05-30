@@ -52,7 +52,7 @@ export class VisitCreateComponent implements OnInit {
     private message: EoNgFeedbackMessageService,
     private api: ApiService,
     private fb: UntypedFormBuilder,
-    private appConfigService: EoNgNavigationService,
+    private navigationService: EoNgNavigationService,
     private router:Router
   ) {
     this.validateForm = this.fb.group({
@@ -64,9 +64,9 @@ export class VisitCreateComponent implements OnInit {
       priority: [null, [EoNgMyValidators.priority]],
       continue: [false, [Validators.required]]
     })
-    this.appConfigService.reqFlashBreadcrumb([
-      { title: '访问策略', routerLink: 'serv-governance/visit' },
-      { title: '新建访问策略' }
+    this.navigationService.reqFlashBreadcrumb([
+      { title: 'API访问权限', routerLink: 'serv-governance/visit' },
+      { title: '新建API访问权限策略' }
     ])
   }
 
@@ -94,9 +94,9 @@ export class VisitCreateComponent implements OnInit {
           msg: string
         }) => {
           if (resp.code === 0) {
-            this.appConfigService.reqFlashBreadcrumb([
+            this.navigationService.reqFlashBreadcrumb([
               {
-                title: '访问策略',
+                title: 'API访问权限',
                 routerLink: 'serv-governance/visit'
               },
               { title: resp.data.strategy!.name }

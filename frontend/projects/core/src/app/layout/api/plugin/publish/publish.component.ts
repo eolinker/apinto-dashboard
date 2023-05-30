@@ -34,15 +34,15 @@ export class ApiPluginTemplatePublishComponent implements OnInit {
     private message: EoNgFeedbackMessageService,
     public api:ApiService,
     private router:Router,
-    private appConfigService:EoNgNavigationService,
+    private navigationService:EoNgNavigationService,
     private publishFailModal:PublishFailService) {
-    this.appConfigService.reqFlashBreadcrumb([{ title: '插件模板', routerLink: 'router/plugin' }, { title: '上线管理' }])
+    this.navigationService.reqFlashBreadcrumb([{ title: 'API操作模板', routerLink: 'router/plugin-template' }, { title: '上线管理' }])
   }
 
   ngOnInit (): void {
     this.uuid = this.baseInfo.allParamsInfo.pluginTemplateId
     if (!this.uuid) {
-      this.router.navigate(['/', 'router', 'plugin'])
+      this.router.navigate(['/', 'router', 'plugin-template'])
     }
     this.getClustersData()
   }

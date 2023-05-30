@@ -20,7 +20,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/variable/variable-model"
 	"github.com/eolinker/apinto-dashboard/modules/variable/variable-store"
 	"github.com/eolinker/eosc/common/bean"
-	"github.com/eolinker/eosc/log"
 	"gorm.io/gorm"
 	"sort"
 	"strings"
@@ -761,39 +760,6 @@ func (c *clusterVariableService) Publish(ctx context.Context, namespaceId, userI
 
 		return client.ForVariable().Publish(namespaceInfo.Name, variableMaps)
 	})
-}
-
-func (c *clusterVariableService) ResetOnline(ctx context.Context, namespaceId, clusterId int) {
-	runtime, err := c.variableRuntimeStore.GetForCluster(ctx, clusterId, clusterId)
-	if err != nil {
-		log.Errorf("clusterVariableService-ResetOnline-GetRuntime clusterId=%d,err=%s", clusterId, err.Error())
-		return
-	}
-
-	if runtime.IsOnline {
-		version, err := c.variablePublishVersionStore.Get(ctx, runtime.VersionId)
-		if err != nil {
-			return
-		}
-
-		client, err := c.apintoClient.GetClient(ctx, clusterId)
-		if err != nil {
-			return
-		}
-
-		variableMaps := make(map[string]string)
-		for _, variableInfo := range version.ClusterVariable {
-			variableMaps[variableInfo.Key] = variableInfo.Value
-		}
-
-		namespaceInfo, err := c.namespaceService.GetById(namespaceId)
-		if err != nil {
-			return
-		}
-
-		_ = client.ForVariable().Publish(namespaceInfo.Name, variableMaps)
-
-	}
 }
 
 func (c *clusterVariableService) PublishHistory(ctx context.Context, namespaceId, pageNum, pageSize int, clusterName string) ([]*variable_model.VariablePublish, int, error) {

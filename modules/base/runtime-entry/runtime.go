@@ -5,9 +5,9 @@ import "time"
 // Runtime 正在运行的版本表
 type Runtime struct {
 	Id          int       `gorm:"type:int(11);size:11;not null;auto_increment;primary_key;column:id;comment:主键ID"`
-	ClusterID   int       `gorm:"type:int(11);size:11;not null;column:cluster;dbUniqueIndex:tag_cluster;uniqueIndex:tag_cluster;comment:集群ID"`
-	Kind        string    `gorm:"size:20;not null;index:kind;column:kind;dbUniqueIndex:tag_cluster;uniqueIndex:tag_cluster;comment:类型"`
-	TargetID    int       `gorm:"type:int(11);size:11;default:0;column:target;dbUniqueIndex:tag_cluster;uniqueIndex:tag_cluster;comment:根据type区分是哪个表的ID"`
+	ClusterID   int       `gorm:"type:int(11);size:11;not null;column:cluster;uniqueIndex:tag_cluster;comment:集群ID"`
+	Kind        string    `gorm:"size:20;not null;index:kind;column:kind;uniqueIndex:tag_cluster;comment:类型"`
+	TargetID    int       `gorm:"type:int(11);size:11;default:0;column:target;uniqueIndex:tag_cluster;comment:根据type区分是哪个表的ID"`
 	NamespaceID int       `gorm:"type:int(11);size:11;not null;column:namespace;comment:工作空间"`
 	Version     int       `gorm:"type:int(11);size:11;not null;column:version;comment:版本ID"`
 	IsOnline    bool      `gorm:"type:tinyint(1);size:1;not null;default:1;column:is_online;comment:是否上线"`

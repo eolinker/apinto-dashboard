@@ -77,7 +77,7 @@ import { DeployService } from '../../../../deploy.service'
 })
 export class DeployClusterEnvironmentConfigUpdateComponent implements OnInit {
   @Input() closeModal?:(value?:any)=>void
-  clustersList:Array<{env:string, status:string, name:string, checked:boolean, id:number}>=[]
+  clustersList:Array<{env:string, status:string, name:string, title:string, checked:boolean, id:number}>=[]
   clusterTableHeadName:THEAD_TYPE[] = [...this.service.createClusterEnvUpdateThead(this)]
   clusterTableBody:TBODY_TYPE[] = [...this.service.createClusterEnvUpdateTbody(this)]
   configsTable2HeadName: THEAD_TYPE[] = [...this.service.createClusterEnvUpdate2Thead(this)]
@@ -88,7 +88,7 @@ export class DeployClusterEnvironmentConfigUpdateComponent implements OnInit {
   clusterName:string = ''
 
   // eslint-disable-next-line camelcase
-  updateConfigForm:{clusters:Array<{name:string, env:string, id:number}>, variables:Array<{key:string, value:string, variableId:number, id:number}>}=
+  updateConfigForm:{clusters:Array<{title:string, name:string, env:string, id:number}>, variables:Array<{key:string, value:string, variableId:number, id:number}>}=
       {
         clusters: [],
         variables: []
