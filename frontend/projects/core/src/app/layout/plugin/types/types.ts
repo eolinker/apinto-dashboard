@@ -31,16 +31,19 @@ export type PluginInstallConfigData = {
     desc:string
     title:string
     placeholder:string
+    type?:string
+}
+
+export type PluginModuleData = {
+    name:string
+    server:string
+    header:Array<PluginInstallConfigData>
+    query:Array<PluginInstallConfigData>
+    initialize:Array<PluginInstallConfigData>
 }
 
 export type PluginInstallData = {
-    module:{
-        name:string
-        server:string
-        header:Array<PluginInstallConfigData>
-        query:Array<PluginInstallConfigData>
-        initialize:Array<PluginInstallConfigData>
-    }
+    module:PluginModuleData,
     render:{
         internet:boolean
         invisible:boolean

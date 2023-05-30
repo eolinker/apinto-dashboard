@@ -1,14 +1,8 @@
-.content-tabs-fixed {
-  position: fixed;
-  top: 51px;
-  width: 100%;
-  // min-width: 1170px;
-}
 .logo {
   display: flex;
   width: 197px;
   height: 50px;
-  background: #fff;
+  background: var(--background-color);
   float: left;
   align-items: center;
   border-bottom: 1px solid #f0f0f0;
@@ -31,7 +25,7 @@ span.ant-breadcrumb-separator.ng-star-inserted {
 
 eo-ng-breadcrumb a,
 eo-ng-breadcrumb span {
-  color: #999999 !important;
+  color: var(--text-secondary-color) !important;
   font-weight: normal;
   font-size: 14px;
   height: 22px;
@@ -54,16 +48,16 @@ eo-ng-login .ant-layout-sider-children {
 .ant-layout-header {
   height: 50px;
   padding: 0 0;
-  background-color: #fff !important;
+  background-color: var(--background-color) !important;
   border-bottom: 1px solid #f0f0f0;
 }
 
 .ant-layout-content {
-  background-color: #fff;
+  background-color: var(--background-color);
 }
 
 .ant-layout {
-  background: #fff;
+  background: var(--background-color);
   height: 100%;
   color: var(--text-color);
 }
@@ -115,7 +109,7 @@ eo-ng-login .ant-layout-sider-children {
 }
 
 .ant-layout-sider {
-  background-color: #fff;
+  background-color: var(--background-color);
 }
 
 eo-ng-inline-menu .ant-menu-inline .ant-menu-item::after {
@@ -169,7 +163,7 @@ eo-ng-layout {
     // min-width: 1366px;
     position: fixed;
     top: 0px;
-    z-index: 999;
+    // z-index: 999;
   }
 
   .ant-layout.ant-layout-has-sider {
@@ -189,14 +183,6 @@ eo-ng-layout {
   }
 }
 
-.inside-content-fixed-top-51 {
-  position: fixed;
-  top: 94px;
-  width: calc(100% - 195px);
-  // min-width: 1170px;
-  height: calc(100vh - 94px);
-  overflow: auto;
-}
 .ant-menu-inline .ant-menu-item:not(:last-child),
 .ant-menu-vertical .ant-menu-item:not(:last-child),
 .ant-menu-vertical-left .ant-menu-item:not(:last-child),
@@ -206,22 +192,4 @@ eo-ng-layout {
 
 .ant-menu-submenu-selected {
   color: var(--text-color);
-}
-
-.list-content-no-top {
-  margin-top: 0px !important;
-  thead > tr > th {
-    border-top: none !important;
-  }
-}
-
-.inside-tab + .monitor-table-block {
-  margin-top: 0px;
-}
-
-.transfer-modal {
-  .ant-modal-body {
-    padding-left: 36px !important;
-    padding-right: 36px !important;
-  }
 }

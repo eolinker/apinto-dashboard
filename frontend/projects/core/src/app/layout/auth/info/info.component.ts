@@ -10,6 +10,14 @@ import { EoNgNavigationService } from '../../../service/eo-ng-navigation.service
   selector: 'eo-ng-auth-info',
   templateUrl: './info.component.html',
   styles: [
+    `
+    :host ::ng-deep{
+        ol {
+          list-style: none;
+          padding-inline-start: 0;
+        }
+    }
+    `
   ]
 })
 export class AuthInfoComponent implements OnInit {

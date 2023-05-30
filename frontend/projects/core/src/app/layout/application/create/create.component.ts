@@ -132,6 +132,7 @@ export class ApplicationCreateComponent implements OnInit {
           this.validateForm.controls['id'].disable()
           this.service.appName = resp.data.application.name
           this.service.appDesc = resp.data.application.desc
+          this.service.appData = resp.data.application
 
           this.customAttrList =
             this.createApplicationForm?.customAttrList?.length > 0
@@ -242,7 +243,7 @@ export class ApplicationCreateComponent implements OnInit {
               this.submitButtonLoading = false
               if (resp.code === 0) {
                 this.message.success(resp.msg || '修改成功', { nzDuration: 1000 })
-                this.service.getApplicationData(this.appId)
+                this.getApplicationMessage()
                 observer.next(true)
               } else {
                 observer.next(false)
