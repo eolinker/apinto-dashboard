@@ -42,14 +42,14 @@ func (r *remotePluginController) createRemoteApis() []apinto_module.RouterInfo {
 			Method:      "GET",
 			Path:        fmt.Sprintf("/api/remote/%s/store/:key", r.moduleName),
 			Handler:     fmt.Sprintf("%s.getRemoteObject", r.moduleName),
-			Labels:      apinto_module.RouterLabelAnonymous,
+			Labels:      apinto_module.RouterLabelApi,
 			HandlerFunc: []apinto_module.HandlerFunc{r.getObject()},
 		},
 		{
 			Method:      "PUT",
 			Path:        fmt.Sprintf("/api/remote/%s/store/:key", r.moduleName),
 			Handler:     fmt.Sprintf("%s.saveRemoteObject", r.moduleName),
-			Labels:      apinto_module.RouterLabelAnonymous,
+			Labels:      apinto_module.RouterLabelApi,
 			HandlerFunc: []apinto_module.HandlerFunc{r.saveObject()},
 		},
 	}
@@ -61,7 +61,11 @@ func (r *remotePluginController) getOpenMode() gin.HandlerFunc {
 
 		module := common.Map{}
 		module["name"] = r.moduleName
-		module["url"] = fmt.Sprintf("%s/%s", strings.TrimSuffix(r.define.Server, "/"), strings.TrimPrefix(r.define.Path, "/"))
+		url := strings.TrimSuffix(r.define.Server, "/")
+		if r.define.Path != "" {
+			url = fmt.Sprintf("%s/%s", url, strings.TrimPrefix(r.define.Path, "/"))
+		}
+		module["url"] = url
 
 		module["query"] = configParamToDto(r.cfg.Query, r.define.Querys)
 		module["header"] = configParamToDto(r.cfg.Header, r.define.Headers)

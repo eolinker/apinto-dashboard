@@ -38,6 +38,6 @@ type CommonGroupCheckExist struct {
 }
 
 type CommonGroupCheckExistOutput struct {
-	IsExist bool   `json:"name"`
+	IsExist bool   `json:"is_exist"`
 	UUID    string `json:"uuid"`
 }
