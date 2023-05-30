@@ -37,6 +37,7 @@ export type RemoteAppItem = {
   uuid: string
   desc: string
   checked?:boolean
+  [key: string]: any
 }
 
 export type RemoteApiItem = {
@@ -46,6 +47,7 @@ export type RemoteApiItem = {
   group: string
   requestPath: string
   checked?:boolean
+  [key: string]: any
 }
 
 export type RemoteServiceItem = {
@@ -54,6 +56,7 @@ export type RemoteServiceItem = {
   scheme: string
   desc: string
   checked?:boolean
+  [key: string]: any
 }
 export interface FilterRemoteOption{
   target: 'apis'|'services'|'applications'

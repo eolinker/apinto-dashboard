@@ -12,7 +12,6 @@ import { CommonModule } from '@angular/common'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { EoNgTableModule } from 'eo-ng-table'
 import { EditableEnvTableComponent } from './editable-env-table/editable-env-table.component'
-import { DynamicComponentComponent } from './dynamic-component/dynamic-component.component'
 import { NzSpaceModule } from 'ng-zorro-antd/space'
 import { EoNgDatePickerModule } from 'eo-ng-date-picker'
 import { EoNgSelectModule } from 'eo-ng-select'
@@ -33,7 +32,7 @@ import { ScrollingModule } from '@angular/cdk/scrolling'
 import { NzResizableModule } from 'ng-zorro-antd/resizable'
 import { DirectiveModule } from '../directive/directive.module'
 import { EoNgApintoTableModule } from 'projects/eo-ng-apinto-table/src/public-api'
-import { TableDisabledStatusTdComponent, TableStatusTdComponent } from './table-status-td/table-status-td.component'
+import { TableDisabledStatusTdComponent, TableStatusTdComponent, TablePublishStatusTdComponent, TablePublishChangeStatusTdComponent, TableRunningStatusTdComponent, TableClusterStatusTdComponent } from './table-status-td/table-status-td.component'
 import { EoNgSearchInputGroupComponent } from './eo-ng-search-input-group/eo-ng-search-input-group.component'
 import { ApiMethodTagComponent } from './api-method-tag/api-method-tag.component'
 import { CopyAddrListComponent } from './copy-addr-list/copy-addr-list.component'
@@ -43,25 +42,30 @@ import { NzCardModule } from 'ng-zorro-antd/card'
 import { NzListModule } from 'ng-zorro-antd/list'
 import { Formily2ReactComponent } from './formily2-react/formily2-react.component'
 import { CustomReactComponentWrapperComponent } from './formily2-react/CustomReactComponentWrapper'
-import { IntelligentPluginLayoutComponent } from './intelligent-plugin/layout/layout.component'
-import { IntelligentPluginListComponent } from './intelligent-plugin/list/list.component'
-import { IntelligentPluginPublishComponent } from './intelligent-plugin/publish/publish.component'
-import { IntelligentPluginCreateComponent } from './intelligent-plugin/create/create.component'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { CustomCodeboxReactComponentWrapperComponent } from './formily2-react/component/codebox/CustomCodeboxComponentWrapper'
 import { CustomEnvVariableReactComponentWrapperComponent } from './formily2-react/component/editable-env-table/CustomEnvVariableComponentWrapper'
+import { EoIntelligentPluginLayoutComponent } from './intelligent-plugin/layout/layout.component'
+import { EoIntelligentPluginListComponent } from './intelligent-plugin/list/list.component'
+import { EoIntelligentPluginPublishComponent } from './intelligent-plugin/publish/publish.component'
+import { EoIntelligentPluginCreateComponent } from './intelligent-plugin/create/create.component'
 import { EoNgCodeboxModule } from 'eo-ng-codebox'
 import { UserAvatarComponent } from './user-avatar/user-avatar.component'
 import { ResetPswComponent } from './reset-psw/reset-psw.component'
 import { UserProfileComponent } from './user-profile/user-profile.component'
 import { SimpleMapComponentWrapperComponent } from './formily2-react/component/simple-map/SimpleMapComponentWrapper'
 import { CustomDialogReactComponentWrapperComponent } from './formily2-react/component/dialog/CustomDialogComponentWrapper'
+import { DynamicComponentComponent } from './dynamic-component/dynamic-component.component'
+import { EoIframeComponent } from './iframe/iframe.component'
 @NgModule({
   declarations: [
     EditableEnvTableComponent,
-    DynamicComponentComponent,
     TableStatusTdComponent,
     TableDisabledStatusTdComponent,
+    TablePublishStatusTdComponent,
+    TablePublishChangeStatusTdComponent,
+    TableRunningStatusTdComponent,
+    TableClusterStatusTdComponent,
     EoNgSearchInputGroupComponent,
     ApiMethodTagComponent,
     CopyAddrListComponent,
@@ -70,15 +74,17 @@ import { CustomDialogReactComponentWrapperComponent } from './formily2-react/com
     CustomReactComponentWrapperComponent,
     CustomCodeboxReactComponentWrapperComponent,
     SimpleMapComponentWrapperComponent,
-    IntelligentPluginLayoutComponent,
-    IntelligentPluginListComponent,
-    IntelligentPluginPublishComponent,
-    IntelligentPluginCreateComponent,
+    EoIntelligentPluginLayoutComponent,
+    EoIntelligentPluginListComponent,
+    EoIntelligentPluginPublishComponent,
+    EoIntelligentPluginCreateComponent,
     CustomEnvVariableReactComponentWrapperComponent,
     CustomDialogReactComponentWrapperComponent,
     UserAvatarComponent,
     ResetPswComponent,
-    UserProfileComponent
+    UserProfileComponent,
+    DynamicComponentComponent,
+    EoIframeComponent
   ],
   imports: [
     CommonModule,
@@ -115,9 +121,12 @@ import { CustomDialogReactComponentWrapperComponent } from './formily2-react/com
   ],
   exports: [
     EditableEnvTableComponent,
-    DynamicComponentComponent,
     TableStatusTdComponent,
     TableDisabledStatusTdComponent,
+    TablePublishStatusTdComponent,
+    TablePublishChangeStatusTdComponent,
+    TableRunningStatusTdComponent,
+    TableClusterStatusTdComponent,
     EoNgSearchInputGroupComponent,
     ApiMethodTagComponent,
     CopyAddrListComponent,
@@ -125,7 +134,10 @@ import { CustomDialogReactComponentWrapperComponent } from './formily2-react/com
     Formily2ReactComponent,
     UserAvatarComponent,
     ResetPswComponent,
-    UserProfileComponent
+    UserProfileComponent,
+    Formily2ReactComponent,
+    CustomReactComponentWrapperComponent,
+    DynamicComponentComponent
   ]
 })
 export class ComponentModule { }
