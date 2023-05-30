@@ -27,7 +27,7 @@ export class DeployClusterPluginHistoryPublishComponent implements OnInit {
   publishRecordTabelHeadName: THEAD_TYPE[]= [...DeployClusterPublishRecordThead]
   publishRecordTableBody: TBODY_TYPE[]=[...DeployClusterPublishRecordTbody]
 
-  publishRecordDetailsTabelHeadName: THEAD_TYPE[] = [...DeployClusterPluginChangeHistoryThead]
+  publishRecordDetailsTableHeadName: THEAD_TYPE[] = [...DeployClusterPluginChangeHistoryThead]
   publishRecordDetailsTableBody: TBODY_TYPE[] = [...DeployClusterPluginChangeHistoryTbody]
   pageSizeOptions:Array<number>=[15, 20, 50, 100]
   statusList:SelectOption[] = [...DeployClusterPluginStatusOptions]

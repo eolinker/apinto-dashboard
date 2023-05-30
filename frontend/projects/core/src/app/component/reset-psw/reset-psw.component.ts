@@ -14,10 +14,10 @@ import {
 import {
   EoNgFeedbackMessageService
 } from 'eo-ng-feedback'
-import { EoNgMyValidators } from '../user-profile/user-profile.component'
 import { CryptoService } from '../../service/crypto.service'
 import { defaultAutoTips } from '../../constant/conf'
 import { ApiService } from '../../service/api.service'
+import { EoNgMyValidators } from '../../constant/eo-ng-validator'
 
 @Component({
   selector: 'eo-ng-apinto-reset-psw',
@@ -29,7 +29,6 @@ export class ResetPswComponent implements OnInit {
   @Output() closeDrawer: EventEmitter<any> = new EventEmitter()
   userName: string = '' // 用户账户
   validateForm: FormGroup = new FormGroup({})
-  // eslint-disable-next-line no-undef
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
 
   constructor (
@@ -116,7 +115,7 @@ export class ResetPswComponent implements OnInit {
         })
         .subscribe((resp: any) => {
           if (resp.code === 0) {
-            this.message.success(resp.msg || '修改密码成功!', { nzDuration: 1000 })
+            this.message.success(resp.msg || '修改密码成功!')
             this.backToList(true)
           } else {
             this.message.error(resp.msg || '修改密码失败!')

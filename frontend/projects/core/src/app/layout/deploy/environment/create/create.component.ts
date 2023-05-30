@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 /* eslint-disable dot-notation */
 import { Component, Input, OnInit } from '@angular/core'
 import { FormGroup, UntypedFormBuilder, Validators } from '@angular/forms'
