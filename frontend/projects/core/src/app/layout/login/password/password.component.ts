@@ -67,7 +67,6 @@ export class PasswordComponent implements OnInit {
                 this.router.navigate([callbackUrl])
               } else {
                 this.router.navigate([this.navigationService.getPageRoute()])
-                // this.router.navigate(['/', ...(this.isBusiness ? ['router', 'api'] : ['guide'])])
               }
             }
           })
