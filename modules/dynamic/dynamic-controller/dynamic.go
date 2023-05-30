@@ -315,13 +315,16 @@ func (c *dynamicController) create(ctx *gin.Context) {
 		return
 	}
 	body, _ := json.Marshal(worker.Append)
-	sourceName, err := c.dynamicService.Create(ctx, namespaceID, c.Profession, c.moduleName, c.Skill, worker.Title, worker.Id, worker.Driver, worker.Description, string(body), users.GetUserId(ctx), c.Depends...)
+	err = c.dynamicService.Create(ctx, namespaceID, c.Profession, c.moduleName, c.Skill, worker.Title, worker.Id, worker.Driver, worker.Description, string(body), users.GetUserId(ctx), c.Depends...)
 	if err != nil {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
 		return
 	}
 	data := common.Map{}
-	data["source_name"] = sourceName
+	info := common.Map{}
+	info["id"] = worker.Id
+	info["source_name"] = fmt.Sprintf("%s@%s", worker.Id, c.moduleName)
+	data["info"] = info
 	ctx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
 
