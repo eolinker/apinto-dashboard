@@ -20,6 +20,7 @@ import { DynamicDemoComponent } from './layout/dynamic-demo/dynamic-demo.compone
 import { environment } from '../environments/environment'
 import { NotFoundPageComponent } from './layout/not-found-page/not-found-page.component'
 import { RemotePluginComponent } from './layout/remote-plugin/remote-plugin.component'
+import { AuthInfoComponent } from './layout/auth/info/info.component'
 const routes: Routes = [
   ...(environment.isBusiness
     ? [{
@@ -44,6 +45,12 @@ const routes: Routes = [
         path: 'guide',
         component: GuideComponent
       },
+      ...(environment.isBusiness
+        ? [{
+            path: 'auth-info',
+            component: AuthInfoComponent
+          }]
+        : []),
       {
         path: 'deploy',
         data: {
