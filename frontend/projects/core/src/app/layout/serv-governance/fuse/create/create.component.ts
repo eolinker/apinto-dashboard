@@ -10,7 +10,7 @@ import { FormGroup, UntypedFormBuilder, Validators } from '@angular/forms'
 import { Router } from '@angular/router'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { ApiService } from 'projects/core/src/app/service/api.service'
-import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 import { EoNgMyValidators } from 'projects/core/src/app/constant/eo-ng-validator'
 import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { BaseInfoService } from 'projects/core/src/app/service/base-info.service'
@@ -77,7 +77,7 @@ export class FuseCreateComponent implements OnInit {
     private message: EoNgFeedbackMessageService,
     private api: ApiService,
     private fb: UntypedFormBuilder,
-    private appConfigService: AppConfigService,
+    private navigationService: EoNgNavigationService,
     private router:Router
   ) {
     this.validateForm = this.fb.group({
@@ -104,7 +104,7 @@ export class FuseCreateComponent implements OnInit {
       body: ['']
     })
 
-    this.appConfigService.reqFlashBreadcrumb([
+    this.navigationService.reqFlashBreadcrumb([
       { title: '熔断策略', routerLink: 'serv-governance/fuse' },
       { title: '新建熔断策略' }
     ])
@@ -134,7 +134,7 @@ export class FuseCreateComponent implements OnInit {
           msg: string
         }) => {
           if (resp.code === 0) {
-            this.appConfigService.reqFlashBreadcrumb([
+            this.navigationService.reqFlashBreadcrumb([
               {
                 title: '熔断策略',
                 routerLink: 'serv-governance/fuse'

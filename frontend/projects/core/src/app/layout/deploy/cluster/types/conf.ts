@@ -3,6 +3,7 @@ import { EO_TBODY_TYPE, EO_THEAD_TYPE } from 'projects/eo-ng-apinto-table/src/pu
 
 export const deployCertsTableHeadName: THEAD_TYPE[] = [
   { title: '证书' },
+  { title: '绑定域名' },
   { title: '证书有效期' },
   { title: '更新者' },
   { title: '更新时间' },
@@ -16,6 +17,9 @@ export const deployCertsTableBody: EO_TBODY_TYPE[] = [
   {
     key: 'name',
     copy: true
+  },
+  {
+    key: 'dnsName',
   },
   { key: 'validTime' },
   { key: 'operator' },
@@ -266,6 +270,7 @@ export const DeployClusterEnvConfigThead:THEAD_TYPE[] = [
 
 export const ClustersThead: THEAD_TYPE[] = [
   { title: '集群名称' },
+  { title: '描述' },
   { title: '环境' },
   { title: '状态' },
   {
@@ -275,10 +280,10 @@ export const ClustersThead: THEAD_TYPE[] = [
 ]
 
 export const DeployClusterPluginThead:THEAD_TYPE[] = [
-  { title: '插件名称' },
+  { title: '插件名称', width: 150 },
   { title: '发布状态' },
   { title: '状态' },
-  { title: '配置' },
+  { title: '配置', width: 200 },
   { title: '更新时间' },
   {
     title: '操作',

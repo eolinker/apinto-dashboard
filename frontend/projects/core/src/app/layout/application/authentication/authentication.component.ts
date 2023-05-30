@@ -1,10 +1,10 @@
 /* eslint-disable dot-notation */
 /* eslint-disable camelcase */
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
+import { Component, OnInit } from '@angular/core'
 import { Router } from '@angular/router'
 import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feedback'
 import { ApiService } from 'projects/core/src/app/service/api.service'
-import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 import { NzModalRef } from 'ng-zorro-antd/modal'
 import { MODAL_SMALL_SIZE } from '../../../constant/app.config'
 import { BaseInfoService } from '../../../service/base-info.service'
@@ -13,6 +13,7 @@ import { differenceInCalendarDays } from 'date-fns'
 import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { authenticationTableBody, authenticationTableHeadName } from '../types/conf'
 import { AuthListData } from '../types/types'
+import { ApplicationAuthenticationViewComponent } from './view/view.component'
 
 @Component({
   selector: 'eo-ng-application-authentication',
@@ -40,7 +41,6 @@ import { AuthListData } from '../types/types'
   ]
 })
 export class ApplicationAuthenticationComponent implements OnInit {
-  @ViewChild('authContentTpl', { read: TemplateRef, static: true }) authContentTpl: TemplateRef<any> | undefined
   appId:string = ''
   nzDisabled:boolean = false
   authenticationTableHeadName:THEAD_TYPE[] = [...authenticationTableHeadName]
@@ -54,8 +54,8 @@ export class ApplicationAuthenticationComponent implements OnInit {
                private baseInfo:BaseInfoService,
                private modalService:EoNgFeedbackModalService,
                private router:Router,
-               private appConfigService:AppConfigService) {
-    this.appConfigService.reqFlashBreadcrumb([{ title: '应用管理', routerLink: 'application' }, { title: '鉴权管理' }])
+               private navigationService:EoNgNavigationService) {
+    this.navigationService.reqFlashBreadcrumb([{ title: '应用管理', routerLink: 'application' }, { title: '鉴权管理' }])
   }
 
   ngOnInit (): void {
@@ -68,38 +68,62 @@ export class ApplicationAuthenticationComponent implements OnInit {
   }
 
   initTable () {
-    this.authenticationTableBody[4].styleFn = (item:any) => {
+    this.authenticationTableBody[3].styleFn = (item:any) => {
       if (item.expireTime && differenceInCalendarDays(item.expireTime * 1000, new Date()) < 0) {
         return 'color:red'
       }
       return ''
     }
 
-    this.authenticationTableBody[8].btns[0].click = (item:any) => { this.openDrawer(item.data.uuid) }
-    this.authenticationTableBody[8].btns[1].disabledFn = () => { return this.nzDisabled }
-    this.authenticationTableBody[8].btns[1].click = (item:any) => { this.delete(item.data) }
+    this.authenticationTableBody[4].btns[0].click = (item:any) => { this.openDrawer('view', item.data.uuid) }
+    this.authenticationTableBody[4].btns[1].click = (item:any) => { this.openDrawer('edit', item.data.uuid) }
+    this.authenticationTableBody[4].btns[2].disabledFn = () => { return this.nzDisabled }
+    this.authenticationTableBody[4].btns[2].click = (item:any) => { this.delete(item.data) }
   }
 
   authTableClick = (item:{data:AuthListData}) => {
-    this.openDrawer(item.data.uuid)
+    this.openDrawer('view', item.data.uuid)
   }
 
   disabledEdit (value:any) {
     this.nzDisabled = value
   }
 
-  openDrawer (authId?:string) {
-    this.modalRef = this.modalService.create({
-      nzTitle: '配置鉴权信息',
-      nzWidth: MODAL_SMALL_SIZE,
-      nzContent: ApplicationAuthenticationFormComponent,
-      nzComponentParams: { authId: authId, appId: this.appId, closeModal: this.closeModal },
-      nzOkDisabled: this.nzDisabled,
-      nzOnOk: (component:ApplicationAuthenticationFormComponent) => {
-        component.saveAuth()
-        return false
-      }
-    })
+  openDrawer (type:'view'|'edit'|'create', authId?:string) {
+    switch (type) {
+      case 'view':
+        this.modalRef = this.modalService.create({
+          nzTitle: '鉴权详情',
+          nzWidth: MODAL_SMALL_SIZE,
+          nzContent: ApplicationAuthenticationViewComponent,
+          nzComponentParams: {
+            authId: authId,
+            appId: this.appId
+          },
+          nzOkDisabled: this.nzDisabled,
+          nzOnOk: () => {
+            return true
+          }
+        })
+        break
+      default:
+        this.modalRef = this.modalService.create({
+          nzTitle: `${type === 'edit' ? '编辑' : '添加'}鉴权`,
+          nzWidth: MODAL_SMALL_SIZE,
+          nzContent: ApplicationAuthenticationFormComponent,
+          nzComponentParams: {
+            appId: this.appId,
+            authId: authId,
+            closeModal: this.closeModal,
+            nzDisabled: this.nzDisabled
+          },
+          nzOkDisabled: this.nzDisabled,
+          nzOnOk: (component: ApplicationAuthenticationFormComponent) => {
+            (component as ApplicationAuthenticationFormComponent).saveAuth()
+            return false
+          }
+        })
+    }
   }
 
   delete (item:AuthListData, e?:Event) {
@@ -135,7 +159,7 @@ export class ApplicationAuthenticationComponent implements OnInit {
       if (resp.code === 0) {
         for (const index in resp.data.auths) {
           resp.data.auths[index].driver = this.getAuthDriver(resp.data.auths[index].driver)
-          resp.data.auths[index].isTransparent = resp.data.auths[index].isTransparent ? '是' : '否'
+          resp.data.auths[index].hideCredential = resp.data.auths[index].hideCredential ? '是' : '否'
           resp.data.auths[index].expireTimeString = resp.data.auths[index].expireTime === 0 ? '永不过期' : this.getDateInList(resp.data.auths[index].expireTime)
         }
         this.authenticationList = resp.data.auths

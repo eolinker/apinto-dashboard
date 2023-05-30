@@ -1,0 +1,65 @@
+<div class="">
+  <form
+    nz-form
+    [nzNoColon]="true"
+    [nzAutoTips]="autoTips"
+    [formGroup]="validateForm"
+  >
+    <nz-form-item class="mt-formtop">
+      <nz-form-label [nzSpan]="7" nzRequired>集群名称：</nz-form-label>
+
+      <nz-form-control [nzSpan]="12">
+        <input
+          class="w-INPUT_NORMAL"
+          eo-ng-input
+          #clusterNameInput
+          formControlName="title"
+          placeholder="请输入集群名称"
+        />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="7" nzRequired>环境：</nz-form-label>
+
+      <nz-form-control [nzSpan]="12">
+        <eo-ng-select
+          class="w-INPUT_NORMAL"
+          formControlName="env"
+          nzAllowClear
+          [nzOptions]="environmentList"
+        ></eo-ng-select>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item class="mb-0">
+      <nz-form-label [nzSpan]="7">描述：</nz-form-label>
+
+      <nz-form-control [nzSpan]="12">
+        <textarea
+          class="w-INPUT_NORMAL"
+          rows="6"
+          eo-ng-input
+          formControlName="desc"
+          placeholder="请输入"
+          eoNgUserAccess="deploy/cluster"
+        ></textarea>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item class="mb-0 sticky bg-white bottom-0 py-mbase z-50">
+      <nz-form-control [nzOffset]="7" [nzSpan]="12">
+        <button
+          class="ant-btn-primary"
+          type="submit"
+          eo-ng-button
+          eoNgUserAccess="deploy/cluster"
+          (click)="saveCluster()"
+          [nzLoading]="submitButtonLoading"
+        >
+          提交
+        </button>
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+</div>

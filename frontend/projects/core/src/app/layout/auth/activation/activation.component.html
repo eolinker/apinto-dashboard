@@ -1,0 +1,77 @@
+<eo-ng-layout style="overflow: hidden">
+  <eo-ng-header *ngIf="!updateAuth">
+    <div class="logo">
+      <img src="../../../../assets/apinto.svg" alt="apinto" />
+    </div>
+  </eo-ng-header>
+
+  <eo-ng-layout
+    class="total-content"
+    style="min-width: 1366px; margin-top: 50px"
+  >
+    <section class="m-auto mt-[20vh] w-[760px] flex flex-col items-center">
+      <header class="flex flex-col items-center">
+        <img
+          class="m-auto"
+          src="../../../../assets/apinto-auth.svg"
+          width="45px"
+          height="45px"
+          alt="apinto"
+        />
+        <p class="text-[20px] font-bold leading-[29px] mt-[8px]">Apinto</p>
+        <p class="font-medium">V3.0.0 (2023-5-22)</p>
+      </header>
+      <div
+        class="flex flex-col items-center mt-[30px]"
+        *ngIf="!showActivationInfo; else showActivationInfoTpl"
+      >
+        <p>1. 复制机器码并发送给 Apinto 客户支持人员</p>
+
+        <div class="mt-btnbase flex items-center">
+          <input
+            class="mr10 h-[32px]"
+            eo-ng-input
+            [ngModel]="macCode"
+            disabled="true"
+          />
+          <a
+            eo-copy
+            class="ml-[8px] whitespace-nowrap"
+            copyType="click"
+            [copyText]="macCode"
+            (copyCallback)="copyCallback()"
+          >
+            复制
+          </a>
+        </div>
+        <p class="mt-[26px]">2. 上传授权证书并激活</p>
+
+        <div class="mt-btnbase">
+          <nz-upload
+            class="block"
+            nzAction="_system/activation"
+            nzName="authFile"
+            [nzLimit]="1"
+            [nzShowUploadList]="false"
+            nzAccept=".cert"
+            (nzChange)="onChange($event)"
+          >
+            <button eo-ng-button nzType="primary">上传</button>
+          </nz-upload>
+        </div>
+      </div>
+      <ng-template #showActivationInfoTpl>
+        <div class="flex flex-col items-center mt-[40px]">
+          <p *ngFor="let info of authInfo.infos">
+            <span class="font-bold">{{ info.key }}：</span>&nbsp;{{
+              info.value
+            }}
+          </p>
+          <a class="mt-[30px]" (click)="goToLogin()"
+            >已完成授权，系统将自动跳转至登录页...</a
+          >
+        </div>
+      </ng-template>
+    </section>
+  </eo-ng-layout>
+</eo-ng-layout>

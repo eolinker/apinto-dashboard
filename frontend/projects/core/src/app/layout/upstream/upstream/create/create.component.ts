@@ -8,7 +8,7 @@ import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { SelectOption } from 'eo-ng-select'
 import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { ApiService } from 'projects/core/src/app/service/api.service'
-import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 import { UpstreamBalanceList, UpstreamSchemeList } from '../types/conf'
 
 @Component({
@@ -74,7 +74,7 @@ export class UpstreamCreateComponent implements OnInit {
     private api: ApiService,
     private router: Router,
     private fb: UntypedFormBuilder,
-    private appConfigService: AppConfigService
+    private navigationService: EoNgNavigationService
   ) {
     this.validateForm = this.fb.group({
       name: ['', [Validators.required, Validators.pattern('^[a-zA-Z][a-zA-Z0-9/_]*')]],
@@ -84,7 +84,7 @@ export class UpstreamCreateComponent implements OnInit {
       discoveryName: ['static', [Validators.required]],
       timeout: [100, [Validators.required]]
     })
-    this.appConfigService.reqFlashBreadcrumb([{ title: '上游管理', routerLink: 'upstream/upstream' }, { title: '创建上游' }])
+    this.navigationService.reqFlashBreadcrumb([{ title: '上游管理', routerLink: 'upstream/upstream' }, { title: '创建上游' }])
   }
 
   public _baseData: any = null
@@ -92,7 +92,7 @@ export class UpstreamCreateComponent implements OnInit {
   ngOnInit (): void {
     if (this.editPage) {
       this.getUpstreamMessage()
-      this.appConfigService.reqFlashBreadcrumb([{ title: '上游管理', routerLink: 'upstream/upstream' }, { title: '上游信息' }])
+      this.navigationService.reqFlashBreadcrumb([{ title: '上游管理', routerLink: 'upstream/upstream' }, { title: '上游信息' }])
     } else {
       this.getDiscovery()
     }

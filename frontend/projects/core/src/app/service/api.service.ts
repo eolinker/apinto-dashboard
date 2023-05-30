@@ -1,8 +1,8 @@
 /* eslint-disable dot-notation */
 /*
- * @Author:
+ * @Author: MengjieYang yangmengjie@eolink.com
  * @Date: 2022-07-30 00:40:51
- * @LastEditors:
+ * @LastEditors: MengjieYang yangmengjie@eolink.com
  * @LastEditTime: 2022-08-30 23:55:26
  * @FilePath: /apinto/src/app/service/api.service.ts
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
@@ -243,6 +243,7 @@ export class ApiService {
   }
 
   handleError = (error: HttpErrorResponse) => {
+    console.log(error)
     if (error.status === 0) {
       // A client-side or network error occurred. Handle it accordingly.
       console.error('An error occurred:', error.error)
@@ -281,7 +282,9 @@ export class ApiService {
     }
     const newData:any = {}
     for (const key in data) {
-      let newKey = key.replace(/([A-Z])/g, (p, m) => `_${m.toLowerCase()}`)
+      // 首字母不参与转换
+      let newKey = key[0] + key.substring(1).replace(/([A-Z])/g, (p, m) => `_${m.toLowerCase()}`
+      )
       newKey = key === 'status4xx' ? 'status_4xx' : (key === 'status5xx' ? 'status_5xx' : newKey)
       newData[newKey] = this.underline(data[key])
     }
