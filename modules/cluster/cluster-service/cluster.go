@@ -3,7 +3,14 @@ package cluster_service
 import (
 	"context"
 	"encoding/json"
+	"time"
+
+	v1 "github.com/eolinker/apinto-dashboard/client/v1"
+
+	"github.com/eolinker/apinto-dashboard/client/v1/initialize/plugin"
+
 	"github.com/eolinker/apinto-dashboard/common"
+	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-dashboard/modules/cluster"
 	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-dto"
@@ -13,7 +20,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/variable"
 	"github.com/eolinker/eosc/common/bean"
 	"gopkg.in/errgo.v2/errors"
-	"time"
 )
 
 type clusterService struct {
@@ -37,6 +43,18 @@ func newClusterService() cluster.IClusterService {
 	return s
 }
 
+func (c *clusterService) ClusterCount(ctx context.Context, namespaceId int) (int64, error) {
+	return c.clusterStore.ClusterCount(ctx, map[string]interface{}{
+		"namespace": namespaceId,
+	})
+}
+func (c *clusterService) Count(ctx context.Context) (int, error) {
+	count, err := c.clusterStore.ClusterCount(ctx, map[string]interface{}{})
+	if err != nil {
+		return 0, err
+	}
+	return int(count), nil
+}
 func (c *clusterService) GetAllCluster(ctx context.Context) ([]*cluster_model2.Cluster, error) {
 	clusters, err := c.clusterStore.GetAll(ctx)
 	if err != nil {
@@ -119,6 +137,22 @@ func (c *clusterService) GetByNames(ctx context.Context, namespaceId int, names 
 	return list, nil
 }
 
+func (c *clusterService) GetByUUIDs(ctx context.Context, namespaceId int, uuids []string) ([]*cluster_model2.Cluster, error) {
+	clusters, err := c.clusterStore.GetByNamespaceByUUIDs(ctx, namespaceId, uuids)
+	if err != nil {
+		return nil, err
+	}
+	list := make([]*cluster_model2.Cluster, 0, len(clusters))
+	for _, clusterInfo := range clusters {
+		value := &cluster_model2.Cluster{
+			Cluster: clusterInfo,
+		}
+		list = append(list, value)
+	}
+
+	return list, nil
+}
+
 // Insert 新增集群
 func (c *clusterService) Insert(ctx context.Context, namespaceId, userId int, clusterInput *cluster_dto.ClusterInput) error {
 	clusterId, _ := c.CheckByNamespaceByName(ctx, namespaceId, clusterInput.Name)
@@ -153,12 +187,13 @@ func (c *clusterService) Insert(ctx context.Context, namespaceId, userId int, cl
 		Env:         clusterInput.Env,
 		Addr:        clusterInput.Addr,
 		UUID:        clusterInfo.Cluster,
+		Title:       clusterInput.Title,
 		CreateTime:  t,
 		UpdateTime:  t,
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Name: clusterInput.Name,
 	})
 
@@ -189,7 +224,12 @@ func (c *clusterService) Insert(ctx context.Context, namespaceId, userId int, cl
 			node.ClusterId = entryCluster.Id
 		}
 
-		return c.clusterNodeService.Insert(txCtx, entryClusterNodes)
+		err = c.clusterNodeService.Insert(txCtx, entryClusterNodes)
+		if err != nil {
+			return err
+		}
+
+		return c.initGlobalPlugin(ctx, entryCluster.Id, entryCluster.Addr)
 	})
 }
 
@@ -256,6 +296,23 @@ func (c *clusterService) QueryListByNamespaceId(ctx context.Context, namespaceId
 	return list, nil
 }
 
+func (c *clusterService) SimpleCluster(ctx context.Context, namespaceId int) ([]*cluster_model2.ClusterSimple, error) {
+	list, err := c.clusterStore.List(ctx, map[string]interface{}{
+		"namespace": namespaceId,
+	})
+	if err != nil {
+		return nil, err
+	}
+	clusters := make([]*cluster_model2.ClusterSimple, 0, len(list))
+	for _, l := range list {
+		clusters = append(clusters, &cluster_model2.ClusterSimple{
+			Name:  l.Name,
+			Title: l.Title,
+		})
+	}
+	return clusters, nil
+}
+
 // DeleteByNamespaceIdByName 删除集群
 func (c *clusterService) DeleteByNamespaceIdByName(ctx context.Context, namespaceId, userId int, name string) error {
 	clusterId, err := c.CheckByNamespaceByName(ctx, namespaceId, name)
@@ -268,7 +325,7 @@ func (c *clusterService) DeleteByNamespaceIdByName(ctx context.Context, namespac
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Name: name,
 	})
 
@@ -291,22 +348,47 @@ func (c *clusterService) DeleteByNamespaceIdByName(ctx context.Context, namespac
 		if err = c.clusterVariableService.DeleteAll(txCtx, namespaceId, clusterId, userId); err != nil {
 			return err
 		}
-
+		//删除集群下的环境变量
+		err := c.clusterNodeService.Delete(txCtx, namespaceId, clusterId)
+		if err != nil {
+			return err
+		}
 		return nil
 	})
 
 }
 
+func (c *clusterService) initGlobalPlugin(ctx context.Context, id int, addr string) error {
+	client, err := c.apintoClientService.GetClient(ctx, id)
+	if err != nil {
+		client, err = v1.NewClient([]string{addr})
+		if err != nil {
+			return err
+		}
+	}
+	list, err := client.ForGlobalPlugin().List()
+	if err != nil {
+		return err
+	}
+	if len(list) < 1 {
+		// 全局插件未初始化
+		return client.ForGlobalPlugin().Set(plugin.GetGlobalPluginConf())
+	}
+	return nil
+}
+
 // UpdateDesc 修改集群描述
-func (c *clusterService) UpdateDesc(ctx context.Context, namespaceId, userId int, name, desc string) error {
+func (c *clusterService) Update(ctx context.Context, namespaceId, userId int, name string, info *cluster_dto.ClusterInput) error {
 	clusterId, err := c.CheckByNamespaceByName(ctx, namespaceId, name)
 	if err != nil {
 		return err
 	}
 
 	clusterInfo := &cluster_entry2.Cluster{
-		Id:   clusterId,
-		Desc: desc,
+		Id:    clusterId,
+		Title: info.Title,
+		Env:   info.Env,
+		Desc:  info.Desc,
 	}
 	oldCluster, err := c.clusterStore.Get(ctx, clusterId)
 	if err != nil {
@@ -314,7 +396,7 @@ func (c *clusterService) UpdateDesc(ctx context.Context, namespaceId, userId int
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Name: name,
 	})
 
@@ -344,7 +426,11 @@ func (c *clusterService) UpdateAddr(ctx context.Context, userId, clusterId int, 
 			return err
 		}
 
-		return c.clusterHistoryStore.HistoryEdit(txCtx, oldCluster.NamespaceId, clusterInfo.Id, oldCluster, clusterInfo, userId)
+		err = c.clusterHistoryStore.HistoryEdit(txCtx, oldCluster.NamespaceId, clusterInfo.Id, oldCluster, clusterInfo, userId)
+		if err != nil {
+			return err
+		}
+		return c.initGlobalPlugin(ctx, clusterId, addr)
 	})
 
 }

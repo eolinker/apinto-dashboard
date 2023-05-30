@@ -10,6 +10,12 @@ type Plugin struct {
 	IsBuilt     bool //是否内置
 }
 
+type PluginEnum struct {
+	Name     string
+	Extended string
+	Schema   string
+}
+
 type PluginBasic struct {
 	*plugin_entry.Plugin
 }

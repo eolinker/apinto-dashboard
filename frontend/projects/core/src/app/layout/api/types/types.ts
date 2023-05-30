@@ -1,3 +1,5 @@
+import { PublishStatus } from '../../../constant/type'
+
 export interface RouterEnum{
     apiId:string
     name:string
@@ -29,18 +31,6 @@ export interface APIImportData{
     id:number
     name:string
     desc:string
-}
-
-export interface APIList{
-    checked?:boolean
-    groupUuid:string
-    uuid:string
-    name:string
-    method:string
-    service:string
-    requestPath:string
-    updateTime:string
-    isDelete:boolean
 }
 
 // api批量上线检测列表
@@ -83,4 +73,41 @@ export type PluginTemplateData = {
     name:string
     desc:string
     plugins:PluginTemplateConfigItem[]
+}
+
+export type ApiListItem = {
+    checked?:boolean
+    groupUuid:string
+    uuid:string
+    name:string
+    scheme:'http'|'websocket'
+    method:string
+    requestPath:string
+    publish:Array<{name:string, status:PublishStatus}>
+    source:string
+    updateTime:string
+    isDelete:boolean
+    isDisable:boolean|string
+    [k:string]:any
+}
+
+export type ApiData = {
+    name:string
+    id:string
+    scheme:'http'|'websocket'
+    method:string
+    path:string
+    service:string
+    proxyPath:string
+    desc:string
+}
+
+export type ApiPublishItem = {
+    checked?:boolean
+    name:string
+    title:string
+    env:string
+    status:'GOONLINE'|'OFFLINE'|'NOTGOONLINE'|'TOUPDATE'
+    operator:string
+    updateTime:string
 }

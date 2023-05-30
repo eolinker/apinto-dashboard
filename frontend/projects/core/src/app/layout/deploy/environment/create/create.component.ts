@@ -8,7 +8,7 @@ import {
 } from 'eo-ng-feedback'
 import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { ApiService } from 'projects/core/src/app/service/api.service'
-import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 
 @Component({
   selector: 'eo-ng-deploy-environment-create',
@@ -34,7 +34,7 @@ export class DeployEnvironmentCreateComponent implements OnInit {
     private api: ApiService,
     private fb: UntypedFormBuilder,
     private router: Router,
-    private appConfigService: AppConfigService
+    private navigationService: EoNgNavigationService
   ) {
     this.validateForm = this.fb.group({
       key: [
@@ -43,8 +43,8 @@ export class DeployEnvironmentCreateComponent implements OnInit {
       ],
       desc: ['']
     })
-    this.appConfigService.reqFlashBreadcrumb([
-      { title: '环境变量', routerLink: 'deploy/env' },
+    this.navigationService.reqFlashBreadcrumb([
+      { title: '环境变量', routerLink: 'deploy/variable' },
       { title: '新建配置' }
     ])
   }
@@ -64,7 +64,7 @@ export class DeployEnvironmentCreateComponent implements OnInit {
           this.submitButtonLoading = false
           if (resp.code === 0) {
             this.message.success(resp.msg || '新增环境变量成功！', { nzDuration: 1000 })
-            this.router.navigate(['/', 'deploy', 'env'])
+            this.router.navigate(['/', 'deploy', 'variable'])
           }
         })
     } else {
@@ -78,6 +78,6 @@ export class DeployEnvironmentCreateComponent implements OnInit {
   }
 
   backToList () {
-    this.router.navigate(['/', 'deploy', 'env'])
+    this.router.navigate(['/', 'deploy', 'variable'])
   }
 }

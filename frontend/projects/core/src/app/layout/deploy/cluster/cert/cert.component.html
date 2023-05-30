@@ -1,7 +1,7 @@
 <!--
- * @Author: 
+ * @Author: MengjieYang yangmengjie@eolink.com
  * @Date: 2022-07-28 22:12:29
- * @LastEditors: 
+ * @LastEditors: MengjieYang yangmengjie@eolink.com
  * @LastEditTime: 2022-07-29 01:34:45
  * @FilePath: /apinto/src/app/layout/deploy/deploy-cluster-cert/deploy-cluster-cert.component.html
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
@@ -28,8 +28,39 @@
       [nzData]="certsList"
       [nzTrClick]="certTableClick"
       [nzMaxOperatorButton]="2"
-      [nzNoScroll]="true"
     >
     </eo-ng-apinto-table>
   </div>
 </div>
+<ng-template #dnsNameTpl let-item="item">
+  <div class="flex items-center">
+    <div
+      eoNgFeedbackTooltip
+      nzTooltipPlacement="top"
+      [nzTooltipTitle]="dnsNameTooltipTpl"
+      nzTooltipTrigger="hover"
+    >
+      <ng-container *ngFor="let name of item.dnsName">
+        <p>{{ name }}</p>
+      </ng-container>
+    </div>
+    <button
+      eo-copy
+      eo-ng-button
+      nzType="primary"
+      nzGhost
+      class="opacity-0 text-table_text ant-btn-text border-transparent h-[22px]"
+      [copyText]="item.dnsName.join(' ')"
+      (copyCallback)="copyCallback($event)"
+      (click)="$event.stopPropagation()"
+    >
+      <svg class="iconpark-icon"><use href="#copy"></use></svg>
+    </button>
+  </div>
+
+  <ng-template #dnsNameTooltipTpl>
+    <ng-container *ngFor="let name of item.dnsName">
+      <p>{{ name }}</p>
+    </ng-container>
+  </ng-template>
+</ng-template>

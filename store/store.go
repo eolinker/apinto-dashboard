@@ -13,25 +13,15 @@ type Table interface {
 	schema.Tabler
 	IdValue() int
 }
+type DBInfo struct {
+	Addr string
+	User string
+	DB   string
+}
 type IDB interface {
 	DB(ctx context.Context) *gorm.DB
 	IsTxCtx(ctx context.Context) bool
-}
-type myDB struct {
-	db *gorm.DB
-}
-
-func (m *myDB) DB(ctx context.Context) *gorm.DB {
-	if tx, ok := ctx.Value(txContextKey{}).(*gorm.DB); ok {
-		return tx
-	}
-	return m.db.WithContext(ctx)
-}
-func (m *myDB) IsTxCtx(ctx context.Context) bool {
-	if _, ok := ctx.Value(txContextKey{}).(*gorm.DB); ok {
-		return ok
-	}
-	return false
+	Info() DBInfo
 }
 
 type IBaseStore[T any] interface {
@@ -52,7 +42,7 @@ type IBaseStore[T any] interface {
 	Transaction(ctx context.Context, f func(txCtx context.Context) error) error
 }
 
-type txContextKey struct{}
+var TxContextKey = struct{}{}
 
 type BaseStore[T any] struct {
 	IDB
@@ -69,7 +59,7 @@ func CreateStore[T any](db IDB) *BaseStore[T] {
 	for i := 0; i < modelType.NumField(); i++ {
 		if fieldStruct := modelType.Field(i); ast.IsExported(fieldStruct.Name) {
 			tagSetting := schema.ParseTagSetting(fieldStruct.Tag.Get("gorm"), ";")
-			if _, ok := tagSetting["DBUNIQUEINDEX"]; ok {
+			if _, ok := tagSetting["UNIQUEINDEX"]; ok {
 				b.UniqueList = append(b.UniqueList, tagSetting["COLUMN"])
 			}
 		}
@@ -217,7 +207,7 @@ func (b *BaseStore[T]) ListPage(ctx context.Context, where string, pageNum, page
 // Transaction 执行事务
 func (b *BaseStore[T]) Transaction(ctx context.Context, f func(context.Context) error) error {
 	return b.DB(ctx).Transaction(func(tx *gorm.DB) error {
-		txCtx := context.WithValue(ctx, txContextKey{}, tx)
+		txCtx := context.WithValue(ctx, TxContextKey, tx)
 		return f(txCtx)
 	})
 }

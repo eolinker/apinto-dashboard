@@ -6,7 +6,7 @@ import { SelectOption } from 'eo-ng-select'
 import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { setFormValue } from 'projects/core/src/app/constant/form'
 import { ApiService } from 'projects/core/src/app/service/api.service'
-import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 import { PluginData } from '../types/types'
 
 @Component({
@@ -31,7 +31,7 @@ export class DeployPluginCreateComponent implements OnInit {
     private api: ApiService,
     private router: Router,
     private fb: UntypedFormBuilder,
-    private appConfigService: AppConfigService) {
+    private navigationService: EoNgNavigationService) {
     this.validateForm = this.fb.group({
       name: ['', [Validators.required, Validators.pattern('^[a-zA-Z][a-zA-Z0-9_]*')]],
       extended: ['', [Validators.required]],
@@ -39,7 +39,7 @@ export class DeployPluginCreateComponent implements OnInit {
       desc: ['']
     })
 
-    this.appConfigService.reqFlashBreadcrumb([{ title: '插件管理', routerLink: 'deploy/plugin' }, { title: '新建插件' }])
+    this.navigationService.reqFlashBreadcrumb([{ title: '节点插件', routerLink: 'deploy/plugin' }, { title: '新建插件' }])
   }
 
   ngOnInit (): void {
@@ -73,9 +73,9 @@ export class DeployPluginCreateComponent implements OnInit {
           msg: string
         }) => {
           if (resp.code === 0) {
-            this.appConfigService.reqFlashBreadcrumb([
+            this.navigationService.reqFlashBreadcrumb([
               {
-                title: '插件管理',
+                title: '节点插件',
                 routerLink: 'deploy/plugin'
               },
               { title: '编辑插件' }

@@ -5,25 +5,20 @@ import (
 	"github.com/eolinker/apinto-dashboard/cache"
 	apimodel "github.com/eolinker/apinto-dashboard/modules/api/model"
 	"github.com/go-redis/redis/v8"
+	"time"
 )
 
 type IImportApiCache interface {
-	cache.IRedisCache[apimodel.ImportAPIRedisData]
-	Key(token string) string
+	cache.IRedisCache[apimodel.ImportAPIRedisData, string]
 }
 
-type importApiCache struct {
-	cache.IRedisCache[apimodel.ImportAPIRedisData]
-}
-
-func (i *importApiCache) Key(token string) string {
+func importKey(token string) string {
 	return fmt.Sprintf("import_api_token:%s", token)
 }
 
 func newImportCache(client *redis.ClusterClient) IImportApiCache {
-	cacheInfo := &importApiCache{
-		IRedisCache: cache.CreateRedisCache[apimodel.ImportAPIRedisData](client),
-	}
+	cacheInfo := cache.CreateRedisCache[apimodel.ImportAPIRedisData, string](client, time.Hour*8, importKey)
+
 	return cacheInfo
 
 }

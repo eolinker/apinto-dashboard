@@ -8,6 +8,7 @@
         eo-ng-button
         eoNgUserAccess="deploy/cluster"
         (click)="openDrawer('publish')"
+        (disabledEdit)="disabledEdit($event)"
       >
         发布
       </button>
@@ -44,6 +45,7 @@
 <ng-template #operatorStatusTpl let-item="item">
   <div class="leading-[22px] flex items-center">
     <span
+      class="truncate"
       eoNgFeedbackTooltip
       [nzTooltipTitle]="item.name"
       nzTooltipPlacement="top"
