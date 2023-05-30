@@ -53,8 +53,6 @@ export class SystemWebhookConfigComponent implements OnInit {
   }
 
   ngOnInit (): void {
-    console.log(this)
-
     this.responseHeaderTableBody[0].disabledFn = () => {
       return this.nzDisabled
     }
