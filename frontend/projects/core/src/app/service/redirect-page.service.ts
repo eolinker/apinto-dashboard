@@ -16,18 +16,18 @@ import { EoNgNavigationService } from './app-config.service'
 })
 export class RedirectPageService implements CanActivate, CanActivate {
   // eslint-disable-next-line  no-useless-constructor
-  constructor(
+  constructor (
     private router: Router,
-    private appConfigService: EoNgNavigationService
+    private navigationService: EoNgNavigationService
   ) {}
 
-  canActivate(): Observable<boolean> {
+  canActivate (): Observable<boolean> {
     if (!this.router.routerState.snapshot.url) {
       return new Observable((observer) => {
-        this.appConfigService.getMenuList().subscribe(() => {
-          const pageRouter = this.appConfigService.getPageRoute()
+        this.navigationService.getMenuList().subscribe(() => {
+          const pageRouter = this.navigationService.getPageRoute()
           if (pageRouter) {
-            this.router.navigate([this.appConfigService.getPageRoute()])
+            this.router.navigate([this.navigationService.getPageRoute()])
             observer.next(true)
           }
         })

@@ -13,7 +13,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/group/group-entry"
 	"github.com/eolinker/apinto-dashboard/modules/group/group-model"
 	"github.com/eolinker/apinto-dashboard/modules/group/group-store"
-	"github.com/eolinker/apinto-dashboard/modules/upstream"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/go-basic/uuid"
 	"gorm.io/gorm"
@@ -28,14 +27,14 @@ const (
 
 type commonGroupService struct {
 	commonGroupStore group_store.ICommonGroupStore
-	service          upstream.IService
-	apiService       api.IAPIService
+	//service          upstream.IService
+	apiService api.IAPIService
 }
 
 func newCommonGroupService() group.ICommonGroupService {
 	c := &commonGroupService{}
 	bean.Autowired(&c.commonGroupStore)
-	bean.Autowired(&c.service)
+	//bean.Autowired(&c.service)
 	bean.Autowired(&c.apiService)
 	return c
 }
@@ -590,11 +589,12 @@ func (c *commonGroupService) GroupUUIDS(ctx context.Context, namespaceId int, gr
 func (c *commonGroupService) getTagId(ctx context.Context, namespaceId int, groupType, typeName string) int {
 	switch groupType {
 	case ServiceName:
-		serviceInfo, err := c.service.GetServiceInfo(ctx, namespaceId, typeName)
-		if err != nil {
-			return 0
-		}
-		return serviceInfo.ServiceId
+		//serviceInfo, err := c.service.GetServiceInfo(ctx, namespaceId, typeName)
+		//if err != nil {
+		//	return 0
+		//}
+		//return serviceInfo.ServiceId
+		return -1
 	case ApiName:
 		return 0
 	}

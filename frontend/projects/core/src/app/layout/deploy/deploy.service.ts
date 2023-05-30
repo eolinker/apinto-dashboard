@@ -10,6 +10,8 @@ import { DeployPluginListComponent } from './plugin/list/list.component'
   providedIn: 'root'
 })
 export class DeployService {
+  clusterName:string = ''
+  clusterDesc:string = ''
   createPluginsTbody = (context:DeployPluginListComponent):EO_TBODY_TYPE[] => {
     return [
       {
@@ -72,7 +74,7 @@ export class DeployService {
         }
       },
       {
-        key: 'name',
+        key: 'title',
         copy: true
       },
       {
@@ -191,11 +193,17 @@ export class DeployService {
   createClusterTbody (context:DeployClusterListComponent) {
     return [
       {
-        key: 'name',
+        key: 'title',
         copy: true
       },
+      {
+        key: 'desc'
+      },
       { key: 'env' },
-      { key: 'status' },
+      {
+        key: 'status',
+        title: context.clusterStatusTpl
+      },
       {
         type: 'btn',
         right: true,
@@ -204,6 +212,8 @@ export class DeployService {
             title: '查看',
             click: (item: any) => {
               context.router.navigate(['/', 'deploy', 'cluster', 'content', item.data.name])
+              this.clusterName = item.data.title
+              this.clusterDesc = item.data.desc
             }
           },
           {

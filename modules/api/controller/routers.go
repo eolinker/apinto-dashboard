@@ -1,9 +1,9 @@
 package controller
 
 import (
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
 	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	group_controller "github.com/eolinker/apinto-dashboard/modules/group/group-controller"
-	apinto_module "github.com/eolinker/apinto-module"
 	"net/http"
 )
 
@@ -76,29 +76,17 @@ func initRouter(name string) apinto_module.RoutersInfo {
 		},
 		{
 			Method:      http.MethodGet,
-			Path:        "/api/router/onlines",
-			Handler:     "api.getOnlineList",
-			HandlerFunc: []apinto_module.HandlerFunc{c.getOnlineList},
-		},
-		{
-			Method:      http.MethodPut,
-			Path:        "/api/router/enable",
-			Handler:     "api.enableAPI",
-			HandlerFunc: []apinto_module.HandlerFunc{c.enableAPI},
-		},
-		{
-			Method:      http.MethodPut,
-			Path:        "/api/router/disable",
-			Handler:     "api.disableAPI",
-			HandlerFunc: []apinto_module.HandlerFunc{c.disableAPI},
+			Path:        "/api/router/online/info",
+			Handler:     "api.getOnlineInfo",
+			HandlerFunc: []apinto_module.HandlerFunc{c.getOnlineInfo},
 		},
 		{
 			Method:      http.MethodGet,
 			Path:        "/api/router/groups",
 			Handler:     "api.groups",
 			HandlerFunc: []apinto_module.HandlerFunc{c.groups},
+			Labels:      apinto_module.RouterLabelAnonymous,
 		},
-
 		{
 			Method:      http.MethodGet,
 			Path:        "/api/router/source",

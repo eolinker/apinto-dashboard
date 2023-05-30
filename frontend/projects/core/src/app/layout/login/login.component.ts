@@ -13,6 +13,7 @@ import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { Subscription } from 'rxjs'
 import { ApiService } from '../../service/api.service'
 import { EoNgNavigationService } from '../../service/eo-ng-navigation.service'
+import { environment } from 'projects/core/src/environments/environment'
 
 @Component({
   selector: 'eo-ng-login',
@@ -20,27 +21,27 @@ import { EoNgNavigationService } from '../../service/eo-ng-navigation.service'
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent implements OnInit {
+  isBusiness:boolean = environment.isBusiness
   private subscription: Subscription = new Subscription()
-  constructor(
-    private appConfigService: EoNgNavigationService,
+  constructor (
+    private navigationService: EoNgNavigationService,
     private api: ApiService,
-    private router: Router,
-    private message: EoNgFeedbackMessageService
+    private router: Router
   ) {}
 
-  ngOnInit() {
+  ngOnInit () {
     this.api.checkAuth().subscribe((resp: any) => {
       if (resp.code === 0) {
-        this.subscription = this.appConfigService
+        this.subscription = this.navigationService
           .getMenuList()
           .subscribe(() => {
-            this.router.navigate([this.appConfigService.getPageRoute()])
+            this.router.navigate([this.navigationService.getPageRoute()], { queryParamsHandling: 'merge' })
           })
       }
     })
   }
 
-  ngOnDestroy() {
+  ngOnDestroy () {
     this.subscription.unsubscribe()
   }
 }

@@ -23,7 +23,7 @@ export class UpstreamMessageComponent implements OnInit {
   readonly nowUrl:string = this.router.routerState.snapshot.url
   serviceName:string = ''
 
-  constructor (private baseInfo:BaseInfoService, public api:ApiService, private appConfigService:EoNgNavigationService, private router:Router, private activateInfo:ActivatedRoute) {
+  constructor (private baseInfo:BaseInfoService, public api:ApiService, private navigationService:EoNgNavigationService, private router:Router, private activateInfo:ActivatedRoute) {
 
   }
 

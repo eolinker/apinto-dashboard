@@ -1,11 +1,11 @@
 package controller
 
 import (
+	"github.com/eolinker/apinto-dashboard/modules/core"
+	"github.com/eolinker/apinto-dashboard/modules/dynamic"
 	"net/http"
 
 	namespace_controller "github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
-
-	"github.com/eolinker/apinto-dashboard/modules/upstream"
 
 	"github.com/eolinker/apinto-dashboard/modules/api"
 
@@ -14,18 +14,16 @@ import (
 	"github.com/eolinker/apinto-dashboard/controller"
 
 	"github.com/eolinker/apinto-dashboard/modules/cluster"
-	"github.com/eolinker/apinto-dashboard/modules/core/service"
-
 	"github.com/gin-gonic/gin"
 
-	apinto_module "github.com/eolinker/apinto-module"
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
 )
 
 type System struct {
-	navigationService service.INavigationService
+	navigationService core.INavigationService
 	clusterService    cluster.IClusterService
 	apiService        api.IAPIService
-	upstreamService   upstream.IService
+	dynamicService    dynamic.IDynamicService
 
 	routers apinto_module.RoutersInfo
 }
@@ -36,7 +34,7 @@ func newSystem() *System {
 	bean.Autowired(&s.navigationService)
 	bean.Autowired(&s.clusterService)
 	bean.Autowired(&s.apiService)
-	bean.Autowired(&s.upstreamService)
+	bean.Autowired(&s.dynamicService)
 	return s
 }
 
@@ -49,13 +47,11 @@ func (s *System) initRouter() {
 		Method:      http.MethodGet,
 		Path:        "/api/system/modules",
 		Handler:     "core.modules",
-		Labels:      apinto_module.RouterLabelModule,
 		HandlerFunc: []apinto_module.HandlerFunc{s.list},
 	}, apinto_module.RouterInfo{
 		Method:      http.MethodGet,
 		Path:        "/api/system/quick_step",
 		Handler:     "core.quick_step",
-		Labels:      apinto_module.RouterLabelModule,
 		HandlerFunc: []apinto_module.HandlerFunc{s.quickStepInfo},
 	})
 }
@@ -80,7 +76,7 @@ func (s *System) quickStepInfo(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return
 	}
-	upstreamCount, err := s.upstreamService.UpstreamCount(ctx, namespaceId)
+	upstreamCount, err := s.dynamicService.Count(ctx, namespaceId, "service", nil)
 	if err != nil {
 		ctx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
 		return

@@ -3,6 +3,11 @@ package cluster_controller
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"sort"
+
+	"github.com/eolinker/apinto-dashboard/controller/users"
+
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/enum"
@@ -12,8 +17,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-model"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/gin-gonic/gin"
-	"net/http"
-	"sort"
 )
 
 type clusterController struct {
@@ -26,18 +29,6 @@ func newClusterController() *clusterController {
 	bean.Autowired(&c.clusterService)
 	bean.Autowired(&c.clusterNodeService)
 	return c
-}
-
-func RegisterClusterRouter(router gin.IRoutes) {
-	c := newClusterController()
-
-	router.GET("/clusters", c.clusters)
-	router.GET("/cluster/enum", c.clusterEnum)
-	router.GET("/cluster", c.cluster)
-	router.DELETE("/cluster", c.del)
-	router.POST("/cluster/", c.create)
-	router.GET("/cluster-test", c.test)
-	router.PUT("/cluster/:cluster_name/desc", c.putDesc)
 }
 
 // clusters 获取集群列表
@@ -54,6 +45,7 @@ func (c *clusterController) clusters(ginCtx *gin.Context) {
 	for _, clusterInfo := range clusters {
 		list = append(list, &cluster_dto.ClusterOut{
 			Name:       clusterInfo.Name,
+			Title:      clusterInfo.Title,
 			Env:        clusterInfo.Env,
 			Status:     enum.ClusterStatus(clusterInfo.Status),
 			Desc:       clusterInfo.Desc,
@@ -62,11 +54,33 @@ func (c *clusterController) clusters(ginCtx *gin.Context) {
 		})
 	}
 
-	m := common.Map[string, interface{}]{}
+	m := common.Map{}
 
 	m["clusters"] = list
 
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
+
+}
+
+// createClusterCheck 获取简易集群列表
+func (c *clusterController) createClusterCheck(ginCtx *gin.Context) {
+
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
+
+}
+
+// simpleClusters 获取简易集群列表
+func (c *clusterController) simpleClusters(ginCtx *gin.Context) {
+	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
+
+	clusters, err := c.clusterService.SimpleCluster(ginCtx, namespaceId)
+	if err != nil {
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
+		return
+	}
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(map[string]interface{}{
+		"clusters": clusters,
+	}))
 
 }
 
@@ -80,7 +94,7 @@ func (c *clusterController) clusterEnum(ginCtx *gin.Context) {
 	}
 
 	envCluster := make([]*cluster_dto.EnvCluster, 0)
-	clusterMap := common.Map[string, []*cluster_model.Cluster]{}
+	clusterMap := map[string][]*cluster_model.Cluster{}
 
 	for _, clusterInfo := range list {
 		clusterMap[clusterInfo.Env] = append(clusterMap[clusterInfo.Env], clusterInfo)
@@ -91,7 +105,9 @@ func (c *clusterController) clusterEnum(ginCtx *gin.Context) {
 
 		for _, clusterInfo := range clusters {
 			clusterOuts = append(clusterOuts, &cluster_dto.ClusterOut{
-				Name: clusterInfo.Name,
+				Name:  clusterInfo.Name,
+				Title: clusterInfo.Title,
+				UUID:  clusterInfo.UUID,
 			})
 		}
 
@@ -104,7 +120,7 @@ func (c *clusterController) clusterEnum(ginCtx *gin.Context) {
 	sort.Slice(envCluster, func(i, j int) bool {
 		return envCluster[i].Name > envCluster[j].Name
 	})
-	m := common.Map[string, interface{}]{}
+	m := common.Map{}
 	m["envs"] = envCluster
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
 }
@@ -125,9 +141,10 @@ func (c *clusterController) cluster(ginCtx *gin.Context) {
 		return
 	}
 
-	m := common.Map[string, interface{}]{}
+	m := common.Map{}
 	m["cluster"] = &cluster_dto.ClusterOut{
 		Name:       clusterInfo.Name,
+		Title:      clusterInfo.Title,
 		Env:        clusterInfo.Env,
 		Status:     enum.ClusterStatus(clusterInfo.Status),
 		Desc:       clusterInfo.Desc,
@@ -160,7 +177,7 @@ func (c *clusterController) create(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, "parameter error")
 		return
 	}
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	if err := c.clusterService.Insert(ginCtx, namespaceId, userId, input); err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
@@ -179,7 +196,7 @@ func (c *clusterController) del(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, "Delete cluster fail. err: cluster_name can't be nil.")
 		return
 	}
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	if err := c.clusterService.DeleteByNamespaceIdByName(ginCtx, namespaceId, userId, clusterName); err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
@@ -188,8 +205,8 @@ func (c *clusterController) del(ginCtx *gin.Context) {
 
 }
 
-// putDesc 修改集群描述
-func (c *clusterController) putDesc(ginCtx *gin.Context) {
+// update 更新集群信息
+func (c *clusterController) update(ginCtx *gin.Context) {
 
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Param("cluster_name")
@@ -200,14 +217,35 @@ func (c *clusterController) putDesc(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
-	userId := controller.GetUserId(ginCtx)
-	if err = c.clusterService.UpdateDesc(ginCtx, namespaceId, userId, clusterName, clusterInput.Desc); err != nil {
+	userId := users.GetUserId(ginCtx)
+	if err = c.clusterService.Update(ginCtx, namespaceId, userId, clusterName, clusterInput); err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 
 }
+
+//// putDesc 修改集群描述
+//func (c *clusterController) putDesc(ginCtx *gin.Context) {
+//
+//	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
+//	clusterName := ginCtx.Param("cluster_name")
+//
+//	clusterInput := &cluster_dto.ClusterInput{}
+//	err := ginCtx.BindJSON(clusterInput)
+//	if err != nil {
+//		controller.ErrorJson(ginCtx, http.StatusOK, err.Logger())
+//		return
+//	}
+//	userId := users.GetUserId(ginCtx)
+//	if err = c.clusterService.UpdateDesc(ginCtx, namespaceId, userId, clusterName, clusterInput.Desc); err != nil {
+//		controller.ErrorJson(ginCtx, http.StatusOK, err.Logger())
+//		return
+//	}
+//	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
+//
+//}
 
 // test 集群测试按钮
 func (c *clusterController) test(context *gin.Context) {
@@ -238,7 +276,7 @@ func (c *clusterController) test(context *gin.Context) {
 	bytes, _ := json.Marshal(nodes)
 	source := common.Base64Encode(bytes)
 
-	m := common.Map[string, interface{}]{}
+	m := common.Map{}
 	m["nodes"] = list
 	m["source"] = source
 	m["is_update"] = isUpdate

@@ -19,7 +19,7 @@ td {
 
   .ant-select-arrow,
   .ant-select-clear {
-    right: 1px !important;
+    // right: 1px !important;
   }
 }
 
@@ -35,4 +35,11 @@ eo-ng-select.limit-select .ant-select-selection-search {
 }
 .ant-select-multiple .ant-select-selection-search {
   margin-inline-start: 2px;
+}
+
+.ant-select:not(.ant-select-customize-input) .ant-select-selector,
+.ant-picker,
+.ant-picker-range .ant-picker-active-bar,
+.ant-picker-input > input {
+  transition: none !important;
 }

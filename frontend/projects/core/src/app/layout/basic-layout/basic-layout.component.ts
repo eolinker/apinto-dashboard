@@ -9,7 +9,7 @@
  * @FilePath: /apinto/src/app/basic-layout/basic-layout.component.ts
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
-import { Component, OnInit } from '@angular/core'
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core'
 import { Router } from '@angular/router'
 import { EoNgBreadcrumbOptions } from 'eo-ng-breadcrumb'
 import { MenuOptions } from 'eo-ng-menu'
@@ -19,13 +19,17 @@ import { MODAL_SMALL_SIZE } from '../../constant/app.config'
 import { ApiService } from '../../service/api.service'
 import { EoNgNavigationService } from '../../service/eo-ng-navigation.service'
 import { AuthInfoDetailComponent } from '../auth/info/detail/detail.component'
-
+import { BaseInfoService } from '../../service/base-info.service'
+import { IframeHttpService } from '../../service/iframe-http.service'
+import { environment } from '../../../environments/environment'
 @Component({
   selector: 'basic-layout',
   templateUrl: './basic-layout.component.html',
   styleUrls: ['./basic-layout.component.scss']
 })
 export class BasicLayoutComponent implements OnInit {
+  @ViewChild('breadcrumbTitleTpl', { static: true }) breadcrumbTitleTpl!: ElementRef
+
   sideMenuOptions: MenuOptions[] = []
   breadcrumbOptions: EoNgBreadcrumbOptions[] = []
   currentRouter: string = '' // 当前路由
@@ -49,6 +53,9 @@ export class BasicLayoutComponent implements OnInit {
     menuTitleClassName: 'menu-icon-hidden'
   }
 
+  userAvatar:boolean = false // 是否显示用户头像，取决于是否开启用户权限插件
+  isBusiness:boolean = environment.isBusiness
+
   private subscription1: Subscription = new Subscription()
   private subscription2: Subscription = new Subscription()
   private subscription3: Subscription = new Subscription()
@@ -58,22 +65,32 @@ export class BasicLayoutComponent implements OnInit {
     private router: Router,
     private api: ApiService,
     private navigationService: EoNgNavigationService,
-    private modalService: NzModalService
+    private modalService: NzModalService,
+    private baseInfo:BaseInfoService,
+    private iframeService:IframeHttpService
   ) {
     this.subscription1 = this.navigationService
       .repFlashBreadcrumb()
       .subscribe((data: any) => {
+        // data[0].iframe=true时面包屑是iframe的导航，需要特殊处理路由
+        if (data && data[0] && data[0].iframe) {
+          for (const bc of data) {
+            bc.nzContext = { url: bc.routerLink, title: bc.title }
+            bc.title = this.breadcrumbTitleTpl
+          }
+        }
         this.breadcrumbOptions = data
       })
 
     this.subscription2 = this.navigationService.repFlashMenu().subscribe(() => {
       this.sideMenuOptions = [
-        this.guideMenu,
+        ...(this.isBusiness ? [] : [this.guideMenu]),
         ...this.navigationService.getCurrentMenuList()
       ]
       for (const menu of this.sideMenuOptions) {
         menu.open = this.openMap[menu['titleString']! as string]
       }
+      this.userAvatar = this.navigationService.getUserPlugin()
     })
 
     this.subscription3 = this.router.events.subscribe(() => {
@@ -94,11 +111,18 @@ export class BasicLayoutComponent implements OnInit {
     this.subscription4.unsubscribe()
   }
 
+  clickIframeBreadcrumb (url:string) {
+    const moduleName:string = this.baseInfo.allParamsInfo.moduleName
+    window.location.href = `module/${moduleName}#/${url}`
+    this.iframeService.reqFlashIframe(url)
+  }
+
   getSideMenu () {
     this.subscription4 = this.navigationService
       .getMenuList()
       .subscribe((res: MenuOptions[]) => {
         this.sideMenuOptions = [this.guideMenu, ...res]
+        this.checkOpenMenu()
         // for (const index in this.sideMenuOptions) {
         //   this.sideMenuOptions[index].openChange = (value:MenuOptions) => {
         //     this.openHandler(value['key']!)
@@ -106,6 +130,18 @@ export class BasicLayoutComponent implements OnInit {
         // }
         this.getAccess()
       })
+  }
+
+  checkOpenMenu () {
+    for (const sideMenu of this.sideMenuOptions) {
+      if (sideMenu?.children?.length) {
+        if (sideMenu.children?.filter((menu:any) => {
+          return this.router.url.includes(menu.routerLink) && this.router.url.substring(1, menu.routerLink.length + 1) === menu.routerLink
+        }).length > 0) {
+          this.openMap[sideMenu['titleString']] = true
+        }
+      }
+    }
   }
 
   getAuthInfo () {
@@ -128,18 +164,19 @@ export class BasicLayoutComponent implements OnInit {
   }
 
   openAuthDialog () {
-    this.modalRef = this.modalService.create({
-      nzWrapClassName: 'auth-modal-header',
-      nzTitle: `${this.authInfo.title}授权`,
-      nzContent: AuthInfoDetailComponent,
-      nzComponentParams: {
-        eoInfos: this.authInfo.infos,
-        updateAuth: this.updateAuth
-      },
-      nzClosable: true,
-      nzFooter: null,
-      nzWidth: MODAL_SMALL_SIZE
-    })
+    // this.modalRef = this.modalService.create({
+    //   nzWrapClassName: 'auth-modal-header',
+    //   nzTitle: `${this.authInfo.title}授权`,
+    //   nzContent: AuthInfoDetailComponent,
+    //   nzComponentParams: {
+    //     eoInfos: this.authInfo.infos,
+    //     updateAuth: this.updateAuth
+    //   },
+    //   nzClosable: true,
+    //   nzFooter: null,
+    //   nzWidth: MODAL_SMALL_SIZE
+    // })
+    this.router.navigate(['/', 'auth-info'])
   }
 
   updateAuth = () => {
@@ -159,7 +196,7 @@ export class BasicLayoutComponent implements OnInit {
         this.router.routerState.snapshot.url === '/login'
       ) {
         // this.router.navigate([this.navigationService.getPageRoute()])
-        this.router.navigate(['/', 'guide'])
+        this.router.navigate(['/', ...(this.isBusiness ? ['router', 'api'] : ['guide'])])
       }
 
       // if (this.router.url !== this.currentRouter) {

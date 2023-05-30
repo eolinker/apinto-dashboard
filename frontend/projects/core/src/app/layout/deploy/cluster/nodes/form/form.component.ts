@@ -112,7 +112,7 @@ export class DeployClusterNodesFormComponent implements OnInit {
   clusterAddrVadidator = (control: any): { [s: string]: boolean } => {
     if (!control.value) {
       return { error: true, required: true }
-    } else if (this.testFlag && !/(\w+):\/\/([a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\.?)(:\d*)/.test(control.value) && !/(\w+):\/\/(((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3})(:\d*)/.test(control.value)) {
+    } else if (this.testFlag && !/(\w+):\/\/([a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})*\.?)*(:\d*)/.test(control.value) && !/(\w+):\/\/(((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3})(:\d*)/.test(control.value)) {
       return { error: true, pattern: true }
     } else if (this.testFlag && control.value !== this.testPassAddr) {
       return { source: true, error: true }
@@ -121,7 +121,7 @@ export class DeployClusterNodesFormComponent implements OnInit {
   }
 
   testCluster ():void {
-    if (this.validateResetNodeForm.controls['clusterAddr'].value && (/(\w+):\/\/([a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\.?)(:\d+)/.test(this.validateResetNodeForm.controls['clusterAddr'].value) || /(\w+):\/\/(((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3})(:\d*)/.test(this.validateResetNodeForm.controls['clusterAddr'].value))) {
+    if (this.validateResetNodeForm.controls['clusterAddr'].value && (/([a-zA-z]+):\/\/([a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})*\.?)*(:\d+)/.test(this.validateResetNodeForm.controls['clusterAddr'].value) || /([a-zA-z]+):\/\/(((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3})(:\d*)/.test(this.validateResetNodeForm.controls['clusterAddr'].value))) {
       this.testFlag = true
       this.api.get('cluster-test', { clusterAddr: this.validateResetNodeForm.controls['clusterAddr'].value }).subscribe(resp => {
         if (resp.code === 0) {

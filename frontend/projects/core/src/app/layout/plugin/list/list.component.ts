@@ -47,13 +47,13 @@ export class PluginListComponent implements OnInit {
   constructor (
     public api: ApiService,
     private modalService: EoNgFeedbackModalService,
-    private appConfigService: EoNgNavigationService,
+    private navigationService: EoNgNavigationService,
     private router: Router,
     private route: ActivatedRoute,
     private baseInfo: BaseInfoService,
     public service: EoNgPluginService
   ) {
-    this.appConfigService.reqFlashBreadcrumb([{ title: '企业插件' }])
+    this.navigationService.reqFlashBreadcrumb([{ title: '插件市场' }])
   }
 
   ngOnInit (): void {
@@ -100,7 +100,7 @@ export class PluginListComponent implements OnInit {
     if (this.activatedNode?.isSelected) {
       this.activatedNode!.isSelected = false
     }
-    this.router.navigate(['/', 'plugin', 'group', 'list', ''])
+    this.router.navigate(['/', 'module-plugin', 'group', 'list', ''])
   }
 
   disabledEdit (value: any) {

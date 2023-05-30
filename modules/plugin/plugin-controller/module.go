@@ -1,8 +1,8 @@
 package plugin_controller
 
 import (
+	"github.com/eolinker/apinto-dashboard/module"
 	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
-	"github.com/eolinker/apinto-module"
 	"net/http"
 )
 
@@ -23,6 +23,26 @@ func (c *PluginDriver) CheckConfig(name string, config interface{}) error {
 
 func (c *PluginDriver) CreatePlugin(define interface{}) (apinto_module.Plugin, error) {
 	return c, nil
+}
+
+func (c *PluginDriver) GetPluginFrontend(moduleName string) string {
+	return "deploy/plugin"
+}
+
+func (c *PluginDriver) IsPluginVisible() bool {
+	return true
+}
+
+func (c *PluginDriver) IsShowServer() bool {
+	return false
+}
+
+func (c *PluginDriver) IsCanUninstall() bool {
+	return false
+}
+
+func (c *PluginDriver) IsCanDisable() bool {
+	return false
 }
 
 type PluginModule struct {
