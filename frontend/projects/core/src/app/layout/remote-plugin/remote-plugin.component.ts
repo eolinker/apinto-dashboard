@@ -80,7 +80,7 @@ export class RemotePluginComponent extends EoIframeComponent implements OnInit {
   }
 
   override showIframe = (noChangeUrl?:boolean, innerUrl?:string) => {
-    this.api.get('remote/module', { name: this.moduleName }).subscribe((resp:{code:number, data:{module:ModuleOpenConfigData}, msg:string}) => {
+    this.api.get(`remote/${this.moduleName}`).subscribe((resp:{code:number, data:{module:ModuleOpenConfigData}, msg:string}) => {
       if (resp.code === 0) {
         const url:string = resp.data.module.url
         const initData:{[k:string]:any} = {}
