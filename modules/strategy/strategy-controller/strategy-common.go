@@ -3,11 +3,10 @@ package strategy_controller
 import (
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
-	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/strategy"
+	"github.com/eolinker/apinto-dashboard/modules/strategy/config"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-dto"
-	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-service/strategy-handler"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -18,23 +17,18 @@ type strategyCommonController struct {
 	strategyService strategy.IStrategyCommonService
 }
 
-func RegisterStrategyCommonRouter(router gin.IRoutes) {
+func NewStrategyCommonController() *strategyCommonController {
 	c := &strategyCommonController{}
 	bean.Autowired(&c.strategyService)
-
-	router.GET("/strategy/filter-options", c.filterOptions)
-	router.GET("/strategy/filter-remote/:name", c.filterRemote)
-	router.GET("/strategy/metrics-options", c.metricsOptions)
-	router.GET("/strategy/content-type", c.contentType)
-	router.GET("/strategy/charset", c.charset)
+	return c
 }
 
-func (s *strategyCommonController) filterOptions(ginCtx *gin.Context) {
+func (s *strategyCommonController) FilterOptions(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 
 	options, err := s.strategyService.GetFilterOptions(ginCtx, namespaceId)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -49,12 +43,12 @@ func (s *strategyCommonController) filterOptions(ginCtx *gin.Context) {
 		})
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["options"] = resList
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
 
-func (s *strategyCommonController) filterRemote(ginCtx *gin.Context) {
+func (s *strategyCommonController) FilterRemote(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 
 	name := ginCtx.Param("name")
@@ -70,55 +64,50 @@ func (s *strategyCommonController) filterRemote(ginCtx *gin.Context) {
 
 	remote, count, err := s.strategyService.GetFilterRemote(ginCtx, namespaceId, name, keyword, groupUUID, pageNum, pageSize)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	res := strategy_dto.FilterRemoteOutput{
-		Target:       remote.Target,
-		Titles:       remote.Titles,
-		Apis:         remote.Apis,
-		Services:     remote.Services,
-		Applications: remote.Applications,
-		Total:        count,
+		Target: remote.Target,
+		Titles: strategy_dto.CreateRemoteOptionTitleFromOption(remote.Titles),
+		List:   remote.List,
+		Key:    remote.Key,
+		Value:  remote.Key,
+		Total:  count,
 	}
 
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(res))
 }
 
-func (s *strategyCommonController) metricsOptions(ginCtx *gin.Context) {
-
-	options, err := s.strategyService.GetMetricsOptions()
-	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
-		return
-	}
+func (s *strategyCommonController) MetricsOptions(ginCtx *gin.Context) {
+	metrics := config.StrategyMetrics()
 
 	resList := make([]*strategy_dto.MetricsOptionsItem, 0)
-	for _, option := range options {
+	for _, option := range metrics {
 		resList = append(resList, &strategy_dto.MetricsOptionsItem{
-			Name:  option.Name,
-			Title: option.Title,
+			Name:  option.Name(),
+			Title: option.Title(),
 		})
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["options"] = resList
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
 
-func (s *strategyCommonController) contentType(ginCtx *gin.Context) {
+func (s *strategyCommonController) ContentType(ginCtx *gin.Context) {
 
-	items := strategy_handler.GetContentTypeList()
-	data := common.Map[string, interface{}]{}
+	items := config.GetContentTypeList()
+	data := common.Map{}
 	data["items"] = items
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
 
-func (s *strategyCommonController) charset(ginCtx *gin.Context) {
+func (s *strategyCommonController) Charset(ginCtx *gin.Context) {
 
-	items := enum.GetStrategyCharsetList()
-	data := common.Map[string, interface{}]{}
+	items := config.GetStrategyCharsetList()
+	data := common.Map{}
 	data["items"] = items
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }

@@ -9,7 +9,7 @@ import { ApiService } from './api.service'
 @Injectable({
   providedIn: 'root'
 })
-export class AppConfigService {
+export class EoNgNavigationService {
   private menuList:MenuOptions[] = [] // 当前用户可显示的菜单
   private updateRightsRouterList:string[] = [] // 当前用户可编辑的菜单rouer列表
   private viewRightsRouterList:string[] = [] // 当前用户可查看的菜单router列表
@@ -148,7 +148,7 @@ export class AppConfigService {
                   icon: originMenuList[indexMenu].icon
                 }
                 // @ts-ignore
-                this.menuMap.set(tempMenu['id']!, tempMenu)
+                this.menuMap.set(tempMenu['id'], tempMenu)
                 this.viewRightsRouterList.push(originMenuList[indexMenu].routerLink)
               }
             } else if (moduleAccess?.length) {

@@ -5,6 +5,16 @@ export interface DeployCertListData{
     operator:string
     createTime:string
     updateTime:string
+    dnsName:Array<string>
+    dnsNameStr?:string
+}
+
+export interface DeployCertData{
+  id:string
+  name:string
+  validTime:string
+  key:string
+  pem:string
 }
 
 export interface RedisData{
@@ -98,4 +108,16 @@ export type ClusterPluginPublishHistoryItem = {
   details:ClusterPluginChangeHistoryItem[]
   total:number
   isExpand?:boolean
+}
+
+export type ClusterStatus = 'NORMAL' | 'PARTIALLY_NORMAL'|'ABNORMAL'
+
+export type ClusterData = {
+  env:string
+  status:ClusterStatus
+  desc:string
+  name:string
+  title:string
+  createTime:string
+  updateTime:string
 }
