@@ -238,6 +238,7 @@ func (m *modulePluginService) GetPluginEnableRender(ctx context.Context, pluginU
 	}
 	renderCfg.Querys = pluginDefine.Querys
 	renderCfg.Initialize = pluginDefine.Initialize
+	renderCfg.Server = pluginDefine.Server
 
 	return renderCfg, nil
 }

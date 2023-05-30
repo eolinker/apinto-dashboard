@@ -655,7 +655,7 @@ func (d *dynamicService) ClusterStatus(ctx context.Context, namespaceId int, pro
 	}, result, nil
 }
 
-func (d *dynamicService) Create(ctx context.Context, namespaceId int, profession string, module string, skill string, title string, name string, driver string, description string, body string, updater int, depend ...string) (string, error) {
+func (d *dynamicService) Create(ctx context.Context, namespaceId int, profession string, module string, skill string, title string, name string, driver string, description string, body string, updater int, depend ...string) error {
 	now := time.Now()
 	info, err := d.dynamicStore.First(ctx, map[string]interface{}{
 		"namespace":  namespaceId,
@@ -663,7 +663,7 @@ func (d *dynamicService) Create(ctx context.Context, namespaceId int, profession
 		"name":       name,
 	})
 	if err != nil && err != gorm.ErrRecordNotFound {
-		return "", err
+		return err
 	}
 	if info == nil {
 		info = &dynamic_entry.Dynamic{
@@ -693,11 +693,10 @@ func (d *dynamicService) Create(ctx context.Context, namespaceId int, profession
 
 	ids, err := getDependIDs([]byte(body), depend)
 	if err != nil {
-		return "", err
+		return err
 	}
 
-	source := fmt.Sprintf("%s@%s", name, module)
-	return source, d.dynamicQuoteStore.Transaction(ctx, func(txCtx context.Context) error {
+	return d.dynamicQuoteStore.Transaction(ctx, func(txCtx context.Context) error {
 		err = d.dynamicStore.Save(txCtx, info)
 		if err != nil {
 			return err
@@ -706,7 +705,7 @@ func (d *dynamicService) Create(ctx context.Context, namespaceId int, profession
 		if err != nil {
 			return err
 		}
-
+		source := fmt.Sprintf("%s@%s", name, module)
 		_, err = d.dynamicQuoteStore.DeleteWhere(txCtx, map[string]interface{}{
 			"namespace": namespaceId,
 			"source":    source,
