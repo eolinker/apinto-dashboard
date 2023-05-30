@@ -1,4 +1,4 @@
-package local
+package remote
 
 import (
 	apinto_module "github.com/eolinker/apinto-dashboard/module"
