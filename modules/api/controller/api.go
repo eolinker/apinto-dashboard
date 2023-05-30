@@ -281,13 +281,15 @@ func (a *apiController) create(ginCtx *gin.Context) {
 		return
 	}
 
-	err := a.apiService.CreateAPI(ginCtx, namespaceId, userId, input)
+	uuid, err := a.apiService.CreateAPI(ginCtx, namespaceId, userId, input)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("创建API失败. err:%s", err.Error()))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
+	data := common.Map{}
+	data["uuid"] = uuid
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
 
 // alter 修改
@@ -701,4 +703,22 @@ func (a *apiController) importAPI(ginCtx *gin.Context) {
 	}
 
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
+}
+
+func (a *apiController) checkApiExist(ginCtx *gin.Context) {
+	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
+	uuid := ginCtx.Query("uuid")
+	apiInfo, err := a.apiService.GetAPIInfo(ginCtx, namespaceID, uuid)
+	if err != nil {
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("CheckApiExist fail. err: %s. ", err))
+		return
+	}
+
+	isExist := false
+	if apiInfo != nil {
+		isExist = true
+	}
+	data := common.Map{}
+	data["is_exist"] = isExist
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }

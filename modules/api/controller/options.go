@@ -74,7 +74,7 @@ func (f *FilterOption) Labels(namespaceId int, values ...string) []string {
 
 func (f *FilterOption) Label(namespaceId int, value string) string {
 	info, err := f.apiService.GetAPIInfo(context.Background(), namespaceId, value)
-	if err != nil {
+	if err != nil || info == nil {
 		return ""
 	}
 	return info.Name

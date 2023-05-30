@@ -8,7 +8,7 @@ import (
 )
 
 type ICommonGroupService interface {
-	CreateGroup(ctx context.Context, namespaceId, operator int, groupType, tagName, groupName, uuid, parentUuid string) (int, error)
+	CreateGroup(ctx context.Context, namespaceId, operator int, groupType, tagName, groupName, uuidStr, parentUuid string) (string, error)
 	UpdateGroup(ctx context.Context, namespaceId int, operator int, groupType, name, uuid string) error
 	DeleteGroup(ctx context.Context, namespaceId int, operator int, groupType, uuid string) error
 	GroupList(ctx context.Context, namespaceId int, groupType, tagName, parentUuid, queryName string) (*group_model.CommonGroupRoot, []*group_model.CommonGroupApi, error)
@@ -20,7 +20,7 @@ type ICommonGroupService interface {
 	ParentGroupName(uuid string, groupMaps map[string]*group_entry.CommonGroup, groupIdMaps map[int]*group_entry.CommonGroup, nameList *[]string)
 	SubGroupUUIDS(groups map[int][]*group_entry.CommonGroup, parentGroup *group_model.CommonGroup, list *[]string)
 	IsGroupExist(ctx context.Context, uuid string) (bool, error)
-	GetGroupByName(ctx context.Context, groupName string, parentID int) (*group_entry.CommonGroup, error)
+	GetGroupByName(ctx context.Context, namespaceId int, groupType string, groupName string, parentUUID string) (*group_model.CommonGroupBasic, error)
 	CheckGroupNameReduplicated(ctx context.Context, groupName string, parentID int) (bool, error)
 	GetGroupInfo(ctx context.Context, uuid string) (*group_entry.CommonGroup, error)
 	DeleteGroupByID(ctx context.Context, id int) error
