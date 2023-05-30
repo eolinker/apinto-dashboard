@@ -2,17 +2,18 @@
   margin-bottom: var(--FORM_SPAN);
 }
 
+@media (min-width: 575px) {
+  .ant-modal-body .ant-row {
+    flex-flow: nowrap;
+  }
+}
+
 .ant-modal-body {
   max-height: 640px;
   overflow-y: auto;
 
   textarea {
-    min-width: 346px !important;
     height: 68px;
-  }
-
-  .ant-row {
-    flex-flow: nowrap;
   }
 
   .vertical_checkbox {
@@ -59,6 +60,7 @@ eo-ng-flow-control-create .limit-bg {
 
 .ant-form-item-label > label::after {
   margin: 0 !important;
+  content: '';
 }
 
 .ant-drawer-body .ant-form-item-label > label::after {

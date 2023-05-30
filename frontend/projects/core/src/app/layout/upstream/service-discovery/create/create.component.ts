@@ -7,7 +7,7 @@ import { Router } from '@angular/router'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { ApiService } from 'projects/core/src/app/service/api.service'
-import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 
 @Component({
   selector: 'eo-ng-service-discovery-create',
@@ -64,19 +64,19 @@ export class ServiceDiscoveryCreateComponent implements OnInit {
     private api: ApiService,
     private router: Router,
     private fb: UntypedFormBuilder,
-    private appConfigService: AppConfigService
+    private navigationService: EoNgNavigationService
   ) {
     this.validateForm = this.fb.group({
       name: ['', [Validators.required, Validators.pattern('^[a-zA-Z][a-zA-Z0-9/_]*')]],
       desc: [''],
       driver: ['nacos', [Validators.required]]
     })
-    this.appConfigService.reqFlashBreadcrumb([{ title: '服务发现', routerLink: 'upstream/serv-discovery' }, { title: '新建服务' }])
+    this.navigationService.reqFlashBreadcrumb([{ title: '服务发现', routerLink: 'upstream/discovery' }, { title: '新建服务' }])
   }
 
   ngOnInit (): void {
     if (this.editPage) {
-      this.appConfigService.reqFlashBreadcrumb([{ title: '服务发现', routerLink: 'upstream/serv-discovery' }, { title: '服务信息' }])
+      this.navigationService.reqFlashBreadcrumb([{ title: '服务发现', routerLink: 'upstream/discovery' }, { title: '服务信息' }])
       this.validateForm.controls['driver'].disable()
       this.validateForm.controls['name'].disable()
       this.getServiceMessage()
@@ -256,6 +256,6 @@ export class ServiceDiscoveryCreateComponent implements OnInit {
   }
 
   backToList () {
-    this.router.navigate(['/', 'upstream', 'serv-discovery'])
+    this.router.navigate(['/', 'upstream', 'discovery'])
   }
 }

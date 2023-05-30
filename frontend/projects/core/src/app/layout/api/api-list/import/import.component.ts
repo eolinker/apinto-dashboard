@@ -8,11 +8,11 @@ import { THEAD_TYPE } from 'eo-ng-table'
 import { NzModalRef } from 'ng-zorro-antd/modal'
 import { NzFormatEmitEvent } from 'ng-zorro-antd/tree'
 import { NzUploadFile } from 'ng-zorro-antd/upload'
-import { MODAL_NORMAL_SIZE } from 'projects/core/src/app/constant/app.config'
 import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { ApiGroup, ApiGroupsData, EmptyHttpResponse } from 'projects/core/src/app/constant/type'
 import { ApiService } from 'projects/core/src/app/service/api.service'
 import { EO_TBODY_TYPE } from 'projects/eo-ng-apinto-table/src/public-api'
+import { MODAL_NORMAL_SIZE } from 'projects/core/src/app/constant/app.config'
 import { apiImportCheckResultTableHeadName, apiImportCheckResultTableBody } from '../../types/conf'
 import { APIImportData } from '../../types/types'
 
@@ -137,11 +137,11 @@ export class ApiImportComponent implements OnInit {
 
   // 获取上游服务列表
   getUpstreamList () {
-    this.api.get('service/enum').subscribe((resp:{code:number, data:{list:Array<string>}, msg:string}) => {
+    this.api.get('common/provider/Service').subscribe((resp:any) => {
       if (resp.code === 0) {
         this.upstreamList = []
-        for (const item of resp.data.list) {
-          this.upstreamList = [...this.upstreamList, { label: item, value: item }]
+        for (const item of resp.data.Service) {
+          this.upstreamList = [...this.upstreamList, { label: item.title, value: item.name }]
         }
       }
     })

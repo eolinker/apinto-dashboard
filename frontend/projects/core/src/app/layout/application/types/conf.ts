@@ -16,7 +16,8 @@ export const algorithmList:SelectOption[] = [
 
 export const positionList:SelectOption[] = [
   { label: 'Header', value: 'header' },
-  { label: 'Query', value: 'query' }
+  { label: 'Query', value: 'query' },
+  { label: 'Body', value: 'body' }
 ]
 
 export const verifyList:SelectOption[] = [
@@ -102,14 +103,10 @@ export const authLabelTableBody:TBODY_TYPE[] = [
 ]
 
 export const authenticationTableHeadName:THEAD_TYPE[] = [
+  { title: '名称' },
   { title: '鉴权类型' },
-  { title: '参数位置' },
-  { title: '参数名' },
-  { title: '参数信息' },
-  { title: '过期时间' },
-  { title: '透传上游' },
-  { title: '更新者' },
-  { title: '更新时间' },
+  { title: '隐藏鉴权信息' },
+  { title: '到期时间' },
   {
     title: '操作',
     right: true
@@ -118,30 +115,24 @@ export const authenticationTableHeadName:THEAD_TYPE[] = [
 
 export const authenticationTableBody:EO_TBODY_TYPE[] = [
   {
-    key: 'driver',
+    key: 'title',
     copy: true
   },
   {
-    key: 'paramPosition'
+    key: 'driver'
   },
-  {
-    key: 'paramName'
-  },
-  {
-    key: 'paramInfo',
-    copy: true
-  },
+  { key: 'hideCredential' },
   {
     key: 'expireTimeString'
   },
-  { key: 'isTransparent' },
-  { key: 'operator' },
-  { key: 'updateTime' },
   {
     type: 'btn',
     right: true,
     btns: [{
       title: '查看'
+    },
+    {
+      title: '修改'
     },
     {
       title: '删除'
@@ -216,5 +207,55 @@ export const extraHeaderTableBody:EO_TBODY_TYPE[] = [
         title: '减少'
       }
     ]
+  }
+]
+
+export const extraTableHeadName:THEAD_TYPE[] = [
+  { title: '参数位置' },
+  { title: '参数名' },
+  { title: '参数值' },
+  { title: '生效规则' },
+  {
+    title: '操作',
+    right: true
+  }
+]
+
+export const extraTableBody:EO_TBODY_TYPE[] = [
+  {
+    key: 'position'
+  },
+  {
+    key: 'key'
+  },
+  { key: 'value' },
+  {
+    key: 'conflict'
+  },
+  {
+    type: 'btn',
+    right: true,
+    btns: [
+      {
+        title: '修改'
+      },
+      {
+        title: '删除'
+      }
+    ]
+  }]
+
+export const extraConflictList:SelectOption[] = [
+  {
+    label: '替换原参数值',
+    value: 'convert'
+  },
+  {
+    label: '原参数值不存在时，添加额外参数',
+    value: 'origin'
+  },
+  {
+    label: '原参数值存在时返回错误',
+    value: 'error'
   }
 ]

@@ -5,7 +5,7 @@ import { CascaderOption } from 'eo-ng-cascader'
 import { CheckBoxOptionInterface } from 'eo-ng-checkbox'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { SelectOption } from 'eo-ng-select'
-import { THEAD_TYPE } from 'eo-ng-table'
+import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { ApiGroup } from 'projects/core/src/app/constant/type'
 import { ApiService } from '../../../../service/api.service'
 import { FilterForm, FilterOption, FilterRemoteOption, RemoteApiItem, RemoteAppItem, RemoteServiceItem } from '../../types/types'
@@ -76,7 +76,6 @@ export class FilterFormComponent implements OnInit {
   @Output() remoteSelectNameListChange:EventEmitter<string[]> = new EventEmitter()
   @Output() staticsListChange:EventEmitter<CheckBoxOptionInterface[]> = new EventEmitter()
   @Output() filterTypeChange:EventEmitter<string> = new EventEmitter()
-
   filterTypeMap: Map<string, any> = new Map() // 筛选条件值与类型的映射
   remoteList: RemoteAppItem[] | RemoteApiItem[] | RemoteServiceItem[] = []
   _remoteSelectList: string[] = [] // 穿梭框内被勾选的选项uuid
@@ -90,7 +89,9 @@ export class FilterFormComponent implements OnInit {
   searchGroup: string[] = []
   showFilterError: boolean = false
   strategyType: string = ''
-  nzDisabled: boolean = false
+
+  valueName:string = 'uuid' // 数据keyName，由接口传入，如果接口未传入则默认为uuid
+  @Input() nzDisabled: boolean = false
   _filterForm: FilterForm = {
     name: '',
     title: '',
@@ -113,7 +114,7 @@ export class FilterFormComponent implements OnInit {
     }
   ]
 
-  filterTbody: THEAD_TYPE[] = [
+  filterTbody: TBODY_TYPE[] = [
     {
       key: 'checked',
       type: 'checkbox'
@@ -196,21 +197,24 @@ export class FilterFormComponent implements OnInit {
           this.remoteList = []
           this.remoteSelectList = []
           this.remoteSelectNameList = []
-          for (const index in resp.data[resp.data.target]) {
-            resp.data[resp.data.target][index].checked = this.editFilter && this.filterForm.name === this.editFilter.name
+          // @ts-ignore // TODO 等待接口修改的兼容处理，接口修改后则删除
+          const list = resp.data.target ? resp.data[resp.data.target] : resp.data.list
+          this.valueName = resp.data.key
+          for (const index in list) {
+            list[index].checked = this.editFilter && this.filterForm.name === this.editFilter.name
               ? !!(!!this.editFilter.values?.includes(
-                  resp.data[resp.data.target][index].uuid
+                  list[index][this.valueName]
                 ) || this.editFilter.values[0] === 'ALL')
               : false
-            if (resp.data[resp.data.target][index].checked) {
+            if (list[index].checked) {
               this.remoteSelectList.push(
-                resp.data[resp.data.target][index].uuid
+                list[index][this.valueName]
               )
               this.remoteSelectNameList.push(
-                resp.data[resp.data.target][index].name
+                list[index].title
               )
             }
-            this.remoteList.push(resp.data[resp.data.target][index] as any)
+            this.remoteList.push(list[index] as any)
           }
           this.originRemoteList = [...this.remoteList]
           this.filterTbody = [
@@ -219,6 +223,9 @@ export class FilterFormComponent implements OnInit {
               type: 'checkbox',
               click: () => {
                 this.getNewRemotesStatus()
+              },
+              disabledFn: () => {
+                return this.nzDisabled
               }
 
             }
@@ -228,12 +235,13 @@ export class FilterFormComponent implements OnInit {
               type: 'checkbox',
               click: () => {
                 this.getNewRemotesStatus()
-              }
+              },
+              disabled: this.nzDisabled
 
             }
           ]
           for (const index in resp.data.titles) {
-            this.filterTbody.push({ key: resp.data.titles[index].field })
+            this.filterTbody.push({ key: (resp.data.titles[index].field).replace(/_([a-z])/g, (p, m) => m.toUpperCase()) })
             this.filterThead.push({ title: resp.data.titles[index].title })
           }
           this.filterTypeMap.get(this.filterForm.name).total = resp.data.total
@@ -253,14 +261,18 @@ export class FilterFormComponent implements OnInit {
     setTimeout(() => {
       for (const item of this.remoteList) {
         if (item.checked) {
-          if (this._remoteSelectList.indexOf(item.uuid) === -1) {
-            this._remoteSelectList.push(item.uuid)
-            this._remoteSelectNameList.push(item.name)
+          // @ts-ignore // TODO 等待接口修改的兼容处理，接口修改后则删除
+          if (this._remoteSelectList.indexOf(item[this.valueName]) === -1) {
+          // @ts-ignore // TODO 等待接口修改的兼容处理，接口修改后则删除
+            this._remoteSelectList.push(item[this.valueName])
+            this._remoteSelectNameList.push(item.title)
           }
         } else {
-          if (this._remoteSelectList.indexOf(item.uuid) !== -1) {
-            this._remoteSelectList.splice(this._remoteSelectList.indexOf(item.uuid), 1)
-            this._remoteSelectNameList.splice(this._remoteSelectNameList.indexOf(item.name), 1)
+          // @ts-ignore // TODO 等待接口修改的兼容处理，接口修改后则删除
+          if (this._remoteSelectList.indexOf(item[this.valueName]) !== -1) {
+          // @ts-ignore // TODO 等待接口修改的兼容处理，接口修改后则删除
+            this._remoteSelectList.splice(this._remoteSelectList.indexOf(item[this.valueName]), 1)
+            this._remoteSelectNameList.splice(this._remoteSelectNameList.indexOf(item.title), 1)
           }
         }
       }
@@ -296,7 +308,13 @@ export class FilterFormComponent implements OnInit {
       })
       .subscribe((resp: {code:number, data:FilterRemoteOption, msg:string}) => {
         if (resp.code === 0) {
-          this.remoteList = resp.data[resp.data.target]
+          this.valueName = resp.data.key
+          // @ts-ignore // TODO 等待接口修改的兼容处理，接口修改后则删除
+          this.remoteList = resp.data.target ? resp.data[resp.data.target] : resp.data.list
+          this.remoteList = this.remoteList.map((item:any) => {
+            item.checked = this._remoteSelectList.indexOf(item.uuid) !== -1
+            return item
+          })
         }
       })
   }
@@ -304,7 +322,7 @@ export class FilterFormComponent implements OnInit {
   // 搜索远程数据（不调接口
   searchRemoteList () {
     this.remoteList = this.originRemoteList.filter((item:any) => {
-      return item.name.includes(this.searchWord)
+      return item.title.includes(this.searchWord)
     })
   }
 
@@ -405,6 +423,8 @@ export class FilterFormComponent implements OnInit {
 
   transferHeader (header: CascaderOption[]) {
     for (const index in header) {
+      header[index].label = header[index]['name']
+      header[index].value = header[index]['uuid']
       if (!header[index].children || header[index].children!.length === 0) {
         header[index].isLeaf = true
       } else {

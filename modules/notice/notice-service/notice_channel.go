@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/eolinker/apinto-dashboard/common"
+	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-dashboard/modules/base/quote-entry"
 	"github.com/eolinker/apinto-dashboard/modules/base/quote-store"
@@ -49,21 +50,21 @@ func (n *noticeChannelService) InitChannelDriver() error {
 		if err != nil {
 			return err
 		}
-		var driverNoticeChannel notice.IDriverNoticeChannel
+		var noticeChannelDriver notice.IDriverNoticeChannel
 		if channel.Type == 2 {
 			email := new(notice_model.NoticeChannelEmail)
 			if err = json.Unmarshal([]byte(version.Config), email); err != nil {
 				return err
 			}
-			driverNoticeChannel = common.NewSmtp(email.SmtpUrl, email.SmtpPort, email.Protocol, email.Account, email.Password, email.Email)
+			noticeChannelDriver = common.NewSmtp(email.SmtpUrl, email.SmtpPort, email.Protocol, email.Account, email.Password, email.Email)
 		} else {
 			webhook := new(notice_model.NoticeChannelWebhook)
 			if err := json.Unmarshal([]byte(version.Config), webhook); err != nil {
 				return err
 			}
-			driverNoticeChannel = common.NewWebhook(webhook.Url, webhook.Method, webhook.ContentType, webhook.NoticeType, webhook.UserSeparator, webhook.Header, webhook.Template)
+			noticeChannelDriver = common.NewWebhook(webhook.Url, webhook.Method, webhook.ContentType, webhook.NoticeType, webhook.UserSeparator, webhook.Header, webhook.Template)
 		}
-		n.noticeChannelDriver.RegisterDriver(channel.Name, driverNoticeChannel)
+		n.noticeChannelDriver.RegisterDriver(channel.Name, noticeChannelDriver)
 	}
 	return nil
 }
@@ -81,7 +82,7 @@ func (n *noticeChannelService) CreateNoticeChannel(ctx context.Context, namespac
 		UpdateTime:  t,
 	}
 
-	var driverNoticeChannel notice.IDriverNoticeChannel
+	var noticeChannelDriver notice.IDriverNoticeChannel
 	//邮箱
 	if channel.Type == 2 {
 		channels, _ := n.noticeChannelStore.GetByType(ctx, namespaceId, channel.Type)
@@ -93,17 +94,17 @@ func (n *noticeChannelService) CreateNoticeChannel(ctx context.Context, namespac
 		if err := json.Unmarshal([]byte(channel.Config), email); err != nil {
 			return err
 		}
-		driverNoticeChannel = common.NewSmtp(email.SmtpUrl, email.SmtpPort, email.Protocol, email.Account, email.Password, email.Email)
+		noticeChannelDriver = common.NewSmtp(email.SmtpUrl, email.SmtpPort, email.Protocol, email.Account, email.Password, email.Email)
 	} else {
 		webhook := new(notice_model.NoticeChannelWebhook)
 		if err := json.Unmarshal([]byte(channel.Config), webhook); err != nil {
 			return err
 		}
-		driverNoticeChannel = common.NewWebhook(webhook.Url, webhook.Method, webhook.ContentType, webhook.NoticeType, webhook.UserSeparator, webhook.Header, webhook.Template)
+		noticeChannelDriver = common.NewWebhook(webhook.Url, webhook.Method, webhook.ContentType, webhook.NoticeType, webhook.UserSeparator, webhook.Header, webhook.Template)
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: channel.Name,
 		Name: channel.Title,
 	})
@@ -137,7 +138,7 @@ func (n *noticeChannelService) CreateNoticeChannel(ctx context.Context, namespac
 			return err
 		}
 
-		n.noticeChannelDriver.RegisterDriver(noticeChannel.Name, driverNoticeChannel)
+		n.noticeChannelDriver.RegisterDriver(noticeChannel.Name, noticeChannelDriver)
 
 		return nil
 	})
@@ -151,7 +152,7 @@ func (n *noticeChannelService) UpdateNoticeChannel(ctx context.Context, namespac
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: noticeChannel.Name,
 		Name: noticeChannel.Title,
 	})
@@ -164,20 +165,20 @@ func (n *noticeChannelService) UpdateNoticeChannel(ctx context.Context, namespac
 	noticeChannel.Operator = userID
 	noticeChannel.UpdateTime = t
 
-	var driverNoticeChannel notice.IDriverNoticeChannel
+	var noticeChannelDriver notice.IDriverNoticeChannel
 	//邮箱
 	if channel.Type == 2 {
 		email := new(notice_model.NoticeChannelEmail)
 		if err = json.Unmarshal([]byte(channel.Config), email); err != nil {
 			return err
 		}
-		driverNoticeChannel = common.NewSmtp(email.SmtpUrl, email.SmtpPort, email.Protocol, email.Account, email.Password, email.Email)
+		noticeChannelDriver = common.NewSmtp(email.SmtpUrl, email.SmtpPort, email.Protocol, email.Account, email.Password, email.Email)
 	} else {
 		webhook := new(notice_model.NoticeChannelWebhook)
 		if err = json.Unmarshal([]byte(channel.Config), webhook); err != nil {
 			return err
 		}
-		driverNoticeChannel = common.NewWebhook(webhook.Url, webhook.Method, webhook.ContentType, webhook.NoticeType, webhook.UserSeparator, webhook.Header, webhook.Template)
+		noticeChannelDriver = common.NewWebhook(webhook.Url, webhook.Method, webhook.ContentType, webhook.NoticeType, webhook.UserSeparator, webhook.Header, webhook.Template)
 
 	}
 
@@ -210,7 +211,7 @@ func (n *noticeChannelService) UpdateNoticeChannel(ctx context.Context, namespac
 			return err
 		}
 
-		n.noticeChannelDriver.RegisterDriver(noticeChannel.Name, driverNoticeChannel)
+		n.noticeChannelDriver.RegisterDriver(noticeChannel.Name, noticeChannelDriver)
 
 		return nil
 	})
@@ -225,7 +226,7 @@ func (n *noticeChannelService) DeleteNoticeChannel(ctx context.Context, namespac
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: noticeChannel.Name,
 		Name: noticeChannel.Title,
 	})

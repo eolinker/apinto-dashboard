@@ -3,7 +3,7 @@
 import { Directive, ElementRef, EventEmitter, Input, OnInit, Output, Renderer2 } from '@angular/core'
 import { Router } from '@angular/router'
 import { Subscription } from 'rxjs'
-import { AppConfigService } from '../service/app-config.service'
+import { EoNgNavigationService } from '../service/eo-ng-navigation.service'
 
 @Directive({
   selector: '[eoNgUserAccess]'
@@ -14,21 +14,17 @@ export class UserAccessDirective implements OnInit {
   @Output() disabledEdit:EventEmitter<any> = new EventEmitter()
   oldAccessRouter:string = ''
   private userRight:boolean = false // 默认用户无权限或查看编辑
-  private userRightList:Array<string> = [] // 用户编辑或查看权限路由列表
   private subscription: Subscription = new Subscription()
   private subscription1: Subscription = new Subscription()
   constructor (
-    private appConfigService:AppConfigService,
+    private navigationService:EoNgNavigationService,
     private el:ElementRef,
     private renderer:Renderer2,
     private router:Router) {
   }
 
   ngOnInit (): void {
-    this.subscription = this.appConfigService.repUpdateRightList().subscribe(() => {
-      this.disableEdit()
-    })
-    this.subscription1 = this.appConfigService.repViewRightList().subscribe(() => {
+    this.subscription = this.navigationService.repUpdateRightList().subscribe(() => {
       this.disableEdit()
     })
   }
@@ -43,9 +39,9 @@ export class UserAccessDirective implements OnInit {
   }
 
   disableEdit () {
-    if (this.appConfigService.dataUpdated) {
-      this.userRightList = this.viewAccess ? this.appConfigService.getViewRightsRouter() : this.appConfigService.getUpdateRightsRouter()
-      this.userRight = this.userRightList.indexOf(this.eoNgUserAccess) !== -1
+    if (this.navigationService.dataUpdated) {
+      const moduleName = this.navigationService.routerNameMap.get(this.eoNgUserAccess) || this.eoNgUserAccess
+      this.userRight = this.viewAccess ? !!this.navigationService.accessMap.get(moduleName) : this.navigationService.accessMap.get(moduleName) === 'edit'
       if (!this.userRight) {
         if (this.el.nativeElement.localName === 'eo-ng-dropdown' || this.el.nativeElement.localName === 'a') {
           this.renderer.setStyle(this.el.nativeElement, 'visibility', 'hidden')
