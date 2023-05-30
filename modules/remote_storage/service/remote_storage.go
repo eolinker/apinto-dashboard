@@ -7,6 +7,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/remote_storage/model"
 	"github.com/eolinker/apinto-dashboard/modules/remote_storage/store"
 	"github.com/eolinker/eosc/common/bean"
+	"gorm.io/gorm"
 )
 
 type remoteStorageService struct {
@@ -16,6 +17,13 @@ type remoteStorageService struct {
 func (c *remoteStorageService) Get(module, key string) (*model.RemoteStorage, error) {
 	ent, err := c.store.Get(context.Background(), module, key)
 	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return &model.RemoteStorage{
+				Module: module,
+				Key:    key,
+				Object: "",
+			}, nil
+		}
 		return nil, err
 	}
 	return &model.RemoteStorage{
