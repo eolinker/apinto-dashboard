@@ -42,14 +42,14 @@ func (r *remotePluginController) createRemoteApis() []apinto_module.RouterInfo {
 			Method:      "GET",
 			Path:        fmt.Sprintf("/api/remote/%s/store/:key", r.moduleName),
 			Handler:     fmt.Sprintf("%s.getRemoteObject", r.moduleName),
-			Labels:      apinto_module.RouterLabelApi,
+			Labels:      apinto_module.RouterLabelAnonymous,
 			HandlerFunc: []apinto_module.HandlerFunc{r.getObject()},
 		},
 		{
 			Method:      "PUT",
 			Path:        fmt.Sprintf("/api/remote/%s/store/:key", r.moduleName),
 			Handler:     fmt.Sprintf("%s.saveRemoteObject", r.moduleName),
-			Labels:      apinto_module.RouterLabelApi,
+			Labels:      apinto_module.RouterLabelAnonymous,
 			HandlerFunc: []apinto_module.HandlerFunc{r.saveObject()},
 		},
 	}
@@ -90,21 +90,20 @@ func configParamToDto(configParams map[string]string, defineParams []ExtendParam
 		items = append(items, item)
 	}
 
-	return nil
+	return items
 }
 
 func (r *remotePluginController) saveObject() gin.HandlerFunc {
 	return func(ginCtx *gin.Context) {
-		module := ginCtx.Param("module")
 		key := ginCtx.Param("key")
 
-		//TODO
-		object, err := ginCtx.GetRawData()
-		if err != nil {
+		object := new(interface{})
+		if err := ginCtx.BindJSON(object); err != nil {
 			controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 			return
 		}
-		err = r.remoteStorageService.Save(module, key, object)
+
+		err := r.remoteStorageService.Save(r.moduleName, key, object)
 		if err != nil {
 			controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 			return
@@ -115,10 +114,9 @@ func (r *remotePluginController) saveObject() gin.HandlerFunc {
 
 func (r *remotePluginController) getObject() gin.HandlerFunc {
 	return func(ginCtx *gin.Context) {
-		module := ginCtx.Param("module")
 		key := ginCtx.Param("key")
 
-		storageInfo, err := r.remoteStorageService.Get(module, key)
+		storageInfo, err := r.remoteStorageService.Get(r.moduleName, key)
 		if err != nil {
 			controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 			return
