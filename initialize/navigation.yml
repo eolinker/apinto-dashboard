@@ -38,7 +38,7 @@
 - id: "navigation.api_market"
   name: "api-market"
   cname: "API市场"
-  icon: "shop"
+  icon: "Eolink"
   quick: true
 - id: "navigation.system"
   name: "system"
