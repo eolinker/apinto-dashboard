@@ -16,6 +16,8 @@
         nzPlaceHolder="请选择"
         [nzDisabled]="nzDisabled"
         (ngModelChange)="changePluginChange()"
+        eoNgUserAccess="router/plugin-template"
+        (disabledEdit)="disabledEdit($event)"
       ></eo-ng-select>
     </nz-form-control>
   </nz-form-item>
@@ -35,6 +37,7 @@
       [(code)]="code"
       (codeChange)="codeChange()"
       [autoFormat]="true"
+      [readonly]="nzDisabled"
     ></eo-ng-codebox>
     <div *ngIf="showValid" class="red">
       {{ code ? 'JSON格式有误' : '必填项' }}

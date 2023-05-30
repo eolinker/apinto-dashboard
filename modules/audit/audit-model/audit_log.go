@@ -1,14 +1,12 @@
 package audit_model
 
-import "github.com/eolinker/apinto-dashboard/enum"
-
 type LogListItem struct {
-	ID          int                 `json:"id"`
-	Operator    *OperatorInfo       `json:"operator"`
-	OperateType enum.LogOperateType `json:"operate_type"`
-	Kind        enum.LogKind        `json:"kind"`
-	Time        string              `json:"time"`
-	IP          string              `json:"ip"`
+	ID          int            `json:"id"`
+	Operator    *OperatorInfo  `json:"operator"`
+	OperateType LogOperateType `json:"operate_type"`
+	Kind        string         `json:"kind"`
+	Time        string         `json:"time"`
+	IP          string         `json:"ip"`
 }
 
 type LogDetailArg struct {

@@ -39,6 +39,10 @@ import { ApplicationPublishComponent } from './publish/publish.component'
 import { DirectiveModule } from '../../directive/directive.module'
 import { EoNgApintoTableModule } from 'projects/eo-ng-apinto-table/src/public-api'
 import { ApplicationAuthenticationFormComponent } from './authentication/form/form.component'
+import { NzSpinModule } from 'ng-zorro-antd/spin'
+import { ApplicationExtraComponent } from './extra/extra.component'
+import { ApplicationAuthenticationViewComponent } from './authentication/view/view.component';
+import { ApplicationExtraFormComponent } from './extra/form/form.component'
 
 @NgModule({
   declarations: [
@@ -49,7 +53,10 @@ import { ApplicationAuthenticationFormComponent } from './authentication/form/fo
     ApplicationPublishComponent,
     ApplicationMessageComponent,
     ApplicationAuthenticationComponent,
-    ApplicationAuthenticationFormComponent
+    ApplicationAuthenticationFormComponent,
+    ApplicationExtraComponent,
+    ApplicationAuthenticationViewComponent,
+    ApplicationExtraFormComponent
   ],
   imports: [
     EoNgLayoutModule,
@@ -84,7 +91,8 @@ import { ApplicationAuthenticationFormComponent } from './authentication/form/fo
     NzHighlightModule,
     DirectiveModule,
     ApplicationRoutingModule,
-    EoNgApintoTableModule
+    EoNgApintoTableModule,
+    NzSpinModule
   ]
 })
 export class ApplicationModule { }

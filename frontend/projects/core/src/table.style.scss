@@ -9,9 +9,10 @@ nz-table-sorters.ant-table-column-sorters {
 }
 nz-table-inner-scroll,
 nz-table-inner-default {
-  .ant-input {
-    // border: none;
+  .ant-table-header {
+    border-top: 1px solid var(--border-color);
   }
+
   .ant-table tfoot > tr > td,
   .ant-table-tbody > tr > td {
     border: none;
@@ -22,9 +23,16 @@ nz-table-inner-default {
     color: var(--TITLE_TEXT);
     font-weight: 400;
     border: none;
-    border-top: 1px solid var(--border-color);
     border-bottom: 1px solid var(--border-color);
     white-space: nowrap;
+    nz-table-filter > .ant-table-column-title {
+      width: calc(100% - 40px);
+      > span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
   }
 }
 

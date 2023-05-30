@@ -39,6 +39,7 @@
         <div></div>
         <eo-ng-search-input-group
           class="w-[224px]"
+          [nzDisabled]="nzDisabled"
           [eoNoWidth]="true"
           [eoInputVal]="searchWord"
           (eoClick)="searchWord = ''; searchRemoteList()"
@@ -48,6 +49,7 @@
             eo-ng-input
             placeholder="请输入"
             [(ngModel)]="searchWord"
+            [disabled]="nzDisabled"
             (keyup.enter)="searchRemoteList()"
           />
         </eo-ng-search-input-group>
@@ -74,6 +76,7 @@
           </eo-ng-cascader>
           <eo-ng-search-input-group
             class="w-[224px] inline-block"
+            [nzDisabled]="nzDisabled"
             [eoNoWidth]="true"
             [eoInputVal]="searchWord"
             (eoClick)="searchWord = ''; getSearchRemoteList()"
@@ -82,6 +85,7 @@
               type="text"
               eo-ng-input
               placeholder="请输入"
+              [disabled]="nzDisabled"
               [(ngModel)]="searchWord"
               (keyup.enter)="getSearchRemoteList()"
             />
@@ -93,7 +97,7 @@
         [nzThead]="filterThead"
         [(nzData)]="remoteList"
         [nzNoScroll]="true"
-        [nzTrClick]="clickItem"
+        [nzTrClick]="nzDisabled ? null : clickItem"
         [nzScrollY]="316"
       ></eo-ng-apinto-table>
     </section>

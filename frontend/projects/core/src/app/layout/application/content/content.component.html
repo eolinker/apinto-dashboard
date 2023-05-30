@@ -1,36 +1,55 @@
 <!--
- * @Author: 
+ * @Author: MengjieYang yangmengjie@eolink.com
  * @Date: 2022-08-24 00:37:49
- * @LastEditors: 
+ * @LastEditors: MengjieYang yangmengjie@eolink.com
  * @LastEditTime: 2022-08-24 00:43:11
  * @FilePath: /apinto/src/app/layout/application/application-content/application-content.component.html
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
-<div class="content-tabs-fixed">
+<div class="overflow-hidden">
+  <div
+    class="pl-btnbase pr-btnrbase py-btnybase border-[0px] border-b-[1px] border-solid border-BORDER"
+  >
+    <section>
+      <button
+        eo-ng-button
+        type="default"
+        class="mr-btnbase"
+        (click)="backToList()"
+      >
+        返回
+      </button>
+      <span class="font-bold"
+        >{{ service.appName }} ： {{ service.appDesc }}</span
+      >
+    </section>
+  </div>
   <eo-ng-tabs [nzLinkRouter]="true" [nzOptions]="tabOptions"></eo-ng-tabs>
 
   <ng-template #tab1Tpl>
-    <span>上线管理</span>
+    <span>额外参数</span>
   </ng-template>
 
   <ng-template #tab2Tpl>
-    <span>应用信息</span>
+    <span>应用设置</span>
   </ng-template>
 
   <ng-template #tab3Tpl>
-    <span *ngIf="appId !== 'anonymous'">鉴权管理</span>
+    <span *ngIf="appId !== 'anonymous'">访问鉴权</span>
     <div
       eoNgFeedbackTooltip
       *ngIf="appId === 'anonymous'"
       eoNgFeedbackTooltip
       nzTooltipPlacement="bottom"
       nzTooltipTrigger="hover"
-      nzTooltipTitle="匿名应用不开放鉴权管理"
+      nzTooltipTitle="匿名应用不开放访问鉴权"
     >
-      鉴权管理
+      访问鉴权
     </div>
   </ng-template>
-</div>
-<div class="inside-content-fixed-top-51">
-  <router-outlet></router-outlet>
+  <div [ngClass]="{ 'mb-formTop': showTopBlank }">
+    <nz-spin [nzSpinning]="service.loading">
+      <router-outlet></router-outlet>
+    </nz-spin>
+  </div>
 </div>

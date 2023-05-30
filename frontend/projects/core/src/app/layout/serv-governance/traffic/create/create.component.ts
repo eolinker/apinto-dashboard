@@ -9,7 +9,7 @@ import {
   EoNgFeedbackMessageService
 } from 'eo-ng-feedback'
 import { ApiService } from 'projects/core/src/app/service/api.service'
-import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 import {
   FormGroup,
   UntypedFormBuilder,
@@ -74,7 +74,7 @@ export class TrafficCreateComponent implements OnInit {
     private api: ApiService,
     private fb: UntypedFormBuilder,
     private router:Router,
-    private appConfigService: AppConfigService
+    private navigationService: EoNgNavigationService
   ) {
     this.validateForm = this.fb.group({
       name: [
@@ -99,9 +99,9 @@ export class TrafficCreateComponent implements OnInit {
       body: ['']
     })
 
-    this.appConfigService.reqFlashBreadcrumb([
-      { title: '流量策略', routerLink: 'serv-governance' },
-      { title: '新建流量策略' }
+    this.navigationService.reqFlashBreadcrumb([
+      { title: '流量限制', routerLink: 'serv-governance/traffic' },
+      { title: '新建流量限制策略' }
     ])
   }
 
@@ -130,9 +130,9 @@ export class TrafficCreateComponent implements OnInit {
           msg: string
         }) => {
           if (resp.code === 0) {
-            this.appConfigService.reqFlashBreadcrumb([
+            this.navigationService.reqFlashBreadcrumb([
               {
-                title: '流量策略',
+                title: '流量限制',
                 routerLink: 'serv-governance/traffic'
               },
               { title: resp.data.strategy!.name }
