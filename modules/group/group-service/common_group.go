@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
+	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/modules/api"
 	"github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-dashboard/modules/group"
@@ -12,7 +13,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/group/group-entry"
 	"github.com/eolinker/apinto-dashboard/modules/group/group-model"
 	"github.com/eolinker/apinto-dashboard/modules/group/group-store"
-	"github.com/eolinker/apinto-dashboard/modules/upstream"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/go-basic/uuid"
 	"gorm.io/gorm"
@@ -27,14 +27,14 @@ const (
 
 type commonGroupService struct {
 	commonGroupStore group_store.ICommonGroupStore
-	service          upstream.IService
-	apiService       api.IAPIService
+	//service          upstream.IService
+	apiService api.IAPIService
 }
 
 func newCommonGroupService() group.ICommonGroupService {
 	c := &commonGroupService{}
 	bean.Autowired(&c.commonGroupStore)
-	bean.Autowired(&c.service)
+	//bean.Autowired(&c.service)
 	bean.Autowired(&c.apiService)
 	return c
 }
@@ -120,7 +120,7 @@ func (c *commonGroupService) DeleteGroup(ctx context.Context, namespaceId int, o
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: uuid,
 		Name: groupInfo.Name,
 	})
@@ -151,7 +151,7 @@ func (c *commonGroupService) UpdateGroup(ctx context.Context, namespaceId int, o
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: uuid,
 		Name: name,
 	})
@@ -444,10 +444,10 @@ func (c *commonGroupService) SubGroupUUIDS(groups map[int][]*group_entry.CommonG
 	}
 }
 
-func (c *commonGroupService) CreateGroup(ctx context.Context, namespaceId int, operator int, groupType, tagName, groupName, uuidStr, parentUuid string) error {
+func (c *commonGroupService) CreateGroup(ctx context.Context, namespaceId, operator int, groupType, tagName, groupName, uuidStr, parentUuid string) (int, error) {
 	tagId := c.getTagId(ctx, namespaceId, groupType, tagName)
 	if tagId == -1 {
-		return errors.New("params error")
+		return 0, errors.New("params error")
 	}
 	t := time.Now()
 	var err error
@@ -456,7 +456,7 @@ func (c *commonGroupService) CreateGroup(ctx context.Context, namespaceId int, o
 	if parentUuid != "" {
 		parentServiceGroup, err = c.commonGroupStore.GetByUUID(ctx, parentUuid)
 		if err != nil && err != gorm.ErrRecordNotFound {
-			return err
+			return 0, err
 		}
 	}
 
@@ -468,10 +468,10 @@ func (c *commonGroupService) CreateGroup(ctx context.Context, namespaceId int, o
 	// 判断要创建的目录下有没有重名的， 有则返回报错
 	isRepeated, err := c.CheckGroupNameReduplicated(ctx, groupName, parentId)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	if isRepeated {
-		return fmt.Errorf("groupName %s is reduplicated. ", groupName)
+		return 0, fmt.Errorf("groupName %s is reduplicated. ", groupName)
 	}
 
 	if uuidStr == "" {
@@ -480,7 +480,7 @@ func (c *commonGroupService) CreateGroup(ctx context.Context, namespaceId int, o
 
 	maxSort, err := c.commonGroupStore.GetMaxSort(ctx, namespaceId, groupType, tagId, parentId)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	groupInfo := &group_entry.CommonGroup{
 		Uuid:        uuidStr,
@@ -496,12 +496,16 @@ func (c *commonGroupService) CreateGroup(ctx context.Context, namespaceId int, o
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: uuidStr,
 		Name: groupName,
 	})
+	err = c.commonGroupStore.Save(ctx, groupInfo)
+	if err != nil {
+		return 0, err
+	}
 
-	return c.commonGroupStore.Save(ctx, groupInfo)
+	return groupInfo.Id, nil
 
 }
 
@@ -514,6 +518,17 @@ func (c *commonGroupService) IsGroupExist(ctx context.Context, uuid string) (boo
 		return false, err
 	}
 	return true, nil
+}
+
+func (c *commonGroupService) GetGroupByName(ctx context.Context, groupName string, parentID int) (*group_entry.CommonGroup, error) {
+	list, err := c.commonGroupStore.GetByNameParentID(ctx, groupName, parentID)
+	if err != nil {
+		return nil, err
+	}
+	if len(list) == 0 {
+		return nil, gorm.ErrRecordNotFound
+	}
+	return list[0], nil
 }
 
 // CheckGroupNameReduplicated 检测分组名是否重复
@@ -574,13 +589,23 @@ func (c *commonGroupService) GroupUUIDS(ctx context.Context, namespaceId int, gr
 func (c *commonGroupService) getTagId(ctx context.Context, namespaceId int, groupType, typeName string) int {
 	switch groupType {
 	case ServiceName:
-		serviceInfo, err := c.service.GetServiceInfo(ctx, namespaceId, typeName)
-		if err != nil {
-			return 0
-		}
-		return serviceInfo.ServiceId
+		//serviceInfo, err := c.service.GetServiceInfo(ctx, namespaceId, typeName)
+		//if err != nil {
+		//	return 0
+		//}
+		//return serviceInfo.ServiceId
+		return -1
 	case ApiName:
 		return 0
 	}
 	return -1
+}
+
+func (c *commonGroupService) GetGroupInfo(ctx context.Context, uuid string) (*group_entry.CommonGroup, error) {
+	return c.commonGroupStore.GetByUUID(ctx, uuid)
+}
+
+func (c *commonGroupService) DeleteGroupByID(ctx context.Context, id int) error {
+	_, err := c.commonGroupStore.Delete(ctx, id)
+	return err
 }

@@ -4,13 +4,15 @@ import { Router, NavigationEnd } from '@angular/router'
 import { NzTreeNodeOptions } from 'ng-zorro-antd/tree'
 import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feedback'
 import { ApiService } from 'projects/core/src/app/service/api.service'
-import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 import { Subscription } from 'rxjs'
 import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { BaseInfoService } from 'projects/core/src/app/service/base-info.service'
-import { apisTableHeadName, apisTableBody } from '../../types/conf'
-import { APIList } from '../../types/types'
-import { MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
+import { MODAL_NORMAL_SIZE, MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
+import { ApiListItem } from '../../types/types'
+import { RouterService } from '../../router.service'
+import { NzModalRef } from 'ng-zorro-antd/modal'
+import { ApiPublishComponent } from '../publish/single/publish.component'
 
 @Component({
   selector: 'eo-ng-api-management-list',
@@ -34,6 +36,7 @@ import { MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
 })
 export class ApiManagementListComponent implements OnInit {
   @ViewChild('methodTpl', { read: TemplateRef, static: true }) methodTpl: TemplateRef<any> | undefined
+  @ViewChild('clusterStatusTpl', { read: TemplateRef, static: true }) clusterStatusTpl: TemplateRef<any> | undefined
   @Input() groupUuid:string = ''
   public nodesList:NzTreeNodeOptions[] = []
   public apiNodesMap:Map<string, any> = new Map()
@@ -42,8 +45,8 @@ export class ApiManagementListComponent implements OnInit {
   nzDisabled:boolean = false
   sourcesList:Array<{text:string, value:any, [key:string]:any}> = []
   apiNameForSear:string = ''
-
-  apisForm: {apis:APIList[], total:number, pageNum:number, pageSize:number, groupUuid:string, sourceIds:Array<string>} = {
+  apiTableLoading:boolean = false
+  apisForm: {apis:ApiListItem[], total:number, pageNum:number, pageSize:number, groupUuid:string, sourceIds:Array<string>} = {
     apis: [],
     total: 0,
     pageNum: 1,
@@ -52,24 +55,23 @@ export class ApiManagementListComponent implements OnInit {
     sourceIds: []
   }
 
-  apisTableHeadName:THEAD_TYPE[] = [...apisTableHeadName]
-  apisTableBody:TBODY_TYPE[] = [...apisTableBody]
+  apisTableHeadName:THEAD_TYPE[] = []
+  apisTableBody:TBODY_TYPE[] = []
 
   private subscription: Subscription = new Subscription()
 
   constructor (private message: EoNgFeedbackMessageService,
     private modalService:EoNgFeedbackModalService,
     private api:ApiService,
-    private router:Router,
+    public router:Router,
     private baseInfo:BaseInfoService,
-    private appConfigService:AppConfigService) {
-    this.appConfigService.reqFlashBreadcrumb([{ title: 'API管理', routerLink: 'router/api/group/list' }])
+    private navigationService:EoNgNavigationService,
+    private service:RouterService) {
+    this.navigationService.reqFlashBreadcrumb([{ title: 'API管理', routerLink: 'router/api/group/list' }])
   }
 
   ngOnInit (): void {
     this.apisForm.groupUuid = this.baseInfo.allParamsInfo.apiGroupId
-    this.initTable()
-    this.getApisData()
     // 当左侧分组中目录被选中时，groupUuid参数会变化，随之获取新的列表
     this.subscription = this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
@@ -84,33 +86,10 @@ export class ApiManagementListComponent implements OnInit {
     this.getSourcesList()
   }
 
-  initTable () {
-    this.apisTableHeadName[0].click = (item:any) => {
-      this.changeApisSet(item, 'all')
-    }
-    this.apisTableHeadName[0].showFn = () => {
-      return !this.nzDisabled
-    }
-    this.apisTableBody[0].click = (item:any) => {
-      this.changeApisSet(item)
-    }
-    this.apisTableBody[0].showFn = () => {
-      return !this.nzDisabled
-    }
-    this.apisTableBody[7].btns[0].click = (item:any) => {
-      this.router.navigate(['/', 'router', 'api', 'content', item.data.uuid, 'publish'])
-    }
-    this.apisTableBody[7].btns[1].click = (item:any) => {
-      this.router.navigate(['/', 'router', 'api', 'content', item.data.uuid])
-    }
-    this.apisTableBody[7].btns[2].click = (item:any) => {
-      this.deleteApiModal(item.data)
-    }
-    this.apisTableBody[7].btns[2].disabledFn = (data:any, item:any) => { return !item.data.isDelete || this.nzDisabled }
-  }
-
   ngAfterViewInit () {
-    this.apisTableBody[2].title = this.methodTpl
+    this.apisTableBody = this.service.createApiListTbody(this)
+    this.apisTableHeadName = this.service.createApiListThead(this)
+    this.getApisData()
   }
 
   ngOnDestroy () {
@@ -122,26 +101,38 @@ export class ApiManagementListComponent implements OnInit {
   }
 
   apisTableClick= (item:{data:{uuid:string, [k:string]:any}}) => {
-    this.router.navigate(['/', 'router', 'api', 'content', item.data.uuid])
+    this.router.navigate(['/', 'router', 'api', item.data['scheme'] === 'websocket' ? 'message-ws' : 'message', item.data.uuid])
   }
 
   // 根据groupUuid获取新的apis列表
   getApisData () {
-    this.api.get('routers', { groupUuid: (this.apisForm.groupUuid || this.groupUuid), searchName: this.apiNameForSear, sourceIds: this.apisForm.sourceIds.join(','), pageNum: this.apisForm.pageNum, pageSize: this.apisForm.pageSize }).subscribe((resp:any) => {
-      if (resp.code === 0) {
-        this.apisForm.apis = this.apisSet.size > 0
-          ? resp.data.apis.map((item:any) => {
-            item.checked = this.apisSet.has(item.uuid)
+    this.apiTableLoading = true
+    this.api.get('routers', { groupUuid: (this.apisForm.groupUuid || this.groupUuid), searchName: this.apiNameForSear, sourceIds: this.apisForm.sourceIds.join(','), pageNum: this.apisForm.pageNum, pageSize: this.apisForm.pageSize })
+      .subscribe((resp:{code:number, data:{apis:ApiListItem[], total:number, pageNum:number, pageSize:number}, msg:string}) => {
+        if (resp.code === 0) {
+          this.apisForm.apis = resp.data.apis.map((item:ApiListItem) => {
+            if (this.apisSet.size) {
+              item.checked = this.apisSet.has(item.uuid)
+            }
+            if (item.publish?.length > 0) {
+              for (const p of item.publish) {
+                item[`cluster_${p.name}`] = p.status
+              }
+            }
+            item.isDisable = item.isDisable ? '拦截' : '放行'
             return item
           })
-          : resp.data.apis
-
-        this.apisForm.groupUuid = this.apisForm.groupUuid || this.groupUuid
-        this.apisForm.total = resp.data.total || this.apisForm.total
-        this.apisForm.pageNum = resp.data.pageNum || this.apisForm.pageNum
-        this.apisForm.pageSize = resp.data.pageSize || this.apisForm.pageSize
-      } 
-    })
+          if (resp.data.apis.length > 0) {
+            this.apisTableBody = this.service.createApiListTbody(this, resp.data.apis[0].publish)
+            this.apisTableHeadName = this.service.createApiListThead(this, resp.data.apis[0].publish)
+          }
+          this.apisForm.groupUuid = this.apisForm.groupUuid || this.groupUuid
+          this.apisForm.total = resp.data.total || this.apisForm.total
+          this.apisForm.pageNum = resp.data.pageNum || this.apisForm.pageNum
+          this.apisForm.pageSize = resp.data.pageSize || this.apisForm.pageSize
+        }
+        this.apiTableLoading = false
+      })
   }
 
   // 获取来源可选列表，供列表筛选用
@@ -150,14 +141,18 @@ export class ApiManagementListComponent implements OnInit {
       if (resp.code === 0) {
         for (const index in resp.data.list) {
           this.sourcesList.push({ text: resp.data.list[index].title, value: resp.data.list[index].id })
-          this.apisTableHeadName[5].filterOpts = this.sourcesList
+          for (const head of this.apisTableHeadName) {
+            if (head.title === '来源') {
+              head.filterOpts = this.sourcesList
+            }
+          }
         }
-      } 
+      }
     })
   }
 
-  addApi () {
-    const url:Array<string> = ['/', 'router', 'api', 'create']
+  addApi (type?:string) {
+    const url:Array<string> = ['/', 'router', 'api', type && type === 'websocket' ? 'create-ws' : 'create']
     if (this.apisForm.groupUuid) {
       url.push(this.apisForm.groupUuid)
     }
@@ -210,9 +205,57 @@ export class ApiManagementListComponent implements OnInit {
     })
   }
 
-  // 过滤器内选择的value变化时的回调
+  // 过滤器内选择的value变化时的回调，仅来源的检索需要调接口
   apisFilterChange (value:any) {
-    this.apisForm.sourceIds = value.keys
-    this.getApisData()
+    if (value.col.title === '来源') {
+      this.apisForm.sourceIds = value.keys
+      this.sourcesList.map((source:any) => {
+        source.byDefault = value.keys.indexOf(source.value) !== -1
+        return source
+      })
+      this.getApisData()
+    }
+  }
+
+  modalRef:NzModalRef|undefined
+  publish (uuid:string) {
+    this.modalRef = this.modalService.create({
+      nzTitle: '发布管理',
+      nzWidth: MODAL_NORMAL_SIZE,
+      nzContent: ApiPublishComponent,
+      nzComponentParams: {
+        apiUuid: uuid,
+        closeModal: () => { this.modalRef?.close() },
+        getApisData: () => { this.getApisData() },
+        nzDisabled: this.nzDisabled
+      },
+      nzFooter: [{
+        label: '取消',
+        type: 'default',
+        onClick: () => {
+          this.modalRef?.close()
+        }
+      },
+      {
+        label: '下线',
+        danger: true,
+        onClick: (context:ApiPublishComponent) => {
+          context.offline()
+        },
+        disabled: () => {
+          return this.nzDisabled
+        }
+      },
+      {
+        label: '上线',
+        type: 'primary',
+        onClick: (context:ApiPublishComponent) => {
+          context.online()
+        },
+        disabled: () => {
+          return this.nzDisabled
+        }
+      }]
+    })
   }
 }

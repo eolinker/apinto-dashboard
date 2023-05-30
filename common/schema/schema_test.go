@@ -30,7 +30,7 @@ func Example() {
 	}
 	bytes, _ := json.MarshalIndent(generated, "", "\t")
 	fmt.Println(string(bytes))
-	// output: {"type":"object","properties":{"bucket":{"type":"object","additionalProperties":{},"dependencies":{"apple":["banana","peach"],"banana":["melon"]}},"coords":{"type":"array","description":"X,Y coordinates","items":{"type":"integer","format":"int32"},"minItems":2,"maxItems":2},"date":{"type":"object","properties":{"day":{"type":"string"},"month":{"type":"string"},"year":{"type":"string"}},"additionalProperties":false,"dependencies":{"day":["month","year"],"month":["year"]}},"id":{"type":"string","description":"Object ID","readOnly":true},"rate":{"type":"number","description":"Rate of change","format":"double","minimum":0}},"additionalProperties":false,"required":["rate","coords"],"dependencies":{"id":["rate"],"rate":["coords","date"]}}
+	// output: {"type":"object","properties":{"bucket":{"type":"object","additionalProperties":{},"dependencies":{"apple":["banana","peach"],"banana":["melon"]}},"coords":{"type":"array","description":"X,Y coordinates","items":{"type":"integer","format":"int32"},"minItems":2,"maxItems":2},"date":{"type":"object","properties":{"day":{"type":"string"},"month":{"type":"string"},"year":{"type":"string"}},"additionalProperties":false,"dependencies":{"day":["month","year"],"month":["year"]}},"id":{"type":"string","description":"Object Uuid","readOnly":true},"rate":{"type":"number","description":"Rate of change","format":"double","minimum":0}},"additionalProperties":false,"required":["rate","coords"],"dependencies":{"id":["rate"],"rate":["coords","date"]}}
 }
 
 var types = []struct {

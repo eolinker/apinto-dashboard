@@ -1,13 +1,13 @@
 <!--
- * @Author: 
+ * @Author: MengjieYang yangmengjie@eolink.com
  * @Date: 2022-09-01 23:11:27
- * @LastEditors: 
+ * @LastEditors: MengjieYang yangmengjie@eolink.com
  * @LastEditTime: 2022-09-20 23:03:23
  * @FilePath: /apinto/src/app/layout/api/api-management/api-management.component.html
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
 <div
-  class="flex flex-nowrap justify-start overflow-y-hidden max-h-[calc(100vh_-_50px)]"
+  class="flex flex-nowrap justify-start overflow-hidden max-h-[calc(100vh_-_50px)]"
 >
   <div>
     <div
@@ -16,7 +16,7 @@
     >
       <div class="flex items-center justify-between px-[11px] py-btnbase">
         <eo-ng-search-input-group
-          class="w-[calc(100%_-_40px)]"
+          class="w-[100%]"
           [eoInputVal]="queryName"
           [eoNoWidth]="true"
           (eoClick)="queryName = ''"
@@ -29,7 +29,7 @@
           />
         </eo-ng-search-input-group>
 
-        <button
+        <!-- <button
           eo-ng-button
           nzType="default"
           class="p-0 ml-[10px] group-icon"
@@ -37,11 +37,11 @@
           (click)="addGroupModal('root')"
         >
           <svg class="iconpark-icon"><use href="#xinzengfenzu"></use></svg>
-        </button>
+        </button> -->
       </div>
 
       <div
-        class="h-[calc(100%_-_56px] absolute overflow-x-hidden overflow-y-auto w-[100%]"
+        class="h-[calc(100%_-_56px)] absolute overflow-x-hidden overflow-y-auto w-[100%]"
         #groupComponent
       >
         <div
@@ -61,6 +61,18 @@
             [nzTreeTemplate]="nzTreeTpl"
             [nzSearchValue]="queryName"
           ></eo-ng-tree-default>
+        </div>
+
+        <div class="mt-formtop">
+          <a
+            class="ml-[28px] flex items-center"
+            eoNgUserAccess="router/api"
+            (click)="addGroupModal('root')"
+          >
+            <svg class="w-[16px] h-[16px] mr-[2px]">
+              <use href="#tianjia"></use></svg
+            ><span>新增分组</span>
+          </a>
         </div>
         <ng-template #nzTreeTpl let-node let-origin="origin">
           <div class="custom-node">
@@ -96,7 +108,8 @@
 
               <eo-ng-dropdown-menu #menu="nzDropdownMenu">
                 <ul nz-menu>
-                  <li nz-menu-item (click)="addApi(origin.uuid)">添加 API</li>
+                  <li nz-menu-item (click)="addApi(origin.uuid, 'http')">添加 HTTP API</li>
+                  <li nz-menu-item (click)="addApi(origin.uuid, 'websocket')">添加 Websocket API</li>
                   <li nz-menu-item (click)="addGroupModal(origin.uuid)">
                     添加子分组
                   </li>
@@ -132,7 +145,7 @@
       ></div>
     </div>
   </div>
-  <div>
+  <div class="min-w-[0px]">
     <router-outlet></router-outlet>
   </div>
 </div>

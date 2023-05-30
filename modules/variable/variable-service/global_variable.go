@@ -3,7 +3,12 @@ package variable_service
 import (
 	"context"
 	"errors"
+	"fmt"
+	"strings"
+	"time"
+
 	"github.com/eolinker/apinto-dashboard/common"
+	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-dashboard/modules/base/quote-entry"
 	"github.com/eolinker/apinto-dashboard/modules/base/quote-store"
@@ -15,10 +20,10 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/variable/variable-store"
 	"github.com/eolinker/eosc/common/bean"
 	"gorm.io/gorm"
-	"time"
 )
 
 type globalVariableService struct {
+	clusterVariableService      variable.IClusterVariableService
 	globalVariableStore         variable_store.IGlobalVariableStore
 	clusterVariableStore        variable_store.IClusterVariableStore
 	clusterService              cluster.IClusterService
@@ -31,6 +36,7 @@ type globalVariableService struct {
 
 func newGlobalVariableService() variable.IGlobalVariableService {
 	s := &globalVariableService{}
+	bean.Autowired(&s.clusterVariableService)
 	bean.Autowired(&s.globalVariableStore)
 	bean.Autowired(&s.clusterVariableStore)
 	bean.Autowired(&s.clusterService)
@@ -132,7 +138,7 @@ func (g *globalVariableService) GetInfo(ctx context.Context, namespaceID int, ke
 		detail := &variable_model.GlobalVariableDetails{
 			ClusterVariable: cVariable,
 			Status:          status,
-			ClusterName:     clusterInfo.Name,
+			ClusterName:     clusterInfo.Title, //这里用title是因为显示需要集群名称，之前是名称是用name的
 			Environment:     clusterInfo.Env,
 		}
 		variableDetails = append(variableDetails, detail)
@@ -199,7 +205,7 @@ func (g *globalVariableService) Create(ctx context.Context, namespaceID, userID 
 		UpdateTime: time.Now(),
 	}
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Name: key,
 	})
 
@@ -235,7 +241,7 @@ func (g *globalVariableService) Delete(ctx context.Context, namespaceID, userID 
 	}
 
 	//编写日志操作对象信息
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Name: key,
 	})
 
@@ -257,4 +263,69 @@ func (g *globalVariableService) Delete(ctx context.Context, namespaceID, userID 
 		return err
 	})
 
+}
+
+func (g *globalVariableService) QuoteVariables(ctx context.Context, namespaceID int, sourceID int, quoteType quote_entry.QuoteKindType, variableKeys []string) error {
+	variables, err := g.globalVariableStore.GetGlobalVariableByKeys(ctx, namespaceID, variableKeys)
+	if err != nil {
+		return fmt.Errorf("引用环境变量失败:%w", err)
+	}
+	if len(variables) != len(variableKeys) {
+		variablesSet := common.SliceToMap(variables, func(v *variable_entry.Variables) string {
+			return v.Key
+		})
+		defeatVariables := make([]string, 0, 3)
+		for _, v := range variableKeys {
+			if _, has := variablesSet[v]; !has {
+				defeatVariables = append(defeatVariables, v)
+			}
+		}
+		return fmt.Errorf("全局环境不存在%s", strings.Join(defeatVariables, ","))
+	}
+
+	variablesIDs := make([]int, 0, len(variableKeys))
+	for _, v := range variables {
+		variablesIDs = append(variablesIDs, v.Id)
+	}
+	return g.quoteStore.Set(ctx, sourceID, quoteType, quote_entry.QuoteTargetKindTypeVariable, variablesIDs...)
+}
+
+func (g *globalVariableService) CheckQuotedVariablesOnline(ctx context.Context, clusterID int, clusterName string, sourceID int, quoteType quote_entry.QuoteKindType) error {
+	//服务引用的环境变量
+	quoteMaps, err := g.quoteStore.GetSourceQuote(ctx, sourceID, quoteType)
+	if err != nil {
+		return fmt.Errorf("获取目标引用的环境变量失败:%w", err)
+	}
+	variableIds := quoteMaps[quote_entry.QuoteTargetKindTypeVariable]
+	if len(variableIds) > 0 {
+		//获取集群正在运行的环境变量版本
+		variablePublishVersion, err := g.clusterVariableService.GetPublishVersion(ctx, clusterID)
+		if err != nil {
+			return fmt.Errorf("获取环境变量发布状态失败:%w", err)
+		}
+		if variablePublishVersion == nil {
+			return errors.New("环境变量尚未发布")
+		}
+
+		//已发布的环境变量
+		toMap := common.SliceToMap(variablePublishVersion.ClusterVariable, func(t *variable_entry.ClusterVariable) int {
+			return t.VariableId
+		})
+
+		for _, variableId := range variableIds {
+			if _, ok := toMap[variableId]; !ok {
+				globalVariable, err := g.GetById(ctx, variableId)
+				if err != nil {
+					return err
+				}
+				return errors.New(fmt.Sprintf("${%s}未上线到{%s}，上线/更新失败", globalVariable.Key, clusterName))
+			}
+		}
+	}
+
+	return nil
+}
+
+func (g *globalVariableService) DeleteVariableQuote(ctx context.Context, sourceID int, quoteType quote_entry.QuoteKindType) error {
+	return g.quoteStore.DelSourceTarget(ctx, sourceID, quoteType, quote_entry.QuoteTargetKindTypeVariable)
 }

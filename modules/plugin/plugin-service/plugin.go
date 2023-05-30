@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/common"
+	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/modules/api"
 	"github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-dashboard/modules/base/locker-service"
@@ -19,6 +21,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/plugin_template"
 	"github.com/eolinker/apinto-dashboard/modules/user"
 	"github.com/eolinker/eosc/common/bean"
+	"github.com/eolinker/eosc/log"
 	"sort"
 	"strings"
 	"time"
@@ -34,7 +37,8 @@ type pluginService struct {
 	apiService            api.IAPIService
 	pluginTemplateService plugin_template.IPluginTemplateService
 	clusterService        cluster.IClusterService
-	lockService           locker_service.IAsynLockService
+	asynLockService       locker_service.IAsynLockService
+	syncLockService       locker_service.ISyncLockService
 	apintoClient          cluster.IApintoClient
 	clusterPluginService  plugin.IClusterPluginService
 }
@@ -47,7 +51,7 @@ func newPluginService() plugin.IPluginService {
 	bean.Autowired(&n.extenderCache)
 	bean.Autowired(&n.userInfoService)
 	bean.Autowired(&n.clusterService)
-	bean.Autowired(&n.lockService)
+	bean.Autowired(&n.asynLockService)
 	bean.Autowired(&n.apintoClient)
 	bean.Autowired(&n.clusterPluginService)
 	bean.Autowired(&n.pluginTemplateService)
@@ -88,6 +92,103 @@ func (p *pluginService) GetList(ctx context.Context, namespaceId int) ([]*plugin
 	}
 
 	return resultList, nil
+}
+
+func (p *pluginService) GetEnumList(ctx context.Context, namespaceId int) ([]*plugin_model.PluginEnum, error) {
+	plugins, err := p.pluginStore.GetListByNamespaceId(ctx, namespaceId)
+	if err != nil {
+		return nil, err
+	}
+
+	extender, err := p.GetExtendersCache(ctx, namespaceId)
+	if err != nil {
+		return nil, fmt.Errorf("获取拓展列表失败. err: %w", err)
+	}
+
+	extenderMap := common.SliceToMap(extender, func(t *plugin_model.ExtenderInfo) string {
+		return t.Id
+	})
+
+	resultList := make([]*plugin_model.PluginEnum, 0, len(plugins))
+	for _, info := range plugins {
+		pluginInfo := &plugin_model.PluginEnum{
+			Name:     info.Name,
+			Extended: info.Extended,
+			Schema:   info.Schema,
+		}
+		extenderInfo, has := extenderMap[info.Extended]
+		if has {
+			pluginInfo.Schema = extenderInfo.Schema
+		}
+
+		resultList = append(resultList, pluginInfo)
+	}
+
+	return resultList, nil
+}
+
+func (p *pluginService) GetExtendersCache(ctx context.Context, namespaceId int) ([]*plugin_model.ExtenderInfo, error) {
+	extender, err := p.extenderCache.GetAll(ctx)
+	if err == nil {
+		return extender, nil
+	}
+	p.syncLockService.Lock(locker_service.LockNamePluginNamespace, namespaceId)
+	defer p.syncLockService.Unlock(locker_service.LockNamePluginNamespace, namespaceId)
+	extender, err = p.extenderCache.GetAll(ctx)
+	if err == nil {
+		return extender, nil
+	}
+
+	clusters, err := p.clusterService.GetAllCluster(ctx)
+	if err != nil {
+		log.Errorf("获取集群信息失败 err=%s", err.Error())
+		return nil, err
+	}
+
+	var extenders = make(map[string]*v1.ExtenderListItem)
+	var clients []v1.IClient
+	for _, clusterInfo := range clusters {
+		client, err := p.apintoClient.GetClient(ctx, clusterInfo.Id)
+		if err != nil {
+			log.Errorf("获取client失败 err=%s", err.Error())
+			continue
+		}
+		clients = append(clients, client)
+		tempExtenders, err := client.ForExtender().List()
+		if err != nil {
+			log.Errorf("获取扩展ID列表失败 err=%s", err.Error())
+			continue
+		}
+		for _, tempExtender := range tempExtenders {
+			extenders[tempExtender.Id] = tempExtender
+		}
+	}
+
+	extenderInfos := make([]*plugin_model.ExtenderInfo, 0)
+	for _, item := range extenders {
+		for _, client := range clients {
+			extenderInfo, err := client.ForExtender().Info(item.Group, item.Project, item.Name)
+			if err != nil {
+				log.Errorf("获取插件扩展信息失败 err=%s", err.Error())
+				continue
+			}
+			extenderInfos = append(extenderInfos, &plugin_model.ExtenderInfo{
+				Id:      item.Id,
+				Group:   item.Group,
+				Project: item.Project,
+				Name:    item.Name,
+				Version: item.Version,
+				Schema:  string(extenderInfo.Render),
+			})
+			break
+		}
+	}
+	log.DebugF("当前最新扩展ID列表 extenders=%v", extenders)
+	if err = p.extenderCache.SetAll(ctx, extenderInfos); err != nil {
+		log.Errorf("扩展ID插入缓存失败 err=%s", err.Error())
+		return nil, err
+	}
+	return extenderInfos, nil
 }
 
 func (p *pluginService) isDelete(ctx context.Context, namespaceId int, clusters []*cluster_model.Cluster, plugins []*plugin_entry.Plugin, plugin *plugin_entry.Plugin) (bool, error) {
@@ -165,12 +266,12 @@ func (p *pluginService) GetBasicInfoList(ctx context.Context, namespaceId int) (
 }
 
 // InsertBuilt 新增内置插件
-func (p *pluginService) InsertBuilt(ctx context.Context, namespaceId int, pluginBuilt []*plugin_model.PluginBuilt) error {
-	if err := p.lockService.Lock(locker_service.LockNamePluginNamespace, namespaceId); err != nil {
+func (p *pluginService) InsertBuiltin(ctx context.Context, namespaceId int, pluginBuilt []*plugin_model.PluginBuilt) error {
+	if err := p.asynLockService.Lock(locker_service.LockNamePluginNamespace, namespaceId); err != nil {
 		return err
 	}
 
-	defer p.lockService.Unlock(locker_service.LockNamePluginNamespace, namespaceId)
+	defer p.asynLockService.Unlock(locker_service.LockNamePluginNamespace, namespaceId)
 
 	t := time.Now()
 	plugins := make([]*plugin_entry.Plugin, 0, len(pluginBuilt))
@@ -230,10 +331,10 @@ func (p *pluginService) InsertBuilt(ctx context.Context, namespaceId int, plugin
 // Create 新增插件
 func (p *pluginService) Create(ctx context.Context, namespaceId, operator int, input *plugin_model.PluginInput) error {
 
-	if err := p.lockService.Lock(locker_service.LockNamePluginNamespace, namespaceId); err != nil {
+	if err := p.asynLockService.Lock(locker_service.LockNamePluginNamespace, namespaceId); err != nil {
 		return err
 	}
-	defer p.lockService.Unlock(locker_service.LockNamePluginNamespace, namespaceId)
+	defer p.asynLockService.Unlock(locker_service.LockNamePluginNamespace, namespaceId)
 
 	pluginInfo, _ := p.pluginStore.GetByName(ctx, namespaceId, input.Name)
 
@@ -241,7 +342,7 @@ func (p *pluginService) Create(ctx context.Context, namespaceId, operator int, i
 		return errors.New("插件名称重复")
 	}
 
-	extender, err := p.extenderCache.GetAll(ctx, p.extenderCache.Key())
+	extender, err := p.extenderCache.GetAll(ctx)
 	if err != nil {
 		return err
 	}
@@ -258,7 +359,7 @@ func (p *pluginService) Create(ctx context.Context, namespaceId, operator int, i
 	}
 
 	t := time.Now()
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Name: input.Name,
 	})
 
@@ -310,10 +411,10 @@ func (p *pluginService) Create(ctx context.Context, namespaceId, operator int, i
 // Update 修改插件
 func (p *pluginService) Update(ctx context.Context, namespaceId, operator int, input *plugin_model.PluginInput) error {
 
-	if err := p.lockService.Lock(locker_service.LockNamePluginNamespace, namespaceId); err != nil {
+	if err := p.asynLockService.Lock(locker_service.LockNamePluginNamespace, namespaceId); err != nil {
 		return err
 	}
-	defer p.lockService.Unlock(locker_service.LockNamePluginNamespace, namespaceId)
+	defer p.asynLockService.Unlock(locker_service.LockNamePluginNamespace, namespaceId)
 
 	pluginInfo, err := p.pluginStore.GetByName(ctx, namespaceId, input.Name)
 	if err != nil {
@@ -321,7 +422,7 @@ func (p *pluginService) Update(ctx context.Context, namespaceId, operator int, i
 	}
 
 	t := time.Now()
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Name: input.Name,
 	})
 
@@ -371,7 +472,7 @@ func (p *pluginService) Delete(ctx context.Context, namespaceId, operator int, n
 		return err
 	}
 
-	common.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
+	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Name: name,
 	})
 
@@ -409,10 +510,10 @@ func (p *pluginService) GetByName(ctx context.Context, namespaceId int, name str
 }
 
 func (p *pluginService) Sort(ctx context.Context, namespaceId, _ int, names []string) error {
-	if err := p.lockService.Lock(locker_service.LockNamePluginNamespace, namespaceId); err != nil {
+	if err := p.asynLockService.Lock(locker_service.LockNamePluginNamespace, namespaceId); err != nil {
 		return err
 	}
-	defer p.lockService.Unlock(locker_service.LockNamePluginNamespace, namespaceId)
+	defer p.asynLockService.Unlock(locker_service.LockNamePluginNamespace, namespaceId)
 
 	plugins, err := p.pluginStore.GetListByNamespaceId(ctx, namespaceId)
 	if err != nil {
