@@ -211,6 +211,7 @@ func (p *modulePluginController) getEnableInfo(ginCtx *gin.Context) {
 			Name:        i.Name,
 			Value:       i.Value,
 			Title:       i.Title,
+			Type:        i.Type,
 			Placeholder: i.Placeholder,
 			Desc:        i.Desc,
 		})
