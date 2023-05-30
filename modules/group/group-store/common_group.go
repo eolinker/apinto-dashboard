@@ -16,6 +16,7 @@ type ICommonGroupStore interface {
 	GetByParentId(ctx context.Context, namespaceId int, groupType string, tagId, parentId int) ([]*group_entry.CommonGroup, error)
 	GetList(ctx context.Context, namespace int, groupType string, tagId int) ([]*group_entry.CommonGroup, error)
 	GetByNameParentID(ctx context.Context, groupName string, parentID int) ([]*group_entry.CommonGroup, error)
+	GetByTypeNameParent(ctx context.Context, namespaceId int, groupType, groupName string, parentID int) (*group_entry.CommonGroup, error)
 }
 
 type commonGroupStore struct {
@@ -73,4 +74,8 @@ func (c *commonGroupStore) GetList(ctx context.Context, namespace int, groupType
 
 func (c *commonGroupStore) GetByNameParentID(ctx context.Context, groupName string, parentID int) ([]*group_entry.CommonGroup, error) {
 	return c.ListQuery(ctx, "`name` = ? and `parent_id` = ? ", []interface{}{groupName, parentID}, "")
+}
+
+func (c *commonGroupStore) GetByTypeNameParent(ctx context.Context, namespaceId int, groupType, groupName string, parentID int) (*group_entry.CommonGroup, error) {
+	return c.FirstQuery(ctx, "`namespace` =? and `type` = ? and `name` = ? and `parent_id` = ?", []interface{}{namespaceId, groupType, groupName, parentID}, "")
 }
