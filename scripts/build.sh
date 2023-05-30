@@ -19,6 +19,8 @@ if [[ "$3" != "" ]];then
   VERSION=$3
 fi
 
+BUILD_TYPE=$4
+
 GO_VERSION=`go version | { read _ _ v _; echo ${v#go}; }`
 
 if [ "$(version ${GO_VERSION})" -lt "$(version 1.18)" ];
@@ -34,7 +36,7 @@ echo "Start building apinto dashboard monolithic ${VERSION}..."
 echo ""
 echo "Step 1 - building apinto dashboard frontend..."
 
-if [[ "$BUILD_MODE" == "all" || ! -d "controller/dist" ]];then
+if [[ "$BUILD_MODE" == "all" || ! -d "frontend/dist" ]];then
   echo "begin frontend building..."
   if command -v pnpm > /dev/null
   then
@@ -44,7 +46,12 @@ if [[ "$BUILD_MODE" == "all" || ! -d "controller/dist" ]];then
       echo "cd frontend && yarn install --registry https://registry.npmmirror.com --legacy-peer-deps "
       cd frontend && yarn install --registry https://registry.npmmirror.com --legacy-peer-deps
       echo "yarn build"
-      yarn build
+      if [[ "${BUILD_TYPE}" != "" ]]
+      then
+        yarn build:${BUILD_TYPE}
+      else
+        yarn build
+      fi
       cd ../
   else
       npm --prefix ./frontend run build
@@ -64,17 +71,18 @@ flags="-X 'github.com/eolinker/apinto-dashboard/app/apserver/version.Version=${V
 -X 'github.com/eolinker/apinto-dashboard/app/apserver/version.buildtime=$(date -u +"%Y-%m-%dT%H:%M:%SZ")'
 -X 'github.com/eolinker/apinto-dashboard/app/apserver/version.builduser=$(id -u -n)'"
 
-
+TAGS="release,mysql"
+if [[ "${BUILD_TYPE}" != "" ]] ;then
+   TAGS="release,mysql,${BUILD_TYPE}"
+fi
 # -ldflags="-w -s" means omit DWARF symbol table and the symbol table and debug information
-CGO_ENABLED=0 go build --tags "release,mysql" -ldflags "-w -s $flags" -o ${OUTPUT_BINARY} ./app/apserver
+GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build --tags "${TAGS}" -ldflags "-w -s $flags" -o ${OUTPUT_BINARY} ./app/apserver
 
 mkdir -p apserver_${VERSION}
 #cp ./scripts/resource/config.yml.tpl ${OUTPUT_DIR}/config.yml
 
-cp ./scripts/resource/config.yml.tpl ./apserver_${VERSION}
+cp ./scripts/resource/* ./apserver_${VERSION}
 cp ${OUTPUT_BINARY} ./apserver_${VERSION}
-cp ./scripts/resource/install.sh ./apserver_${VERSION}
-cp ./scripts/resource/run.sh ./apserver_${VERSION}
 
 echo "Completed building apinto dashboard backend."
 

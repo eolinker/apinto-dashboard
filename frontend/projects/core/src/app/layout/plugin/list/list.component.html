@@ -1,0 +1,39 @@
+<div class="h-[100%]">
+  <div
+    class="list-header pl-btnbase pr-btnrbase py-btnybase flex flex-nowrap items-center justify-between"
+  >
+    <div>
+      <button
+        eo-ng-button
+        class="ant-btn-primary"
+        eoNgUserAccess="module-plugin"
+        (disabledEdit)="disabledEdit($event)"
+        (click)="installPlugin()"
+      >
+        上传插件
+      </button>
+    </div>
+    <div>
+      <eo-ng-radio-group
+        [(ngModel)]="radioValue"
+        [nzOptions]="radioOptions"
+        [nzDisabled]="nzDisabled"
+        nzStyle="button"
+        nzButtonStyle="solid"
+      ></eo-ng-radio-group>
+    </div>
+  </div>
+  <div
+    class="list-content pb-[4px] h-[calc(100%_-_64px)] overflow-y-auto border-0 border-t-[1px] border-solid border-color-base"
+  >
+    <eo-ng-card-list
+      *ngIf="filterPluginList().length; else emptyTpl"
+      [cardList]="filterPluginList()"
+      (cardClick)="handerCardClick($event)"
+    ></eo-ng-card-list>
+
+    <ng-template #emptyTpl class="w-[100%]">
+      <eo-ng-empty nzMainTitle="暂无数据" nzInputImage="simple"></eo-ng-empty>
+    </ng-template>
+  </div>
+</div>

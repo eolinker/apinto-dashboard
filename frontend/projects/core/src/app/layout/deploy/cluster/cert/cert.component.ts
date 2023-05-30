@@ -1,9 +1,9 @@
 /* eslint-disable camelcase */
-import { Component, OnInit } from '@angular/core'
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
 import { Router } from '@angular/router'
 import { EoNgFeedbackModalService, EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { ApiService } from 'projects/core/src/app/service/api.service'
-import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 import { NzModalRef } from 'ng-zorro-antd/modal'
 import { MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
 import { BaseInfoService } from 'projects/core/src/app/service/base-info.service'
@@ -22,6 +22,7 @@ import { EmptyHttpResponse } from 'projects/core/src/app/constant/type'
   ]
 })
 export class DeployClusterCertComponent implements OnInit {
+  @ViewChild('dnsNameTpl', { read: TemplateRef, static: true }) dnsNameTpl: TemplateRef<any> | undefined
   clusterName:string=''
   nzDisabled:boolean = false
   modalRef:NzModalRef | undefined
@@ -35,8 +36,8 @@ export class DeployClusterCertComponent implements OnInit {
                 private api:ApiService,
                 private baseInfo:BaseInfoService,
                 private router:Router,
-                private appConfigService:AppConfigService) {
-    this.appConfigService.reqFlashBreadcrumb([{ title: '网关集群', routerLink: 'deploy/cluster' }, { title: '证书管理' }])
+                private navigationService:EoNgNavigationService) {
+    this.navigationService.reqFlashBreadcrumb([{ title: '网关集群', routerLink: 'deploy/cluster' }, { title: 'SSL证书' }])
   }
 
   ngOnInit (): void {
@@ -44,10 +45,11 @@ export class DeployClusterCertComponent implements OnInit {
     if (!this.clusterName) {
       this.router.navigate(['/'])
     }
-    this.certsTableBody[4].btns[0].disabledFn = () => { return this.nzDisabled }
-    this.certsTableBody[4].btns[0].click = (item:any) => { this.openDrawer('editCert', item.data) }
-    this.certsTableBody[4].btns[1].disabledFn = () => { return this.nzDisabled }
-    this.certsTableBody[4].btns[1].click = (item:any) => { this.delete(item.data) }
+    this.certsTableBody[1].title = this.dnsNameTpl
+    this.certsTableBody[5].btns[0].disabledFn = () => { return this.nzDisabled }
+    this.certsTableBody[5].btns[0].click = (item:any) => { this.openDrawer('editCert', item.data) }
+    this.certsTableBody[5].btns[1].disabledFn = () => { return this.nzDisabled }
+    this.certsTableBody[5].btns[1].click = (item:any) => { this.delete(item.data) }
 
     this.getCertsList()
   }
@@ -79,7 +81,10 @@ export class DeployClusterCertComponent implements OnInit {
     this.api.get('cluster/' + this.clusterName + '/certificates')
       .subscribe((resp:{code:number, data:{certificates:DeployCertListData[]}, msg:string}) => {
         if (resp.code === 0) {
-          this.certsList = resp.data.certificates
+          this.certsList = resp.data.certificates.map((cert:DeployCertListData) => {
+            cert.dnsNameStr = cert.dnsName.join('/')
+            return cert
+          })
         }
       })
   }
@@ -90,7 +95,7 @@ export class DeployClusterCertComponent implements OnInit {
       nzTitle: usage === 'addCert' ? '新建证书' : '修改证书',
       nzWidth: MODAL_SMALL_SIZE,
       nzContent: DeployClusterCertFormComponent,
-      nzComponentParams: { certId: data?.id, clusterName: this.clusterName, closeModal: this.closeModal },
+      nzComponentParams: { certId: data?.id, clusterName: this.clusterName, editPage: usage === 'editCert', closeModal: this.closeModal },
       nzOkText: usage === 'addCert' ? '保存' : '提交',
       nzOnOk: (component:DeployClusterCertFormComponent) => {
         component.save(usage)
@@ -112,5 +117,12 @@ export class DeployClusterCertComponent implements OnInit {
           this.message.success(resp.msg || '删除成功!', { nzDuration: 1000 })
         }
       })
+  }
+
+  copyCallback (event?:Event) {
+    event?.stopPropagation()
+    this.message.success('复制成功', {
+      nzDuration: 1000
+    })
   }
 }

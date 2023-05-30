@@ -1,12 +1,12 @@
 /* eslint-disable dot-notation */
 import { Component, Input, OnInit } from '@angular/core'
 import { FormGroup, UntypedFormBuilder, Validators } from '@angular/forms'
-import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { ApiService } from 'projects/core/src/app/service/api.service'
-import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
 import { Buffer } from 'buffer'
 import { EmptyHttpResponse } from 'projects/core/src/app/constant/type'
+import { DeployCertData } from '../../types/types'
+import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 
 @Component({
   selector: 'eo-ng-deploy-cluster-cert-form',
@@ -65,6 +65,7 @@ import { EmptyHttpResponse } from 'projects/core/src/app/constant/type'
 })
 export class DeployClusterCertFormComponent implements OnInit {
   @Input() closeModal?:(value?:any)=>void
+  @Input() editPage:boolean = false
   validateForm:FormGroup = new FormGroup({})
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
   clusterName:string = ''
@@ -74,16 +75,29 @@ export class DeployClusterCertFormComponent implements OnInit {
   constructor (
     private message: EoNgFeedbackMessageService,
     public api:ApiService,
-    private fb: UntypedFormBuilder,
-    private appConfigService:AppConfigService) {
+    private fb: UntypedFormBuilder) {
     this.validateForm = this.fb.group({
       key: ['', [Validators.required]],
       pem: ['', [Validators.required]]
     })
-    this.appConfigService.reqFlashBreadcrumb([{ title: '网关集群', routerLink: 'deploy/cluster' }, { title: '证书管理' }])
   }
 
   ngOnInit (): void {
+    if (this.editPage) {
+      this.getCertMessage()
+    }
+  }
+
+  getCertMessage () {
+    this.api.get(`cluster/${this.clusterName}/certificate/${this.certId}`)
+      .subscribe((resp:{code:number, data:{certificate:DeployCertData}, msg:string}) => {
+        if (resp.code === 0) {
+          this.validateForm.patchValue({
+            key: this.decode(resp.data.certificate.key),
+            pem: this.decode(resp.data.certificate.pem)
+          })
+        }
+      })
   }
 
   disabledEdit (value: any) {
@@ -97,6 +111,7 @@ export class DeployClusterCertFormComponent implements OnInit {
           this.api.post('cluster/' + this.clusterName + '/certificate', { key: this.encode(this.validateForm.controls['key'].value), pem: this.encode(this.validateForm.controls['pem'].value) || '' })
             .subscribe((resp:EmptyHttpResponse) => {
               if (resp.code === 0) {
+                this.message.success(resp.msg || '新增成功')
                 this.closeModal && this.closeModal()
               }
             })
@@ -105,6 +120,7 @@ export class DeployClusterCertFormComponent implements OnInit {
           this.api.put('cluster/' + this.clusterName + '/certificate/' + this.certId, { key: this.encode(this.validateForm.controls['key'].value), pem: this.encode(this.validateForm.controls['pem'].value) || '' })
             .subscribe((resp:EmptyHttpResponse) => {
               if (resp.code === 0) {
+                this.message.success(resp.msg || '修改成功')
                 this.closeModal && this.closeModal()
               }
             })
@@ -145,6 +161,10 @@ export class DeployClusterCertFormComponent implements OnInit {
 
   // 字符串转base64
   encode (str:string) {
-    return Buffer.from(str).toString('base64')
+    return str ? Buffer.from(str).toString('base64') : ''
+  }
+
+  decode (str:string) {
+    return str ? Buffer.from(str, 'base64').toString('utf8') : ''
   }
 }

@@ -1,23 +1,21 @@
 package cluster_service
 
 import (
-	"github.com/eolinker/apinto-dashboard/modules/cluster"
-	driver2 "github.com/eolinker/apinto-dashboard/modules/cluster/driver"
 	"github.com/eolinker/eosc/common/bean"
 )
 
 func init() {
 
-	clConfigDriverManager := newCLConfigDriverManager()
-	redisDriver := driver2.CreateRedis("redis")
-	clConfigDriverManager.RegisterDriver(cluster.CLConfigRedis, redisDriver)
-
-	bean.Injection(&clConfigDriverManager)
+	//clConfigDriverManager := newCLConfigDriverManager()
+	//redisDriver := driver2.CreateRedis("redis")
+	//clConfigDriverManager.RegisterDriver(cluster.CLConfigRedis, redisDriver)
+	//
+	//bean.Injection(&clConfigDriverManager)
 
 	iClusterService := newClusterService()
 	clusterCertificate := newClusterCertificateService()
 	clusterNode := newClusterNodeService()
-	clusterConfig := newClusterConfigService()
+	//clusterConfig := newClusterConfigService()
 
 	apintoClient := newApintoClientService()
 
@@ -26,5 +24,5 @@ func init() {
 	bean.Injection(&iClusterService)
 	bean.Injection(&clusterCertificate)
 	bean.Injection(&clusterNode)
-	bean.Injection(&clusterConfig)
+	//bean.Injection(&clusterConfig)
 }

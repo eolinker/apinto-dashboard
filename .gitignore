@@ -3,14 +3,14 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
 # Compiled output
-/tmp
-/out-tsc
-/bazel-out
+/frontend/tmp
+/frontend/out-tsc
+/frontend/bazel-out
 
 # Node
-/node_modules
+/frontend/node_modules
 npm-debug.log
-yarn-error.log
+/frontend/yarn-error.log
 
 # IDEs and editors
 .idea/
@@ -30,7 +30,7 @@ yarn-error.log
 .history/*
 
 # Miscellaneous
-/.angular/cache
+/frontend/.angular/cache
 .sass-cache/
 /connect.lock
 /coverage
@@ -43,8 +43,7 @@ testem.log
 Thumbs.db
 
 # 单元测试
-unit_coverage
-dist
+/frontend/unit_coverage
 
 #端到端测试
 e2e_coverage
@@ -53,6 +52,7 @@ e2e_coverage
 .vscode
 deploy.gitlab-ci.yml
 #根据后端项目组需求，暂时不上传新的angular.json文件（仓库文件中含有deployurl）
+/frontend/dist
 /apinto-build/
 /app/work
 /.pnpm-debug.log

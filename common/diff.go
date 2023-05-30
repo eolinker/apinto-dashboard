@@ -7,19 +7,19 @@ type Diff interface {
 	Values() []string
 }
 
-//DiffContrast 泛型语法 更方便  需要go 1.18支持
-//第一个返回切片表示对比数据新增的数据
-//第二个返回切片表示对比数据已修改的数据
-//第三个返回切片表示对比数据删除的数据
+// DiffContrast 泛型语法 更方便  需要go 1.18支持
+// 第一个返回切片表示对比数据新增的数据
+// 第二个返回切片表示对比数据已修改的数据
+// 第三个返回切片表示对比数据删除的数据
 func DiffContrast[T Diff](oldList, newList []T) ([]T, []T, []T) {
 	if len(oldList) == 0 { //旧的数据没有 那全是新增的数据
 		return newList, nil, nil
 	}
-	oldMap := Map[string, []string]{}
+	oldMap := map[string][]string{}
 	for _, value := range oldList {
 		oldMap[value.GetKey()] = value.Values()
 	}
-	newMap := Map[string, []string]{}
+	newMap := map[string][]string{}
 	for _, value := range newList {
 		newMap[value.GetKey()] = value.Values()
 	}
@@ -58,7 +58,7 @@ func DiffContrast[T Diff](oldList, newList []T) ([]T, []T, []T) {
 // DiffField
 // 对比结构体中字段的差异。仅支持string,uint,uint8,uint16,uint32,uint64,int,int8,int16,int32,int64,bool,float32,float64
 func DiffField[T any](oldData, newData *T) *T {
-	oldDataMap := Map[int, any]{}
+	oldDataMap := map[int]any{}
 
 	oldValueOf := reflect.ValueOf(oldData).Elem()
 	for i := 0; i < oldValueOf.NumField(); i++ {

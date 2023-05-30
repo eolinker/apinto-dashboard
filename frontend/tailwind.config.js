@@ -27,16 +27,25 @@ module.exports = {
         SEC_TEXT: 'var(--SEC_TEXT)',
         MAIN_DISABLED_BG: 'var(--disabled-background-color)',
         FIX_BG: '#ffffff',
-        theme: 'var(--primary-color)'
+        theme: 'var(--primary-color)',
+        DESC_TEXT: '#666666',
+        HOVER_BG: 'var(--item-hover-background-color)',
+        guide_cluster: '#ee6760',
+        guide_upstream: '#f9a429',
+        guide_api: '#71d24d',
+        guide_publishApi: '#5884ff',
+        guide_final: '#915bf9',
+        table_text: 'var(--table-text-color)'
       },
       spacing: {
         mbase: '20px',
         label: '12px', // 选择器和label之间的间距，待删
         btnbase: '10px', // x方向的间距
-        btnybase: '16px', // y轴方向的间距
+        btnybase: '10px', // y轴方向的间距
         btnrbase: '20px', // 页面最右侧边距20px
         formtop: '20px',
         icon: '5px',
+        blockbase: '40px',
         DEFAULT_BORDER_RADIUS: 'var(--border-radius)'
       },
       borderColor: {
