@@ -10,14 +10,14 @@ import { Router } from '@angular/router'
 })
 export class PluginManagementComponent {
   constructor (private router:Router) {
-    if (this.router.url === '/plugin') {
-      this.router.navigate(['/', 'plugin', 'group', 'list'])
+    if (this.router.url === '/module-plugin') {
+      this.router.navigate(['/', 'module-plugin', 'group', 'list'])
     }
   }
 
   ngDoCheck () {
-    if (this.router.url === '/plugin') {
-      this.router.navigate(['/', 'plugin', 'group', 'list'])
+    if (this.router.url === '/module-plugin') {
+      this.router.navigate(['/', 'module-plugin', 'group', 'list'])
     }
   }
 }

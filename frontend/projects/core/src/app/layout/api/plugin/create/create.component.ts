@@ -33,13 +33,13 @@ export class ApiPluginTemplateCreateComponent implements OnInit {
   constructor (private message: EoNgFeedbackMessageService,
     private baseInfo:BaseInfoService,
     private api:ApiService,
-    private appConfigService:EoNgNavigationService,
+    private navigationService:EoNgNavigationService,
     private fb: UntypedFormBuilder,
     private router: Router,
     private jsonService:EoNgJsonService
   ) {
-    this.appConfigService.reqFlashBreadcrumb([
-      { title: '插件模板', routerLink: 'router/plugin' },
+    this.navigationService.reqFlashBreadcrumb([
+      { title: 'API操作模板', routerLink: 'router/plugin-template' },
       { title: '新建模板' }
     ])
 
@@ -51,8 +51,8 @@ export class ApiPluginTemplateCreateComponent implements OnInit {
 
   ngOnInit (): void {
     if (this.baseInfo.allParamsInfo.pluginTemplateId) {
-      this.appConfigService.reqFlashBreadcrumb([
-        { title: '插件模板', routerLink: 'router/plugin' },
+      this.navigationService.reqFlashBreadcrumb([
+        { title: 'API操作模板', routerLink: 'router/plugin-template' },
         { title: '编辑模板' }
       ])
     }
@@ -87,7 +87,7 @@ export class ApiPluginTemplateCreateComponent implements OnInit {
 
   // 返回列表页，当fromList为true时，该页面左侧有分组
   backToList () {
-    this.router.navigate(['/', 'router', 'plugin'])
+    this.router.navigate(['/', 'router', 'plugin-template'])
   }
 
   handlerConfigListChange () {

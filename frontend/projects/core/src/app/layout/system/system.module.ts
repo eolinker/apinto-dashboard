@@ -17,7 +17,12 @@ import { NzFormModule } from 'ng-zorro-antd/form'
 import { DirectiveModule } from '../../directive/directive.module'
 import { EoNgCopyModule } from 'eo-ng-copy'
 import { EoNgFeedbackAlertModule, EoNgFeedbackTooltipModule } from 'eo-ng-feedback'
+import { SystemEmailComponent } from './email/system-email.component'
+import { SystemWebhookComponent } from './webhook/webhook.component'
+import { SystemWebhookListComponent } from './webhook/list/list.component'
+import { SystemEmailConfigComponent } from './email/config/config.component'
 import { EoNgSelectModule } from 'eo-ng-select'
+import { SystemWebhookConfigComponent } from './webhook/config/config.component'
 
 @NgModule({
   declarations: [
@@ -25,7 +30,12 @@ import { EoNgSelectModule } from 'eo-ng-select'
     ExternalAppComponent,
     ExternalAppListComponent,
     ExternalAppCreateComponent,
-    ExternalAppMessageComponent
+    ExternalAppMessageComponent,
+    SystemEmailComponent,
+    SystemWebhookComponent,
+    SystemWebhookListComponent,
+    SystemEmailConfigComponent,
+    SystemWebhookConfigComponent
   ],
   imports: [
     CommonModule,

@@ -27,10 +27,10 @@ export class ApiPluginTemplateListComponent implements OnInit {
     private modalService: EoNgFeedbackModalService,
     private api: ApiService,
     public router: Router,
-    private appConfigService: EoNgNavigationService,
+    private navigationService: EoNgNavigationService,
     private service:RouterService
   ) {
-    this.appConfigService.reqFlashBreadcrumb([{ title: '插件模板' }])
+    this.navigationService.reqFlashBreadcrumb([{ title: 'API操作模板' }])
   }
 
   ngOnInit (): void {
@@ -78,10 +78,10 @@ export class ApiPluginTemplateListComponent implements OnInit {
   }
 
   pluginTableClick= (item:any) => {
-    this.router.navigate(['/', 'router', 'plugin', 'content', item.data.uuid])
+    this.router.navigate(['/', 'router', 'plugin-template', 'content', item.data.uuid])
   }
 
   addPluginTemplate (): void {
-    this.router.navigate(['/', 'router', 'plugin', 'create'])
+    this.router.navigate(['/', 'router', 'plugin-template', 'create'])
   }
 }

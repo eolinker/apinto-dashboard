@@ -39,7 +39,7 @@ export const AppConfig: any = {
         },
         {
           title: '服务发现',
-          routerLink: 'upstream/serv-discovery',
+          routerLink: 'upstream/discovery',
           menuIndex: 0,
           id: 202,
           level: 1,
@@ -74,7 +74,7 @@ export const AppConfig: any = {
         },
         {
           title: '插件模板',
-          routerLink: 'router/plugin',
+          routerLink: 'router/plugin-template',
           menuIndex: 0,
           id: 402,
           level: 1,
@@ -120,7 +120,7 @@ export const AppConfig: any = {
         },
         {
           title: '环境变量',
-          routerLink: 'deploy/env',
+          routerLink: 'deploy/variable',
           menuIndex: 0,
           id: 102,
           level: 1,
@@ -298,7 +298,7 @@ export const AppConfig: any = {
     },
     {
       title: '企业插件',
-      routerLink: 'plugin',
+      routerLink: 'module-plugin',
       menu: true,
       id: 10,
       level: 0,

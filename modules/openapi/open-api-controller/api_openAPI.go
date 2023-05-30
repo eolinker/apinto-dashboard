@@ -158,12 +158,6 @@ func (a *apiOpenAPIController) syncAPI(ginCtx *gin.Context) {
 		return
 	}
 
-	//校验服务名是否合法
-	if err := common.IsMatchString(common.EnglishOrNumber_, inputData.ServiceName); err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("syncAPI upstream 't is illegal. err: %s. ", err))
-		return
-	}
-
 	checkList, err := a.apiOpenAPIService.SyncImport(ginCtx, namespace_controller.GetNamespaceId(ginCtx), ginCtx.GetInt("appId"), inputData)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("syncAPI fail. err:%s", err))

@@ -11,4 +11,5 @@ export interface EO_TBODY_TYPE extends TBODY_TYPE{
 export interface EO_THEAD_TYPE extends THEAD_TYPE{
     required?:boolean
     titleString?:string // require用
+    tooltip?:string
 }

@@ -1,8 +1,9 @@
 package service
 
 import (
-	apinto_module "github.com/eolinker/apinto-module"
 	"sync/atomic"
+
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
 )
 
 var _ IProviderService = (*ProviderService)(nil)
@@ -13,6 +14,14 @@ type IProviderService interface {
 }
 type ProviderService struct {
 	atomic.Pointer[apinto_module.IProviders]
+}
+
+func (p *ProviderService) Status(key string, namespaceId int, cluster string) (apinto_module.CargoStatus, string) {
+	ps := p.Load()
+	if ps == nil || *ps == nil {
+		return apinto_module.None, ""
+	}
+	return (*ps).Status(key, namespaceId, cluster)
 }
 
 func NewProviderService() IProviderService {

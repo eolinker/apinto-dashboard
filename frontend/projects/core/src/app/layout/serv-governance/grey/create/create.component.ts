@@ -77,7 +77,7 @@ export class GreyCreateComponent implements OnInit {
     private message: EoNgFeedbackMessageService,
     private api: ApiService,
     private fb: UntypedFormBuilder,
-    private appConfigService: EoNgNavigationService,
+    private navigationService: EoNgNavigationService,
     private router:Router
   ) {
     this.validateForm = this.fb.group({
@@ -93,9 +93,9 @@ export class GreyCreateComponent implements OnInit {
       percent2: [99]
     })
 
-    this.appConfigService.reqFlashBreadcrumb([
-      { title: '灰度策略', routerLink: 'serv-governance/grey' },
-      { title: '新建灰度策略' }
+    this.navigationService.reqFlashBreadcrumb([
+      { title: '灰度发布', routerLink: 'serv-governance/grey' },
+      { title: '新建灰度发布策略' }
     ])
   }
 
@@ -110,7 +110,7 @@ export class GreyCreateComponent implements OnInit {
   initTable () {
     this.nodesTableBody[0].check = (item:any) => {
       if (!/^((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3}:[0-9]+$/.test(item) &&
-      !/^[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\.?(:[0-9]+)?$/.test(item)) {
+      !/^[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})*\.?(:[0-9]+)?$/.test(item)) {
         return false
       }
       return true
@@ -159,9 +159,9 @@ export class GreyCreateComponent implements OnInit {
           msg: string
         }) => {
           if (resp.code === 0) {
-            this.appConfigService.reqFlashBreadcrumb([
+            this.navigationService.reqFlashBreadcrumb([
               {
-                title: '灰度策略',
+                title: '灰度发布',
                 routerLink: 'serv-governance/grey'
               },
               { title: resp.data.strategy!.name }

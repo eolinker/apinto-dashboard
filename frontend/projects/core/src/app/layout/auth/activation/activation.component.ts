@@ -3,7 +3,7 @@
 import { Component, Input, OnInit } from '@angular/core'
 import { Router } from '@angular/router'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
-import { NzUploadFile } from 'ng-zorro-antd/upload'
+import { NzUploadChangeParam, NzUploadFile } from 'ng-zorro-antd/upload'
 import { ApiService } from '../../../service/api.service'
 
 @Component({
@@ -29,8 +29,16 @@ export class AuthActivationComponent implements OnInit {
   authFile:NzUploadFile|undefined
   showActivationInfo:boolean = false
   fileList: NzUploadFile[] = [];
+  free:boolean = true
   authInfo:{title:string, infos:Array<{key:string, value:string}>}
-  = { title: '标准版授权', infos: [] }
+  = {
+    title: '标准版授权',
+    infos: [
+      { key: '授权信息', value: '免费版' },
+      { key: '有效期至', value: '永久' }
+
+    ]
+  }
 
   constructor (
     private message: EoNgFeedbackMessageService,
@@ -89,7 +97,7 @@ export class AuthActivationComponent implements OnInit {
       })
   }
 
-  goToLogin () {
+  goToLogin = () => {
     this.router.navigate(['/', 'login'])
   }
 
@@ -97,4 +105,19 @@ export class AuthActivationComponent implements OnInit {
     this.message.success('复制成功', { nzDuration: 1000 })
     if (!this.certCanActive) { this.certCanActive = true }
   };
+
+  onChange (e: NzUploadChangeParam): void {
+    if (e.file.status === 'done') {
+      if (e.file.response.code === 0) {
+        this.message.success(e.file.response.msg || '操作成功')
+        this.showActivationInfo = true
+        this.authInfo.infos = e.file.response.data.infos
+        setTimeout(this.goToLogin, 3000)
+      } else {
+        this.message.error(e.file.response.msg || '操作失败')
+      }
+    } else if (e.file.status === 'error') {
+      this.message.error(`${e.file.name}上传失败，请重试`)
+    }
+  }
 }

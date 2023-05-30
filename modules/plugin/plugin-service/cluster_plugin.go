@@ -20,7 +20,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/plugin/plugin-store"
 	"github.com/eolinker/apinto-dashboard/modules/user"
 	"github.com/eolinker/eosc/common/bean"
-	"github.com/eolinker/eosc/log"
 	"gorm.io/gorm"
 	"sort"
 	"strings"
@@ -244,9 +243,22 @@ func (c *clusterPluginService) EditPlugin(ctx context.Context, namespaceID int, 
 		return errors.New("Can't Edit Inner Plugin. ")
 	}
 
+	extenders, err := c.pluginService.GetExtendersCache(ctx, namespaceID)
+	if err != nil {
+		return err
+	}
+	extendersMap := common.SliceToMap(extenders, func(t *plugin_model.ExtenderInfo) string {
+		return t.Id
+	})
+
 	pluginConfig, _ := json.Marshal(config)
 	//检测JsonSchema格式是否正确
-	if err = common.JsonSchemaValid(globalPlugin.Schema, string(pluginConfig)); err != nil {
+	schema := globalPlugin.Schema
+	extenderInfo, has := extendersMap[globalPlugin.Extended]
+	if has {
+		schema = extenderInfo.Schema
+	}
+	if err = common.JsonSchemaValid(schema, string(pluginConfig)); err != nil {
 		return errors.New(fmt.Sprintf("插件配置格式错误 err=%s", err.Error()))
 	}
 
@@ -644,7 +656,7 @@ func (c *clusterPluginService) Publish(ctx context.Context, namespaceId, userId 
 	//	}
 	//	gp := globalPluginsMap[p.PluginName]
 	//	if err = common.JsonSchemaValid(gp.Schema, p.NoReleasedConfig.Config); err != nil {
-	//		return errors.New(fmt.Sprintf("插件%s配置格式错误 err=%s", p.PluginName, err.Error()))
+	//		return errors.New(fmt.Sprintf("插件%s配置格式错误 err=%s", p.PluginName, err.Logger()))
 	//	}
 	//}
 
@@ -810,33 +822,6 @@ func (c *clusterPluginService) GetPublishVersion(ctx context.Context, clusterId 
 	}
 
 	return &plugin_model.ClusterPluginPublishVersion{ClusterPluginPublishVersion: currentVersion}, nil
-}
-
-func (c *clusterPluginService) ResetOnline(ctx context.Context, _, clusterId int) {
-	runtime, err := c.clusterPluginRuntimeStore.GetForCluster(ctx, clusterId, clusterId)
-	if err != nil {
-		log.Errorf("clusterPluginService-ResetOnline-GetRuntime clusterId=%d,err=%s", clusterId, err.Error())
-		return
-	}
-
-	if runtime.IsOnline {
-		version, err := c.clusterPluginPublishVersionStore.Get(ctx, runtime.VersionId)
-		if err != nil {
-			return
-		}
-
-		client, err := c.apintoClient.GetClient(ctx, clusterId)
-		if err != nil {
-			return
-		}
-
-		plugins, err := getToSendPlugins(version.PublishedPluginsList)
-		if err != nil {
-			return
-		}
-		//发布插件
-		_ = client.ForGlobalPlugin().Set(plugins)
-	}
 }
 
 func (c *clusterPluginService) IsOnlineByName(ctx context.Context, namespaceID int, clusterName, pluginName string) (bool, error) {

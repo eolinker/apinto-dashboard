@@ -1,15 +1,17 @@
 package cluster_controller
 
 import (
+	"net/http"
+
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
+	"github.com/eolinker/apinto-dashboard/controller/users"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/cluster"
 	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-dto"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 type clusterNodeController struct {
@@ -20,14 +22,6 @@ func newClusterNodeController() *clusterNodeController {
 	c := &clusterNodeController{}
 	bean.Autowired(&c.clusterNodeService)
 	return c
-}
-
-func RegisterClusterNodeRouter(router gin.IRoutes) {
-	c := newClusterNodeController()
-
-	router.GET("/cluster/:cluster_name/nodes", c.nodes)
-	router.POST("/cluster/:cluster_name/node/reset", c.reset)
-	router.PUT("/cluster/:cluster_name/node", c.put)
 }
 
 // gets  获取节点列表
@@ -51,7 +45,7 @@ func (c *clusterNodeController) nodes(ginCtx *gin.Context) {
 		})
 	}
 
-	m := common.Map[string, interface{}]{}
+	m := common.Map{}
 	m["nodes"] = list
 	m["is_update"] = isUpdate
 
@@ -73,7 +67,7 @@ func (c *clusterNodeController) reset(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, "cluster_add is null or source is null")
 		return
 	}
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	if err := c.clusterNodeService.Reset(ginCtx, namespaceId, userId, clusterName, input.ClusterAddr, input.Source); err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
