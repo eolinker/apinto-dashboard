@@ -8,17 +8,17 @@ import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navig
 import { Subscription } from 'rxjs'
 import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { BaseInfoService } from 'projects/core/src/app/service/base-info.service'
-import { MODAL_NORMAL_SIZE, MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
+import { MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
 import { ApiListItem } from '../../types/types'
 import { RouterService } from '../../router.service'
-import { NzModalRef } from 'ng-zorro-antd/modal'
-import { ApiPublishComponent } from '../publish/single/publish.component'
 
 @Component({
   selector: 'eo-ng-api-management-list',
   templateUrl: './list.component.html',
   styles: [
     `
+
+
     div eo-ng-api-method-tag{
       margin: 0 2px;
     }
@@ -28,8 +28,14 @@ import { ApiPublishComponent } from '../publish/single/publish.component'
     div eo-ng-api-method-tag:last-child {
       margin-right: 0;
     }
-    .ml107{
-      margin-top:4px;
+
+    :host ::ng-deep{
+        .ant-tooltip-inner {
+          background-color: var(--background-color);
+        }
+        .ant-tooltip-arrow-content {
+          --antd-arrow-background-color:var(--background-color);
+        }
     }
     `
   ]
@@ -217,45 +223,7 @@ export class ApiManagementListComponent implements OnInit {
     }
   }
 
-  modalRef:NzModalRef|undefined
   publish (uuid:string) {
-    this.modalRef = this.modalService.create({
-      nzTitle: '发布管理',
-      nzWidth: MODAL_NORMAL_SIZE,
-      nzContent: ApiPublishComponent,
-      nzComponentParams: {
-        apiUuid: uuid,
-        closeModal: () => { this.modalRef?.close() },
-        getApisData: () => { this.getApisData() },
-        nzDisabled: this.nzDisabled
-      },
-      nzFooter: [{
-        label: '取消',
-        type: 'default',
-        onClick: () => {
-          this.modalRef?.close()
-        }
-      },
-      {
-        label: '下线',
-        danger: true,
-        onClick: (context:ApiPublishComponent) => {
-          context.offline()
-        },
-        disabled: () => {
-          return this.nzDisabled
-        }
-      },
-      {
-        label: '上线',
-        type: 'primary',
-        onClick: (context:ApiPublishComponent) => {
-          context.online()
-        },
-        disabled: () => {
-          return this.nzDisabled
-        }
-      }]
-    })
+    this.service.publishApiModal(uuid, this)
   }
 }

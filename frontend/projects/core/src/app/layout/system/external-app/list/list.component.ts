@@ -1,5 +1,3 @@
-/* eslint-disable camelcase */
-/* eslint-disable no-useless-constructor */
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
 import { Router } from '@angular/router'
 import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feedback'

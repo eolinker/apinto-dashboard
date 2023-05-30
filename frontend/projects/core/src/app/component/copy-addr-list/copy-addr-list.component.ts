@@ -78,6 +78,9 @@ import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 
   `,
   styles: [
+    `
+    :host ::ng-deep{
+    }`
   ]
 })
 export class CopyAddrListComponent implements OnInit {

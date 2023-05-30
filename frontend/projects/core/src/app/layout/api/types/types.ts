@@ -1,5 +1,6 @@
 import { PublishStatus } from '../../../constant/type'
 
+export type APIProtocol = 'http'|'websocket'
 export interface RouterEnum{
     apiId:string
     name:string

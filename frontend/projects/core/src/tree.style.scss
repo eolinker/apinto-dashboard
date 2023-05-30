@@ -1,17 +1,6 @@
-.ant-switch-handle {
-  transition: none !important;
-}
 .ant-switch-handle::before {
   box-shadow: none !important;
-  transition: none !important;
   content: '';
-}
-
-eo-ng-apinto-roles-group {
-  .ant-tree .ant-tree-node-content-wrapper {
-    margin-left: 12px;
-    min-width: 0px;
-  }
 }
 
 eo-ng-tree-default:not(.ant-select-tree) {
@@ -77,5 +66,5 @@ eo-ng-tree-default:not(.ant-select-tree) {
 
 .ant-tree,
 .ant-tree-checkbox-group {
-  font-size: 13px;
+  font-size: 12px;
 }

@@ -26,7 +26,6 @@ export class UserAvatarComponent implements OnInit {
   nickName: string = ''
   userName: string = ''
   drawerRef:NzModalRef | undefined
-  // eslint-disable-next-line no-useless-constructor
   constructor (private message: EoNgFeedbackMessageService,
                 private modalService:EoNgFeedbackModalService,
                 private router: Router,

@@ -9,7 +9,7 @@ import { ApiService } from './api.service'
 @Injectable({
   providedIn: 'root'
 })
-export class EoNgNavigationService {
+export class eoNgAppService {
   private menuList:MenuOptions[] = [] // 当前用户可显示的菜单
   private updateRightsRouterList:string[] = [] // 当前用户可编辑的菜单rouer列表
   private viewRightsRouterList:string[] = [] // 当前用户可查看的菜单router列表
@@ -17,7 +17,6 @@ export class EoNgNavigationService {
   dataUpdated:boolean = false // 是否获取过数据，避免组件在ngOnChanges时读取空数组
   private userRoleId:string = '' // 当前用户角色id
   private userId:string = '' // 当前用户id
-  // eslint-disable-next-line no-useless-constructor
   constructor (
     private message: EoNgFeedbackMessageService,
     public api:ApiService) {
@@ -64,15 +63,15 @@ export class EoNgNavigationService {
     return this.flashFlag.asObservable()
   }
 
-  private userUpdeteRightList: Subject<Array<string>> = new Subject<Array<string>>()
+  private userUpdateRightList: Subject<Array<string>> = new Subject<Array<string>>()
 
   reqUpdateRightList () {
-    this.userUpdeteRightList.next(this.updateRightsRouterList)
+    this.userUpdateRightList.next(this.updateRightsRouterList)
     this.dataUpdated = true
   }
 
   repUpdateRightList () {
-    return this.userUpdeteRightList.asObservable()
+    return this.userUpdateRightList.asObservable()
   }
 
   private userViewUpdeteRightList: Subject<Array<string>> = new Subject<Array<string>>()
