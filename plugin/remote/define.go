@@ -1,4 +1,4 @@
-package local
+package remote
 
 type Define struct {
 	Server     string               `json:"server" yaml:"server"`

@@ -1,4 +1,4 @@
-package local
+package remote
 
 import (
 	"fmt"
@@ -29,7 +29,7 @@ type remotePluginController struct {
 	define               *Define
 }
 
-func (r *remotePluginController) createRemoteStorageApis() []apinto_module.RouterInfo {
+func (r *remotePluginController) createRemoteApis() []apinto_module.RouterInfo {
 	return []apinto_module.RouterInfo{
 		{
 			Method:      "GET",
@@ -63,11 +63,34 @@ func (r *remotePluginController) getOpenMode() gin.HandlerFunc {
 		module["name"] = r.moduleName
 		module["url"] = fmt.Sprintf("%s/%s", strings.TrimSuffix(r.define.Server, "/"), strings.TrimPrefix(r.define.Path, "/"))
 
-		//TODO 补充信息
+		module["query"] = configParamToDto(r.cfg.Query, r.define.Querys)
+		module["header"] = configParamToDto(r.cfg.Header, r.define.Headers)
+		module["initialize"] = configParamToDto(r.cfg.Initialize, r.define.Initialize)
 
 		data["module"] = module
 		ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 	}
+}
+
+// configParamToDto 将config内的query，header，initialize转化成接口需要返回的格式
+func configParamToDto(configParams map[string]string, defineParams []ExtendParamsRender) []*DtoOpenModeParam {
+	items := make([]*DtoOpenModeParam, 0, len(configParams))
+
+	defineParamsMap := common.SliceToMap(defineParams, func(t ExtendParamsRender) string {
+		return t.Name
+	})
+	for name, value := range configParams {
+		item := &DtoOpenModeParam{
+			Name:  name,
+			Value: value,
+		}
+		if info, has := defineParamsMap[name]; has {
+			item.Type = info.Type
+		}
+		items = append(items, item)
+	}
+
+	return nil
 }
 
 func (r *remotePluginController) saveObject() gin.HandlerFunc {
