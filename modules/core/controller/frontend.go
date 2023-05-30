@@ -2,7 +2,7 @@ package controller
 
 import (
 	"github.com/eolinker/apinto-dashboard/frontend"
-	apinto_module "github.com/eolinker/apinto-module"
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"path"
@@ -39,6 +39,11 @@ func moduleRouters() apinto_module.RoutersInfo {
 			Method:      http.MethodGet,
 			Path:        "/:module",
 			Labels:      apinto_module.RouterLabelModule,
+			HandlerFunc: []apinto_module.HandlerFunc{mc.HandleModule},
+		}, {
+			Method:      http.MethodGet,
+			Path:        "/login",
+			Labels:      apinto_module.RouterLabelAssets,
 			HandlerFunc: []apinto_module.HandlerFunc{mc.HandleModule},
 		},
 	}

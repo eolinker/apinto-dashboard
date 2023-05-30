@@ -57,6 +57,7 @@ import { UntypedFormBuilder, Validators } from '@angular/forms'
             *ngIf="!enable"
             class="ml-btnybase ant-btn-primary"
             eo-ng-button
+        eoNgUserAccess="module-plugin"
             (click)="enablePlugin()"
           >
             启用
@@ -65,6 +66,7 @@ import { UntypedFormBuilder, Validators } from '@angular/forms'
             *ngIf="enable && canDisable"
             class="ml-btnybase"
             eo-ng-button
+        eoNgUserAccess="module-plugin"
             (click)="disablePluginModal(false)"
           >
             停用
@@ -73,6 +75,7 @@ import { UntypedFormBuilder, Validators } from '@angular/forms'
             *ngIf="!enable && uninstall"
             class="ml-btnybase"
             eo-ng-button
+        eoNgUserAccess="module-plugin"
             (click)="disablePluginModal(true)"
           >
             卸载
@@ -88,7 +91,6 @@ import { UntypedFormBuilder, Validators } from '@angular/forms'
         nzInputImage="simple"
       ></eo-ng-empty>
       <markdown
-        clipboard
         class="markdown-body"
         *ngIf="!showEmpty"
         [src]="getMd()"
@@ -117,14 +119,14 @@ export class PluginMessageComponent implements OnInit {
     private modalService: EoNgFeedbackModalService,
     private api: ApiService,
     private baseInfo: BaseInfoService,
-    private appConfigService: EoNgNavigationService,
+    private navigationService: EoNgNavigationService,
     private markdownService: MarkdownService,
     private router: Router,
     private fb: UntypedFormBuilder,
     @Inject(API_URL) public urlPrefix: string
   ) {
-    this.appConfigService.reqFlashBreadcrumb([
-      { title: '企业插件', routerLink: ['/', 'plugin', 'group', 'list', ''] },
+    this.navigationService.reqFlashBreadcrumb([
+      { title: '插件市场', routerLink: ['/', 'module-plugin', 'group', 'list', ''] },
       { title: '插件详情' }
     ])
   }
@@ -172,7 +174,7 @@ export class PluginMessageComponent implements OnInit {
     }
   }
 
-  getPluginDetail () {
+  getPluginDetail = () => {
     this.api
       .get('system/plugin/info', { id: this.pluginId })
       .subscribe(
@@ -234,7 +236,7 @@ export class PluginMessageComponent implements OnInit {
         (resp: { code: number; data: PluginInstallData; msg: string }) => {
           if (resp.code === 30001) {
             this.message.success(resp.msg || '启用插件成功')
-            const subscription = this.appConfigService
+            const subscription = this.navigationService
               .getMenuList()
               .subscribe(() => {
                 subscription.unsubscribe()
@@ -276,7 +278,7 @@ export class PluginMessageComponent implements OnInit {
               params.queryList.length ||
               params.initializeList.length
             ) {
-              this.modalService.create({
+              this.modalRef = this.modalService.create({
                 nzTitle: '启用',
                 nzWidth: MODAL_NORMAL_SIZE,
                 nzContent: PluginConfigComponent,
@@ -287,7 +289,8 @@ export class PluginMessageComponent implements OnInit {
                   validateForm: this.fb.group({
                     name: [params.name, [Validators.required]],
                     server: [params.server, [Validators.required]]
-                  })
+                  }),
+                  closeModal: () => { this.modalRef?.close() }
                 },
                 nzOkText: '确定',
                 nzCancelText: '取消',
@@ -306,12 +309,13 @@ export class PluginMessageComponent implements OnInit {
                 .subscribe((resp: EmptyHttpResponse) => {
                   if (resp.code === 0) {
                     this.message.success(resp.msg || '启用插件成功')
-                    const subscription = this.appConfigService
+                    const subscription = this.navigationService
                       .getMenuList()
                       .subscribe(() => {
                         subscription.unsubscribe()
                       })
                     this.getPluginDetail()
+                    this.modalRef?.close()
                   }
                 })
             }
@@ -359,7 +363,7 @@ export class PluginMessageComponent implements OnInit {
       .subscribe((resp: EmptyHttpResponse) => {
         if (resp.code === 0) {
           this.message.success(resp.msg || '禁用成功')
-          const subscription = this.appConfigService
+          const subscription = this.navigationService
             .getMenuList()
             .subscribe(() => {
               subscription.unsubscribe()
@@ -377,12 +381,12 @@ export class PluginMessageComponent implements OnInit {
       .subscribe((resp: EmptyHttpResponse) => {
         if (resp.code === 0) {
           this.message.success(resp.msg || '卸载成功')
-          const subscription = this.appConfigService
+          const subscription = this.navigationService
             .getMenuList()
             .subscribe(() => {
               subscription.unsubscribe()
             })
-          this.router.navigate(['/', 'plugin', 'group', 'list'])
+          this.router.navigate(['/', 'module-plugin', 'group', 'list'])
           this.modalRef?.close()
         }
       })

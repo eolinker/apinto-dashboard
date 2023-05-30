@@ -5,6 +5,7 @@ import (
 	plugin2 "github.com/eolinker/apinto-dashboard/client/v1/initialize/plugin"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
+	"github.com/eolinker/apinto-dashboard/controller/users"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/plugin"
 	"github.com/eolinker/apinto-dashboard/modules/plugin/plugin-dto"
@@ -38,7 +39,7 @@ func (p *pluginController) plugin(ginCtx *gin.Context) {
 		return
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["plugin"] = plugin_dto.PluginItem{
 		Name:     pluginInfo.Name,
 		Extended: pluginInfo.Extended,
@@ -76,7 +77,7 @@ func (p *pluginController) plugins(ginCtx *gin.Context) {
 		})
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["plugins"] = resultList
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
@@ -100,7 +101,7 @@ func (p *pluginController) basicInfoPlugins(ginCtx *gin.Context) {
 		})
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["plugins"] = resultList
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
@@ -108,7 +109,7 @@ func (p *pluginController) basicInfoPlugins(ginCtx *gin.Context) {
 // 新增插件
 func (p *pluginController) createPlugin(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	input := new(plugin_dto.PluginInput)
 
 	if err := ginCtx.BindJSON(input); err != nil {
@@ -140,7 +141,7 @@ func (p *pluginController) createPlugin(ginCtx *gin.Context) {
 // 修改插件
 func (p *pluginController) updatePlugin(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	input := new(plugin_dto.PluginInput)
 
 	if err := ginCtx.BindJSON(input); err != nil {
@@ -172,7 +173,7 @@ func (p *pluginController) updatePlugin(ginCtx *gin.Context) {
 // 删除插件
 func (p *pluginController) delPlugin(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	name := ginCtx.Query("name")
 
 	if err := p.pluginService.Delete(ginCtx, namespaceId, userId, name); err != nil {
@@ -185,7 +186,7 @@ func (p *pluginController) delPlugin(ginCtx *gin.Context) {
 
 // 插件的扩展ID列表
 func (p *pluginController) pluginExtendeds(ginCtx *gin.Context) {
-	extenderList, err := p.extenderCache.GetAll(ginCtx, p.extenderCache.Key())
+	extenderList, err := p.extenderCache.GetAll(ginCtx)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
@@ -204,7 +205,7 @@ func (p *pluginController) pluginExtendeds(ginCtx *gin.Context) {
 		names = append(names, extender.Id)
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["extendeds"] = names
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
@@ -212,7 +213,7 @@ func (p *pluginController) pluginExtendeds(ginCtx *gin.Context) {
 // 修改插件顺序
 func (p *pluginController) pluginSort(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 
 	pluginSort := new(plugin_dto.PluginSort)
 
@@ -232,7 +233,7 @@ func (p *pluginController) pluginSort(ginCtx *gin.Context) {
 // 获取作为选项的插件列表（剔除掉黑名单）
 func (p *pluginController) pluginEnum(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	plugins, err := p.pluginService.GetList(ginCtx, namespaceId)
+	plugins, err := p.pluginService.GetEnumList(ginCtx, namespaceId)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
@@ -255,7 +256,7 @@ func (p *pluginController) pluginEnum(ginCtx *gin.Context) {
 		})
 
 	}
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["plugins"] = resultList
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
@@ -263,22 +264,22 @@ func (p *pluginController) pluginEnum(ginCtx *gin.Context) {
 // 插件配置信息
 func (p *pluginController) pluginRender(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
-	plugins, err := p.pluginService.GetList(ginCtx, namespaceId)
+	plugins, err := p.pluginService.GetEnumList(ginCtx, namespaceId)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
-	resultList := make([]plugin_dto.PluginListItem, 0, len(plugins))
+	resultList := make([]plugin_dto.PluginEnum, 0, len(plugins))
 
 	for _, pluginInfo := range plugins {
-		resultList = append(resultList, plugin_dto.PluginListItem{
+		resultList = append(resultList, plugin_dto.PluginEnum{
 			Name:   pluginInfo.Name,
 			Config: pluginInfo.Schema,
 		})
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["plugins"] = resultList
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }

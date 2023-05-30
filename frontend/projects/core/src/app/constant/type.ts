@@ -19,6 +19,24 @@ export interface UserListData{
   email:string
 }
 
+export interface UserData{
+  sex?:number
+  avatar?:string
+  email:string
+  phone:string
+  user_name:string
+  nick_name:string
+  role_ids:Array<string>
+  desc:string
+  notice_user_id:string
+}
+
+export interface MonitorAlarmChannelsData {
+  uuid: string
+  title: string
+  type: 1 | 2
+}
+
 // 创建/修改目录
 export interface GroupData{
   name:string
@@ -56,9 +74,19 @@ export interface ClustersData{
   env: string,
   status: 'NORMAL'|'PARTIALLY_NORMAL'|'ABNORMAL',
   desc: string,
+  title:string,
   name: string,
   createTime: string,
   updateTime: string
+}
+
+export type PublishStatus = 'GOONLINE'|'OFFLINE'|'NOTGOONLINE'|'TOUPDATE'
+
+// 简易集群列表，即将集群名与环境名组合在一起的一级目录
+export type ClusterSimpleOption = {
+  id:string
+  name:string
+  title:string
 }
 
 // 获取远程类型的选项（用在服务治理-筛选条件和监控告警-选择api和上游 -api

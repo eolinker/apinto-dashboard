@@ -16,7 +16,15 @@ import { GuideStepList, StepItem, TutorialItem, TutorialsList } from './conf'
       background-color: #f5f7fa;
       overflow: hidden;
       overflow-y:auto;
-    }`
+    }
+
+    .right-border-box::after {
+      content:' ';
+      height:100%;
+      color:black;
+    }
+
+`
   ]
 })
 export class GuideComponent implements OnInit {
@@ -24,10 +32,18 @@ export class GuideComponent implements OnInit {
   tutorialsList:Array<TutorialItem> = [...TutorialsList]
   btnLoading:boolean = true
 
-  constructor (private appConfigService:EoNgNavigationService, private api:ApiService, private router:Router) {}
+  constructor (private navigationService:EoNgNavigationService, private api:ApiService, private router:Router) {}
   ngOnInit (): void {
-    this.appConfigService.reqFlashBreadcrumb([])
+    this.navigationService.reqFlashBreadcrumb([])
     this.getStepStatus()
+  }
+
+  getTitleStyle (step:StepItem) {
+    return step.status === 'doing' ? `text-guide_${step.name} font-bold text-[16px] ` : (step.status === 'undo' ? 'text-DESC_TEXT  font-bold text-[16px]' : 'font-bold text-[16px]')
+  }
+
+  getDoingBtnClass (step:StepItem) {
+    return `text-guide_${step.name} border-guide_${step.name}`
   }
 
   getStepStatus () {
@@ -37,8 +53,8 @@ export class GuideComponent implements OnInit {
       this.btnLoading = false
       if (resp.code === 0) {
         let doingFlag = false // 只有一个前往
-        for (let i = 0; i < this.stepList.length; i++) {
-          this.stepList[i].status = resp.data[this.stepList[i].name] ? 'done' : ((i === 0 || (i > 0 && this.stepList[i - 1].status === 'done')) && !doingFlag ? 'doing' : 'undo')
+        for (let i = 0; i < this.stepList.length - 1; i++) {
+          this.stepList[i].status = resp.data[this.stepList[i].name as 'cluster'|'upstream'|'api'|'publishApi'] ? 'done' : ((i === 0 || (i > 0 && this.stepList[i - 1].status === 'done')) && !doingFlag ? 'doing' : 'undo')
           if (this.stepList[i].status === 'doing') {
             doingFlag = true
           }

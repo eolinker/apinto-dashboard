@@ -1,4 +1,4 @@
-import { ArrayItemData } from '../../../constant/type'
+import { ArrayItemData, PublishStatus } from '../../../constant/type'
 
 /* eslint-disable camelcase */
 export interface ApplicationEnum{
@@ -13,21 +13,32 @@ export interface ApplicationListData{
     operator:string
     updateTime:string
     isDelete:boolean
+    publish:Array<{name:string, title:string, status:PublishStatus}>
+    [k:string]:any
 }
 
+export type ApplicationParamData = {
+    key:string
+    value:string
+    conflict:string
+    position:string
+    eoKey?:string
+    conflictString?:string
+}
 export interface ApplicationData{
     name:string
     id:string
     desc:string
     customAttrList:ArrayItemData[]
-    extraParamList:Array<{key:string, value:string, position:string, conflict:string}>
+    params?:ApplicationParamData[]
 }
 
 export interface ApplicationAuthForm{
+    title:string
     position:string
     uuid?:string
     tokenName:string
-    isTransparent:boolean
+    hideCredential:boolean
     expireTime:number
     expireTimeDate:Date|null
     driver:string
@@ -51,8 +62,9 @@ export interface ApplicationAuthForm{
 }
 
 export interface AuthData{
+    title:string
     driver:'basic' | 'apikey' | 'aksk' | 'jwt'
-    isTransparent:boolean
+    hideCredential:boolean
     expireTime:number
     position:string
     tokenName:string
@@ -78,7 +90,7 @@ export interface AuthData{
 export interface AuthListData{
     uuid:string
     driver:string
-    isTransparent:boolean|string
+    hideCredential:boolean|string
     expireTime:number
     expireTimeString?:string,
     paramPosition:string

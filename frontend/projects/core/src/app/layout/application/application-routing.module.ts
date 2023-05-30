@@ -6,7 +6,7 @@ import { ApplicationContentComponent } from './content/content.component'
 import { ApplicationCreateComponent } from './create/create.component'
 import { ApplicationManagementListComponent } from './list/list.component'
 import { ApplicationMessageComponent } from './message/message.component'
-import { ApplicationPublishComponent } from './publish/publish.component'
+import { ApplicationExtraComponent } from './extra/extra.component'
 
 const routes: Routes = [{
   path: '',
@@ -25,18 +25,22 @@ const routes: Routes = [{
       component: ApplicationContentComponent,
       children: [
         {
-          path: '',
-          component: ApplicationPublishComponent
+          path: 'authentication',
+          component: ApplicationAuthenticationComponent
         },
         {
           path: 'message',
           component: ApplicationMessageComponent
         },
         {
-          path: 'authentication',
-          component: ApplicationAuthenticationComponent
+          path: 'extra',
+          component: ApplicationExtraComponent
         }
       ]
+    },
+    {
+      path: '**',
+      component: ApplicationManagementListComponent
     }
   ]
 }]

@@ -1,8 +1,9 @@
 package cluster_controller
 
 import (
-	"github.com/eolinker/apinto-module"
 	"net/http"
+
+	"github.com/eolinker/apinto-dashboard/module"
 )
 
 type ClusterPluginDriver struct {
@@ -13,7 +14,7 @@ func NewClusterPlugin() apinto_module.Driver {
 }
 
 func (c *ClusterPluginDriver) CreateModule(name string, config interface{}) (apinto_module.Module, error) {
-	return NewClusterModule(name), nil
+	return NewModule(name), nil
 }
 
 func (c *ClusterPluginDriver) CheckConfig(name string, config interface{}) error {
@@ -24,45 +25,65 @@ func (c *ClusterPluginDriver) CreatePlugin(define interface{}) (apinto_module.Pl
 	return c, nil
 }
 
-type ClusterModule struct {
+func (c *ClusterPluginDriver) GetPluginFrontend(moduleName string) string {
+	return "deploy/cluster"
+}
+
+func (c *ClusterPluginDriver) IsPluginVisible() bool {
+	return true
+}
+
+func (c *ClusterPluginDriver) IsShowServer() bool {
+	return false
+}
+
+func (c *ClusterPluginDriver) IsCanUninstall() bool {
+	return false
+}
+
+func (c *ClusterPluginDriver) IsCanDisable() bool {
+	return false
+}
+
+type Module struct {
 	isInit bool
 
 	name    string
 	routers apinto_module.RoutersInfo
 }
 
-func (c *ClusterModule) Name() string {
+func (c *Module) Name() string {
 	return c.name
 }
 
-func (c *ClusterModule) Support() (apinto_module.ProviderSupport, bool) {
+func (c *Module) Support() (apinto_module.ProviderSupport, bool) {
 	return nil, false
 }
 
-func (c *ClusterModule) Routers() (apinto_module.Routers, bool) {
+func (c *Module) Routers() (apinto_module.Routers, bool) {
 	return c, true
 }
 
-func (c *ClusterModule) Middleware() (apinto_module.Middleware, bool) {
+func (c *Module) Middleware() (apinto_module.Middleware, bool) {
 	return nil, false
 }
 
-func NewClusterModule(name string) *ClusterModule {
+func NewModule(name string) *Module {
 
-	return &ClusterModule{name: name}
+	return &Module{name: name}
 }
 
-func (c *ClusterModule) RoutersInfo() apinto_module.RoutersInfo {
+func (c *Module) RoutersInfo() apinto_module.RoutersInfo {
 	if !c.isInit {
 		c.initRouter()
 		c.isInit = true
 	}
 	return c.routers
 }
-func (c *ClusterModule) initRouter() {
+func (c *Module) initRouter() {
 	clrController := newClusterController()
 	nodeController := newClusterNodeController()
-	configController := newClusterConfigController()
+	//configController := newClusterConfigController()
 	certificateController := newClusterCertificateController()
 	c.routers = []apinto_module.RouterInfo{
 		{
@@ -70,6 +91,18 @@ func (c *ClusterModule) initRouter() {
 			Path:        "/api/clusters",
 			Handler:     "cluster.list",
 			HandlerFunc: []apinto_module.HandlerFunc{clrController.clusters},
+		},
+		{
+			Method:      http.MethodGet,
+			Path:        "/api/clusters/simple",
+			Handler:     "cluster.simple_list",
+			HandlerFunc: []apinto_module.HandlerFunc{clrController.simpleClusters},
+		},
+		{
+			Method:      http.MethodGet,
+			Path:        "/api/clusters/create_check",
+			Handler:     "cluster.simple_list",
+			HandlerFunc: []apinto_module.HandlerFunc{clrController.createClusterCheck},
 		},
 		{
 			Method:      http.MethodGet,
@@ -102,9 +135,9 @@ func (c *ClusterModule) initRouter() {
 		},
 		{
 			Method:      http.MethodPut,
-			Path:        "/api/cluster/:cluster_name/desc",
+			Path:        "/api/cluster/:cluster_name",
 			Handler:     "cluster.desc.edit",
-			HandlerFunc: []apinto_module.HandlerFunc{clrController.putDesc},
+			HandlerFunc: []apinto_module.HandlerFunc{clrController.update},
 		},
 		{
 			Method:      http.MethodGet,
@@ -124,36 +157,42 @@ func (c *ClusterModule) initRouter() {
 			Handler:     "cluster.nodes.edit",
 			HandlerFunc: []apinto_module.HandlerFunc{nodeController.put},
 		},
-		{
-			Method:      http.MethodGet,
-			Path:        "/api/cluster/:cluster_name/configuration/:type",
-			Handler:     "cluster.config",
-			HandlerFunc: []apinto_module.HandlerFunc{configController.get},
-		},
-		{
-			Method:      http.MethodPut,
-			Path:        "/api/cluster/:cluster_name/configuration/:type",
-			Handler:     "cluster.config.edit",
-			HandlerFunc: []apinto_module.HandlerFunc{configController.edit},
-		},
-		{
-			Method:      http.MethodPut,
-			Path:        "/api/cluster/:cluster_name/configuration/:type/enable",
-			Handler:     "cluster.config.enable",
-			HandlerFunc: []apinto_module.HandlerFunc{configController.enable},
-		},
-		{
-			Method:      http.MethodPut,
-			Path:        "/api/cluster/:cluster_name/configuration/:type/disable",
-			Handler:     "cluster.config.disable",
-			HandlerFunc: []apinto_module.HandlerFunc{configController.disable},
-		},
+		//{
+		//	Method:      http.MethodGet,
+		//	Path:        "/api/cluster/:cluster_name/configuration/:type",
+		//	Handler:     "cluster.config",
+		//	HandlerFunc: []apinto_module.HandlerFunc{configController.get},
+		//},
+		//{
+		//	Method:      http.MethodPut,
+		//	Path:        "/api/cluster/:cluster_name/configuration/:type",
+		//	Handler:     "cluster.config.edit",
+		//	HandlerFunc: []apinto_module.HandlerFunc{configController.edit},
+		//},
+		//{
+		//	Method:      http.MethodPut,
+		//	Path:        "/api/cluster/:cluster_name/configuration/:type/enable",
+		//	Handler:     "cluster.config.enable",
+		//	HandlerFunc: []apinto_module.HandlerFunc{configController.enable},
+		//},
+		//{
+		//	Method:      http.MethodPut,
+		//	Path:        "/api/cluster/:cluster_name/configuration/:type/disable",
+		//	Handler:     "cluster.config.disable",
+		//	HandlerFunc: []apinto_module.HandlerFunc{configController.disable},
+		//},
 
 		{
 			Method:      http.MethodPost,
 			Path:        "/api/cluster/:cluster_name/certificate",
 			Handler:     "cluster.certificates.post",
 			HandlerFunc: []apinto_module.HandlerFunc{certificateController.post},
+		},
+		{
+			Method:      http.MethodGet,
+			Path:        "/api/cluster/:cluster_name/certificate/:certificate_id",
+			Handler:     "cluster.certificates.get",
+			HandlerFunc: []apinto_module.HandlerFunc{certificateController.get},
 		},
 		{
 			Method:      http.MethodPut,

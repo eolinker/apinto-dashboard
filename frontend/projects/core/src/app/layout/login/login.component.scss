@@ -1,9 +1,11 @@
 :host ::ng-deep {
   height: 100%;
   width: 100%;
-  display: block;
+  display: flex;
   background-color: #f5f7fa;
-  overflow: hidden;
+  align-items: center;
+  overflow: auto;
+  min-height: 490px;
 }
 
 eo-ng-apinto:host {

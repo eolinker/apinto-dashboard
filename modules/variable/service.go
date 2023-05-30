@@ -2,8 +2,9 @@ package variable
 
 import (
 	"context"
+
+	quote_entry "github.com/eolinker/apinto-dashboard/modules/base/quote-entry"
 	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-dto"
-	"github.com/eolinker/apinto-dashboard/modules/online"
 	"github.com/eolinker/apinto-dashboard/modules/variable/variable-model"
 )
 
@@ -13,7 +14,13 @@ type IGlobalVariableService interface {
 	Create(ctx context.Context, namespaceID, userID int, key, desc string) (int, error)
 	Delete(ctx context.Context, namespaceID, userID int, key string) error
 	GetByKeys(ctx context.Context, namespaceId int, keys []string) ([]*variable_model.GlobalVariable, error)
-	GetById(ctx context.Context, namespaceId int) (*variable_model.GlobalVariable, error)
+	GetById(ctx context.Context, id int) (*variable_model.GlobalVariable, error)
+	//QuoteVariables 引用环境变量
+	QuoteVariables(ctx context.Context, namespaceID, sourceID int, quoteType quote_entry.QuoteKindType, variableKeys []string) error
+	//CheckQuotedVariablesOnline 检查Source引用的环境变量是否在目标集群已上线
+	CheckQuotedVariablesOnline(ctx context.Context, clusterID int, clusterName string, sourceID int, quoteType quote_entry.QuoteKindType) error
+	//DeleteVariableQuote 删除source的环境变量引用关系
+	DeleteVariableQuote(ctx context.Context, sourceID int, quoteType quote_entry.QuoteKindType) error
 }
 
 type IClusterVariableService interface {
@@ -29,5 +36,5 @@ type IClusterVariableService interface {
 	GetSyncConf(ctx context.Context, namespaceId int, clusterName string) (*variable_model.ClustersVariables, error)
 	PublishHistory(ctx context.Context, namespaceId, pageNum, pageSize int, clusterName string) ([]*variable_model.VariablePublish, int, error)
 	GetPublishVersion(ctx context.Context, clusterId int) (*variable_model.VariablePublishVersion, error)
-	online.IResetOnlineService
+	//online.IResetOnlineService
 }

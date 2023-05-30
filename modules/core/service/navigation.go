@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"github.com/eolinker/apinto-dashboard/modules/core"
 
 	navigation_service "github.com/eolinker/apinto-dashboard/modules/navigation"
 
@@ -12,16 +13,12 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/core/model"
 )
 
-type INavigationService interface {
-	List(ctx context.Context) ([]*model.Navigation, map[string]string, error)
-}
-
 type navigation struct {
 	navigationService   navigation_service.INavigationService
 	modulePluginService module_plugin.IModulePlugin
 }
 
-func newNavigationService() INavigationService {
+func newNavigationService() core.INavigationService {
 	n := &navigation{}
 	bean.Autowired(&n.navigationService)
 	bean.Autowired(&n.modulePluginService)
@@ -46,8 +43,8 @@ func (n *navigation) List(ctx context.Context) ([]*model.Navigation, map[string]
 		moduleMap[m.Navigation] = append(moduleMap[m.Navigation], &model.Module{
 			Name:  m.Name,
 			Title: m.Title,
-			Type:  m.Type,
-			Path:  m.Path,
+			//Type:  m.Type,
+			Path: m.Path,
 		})
 	}
 	list := n.navigationService.List()

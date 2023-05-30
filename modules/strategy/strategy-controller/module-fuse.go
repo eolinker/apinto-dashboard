@@ -1,8 +1,8 @@
 package strategy_controller
 
 import (
+	"github.com/eolinker/apinto-dashboard/module"
 	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
-	"github.com/eolinker/apinto-module"
 	"net/http"
 )
 
@@ -23,6 +23,26 @@ func (c *StrategyFuseDriver) CheckConfig(name string, config interface{}) error 
 
 func (c *StrategyFuseDriver) CreatePlugin(define interface{}) (apinto_module.Plugin, error) {
 	return c, nil
+}
+
+func (c *StrategyFuseDriver) GetPluginFrontend(moduleName string) string {
+	return "serv-governance/fuse"
+}
+
+func (c *StrategyFuseDriver) IsPluginVisible() bool {
+	return true
+}
+
+func (c *StrategyFuseDriver) IsShowServer() bool {
+	return false
+}
+
+func (c *StrategyFuseDriver) IsCanUninstall() bool {
+	return false
+}
+
+func (c *StrategyFuseDriver) IsCanDisable() bool {
+	return true
 }
 
 type StrategyFuseModule struct {

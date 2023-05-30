@@ -1,0 +1,36 @@
+<div class="">
+  <div
+    class="list-header pl-btnbase pr-btnrbase py-btnybase flex flex-nowrap items-center justify-between"
+  >
+    <button
+      eo-ng-button
+      class="ant-btn-primary"
+      eoNgUserAccess="application"
+      (disabledEdit)="disabledEdit($event)"
+      (click)="openDrawer()"
+    >
+      添加参数
+    </button>
+  </div>
+  <div class="list-content">
+    <eo-ng-apinto-table
+      class=""
+      [nzTbody]="extraTableBody"
+      [nzThead]="extraTableHeadName"
+      [nzData]="service.appData?.params || []"
+      [nzTrClick]="authTableClick"
+      [nzMaxOperatorButton]="2"
+      [nzNoScroll]="true"
+    >
+    </eo-ng-apinto-table>
+  </div>
+
+  <ng-template #conflictTpl let-item="item">
+    <ng-container [ngSwitch]="item.conflict">
+      <span *ngSwitchCase="'convert'">替换原参数值</span>
+      <span *ngSwitchCase="'origin'">原参数值不存在时，添加额外参数</span>
+      <span *ngSwitchCase="'error'">原参数值存在时返回错误</span>
+      <span *ngSwitchDefault>-</span>
+    </ng-container>
+  </ng-template>
+</div>

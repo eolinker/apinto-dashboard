@@ -16,7 +16,7 @@
     >
       <div class="flex items-center justify-between px-[11px] py-btnbase">
         <eo-ng-search-input-group
-          class="w-[calc(100%_-_40px)]"
+          class="w-[100%]"
           [eoInputVal]="queryName"
           [eoNoWidth]="true"
           (eoClick)="queryName = ''"
@@ -29,7 +29,7 @@
           />
         </eo-ng-search-input-group>
 
-        <button
+        <!-- <button
           eo-ng-button
           nzType="default"
           class="p-0 ml-[10px] group-icon"
@@ -37,7 +37,7 @@
           (click)="addGroupModal('root')"
         >
           <svg class="iconpark-icon"><use href="#xinzengfenzu"></use></svg>
-        </button>
+        </button> -->
       </div>
 
       <div
@@ -61,6 +61,18 @@
             [nzTreeTemplate]="nzTreeTpl"
             [nzSearchValue]="queryName"
           ></eo-ng-tree-default>
+        </div>
+
+        <div class="mt-formtop">
+          <a
+            class="ml-[28px] flex items-center"
+            eoNgUserAccess="router/api"
+            (click)="addGroupModal('root')"
+          >
+            <svg class="w-[16px] h-[16px] mr-[2px]">
+              <use href="#tianjia"></use></svg
+            ><span>新增分组</span>
+          </a>
         </div>
         <ng-template #nzTreeTpl let-node let-origin="origin">
           <div class="custom-node">
@@ -96,7 +108,8 @@
 
               <eo-ng-dropdown-menu #menu="nzDropdownMenu">
                 <ul nz-menu>
-                  <li nz-menu-item (click)="addApi(origin.uuid)">添加 API</li>
+                  <li nz-menu-item (click)="addApi(origin.uuid, 'http')">添加 HTTP API</li>
+                  <li nz-menu-item (click)="addApi(origin.uuid, 'websocket')">添加 Websocket API</li>
                   <li nz-menu-item (click)="addGroupModal(origin.uuid)">
                     添加子分组
                   </li>
@@ -132,7 +145,7 @@
       ></div>
     </div>
   </div>
-  <div class="w-[100%]">
+  <div class="min-w-[0px]">
     <router-outlet></router-outlet>
   </div>
 </div>

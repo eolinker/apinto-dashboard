@@ -7,24 +7,16 @@
   class="authDrawer"
 >
   <nz-form-item class="form-row">
-    <label class="label">
-      <span
-        eoNgFeedbackTooltip
-        nzTooltipTitle="转发时默认将鉴权信息透传到上游"
-        nzTooltipPlacement="top"
-        [nzTooltipVisible]="false"
-        nzTooltipTrigger="hover"
-        ><span class="required-symbol">*</span>隐藏鉴权信息：
-      </span></label
-    >
-    <nz-form-control class="">
-      <eo-ng-switch
-        name="transparent"
-        formControlName="isTransparent"
-        nzCheckedChildren="开"
-        nzUnCheckedChildren="关"
-        [nzDisabled]="nzDisabled"
-      ></eo-ng-switch>
+    <label class="label"><span class="required-symbol">*</span>名称：</label>
+    <nz-form-control>
+      <input
+        eo-ng-input
+        class="w-INPUT_NORMAL"
+        name="title"
+        required
+        formControlName="title"
+        placeholder="请输入名称"
+      />
     </nz-form-control>
   </nz-form-item>
 
@@ -231,10 +223,7 @@
     </nz-form-item>
   </ng-template>
 
-  <nz-form-item
-    class="form-row"
-    [ngClass]="{ 'mb-0': validateForm.controls['driver'].value !== 'jwt' }"
-  >
+  <nz-form-item class="form-row">
     <label class="label" for="driver">过期时间：</label>
     <nz-form-control class="form-input" nzErrorTip="过期时间不得早于当前时间">
       <nz-date-picker
@@ -248,19 +237,24 @@
     </nz-form-control>
   </nz-form-item>
 
-  <div *ngIf="validateForm.controls['driver'].value === 'jwt'">
-    <nz-form-item class="form-row w-[200px] mb-0">
-      <label class="label" for="driver">标签信息：</label>
-      <nz-form-control>
-        <eo-ng-apinto-table
-          class="arrayItem label"
-          [nzTbody]="labelHeaderTableBody"
-          [nzData]="labelHeaderList"
-          eoNgUserAccess="application"
-          [nzNoScroll]="true"
-        >
-        </eo-ng-apinto-table>
-      </nz-form-control>
-    </nz-form-item>
-  </div>
+  <nz-form-item class="form-row mb-0">
+    <label class="label">
+      <span
+        eoNgFeedbackTooltip
+        nzTooltipTitle="转发时默认将鉴权信息透传到上游"
+        nzTooltipPlacement="top"
+        [nzTooltipVisible]="false"
+        nzTooltipTrigger="hover"
+        ><span class="required-symbol">*</span>隐藏鉴权信息：
+      </span></label
+    >
+    <nz-form-control class="">
+      <label
+        eo-ng-checkbox
+        name="transparent"
+        formControlName="hideCredential"
+        [nzDisabled]="nzDisabled"
+      ></label>
+    </nz-form-control>
+  </nz-form-item>
 </form>

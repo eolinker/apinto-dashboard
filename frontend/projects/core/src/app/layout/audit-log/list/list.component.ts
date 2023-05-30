@@ -30,10 +30,14 @@ import { AuditLogDetail, AuditLogsData } from '../types/types'
      eo-ng-select.ant-select,
     eo-ng-select-top-control.ant-select-selector,
     nz-range-picker,
-    .group-search-large eo-ng-input-group{
+    eo-ng-search-input-group{
       width:254px !important;
     border-radius: var(--border-radius);
       min-height:32px;
+    }
+
+    label{
+      width:70px;
     }
 
     `
@@ -65,8 +69,8 @@ export class AuditLogListComponent implements OnInit {
     private message: EoNgFeedbackMessageService,
      private api:ApiService,
      private modalService: EoNgFeedbackModalService,
-     private appConfigService:EoNgNavigationService) {
-    this.appConfigService.reqFlashBreadcrumb([{ title: '审计日志' }])
+     private navigationService:EoNgNavigationService) {
+    this.navigationService.reqFlashBreadcrumb([{ title: 'Debug日志' }])
   }
 
   ngOnInit (): void {
