@@ -1,4 +1,4 @@
-package local
+package remote
 
 import (
 	apinto_module "github.com/eolinker/apinto-dashboard/module"
@@ -7,7 +7,7 @@ import (
 type rDriver struct {
 }
 
-func NewDriver() *rDriver {
+func NewDriver() apinto_module.Driver {
 	return &rDriver{}
 }
 

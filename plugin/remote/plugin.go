@@ -1,4 +1,4 @@
-package local
+package remote
 
 import (
 	"fmt"
@@ -27,7 +27,7 @@ func (r *rPlugin) CreateModule(name string, config interface{}) (apinto_module.M
 
 	//注册远程插件存储接口, 打开方式接口
 	remoteStorage := newRemotePluginController(name, cv, r.define)
-	module.routersInfo = append(module.routersInfo, remoteStorage.createRemoteStorageApis()...)
+	module.routersInfo = append(module.routersInfo, remoteStorage.createRemoteApis()...)
 
 	return module, nil
 }
