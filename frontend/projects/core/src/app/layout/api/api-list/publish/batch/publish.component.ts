@@ -19,7 +19,8 @@ import { apiBatchOnlineVerifyTableBody, apiBatchOnlineVerifyTableHeadName, apiBa
       margin-bottom: 16px;
       display: block;
       margin-top: 2px;
-    }`
+    }
+  `
   ]
 })
 export class ApiBatchPublishComponent implements OnInit {
@@ -238,7 +239,7 @@ export class ApiBatchPublishComponent implements OnInit {
         if (resp.code === 0) {
           this.flashList.emit(true)
           this.apisSet = new Set()
-        } 
+        }
         this.resultList = resp.data.list
         for (const index in this.resultList) {
           this.resultList[index].statusString = this.resultList[index].status ? '成功' : '失败'

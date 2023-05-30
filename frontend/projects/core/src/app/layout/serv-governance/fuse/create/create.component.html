@@ -86,7 +86,6 @@
       <nz-form-label [nzSpan]="6" nzRequired>熔断维度：</nz-form-label>
       <nz-form-control [nzSpan]="13">
         <eo-ng-select
-          class="limit-select"
           name="metric"
           class="w-INPUT_NORMAL"
           required
@@ -165,7 +164,6 @@
                   type="number"
                   eo-ng-input
                   required
-                  class=""
                   placeholder="请输入"
                   formControlName="configFuseCount"
                   eoNgUserAccess="serv-governance/fuse"
@@ -185,7 +183,10 @@
                 ></label
               >
               <nz-form-control nzExtra="单位：s，最小值：1">
-                <eo-ng-input-group nzSuffix="乘连续熔断次数">
+                <eo-ng-input-group
+                  class="w-INPUT_NORMAL"
+                  nzSuffix="乘连续熔断次数"
+                >
                   <input
                     class="w-INPUT_NORMAL"
                     [nzBorderless]="true"
