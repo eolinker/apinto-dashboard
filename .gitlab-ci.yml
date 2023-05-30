@@ -10,7 +10,7 @@ variables:
 default:
   cache:
     paths:
-      - controller/dist/
+      - frontend/dist/
       - ${BUILD_DIR}
 stages:
   - notice
@@ -33,20 +33,25 @@ feishu-informer: # 飞书回调
 frontend-builder: # 前端构建
   stage: build
   rules:
+    - if: $CI_COMMIT_TITLE =~ /^frontend-business/ && ($CI_COMMIT_BRANCH == "V2.0" || $CI_COMMIT_BRANCH =~ /^release\/v/) # 当前端提交后触发
+      variables:
+        BUILD_TYPE: business
     - if: $CI_COMMIT_TITLE =~ /^frontend/ && ($CI_COMMIT_BRANCH == "V2.0" || $CI_COMMIT_BRANCH =~ /^release\/v/) # 当前端提交后触发
   script:
     - sed -i '/replace github.com\/eolinker\/eosc => */d' go.mod
     - go mod tidy
-    - ./scripts/build.sh $BUILD_DIR all ${VERSION}
+    - ./scripts/build.sh $BUILD_DIR all ${VERSION} ${BUILD_TYPE}
 
 golang-builder:
   stage: build
   rules:
     - if: $CI_COMMIT_TITLE !~ /^frontend/ && ($CI_COMMIT_BRANCH == "V2.0" || $CI_COMMIT_BRANCH =~ /^release\/v/) # 当后端提交后触发
+      variables:
+        BUILD_TYPE: business
   script:
     - sed -i '/replace github.com\/eolinker\/eosc => */d' go.mod
     - go mod tidy
-    - ./scripts/build.sh $BUILD_DIR backend ${VERSION}
+    - ./scripts/build.sh $BUILD_DIR backend ${VERSION} ${BUILD_TYPE}
 deployer:
   stage: publish
   rules:

@@ -1,6 +1,8 @@
 <div class="">
-  <div class="list-header pl-btnbase pr-btnrbase py-btnybase">
-    <div class="group-search-large">
+  <div
+    class="list-header pl-btnbase pr-btnrbase py-btnybase grid gap-x-btnbase gap-y-btnybase xl:grid-cols-3 xl:max-w-[992px] lg:grid-cols-2 lg:max-w-[658px] md:grid-cols-1"
+  >
+    <div class="flex flex-nowrap items-center">
       <label class="">操作类型：</label>
       <eo-ng-select
         [(ngModel)]="searchData.operateType"
@@ -8,20 +10,24 @@
         [nzAllowClear]="true"
         nzPlaceHolder="请选择"
       ></eo-ng-select>
-      <label class="ml-btnybase label">操作对象：</label>
+    </div>
+    <div class="flex flex-nowrap items-center">
+      <label class="label">操作对象：</label>
       <eo-ng-select
         [(ngModel)]="searchData.kind"
         [nzOptions]="listOfKind"
         [nzAllowClear]="true"
         nzPlaceHolder="请选择"
       ></eo-ng-select>
-
-      <label class="ml-btnybase label">搜索内容：</label>
+    </div>
+    <div class="flex flex-nowrap items-center">
+      <label class="label">搜索内容：</label>
 
       <eo-ng-search-input-group
         class="inline-block"
         [eoSingle]="false"
         [eoInputVal]="searchData.keyword"
+        [eoNoWidth]="true"
         (eoClick)="searchData.keyword = ''; getLogList()"
       >
         <input
@@ -33,8 +39,7 @@
         />
       </eo-ng-search-input-group>
     </div>
-
-    <div class="group-search-large">
+    <div class="flex flex-nowrap items-center">
       <label>操作时间：</label>
       <nz-range-picker
         [nzShowTime]="true"
@@ -42,10 +47,9 @@
         nzFormat="MM/dd HH:mm:ss"
         (ngModelChange)="onDateRangeChange($event)"
       ></nz-range-picker>
-
-      <button class="ml-btnybase" eo-ng-button (click)="clearSearch()">
-        重置
-      </button>
+    </div>
+    <div class="flex flex-nowarp">
+      <button class="" eo-ng-button (click)="clearSearch()">重置</button>
       <button
         class="ant-btn-primary ml-btnybase"
         eo-ng-button
@@ -63,7 +67,6 @@
       [nzData]="logsList"
       [nzTrClick]="logsTableClick"
       [nzMaxOperatorButton]="1"
-      [nzNoScroll]="true"
       [nzShowPagination]="true"
       [nzFrontPagination]="false"
       [nzTotal]="searchData.total"

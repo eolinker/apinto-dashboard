@@ -3,6 +3,8 @@ package common
 import (
 	"errors"
 	"net/url"
+	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -18,4 +20,16 @@ func CheckAndFormatPath(path string) (string, error) {
 		return path, errors.New("can't contain ?. ")
 	}
 	return decodedPath, nil
+}
+
+func GetCurrentPath() (string, error) {
+	execPath, err := os.Executable()
+	if err != nil {
+		return "", err
+	}
+	currentPath, err := filepath.EvalSymlinks(filepath.Dir(execPath))
+	if err != nil {
+		return "", err
+	}
+	return currentPath, nil
 }
