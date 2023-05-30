@@ -61,6 +61,11 @@ func (n *navigation) List(ctx context.Context) ([]*model.Navigation, map[string]
 			defaultModule = ms[0].Name
 		}
 
+		//若导航下没有模块, 则不显示
+		if len(ms) == 0 {
+			continue
+		}
+
 		navigations = append(navigations, &model.Navigation{
 			Title:   l.Title,
 			Icon:    l.Icon,
