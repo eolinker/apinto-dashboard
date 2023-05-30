@@ -531,7 +531,7 @@ func (c *commonGroupService) GetGroupByName(ctx context.Context, namespaceId int
 			parentID = parentInfo.ParentId
 		}
 	}
-	groupInfo, err := c.commonGroupStore.GetByTypeNameParent(ctx, 0, groupType, groupName, parentID)
+	groupInfo, err := c.commonGroupStore.GetByTypeNameParent(ctx, namespaceId, groupType, groupName, parentID)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, nil
