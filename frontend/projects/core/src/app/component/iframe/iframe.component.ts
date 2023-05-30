@@ -101,7 +101,6 @@ export class EoIframeComponent implements OnInit {
         } catch {
           console.warn('转化接口数据命名法出现问题')
         }
-        console.log(this, result)
         ;(this.iframe as any).contentWindow.postMessage({
           requestId: event.data.requestId,
           type: 'response',
@@ -161,8 +160,10 @@ export class EoIframeComponent implements OnInit {
      return
    }
 
-   this.iframe = this.createIframe('iframe', `${url}${this.router.url.includes('#') ? this.router.url.split('#')[1] : ''}`)
-   this.loadIframe()
+   setTimeout(() => {
+     this.iframe = this.createIframe('iframe', `${url}${this.router.url.includes('#') ? this.router.url.split('#')[1] : ''}`)
+     this.loadIframe()
+   })
  }
 
  loadIframe (initData?:any) {
