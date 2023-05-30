@@ -1,5 +1,3 @@
-/* eslint-disable camelcase */
-/* eslint-disable no-useless-constructor */
 import { Component, OnInit, Output, EventEmitter } from '@angular/core'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { ApiService } from 'projects/core/src/app/service/api.service'
