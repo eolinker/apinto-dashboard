@@ -5,11 +5,17 @@ import { THEAD_TYPE } from 'eo-ng-table'
 import { ApiManagementListComponent } from './api-list/list/list.component'
 import { ApiPublishComponent } from './api-list/publish/single/publish.component'
 import { FilterOpts } from '../../constant/conf'
+import { MODAL_NORMAL_SIZE } from '../../constant/app.config'
+import { EoNgFeedbackModalService } from 'eo-ng-feedback'
+import { NzModalRef } from 'ng-zorro-antd/modal'
 
 @Injectable({
   providedIn: 'root'
 })
 export class RouterService {
+  constructor (
+    private modalService:EoNgFeedbackModalService) {}
+
   createApiListThead (context:ApiManagementListComponent, publishList?:Array<any>):THEAD_TYPE[] {
     return [
       {
@@ -227,5 +233,47 @@ export class RouterService {
       { key: 'updateTime' }
     ]
     return tbody
+  }
+
+  modalRef:NzModalRef|undefined
+
+  publishApiModal (uuid:string, component?:ApiManagementListComponent) {
+    this.modalRef = this.modalService.create({
+      nzTitle: '发布管理',
+      nzWidth: MODAL_NORMAL_SIZE,
+      nzContent: ApiPublishComponent,
+      nzComponentParams: {
+        apiUuid: uuid,
+        closeModal: () => { this.modalRef?.close() },
+        getApisData: () => { component?.getApisData() }
+      },
+      nzFooter: [{
+        label: '取消',
+        type: 'default',
+        onClick: () => {
+          this.modalRef?.close()
+        }
+      },
+      {
+        label: '下线',
+        danger: true,
+        onClick: (context:ApiPublishComponent) => {
+          context.offline()
+        },
+        disabled: () => {
+          return component?.nzDisabled || false
+        }
+      },
+      {
+        label: '上线',
+        type: 'primary',
+        onClick: (context:ApiPublishComponent) => {
+          context.online()
+        },
+        disabled: () => {
+          return component?.nzDisabled || false
+        }
+      }]
+    })
   }
 }

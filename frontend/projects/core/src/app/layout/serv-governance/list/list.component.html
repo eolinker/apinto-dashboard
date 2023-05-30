@@ -52,11 +52,10 @@
   <input
     eo-ng-input
     type="number"
-    class="priority-input"
+    class="w-[calc(100%_-_1px)] h-[38px] min-w-auto px-[16px] text-center"
     aotucomplete="off"
     eoNgUserAccess="{{ 'serv-governance/' + strategyType }}"
     [attr.id]="item.uuid"
-    class="strategy-priority-input"
     [(ngModel)]="item.priority"
     (click)="$event.stopPropagation()"
     (focus)="changeEditingPriority($event, item.priority)"

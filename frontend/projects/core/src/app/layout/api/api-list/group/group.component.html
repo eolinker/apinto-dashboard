@@ -49,7 +49,9 @@
           [ngClass]="{ 'group-title-selected': showAll }"
           (click)="viewAllApis()"
         >
-          <svg class="iconpark-icon mr5 fs18"><use href="#suoyou"></use></svg>
+          <svg class="iconpark-icon mr-[6px] fs18">
+            <use href="#suoyou"></use>
+          </svg>
           <span>所有API</span>
         </div>
         <div>
@@ -108,8 +110,12 @@
 
               <eo-ng-dropdown-menu #menu="nzDropdownMenu">
                 <ul nz-menu>
-                  <li nz-menu-item (click)="addApi(origin.uuid, 'http')">添加 HTTP API</li>
-                  <li nz-menu-item (click)="addApi(origin.uuid, 'websocket')">添加 Websocket API</li>
+                  <li nz-menu-item (click)="addApi(origin.uuid, 'http')">
+                    添加 HTTP API
+                  </li>
+                  <li nz-menu-item (click)="addApi(origin.uuid, 'websocket')">
+                    添加 Websocket API
+                  </li>
                   <li nz-menu-item (click)="addGroupModal(origin.uuid)">
                     添加子分组
                   </li>

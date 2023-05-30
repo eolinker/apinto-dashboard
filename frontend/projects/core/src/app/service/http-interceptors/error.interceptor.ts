@@ -1,4 +1,3 @@
-/* eslint-disable no-useless-constructor */
 import { Component, Injectable } from '@angular/core'
 import {
   HttpRequest,

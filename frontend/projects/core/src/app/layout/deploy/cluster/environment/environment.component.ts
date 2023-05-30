@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 /* eslint-disable dot-notation */
 /*
  * @Author: MengjieYang yangmengjie@eolink.com
@@ -57,7 +56,6 @@ export class DeployClusterEnvironmentComponent implements OnInit {
 
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
 
-  // eslint-disable-next-line no-useless-constructor
   constructor (
           private baseInfo:BaseInfoService,
           private message: EoNgFeedbackMessageService,
