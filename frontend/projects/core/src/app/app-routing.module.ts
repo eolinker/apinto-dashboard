@@ -18,6 +18,9 @@ import { AuthInfoComponent } from './layout/auth/info/info.component'
 import { AuthUpdateComponent } from './layout/auth/update/update.component'
 import { IframePageComponent } from './layout/iframe-page/iframe-page.component'
 import { GuideComponent } from './layout/guide/guide.component'
+import { DynamicDemoComponent } from './layout/dynamic-demo/dynamic-demo.component'
+import { OuterComponent } from './layout/outer/outer.component'
+import { IntelligentPluginLayoutComponent } from './component/intelligent-plugin/layout/layout.component'
 const routes: Routes = [
   {
     path: 'auth',
@@ -29,9 +32,13 @@ const routes: Routes = [
   },
   {
     path: '',
+    pathMatch: 'full',
+    component: LoginComponent
+  },
+  {
+    path: '',
     component: BasicLayoutComponent,
     children: [
-
       {
         path: 'guide',
         component: GuideComponent
@@ -68,6 +75,7 @@ const routes: Routes = [
         data: {
           id: '3'
         },
+        pathMatch: 'prefix',
         loadChildren: () => import('./layout/application/application.module').then(m => m.ApplicationModule)
       },
 
@@ -100,7 +108,7 @@ const routes: Routes = [
         loadChildren: () => import('./layout/audit-log/audit-log.module').then(m => m.AuditLogModule)
       },
       {
-        path: 'plugin',
+        path: 'module-plugin',
         data: {
           id: '10'
         },
@@ -114,16 +122,45 @@ const routes: Routes = [
         loadChildren: () => import('./layout/navigation/navigation.module').then(m => m.NavigationModule)
       },
       {
-        path: 'iframe',
+        path: 'dynamic-demo',
         data: {
 
         },
         children: [{
           path: '**',
-          component: IframePageComponent
+          component: DynamicDemoComponent
         }
         ],
-        component: IframePageComponent
+        component: DynamicDemoComponent
+      },
+      {
+        path: 'module',
+        children: [
+          {
+            path: ':moduleName',
+            children: [{ path: ':subPath', component: IframePageComponent }, {
+              path: '**',
+              component: IframePageComponent
+            }
+            ]
+          }
+        ]
+      },
+      {
+        path: 'template',
+        data: {
+        },
+        component: OuterComponent,
+        children: [
+          {
+            path: ':moduleName',
+            children: [{
+              path: '**',
+              component: IntelligentPluginLayoutComponent
+            }
+            ]
+          }
+        ]
       }
     ]
   }

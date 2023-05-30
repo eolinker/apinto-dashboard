@@ -150,7 +150,7 @@ describe('DeployEnvironmentCreateComponent test', () => {
     expect(spyService).toHaveBeenCalled()
     expect(spyMessage).not.toHaveBeenCalled()
     expect(spyRouterChange).toHaveBeenCalled()
-    expect(spyRouterChange).toHaveBeenCalledWith(['/', 'deploy', 'env'])
+    expect(spyRouterChange).toHaveBeenCalledWith(['/', 'deploy', 'variable'])
   })
 
   it('##save failed', () => {

@@ -15,6 +15,7 @@ import { DeployPluginCreateComponent } from './plugin/create/create.component'
 import { DeployPluginListComponent } from './plugin/list/list.component'
 import { DeployPluginMessageComponent } from './plugin/message/message.component'
 import { DeployClusterPluginComponent } from './cluster/plugin/plugin.component'
+import { DeployClusterMessageComponent } from './cluster/message/message.component'
 const routes: Routes = [{
   path: '',
   component: DeployClusterComponent,
@@ -43,7 +44,7 @@ const routes: Routes = [{
           component: DeployClusterContentComponent,
           children: [
             {
-              path: '',
+              path: 'env',
               component: DeployClusterEnvironmentComponent
             },
             {
@@ -51,18 +52,23 @@ const routes: Routes = [{
               component: DeployClusterCertComponent
             },
             {
-              path: 'nodes',
+              path: '',
               component: DeployClusterNodesComponent
             },
             {
               path: 'plugin',
               component: DeployClusterPluginComponent
+            },
+            {
+              path: 'message',
+              component: DeployClusterMessageComponent
             }
+
           ]
         }]
     },
     {
-      path: 'env',
+      path: 'variable',
       component: DeployEnvironmentComponent,
       data: {
         id: '102',

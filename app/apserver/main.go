@@ -2,6 +2,12 @@ package main
 
 import (
 	"fmt"
+	grpc_service "github.com/eolinker/apinto-dashboard/grpc-service"
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
+	"github.com/eolinker/apinto-dashboard/modules/grpc-service/service"
+	"github.com/eolinker/apinto-dashboard/modules/notice"
+	"github.com/soheilhy/cmux"
+	"google.golang.org/grpc"
 	"net"
 	"net/http"
 	"os"
@@ -60,14 +66,51 @@ func run() {
 	}
 	coreService.ReloadModule()
 	go plugin_timer.ExtenderTimer()
-	// todo 不适合开源，后续通过插件接入
+
+	//初始化通知渠道驱动
+	initNoticeChannelDriver()
+
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", GetPort()))
 	if err != nil {
 		panic(err)
 	}
+	// Create a cmux.
+	m := cmux.New(listener)
+	grpcL := m.MatchWithWriters(cmux.HTTP2MatchHeaderFieldPrefixSendSettings("content-type", "application/grpc"))
 
-	s := http.Server{Handler: coreService}
-	s.Serve(listener)
+	httpL := m.Match(cmux.HTTP1Fast())
+
+	httpServer := &http.Server{Handler: coreService}
+	grpcServer := grpc.NewServer()
+
+	grpc_service.RegisterGetConsoleInfoServer(grpcServer, service.NewConsoleInfoService())
+	grpc_service.RegisterNoticeSendServer(grpcServer, service.NewNoticeSendService())
+
+	console := newConsoleServer(httpServer, grpcServer)
+	go func() {
+		err := httpServer.Serve(httpL)
+		if err != nil {
+			log.Error("listen httpServer error: ", err)
+		}
+	}()
+	go func() {
+		err := grpcServer.Serve(grpcL)
+		if err != nil {
+			log.Error("listen grpcServer error: ", err)
+		}
+	}()
+	go func() {
+		err := m.Serve()
+		if err != nil {
+			log.Error("server close: ", err)
+			return
+		}
+	}()
+	err = console.Wait()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 }
 
 type Front struct {
@@ -75,6 +118,15 @@ type Front struct {
 
 func (f *Front) CreateEngine() *gin.Engine {
 	engine := gin.Default()
-
+	engine.Use(apinto_module.SetRepeatReader)
 	return engine
+}
+
+func initNoticeChannelDriver() {
+	var noticeChannelService notice.INoticeChannelService
+	bean.Autowired(&noticeChannelService)
+	err := noticeChannelService.InitChannelDriver()
+	if err != nil {
+		panic(err)
+	}
 }

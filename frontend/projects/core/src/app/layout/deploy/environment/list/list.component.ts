@@ -87,10 +87,10 @@ export class DeployEnvironmentListComponent {
     private modalService: EoNgFeedbackModalService,
     private api: ApiService,
     private router: Router,
-    private appConfigService: EoNgNavigationService
+    private navigationService: EoNgNavigationService
   ) {
-    this.appConfigService.reqFlashBreadcrumb([
-      { title: '环境变量', routerLink: 'deploy/env' }
+    this.navigationService.reqFlashBreadcrumb([
+      { title: '环境变量', routerLink: 'deploy/variable' }
     ])
   }
 
@@ -160,7 +160,7 @@ export class DeployEnvironmentListComponent {
   }
 
   addConfig () {
-    this.router.navigate(['/', 'deploy', 'env', 'create'])
+    this.router.navigate(['/', 'deploy', 'variable', 'create'])
   }
 
   resetSearch () {

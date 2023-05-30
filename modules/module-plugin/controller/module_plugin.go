@@ -1,10 +1,10 @@
 package controller
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
+	"github.com/eolinker/apinto-dashboard/controller/users"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/dto"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/model"
@@ -17,7 +17,6 @@ import (
 	"net/http"
 	"os"
 	"path"
-	"strings"
 )
 
 type modulePluginController struct {
@@ -73,7 +72,7 @@ func (p *modulePluginController) plugins(ginCtx *gin.Context) {
 		})
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["plugins"] = plugins
 	data["groups"] = groups
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
@@ -88,7 +87,7 @@ func (p *modulePluginController) getPluginInfo(ginCtx *gin.Context) {
 		return
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	info := &dto.PluginInfo{
 		Id:         pluginInfo.UUID,
 		Name:       pluginInfo.Name,
@@ -118,7 +117,7 @@ func (p *modulePluginController) getGroupsEnum(ginCtx *gin.Context) {
 		})
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["groups"] = groups
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
@@ -139,7 +138,7 @@ func (p *modulePluginController) getEnableInfo(ginCtx *gin.Context) {
 
 	//若模块名没有冲突，且没有需要填的，直接启用
 	if !render.NameConflict && !render.Internet && len(render.Headers) == 0 && len(render.Querys) == 0 && len(render.Initialize) == 0 {
-		userId := controller.GetUserId(ginCtx)
+		userId := users.GetUserId(ginCtx)
 		err = p.modulePluginService.EnablePlugin(ginCtx, userId, pluginUUID, &dto.PluginEnableInfo{
 			Name:   info.Name,
 			Server: "",
@@ -226,20 +225,19 @@ func (p *modulePluginController) getEnableInfo(ginCtx *gin.Context) {
 		Initialize: renderInitialize,
 	}
 
-	data := common.Map[string, interface{}]{}
+	data := common.Map{}
 	data["module"] = enableInfo
 	data["render"] = enableRender
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
 
 func (p *modulePluginController) install(ginCtx *gin.Context) {
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	pluginPackage, err := ginCtx.FormFile("plugin")
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("install plugin FormFilefail. err:%s", err.Error()))
 		return
 	}
-
 	file, err := pluginPackage.Open()
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("install plugin openFile fail. err:%s", err.Error()))
@@ -248,15 +246,15 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 	defer file.Close()
 
 	// 检查文件类型和大小
-	contentType := pluginPackage.Header.Get("Content-Type")
-	if !strings.HasPrefix(contentType, "application/x-gzip") {
-		ginCtx.String(http.StatusBadRequest, "Invalid file type")
-		return
-	}
-	if pluginPackage.Size > 4<<20 {
-		ginCtx.String(http.StatusBadRequest, "File too large")
-		return
-	}
+	//contentType := pluginPackage.Header.Get("Content-Type")
+	//if !strings.HasPrefix(contentType, "application/x-gzip") {
+	//	ginCtx.String(http.StatusBadRequest, "Invalid file type")
+	//	return
+	//}
+	//if pluginPackage.Size > 4<<20 {
+	//	ginCtx.String(http.StatusBadRequest, "File too large")
+	//	return
+	//}
 
 	//读取压缩文件的内容
 	fileBuffer, err := io.ReadAll(file)
@@ -264,7 +262,6 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("install plugin read file fail. err:%s", err.Error()))
 		return
 	}
-	packageFile := bytes.NewReader(fileBuffer)
 
 	randomId := uuid.New()
 	tmpDir := fmt.Sprintf("%s%s%s", PluginDir, string(os.PathSeparator), randomId)
@@ -274,7 +271,7 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("install plugin read file fail. err:%s", err.Error()))
 		return
 	}
-	err = common.DeCompress(packageFile, tmpDir)
+	err = common.UnzipFromBytes(fileBuffer, tmpDir)
 	if err != nil {
 		//删除目录
 		os.RemoveAll(tmpDir)
@@ -344,7 +341,7 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 }
 
 func (p *modulePluginController) uninstall(ginCtx *gin.Context) {
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	pluginUUID := ginCtx.Query("id")
 
 	err := p.modulePluginService.UninstallPlugin(ginCtx, userId, pluginUUID)
@@ -368,7 +365,7 @@ func (p *modulePluginController) enable(ginCtx *gin.Context) {
 		return
 	}
 
-	err := p.modulePluginService.EnablePlugin(ginCtx, controller.GetUserId(ginCtx), pluginUUID, input)
+	err := p.modulePluginService.EnablePlugin(ginCtx, users.GetUserId(ginCtx), pluginUUID, input)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
@@ -380,7 +377,7 @@ func (p *modulePluginController) disable(ginCtx *gin.Context) {
 
 	pluginUUID := ginCtx.Query("id")
 
-	err := p.modulePluginService.DisablePlugin(ginCtx, controller.GetUserId(ginCtx), pluginUUID)
+	err := p.modulePluginService.DisablePlugin(ginCtx, users.GetUserId(ginCtx), pluginUUID)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Disable plugin fail. err:%s", err.Error()))
 		return

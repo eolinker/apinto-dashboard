@@ -1,7 +1,7 @@
 package audit_controller
 
 import (
-	apinto_module "github.com/eolinker/apinto-module"
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
 	"github.com/eolinker/eosc/common/bean"
 	"net/http"
 )
@@ -59,6 +59,27 @@ func (d *Driver) CheckConfig(name string, config interface{}) error {
 func (d *Driver) CreatePlugin(define interface{}) (apinto_module.Plugin, error) {
 	return d, nil
 }
+
+func (d *Driver) GetPluginFrontend(moduleName string) string {
+	return "audit-log"
+}
+
+func (d *Driver) IsPluginVisible() bool {
+	return true
+}
+
+func (d *Driver) IsShowServer() bool {
+	return false
+}
+
+func (d *Driver) IsCanUninstall() bool {
+	return false
+}
+
+func (d *Driver) IsCanDisable() bool {
+	return true
+}
+
 func (d *Driver) newModule(name string) *Module {
 
 	return &Module{name: name, middlewareHandler: d.middlewareHandler, routers: d.routers}

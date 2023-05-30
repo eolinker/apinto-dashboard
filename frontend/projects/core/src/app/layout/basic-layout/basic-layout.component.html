@@ -9,8 +9,19 @@
 <eo-ng-layout>
   <eo-ng-header>
     <div class="logo">
-      <img class="h-[26px]" src="../../../assets/apinto.svg" alt="apinto" />
-      <a (click)="goToGithub()" class="flex item-center ml-[6px]"
+      <img
+        [ngClass]="{ 'h-[32px]': isBusiness, 'h-[26px]': !isBusiness }"
+        [src]="
+          isBusiness
+            ? '../../../assets/apinto-pro.svg'
+            : '../../../assets/apinto.svg'
+        "
+        [alt]="isBusiness ? 'apinto-pro' : 'apinto'"
+      />
+      <a
+        *ngIf="!isBusiness"
+        (click)="goToGithub()"
+        class="flex item-center ml-[6px]"
         ><img
           src="https://img.shields.io/github/stars/eolinker/apinto?style=social"
           alt=""
@@ -19,9 +30,24 @@
     </div>
     <div class="flex h-[49px] items-center justify-between">
       <eo-ng-breadcrumb [nzOptions]="breadcrumbOptions"></eo-ng-breadcrumb>
-      <button eo-ng-button class="mr-btnrbase" (click)="goToHelp()">
-        帮助文档
-      </button>
+      <ng-template
+        #breadcrumbTitleTpl
+        let-data="data"
+        let-option
+        let-url="url"
+        let-title="title"
+      >
+        <a (click)="clickIframeBreadcrumb(url)">{{ title }}</a>
+      </ng-template>
+      <div>
+        <button eo-ng-button class="mr-btnrbase" (click)="goToHelp()">
+          帮助文档
+        </button>
+
+        <eo-ng-apinto-user-avatar
+          class="avatar mg-top-right"
+        ></eo-ng-apinto-user-avatar>
+      </div>
     </div>
   </eo-ng-header>
   <eo-ng-layout class="total-content">

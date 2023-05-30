@@ -77,7 +77,7 @@ func (e *extender) UpdateExtender() {
 
 	for _, namespaceInfo := range namespaces {
 
-		if err = e.builtPlugin(ctx, namespaceInfo.Id, globalPlugins, extenderMaps); err != nil {
+		if err = e.createBuiltinPlugin(ctx, namespaceInfo.Id, globalPlugins, extenderMaps); err != nil {
 			log.Errorf("extender-UpdateExtender err=%s", err.Error())
 		}
 
@@ -85,7 +85,7 @@ func (e *extender) UpdateExtender() {
 
 }
 
-func (e *extender) builtPlugin(ctx context.Context, namespaceId int, globalPlugins []*v1.GlobalPlugin, extenderMaps map[string]*plugin_model.ExtenderInfo) error {
+func (e *extender) createBuiltinPlugin(ctx context.Context, namespaceId int, globalPlugins []*v1.GlobalPlugin, extenderMaps map[string]*plugin_model.ExtenderInfo) error {
 	plugins, err := e.pluginService.GetBasicInfoList(ctx, namespaceId)
 	if err != nil {
 		log.Errorf("获取插件信息失败 err=%s", err.Error())
@@ -132,7 +132,7 @@ func (e *extender) builtPlugin(ctx context.Context, namespaceId int, globalPlugi
 		}
 	}
 	if len(pluginBuilt) > 0 {
-		if err = e.pluginService.InsertBuilt(ctx, namespaceId, pluginBuilt); err != nil {
+		if err = e.pluginService.InsertBuiltin(ctx, namespaceId, pluginBuilt); err != nil {
 			log.Errorf("新增内置插件失败 err=%s", err.Error())
 			return err
 		}
@@ -189,7 +189,7 @@ func (e *extender) getExtenderMaps(ctx context.Context) (map[string]*plugin_mode
 
 	log.DebugF("当前最新扩展ID列表 extenders=%v", extenders)
 	if len(extenderInfos) > 0 {
-		if err = e.extenderCache.SetAll(ctx, e.extenderCache.Key(), extenderInfos, time.Minute*5); err != nil {
+		if err = e.extenderCache.SetAll(ctx, extenderInfos); err != nil {
 			log.Errorf("扩展ID插入缓存失败 err=%s", err.Error())
 			return nil, err
 		}

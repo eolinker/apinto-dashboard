@@ -57,7 +57,7 @@ const routes: Routes = [{
       ]
     },
     {
-      path: 'serv-discovery',
+      path: 'discovery',
       component: ServiceDiscoveryComponent,
       data: {
         id: '202',

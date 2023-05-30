@@ -1,8 +1,8 @@
 package strategy_controller
 
 import (
+	"github.com/eolinker/apinto-dashboard/module"
 	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
-	"github.com/eolinker/apinto-module"
 	"net/http"
 )
 
@@ -23,6 +23,26 @@ func (c *StrategyTrafficDriver) CheckConfig(name string, config interface{}) err
 
 func (c *StrategyTrafficDriver) CreatePlugin(define interface{}) (apinto_module.Plugin, error) {
 	return c, nil
+}
+
+func (c *StrategyTrafficDriver) GetPluginFrontend(moduleName string) string {
+	return "serv-governance/traffic"
+}
+
+func (c *StrategyTrafficDriver) IsPluginVisible() bool {
+	return true
+}
+
+func (c *StrategyTrafficDriver) IsShowServer() bool {
+	return false
+}
+
+func (c *StrategyTrafficDriver) IsCanUninstall() bool {
+	return false
+}
+
+func (c *StrategyTrafficDriver) IsCanDisable() bool {
+	return true
 }
 
 type StrategyTrafficModule struct {

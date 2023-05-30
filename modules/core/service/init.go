@@ -1,7 +1,7 @@
 package service
 
 import (
-	apinto_module "github.com/eolinker/apinto-module"
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
 	"github.com/eolinker/eosc/common/bean"
 )
 

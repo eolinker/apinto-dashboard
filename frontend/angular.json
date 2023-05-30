@@ -43,7 +43,7 @@
           "options": {
             "deployUrl": "/frontend/",
             "outputPath": "./dist",
-            "index": "projects/core/src/index.html",
+            "index": "projects/core/src/index.html",  
             "main": "projects/core/src/main.ts",
             "polyfills": "projects/core/src/polyfills.ts",
             "tsConfig": "tsconfig.app.json",
@@ -72,6 +72,7 @@
               "node_modules/eo-ng-codebox/lib/codebox.component.scss",
               "node_modules/eo-ng-collapse/lib/eo-ng-collapse.component.scss",
               "node_modules/eo-ng-date-picker/styles.scss",
+              "node_modules/eo-ng-empty/styles.scss",
               "node_modules/eo-ng-feedback/styles.scss",
               "node_modules/eo-ng-input/styles.scss",
               "node_modules/eo-ng-menu/styles.scss",
@@ -88,8 +89,7 @@
               "node_modules/katex/dist/katex.min.css",
               "node_modules/github-markdown-css/github-markdown.css"
             ],
-            "scripts": [
-            ],
+            "scripts": ["node_modules/clipboard/dist/clipboard.min.js"],
             "allowedCommonJsDependencies": [
               "ace-builds",
               "ace-builds/src-noconflict/ext-language_tools"
@@ -101,7 +101,7 @@
                 {
                   "type": "initial",
                   "maximumWarning": "500kb",
-                  "maximumError": "4mb"
+                  "maximumError": "5mb"
                 },
                 {
                   "type": "anyComponentStyle",
@@ -117,6 +117,27 @@
               ],
               "outputHashing": "all"
             },
+            "business": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "500kb",
+                  "maximumError": "5mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "4kb",
+                  "maximumError": "8kb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "projects/core/src/environments/environment.ts",
+                  "with": "projects/core/src/environments/environment.business.prod.ts"
+                }
+              ],
+              "outputHashing": "all"
+            },
             "development": {
               "buildOptimizer": false,
               "optimization": false,
@@ -124,6 +145,20 @@
               "extractLicenses": false,
               "sourceMap": true,
               "namedChunks": true
+            },
+            "businessDevelopment": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true,
+              "fileReplacements": [
+                {
+                  "replace": "projects/core/src/environments/environment.ts",
+                  "with": "projects/core/src/environments/environment.business.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -134,8 +169,14 @@
             "production": {
               "browserTarget": "apinto:build:production"
             },
+            "business": {
+              "browserTarget": "apinto:build:business"
+            },
             "development": {
               "browserTarget": "apinto:build:development"
+            },
+            "businessDevelopment": {
+              "browserTarget": "apinto:build:businessDevelopment"
             }
           },
           "defaultConfiguration": "development"
@@ -163,7 +204,13 @@
             "production": {
               "tsConfig": "projects/eo-ng-apinto-table/tsconfig.lib.prod.json"
             },
+            "business": {
+              "tsConfig": "projects/eo-ng-apinto-table/tsconfig.lib.prod.json"
+            },
             "development": {
+              "tsConfig": "projects/eo-ng-apinto-table/tsconfig.lib.json"
+            },
+            "businessDevelopment": {
               "tsConfig": "projects/eo-ng-apinto-table/tsconfig.lib.json"
             }
           },

@@ -1,8 +1,8 @@
 package strategy_controller
 
 import (
+	"github.com/eolinker/apinto-dashboard/module"
 	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
-	"github.com/eolinker/apinto-module"
 	"net/http"
 )
 
@@ -23,6 +23,26 @@ func (c *StrategyGreyDriver) CheckConfig(name string, config interface{}) error 
 
 func (c *StrategyGreyDriver) CreatePlugin(define interface{}) (apinto_module.Plugin, error) {
 	return c, nil
+}
+
+func (c *StrategyGreyDriver) GetPluginFrontend(moduleName string) string {
+	return "serv-governance/grey"
+}
+
+func (c *StrategyGreyDriver) IsPluginVisible() bool {
+	return true
+}
+
+func (c *StrategyGreyDriver) IsShowServer() bool {
+	return false
+}
+
+func (c *StrategyGreyDriver) IsCanUninstall() bool {
+	return false
+}
+
+func (c *StrategyGreyDriver) IsCanDisable() bool {
+	return true
 }
 
 type StrategyGreyModule struct {

@@ -41,6 +41,21 @@ import { EoNgCopyModule } from 'eo-ng-copy'
 import { CardListComponent } from './card-list/card-list.component'
 import { NzCardModule } from 'ng-zorro-antd/card'
 import { NzListModule } from 'ng-zorro-antd/list'
+import { Formily2ReactComponent } from './formily2-react/formily2-react.component'
+import { CustomReactComponentWrapperComponent } from './formily2-react/CustomReactComponentWrapper'
+import { IntelligentPluginLayoutComponent } from './intelligent-plugin/layout/layout.component'
+import { IntelligentPluginListComponent } from './intelligent-plugin/list/list.component'
+import { IntelligentPluginPublishComponent } from './intelligent-plugin/publish/publish.component'
+import { IntelligentPluginCreateComponent } from './intelligent-plugin/create/create.component'
+import { NzSpinModule } from 'ng-zorro-antd/spin'
+import { CustomCodeboxReactComponentWrapperComponent } from './formily2-react/component/codebox/CustomCodeboxComponentWrapper'
+import { CustomEnvVariableReactComponentWrapperComponent } from './formily2-react/component/editable-env-table/CustomEnvVariableComponentWrapper'
+import { EoNgCodeboxModule } from 'eo-ng-codebox'
+import { UserAvatarComponent } from './user-avatar/user-avatar.component'
+import { ResetPswComponent } from './reset-psw/reset-psw.component'
+import { UserProfileComponent } from './user-profile/user-profile.component'
+import { SimpleMapComponentWrapperComponent } from './formily2-react/component/simple-map/SimpleMapComponentWrapper'
+import { CustomDialogReactComponentWrapperComponent } from './formily2-react/component/dialog/CustomDialogComponentWrapper'
 @NgModule({
   declarations: [
     EditableEnvTableComponent,
@@ -50,7 +65,20 @@ import { NzListModule } from 'ng-zorro-antd/list'
     EoNgSearchInputGroupComponent,
     ApiMethodTagComponent,
     CopyAddrListComponent,
-    CardListComponent
+    CardListComponent,
+    Formily2ReactComponent,
+    CustomReactComponentWrapperComponent,
+    CustomCodeboxReactComponentWrapperComponent,
+    SimpleMapComponentWrapperComponent,
+    IntelligentPluginLayoutComponent,
+    IntelligentPluginListComponent,
+    IntelligentPluginPublishComponent,
+    IntelligentPluginCreateComponent,
+    CustomEnvVariableReactComponentWrapperComponent,
+    CustomDialogReactComponentWrapperComponent,
+    UserAvatarComponent,
+    ResetPswComponent,
+    UserProfileComponent
   ],
   imports: [
     CommonModule,
@@ -81,7 +109,9 @@ import { NzListModule } from 'ng-zorro-antd/list'
     EoNgApintoTableModule,
     EoNgCopyModule,
     NzCardModule,
-    NzListModule
+    NzListModule,
+    NzSpinModule,
+    EoNgCodeboxModule
   ],
   exports: [
     EditableEnvTableComponent,
@@ -91,7 +121,11 @@ import { NzListModule } from 'ng-zorro-antd/list'
     EoNgSearchInputGroupComponent,
     ApiMethodTagComponent,
     CopyAddrListComponent,
-    CardListComponent
+    CardListComponent,
+    Formily2ReactComponent,
+    UserAvatarComponent,
+    ResetPswComponent,
+    UserProfileComponent
   ]
 })
 export class ComponentModule { }

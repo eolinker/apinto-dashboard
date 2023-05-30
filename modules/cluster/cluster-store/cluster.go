@@ -15,6 +15,7 @@ type IClusterStore interface {
 	store.IBaseStore[cluster_entry.Cluster]
 	GetByNamespaceByName(ctx context.Context, namespaceId int, name string) (*cluster_entry.Cluster, error)
 	GetByNamespaceByNames(ctx context.Context, namespaceId int, names []string) ([]*cluster_entry.Cluster, error)
+	GetByNamespaceByUUIDs(ctx context.Context, namespaceId int, UUIDs []string) ([]*cluster_entry.Cluster, error)
 	GetAllByNamespaceId(ctx context.Context, namespace int) ([]*cluster_entry.Cluster, error)
 	GetAll(ctx context.Context) ([]*cluster_entry.Cluster, error)
 	ClusterCount(ctx context.Context, params map[string]interface{}) (int64, error)
@@ -40,6 +41,10 @@ func (c *clusterStore) GetByNamespaceByName(ctx context.Context, namespaceId int
 
 func (c *clusterStore) GetByNamespaceByNames(ctx context.Context, namespaceId int, names []string) ([]*cluster_entry.Cluster, error) {
 	return c.ListQuery(ctx, "`namespace` = ? and `name` in (?)", []interface{}{namespaceId, names}, "")
+}
+
+func (c *clusterStore) GetByNamespaceByUUIDs(ctx context.Context, namespaceId int, UUIDs []string) ([]*cluster_entry.Cluster, error) {
+	return c.ListQuery(ctx, "`namespace` = ? and `uuid` in (?)", []interface{}{namespaceId, UUIDs}, "")
 }
 
 func (c *clusterStore) GetAllByNamespaceId(ctx context.Context, namespace int) ([]*cluster_entry.Cluster, error) {

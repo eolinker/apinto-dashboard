@@ -28,10 +28,10 @@ export class GroupComponent implements OnInit {
     private baseInfo:BaseInfoService,
     private api: ApiService,
     private router: Router,
-    private appConfigService:EoNgNavigationService,
+    private navigationService:EoNgNavigationService,
     public service:EoNgPluginService
   ) {
-    this.appConfigService.reqFlashBreadcrumb([{ title: '企业插件' }])
+    this.navigationService.reqFlashBreadcrumb([{ title: '插件市场' }])
   }
 
   ngOnInit (): void {
@@ -46,7 +46,7 @@ export class GroupComponent implements OnInit {
     if (this.activatedNode?.isSelected) {
     this.activatedNode!.isSelected = false
     }
-    this.router.navigate(['/', 'plugin', 'group', 'list'])
+    this.router.navigate(['/', 'module-plugin', 'group', 'list'])
   }
 
   getPluginList () {
@@ -71,10 +71,10 @@ export class GroupComponent implements OnInit {
     // eslint-disable-next-line dot-notation
     if (data.node!.origin['uuid']) {
       // eslint-disable-next-line dot-notation
-      this.router.navigate(['/', 'plugin', 'group', 'list', data.node!.origin['uuid']])
+      this.router.navigate(['/', 'module-plugin', 'group', 'list', data.node!.origin['uuid']])
     } else {
       // eslint-disable-next-line dot-notation
-      this.router.navigate(['/', 'plugin', 'group', 'list', ''])
+      this.router.navigate(['/', 'module-plugin', 'group', 'list', ''])
     }
     this.activatedNode = data.node!
   }
