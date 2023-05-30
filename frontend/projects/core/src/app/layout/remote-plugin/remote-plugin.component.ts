@@ -108,7 +108,9 @@ export class RemotePluginComponent extends EoIframeComponent implements OnInit {
     } else {
       newUrl = `${newUrl.split('?')[0]}?${newQuery}`
     }
-    this.iframe = this.createIframe('iframe', newUrl)
-    this.loadIframe(initData)
+    setTimeout(() => {
+      this.iframe = this.createIframe('iframe', newUrl)
+      this.loadIframe(initData)
+    }, 0)
   }
 }

@@ -239,6 +239,22 @@ export class IframeHttpService {
         })
       })
     },
+    // 获取简易集群列表
+    getSimpleClusters: () => {
+      return new Promise((resolve) => {
+        this.api.get('clusters/simple').subscribe((resp:any) => {
+          resolve(resp)
+        })
+      })
+    },
+    // 将智能插件的实例发布到指定集群里
+    dynamicOnlines: (name:string, uuid:string, cluster:Array<string>) => {
+      return new Promise((resolve) => {
+        this.api.put(`dynamic/${name}/online/${uuid}`, { cluster: cluster }).subscribe((resp:any) => {
+          resolve(resp)
+        })
+      })
+    },
     // 发起发布管理弹窗，type支持api
     publishModal: (type:string, uuid:string) => {
       return this.publishModal(type, uuid)
