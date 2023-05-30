@@ -41,6 +41,8 @@
       [nzTrClick]="nzDisabled ? null : tableClick"
       [nzNoScroll]="true"
       [nzDisabled]="nzDisabled"
+      eoNgUserAccess="router/api"
+      (disabledEdit)="disabledEdit($event)"
     >
     </eo-ng-apinto-table>
     <p class="text-red-500" *ngIf="unpublishMsg">

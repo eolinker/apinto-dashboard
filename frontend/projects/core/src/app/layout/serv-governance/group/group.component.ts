@@ -131,8 +131,7 @@ export class GroupComponent implements OnInit {
       this.clusterKey !== data.keys[0] &&
       this.eoNgTreeDefault?.getTreeNodeByKey(this.clusterKey)?.isSelected
     ) {
-      // @ts-ignore
-      this.eoNgTreeDefault.getTreeNodeByKey(this.clusterKey).isSelected = false
+      this.eoNgTreeDefault.getTreeNodeByKey(this.clusterKey)!.isSelected = false
     }
     // 节点是集群名
     if (!data.node.origin.children || data.node.origin.children.length === 0) {

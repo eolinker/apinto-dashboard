@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-
+// 智能插件接口数据变量名不参与驼峰转换
 export type DynamicField = {
     name: string,
     title: string,

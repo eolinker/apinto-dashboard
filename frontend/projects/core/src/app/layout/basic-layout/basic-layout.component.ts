@@ -1,6 +1,4 @@
-/* eslint-disable camelcase */
 /* eslint-disable dot-notation */
-/* eslint-disable no-useless-constructor */
 /*
  * @Author: maggieyyy im.ymj@hotmail.com
  * @Date: 2022-07-12 00:19:11
@@ -15,10 +13,8 @@ import { EoNgBreadcrumbOptions } from 'eo-ng-breadcrumb'
 import { MenuOptions } from 'eo-ng-menu'
 import { NzModalRef, NzModalService } from 'ng-zorro-antd/modal'
 import { Subscription } from 'rxjs'
-import { MODAL_SMALL_SIZE } from '../../constant/app.config'
 import { ApiService } from '../../service/api.service'
 import { EoNgNavigationService } from '../../service/eo-ng-navigation.service'
-import { AuthInfoDetailComponent } from '../auth/info/detail/detail.component'
 import { BaseInfoService } from '../../service/base-info.service'
 import { IframeHttpService } from '../../service/iframe-http.service'
 import { environment } from '../../../environments/environment'
@@ -123,11 +119,6 @@ export class BasicLayoutComponent implements OnInit {
       .subscribe((res: MenuOptions[]) => {
         this.sideMenuOptions = [this.guideMenu, ...res]
         this.checkOpenMenu()
-        // for (const index in this.sideMenuOptions) {
-        //   this.sideMenuOptions[index].openChange = (value:MenuOptions) => {
-        //     this.openHandler(value['key']!)
-        //   }
-        // }
         this.getAccess()
       })
   }
@@ -164,18 +155,6 @@ export class BasicLayoutComponent implements OnInit {
   }
 
   openAuthDialog () {
-    // this.modalRef = this.modalService.create({
-    //   nzWrapClassName: 'auth-modal-header',
-    //   nzTitle: `${this.authInfo.title}授权`,
-    //   nzContent: AuthInfoDetailComponent,
-    //   nzComponentParams: {
-    //     eoInfos: this.authInfo.infos,
-    //     updateAuth: this.updateAuth
-    //   },
-    //   nzClosable: true,
-    //   nzFooter: null,
-    //   nzWidth: MODAL_SMALL_SIZE
-    // })
     this.router.navigate(['/', 'auth-info'])
   }
 
@@ -195,15 +174,8 @@ export class BasicLayoutComponent implements OnInit {
         this.router.routerState.snapshot.url === '/' ||
         this.router.routerState.snapshot.url === '/login'
       ) {
-        // this.router.navigate([this.navigationService.getPageRoute()])
-        this.router.navigate(['/', ...(this.isBusiness ? ['router', 'api'] : ['guide'])])
+        this.router.navigate([this.navigationService.getPageRoute()])
       }
-
-      // if (this.router.url !== this.currentRouter) {
-      //   setTimeout(() => {
-      //     this.selectOrOpenMenu(this.router.url)
-      //   }, 0)
-      // }
     }
     // this.getAuthInfo()
   }
