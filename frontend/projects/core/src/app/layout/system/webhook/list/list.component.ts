@@ -2,13 +2,13 @@ import { Component, OnInit } from '@angular/core'
 import { EoNgFeedbackModalService } from 'eo-ng-feedback'
 import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { NzModalRef } from 'ng-zorro-antd/modal'
-import { webhooksTableBody, webhooksTableHead } from 'projects/core/src/app/constant/table.conf'
 import { ApiService } from 'projects/core/src/app/service/api.service'
 import { EoNgMessageService } from 'projects/core/src/app/service/eo-ng-message.service'
 import { WebhookListData } from '../../types/type'
 import { SystemWebhookConfigComponent } from '../config/config.component'
 import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 import { MODAL_NORMAL_SIZE, MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
+import { webhooksTableHead, webhooksTableBody } from '../../types/conf'
 
 @Component({
   selector: 'eo-ng-system-webhook-list',

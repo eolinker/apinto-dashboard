@@ -81,11 +81,9 @@ export class DeployClusterEnvironmentPublishComponent implements OnInit {
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
   validatePublishForm:FormGroup = new FormGroup({})
   clusterName:string=''
-  // eslint-disable-next-line camelcase
   public unpublishMsg:string = ''
   nzDisabled:boolean = false
   publishSource:string = ''
-  // eslint-disable-next-line camelcase
   publishData:{source:string, variables:Array<{key:string, finishValue:string, noReleasedValue:string, createTime:string, optType:string}>, isPublish:boolean, versionName:string}=
       {
         source: '',
@@ -135,7 +133,7 @@ export class DeployClusterEnvironmentPublishComponent implements OnInit {
             this.unpublishMsg = '当前环境变量不可发布'
           }
         }
-      } 
+      }
     })
   }
 

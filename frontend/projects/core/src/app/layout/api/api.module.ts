@@ -29,7 +29,6 @@ import { NzModalModule } from 'ng-zorro-antd/modal'
 import { NzTableModule } from 'ng-zorro-antd/table'
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
 import { ComponentModule } from '../../component/component.module'
-import { EoNgTransferModule } from '../../component/transfer/transfer.module'
 import { RouterComponent } from './router/router.component'
 import { DirectiveModule } from '../../directive/directive.module'
 import { EoNgApintoTableModule } from 'projects/eo-ng-apinto-table/src/public-api'
@@ -110,7 +109,6 @@ import { ApiWebsocketMessageComponent } from './api-list/message/websocket-messa
     EoNgSwitchModule,
     NzAvatarModule,
     EoNgButtonModule,
-    EoNgTransferModule,
     NzFormModule,
     ReactiveFormsModule,
     NzLayoutModule,
