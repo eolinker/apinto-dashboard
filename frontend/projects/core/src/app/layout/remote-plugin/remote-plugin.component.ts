@@ -72,10 +72,6 @@ export class RemotePluginComponent extends EoIframeComponent implements OnInit {
     iframe.onload = () => {
       this.start = true
     }
-
-    setTimeout(() => {
-      this.iframeService.apinto2PluginApi.publishModal('api', 'testsss')
-    }, 3000)
     return iframe
   }
 
@@ -96,15 +92,21 @@ export class RemotePluginComponent extends EoIframeComponent implements OnInit {
               initData[init.name] = init.value
           }
         }
-        this.getRemoteUrl(`${noChangeUrl ? url : url + innerUrl}`, resp.data.module.header, resp.data.module.query, initData)
+        this.getRemoteUrl(`${noChangeUrl && innerUrl ? url + innerUrl : url}`, resp.data.module.header, resp.data.module.query, initData)
       }
     })
   }
 
   getRemoteUrl (url:string, header?:any, query?:any, initData?:any) {
     let newUrl = url
+    let newQuery:string = ''
     for (const que of query) {
-      newUrl = `${newUrl.split('?')[0]}${que.name}=${que.value}${newUrl.split('?')[1]}`
+      newQuery = `${que.name}=${que.value}`
+    }
+    if (newUrl.indexOf('?') !== -1) {
+      newUrl = `${newUrl.split('?')[0]}?${newQuery}${newUrl.split('?')[1] || ''}`
+    } else {
+      newUrl = `${newUrl.split('?')[0]}?${newQuery}`
     }
     this.iframe = this.createIframe('iframe', newUrl)
     this.loadIframe(initData)
