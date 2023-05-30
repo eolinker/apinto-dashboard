@@ -61,7 +61,14 @@ func (r *remotePluginController) getOpenMode() gin.HandlerFunc {
 
 		module := common.Map{}
 		module["name"] = r.moduleName
-		url := strings.TrimSuffix(r.define.Server, "/")
+
+		//兼容远程插件需要配server和不需要配server的情况
+		server := r.cfg.Server
+		if server == "" {
+			server = r.define.Server
+		}
+
+		url := strings.TrimSuffix(server, "/")
 		if r.define.Path != "" {
 			url = fmt.Sprintf("%s/%s", url, strings.TrimPrefix(r.define.Path, "/"))
 		}
