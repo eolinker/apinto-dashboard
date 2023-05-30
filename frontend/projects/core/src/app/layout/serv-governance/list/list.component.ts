@@ -18,14 +18,7 @@ import { StrategyListData } from '../types/types'
   selector: 'eo-ng-serv-governance-list',
   templateUrl: './list.component.html',
   styles: [
-    `
-  input[eo-ng-input].strategy-priority-input.ant-input:not(.w206):not(.w131):not(.w240){
-    width:calc(100% - 1px) !important;
-    height:38px;
-    min-width:auto !important;
-    padding:0 16px !important;
-    text-align: center;
-  }`
+    ''
   ]
 })
 export class ListComponent implements OnInit {
@@ -52,7 +45,6 @@ export class ListComponent implements OnInit {
   strategiesList:Array<StrategyListData> = []
 
   editingPriority:number|string|null = null
-  // eslint-disable-next-line no-useless-constructor
   constructor (private baseInfo:BaseInfoService,
     private viewportScroller: ViewportScroller,
                 private message: EoNgFeedbackMessageService,

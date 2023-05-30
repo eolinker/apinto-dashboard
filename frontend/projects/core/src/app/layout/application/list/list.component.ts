@@ -21,8 +21,7 @@ import { SelectOption } from 'eo-ng-select'
 import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { NzModalRef } from 'ng-zorro-antd/modal'
 import { ApiService } from '../../../service/api.service'
-import { EoNgNavigationService } from '../../../service/app-config.service'
-import { BaseInfoService } from '../../../service/base-info.service'
+import { EoNgNavigationService } from '../../../service/eo-ng-navigation.service'
 
 @Component({
   selector: 'eo-ng-application-management-list',
@@ -57,7 +56,6 @@ export class ApplicationManagementListComponent implements OnInit {
     public modalService:EoNgFeedbackModalService,
     public api:ApiService,
     public router:Router,
-    private baseInfo:BaseInfoService,
     public navigationService: EoNgNavigationService) {
 
   }

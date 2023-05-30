@@ -1,4 +1,3 @@
-/* eslint-disable no-useless-constructor */
 import { Component } from '@angular/core'
 
 @Component({
