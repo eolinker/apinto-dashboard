@@ -18,6 +18,7 @@ import (
 	variable_controller "github.com/eolinker/apinto-dashboard/modules/variable/variable-controller"
 	webhook_controller "github.com/eolinker/apinto-dashboard/modules/webhook/controller"
 	"github.com/eolinker/apinto-dashboard/plugin/local"
+	"github.com/eolinker/apinto-dashboard/plugin/remote"
 )
 
 func init() {
@@ -39,6 +40,7 @@ func init() {
 	apintoModule.Register("variable.apinto.com", variable_controller.NewVariableDriver())
 
 	apintoModule.Register("local", local.NewDriver())
+	apintoModule.Register("remote", remote.NewDriver())
 
 	apintoModule.Register("email.apinto.com", email_controller.NewEmailDriver())
 	apintoModule.Register("webhook.apinto.com", webhook_controller.NewWebhookDriver())
