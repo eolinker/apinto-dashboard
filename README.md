@@ -4,15 +4,19 @@
 ![](http://data.eolinker.com/course/eaC48Js3400ffd03c21e36b3eea434dce22d7877a3194f6.png)
 
 Apinto Dashboad主版本应与 Apinto主版本一起使用。
-最新发布的Apinto Dashboad版本是2.0.0，可与Apinto0.12.4以上版本兼容。
+最新发布的Apinto Dashboad版本是3.0.1，可与Apinto0.12.4以上版本兼容。
 
 ## Demo 
 体验地址：[demo-dashboard.apinto.com](https://demo-dashboard.apinto.com/)
 
+账号：apinto
 
-## 什么是Apinto Dashboad V2.0.0
+密码：12345678
 
-Apinto Dashboard V2.0.0 是一个可视化控制台项目，基于开源网关 Apinto，并满足企业级 API 网关需求场景。通过 Dashboard，可以管理集群、上游、应用和 API 等模块，并以集群维度管理各个模块的生命周期。该项目具有出色的用户操作体验，配置流程简短，上手难度低。
+
+## 什么是Apinto Dashboad V3.0
+
+Apinto Dashboard V3.0 是一个可视化控制台项目，基于开源网关 Apinto，并满足企业级 API 网关需求场景。通过 Dashboard，可以管理集群、上游、应用和 API 等模块，并以集群维度管理各个模块的生命周期。该项目具有出色的用户操作体验，配置流程简短，上手难度低。
 
 Apinto Dashboard与Apinto交互流程如下图所示：
 <img width="1664" alt="img_v2_22590d84-f8a4-4d3a-9c67-b481ecfdf1fg" src="https://user-images.githubusercontent.com/18322454/228448391-160153ff-86b8-494c-9a1d-00afb34876a1.png">
@@ -50,10 +54,10 @@ API管理：支持业务域分组，管理所有后端系统提供的API及其�
 <br>
 1、下载最新版本`apinto-dashboard`
 
-以`apinto-dashboard v2.0.1`版本示例
+以`apinto-dashboard v3.0.1`版本示例
 
 ```
-wget https://github.com/eolinker/apinto-dashboard/releases/download/v2.0.1/apserver_v2.0.1_linux_amd64.tar.gz
+wget https://github.com/eolinker/apinto-dashboard/releases/download/v3.0.1/apserver_v3.0.1_linux_amd64.tar.gz
 ```
 
 安装包支持Linux、Darwin系统，AMD64、ARM64架构，使用者可以按需到[Release页面](https://github.com/eolinker/apinto-dashboard/releases/tag)进行下载。
@@ -61,7 +65,7 @@ wget https://github.com/eolinker/apinto-dashboard/releases/download/v2.0.1/apser
 2、解压安装包，并进入对应目录
 
 ```
-tar -zxvf apserver_v2.0.1_linux_amd64.tar.gz && cd apserver_v2.0.1
+tar -zxvf apserver_v3.0.1_linux_amd64.tar.gz && cd apserver_v3.0.1
 ```
 
 3、安装程序
@@ -415,12 +419,17 @@ docker-compose up -d
 
 部署完成后，在浏览器输入地址：http://{ip或域名}:{端口号}，访问控制台页面
 
-![](http://data.eolinker.com/course/cvYVZfEe75da267b31d873df0fdb7bf00e14f63b41bed9d.png)
+![](http://data.eolinker.com/course/5rrURpNe2b7d3861f173f1e0072ce74f9ee40728f74c912.png)
+
+初始账号：admin ，初始密码：12345678 ，部署完成后，建议修改密码。
+
+
+![](http://data.eolinker.com/course/fILkh1527d0a901f66468d4a0c423eb2dbcbb06ad439b83.png)
 
 - ### **联系我们**
 
 
-* **帮助文档**：[https://help.apinto.com](https://help.apinto.com/docs)
+* **帮助文档**：[https://help.eolink.com/tutorial/Apinto](https://help.eolink.com/tutorial/Apinto)
 
 - **QQ群**: 725853895
 
