@@ -528,7 +528,7 @@ func (c *commonGroupService) GetGroupByName(ctx context.Context, namespaceId int
 			return nil, err
 		}
 		if parentInfo != nil {
-			parentID = parentInfo.ParentId
+			parentID = parentInfo.Id
 		}
 	}
 	groupInfo, err := c.commonGroupStore.GetByTypeNameParent(ctx, namespaceId, groupType, groupName, parentID)
