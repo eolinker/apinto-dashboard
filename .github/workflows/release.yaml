@@ -47,7 +47,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: apserver-frontend
-          path: controller/dist
+          path: frontend/dist
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
