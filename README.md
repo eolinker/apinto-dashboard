@@ -4,7 +4,7 @@
 ![](http://data.eolinker.com/course/eaC48Js3400ffd03c21e36b3eea434dce22d7877a3194f6.png)
 
 Apinto Dashboad主版本应与 Apinto主版本一起使用。
-最新发布的Apinto Dashboad版本是3.0.1，可与Apinto0.12.4以上版本兼容。
+最新发布的Apinto Dashboad版本是3.0.1，可与Apinto0.12.10以上版本兼容。
 
 ## Demo 
 体验地址：[demo-dashboard.apinto.com](https://demo-dashboard.apinto.com/)
