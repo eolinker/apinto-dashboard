@@ -94,7 +94,7 @@ jobs:
           name: apinto-dashboard-release
           path: scripts/apserver_v${{ steps.vars.outputs.tag }}_linux_amd64.tar.gz
       - name: build
-        run: cd scripts && docker build --build-arg Version=${{ steps.vars.outputs.tag }} --build-arg APP="apserver" --build-arg DIR="." -t ${{ secrets.DOCKER_USERNAME }}/apinto-dashboard:${{ steps.vars.outputs.tag }} ./
+        run: cd scripts && docker build --build-arg VERSION=${{ steps.vars.outputs.tag }} --build-arg APP="apserver" --build-arg DIR="." -t ${{ secrets.DOCKER_USERNAME }}/apinto-dashboard:${{ steps.vars.outputs.tag }} ./
 
       - name: push image
         run: |
