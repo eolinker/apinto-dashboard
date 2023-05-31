@@ -31,7 +31,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: apserver-frontend
-          path: controller/dist
+          path: frontend/dist
   release:
     needs: [frontend-builder]
     name: release
