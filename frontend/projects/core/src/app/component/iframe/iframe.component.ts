@@ -121,6 +121,7 @@ export class EoIframeComponent implements OnInit {
   }
 
    createIframe = (id: string, url: string) => {
+     this.navigation.reqFlashBreadcrumb([])
      const iframe = document.createElement('iframe')
      iframe.id = id
      iframe.width = '100%'
@@ -201,5 +202,14 @@ export class EoIframeComponent implements OnInit {
      type: 'stopConnection',
      apinto: true
    }, '*')
+ }
+
+ count:number = 0
+ testIframe () {
+   this.iframeService.batchPublishResModal('api', 'online', { uuids: ['apispace-119762', 'apispace-119763', 'apispace-119767'], clusters: ['cluster_84bf7525_2d1c_4bb9_81d7_fdcc56de5ccf', 'remote'] }, () => { console.log('上一步') })
+ }
+
+ testIframe1 () {
+   this.iframeService.batchPublishResModal('api', 'offline', { uuids: ['apispace-119762', 'apispace-119763', 'apispace-119767'], clusters: ['cluster_84bf7525_2d1c_4bb9_81d7_fdcc56de5ccf', 'remote'] }, () => { console.log('上一步') })
  }
 }
