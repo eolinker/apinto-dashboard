@@ -220,7 +220,6 @@ export class ApplicationManagementListComponent implements OnInit {
 
   // 删除单条数据
    deleteData = (items:{id:string, [k:string]:any}) => {
-     // TODO
      this.api.delete('application', { appId: items.id }).subscribe((resp:any) => {
        if (resp.code === 0) {
          this.message.success(resp.msg || '删除成功!')
