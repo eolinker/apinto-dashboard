@@ -308,6 +308,7 @@ func (c *clusterService) SimpleCluster(ctx context.Context, namespaceId int) ([]
 		clusters = append(clusters, &cluster_model2.ClusterSimple{
 			Name:  l.Name,
 			Title: l.Title,
+			Env:   l.Env,
 		})
 	}
 	return clusters, nil
