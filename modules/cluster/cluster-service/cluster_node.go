@@ -61,6 +61,7 @@ func (c *clusterNodeService) QueryList(ctx context.Context, namespaceId int, clu
 		return nil, false, err
 	}
 
+	//控制台集群下存储的节点列表
 	list := make([]*cluster_model2.ClusterNode, 0)
 
 	group, _ := errgroup.WithContext(ctx)
@@ -79,7 +80,7 @@ func (c *clusterNodeService) QueryList(ctx context.Context, namespaceId int, clu
 		}
 		return nil
 	})
-
+	//调用admin接口返回集群下的节点列表
 	clusterNodes := make([]*cluster_model2.ClusterNode, 0)
 	group.Go(func() error {
 		clusterNodes, err = c.GetNodesByUrl(cluster.Addr)
@@ -95,8 +96,14 @@ func (c *clusterNodeService) QueryList(ctx context.Context, namespaceId int, clu
 	}
 
 	if len(clusterNodes) > 0 {
+		//判断ClusterNodes 集合里 是否存在控制台节点，
+		clusterNodesSet := common.SliceToSet(clusterNodes, func(t *cluster_model2.ClusterNode) string {
+			return t.Name
+		})
 		for _, node := range list {
-			node.Status = 2
+			if _, has := clusterNodesSet[node.Name]; has {
+				node.Status = 2
+			}
 		}
 	}
 
