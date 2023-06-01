@@ -96,6 +96,7 @@ func (c *Module) initRouter() {
 			Method:      http.MethodGet,
 			Path:        "/api/clusters/simple",
 			Handler:     "cluster.simple_list",
+			Labels:      apinto_module.RouterLabelAnonymous,
 			HandlerFunc: []apinto_module.HandlerFunc{clrController.simpleClusters},
 		},
 		{
@@ -108,6 +109,7 @@ func (c *Module) initRouter() {
 			Method:      http.MethodGet,
 			Path:        "/api/cluster/enum",
 			Handler:     "cluster.enum",
+			Labels:      apinto_module.RouterLabelAnonymous,
 			HandlerFunc: []apinto_module.HandlerFunc{clrController.clusterEnum},
 		},
 		{
