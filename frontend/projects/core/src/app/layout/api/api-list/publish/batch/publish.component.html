@@ -59,7 +59,7 @@
     </div>
   </div>
 </ng-template>
-<ng-template #resultContentTpl let-data>
+<!-- <ng-template #resultContentTpl let-data>
   <div *ngIf="data?.type === 'online'" class="mt-0 drawer-table">
     <eo-ng-apinto-table
       [nzTbody]="onlineResultTableBody"
@@ -106,7 +106,6 @@
   </div>
   <div *ngIf="data?.type === 'offline'">
     <button
-      eo-ng-button
       class="ant-btn-primary"
       [disabled]="true"
       (click)="apisOperatorResult(data.type)"
@@ -123,7 +122,7 @@
       <button eo-ng-button (click)="closeDrawer(data.type)">返回</button>
     </div>
   </div>
-</ng-template>
+</ng-template> -->
 
 <ng-template #disabledCheckboxTpl let-option="option">
   <span

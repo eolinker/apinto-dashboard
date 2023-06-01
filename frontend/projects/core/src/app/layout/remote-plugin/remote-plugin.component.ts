@@ -61,9 +61,9 @@ export class RemotePluginComponent extends EoIframeComponent implements OnInit {
     })
   }
 
-  // 理想的remote插件，需要能传递header
   override createIframe = (id: string, url: string) => {
-    this.start = true
+    this.navigation.reqFlashBreadcrumb([])
+    this.start = true // TODO 暂时关闭loading，等apispace对接完成后改回false
     const iframe = document.createElement('iframe')
     iframe.id = id
     iframe.width = '100%'
