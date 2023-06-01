@@ -59,6 +59,7 @@ import { ApiWebsocketCreateComponent } from './api-list/create/websocket-create/
 import { NzTypographyModule } from 'ng-zorro-antd/typography'
 import { ApiHttpMessageComponent } from './api-list/message/http-message/http-message.component'
 import { ApiWebsocketMessageComponent } from './api-list/message/websocket-message/websocket-message.component'
+import { ApiBatchPublishResultComponent } from './api-list/publish/batch/result.component'
 
 @NgModule({
   declarations: [
@@ -85,7 +86,8 @@ import { ApiWebsocketMessageComponent } from './api-list/message/websocket-messa
     ApiHttpCreateComponent,
     ApiWebsocketCreateComponent,
     ApiHttpMessageComponent,
-    ApiWebsocketMessageComponent
+    ApiWebsocketMessageComponent,
+    ApiBatchPublishResultComponent
   ],
   imports: [
     EoNgLayoutModule,
