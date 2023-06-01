@@ -259,6 +259,10 @@ export class IframeHttpService {
     publishModal: (type:string, uuid:string) => {
       return this.publishModal(type, uuid)
     },
+    // 发起批量发布管理弹窗，type支持api
+    batchPublishResModal: (publishType:string, type:'online'|'offline', data:any, chooseCluster?:Function) => {
+      return this.batchPublishResModal(publishType, type, data, chooseCluster)
+    },
     // remote插件存储数据
     storeKey: (key:string, data:any) => {
       return new Promise((resolve) => {
@@ -344,6 +348,16 @@ export class IframeHttpService {
     switch (type) {
       case 'api':
         this.routerService.publishApiModal(uuid)
+        break
+      default:
+        console.warn(`eo预警：无法调用发布管理方法，请检查传入的type=${type}是否正确`)
+    }
+  }
+
+  batchPublishResModal (publishType:string, type:'online'|'offline', data:any, chooseCluster?:Function) {
+    switch (publishType) {
+      case 'api':
+        this.routerService.batchPublishApiResModal(type, data, chooseCluster)
         break
       default:
         console.warn(`eo预警：无法调用发布管理方法，请检查传入的type=${type}是否正确`)
