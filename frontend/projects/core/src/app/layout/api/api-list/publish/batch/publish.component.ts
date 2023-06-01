@@ -83,7 +83,6 @@ export class ApiBatchPublishComponent implements OnInit {
 
   // 打开弹窗-批量上线\下线 选择集群页
   openDrawer (type:'online'|'offline') {
-    console.log(this)
     switch (type) {
       case 'online': {
         this.onlineModalRef?.close()
@@ -123,6 +122,7 @@ export class ApiBatchPublishComponent implements OnInit {
       type,
       { uuids: [...this.apisSet], clusters: [...this.clustersSet] },
       () => { this.openDrawer(type) },
+      () => {}, // 给sdk预留的参数
       this)
     this.onlineModalRef?.close()
     this.offlineModalRef?.close()
