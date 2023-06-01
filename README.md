@@ -9,9 +9,9 @@ Apinto Dashboad主版本应与 Apinto主版本一起使用。
 ## Demo 
 体验地址：[demo-dashboard.apinto.com](https://demo-dashboard.apinto.com/)
 
-账号：apinto
+提供6个体验账号：apinto-1、apinto-2、apinto-3、apinto-4、apinto-5、apinto-6
 
-密码：12345678
+密码均为：12345678
 
 
 ## 什么是Apinto Dashboad V3.0
