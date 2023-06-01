@@ -1,70 +1,70 @@
-.ant-switch-handle::before {
-  box-shadow: none !important;
-  content: '';
-}
+// .ant-switch-handle::before {
+//   box-shadow: none !important;
+//   content: '';
+// }
 
-eo-ng-tree-default:not(.ant-select-tree) {
-  nz-tree-node-title {
-    height: 32px;
-    cursor: pointer;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: inline-block;
-    width: 100%;
-  }
-  .ant-tree-title,
-  nz-tree-node-title,
-  .f-row-js-ac,
-  nz-dropdown {
-    height: 32px;
-    line-height: 32px;
-    button {
-      border: none !important;
-      background-color: transparent !important;
-      width: auto;
-      height: 28px !important;
-      line-height: 28px !important;
-    }
-  }
-  .custom-node {
-    height: 32px;
-    cursor: pointer;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: inline-block;
-    width: 100%;
-  }
+// eo-ng-tree-default:not(.ant-select-tree) {
+//   nz-tree-node-title {
+//     height: 32px;
+//     cursor: pointer;
+//     white-space: nowrap;
+//     overflow: hidden;
+//     text-overflow: ellipsis;
+//     display: inline-block;
+//     width: 100%;
+//   }
+//   .ant-tree-title,
+//   nz-tree-node-title,
+//   .f-row-js-ac,
+//   nz-dropdown {
+//     height: 32px;
+//     line-height: 32px;
+//     button {
+//       border: none !important;
+//       background-color: transparent !important;
+//       width: auto;
+//       height: 28px !important;
+//       line-height: 28px !important;
+//     }
+//   }
+//   .custom-node {
+//     height: 32px;
+//     cursor: pointer;
+//     white-space: nowrap;
+//     overflow: hidden;
+//     text-overflow: ellipsis;
+//     display: inline-block;
+//     width: 100%;
+//   }
 
-  .ant-tree-treenode button {
-    opacity: 0;
-  }
+//   .ant-tree-treenode button {
+//     opacity: 0;
+//   }
 
-  .ant-tree-treenode:hover button:not([disabled]) {
-    opacity: 1;
-  }
-}
+//   .ant-tree-treenode:hover button:not([disabled]) {
+//     opacity: 1;
+//   }
+// }
 
-.ant-select-tree {
-  nz-tree-node-title {
-    .ant-tree-title {
-      margin-left: 24px;
-    }
-  }
-  nz-tree-node-switcher + nz-tree-node-title {
-    .ant-tree-title {
-      margin-left: 0px;
-    }
-  }
-}
+// .ant-select-tree {
+//   nz-tree-node-title {
+//     .ant-tree-title {
+//       margin-left: 24px;
+//     }
+//   }
+//   nz-tree-node-switcher + nz-tree-node-title {
+//     .ant-tree-title {
+//       margin-left: 0px;
+//     }
+//   }
+// }
 
-.cdk-overlay-pane:has(.api-tree-select) {
-  min-width: 202px;
-  width: auto !important;
-}
+// .cdk-overlay-pane:has(.api-tree-select) {
+//   min-width: 202px;
+//   width: auto !important;
+// }
 
-.ant-tree,
-.ant-tree-checkbox-group {
-  font-size: 12px;
-}
+// .ant-tree,
+// .ant-tree-checkbox-group {
+//   font-size: 12px;
+// }
