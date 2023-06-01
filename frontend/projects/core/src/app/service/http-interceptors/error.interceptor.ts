@@ -64,6 +64,8 @@ export class ErrorInterceptor implements HttpInterceptor {
         break
       case -3:
         setTimeout(() => {
+          this.modalService.closeAll()
+          this.eoModalService.closeAll()
           if (!this.router.url.includes('/login')) {
             this.router.navigate(['/', 'login'], { queryParams: { callback: this.router.url }, queryParamsHandling: 'merge' })
           }
