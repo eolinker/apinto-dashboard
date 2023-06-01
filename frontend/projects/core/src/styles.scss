@@ -465,7 +465,7 @@ eo-ng-api-management {
 
 eo-ng-tree-default:not(.ant-select-tree) {
   nz-tree-node-title {
-    height: var(--button-height);
+    // height: var(--button-height);
     cursor: pointer;
     white-space: nowrap;
     overflow: hidden;
@@ -477,8 +477,8 @@ eo-ng-tree-default:not(.ant-select-tree) {
   nz-tree-node-title,
   .f-row-js-ac,
   nz-dropdown {
-    height: var(--button-height);
-    line-height: var(--button-height);
+    // height: var(--button-height);
+    // line-height: var(--button-height);
     button {
       border: none !important;
       background-color: transparent !important;
@@ -488,12 +488,12 @@ eo-ng-tree-default:not(.ant-select-tree) {
       color: var(--text-color);
     }
     button:hover {
-      background-color: rgba(0, 0, 0, 0.1) !important;
+      // background-color: rgba(0, 0, 0, 0.1) !important;
       color: var(--text-color);
     }
   }
   .custom-node {
-    height: var(--button-height);
+    // height: var(--button-height);
     cursor: pointer;
     white-space: nowrap;
     overflow: hidden;
