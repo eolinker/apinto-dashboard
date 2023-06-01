@@ -280,7 +280,7 @@ export class RouterService {
     })
   }
 
-  batchPublishApiResModal (type:'online'|'offline', data:{uuids:Array<string>, clusters:Array<string>}, chooseCluster?:Function, component?:ApiBatchPublishComponent) {
+  batchPublishApiResModal (type:'online'|'offline', data:{uuids:Array<string>, clusters:Array<string>}, chooseCluster?: Function, finishPublish?: Function, component?:ApiBatchPublishComponent) {
     const checkModalConfig:ModalOptions = {
       nzTitle: '检测结果',
       nzWidth: MODAL_NORMAL_SIZE,
@@ -300,11 +300,15 @@ export class RouterService {
         onlineApisModal: (context?:ApiBatchPublishResultComponent) => {
           this.modalRef?.close()
           this.modalRef = this.modalService.create(this.getResModalConfig(type, data, component, context))
+          finishPublish && finishPublish()
         }
       },
       nzFooter: [{
         label: '重新检测',
         type: 'primary',
+        loading: (context:ApiBatchPublishResultComponent) => {
+          return context.loading
+        },
         show: (context?:ApiBatchPublishResultComponent) => (
           context?.stepType === 'check'
         ),
@@ -314,29 +318,43 @@ export class RouterService {
       },
       {
         label: '上一步',
+        loading: (context:ApiBatchPublishResultComponent) => {
+          return context.loading
+        },
         show: (context?:ApiBatchPublishResultComponent) => (
           context?.stepType === 'check' && !!context?.chooseCluster
         ),
         onClick: (context:ApiBatchPublishResultComponent) => {
           context.chooseCluster && context.chooseCluster()
+
           this.modalRef?.close()
         }
       },
       {
         label: '批量上线',
         type: 'primary',
+        loading: (context:ApiBatchPublishResultComponent) => {
+          return context.loading
+        },
+        disabled: (context:ApiBatchPublishResultComponent) => {
+          return !context.onlineToken
+        },
         show: (context?:ApiBatchPublishResultComponent) => (
           context?.stepType === 'check'
         ),
         onClick: (context:ApiBatchPublishResultComponent) => {
           this.modalRef?.close()
           this.modalRef = this.modalService.create(this.getResModalConfig(type, data, component, context))
+          finishPublish && finishPublish()
         }
       }]
 
     }
 
     this.modalRef = this.modalService.create(type === 'online' ? checkModalConfig : this.getResModalConfig(type, data, component))
+    if (type === 'offline') {
+      finishPublish && finishPublish()
+    }
   }
 
   getResModalConfig:(...args:any)=>ModalOptions = (type:'online'|'offline', data:{uuids:Array<string>, clusters:Array<string>}, component?:ApiBatchPublishComponent, context?:ApiBatchPublishResultComponent) => {
@@ -360,6 +378,9 @@ export class RouterService {
       nzFooter: [
         {
           label: '返回',
+          loading: (context:ApiBatchPublishResultComponent) => {
+            return context.loading
+          },
           onClick: () => {
             this.modalRef?.close()
           }
