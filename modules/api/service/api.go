@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	status_code "github.com/eolinker/apinto-dashboard/modules/api/status-code"
 	dynamic_model "github.com/eolinker/apinto-dashboard/modules/dynamic/dynamic-model"
 	"reflect"
 	"sort"
@@ -542,10 +543,10 @@ func (a *apiService) GetAPIVersionInfo(ctx context.Context, namespaceID int, uui
 	return info, nil
 }
 
-func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator int, input *api_dto.APIInfo) (string, error) {
+func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator int, input *api_dto.APIInfo) (string, int, error) {
 	uid := input.UUID
 	if err := a.CheckAPIReduplicative(ctx, namespaceID, uid, input); err != nil {
-		return "", err
+		return "", status_code.ApiRouterReduplicatedErr, err
 	}
 
 	if uid == "" {
@@ -562,10 +563,10 @@ func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator in
 
 	isExist, err := a.commonGroup.IsGroupExist(ctx, input.GroupUUID)
 	if err != nil {
-		return "", err
+		return "", status_code.ApiDataBaseErr, err
 	}
 	if !isExist {
-		return "", fmt.Errorf("group doesn't. group_uuid:%s ", input.GroupUUID)
+		return "", status_code.ApiGroupNotExistErr, fmt.Errorf("group doesn't. group_uuid:%s ", input.GroupUUID)
 	}
 	idx := strings.LastIndex(input.ServiceName, "@")
 	service := input.ServiceName
@@ -574,14 +575,14 @@ func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator in
 	}
 	serviceID, err := a.dynamicService.GetIDByName(ctx, namespaceID, professionService, service)
 	if err != nil {
-		return "", err
+		return "", status_code.ApiServiceNotExistErr, err
 	}
 
 	var templateID int
 	if input.TemplateUUID != "" {
 		templateInfo, err := a.pluginTemplateService.GetByUUID(ctx, namespaceID, input.TemplateUUID)
 		if err != nil {
-			return "", err
+			return "", status_code.ApiTemplateNotExistErr, err
 		}
 		templateID = templateInfo.Id
 	}
@@ -589,7 +590,7 @@ func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator in
 	t := time.Now()
 	apiInfo, err := a.apiStore.GetByUUID(ctx, namespaceID, uid)
 	if err != nil && err != gorm.ErrRecordNotFound {
-		return "", err
+		return "", status_code.ApiDataBaseErr, err
 	}
 	if apiInfo == nil {
 		apiInfo = &apientry.API{
@@ -623,7 +624,7 @@ func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator in
 		apiInfo.UpdateTime = t
 	}
 
-	return uid, a.apiStore.Transaction(ctx, func(txCtx context.Context) error {
+	err = a.apiStore.Transaction(ctx, func(txCtx context.Context) error {
 		if err = a.apiStore.Save(txCtx, apiInfo); err != nil {
 			return err
 		}
@@ -691,7 +692,11 @@ func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator in
 
 		return a.quoteStore.Set(txCtx, apiInfo.Id, quote_entry.QuoteKindTypeAPI, quote_entry.QuoteTargetKindTypeService, serviceID)
 	})
+	if err != nil {
+		return "", status_code.ApiDataBaseErr, err
+	}
 
+	return uid, 0, nil
 }
 
 func (a *apiService) UpdateAPI(ctx context.Context, namespaceID int, operator int, input *api_dto.APIInfo) error {
