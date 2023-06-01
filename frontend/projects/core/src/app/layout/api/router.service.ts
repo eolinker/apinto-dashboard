@@ -7,7 +7,10 @@ import { ApiPublishComponent } from './api-list/publish/single/publish.component
 import { FilterOpts } from '../../constant/conf'
 import { MODAL_NORMAL_SIZE } from '../../constant/app.config'
 import { EoNgFeedbackModalService } from 'eo-ng-feedback'
-import { NzModalRef } from 'ng-zorro-antd/modal'
+import { ModalOptions, NzModalRef } from 'ng-zorro-antd/modal'
+import { ApiBatchPublishResultComponent } from './api-list/publish/batch/result.component'
+import { apiBatchOnlineVerifyTableBody, apiBatchOnlineVerifyTableHeadName, apiBatchPublishResultTableBody, apiBatchPublishResultTableHeadName } from './types/conf'
+import { ApiBatchPublishComponent } from './api-list/publish/batch/publish.component'
 
 @Injectable({
   providedIn: 'root'
@@ -275,5 +278,93 @@ export class RouterService {
         }
       }]
     })
+  }
+
+  batchPublishApiResModal (type:'online'|'offline', data:{uuids:Array<string>, clusters:Array<string>}, chooseCluster?:Function, component?:ApiBatchPublishComponent) {
+    const checkModalConfig:ModalOptions = {
+      nzTitle: '检测结果',
+      nzWidth: MODAL_NORMAL_SIZE,
+      nzContent: ApiBatchPublishResultComponent,
+      nzComponentParams: {
+        publishType: 'online',
+        stepType: 'check',
+        apisSet: new Set(data.uuids),
+        clustersSet: new Set(data.clusters),
+        chooseCluster: chooseCluster,
+        renewApiList: () => {
+          component?.flashList?.emit(true)
+        },
+        closeModal: () => { this.modalRef?.close() },
+        batchPublishTableBody: [...apiBatchOnlineVerifyTableBody],
+        batchPublishTableHeadName: [...apiBatchOnlineVerifyTableHeadName],
+        onlineApisModal: (context?:ApiBatchPublishResultComponent) => {
+          this.modalRef?.close()
+          this.modalRef = this.modalService.create(this.getResModalConfig(type, data, component, context))
+        }
+      },
+      nzFooter: [{
+        label: '重新检测',
+        type: 'primary',
+        show: (context?:ApiBatchPublishResultComponent) => (
+          context?.stepType === 'check'
+        ),
+        onClick: (context:ApiBatchPublishResultComponent) => {
+          context.onlineApisCheck()
+        }
+      },
+      {
+        label: '上一步',
+        show: (context?:ApiBatchPublishResultComponent) => (
+          context?.stepType === 'check' && !!context?.chooseCluster
+        ),
+        onClick: (context:ApiBatchPublishResultComponent) => {
+          context.chooseCluster && context.chooseCluster()
+          this.modalRef?.close()
+        }
+      },
+      {
+        label: '批量上线',
+        type: 'primary',
+        show: (context?:ApiBatchPublishResultComponent) => (
+          context?.stepType === 'check'
+        ),
+        onClick: (context:ApiBatchPublishResultComponent) => {
+          this.modalRef?.close()
+          this.modalRef = this.modalService.create(this.getResModalConfig(type, data, component, context))
+        }
+      }]
+
+    }
+
+    this.modalRef = this.modalService.create(type === 'online' ? checkModalConfig : this.getResModalConfig(type, data, component))
+  }
+
+  getResModalConfig:(...args:any)=>ModalOptions = (type:'online'|'offline', data:{uuids:Array<string>, clusters:Array<string>}, component?:ApiBatchPublishComponent, context?:ApiBatchPublishResultComponent) => {
+    return {
+      nzTitle: type === 'online' ? '批量上线结果' : '批量下线结果',
+      nzWidth: MODAL_NORMAL_SIZE,
+      nzContent: ApiBatchPublishResultComponent,
+      nzComponentParams: {
+        publishType: type,
+        stepType: 'result',
+        apisSet: new Set(data.uuids),
+        clustersSet: new Set(data.clusters),
+        closeModal: () => { this.modalRef?.close() },
+        batchPublishTableBody: [...apiBatchPublishResultTableBody],
+        batchPublishTableHeadName: [...apiBatchPublishResultTableHeadName],
+        onlineToken: context?.onlineToken,
+        renewApiList: () => {
+          component?.flashList?.emit(true)
+        }
+      },
+      nzFooter: [
+        {
+          label: '返回',
+          onClick: () => {
+            this.modalRef?.close()
+          }
+        }]
+
+    }
   }
 }
