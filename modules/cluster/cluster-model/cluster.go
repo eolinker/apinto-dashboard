@@ -20,4 +20,5 @@ type Cluster struct {
 type ClusterSimple struct {
 	Name  string `json:"name"`
 	Title string `json:"title"`
+	Env   string `json:"env"`
 }

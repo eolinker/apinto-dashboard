@@ -252,31 +252,26 @@ func (c *clusterService) QueryListByNamespaceId(ctx context.Context, namespaceId
 		return nil, err
 	}
 
+	list := c.getClustersDetails(ctx, namespaceId, clusters)
+	return list, nil
+}
+
+// QueryListByClusterNames 更具
+func (c *clusterService) QueryListByClusterNames(ctx context.Context, namespaceId int, clusterNames []string) ([]*cluster_model2.Cluster, error) {
+	clusters, err := c.clusterStore.GetByNamespaceByNames(ctx, namespaceId, clusterNames)
+	if err != nil {
+		return nil, err
+	}
+
+	list := c.getClustersDetails(ctx, namespaceId, clusters)
+	return list, nil
+}
+
+// getClustersDetails 返回包括集群运行状态在内的集群信息
+func (c *clusterService) getClustersDetails(ctx context.Context, namespaceId int, clusters []*cluster_entry2.Cluster) []*cluster_model2.Cluster {
 	list := make([]*cluster_model2.Cluster, 0, len(clusters))
 	for _, clusterInfo := range clusters {
-		status := 1
-		clusterNodes, _, _ := c.clusterNodeService.QueryList(ctx, namespaceId, clusterInfo.Name)
-		if len(clusterNodes) == 0 {
-			status = 3 //异常
-		} else {
-			abnormalNum := 0
-			normalNum := 0
-			for _, node := range clusterNodes {
-				if node.Status == 2 {
-					normalNum++
-				} else {
-					abnormalNum++
-				}
-			}
-			if normalNum == len(clusterNodes) { //正常
-				status = 1
-			} else if abnormalNum == len(clusterNodes) {
-				status = 3
-			} else {
-				status = 2 //部分正常
-			}
-		}
-
+		status := c.checkClusterStatus(ctx, namespaceId, clusterInfo.Name)
 		//兼容旧版本数据
 		if clusterInfo.UUID == "" {
 			go func() {
@@ -292,8 +287,34 @@ func (c *clusterService) QueryListByNamespaceId(ctx context.Context, namespaceId
 			Status:  status,
 		})
 	}
+	return list
+}
 
-	return list, nil
+// checkClusterStatus 检测集群状态 1:正常  2:部分正常 3:异常
+func (c *clusterService) checkClusterStatus(ctx context.Context, namespaceId int, clusterName string) int {
+	status := 1
+	clusterNodes, _, _ := c.clusterNodeService.QueryList(ctx, namespaceId, clusterName)
+	if len(clusterNodes) == 0 {
+		status = 3 //异常
+	} else {
+		abnormalNum := 0
+		normalNum := 0
+		for _, node := range clusterNodes {
+			if node.Status == 2 {
+				normalNum++
+			} else {
+				abnormalNum++
+			}
+		}
+		if normalNum == len(clusterNodes) { //正常
+			status = 1
+		} else if abnormalNum == len(clusterNodes) {
+			status = 3
+		} else {
+			status = 2 //部分正常
+		}
+	}
+	return status
 }
 
 func (c *clusterService) SimpleCluster(ctx context.Context, namespaceId int) ([]*cluster_model2.ClusterSimple, error) {
@@ -308,6 +329,7 @@ func (c *clusterService) SimpleCluster(ctx context.Context, namespaceId int) ([]
 		clusters = append(clusters, &cluster_model2.ClusterSimple{
 			Name:  l.Name,
 			Title: l.Title,
+			Env:   l.Env,
 		})
 	}
 	return clusters, nil

@@ -10,6 +10,7 @@ import (
 	service "github.com/eolinker/apinto-dashboard/modules/api"
 	"github.com/eolinker/apinto-dashboard/modules/api/api-dto"
 	_ "github.com/eolinker/apinto-dashboard/modules/api/service"
+	status_code "github.com/eolinker/apinto-dashboard/modules/api/status-code"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/group/group-dto"
 	"github.com/eolinker/apinto-dashboard/modules/group/group-model"
@@ -266,24 +267,24 @@ func (a *apiController) create(ginCtx *gin.Context) {
 
 	input := new(api_dto.APIInfo)
 	if err := ginCtx.BindJSON(input); err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
+		controller.ErrorJsonWithCode(ginCtx, http.StatusOK, status_code.ApiConfigBindErr, err.Error())
 		return
 	}
 
 	//API管理器校验参数
 	driver := a.apiService.GetAPIDriver(input.Scheme)
 	if driver == nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("创建API失败, 协议类型不存在"))
+		controller.ErrorJsonWithCode(ginCtx, http.StatusOK, status_code.ApiSchemeNotExist, fmt.Sprintf("创建API失败, 协议类型不存在"))
 		return
 	}
 	if err := driver.CheckInput(input); err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("创建API失败. err:%s", err.Error()))
+		controller.ErrorJsonWithCode(ginCtx, http.StatusOK, status_code.ApiConfigCheckErr, fmt.Sprintf("创建API失败. err:%s", err.Error()))
 		return
 	}
 
-	uuid, err := a.apiService.CreateAPI(ginCtx, namespaceId, userId, input)
+	uuid, statusCode, err := a.apiService.CreateAPI(ginCtx, namespaceId, userId, input)
 	if err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("创建API失败. err:%s", err.Error()))
+		controller.ErrorJsonWithCode(ginCtx, http.StatusOK, statusCode, fmt.Sprintf("创建API失败. err:%s", err.Error()))
 		return
 	}
 
