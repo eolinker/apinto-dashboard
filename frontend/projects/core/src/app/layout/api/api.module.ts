@@ -60,6 +60,7 @@ import { NzTypographyModule } from 'ng-zorro-antd/typography'
 import { ApiHttpMessageComponent } from './api-list/message/http-message/http-message.component'
 import { ApiWebsocketMessageComponent } from './api-list/message/websocket-message/websocket-message.component'
 import { ApiBatchPublishResultComponent } from './api-list/publish/batch/result.component'
+import { NzSpinModule } from 'ng-zorro-antd/spin'
 
 @NgModule({
   declarations: [
@@ -126,7 +127,8 @@ import { ApiBatchPublishResultComponent } from './api-list/publish/batch/result.
     NzDropDownModule,
     EoNgCodeboxModule,
     EoNgCopyModule,
-    NzTypographyModule
+    NzTypographyModule,
+    NzSpinModule
   ],
   exports: [
     MatchTableComponent,

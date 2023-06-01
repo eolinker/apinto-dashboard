@@ -22,7 +22,7 @@ export class ApiBatchPublishResultComponent {
   chooseCluster:Function|undefined
   renewApiList:Function|undefined
   onlineApisModal:Function|undefined // 当检测结果成功时，直接进入批量上线
-
+  loading:boolean = false
   constructor (private api:ApiService) { }
 
   // 在批量上\下线检测页和结果页中，上\下线成功的表格行字体为绿色，失败的为红色
@@ -46,12 +46,14 @@ export class ApiBatchPublishResultComponent {
 
   // 检测批量上线的api
   onlineApisCheck () {
+    this.loading = true
     this.onlineToken = ''
     this.api.post(
       'routers/batch-online/check',
       { apiUuids: [...this.apisSet], clusterNames: [...this.clustersSet] }
     )
       .subscribe((resp:{code:number, data:{list:APIBatchOnlineVerifyData[], onlineToken:string}, msg:string}) => {
+        this.loading = false
         if (resp.code === 0) {
           this.batchPublishTableList = resp.data.list
           for (const index in this.batchPublishTableList) {
@@ -67,11 +69,13 @@ export class ApiBatchPublishResultComponent {
 
   // 批量上线api
   onlineApis () {
+    this.loading = true
     this.api.post(
       'routers/batch-online',
       { onlineToken: this.onlineToken }
     )
       .subscribe((resp:{code:number, data:{list:APIBatchPublishData[]}, msg:string}) => {
+        this.loading = false
         if (resp.code === 0) {
           // this.apisOperatorResult('online-res')
           this.batchPublishTableList = resp.data.list
@@ -89,11 +93,13 @@ export class ApiBatchPublishResultComponent {
 
   // 批量下线api
   offlineApis () {
+    this.loading = true
     this.api.post(
       'routers/batch-offline',
       { apiUuids: [...this.apisSet], clusterNames: [...this.clustersSet] }
     )
       .subscribe((resp:{code:number, data:{ list:APIBatchPublishData[] }, msg:string}) => {
+        this.loading = false
         if (resp.code === 0) {
           this.renewApiList && this.renewApiList()
           this.apisSet = new Set()
@@ -103,5 +109,13 @@ export class ApiBatchPublishResultComponent {
           this.batchPublishTableList[index].statusString = this.batchPublishTableList[index].status ? '成功' : '失败'
         }
       })
+  }
+
+  getTip () {
+    if (this.stepType === 'check') {
+      return `正在检测选中 API 是否可以${(this.publishType === 'online' ? '上线' : '下线')} ...`
+    } else {
+      return `正在${(this.publishType === 'online' ? '上线' : '下线')}选中 API...`
+    }
   }
 }
