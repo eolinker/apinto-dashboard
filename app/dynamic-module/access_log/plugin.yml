@@ -825,7 +825,7 @@ define:  # 动态模块定义
                       }
                   }
               },
-              "version": {
+              "kafka_version": {
                   "title": "版本",
                   "x-decorator": "FormItem",
                   "x-component": "Select",
@@ -835,7 +835,7 @@ define:  # 动态模块定义
                       "labelCol": 6,
                       "wrapperCol": 10
                   },
-                  "name": "version",
+                  "name": "kafka_version",
                   "required": true,
                   "enum": [
                       {
