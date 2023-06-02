@@ -308,8 +308,9 @@ func (a *apiOpenAPIService) GetSyncImportInfo(ctx context.Context, namespaceID i
 	serviceList := make([]*openapi_model.ApiOpenAPIService, 0, len(provider.Provide(namespaceID)))
 	for _, d := range provider.Provide(namespaceID) {
 		item := &openapi_model.ApiOpenAPIService{
-			Name: d.Value,
-			Desc: "",
+			Name:  d.Value,
+			Desc:  "",
+			Title: d.Title,
 		}
 		serviceList = append(serviceList, item)
 	}
