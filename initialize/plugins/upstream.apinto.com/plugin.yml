@@ -2,7 +2,7 @@ id: "upstream.apinto.com"
 name: "upstream"
 cname: "上游服务"
 resume: "配置上游服务信息，通过API绑定，实现完整转发流程。支持IP Hash、带权轮询等负载均衡算法，合理分配上游服务压力，保证上游服务稳定性。"
-version: "v1.0.0"
+version: "v1.0.5"
 icon: "上游服务.png"
 driver: "upstream.apinto.com"
 type: 1 #0为框架模块 1为核心模块 2为内置模块 3为非内置
@@ -341,6 +341,69 @@ define:  # 动态模块定义
                   ],
                   "x-index": 6
               },
+              "pass_host":{
+                  "title": "转发Host",
+                  "x-decorator": "FormItem",
+                  "x-component": "Select",
+                  "x-validator": [],
+                  "x-component-props": {},
+                  "x-decorator-props": {
+                      "labelCol": 6,
+                      "wrapperCol": 10
+                  },
+                  "default": "pass",
+                  "required": true,
+                  "enum": [
+                      {
+                          "children": [],
+                          "label": "透传客户端请求Host",
+                          "value": "pass"
+                      },
+                      {
+                          "children": [],
+                          "label": "使用上游服务Host",
+                          "value": "node"
+                      },
+                      {
+                          "children": [],
+                          "label": "重写Host",
+                          "value": "rewrite"
+                      }
+                  ],
+                  "x-index": 7
+              },
+              "upstream_host":{
+                  "type": "string",
+                  "title": "重写域名",
+                  "x-decorator": "FormItem",
+                  "x-component": "Input",
+                  "x-validator": [],
+                  "x-component-props": {},
+                  "x-decorator-props": {
+                      "labelCol": 6,
+                      "wrapperCol": 10
+                  },
+                  "required": true,
+                  "x-reactions": [
+                      {
+                          "dependencies": [
+                              "pass_host"
+                          ],
+                          "when": "{{$deps[0] === 'rewrite'}}",
+                          "fulfill": {
+                              "state": {
+                                  "visible": true
+                              }
+                          },
+                          "otherwise": {
+                              "state": {
+                                  "visible": false
+                              }
+                          }
+                      }
+                  ],
+                  "x-index": 8
+              },
               "timeout": {
                   "type": "number",
                   "title": "请求超时时间",
@@ -361,7 +424,7 @@ define:  # 动态模块定义
                   "default": 1000,
                   "name": "timeout",
                   "description": "单位：ms，最小值：1",
-                  "x-index": 7
+                  "x-index": 9
               }
           }
       }
