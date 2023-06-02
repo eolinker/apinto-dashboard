@@ -81,7 +81,7 @@ export class ErrorInterceptor implements HttpInterceptor {
         }, 1000)
         break
       default:
-        if (code !== undefined && !(responseBody.url.includes('sso/login/check')) && code !== 0 && code !== 30001) {
+        if (!this.router.url.startsWith('/remote') && code !== undefined && !(responseBody.url.includes('sso/login/check')) && code !== 0 && code !== 30001) {
           let msg = responseBody.body.msg
           if (responseBody.url.includes('router/online') && requestMethod === 'PUT') {
             msg = responseBody.body.data.router.map((data:any) => {
