@@ -77,8 +77,7 @@ export class IframeHttpService {
         }
         newRouterArr = newRouterArr.join('').split('/')
         newRouterArr[newRouterArr.length - 1] = `${newRouterArr[newRouterArr.length - 1]}#${url}`
-        window.location.href = newRouterArr.join('/')
-        console.log(window.history)
+        window.history.replaceState(null, '', newRouterArr.join('/'))
         resolve(true)
       })
     },
