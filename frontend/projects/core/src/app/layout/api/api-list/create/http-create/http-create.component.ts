@@ -43,8 +43,7 @@ export class ApiHttpCreateComponent extends ApiWebsocketCreateComponent {
     this.api.get('router', { uuid: this.apiUuid }).subscribe((resp) => {
       if (resp.code === 0) {
         setFormValue(this.validateForm, resp.data.api)
-        // eslint-disable-next-line dot-notation
-        this.validateForm.controls['requestPath'].setValue(resp.data.api.requestPath.slice(1))
+        this.validateForm.controls['requestPath'].setValue(resp.data.api.requestPath[0] === '/' ? resp.data.api.requestPath.slice(1) : resp.data.api.requestPath)
         this.createApiForm = resp.data.api
         if (
           !this.createApiForm.method ||
