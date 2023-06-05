@@ -62,7 +62,7 @@ func (r *remotePluginController) getOpenMode() gin.HandlerFunc {
 		module := common.Map{}
 		module["name"] = r.moduleName
 
-		//兼容远程插件需要配server和不需要配server的情况
+		//兼容remoteDriver是内置还是安装的情况
 		server := r.cfg.Server
 		if server == "" {
 			server = r.define.Server
