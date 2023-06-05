@@ -78,6 +78,7 @@ export class IframeHttpService {
         newRouterArr = newRouterArr.join('').split('/')
         newRouterArr[newRouterArr.length - 1] = `${newRouterArr[newRouterArr.length - 1]}#${url}`
         window.location.href = newRouterArr.join('/')
+        console.log(window.history)
         resolve(true)
       })
     },
@@ -361,13 +362,11 @@ export class IframeHttpService {
           ? () => {
               return new Promise((resolve) => {
                 resolve({ data: { lastStep: true } })
-                console.log({ data: { lastStep: true } })
               })
             }
           : undefined, () => {
           return new Promise((resolve) => {
             resolve({ data: { finishPublish: true } })
-            console.log({ data: { finishPublish: true } })
           })
         })
         break
