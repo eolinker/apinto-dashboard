@@ -137,7 +137,7 @@ export class RouterService {
         type: 'btn',
         right: true,
         btns: [{
-          title: '上线管理',
+          title: '发布管理',
           click: (item:any) => {
             context.publish(item.data.uuid)
           }
