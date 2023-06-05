@@ -1,5 +1,4 @@
 /* eslint-disable dot-notation */
-/* eslint-disable no-useless-constructor */
 import {
   Component,
 
@@ -28,7 +27,7 @@ import { BaseInfoService } from 'projects/core/src/app/service/base-info.service
 import { cloneDeep } from 'lodash'
 import { MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
 import { ApiManagementProxyComponent } from '../../proxy/proxy.component'
-import { APINotFormGroupData } from '../../../types/types'
+import { APINotFormGroupData, APIProtocol } from '../../../types/types'
 import { methodList, proxyHeaderTableHeadName, proxyHeaderTableBody, hostHeaderTableBody, defaultHostList } from '../../../types/conf'
 import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 @Component({
@@ -69,6 +68,7 @@ export class ApiWebsocketCreateComponent implements OnInit {
   @Input() apiUuid:string = ''
   @Input() editPage:boolean = false
   @Input() groupUuid:string = ''
+  apiProtocol:APIProtocol = 'websocket'
   nzDisabled:boolean = false
   headerList:NzTreeNodeOptions[]= []
   firstLevelList:Array<string> = []

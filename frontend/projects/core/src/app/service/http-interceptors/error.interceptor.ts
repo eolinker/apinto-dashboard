@@ -1,4 +1,3 @@
-/* eslint-disable no-useless-constructor */
 import { Component, Injectable } from '@angular/core'
 import {
   HttpRequest,
@@ -65,6 +64,8 @@ export class ErrorInterceptor implements HttpInterceptor {
         break
       case -3:
         setTimeout(() => {
+          this.modalService.closeAll()
+          this.eoModalService.closeAll()
           if (!this.router.url.includes('/login')) {
             this.router.navigate(['/', 'login'], { queryParams: { callback: this.router.url }, queryParamsHandling: 'merge' })
           }
@@ -80,7 +81,7 @@ export class ErrorInterceptor implements HttpInterceptor {
         }, 1000)
         break
       default:
-        if (code !== undefined && !(responseBody.url.includes('sso/login/check')) && code !== 0 && code !== 30001) {
+        if (!this.router.url.startsWith('/remote') && code !== undefined && !(responseBody.url.includes('sso/login/check')) && code !== 0 && code !== 30001) {
           let msg = responseBody.body.msg
           if (responseBody.url.includes('router/online') && requestMethod === 'PUT') {
             msg = responseBody.body.data.router.map((data:any) => {

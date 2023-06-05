@@ -1,5 +1,3 @@
-/* eslint-disable dot-notation */
-/* eslint-disable no-useless-constructor */
 import { Directive, ElementRef, EventEmitter, Input, OnInit, Output, Renderer2 } from '@angular/core'
 import { Router } from '@angular/router'
 import { Subscription } from 'rxjs'
