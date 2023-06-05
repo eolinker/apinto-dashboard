@@ -54,7 +54,7 @@ const containerElementName = 'customReactComponentContainer'
         }
 
         .ant-checkbox {
-          top: 0.4em;
+          top: 0em;
         }
 
         .ant-checkbox-group-item .ant-checkbox {
