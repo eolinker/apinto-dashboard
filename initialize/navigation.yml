@@ -35,6 +35,11 @@
   cname: "插件市场"
   icon: "shop"
   quick: true
+- id: "navigation.api_market"
+  name: "api-market"
+  cname: "API市场"
+  icon: "Eolink"
+  quick: true
 - id: "navigation.system"
   name: "system"
   cname: "系统管理"

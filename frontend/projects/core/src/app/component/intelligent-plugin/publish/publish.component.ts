@@ -1,6 +1,6 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
 import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
-import { IntelligentPluginService } from '../intelligent-plugin.service'
+import { EoIntelligentPluginService } from '../intelligent-plugin.service'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { ApiService } from '../../../service/api.service'
 import { DynamicPublish, DynamicPublishCluster, DynamicPublishData } from '../types/types'
@@ -11,7 +11,7 @@ import { DynamicPublish, DynamicPublishCluster, DynamicPublishData } from '../ty
   styles: [
   ]
 })
-export class IntelligentPluginPublishComponent implements OnInit {
+export class EoIntelligentPluginPublishComponent implements OnInit {
   @ViewChild('clusterStatusTpl', { read: TemplateRef, static: true }) clusterStatusTpl: TemplateRef<any> | undefined
   name:string = ''
   id:string = ''
@@ -26,7 +26,7 @@ export class IntelligentPluginPublishComponent implements OnInit {
   nzDisabled:boolean = false
   constructor (
     public message: EoNgFeedbackMessageService,
-    private service:IntelligentPluginService,
+    private service:EoIntelligentPluginService,
     public api:ApiService) {}
 
   ngOnInit (): void {

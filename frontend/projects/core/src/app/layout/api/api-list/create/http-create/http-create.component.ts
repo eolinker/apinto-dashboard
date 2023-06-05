@@ -1,10 +1,11 @@
 import { Component } from '@angular/core'
 import { ApiWebsocketCreateComponent } from '../websocket-create/websocket-create.component'
 import { setFormValue } from 'projects/core/src/app/constant/form'
+import { APIProtocol } from '../../../types/types'
 
 @Component({
   selector: 'eo-ng-api-http-create',
-  templateUrl: './http-create.component.html',
+  templateUrl: '../websocket-create/websocket-create.component.html',
   styles: [
     `
     :host {
@@ -36,6 +37,7 @@ import { setFormValue } from 'projects/core/src/app/constant/form'
   ]
 })
 export class ApiHttpCreateComponent extends ApiWebsocketCreateComponent {
+  override apiProtocol:APIProtocol = 'http'
   // 当编辑api时，需要获取api信息
   override getApiMessage () {
     this.api.get('router', { uuid: this.apiUuid }).subscribe((resp) => {

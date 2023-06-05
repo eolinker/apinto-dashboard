@@ -7,8 +7,9 @@ type ApiOpenAPIGroups struct {
 }
 
 type ApiOpenAPIService struct {
-	Name string `json:"name"`
-	Desc string `json:"desc"`
+	Name  string `json:"name"`
+	Desc  string `json:"desc"`
+	Title string `json:"title"`
 }
 
 type ServiceStaticDriverConf struct {

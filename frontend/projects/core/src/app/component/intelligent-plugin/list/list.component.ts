@@ -1,14 +1,14 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
 import { SelectOption } from 'eo-ng-select'
 import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
-import { IntelligentPluginDefaultThead } from '../types/conf'
-import { IntelligentPluginService } from '../intelligent-plugin.service'
+import { EoIntelligentPluginDefaultThead } from '../types/conf'
+import { EoIntelligentPluginService } from '../intelligent-plugin.service'
 import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feedback'
 import { MODAL_NORMAL_SIZE, MODAL_SMALL_SIZE } from '../../../constant/app.config'
 import { ApiService } from '../../../service/api.service'
-import { IntelligentPluginPublishComponent } from '../publish/publish.component'
+import { EoIntelligentPluginPublishComponent } from '../publish/publish.component'
 import { NzModalRef } from 'ng-zorro-antd/modal'
-import { IntelligentPluginCreateComponent } from '../create/create.component'
+import { EoIntelligentPluginCreateComponent } from '../create/create.component'
 import { DynamicConfig, DynamicDriverData, DynamicField, DynamicListStatus, DynamicRender } from '../types/types'
 import { ClusterSimpleOption, EmptyHttpResponse } from '../../../constant/type'
 import { Subscription, forkJoin, map } from 'rxjs'
@@ -25,7 +25,7 @@ import { debounce } from 'lodash-es'
   styles: [
   ]
 })
-export class IntelligentPluginListComponent implements OnInit {
+export class EoIntelligentPluginListComponent implements OnInit {
   @ViewChild('clusterStatusTpl', { read: TemplateRef, static: true }) clusterStatusTpl: TemplateRef<any> | undefined
   @ViewChild('loadingTpl', { read: TemplateRef, static: true }) loadingTpl: TemplateRef<any> | undefined
   moduleName:string = ''
@@ -35,7 +35,7 @@ export class IntelligentPluginListComponent implements OnInit {
   cluster:any = []
   clusterOptions:SelectOption[] = []
   tableBody:TBODY_TYPE[] = [...this.service.createTbody(this)]
-  tableHeadName:THEAD_TYPE[] = [...IntelligentPluginDefaultThead]
+  tableHeadName:THEAD_TYPE[] = [...EoIntelligentPluginDefaultThead]
   tableData:{data:any[], pagination:boolean, total:number, pageNum:number, pageSize:number}
   = { data: [], pagination: true, total: 1, pageSize: 20, pageNum: 1 }
 
@@ -49,7 +49,7 @@ export class IntelligentPluginListComponent implements OnInit {
 
   constructor (
     public message: EoNgFeedbackMessageService,
-    public service:IntelligentPluginService,
+    public service:EoIntelligentPluginService,
     public modalService:EoNgFeedbackModalService,
     public api:ApiService,
     public router:Router,
@@ -68,7 +68,7 @@ export class IntelligentPluginListComponent implements OnInit {
         this.cluster = []
         this.clusterOptions = []
         this.tableBody = [...this.service.createTbody(this)]
-        this.tableHeadName = [...IntelligentPluginDefaultThead]
+        this.tableHeadName = [...EoIntelligentPluginDefaultThead]
         this.tableData = { data: [], pagination: true, total: 1, pageSize: 20, pageNum: 1 }
 
         this.driverOptions = []
@@ -253,7 +253,7 @@ export class IntelligentPluginListComponent implements OnInit {
     this.modalRef = this.modalService.create({
       nzTitle: `${value.data.title}上线管理`,
       nzWidth: MODAL_NORMAL_SIZE,
-      nzContent: IntelligentPluginPublishComponent,
+      nzContent: EoIntelligentPluginPublishComponent,
       nzComponentParams: {
         name: value.data.title,
         id: value.data.id,
@@ -272,7 +272,7 @@ export class IntelligentPluginListComponent implements OnInit {
       {
         label: '下线',
         danger: true,
-        onClick: (context:IntelligentPluginPublishComponent) => {
+        onClick: (context:EoIntelligentPluginPublishComponent) => {
           context.offline()
         },
         disabled: () => {
@@ -282,7 +282,7 @@ export class IntelligentPluginListComponent implements OnInit {
       {
         label: '上线',
         type: 'primary',
-        onClick: (context:IntelligentPluginPublishComponent) => {
+        onClick: (context:EoIntelligentPluginPublishComponent) => {
           context.online()
         },
         disabled: () => {
@@ -296,7 +296,7 @@ export class IntelligentPluginListComponent implements OnInit {
     this.modalRef = this.modalService.create({
       nzTitle: `新建${this.pluginName}`,
       nzWidth: MODAL_NORMAL_SIZE,
-      nzContent: IntelligentPluginCreateComponent,
+      nzContent: EoIntelligentPluginCreateComponent,
       nzComponentParams: {
         renderSchema: this.renderSchema,
         editPage: false,
@@ -304,7 +304,7 @@ export class IntelligentPluginListComponent implements OnInit {
         driverSelectOptions: this.driverOptions,
         initFormValue: { driver: this.driverOptions[0].value || '' }
       },
-      nzOnOk: (component:IntelligentPluginCreateComponent) => {
+      nzOnOk: (component:EoIntelligentPluginCreateComponent) => {
         component.form.validate().then((res:any) => {
           if (!res) {
             // eslint-disable-next-line dot-notation
@@ -320,7 +320,7 @@ export class IntelligentPluginListComponent implements OnInit {
     this.modalRef = this.modalService.create({
       nzTitle: `编辑${this.pluginName}`,
       nzWidth: MODAL_NORMAL_SIZE,
-      nzContent: IntelligentPluginCreateComponent,
+      nzContent: EoIntelligentPluginCreateComponent,
       nzComponentParams: {
         renderSchema: this.renderSchema,
         editPage: true,
@@ -328,10 +328,9 @@ export class IntelligentPluginListComponent implements OnInit {
         uuid: value.data.id,
         driverSelectOptions: this.driverOptions
       },
-      nzOnOk: (component:IntelligentPluginCreateComponent) => {
+      nzOnOk: (component:EoIntelligentPluginCreateComponent) => {
         component.form.validate().then((res:any) => {
           if (!res) {
-            // eslint-disable-next-line dot-notation
             this.saveData(JSON.parse(JSON.stringify(component.form.values)), component.uuid, true)
           }
         })

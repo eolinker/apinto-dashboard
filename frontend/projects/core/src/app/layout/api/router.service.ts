@@ -5,11 +5,20 @@ import { THEAD_TYPE } from 'eo-ng-table'
 import { ApiManagementListComponent } from './api-list/list/list.component'
 import { ApiPublishComponent } from './api-list/publish/single/publish.component'
 import { FilterOpts } from '../../constant/conf'
+import { MODAL_NORMAL_SIZE } from '../../constant/app.config'
+import { EoNgFeedbackModalService } from 'eo-ng-feedback'
+import { ModalOptions, NzModalRef } from 'ng-zorro-antd/modal'
+import { ApiBatchPublishResultComponent } from './api-list/publish/batch/result.component'
+import { apiBatchOnlineVerifyTableBody, apiBatchOnlineVerifyTableHeadName, apiBatchPublishResultTableBody, apiBatchPublishResultTableHeadName } from './types/conf'
+import { ApiBatchPublishComponent } from './api-list/publish/batch/publish.component'
 
 @Injectable({
   providedIn: 'root'
 })
 export class RouterService {
+  constructor (
+    private modalService:EoNgFeedbackModalService) {}
+
   createApiListThead (context:ApiManagementListComponent, publishList?:Array<any>):THEAD_TYPE[] {
     return [
       {
@@ -227,5 +236,156 @@ export class RouterService {
       { key: 'updateTime' }
     ]
     return tbody
+  }
+
+  modalRef:NzModalRef|undefined
+
+  publishApiModal (uuid:string, component?:ApiManagementListComponent) {
+    this.modalRef = this.modalService.create({
+      nzTitle: '发布管理',
+      nzWidth: MODAL_NORMAL_SIZE,
+      nzContent: ApiPublishComponent,
+      nzComponentParams: {
+        apiUuid: uuid,
+        closeModal: () => { this.modalRef?.close() },
+        getApisData: () => { component?.getApisData() }
+      },
+      nzFooter: [{
+        label: '取消',
+        type: 'default',
+        onClick: () => {
+          this.modalRef?.close()
+        }
+      },
+      {
+        label: '下线',
+        danger: true,
+        onClick: (context:ApiPublishComponent) => {
+          context.offline()
+        },
+        disabled: () => {
+          return component?.nzDisabled || false
+        }
+      },
+      {
+        label: '上线',
+        type: 'primary',
+        onClick: (context:ApiPublishComponent) => {
+          context.online()
+        },
+        disabled: () => {
+          return component?.nzDisabled || false
+        }
+      }]
+    })
+  }
+
+  batchPublishApiResModal (type:'online'|'offline', data:{uuids:Array<string>, clusters:Array<string>}, chooseCluster?: Function, finishPublish?: Function, component?:ApiBatchPublishComponent) {
+    const checkModalConfig:ModalOptions = {
+      nzTitle: '检测结果',
+      nzWidth: MODAL_NORMAL_SIZE,
+      nzContent: ApiBatchPublishResultComponent,
+      nzComponentParams: {
+        publishType: 'online',
+        stepType: 'check',
+        apisSet: new Set(data.uuids),
+        clustersSet: new Set(data.clusters),
+        chooseCluster: chooseCluster,
+        renewApiList: () => {
+          component?.flashList?.emit(true)
+        },
+        closeModal: () => { this.modalRef?.close() },
+        batchPublishTableBody: [...apiBatchOnlineVerifyTableBody],
+        batchPublishTableHeadName: [...apiBatchOnlineVerifyTableHeadName],
+        onlineApisModal: (context?:ApiBatchPublishResultComponent) => {
+          this.modalRef?.close()
+          this.modalRef = this.modalService.create(this.getResModalConfig(type, data, component, context))
+          finishPublish && finishPublish()
+        }
+      },
+      nzFooter: [{
+        label: '重新检测',
+        type: 'primary',
+        loading: (context:ApiBatchPublishResultComponent) => {
+          return context.loading
+        },
+        show: (context?:ApiBatchPublishResultComponent) => (
+          context?.stepType === 'check'
+        ),
+        onClick: (context:ApiBatchPublishResultComponent) => {
+          context.onlineApisCheck()
+        }
+      },
+      {
+        label: '上一步',
+        loading: (context:ApiBatchPublishResultComponent) => {
+          return context.loading
+        },
+        show: (context?:ApiBatchPublishResultComponent) => (
+          context?.stepType === 'check' && !!context?.chooseCluster
+        ),
+        onClick: (context:ApiBatchPublishResultComponent) => {
+          context.chooseCluster && context.chooseCluster()
+
+          this.modalRef?.close()
+        }
+      },
+      {
+        label: '批量上线',
+        type: 'primary',
+        loading: (context:ApiBatchPublishResultComponent) => {
+          return context.loading
+        },
+        disabled: (context:ApiBatchPublishResultComponent) => {
+          return !context.onlineToken
+        },
+        show: (context?:ApiBatchPublishResultComponent) => (
+          context?.stepType === 'check'
+        ),
+        onClick: (context:ApiBatchPublishResultComponent) => {
+          this.modalRef?.close()
+          this.modalRef = this.modalService.create(this.getResModalConfig(type, data, component, context))
+          finishPublish && finishPublish()
+        }
+      }]
+
+    }
+
+    this.modalRef = this.modalService.create(type === 'online' ? checkModalConfig : this.getResModalConfig(type, data, component))
+    if (type === 'offline') {
+      finishPublish && finishPublish()
+    }
+  }
+
+  getResModalConfig:(...args:any)=>ModalOptions = (type:'online'|'offline', data:{uuids:Array<string>, clusters:Array<string>}, component?:ApiBatchPublishComponent, context?:ApiBatchPublishResultComponent) => {
+    return {
+      nzTitle: type === 'online' ? '批量上线结果' : '批量下线结果',
+      nzWidth: MODAL_NORMAL_SIZE,
+      nzContent: ApiBatchPublishResultComponent,
+      nzComponentParams: {
+        publishType: type,
+        stepType: 'result',
+        apisSet: new Set(data.uuids),
+        clustersSet: new Set(data.clusters),
+        closeModal: () => { this.modalRef?.close() },
+        batchPublishTableBody: [...apiBatchPublishResultTableBody],
+        batchPublishTableHeadName: [...apiBatchPublishResultTableHeadName],
+        onlineToken: context?.onlineToken,
+        renewApiList: () => {
+          component?.flashList?.emit(true)
+        }
+      },
+      nzFooter: [
+        {
+          label: '返回',
+          loading: (context:ApiBatchPublishResultComponent) => {
+            return context.loading
+          },
+          onClick: () => {
+            this.modalRef?.close()
+          }
+        }]
+
+    }
   }
 }
