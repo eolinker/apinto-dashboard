@@ -52,7 +52,7 @@ func (r *rPlugin) IsPluginVisible() bool {
 }
 
 func (r *rPlugin) IsShowServer() bool {
-	return true
+	return false
 }
 
 func (r *rPlugin) IsCanUninstall() bool {
