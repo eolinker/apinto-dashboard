@@ -3,7 +3,6 @@ import { EoIntelligentPluginListComponent } from './list/list.component'
 import { EO_TBODY_TYPE } from 'projects/eo-ng-apinto-table/src/public-api'
 import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { EoIntelligentPluginPublishComponent } from './publish/publish.component'
-import { ApplicationManagementListComponent } from '../../layout/application/list/list.component'
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +16,7 @@ export class EoIntelligentPluginService {
         return !component.tableLoading
       },
       btns: [{
-        title: '上线管理',
+        title: '发布管理',
         click: (item:any) => {
           component.publish(item)
         }
@@ -46,7 +45,7 @@ export class EoIntelligentPluginService {
         return component.tableLoading
       },
       btns: [{
-        title: '上线管理',
+        title: '发布管理',
         click: (item:any) => {
           component.publish(item)
         }

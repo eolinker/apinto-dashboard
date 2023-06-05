@@ -33,7 +33,11 @@ export const CustomEnvVariableComponent = React.forwardRef(
     }
 
     return (
-      <a href="#!" onClick={openModal}>
+      <a
+        href="#!"
+        style={{ display: 'block', whiteSpace: 'nowrap' }}
+        onClick={openModal}
+      >
         {title}
       </a>
     )
