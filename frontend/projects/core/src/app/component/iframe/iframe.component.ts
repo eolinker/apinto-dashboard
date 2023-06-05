@@ -62,6 +62,15 @@ export class EoIframeComponent implements OnInit {
     this.subscription2 = this.iframeService.repFlashIframe().subscribe((event) => {
       this.showIframe(true, `${event ? `/${event}` : ''}`)
     })
+
+    window.addEventListener('popstate', this.hashChange, false)
+  }
+
+  hashChange = (e:PopStateEvent) => {
+    if (this.router.url !== window.location.href && e.state.navigationId) {
+      console.log(window.history)
+      this.showIframe(true, `${window.location.hash.slice(1) ? `${window.location.hash.slice(1)}` : ''}`)
+    }
   }
 
   ngAfterViewInit () {
@@ -75,6 +84,7 @@ export class EoIframeComponent implements OnInit {
     this.subscription.unsubscribe()
     this.iframeService.subscription.unsubscribe()
     this.subscription2.unsubscribe()
+    window.removeEventListener('popstate', this.hashChange)
   }
 
   proxyHandler:{[k:string]:any} ={
@@ -157,7 +167,8 @@ export class EoIframeComponent implements OnInit {
    const url:string = `agent/${this.moduleName}`
 
    if (noChangeUrl) {
-     this.iframe.src = `${url}/${innerUrl}`
+     console.log(`${url}${innerUrl}`)
+     this.iframe.src = `${url}${innerUrl}`
      return
    }
 
