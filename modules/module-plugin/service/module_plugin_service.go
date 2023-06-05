@@ -114,8 +114,8 @@ func (m *modulePluginService) GetPluginInfo(ctx context.Context, pluginUUID stri
 	}
 	info.CanDisable = enableEntry.IsCanDisable
 
-	//若插件可卸载，且为停用，才能返回可卸载
-	if enableEntry.IsEnable == statusPluginDisable && enableEntry.IsCanUninstall {
+	//若非内置插件插件可卸载，且为停用，才能返回可卸载
+	if !IsInnerPlugin(plugin.Type) && enableEntry.IsEnable == statusPluginDisable && enableEntry.IsCanUninstall {
 		info.Uninstall = true
 	}
 
@@ -357,8 +357,8 @@ func (m *modulePluginService) UninstallPlugin(ctx context.Context, userID int, p
 		return err
 	}
 
-	if !enableInfo.IsCanUninstall {
-		return errors.New("内置插件不可以卸载")
+	if !IsInnerPlugin(pluginInfo.Type) && !enableInfo.IsCanUninstall {
+		return errors.New("该插件不可以卸载")
 	}
 
 	//校验插件启用状态
