@@ -464,6 +464,8 @@ eo-ng-api-management {
 }
 
 eo-ng-tree-default:not(.ant-select-tree) {
+  font-size: 12px;
+
   nz-tree-node-title {
     // height: var(--button-height);
     cursor: pointer;
