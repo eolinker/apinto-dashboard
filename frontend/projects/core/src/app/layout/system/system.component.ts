@@ -5,6 +5,15 @@ import { Component } from '@angular/core'
   template: `
   <router-outlet></router-outlet>`,
   styles: [
+    `
+    :host ::ng-deep{
+        td {
+          eo-ng-select.ant-select,
+          eo-ng-select-top-control.ant-select-selector {
+            width: 100% !important;
+          }
+        }
+    }`
   ]
 })
 export class SystemComponent {

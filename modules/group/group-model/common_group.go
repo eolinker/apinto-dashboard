@@ -23,3 +23,12 @@ type CommonGroupApi struct {
 	Methods   []string
 	GroupUUID string
 }
+
+type CommonGroupBasic struct {
+	Uuid     string
+	Type     string
+	TagID    int
+	Name     string
+	ParentId int
+	Sort     int
+}

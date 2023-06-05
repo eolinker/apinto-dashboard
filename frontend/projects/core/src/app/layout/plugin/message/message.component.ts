@@ -336,9 +336,7 @@ export class PluginMessageComponent implements OnInit {
   disablePluginModal (deletePlugin: boolean) {
     this.modalRef = this.modalService.create({
       nzTitle: deletePlugin ? '卸载' : '停用',
-      nzContent: `该插件${
-        deletePlugin ? '卸载后将无法找回' : '停用后将无法再使用'
-      }，请确认是否要${deletePlugin ? '卸载' : '停用'}？`,
+      nzContent: deletePlugin ? '是否卸载插件？卸载后插件数据依然会保留，后续如需再次使用插件，重新安装即可。' : '是否停用插件？',
       nzClosable: true,
       nzClassName: 'delete-modal',
       nzWidth: MODAL_SMALL_SIZE,

@@ -2,13 +2,12 @@ import { Injectable } from '@angular/core'
 import { CanActivate, Router } from '@angular/router'
 import { Observable } from 'rxjs'
 import { ApiService } from './api.service'
-import { EoNgNavigationService } from './app-config.service'
+import { EoNgNavigationService } from './eo-ng-navigation.service'
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthGuardService implements CanActivate {
-  // eslint-disable-next-line  no-useless-constructor
   constructor (private router: Router,
               private api: ApiService,
               private navigationService: EoNgNavigationService) {}

@@ -3,19 +3,21 @@ import { Component, EventEmitter, Input, Output } from '@angular/core'
 @Component({
   selector: 'eo-ng-auth-info-detail',
   template: `
-  <ol class="activation-info">
+  <ol
+        class="text-DESC_TEXT block m-auto mt-[40px] text-MAIN_TEXT text-[14px] font-medium leading-[26px] list-none"
+        style="padding-inline-start: 0px">
     <li *ngFor="let info of eoInfos">
       {{ info.key }} ：{{ info.value }}
     </li>
   </ol>
-  <a class="auth-a" eoNgUserAccess="auth-info" (click)="updateAuth()"
+  <a class="m-auto mt-[24px] text-center" eoNgUserAccess="auth-info" (click)="updateAuth()"
     >更新授权</a
   >
   `,
   styles: [
     `
     ol {
-      color: #666666;
+      color: var(--TITLE_TEXT);
       font-size: 14px;
       font-weight: 500;
       line-height: 26px;
@@ -27,6 +29,12 @@ import { Component, EventEmitter, Input, Output } from '@angular/core'
       font-size: 14px;
       font-weight: 400;
       line-height: 22px;
+    }
+
+    :host{
+        display: inline-block;
+        width: auto;
+        margin: auto;
     }
     `
   ]

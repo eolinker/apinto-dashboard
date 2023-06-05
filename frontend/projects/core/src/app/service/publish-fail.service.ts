@@ -1,4 +1,3 @@
-/* eslint-disable no-useless-constructor */
 // api上线、应用上线、服务发现上线、上游服务上线报错时，需要打开弹窗并支持打开新窗口跳转到后端传来的新链接
 import { Injectable } from '@angular/core'
 import { EoNgFeedbackModalService } from 'eo-ng-feedback'
@@ -11,7 +10,7 @@ export class PublishFailService {
   constructor (
     private modalService:EoNgFeedbackModalService) { }
 
-  openModal (msg:string, type:string, routerName:string, routerParam:{[k:string]:any}, footer?:any) {
+  openModal (msg:string, type:string, routerName:string, routerParam:{[k:string]:any}) {
     this.modalService.create({
       nzTitle: '提示',
       nzIconType: 'exclamation-circle',

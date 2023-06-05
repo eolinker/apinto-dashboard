@@ -3,23 +3,15 @@ import { CustomReactComponentWrapperComponent } from '../../formily2-react/Custo
 import { SelectOption } from 'eo-ng-select'
 import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feedback'
 import { ApiService } from '../../../service/api.service'
-import { IntelligentPluginService } from '../intelligent-plugin.service'
+import { EoIntelligentPluginService } from '../intelligent-plugin.service'
 
 @Component({
   selector: 'eo-ng-intelligent-plugin-create',
-  template: `
-       <formily2-react-wrapper
-        #formily
-        [renderSchema]="renderSchema"
-        [editPage]="editPage"
-        [initFormValue]="initFormValue"
-        [driverSelectOptions]="driverSelectOptions"
-       ></formily2-react-wrapper>
-  `,
+  templateUrl: './create.component.html',
   styles: [
   ]
 })
-export class IntelligentPluginCreateComponent implements OnInit {
+export class EoIntelligentPluginCreateComponent implements OnInit {
   @ViewChild('formily', { static: true }) formily!: CustomReactComponentWrapperComponent
   @Input() renderSchema: { [k: string]: any } = {}
   @Input() editPage: boolean = false
@@ -32,7 +24,7 @@ export class IntelligentPluginCreateComponent implements OnInit {
 
   constructor (
     private message: EoNgFeedbackMessageService,
-    private service:IntelligentPluginService,
+    private service:EoIntelligentPluginService,
     private modalService:EoNgFeedbackModalService,
     private api:ApiService) {
 
