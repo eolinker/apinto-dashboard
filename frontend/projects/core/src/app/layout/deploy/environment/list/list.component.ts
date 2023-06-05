@@ -1,6 +1,3 @@
-/* eslint-disable no-useless-constructor */
-/* eslint-disable no-undef */
-/* eslint-disable camelcase */
 /* eslint-disable dot-notation */
 /*
  * @Author: MengjieYang yangmengjie@eolink.com
@@ -32,11 +29,6 @@ import { DeployGlobalEnvTableBody, DeployGlobalEnvTableHeadName } from '../types
     `
       label {
         line-height: 32px !important;
-      }
-
-      input.ant-input:not(.w206):not(.w131):not(.w240),
-      eo-ng-select.ant-select {
-        width: 216px !important;
       }
     `
   ]

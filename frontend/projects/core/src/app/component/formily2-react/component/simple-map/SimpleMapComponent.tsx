@@ -85,7 +85,7 @@ export const SimpleMapComponent = React.forwardRef(
                 placeholder={placeholderValue}
               />
               <a
-                className="array_item_addition ml-[10px] ant-btn-text anticon"
+                className="arrayItemAddition ml-[10px] ant-btn-text anticon"
                 onClick={() => addLine(index)}
               >
                 <span>
@@ -96,7 +96,7 @@ export const SimpleMapComponent = React.forwardRef(
               </a>
               {index !== 0 && (
                 <a
-                  className="array_item_addition ant-btn-text anticon"
+                  className="arrayItemAddition ant-btn-text anticon"
                   onClick={() => removeLine(index)}
                 >
                   <span>

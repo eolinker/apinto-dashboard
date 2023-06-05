@@ -14,7 +14,6 @@ import { ClusterPluginChangeHistoryItem } from '../../../types/types'
 })
 export class DeployClusterPluginHistoryChangeComponent implements OnInit {
   @Input() publishTypeTpl: TemplateRef<any> | undefined
-  // eslint-disable-next-line camelcase
   operateRecordsData:{historys:ClusterPluginChangeHistoryItem[], total:number}=
       {
         historys: [],
@@ -25,7 +24,6 @@ export class DeployClusterPluginHistoryChangeComponent implements OnInit {
   operateRecordTableBody:TBODY_TYPE[]=[...DeployClusterPluginChangeHistoryTbody]
 
   // 更改历史分页
-  // eslint-disable-next-line camelcase
   operateRecordsPage:{pageNum:number, pageSize:number, total:number}={
     pageNum: 1,
     pageSize: 15,

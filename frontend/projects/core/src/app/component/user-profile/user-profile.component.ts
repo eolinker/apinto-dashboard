@@ -8,14 +8,13 @@
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
 import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core'
-import { AbstractControl, FormGroup, UntypedFormBuilder, ValidatorFn, Validators } from '@angular/forms'
+import { FormGroup, UntypedFormBuilder, Validators } from '@angular/forms'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
-import { NzSafeAny } from 'ng-zorro-antd/core/types'
 import { defaultAutoTips } from '../../constant/conf'
 import { ApiService } from '../../service/api.service'
-import { EoNgNavigationService } from '../../service/app-config.service'
-import { UserData } from '../../constant/type'
 import { setFormValue } from '../../constant/form'
+import { EoNgMyValidators } from '../../constant/eo-ng-validator'
+import { EoNgNavigationService } from '../../service/eo-ng-navigation.service'
 
 @Component({
   selector: 'eo-ng-apinto-user-profile',
@@ -49,25 +48,9 @@ export class UserProfileComponent implements OnInit {
   }
 
   ngOnInit (): void {
-    switch (this.type) {
-      // 用户设置(修改当前用户信息)
-      case 'editCurrentUser':
-        this.getCurrentUserProfile()
-        this.validateForm.controls['userName'].disable()
-        this.validateForm.controls['role'].disable()
-        break
-      case 'editUser':
-        this.getOtherUserProfile(this.userId)
-        this.validateForm.controls['userName'].disable()
-        if (this.userId === this.appService.getUserId()) {
-          this.validateForm.controls['role'].disable()
-        }
-        this.getRolesList(false)
-        break
-      case 'addUser':
-        this.getRolesList(false)
-        break
-    }
+    this.getCurrentUserProfile()
+    this.validateForm.controls['userName'].disable()
+    this.validateForm.controls['role'].disable()
   }
 
   getCurrentUserProfile () {
@@ -82,101 +65,22 @@ export class UserProfileComponent implements OnInit {
     })
   }
 
-  getOtherUserProfile (id:string) {
-    this.apiService.get('user/profile', { id: id || '' }).subscribe((resp:{code:number, data:{profile:UserData}, msg:string}) => {
-      if (resp.code === 0) {
-        this.validateForm.controls['userName'].setValue(resp.data.profile.user_name)
-        this.validateForm.controls['nickName'].setValue(resp.data.profile.nick_name)
-        this.validateForm.controls['noticeUserId'].setValue(resp.data.profile.notice_user_id)
-        this.validateForm.controls['email'].setValue(resp.data.profile.email)
-        this.validateForm.controls['role'].setValue(resp.data.profile.role_ids[0])
-        this.validateForm.controls['desc'].setValue(resp.data.profile.desc)
-      } else {
-        this.message.error(resp.msg || '获取用户信息失败!')
-      }
-    })
-  }
-
-  // 获取角色id与title对应值, 传入list时,需要为该list的角色id与角色名匹配
-  // 传入参数为true时,展示超管角色
-  getRolesList (showM:boolean) {
-    this.apiService.get('role/options').subscribe((resp:any) => {
-      if (resp.code === 0) {
-        this.rolesList = showM
-          ? resp.data.roles
-          : resp.data.roles.filter((item:any) => {
-            return item.title !== '超级管理员'
-          })
-        for (const index in this.rolesList) {
-          this.rolesList[index].label = this.rolesList[index].title
-          this.rolesList[index].value = this.rolesList[index].id
-        }
-        this.rolesList.push({ label: '未分配', value: '' })
-      } else {
-        this.message.error(resp.msg || '获取角色列表失败!')
-      }
-    })
-  }
-
-  backToList (value:any) {
-    this.closeModal(value)
-    this.eoCloseDrawer.emit(value)
-  }
-
   // 当表单通过验证后,根据父组件data传来的type提交表单
   saveUserProfile () {
     if (this.validateForm.valid) {
-      switch (this.type) {
-        case 'editCurrentUser':
-          this.apiService.put('my/profile', {
-            nick_name: this.validateForm.value.nickName,
-            notice_user_id: this.validateForm.value.noticeUserId,
-            email: this.validateForm.value.email,
-            desc: this.validateForm.value.desc || ''
-          }).subscribe((resp:any) => {
-            if (resp.code === 0) {
-              this.message.success(resp.msg || '修改成功!', { nzDuration: 1000 })
-              this.closeModal()
-            } else {
-              this.message.error(resp.msg || '修改失败!')
-            }
-          })
-          break
-        case 'addUser':
-          this.apiService.post('user/profile', {
-            user_name: this.validateForm.value.userName,
-            nick_name: this.validateForm.value.nickName,
-            notice_user_id: this.validateForm.value.noticeUserId,
-            email: this.validateForm.value.email,
-            desc: this.validateForm.value.desc || '',
-            role_ids: [this.validateForm.value.role]
-          }).subscribe((resp:any) => {
-            if (resp.code === 0) {
-              this.message.success(resp.msg || '新增用户成功!', { nzDuration: 1000 })
-              this.closeModal(true)
-            } else {
-              this.message.error(resp.msg || '新增用户失败!')
-            }
-          })
-          break
-        case 'editUser':
-          this.apiService.put('user/profile', {
-            user_name: this.validateForm.controls['userName'].value,
-            nick_name: this.validateForm.value.nickName,
-            notice_user_id: this.validateForm.value.noticeUserId,
-            email: this.validateForm.value.email,
-            desc: this.validateForm.value.desc || '',
-            role_ids: [this.validateForm.value.role]
-          }, { id: this.userId }).subscribe((resp:any) => {
-            if (resp.code === 0) {
-              this.message.success(resp.msg || '编辑用户信息成功!', { nzDuration: 1000 })
-              this.closeModal(true)
-            } else {
-              this.message.error(resp.msg || '编辑用户信息失败!')
-            }
-          })
-          break
-      }
+      this.apiService.put('my/profile', {
+        nick_name: this.validateForm.value.nickName,
+        notice_user_id: this.validateForm.value.noticeUserId,
+        email: this.validateForm.value.email,
+        desc: this.validateForm.value.desc || ''
+      }).subscribe((resp:any) => {
+        if (resp.code === 0) {
+          this.message.success(resp.msg || '修改成功!', { nzDuration: 1000 })
+          this.closeModal()
+        } else {
+          this.message.error(resp.msg || '修改失败!')
+        }
+      })
     } else {
       Object.values(this.validateForm.controls).forEach(control => {
         if (control.invalid) {
@@ -190,38 +94,5 @@ export class UserProfileComponent implements OnInit {
 
   closeModal:(value?:any)=>void = () => {
 
-  }
-}
-
-// current locale is key of the MyErrorsOptions
-export type EoNgMyErrorsOptions = { 'zh-cn': string; en: string } & Record<string, NzSafeAny>;
-export type EoNgMyValidationErrors = Record<string, EoNgMyErrorsOptions>;
-
-export class EoNgMyValidators extends Validators {
-  static override minLength (minLength: number): ValidatorFn {
-    return (control: AbstractControl): EoNgMyValidationErrors | null => {
-      if (Validators.minLength(minLength)(control) === null) {
-        return null
-      }
-      return { minlength: { 'zh-cn': `最小长度为 ${minLength}`, en: `MinLength is ${minLength}` } }
-    }
-  }
-
-  static override maxLength (maxLength: number): ValidatorFn {
-    return (control: AbstractControl): EoNgMyValidationErrors | null => {
-      if (Validators.maxLength(maxLength)(control) === null) {
-        return null
-      }
-      return { maxlength: { 'zh-cn': `最大长度为 ${maxLength}`, en: `MaxLength is ${maxLength}` } }
-    }
-  }
-
-  static roleAccess (control:AbstractControl): EoNgMyValidationErrors | null {
-    const value = control.value
-    if (value.size > 0) {
-      return null
-    } else {
-      return { roleAccess: { 'zh-cn': '角色权限不能为空', en: 'Not Empty' } }
-    }
   }
 }

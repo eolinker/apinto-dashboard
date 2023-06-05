@@ -1,4 +1,3 @@
-/* eslint-disable no-useless-constructor */
 /* eslint-disable dot-notation */
 /*
  * @Author: MengjieYang yangmengjie@eolink.com
