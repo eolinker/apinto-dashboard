@@ -113,6 +113,12 @@ func initRouter(name string) apinto_module.RoutersInfo {
 		},
 		{
 			Method:      http.MethodGet,
+			Path:        "/api/router/check",
+			Handler:     "group.checkApiExist",
+			HandlerFunc: []apinto_module.HandlerFunc{c.checkApiExist},
+		},
+		{
+			Method:      http.MethodGet,
 			Path:        "/api/group/:group_type",
 			Handler:     "group.groups",
 			HandlerFunc: []apinto_module.HandlerFunc{c.groups},
@@ -140,6 +146,12 @@ func initRouter(name string) apinto_module.RoutersInfo {
 			Path:        "/api/groups/:group_type/sort",
 			Handler:     "group.groupSort",
 			HandlerFunc: []apinto_module.HandlerFunc{g.GroupSort},
+		},
+		{
+			Method:      http.MethodPut,
+			Path:        "/api/group/:group_type/check",
+			Handler:     "group.groupCheckExist",
+			HandlerFunc: []apinto_module.HandlerFunc{g.CheckGroupExist},
 		},
 	}
 }

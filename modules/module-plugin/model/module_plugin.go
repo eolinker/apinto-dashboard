@@ -33,6 +33,7 @@ type PluginEnableInfo struct {
 
 type PluginEnableRender struct {
 	Internet     bool
+	Server       string //define里的server
 	NameConflict bool
 	//Invisible  bool
 	Headers    []ExtendParamsRender
@@ -49,6 +50,7 @@ type ExtendParamsRender struct {
 	Name        string `json:"name" yaml:"name"`
 	Value       string `json:"value" yaml:"value"`
 	Title       string `json:"title" yaml:"title"`
+	Type        string `json:"type" yaml:"type"`
 	Placeholder string `json:"placeholder" yaml:"placeholder"`
 	Desc        string `json:"desc" yaml:"desc"`
 }

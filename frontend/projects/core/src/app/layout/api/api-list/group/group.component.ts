@@ -1,6 +1,4 @@
 /* eslint-disable dot-notation */
-/* eslint-disable no-useless-constructor */
-/* eslint-disable no-undef */
 import { Component, ElementRef, OnInit, TemplateRef, ViewChild } from '@angular/core'
 import { NavigationEnd, Router } from '@angular/router'
 import { NzTreeNodeOptions, NzFormatEmitEvent, NzTreeNode } from 'ng-zorro-antd/tree'
@@ -239,8 +237,7 @@ export class ApiManagementComponent implements OnInit {
       this.groupUuid !== data.keys![0] &&
       this.eoNgTreeDefault?.getTreeNodeByKey(this.groupUuid)?.isSelected
     ) {
-      // @ts-ignore
-      this.eoNgTreeDefault.getTreeNodeByKey(this.groupUuid).isSelected = false
+      this.eoNgTreeDefault.getTreeNodeByKey(this.groupUuid)!.isSelected = false
     }
 
     this.showAll = false

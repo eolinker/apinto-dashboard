@@ -3,6 +3,7 @@ package dynamic_controller
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/eolinker/apinto-dashboard/common"
 	"net/http"
 	"strconv"
 
@@ -319,7 +320,12 @@ func (c *dynamicController) create(ctx *gin.Context) {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
 		return
 	}
-	ctx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
+	data := common.Map{}
+	info := common.Map{}
+	info["id"] = worker.Id
+	info["source_name"] = fmt.Sprintf("%s@%s", worker.Id, c.moduleName)
+	data["info"] = info
+	ctx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
 
 func (c *dynamicController) save(ctx *gin.Context) {

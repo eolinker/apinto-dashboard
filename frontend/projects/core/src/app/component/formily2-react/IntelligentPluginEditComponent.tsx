@@ -213,7 +213,6 @@ export const IntelligentPluginEditComponent = React.forwardRef(
       onSubmit && onSubmit(value)
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const getSkillData = async (skill: string) => {
       return new Promise((resolve) => {
         axios.get(`api/common/provider/${skill}`).then((resp) => {
@@ -231,7 +230,6 @@ export const IntelligentPluginEditComponent = React.forwardRef(
       })
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const useAsyncDataSource =
       (service: any, skill: string) => (field: any) => {
         field.loading = true
