@@ -117,7 +117,7 @@ export class ApplicationManagementListComponent implements OnInit {
 
   publish (value:any) {
     this.modalRef = this.modalService.create({
-      nzTitle: `${value.data.name}上线管理`,
+      nzTitle: `${value.data.name}发布管理`,
       nzWidth: MODAL_NORMAL_SIZE,
       nzContent: ApplicationPublishComponent,
       nzComponentParams: {
