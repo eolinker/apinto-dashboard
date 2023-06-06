@@ -53,6 +53,7 @@ type ExtendParamsRender struct {
 	Name        string `json:"name"`
 	Value       string `json:"value"`
 	Title       string `json:"title"`
+	Type        string `json:"type,omitempty"`
 	Placeholder string `json:"placeholder"`
 	Desc        string `json:"desc"`
 }

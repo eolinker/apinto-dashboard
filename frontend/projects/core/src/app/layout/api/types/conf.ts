@@ -325,7 +325,9 @@ export const apiBatchOnlineVerifyTableBody :EO_TBODY_TYPE[] = [
     right: true,
     showFn: (item:any) => {
       return !item.solution.name
-    }
+    },
+    btns: [
+    ]
   }
 ]
 
@@ -539,4 +541,3 @@ export const PluginTemplatePublishTbody:EO_TBODY_TYPE[] = [
     ]
   }
 ]
-

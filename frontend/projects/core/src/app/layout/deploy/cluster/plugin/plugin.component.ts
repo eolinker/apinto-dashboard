@@ -40,7 +40,6 @@ export class DeployClusterPluginComponent implements OnInit {
 
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
 
-  // eslint-disable-next-line no-useless-constructor
   constructor (
           private baseInfo:BaseInfoService,
           private message: EoNgFeedbackMessageService,
