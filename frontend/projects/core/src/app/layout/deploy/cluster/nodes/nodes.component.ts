@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 /* eslint-disable dot-notation */
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
 import { FormGroup } from '@angular/forms'

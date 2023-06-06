@@ -119,9 +119,9 @@ export class DeployClusterEnvironmentConfigFormComponent implements OnInit {
         .replace(/(\n|\r|\r\n|↵)/g, '#换行符#')
         .replace(/\t/g, '#制表符#')
         .replace(/\s/g, '#空格#')
-        .replace(/#空格#/g, '<span class="detected-symbol">#空格#</span>')
-        .replace(/#换行符#/g, '<span class="detected-symbol">#换行符#</span>')
-        .replace(/#制表符#/g, '<span class="detected-symbol">#制表符#</span>')
+        .replace(/#空格#/g, '<span class="text-theme">#空格#</span>')
+        .replace(/#换行符#/g, '<span class="text-theme">#换行符#</span>')
+        .replace(/#制表符#/g, '<span class="text-theme">#制表符#</span>')
       this.showValueAfterTest = true
     }
   }

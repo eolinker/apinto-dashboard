@@ -29,7 +29,6 @@ import { NzModalModule } from 'ng-zorro-antd/modal'
 import { NzTableModule } from 'ng-zorro-antd/table'
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
 import { ComponentModule } from '../../component/component.module'
-import { EoNgTransferModule } from '../../component/transfer/transfer.module'
 import { ApplicationAuthenticationComponent } from './authentication/authentication.component'
 import { ApplicationContentComponent } from './content/content.component'
 import { ApplicationCreateComponent } from './create/create.component'
@@ -41,7 +40,7 @@ import { EoNgApintoTableModule } from 'projects/eo-ng-apinto-table/src/public-ap
 import { ApplicationAuthenticationFormComponent } from './authentication/form/form.component'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { ApplicationExtraComponent } from './extra/extra.component'
-import { ApplicationAuthenticationViewComponent } from './authentication/view/view.component';
+import { ApplicationAuthenticationViewComponent } from './authentication/view/view.component'
 import { ApplicationExtraFormComponent } from './extra/form/form.component'
 
 @NgModule({
@@ -80,7 +79,6 @@ import { ApplicationExtraFormComponent } from './extra/form/form.component'
     EoNgSwitchModule,
     NzAvatarModule,
     EoNgButtonModule,
-    EoNgTransferModule,
     NzFormModule,
     ReactiveFormsModule,
     NzLayoutModule,
