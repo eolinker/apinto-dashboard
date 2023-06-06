@@ -31,3 +31,13 @@ type CommGroupSortInput struct {
 	Root  string   `json:"root"`  //操作目标id，根目录为空
 	Items []string `json:"items"` //操作之后，root下级的目录uuid数组
 }
+
+type CommonGroupCheckExist struct {
+	Name       string `json:"name"`
+	ParentUuid string `json:"parent_uuid"`
+}
+
+type CommonGroupCheckExistOutput struct {
+	IsExist bool   `json:"is_exist"`
+	UUID    string `json:"uuid"`
+}

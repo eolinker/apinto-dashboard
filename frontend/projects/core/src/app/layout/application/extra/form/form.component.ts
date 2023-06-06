@@ -53,38 +53,4 @@ export class ApplicationExtraFormComponent {
   disabledEdit (value:any) {
     this.nzDisabled = value
   }
-
-  // saveParam () {
-  //   console.log(this)
-  //   if (this.validateParamForm.valid) {
-  //     if (this.data) {
-  //       if (this.matchHeaderSet.has(this.validateParamForm.controls['key'].value)) {
-  //         for (const index in this.extraList) {
-  //           if (this.extraList[index].key === this.validateParamForm.controls['key'].value && this.extraList[index].position === this.validateParamForm.controls['position'].value) {
-  //             this.extraList.splice(Number(index), 1)
-  //             break
-  //           }
-  //         }
-  //       }
-  //     } else {
-  //       for (const index in this.extraList) {
-  //         console.log(this.extraList, this)
-  //         if (this.extraList[index].key === this.data!.key && this.extraList[index].position === this.data!.position && this.extraList[index].value === this.data!.value && this.extraList[index].conflict === this.data!.conflict) {
-  //           this.extraList.splice(Number(index), 1)
-  //           break
-  //         }
-  //       }
-  //     }
-  //     if (this.validateParamForm.controls['position'].value === 'HEADER') { this.matchHeaderSet.add(this.validateParamForm.controls['key'].value) }
-  //     this.extraList = [{ position: this.validateParamForm.controls['position'].value, key: this.validateParamForm.controls['key'].value, value: this.validateParamForm.controls['value'].value, conflict: this.validateParamForm.controls['conflict'].value }, ...this.extraList]
-  //     this.closeModal && this.closeModal()
-  //   } else {
-  //     Object.values(this.validateParamForm.controls).forEach(control => {
-  //       if (control.invalid) {
-  //         control.markAsDirty()
-  //         control.updateValueAndValidity({ onlySelf: true })
-  //       }
-  //     })
-  //   }
-  // }
 }

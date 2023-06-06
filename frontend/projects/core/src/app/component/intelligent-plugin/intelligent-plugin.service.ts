@@ -1,15 +1,15 @@
 import { Injectable } from '@angular/core'
-import { IntelligentPluginListComponent } from './list/list.component'
+import { EoIntelligentPluginListComponent } from './list/list.component'
 import { EO_TBODY_TYPE } from 'projects/eo-ng-apinto-table/src/public-api'
 import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
-import { IntelligentPluginPublishComponent } from './publish/publish.component'
+import { EoIntelligentPluginPublishComponent } from './publish/publish.component'
 import { ApplicationManagementListComponent } from '../../layout/application/list/list.component'
 
 @Injectable({
   providedIn: 'root'
 })
-export class IntelligentPluginService {
-  createTbody (component:IntelligentPluginListComponent, key?:string):TBODY_TYPE[] {
+export class EoIntelligentPluginService {
+  createTbody (component:EoIntelligentPluginListComponent, key?:string):TBODY_TYPE[] {
     const btnConfig:EO_TBODY_TYPE[] = [{
       type: 'btn',
       right: true,
@@ -75,7 +75,7 @@ export class IntelligentPluginService {
     return key === 'btn' ? btnConfig : tbody
   }
 
-  createPluginThead (component:IntelligentPluginPublishComponent):THEAD_TYPE[] {
+  createPluginThead (component:EoIntelligentPluginPublishComponent):THEAD_TYPE[] {
     const thead:THEAD_TYPE[] =
     [{
       type: 'checkbox',
@@ -91,7 +91,7 @@ export class IntelligentPluginService {
     return thead
   }
 
-  createPluginTbody (component:IntelligentPluginPublishComponent):TBODY_TYPE[] {
+  createPluginTbody (component:EoIntelligentPluginPublishComponent):TBODY_TYPE[] {
     const tbody:EO_TBODY_TYPE[] = [
       {
         type: 'checkbox',
