@@ -1,5 +1,4 @@
 /* eslint-disable dot-notation */
-/* eslint-disable camelcase */
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
 import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feedback'
 import { SelectOption } from 'eo-ng-select'
@@ -34,6 +33,13 @@ import { AuditLogDetail, AuditLogsData } from '../types/types'
       width:254px !important;
     border-radius: var(--border-radius);
       min-height:32px;
+    }
+
+    :host ::ng-deep{
+      .ant-picker-suffix {
+        display: none;
+      }
+
     }
 
     label{

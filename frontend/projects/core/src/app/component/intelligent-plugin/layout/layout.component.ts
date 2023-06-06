@@ -5,5 +5,5 @@ import { Component } from '@angular/core'
   styles: [
   ]
 })
-export class IntelligentPluginLayoutComponent {
+export class EoIntelligentPluginLayoutComponent {
 }

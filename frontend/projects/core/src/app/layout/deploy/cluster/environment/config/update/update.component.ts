@@ -83,11 +83,9 @@ export class DeployClusterEnvironmentConfigUpdateComponent implements OnInit {
   configsTable2HeadName: THEAD_TYPE[] = [...this.service.createClusterEnvUpdate2Thead(this)]
   configsTable2Body: TBODY_TYPE[]=[...this.service.createClusterEnvUpdate2Tbody(this)]
 
-  // eslint-disable-next-line camelcase
   updateConfigsList: Array<{ key: string, value: string, variableId: number, publish:string, status:string, desc:string, operator:string, updateTime:string, createTime:string, id: number, checked:boolean}> = []
   clusterName:string = ''
 
-  // eslint-disable-next-line camelcase
   updateConfigForm:{clusters:Array<{title:string, name:string, env:string, id:number}>, variables:Array<{key:string, value:string, variableId:number, id:number}>}=
       {
         clusters: [],

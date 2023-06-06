@@ -6,7 +6,7 @@ import { BaseInfoService } from 'projects/core/src/app/service/base-info.service
 @Component({
   selector: 'eo-ng-api-plugin-template-content',
   template: `
-  <div class="content-tabs-fixed">
+  <div class="fixed top-[51px] w-[100%]">
     <eo-ng-tabs
       [nzLinkRouter]="true"
       [(nzSelectedIndex)]="selectedIndex"
@@ -20,7 +20,7 @@ import { BaseInfoService } from 'projects/core/src/app/service/base-info.service
       <span>模板信息</span>
     </ng-template>
   </div>
-  <div class="inside-content-fixed-top-51">
+  <div class="fixed top-[94px] w-[calc(100%_-_195px)] h-[calc(100vh_-_94px)] overflow-auto">
     <router-outlet></router-outlet>
   </div>
   `,

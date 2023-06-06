@@ -19,16 +19,35 @@ import { EmptyHttpResponse } from 'projects/core/src/app/constant/type'
   templateUrl: './create.component.html',
   styles: [
     `
-    nz-slider{
-      width:318px;
-    }
+    :host ::ng-deep{
+        nz-slider{
+          width:318px;
+            .ant-slider {
+              margin: 10px 0px !important;
+            }
 
-    nz-sider{
-      width:318px;
-      padding:0px;
-      margin:0px;
-      display:inline-block;
-      vertical-align:middle;
+            .ant-slider-handle {
+              display: none;
+            }
+
+            .ant-slider:hover .ant-slider-rail,
+            .ant-slider-rail {
+              height: 10px !important;
+              border-radius: 16px !important;
+              top: 0px;
+              background-color: #d9d9d9;
+            }
+
+            .ant-slider:hover .ant-slider-track,
+            .ant-slider-track {
+              height: 6px !important;
+              border-radius: 16px !important;
+              top: 2px;
+              background-color: var(--background-color);
+              max-width: 314px;
+              left: 2px !important;
+            }
+        }
     }
 
     nz-input-number{

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable multiline-ternary */
 import * as React from 'react'
 import {
@@ -33,9 +34,7 @@ const EditableCell: React.FC<EditableCellProps> = (props: any) => {
     dataIndex,
     title,
     inputType,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     record,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     index,
     children,
     ...restProps
