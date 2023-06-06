@@ -59,7 +59,7 @@ func InitPlugins() error {
 	for _, p := range plugins {
 		//TODO 校验内置插件
 
-		pluginCfg := &model.InnerPluginYmlCfg{
+		pluginCfg := &model.InnerPluginCfg{
 			ID:         p.Id,
 			Name:       p.Name,
 			Version:    p.Version,
@@ -67,11 +67,9 @@ func InitPlugins() error {
 			Resume:     p.Resume,
 			ICon:       p.Icon,
 			Driver:     p.Driver,
-			Front:      p.Front,
 			Navigation: p.Navigation,
 			GroupID:    p.GroupID,
 			Type:       p.Type,
-			Auto:       p.Auto,
 			Define:     p.Define,
 		}
 
