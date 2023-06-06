@@ -5,7 +5,7 @@ import { API_URL, ApiService } from './api.service'
 import { NavigationEnd, Router } from '@angular/router'
 import { EoNgNavigationService } from './eo-ng-navigation.service'
 import { BaseInfoService } from './base-info.service'
-import { stringify } from 'querystring'
+import { RouterService } from '../layout/api/router.service'
 
 @Injectable({
   providedIn: 'root'
@@ -14,11 +14,15 @@ export class IframeHttpService {
   moduleName:string = ''
   subscription: Subscription = new Subscription()
 
+  modalMaskEl: HTMLDivElement | undefined;
+  private changeIframe: Subject<string> = new Subject<string>()
+
   constructor (private http:HttpClient,
     private api:ApiService,
     private router:Router,
     private navigation:EoNgNavigationService,
     private baseInfo:BaseInfoService,
+    private routerService:RouterService,
     @Inject(API_URL) public urlPrefix:string) {
     this.moduleName = this.baseInfo.allParamsInfo.moduleName
     this.subscription = this.router.events.subscribe((event) => {
@@ -73,7 +77,7 @@ export class IframeHttpService {
         }
         newRouterArr = newRouterArr.join('').split('/')
         newRouterArr[newRouterArr.length - 1] = `${newRouterArr[newRouterArr.length - 1]}#${url}`
-        window.location.href = newRouterArr.join('/')
+        window.history.replaceState(null, '', newRouterArr.join('/'))
         resolve(true)
       })
     },
@@ -89,6 +93,7 @@ export class IframeHttpService {
         resolve(true)
       })
     },
+    // user-center
     renewUserInfo: async () => {
       return new Promise((resolve) => {
         this.navigation.reqUpdateRightList()
@@ -110,41 +115,6 @@ export class IframeHttpService {
         })
       })
     },
-    accessList: async () => {
-      return new Promise((resolve) => {
-        return this.api.get('access').subscribe((resp:any) => {
-          resolve(resp)
-        })
-      })
-    },
-    roleProfile: async (roleId:string) => {
-      return new Promise((resolve) => {
-        return this.api.get('role', { id: roleId }).subscribe((resp:any) => {
-          resolve(resp)
-        })
-      })
-    },
-    addRole: async (data:any) => {
-      return new Promise((resolve) => {
-        return this.api.post('role', data).subscribe((resp:any) => {
-          resolve(resp)
-        })
-      })
-    },
-    editRole: async (roleId:string, data:any) => {
-      return new Promise((resolve) => {
-        return this.api.put('role', data, { id: roleId }).subscribe((resp:any) => {
-          resolve(resp)
-        })
-      })
-    },
-    deleteRole: async (roleId:string) => {
-      return new Promise((resolve) => {
-        return this.api.delete('role', { id: roleId }).subscribe((resp:any) => {
-          resolve(resp)
-        })
-      })
-    },
     getMyProfile: async () => {
       return new Promise((resolve) => {
         return this.api.get('my/profile').subscribe((resp:any) => {
@@ -159,76 +129,6 @@ export class IframeHttpService {
         })
       })
     },
-    otherUserProfile: async (userId:string) => {
-      return new Promise((resolve) => {
-        return this.api.get('user/profile', { id: userId }).subscribe((resp:any) => {
-          resolve(resp)
-        })
-      })
-    },
-    addUser: async (data:any) => {
-      return new Promise((resolve) => {
-        return this.api.post('user/profile', data).subscribe((resp:any) => {
-          resolve(resp)
-        })
-      })
-    },
-    editUser: async (userId:string, data:any) => {
-      return new Promise((resolve) => {
-        return this.api.put('user/profile', data, { id: userId }).subscribe((resp:any) => {
-          resolve(resp)
-        })
-      })
-    },
-    changeUserPartInfo: async (userId:string, data:any) => {
-      return new Promise((resolve) => {
-        return this.api.patch('user/profile', data, { id: userId }).subscribe((resp:any) => {
-          resolve(resp)
-        })
-      })
-    },
-    deleteUsers: async (idsList:string[]) => {
-      return new Promise((resolve) => {
-        return this.api.post('user/delete', { ids: idsList }).subscribe((resp:any) => {
-          resolve(resp)
-        })
-      })
-    },
-    rolesList: async () => {
-      return new Promise((resolve) => {
-        return this.api.get('role/options').subscribe((resp:any) => {
-          resolve(resp)
-        })
-      })
-    },
-    usersList: async (data:any) => {
-      return new Promise((resolve) => {
-        return this.api.get('user/list', data).subscribe((resp:any) => {
-          resolve(resp)
-        })
-      })
-    },
-    updateRole: async (data:any) => {
-      return new Promise((resolve) => {
-        return this.api.post('role/batch-update', data).subscribe((resp:any) => {
-          resolve(resp)
-        })
-      })
-    },
-    rolesGroupList: async () => {
-      return new Promise((resolve) => {
-        return this.api.get('roles').subscribe((resp:any) => {
-          resolve(resp)
-        })
-      })
-    },
-    batchDeleteRoles: async (data:any) => {
-      return new Promise((resolve) => {
-        return this.api.post('role/batch-delete', data).subscribe((resp:any) => {
-          resolve(resp)
-        })
-      })
-    },
     randomPsw: async () => {
       return new Promise((resolve) => {
         return this.api.get('random/password/id').subscribe((resp:any) => {
@@ -236,161 +136,7 @@ export class IframeHttpService {
         })
       })
     },
-    resetPsw: async (data:any) => {
-      return new Promise((resolve) => {
-        return this.api.post('user/password-reset', data).subscribe((resp:any) => {
-          resolve(resp)
-        })
-      })
-    },
-    monitorPartition: async (uuid:string) => {
-      return new Promise((resolve) => {
-        return this.api.get('monitor/partition', { uuid: uuid }).subscribe((resp:any) => {
-          resolve(resp)
-        })
-      })
-    },
-    addMonitorPartition: (data:any) => {
-      return new Promise((resolve) => {
-        return this.api.post('monitor/partition', data).subscribe((resp:any) => {
-          resolve(resp)
-        })
-      })
-    },
-    editMonitorPartition: (data:any) => {
-      return new Promise((resolve) => {
-        return this.api.put('monitor/partition', data).subscribe((resp:any) => {
-          resolve(resp)
-        })
-      })
-    },
-    deleteMonitorPartition: async (uuid:string) => {
-      return new Promise((resolve) => {
-        this.api.delete('monitor/partition', { uuid: uuid }).subscribe((resp:any) => {
-          resolve(resp)
-        })
-      })
-    },
-    monitorPartitionList: async () => {
-      return new Promise((resolve) => {
-        this.api.get('monitor/partitions').subscribe((resp:any) => {
-          resolve(resp)
-        })
-      })
-    },
-    monitorOverviewSummary: async (data:any) => {
-      return new Promise((resolve) => {
-        this.api.post('monitor/overview/summary', data).subscribe((resp:any) => {
-          resolve(resp)
-        })
-      })
-    },
-    monitorOverviewInvoke: async (data:any) => {
-      return new Promise((resolve) => {
-        this.api.post('monitor/overview/invoke', data).subscribe((resp:any) => {
-          resolve(resp)
-        })
-      })
-    },
-    monitorOverviewMessage: async (data:any) => {
-      return new Promise((resolve) => {
-        this.api.post('monitor/overview/message', data).subscribe((resp:any) => {
-          resolve(resp)
-        })
-      })
-    },
-    monitorOverviewTop: async (data:any) => {
-      return new Promise((resolve) => {
-        this.api.post('monitor/overview/top', data).subscribe((resp:any) => {
-          resolve(resp)
-        })
-      })
-    },
-    monitorApiTableList: async (data:any) => {
-      return new Promise((resolve) => {
-        this.api.post('monitor/api', data).subscribe((resp:any) => {
-          resolve(resp)
-        })
-      })
-    },
-    monitorAppTableList: async (data:any) => {
-      return new Promise((resolve) => {
-        this.api.post('monitor/app', data).subscribe((resp:any) => {
-          resolve(resp)
-        })
-      })
-    },
-    monitorInvokeDetail: async (type:string, data:any) => {
-      return new Promise((resolve) => {
-        this.api.post(`monitor/${type}/details`, data).subscribe((resp:any) => {
-          resolve(resp)
-        })
-      })
-    },
-    monitorDetail: async (currentType:string, detailType:string, data:any) => {
-      return new Promise((resolve) => {
-        this.api.post(`monitor/${currentType}/details/${detailType}`, data).subscribe((resp:any) => {
-          resolve(resp)
-        })
-      })
-    },
-    monitorDetailTrend: async (currentType:string, detailType:string, data:any) => {
-      return new Promise((resolve) => {
-        this.api.post(`monitor/${currentType}/details/${detailType}/trend`, data).subscribe((resp:any) => {
-          resolve(resp)
-        })
-      })
-    },
-    warnHistoryList: async (data:any) => {
-      return new Promise((resolve) => {
-        this.api.get('warn/history', data).subscribe((resp:any) => {
-          resolve(resp)
-        })
-      })
-    },
-    warnStrategyData: (uuid:string) => {
-      return new Promise((resolve) => {
-        return this.api.get('warn/strategy', { uuid: uuid }).subscribe((resp:any) => {
-          resolve(resp)
-        })
-      })
-    },
-    addWarnStrategy: (data:any) => {
-      return new Promise((resolve) => {
-        return this.api.post('warn/strategy', data).subscribe((resp:any) => {
-          resolve(resp)
-        })
-      })
-    },
-    editWarnStrategy: (data:any) => {
-      return new Promise((resolve) => {
-        return this.api.put('warn/strategy', data).subscribe((resp:any) => {
-          resolve(resp)
-        })
-      })
-    },
-    deleteWarnStrategy: (uuid:string) => {
-      return new Promise((resolve) => {
-        return this.api.delete('warn/strategy', { uuid: uuid }).subscribe((resp:any) => {
-          resolve(resp)
-        })
-      })
-    },
-    disabledStrategy: (data:any) => {
-      return new Promise((resolve) => {
-        this.api.patch('warn/strategy', data).subscribe((resp:any) => {
-          resolve(resp)
-        })
-      })
-    },
-    warnStrategyList: (data:any) => {
-      return new Promise((resolve) => {
-        return this.api.get('warn/strategys', data).subscribe((resp:any) => {
-          resolve(resp)
-        })
-      })
-    },
-    // 策略remote选项
+    // monitor
     strategyRemote: (type:string, data?:any) => {
       return new Promise((resolve) => {
         return this.api.get(`strategy/filter-remote/${type}`, data).subscribe((resp:any) => {
@@ -451,9 +197,128 @@ export class IframeHttpService {
           resolve(resp)
         })
       })
+    },
+    // apiSpace
+    // 根据uuid判断api是否已存在
+    checkApi: (uuid:string) => {
+      return new Promise((resolve) => {
+        this.api.get('router/check', { uuid: uuid }).subscribe((resp:any) => {
+          resolve(resp)
+        })
+      })
+    },
+    // 根据分组名称和uuid判断分组是否已存在
+    checkGroupName: (type:string, data:any) => {
+      return new Promise((resolve) => {
+        this.api.put(`group/${type}/check`, data).subscribe((resp:any) => {
+          resolve(resp)
+        })
+      })
+    },
+    // 新建分组
+    addGroup: (type:string, data:any) => {
+      return new Promise((resolve) => {
+        this.api.post(`group/${type}`, data).subscribe((resp:any) => {
+          resolve(resp)
+        })
+      })
+    },
+    // 新建实例（智能插件，比如上游是智能插件，新建上游=新建name为Service的示例
+    addDynamic: (name:string, data:any) => {
+      return new Promise((resolve) => {
+        this.api.post(`dynamic/${name}`, data).subscribe((resp:any) => {
+          resolve(resp)
+        })
+      })
+    },
+    // 添加api
+    addApi: (data:any) => {
+      return new Promise((resolve) => {
+        this.api.post('router', data).subscribe((resp:any) => {
+          resolve(resp)
+        })
+      })
+    },
+    // 获取简易集群列表
+    getSimpleClusters: () => {
+      return new Promise((resolve) => {
+        this.api.get('clusters/simple').subscribe((resp:any) => {
+          resolve(resp)
+        })
+      })
+    },
+    // 将智能插件的实例发布到指定集群里
+    dynamicOnlines: (name:string, uuid:string, cluster:Array<string>) => {
+      return new Promise((resolve) => {
+        this.api.put(`dynamic/${name}/online/${uuid}`, { cluster: cluster }).subscribe((resp:any) => {
+          resolve(resp)
+        })
+      })
+    },
+    // 发起发布管理弹窗，type支持api
+    publishModal: (type:string, uuid:string) => {
+      return this.publishModal(type, uuid)
+    },
+    // 发起批量发布管理弹窗，type支持api
+    batchPublishResModal: (publishType:string, type:'online'|'offline', data:any, showLastStep?:boolean) => {
+      return this.batchPublishResModal(publishType, type, data, showLastStep)
+    },
+    // remote插件存储数据
+    storeKey: (key:string, data:any) => {
+      return new Promise((resolve) => {
+        this.api.put(`remote/${this.moduleName}/store/${key}`, data).subscribe((resp:any) => {
+          resolve(resp)
+        })
+      })
+    },
+    // remote插件获得存储的数据
+    getStore: (key:string) => {
+      return new Promise((resolve) => {
+        this.api.get(`remote/${this.moduleName}/store/${key}`).subscribe((resp:any) => {
+          resolve(resp)
+        })
+      })
+    },
+    showModalMask: (style = {}) => {
+      return new Promise((resolve) => {
+        this.modalMaskEl?.remove()
+        this.modalMaskEl = document.createElement('div')
+        this.modalMaskEl.classList.add('ant-modal-mask', 'cdk-overlay-backdrop-showing')
+        document.getElementById('iframePanel')?.parentElement!.appendChild(this.modalMaskEl)
+        this.modalMaskEl.classList.add('cdk-overlay-backdrop')
+        const iframeWrapper = document.querySelector<HTMLDivElement>('#iframePanel')
+        if (iframeWrapper) {
+          iframeWrapper.style.zIndex = '10000'
+        }
+        // this.modalMaskEl.onclick = () => {
+        //   this.modalMaskEl!.style.display = 'none'
+        //   this.modalMaskEl!.classList.remove('cdk-overlay-backdrop')
+        //  this.modalMaskEl!.remove()
+        // }
+        Object.entries(style).forEach(([key, value]) => {
+          // @ts-ignore
+          this.modalMaskEl.style[key] = value
+        })
+        resolve(true)
+      })
+    },
+    hideModalMask: () => {
+      return new Promise((resolve) => {
+        if (this.modalMaskEl) {
+          this.modalMaskEl!.style.display = 'none'
+          this.modalMaskEl!.classList.remove('cdk-overlay-backdrop')
+         this.modalMaskEl!.remove()
+        }
+        const iframeWrapper = document.querySelector<HTMLDivElement>('#iframePanel')
+        if (iframeWrapper) {
+          iframeWrapper.style.zIndex = 'unset'
+        }
+        resolve(true)
+      })
     }
   }
 
+  // 该方法是为了打开需要传入header的iframe页面(remote插件），local插件则不需要
   openIframe (url:string, option?:{headers?:Array<{name:string, value:string}>}) {
     return new Observable((observer: Subscriber<any>) => {
       let objectUrl: string|null
@@ -479,8 +344,37 @@ export class IframeHttpService {
     })
   }
 
-  private changeIframe: Subject<string> = new Subject<string>()
+  publishModal (type:string, uuid:string) {
+    switch (type) {
+      case 'api':
+        this.routerService.publishApiModal(uuid)
+        break
+      default:
+        console.warn(`eo预警：无法调用发布管理方法，请检查传入的type=${type}是否正确`)
+    }
+  }
 
+  batchPublishResModal (publishType:string, type:'online'|'offline', data:any, showLastStep?:boolean) {
+    switch (publishType) {
+      case 'api':
+        this.routerService.batchPublishApiResModal(type, data, showLastStep
+          ? () => {
+              return new Promise((resolve) => {
+                resolve({ data: { lastStep: true } })
+              })
+            }
+          : undefined, () => {
+          return new Promise((resolve) => {
+            resolve({ data: { finishPublish: true } })
+          })
+        })
+        break
+      default:
+        console.warn(`eo预警：无法调用发布管理方法，请检查传入的type=${type}是否正确`)
+    }
+  }
+
+  // 控制台手动触发iframe路由跳转，暂时用在面包屑中
   reqFlashIframe (url:string) {
     this.changeIframe.next(url)
   }

@@ -32,6 +32,10 @@ export class ApiPublishComponent implements OnInit {
     private api:ApiService,
     private baseInfo:BaseInfoService) {}
 
+  disabledEdit (value:any) {
+    this.nzDisabled = value
+  }
+
   ngOnInit (): void {
     this.getPublishList()
   }

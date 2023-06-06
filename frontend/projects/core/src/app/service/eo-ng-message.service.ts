@@ -1,4 +1,3 @@
-/* eslint-disable no-useless-constructor */
 import { Injectable, Injector, TemplateRef } from '@angular/core'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { NzSingletonService } from 'ng-zorro-antd/core/services'

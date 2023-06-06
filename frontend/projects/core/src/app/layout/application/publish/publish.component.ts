@@ -1,13 +1,12 @@
 /* eslint-disable dot-notation */
 import { Component, OnInit } from '@angular/core'
-import { IntelligentPluginPublishComponent } from '../../../component/intelligent-plugin/publish/publish.component'
 import { DynamicPublish, DynamicPublishCluster } from '../../../component/intelligent-plugin/types/types'
 import { Observable } from 'rxjs'
-import { TBODY_TYPE } from 'eo-ng-table'
 import { EoNgApplicationService } from '../application.service'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
-import { IntelligentPluginService } from '../../../component/intelligent-plugin/intelligent-plugin.service'
 import { ApiService } from '../../../service/api.service'
+import { EoIntelligentPluginPublishComponent } from '../../../component/intelligent-plugin/publish/publish.component'
+import { EoIntelligentPluginService } from '../../../component/intelligent-plugin/intelligent-plugin.service'
 
 @Component({
   selector: 'eo-ng-application-publish',
@@ -15,10 +14,10 @@ import { ApiService } from '../../../service/api.service'
   styles: [
   ]
 })
-export class ApplicationPublishComponent extends IntelligentPluginPublishComponent implements OnInit {
+export class ApplicationPublishComponent extends EoIntelligentPluginPublishComponent implements OnInit {
   constructor (
     message: EoNgFeedbackMessageService,
-    service:IntelligentPluginService,
+    service:EoIntelligentPluginService,
     api:ApiService,
     public appService:EoNgApplicationService) {
     super(message, service, api)
