@@ -125,24 +125,13 @@ type DynamicTitleDefine struct {
 	Title string `json:"title" yaml:"title"`
 }
 
-type InnerDefine struct {
-	ID      string                 `json:"id" yaml:"id"`
-	Name    string                 `json:"name" yaml:"name"`
-	Version string                 `json:"version" yaml:"version"`
-	ICon    string                 `json:"icon" yaml:"icon"`
-	Driver  string                 `json:"driver" yaml:"driver"`
-	Core    bool                   `json:"core" yaml:"core"`
-	Install *InnerPluginYmlInstall `json:"install" yaml:"install"`
-	Main    *InnerPluginYmlMain    `json:"main" yaml:"main"`
-}
-
 // MiddlewareItem 拦截器项结构体
 type MiddlewareItem struct {
 	Name string `json:"name"`
 	Desc string `json:"desc"`
 }
 
-type PluginYmlCfg struct {
+type PluginCfg struct {
 	ID         string      `json:"id" yaml:"id"`
 	Name       string      `json:"name" yaml:"name"`
 	Version    string      `json:"version" yaml:"version"`
@@ -152,41 +141,21 @@ type PluginYmlCfg struct {
 	Resume     string      `json:"resume" yaml:"resume"`
 	ICon       string      `json:"icon" yaml:"icon"`
 	Driver     string      `json:"driver" yaml:"driver"`
-	Front      string      `json:"front" yaml:"front"`
 	Define     interface{} `json:"define" yaml:"define"`
 }
 
-type InnerPluginYmlCfg struct {
+type InnerPluginCfg struct {
 	ID         string      `json:"id" yaml:"id"`
 	Name       string      `json:"name" yaml:"name"`
 	Version    string      `json:"version" yaml:"version"`
 	CName      string      `json:"cname" yaml:"cname"`
+	Navigation string      `json:"navigation" yaml:"navigation"`
+	GroupID    string      `json:"group_id" yaml:"group_id"`
 	Resume     string      `json:"resume" yaml:"resume"`
 	ICon       string      `json:"icon" yaml:"icon"`
 	Driver     string      `json:"driver" yaml:"driver"`
-	Front      string      `json:"front" yaml:"front"`
-	Navigation string      `json:"navigation" yaml:"navigation"`
-	GroupID    string      `json:"group_id" yaml:"group_id"`
 	Type       int         `json:"type" yaml:"type"`
-	Auto       bool        `json:"auto" yaml:"auto"`
 	Define     interface{} `json:"define" yaml:"define"`
-}
-
-type InnerPluginYmlInstall struct {
-	Auto       bool   `json:"auto" yaml:"auto"`
-	Front      string `json:"front" yaml:"front"`
-	Navigation string `json:"navigation" yaml:"navigation"`
-}
-
-type InnerPluginYmlMain struct {
-	Middleware []string `json:"middleware" yaml:"middleware"`
-}
-
-// NavigationEnabledPlugin 用于给导航返回的
-type NavigationEnabledPlugin struct {
-	*entry.ModulePluginEnable
-	UUID  string
-	CName string
 }
 
 // NavigationModuleInfo 导航所需要的模块信息

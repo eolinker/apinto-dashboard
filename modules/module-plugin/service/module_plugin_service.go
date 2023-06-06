@@ -243,7 +243,7 @@ func (m *modulePluginService) GetPluginEnableRender(ctx context.Context, pluginU
 	return renderCfg, nil
 }
 
-func (m *modulePluginService) InstallPlugin(ctx context.Context, userID int, pluginYml *model.PluginYmlCfg, packageContent []byte) error {
+func (m *modulePluginService) InstallPlugin(ctx context.Context, userID int, pluginYml *model.PluginCfg, packageContent []byte) error {
 	//通过插件id来判断插件是否已安装
 	_, err := m.pluginStore.GetPluginInfo(ctx, pluginYml.ID)
 	if err != nil && err != gorm.ErrRecordNotFound {
@@ -586,7 +586,7 @@ func (m *modulePluginService) DisablePlugin(ctx context.Context, userID int, plu
 	return nil
 }
 
-func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml *model.InnerPluginYmlCfg) error {
+func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml *model.InnerPluginCfg) error {
 	driver, has := apinto_module.GetDriver(pluginYml.Driver)
 	if !has {
 		panic(fmt.Errorf("not find driver:%s", pluginYml.Driver))
@@ -621,15 +621,12 @@ func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml 
 		if err := m.pluginStore.Save(txCtx, pluginInfo); err != nil {
 			return err
 		}
-		isEnable := statusPluginDisable
-		if pluginYml.Auto {
-			isEnable = statusPluginEnable
-		}
+
 		enable := &entry.ModulePluginEnable{
 			Id:              pluginInfo.Id,
 			Name:            pluginYml.Name,
 			Navigation:      pluginYml.Navigation,
-			IsEnable:        isEnable,
+			IsEnable:        statusPluginDisable,
 			IsCanDisable:    plugin.IsCanDisable(),
 			IsCanUninstall:  plugin.IsCanUninstall(),
 			IsShowServer:    plugin.IsShowServer(),
@@ -653,7 +650,7 @@ func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml 
 	return nil
 }
 
-func (m *modulePluginService) UpdateInnerPlugin(ctx context.Context, pluginYml *model.InnerPluginYmlCfg) error {
+func (m *modulePluginService) UpdateInnerPlugin(ctx context.Context, pluginYml *model.InnerPluginCfg) error {
 
 	pluginInfo, err := m.pluginStore.GetPluginInfo(ctx, pluginYml.ID)
 	if err != nil {
