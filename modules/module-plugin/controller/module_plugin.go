@@ -347,10 +347,9 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 }
 
 func (p *modulePluginController) uninstall(ginCtx *gin.Context) {
-	userId := users.GetUserId(ginCtx)
 	pluginUUID := ginCtx.Query("id")
 
-	err := p.modulePluginService.UninstallPlugin(ginCtx, userId, pluginUUID)
+	err := p.modulePluginService.UninstallPlugin(ginCtx, pluginUUID)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return

@@ -45,21 +45,23 @@ type EnablePlugin struct {
 
 // EnabledModule 启用的导航模块信息
 type EnabledModule struct {
-	Name            string `gorm:"column:name" json:"name"`
-	Title           string `gorm:"column:cname" json:"cname"`
-	Type            int    `gorm:"column:type" json:"type"`
-	Navigation      string `gorm:"column:navigation" json:"navigation"`
-	IsPluginVisible bool   `gorm:"column:is_plugin_visible" json:"is_plugin_visible"`
-	Frontend        string `gorm:"column:frontend" json:"frontend"`
+	Name                string `gorm:"column:name" json:"name"`
+	Title               string `gorm:"column:cname" json:"cname"`
+	Type                int    `gorm:"column:type" json:"type"`
+	Navigation          string `gorm:"column:navigation" json:"navigation"`
+	VisibleInNavigation bool   `gorm:"column:visible_in_navigation" json:"visible_in_navigation"`
+	Frontend            string `gorm:"column:frontend" json:"frontend"`
 }
 
 type PluginListItem struct {
-	UUID     string `gorm:"column:uuid" json:"uuid"`
-	Name     string `gorm:"column:name" json:"name"`
-	CName    string `gorm:"column:cname" json:"cname"`
-	Resume   string `gorm:"column:resume" json:"resume"`
-	ICon     string `gorm:"column:icon" json:"icon"`
-	Type     int    `gorm:"column:type" json:"type"`
-	Group    string `gorm:"column:group" json:"group"`
-	IsEnable int    `gorm:"is_enable" json:"is_enable"`
+	UUID                string `gorm:"column:uuid" json:"uuid"`
+	Name                string `gorm:"column:name" json:"name"`
+	CName               string `gorm:"column:cname" json:"cname"`
+	Resume              string `gorm:"column:resume" json:"resume"`
+	ICon                string `gorm:"column:icon" json:"icon"`
+	IsInner             bool   `gorm:"column:is_inner" json:"is_inner"`
+	VisibleInNavigation bool   `gorm:"column:visible_in_navigation" json:"visible_in_navigation"`
+	VisibleInMarket     bool   `gorm:"column:visible_in_market" json:"visible_in_market"`
+	Group               string `gorm:"column:group" json:"group"`
+	IsEnable            int    `gorm:"is_enable" json:"is_enable"`
 }
