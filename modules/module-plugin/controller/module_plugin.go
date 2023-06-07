@@ -300,7 +300,7 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("install plugin read plugin.yml fail. err:%s", err.Error()))
 		return
 	}
-	pluginCfg := new(model.PluginCfg)
+	pluginCfg := new(model.ExternPluginCfg)
 	err = yaml.Unmarshal(pluginBuffer, pluginCfg)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("install plugin unmarshal plugin.yml fail. err:%s", err.Error()))

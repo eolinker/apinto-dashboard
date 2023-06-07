@@ -23,27 +23,6 @@ var (
 	pluginDir embed.FS
 )
 
-type Plugin struct {
-	Id                  string      `yaml:"id"`
-	Name                string      `yaml:"name"`
-	CName               string      `yaml:"cname"`
-	Resume              string      `yaml:"resume"`
-	Version             string      `yaml:"version"`
-	Icon                string      `yaml:"icon"`
-	Driver              string      `yaml:"driver"`
-	Front               string      `yaml:"front"`
-	Navigation          string      `yaml:"navigation"`
-	GroupID             string      `yaml:"group_id"`
-	Type                int         `yaml:"type"`
-	Auto                bool        `yaml:"auto"`
-	IsCanDisable        bool        `json:"is_can_disable" yaml:"is_can_disable"`
-	IsCanUninstall      bool        `json:"is_can_uninstall" yaml:"is_can_uninstall"`
-	IsInner             bool        `json:"is_inner" yaml:"is_inner"`
-	VisibleInNavigation bool        `json:"visible_in_navigation" yaml:"visible_in_navigation"`
-	VisibleInMarket     bool        `json:"visible_in_market" yaml:"visible_in_market"`
-	Define              interface{} `yaml:"define"`
-}
-
 func InitPlugins() error {
 	var service module_plugin.IModulePluginService
 	bean.Autowired(&service)
@@ -64,8 +43,8 @@ func InitPlugins() error {
 	for _, p := range plugins {
 		//TODO 校验内置插件
 
-		pluginCfg := &model.InnerPluginCfg{
-			ID:         p.Id,
+		pluginCfg := &model.PluginCfg{
+			ID:         p.ID,
 			Name:       p.Name,
 			Version:    p.Version,
 			CName:      p.CName,
@@ -78,10 +57,10 @@ func InitPlugins() error {
 			Define:     p.Define,
 		}
 
-		pluginInfo, has := innerPluginsMap[p.Id]
+		pluginInfo, has := innerPluginsMap[p.ID]
 		if !has {
 			// 插入安装记录
-			err = service.InstallInnerPlugin(ctx, pluginCfg)
+			err = service.InstallInnerPlugin(ctx, pluginCfg, nil)
 			if err != nil {
 				return err
 			}
@@ -99,12 +78,12 @@ func InitPlugins() error {
 	return nil
 }
 
-func loadPlugins(dir string, target string) ([]*Plugin, error) {
+func loadPlugins(dir string, target string) ([]*model.InnerPluginCfg, error) {
 	entries, err := pluginDir.ReadDir(dir)
 	if err != nil {
 		return nil, err
 	}
-	plugins := make([]*Plugin, 0)
+	plugins := make([]*model.InnerPluginCfg, 0)
 	for _, e := range entries {
 		nextFile := path.Join(dir, e.Name())
 		if e.IsDir() {
@@ -120,7 +99,7 @@ func loadPlugins(dir string, target string) ([]*Plugin, error) {
 			if err != nil {
 				return nil, err
 			}
-			p := new(Plugin)
+			p := new(model.InnerPluginCfg)
 			err = yaml.Unmarshal(s, p)
 			if err != nil {
 				log.Errorf("parse file(%s) error: %v", nextFile, err)

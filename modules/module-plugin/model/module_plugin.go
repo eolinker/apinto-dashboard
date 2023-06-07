@@ -131,7 +131,7 @@ type MiddlewareItem struct {
 	Desc string `json:"desc"`
 }
 
-type PluginCfg struct {
+type ExternPluginCfg struct {
 	ID         string      `json:"id" yaml:"id"`
 	Name       string      `json:"name" yaml:"name"`
 	Version    string      `json:"version" yaml:"version"`
@@ -145,6 +145,27 @@ type PluginCfg struct {
 }
 
 type InnerPluginCfg struct {
+	ID                  string      `yaml:"id" json:"id"`
+	Name                string      `yaml:"name" json:"name"`
+	CName               string      `yaml:"cname" json:"cname"`
+	Resume              string      `yaml:"resume" json:"resume"`
+	Version             string      `yaml:"version" json:"version"`
+	Icon                string      `yaml:"icon" json:"icon"`
+	Driver              string      `yaml:"driver" json:"driver"`
+	Front               string      `yaml:"front" json:"front"`
+	Navigation          string      `yaml:"navigation" json:"navigation"`
+	GroupID             string      `yaml:"group_id" json:"group_id"`
+	Type                int         `yaml:"type" json:"type"`
+	Auto                bool        `yaml:"auto" json:"auto"`
+	IsCanDisable        bool        `yaml:"is_can_disable" json:"is_can_disable"`
+	IsCanUninstall      bool        `yaml:"is_can_uninstall" json:"is_can_uninstall"`
+	IsInner             bool        `yaml:"is_inner" json:"is_inner"`
+	VisibleInNavigation bool        `yaml:"visible_in_navigation" json:"visible_in_navigation"`
+	VisibleInMarket     bool        `yaml:"visible_in_market" json:"visible_in_market"`
+	Define              interface{} `yaml:"define" json:"define"`
+}
+
+type PluginCfg struct {
 	ID                  string      `json:"id" yaml:"id"`
 	Name                string      `json:"name" yaml:"name"`
 	Version             string      `json:"version" yaml:"version"`
@@ -164,7 +185,7 @@ type InnerPluginCfg struct {
 }
 
 type EmbedPluginCfg struct {
-	PluginCfg *InnerPluginCfg
+	PluginCfg *PluginCfg
 	Resources *EmbedPluginResources
 }
 

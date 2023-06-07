@@ -16,6 +16,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/dto"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/entry"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/model"
+	"github.com/eolinker/apinto-dashboard/modules/module-plugin/resources_manager"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/store"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
@@ -245,23 +246,14 @@ func (m *modulePluginService) GetPluginEnableRender(ctx context.Context, pluginU
 	return renderCfg, nil
 }
 
-func (m *modulePluginService) InstallPlugin(ctx context.Context, userID int, pluginYml *model.PluginCfg, resources *model.PluginResources) error {
+func (m *modulePluginService) InstallPlugin(ctx context.Context, userID int, cfg *model.ExternPluginCfg, resources *model.PluginResources) error {
 	//通过插件id来判断插件是否已安装
-	_, err := m.pluginStore.GetPluginInfo(ctx, pluginYml.ID)
+	_, err := m.pluginStore.GetPluginInfo(ctx, cfg.ID)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return err
 	}
 	if err == nil {
 		return ErrModulePluginInstalled
-	}
-
-	driver, has := apinto_module.GetDriver(pluginYml.Driver)
-	if !has {
-		return ErrModulePluginDriverNotFound
-	}
-	plugin, err := driver.CreatePlugin(pluginYml.Define)
-	if err != nil {
-		return fmt.Errorf("创建插件 %s 失败:%s", pluginYml.Name, err.Error())
 	}
 
 	//全局异步锁
@@ -272,71 +264,35 @@ func (m *modulePluginService) InstallPlugin(ctx context.Context, userID int, plu
 	defer m.lockService.Unlock(locker_service.LockNameModulePlugin, 0)
 
 	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
-		Uuid: pluginYml.ID,
-		Name: pluginYml.CName,
+		Uuid: cfg.ID,
+		Name: cfg.CName,
 	})
 
-	err = m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
-		t := time.Now()
-		details, _ := json.Marshal(pluginYml.Define)
+	pluginCfg := &model.PluginCfg{
+		ID:                  cfg.ID,
+		Name:                cfg.Name,
+		Version:             cfg.Version,
+		CName:               cfg.CName,
+		Navigation:          cfg.Navigation,
+		GroupID:             cfg.GroupID,
+		Resume:              cfg.Resume,
+		ICon:                cfg.ICon,
+		Driver:              cfg.Driver,
+		Type:                pluginTypeNotInner,
+		IsCanDisable:        true,
+		IsCanUninstall:      true,
+		IsInner:             false,
+		VisibleInNavigation: true,
+		VisibleInMarket:     true,
+		Define:              cfg.Define,
+	}
 
-		pluginInfo := &entry.ModulePlugin{
-			UUID:                pluginYml.ID,
-			Name:                pluginYml.Name,
-			Version:             pluginYml.Version,
-			Group:               pluginYml.GroupID,
-			Navigation:          pluginYml.Navigation,
-			CName:               pluginYml.CName,
-			Resume:              pluginYml.Resume,
-			ICon:                pluginYml.ICon,
-			Type:                pluginTypeNotInner,
-			Driver:              pluginYml.Driver,
-			IsCanDisable:        true,
-			IsCanUninstall:      true,
-			IsInner:             false,
-			VisibleInNavigation: true,
-			VisibleInMarket:     true,
-			Details:             details,
-			Operator:            userID,
-			CreateTime:          t,
-			UpdateTime:          t,
-		}
-		if err = m.pluginStore.Save(txCtx, pluginInfo); err != nil {
-			return err
-		}
-		enableInfo := &entry.ModulePluginEnable{
-			Id:              pluginInfo.Id,
-			Name:            pluginYml.Name,
-			Navigation:      pluginYml.Navigation,
-			IsEnable:        statusPluginDisable,
-			IsCanDisable:    true,
-			IsCanUninstall:  true,
-			IsShowServer:    plugin.IsShowServer(),
-			IsPluginVisible: true,
-			Config:          []byte{},
-			Operator:        userID,
-			UpdateTime:      t,
-		}
-
-		if err = m.pluginEnableStore.Save(txCtx, enableInfo); err != nil {
-			return err
-		}
-
-		return m.pluginResourcesStore.Save(txCtx, &entry.PluginResources{
-			ID:        pluginInfo.Id,
-			Uuid:      pluginYml.ID,
-			Resources: resources,
-		})
-
-	})
+	err = m.Install(ctx, userID, pluginCfg, resources)
 	if err != nil {
 		return err
 	}
-	//缓存
-	_ = m.installedCache.Set(ctx, pluginYml.ID, &model.PluginInstalledStatus{
-		Installed: true,
-	})
-
+	//存储资源
+	resources_manager.StoreExternPluginResources(cfg.ID, resources)
 	return nil
 }
 
@@ -594,20 +550,85 @@ func (m *modulePluginService) DisablePlugin(ctx context.Context, userID int, plu
 	return nil
 }
 
-func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml *model.InnerPluginCfg) error {
+func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, cfg *model.InnerPluginCfg, resources *model.EmbedPluginResources) error {
+	pluginCfg := &model.PluginCfg{
+		ID:                  cfg.ID,
+		Name:                cfg.Name,
+		Version:             cfg.Version,
+		CName:               cfg.CName,
+		Navigation:          cfg.Navigation,
+		GroupID:             cfg.GroupID,
+		Resume:              cfg.Resume,
+		ICon:                cfg.Icon,
+		Driver:              cfg.Driver,
+		Type:                cfg.Type,
+		IsCanDisable:        cfg.IsCanDisable,
+		IsCanUninstall:      cfg.IsCanUninstall,
+		IsInner:             cfg.IsInner,
+		VisibleInNavigation: cfg.VisibleInNavigation,
+		VisibleInMarket:     cfg.VisibleInMarket,
+		Define:              cfg.Define,
+	}
+	//安装
+	err := m.Install(ctx, 0, pluginCfg, nil)
+	if err != nil {
+		return err
+	}
+	//自动启用
+	if cfg.Auto {
+		defineBytes, _ := json.Marshal(cfg.Define)
+		defineCfg := new(model.PluginDefine)
+		_ = json.Unmarshal(defineBytes, defineCfg)
+		enableInfo := &dto.PluginEnableInfo{
+			Name:   cfg.Name,
+			Server: defineCfg.Server,
+		}
+		header := make([]dto.ExtendParams, 0, len(defineCfg.Headers))
+		query := make([]dto.ExtendParams, 0, len(defineCfg.Querys))
+		initial := make([]dto.ExtendParams, 0, len(defineCfg.Initialize))
+		for _, h := range defineCfg.Headers {
+			header = append(header, dto.ExtendParams{
+				Name:  h.Name,
+				Value: h.Value,
+			})
+		}
+		for _, q := range defineCfg.Querys {
+			query = append(query, dto.ExtendParams{
+				Name:  q.Name,
+				Value: q.Value,
+			})
+		}
+		for _, i := range defineCfg.Initialize {
+			initial = append(initial, dto.ExtendParams{
+				Name:  i.Name,
+				Value: i.Value,
+			})
+		}
+		enableInfo.Header = header
+		enableInfo.Query = query
+		enableInfo.Initialize = initial
+		err := m.EnablePlugin(ctx, 0, cfg.ID, enableInfo)
+		if err != nil {
+			log.Errorf("内置插件%s自动启用失败 err:%s", cfg.ID, err.Error())
+		}
+	}
+	//存储资源
+	resources_manager.StoreEmbedPluginResources(cfg.ID, resources)
+	return nil
+}
+
+func (m *modulePluginService) Install(ctx context.Context, userID int, pluginYml *model.PluginCfg, resources *model.PluginResources) error {
 	driver, has := apinto_module.GetDriver(pluginYml.Driver)
 	if !has {
-		panic(fmt.Errorf("not find driver:%s", pluginYml.Driver))
+		return ErrModulePluginDriverNotFound
 	}
-
 	plugin, err := driver.CreatePlugin(pluginYml.Define)
 	if err != nil {
-		panic(fmt.Errorf("create plugin %s error:%s", pluginYml.Name, err.Error()))
+		return fmt.Errorf("创建插件 %s 失败:%s", pluginYml.Name, err.Error())
 	}
 
 	err = m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
 		t := time.Now()
-
 		details, _ := json.Marshal(pluginYml.Define)
 
 		pluginInfo := &entry.ModulePlugin{
@@ -627,15 +648,14 @@ func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml 
 			VisibleInNavigation: pluginYml.VisibleInNavigation,
 			VisibleInMarket:     pluginYml.VisibleInMarket,
 			Details:             details,
-			Operator:            0,
+			Operator:            userID,
 			CreateTime:          t,
 			UpdateTime:          t,
 		}
-		if err := m.pluginStore.Save(txCtx, pluginInfo); err != nil {
+		if err = m.pluginStore.Save(txCtx, pluginInfo); err != nil {
 			return err
 		}
-
-		enable := &entry.ModulePluginEnable{
+		enableInfo := &entry.ModulePluginEnable{
 			Id:              pluginInfo.Id,
 			Name:            pluginYml.Name,
 			Navigation:      pluginYml.Navigation,
@@ -643,14 +663,26 @@ func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml 
 			IsCanDisable:    pluginYml.IsCanDisable,
 			IsCanUninstall:  pluginYml.IsCanUninstall,
 			IsShowServer:    plugin.IsShowServer(),
-			IsPluginVisible: pluginYml.VisibleInNavigation,
 			Frontend:        plugin.GetPluginFrontend(pluginYml.Name),
+			IsPluginVisible: true,
 			Config:          []byte{},
-			Operator:        0,
+			Operator:        userID,
 			UpdateTime:      t,
 		}
 
-		return m.pluginEnableStore.Save(txCtx, enable)
+		if err = m.pluginEnableStore.Save(txCtx, enableInfo); err != nil {
+			return err
+		}
+
+		if resources != nil {
+			return m.pluginResourcesStore.Save(txCtx, &entry.PluginResources{
+				ID:        pluginInfo.Id,
+				Uuid:      pluginYml.ID,
+				Resources: resources,
+			})
+		}
+
+		return nil
 	})
 	if err != nil {
 		return err
@@ -663,7 +695,7 @@ func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, pluginYml 
 	return nil
 }
 
-func (m *modulePluginService) UpdateInnerPlugin(ctx context.Context, pluginYml *model.InnerPluginCfg) error {
+func (m *modulePluginService) UpdateInnerPlugin(ctx context.Context, pluginYml *model.PluginCfg) error {
 
 	pluginInfo, err := m.pluginStore.GetPluginInfo(ctx, pluginYml.ID)
 	if err != nil {
