@@ -35,7 +35,8 @@ func newModulePluginStore(db store.IDB) IModulePluginStore {
 func (c *modulePluginStore) GetPluginList(ctx context.Context, groupID string, searchName string) ([]*entry.PluginListItem, error) {
 	plugins := make([]*entry.PluginListItem, 0)
 
-	db := c.DB(ctx).Table("module_plugin").Select("module_plugin.uuid, module_plugin.name, module_plugin.cname, module_plugin.resume, module_plugin.icon, module_plugin.type, module_plugin.group, module_plugin_enable.is_enable").
+	db := c.DB(ctx).Table("module_plugin").Select("module_plugin.uuid, module_plugin.name, module_plugin.cname, module_plugin.resume, " +
+		"module_plugin.icon, module_plugin.is_inner, module_plugin.visible_in_navigation, module_plugin.visible_in_market, module_plugin.group, module_plugin_enable.is_enable").
 		Joins("right join module_plugin_enable on module_plugin.id = module_plugin_enable.id")
 	if groupID != "" {
 		db = db.Where("`group` = ?", groupID)
@@ -56,7 +57,8 @@ func (c *modulePluginStore) GetInnerPluginList(ctx context.Context) ([]*entry.Mo
 func (c *modulePluginStore) GetOtherGroupPlugins(ctx context.Context, groupIDs []string, searchName string) ([]*entry.PluginListItem, error) {
 	plugins := make([]*entry.PluginListItem, 0)
 
-	db := c.DB(ctx).Table("module_plugin").Select("module_plugin.uuid, module_plugin.name, module_plugin.cname, module_plugin.resume, module_plugin.icon, module_plugin.type, module_plugin.group, module_plugin_enable.is_enable").
+	db := c.DB(ctx).Table("module_plugin").Select("module_plugin.uuid, module_plugin.name, module_plugin.cname, module_plugin.resume, module_plugin.icon, " +
+		"module_plugin.is_inner, module_plugin.visible_in_navigation, module_plugin.visible_in_market, module_plugin.group, module_plugin_enable.is_enable").
 		Joins("right join module_plugin_enable on module_plugin.id = module_plugin_enable.id")
 	if len(groupIDs) > 0 {
 		db = db.Where("`group` not in (?)", groupIDs)
@@ -85,7 +87,7 @@ func (c *modulePluginStore) GetEnabledPlugins(ctx context.Context) ([]*entry.Ena
 // GetNavigationModules 获取导航接口所需要的模块列表
 func (c *modulePluginStore) GetNavigationModules(ctx context.Context) ([]*entry.EnabledModule, error) {
 	modules := make([]*entry.EnabledModule, 0)
-	err := c.DB(ctx).Table("module_plugin").Select("module_plugin_enable.name, module_plugin.cname, module_plugin.type, module_plugin_enable.navigation, module_plugin_enable.is_plugin_visible,module_plugin_enable.frontend").
+	err := c.DB(ctx).Table("module_plugin").Select("module_plugin_enable.name, module_plugin.cname, module_plugin.type, module_plugin_enable.navigation, module_plugin.visible_in_navigation,module_plugin_enable.frontend").
 		Joins("right join module_plugin_enable on module_plugin.id = module_plugin_enable.id").
 		Where("module_plugin_enable.is_enable = 2").Scan(&modules).Error
 
