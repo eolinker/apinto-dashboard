@@ -17,14 +17,11 @@ import (
 )
 
 type DynamicModuleDriver struct {
-	pluginVisible bool
-	showServer    bool
-	canUninstall  bool
-	canDisable    bool
+	showServer bool
 }
 
-func NewDynamicModuleDriver(pluginVisible bool, showServer bool, canUninstall bool, canDisable bool) *DynamicModuleDriver {
-	return &DynamicModuleDriver{pluginVisible: pluginVisible, showServer: showServer, canUninstall: canUninstall, canDisable: canDisable}
+func NewDynamicModuleDriver(showServer bool) *DynamicModuleDriver {
+	return &DynamicModuleDriver{showServer: showServer}
 }
 
 func (c *DynamicModuleDriver) CreatePlugin(define interface{}) (apinto_module.Plugin, error) {
@@ -42,20 +39,8 @@ func (c *DynamicModulePlugin) GetPluginFrontend(moduleName string) string {
 	return fmt.Sprintf("template/%s", moduleName)
 }
 
-func (c *DynamicModulePlugin) IsPluginVisible() bool {
-	return c.pluginVisible
-}
-
 func (c *DynamicModulePlugin) IsShowServer() bool {
 	return c.showServer
-}
-
-func (c *DynamicModulePlugin) IsCanUninstall() bool {
-	return c.canUninstall
-}
-
-func (c *DynamicModulePlugin) IsCanDisable() bool {
-	return c.canDisable
 }
 
 type DynamicModulePlugin struct {
