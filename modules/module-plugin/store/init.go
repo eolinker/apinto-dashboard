@@ -10,9 +10,11 @@ func init() {
 		modulePlugin := newModulePluginStore(db)
 		pluginEnable := newModulePluginEnableStore(db)
 		pluginPackage := newModulePluginPackageStore(db)
+		modulePluginResources := newPluginResourcesStore(db)
 
 		bean.Injection(&modulePlugin)
 		bean.Injection(&pluginEnable)
 		bean.Injection(&pluginPackage)
+		bean.Injection(&modulePluginResources)
 	})
 }
