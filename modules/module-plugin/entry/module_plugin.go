@@ -47,7 +47,6 @@ type EnablePlugin struct {
 type EnabledModule struct {
 	Name                string `gorm:"column:name" json:"name"`
 	Title               string `gorm:"column:cname" json:"cname"`
-	Type                int    `gorm:"column:type" json:"type"`
 	Navigation          string `gorm:"column:navigation" json:"navigation"`
 	VisibleInNavigation bool   `gorm:"column:visible_in_navigation" json:"visible_in_navigation"`
 	Frontend            string `gorm:"column:frontend" json:"frontend"`

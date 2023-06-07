@@ -159,33 +159,22 @@ type InnerPluginCfg struct {
 	Auto                bool        `yaml:"auto" json:"auto"`
 	IsCanDisable        bool        `yaml:"is_can_disable" json:"is_can_disable"`
 	IsCanUninstall      bool        `yaml:"is_can_uninstall" json:"is_can_uninstall"`
-	IsInner             bool        `yaml:"is_inner" json:"is_inner"`
 	VisibleInNavigation bool        `yaml:"visible_in_navigation" json:"visible_in_navigation"`
 	VisibleInMarket     bool        `yaml:"visible_in_market" json:"visible_in_market"`
 	Define              interface{} `yaml:"define" json:"define"`
 }
 
 type PluginCfg struct {
-	ID                  string      `json:"id" yaml:"id"`
-	Name                string      `json:"name" yaml:"name"`
-	Version             string      `json:"version" yaml:"version"`
-	CName               string      `json:"cname" yaml:"cname"`
-	Navigation          string      `json:"navigation" yaml:"navigation"`
-	GroupID             string      `json:"group_id" yaml:"group_id"`
-	Resume              string      `json:"resume" yaml:"resume"`
-	ICon                string      `json:"icon" yaml:"icon"`
-	Driver              string      `json:"driver" yaml:"driver"`
-	Type                int         `json:"type" yaml:"type"`
-	IsCanDisable        bool        `json:"is_can_disable" yaml:"is_can_disable"`
-	IsCanUninstall      bool        `json:"is_can_uninstall" yaml:"is_can_uninstall"`
-	IsInner             bool        `json:"is_inner" yaml:"is_inner"`
-	VisibleInNavigation bool        `json:"visible_in_navigation" yaml:"visible_in_navigation"`
-	VisibleInMarket     bool        `json:"visible_in_market" yaml:"visible_in_market"`
-	Define              interface{} `json:"define" yaml:"define"`
+	Version    string      `json:"version" yaml:"version"`
+	Navigation string      `json:"navigation" yaml:"navigation"`
+	GroupID    string      `json:"group_id" yaml:"group_id"`
+	Resume     string      `json:"resume" yaml:"resume"`
+	Type       int         `json:"type" yaml:"type"`
+	Define     interface{} `json:"define" yaml:"define"`
 }
 
 type EmbedPluginCfg struct {
-	PluginCfg *PluginCfg
+	PluginCfg *InnerPluginCfg
 	Resources *EmbedPluginResources
 }
 
