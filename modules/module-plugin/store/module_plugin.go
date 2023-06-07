@@ -25,6 +25,10 @@ type modulePluginStore struct {
 }
 
 func newModulePluginStore(db store.IDB) IModulePluginStore {
+	err := db.DB(context.Background()).AutoMigrate(&entry.ModulePlugin{})
+	if err != nil {
+		panic(err)
+	}
 	return &modulePluginStore{BaseStore: store.CreateStore[entry.ModulePlugin](db)}
 }
 
