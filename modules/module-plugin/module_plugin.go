@@ -15,15 +15,17 @@ type IModulePluginService interface {
 	GetInnerPluginList(ctx context.Context) ([]*model.ModulePluginInfo, error)
 	GetPluginEnableInfo(ctx context.Context, pluginUUID string) (*model.PluginEnableInfo, error)
 	GetPluginEnableRender(ctx context.Context, pluginUUID string) (*model.PluginEnableRender, error)
-	InstallPlugin(ctx context.Context, userID int, pluginYml *model.PluginCfg, resources *model.PluginResources) error
+
+	InstallPlugin(ctx context.Context, userID int, cfg *model.ExternPluginCfg, resources *model.PluginResources) error
+	InstallInnerPlugin(ctx context.Context, cfg *model.InnerPluginCfg, resources *model.EmbedPluginResources) error
+	Install(ctx context.Context, userID int, pluginYml *model.PluginCfg, resources *model.PluginResources) error
+	UpdateInnerPlugin(ctx context.Context, pluginYml *model.PluginCfg) error
 	UninstallPlugin(ctx context.Context, pluginID string) error
 	EnablePlugin(ctx context.Context, userID int, pluginUUID string, enableInfo *dto.PluginEnableInfo) error
 	DisablePlugin(ctx context.Context, userID int, pluginUUID string) error
 
 	CheckPluginInstalled(ctx context.Context, pluginID string) (bool, error)
 	CheckPluginISDeCompress(ctx context.Context, pluginDir string, pluginID string) error
-	InstallInnerPlugin(ctx context.Context, pluginYml *model.InnerPluginCfg) error
-	UpdateInnerPlugin(ctx context.Context, pluginYml *model.InnerPluginCfg) error
 }
 
 type IModulePlugin interface {
