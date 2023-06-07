@@ -7,6 +7,7 @@ import (
 )
 
 type IPluginResources interface {
+	store.IBaseStore[entry.PluginResources]
 	GetByUUID(ctx context.Context, uuid string) (*entry.PluginResources, error)
 }
 

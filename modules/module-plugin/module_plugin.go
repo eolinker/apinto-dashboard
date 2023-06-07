@@ -15,8 +15,8 @@ type IModulePluginService interface {
 	GetInnerPluginList(ctx context.Context) ([]*model.ModulePluginInfo, error)
 	GetPluginEnableInfo(ctx context.Context, pluginUUID string) (*model.PluginEnableInfo, error)
 	GetPluginEnableRender(ctx context.Context, pluginUUID string) (*model.PluginEnableRender, error)
-	InstallPlugin(ctx context.Context, userID int, pluginYml *model.PluginCfg, packageContent []byte) error
-	UninstallPlugin(ctx context.Context, userID int, pluginID string) error
+	InstallPlugin(ctx context.Context, userID int, pluginYml *model.PluginCfg, resources *model.PluginResources) error
+	UninstallPlugin(ctx context.Context, pluginID string) error
 	EnablePlugin(ctx context.Context, userID int, pluginUUID string, enableInfo *dto.PluginEnableInfo) error
 	DisablePlugin(ctx context.Context, userID int, pluginUUID string) error
 

@@ -145,17 +145,27 @@ type PluginCfg struct {
 }
 
 type InnerPluginCfg struct {
-	ID         string      `json:"id" yaml:"id"`
-	Name       string      `json:"name" yaml:"name"`
-	Version    string      `json:"version" yaml:"version"`
-	CName      string      `json:"cname" yaml:"cname"`
-	Navigation string      `json:"navigation" yaml:"navigation"`
-	GroupID    string      `json:"group_id" yaml:"group_id"`
-	Resume     string      `json:"resume" yaml:"resume"`
-	ICon       string      `json:"icon" yaml:"icon"`
-	Driver     string      `json:"driver" yaml:"driver"`
-	Type       int         `json:"type" yaml:"type"`
-	Define     interface{} `json:"define" yaml:"define"`
+	ID                  string      `json:"id" yaml:"id"`
+	Name                string      `json:"name" yaml:"name"`
+	Version             string      `json:"version" yaml:"version"`
+	CName               string      `json:"cname" yaml:"cname"`
+	Navigation          string      `json:"navigation" yaml:"navigation"`
+	GroupID             string      `json:"group_id" yaml:"group_id"`
+	Resume              string      `json:"resume" yaml:"resume"`
+	ICon                string      `json:"icon" yaml:"icon"`
+	Driver              string      `json:"driver" yaml:"driver"`
+	Type                int         `json:"type" yaml:"type"`
+	IsCanDisable        bool        `json:"is_can_disable" yaml:"is_can_disable"`
+	IsCanUninstall      bool        `json:"is_can_uninstall" yaml:"is_can_uninstall"`
+	IsInner             bool        `json:"is_inner" yaml:"is_inner"`
+	VisibleInNavigation bool        `json:"visible_in_navigation" yaml:"visible_in_navigation"`
+	VisibleInMarket     bool        `json:"visible_in_market" yaml:"visible_in_market"`
+	Define              interface{} `json:"define" yaml:"define"`
+}
+
+type EmbedPluginCfg struct {
+	PluginCfg *InnerPluginCfg
+	Resources *EmbedPluginResources
 }
 
 // NavigationModuleInfo 导航所需要的模块信息
