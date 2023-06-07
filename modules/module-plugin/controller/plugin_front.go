@@ -6,7 +6,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/initialize"
 	module_plugin "github.com/eolinker/apinto-dashboard/modules/module-plugin"
-	"github.com/eolinker/apinto-dashboard/modules/module-plugin/service"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
 	"github.com/gin-gonic/gin"
@@ -103,7 +102,7 @@ func (p *pluginFrontController) getPluginInfo(c *gin.Context) {
 
 	var fs http.FileSystem
 	//若为内置插件，则从内嵌目录中获取
-	if service.IsInnerPlugin(info.Type) {
+	if info.IsInner {
 		fs, err = initialize.GetInnerPluginFS(filePath)
 		if err != nil {
 			c.Data(http.StatusNotFound, "application/text", []byte("404 page not found"))
@@ -137,7 +136,7 @@ func (p *pluginFrontController) getPluginResources(c *gin.Context) {
 
 	var fs http.FileSystem
 	//若为内置插件，则从内嵌目录中获取
-	if service.IsInnerPlugin(info.Type) {
+	if info.IsInner {
 		fs, err = initialize.GetInnerPluginFS(filePath)
 		if err != nil {
 			c.Data(http.StatusNotFound, "application/text", []byte("404 page not found"))

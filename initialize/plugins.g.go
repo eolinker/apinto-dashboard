@@ -24,19 +24,24 @@ var (
 )
 
 type Plugin struct {
-	Id         string      `yaml:"id"`
-	Name       string      `yaml:"name"`
-	CName      string      `yaml:"cname"`
-	Resume     string      `yaml:"resume"`
-	Version    string      `yaml:"version"`
-	Icon       string      `yaml:"icon"`
-	Driver     string      `yaml:"driver"`
-	Front      string      `yaml:"front"`
-	Navigation string      `yaml:"navigation"`
-	GroupID    string      `yaml:"group_id"`
-	Type       int         `yaml:"type"`
-	Auto       bool        `yaml:"auto"`
-	Define     interface{} `yaml:"define"`
+	Id                  string      `yaml:"id"`
+	Name                string      `yaml:"name"`
+	CName               string      `yaml:"cname"`
+	Resume              string      `yaml:"resume"`
+	Version             string      `yaml:"version"`
+	Icon                string      `yaml:"icon"`
+	Driver              string      `yaml:"driver"`
+	Front               string      `yaml:"front"`
+	Navigation          string      `yaml:"navigation"`
+	GroupID             string      `yaml:"group_id"`
+	Type                int         `yaml:"type"`
+	Auto                bool        `yaml:"auto"`
+	IsCanDisable        bool        `json:"is_can_disable" yaml:"is_can_disable"`
+	IsCanUninstall      bool        `json:"is_can_uninstall" yaml:"is_can_uninstall"`
+	IsInner             bool        `json:"is_inner" yaml:"is_inner"`
+	VisibleInNavigation bool        `json:"visible_in_navigation" yaml:"visible_in_navigation"`
+	VisibleInMarket     bool        `json:"visible_in_market" yaml:"visible_in_market"`
+	Define              interface{} `yaml:"define"`
 }
 
 func InitPlugins() error {

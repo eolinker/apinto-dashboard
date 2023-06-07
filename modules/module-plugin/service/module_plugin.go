@@ -74,7 +74,7 @@ func (m *modulePlugin) GetNavigationModules(ctx context.Context) ([]*model.Navig
 	list := make([]*model.NavigationModuleInfo, 0, len(moduleInfos))
 	for _, module := range moduleInfos {
 		//导航不存在表示不需要在前端显示
-		if !module.IsPluginVisible {
+		if !module.VisibleInNavigation {
 			continue
 		}
 		info := &model.NavigationModuleInfo{
@@ -106,8 +106,8 @@ func (m *modulePlugin) GetEnabledPluginByModuleName(ctx context.Context, moduleN
 	return &model.ModulePluginInfo{
 		ModulePlugin: plugin,
 		Enable:       true,
-		CanDisable:   enableInfo.IsCanDisable,
-		Uninstall:    enableInfo.IsCanUninstall,
+		CanDisable:   plugin.IsCanDisable,
+		Uninstall:    plugin.IsCanUninstall,
 	}, nil
 
 }
