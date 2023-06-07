@@ -50,7 +50,7 @@ func (c *modulePluginStore) GetPluginList(ctx context.Context, groupID string, s
 
 func (c *modulePluginStore) GetInnerPluginList(ctx context.Context) ([]*entry.ModulePlugin, error) {
 	plugins := make([]*entry.ModulePlugin, 0)
-	err := c.DB(ctx).Model(plugins).Where("`type` = 0 or `type` = 1 or `type` = 2").Find(&plugins).Error
+	err := c.DB(ctx).Model(plugins).Where("`is_inner` = 1").Find(&plugins).Error
 	return plugins, err
 }
 
@@ -87,7 +87,7 @@ func (c *modulePluginStore) GetEnabledPlugins(ctx context.Context) ([]*entry.Ena
 // GetNavigationModules 获取导航接口所需要的模块列表
 func (c *modulePluginStore) GetNavigationModules(ctx context.Context) ([]*entry.EnabledModule, error) {
 	modules := make([]*entry.EnabledModule, 0)
-	err := c.DB(ctx).Table("module_plugin").Select("module_plugin_enable.name, module_plugin.cname, module_plugin.type, module_plugin_enable.navigation, module_plugin.visible_in_navigation,module_plugin_enable.frontend").
+	err := c.DB(ctx).Table("module_plugin").Select("module_plugin_enable.name, module_plugin.cname, module_plugin_enable.navigation, module_plugin.visible_in_navigation,module_plugin_enable.frontend").
 		Joins("right join module_plugin_enable on module_plugin.id = module_plugin_enable.id").
 		Where("module_plugin_enable.is_enable = 2").Scan(&modules).Error
 
