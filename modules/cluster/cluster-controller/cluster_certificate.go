@@ -41,11 +41,18 @@ func (c *clusterCertificateController) gets(ginCtx *gin.Context) {
 			controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 			return
 		}
+		dnsNames := cert.Leaf.DNSNames
+		if dnsNames == nil && cert.Leaf.IPAddresses != nil {
+			dnsNames = make([]string, 0, len(cert.Leaf.IPAddresses))
+			for _, ip := range cert.Leaf.IPAddresses {
+				dnsNames = append(dnsNames, ip.String())
+			}
+		}
 		dtoList = append(dtoList, &cluster_dto.ClusterCertificateOut{
 			Id:           val.Id,
 			ClusterId:    val.ClusterId,
 			Name:         cert.Leaf.Subject.CommonName,
-			DNSName:      cert.Leaf.DNSNames,
+			DNSName:      dnsNames,
 			ValidTime:    common.TimeToStr(cert.Leaf.NotAfter),
 			OperatorName: val.OperatorName,
 			CreateTime:   common.TimeToStr(val.CreateTime),
