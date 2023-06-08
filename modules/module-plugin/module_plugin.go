@@ -26,7 +26,7 @@ type IModulePluginService interface {
 	DisablePlugin(ctx context.Context, userID int, pluginUUID string) error
 
 	CheckPluginInstalled(ctx context.Context, pluginID string) (bool, error)
-	CheckPluginISDeCompress(ctx context.Context, pluginID string) error
+	CheckExternPluginInCache(ctx context.Context, pluginID string) error
 }
 
 type IModulePlugin interface {
