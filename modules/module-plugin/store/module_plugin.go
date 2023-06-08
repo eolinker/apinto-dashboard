@@ -25,9 +25,28 @@ type modulePluginStore struct {
 }
 
 func newModulePluginStore(db store.IDB) IModulePluginStore {
-	err := db.DB(context.Background()).AutoMigrate(&entry.ModulePlugin{})
+	ctx := context.Background()
+	err := db.DB(ctx).AutoMigrate(&entry.ModulePlugin{})
 	if err != nil {
 		panic(err)
+	}
+	migrate := db.DB(ctx).Migrator()
+	if migrate.HasColumn(&entry.ModulePlugin{}, "type") {
+		db.DB(ctx).Model(&entry.ModulePlugin{}).Where("type = 3").Updates(map[string]interface{}{
+			"is_can_disable":        1,
+			"is_can_uninstall":      1,
+			"visible_in_navigation": 1,
+			"visible_in_market":     1,
+		})
+
+		db.DB(ctx).Model(&entry.ModulePlugin{}).Where("type < 3").Updates(map[string]interface{}{
+			"is_inner": 1,
+		})
+
+		err := migrate.DropColumn(&entry.ModulePlugin{}, "type")
+		if err != nil {
+			panic(err)
+		}
 	}
 	return &modulePluginStore{BaseStore: store.CreateStore[entry.ModulePlugin](db)}
 }

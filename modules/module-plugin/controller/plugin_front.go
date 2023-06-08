@@ -1,8 +1,6 @@
 package controller
 
 import (
-	"fmt"
-	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	module_plugin "github.com/eolinker/apinto-dashboard/modules/module-plugin"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/resources_manager"
@@ -10,18 +8,7 @@ import (
 	"github.com/eolinker/eosc/log"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"os"
 )
-
-var PluginDir string
-
-func init() {
-	currentPath, err := common.GetCurrentPath()
-	if err != nil {
-		panic(err)
-	}
-	PluginDir = fmt.Sprintf("%s%splugin", currentPath, string(os.PathSeparator))
-}
 
 type pluginFrontController struct {
 	modulePluginService module_plugin.IModulePluginService
