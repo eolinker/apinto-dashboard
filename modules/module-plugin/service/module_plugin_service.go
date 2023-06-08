@@ -267,17 +267,12 @@ func (m *modulePluginService) InstallPlugin(ctx context.Context, userID int, id,
 		Uuid: id,
 		Name: cname,
 	})
-
-	pluginCfg := &model.PluginCfg{
-		Version:    cfg.Version,
-		Navigation: cfg.Navigation,
-		GroupID:    cfg.GroupID,
-		Resume:     cfg.Resume,
-		Type:       pluginTypeNotInner,
-		Define:     cfg.Define,
+	if cfg == nil {
+		cfg = &model.PluginCfg{}
 	}
+	cfg.Type = pluginTypeNotInner
 
-	err = m.Install(ctx, userID, id, name, cname, driver, icon, true, true, false, true, true, pluginCfg, resources)
+	err = m.Install(ctx, userID, id, name, cname, driver, icon, true, true, false, true, true, cfg, resources)
 	if err != nil {
 		return err
 	}
@@ -351,6 +346,23 @@ func (m *modulePluginService) UninstallPlugin(ctx context.Context, pluginID stri
 	})
 
 	return nil
+}
+
+// DeleteInnerByIds 通过插件的主键id删除
+func (m *modulePluginService) DeleteInnerByIds(ctx context.Context, ids ...int) error {
+	return m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
+		//从插件资源表，启用表，插件表中删除
+		_, err := m.pluginEnableStore.Delete(txCtx, ids...)
+		if err != nil {
+			return err
+		}
+		_, err = m.pluginStore.Delete(txCtx, ids...)
+		if err != nil {
+			return err
+		}
+
+		return err
+	})
 }
 
 func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, pluginUUID string, enableInfo *dto.PluginEnableInfo) error {
@@ -541,16 +553,11 @@ func (m *modulePluginService) DisablePlugin(ctx context.Context, userID int, plu
 }
 
 func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, id, name, cname, driver, icon string, isEnable, isCanDisable, isCanUninstall, visibleInNavigation, visibleInMarket bool, cfg *model.PluginCfg, resources *model.EmbedPluginResources) error {
-	pluginCfg := &model.PluginCfg{
-		Version:    cfg.Version,
-		Navigation: cfg.Navigation,
-		GroupID:    cfg.GroupID,
-		Resume:     cfg.Resume,
-		Type:       cfg.Type,
-		Define:     cfg.Define,
+	if cfg == nil {
+		cfg = &model.PluginCfg{}
 	}
 	//安装
-	err := m.Install(ctx, 0, id, name, cname, driver, icon, isCanDisable, isCanUninstall, true, visibleInNavigation, visibleInMarket, pluginCfg, nil)
+	err := m.Install(ctx, 0, id, name, cname, driver, icon, isCanDisable, isCanUninstall, true, visibleInNavigation, visibleInMarket, cfg, nil)
 	if err != nil {
 		return err
 	}
@@ -568,30 +575,30 @@ func (m *modulePluginService) InstallInnerPlugin(ctx context.Context, id, name, 
 	return nil
 }
 
-func (m *modulePluginService) Install(ctx context.Context, userID int, id, name, cname, driver, icon string, isCanDisable, isCanUninstall, isInner, visibleInNavigation, visibleInMarket bool, pluginYml *model.PluginCfg, resources *model.PluginResources) error {
+func (m *modulePluginService) Install(ctx context.Context, userID int, id, name, cname, driver, icon string, isCanDisable, isCanUninstall, isInner, visibleInNavigation, visibleInMarket bool, cfg *model.PluginCfg, resources *model.PluginResources) error {
 	pluginDriver, has := apinto_module.GetDriver(driver)
 	if !has {
 		return ErrModulePluginDriverNotFound
 	}
-	plugin, err := pluginDriver.CreatePlugin(pluginYml.Define)
+	plugin, err := pluginDriver.CreatePlugin(cfg.Define)
 	if err != nil {
 		return fmt.Errorf("创建插件 %s 失败:%s", name, err.Error())
 	}
 
 	err = m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
 		t := time.Now()
-		details, _ := json.Marshal(pluginYml.Define)
+		details, _ := json.Marshal(cfg.Define)
 
 		pluginInfo := &entry.ModulePlugin{
 			UUID:                id,
 			Name:                name,
-			Version:             pluginYml.Version,
-			Group:               pluginYml.GroupID,
-			Navigation:          pluginYml.Navigation,
+			Version:             cfg.Version,
+			Group:               cfg.GroupID,
+			Navigation:          cfg.Navigation,
 			CName:               cname,
-			Resume:              pluginYml.Resume,
+			Resume:              cfg.Resume,
 			ICon:                icon,
-			Type:                pluginYml.Type,
+			Type:                cfg.Type,
 			Driver:              driver,
 			IsCanDisable:        isCanDisable,
 			IsCanUninstall:      isCanUninstall,
@@ -609,7 +616,7 @@ func (m *modulePluginService) Install(ctx context.Context, userID int, id, name,
 		enableInfo := &entry.ModulePluginEnable{
 			Id:              pluginInfo.Id,
 			Name:            name,
-			Navigation:      pluginYml.Navigation,
+			Navigation:      cfg.Navigation,
 			IsEnable:        statusPluginDisable,
 			IsCanDisable:    isCanDisable,
 			IsCanUninstall:  isCanUninstall,
@@ -646,21 +653,24 @@ func (m *modulePluginService) Install(ctx context.Context, userID int, id, name,
 	return nil
 }
 
-func (m *modulePluginService) UpdateInnerPlugin(ctx context.Context, id, name, cname, driver, icon string, isCanDisable, isCanUninstall, visibleInNavigation, visibleInMarket bool, pluginYml *model.PluginCfg) error {
-
+func (m *modulePluginService) UpdateInnerPlugin(ctx context.Context, id, name, cname, driver, icon string, isCanDisable, isCanUninstall, visibleInNavigation, visibleInMarket bool, cfg *model.PluginCfg, resources *model.EmbedPluginResources) error {
 	pluginInfo, err := m.pluginStore.GetPluginInfo(ctx, id)
 	if err != nil {
 		return err
 	}
+
 	t := time.Now()
+	if cfg == nil {
+		cfg = &model.PluginCfg{}
+	}
 
 	pluginInfo.Name = name
-	pluginInfo.Version = pluginYml.Version
-	pluginInfo.Navigation = pluginYml.Navigation
+	pluginInfo.Version = cfg.Version
+	pluginInfo.Navigation = cfg.Navigation
 	pluginInfo.CName = cname
-	pluginInfo.Resume = pluginYml.Resume
+	pluginInfo.Resume = cfg.Resume
 	pluginInfo.ICon = icon
-	pluginInfo.Type = pluginYml.Type
+	pluginInfo.Type = cfg.Type
 	pluginInfo.Driver = driver
 	pluginInfo.IsInner = true
 	pluginInfo.IsCanDisable = isCanDisable
@@ -669,19 +679,19 @@ func (m *modulePluginService) UpdateInnerPlugin(ctx context.Context, id, name, c
 	pluginInfo.VisibleInNavigation = visibleInNavigation
 	pluginInfo.UpdateTime = t
 
-	details, _ := json.Marshal(pluginYml.Define)
+	details, _ := json.Marshal(cfg.Define)
 	pluginInfo.Details = details
 
 	pluginDriver, has := apinto_module.GetDriver(driver)
 	if !has {
 		panic(fmt.Errorf("not find driver:%s", driver))
 	}
-	plugin, err := pluginDriver.CreatePlugin(pluginYml.Define)
+	plugin, err := pluginDriver.CreatePlugin(cfg.Define)
 	if err != nil {
 		panic(fmt.Errorf("create plugin %s error:%s", name, err.Error()))
 	}
 
-	return m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
+	err = m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
 		if err = m.pluginStore.Save(txCtx, pluginInfo); err != nil {
 			return err
 		}
@@ -690,7 +700,7 @@ func (m *modulePluginService) UpdateInnerPlugin(ctx context.Context, id, name, c
 			return err
 		}
 		//name和enable不更新
-		enableInfo.Navigation = pluginYml.Navigation
+		enableInfo.Navigation = cfg.Navigation
 		enableInfo.IsCanDisable = isCanDisable
 		enableInfo.IsCanUninstall = isCanUninstall
 		enableInfo.IsShowServer = plugin.IsShowServer()
@@ -702,6 +712,12 @@ func (m *modulePluginService) UpdateInnerPlugin(ctx context.Context, id, name, c
 		return m.pluginEnableStore.Save(txCtx, enableInfo)
 
 	})
+	if err != nil {
+		return err
+	}
+	//存储资源
+	resources_manager.StoreEmbedPluginResources(id, resources)
+	return nil
 }
 
 func (m *modulePluginService) CheckPluginInstalled(ctx context.Context, pluginID string) (bool, error) {
