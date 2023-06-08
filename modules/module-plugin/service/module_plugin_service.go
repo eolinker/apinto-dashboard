@@ -752,7 +752,7 @@ func (m *modulePluginService) CheckPluginInstalled(ctx context.Context, pluginID
 }
 
 // TODO
-func (m *modulePluginService) CheckPluginISDeCompress(ctx context.Context, pluginDir string, pluginID string) error {
+func (m *modulePluginService) CheckPluginISDeCompress(ctx context.Context, pluginID string) error {
 	pluginInfo, err := m.pluginStore.GetPluginInfo(ctx, pluginID)
 	if err != nil {
 		return err
@@ -773,7 +773,7 @@ func (m *modulePluginService) CheckPluginISDeCompress(ctx context.Context, plugi
 				return err
 			}
 
-			err = common.UnzipFromBytes(packageEntry.Package, dirPath)
+			err = common.UnzipFromBytes(packageEntry.Package)
 			if err != nil {
 				//删除目录
 				os.RemoveAll(dirPath)
