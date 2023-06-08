@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/initialize"
 	apinto_module "github.com/eolinker/apinto-dashboard/module"
@@ -22,7 +21,6 @@ import (
 	"github.com/eolinker/eosc/log"
 	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
-	"os"
 	"time"
 )
 
@@ -35,7 +33,8 @@ type modulePluginService struct {
 	coreService            core.ICore
 	installedCache         IInstalledCache
 	navigationModulesCache module_plugin.INavigationModulesCache
-	lockService            locker_service.IAsynLockService
+	asynLockService        locker_service.IAsynLockService
+	syncLockService        locker_service.ISyncLockService
 }
 
 func newModulePluginService() module_plugin.IModulePluginService {
@@ -47,7 +46,8 @@ func newModulePluginService() module_plugin.IModulePluginService {
 	bean.Autowired(&s.coreService)
 	bean.Autowired(&s.installedCache)
 	bean.Autowired(&s.navigationModulesCache)
-	bean.Autowired(&s.lockService)
+	bean.Autowired(&s.asynLockService)
+	bean.Autowired(&s.syncLockService)
 	return s
 }
 
@@ -257,11 +257,11 @@ func (m *modulePluginService) InstallPlugin(ctx context.Context, userID int, id,
 	}
 
 	//全局异步锁
-	err = m.lockService.Lock(locker_service.LockNameModulePlugin, 0)
+	err = m.asynLockService.Lock(locker_service.LockNameModulePlugin, 0)
 	if err != nil {
 		return errors.New("现在有人在操作,请稍后再试")
 	}
-	defer m.lockService.Unlock(locker_service.LockNameModulePlugin, 0)
+	defer m.asynLockService.Unlock(locker_service.LockNameModulePlugin, 0)
 
 	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: id,
@@ -292,11 +292,11 @@ func (m *modulePluginService) UninstallPlugin(ctx context.Context, pluginID stri
 	}
 
 	//全局异步锁
-	err = m.lockService.Lock(locker_service.LockNameModulePlugin, 0)
+	err = m.asynLockService.Lock(locker_service.LockNameModulePlugin, 0)
 	if err != nil {
 		return errors.New("现在有人在操作,请稍后再试")
 	}
-	defer m.lockService.Unlock(locker_service.LockNameModulePlugin, 0)
+	defer m.asynLockService.Unlock(locker_service.LockNameModulePlugin, 0)
 
 	enableInfo, err := m.pluginEnableStore.Get(ctx, pluginInfo.Id)
 	if err != nil {
@@ -375,11 +375,11 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 	}
 
 	//全局异步锁
-	err = m.lockService.Lock(locker_service.LockNameModulePlugin, 0)
+	err = m.asynLockService.Lock(locker_service.LockNameModulePlugin, 0)
 	if err != nil {
 		return errors.New("现在有人在操作,请稍后再试")
 	}
-	defer m.lockService.Unlock(locker_service.LockNameModulePlugin, 0)
+	defer m.asynLockService.Unlock(locker_service.LockNameModulePlugin, 0)
 
 	//判断插件是否已启用
 	enable, err := m.pluginEnableStore.Get(ctx, pluginInfo.Id)
@@ -502,11 +502,11 @@ func (m *modulePluginService) DisablePlugin(ctx context.Context, userID int, plu
 		return err
 	}
 
-	err = m.lockService.Lock(locker_service.LockNameModulePlugin, 0)
+	err = m.asynLockService.Lock(locker_service.LockNameModulePlugin, 0)
 	if err != nil {
 		return err
 	}
-	defer m.lockService.Unlock(locker_service.LockNameModulePlugin, 0)
+	defer m.asynLockService.Unlock(locker_service.LockNameModulePlugin, 0)
 
 	enableInfo, err := m.pluginEnableStore.Get(ctx, pluginInfo.Id)
 	if err != nil {
@@ -633,10 +633,11 @@ func (m *modulePluginService) Install(ctx context.Context, userID int, id, name,
 		}
 
 		if resources != nil {
+			resourcesData, _ := json.Marshal(resources)
 			return m.pluginResourcesStore.Save(txCtx, &entry.PluginResources{
 				ID:        pluginInfo.Id,
 				Uuid:      id,
-				Resources: resources,
+				Resources: resourcesData,
 			})
 		}
 
@@ -751,35 +752,35 @@ func (m *modulePluginService) CheckPluginInstalled(ctx context.Context, pluginID
 	return isInstalled, nil
 }
 
-// TODO
-func (m *modulePluginService) CheckPluginISDeCompress(ctx context.Context, pluginID string) error {
+func (m *modulePluginService) CheckExternPluginInCache(ctx context.Context, pluginID string) error {
 	pluginInfo, err := m.pluginStore.GetPluginInfo(ctx, pluginID)
 	if err != nil {
 		return err
 	}
 	//若插件已安装且为非内置插件，检查本地缓存是否存在
 	if !pluginInfo.IsInner {
-		dirPath := fmt.Sprintf("%s/%s", pluginDir, pluginID)
-		// 检查目录是否存在, 若不存在，则从数据库读取数据并解压
-		if _, err := os.Stat(dirPath); os.IsNotExist(err) {
-			packageEntry, err := m.pluginPackageStore.Get(ctx, pluginInfo.Id)
-			if err != nil {
-				return err
-			}
-			//创建目录
-			err = os.MkdirAll(dirPath, os.ModePerm)
-			if err != nil {
-				log.Error("安装插件失败, 无法创建目录:", err)
-				return err
-			}
-
-			err = common.UnzipFromBytes(packageEntry.Package)
-			if err != nil {
-				//删除目录
-				os.RemoveAll(dirPath)
-				return err
-			}
+		// 检查内存中是否存在, 若不存在，则从数据库读取数据并解压
+		_, has := resources_manager.GetExternPluginResources(pluginID)
+		if has {
+			return nil
 		}
+
+		m.syncLockService.Lock(locker_service.LockNameModulePlugin, pluginInfo.Id)
+		defer m.syncLockService.Unlock(locker_service.LockNameModulePlugin, pluginInfo.Id)
+
+		_, has = resources_manager.GetExternPluginResources(pluginID)
+		if has {
+			return nil
+		}
+		resourcesEntry, err := m.pluginResourcesStore.Get(ctx, pluginInfo.Id)
+		if err != nil {
+			return err
+		}
+		resources := new(model.PluginResources)
+		_ = json.Unmarshal(resourcesEntry.Resources, resources)
+
+		resources_manager.StoreExternPluginResources(pluginID, resources)
+
 	}
 	return nil
 }
