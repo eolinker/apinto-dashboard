@@ -14,7 +14,6 @@ type ModulePlugin struct {
 	CName               string    `gorm:"size:255;not null;column:cname;comment:昵称" json:"cname"`
 	Resume              string    `gorm:"size:255;not null;column:resume;comment:简介" json:"resume"`
 	ICon                string    `gorm:"size:255;not null;column:icon;comment:图标的文件名, 相对路径" json:"icon"`
-	Type                int       `gorm:"type:tinyint(1);size:1;not null;column:type;comment:插件类型 0为框架模块 1为核心模块 2为内置模块 3为非内置" json:"type"`
 	Driver              string    `gorm:"size:255;not null;column:driver;comment:插件类型" json:"driver"`
 	IsCanDisable        bool      `gorm:"type:tinyint(1);size:1;not null;column:is_can_disable;comment:是否可停用" json:"is_can_disable"`
 	IsCanUninstall      bool      `gorm:"type:tinyint(1);size:1;not null;column:is_can_uninstall;comment:是否可卸载" json:"is_can_uninstall"`
