@@ -25,7 +25,7 @@ func init() {
 		CallerPrettyfier: nil,
 	}
 
-	fileWriter := filelog.NewFileWriteByPeriod(&filelog.Config{
+	fileWriter := filelog.NewFileWriteByPeriod(filelog.Config{
 		Dir:    GetLogDir(),
 		File:   GetLogName(),
 		Expire: GetLogExpire(),

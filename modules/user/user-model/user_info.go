@@ -27,7 +27,7 @@ type UserBase struct {
 }
 
 func CreateUserInfo(info *user_entry.UserInfo) *UserInfo {
-	return &UserInfo{
+	u := &UserInfo{
 		Id:            info.Id,
 		Sex:           info.Sex,
 		UserName:      info.UserName,
@@ -38,4 +38,8 @@ func CreateUserInfo(info *user_entry.UserInfo) *UserInfo {
 		Avatar:        info.Avatar,
 		LastLoginTime: info.LastLoginTime,
 	}
+	if u.NickName == "" {
+		u.NickName = u.UserName
+	}
+	return u
 }
