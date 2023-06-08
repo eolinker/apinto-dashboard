@@ -3,8 +3,6 @@ package model
 import (
 	"embed"
 	"fmt"
-	"mime"
-	"strings"
 )
 
 type PluginResources struct {
@@ -13,22 +11,14 @@ type PluginResources struct {
 	Files  map[string][]byte
 }
 
-func (p *PluginResources) ICon() ([]byte, string, bool) {
-	contentType := ""
-	extensionIdx := strings.LastIndex(p.Icon, ".")
-	if extensionIdx > -1 {
-		contentType = mime.TypeByExtension(p.Icon[extensionIdx:])
-	}
-	return p.Files[p.Icon], contentType, true
+func (p *PluginResources) ICon() ([]byte, bool) {
+	data, has := p.Files[p.Icon]
+	return data, has
 }
 
-func (p *PluginResources) RM() ([]byte, string, bool) {
-	contentType := ""
-	extensionIdx := strings.LastIndex(p.Readme, ".")
-	if extensionIdx > -1 {
-		contentType = mime.TypeByExtension(p.Readme[extensionIdx:])
-	}
-	return p.Files[p.Readme], contentType, true
+func (p *PluginResources) RM() ([]byte, bool) {
+	data, has := p.Files[p.Readme]
+	return data, has
 }
 
 func (p *PluginResources) ReadMe(name string) ([]byte, bool) {
@@ -49,30 +39,20 @@ type EmbedPluginResources struct {
 	Fs       embed.FS
 }
 
-func (e *EmbedPluginResources) ICon() ([]byte, string, bool) {
-	contentType := ""
-	extensionIdx := strings.LastIndex(e.Icon, ".")
-	if extensionIdx > -1 {
-		contentType = mime.TypeByExtension(e.Icon[extensionIdx:])
-	}
+func (e *EmbedPluginResources) ICon() ([]byte, bool) {
 	data, err := e.Fs.ReadFile(fmt.Sprintf("plugins/%s/%s", e.PluginID, e.Icon))
 	if err != nil {
-		return nil, "", false
+		return nil, false
 	}
-	return data, contentType, true
+	return data, true
 }
 
-func (e *EmbedPluginResources) RM() ([]byte, string, bool) {
-	contentType := ""
-	extensionIdx := strings.LastIndex(e.Readme, ".")
-	if extensionIdx > -1 {
-		contentType = mime.TypeByExtension(e.Readme[extensionIdx:])
-	}
+func (e *EmbedPluginResources) RM() ([]byte, bool) {
 	data, err := e.Fs.ReadFile(fmt.Sprintf("plugins/%s/%s", e.PluginID, e.Readme))
 	if err != nil {
-		return nil, "", false
+		return nil, false
 	}
-	return data, contentType, true
+	return data, true
 }
 
 func (e *EmbedPluginResources) ReadMe(name string) ([]byte, bool) {
