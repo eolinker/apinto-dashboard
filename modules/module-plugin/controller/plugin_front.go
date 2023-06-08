@@ -50,7 +50,7 @@ func (p *pluginFrontController) checkPluginID(c *gin.Context) {
 		return
 	}
 	//若插件存在
-	err = p.modulePluginService.CheckPluginISDeCompress(c, PluginDir, pluginID)
+	err = p.modulePluginService.CheckPluginISDeCompress(c, pluginID)
 	if err != nil {
 		log.Errorf("Decompress Plugin Package fail. pluginID:%s, err:%s", pluginID, err)
 		c.Abort()
