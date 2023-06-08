@@ -19,8 +19,9 @@ type IModulePluginService interface {
 	InstallPlugin(ctx context.Context, userID int, id, name, cname, driver, icon string, cfg *model.PluginCfg, resources *model.PluginResources) error
 	InstallInnerPlugin(ctx context.Context, id, name, cname, driver, icon string, isEnable, isCanDisable, isCanUninstall, visibleInNavigation, visibleInMarket bool, cfg *model.PluginCfg, resources *model.EmbedPluginResources) error
 	Install(ctx context.Context, userID int, id, name, cname, driver, icon string, isCanDisable, isCanUninstall, isInner, visibleInNavigation, visibleInMarket bool, cfg *model.PluginCfg, resources *model.PluginResources) error
-	UpdateInnerPlugin(ctx context.Context, id, name, cname, driver, icon string, isCanDisable, isCanUninstall, visibleInNavigation, visibleInMarket bool, pluginYml *model.PluginCfg) error
+	UpdateInnerPlugin(ctx context.Context, id, name, cname, driver, icon string, isCanDisable, isCanUninstall, visibleInNavigation, visibleInMarket bool, cfg *model.PluginCfg, resources *model.EmbedPluginResources) error
 	UninstallPlugin(ctx context.Context, pluginID string) error
+	DeleteInnerByIds(ctx context.Context, ids ...int) error
 	EnablePlugin(ctx context.Context, userID int, pluginUUID string, enableInfo *dto.PluginEnableInfo) error
 	DisablePlugin(ctx context.Context, userID int, pluginUUID string) error
 
