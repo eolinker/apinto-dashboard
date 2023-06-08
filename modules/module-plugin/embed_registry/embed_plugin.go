@@ -5,6 +5,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/common"
 	module_plugin "github.com/eolinker/apinto-dashboard/modules/module-plugin"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/model"
+	"github.com/eolinker/apinto-dashboard/modules/module-plugin/resources_manager"
 	"github.com/eolinker/eosc/common/bean"
 )
 
@@ -31,7 +32,7 @@ func InitEmbedPlugins() error {
 	for _, p := range embedPlugins {
 		//TODO 校验内置插件
 		epCfg := p.PluginCfg
-		pluginInfo, has := innerPluginsMap[epCfg.ID]
+		_, has := innerPluginsMap[epCfg.ID]
 		cfg := &model.PluginCfg{
 			Version:    epCfg.Version,
 			Navigation: epCfg.Navigation,
@@ -47,25 +48,28 @@ func InitEmbedPlugins() error {
 			if err != nil {
 				return err
 			}
-			continue
 		} else {
-			//判断version有没改变，有则更新
-			if pluginInfo.Version != p.PluginCfg.Version {
-				err = service.UpdateInnerPlugin(ctx, epCfg.ID, epCfg.Name, epCfg.CName, epCfg.Driver, epCfg.Icon, epCfg.IsCanDisable,
-					epCfg.IsCanUninstall, epCfg.VisibleInNavigation, epCfg.VisibleInMarket, cfg, p.Resources)
-				if err != nil {
-					return err
-				}
+			//有则更新
+			err = service.UpdateInnerPlugin(ctx, epCfg.ID, epCfg.Name, epCfg.CName, epCfg.Driver, epCfg.Icon, epCfg.IsCanDisable,
+				epCfg.IsCanUninstall, epCfg.VisibleInNavigation, epCfg.VisibleInMarket, cfg, p.Resources)
+			if err != nil {
+				return err
 			}
+
 			delete(innerPluginsMap, p.PluginCfg.ID)
 		}
+
+		resources_manager.StoreEmbedPluginResources(epCfg.ID, p.Resources)
 	}
 
 	//遍历innerPluginsMap, 删除不存在的内置插件
-	deleteIds := make([]int, 0, len(innerPluginsMap))
-	for _, v := range innerPluginsMap {
-		deleteIds = append(deleteIds, v.Id)
+	if len(innerPluginsMap) > 0 {
+		deleteIds := make([]int, 0, len(innerPluginsMap))
+		for _, v := range innerPluginsMap {
+			deleteIds = append(deleteIds, v.Id)
+		}
+		return service.DeleteInnerByIds(ctx, deleteIds...)
 	}
 
-	return service.DeleteInnerByIds(ctx, deleteIds...)
+	return nil
 }

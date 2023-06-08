@@ -14,9 +14,8 @@ import (
 )
 
 type modulePlugin struct {
-	pluginStore        store.IModulePluginStore
-	pluginEnableStore  store.IModulePluginEnableStore
-	pluginPackageStore store.IModulePluginPackageStore
+	pluginStore       store.IModulePluginStore
+	pluginEnableStore store.IModulePluginEnableStore
 
 	navigationModulesCache module_plugin.INavigationModulesCache
 	commonGroup            group.ICommonGroupService
@@ -28,7 +27,6 @@ func newModulePlugin() module_plugin.IModulePlugin {
 	s := &modulePlugin{}
 	bean.Autowired(&s.pluginStore)
 	bean.Autowired(&s.pluginEnableStore)
-	bean.Autowired(&s.pluginPackageStore)
 
 	bean.Autowired(&s.navigationModulesCache)
 	bean.Autowired(&s.commonGroup)
