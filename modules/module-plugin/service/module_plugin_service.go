@@ -27,7 +27,6 @@ import (
 type modulePluginService struct {
 	pluginStore          store.IModulePluginStore
 	pluginEnableStore    store.IModulePluginEnableStore
-	pluginPackageStore   store.IModulePluginPackageStore
 	pluginResourcesStore store.IPluginResources
 
 	coreService            core.ICore
@@ -41,7 +40,7 @@ func newModulePluginService() module_plugin.IModulePluginService {
 	s := &modulePluginService{}
 	bean.Autowired(&s.pluginStore)
 	bean.Autowired(&s.pluginEnableStore)
-	bean.Autowired(&s.pluginPackageStore)
+	bean.Autowired(&s.pluginResourcesStore)
 
 	bean.Autowired(&s.coreService)
 	bean.Autowired(&s.installedCache)
@@ -458,18 +457,14 @@ func (m *modulePluginService) EnablePlugin(ctx context.Context, userID int, plug
 
 	err = m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
 		enableEntry := &entry.ModulePluginEnable{
-			Id:              pluginInfo.Id,
-			Name:            enableInfo.Name,
-			Navigation:      pluginInfo.Navigation,
-			IsEnable:        statusPluginEnable,
-			IsCanDisable:    pluginInfo.IsCanDisable,
-			IsCanUninstall:  pluginInfo.IsCanUninstall,
-			IsShowServer:    plugin.IsShowServer(),
-			IsPluginVisible: pluginInfo.VisibleInNavigation,
-			Frontend:        plugin.GetPluginFrontend(enableInfo.Name),
-			Config:          config,
-			Operator:        userID,
-			UpdateTime:      time.Now(),
+			Id:         pluginInfo.Id,
+			Name:       enableInfo.Name,
+			Navigation: pluginInfo.Navigation,
+			IsEnable:   statusPluginEnable,
+			Frontend:   plugin.GetPluginFrontend(enableInfo.Name),
+			Config:     config,
+			Operator:   userID,
+			UpdateTime: time.Now(),
 		}
 
 		return m.pluginEnableStore.Save(txCtx, enableEntry)
@@ -598,7 +593,6 @@ func (m *modulePluginService) Install(ctx context.Context, userID int, id, name,
 			CName:               cname,
 			Resume:              cfg.Resume,
 			ICon:                icon,
-			Type:                cfg.Type,
 			Driver:              driver,
 			IsCanDisable:        isCanDisable,
 			IsCanUninstall:      isCanUninstall,
@@ -614,18 +608,14 @@ func (m *modulePluginService) Install(ctx context.Context, userID int, id, name,
 			return err
 		}
 		enableInfo := &entry.ModulePluginEnable{
-			Id:              pluginInfo.Id,
-			Name:            name,
-			Navigation:      cfg.Navigation,
-			IsEnable:        statusPluginDisable,
-			IsCanDisable:    isCanDisable,
-			IsCanUninstall:  isCanUninstall,
-			IsShowServer:    plugin.IsShowServer(),
-			Frontend:        plugin.GetPluginFrontend(name),
-			IsPluginVisible: true,
-			Config:          []byte{},
-			Operator:        userID,
-			UpdateTime:      t,
+			Id:         pluginInfo.Id,
+			Name:       name,
+			Navigation: cfg.Navigation,
+			IsEnable:   statusPluginDisable,
+			Frontend:   plugin.GetPluginFrontend(name),
+			Config:     []byte{},
+			Operator:   userID,
+			UpdateTime: t,
 		}
 
 		if err = m.pluginEnableStore.Save(txCtx, enableInfo); err != nil {
@@ -671,7 +661,6 @@ func (m *modulePluginService) UpdateInnerPlugin(ctx context.Context, id, name, c
 	pluginInfo.CName = cname
 	pluginInfo.Resume = cfg.Resume
 	pluginInfo.ICon = icon
-	pluginInfo.Type = cfg.Type
 	pluginInfo.Driver = driver
 	pluginInfo.IsInner = true
 	pluginInfo.IsCanDisable = isCanDisable
@@ -685,11 +674,11 @@ func (m *modulePluginService) UpdateInnerPlugin(ctx context.Context, id, name, c
 
 	pluginDriver, has := apinto_module.GetDriver(driver)
 	if !has {
-		panic(fmt.Errorf("not find driver:%s", driver))
+		return fmt.Errorf("not find driver:%s", driver)
 	}
 	plugin, err := pluginDriver.CreatePlugin(cfg.Define)
 	if err != nil {
-		panic(fmt.Errorf("create plugin %s error:%s", name, err.Error()))
+		return fmt.Errorf("create plugin %s error:%s", name, err.Error())
 	}
 
 	err = m.pluginStore.Transaction(ctx, func(txCtx context.Context) error {
@@ -702,10 +691,6 @@ func (m *modulePluginService) UpdateInnerPlugin(ctx context.Context, id, name, c
 		}
 		//name和enable不更新
 		enableInfo.Navigation = cfg.Navigation
-		enableInfo.IsCanDisable = isCanDisable
-		enableInfo.IsCanUninstall = isCanUninstall
-		enableInfo.IsShowServer = plugin.IsShowServer()
-		enableInfo.IsPluginVisible = visibleInNavigation
 		enableInfo.Frontend = plugin.GetPluginFrontend(enableInfo.Name)
 		enableInfo.Operator = 0
 		enableInfo.UpdateTime = t

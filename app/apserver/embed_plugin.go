@@ -1,4 +1,4 @@
-package embed_registry
+package main
 
 import (
 	_ "github.com/eolinker/apinto-dashboard/initialize"
