@@ -43,11 +43,12 @@ func decode(v any) (*user_model.UserBase, error) {
 
 func (u *userInfoService) save(ctx context.Context, info *user_entry.UserInfo) error {
 	return u.userInfoStore.Transaction(ctx, func(txCtx context.Context) error {
-		userModel := user_model.CreateUserInfo(info)
+
 		err := u.userInfoStore.Save(ctx, info)
 		if err != nil {
 			return err
 		}
+		userModel := user_model.CreateUserInfo(info)
 		err = u.userNameCache.Set(ctx, userModel.UserName, userModel)
 		if err != nil {
 			return err
