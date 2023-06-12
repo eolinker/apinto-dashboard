@@ -420,7 +420,7 @@ func (d *dynamicService) Online(ctx context.Context, namespaceId int, profession
 
 		err = d.saveVersion(ctx, version, history, c.Name, c.Addr)
 		if err != nil {
-			errInfo := fmt.Sprintf("fail to online config in cluster(%s),addr is %s,profession is %s,uuid is %s,config is %s", c.Name, c.Addr, profession, name, config)
+			errInfo := fmt.Sprintf("fail to online config in cluster(%s),addr is %s,profession is %s,uuid is %s,config is %s,err is %s", c.Name, c.Addr, profession, name, config, err.Error())
 			log.Error(errInfo)
 			failClusters = append(failClusters, errInfo)
 			continue
