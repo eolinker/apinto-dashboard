@@ -29,7 +29,7 @@ type IBaseStore[T any] interface {
 	Get(ctx context.Context, id int) (*T, error)
 	Save(ctx context.Context, t *T) error
 	UpdateByUnique(ctx context.Context, t *T, uniques []string) error
-	Delete(ctx context.Context, id int) (int, error)
+	Delete(ctx context.Context, id ...int) (int, error)
 	UpdateWhere(ctx context.Context, t *T, m map[string]interface{}) (int, error)
 	Update(ctx context.Context, t *T) (int, error)
 	DeleteWhere(ctx context.Context, m map[string]interface{}) (int, error)
@@ -106,7 +106,7 @@ func (b *BaseStore[T]) UpdateByUnique(ctx context.Context, t *T, uniques []strin
 	}).Create(t).Error
 }
 
-func (b *BaseStore[T]) Delete(ctx context.Context, id int) (int, error) {
+func (b *BaseStore[T]) Delete(ctx context.Context, id ...int) (int, error) {
 
 	result := b.DB(ctx).Delete(b.TargetType, id)
 

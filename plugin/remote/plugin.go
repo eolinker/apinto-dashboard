@@ -52,7 +52,7 @@ func (r *rPlugin) IsPluginVisible() bool {
 }
 
 func (r *rPlugin) IsShowServer() bool {
-	return false
+	return !r.define.Internet
 }
 
 func (r *rPlugin) IsCanUninstall() bool {
