@@ -5535,10 +5535,10 @@ eo-ng-radio@0.1.13:
   dependencies:
     tslib "^2.3.0"
 
-eo-ng-select@0.1.15:
-  version "0.1.15"
-  resolved "https://registry.npmmirror.com/eo-ng-select/-/eo-ng-select-0.1.15.tgz#b2223bd5f95613009526b4ff9f6a99b7516c8116"
-  integrity sha512-NYXZ0JhNRQRhgrSshYZy1yL9By+JjTOncje7t47tgdkh9VjsslNQemreJBQk1xFUayluJbInZVA70c9S6es44g==
+eo-ng-select@0.1.20:
+  version "0.1.20"
+  resolved "https://registry.npmmirror.com/eo-ng-select/-/eo-ng-select-0.1.20.tgz#e4edeae930e5d7db5355486095963e60fd7c5f14"
+  integrity sha512-3rzC9BU41rIjeJNFnou7awK4j/7pafb1zqX0Z9oVParegBDUBmFE2XIrF3iLIACqypujq+9Q2HOq13nDII+4gw==
   dependencies:
     tslib "^2.3.0"
 
@@ -5549,10 +5549,10 @@ eo-ng-switch@0.1.10:
   dependencies:
     tslib "^2.3.0"
 
-eo-ng-table@0.1.42:
-  version "0.1.42"
-  resolved "https://registry.npmmirror.com/eo-ng-table/-/eo-ng-table-0.1.42.tgz#a707dcc24db2d8a74d5824dae50184218f556793"
-  integrity sha512-2FTJ2812j5Kbipvrfu98lkBEMb/lYvcJogpdrUH8FWC8efC15/XnRmq2wYy1MptOZiq68LuPKcY/9I8OnjcwKg==
+eo-ng-table@0.1.61:
+  version "0.1.61"
+  resolved "https://registry.npmmirror.com/eo-ng-table/-/eo-ng-table-0.1.61.tgz#7d0c0373b7881fd5223c2dade330b993a1a65a63"
+  integrity sha512-YOnxcR/EODty1EFi4JCI3D/lW0RyB9Fd/2xA8wCQ/H7hAVHVlb40zbOWTX19hK0iSZg0kTgwOXFkisgct0hBoA==
   dependencies:
     tslib "^2.3.0"
 
