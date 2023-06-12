@@ -62,10 +62,11 @@ func (r *remotePluginController) getOpenMode() gin.HandlerFunc {
 		module := common.Map{}
 		module["name"] = r.moduleName
 
-		//兼容remoteDriver是内置还是安装的情况
-		server := r.cfg.Server
-		if server == "" {
+		server := ""
+		if r.define.Internet {
 			server = r.define.Server
+		} else {
+			server = r.cfg.Server
 		}
 
 		url := strings.TrimSuffix(server, "/")
