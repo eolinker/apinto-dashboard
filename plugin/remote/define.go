@@ -1,6 +1,7 @@
 package remote
 
 type Define struct {
+	Internet   bool                 `json:"internet" yaml:"internet"`
 	Server     string               `json:"server" yaml:"server"`
 	Path       string               `json:"path" yaml:"path"`
 	Headers    []ExtendParamsRender `json:"headers,omitempty" yaml:"headers,omitempty"`       //local

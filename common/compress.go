@@ -6,12 +6,10 @@ import (
 	"bytes"
 	"compress/gzip"
 	"fmt"
+	"github.com/eolinker/eosc/log"
 	"io"
 	"os"
 	"path"
-	"path/filepath"
-
-	"github.com/eolinker/eosc/log"
 )
 
 // DeCompress 解压 tar.gz
@@ -63,21 +61,19 @@ func DeCompress(srcFile io.Reader, dest string) error {
 	return nil
 }
 
-func UnzipFromBytes(packageContent []byte, dest string) error {
+func UnzipFromBytes(packageContent []byte) (map[string][]byte, error) {
 	// 通过字节流创建zip的Reader对象
 	zr, err := zip.NewReader(bytes.NewReader(packageContent), int64(len(packageContent)))
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// 解压
-	return Unzip(zr, dest)
+	return Unzip(zr)
 }
 
-func Unzip(src *zip.Reader, dst string) error {
-	// 强制转换一遍目录
-	dst = filepath.Clean(dst)
-
+func Unzip(src *zip.Reader) (map[string][]byte, error) {
+	files := make(map[string][]byte)
 	// 遍历压缩文件
 	for _, file := range src.File {
 		// 在闭包中完成以下操作可以及时释放文件句柄
@@ -86,24 +82,8 @@ func Unzip(src *zip.Reader, dst string) error {
 			if file.Mode().IsDir() {
 				return nil
 			}
-			decodeName := file.Name
-			//if file.Flags == 0 {
-			//	//如果标致位是0  则是默认的本地编码   默认为gbk
-			//	i := bytes.NewReader([]byte(file.Name))
-			//	decoder := transform.NewReader(i, simplifiedchinese.GB18030.NewDecoder())
-			//	content, _ := io.ReadAll(decoder)
-			//	decodeName = string(content)
-			//} else {
-			//如果标志为是 1 << 11也就是 2048  则是utf-8编码
-			//decodeName = file.Name
-			//}
 			// 配置输出目标路径
-			filename := filepath.Join(dst, decodeName)
-			// 创建目标路径所在文件夹
-			e := os.MkdirAll(filepath.Dir(filename), 0666)
-			if e != nil {
-				return e
-			}
+			filePath := file.Name
 
 			// 打开这个压缩文件
 			zfr, e := file.Open()
@@ -112,29 +92,23 @@ func Unzip(src *zip.Reader, dst string) error {
 			}
 			defer zfr.Close()
 
-			// 创建目标文件
-			fw, e := os.Create(filename)
-			if e != nil {
-				return e
+			// 读出内容
+			buf := new(bytes.Buffer)
+			_, err := buf.ReadFrom(zfr)
+			if err != nil {
+				return err
 			}
-			defer fw.Close()
+			files[filePath] = buf.Bytes()
 
-			// 执行拷贝
-			_, e = io.Copy(fw, zfr)
-			if e != nil {
-				return e
-			}
-
-			// 拷贝成功
 			return nil
 		}()
 
 		// 是否发生异常
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 
 	// 解压完成
-	return nil
+	return files, nil
 }
