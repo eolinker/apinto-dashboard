@@ -24,7 +24,5 @@ func newPluginResourcesStore(db store.IDB) IPluginResources {
 	if err != nil {
 		panic(err)
 	}
-	base := store.CreateStore[entry.PluginResources](db)
-
-	return &pluginResources{IBaseStore: base}
+	return &pluginResources{IBaseStore: store.CreateStore[entry.PluginResources](db)}
 }
