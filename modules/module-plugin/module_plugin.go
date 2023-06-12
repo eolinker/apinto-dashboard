@@ -15,15 +15,18 @@ type IModulePluginService interface {
 	GetInnerPluginList(ctx context.Context) ([]*model.ModulePluginInfo, error)
 	GetPluginEnableInfo(ctx context.Context, pluginUUID string) (*model.PluginEnableInfo, error)
 	GetPluginEnableRender(ctx context.Context, pluginUUID string) (*model.PluginEnableRender, error)
-	InstallPlugin(ctx context.Context, userID int, pluginYml *model.PluginYmlCfg, packageContent []byte) error
-	UninstallPlugin(ctx context.Context, userID int, pluginID string) error
+
+	InstallPlugin(ctx context.Context, userID int, id, name, cname, driver, icon string, cfg *model.PluginCfg, resources *model.PluginResources) error
+	InstallInnerPlugin(ctx context.Context, id, name, cname, driver, icon string, isEnable, isCanDisable, isCanUninstall, visibleInNavigation, visibleInMarket bool, cfg *model.PluginCfg, resources *model.EmbedPluginResources) error
+	Install(ctx context.Context, userID int, id, name, cname, driver, icon string, isCanDisable, isCanUninstall, isInner, visibleInNavigation, visibleInMarket bool, cfg *model.PluginCfg, resources *model.PluginResources) error
+	UpdateInnerPlugin(ctx context.Context, id, name, cname, driver, icon string, isCanDisable, isCanUninstall, visibleInNavigation, visibleInMarket bool, cfg *model.PluginCfg, resources *model.EmbedPluginResources) error
+	UninstallPlugin(ctx context.Context, pluginID string) error
+	DeleteInnerByIds(ctx context.Context, ids ...int) error
 	EnablePlugin(ctx context.Context, userID int, pluginUUID string, enableInfo *dto.PluginEnableInfo) error
 	DisablePlugin(ctx context.Context, userID int, pluginUUID string) error
 
 	CheckPluginInstalled(ctx context.Context, pluginID string) (bool, error)
-	CheckPluginISDeCompress(ctx context.Context, pluginDir string, pluginID string) error
-	InstallInnerPlugin(ctx context.Context, pluginYml *model.InnerPluginYmlCfg) error
-	UpdateInnerPlugin(ctx context.Context, pluginYml *model.InnerPluginYmlCfg) error
+	CheckExternPluginInCache(ctx context.Context, pluginID string) error
 }
 
 type IModulePlugin interface {
