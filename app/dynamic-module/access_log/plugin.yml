@@ -825,7 +825,7 @@ define:  # 动态模块定义
                       }
                   }
               },
-              "version": {
+              "kafka_version": {
                   "title": "版本",
                   "x-decorator": "FormItem",
                   "x-component": "Select",
@@ -835,143 +835,144 @@ define:  # 动态模块定义
                       "labelCol": 6,
                       "wrapperCol": 10
                   },
-                  "name": "version",
+                  "name": "kafka_version",
+                  "default":"3.1.0",
                   "required": true,
                   "enum": [
                       {
                           "children": [],
-                          "label": "3.1.0.0",
-                          "value": "3.1.0.0"
+                          "label": "3.1.0",
+                          "value": "3.1.0"
                       },
                       {
                           "children": [],
-                          "label": "3.0.0.0",
-                          "value": "3.0.0.0"
+                          "label": "3.0.0",
+                          "value": "3.0.0"
                       },
                       {
                           "children": [],
-                          "label": "2.8.1.0",
-                          "value": "2.8.1.0"
+                          "label": "2.8.1",
+                          "value": "2.8.1"
                       },
                       {
                           "children": [],
-                          "label": "2.8.0.0",
-                          "value": "2.8.0.0"
+                          "label": "2.8.0",
+                          "value": "2.8.0"
                       },
                       {
                           "children": [],
-                          "label": "2.7.1.0",
-                          "value": "2.7.1.0"
+                          "label": "2.7.1",
+                          "value": "2.7.1"
                       },
                       {
                           "children": [],
-                          "label": "2.7.0.0",
-                          "value": "2.7.0.0"
+                          "label": "2.7.0",
+                          "value": "2.7.0"
                       },
                       {
                           "children": [],
-                          "label": "2.6.2.0",
-                          "value": "2.6.2.0"
+                          "label": "2.6.2",
+                          "value": "2.6.2"
                       },
                       {
                           "children": [],
-                          "label": "2.6.1.0",
-                          "value": "2.6.1.0"
+                          "label": "2.6.1",
+                          "value": "2.6.1"
                       },
                       {
                           "children": [],
-                          "label": "2.6.0.0",
-                          "value": "2.6.0.0"
+                          "label": "2.6.0",
+                          "value": "2.6.0"
                       },
                       {
                           "children": [],
-                          "label": "2.5.1.0",
-                          "value": "2.5.1.0"
+                          "label": "2.5.1",
+                          "value": "2.5.1"
                       },
                       {
                           "children": [],
-                          "label": "2.5.0.0",
-                          "value": "2.5.0.0"
+                          "label": "2.5.0",
+                          "value": "2.5.0"
                       },
                       {
                           "children": [],
-                          "label": "2.4.1.0",
-                          "value": "2.4.1.0"
+                          "label": "2.4.1",
+                          "value": "2.4.1"
                       },
                       {
                           "children": [],
-                          "label": "2.4.0.0",
-                          "value": "2.4.0.0"
+                          "label": "2.4.0",
+                          "value": "2.4.0"
                       },
                       {
                           "children": [],
-                          "label": "2.3.1.0",
-                          "value": "2.3.1.0"
+                          "label": "2.3.1",
+                          "value": "2.3.1"
                       },
                       {
                           "children": [],
-                          "label": "2.3.0.0",
-                          "value": "2.3.0.0"
+                          "label": "2.3.0",
+                          "value": "2.3.0"
                       },
                       {
                           "children": [],
-                          "label": "2.2.2.0",
-                          "value": "2.2.2.0"
+                          "label": "2.2.2",
+                          "value": "2.2.2"
                       },
                       {
                           "children": [],
-                          "label": "2.2.1.0",
-                          "value": "2.2.1.0"
+                          "label": "2.2.1",
+                          "value": "2.2.1"
                       },
                       {
                           "children": [],
-                          "label": "2.2.0.0",
-                          "value": "2.2.0.0"
+                          "label": "2.2.0",
+                          "value": "2.2.0"
                       },
                       {
                           "children": [],
-                          "label": "2.1.1.0",
-                          "value": "2.1.1.0"
+                          "label": "2.1.1",
+                          "value": "2.1.1"
                       },
                       {
                           "children": [],
-                          "label": "2.1.0.0",
-                          "value": "2.1.0.0"
+                          "label": "2.1.0",
+                          "value": "2.1.0"
                       },
                       {
                           "children": [],
-                          "label": "2.0.1.0",
-                          "value": "2.0.1.0"
+                          "label": "2.0.1",
+                          "value": "2.0.1"
                       },
                       {
                           "children": [],
-                          "label": "2.0.0.0",
-                          "value": "2.0.0.0"
+                          "label": "2.0.0",
+                          "value": "2.0.0"
                       },
                       {
                           "children": [],
-                          "label": "1.1.1.0",
-                          "value": "1.1.1.0"
+                          "label": "1.1.1",
+                          "value": "1.1.1"
                       },
                       {
                           "children": [],
-                          "label": "1.1.0.0",
-                          "value": "1.1.0.0"
+                          "label": "1.1.0",
+                          "value": "1.1.0"
                       },
                       {
                           "children": [],
-                          "label": "1.0.2.0",
-                          "value": "1.0.2.0"
+                          "label": "1.0.2",
+                          "value": "1.0.2"
                       },
                       {
                           "children": [],
-                          "label": "1.0.1.0",
-                          "value": "1.0.1.0"
+                          "label": "1.0.1",
+                          "value": "1.0.1"
                       },
                       {
                           "children": [],
-                          "label": "1.0.0.0",
-                          "value": "1.0.0.0"
+                          "label": "1.0.0",
+                          "value": "1.0.0"
                       },
                       {
                           "children": [],

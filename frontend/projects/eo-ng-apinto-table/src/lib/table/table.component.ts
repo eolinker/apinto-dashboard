@@ -181,6 +181,9 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
       case '上线管理': {
         return 'shangxianguanli-new'
       }
+      case '发布管理': {
+        return 'shangxianguanli-new'
+      }
       case '上线': {
         return 'circle-right-up-7mnlo5g9'
       }
