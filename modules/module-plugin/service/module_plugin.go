@@ -14,9 +14,8 @@ import (
 )
 
 type modulePlugin struct {
-	pluginStore        store.IModulePluginStore
-	pluginEnableStore  store.IModulePluginEnableStore
-	pluginPackageStore store.IModulePluginPackageStore
+	pluginStore       store.IModulePluginStore
+	pluginEnableStore store.IModulePluginEnableStore
 
 	navigationModulesCache module_plugin.INavigationModulesCache
 	commonGroup            group.ICommonGroupService
@@ -28,7 +27,6 @@ func newModulePlugin() module_plugin.IModulePlugin {
 	s := &modulePlugin{}
 	bean.Autowired(&s.pluginStore)
 	bean.Autowired(&s.pluginEnableStore)
-	bean.Autowired(&s.pluginPackageStore)
 
 	bean.Autowired(&s.navigationModulesCache)
 	bean.Autowired(&s.commonGroup)
@@ -74,7 +72,7 @@ func (m *modulePlugin) GetNavigationModules(ctx context.Context) ([]*model.Navig
 	list := make([]*model.NavigationModuleInfo, 0, len(moduleInfos))
 	for _, module := range moduleInfos {
 		//导航不存在表示不需要在前端显示
-		if !module.IsPluginVisible {
+		if !module.VisibleInNavigation {
 			continue
 		}
 		info := &model.NavigationModuleInfo{
@@ -106,8 +104,8 @@ func (m *modulePlugin) GetEnabledPluginByModuleName(ctx context.Context, moduleN
 	return &model.ModulePluginInfo{
 		ModulePlugin: plugin,
 		Enable:       true,
-		CanDisable:   enableInfo.IsCanDisable,
-		Uninstall:    enableInfo.IsCanUninstall,
+		CanDisable:   plugin.IsCanDisable,
+		Uninstall:    plugin.IsCanUninstall,
 	}, nil
 
 }
