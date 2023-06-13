@@ -15,7 +15,7 @@ import { ApiHttpCreateComponent } from './api-list/create/http-create/http-creat
 import { ApiHttpMessageComponent } from './api-list/message/http-message/http-message.component'
 import { ApiWebsocketMessageComponent } from './api-list/message/websocket-message/websocket-message.component'
 
-const routes: Routes = [{
+export const routes: Routes = [{
   path: '',
   component: RouterComponent,
   data: { id: '4' },

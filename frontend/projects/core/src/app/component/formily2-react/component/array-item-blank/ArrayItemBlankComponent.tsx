@@ -46,7 +46,8 @@ export const ArrayItemBlankComponent = React.forwardRef(
                   }
                 }
                 return newValue
-              })
+              }),
+            ...getDefaultListItem()
           ]
         : [...getDefaultListItem()]
     )
@@ -92,16 +93,16 @@ export const ArrayItemBlankComponent = React.forwardRef(
     }
 
     const addLine = (index: number) => {
+      resList.splice(index + 1, 0, ...getDefaultListItem())
       const newKvList = [...resList]
-      newKvList.splice(index + 1, 0, ...getDefaultListItem())
       setResList(newKvList)
       emitNewArr()
     }
 
     const removeLine = (index: number) => {
+      resList.splice(index, 1)
       const newKvList = [...resList]
-      newKvList.splice(index, 1)
-      setResList(newKvList)
+      setResList([...newKvList])
       emitNewArr()
     }
 
@@ -131,27 +132,31 @@ export const ArrayItemBlankComponent = React.forwardRef(
                 )
               })}
 
-              <a
-                className="array_item_addition ant-btn-text anticon"
-                onClick={() => addLine(index)}
-              >
-                <span>
-                  <svg className="iconpark-icon">
-                    <use href="#add-circle"></use>
-                  </svg>
-                </span>
-              </a>
-              {index !== 0 && (
-                <a
-                  className="array_item_addition ant-btn-text anticon"
-                  onClick={() => removeLine(index)}
-                >
-                  <span>
-                    <svg className="iconpark-icon">
-                      <use href="#reduce-one"></use>
-                    </svg>
-                  </span>
-                </a>
+              {index !== resList.length - 1 && (
+                <div style={{ display: 'inline-block' }}>
+                  {n[dataFormat[0].key] && (
+                    <a
+                      className="array_item_addition ant-btn-text anticon"
+                      onClick={() => addLine(index)}
+                    >
+                      <span>
+                        <svg className="iconpark-icon">
+                          <use href="#add-circle"></use>
+                        </svg>
+                      </span>
+                    </a>
+                  )}
+                  <a
+                    className="array_item_addition ant-btn-text anticon"
+                    onClick={() => removeLine(index)}
+                  >
+                    <span>
+                      <svg className="iconpark-icon">
+                        <use href="#reduce-one"></use>
+                      </svg>
+                    </span>
+                  </a>
+                </div>
               )}
             </div>
           )

@@ -145,7 +145,9 @@ const containerElementName = 'customReactComponentContainer'
   ]
 })
 export class CustomReactComponentWrapperComponent {
-  @ViewChild(containerElementName, { static: true }) containerRef!: ElementRef
+  @ViewChild(containerElementName, { static: true }) containerRef:
+    | ElementRef
+    | undefined = undefined
 
   @Output() public componentClick = new EventEmitter<void>()
   @Output() onSubmit = new EventEmitter<any>()
@@ -296,7 +298,7 @@ export class CustomReactComponentWrapperComponent {
   }
 
   ngOnDestroy() {
-    ReactDOM.unmountComponentAtNode(this.containerRef.nativeElement)
+    ReactDOM.unmountComponentAtNode(this.containerRef!.nativeElement)
   }
 
   handlerSubmit = (value: any) => {
@@ -319,7 +321,7 @@ export class CustomReactComponentWrapperComponent {
           />
         </div>
       </React.StrictMode>,
-      this.containerRef.nativeElement
+      this.containerRef!.nativeElement
     )
   }
 }

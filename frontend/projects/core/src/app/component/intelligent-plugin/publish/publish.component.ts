@@ -1,4 +1,4 @@
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
+import { ChangeDetectorRef, Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
 import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { EoIntelligentPluginService } from '../intelligent-plugin.service'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
@@ -24,10 +24,12 @@ export class EoIntelligentPluginPublishComponent implements OnInit {
   moduleName:string = ''
   closeModal:any
   nzDisabled:boolean = false
+  returnToSdk:Function|undefined
   constructor (
     public message: EoNgFeedbackMessageService,
     private service:EoIntelligentPluginService,
-    public api:ApiService) {}
+    public api:ApiService,
+    public cdref:ChangeDetectorRef) {}
 
   ngOnInit (): void {
     this.getPublishList()
@@ -35,12 +37,15 @@ export class EoIntelligentPluginPublishComponent implements OnInit {
 
   ngAfterViewInit () {
     this.publishTableBody = [...this.service.createPluginTbody(this)]
+    this.cdref.detectChanges()
   }
 
   getPublishList () {
     this.api.get(`dynamic/${this.moduleName}/cluster/${this.id}`).subscribe((resp:{code:number, msg:string, data:DynamicPublishData}) => {
       if (resp.code === 0) {
         this.publishList = resp.data.clusters
+      } else {
+        this.returnToSdk && this.returnToSdk(resp)
       }
     })
   }
@@ -86,6 +91,7 @@ export class EoIntelligentPluginPublishComponent implements OnInit {
         this.message.success(resp.msg)
         this.closeModal && this.closeModal()
       }
+      this.returnToSdk && this.returnToSdk(resp)
     })
   }
 
@@ -100,6 +106,7 @@ export class EoIntelligentPluginPublishComponent implements OnInit {
         this.message.success(resp.msg)
         this.closeModal && this.closeModal()
       }
+      this.returnToSdk && this.returnToSdk(resp)
     })
   }
 }
