@@ -60,13 +60,13 @@ export class SystemWebhookConfigComponent implements OnInit {
       return this.nzDisabled
     }
     this.responseHeaderTableBody[2].showFn = (item: any) => {
-      return item === this.responseHeaderList[0]
+      return item !== this.responseHeaderList[this.responseHeaderList.length - 1] && !item.key
     }
     this.responseHeaderTableBody[2].btns[0].disabledFn = () => {
       return this.nzDisabled
     }
     this.responseHeaderTableBody[3].showFn = (item: any) => {
-      return item !== this.responseHeaderList[0]
+      return item !== this.responseHeaderList[this.responseHeaderList.length - 1] && item.key
     }
     this.responseHeaderTableBody[3].btns[0].disabledFn = () => {
       return this.nzDisabled
@@ -100,7 +100,7 @@ export class SystemWebhookConfigComponent implements OnInit {
       for (const key of keys) {
         res.push({ key: key, value: rawData[key] })
       }
-      return res
+      return [...res, { key: '', value: '' }]
     }
     return [{ key: '', value: '' }]
   }

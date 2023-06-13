@@ -6,13 +6,13 @@ import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feed
 import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { NzModalRef } from 'ng-zorro-antd/modal'
 import { Subscription } from 'rxjs'
-import { MODAL_NORMAL_SIZE, MODAL_SMALL_SIZE } from '../../../constant/app.config'
+import { MODAL_SMALL_SIZE } from '../../../constant/app.config'
 import { EmptyHttpResponse } from '../../../constant/type'
 import { ApiService } from '../../../service/api.service'
 import { BaseInfoService } from '../../../service/base-info.service'
-import { ServiceGovernancePublishComponent } from '../publish/publish.component'
 import { strategiesTableBody, strategiesTableHeadName } from '../types/conf'
 import { StrategyListData } from '../types/types'
+import { ServiceGovernanceService } from '../service-governance.service'
 
 @Component({
   selector: 'eo-ng-serv-governance-list',
@@ -50,8 +50,9 @@ export class ListComponent implements OnInit {
                 private message: EoNgFeedbackMessageService,
                 private modalService:EoNgFeedbackModalService,
                 private api:ApiService,
+                private service:ServiceGovernanceService,
                 private router:Router) {
-    this.strategyType = this.router.url.split('/')[2]
+    this.strategyType = this.router.url.split('/')[this.router.url.split('/').indexOf('serv-governance') + 1]
   }
 
   ngOnInit (): void {
@@ -316,22 +317,8 @@ export class ListComponent implements OnInit {
   openDrawer (type:string) {
     switch (type) {
       case 'publish': {
-        this.drawerPublishRef = this.modalService.create({
-          nzTitle: '发布策略',
-          nzWidth: MODAL_NORMAL_SIZE,
-          nzContent: ServiceGovernancePublishComponent,
-          nzComponentParams: {
-            strategyType: this.strategyType,
-            clusterName: this.clusterName,
-            strategiesStatusTpl: this.strategiesStatusTpl,
-            closeModal: this.cancelDrawer
-          },
-          nzOkDisabled: this.nzDisabled,
-          nzOnOk: (component:ServiceGovernancePublishComponent) => {
-            component.publish()
-            return false
-          }
-        }) }
+        this.service.publishStrategyModal(this.strategyType, this.clusterName, this)
+      }
     }
   }
 

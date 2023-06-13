@@ -1,5 +1,5 @@
 /* eslint-disable dot-notation */
-import { Component, Input, OnInit, TemplateRef, ViewChild } from '@angular/core'
+import { ChangeDetectorRef, Component, Input, OnInit, TemplateRef, ViewChild } from '@angular/core'
 import { Router, NavigationEnd } from '@angular/router'
 import { NzTreeNodeOptions } from 'ng-zorro-antd/tree'
 import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feedback'
@@ -72,7 +72,9 @@ export class ApiManagementListComponent implements OnInit {
     public router:Router,
     private baseInfo:BaseInfoService,
     private navigationService:EoNgNavigationService,
-    private service:RouterService) {
+    private service:RouterService,
+    private cdref:ChangeDetectorRef
+  ) {
     this.navigationService.reqFlashBreadcrumb([{ title: 'API管理', routerLink: 'router/api/group/list' }])
   }
 
@@ -96,6 +98,7 @@ export class ApiManagementListComponent implements OnInit {
     this.apisTableBody = this.service.createApiListTbody(this)
     this.apisTableHeadName = this.service.createApiListThead(this)
     this.getApisData()
+    this.cdref.detectChanges()
   }
 
   ngOnDestroy () {
@@ -225,5 +228,9 @@ export class ApiManagementListComponent implements OnInit {
 
   publish (uuid:string) {
     this.service.publishApiModal(uuid, this)
+  }
+
+  batchPublish (type:'online'|'offline') {
+    this.service.batchPublishApiModal(type, { uuids: [...this.apisSet] }, undefined, this)
   }
 }

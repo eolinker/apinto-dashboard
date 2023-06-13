@@ -3,7 +3,6 @@ import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core'
 import { Router } from '@angular/router'
 import { CascaderOption } from 'eo-ng-cascader'
 import { CheckBoxOptionInterface } from 'eo-ng-checkbox'
-import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { SelectOption } from 'eo-ng-select'
 import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { ApiGroup } from 'projects/core/src/app/constant/type'
@@ -144,11 +143,10 @@ export class FilterFormComponent implements OnInit {
   originRemoteList:any[] = [] // 未经筛选的数据列表
 
   constructor (
-    private message: EoNgFeedbackMessageService,
     private router: Router,
     private api: ApiService
   ) {
-    this.strategyType = this.router.url.split('/')[2]
+    this.strategyType = this.router.url.split('/')[this.router.url.split('/').indexOf('serv-governance') + 1]
   }
 
   ngOnInit (): void {

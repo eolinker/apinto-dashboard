@@ -5,17 +5,21 @@ import { THEAD_TYPE } from 'eo-ng-table'
 import { ApiManagementListComponent } from './api-list/list/list.component'
 import { ApiPublishComponent } from './api-list/publish/single/publish.component'
 import { FilterOpts } from '../../constant/conf'
-import { MODAL_NORMAL_SIZE } from '../../constant/app.config'
+import { MODAL_NORMAL_SIZE, MODAL_SMALL_SIZE } from '../../constant/app.config'
 import { EoNgFeedbackModalService } from 'eo-ng-feedback'
 import { ModalOptions, NzModalRef } from 'ng-zorro-antd/modal'
 import { ApiBatchPublishResultComponent } from './api-list/publish/batch/result.component'
 import { apiBatchOnlineVerifyTableBody, apiBatchOnlineVerifyTableHeadName, apiBatchPublishResultTableBody, apiBatchPublishResultTableHeadName } from './types/conf'
-import { ApiBatchPublishComponent } from './api-list/publish/batch/publish.component'
+import { ApiManagementEditGroupComponent } from './api-list/group/edit-group/edit-group.component'
+import { ApiManagementComponent } from './api-list/group/group.component'
+import { EmptyHttpResponse } from '../../constant/type'
+import { ApiBatchPublishChooseClusterComponent } from './api-list/publish/batch/choose-cluster.component'
 
 @Injectable({
   providedIn: 'root'
 })
 export class RouterService {
+  groupModal: NzModalRef |undefined
   constructor (
     private modalService:EoNgFeedbackModalService) {}
 
@@ -240,7 +244,7 @@ export class RouterService {
 
   modalRef:NzModalRef|undefined
 
-  publishApiModal (uuid:string, component?:ApiManagementListComponent) {
+  publishApiModal (uuid:string, component?:ApiManagementListComponent, returnToSdk?:Function) {
     this.modalRef = this.modalService.create({
       nzTitle: '发布管理',
       nzWidth: MODAL_NORMAL_SIZE,
@@ -248,13 +252,18 @@ export class RouterService {
       nzComponentParams: {
         apiUuid: uuid,
         closeModal: () => { this.modalRef?.close() },
-        getApisData: () => { component?.getApisData() }
+        getApisData: () => { component?.getApisData() },
+        returnToSdk
+      },
+      nzOnCancel: () => {
+        returnToSdk && returnToSdk({ data: { closeModal: true } })
       },
       nzFooter: [{
         label: '取消',
         type: 'default',
         onClick: () => {
           this.modalRef?.close()
+          returnToSdk && returnToSdk({ data: { closeModal: true } })
         }
       },
       {
@@ -280,7 +289,55 @@ export class RouterService {
     })
   }
 
-  batchPublishApiResModal (type:'online'|'offline', data:{uuids:Array<string>, clusters:Array<string>}, chooseCluster?: Function, finishPublish?: Function, component?:ApiBatchPublishComponent) {
+  batchPublishApiModal (type:'online'|'offline', data:{uuids:Array<string>}, returnToSdk?:Function, component?:ApiManagementListComponent) {
+    this.modalRef?.close()
+    const batchPublishApiConfig:ModalOptions =
+    {
+      nzTitle: `批量${type === 'online' ? '上' : '下'}线`,
+      nzWidth: MODAL_SMALL_SIZE,
+      nzContent: ApiBatchPublishChooseClusterComponent,
+      nzComponentParams: {
+        type,
+        apisSet: new Set(data.uuids)
+      },
+      nzOnCancel: () => {
+        returnToSdk && returnToSdk({ data: { closeModal: true } })
+      },
+      nzFooter: [
+        {
+          label: '取消',
+          type: 'default',
+          onClick: () => {
+            this.modalRef?.close()
+            returnToSdk && returnToSdk({ data: { closeModal: true } })
+          }
+        },
+        {
+          label: type === 'online' ? '下一步' : '提交',
+          type: 'primary',
+          loading: (context:ApiBatchPublishChooseClusterComponent) => {
+            return context.loading
+          },
+          onClick: (context:ApiBatchPublishChooseClusterComponent) => {
+            this.modalRef?.close()
+            this.batchPublishApiResModal(type,
+              { uuids: [...context.apisSet], clusters: [...context.clustersSet] },
+              () => { this.batchPublishApiModal(type, data) },
+              (resp:any) => { returnToSdk && returnToSdk(resp) },
+              component
+            )
+          },
+          disabled: (context:ApiBatchPublishChooseClusterComponent) => {
+            return context.clustersSet.size === 0
+          }
+        }
+      ]
+    }
+    this.modalRef = this.modalService.create(batchPublishApiConfig)
+  }
+
+  batchPublishApiResModal (type:'online'|'offline', data:{uuids:Array<string>, clusters:Array<string>}, chooseCluster?: Function, returnToSdk?: Function, component?:ApiManagementListComponent) {
+    this.modalRef?.close()
     const checkModalConfig:ModalOptions = {
       nzTitle: '检测结果',
       nzWidth: MODAL_NORMAL_SIZE,
@@ -292,7 +349,8 @@ export class RouterService {
         clustersSet: new Set(data.clusters),
         chooseCluster: chooseCluster,
         renewApiList: () => {
-          component?.flashList?.emit(true)
+          component?.getApisData()
+          component?.apisSet.clear()
         },
         closeModal: () => { this.modalRef?.close() },
         batchPublishTableBody: [...apiBatchOnlineVerifyTableBody],
@@ -300,8 +358,11 @@ export class RouterService {
         onlineApisModal: (context?:ApiBatchPublishResultComponent) => {
           this.modalRef?.close()
           this.modalRef = this.modalService.create(this.getResModalConfig(type, data, component, context))
-          finishPublish && finishPublish()
+          returnToSdk && returnToSdk({ data: { finishPublish: true } })
         }
+      },
+      nzOnCancel: () => {
+        returnToSdk && returnToSdk({ data: { closeModal: true } })
       },
       nzFooter: [{
         label: '重新检测',
@@ -326,7 +387,7 @@ export class RouterService {
         ),
         onClick: (context:ApiBatchPublishResultComponent) => {
           context.chooseCluster && context.chooseCluster()
-
+          chooseCluster && chooseCluster()
           this.modalRef?.close()
         }
       },
@@ -344,8 +405,8 @@ export class RouterService {
         ),
         onClick: (context:ApiBatchPublishResultComponent) => {
           this.modalRef?.close()
-          this.modalRef = this.modalService.create(this.getResModalConfig(type, data, component, context))
-          finishPublish && finishPublish()
+          this.modalRef = this.modalService.create(this.getResModalConfig(type, data, returnToSdk, component, context))
+          returnToSdk && returnToSdk({ data: { finishPublish: true } })
         }
       }]
 
@@ -353,11 +414,11 @@ export class RouterService {
 
     this.modalRef = this.modalService.create(type === 'online' ? checkModalConfig : this.getResModalConfig(type, data, component))
     if (type === 'offline') {
-      finishPublish && finishPublish()
+      returnToSdk && returnToSdk({ data: { finishPublish: true } })
     }
   }
 
-  getResModalConfig:(...args:any)=>ModalOptions = (type:'online'|'offline', data:{uuids:Array<string>, clusters:Array<string>}, component?:ApiBatchPublishComponent, context?:ApiBatchPublishResultComponent) => {
+  getResModalConfig:(...args:any)=>ModalOptions = (type:'online'|'offline', data:{uuids:Array<string>, clusters:Array<string>}, returnToSdk?:Function, component?:ApiManagementListComponent, context?:ApiBatchPublishResultComponent) => {
     return {
       nzTitle: type === 'online' ? '批量上线结果' : '批量下线结果',
       nzWidth: MODAL_NORMAL_SIZE,
@@ -372,8 +433,10 @@ export class RouterService {
         batchPublishTableHeadName: [...apiBatchPublishResultTableHeadName],
         onlineToken: context?.onlineToken,
         renewApiList: () => {
-          component?.flashList?.emit(true)
-        }
+          component?.getApisData()
+          component?.apisSet.clear()
+        },
+        returnToSdk: returnToSdk
       },
       nzFooter: [
         {
@@ -384,8 +447,43 @@ export class RouterService {
           onClick: () => {
             this.modalRef?.close()
           }
-        }]
-
+        }
+      ]
     }
+  }
+
+  addOrEditGroupModal (type:'add'|'edit', uuid?:string, name?:string, component?:ApiManagementComponent) {
+    return new Promise((resolve) => {
+      const title:string = type === 'add' ? (uuid !== 'root' ? '添加子分组' : '添加分组') : '编辑分组'
+
+      this.groupModal = this.modalService.create({
+        nzTitle: title,
+        nzContent: ApiManagementEditGroupComponent,
+        nzWidth: MODAL_SMALL_SIZE,
+        nzComponentParams: {
+          ...(type === 'edit' ? { groupName: name } : {}),
+          uuid: uuid,
+          type: type,
+          closeModal: (resp:EmptyHttpResponse) => { resolve(resp); this.groupModal?.close(); component?.getMenuList(true) },
+          showUuid: type === 'add'
+        },
+        nzClosable: true,
+        nzCancelText: '取消',
+        nzOkText: '确定',
+        nzOnOk: (context:ApiManagementEditGroupComponent) => {
+          if (type === 'add') {
+            component && (component.editParentUuid = uuid === 'root' ? '' : uuid || '')
+            context.addGroup(uuid!)
+          } else {
+            component && (component.editUuid = uuid!)
+            context.editGroup(uuid!)
+          }
+          return false
+        },
+        nzOnCancel: () => {
+          resolve({ closeModal: true })
+        }
+      })
+    })
   }
 }

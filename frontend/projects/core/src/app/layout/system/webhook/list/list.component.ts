@@ -77,7 +77,7 @@ export class SystemWebhookListComponent implements OnInit {
   openWebhookModal (id:string = '') {
     this.webhookId = id || ''
     this.modalRef = this.modalService.create({
-      nzTitle: this.webhookId ? '新建Webhook' : '编辑Webhook',
+      nzTitle: this.webhookId ? '编辑Webhook' : '新建Webhook',
       nzContent: SystemWebhookConfigComponent,
       nzComponentParams: {
         webhookId: this.webhookId,
@@ -85,7 +85,7 @@ export class SystemWebhookListComponent implements OnInit {
       },
       nzClosable: true,
       nzWidth: MODAL_NORMAL_SIZE,
-      nzOkText: this.webhookId ? '提交' : '保存',
+      nzOkText: this.webhookId ? '保存' : '提交',
       nzOnOk: (component:SystemWebhookConfigComponent) => {
         component.saveWebhook()
         return false

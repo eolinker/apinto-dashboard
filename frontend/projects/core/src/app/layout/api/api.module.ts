@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core'
-import { CommonModule } from '@angular/common'
+import { CommonModule, registerLocaleData } from '@angular/common'
 
 import { ApiRoutingModule } from './api-routing.module'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
@@ -42,7 +42,6 @@ import { ApiPublishComponent } from './api-list/publish/single/publish.component
 import { MatchFormComponent } from './api-list/match/form/form.component'
 import { MatchTableComponent } from './api-list/match/table/table.component'
 import { ApiImportComponent } from './api-list/import/import.component'
-import { ApiBatchPublishComponent } from './api-list/publish/batch/publish.component'
 import { ApiManagementProxyComponent } from './api-list/proxy/proxy.component'
 import { ApiManagementEditGroupComponent } from './api-list/group/edit-group/edit-group.component'
 import { ApiPluginTemplateComponent } from './plugin/plugin.component'
@@ -61,7 +60,10 @@ import { ApiHttpMessageComponent } from './api-list/message/http-message/http-me
 import { ApiWebsocketMessageComponent } from './api-list/message/websocket-message/websocket-message.component'
 import { ApiBatchPublishResultComponent } from './api-list/publish/batch/result.component'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
+import { ApiBatchPublishChooseClusterComponent } from './api-list/publish/batch/choose-cluster.component'
+import zh from '@angular/common/locales/zh'
 
+registerLocaleData(zh)
 @NgModule({
   declarations: [
     ApiManagementComponent,
@@ -72,7 +74,6 @@ import { NzSpinModule } from 'ng-zorro-antd/spin'
     MatchFormComponent,
     MatchTableComponent,
     ApiImportComponent,
-    ApiBatchPublishComponent,
     ApiManagementProxyComponent,
     ApiManagementEditGroupComponent,
     ApiListComponent,
@@ -88,7 +89,8 @@ import { NzSpinModule } from 'ng-zorro-antd/spin'
     ApiWebsocketCreateComponent,
     ApiHttpMessageComponent,
     ApiWebsocketMessageComponent,
-    ApiBatchPublishResultComponent
+    ApiBatchPublishResultComponent,
+    ApiBatchPublishChooseClusterComponent
   ],
   imports: [
     EoNgLayoutModule,
