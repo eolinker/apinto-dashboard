@@ -11,6 +11,7 @@ import { Router } from '@angular/router'
 import { NzModalService } from 'ng-zorro-antd/modal'
 import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feedback'
 import { EoNgNavigationService } from '../eo-ng-navigation.service'
+import { environment } from 'projects/core/src/environments/environment'
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
@@ -72,13 +73,15 @@ export class ErrorInterceptor implements HttpInterceptor {
         }, 1000)
         break
       case -7:
-        this.eoModalService.closeAll()
-        this.modalService.closeAll()
-        setTimeout(() => {
-          if (!responseBody.url.includes('create_check')) {
-            this.router.navigate(['/', 'auth'])
-          }
-        }, 1000)
+        if (environment.isBusiness) {
+          this.eoModalService.closeAll()
+          this.modalService.closeAll()
+          setTimeout(() => {
+            if (!responseBody.url.includes('create_check')) {
+              this.router.navigate(['/', 'auth'])
+            }
+          }, 1000)
+        }
         break
       default:
         if (!this.router.url.startsWith('/remote') && code !== undefined && !(responseBody.url.includes('sso/login/check')) && code !== 0 && code !== 30001) {

@@ -251,6 +251,7 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
     } else {
       this.nzScroll = { x: this.nzNoScroll || this.nzData.length === 0 ? undefined : this.nzScroll.x || '100%', y: undefined }
     }
+    this.cdr.detectChanges()
   }
 
   stopTrClick (index:number, length:number, e:any) {

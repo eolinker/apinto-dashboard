@@ -11,13 +11,13 @@ import { Router } from '@angular/router'
 })
 export class ApiListComponent {
   constructor (private router:Router) {
-    if (this.router.url === '/router/api') {
+    if (this.router.url.split('?')[0] === '/router/api') {
       this.router.navigate(['/', 'router', 'api', 'group', 'list'])
     }
   }
 
   ngDoCheck () {
-    if (this.router.url === '/router/api') {
+    if (this.router.url.split('?')[0] === '/router/api') {
       this.router.navigate(['/', 'router', 'api', 'group', 'list'])
     }
   }

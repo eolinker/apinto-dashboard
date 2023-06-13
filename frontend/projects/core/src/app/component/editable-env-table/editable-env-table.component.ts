@@ -115,7 +115,7 @@ export class EditableEnvTableComponent implements OnInit {
   pageSizeOptions:Array<number>=[15, 20, 50, 100]
 
   chooseEnv = (item:any) => {
-    this.eoChooseEnv.emit(item)
+    this.eoChooseEnv.emit(item.data)
   }
 
   constructor (private message: EoNgFeedbackMessageService, private api:ApiService) { }

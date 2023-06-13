@@ -22,7 +22,9 @@ const containerElementName = 'customReactComponentContainer'
   encapsulation: ViewEncapsulation.None
 })
 export class CustomDialogReactComponentWrapperComponent {
-  @ViewChild(containerElementName, { static: true }) containerRef!: ElementRef
+  @ViewChild(containerElementName, { static: true }) containerRef:
+    | ElementRef
+    | undefined = undefined
 
   @Output() onChange: EventEmitter<any> = new EventEmitter<any>()
   // 动态渲染区域的render语句，目前后端接口传来的是对象，可以直接用，无需前端处理
@@ -38,7 +40,7 @@ export class CustomDialogReactComponentWrapperComponent {
   }
 
   ngOnDestroy() {
-    ReactDOM.unmountComponentAtNode(this.containerRef.nativeElement)
+    ReactDOM.unmountComponentAtNode(this.containerRef!.nativeElement)
   }
 
   handleChange = (data: string) => {
@@ -56,7 +58,7 @@ export class CustomDialogReactComponentWrapperComponent {
           />
         </div>
       </React.StrictMode>,
-      this.containerRef.nativeElement
+      this.containerRef!.nativeElement
     )
   }
 }

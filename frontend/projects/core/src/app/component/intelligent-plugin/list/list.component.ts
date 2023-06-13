@@ -6,7 +6,6 @@ import { EoIntelligentPluginService } from '../intelligent-plugin.service'
 import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feedback'
 import { MODAL_NORMAL_SIZE, MODAL_SMALL_SIZE } from '../../../constant/app.config'
 import { ApiService } from '../../../service/api.service'
-import { EoIntelligentPluginPublishComponent } from '../publish/publish.component'
 import { NzModalRef } from 'ng-zorro-antd/modal'
 import { EoIntelligentPluginCreateComponent } from '../create/create.component'
 import { DynamicConfig, DynamicDriverData, DynamicField, DynamicListStatus, DynamicRender } from '../types/types'
@@ -150,6 +149,7 @@ export class EoIntelligentPluginListComponent implements OnInit {
     this.pluginName = data.title
     this.getTableConfig(data.fields) // 获取列表配置
     this.tableData.data = data.list // 获取列表数据
+    this.tableData.total = data.total
     this.driverOptions = data.drivers?.map((driver:DynamicDriverData) => {
       return { label: driver.title, value: driver.name }
     }) || []
@@ -250,46 +250,12 @@ export class EoIntelligentPluginListComponent implements OnInit {
   }
 
   publish (value:any) {
-    this.modalRef = this.modalService.create({
-      nzTitle: `${value.data.title}发布管理`,
-      nzWidth: MODAL_NORMAL_SIZE,
-      nzContent: EoIntelligentPluginPublishComponent,
-      nzComponentParams: {
+    this.service.publishPluginModal(this.moduleName,
+      {
         name: value.data.title,
         id: value.data.id,
-        desc: value.data.description,
-        moduleName: this.moduleName,
-        closeModal: this.closeModal,
-        nzDisabled: this.nzDisabled
-      },
-      nzFooter: [{
-        label: '取消',
-        type: 'default',
-        onClick: () => {
-          this.modalRef?.close()
-        }
-      },
-      {
-        label: '下线',
-        danger: true,
-        onClick: (context:EoIntelligentPluginPublishComponent) => {
-          context.offline()
-        },
-        disabled: () => {
-          return this.nzDisabled
-        }
-      },
-      {
-        label: '上线',
-        type: 'primary',
-        onClick: (context:EoIntelligentPluginPublishComponent) => {
-          context.online()
-        },
-        disabled: () => {
-          return this.nzDisabled
-        }
-      }]
-    })
+        desc: value.data.description
+      }, this)
   }
 
   addData () {

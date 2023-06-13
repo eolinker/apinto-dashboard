@@ -1,5 +1,5 @@
 /* eslint-disable dot-notation */
-import { Component, OnInit } from '@angular/core'
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core'
 import { DynamicPublish, DynamicPublishCluster } from '../../../component/intelligent-plugin/types/types'
 import { Observable } from 'rxjs'
 import { EoNgApplicationService } from '../application.service'
@@ -19,12 +19,14 @@ export class ApplicationPublishComponent extends EoIntelligentPluginPublishCompo
     message: EoNgFeedbackMessageService,
     service:EoIntelligentPluginService,
     api:ApiService,
-    public appService:EoNgApplicationService) {
-    super(message, service, api)
+    public appService:EoNgApplicationService,
+    cdref:ChangeDetectorRef) {
+    super(message, service, api, cdref)
   }
 
   override ngAfterViewInit () {
     this.publishTableBody = [...this.appService.createApplicationPublicTbody(this)]
+    this.cdref.detectChanges()
   }
 
   override getPublishList () {
@@ -34,6 +36,8 @@ export class ApplicationPublishComponent extends EoIntelligentPluginPublishCompo
         this.name = resp.data.info.name
         this.id = resp.data.info.id
         this.desc = resp.data.info.desc
+      } else {
+        this.returnToSdk && this.returnToSdk(resp)
       }
     })
   }
@@ -53,6 +57,7 @@ export class ApplicationPublishComponent extends EoIntelligentPluginPublishCompo
         } else {
           observer.next(false)
         }
+        this.returnToSdk && this.returnToSdk(resp)
       })
     })
   }
@@ -72,6 +77,7 @@ export class ApplicationPublishComponent extends EoIntelligentPluginPublishCompo
         } else {
           observer.next(false)
         }
+        this.returnToSdk && this.returnToSdk(resp)
       })
     })
   }

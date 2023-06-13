@@ -62,7 +62,7 @@ export class FilterFooterComponent {
   }
 
   constructor (private router:Router) {
-    this.strategyType = this.router.url.split('/')[2]
+    this.strategyType = this.router.url.split('/')[this.router.url.split('/').indexOf('serv-governance') + 1]
   }
 
   saveFilter () {

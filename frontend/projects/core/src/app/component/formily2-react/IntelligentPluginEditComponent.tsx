@@ -86,7 +86,9 @@ const SchemaField = createSchemaField({
     Form,
     FormButtonGroup,
     FormCollapse,
+    // @ts-ignore
     FormDialog,
+    // @ts-ignore
     FormDrawer,
     FormGrid,
     FormItem,
@@ -242,6 +244,7 @@ export const IntelligentPluginEditComponent = React.forwardRef(
         )
       }
     return (
+      // @ts-ignore
       <FormProvider form={form} layout="vertical">
         <SchemaField
           schema={demo ? demoSchema : pluginEditSchema}
@@ -249,9 +252,8 @@ export const IntelligentPluginEditComponent = React.forwardRef(
         />
         {demo && demoSchema && (
           <FormButtonGroup>
-            <Submit ref={submitRef} onSubmit={submit}>
-              提交
-            </Submit>
+            // @ts-ignore
+            <Submit onSubmit={submit}>提交</Submit>
           </FormButtonGroup>
         )}
       </FormProvider>
