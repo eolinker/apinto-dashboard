@@ -7,11 +7,11 @@ import { ApiService } from 'projects/core/src/app/service/api.service'
 import { NzModalRef } from 'ng-zorro-antd/modal'
 import { Subscription } from 'rxjs'
 import { EoNgTreeDefaultComponent } from 'eo-ng-tree'
-import { ApiManagementEditGroupComponent } from './edit-group/edit-group.component'
 import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { ApiGroup, EmptyHttpResponse } from 'projects/core/src/app/constant/type'
 import { BaseInfoService } from 'projects/core/src/app/service/base-info.service'
 import { MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
+import { RouterService } from '../../router.service'
 
 @Component({
   selector: 'eo-ng-api-management',
@@ -67,7 +67,8 @@ export class ApiManagementComponent implements OnInit {
     private modalService:EoNgFeedbackModalService,
     private baseInfo:BaseInfoService,
     private api:ApiService,
-    private router:Router) {
+    private router:Router,
+    private service:RouterService) {
   }
 
   ngOnInit (): void {
@@ -140,29 +141,7 @@ export class ApiManagementComponent implements OnInit {
 
   // 添加分组时的弹窗
   addGroupModal = (uuid?:any) => {
-    let title:string = '添加分组'
-    if (uuid !== 'root') {
-      title = '添加子分组'
-    }
-    this.groupModal = this.modalService.create({
-      nzTitle: title,
-      nzContent: ApiManagementEditGroupComponent,
-      nzWidth: MODAL_SMALL_SIZE,
-      nzComponentParams: {
-        uuid: uuid,
-        type: 'add',
-        closeModal: this.closeModal,
-        showUuid: false
-      },
-      nzClosable: true,
-      nzCancelText: '取消',
-      nzOkText: '确定',
-      nzOnOk: (component:ApiManagementEditGroupComponent) => {
-        this.editParentUuid = uuid === 'root' ? '' : uuid || ''
-        component.addGroup(uuid)
-        return false
-      }
-    })
+    this.service.addOrEditGroupModal('add', uuid, undefined, this)
   }
 
   groupScrollToBottom () {
@@ -173,26 +152,7 @@ export class ApiManagementComponent implements OnInit {
 
   // 编辑分组的弹窗
   editGroupModal = (uuid:string, name?:string) => {
-    this.groupModal = this.modalService.create({
-      nzTitle: '编辑分组',
-      nzContent: ApiManagementEditGroupComponent,
-      nzWidth: MODAL_SMALL_SIZE,
-      nzComponentParams: {
-        groupName: name,
-        uuid: uuid,
-        type: 'edit',
-        closeModal: this.closeModal,
-        showUuid: true
-      },
-      nzClosable: true,
-      nzOkText: '确定',
-      nzCancelText: '取消',
-      nzOnOk: (component:ApiManagementEditGroupComponent) => {
-        this.editUuid = uuid
-        component.editGroup(uuid)
-        return false
-      }
-    })
+    this.service.addOrEditGroupModal('edit', uuid, name, this)
   }
 
   closeModal = () => {

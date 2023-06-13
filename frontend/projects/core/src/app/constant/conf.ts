@@ -1,6 +1,8 @@
 import { THEAD_TYPE } from 'eo-ng-table'
 import { EO_TBODY_TYPE } from 'projects/eo-ng-apinto-table/src/public-api'
 
+export const TryBusinessAddr:string = 'https://easy-open-link.feishu.cn/share/base/form/shrcn5Z86ThUCZbQMYb2brmT3Ah'
+
 export const defaultAutoTips: Record<string, Record<string, string>> = {
   'zh-cn': {
     required: '必填项'

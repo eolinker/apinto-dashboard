@@ -23,6 +23,7 @@ export class ApiBatchPublishResultComponent {
   renewApiList:Function|undefined
   onlineApisModal:Function|undefined // 当检测结果成功时，直接进入批量上线
   loading:boolean = false
+  returnToSdk:Function | undefined // 从sdk调用上下线弹窗时，需要的回调
   constructor (private api:ApiService) { }
 
   // 在批量上\下线检测页和结果页中，上\下线成功的表格行字体为绿色，失败的为红色
@@ -64,6 +65,9 @@ export class ApiBatchPublishResultComponent {
             this.onlineApisModal && this.onlineApisModal(this)
           }
         }
+        if (this.onlineToken) {
+          this.returnToSdk && this.returnToSdk(resp)
+        }
       })
   }
 
@@ -88,6 +92,7 @@ export class ApiBatchPublishResultComponent {
           // this.apisOperatorResult('online-res')
           this.batchPublishTableList = resp.data.list
         }
+        this.returnToSdk && this.returnToSdk(resp)
       })
   }
 
@@ -108,6 +113,7 @@ export class ApiBatchPublishResultComponent {
         for (const index in this.batchPublishTableList) {
           this.batchPublishTableList[index].statusString = this.batchPublishTableList[index].status ? '成功' : '失败'
         }
+        this.returnToSdk && this.returnToSdk(resp)
       })
   }
 

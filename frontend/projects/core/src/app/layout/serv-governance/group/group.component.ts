@@ -34,7 +34,7 @@ export class GroupComponent implements OnInit {
     private router: Router,
     private navigationService:EoNgNavigationService
   ) {
-    this.strategyType = this.router.url.split('/')[2]
+    this.strategyType = this.router.url.split('/')[this.router.url.split('/').indexOf('serv-governance') + 1]
     this.getBreadcrumb()
   }
 

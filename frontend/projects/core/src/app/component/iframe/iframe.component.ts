@@ -129,7 +129,7 @@ export class EoIframeComponent implements OnInit {
      if (environment.production) {
        iframe.src = url
      } else { // 调试用
-       iframe.src = 'http://localhost:4444'
+       iframe.src = this.moduleName === 'monitor' ? 'http://localhost:4444' : 'http://localhost:5555'
      }
      iframe.onload = () => {
        this.start = true
@@ -221,6 +221,8 @@ export class EoIframeComponent implements OnInit {
  }
 
  testIframe1 () {
-   this.iframeService.batchPublishResModal('api', 'offline', { uuids: ['apispace-119762', 'apispace-119763', 'apispace-119767'], clusters: ['cluster_84bf7525_2d1c_4bb9_81d7_fdcc56de5ccf', 'remote'] }, true)
+   this.iframeService.apinto2PluginApi.chooseEnvVar().then((resp) => {
+     console.log(resp)
+   })
  }
 }

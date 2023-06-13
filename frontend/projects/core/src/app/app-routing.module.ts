@@ -22,12 +22,10 @@ import { NotFoundPageComponent } from './layout/not-found-page/not-found-page.co
 import { RemotePluginComponent } from './layout/remote-plugin/remote-plugin.component'
 import { AuthInfoComponent } from './layout/auth/info/info.component'
 const routes: Routes = [
-  ...(environment.isBusiness
-    ? [{
-        path: 'auth',
-        component: AuthActivationComponent
-      }]
-    : []),
+  {
+    path: 'auth',
+    component: AuthActivationComponent
+  },
   {
     path: 'login',
     component: LoginComponent

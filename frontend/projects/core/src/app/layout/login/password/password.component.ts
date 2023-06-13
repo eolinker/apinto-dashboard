@@ -60,7 +60,7 @@ export class PasswordComponent implements OnInit {
           })
           .subscribe((resp: any) => {
             if (resp.code === 0) {
-              this.navigationService.reqFlashMenu()
+              // this.navigationService.reqFlashMenu()
               this.message.create('success', '登录成功')
               const callbackUrl:string | null = this.route.snapshot.queryParams['callback']
               if (callbackUrl) {

@@ -1,5 +1,5 @@
 /* eslint-disable dot-notation */
-import { Component, Input, OnInit, TemplateRef } from '@angular/core'
+import { Component, Input, OnInit, TemplateRef, ViewChild } from '@angular/core'
 import { FormGroup, UntypedFormBuilder, Validators } from '@angular/forms'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
@@ -70,12 +70,17 @@ import { StrategyPublishListData } from '../types/types'
       </nz-form-control>
     </nz-form-item>
   </form>
+
+
+<ng-template #strategiesStatusTpl let-item="item">
+  <eo-ng-table-status [status]="item.status"></eo-ng-table-status>
+</ng-template>
   `,
   styles: [
   ]
 })
 export class ServiceGovernancePublishComponent implements OnInit {
-  @Input() strategiesStatusTpl:TemplateRef<any>|undefined
+  @ViewChild('strategiesStatusTpl', { read: TemplateRef, static: true }) strategiesStatusTpl: TemplateRef<any> | undefined
   @Input() closeModal?:(value?:any)=>void
   validateForm: FormGroup = new FormGroup({})
   nzDisabled:boolean = false
@@ -91,6 +96,7 @@ export class ServiceGovernancePublishComponent implements OnInit {
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
   strategyIsPublish:boolean = false
   clusterName:string = ''
+  returnToSdk:Function|undefined
   constructor (
                 private message: EoNgFeedbackMessageService,
                 private api:ApiService,
@@ -130,6 +136,8 @@ export class ServiceGovernancePublishComponent implements OnInit {
               this.strategyUnpublishMsg = '当前无可发布策略'
             }
           }
+        } else {
+          this.returnToSdk && this.returnToSdk(resp)
         }
       })
   }
@@ -143,6 +151,7 @@ export class ServiceGovernancePublishComponent implements OnInit {
             this.message.success(resp.msg || '发布策略成功!', { nzDuration: 1000 })
             this.closeModal && this.closeModal()
           }
+          this.returnToSdk && this.returnToSdk(resp)
         })
     } else {
       Object.values(this.validateForm.controls).forEach((control) => {

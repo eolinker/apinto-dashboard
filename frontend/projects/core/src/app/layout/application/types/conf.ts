@@ -160,7 +160,8 @@ export const customAttrTableBody: EO_TBODY_TYPE[] = [
     type: 'btn',
     btns: [
       {
-        title: '添加'
+        title: '减少',
+        action: 'delete'
       }
     ]
   },
@@ -168,43 +169,12 @@ export const customAttrTableBody: EO_TBODY_TYPE[] = [
     type: 'btn',
     btns: [
       {
-        title: '添加'
+        title: '添加',
+        action: 'add'
       },
       {
-        title: '减少'
-      }
-    ]
-  }
-]
-
-export const extraHeaderTableBody:EO_TBODY_TYPE[] = [
-  {
-    key: 'key',
-    type: 'input',
-    placeholder: '请输入Key'
-  },
-  {
-    key: 'value',
-    type: 'input',
-    placeholder: '请输入Value'
-  },
-  {
-    type: 'btn',
-    btns: [
-      {
-        title: '添加'
-      }
-    ]
-  },
-  {
-    type: 'btn',
-    btns: [
-      {
-        title: '添加'
-      },
-
-      {
-        title: '减少'
+        title: '减少',
+        action: 'add'
       }
     ]
   }

@@ -8,6 +8,7 @@
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
 import {
+  ChangeDetectorRef,
   Component,
   ElementRef,
   OnInit,
@@ -74,7 +75,8 @@ export class DeployClusterListComponent implements OnInit {
     private api: ApiService,
     public router: Router,
     private navigationService: EoNgNavigationService,
-    private service:DeployService
+    private service:DeployService,
+    private cdref:ChangeDetectorRef
   ) {
     this.navigationService.reqFlashBreadcrumb([{ title: '网关集群', routerLink: 'deploy/cluster' }])
   }
@@ -86,6 +88,7 @@ export class DeployClusterListComponent implements OnInit {
 
   ngAfterViewInit () {
     this.clustersTableBody = [...this.service.createClusterTbody(this)]
+    this.cdref.detectChanges()
   }
 
   getClustersData () {
