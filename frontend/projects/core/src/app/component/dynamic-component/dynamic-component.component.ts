@@ -486,7 +486,7 @@ export class DynamicComponentComponent implements OnInit {
   drawerAddRef:NzModalRef | undefined
   envNameForSear:string = ''
   public propertyWaitForChoose:any = null
-  private subscription: Subscription = new Subscription()
+  public subscription: Subscription = new Subscription()
 
   openDrawer (property:any) {
     this.propertyWaitForChoose = property

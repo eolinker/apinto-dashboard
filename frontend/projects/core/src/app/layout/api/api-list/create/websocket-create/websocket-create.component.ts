@@ -93,7 +93,8 @@ export class ApiWebsocketCreateComponent implements OnInit {
 
   pluginTemplateList:SelectOption[] = []
   submitButtonLoading:boolean = false
-  constructor (private message: EoNgFeedbackMessageService,
+  showCheckboxGroupValid: boolean = false
+  constructor (public message: EoNgFeedbackMessageService,
     private baseInfo:BaseInfoService,
     public api:ApiService,
     private navigationService:EoNgNavigationService,
@@ -116,7 +117,6 @@ export class ApiWebsocketCreateComponent implements OnInit {
       proxyPath: [''],
       timeout: [10000, [Validators.required]],
       retry: [0, [Validators.required]],
-      enableWebsocket: [false],
       templateUuid: ['']
     })
   }
@@ -150,9 +150,9 @@ export class ApiWebsocketCreateComponent implements OnInit {
     }
 
     this.hostsTableBody[0].disabledFn = () => { return this.nzDisabled }
-    this.hostsTableBody[1].showFn = (item: any) => { return item === this.hostsList[0] }
+    this.hostsTableBody[1].showFn = (item: any) => { return item !== this.hostsList[this.hostsList.length - 1] && !item.key }
     this.hostsTableBody[1].btns[0].disabledFn = () => { return this.nzDisabled }
-    this.hostsTableBody[2].showFn = (item: any) => { return item !== this.hostsList[0] }
+    this.hostsTableBody[2].showFn = (item: any) => { return item !== this.hostsList[this.hostsList.length - 1] && item.key }
     this.hostsTableBody[2].btns[0].disabledFn = () => { return this.nzDisabled }
     this.hostsTableBody[2].btns[1].disabledFn = () => { return this.nzDisabled }
   }
@@ -214,13 +214,6 @@ export class ApiWebsocketCreateComponent implements OnInit {
     return resList
   }
 
-  nzTreeClick (value: any) {
-    if (value.node.origin.selectable === false) {
-      value.node.origin.expanded = !value.node.origin.expanded
-    }
-    this.headerList = [...this.headerList]
-  }
-
   // 获取上游服务列表
   getServiceList () {
     this.api.get('common/provider/Service').subscribe((resp: any) => {
@@ -242,58 +235,6 @@ export class ApiWebsocketCreateComponent implements OnInit {
         })
       }
     })
-  }
-
-  updateAllChecked (): void {
-    if (this.allChecked) {
-      this.methodList = this.methodList.map((item: any) => ({
-        ...item,
-        checked: true
-      }))
-      this.createApiForm.method = []
-      for (const index in this.methodList) {
-        if (this.methodList[index].checked) {
-          this.createApiForm.method.push(this.methodList[index].value)
-        }
-      }
-      this.showCheckboxGroupValid = false
-    } else {
-      this.methodList = this.methodList.map((item: any) => ({
-        ...item,
-        checked: false
-      }))
-      this.createApiForm.method = []
-      this.showCheckboxGroupValid = false
-    }
-  }
-
-  initCheckbox (): void {
-    for (const index in this.methodList) {
-      if (
-        this.createApiForm.method.indexOf(this.methodList[index].label) !== -1
-      ) {
-        this.methodList[index].checked = true
-      }
-    }
-  }
-
-  updateSingleChecked (): void {
-    if (this.methodList.every((item: any) => !item.checked)) {
-      this.allChecked = false
-    } else if (this.methodList.every((item: any) => item.checked)) {
-      this.allChecked = true
-    } else {
-      this.allChecked = false
-    }
-    this.createApiForm.method = []
-    for (const index in this.methodList) {
-      if (this.methodList[index].checked) {
-        this.createApiForm.method.push(this.methodList[index].value)
-      }
-    }
-    if (this.methodList.length > 0) {
-      this.showCheckboxGroupValid = false
-    }
   }
 
   proxyTableClick = (item: any) => {
@@ -324,11 +265,63 @@ export class ApiWebsocketCreateComponent implements OnInit {
             return false
           }
         })
-        this.modalRef.afterClose.subscribe(() => {
+        this.modalRef.afterClose?.subscribe(() => {
           this.proxyEdit = false
         })
         break
       }
+    }
+  }
+
+  initCheckbox (): void {
+    for (const index in this.methodList) {
+      if (
+        this.createApiForm.method.indexOf(this.methodList[index].label) !== -1
+      ) {
+        this.methodList[index].checked = true
+      }
+    }
+  }
+
+  updateAllChecked (): void {
+    if (this.allChecked) {
+      this.methodList = this.methodList.map((item: any) => ({
+        ...item,
+        checked: true
+      }))
+      this.createApiForm.method = []
+      for (const index in this.methodList) {
+        if (this.methodList[index].checked) {
+          this.createApiForm.method.push(this.methodList[index].value)
+        }
+      }
+      this.showCheckboxGroupValid = false
+    } else {
+      this.methodList = this.methodList.map((item: any) => ({
+        ...item,
+        checked: false
+      }))
+      this.createApiForm.method = []
+      this.showCheckboxGroupValid = false
+    }
+  }
+
+  updateSingleChecked (): void {
+    if (this.methodList.every((item: any) => !item.checked)) {
+      this.allChecked = false
+    } else if (this.methodList.every((item: any) => item.checked)) {
+      this.allChecked = true
+    } else {
+      this.allChecked = false
+    }
+    this.createApiForm.method = []
+    for (const index in this.methodList) {
+      if (this.methodList[index].checked) {
+        this.createApiForm.method.push(this.methodList[index].value)
+      }
+    }
+    if (this.methodList.length > 0) {
+      this.showCheckboxGroupValid = false
     }
   }
 
@@ -405,7 +398,6 @@ export class ApiWebsocketCreateComponent implements OnInit {
     }
   }
 
-  showCheckboxGroupValid: boolean = false
 
   requestPathChange () {
     if (!this.validateForm.controls['proxyPath'].value && this.validateForm.controls['requestPath'].value) {

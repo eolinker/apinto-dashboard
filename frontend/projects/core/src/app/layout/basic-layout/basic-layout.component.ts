@@ -11,13 +11,14 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core'
 import { Router } from '@angular/router'
 import { EoNgBreadcrumbOptions } from 'eo-ng-breadcrumb'
 import { MenuOptions } from 'eo-ng-menu'
-import { NzModalRef, NzModalService } from 'ng-zorro-antd/modal'
+import { NzModalRef } from 'ng-zorro-antd/modal'
 import { Subscription } from 'rxjs'
 import { ApiService } from '../../service/api.service'
 import { EoNgNavigationService } from '../../service/eo-ng-navigation.service'
 import { BaseInfoService } from '../../service/base-info.service'
 import { IframeHttpService } from '../../service/iframe-http.service'
 import { environment } from '../../../environments/environment'
+import { TryBusinessAddr } from '../../constant/conf'
 @Component({
   selector: 'basic-layout',
   templateUrl: './basic-layout.component.html',
@@ -61,7 +62,6 @@ export class BasicLayoutComponent implements OnInit {
     private router: Router,
     private api: ApiService,
     private navigationService: EoNgNavigationService,
-    private modalService: NzModalService,
     private baseInfo:BaseInfoService,
     private iframeService:IframeHttpService
   ) {
@@ -75,12 +75,17 @@ export class BasicLayoutComponent implements OnInit {
             bc.title = this.breadcrumbTitleTpl
           }
         }
-        this.breadcrumbOptions = data
+        while (this.breadcrumbOptions.length > 0) {
+          this.breadcrumbOptions.pop()
+        }
+        for (const newBd of data) {
+          this.breadcrumbOptions.push(newBd)
+        }
       })
 
     this.subscription2 = this.navigationService.repFlashMenu().subscribe(() => {
       this.sideMenuOptions = [
-        ...(this.isBusiness ? [] : [this.guideMenu]),
+        { ...this.guideMenu },
         ...this.navigationService.getCurrentMenuList()
       ]
       for (const menu of this.sideMenuOptions) {
@@ -216,5 +221,9 @@ export class BasicLayoutComponent implements OnInit {
 
   goToHelp () {
     window.open('https://help.apinto.com/docs')
+  }
+
+  goToRry () {
+    window.open(TryBusinessAddr)
   }
 }

@@ -17,7 +17,8 @@ export type DynamicConfig = {
     title: string,
     drivers: Array<DynamicDriverData>,
     fields: Array<DynamicField>,
-    list: Array<{[k:string]:any}>
+    list: Array<{[k:string]:any}>,
+    total:number
 }
 
 export type DynamicRender = {

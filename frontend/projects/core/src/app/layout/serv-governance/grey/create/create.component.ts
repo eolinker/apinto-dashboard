@@ -141,13 +141,13 @@ export class GreyCreateComponent implements OnInit {
       return this.nzDisabled
     }
     this.nodesTableBody[1].showFn = (item:any) => {
-      return item === this.nodesList[0]
+      return item !== this.nodesList[this.nodesList.length - 1] && !item.node
     }
     this.nodesTableBody[1].btns[0].disabledFn = () => {
       return this.nzDisabled
     }
     this.nodesTableBody[2].showFn = (item:any) => {
-      return item !== this.nodesList[0]
+      return item !== this.nodesList[this.nodesList.length - 1] && item.node
     }
     this.nodesTableBody[2].btns[0].disabledFn = () => {
       return this.nzDisabled
@@ -218,7 +218,7 @@ export class GreyCreateComponent implements OnInit {
             for (const index in resp.data.strategy?.config.nodes) {
               this.nodesList.push({ node: resp.data.strategy?.config.nodes[index as any] || '' })
             }
-            this.nodesList = this.nodesList.length > 0 ? this.nodesList : [{ node: '' }]
+            this.nodesList = this.nodesList.length > 0 ? [...this.nodesList, { node: '' }] : [{ node: '' }]
           }
         }
       )
