@@ -1,7 +1,9 @@
 // 此处放置单元测试用到的参数
 
+import { Observable } from 'rxjs'
 import { ApiMessage } from '../layout/api/types/types'
 import { ApiGroup } from './type'
+import { ModalOptions } from 'ng-zorro-antd/modal'
 
 export class MockRenderer {
   removeAttribute (element: any, cssClass: string) {
@@ -20,8 +22,14 @@ export class MockMessageService {
 }
 
 export class MockEnsureService {
-  create () {
-    return 'modal is create'
+  create (args:ModalOptions) {
+    return {
+      close: () => { 'modal is close' },
+      afterClose: new Observable((observer) => {
+        observer.next('close')
+      }),
+      ...args
+    }
   }
 }
 
