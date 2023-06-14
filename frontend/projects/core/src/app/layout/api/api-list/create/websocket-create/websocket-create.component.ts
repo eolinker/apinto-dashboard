@@ -398,7 +398,6 @@ export class ApiWebsocketCreateComponent implements OnInit {
     }
   }
 
-
   requestPathChange () {
     if (!this.validateForm.controls['proxyPath'].value && this.validateForm.controls['requestPath'].value) {
       this.validateForm.controls['proxyPath'].setValue('/' + this.validateForm.controls['requestPath'].value)

@@ -156,8 +156,13 @@ export interface PublishManagementData{
 }
 
 // 集群列表接口
+
+export type ClusterEnumData = {
+  name:string, uuid:string,
+  title:string
+}
 export interface ClusterEnum{
-  clusters:Array<{name:string}>
+  clusters:Array<ClusterEnumData>
   name:string
 }
 

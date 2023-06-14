@@ -56,7 +56,7 @@ import { DynamicDemoComponent } from './dynamic-demo/dynamic-demo.component'
 import { SafePipe } from '../pipe/safe.pipe'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { NotFoundPageComponent } from './not-found-page/not-found-page.component'
-import { IntelligentPluginComponent } from './intelligent-plugin/intelligent-plugin.component';
+import { IntelligentPluginComponent } from './intelligent-plugin/intelligent-plugin.component'
 import { RemotePluginComponent } from './remote-plugin/remote-plugin.component'
 
 @NgModule({
