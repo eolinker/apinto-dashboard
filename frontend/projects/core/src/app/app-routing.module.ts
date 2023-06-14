@@ -100,6 +100,13 @@ const routes: Routes = [
         loadChildren: () => import('./layout/plugin/plugin-management.module').then(m => m.PluginManagementModule)
       },
       {
+        path: 'log-retrieval',
+        data: {
+          id: '11'
+        },
+        loadChildren: () => import('./layout/log-retrieval/log-retrieval.module').then(m => m.LogRetrievalModule)
+      },
+      {
         path: 'dynamic-demo',
         data: {
 

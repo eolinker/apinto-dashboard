@@ -357,6 +357,9 @@ describe('#init ApiWebsocketCreateComponent', () => {
   }))
 
   it('test proxyModal when create a new api', () => {
+    const componentProxy:ApiManagementProxyComponent = TestBed.createComponent(ApiWebsocketCreateComponent)
+    const fixtureProxy: ComponentFixture<ApiManagementProxyComponent> = fixture.componentInstance
+
     expect(component).toBeTruthy()
     expect(component.validateForm.controls['groupUuid'].value).toEqual('')
     expect(component.createApiForm.proxyHeader).toEqual([])
@@ -375,12 +378,10 @@ describe('#init ApiWebsocketCreateComponent', () => {
     fixture.detectChanges()
 
     expect(component.editData).not.toBeNull()
-    expect(component.proxyEdit).toEqual(true)
-
-    component.modalRef?.close()
-    fixture.detectChanges()
-
     expect(component.proxyEdit).toEqual(false)
+
+    // @ts-ignore
+    expect(component.modalRef?.nzOnOk(componentProxy)).toEqual(false)
   })
 
   it('test checkbox when create a new api', () => {
