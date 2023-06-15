@@ -45,7 +45,6 @@ export class EoNgLogRetrievalTailComponent {
   }
 
   closeConnect () {
-    console.log('close')
     this.log += '\n...已中断连接...\n'
     this.connected = false
     this.wsRef?.ws.close()
@@ -54,7 +53,6 @@ export class EoNgLogRetrievalTailComponent {
 
   clear () {
     this.log = ''
-    console.log('clear:', this.log)
   }
 
   connectWs (reConnect?:boolean) {

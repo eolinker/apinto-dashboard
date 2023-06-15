@@ -9,6 +9,7 @@ import { DeployGlobalEnvDetailTableHeadName, DeployGlobalEnvDetailTableBody } fr
   template: `
   <div class="drawer-table">
     <eo-ng-apinto-table
+    class="drawer-table"
       class="mr-btnbase mt-btnbase"
       [nzTbody]="globalEnvDetailTableBody"
       [nzThead]="globalEnvDetailTableHeadName"
