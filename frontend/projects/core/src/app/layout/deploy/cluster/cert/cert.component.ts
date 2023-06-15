@@ -18,6 +18,11 @@ import { EmptyHttpResponse } from 'projects/core/src/app/constant/type'
   templateUrl: './cert.component.html',
   styles: [
     `
+    :host{
+      overflow-y:auto;
+      height:100%;
+      display:block;
+    }
     `
   ]
 })

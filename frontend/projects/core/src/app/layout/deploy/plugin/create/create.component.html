@@ -1,13 +1,14 @@
-<div class="">
+<div class="h-[100%] block">
   <form
+    eoNgScrollDom
+    [eoAfterDom]="btnGroup"
+    class="pt-formtop"
     nz-form
     [nzNoColon]="true"
     [nzAutoTips]="autoTips"
     [formGroup]="validateForm"
   >
-    <div
-      class="list-header mt-formtop flex-nowrap items-center justify-between"
-    >
+    <div class="list-header flex-nowrap items-center justify-between">
       <nz-form-item>
         <nz-form-label [nzSpan]="7" nzRequired>插件名称：</nz-form-label>
 
@@ -78,21 +79,23 @@
     </div>
   </form>
 
-  <nz-form-item class="mb-0 sticky bg-white bottom-0 py-mbase z-50">
-    <nz-form-control [nzOffset]="7" [nzSpan]="18">
-      <button
-        class="ant-btn-primary"
-        eoNgUserAccess="deploy/plugin"
-        type="submit"
-        eo-ng-button
-        (click)="savePlugin()"
-        [nzLoading]="submitButtonLoading"
-      >
-        {{ editPage ? '提交' : '保存' }}
-      </button>
-      <button eo-ng-button class="ml-btnybase" (click)="backToList()">
-        取消
-      </button>
-    </nz-form-control>
-  </nz-form-item>
+  <div #btnGroup>
+    <nz-form-item class="mb-0 sticky bg-white bottom-0 py-mbase z-50">
+      <nz-form-control [nzOffset]="7" [nzSpan]="12">
+        <button
+          class="ant-btn-primary"
+          eoNgUserAccess="deploy/plugin"
+          type="submit"
+          eo-ng-button
+          (click)="savePlugin()"
+          [nzLoading]="submitButtonLoading"
+        >
+          {{ editPage ? '提交' : '保存' }}
+        </button>
+        <button eo-ng-button class="ml-btnybase" (click)="backToList()">
+          取消
+        </button>
+      </nz-form-control>
+    </nz-form-item>
+  </div>
 </div>

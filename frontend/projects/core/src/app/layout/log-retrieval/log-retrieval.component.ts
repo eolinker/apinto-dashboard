@@ -128,10 +128,10 @@ export class LogRetrievalComponent {
     }
     // TODO 假数据
     if (environment.production) {
-      this.api.get(`cluster/${this.searchData.cluster}/nodes/simple`).subscribe((resp:{code:number, data:{nodes:Array<{id:number, name:string}>}}) => {
+      this.api.get(`cluster/${this.searchData.cluster}/nodes/simple`).subscribe((resp:{code:number, data:{nodes:Array<{id:number}>}}) => {
         if (resp.code === 0) {
-          this.nodeList = resp.data.nodes.map((node:{id:number, name:string}) => {
-            return ({ label: node.name, value: node.id })
+          this.nodeList = resp.data.nodes.map((node:{id:number}) => {
+            return ({ label: node.id, value: node.id })
           })
           this.searchData.node = resp.data.nodes[0].id
           init && this.getData()
