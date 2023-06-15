@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"sort"
+	"strings"
 
 	"github.com/eolinker/apinto-dashboard/controller/users"
 
@@ -261,15 +262,15 @@ func (c *clusterController) test(context *gin.Context) {
 
 	isUpdate := false
 	for _, node := range nodes {
-		status := enum.ClusterNodeStatus(node.Status)
-		if status == enum.ClusterNodeStatusRunning {
-			isUpdate = true
-		}
+		//status := enum.ClusterNodeStatus(node.Status)
+		//if status == enum.ClusterNodeStatusRunning {
+		//	isUpdate = true
+		//}
 		list = append(list, &cluster_dto.ClusterNode{
 			Name:        node.Name,
-			ServiceAddr: node.ServiceAddr,
-			AdminAddr:   node.AdminAddr,
-			Status:      status,
+			ServiceAddr: strings.Join(node.ServiceAddr, ","),
+			AdminAddr:   strings.Join(node.AdminAddrs, ","),
+			Status:      enum.ClusterNodeStatusRunning,
 		})
 
 	}
