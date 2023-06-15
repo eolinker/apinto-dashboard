@@ -36,6 +36,12 @@ import { DeployClusterEnvironmentPublishComponent } from './publish/publish.comp
     .ant-col-4{
       text-align:right;
     }
+
+    :host{
+      overflow-y:auto;
+      height:100%;
+      display:block;
+    }
 `
   ]
 })

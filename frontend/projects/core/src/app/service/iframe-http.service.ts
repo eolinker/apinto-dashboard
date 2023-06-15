@@ -10,7 +10,6 @@ import { EditableEnvTableService } from '../component/editable-env-table/editabl
 import { EoNgApplicationService } from '../layout/application/application.service'
 import { EoIntelligentPluginService } from '../component/intelligent-plugin/intelligent-plugin.service'
 import { ServiceGovernanceService } from '../layout/serv-governance/service-governance.service'
-import { resolve } from 'path'
 
 @Injectable({
   providedIn: 'root'
