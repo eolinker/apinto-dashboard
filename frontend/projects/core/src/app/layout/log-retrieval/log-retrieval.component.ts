@@ -94,7 +94,6 @@ export class LogRetrievalComponent {
     for (const btn of this.accTableBody[this.accTableBody.length - 1].btns) {
       if (btn.title === '下载') {
         btn.click = (item:{data:LogFileData}) => {
-          console.log(item.data.key)
           this.downloadLog(item.data)
         }
         return
@@ -116,7 +115,6 @@ export class LogRetrievalComponent {
             }))
           })
         }
-        console.log(this.clusterList)
         this.searchData.cluster = resp.data.envs[0].clusters[0].uuid
         this.getNodeList(init)
       }
@@ -236,7 +234,6 @@ export class LogRetrievalComponent {
 
   getTail (e:Event, panel:any) {
     e?.stopPropagation()
-    console.log(panel)
 
     this.modalRef = this.modalService.create({
       nzTitle: `日志详情：${panel.name}`,
@@ -251,7 +248,6 @@ export class LogRetrievalComponent {
   }
 
   downloadLog (file:LogFileData) {
-    console.log(file)
     this.api.get(`log/download/${file.key}`).subscribe((resp:any) => {
       console.log(resp)
     })
