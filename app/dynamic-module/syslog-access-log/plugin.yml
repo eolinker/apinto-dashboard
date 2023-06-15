@@ -3,7 +3,7 @@ name: "syslog-access-log"
 cname: "Syslog日志"
 resume: "将请求和响应日志发送到Syslog中"
 version: "v1.0.0"
-icon: "Access日志.png"
+icon: "SYSLOG日志.png"
 driver: "dynamic.apinto.com"
 front: template
 navigation: "navigation.system"

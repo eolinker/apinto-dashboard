@@ -3,7 +3,7 @@ name: "http-access-log"
 cname: "HTTP日志"
 resume: "将请求和响应日志发送到HTTP服务器"
 version: "v1.0.0"
-icon: "Access日志.png"
+icon: "HTTP日志.png"
 driver: "dynamic.apinto.com"
 front: template
 navigation: "navigation.system"
