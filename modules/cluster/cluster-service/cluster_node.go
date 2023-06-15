@@ -25,6 +25,15 @@ type clusterNodeService struct {
 	apintoClient     cluster.IApintoClient
 }
 
+func (c *clusterNodeService) List(ctx context.Context, namespaceId int, clusterName string) ([]*cluster_model2.Node, error) {
+	cm, err := c.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
+	if err != nil {
+		return nil, err
+	}
+	return c.QueryByClusterIds(ctx, cm.Id)
+
+}
+
 func (c *clusterNodeService) Delete(ctx context.Context, namespaceId int, clusterId int) error {
 
 	_, err := c.clusterNodeStore.DeleteWhere(ctx, map[string]interface{}{
@@ -46,48 +55,55 @@ func newClusterNodeService() cluster.IClusterNodeService {
 	return s
 }
 
-func (c *clusterNodeService) Insert(ctx context.Context, nodes []*cluster_model2.ClusterNode) error {
+func (c *clusterNodeService) Insert(ctx context.Context, nodes []*cluster_model2.Node) error {
 	entryNodes := make([]*cluster_entry.ClusterNode, 0, len(nodes))
 	for _, node := range nodes {
-		entryNodes = append(entryNodes, node.ClusterNode)
+		entryNodes = append(entryNodes, node.ToEntity())
 	}
 	return c.clusterNodeStore.Insert(ctx, entryNodes...)
 }
 
 // QueryList 查询集群下的节点列表
 func (c *clusterNodeService) QueryList(ctx context.Context, namespaceId int, clusterName string) ([]*cluster_model2.ClusterNode, bool, error) {
-	cluster, err := c.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
+	clusterModel, err := c.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
 	if err != nil {
 		return nil, false, err
 	}
 
 	//控制台集群下存储的节点列表
-	list := make([]*cluster_model2.ClusterNode, 0)
+	list := make([]*cluster_model2.Node, 0)
 
 	group, _ := errgroup.WithContext(ctx)
 
 	group.Go(func() error {
-		nodes, err := c.clusterNodeStore.GetAllByClusterIds(ctx, cluster.Id)
+		nodes, err := c.QueryByClusterIds(ctx, clusterModel.Id)
 		if err != nil {
 			return err
 		}
-		for _, node := range nodes {
-			list = append(list, &cluster_model2.ClusterNode{
-				ClusterNode: node,
-				AdminAddrs:  strings.Split(node.AdminAddr, ","),
-				Status:      1,
-			})
-		}
+		list = append(list, nodes...)
+		//for _, node := range nodes {
+		//	list = append(list, &cluster_model2.Node{
+		//		Node:   *node,
+		//		Status: 1,
+		//	})
+		//}
 		return nil
 	})
 	//调用admin接口返回集群下的节点列表
-	clusterNodes := make([]*cluster_model2.ClusterNode, 0)
+	clusterNodes := make([]*cluster_model2.Node, 0)
 	group.Go(func() error {
-		clusterNodes, err = c.GetNodesByUrl(cluster.Addr)
+		ns, err := c.GetNodesByUrl(clusterModel.Addr)
 		if err != nil {
-			log.Errorf("clusterNodeService-QueryList addr=%s err=%s", cluster.Addr, err.Error())
+			log.Errorf("clusterNodeService-QueryList addr=%s err=%s", clusterModel.Addr, err.Error())
 			return err
 		}
+		clusterNodes = append(clusterNodes, ns...)
+		//for _, n := range ns {
+		//	clusterNodes = append(clusterNodes, &cluster_model2.ClusterNode{
+		//		Node:   *n,
+		//		Status: 1,
+		//	})
+		//}
 		return nil
 	})
 
@@ -95,37 +111,36 @@ func (c *clusterNodeService) QueryList(ctx context.Context, namespaceId int, clu
 		return nil, false, err
 	}
 
+	rs := make([]*cluster_model2.ClusterNode, 0, len(list))
+	addList, updateList, delList := common.DiffContrast(list, clusterNodes)
+	isUpdate := len(addList) > 0 || len(updateList) > 0 || len(delList) > 0
+
 	if len(clusterNodes) > 0 {
 		//判断ClusterNodes 集合里 是否存在控制台节点，
-		clusterNodesSet := common.SliceToSet(clusterNodes, func(t *cluster_model2.ClusterNode) string {
+		clusterNodesSet := common.SliceToSet(clusterNodes, func(t *cluster_model2.Node) string {
 			return t.Name
 		})
 		for _, node := range list {
+			ni := &cluster_model2.ClusterNode{Node: *node, Status: 1}
 			if _, has := clusterNodesSet[node.Name]; has {
-				node.Status = 2
+				ni.Status = 2
 			}
+			rs = append(rs, ni)
 		}
 	}
 
-	addList, updateList, delList := common.DiffContrast(list, clusterNodes)
-
-	isUpdate := len(addList) > 0 || len(updateList) > 0 || len(delList) > 0
-
-	return list, isUpdate, nil
+	return rs, isUpdate, nil
 }
 
-func (c *clusterNodeService) QueryByClusterIds(ctx context.Context, clusterIds ...int) ([]*cluster_model2.ClusterNode, error) {
+func (c *clusterNodeService) QueryByClusterIds(ctx context.Context, clusterIds ...int) ([]*cluster_model2.Node, error) {
 	nodes, err := c.clusterNodeStore.GetAllByClusterIds(ctx, clusterIds...)
 	if err != nil {
 		return nil, err
 	}
-	list := make([]*cluster_model2.ClusterNode, 0, len(nodes))
+	list := make([]*cluster_model2.Node, 0, len(nodes))
 
 	for _, node := range nodes {
-		list = append(list, &cluster_model2.ClusterNode{
-			ClusterNode: node,
-			AdminAddrs:  strings.Split(node.AdminAddr, ","),
-		})
+		list = append(list, cluster_model2.ReadClusterNode(node))
 	}
 	return list, nil
 }
@@ -141,7 +156,7 @@ func (c *clusterNodeService) Reset(ctx context.Context, namespaceId, userId int,
 	if err != nil {
 		return err
 	}
-	nodes := make([]*cluster_model2.ClusterNode, 0)
+	nodes := make([]*cluster_model2.Node, 0)
 	if err = json.Unmarshal(bytes, &nodes); err != nil {
 		return err
 	}
@@ -162,15 +177,13 @@ func (c *clusterNodeService) Reset(ctx context.Context, namespaceId, userId int,
 		nodesAdminAddr := make([]string, 0, len(nodes))
 
 		for _, node := range nodes {
-			entryClusterNodes = append(entryClusterNodes, &cluster_entry.ClusterNode{
-				ClusterId:   clusterId,
-				NamespaceId: namespaceId,
-				AdminAddr:   node.AdminAddr,
-				ServiceAddr: node.ServiceAddr,
-				Name:        node.Name,
-				CreateTime:  t,
-			})
-			nodesAdminAddr = append(nodesAdminAddr, node.AdminAddr)
+			ent := node.ToEntity()
+			ent.ClusterId = clusterId
+			ent.CreateTime = t
+			ent.NamespaceId = namespaceId
+
+			entryClusterNodes = append(entryClusterNodes, ent)
+			nodesAdminAddr = append(nodesAdminAddr, ent.AdminAddr)
 		}
 		if err = c.clusterNodeStore.UpdateNodes(txCtx, clusterId, entryClusterNodes); err != nil {
 			return err
@@ -208,8 +221,8 @@ func (c *clusterNodeService) Update(ctx context.Context, namespaceId int, cluste
 		newClusterNodes = append(newClusterNodes, &cluster_entry.ClusterNode{
 			ClusterId:   clusterInfo.Id,
 			NamespaceId: namespaceId,
-			AdminAddr:   node.AdminAddr,
-			ServiceAddr: node.ServiceAddr,
+			AdminAddr:   strings.Join(node.AdminAddrs, ","),
+			ServiceAddr: strings.Join(node.ServiceAddr, ","),
 			Name:        node.Name,
 			CreateTime:  t,
 		})
@@ -230,7 +243,7 @@ func (c *clusterNodeService) Update(ctx context.Context, namespaceId int, cluste
 }
 
 // NodeRepeatContrast  节点重复对比
-func (c *clusterNodeService) NodeRepeatContrast(ctx context.Context, namespaceId, clusterId int, newList []*cluster_model2.ClusterNode) error {
+func (c *clusterNodeService) NodeRepeatContrast(ctx context.Context, namespaceId, clusterId int, newList []*cluster_model2.Node) error {
 	clusters, err := c.clusterService.GetByNamespaceId(ctx, namespaceId)
 	if err != nil {
 		return err
@@ -255,7 +268,7 @@ func (c *clusterNodeService) NodeRepeatContrast(ctx context.Context, namespaceId
 
 	//对比clusterNods和nodes是否有重复的name
 
-	mapNode := common.SliceToMap(newList, func(t *cluster_model2.ClusterNode) string {
+	mapNode := common.SliceToMap(newList, func(t *cluster_model2.Node) string {
 		return t.Name
 	})
 
@@ -271,7 +284,7 @@ func (c *clusterNodeService) NodeRepeatContrast(ctx context.Context, namespaceId
 	return nil
 }
 
-func (c *clusterNodeService) GetNodesByUrl(addr string) ([]*cluster_model2.ClusterNode, error) {
+func (c *clusterNodeService) GetNodesByUrl(addr string) ([]*cluster_model2.Node, error) {
 
 	client, err := v1.NewClient([]string{addr})
 	if err != nil {
@@ -291,18 +304,16 @@ func (c *clusterNodeService) GetNodesByUrl(addr string) ([]*cluster_model2.Clust
 		return nil, err
 	}
 
-	list := make([]*cluster_model2.ClusterNode, 0)
+	list := make([]*cluster_model2.Node, 0)
 	for _, node := range clusterInfo.Nodes {
-		adminAddr := strings.Join(node.Admin, ",")
-		serverAddr := strings.Join(node.Server, ",")
-		list = append(list, &cluster_model2.ClusterNode{
-			ClusterNode: &cluster_entry.ClusterNode{
+		list = append(list,
+
+			&cluster_model2.Node{
 				Name:        node.Name,
-				AdminAddr:   adminAddr,
-				ServiceAddr: serverAddr,
+				AdminAddrs:  node.Admin,
+				ServiceAddr: node.Server,
 			},
-			Status: 2,
-		})
+		)
 	}
 
 	return list, nil

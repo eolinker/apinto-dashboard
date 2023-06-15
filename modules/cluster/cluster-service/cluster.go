@@ -164,7 +164,7 @@ func (c *clusterService) Insert(ctx context.Context, namespaceId, userId int, cl
 	if err != nil {
 		return err
 	}
-	nodes := make([]*cluster_model2.ClusterNode, 0)
+	nodes := make([]*cluster_model2.Node, 0)
 	if err = json.Unmarshal(bytes, &nodes); err != nil {
 		return err
 	}
@@ -206,19 +206,18 @@ func (c *clusterService) Insert(ctx context.Context, namespaceId, userId int, cl
 			return err
 		}
 
-		entryClusterNodes := make([]*cluster_model2.ClusterNode, 0, len(nodes))
-		nodesAdminAddr := make([]string, 0, len(nodes))
+		entryClusterNodes := make([]*cluster_model2.Node, 0, len(nodes))
 
 		for _, node := range nodes {
-			entryClusterNodes = append(entryClusterNodes, &cluster_model2.ClusterNode{ClusterNode: &cluster_entry2.ClusterNode{
+			entryClusterNodes = append(entryClusterNodes, &cluster_model2.Node{
 				NamespaceId: namespaceId,
-				AdminAddr:   node.AdminAddr,
+				AdminAddrs:  node.AdminAddrs,
 				ServiceAddr: node.ServiceAddr,
 				Name:        node.Name,
 				CreateTime:  t,
 				ClusterId:   entryCluster.Id,
-			}})
-			nodesAdminAddr = append(nodesAdminAddr, node.AdminAddr)
+			})
+
 		}
 		for _, node := range entryClusterNodes {
 			node.ClusterId = entryCluster.Id

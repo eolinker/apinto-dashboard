@@ -2,6 +2,7 @@ package cluster_controller
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
@@ -39,8 +40,8 @@ func (c *clusterNodeController) nodes(ginCtx *gin.Context) {
 	for _, node := range nodes {
 		list = append(list, &cluster_dto.ClusterNode{
 			Name:        node.Name,
-			ServiceAddr: node.ServiceAddr,
-			AdminAddr:   node.AdminAddr,
+			ServiceAddr: strings.Join(node.ServiceAddr, ","),
+			AdminAddr:   strings.Join(node.AdminAddrs, ","),
 			Status:      enum.ClusterNodeStatus(node.Status),
 		})
 	}
@@ -48,6 +49,30 @@ func (c *clusterNodeController) nodes(ginCtx *gin.Context) {
 	m := common.Map{}
 	m["nodes"] = list
 	m["is_update"] = isUpdate
+
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
+}
+
+// gets  获取节点列表
+func (c *clusterNodeController) nodesSimple(ginCtx *gin.Context) {
+	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
+	clusterName := ginCtx.Param("cluster_name")
+
+	nodes, err := c.clusterNodeService.List(ginCtx, namespaceId, clusterName)
+	if err != nil {
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
+		return
+	}
+
+	list := make([]*cluster_dto.ClusterNodeSimple, 0, len(nodes))
+	for _, node := range nodes {
+		list = append(list, &cluster_dto.ClusterNodeSimple{
+			Name: node.Name,
+		})
+	}
+
+	m := common.Map{}
+	m["nodes"] = list
 
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
 }
