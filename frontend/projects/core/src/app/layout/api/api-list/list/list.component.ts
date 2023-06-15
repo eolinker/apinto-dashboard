@@ -231,6 +231,6 @@ export class ApiManagementListComponent implements OnInit {
   }
 
   batchPublish (type:'online'|'offline') {
-    this.service.batchPublishApiModal(type, { uuids: [...this.apisSet] }, undefined, this)
+    this.service.batchPublishApiModal(type, { uuids: [...this.apisSet] }, () => {}, this)
   }
 }

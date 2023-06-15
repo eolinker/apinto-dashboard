@@ -27,8 +27,6 @@ export class WebsocketService {
       this.subject?.complete()
     }
 
-    this.subject.subscribe({ next: console.log, error: console.error, complete: console.info })
-
     return {
       wsRef: this.subject,
       ws: ws,

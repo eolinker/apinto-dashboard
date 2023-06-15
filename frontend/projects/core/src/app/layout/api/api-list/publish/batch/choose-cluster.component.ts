@@ -32,14 +32,13 @@ export class ApiBatchPublishChooseClusterComponent implements OnInit {
 
   getClusterList ():void {
     this.loading = true
-    this.clustersSet.clear()
     this.clustersList = []
     this.api.get('clusters/simple').subscribe((resp:{code:number, data:{clusters:ClusterSimpleOption[]}, msg:string}) => {
       if (resp.code === 0) {
         this.clustersList = []
         for (const index in resp.data.clusters) {
           this.clustersList = resp.data.clusters.map((cluster:ClusterSimpleOption) => {
-            return { label: cluster.title, value: cluster.name }
+            return { label: cluster.title, value: cluster.name, checked: this.clustersSet.has(cluster.name) }
           })
           if (this.clustersList.length === 1) {
             this.clustersSet.add(resp.data.clusters[index].name)
