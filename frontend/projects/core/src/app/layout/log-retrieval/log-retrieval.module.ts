@@ -12,6 +12,7 @@ import { EoNgApintoTableModule } from 'projects/eo-ng-apinto-table/src/public-ap
 import { EoNgLogRetrievalTailComponent } from './tail-log/tail-log.component'
 import { EoNgCheckboxModule } from 'eo-ng-checkbox'
 import { EoNgCodeboxModule } from 'eo-ng-codebox'
+import { DirectiveModule } from '../../directive/directive.module'
 
 @NgModule({
   declarations: [
@@ -20,6 +21,7 @@ import { EoNgCodeboxModule } from 'eo-ng-codebox'
   ],
   imports: [
     CommonModule,
+    DirectiveModule,
     LogRetrievalRoutingModule,
     FormsModule,
     ReactiveFormsModule,

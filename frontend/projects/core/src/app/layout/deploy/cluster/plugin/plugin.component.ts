@@ -20,6 +20,12 @@ import { MODAL_NORMAL_SIZE, MODAL_SMALL_SIZE } from 'projects/core/src/app/const
   selector: 'eo-ng-deploy-cluster-plugin',
   templateUrl: './plugin.component.html',
   styles: [
+    `
+    :host{
+      overflow-y:auto;
+      height:100%;
+      display:block;
+    }`
   ]
 })
 export class DeployClusterPluginComponent implements OnInit {

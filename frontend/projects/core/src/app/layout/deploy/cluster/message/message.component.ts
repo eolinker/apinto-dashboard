@@ -15,6 +15,11 @@ import { DeployService } from '../../deploy.service'
   selector: 'eo-ng-cluster-message',
   templateUrl: './message.component.html',
   styles: [
+    `
+    :host{
+      height:calc(100% - 43px);
+      display:block;
+    }`
   ]
 })
 export class DeployClusterMessageComponent {

@@ -1,5 +1,8 @@
 <div class="h-full overflow-y-hidden">
-  <div class="flex flex-wrap items-center list-header pl-btnbase pr-btnrbase">
+  <div
+    #searchGroup
+    class="flex flex-wrap items-center list-header pl-btnbase pr-btnrbase"
+  >
     <div class="flex flex-nowrap items-center mr-btnbase py-btnybase">
       <label class="">集群：</label>
       <eo-ng-tree-select
@@ -35,7 +38,11 @@
       </button>
     </div>
   </div>
-  <div class="list-content pb-[4px] overflow-y-auto max-h-[calc(100%_-_52px)]">
+  <div
+    eoNgScrollDom
+    [eoBeforeDom]="searchGroup"
+    class="list-content pb-[4px] overflow-y-auto max-h-[calc(100%_-_52px)]"
+  >
     <nz-collapse [nzBordered]="false">
       <nz-collapse-panel
         #p
