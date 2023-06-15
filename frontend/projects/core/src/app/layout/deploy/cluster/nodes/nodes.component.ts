@@ -18,6 +18,12 @@ import { DeployClusterNodesFormComponent } from './form/form.component'
   templateUrl: './nodes.component.html',
   styles: [
     `
+
+    :host{
+      overflow-y:auto;
+      height:100%;
+      display:block;
+    }
 `
   ]
 })
