@@ -2,7 +2,6 @@ package cluster_service
 
 import (
 	"context"
-	"strings"
 	"sync"
 
 	"github.com/eolinker/apinto-dashboard/client/v1"
@@ -66,7 +65,7 @@ func (c *apintoClientService) getClient(ctx context.Context, clusterId int) (v1.
 	//newAdmin = append(newAdmin, cluster.Addr)
 	for _, node := range nodes {
 
-		for _, nodeAddr := range strings.Split(node.AdminAddr, ",") {
+		for _, nodeAddr := range node.AdminAddrs {
 			//newNodeAddrSlice := strings.SplitN(strings.ReplaceAll(nodeAddr, "http://", ""), ".", 3)
 			//if len(newNodeAddrSlice) >= 2 {
 			//	if newAddrSlice[0] == newNodeAddrSlice[0] && newAddrSlice[1] == newNodeAddrSlice[1] {

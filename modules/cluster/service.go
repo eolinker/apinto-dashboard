@@ -61,13 +61,14 @@ type IClusterConfigService interface {
 
 type IClusterNodeService interface {
 	QueryList(ctx context.Context, namespaceId int, clusterName string) ([]*cluster_model.ClusterNode, bool, error)
-	QueryByClusterIds(ctx context.Context, clusterIds ...int) ([]*cluster_model.ClusterNode, error)
+	List(ctx context.Context, namespaceId int, clusterName string) ([]*cluster_model.Node, error)
+	QueryByClusterIds(ctx context.Context, clusterIds ...int) ([]*cluster_model.Node, error)
 	Reset(ctx context.Context, namespaceId, userId int, clusterName, clusterAddr, source string) error
 	Update(ctx context.Context, namespaceId int, clusterName string) error
 	Delete(ctx context.Context, namespaceId int, clusterId int) error
-	NodeRepeatContrast(ctx context.Context, namespaceId, clusterId int, newList []*cluster_model.ClusterNode) error
-	Insert(ctx context.Context, nodes []*cluster_model.ClusterNode) error
-	GetNodesByUrl(addr string) ([]*cluster_model.ClusterNode, error)
+	NodeRepeatContrast(ctx context.Context, namespaceId, clusterId int, newList []*cluster_model.Node) error
+	Insert(ctx context.Context, nodes []*cluster_model.Node) error
+	GetNodesByUrl(addr string) ([]*cluster_model.Node, error)
 	GetClusterInfo(addr string) (*v1.ClusterInfo, error)
 }
 

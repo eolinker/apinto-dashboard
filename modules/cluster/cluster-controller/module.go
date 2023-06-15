@@ -148,6 +148,12 @@ func (c *Module) initRouter() {
 			HandlerFunc: []apinto_module.HandlerFunc{nodeController.nodes},
 		},
 		{
+			Method:      http.MethodGet,
+			Path:        "/api/cluster/:cluster_name/nodes/simple",
+			Handler:     "cluster.nodes.simple",
+			HandlerFunc: []apinto_module.HandlerFunc{nodeController.nodesSimple},
+		},
+		{
 			Method:      http.MethodPost,
 			Path:        "/api/cluster/:cluster_name/node/reset",
 			Handler:     "cluster.nodes.reset",
