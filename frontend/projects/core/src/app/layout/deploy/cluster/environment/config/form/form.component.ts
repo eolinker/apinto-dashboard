@@ -23,11 +23,11 @@ import { ApiService } from 'projects/core/src/app/service/api.service'
         eo-ng-input
         formControlName="key"
         eoNgUserAccess="deploy/cluster"
-        placeholder="英文、下划线及圆点组合"
+        placeholder="英文数字下划线任意一种，首字母必须为英文"
       />
       <ng-template #matchKeyErrorTpl let-control>
         <ng-container *ngIf="control.hasError('pattern')"
-          >英文、下划线及圆点组合</ng-container
+          >英文数字下划线任意一种，首字母必须为英文</ng-container
         >
         <ng-container *ngIf="control.hasError('required')"
           >必填项</ng-container
@@ -103,7 +103,7 @@ export class DeployClusterEnvironmentConfigFormComponent implements OnInit {
 
   ngOnInit (): void {
     this.validateAddConfigForm = this.fb.group({
-      key: [this.editData?.key || '', [Validators.required, Validators.pattern(/^[A-Za-z_\\.]*$/)]],
+      key: [this.editData?.key || '', [Validators.required, Validators.pattern('^[a-zA-Z][a-zA-Z0-9/_]*')]],
       value: [this.editData?.value || ''],
       desc: [this.editData?.desc || '']
     })

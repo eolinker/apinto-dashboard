@@ -65,6 +65,7 @@
       [(nzPageSize)]="variablePage.pageSize"
       (nzPageIndexChange)="getVariables()"
       (nzPageSizeChange)="getVariables()"
+      [nzLoading]="globalEnvTableLoading"
     >
     </eo-ng-apinto-table>
   </div>

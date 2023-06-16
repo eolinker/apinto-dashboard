@@ -17,6 +17,13 @@ import { EoNgNavigationService } from '../../../service/eo-ng-navigation.service
   selector: 'eo-ng-application-extra',
   templateUrl: './extra.component.html',
   styles: [
+    `
+    :host{
+      height:100%;
+      display:block;
+      overflow-y:auto;
+    }
+`
   ]
 })
 export class ApplicationExtraComponent {

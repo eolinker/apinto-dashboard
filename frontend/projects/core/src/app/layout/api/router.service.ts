@@ -465,7 +465,7 @@ export class RouterService {
           uuid: uuid,
           type: type,
           closeModal: (resp:EmptyHttpResponse) => { resolve(resp); this.groupModal?.close(); component?.getMenuList(true) },
-          showUuid: type === 'add'
+          showUuid: type === 'add' && uuid !== 'root'
         },
         nzClosable: true,
         nzCancelText: '取消',
