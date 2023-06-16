@@ -133,14 +133,12 @@ export class DeployClusterEnvironmentConfigUpdateComponent implements OnInit {
   }
 
   clusterTableClick = (item:any) => {
-    console.log(item)
     item.checked = !item.checked
     item.data.checked = !item.data.checked
     this.getClusterCheckedList()
   }
 
   configTableClick = (item:any) => {
-    console.log(item)
     item.checked = !item.checked
     item.data.checked = !item.data.checked
     this.getVarCheckedList()

@@ -35,17 +35,7 @@
   </ng-template>
 
   <ng-template #tab3Tpl>
-    <span *ngIf="appId !== 'anonymous'">访问鉴权</span>
-    <div
-      eoNgFeedbackTooltip
-      *ngIf="appId === 'anonymous'"
-      eoNgFeedbackTooltip
-      nzTooltipPlacement="bottom"
-      nzTooltipTrigger="hover"
-      nzTooltipTitle="匿名应用不开放访问鉴权"
-    >
-      访问鉴权
-    </div>
+    <span>访问鉴权</span>
   </ng-template>
   <div class="h-[calc(100%_-_96px)]">
     <nz-spin class="h-[100%]" [nzSpinning]="service.loading">
