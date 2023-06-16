@@ -48,12 +48,12 @@ func (c *Controller) RoutersInfo() apinto_module.RoutersInfo {
 			Method:      http.MethodGet,
 			Path:        "/api/log/download/:key",
 			Handler:     "log.list.node",
-			HandlerFunc: []apinto_module.HandlerFunc{c.list},
+			HandlerFunc: []apinto_module.HandlerFunc{c.download},
 		}, {
 			Method:      http.MethodGet,
 			Path:        "/api/log/tail/:key",
 			Handler:     "log.list.node",
-			HandlerFunc: []apinto_module.HandlerFunc{c.list},
+			HandlerFunc: []apinto_module.HandlerFunc{c.tail},
 		},
 	}
 }
@@ -169,7 +169,7 @@ func readFiles(name string, addrs []string, prefix string) *dto.Output {
 		err = json.Unmarshal(body, &files)
 		if err != nil {
 			log.Info("read file form ", url, " ", err)
-			return nil
+			break
 		}
 		out.Files = make([]dto.File, 0, len(files))
 		for _, fi := range files {
