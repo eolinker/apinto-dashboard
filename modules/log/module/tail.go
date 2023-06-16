@@ -9,51 +9,54 @@
 package module
 
 import (
+	"bufio"
+	"encoding/base64"
 	"github.com/gin-gonic/gin"
-)
-
-var (
-//	dialer = Dialer{
-//		NetDial:          nil,
-//		HandshakeTimeout: 0,
-//	}
+	"io"
+	"net/http"
 )
 
 func (c *Controller) tail(ginCtx *gin.Context) {
+	key := ginCtx.Param("key")
+	keyData, err := base64.URLEncoding.DecodeString(key)
+	if err != nil {
+		ginCtx.AbortWithStatus(http.StatusBadRequest)
+		return
 
-	//if !tokenListContainsValue(ginCtx.Request.Header, "Connection", "Upgrade") {
-	//
-	//	var brw *bufio.ReadWriter
-	//	netConn, brw, err := ginCtx.Writer.Hijack()
-	//	if err != nil {
-	//		ginCtx.AbortWithStatus(http.StatusInternalServerError)
-	//		return
-	//	}
-	//	defer func() {
-	//
-	//		netConn.Close()
-	//	}()
-	//	if brw.Reader.Buffered() > 0 {
-	//
-	//		return
-	//	}
-	//
-	//
-	//	upstream, resp, err := dialer.DialContext(request)
-	//	if err != nil {
-	//		ginCtx.AbortWithStatus(http.StatusInternalServerError)
-	//		return
-	//	}
-	//	defer upstream.Close()
-	//	err = resp.Write(netConn)
-	//	if err != nil {
-	//		return
-	//	}
-	//	go func() {
-	//		io.Copy(netConn, upstream)
-	//	}()
-	//	io.Copy(upstream, netConn)
-	//} else {
-	//	ginCtx.AbortWithStatus(http.StatusInternalServerError)
-	//}
+	}
+	url := string(keyData)
+	if !tokenListContainsValue(ginCtx.Request.Header, "Connection", "Upgrade") {
+
+		var brw *bufio.ReadWriter
+		netConn, brw, err := ginCtx.Writer.Hijack()
+		if err != nil {
+			ginCtx.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+		defer func() {
+
+			netConn.Close()
+		}()
+		if brw.Reader.Buffered() > 0 {
+			ginCtx.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+
+		upstream, resp, err := DefaultDialer.DialContext(ginCtx, url, ginCtx.Request.Header)
+		if err != nil {
+			ginCtx.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+		defer upstream.Close()
+		err = resp.Write(netConn)
+		if err != nil {
+			return
+		}
+		go func() {
+			io.Copy(netConn, upstream)
+		}()
+		io.Copy(upstream, netConn)
+	} else {
+		ginCtx.AbortWithStatus(http.StatusInternalServerError)
+	}
 }
