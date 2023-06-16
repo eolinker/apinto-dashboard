@@ -845,12 +845,12 @@ eo-ng-radio-group.date-picker-button-group
 
 .scroll-top-box-shadow {
   position: relative;
-  z-index: 2;
+  z-index: 999;
   box-shadow: 0 1px 1px 0px rgba(0, 0, 0, 0.05);
 }
 
 .scroll-bottom-box-shadow {
   position: relative;
-  z-index: 2;
+  z-index: 999;
   box-shadow: 0 -1px 1px 0px rgba(0, 0, 0, 0.05);
 }

@@ -146,8 +146,8 @@ export const customAttrTableBody: EO_TBODY_TYPE[] = [
     type: 'input',
     placeholder: '请输入Key',
     checkMode: 'change',
-    check: (item: any) => {
-      return !item || /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(item)
+    check: (key: any) => {
+      return !key || /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(key)
     },
     errorTip: '首字母必须为英文'
   },
@@ -174,7 +174,7 @@ export const customAttrTableBody: EO_TBODY_TYPE[] = [
       },
       {
         title: '减少',
-        action: 'add'
+        action: 'delete'
       }
     ]
   }

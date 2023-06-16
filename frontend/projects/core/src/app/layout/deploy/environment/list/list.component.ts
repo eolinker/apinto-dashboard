@@ -57,6 +57,7 @@ export class DeployEnvironmentListComponent {
 
   globalEnvTableHeadName: THEAD_TYPE[] = [...DeployGlobalEnvTableHeadName]
   globalEnvTableBody: EO_TBODY_TYPE[] = [...DeployGlobalEnvTableBody]
+  globalEnvTableLoading:boolean = false
 
   editConfigDrawerRef: NzModalRef | undefined
 
@@ -123,6 +124,7 @@ export class DeployEnvironmentListComponent {
   }
 
   getVariables () {
+    this.globalEnvTableLoading = true
     this.api
       .get('variables', {
         pageNum: this.variablePage.pageNum,
@@ -135,6 +137,7 @@ export class DeployEnvironmentListComponent {
           this.globalEnvForms = resp.data
           this.variablePage.total = resp.data.total
         }
+        this.globalEnvTableLoading = false
       })
   }
 
