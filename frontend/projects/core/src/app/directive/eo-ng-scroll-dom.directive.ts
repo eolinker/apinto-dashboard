@@ -8,6 +8,14 @@ export class EoNgScrollDomDirective implements AfterViewInit {
   @Input() eoAfterDom : HTMLDivElement|undefined // 位于滚动元素下方、不参与滚动、与滚动元素为兄弟节点的dom，如果无该元素则滚动元素的高度=父元素高度
   @Input() eoParentDom : HTMLDivElement|undefined // 父元素
   domMaxHeight:number = 0 // 滚动元素的最大高度 = 父元素高度 - lastDom高度
+  resizeObserver = new ResizeObserver((entries:any) => {
+    for (const entry of entries) {
+      if (entry.contentBoxSize) {
+        this.getElementHeight()
+      }
+    }
+  })
+
   constructor (
     private el:ElementRef, private renderer2:Renderer2) {
   }
@@ -40,5 +48,6 @@ export class EoNgScrollDomDirective implements AfterViewInit {
     setTimeout(() => {
       this.getElementHeight()
     }, 100)
+    this.resizeObserver.observe(this.el.nativeElement)
   }
 }

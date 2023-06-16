@@ -199,6 +199,9 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
       case '复制Token': {
         return 'copy'
       }
+      case '下载': {
+        return 'download'
+      }
     }
     return ''
   }
