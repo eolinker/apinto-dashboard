@@ -56,9 +56,9 @@ export class EoNgLogRetrievalTailComponent {
   }
 
   connectWs (reConnect?:boolean) {
-    if (this.tailKey) {
-      this.url = `ws://${window.location.host}/api/log/tail/${this.tailKey}`
-    }
+    // if (this.tailKey) {
+    //   this.url = `ws://${window.location.host}/api/log/tail/${this.tailKey}`
+    // }
 
     this.wsRef = this.ws.create(this.url)
     this.connected = true
