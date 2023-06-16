@@ -601,6 +601,16 @@ eo-ng-tree-default:not(.ant-select-tree) {
   background: var(--scrollbar-thumb-background-color);
 }
 
+.ace_scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(220, 220, 220, 0.6);
+  border-radius: 10px;
+}
+
+.ace_scrollbar::-webkit-scrollbar-track {
+  background-color: rgba(220, 220, 220, 0.3);
+  border-radius: 10px;
+}
+
 .modal-header {
   .ant-modal-confirm-confirm .ant-modal-confirm-body > .anticon,
   .ant-modal-confirm-warning .ant-modal-confirm-body > .anticon {
@@ -853,4 +863,9 @@ eo-ng-radio-group.date-picker-button-group
   position: relative;
   z-index: 999;
   box-shadow: 0 -1px 1px 0px rgba(0, 0, 0, 0.05);
+}
+
+eo-ng-codebox div.nz-resizable {
+  height: 0px !important;
+  min-height: 0;
 }

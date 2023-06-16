@@ -154,7 +154,6 @@ export class ListComponent implements OnInit {
     if (this.editingPriority && this.editingPriority !== priority) {
       this.changePriorityMap(this.editingPriority, priority, uuid)
     }
-    console.log(priority, uuid, this)
     // 1.输入为空
     if (priority === 'NULL') {
       this.message.error('优先级不能为空，请填写后提交')
