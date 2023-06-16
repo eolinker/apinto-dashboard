@@ -13,6 +13,11 @@ import { Component } from '@angular/core'
   <router-outlet></router-outlet>
   `,
   styles: [
+    `
+    :host{
+      height:100%;
+      display:block;
+    }`
   ]
 })
 export class ApplicationManagementComponent {

@@ -17,7 +17,19 @@ import { EoNgApplicationService } from '../application.service'
 @Component({
   selector: 'eo-ng-application-content',
   templateUrl: './content.component.html',
-  styles: [
+  styles: [`
+
+  :host{
+      height:100%;
+      display:block;
+
+      ::ng-deep{
+        nz-spin>.ant-spin-container{
+          height:100%;
+          display:block;
+        }
+      }
+    }`
   ]
 })
 export class ApplicationContentComponent implements OnInit {

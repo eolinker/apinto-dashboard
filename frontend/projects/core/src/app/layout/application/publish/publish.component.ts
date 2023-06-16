@@ -50,6 +50,11 @@ export class ApplicationPublishComponent extends EoIntelligentPluginPublishCompo
       }).map((item) => {
         return item.name
       })
+      this.showNoCluster = cluster.length <= 0
+      if (this.showNoCluster) {
+        observer.next(false)
+        return
+      }
       this.api.put('application/offline', { clusterNames: cluster }, { appId: this.id }).subscribe((resp:DynamicPublish) => {
         if (resp.code === 0) {
           this.message.success(resp.msg)
@@ -70,6 +75,11 @@ export class ApplicationPublishComponent extends EoIntelligentPluginPublishCompo
       }).map((item) => {
         return item.name
       })
+      this.showNoCluster = cluster.length <= 0
+      if (this.showNoCluster) {
+        observer.next(false)
+        return
+      }
       this.api.put('application/online', { clusterNames: cluster }, { appId: this.id }).subscribe((resp:DynamicPublish) => {
         if (resp.code === 0) {
           this.message.success(resp.msg)

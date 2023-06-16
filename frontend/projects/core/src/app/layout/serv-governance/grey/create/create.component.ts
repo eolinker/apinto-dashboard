@@ -194,15 +194,13 @@ export class GreyCreateComponent implements OnInit {
               distribution: resp.data.strategy!.config.distribution || 'percent'
             })
 
-            if (resp.data.strategy!.config.distribution === 'percent') {
-              this.validateForm.controls['percent1'].setValue(
+            this.validateForm.controls['percent1'].setValue(
               resp.data.strategy!.config.percent! / 100 || 1
-              )
+            )
 
-              this.validateForm.controls['percent2'].setValue(
-                100 - (resp.data.strategy!.config.percent! / 100 || 1)
-              )
-            }
+            this.validateForm.controls['percent2'].setValue(
+              100 - (resp.data.strategy!.config.percent! / 100 || 0)
+            )
             this.createStrategyForm = resp.data.strategy!
             this.createStrategyForm.filters = this.createStrategyForm.filters || []
             this.createStrategyForm.config.match = this.createStrategyForm.config.match || []

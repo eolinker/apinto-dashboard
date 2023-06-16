@@ -15,6 +15,13 @@ import { BaseInfoService } from '../../../service/base-info.service'
   selector: 'eo-ng-application-message',
   templateUrl: './message.component.html',
   styles: [
+    `
+    :host{
+      height:100%;
+      display:block;
+      overflow-y:auto;
+    }
+`
   ]
 })
 export class ApplicationMessageComponent implements OnInit {

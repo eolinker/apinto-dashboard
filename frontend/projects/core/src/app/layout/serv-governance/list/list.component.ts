@@ -154,31 +154,27 @@ export class ListComponent implements OnInit {
     if (this.editingPriority && this.editingPriority !== priority) {
       this.changePriorityMap(this.editingPriority, priority, uuid)
     }
+    console.log(priority, uuid, this)
     // 1.输入为空
     if (priority === 'NULL') {
       this.message.error('优先级不能为空，请填写后提交')
     } else if (Number(priority) > 999) {
       this.message.error('优先级范围在1-999之间，请修改后提交')
     } else {
+      const checkPMap:boolean = !!this.checkPriorityMap()
       // 2.输入不为空, 检查priorityMap中相同priority的数组, 如果数组内包含其他1个策略, 提示冲突的策略名, 滚动到相应策略, 不允许提交
       if (this.priorityMap.get(priority)?.length === 2) {
         const anotherStrategy = this.priorityMap.get(priority)![0].uuid === uuid ? this.priorityMap.get(priority)![1] : this.priorityMap.get(priority)![0]
         this.viewportScroller.scrollToAnchor(anotherStrategy.uuid)
         this.message.error(`修改后的优先级与${anotherStrategy.name}冲突，无法自动提交`)
-        if (this.priorityDangerP.indexOf(Number(priority)) === -1) {
-          this.priorityDangerP.push(Number(priority))
-        }
         // 3.输入不为空, 检查priorityMap中相同priority的数组, 如果数组内包含其他多个策略, 提示有多个冲突, 不允许提交
       } else if (this.priorityMap.get(priority)!.length > 2) {
         this.message.error('优先级存在冲突或数值超出范围，无法自动提交')
-        if (this.priorityDangerP.indexOf(Number(priority)) === -1) {
-          this.priorityDangerP.push(Number(priority))
-        }
         // 4.输入不为空, 检查priorityMap中其他priority的数组, 如果数组内包含其他多个策略, 提示有多个冲突, 不允许提交
         // 5.输入不为空, 检查priorityMap中其他priority的数组, 如果全部数组的策略个数小于等于1, 允许提交
         // 检查priorityMap,将所有冲突策略的优先级放入priorityDangerP中, 以便页面中的input检测状态
       } else {
-        if (this.checkPriorityMap()) {
+        if (checkPMap) {
           this.editingPriority !== priority && this.changePriority()
         } else {
           this.message.error('优先级存在冲突或数值超出范围，无法自动提交')

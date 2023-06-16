@@ -5,22 +5,17 @@
   >
     <div class="flex flex-nowrap items-center mr-btnbase py-btnybase">
       <label class="">集群：</label>
-      <eo-ng-tree-select
-        name="header"
+
+      <eo-ng-cascader
+        [nzExpandTrigger]="'hover'"
         class="w-LOG"
         required
         [(ngModel)]="searchData.cluster"
         (ngModelChange)="getNodeList()"
-        nzLabelProperty="name"
-        nzValueProperty="uuid"
         nzPlaceHolder="请选择"
-        eoNgUserAccess="router/api"
-        [nzDisabled]="nzDisabled"
-        (disabledEdit)="disabledEdit($event)"
-        nzDropdownClassName="api-tree-select"
-        [nzNodes]="clusterList"
-        nzShowSearch
-      ></eo-ng-tree-select>
+        [nzOptions]="clusterList"
+        [nzAllowClear]="false"
+      ></eo-ng-cascader>
     </div>
     <div class="flex flex-nowrap items-center mr-btnbase py-btnybase">
       <label class="">节点：</label>
@@ -28,7 +23,7 @@
         class="w-LOG"
         [(ngModel)]="searchData.node"
         [nzOptions]="nodeList"
-        [nzAllowClear]="true"
+        [nzAllowClear]="false"
         nzPlaceHolder="请选择"
       ></eo-ng-select>
     </div>
@@ -38,7 +33,14 @@
       </button>
     </div>
   </div>
+  <eo-ng-empty
+    *ngIf="!accGroupList || accGroupList.length === 0"
+    nzMainTitle="暂无数据"
+    nzInputImage="simple"
+  ></eo-ng-empty>
+
   <div
+    *ngIf="accGroupList && accGroupList.length > 0"
     eoNgScrollDom
     [eoBeforeDom]="searchGroup"
     class="list-content pb-[4px] overflow-y-auto max-h-[calc(100%_-_52px)]"

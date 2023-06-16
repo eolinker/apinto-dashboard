@@ -25,6 +25,7 @@ export class EoIntelligentPluginPublishComponent implements OnInit {
   closeModal:any
   nzDisabled:boolean = false
   returnToSdk:Function|undefined
+  showNoCluster:boolean = false
   constructor (
     public message: EoNgFeedbackMessageService,
     private service:EoIntelligentPluginService,
@@ -75,6 +76,8 @@ export class EoIntelligentPluginPublishComponent implements OnInit {
       })
       this.selectedNum = this.selectedClusters.length
       this.publishList = [...this.publishList] // 表头的勾选状态需要重载数据才能刷新
+
+      this.showNoCluster = this.selectedNum === 0
     }, 0
 
     )
@@ -86,6 +89,10 @@ export class EoIntelligentPluginPublishComponent implements OnInit {
     }).map((item) => {
       return item.name
     })
+    this.showNoCluster = cluster.length <= 0
+    if (this.showNoCluster) {
+      return
+    }
     this.api.put(`dynamic/${this.moduleName}/offline/${this.id}`, { cluster: cluster }).subscribe((resp:DynamicPublish) => {
       if (resp.code === 0) {
         this.message.success(resp.msg)
@@ -101,6 +108,10 @@ export class EoIntelligentPluginPublishComponent implements OnInit {
     }).map((item) => {
       return item.name
     })
+    this.showNoCluster = cluster.length <= 0
+    if (this.showNoCluster) {
+      return
+    }
     this.api.put(`dynamic/${this.moduleName}/online/${this.id}`, { cluster: cluster }).subscribe((resp:DynamicPublish) => {
       if (resp.code === 0) {
         this.message.success(resp.msg)

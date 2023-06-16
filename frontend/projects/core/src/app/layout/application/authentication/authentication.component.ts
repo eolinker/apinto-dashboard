@@ -20,6 +20,11 @@ import { ApplicationAuthenticationViewComponent } from './view/view.component'
   templateUrl: './authentication.component.html',
   styles: [
     `
+    :host{
+      height:100%;
+      display:block;
+      overflow-y:auto;
+    }
 
     .authDrawer .label-large{
       width:126px;
