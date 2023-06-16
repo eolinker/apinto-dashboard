@@ -11,6 +11,12 @@ import { PublishFailService } from 'projects/core/src/app/service/publish-fail.s
   selector: 'eo-ng-api-plugin-template-publish',
   templateUrl: './publish.component.html',
   styles: [
+    `
+    :host ::ng-deep{
+      eo-ng-apinto-table:not(.arrayItem) nz-table-inner-scroll table:first-child, eo-ng-apinto-table:not(.arrayItem) nz-table-inner-default table:first-child{
+        border-top:none;
+      }
+    }`
   ]
 })
 export class ApiPluginTemplatePublishComponent implements OnInit {
