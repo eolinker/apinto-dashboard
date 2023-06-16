@@ -210,8 +210,8 @@ func (d *Dialer) DialContext(ctx context.Context, urlStr string, requestHeader h
 	}
 
 	resp.Body = io.NopCloser(bytes.NewReader([]byte{}))
-
 	netConn.SetDeadline(time.Time{})
+	netConn = nil // to avoid close in defer.
 	return conn, resp, nil
 }
 

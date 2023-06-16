@@ -10,6 +10,7 @@ package module
 
 import (
 	"bufio"
+	"context"
 	"encoding/base64"
 	"github.com/gin-gonic/gin"
 	"io"
@@ -33,29 +34,34 @@ func (c *Controller) tail(ginCtx *gin.Context) {
 			ginCtx.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
-		defer func() {
-
-			netConn.Close()
-		}()
-		if brw.Reader.Buffered() > 0 {
-			ginCtx.AbortWithStatus(http.StatusInternalServerError)
-			return
-		}
-
-		upstream, resp, err := DefaultDialer.DialContext(ginCtx, url, ginCtx.Request.Header)
-		if err != nil {
-			ginCtx.AbortWithStatus(http.StatusInternalServerError)
-			return
-		}
-		defer upstream.Close()
-		err = resp.Write(netConn)
-		if err != nil {
-			return
-		}
 		go func() {
+			defer func() {
+
+				netConn.Close()
+			}()
+			if brw.Reader.Buffered() > 0 {
+				ginCtx.AbortWithStatus(http.StatusInternalServerError)
+				return
+			}
+
+			upstream, resp, err := DefaultDialer.DialContext(context.Background(), url, ginCtx.Request.Header)
+			if err != nil {
+				ginCtx.AbortWithStatus(http.StatusInternalServerError)
+				return
+			}
+			defer func() {
+				upstream.Close()
+			}()
+			err = resp.Write(netConn)
+			if err != nil {
+				return
+			}
+			go func() {
+				io.Copy(upstream, netConn)
+			}()
 			io.Copy(netConn, upstream)
 		}()
-		io.Copy(upstream, netConn)
+
 	} else {
 		ginCtx.AbortWithStatus(http.StatusInternalServerError)
 	}
