@@ -21,6 +21,7 @@ import { DeployService } from '../../../../deploy.service'
             [nzTbody]="clusterTableBody"
             [nzThead]="clusterTableHeadName"
             [(nzData)]="clustersList"
+            [nzTrClick]="clusterTableClick"
             [nzNoScroll]="true"
             [nzScrollY]="120"
           >
@@ -33,7 +34,7 @@ import { DeployService } from '../../../../deploy.service'
               class="ant-form-item-explain-error"
               style="margin-left: var(--LAYOUT_PADDING)"
             >
-              必填项！
+              请至少选中一个集群
             </div>
           </div>
         </div>
@@ -52,6 +53,7 @@ import { DeployService } from '../../../../deploy.service'
           [nzTbody]="configsTable2Body"
           [nzThead]="configsTable2HeadName"
           [(nzData)]="updateConfigsList"
+          [nzTrClick]="configTableClick"
           [nzNoScroll]="true"
         >
         </eo-ng-apinto-table>
@@ -63,7 +65,7 @@ import { DeployService } from '../../../../deploy.service'
             class="ant-form-item-explain-error"
             style="margin-left: var(--LAYOUT_PADDING)"
           >
-          必填项！
+          请至少选中一个配置
           </div>
         </div>
       </div>
@@ -117,6 +119,7 @@ export class DeployClusterEnvironmentConfigUpdateComponent implements OnInit {
       this.updateConfigForm.variables = this.updateConfigsList?.filter(config => {
         return config.checked
       })
+      this.updateConfigsList = [...this.updateConfigsList]
     }, 0)
   }
 
@@ -125,7 +128,22 @@ export class DeployClusterEnvironmentConfigUpdateComponent implements OnInit {
       this.updateConfigForm.clusters = this.clustersList.filter(cluster => {
         return cluster.checked
       })
+      this.clustersList = [...this.clustersList]
     }, 0)
+  }
+
+  clusterTableClick = (item:any) => {
+    console.log(item)
+    item.checked = !item.checked
+    item.data.checked = !item.data.checked
+    this.getClusterCheckedList()
+  }
+
+  configTableClick = (item:any) => {
+    console.log(item)
+    item.checked = !item.checked
+    item.data.checked = !item.data.checked
+    this.getVarCheckedList()
   }
 
   save () {

@@ -84,10 +84,9 @@ export class ApiManagementListComponent implements OnInit {
     this.subscription = this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
         this.apisForm.groupUuid = this.baseInfo.allParamsInfo.apiGroupId
-        this.getApisData()
         this.apisForm.pageNum = 1
         this.apisForm.pageSize = 20
-        this.apiNameForSear = ''
+        this.getApisData()
       }
     })
 
