@@ -25,6 +25,7 @@ export class DeployPluginListComponent implements OnInit {
   pluginsList: PluginItem[]= []
   pluginsTableHeadName:THEAD_TYPE[] = [...PluginsTableHeadName]
   pluginsTableBody:TBODY_TYPE[] = []
+  pluginTableLoading:boolean = false
   constructor (
     private message: EoNgFeedbackMessageService,
     private modalService: EoNgFeedbackModalService,
@@ -47,10 +48,12 @@ export class DeployPluginListComponent implements OnInit {
   }
 
   getPluginsData () {
+    this.pluginTableLoading = true
     this.api.get('plugins').subscribe((resp:{code:number, data:{plugins:PluginItem[]}, msg:string}) => {
       if (resp.code === 0) {
         this.pluginsList = resp.data.plugins
       }
+      this.pluginTableLoading = false
     })
   }
 

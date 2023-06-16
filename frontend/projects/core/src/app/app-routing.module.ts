@@ -100,7 +100,7 @@ const routes: Routes = [
         loadChildren: () => import('./layout/plugin/plugin-management.module').then(m => m.PluginManagementModule)
       },
       {
-        path: 'log-retrieval',
+        path: 'log',
         data: {
           id: '11'
         },
