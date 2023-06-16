@@ -48,7 +48,6 @@ export class EoNgScrollDomDirective implements AfterViewInit {
     setTimeout(() => {
       this.getElementHeight()
     }, 100)
-    console.log(this.el, this.el.nativeElement)
     this.resizeObserver.observe(this.el.nativeElement)
   }
 }
