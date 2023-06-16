@@ -52,6 +52,7 @@ func newPluginService() plugin.IPluginService {
 	bean.Autowired(&n.userInfoService)
 	bean.Autowired(&n.clusterService)
 	bean.Autowired(&n.asynLockService)
+	bean.Autowired(&n.syncLockService)
 	bean.Autowired(&n.apintoClient)
 	bean.Autowired(&n.clusterPluginService)
 	bean.Autowired(&n.pluginTemplateService)
