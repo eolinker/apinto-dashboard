@@ -17,6 +17,11 @@ import { CascaderOption } from 'eo-ng-cascader'
   styles: [
     `
     :host ::ng-deep{
+
+      nz-spin > div{
+        height:100%;
+      }
+
       .ant-table-thead{
         height:0;
       }
@@ -29,6 +34,7 @@ import { CascaderOption } from 'eo-ng-cascader'
         nz-table-inner-scroll table:first-child, eo-ng-apinto-table:not(.arrayItem) nz-table-inner-default table:first-child {
           border-top: none;
       }
+
     }
 
     .ant-collapse-borderless>.ant-collapse-item{
@@ -77,9 +83,9 @@ export class LogRetrievalComponent {
   accGroupList:LogOutputData[] = []
   accTableHeader:THEAD_TYPE[] = [...LogRetrievalTableHeadName]
   accTableBody:TBODY_TYPE[] = [...LogRetrievalTableBody]
-
+  accGroupLoading:boolean = false
   modalRef:NzModalRef|undefined
-
+  start:boolean = false
   constructor (private api:ApiService, private modalService:EoNgFeedbackModalService) {
 
   }
@@ -138,12 +144,15 @@ export class LogRetrievalComponent {
   }
 
   getData () {
+    this.accGroupLoading = true
     this.api.get('log/files', { cluster: this.searchData.cluster[1], node: this.searchData.node }).subscribe((resp:{code:number, data:{output:LogOutputData[]}, msg:string}) => {
       if (resp.code === 0) {
         this.accGroupList = resp.data.output.filter((x:LogOutputData) => (x)).map((x:LogOutputData) => {
           return { ...x, active: true }
         })
       }
+      this.start = true
+      this.accGroupLoading = false
     })
   }
 
@@ -163,9 +172,7 @@ export class LogRetrievalComponent {
   }
 
   downloadLog (file:LogFileData) {
-    this.api.get(`log/download/${file.key}`).subscribe((resp:any) => {
-      console.log(resp)
-    })
+    window.location.href = `api/log/download/${file.key}`
   }
 
   show (val:any) {
