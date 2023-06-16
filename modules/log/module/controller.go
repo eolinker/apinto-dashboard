@@ -54,6 +54,7 @@ func (c *Controller) RoutersInfo() apinto_module.RoutersInfo {
 			Path:        "/api/log/tail/:key",
 			Handler:     "log.list.node",
 			HandlerFunc: []apinto_module.HandlerFunc{c.tail},
+			Labels:      apinto_module.RouterLabelAssets,
 		},
 	}
 }

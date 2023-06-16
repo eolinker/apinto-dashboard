@@ -25,7 +25,7 @@ func (c *Controller) tail(ginCtx *gin.Context) {
 
 	}
 	url := string(keyData)
-	if !tokenListContainsValue(ginCtx.Request.Header, "Connection", "Upgrade") {
+	if tokenListContainsValue(ginCtx.Request.Header, "Connection", "Upgrade") {
 
 		var brw *bufio.ReadWriter
 		netConn, brw, err := ginCtx.Writer.Hijack()
