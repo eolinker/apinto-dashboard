@@ -6,6 +6,7 @@ import { Component } from '@angular/core'
     <router-outlet></router-outlet>
   `,
   styles: [
+    ''
   ]
 })
 export class DeployEnvironmentComponent {

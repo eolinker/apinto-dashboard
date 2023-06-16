@@ -59,3 +59,5 @@ deploy.gitlab-ci.yml
 vender
 /out/
 *.gitlab-ci.yml
+/apserver/
+/builds/
