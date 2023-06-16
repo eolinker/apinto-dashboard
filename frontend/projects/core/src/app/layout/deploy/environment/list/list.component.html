@@ -36,6 +36,7 @@
         [(ngModel)]="searchForm.status"
         [nzOptions]="statusList"
         nzPlaceHolder="请选择"
+        [nzAllowClear]="true"
       ></eo-ng-select>
 
       <button class="ml-btnybase" eo-ng-button (click)="resetSearch()">

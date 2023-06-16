@@ -105,8 +105,7 @@ export class IframeHttpService {
     // user-center
     renewUserInfo: async () => {
       return new Promise((resolve) => {
-        this.navigation.reqUpdateRightList()
-        return this.navigation.repUpdateRightList().pipe(take(1)).subscribe(() => {
+        this.navigation.getMenuList().subscribe(() => {
           resolve({
             userId: this.navigation.getUserId(),
             userRoleId: this.navigation.getUserRoleId(),

@@ -14,6 +14,7 @@ import { EoNgCodeboxModule } from 'eo-ng-codebox'
 import { DirectiveModule } from '../../directive/directive.module'
 import { EoNgEmptyModule } from 'eo-ng-empty'
 import { EoNgCascaderModule } from 'eo-ng-cascader'
+import { NzSpinModule } from 'ng-zorro-antd/spin'
 
 @NgModule({
   declarations: [
@@ -33,7 +34,8 @@ import { EoNgCascaderModule } from 'eo-ng-cascader'
     EoNgApintoTableModule,
     EoNgCodeboxModule,
     EoNgEmptyModule,
-    EoNgCascaderModule
+    EoNgCascaderModule,
+    NzSpinModule
   ]
 })
 export class LogRetrievalModule { }

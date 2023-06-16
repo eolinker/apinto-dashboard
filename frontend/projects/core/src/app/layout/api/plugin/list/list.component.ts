@@ -14,6 +14,8 @@ import { PluginTemplateItem } from '../../types/types'
   selector: 'eo-ng-api-plugin-template-list',
   templateUrl: './list.component.html',
   styles: [
+    `
+    `
   ]
 })
 export class ApiPluginTemplateListComponent implements OnInit {
