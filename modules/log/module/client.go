@@ -96,9 +96,9 @@ func (d *Dialer) DialContext(ctx context.Context, urlStr string, requestHeader h
 	}
 
 	switch u.Scheme {
-	case "ws":
+	case "ws", "http":
 		u.Scheme = "http"
-	case "wss":
+	case "wss", "https":
 		u.Scheme = "https"
 	default:
 		return nil, nil, errMalformedURL
@@ -119,30 +119,6 @@ func (d *Dialer) DialContext(ctx context.Context, urlStr string, requestHeader h
 		Host:       u.Host,
 	}
 	req = req.WithContext(ctx)
-
-	for k, vs := range requestHeader {
-		switch {
-		case k == "Host":
-			if len(vs) > 0 {
-				req.Host = vs[0]
-			}
-		case k == "Upgrade" ||
-			k == "Connection" ||
-			k == "Sec-Websocket-Key" ||
-			k == "Sec-Websocket-Version" ||
-			k == "Sec-Websocket-Extensions" ||
-			(k == "Sec-Websocket-Protocol" && len(d.Subprotocols) > 0):
-			return nil, nil, errors.New("websocket: duplicate header not allowed: " + k)
-		case k == "Sec-Websocket-Protocol":
-			req.Header["Sec-WebSocket-Protocol"] = vs
-		default:
-			req.Header[k] = vs
-		}
-	}
-
-	if d.EnableCompression {
-		req.Header["Sec-WebSocket-Extensions"] = []string{"permessage-deflate; server_no_context_takeover; client_no_context_takeover"}
-	}
 
 	if d.HandshakeTimeout != 0 {
 		var cancel func()
