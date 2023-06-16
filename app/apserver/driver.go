@@ -9,6 +9,7 @@ import (
 	_ "github.com/eolinker/apinto-dashboard/modules/core/controller"
 	dynamic_controller "github.com/eolinker/apinto-dashboard/modules/dynamic/dynamic-controller"
 	email_controller "github.com/eolinker/apinto-dashboard/modules/email/controller"
+	logModule "github.com/eolinker/apinto-dashboard/modules/log/module"
 	module_plugin_controller "github.com/eolinker/apinto-dashboard/modules/module-plugin/controller"
 	open_api_controller "github.com/eolinker/apinto-dashboard/modules/openapi/open-api-controller"
 	open_app_controller "github.com/eolinker/apinto-dashboard/modules/openapp/open-app-controller"
@@ -44,6 +45,7 @@ func init() {
 
 	apintoModule.Register("email.apinto.com", email_controller.NewEmailDriver())
 	apintoModule.Register("webhook.apinto.com", webhook_controller.NewWebhookDriver())
+	apintoModule.Register("log.apinto.com", logModule.NewDriver())
 
 	apintoModule.Register("dynamic.apinto.com", dynamic_controller.NewDynamicModuleDriver(false))
 	apintoModule.Register("upstream.apinto.com", dynamic_controller.NewDynamicModuleDriver(false))
