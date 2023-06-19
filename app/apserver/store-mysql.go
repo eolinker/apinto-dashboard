@@ -5,7 +5,6 @@ package main
 import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/db_migrator"
-	_ "github.com/eolinker/apinto-dashboard/initialize"
 	"github.com/eolinker/apinto-dashboard/store"
 	"github.com/eolinker/apinto-dashboard/store/store_mysql"
 	"gorm.io/driver/mysql"
