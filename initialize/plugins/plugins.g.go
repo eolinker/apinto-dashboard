@@ -1,4 +1,12 @@
-package initialize
+/*
+ * Copyright (c) 2023. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+ * Morbi non lorem porttitor neque feugiat blandit. Ut vitae ipsum eget quam lacinia accumsan.
+ * Etiam sed turpis ac ipsum condimentum fringilla. Maecenas magna.
+ * Proin dapibus sapien vel ante. Aliquam erat volutpat. Pellentesque sagittis ligula eget metus.
+ * Vestibulum commodo. Ut rhoncus gravida arcu.
+ */
+
+package plugins
 
 import (
 	"embed"
@@ -15,12 +23,12 @@ import (
 )
 
 var (
-	//go:embed plugins
+	//go:embed embed
 	pluginDir embed.FS
 )
 
 func init() {
-	plugins, err := loadPlugins("plugins", "plugin.yml")
+	plugins, err := loadPlugins("embed", "plugin.yml")
 	if err != nil {
 		panic(err)
 	}
