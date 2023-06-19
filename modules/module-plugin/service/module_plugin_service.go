@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/controller"
-	"github.com/eolinker/apinto-dashboard/initialize"
+	"github.com/eolinker/apinto-dashboard/initialize/plugin-group"
 	apinto_module "github.com/eolinker/apinto-dashboard/module"
 	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-dashboard/modules/base/locker-service"
@@ -55,7 +55,7 @@ func (m *modulePluginService) GetPlugins(ctx context.Context, groupID, searchNam
 	var err error
 	//判断groupID是不是其它分组
 	if groupID == pluginGroupOther {
-		groupList := initialize.GetModulePluginGroups()
+		groupList := plugin_group.GetModulePluginGroups()
 		groups := make([]string, 0, len(groupList))
 		for _, group := range groupList {
 			groups = append(groups, group.ID)
@@ -138,7 +138,7 @@ func (m *modulePluginService) GetPluginGroups(ctx context.Context) ([]*model.Plu
 		}
 	}
 
-	list := initialize.GetModulePluginGroups()
+	list := plugin_group.GetModulePluginGroups()
 	groups := make([]*model.PluginGroup, 0, len(list)+1)
 	for _, item := range list {
 		hasGroupPluginsCount = hasGroupPluginsCount + groupCountMap[item.ID]
