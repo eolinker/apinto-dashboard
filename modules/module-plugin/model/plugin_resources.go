@@ -3,6 +3,7 @@ package model
 import (
 	"embed"
 	"fmt"
+	"path"
 )
 
 type PluginResources struct {
@@ -33,14 +34,18 @@ func (p *PluginResources) Resources(path string) ([]byte, bool) {
 }
 
 type EmbedPluginResources struct {
-	PluginID string
-	Icon     string
-	Readme   string
-	Fs       embed.FS
+	icon   string
+	readme string
+	root   string
+	Fs     embed.FS
+}
+
+func NewEmbedPluginResources(fs embed.FS, root string, icon string, readme string) *EmbedPluginResources {
+	return &EmbedPluginResources{icon: icon, readme: readme, root: path.Join(root), Fs: fs}
 }
 
 func (e *EmbedPluginResources) ICon() ([]byte, bool) {
-	data, err := e.Fs.ReadFile(fmt.Sprintf("plugins/%s/%s", e.PluginID, e.Icon))
+	data, err := e.Fs.ReadFile(path.Join(e.root, e.icon))
 	if err != nil {
 		return nil, false
 	}
@@ -48,7 +53,7 @@ func (e *EmbedPluginResources) ICon() ([]byte, bool) {
 }
 
 func (e *EmbedPluginResources) RM() ([]byte, bool) {
-	data, err := e.Fs.ReadFile(fmt.Sprintf("plugins/%s/%s", e.PluginID, e.Readme))
+	data, err := e.Fs.ReadFile(path.Join(e.root, e.readme))
 	if err != nil {
 		return nil, false
 	}
@@ -56,15 +61,15 @@ func (e *EmbedPluginResources) RM() ([]byte, bool) {
 }
 
 func (e *EmbedPluginResources) ReadMe(name string) ([]byte, bool) {
-	data, err := e.Fs.ReadFile(fmt.Sprintf("plugins/%s/%s", e.PluginID, name))
+	data, err := e.Fs.ReadFile(path.Join(e.root, name))
 	if err != nil {
 		return nil, false
 	}
 	return data, true
 }
 
-func (e *EmbedPluginResources) Resources(path string) ([]byte, bool) {
-	data, err := e.Fs.ReadFile(fmt.Sprintf("plugins/%s/resources/%s", e.PluginID, path))
+func (e *EmbedPluginResources) Resources(file string) ([]byte, bool) {
+	data, err := e.Fs.ReadFile(path.Join(e.root, "resources", file))
 	if err != nil {
 		return nil, false
 	}
