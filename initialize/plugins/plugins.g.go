@@ -56,12 +56,7 @@ func loadPlugins(dir string, target string) ([]*model.EmbedPluginCfg, error) {
 
 		plugins = append(plugins, &model.EmbedPluginCfg{
 			PluginCfg: pluginCfg,
-			Resources: &model.EmbedPluginResources{
-				PluginID: pluginCfg.ID,
-				Icon:     pluginCfg.Icon,
-				Readme:   "README.md",
-				Fs:       pluginDir,
-			},
+			Resources: model.NewEmbedPluginResources(pluginDir, path.Join("embed", e.Name()), pluginCfg.Icon, "README.md"),
 		})
 
 	}
