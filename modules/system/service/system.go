@@ -31,7 +31,7 @@ func NewSystemServiceIml[T any](key string) system.ISystemConfigService[T] {
 func (s *systemServiceIml[T]) Get() (*T, error) {
 	data, err := s.dataService.Get(s.key)
 
-	var v *T
+	v := new(T)
 	err = json.Unmarshal(data, v)
 	if err != nil {
 		return nil, err
