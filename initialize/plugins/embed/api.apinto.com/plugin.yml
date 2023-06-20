@@ -3,7 +3,7 @@ name: "api"
 cname: "API管理"
 resume: "管理和配置API转发信息，支持配置多协议接口，包括HTTP/HTTPS、Webservice、Restful、SOAP等多种请求协议。"
 version: "v1.0.7"
-icon: "API管理.png"
+icon: "logo.png"
 driver: "api.apinto.com"
 type: 1 #0为框架模块 1为核心模块 2为内置模块 3为非内置
 auto: true
