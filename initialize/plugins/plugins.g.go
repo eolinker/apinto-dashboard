@@ -10,10 +10,7 @@ package plugins
 
 import (
 	"embed"
-	"fmt"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/embed_registry"
-	"io/fs"
-	"net/http"
 	"path"
 
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/model"
@@ -61,18 +58,4 @@ func loadPlugins(dir string, target string) ([]*model.EmbedPluginCfg, error) {
 
 	}
 	return plugins, nil
-}
-
-func GetInnerPluginFS(filePath string) (http.FileSystem, error) {
-	//先检验文件是否存在
-	_, err := pluginDir.ReadFile(fmt.Sprintf("plugins/%s", filePath))
-	if err != nil {
-		return nil, err
-	}
-
-	pluginsFS, err := fs.Sub(pluginDir, "plugins")
-	if err != nil {
-		return nil, err
-	}
-	return http.FS(pluginsFS), nil
 }
