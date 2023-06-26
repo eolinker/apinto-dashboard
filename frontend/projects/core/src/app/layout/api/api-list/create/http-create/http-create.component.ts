@@ -46,18 +46,9 @@ export class ApiHttpCreateComponent extends ApiWebsocketCreateComponent {
         this.validateForm.controls['requestPath'].setValue(resp.data.api.requestPath[0] === '/' ? resp.data.api.requestPath.slice(1) : resp.data.api.requestPath)
         this.createApiForm = resp.data.api
         if (
-          !this.createApiForm.method ||
-          this.createApiForm.method.length === 0
+          !resp.data.api.method ||
+          resp.data.api.method.length === 0
         ) {
-          this.createApiForm.method = [
-            'POST',
-            'PUT',
-            'GET',
-            'DELETE',
-            'PATCH',
-            'HEAD',
-            'OPTIONS'
-          ]
           this.allChecked = true
           this.updateAllChecked()
         } else {
