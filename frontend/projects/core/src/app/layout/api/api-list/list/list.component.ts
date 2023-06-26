@@ -17,8 +17,6 @@ import { RouterService } from '../../router.service'
   templateUrl: './list.component.html',
   styles: [
     `
-
-
     div eo-ng-api-method-tag{
       margin: 0 2px;
     }
@@ -73,7 +71,7 @@ export class ApiManagementListComponent implements OnInit {
     private baseInfo:BaseInfoService,
     private navigationService:EoNgNavigationService,
     private service:RouterService,
-    private cdref:ChangeDetectorRef
+    private cdRef:ChangeDetectorRef
   ) {
     this.navigationService.reqFlashBreadcrumb([{ title: 'API管理', routerLink: 'router/api/group/list' }])
   }
@@ -89,7 +87,6 @@ export class ApiManagementListComponent implements OnInit {
         this.getApisData()
       }
     })
-
     this.getSourcesList()
   }
 
@@ -97,7 +94,7 @@ export class ApiManagementListComponent implements OnInit {
     this.apisTableBody = this.service.createApiListTbody(this)
     this.apisTableHeadName = this.service.createApiListThead(this)
     this.getApisData()
-    this.cdref.detectChanges()
+    this.cdRef.detectChanges()
   }
 
   ngOnDestroy () {

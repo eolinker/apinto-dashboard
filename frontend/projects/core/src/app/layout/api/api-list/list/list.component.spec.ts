@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing'
-import { ApiWebsocketCreateComponent } from './websocket-create.component'
 import { ComponentModule } from 'projects/core/src/app/component/component.module'
 import { APP_BASE_HREF } from '@angular/common'
 import { HttpClientModule } from '@angular/common/http'
@@ -12,9 +11,7 @@ import { EoNgFeedbackMessageService, EoNgFeedbackModalModule, EoNgFeedbackModalS
 import { NzNoAnimationModule } from 'ng-zorro-antd/core/no-animation'
 import { NzOutletModule } from 'ng-zorro-antd/core/outlet'
 import { NzOverlayModule } from 'ng-zorro-antd/core/overlay'
-import { LayoutModule } from '../../../../layout.module'
 import { BidiModule } from '@angular/cdk/bidi'
-import { routes } from '../../../api-routing.module'
 import { MockRenderer, MockMessageService, MockEnsureService, MockEmptySuccessResponse, MockGetCommonProviderService, MockPluginTemplateEnum, MockRouterGroups, MockAccessList, MockModuleList, MockApiWsMessage, MockApiWsMessage2 } from 'projects/core/src/app/constant/spec-test'
 import { of } from 'rxjs'
 import { API_URL, ApiService } from 'projects/core/src/app/service/api.service'
@@ -28,20 +25,22 @@ import { EoNgCheckboxModule } from 'eo-ng-checkbox'
 import { EoNgApintoTableModule } from 'projects/eo-ng-apinto-table/src/public-api'
 import { EoNgSelectModule } from 'eo-ng-select'
 import { BaseInfoService } from 'projects/core/src/app/service/base-info.service'
-import { ApiManagementProxyComponent } from '../../proxy/proxy.component'
+import { LayoutModule } from '../../../layout.module'
+import { routes } from '../../api-routing.module'
+import { ApiManagementProxyComponent } from '../proxy/proxy.component'
+import { ApiManagementListComponent } from './list.component'
 
 export class MockElementRef extends ElementRef {
   constructor () { super(null) }
 }
 
-describe('#init ApiWebsocketCreateComponent', () => {
-  let component:ApiWebsocketCreateComponent
-  let fixture: ComponentFixture<ApiWebsocketCreateComponent>
+describe('#init ApiManagementListComponent', () => {
+  let component:ApiManagementListComponent
+  let fixture: ComponentFixture<ApiManagementListComponent>
   let spyGetApiMessage:jest.SpyInstance<any>
   let spyOpenDrawer:jest.SpyInstance<any>
   let httpCommonService:any
-  let spyPutApiService:jest.SpyInstance<any>
-  let spyPostApiService:jest.SpyInstance<any>
+  let spyDeleteApiService:jest.SpyInstance<any>
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let spyApiService:jest.SpyInstance<any>
   global.structuredClone = (val:any) => JSON.parse(JSON.stringify(val))
@@ -55,7 +54,7 @@ describe('#init ApiWebsocketCreateComponent', () => {
         EoNgSwitchModule, EoNgCheckboxModule, EoNgApintoTableModule, EoNgSelectModule, EoNgFeedbackModalModule,
         EoNgFeedbackTooltipModule
       ],
-      declarations: [ApiWebsocketCreateComponent
+      declarations: [ApiManagementListComponent
       ],
       providers: [
         { provide: Overlay, useClass: Overlay },
@@ -70,33 +69,27 @@ describe('#init ApiWebsocketCreateComponent', () => {
       teardown: { destroyAfterEach: false }
     }).compileComponents()
 
-    fixture = TestBed.createComponent(ApiWebsocketCreateComponent)
+    fixture = TestBed.createComponent(ApiManagementListComponent)
     component = fixture.componentInstance
 
     fixture.detectChanges()
-    spyGetApiMessage = jest.spyOn(component, 'getApiMessage')
-    spyOpenDrawer = jest.spyOn(component, 'openDrawer')
 
     httpCommonService = fixture.debugElement.injector.get(ApiService)
     spyApiService = jest.spyOn(httpCommonService, 'get').mockImplementation(
       (...args) => {
         switch (args[0]) {
-          case 'common/provider/Service':
+          case 'routers':
             return of(MockGetCommonProviderService)
-          case 'plugin/template/enum':
+          case 'router/source':
             return of(MockPluginTemplateEnum)
-          case 'router/groups':
-            return of(MockRouterGroups)
-          case 'my/access':
-            return of(MockAccessList)
-          case 'system/modules':
-            return of(MockModuleList)
-          case 'router':
-            return of(MockApiWsMessage)
           default:
             return of(MockEmptySuccessResponse)
         }
       }
+    )
+
+    spyDeleteApiService = jest.spyOn(httpCommonService, 'delete').mockReturnValue(
+      of(MockEmptySuccessResponse)
     )
   })
 
