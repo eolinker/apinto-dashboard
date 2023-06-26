@@ -1,18 +1,7 @@
 /* eslint-disable dot-notation */
-import {
-  Component,
-
-  Input,
-  OnInit,
-
-  TemplateRef,
-  ViewChild
-} from '@angular/core'
+import { Component, Input, OnInit, TemplateRef, ViewChild } from '@angular/core'
 import { Router } from '@angular/router'
-import {
-  EoNgFeedbackMessageService,
-  EoNgFeedbackModalService
-} from 'eo-ng-feedback'
+import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feedback'
 import { ApiService } from 'projects/core/src/app/service/api.service'
 import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 import { UntypedFormBuilder, FormGroup, Validators } from '@angular/forms'
@@ -289,12 +278,7 @@ export class ApiWebsocketCreateComponent implements OnInit {
         ...item,
         checked: true
       }))
-      this.createApiForm.method = []
-      for (const index in this.methodList) {
-        if (this.methodList[index].checked) {
-          this.createApiForm.method.push(this.methodList[index].value)
-        }
-      }
+      this.createApiForm.method = [...this.methodList.filter((m:CheckBoxOptionInterface) => (m.checked)).map((x:CheckBoxOptionInterface) => (x.value))]
       this.showCheckboxGroupValid = false
     } else {
       this.methodList = this.methodList.map((item: any) => ({
@@ -302,7 +286,7 @@ export class ApiWebsocketCreateComponent implements OnInit {
         checked: false
       }))
       this.createApiForm.method = []
-      this.showCheckboxGroupValid = false
+      this.showCheckboxGroupValid = true
     }
   }
 
@@ -314,20 +298,59 @@ export class ApiWebsocketCreateComponent implements OnInit {
     } else {
       this.allChecked = false
     }
-    this.createApiForm.method = []
-    for (const index in this.methodList) {
-      if (this.methodList[index].checked) {
-        this.createApiForm.method.push(this.methodList[index].value)
-      }
-    }
-    if (this.methodList.length > 0) {
-      this.showCheckboxGroupValid = false
-    }
+    this.createApiForm.method = [...this.methodList.filter((m:CheckBoxOptionInterface) => (m.checked)).map((x:CheckBoxOptionInterface) => (x.value))]
+    this.showCheckboxGroupValid = this.createApiForm.method.length === 0
   }
 
   // 返回列表页，当fromList为true时，该页面左侧有分组
   backToList () {
     this.router.navigate(['/', 'router', 'api', 'group', 'list'])
+  }
+
+  requestPathChange () {
+    if (!this.validateForm.controls['proxyPath'].value && this.validateForm.controls['requestPath'].value) {
+      this.validateForm.controls['proxyPath'].setValue('/' + this.validateForm.controls['requestPath'].value)
+    }
+  }
+
+  checkTimeout () {
+    if (
+      this.validateForm.controls['timeout'].value &&
+      this.validateForm.controls['timeout'].value < 1
+    ) {
+      this.validateForm.controls['timeout'].setValue(1)
+    }
+  }
+
+  // 保存转发上游请求头数据时，如果是新建数据，直接加入tableList，如果是编辑数据，需要删除原先同key的数据再保存
+  saveProxyHeader (proxyRef: ApiManagementProxyComponent): void {
+    let proxyValid:boolean = false
+    if (proxyRef.validateProxyHeaderForm.controls['optType'].value === 'DELETE') {
+      proxyValid = !!proxyRef.validateProxyHeaderForm.controls['key'].value
+    } else {
+      proxyValid = proxyRef.validateProxyHeaderForm.valid
+    }
+    if (proxyValid) {
+      if (this.proxyEdit) {
+        for (const index in this.createApiForm.proxyHeader) {
+          if (this.createApiForm.proxyHeader[index].key === this.editData.key && this.createApiForm.proxyHeader[index].optType === this.editData.optType && this.createApiForm.proxyHeader[index].value === this.editData.value) {
+            this.createApiForm.proxyHeader.splice(Number(index), 1)
+            break
+          }
+        }
+      }
+      this.createApiForm.proxyHeader = [{ optType: proxyRef.validateProxyHeaderForm.controls['optType'].value, key: proxyRef.validateProxyHeaderForm.controls['key'].value, value: proxyRef.validateProxyHeaderForm.controls['value'].value }, ...this.createApiForm.proxyHeader]
+      this.modalRef?.close()
+    } else {
+      Object.values(proxyRef.validateProxyHeaderForm.controls).forEach(
+        (control) => {
+          if (control.invalid) {
+            control.markAsDirty()
+            control.updateValueAndValidity({ onlySelf: true })
+          }
+        }
+      )
+    }
   }
 
   // 提交api数据
@@ -395,52 +418,6 @@ export class ApiWebsocketCreateComponent implements OnInit {
           control.updateValueAndValidity({ onlySelf: true })
         }
       })
-    }
-  }
-
-  requestPathChange () {
-    if (!this.validateForm.controls['proxyPath'].value && this.validateForm.controls['requestPath'].value) {
-      this.validateForm.controls['proxyPath'].setValue('/' + this.validateForm.controls['requestPath'].value)
-    }
-  }
-
-  checkTimeout () {
-    if (
-      this.validateForm.controls['timeout'].value !== null &&
-      this.validateForm.controls['timeout'].value < 1
-    ) {
-      this.validateForm.controls['timeout'].setValue(1)
-    }
-  }
-
-  // 保存转发上游请求头数据时，如果是新建数据，直接加入tableList，如果是编辑数据，需要删除原先同key的数据再保存
-  saveProxyHeader (proxyRef: ApiManagementProxyComponent): void {
-    let proxyValid:boolean = false
-    if (proxyRef.validateProxyHeaderForm.controls['optType'].value === 'DELETE') {
-      proxyValid = !!proxyRef.validateProxyHeaderForm.controls['key'].value
-    } else {
-      proxyValid = proxyRef.validateProxyHeaderForm.valid
-    }
-    if (proxyValid) {
-      if (this.proxyEdit) {
-        for (const index in this.createApiForm.proxyHeader) {
-          if (this.createApiForm.proxyHeader[index].key === this.editData.key && this.createApiForm.proxyHeader[index].optType === this.editData.optType && this.createApiForm.proxyHeader[index].value === this.editData.value) {
-            this.createApiForm.proxyHeader.splice(Number(index), 1)
-            break
-          }
-        }
-      }
-      this.createApiForm.proxyHeader = [{ optType: proxyRef.validateProxyHeaderForm.controls['optType'].value, key: proxyRef.validateProxyHeaderForm.controls['key'].value, value: proxyRef.validateProxyHeaderForm.controls['value'].value }, ...this.createApiForm.proxyHeader]
-      this.modalRef?.close()
-    } else {
-      Object.values(proxyRef.validateProxyHeaderForm.controls).forEach(
-        (control) => {
-          if (control.invalid) {
-            control.markAsDirty()
-            control.updateValueAndValidity({ onlySelf: true })
-          }
-        }
-      )
     }
   }
 }
