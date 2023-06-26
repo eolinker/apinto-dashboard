@@ -353,3 +353,79 @@ export const MockApiWsMessage2:{code:number, data:{api:ApiMessage}, msg:string} 
   },
   msg: 'success'
 }
+
+export const MockApiHttpMessage:{code:number, data:{api:ApiMessage}, msg:string} = {
+  code: 0,
+  data: {
+    api: {
+      name: 'ss',
+      uuid: '569c8d47-d742-5306-c0e2-a5ae38727fa7',
+      groupUuid: '50458642-5a9f-4136-9ff1-e30d647297e8',
+      desc: '',
+      isDisable: false,
+      scheme: 'http',
+      requestPath: '/tetetetete',
+      service: 'testService',
+      method: ['GET'],
+      proxyPath: 'tetetetete',
+      hosts: ['test1.host.addr', 'test2.host.addr'],
+      timeout: 10000,
+      retry: 0,
+      match: [
+        {
+          position: 'header',
+          matchType: 'PREFIX',
+          key: 'ee',
+          pattern: 'te'
+        }
+      ],
+      proxyHeader: [
+        {
+          optType: 'DELETE',
+          key: 'eee',
+          value: ''
+        }
+      ],
+      templateUuid: 'e59693df-27cc-61a7-d0f0-c17da203026a'
+    }
+  },
+  msg: 'success'
+}
+
+export const MockApiHttpMessage2:{code:number, data:{api:ApiMessage}, msg:string} = {
+  code: 0,
+  data: {
+    api: {
+      name: 'ss',
+      uuid: '569c8d47-d742-5306-c0e2-a5ae38727fa7',
+      groupUuid: '50458642-5a9f-4136-9ff1-e30d647297e8',
+      desc: '',
+      isDisable: false,
+      scheme: 'http',
+      requestPath: '{{baseUrl}}/test',
+      service: 'testService',
+      method: [],
+      proxyPath: 'tetetetete',
+      hosts: [],
+      timeout: 10000,
+      retry: 0,
+      match: [
+        {
+          position: 'header',
+          matchType: 'PREFIX',
+          key: 'ee',
+          pattern: 'te'
+        }
+      ],
+      proxyHeader: [
+        {
+          optType: 'DELETE',
+          key: 'eee',
+          value: ''
+        }
+      ],
+      templateUuid: 'e59693df-27cc-61a7-d0f0-c17da203026a'
+    }
+  },
+  msg: 'success'
+}
