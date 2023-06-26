@@ -41,6 +41,21 @@
       </ng-template>
       <div>
         <button
+          *ngIf="isBusiness && authStatus && authStatus !== 'normal'"
+          nzType="primary"
+          [nzDanger]="true"
+          eo-ng-button
+          class="mr-btnbase"
+          (click)="goToAuth()"
+          eoNgFeedbackTooltip
+          [nzTooltipTitle]="btnTooltip"
+          nzTooltipPlacement="bottom"
+          [nzTooltipVisible]="false"
+          nzTooltipTrigger="hover"
+        >
+          {{ btnLabel }}
+        </button>
+        <button
           *ngIf="!isBusiness"
           nzType="primary"
           eo-ng-button
