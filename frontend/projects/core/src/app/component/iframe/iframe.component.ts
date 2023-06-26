@@ -97,7 +97,7 @@ export class EoIframeComponent implements OnInit {
         const args = event.data.data
         const result = await handler(...args)
         try {
-          result.data = this.api.underline(result.data)
+          result.data = this.api.underline('', result.data)
         } catch {
           console.warn('转化接口数据命名法出现问题')
         }

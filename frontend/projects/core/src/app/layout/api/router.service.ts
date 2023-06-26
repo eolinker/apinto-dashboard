@@ -11,7 +11,7 @@ import { ModalOptions, NzModalRef } from 'ng-zorro-antd/modal'
 import { ApiBatchPublishResultComponent } from './api-list/publish/batch/result.component'
 import { apiBatchOnlineVerifyTableBody, apiBatchOnlineVerifyTableHeadName, apiBatchPublishResultTableBody, apiBatchPublishResultTableHeadName } from './types/conf'
 import { ApiManagementEditGroupComponent } from './api-list/group/edit-group/edit-group.component'
-import { ApiManagementComponent } from './api-list/group/group.component'
+import { ApiManagementGroupComponent } from './api-list/group/group.component'
 import { EmptyHttpResponse } from '../../constant/type'
 import { ApiBatchPublishChooseClusterComponent } from './api-list/publish/batch/choose-cluster.component'
 
@@ -452,7 +452,7 @@ export class RouterService {
     }
   }
 
-  addOrEditGroupModal (type:'add'|'edit', uuid?:string, name?:string, component?:ApiManagementComponent) {
+  addOrEditGroupModal (type:'add'|'edit', uuid?:string, name?:string, component?:ApiManagementGroupComponent) {
     return new Promise((resolve) => {
       const title:string = type === 'add' ? (uuid !== 'root' ? '添加子分组' : '添加分组') : '编辑分组'
 
