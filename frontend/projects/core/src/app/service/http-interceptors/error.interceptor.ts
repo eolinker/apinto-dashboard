@@ -15,6 +15,7 @@ import { environment } from 'projects/core/src/environments/environment'
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
+  authStatus:'normal'|'warning'|'freeze' = 'normal'
   constructor (
     private router: Router,
     private navigationService: EoNgNavigationService,
@@ -27,6 +28,7 @@ export class ErrorInterceptor implements HttpInterceptor {
       tap((event:any) => {
         // this.hideLoader()
         if (event instanceof HttpResponse) {
+          this.checkAuthStatus(event)
           this.checkAccess(event.body.code, event, request.method)
           if (!request.url.includes('api/dynamic/')) {
             try {
@@ -53,6 +55,13 @@ export class ErrorInterceptor implements HttpInterceptor {
       newData[newKey] = this.camel(data[key])
     }
     return newData
+  }
+
+  checkAuthStatus (event:HttpResponse<any>) {
+    console.log(event.headers.get('X-Apinto-Auth-Status'))
+    if (event.headers && event.headers.get('X-Apinto-Auth-Status') && this.authStatus !== event.headers.get('X-Apinto-Auth-Status')) {
+      this.navigationService.reqCheckAuthStatus()
+    }
   }
 
   // 根据后端返回的code判断是否要提示无权限弹窗或跳转路由

@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core'
 import { RouterModule, Routes } from '@angular/router'
 import { ApiListComponent } from './api-list/api-list.component'
-import { ApiManagementComponent } from './api-list/group/group.component'
+import { ApiManagementGroupComponent } from './api-list/group/group.component'
 import { ApiManagementListComponent } from './api-list/list/list.component'
 import { ApiPluginTemplateContentComponent } from './plugin/content/content.component'
 import { ApiPluginTemplateCreateComponent } from './plugin/create/create.component'
@@ -26,7 +26,7 @@ export const routes: Routes = [{
       children: [
         {
           path: 'group',
-          component: ApiManagementComponent,
+          component: ApiManagementGroupComponent,
           children: [
             {
               path: 'list',
