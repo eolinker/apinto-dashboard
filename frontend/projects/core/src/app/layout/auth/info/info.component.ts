@@ -5,6 +5,7 @@ import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { ApiService } from '../../../service/api.service'
 import { NzUploadChangeParam, NzUploadFile } from 'ng-zorro-antd/upload'
 import { EoNgNavigationService } from '../../../service/eo-ng-navigation.service'
+import { updateDate, version } from '../../../constant/app.config'
 
 @Component({
   selector: 'eo-ng-auth-info',
@@ -34,6 +35,9 @@ export class AuthInfoComponent implements OnInit {
     title: '授权管理',
     infos: []
   }
+
+  version:string = version
+  updateDate:string = updateDate
 
   constructor (
     private message: EoNgFeedbackMessageService,
