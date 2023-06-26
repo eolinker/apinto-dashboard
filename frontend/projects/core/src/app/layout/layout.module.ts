@@ -18,7 +18,7 @@ import { NzAvatarModule } from 'ng-zorro-antd/avatar'
 import { EoNgBreadcrumbModule } from 'eo-ng-breadcrumb'
 import { EoNgLayoutModule } from 'eo-ng-layout'
 import { EoNgSelectModule } from 'eo-ng-select'
-import { EoNgFeedbackModalModule, EoNgFeedbackTooltipModule } from 'eo-ng-feedback'
+import { EoNgFeedbackAlertModule, EoNgFeedbackModalModule, EoNgFeedbackTooltipModule } from 'eo-ng-feedback'
 import { EoNgTabsModule } from 'eo-ng-tabs'
 import { EoNgCheckboxModule } from 'eo-ng-checkbox'
 import { EoNgInputModule } from 'eo-ng-input'
@@ -115,7 +115,8 @@ import { RemotePluginComponent } from './remote-plugin/remote-plugin.component'
     NzUploadModule,
     EoNgEmptyModule,
     NzDividerModule,
-    NzSpinModule
+    NzSpinModule,
+    EoNgFeedbackAlertModule
   ],
   exports: [
     BasicLayoutComponent

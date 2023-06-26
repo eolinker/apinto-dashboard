@@ -35,7 +35,7 @@ import { EoNgApintoTableModule } from 'projects/eo-ng-apinto-table/src/public-ap
 import { NzUploadModule } from 'ng-zorro-antd/upload'
 import { NzDropDownModule } from 'ng-zorro-antd/dropdown'
 import { ApiListComponent } from './api-list/api-list.component'
-import { ApiManagementComponent } from './api-list/group/group.component'
+import { ApiManagementGroupComponent } from './api-list/group/group.component'
 import { ApiManagementListComponent } from './api-list/list/list.component'
 import { ApiMessageComponent } from './api-list/message/message.component'
 import { ApiPublishComponent } from './api-list/publish/single/publish.component'
@@ -66,7 +66,7 @@ import zh from '@angular/common/locales/zh'
 registerLocaleData(zh)
 @NgModule({
   declarations: [
-    ApiManagementComponent,
+    ApiManagementGroupComponent,
     ApiManagementListComponent,
     ApiMessageComponent,
     ApiPublishComponent,

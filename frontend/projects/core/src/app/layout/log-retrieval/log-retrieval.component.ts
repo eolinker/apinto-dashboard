@@ -10,6 +10,8 @@ import { ClusterEnum, ClusterEnumData } from '../../constant/type'
 import { LogFileData, LogOutputData } from './type'
 import { LogRetrievalTableBody, LogRetrievalTableHeadName } from './conf'
 import { CascaderOption } from 'eo-ng-cascader'
+import { EoNgNavigationService } from '../../service/eo-ng-navigation.service'
+import * as moment from 'moment'
 
 @Component({
   selector: 'eo-ng-log-retrieval',
@@ -86,7 +88,7 @@ export class LogRetrievalComponent {
   accGroupLoading:boolean = false
   modalRef:NzModalRef|undefined
   start:boolean = false
-  constructor (private api:ApiService, private modalService:EoNgFeedbackModalService) {
+  constructor (private api:ApiService, private modalService:EoNgFeedbackModalService, private navigationService:EoNgNavigationService) {
 
   }
 
@@ -95,6 +97,7 @@ export class LogRetrievalComponent {
   }
 
   ngOnInit () {
+    this.navigationService.reqFlashBreadcrumb([{ title: '日志检索' }])
     this.getClusterList(true)
     for (const btn of this.accTableBody[this.accTableBody.length - 1].btns) {
       if (btn.title === '下载') {
@@ -148,12 +151,24 @@ export class LogRetrievalComponent {
     this.api.get('log/files', { cluster: this.searchData.cluster[1], node: this.searchData.node }).subscribe((resp:{code:number, data:{output:LogOutputData[]}, msg:string}) => {
       if (resp.code === 0) {
         this.accGroupList = resp.data.output.filter((x:LogOutputData) => (x)).map((x:LogOutputData) => {
-          return { ...x, active: true }
+          return { ...x, files: this.filesDataTransfer(x.files), active: true }
         })
       }
       this.start = true
       this.accGroupLoading = false
     })
+  }
+
+  // 文件名按z-a排序
+  filesDataTransfer (files:Array<LogFileData>) {
+    const newFiles =
+        files.sort((a:LogFileData, b:LogFileData) => ((b.file + '').localeCompare(a.file + '')))
+          .map((x:LogFileData) => {
+            console.log(x.mod, moment(x.mod).format('YYYY-MM-DD HH:mm:ss'))
+            x.mod = moment(x.mod).format('YYYY-MM-DD HH:mm:ss')
+            return x
+          })
+    return newFiles
   }
 
   getTail (e:Event, panel:any) {
