@@ -1,5 +1,5 @@
 /* eslint-disable dot-notation */
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core'
+import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core'
 import { NavigationEnd, Router } from '@angular/router'
 import { NzTreeNodeOptions, NzFormatEmitEvent, NzTreeNode } from 'ng-zorro-antd/tree'
 import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feedback'
@@ -52,6 +52,7 @@ export class ApiManagementGroupComponent implements OnInit {
 
   groupModal: NzModalRef |undefined
   editParentUuid:string = ''
+  selectGroupExist:boolean = false
   private subscription: Subscription = new Subscription()
 
   constructor (private message: EoNgFeedbackMessageService,
@@ -59,7 +60,8 @@ export class ApiManagementGroupComponent implements OnInit {
     private baseInfo:BaseInfoService,
     private api:ApiService,
     private router:Router,
-    private service:RouterService) {
+    private service:RouterService,
+    private cdRef:ChangeDetectorRef) {
   }
 
   ngOnInit (): void {
@@ -79,22 +81,26 @@ export class ApiManagementGroupComponent implements OnInit {
   }
 
   // 获取api列表
-  getMenuList (flash?:boolean) {
+  getMenuList () {
     this.api.get('router/groups').subscribe((resp:{code:number, data:ApiGroup, msg:string}) => {
       if (resp.code === 0) {
         this.queryName = ''
+        this.selectGroupExist = false
         this.nodesList = this.nodesTransfer(resp.data.root.groups)
+        // 如果选中的分组不存在（此场景一般发生在选中分组或选中分组的父分组被删除后），需要跳转至所有api分组
+        // 如果添加新分组，需要滚动到底部
+        if (this.groupUuid && !this.selectGroupExist) {
+          this.viewAllApis()
+        }
+
         setTimeout(() => {
-          if (flash && !this.editParentUuid && !this.editUuid) {
-            this.groupScrollToBottom()
-          }
-        })
+          this.groupScrollToDom()
+        }, 0)
       }
     })
   }
 
   // 遍历目录列表，转化成tree组件需要的参数格式
-  // 第一级目录不可以创建api，当root为true时，标志该目录为第一级，并放入firstLevelMap
   nodesTransfer (data:any): NzTreeNodeOptions[] {
     const res:NzTreeNodeOptions[] = []
     for (const index in data) {
@@ -103,6 +109,7 @@ export class ApiManagementGroupComponent implements OnInit {
       if (this.groupUuid && data[index].uuid === this.groupUuid) {
         data[index].selected = true
         this.showAll = false
+        this.selectGroupExist = true
       } else if ((this.editParentUuid && data[index].uuid === this.editParentUuid)) {
         this.showAll = false
       }
@@ -129,9 +136,13 @@ export class ApiManagementGroupComponent implements OnInit {
     this.service.addOrEditGroupModal('add', uuid, undefined, this)
   }
 
-  groupScrollToBottom () {
+  groupScrollToDom () {
     try {
-      this.groupComponent.nativeElement.scrollTop = this.groupComponent.nativeElement.scrollHeight
+      if (this.groupUuid) {
+        document.getElementById('tree-node-' + this.groupUuid)?.scrollIntoView({ block: 'center' })
+      } else {
+        document.getElementsByTagName('eo-ng-tree-default-node')[0].scrollIntoView({ block: 'center' })
+      }
     } catch (err) {}
   }
 
@@ -142,7 +153,7 @@ export class ApiManagementGroupComponent implements OnInit {
 
   closeModal = () => {
     this.groupModal?.close()
-    this.getMenuList(true)
+    this.getMenuList()
   }
 
   // 删除分组的弹窗
@@ -175,7 +186,7 @@ export class ApiManagementGroupComponent implements OnInit {
 
   // 点击分组节点时，切换activatedNode
   // 当节点是目录时，右侧页面需要跳转至list页
-  // 当节点是api时，右侧页面需要跳转至API编辑页
+  // 逻辑已删除:当节点是api时，右侧页面需要跳转至API编辑页
   activeNode (data: NzFormatEmitEvent): void {
     if (
       data.keys![0] &&
@@ -199,6 +210,7 @@ export class ApiManagementGroupComponent implements OnInit {
     }
     if (this.activatedNode?.isSelected) {
     this.activatedNode!.isSelected = false
+    this.cdRef.detectChanges()
     }
     this.router.navigate(['/', 'router', 'api', 'group', 'list'])
   }

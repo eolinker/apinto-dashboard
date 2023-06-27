@@ -35,6 +35,7 @@
         #groupComponent
       >
         <div
+          id="tree-node-root"
           class="group-title"
           [ngClass]="{ 'group-title-selected': showAll }"
           (click)="viewAllApis()"
@@ -67,7 +68,7 @@
           </a>
         </div>
         <ng-template #nzTreeTpl let-node let-origin="origin">
-          <div class="custom-node">
+          <div class="custom-node" [id]="'tree-node-' + node.key">
             <div class="f-row-js-ac" *ngIf="!node.isLeaf">
               <div style="overflow: hidden; text-overflow: ellipsis">
                 <span
