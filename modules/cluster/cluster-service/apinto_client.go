@@ -21,33 +21,12 @@ func newApintoClientService() cluster.IApintoClient {
 }
 
 func (c *apintoClientService) GetClient(ctx context.Context, clusterId int) (v1.IClient, error) {
-	nodes, err := c.clusterNodeService.QueryByClusterId(ctx, clusterId)
+	adminAddr, err := c.clusterNodeService.QueryAdminAddrByClusterId(ctx, clusterId)
 	if err != nil {
 		return nil, err
 	}
 
-	//cluster, err := c.clusterService.GetByClusterId(ctx, clusterId)
-	//if err != nil {
-	//	return nil, err
-	//}
-
-	//newAddrSlice := strings.SplitN(strings.ReplaceAll(cluster.Addr, "http://", ""), ".", 3)
-
-	newAdmin := make([]string, 0)
-	//newAdmin = append(newAdmin, cluster.Addr)
-	for _, node := range nodes {
-		for _, nodeAddr := range node.AdminAddrs {
-			//newNodeAddrSlice := strings.SplitN(strings.ReplaceAll(nodeAddr, "http://", ""), ".", 3)
-			//if len(newNodeAddrSlice) >= 2 {
-			//	if newAddrSlice[0] == newNodeAddrSlice[0] && newAddrSlice[1] == newNodeAddrSlice[1] {
-			newAdmin = append(newAdmin, nodeAddr)
-			//}
-			//}
-		}
-
-	}
-
-	client, err := v1.NewClient(newAdmin)
+	client, err := v1.NewClient(adminAddr)
 	if err != nil {
 		return nil, err
 	}

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/common"
+	locker_service "github.com/eolinker/apinto-dashboard/modules/base/locker-service"
 	"github.com/eolinker/apinto-dashboard/modules/cluster"
 	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-entry"
 	cluster_model2 "github.com/eolinker/apinto-dashboard/modules/cluster/cluster-model"
@@ -24,6 +25,7 @@ type clusterNodeService struct {
 	clusterService   cluster.IClusterService
 	nodeCache        INodeCache
 	apintoClient     cluster.IApintoClient
+	lockService      locker_service.ISyncLockService
 }
 
 func (c *clusterNodeService) List(ctx context.Context, namespaceId int, clusterName string) ([]*cluster_model2.Node, error) {
@@ -53,6 +55,7 @@ func newClusterNodeService() cluster.IClusterNodeService {
 	bean.Autowired(&s.clusterService)
 	bean.Autowired(&s.apintoClient)
 	bean.Autowired(&s.nodeCache)
+	bean.Autowired(&s.lockService)
 
 	return s
 }
@@ -143,20 +146,33 @@ func (c *clusterNodeService) QueryByClusterId(ctx context.Context, id int) ([]*c
 	//若redis存在值
 	if err == nil {
 		return *nodes, nil
-	} else {
-		//若redis无缓存
-		nodeEntries, err := c.clusterNodeStore.GetAllByClusterIds(ctx, id)
-		if err != nil {
-			return nil, err
-		}
-		list := make([]*cluster_model2.Node, 0, len(nodeEntries))
-		for _, node := range nodeEntries {
-			list = append(list, cluster_model2.ReadClusterNode(node))
-		}
-		//缓存
-		_ = c.nodeCache.Set(ctx, id, &list)
-		return list, nil
 	}
+
+	//若redis无缓存
+	//加锁
+	c.lockService.Lock(locker_service.LockNameModuleClusterNodes, id)
+	defer c.lockService.Unlock(locker_service.LockNameModuleClusterNodes, id)
+
+	nodes, err = c.nodeCache.Get(ctx, id)
+	if err != nil && err != redis.Nil {
+		return nil, err
+	}
+	if err == nil {
+		return *nodes, nil
+	}
+
+	nodeEntries, err := c.clusterNodeStore.GetAllByClusterIds(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	list := make([]*cluster_model2.Node, 0, len(nodeEntries))
+	for _, node := range nodeEntries {
+		list = append(list, cluster_model2.ReadClusterNode(node))
+	}
+	//缓存
+	_ = c.nodeCache.Set(ctx, id, &list)
+	return list, nil
+
 }
 
 func (c *clusterNodeService) QueryAllCluster(ctx context.Context) ([]*cluster_model2.Node, error) {
