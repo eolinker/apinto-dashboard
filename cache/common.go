@@ -23,11 +23,11 @@ type ICommonCache interface {
 }
 
 type commonCache struct {
-	client    *redis.ClusterClient
+	client    redis.UniversalClient
 	keyPrefix string
 }
 
-func newCommonCache(client *redis.ClusterClient) ICommonCache {
+func newCommonCache(client redis.UniversalClient) ICommonCache {
 
 	return &commonCache{client: client, keyPrefix: "apinto-dashboard:"}
 }
