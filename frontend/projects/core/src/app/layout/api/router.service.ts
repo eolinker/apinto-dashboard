@@ -464,7 +464,7 @@ export class RouterService {
           ...(type === 'edit' ? { groupName: name } : {}),
           uuid: uuid,
           type: type,
-          closeModal: (resp:EmptyHttpResponse) => { resolve(resp); this.groupModal?.close(); component?.getMenuList(true) },
+          closeModal: (resp:EmptyHttpResponse) => { resolve(resp); this.groupModal?.close(); component?.getMenuList() },
           showUuid: type === 'add' && uuid !== 'root'
         },
         nzClosable: true,
