@@ -1,5 +1,5 @@
 /* eslint-disable dot-notation */
-import { ChangeDetectorRef, Component, Input, OnInit, TemplateRef, ViewChild } from '@angular/core'
+import { ChangeDetectorRef, Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
 import { Router, NavigationEnd } from '@angular/router'
 import { NzTreeNodeOptions } from 'ng-zorro-antd/tree'
 import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feedback'
@@ -17,8 +17,6 @@ import { RouterService } from '../../router.service'
   templateUrl: './list.component.html',
   styles: [
     `
-
-
     div eo-ng-api-method-tag{
       margin: 0 2px;
     }
@@ -43,10 +41,7 @@ import { RouterService } from '../../router.service'
 export class ApiManagementListComponent implements OnInit {
   @ViewChild('methodTpl', { read: TemplateRef, static: true }) methodTpl: TemplateRef<any> | undefined
   @ViewChild('clusterStatusTpl', { read: TemplateRef, static: true }) clusterStatusTpl: TemplateRef<any> | undefined
-  @Input() groupUuid:string = ''
   public nodesList:NzTreeNodeOptions[] = []
-  public apiNodesMap:Map<string, any> = new Map()
-  public apiNodesList:Array<any> = []
   apisSet:Set<string> = new Set()
   nzDisabled:boolean = false
   sourcesList:Array<{text:string, value:any, [key:string]:any}> = []
@@ -73,7 +68,7 @@ export class ApiManagementListComponent implements OnInit {
     private baseInfo:BaseInfoService,
     private navigationService:EoNgNavigationService,
     private service:RouterService,
-    private cdref:ChangeDetectorRef
+    private cdRef:ChangeDetectorRef
   ) {
     this.navigationService.reqFlashBreadcrumb([{ title: 'API管理', routerLink: 'router/api/group/list' }])
   }
@@ -89,15 +84,17 @@ export class ApiManagementListComponent implements OnInit {
         this.getApisData()
       }
     })
-
-    this.getSourcesList()
   }
 
   ngAfterViewInit () {
+    // 初始化表格，此时表格中无集群列，目前api数据大的时候接口返回慢，保留此项体验会好一些，而且方便后续需要将状态数据单独抽出接口
     this.apisTableBody = this.service.createApiListTbody(this)
     this.apisTableHeadName = this.service.createApiListThead(this)
+    // 获取api数据与表头列数（加入集群列）
     this.getApisData()
-    this.cdref.detectChanges()
+    // 获取来源列表
+    this.getSourcesList()
+    this.cdRef.detectChanges()
   }
 
   ngOnDestroy () {
@@ -115,7 +112,7 @@ export class ApiManagementListComponent implements OnInit {
   // 根据groupUuid获取新的apis列表
   getApisData () {
     this.apiTableLoading = true
-    this.api.get('routers', { groupUuid: (this.apisForm.groupUuid || this.groupUuid), searchName: this.apiNameForSear, sourceIds: this.apisForm.sourceIds.join(','), pageNum: this.apisForm.pageNum, pageSize: this.apisForm.pageSize })
+    this.api.get('routers', { groupUuid: this.apisForm.groupUuid || '', searchName: this.apiNameForSear, sourceIds: this.apisForm.sourceIds.join(','), pageNum: this.apisForm.pageNum, pageSize: this.apisForm.pageSize })
       .subscribe((resp:{code:number, data:{apis:ApiListItem[], total:number, pageNum:number, pageSize:number}, msg:string}) => {
         if (resp.code === 0) {
           this.apisForm.apis = resp.data.apis.map((item:ApiListItem) => {
@@ -134,7 +131,6 @@ export class ApiManagementListComponent implements OnInit {
             this.apisTableBody = this.service.createApiListTbody(this, resp.data.apis[0].publish)
             this.apisTableHeadName = this.service.createApiListThead(this, resp.data.apis[0].publish)
           }
-          this.apisForm.groupUuid = this.apisForm.groupUuid || this.groupUuid
           this.apisForm.total = resp.data.total || this.apisForm.total
           this.apisForm.pageNum = resp.data.pageNum || this.apisForm.pageNum
           this.apisForm.pageSize = resp.data.pageSize || this.apisForm.pageSize
@@ -160,15 +156,12 @@ export class ApiManagementListComponent implements OnInit {
   }
 
   addApi (type?:string) {
-    const url:Array<string> = ['/', 'router', 'api', type && type === 'websocket' ? 'create-ws' : 'create']
-    if (this.apisForm.groupUuid) {
-      url.push(this.apisForm.groupUuid)
-    }
-    this.router.navigate(url)
+    this.router.navigate(['/', 'router', 'api', type && type === 'websocket' ? 'create-ws' : 'create', ...(this.apisForm.groupUuid ? [this.apisForm.groupUuid] : [])])
   }
 
-  changeApisSet (item: {uuid:string, [k:string]:any}, type?:string) {
+  changeApisSet (item: {uuid:string, [k:string]:any} | boolean, type?:string) {
     if (type === 'all') {
+      console.log(item, !!item)
       if (item) {
         for (const index in this.apisForm.apis) {
           this.apisSet.add(this.apisForm.apis[index].uuid)
@@ -178,11 +171,11 @@ export class ApiManagementListComponent implements OnInit {
       }
     } else {
     // 被取消勾选
-      if (item?.['checked']) {
-        this.apisSet.delete(item.uuid)
+      if ((item as {uuid:string, [k:string]:any})?.['checked']) {
+        this.apisSet.delete((item as {uuid:string, [k:string]:any}).uuid)
       } else {
       // 被选中
-        this.apisSet.add(item.uuid)
+        this.apisSet.add((item as {uuid:string, [k:string]:any}).uuid)
       }
     }
   }

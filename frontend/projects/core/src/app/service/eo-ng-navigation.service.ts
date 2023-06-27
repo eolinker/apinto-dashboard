@@ -66,6 +66,16 @@ export class EoNgNavigationService {
     return this.flashFlag.asObservable()
   }
 
+  private checkAuthStatus: Subject<boolean> = new Subject<boolean>()
+
+  reqCheckAuthStatus () {
+    this.checkAuthStatus.next(true)
+  }
+
+  repCheckAuthStatus () {
+    return this.checkAuthStatus.asObservable()
+  }
+
   private userUpdateRightList: Subject<boolean> = new Subject<
     boolean
   >()

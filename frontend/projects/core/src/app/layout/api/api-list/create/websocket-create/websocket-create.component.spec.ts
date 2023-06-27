@@ -15,7 +15,6 @@ import { NzOverlayModule } from 'ng-zorro-antd/core/overlay'
 import { LayoutModule } from '../../../../layout.module'
 import { BidiModule } from '@angular/cdk/bidi'
 import { routes } from '../../../api-routing.module'
-import { BasicLayoutComponent } from '../../../../basic-layout/basic-layout.component'
 import { MockRenderer, MockMessageService, MockEnsureService, MockEmptySuccessResponse, MockGetCommonProviderService, MockPluginTemplateEnum, MockRouterGroups, MockAccessList, MockModuleList, MockApiWsMessage, MockApiWsMessage2 } from 'projects/core/src/app/constant/spec-test'
 import { of } from 'rxjs'
 import { API_URL, ApiService } from 'projects/core/src/app/service/api.service'
@@ -28,48 +27,24 @@ import { EoNgSwitchModule } from 'eo-ng-switch'
 import { EoNgCheckboxModule } from 'eo-ng-checkbox'
 import { EoNgApintoTableModule } from 'projects/eo-ng-apinto-table/src/public-api'
 import { EoNgSelectModule } from 'eo-ng-select'
-import { MatchTableComponent } from '../../match/table/table.component'
 import { BaseInfoService } from 'projects/core/src/app/service/base-info.service'
+import { ApiManagementProxyComponent } from '../../proxy/proxy.component'
 
 export class MockElementRef extends ElementRef {
   constructor () { super(null) }
 }
 
-class MockBaseInfoService {
-  allParam = {
-
-  }
-
-  get allParamsInfo () {
-    return { ...this.allParam }
-  }
-}
-
 describe('#init ApiWebsocketCreateComponent', () => {
   let component:ApiWebsocketCreateComponent
   let fixture: ComponentFixture<ApiWebsocketCreateComponent>
-  let fixtureBasic: ComponentFixture<BasicLayoutComponent>
-  let componentBasic:BasicLayoutComponent
   let spyGetApiMessage:jest.SpyInstance<any>
-  let spyGetHeaderList:jest.SpyInstance<any>
-  let spyTransferHeader:jest.SpyInstance<any>
-  let spyNzTreeClick:jest.SpyInstance<any>
-  let spyGetServiceList:jest.SpyInstance<any>
-  let spyGetPluginTemplateList:jest.SpyInstance<any>
-  let spyUpdateAllChecked:jest.SpyInstance<any>
-  let spyInitCheckbox:jest.SpyInstance<any>
-  let spyUpdateSingleChecked:jest.SpyInstance<any>
-  let spyProxyTableClick:jest.SpyInstance<any>
   let spyOpenDrawer:jest.SpyInstance<any>
-  let spyBackToList:jest.SpyInstance<any>
-  let spySaveApi:jest.SpyInstance<any>
-  let spyRequestPathChange:jest.SpyInstance<any>
-  let spyCheckTimeout:jest.SpyInstance<any>
-  let spySaveProxyHeader:jest.SpyInstance<any>
-  let spyMessage:jest.SpyInstance<any>
-  let spyNavService:jest.SpyInstance<any>
   let httpCommonService:any
+  let spyPutApiService:jest.SpyInstance<any>
+  let spyPostApiService:jest.SpyInstance<any>
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let spyApiService:jest.SpyInstance<any>
+  global.structuredClone = (val:any) => JSON.parse(JSON.stringify(val))
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -80,7 +55,7 @@ describe('#init ApiWebsocketCreateComponent', () => {
         EoNgSwitchModule, EoNgCheckboxModule, EoNgApintoTableModule, EoNgSelectModule, EoNgFeedbackModalModule,
         EoNgFeedbackTooltipModule
       ],
-      declarations: [ApiWebsocketCreateComponent, MatchTableComponent
+      declarations: [ApiWebsocketCreateComponent
       ],
       providers: [
         { provide: Overlay, useClass: Overlay },
@@ -91,7 +66,8 @@ describe('#init ApiWebsocketCreateComponent', () => {
         { provide: EoNgFeedbackMessageService, useClass: MockMessageService },
         { provide: EoNgFeedbackModalService, useClass: MockEnsureService },
         { provide: ChangeDetectorRef, useClass: ChangeDetectorRef }
-      ]
+      ],
+      teardown: { destroyAfterEach: false }
     }).compileComponents()
 
     fixture = TestBed.createComponent(ApiWebsocketCreateComponent)
@@ -99,20 +75,7 @@ describe('#init ApiWebsocketCreateComponent', () => {
 
     fixture.detectChanges()
     spyGetApiMessage = jest.spyOn(component, 'getApiMessage')
-    spyGetHeaderList = jest.spyOn(component, 'getHeaderList')
-    spyTransferHeader = jest.spyOn(component, 'transferHeader')
-    spyGetServiceList = jest.spyOn(component, 'getServiceList')
-    spyGetPluginTemplateList = jest.spyOn(component, 'getPluginTemplateList')
-    spyUpdateAllChecked = jest.spyOn(component, 'updateAllChecked')
-    spyUpdateSingleChecked = jest.spyOn(component, 'updateSingleChecked')
-    spyProxyTableClick = jest.spyOn(component, 'proxyTableClick')
     spyOpenDrawer = jest.spyOn(component, 'openDrawer')
-    spyBackToList = jest.spyOn(component, 'backToList')
-    spySaveApi = jest.spyOn(component, 'saveApi')
-    spyRequestPathChange = jest.spyOn(component, 'requestPathChange')
-    spyCheckTimeout = jest.spyOn(component, 'checkTimeout')
-    spySaveProxyHeader = jest.spyOn(component, 'saveProxyHeader')
-    spyMessage = jest.spyOn(component.message, 'success')
 
     httpCommonService = fixture.debugElement.injector.get(ApiService)
     spyApiService = jest.spyOn(httpCommonService, 'get').mockImplementation(
@@ -356,9 +319,9 @@ describe('#init ApiWebsocketCreateComponent', () => {
     expect(component.hostsList).toEqual([{ key: '' }])
   }))
 
-  it('test proxyModal when create a new api', () => {
-    const componentProxy:ApiManagementProxyComponent = TestBed.createComponent(ApiWebsocketCreateComponent)
-    const fixtureProxy: ComponentFixture<ApiManagementProxyComponent> = fixture.componentInstance
+  it('test proxyModal when create a new api', fakeAsync(() => {
+    const fixtureProxy: ComponentFixture<ApiManagementProxyComponent> = TestBed.createComponent(ApiManagementProxyComponent)
+    const componentProxy:ApiManagementProxyComponent = fixtureProxy.componentInstance
 
     expect(component).toBeTruthy()
     expect(component.validateForm.controls['groupUuid'].value).toEqual('')
@@ -369,6 +332,7 @@ describe('#init ApiWebsocketCreateComponent', () => {
 
     component.openDrawer('proxyHeader')
     fixture.detectChanges()
+    tick()
 
     expect(component.editData).toBeNull()
     expect(component.modalRef).not.toBeUndefined()
@@ -376,21 +340,459 @@ describe('#init ApiWebsocketCreateComponent', () => {
 
     component.proxyTableClick({ data: { test: 1 } })
     fixture.detectChanges()
+    tick()
 
     expect(component.editData).not.toBeNull()
     expect(component.proxyEdit).toEqual(false)
 
     // @ts-ignore
     expect(component.modalRef?.nzOnOk(componentProxy)).toEqual(false)
-  })
+  }))
 
-  it('test checkbox when create a new api', () => {
+  it('test init checkbox', () => {
     expect(component).toBeTruthy()
     component.ngOnInit()
     fixture.detectChanges()
 
+    expect(component.createApiForm.method).toEqual([])
+    expect(component.methodList.length).toEqual(6) // GET, POST, PUT, DELETE, PATCH, HEAD
+
     component.initCheckbox()
     fixture.detectChanges()
-    // expect()
+    expect(component.createApiForm.method).toEqual([])
+    for (const m of component.methodList) {
+      expect(m.checked).toEqual(false)
+    }
+    component.createApiForm.method = ['PUT']
+
+    component.initCheckbox()
+    fixture.detectChanges()
+
+    for (const m of component.methodList) {
+      if (m.label !== 'PUT') {
+        expect(m.checked).toEqual(false)
+      } else {
+        expect(m.checked).toEqual(true)
+      }
+    }
+  })
+
+  it('test update all checkbox', () => {
+    expect(component).toBeTruthy()
+    component.ngOnInit()
+    fixture.detectChanges()
+
+    expect(component.createApiForm.method).toEqual([])
+    expect(component.methodList.length).toEqual(6) // GET, POST, PUT, DELETE, PATCH, HEAD
+
+    component.initCheckbox()
+    fixture.detectChanges()
+    expect(component.createApiForm.method).toEqual([])
+    for (const m of component.methodList) {
+      expect(m.checked).toEqual(false)
+    }
+    expect(component.allChecked).toEqual(false)
+
+    component.updateAllChecked()
+    fixture.detectChanges()
+
+    for (const m of component.methodList) {
+      expect(m.checked).toEqual(false)
+    }
+    expect(component.createApiForm.method).toEqual([])
+    expect(component.showCheckboxGroupValid).toEqual(true)
+
+    component.allChecked = true
+    component.updateAllChecked()
+    fixture.detectChanges()
+
+    for (const m of component.methodList) {
+      expect(m.checked).toEqual(true)
+    }
+    expect(component.createApiForm.method.length).toEqual(component.methodList.length)
+    expect(component.showCheckboxGroupValid).toEqual(false)
+
+    component.allChecked = false
+    component.updateAllChecked()
+    fixture.detectChanges()
+
+    for (const m of component.methodList) {
+      expect(m.checked).toEqual(false)
+    }
+    expect(component.createApiForm.method).toEqual([])
+    expect(component.showCheckboxGroupValid).toEqual(true)
+  })
+
+  it('test update single checkbox', () => {
+    expect(component).toBeTruthy()
+    component.ngOnInit()
+    fixture.detectChanges()
+
+    expect(component.createApiForm.method).toEqual([])
+    expect(component.methodList.length).toEqual(6) // GET, POST, PUT, DELETE, PATCH, HEAD
+
+    component.initCheckbox()
+    fixture.detectChanges()
+    expect(component.createApiForm.method).toEqual([])
+    for (const m of component.methodList) {
+      expect(m.checked).toEqual(false)
+    }
+    expect(component.allChecked).toEqual(false)
+
+    component.updateSingleChecked()
+    fixture.detectChanges()
+
+    for (const m of component.methodList) {
+      expect(m.checked).toEqual(false)
+    }
+    expect(component.allChecked).toEqual(false)
+    expect(component.createApiForm.method).toEqual([])
+    expect(component.showCheckboxGroupValid).toEqual(true)
+
+    component.methodList[2].checked = true
+    component.updateSingleChecked()
+    fixture.detectChanges()
+
+    for (const m of component.methodList) {
+      if (component.methodList.indexOf(m) !== 2) {
+        expect(m.checked).toEqual(false)
+      } else {
+        expect(m.checked).toEqual(true)
+      }
+    }
+    expect(component.allChecked).toEqual(false)
+    expect(component.createApiForm.method.length).toEqual(1)
+    expect(component.showCheckboxGroupValid).toEqual(false)
+
+    for (const m of component.methodList) {
+      m.checked = true
+    }
+    component.updateSingleChecked()
+    fixture.detectChanges()
+
+    for (const m of component.methodList) {
+      expect(m.checked).toEqual(true)
+    }
+    expect(component.allChecked).toEqual(true)
+    expect(component.createApiForm.method.length).toEqual(component.methodList.length)
+    expect(component.showCheckboxGroupValid).toEqual(false)
+  })
+
+  it('test default proxyPath', () => {
+    expect(component).toBeTruthy()
+    component.ngOnInit()
+    fixture.detectChanges()
+
+    component.validateForm.controls['requestPath'].setValue('requestPath')
+    expect(!component.validateForm.controls['proxyPath'].value).toEqual(true)
+    expect(!!component.validateForm.controls['requestPath'].value).toEqual(true)
+
+    component.requestPathChange()
+    fixture.detectChanges()
+
+    expect(!!component.validateForm.controls['proxyPath'].value).toEqual(true)
+    expect(component.validateForm.controls['proxyPath'].value).toEqual('/requestPath')
+
+    component.validateForm.controls['requestPath'].setValue('requestPath2')
+
+    component.requestPathChange()
+    fixture.detectChanges()
+
+    expect(component.validateForm.controls['proxyPath'].value).toEqual('/requestPath')
+  })
+
+  it('test timeout', () => {
+    expect(component).toBeTruthy()
+    component.ngOnInit()
+    component.checkTimeout()
+    fixture.detectChanges()
+    expect(component.validateForm.controls['timeout'].value).toEqual(10000)
+
+    component.validateForm.controls['timeout'].setValue('')
+    component.checkTimeout()
+    fixture.detectChanges()
+    expect(component.validateForm.controls['timeout'].value).toEqual('')
+
+    component.validateForm.controls['timeout'].setValue(-5)
+    component.checkTimeout()
+    fixture.detectChanges()
+    expect(component.validateForm.controls['timeout'].value).toEqual(1)
+
+    component.validateForm.controls['timeout'].setValue(2)
+    component.checkTimeout()
+    fixture.detectChanges()
+    expect(component.validateForm.controls['timeout'].value).toEqual(2)
+  })
+
+  it('test save proxy header', () => {
+    const fixtureProxy: ComponentFixture<ApiManagementProxyComponent> = TestBed.createComponent(ApiManagementProxyComponent)
+    const componentProxy:ApiManagementProxyComponent = fixtureProxy.componentInstance
+    const spyProxyKeyDirty = jest.spyOn(componentProxy.validateProxyHeaderForm.controls['key'], 'markAsDirty')
+    expect(component).toBeTruthy()
+    component.ngOnInit()
+    fixture.detectChanges()
+    expect(component.proxyEdit).toEqual(false)
+    expect(spyProxyKeyDirty).not.toHaveBeenCalled()
+    componentProxy.validateProxyHeaderForm.controls['optType'].setValue('ADD')
+    componentProxy.validateProxyHeaderForm.controls['key'].setValue('')
+    componentProxy.validateProxyHeaderForm.controls['value'].setValue('')
+
+    component.saveProxyHeader(componentProxy)
+    expect(spyProxyKeyDirty).toHaveBeenCalledTimes(1)
+
+    componentProxy.validateProxyHeaderForm.controls['optType'].setValue('DELETE')
+    componentProxy.validateProxyHeaderForm.controls['key'].setValue('')
+
+    component.saveProxyHeader(componentProxy)
+    expect(spyProxyKeyDirty).toHaveBeenCalledTimes(2)
+
+    componentProxy.validateProxyHeaderForm.controls['optType'].setValue('ADD')
+    componentProxy.validateProxyHeaderForm.controls['key'].setValue('KEY')
+    componentProxy.validateProxyHeaderForm.controls['value'].setValue('VALUE')
+
+    component.saveProxyHeader(componentProxy)
+    expect(component.createApiForm.proxyHeader).toEqual([{ optType: 'ADD', key: 'KEY', value: 'VALUE' }])
+    expect(spyProxyKeyDirty).toHaveBeenCalledTimes(2)
+
+    componentProxy.validateProxyHeaderForm.controls['optType'].setValue('ADD')
+    componentProxy.validateProxyHeaderForm.controls['key'].setValue('KEY2')
+    componentProxy.validateProxyHeaderForm.controls['value'].setValue('VALUE2')
+
+    component.saveProxyHeader(componentProxy)
+    expect(component.createApiForm.proxyHeader).toEqual([{ optType: 'ADD', key: 'KEY2', value: 'VALUE2' }, { optType: 'ADD', key: 'KEY', value: 'VALUE' }])
+    expect(spyProxyKeyDirty).toHaveBeenCalledTimes(2)
+
+    component.proxyEdit = true
+    component.editData = { optType: 'ADD', key: 'KEY2', value: 'VALUE2' }
+    componentProxy.validateProxyHeaderForm.controls['optType'].setValue('ADD')
+    componentProxy.validateProxyHeaderForm.controls['key'].setValue('KEY22')
+    componentProxy.validateProxyHeaderForm.controls['value'].setValue('VALUE22')
+
+    component.saveProxyHeader(componentProxy)
+    expect(component.createApiForm.proxyHeader).toEqual([{ optType: 'ADD', key: 'KEY22', value: 'VALUE22' }, { optType: 'ADD', key: 'KEY', value: 'VALUE' }])
+    expect(spyProxyKeyDirty).toHaveBeenCalledTimes(2)
+
+    component.proxyEdit = false
+    component.editData = {}
+    componentProxy.validateProxyHeaderForm.controls['optType'].setValue('DELETE')
+    componentProxy.validateProxyHeaderForm.controls['key'].setValue('')
+    componentProxy.validateProxyHeaderForm.controls['value'].setValue('')
+
+    component.saveProxyHeader(componentProxy)
+    expect(component.createApiForm.proxyHeader).toEqual([{ optType: 'ADD', key: 'KEY22', value: 'VALUE22' }, { optType: 'ADD', key: 'KEY', value: 'VALUE' }])
+    expect(spyProxyKeyDirty).toHaveBeenCalledTimes(3)
+
+    component.proxyEdit = false
+    component.editData = {}
+    componentProxy.validateProxyHeaderForm.controls['optType'].setValue('DELETE')
+    componentProxy.validateProxyHeaderForm.controls['key'].setValue('DELETE1')
+    componentProxy.validateProxyHeaderForm.controls['value'].setValue('')
+
+    component.saveProxyHeader(componentProxy)
+    expect(component.createApiForm.proxyHeader).toEqual([{ optType: 'DELETE', key: 'DELETE1', value: '' }, { optType: 'ADD', key: 'KEY22', value: 'VALUE22' }, { optType: 'ADD', key: 'KEY', value: 'VALUE' }])
+    expect(spyProxyKeyDirty).toHaveBeenCalledTimes(3)
+
+    component.proxyEdit = true
+    component.editData = { optType: 'DELETE', key: 'DELETE1', value: '' }
+    componentProxy.validateProxyHeaderForm.controls['optType'].setValue('DELETE')
+    componentProxy.validateProxyHeaderForm.controls['key'].setValue('DELETE12')
+    componentProxy.validateProxyHeaderForm.controls['value'].setValue('')
+
+    component.saveProxyHeader(componentProxy)
+    expect(component.createApiForm.proxyHeader).toEqual([{ optType: 'DELETE', key: 'DELETE12', value: '' }, { optType: 'ADD', key: 'KEY22', value: 'VALUE22' }, { optType: 'ADD', key: 'KEY', value: 'VALUE' }])
+    expect(spyProxyKeyDirty).toHaveBeenCalledTimes(3)
+
+    component.proxyEdit = true
+    component.editData = { optType: 'DELETE', key: 'DELETE12', value: '' }
+    componentProxy.validateProxyHeaderForm.controls['optType'].setValue('ADD')
+    componentProxy.validateProxyHeaderForm.controls['key'].setValue('KEY222')
+    componentProxy.validateProxyHeaderForm.controls['value'].setValue('VALUE222')
+
+    component.saveProxyHeader(componentProxy)
+    expect(component.createApiForm.proxyHeader).toEqual([{ optType: 'ADD', key: 'KEY222', value: 'VALUE222' }, { optType: 'ADD', key: 'KEY22', value: 'VALUE22' }, { optType: 'ADD', key: 'KEY', value: 'VALUE' }])
+    expect(spyProxyKeyDirty).toHaveBeenCalledTimes(3)
+
+    component.proxyEdit = true
+    component.editData = { optType: 'ADD', key: 'KEY', value: 'VALUE' }
+    componentProxy.validateProxyHeaderForm.controls['optType'].setValue('DELETE')
+    componentProxy.validateProxyHeaderForm.controls['key'].setValue('KEY2222')
+    componentProxy.validateProxyHeaderForm.controls['value'].setValue('')
+
+    component.saveProxyHeader(componentProxy)
+
+    expect(component.createApiForm.proxyHeader).toEqual([{ optType: 'DELETE', key: 'KEY2222', value: '' }, { optType: 'ADD', key: 'KEY222', value: 'VALUE222' }, { optType: 'ADD', key: 'KEY22', value: 'VALUE22' }])
+    expect(spyProxyKeyDirty).toHaveBeenCalledTimes(3)
+  })
+
+  it('test save api', () => {
+    expect(component).toBeTruthy()
+    component.ngOnInit()
+    component.checkTimeout()
+    fixture.detectChanges()
+    expect(component.validateForm.controls['timeout'].value).toEqual(10000)
+
+    component.validateForm.controls['timeout'].setValue('')
+    component.checkTimeout()
+    fixture.detectChanges()
+    expect(component.validateForm.controls['timeout'].value).toEqual('')
+
+    component.validateForm.controls['timeout'].setValue(-5)
+    component.checkTimeout()
+    fixture.detectChanges()
+    expect(component.validateForm.controls['timeout'].value).toEqual(1)
+
+    component.validateForm.controls['timeout'].setValue(2)
+    component.checkTimeout()
+    fixture.detectChanges()
+    expect(component.validateForm.controls['timeout'].value).toEqual(2)
+  })
+
+  it('test save proxy header as create a new api', () => {
+    spyPutApiService = jest.spyOn(httpCommonService, 'put').mockReturnValue(
+      of(MockEmptySuccessResponse)
+    )
+
+    spyPostApiService = jest.spyOn(httpCommonService, 'post').mockReturnValue(
+      of(MockEmptySuccessResponse)
+    )
+    const spyFormServiceDirty = jest.spyOn(component.validateForm.controls['service'], 'markAsDirty')
+    expect(component).toBeTruthy()
+    expect(spyFormServiceDirty).not.toHaveBeenCalled()
+    expect(spyPutApiService).not.toHaveBeenCalled()
+    expect(spyPostApiService).not.toHaveBeenCalled()
+    expect(component.submitButtonLoading).toEqual(false)
+
+    component.ngOnInit()
+    component.saveApi('websocket')
+    fixture.detectChanges()
+
+    expect(spyFormServiceDirty).toHaveBeenCalledTimes(1)
+    expect(spyPutApiService).not.toHaveBeenCalled()
+    expect(spyPostApiService).not.toHaveBeenCalled()
+    expect(component.submitButtonLoading).toEqual(false)
+    component.showCheckboxGroupValid = true
+    component.saveApi('websocket')
+    fixture.detectChanges()
+
+    expect(spyFormServiceDirty).toHaveBeenCalledTimes(2)
+    expect(spyPutApiService).not.toHaveBeenCalled()
+    expect(spyPostApiService).not.toHaveBeenCalled()
+    expect(component.submitButtonLoading).toEqual(false)
+
+    component.validateForm.patchValue({
+      groupUuid: 'test'
+    })
+
+    component.saveApi('websocket')
+    fixture.detectChanges()
+
+    expect(spyFormServiceDirty).toHaveBeenCalledTimes(3)
+    expect(spyPutApiService).not.toHaveBeenCalled()
+    expect(spyPostApiService).not.toHaveBeenCalled()
+    expect(component.submitButtonLoading).toEqual(false)
+
+    component.validateForm.patchValue({
+      name: 'test'
+    })
+
+    component.saveApi('websocket')
+    fixture.detectChanges()
+
+    expect(spyFormServiceDirty).toHaveBeenCalledTimes(4)
+    expect(spyPutApiService).not.toHaveBeenCalled()
+    expect(spyPostApiService).not.toHaveBeenCalled()
+    expect(component.submitButtonLoading).toEqual(false)
+
+    component.validateForm.patchValue({
+      requestPath: 'test'
+    })
+
+    component.saveApi('websocket')
+    fixture.detectChanges()
+
+    expect(spyFormServiceDirty).toHaveBeenCalledTimes(5)
+    expect(spyPutApiService).not.toHaveBeenCalled()
+    expect(spyPostApiService).not.toHaveBeenCalled()
+    expect(component.submitButtonLoading).toEqual(false)
+
+    component.validateForm.patchValue({
+      service: 'test'
+    })
+
+    component.saveApi('websocket')
+    fixture.detectChanges()
+
+    expect(spyFormServiceDirty).toHaveBeenCalledTimes(5)
+    expect(spyPutApiService).not.toHaveBeenCalled()
+    expect(spyPostApiService).not.toHaveBeenCalled()
+    expect(component.submitButtonLoading).toEqual(false)
+
+    component.showCheckboxGroupValid = false
+    component.saveApi('websocket')
+    fixture.detectChanges()
+
+    expect(spyFormServiceDirty).toHaveBeenCalledTimes(5)
+    expect(spyPutApiService).not.toHaveBeenCalled()
+    expect(spyPostApiService).toHaveBeenCalledTimes(1)
+    expect(component.createApiForm.method).toEqual([]) // websocket
+    expect(component.submitButtonLoading).toEqual(false)
+  })
+
+  it('test save proxy header as edit  api', () => {
+    httpCommonService = fixture.debugElement.injector.get(ApiService)
+    spyPutApiService = jest.spyOn(httpCommonService, 'put').mockReturnValue(
+      of(MockEmptySuccessResponse)
+    )
+
+    spyPostApiService = jest.spyOn(httpCommonService, 'post').mockReturnValue(
+      of(MockEmptySuccessResponse)
+    )
+    spyApiService = jest.spyOn(httpCommonService, 'get').mockImplementation(
+      (...args) => {
+        switch (args[0]) {
+          case 'common/provider/Service':
+            return of(MockGetCommonProviderService)
+          case 'plugin/template/enum':
+            return of(MockPluginTemplateEnum)
+          case 'router/groups':
+            return of(MockRouterGroups)
+          case 'my/access':
+            return of(MockAccessList)
+          case 'system/modules':
+            return of(MockModuleList)
+          case 'router':
+            return of(MockApiWsMessage)
+          default:
+            return of(MockEmptySuccessResponse)
+        }
+      }
+    )
+
+    const spyFormServiceDirty = jest.spyOn(component.validateForm.controls['service'], 'markAsDirty')
+    expect(component).toBeTruthy()
+    component.editPage = true
+
+    expect(spyFormServiceDirty).not.toHaveBeenCalled()
+    expect(spyPutApiService).not.toHaveBeenCalled()
+    expect(spyPostApiService).not.toHaveBeenCalled()
+    expect(component.submitButtonLoading).toEqual(false)
+
+    component.ngOnInit()
+    component.saveApi('websocket')
+    fixture.detectChanges()
+
+    expect(spyPostApiService).not.toHaveBeenCalled()
+    expect(spyPutApiService).toHaveBeenCalledTimes(1)
+    expect(component.createApiForm.method).toEqual([]) // websocket
+    expect(component.submitButtonLoading).toEqual(false)
+
+    component.showCheckboxGroupValid = true
+    component.saveApi('websocket')
+    fixture.detectChanges()
+
+    expect(spyFormServiceDirty).not.toHaveBeenCalled()
+    expect(spyPutApiService).toHaveBeenCalledTimes(1)
+    expect(spyPostApiService).not.toHaveBeenCalled()
+    expect(component.submitButtonLoading).toEqual(false)
   })
 })

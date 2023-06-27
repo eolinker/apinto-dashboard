@@ -4,7 +4,7 @@ import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { NzUploadChangeParam, NzUploadFile } from 'ng-zorro-antd/upload'
 import { ApiService } from '../../../service/api.service'
 import { environment } from 'projects/core/src/environments/environment'
-
+import { version, updateDate } from 'projects/core/src/app/constant/app.config'
 @Component({
   selector: 'eo-ng-auth-activation',
   templateUrl: './activation.component.html',
@@ -102,6 +102,9 @@ export class AuthActivationComponent implements OnInit {
 
     ]
   }
+
+  version:string = version
+  updateDate:string = updateDate
 
   constructor (
     private message: EoNgFeedbackMessageService,

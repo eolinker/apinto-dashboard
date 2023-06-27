@@ -13,6 +13,8 @@ export const APP_CONFIG = new InjectionToken('app.config')
 export const MODAL_NORMAL_SIZE: number = 900
 export const MODAL_SMALL_SIZE: number = 600
 export const MODAL_LARGE_SIZE: number = 1200
+export const version:string = '3.2.0'
+export const updateDate:string = '2023-06-16'
 
 // apinto项目的目录参数,其中view和edit字段需要与后端数据一致,以便匹配(权限用)
 export const AppConfig: any = {
