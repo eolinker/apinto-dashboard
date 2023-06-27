@@ -8,11 +8,11 @@
  */
 import { Component, OnInit } from '@angular/core'
 import { Router } from '@angular/router'
-import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { Subscription } from 'rxjs'
 import { ApiService } from '../../service/api.service'
 import { EoNgNavigationService } from '../../service/eo-ng-navigation.service'
 import { environment } from 'projects/core/src/environments/environment'
+import { updateDate, version } from '../../constant/app.config'
 
 @Component({
   selector: 'eo-ng-login',
@@ -22,6 +22,8 @@ import { environment } from 'projects/core/src/environments/environment'
 export class LoginComponent implements OnInit {
   isBusiness:boolean = environment.isBusiness
   private subscription: Subscription = new Subscription()
+  version:string = version
+  updateDate:string = updateDate.split('-').join('')
   constructor (
     private navigationService: EoNgNavigationService,
     private api: ApiService,
