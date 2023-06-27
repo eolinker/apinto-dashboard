@@ -38,6 +38,7 @@ export class ListComponent implements OnInit {
 
   strategyType:string = ''
   private subscription: Subscription = new Subscription()
+  private subGetList: Subscription = new Subscription()
 
   strategiesTableHeadName:THEAD_TYPE[]= [...strategiesTableHeadName]
   strategiesTableBody:TBODY_TYPE[] = [...strategiesTableBody]
@@ -78,6 +79,7 @@ export class ListComponent implements OnInit {
 
   ngOnDestroy () {
     this.subscription.unsubscribe()
+    this.subGetList.unsubscribe()
   }
 
   initTable () {
@@ -248,7 +250,8 @@ export class ListComponent implements OnInit {
   // 获取策略列表
   getStrategiesList () {
     if (this.clusterName) {
-      this.api.get('strategies/' + this.strategyType, { clusterName: this.clusterName || '' })
+      this.subGetList.unsubscribe()
+      this.subGetList = this.api.get('strategies/' + this.strategyType, { clusterName: this.clusterName || '' })
         .subscribe((resp:{code:number, data:{strategies:StrategyListData[]}, msg:string}) => {
           if (resp.code === 0) {
             this.priorityMap = new Map()

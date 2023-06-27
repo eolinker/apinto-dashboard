@@ -26,7 +26,7 @@ export class ApiImportComponent implements OnInit {
   @ViewChild('importFooterTpl', { read: TemplateRef, static: true }) importFooterTpl: TemplateRef<any> | undefined
   @ViewChild('methodTpl', { read: TemplateRef, static: true }) methodTpl: TemplateRef<any> | undefined
   @Output() flashList:EventEmitter<any> = new EventEmitter()
-  drawerRef:NzModalRef | undefined
+  modalRef:NzModalRef | undefined
   groupList:any[]= []
   upstreamList:SelectOption[]= []
   importFormPage:boolean = true
@@ -94,7 +94,7 @@ export class ApiImportComponent implements OnInit {
       upstream: ['', [Validators.required]],
       requestPrefix: ['', [Validators.pattern('^[^?]*')]]
     })
-    this.drawerRef = this.modalService.create({
+    this.modalRef = this.modalService.create({
       nzTitle: '导入swagger文件',
       nzWidth: MODAL_NORMAL_SIZE,
       nzContent: this.importContentTpl,
@@ -254,7 +254,7 @@ export class ApiImportComponent implements OnInit {
     this.api.put('router/import', { apis: submitApis, token: this.token }).subscribe((resp:EmptyHttpResponse) => {
       if (resp.code === 0) {
         this.message.success(resp.msg || 'API导入成功！', { nzDuration: 1000 })
-        this.drawerRef?.close()
+        this.modalRef?.close()
         this.flashList.emit()
         return true
       } else {
