@@ -369,7 +369,7 @@ func (c *clusterService) DeleteByNamespaceIdByName(ctx context.Context, namespac
 		if err = c.clusterVariableService.DeleteAll(txCtx, namespaceId, clusterId, userId); err != nil {
 			return err
 		}
-		//删除集群下的环境变量
+		//删除集群下的节点
 		err := c.clusterNodeService.Delete(txCtx, namespaceId, clusterId)
 		if err != nil {
 			return err

@@ -25,4 +25,7 @@ func init() {
 	bean.Injection(&clusterCertificate)
 	bean.Injection(&clusterNode)
 	//bean.Injection(&clusterConfig)
+	nodeCache := newINodeCache()
+	bean.Injection(&nodeCache)
+
 }
