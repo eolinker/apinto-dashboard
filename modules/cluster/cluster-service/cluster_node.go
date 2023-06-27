@@ -7,13 +7,14 @@ import (
 	"fmt"
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/common"
+	locker_service "github.com/eolinker/apinto-dashboard/modules/base/locker-service"
 	"github.com/eolinker/apinto-dashboard/modules/cluster"
 	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-entry"
 	cluster_model2 "github.com/eolinker/apinto-dashboard/modules/cluster/cluster-model"
 	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-store"
-
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
+	"github.com/go-redis/redis/v8"
 	"golang.org/x/sync/errgroup"
 	"strings"
 	"time"
@@ -22,7 +23,9 @@ import (
 type clusterNodeService struct {
 	clusterNodeStore cluster_store.IClusterNodeStore
 	clusterService   cluster.IClusterService
+	nodeCache        INodeCache
 	apintoClient     cluster.IApintoClient
+	lockService      locker_service.ISyncLockService
 }
 
 func (c *clusterNodeService) List(ctx context.Context, namespaceId int, clusterName string) ([]*cluster_model2.Node, error) {
@@ -30,7 +33,7 @@ func (c *clusterNodeService) List(ctx context.Context, namespaceId int, clusterN
 	if err != nil {
 		return nil, err
 	}
-	return c.QueryByClusterIds(ctx, cm.Id)
+	return c.QueryByClusterId(ctx, cm.Id)
 
 }
 
@@ -51,6 +54,8 @@ func newClusterNodeService() cluster.IClusterNodeService {
 	bean.Autowired(&s.clusterNodeStore)
 	bean.Autowired(&s.clusterService)
 	bean.Autowired(&s.apintoClient)
+	bean.Autowired(&s.nodeCache)
+	bean.Autowired(&s.lockService)
 
 	return s
 }
@@ -76,7 +81,7 @@ func (c *clusterNodeService) QueryList(ctx context.Context, namespaceId int, clu
 	group, _ := errgroup.WithContext(ctx)
 
 	group.Go(func() error {
-		nodes, err := c.QueryByClusterIds(ctx, clusterModel.Id)
+		nodes, err := c.QueryByClusterId(ctx, clusterModel.Id)
 		if err != nil {
 			return err
 		}
@@ -132,8 +137,46 @@ func (c *clusterNodeService) QueryList(ctx context.Context, namespaceId int, clu
 	return rs, isUpdate, nil
 }
 
-func (c *clusterNodeService) QueryByClusterIds(ctx context.Context, clusterIds ...int) ([]*cluster_model2.Node, error) {
-	nodes, err := c.clusterNodeStore.GetAllByClusterIds(ctx, clusterIds...)
+func (c *clusterNodeService) QueryByClusterId(ctx context.Context, id int) ([]*cluster_model2.Node, error) {
+	nodes, err := c.nodeCache.Get(ctx, id)
+	if err != nil && err != redis.Nil {
+		return nil, err
+	}
+
+	//若redis存在值
+	if err == nil {
+		return *nodes, nil
+	}
+
+	//若redis无缓存
+	//加锁
+	c.lockService.Lock(locker_service.LockNameModuleClusterNodes, id)
+	defer c.lockService.Unlock(locker_service.LockNameModuleClusterNodes, id)
+
+	nodes, err = c.nodeCache.Get(ctx, id)
+	if err != nil && err != redis.Nil {
+		return nil, err
+	}
+	if err == nil {
+		return *nodes, nil
+	}
+
+	nodeEntries, err := c.clusterNodeStore.GetAllByClusterIds(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	list := make([]*cluster_model2.Node, 0, len(nodeEntries))
+	for _, node := range nodeEntries {
+		list = append(list, cluster_model2.ReadClusterNode(node))
+	}
+	//缓存
+	_ = c.nodeCache.Set(ctx, id, &list)
+	return list, nil
+
+}
+
+func (c *clusterNodeService) QueryAllCluster(ctx context.Context) ([]*cluster_model2.Node, error) {
+	nodes, err := c.clusterNodeStore.List(ctx, map[string]interface{}{})
 	if err != nil {
 		return nil, err
 	}
@@ -143,6 +186,20 @@ func (c *clusterNodeService) QueryByClusterIds(ctx context.Context, clusterIds .
 		list = append(list, cluster_model2.ReadClusterNode(node))
 	}
 	return list, nil
+}
+
+func (c *clusterNodeService) QueryAdminAddrByClusterId(ctx context.Context, id int) ([]string, error) {
+	nodes, err := c.QueryByClusterId(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	admins := make([]string, 0)
+	for _, node := range nodes {
+		for _, nodeAddr := range node.AdminAddrs {
+			admins = append(admins, nodeAddr)
+		}
+	}
+	return admins, nil
 }
 
 // Reset 重置节点信息
@@ -171,9 +228,10 @@ func (c *clusterNodeService) Reset(ctx context.Context, namespaceId, userId int,
 		return err
 	}
 
+	entryClusterNodes := make([]*cluster_entry.ClusterNode, 0, len(nodes))
 	err = c.clusterNodeStore.Transaction(ctx, func(txCtx context.Context) error {
 		t := time.Now()
-		entryClusterNodes := make([]*cluster_entry.ClusterNode, 0, len(nodes))
+
 		nodesAdminAddr := make([]string, 0, len(nodes))
 
 		for _, node := range nodes {
@@ -194,7 +252,13 @@ func (c *clusterNodeService) Reset(ctx context.Context, namespaceId, userId int,
 	if err != nil {
 		return err
 	}
-	c.apintoClient.SetClient(namespaceId, clusterId)
+	list := make([]*cluster_model2.Node, 0, len(entryClusterNodes))
+	for _, node := range entryClusterNodes {
+		list = append(list, cluster_model2.ReadClusterNode(node))
+	}
+	//缓存
+	_ = c.nodeCache.Set(ctx, clusterId, &list)
+
 	return nil
 }
 
@@ -238,7 +302,17 @@ func (c *clusterNodeService) Update(ctx context.Context, namespaceId int, cluste
 	if err != nil {
 		return err
 	}
-	c.apintoClient.SetClient(namespaceId, clusterInfo.Id)
+
+	list := make([]*cluster_model2.Node, 0, len(newClusterNodes))
+	for _, node := range nodes {
+		node.NamespaceId = namespaceId
+		node.ClusterId = clusterInfo.Id
+		node.CreateTime = t
+		list = append(list, node)
+	}
+	//缓存
+	_ = c.nodeCache.Set(ctx, clusterInfo.Id, &list)
+
 	return nil
 }
 
@@ -252,18 +326,18 @@ func (c *clusterNodeService) NodeRepeatContrast(ctx context.Context, namespaceId
 	clustersMap := common.SliceToMap(clusters, func(t *cluster_model2.Cluster) int {
 		return t.Id
 	})
-	//工作空间下任何一个节点名称和这次添加的有重复,不可保存
-	clusterIds := make([]int, 0)
-	for _, clusterInfo := range clusters {
-		if clusterId == clusterInfo.Id { //过滤本身的
-			continue
-		}
-		clusterIds = append(clusterIds, clusterInfo.Id)
-	}
 
-	clusterNodes, err := c.QueryByClusterIds(ctx, clusterIds...)
+	clusterNodes, err := c.QueryAllCluster(ctx)
 	if err != nil {
 		return err
+	}
+	//工作空间下任何一个节点名称和这次添加的有重复,不可保存
+	filteredNodes := make([]*cluster_model2.Node, 0, len(clusterNodes))
+	for _, node := range clusterNodes {
+		if clusterId == node.ClusterId { //过滤本身的
+			continue
+		}
+		filteredNodes = append(filteredNodes, node)
 	}
 
 	//对比clusterNods和nodes是否有重复的name
@@ -272,7 +346,7 @@ func (c *clusterNodeService) NodeRepeatContrast(ctx context.Context, namespaceId
 		return t.Name
 	})
 
-	for _, node := range clusterNodes {
+	for _, node := range filteredNodes {
 		if _, ok := mapNode[node.Name]; ok {
 			if clusterInfo, clusterOk := clustersMap[node.ClusterId]; clusterOk {
 				return errors.New(fmt.Sprintf("%s集群已有这个节点信息", clusterInfo.Name))
