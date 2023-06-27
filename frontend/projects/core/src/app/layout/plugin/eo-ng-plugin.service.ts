@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { Subject } from 'rxjs'
+import { Subject, Subscription } from 'rxjs'
 import { CardItem } from '../../component/card-list/card-list.component'
 import { PluginItem, PluginGroupItem } from './types/types'
 import { ApiService } from '../../service/api.service'
@@ -18,6 +18,7 @@ export class EoNgPluginService {
   radioValue:string|boolean = ''
   pluginList:(PluginItem & CardItem)[] = []
   totalNum:number = 0
+  private subGetList: Subscription = new Subscription()
   constructor (private api:ApiService,
     private baseInfo:BaseInfoService) { }
 
@@ -39,8 +40,9 @@ export class EoNgPluginService {
 
   // 获取分组和插件列表
   getPluginList () {
+    this.subGetList.unsubscribe()
     this.groupUuid = this.baseInfo.allParamsInfo.pluginGroupId
-    this.api.get('system/plugin/installed', { group: this.groupUuid || '', search: this.queryName || '' }).subscribe((resp:{code:number, data:{plugins:PluginItem[], groups:PluginGroupItem[]}, msg:string}) => {
+    this.subGetList = this.api.get('system/plugin/installed', { group: this.groupUuid || '', search: this.queryName || '' }).subscribe((resp:{code:number, data:{plugins:PluginItem[], groups:PluginGroupItem[]}, msg:string}) => {
       if (resp.code === 0) {
         this.nodesList = this.nodesTransfer(resp.data.groups)
         this.totalNum = 0

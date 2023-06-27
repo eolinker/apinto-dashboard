@@ -54,7 +54,7 @@ export class DeployClusterEnvironmentComponent implements OnInit {
   readonly nowUrl:string = this.router.routerState.snapshot.url
    configsList: Array<{ key: string, value: string, variableId: number, publish:string, status:string, desc:string, operator:string, updateTime:string, createTime:string, id: number, checked:boolean}> = []
 
-  drawerRef:NzModalRef | undefined
+  modalRef:NzModalRef | undefined
   nzDisabled:boolean = false
 
   configsTableHeadName: THEAD_TYPE[]= [...DeployClusterEnvConfigThead]
@@ -131,7 +131,7 @@ export class DeployClusterEnvironmentComponent implements OnInit {
     e?.stopPropagation()
     switch (usage) {
       case 'addConfig':
-        this.drawerRef = this.modalService.create({
+        this.modalRef = this.modalService.create({
           nzTitle: '新建配置',
           nzWidth: MODAL_SMALL_SIZE,
           nzContent: DeployClusterEnvironmentConfigFormComponent,
@@ -144,7 +144,7 @@ export class DeployClusterEnvironmentComponent implements OnInit {
         })
         break
       case 'editConfig':
-        this.drawerRef = this.modalService.create({
+        this.modalRef = this.modalService.create({
           nzTitle: '编辑配置',
           nzWidth: MODAL_SMALL_SIZE,
           nzContent: DeployClusterEnvironmentConfigFormComponent,
@@ -158,7 +158,7 @@ export class DeployClusterEnvironmentComponent implements OnInit {
         })
         break
       case 'updateConfig':
-        this.drawerRef = this.modalService.create({
+        this.modalRef = this.modalService.create({
           nzTitle: '同步配置',
           nzWidth: MODAL_NORMAL_SIZE,
           nzContent: DeployClusterEnvironmentConfigUpdateComponent,
@@ -172,7 +172,7 @@ export class DeployClusterEnvironmentComponent implements OnInit {
         })
         break
       case 'operateRecords':
-        this.drawerRef = this.modalService.create({
+        this.modalRef = this.modalService.create({
           nzTitle: '更改历史',
           nzWidth: MODAL_NORMAL_SIZE,
           nzContent: DeployClusterEnvironmentHistoryChangeComponent,
@@ -184,7 +184,7 @@ export class DeployClusterEnvironmentComponent implements OnInit {
         })
         break
       case 'publishRecords':
-        this.drawerRef = this.modalService.create({
+        this.modalRef = this.modalService.create({
           nzTitle: '发布历史',
           nzWidth: MODAL_NORMAL_SIZE,
           nzContent: DeployClusterEnvironmentHistoryPublishComponent,
@@ -196,7 +196,7 @@ export class DeployClusterEnvironmentComponent implements OnInit {
         })
         break
       case 'publish':
-        this.drawerRef = this.modalService.create({
+        this.modalRef = this.modalService.create({
           nzTitle: '发布',
           nzWidth: MODAL_NORMAL_SIZE,
           nzContent: DeployClusterEnvironmentPublishComponent,
@@ -218,7 +218,7 @@ export class DeployClusterEnvironmentComponent implements OnInit {
 
   closeModal = (fresh?:boolean) => {
     fresh && this.getConfigsList()
-    this.drawerRef?.close()
+    this.modalRef?.close()
   }
 
   copyCallback () {
