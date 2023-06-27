@@ -46,18 +46,6 @@ type IClusterService interface {
 	UpdateAddr(ctx context.Context, userId, clusterId int, addr, uuid string) error
 	ClusterCount(ctx context.Context, namespaceId int) (int64, error)
 }
-type IClusterConfigService interface {
-	Get(ctx context.Context, namespaceId int, clusterName, configType string) (interface{}, error)
-	Edit(ctx context.Context, namespaceId, operator int, clusterName, configType string, config []byte) error
-	Enable(ctx context.Context, namespaceId, operator int, clusterName, configType string) error
-	Disable(ctx context.Context, namespaceId, operator int, clusterName, configType string) error
-
-	IsConfigTypeExist(configType string) bool
-	CheckInput(configType string, config []byte) error
-	FormatOutput(configType string, operator string, config *cluster_entry.ClusterConfig) interface{}
-	ToApinto(client v1.IClient, name, configType string, config []byte) error
-	OfflineApinto(client v1.IClient, name, configType string) error
-}
 
 type IClusterNodeService interface {
 	QueryList(ctx context.Context, namespaceId int, clusterName string) ([]*cluster_model.ClusterNode, bool, error)
