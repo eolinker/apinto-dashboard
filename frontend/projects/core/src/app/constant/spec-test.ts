@@ -353,3 +353,365 @@ export const MockApiWsMessage2:{code:number, data:{api:ApiMessage}, msg:string} 
   },
   msg: 'success'
 }
+
+export const MockApiHttpMessage:{code:number, data:{api:ApiMessage}, msg:string} = {
+  code: 0,
+  data: {
+    api: {
+      name: 'ss',
+      uuid: '569c8d47-d742-5306-c0e2-a5ae38727fa7',
+      groupUuid: '50458642-5a9f-4136-9ff1-e30d647297e8',
+      desc: '',
+      isDisable: false,
+      scheme: 'http',
+      requestPath: '/tetetetete',
+      service: 'testService',
+      method: ['GET'],
+      proxyPath: 'tetetetete',
+      hosts: ['test1.host.addr', 'test2.host.addr'],
+      timeout: 10000,
+      retry: 0,
+      match: [
+        {
+          position: 'header',
+          matchType: 'PREFIX',
+          key: 'ee',
+          pattern: 'te'
+        }
+      ],
+      proxyHeader: [
+        {
+          optType: 'DELETE',
+          key: 'eee',
+          value: ''
+        }
+      ],
+      templateUuid: 'e59693df-27cc-61a7-d0f0-c17da203026a'
+    }
+  },
+  msg: 'success'
+}
+
+export const MockApiHttpMessage2:{code:number, data:{api:ApiMessage}, msg:string} = {
+  code: 0,
+  data: {
+    api: {
+      name: 'ss',
+      uuid: '569c8d47-d742-5306-c0e2-a5ae38727fa7',
+      groupUuid: '50458642-5a9f-4136-9ff1-e30d647297e8',
+      desc: '',
+      isDisable: false,
+      scheme: 'http',
+      requestPath: '{{baseUrl}}/test',
+      service: 'testService',
+      method: [],
+      proxyPath: 'tetetetete',
+      hosts: [],
+      timeout: 10000,
+      retry: 0,
+      match: [
+        {
+          position: 'header',
+          matchType: 'PREFIX',
+          key: 'ee',
+          pattern: 'te'
+        }
+      ],
+      proxyHeader: [
+        {
+          optType: 'DELETE',
+          key: 'eee',
+          value: ''
+        }
+      ],
+      templateUuid: 'e59693df-27cc-61a7-d0f0-c17da203026a'
+    }
+  },
+  msg: 'success'
+}
+
+export const MockApiSource = {
+  code: 0,
+  data: {
+    list: [
+      {
+        id: 'self-build:-1:',
+        title: '自建'
+      },
+      {
+        id: 'import:-1:',
+        title: '导入'
+      },
+      {
+        id: 'sync:1:',
+        title: 'Apikit'
+      },
+      {
+        id: 'sync:2:',
+        title: 'Postcat'
+      }
+    ]
+  },
+  msg: 'success'
+}
+
+export const MockApisList = {
+  code: 0,
+  data: {
+    apis: [
+      {
+        group_uuid: '35938ae4-1a62-4e22-ad8c-3691e111820e',
+        uuid: '549a9e3f-50ed-f004-c033-df1cc6c48df1',
+        name: 'Logs user into the system',
+        scheme: 'http',
+        method: [
+          'GET'
+        ],
+        service: 'newsbaidu',
+        request_path: '/user/login',
+        is_disable: false,
+        publish: [
+          {
+            name: 'cluster_0d6bb2b5_9012_4f60_a047_61415a9482b2',
+            title: 'kingsword',
+            status: 'NOTGOONLINE'
+          },
+          {
+            name: 'cluster_84bf7525_2d1c_4bb9_81d7_fdcc56de5ccf',
+            title: '测试',
+            status: 'NOTGOONLINE'
+          },
+          {
+            name: 'remote',
+            title: '远程集群',
+            status: 'NOTGOONLINE'
+          }
+        ],
+        source: '导入',
+        update_time: '2023-03-23 15:49:34',
+        is_delete: true
+      },
+      {
+        group_uuid: '35938ae4-1a62-4e22-ad8c-3691e111820e',
+        uuid: 'bc6e3590-b226-bfb2-0221-10ae4d41fc9e',
+        name: 'Logs out current logged in user session',
+        scheme: 'http',
+        method: [
+          'GET'
+        ],
+        service: 'newsbaidu',
+        request_path: '/user/logout',
+        is_disable: false,
+        publish: [
+          {
+            name: 'cluster_0d6bb2b5_9012_4f60_a047_61415a9482b2',
+            title: 'kingsword',
+            status: 'NOTGOONLINE'
+          },
+          {
+            name: 'cluster_84bf7525_2d1c_4bb9_81d7_fdcc56de5ccf',
+            title: '测试',
+            status: 'NOTGOONLINE'
+          },
+          {
+            name: 'remote',
+            title: '远程集群',
+            status: 'NOTGOONLINE'
+          }
+        ],
+        source: '导入',
+        update_time: '2023-03-23 15:49:34',
+        is_delete: true
+      },
+      {
+        group_uuid: '50458642-5a9f-4136-9ff1-e30d647297e8',
+        uuid: '0f46c5dd-47f4-176f-8e96-620d0e042e19',
+        name: 'COVID-19 national epidemic',
+        scheme: 'http',
+        method: [
+          'GET'
+        ],
+        service: 'demo_consul_service',
+        request_path: 'https://view.inews.qq.com/g2/getOnsInfo',
+        is_disable: false,
+        publish: [
+          {
+            name: 'cluster_0d6bb2b5_9012_4f60_a047_61415a9482b2',
+            title: 'kingsword',
+            status: 'NOTGOONLINE'
+          },
+          {
+            name: 'cluster_84bf7525_2d1c_4bb9_81d7_fdcc56de5ccf',
+            title: '测试',
+            status: 'NOTGOONLINE'
+          },
+          {
+            name: 'remote',
+            title: '远程集群',
+            status: 'NOTGOONLINE'
+          }
+        ],
+        source: 'Apikit',
+        update_time: '2023-03-23 10:18:02',
+        is_delete: true
+      },
+      {
+        group_uuid: '50458642-5a9f-4136-9ff1-e30d647297e8',
+        uuid: 'b946a147-6c1b-da01-926b-660f44860828',
+        name: 'Get City Weather Today',
+        scheme: 'http',
+        method: [
+          'GET'
+        ],
+        service: 'demo_consul_service',
+        request_path: 'http://www.weather.com.cn/data/cityinfo/{cityCode}.html',
+        is_disable: false,
+        publish: [
+          {
+            name: 'cluster_0d6bb2b5_9012_4f60_a047_61415a9482b2',
+            title: 'kingsword',
+            status: 'NOTGOONLINE'
+          },
+          {
+            name: 'cluster_84bf7525_2d1c_4bb9_81d7_fdcc56de5ccf',
+            title: '测试',
+            status: 'NOTGOONLINE'
+          },
+          {
+            name: 'remote',
+            title: '远程集群',
+            status: 'NOTGOONLINE'
+          }
+        ],
+        source: 'Apikit',
+        update_time: '2023-03-23 10:18:02',
+        is_delete: true
+      },
+      {
+        group_uuid: '35938ae4-1a62-4e22-ad8c-3691e111820e',
+        uuid: 'fbe1f7a3-3a44-bc1b-d5a3-b06e91c89824',
+        name: 'demo_conusl_api',
+        scheme: 'http',
+        method: [
+          'GET',
+          'POST',
+          'PUT'
+        ],
+        service: 'demo_consul_service',
+        request_path: '/demo_consul',
+        is_disable: false,
+        publish: [
+          {
+            name: 'cluster_0d6bb2b5_9012_4f60_a047_61415a9482b2',
+            title: 'kingsword',
+            status: 'NOTGOONLINE'
+          },
+          {
+            name: 'cluster_84bf7525_2d1c_4bb9_81d7_fdcc56de5ccf',
+            title: '测试',
+            status: 'TOUPDATE'
+          },
+          {
+            name: 'remote',
+            title: '远程集群',
+            status: 'NOTGOONLINE'
+          }
+        ],
+        source: '自建',
+        update_time: '2023-03-17 20:29:06',
+        is_delete: false
+      },
+      {
+        group_uuid: '35938ae4-1a62-4e22-ad8c-3691e111820e',
+        uuid: '650e4900-1833-ba59-fef9-e00f1a464e87',
+        name: 'Logs out current logged in user session',
+        scheme: 'http',
+        method: [
+          'GET'
+        ],
+        service: 'newsbaidu',
+        request_path: '/web/user/logout',
+        is_disable: false,
+        publish: [
+          {
+            name: 'cluster_0d6bb2b5_9012_4f60_a047_61415a9482b2',
+            title: 'kingsword',
+            status: 'NOTGOONLINE'
+          },
+          {
+            name: 'cluster_84bf7525_2d1c_4bb9_81d7_fdcc56de5ccf',
+            title: '测试',
+            status: 'NOTGOONLINE'
+          },
+          {
+            name: 'remote',
+            title: '远程集群',
+            status: 'NOTGOONLINE'
+          }
+        ],
+        source: '导入',
+        update_time: '2023-03-17 17:36:34',
+        is_delete: true
+      },
+      {
+        group_uuid: '35938ae4-1a62-4e22-ad8c-3691e111820e',
+        uuid: '3b104bdb-ad12-cc9f-0819-9c02e304cc94',
+        name: 'Update user',
+        scheme: 'http',
+        method: [
+          'PUT'
+        ],
+        service: 'newsbaidu',
+        request_path: '/web/user/{username}',
+        is_disable: false,
+        publish: [
+          {
+            name: 'cluster_0d6bb2b5_9012_4f60_a047_61415a9482b2',
+            title: 'kingsword',
+            status: 'NOTGOONLINE'
+          },
+          {
+            name: 'cluster_84bf7525_2d1c_4bb9_81d7_fdcc56de5ccf',
+            title: '测试',
+            status: 'NOTGOONLINE'
+          },
+          {
+            name: 'remote',
+            title: '远程集群',
+            status: 'NOTGOONLINE'
+          }
+        ],
+        source: '导入',
+        update_time: '2023-03-17 17:36:34',
+        is_delete: true
+      }
+    ],
+    total: 7
+  },
+  msg: 'success'
+}
+
+export const MockApisList2 = {
+  code: 0,
+  data: {
+    apis: [
+      {
+        group_uuid: '35938ae4-1a62-4e22-ad8c-3691e111820e',
+        uuid: '549a9e3f-50ed-f004-c033-df1cc6c48df1',
+        name: 'Logs user into the system',
+        scheme: 'http',
+        method: [
+          'GET'
+        ],
+        service: 'newsbaidu',
+        request_path: '/user/login',
+        is_disable: false,
+        source: '导入',
+        update_time: '2023-03-23 15:49:34',
+        is_delete: true
+      }
+    ],
+    total: 0
+  },
+  msg: 'success'
+}

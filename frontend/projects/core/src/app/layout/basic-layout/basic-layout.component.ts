@@ -53,10 +53,15 @@ export class BasicLayoutComponent implements OnInit {
   userAvatar:boolean = false // 是否显示用户头像，取决于是否开启用户权限插件
   isBusiness:boolean = environment.isBusiness
 
+  authStatus:'normal' | 'warning' | 'freeze' = 'normal'
+  btnLabel:string = ''
+  btnTooltip:string = ''
+
   private subscription1: Subscription = new Subscription()
   private subscription2: Subscription = new Subscription()
   private subscription3: Subscription = new Subscription()
   private subscription4: Subscription = new Subscription()
+  private subscription5: Subscription = new Subscription()
 
   constructor (
     private router: Router,
@@ -99,6 +104,10 @@ export class BasicLayoutComponent implements OnInit {
         this.selectOrOpenMenu(this.router.url)
       }
     })
+
+    this.subscription5 = this.navigationService.repCheckAuthStatus().subscribe(() => {
+      this.checkAuthStatus()
+    })
   }
 
   ngOnInit () {
@@ -110,6 +119,7 @@ export class BasicLayoutComponent implements OnInit {
     this.subscription2.unsubscribe()
     this.subscription3.unsubscribe()
     this.subscription4.unsubscribe()
+    this.subscription5.unsubscribe()
   }
 
   clickIframeBreadcrumb (url:string) {
@@ -140,23 +150,18 @@ export class BasicLayoutComponent implements OnInit {
     }
   }
 
-  getAuthInfo () {
-    if (this.navigationService.getUserAuthAccess()) {
-      this.api.authGet('activation/info').subscribe(
-        (resp: {
-          code: number
-          data: {
-            infos: Array<{ key: string; value: string }>
-            title: string
-          }
-          msg: string
-        }) => {
-          if (resp.code === 0) {
-            this.authInfo = resp.data
-          }
+  checkAuthStatus () {
+    this.api.authGet('activation/check').subscribe((resp:{code:number, msg:string, data:{status:'normal'|'warning'|'freeze', prompt:string, label:string}}) => {
+      if (resp.code === 0) {
+        if (resp.data.status === 'freeze') {
+          this.router.navigate(['/', 'auth-info'])
+          return
         }
-      )
-    }
+        this.authStatus = resp.data.status
+        this.btnLabel = resp.data.label
+        this.btnTooltip = resp.data.prompt
+      }
+    })
   }
 
   openAuthDialog () {
@@ -182,7 +187,6 @@ export class BasicLayoutComponent implements OnInit {
         this.router.navigate([this.navigationService.getPageRoute()])
       }
     }
-    // this.getAuthInfo()
   }
 
   // 根据路由选中并打开对应menu
@@ -204,16 +208,9 @@ export class BasicLayoutComponent implements OnInit {
     }
   }
 
-  // openHandler (key: string): void {
-  //   for (const index in this.sideMenuOptions) {
-  //     if (this.sideMenuOptions[index]['key'] !== key) {
-  //       // this.sideMenuOptions[index].open = false
-  //     } else {
-  //       this.sideMenuOptions[index].open = true
-  //     }
-  //     this.openMap[this.sideMenuOptions[index]['key'] as string] = !!this.sideMenuOptions[index].open
-  //   }
-  // }
+  goToAuth () {
+    this.router.navigate(['/', 'auth-info'])
+  }
 
   goToGithub () {
     window.open('https://github.com/eolinker/apinto')

@@ -439,7 +439,7 @@ eo-ng-option-item {
   }
 }
 
-eo-ng-api-management,
+eo-ng-api-management-group,
 eo-ng-flow-control-group {
   .ant-tree .ant-tree-treenode {
     padding-left: var(--small-padding);
@@ -457,7 +457,7 @@ eo-ng-flow-control-group {
   color: var(--text-color);
 }
 
-eo-ng-api-management {
+eo-ng-api-management-group {
   .ant-tree .ant-tree-node-content-wrapper {
     padding-left: 26px;
   }
