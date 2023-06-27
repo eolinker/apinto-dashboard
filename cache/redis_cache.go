@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/go-redis/redis/v8"
+	"github.com/eolinker/eosc/common/bean"
 	"strings"
 	"time"
 )
@@ -15,18 +15,42 @@ type IRedisCache[T any, K comparable] interface {
 
 	Delete(ctx context.Context, keys ...K) error
 }
+
+type IRedisCacheSingleton[T any] interface {
+	Get(ctx context.Context) (*T, error)
+	Set(ctx context.Context, t *T) error
+	Delete(ctx context.Context) error
+}
+
 type IRedisCacheNoKey[T any] interface {
 	SetAll(ctx context.Context, t []*T) error
 	GetAll(ctx context.Context) ([]*T, error)
 }
 type redisCache[T any, K comparable] struct {
-	client        *redis.ClusterClient
+	client        ICommonCache
 	keyPrefix     string
 	formatHandler func(K) string
 	expiration    time.Duration
 }
+type redisCacheSingleton[T any] struct {
+	base IRedisCache[T, string]
+	key  string
+}
+
+func (r *redisCacheSingleton[T]) Get(ctx context.Context) (*T, error) {
+	return r.base.Get(ctx, r.key)
+}
+
+func (r *redisCacheSingleton[T]) Set(ctx context.Context, t *T) error {
+	return r.base.Set(ctx, r.key, t)
+}
+
+func (r *redisCacheSingleton[T]) Delete(ctx context.Context) error {
+	return r.base.Delete(ctx, r.key)
+}
+
 type redisCacheNoKey[T any] struct {
-	client     *redis.ClusterClient
+	client     ICommonCache
 	key        string
 	expiration time.Duration
 }
@@ -34,7 +58,7 @@ type redisCacheNoKey[T any] struct {
 func (r *redisCache[T, K]) Get(ctx context.Context, k K) (*T, error) {
 	kv := r.keyPrefix + r.formatHandler(k)
 
-	bytes, err := r.client.Get(ctx, kv).Bytes()
+	bytes, err := r.client.Get(ctx, kv)
 	if err != nil {
 		return nil, err
 	}
@@ -52,13 +76,13 @@ func (r *redisCache[T, K]) Set(ctx context.Context, k K, t *T) error {
 		return err
 	}
 
-	return r.client.Set(ctx, kv, bytes, r.expiration).Err()
+	return r.client.Set(ctx, kv, bytes, r.expiration)
 }
 
 func (r *redisCache[T, K]) Delete(ctx context.Context, ks ...K) error {
 	for _, k := range ks {
 		key := r.keyPrefix + r.formatHandler(k)
-		if err := r.client.Del(ctx, key).Err(); err != nil {
+		if err := r.client.Del(ctx, key); err != nil {
 			return err
 		}
 
@@ -68,7 +92,7 @@ func (r *redisCache[T, K]) Delete(ctx context.Context, ks ...K) error {
 
 func (r *redisCacheNoKey[T]) GetAll(ctx context.Context) ([]*T, error) {
 
-	bytes, err := r.client.Get(ctx, r.key).Bytes()
+	bytes, err := r.client.Get(ctx, r.key)
 	if err != nil {
 		return nil, err
 	}
@@ -84,33 +108,42 @@ func (r *redisCacheNoKey[T]) SetAll(ctx context.Context, t []*T) error {
 		return err
 	}
 
-	return r.client.Set(ctx, r.key, bytes, r.expiration).Err()
+	return r.client.Set(ctx, r.key, bytes, r.expiration)
 }
-func CreateRedisCacheNoKey[T any](client *redis.ClusterClient, expiration time.Duration, key string, prefix ...string) IRedisCacheNoKey[T] {
+func CreateRedisCacheNoKey[T any](expiration time.Duration, key string, prefix ...string) IRedisCacheNoKey[T] {
 	keyPrefix := "apinto-dashboard"
 	if len(key) > 0 {
 		keyPrefix = strings.Join(prefix, "-")
 	}
-	return &redisCacheNoKey[T]{
-		client:     client,
+	r := &redisCacheNoKey[T]{
 		key:        fmt.Sprint(keyPrefix, ":", key),
 		expiration: expiration,
 	}
+	bean.Autowired(&r.client)
+	return r
 }
 
-func CreateRedisCache[T any, K comparable](client *redis.ClusterClient, expiration time.Duration, format func(k K) string, key ...string) IRedisCache[T, K] {
+func CreateRedisCache[T any, K comparable](expiration time.Duration, format func(k K) string, key ...string) IRedisCache[T, K] {
 	keyPrefix := "apinto-dashboard:"
 	if len(key) > 0 {
 		keyPrefix = strings.Join(key, "-")
 	}
-	return &redisCache[T, K]{
-		client:        client,
+	r := &redisCache[T, K]{
 		keyPrefix:     keyPrefix,
 		formatHandler: format,
 		expiration:    expiration,
 	}
+	bean.Autowired(&r.client)
+	return r
 }
-
+func CreateRedisCacheSingleton[T any](expiration time.Duration, key string) IRedisCacheSingleton[T] {
+	return &redisCacheSingleton[T]{
+		base: CreateRedisCache[T, string](expiration, func(k string) string {
+			return k
+		}),
+		key: fmt.Sprintf("apinto-dashboard:%s", key),
+	}
+}
 func structToBytes[T any](t *T) ([]byte, error) {
 
 	bytes, err := json.Marshal(t)

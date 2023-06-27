@@ -34,9 +34,9 @@ func InitCache(c *redis.ClusterClient) {
 	defer lock.Unlock()
 	client = c
 	iCommonCache := newCommonCache(client)
-
 	bean.Injection(&iCommonCache)
-
+	lockerManger := newManager(client)
+	bean.Injection(&lockerManger)
 	for _, h := range handlers {
 		h(client)
 	}
