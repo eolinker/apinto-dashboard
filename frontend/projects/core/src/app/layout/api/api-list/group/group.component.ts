@@ -54,6 +54,7 @@ export class ApiManagementGroupComponent implements OnInit {
   editParentUuid:string = ''
   selectGroupExist:boolean = false
   private subscription: Subscription = new Subscription()
+  private subGetRouter: Subscription = new Subscription()
 
   constructor (private message: EoNgFeedbackMessageService,
     private modalService:EoNgFeedbackModalService,
@@ -76,20 +77,22 @@ export class ApiManagementGroupComponent implements OnInit {
     this.getMenuList()
   }
 
-  onDestroy () {
+  ngOnDestroy () {
     this.subscription.unsubscribe()
+    this.subGetRouter.unsubscribe()
   }
 
   // 获取api列表
-  getMenuList () {
-    this.api.get('router/groups').subscribe((resp:{code:number, data:ApiGroup, msg:string}) => {
+  getMenuList (fresh?:boolean) {
+    this.subGetRouter.unsubscribe()
+    this.subGetRouter = this.api.get('router/groups').subscribe((resp:{code:number, data:ApiGroup, msg:string}) => {
       if (resp.code === 0) {
         this.queryName = ''
         this.selectGroupExist = false
         this.nodesList = this.nodesTransfer(resp.data.root.groups)
         // 如果选中的分组不存在（此场景一般发生在选中分组或选中分组的父分组被删除后），需要跳转至所有api分组
         // 如果添加新分组，需要滚动到底部
-        if (this.groupUuid && !this.selectGroupExist) {
+        if (fresh && this.groupUuid && !this.selectGroupExist) {
           this.viewAllApis()
         }
 
@@ -153,7 +156,7 @@ export class ApiManagementGroupComponent implements OnInit {
 
   closeModal = () => {
     this.groupModal?.close()
-    this.getMenuList()
+    this.getMenuList(true)
   }
 
   // 删除分组的弹窗
@@ -197,7 +200,9 @@ export class ApiManagementGroupComponent implements OnInit {
     }
 
     this.showAll = false
-    data.node!.isExpanded = !data.node!.isExpanded
+    if (data.node) {
+      data.node.isExpanded = !data.node.isExpanded
+    }
     this.router.navigate(['/', 'router', 'api', 'group', 'list', data.node!.origin['uuid']])
     this.activatedNode = data.node!
   }

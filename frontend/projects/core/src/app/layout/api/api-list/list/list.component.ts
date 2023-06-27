@@ -60,6 +60,7 @@ export class ApiManagementListComponent implements OnInit {
   apisTableBody:TBODY_TYPE[] = []
 
   private subscription: Subscription = new Subscription()
+  private subGetApiList: Subscription = new Subscription()
 
   constructor (private message: EoNgFeedbackMessageService,
     private modalService:EoNgFeedbackModalService,
@@ -112,7 +113,8 @@ export class ApiManagementListComponent implements OnInit {
   // 根据groupUuid获取新的apis列表
   getApisData () {
     this.apiTableLoading = true
-    this.api.get('routers', { groupUuid: this.apisForm.groupUuid || '', searchName: this.apiNameForSear, sourceIds: this.apisForm.sourceIds.join(','), pageNum: this.apisForm.pageNum, pageSize: this.apisForm.pageSize })
+    this.subGetApiList.unsubscribe()
+    this.subGetApiList = this.api.get('routers', { groupUuid: this.apisForm.groupUuid || '', searchName: this.apiNameForSear, sourceIds: this.apisForm.sourceIds.join(','), pageNum: this.apisForm.pageNum, pageSize: this.apisForm.pageSize })
       .subscribe((resp:{code:number, data:{apis:ApiListItem[], total:number, pageNum:number, pageSize:number}, msg:string}) => {
         if (resp.code === 0) {
           this.apisForm.apis = resp.data.apis.map((item:ApiListItem) => {

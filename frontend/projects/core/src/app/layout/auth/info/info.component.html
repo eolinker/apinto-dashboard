@@ -1,7 +1,7 @@
 <div class="full-view">
   <eo-ng-feedback-alert
     *ngIf="authInfo.status && authInfo.status !== 'normal'"
-    [nzType]="authInfo.status === 'warning' ? 'warning' : 'error'"
+    [nzType]="authInfo.status === 'waring' ? 'warning' : 'error'"
     nzMessage="节点数超出授权"
     [nzDescription]="
       authInfo.refer || '节点数超出授权，请尽快更新授权或减少节点到授权数量内'

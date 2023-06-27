@@ -15,7 +15,7 @@ import { environment } from 'projects/core/src/environments/environment'
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
-  authStatus:'normal'|'warning'|'freeze' = 'normal'
+  authStatus:'normal'|'waring'|'freeze' = 'normal'
   constructor (
     private router: Router,
     private navigationService: EoNgNavigationService,
@@ -60,6 +60,7 @@ export class ErrorInterceptor implements HttpInterceptor {
   checkAuthStatus (event:HttpResponse<any>) {
     console.log(event.headers.get('X-Apinto-Auth-Status'))
     if (event.headers && event.headers.get('X-Apinto-Auth-Status') && this.authStatus !== event.headers.get('X-Apinto-Auth-Status')) {
+      this.authStatus = event.headers.get('X-Apinto-Auth-Status') as 'normal' | 'waring' | 'freeze'
       this.navigationService.reqCheckAuthStatus()
     }
   }
