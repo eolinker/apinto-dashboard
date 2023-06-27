@@ -5,6 +5,7 @@ import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { ApiService } from '../../../service/api.service'
 import { NzUploadChangeParam, NzUploadFile } from 'ng-zorro-antd/upload'
 import { EoNgNavigationService } from '../../../service/eo-ng-navigation.service'
+import { updateDate, version } from '../../../constant/app.config'
 
 @Component({
   selector: 'eo-ng-auth-info',
@@ -15,6 +16,17 @@ import { EoNgNavigationService } from '../../../service/eo-ng-navigation.service
         ol {
           list-style: none;
           padding-inline-start: 0;
+        }
+
+        .ant-alert-with-description .ant-alert-icon{
+          height:24px;
+        }
+
+        .ant-alert-with-description .ant-alert-message{
+          font-weight:bold;
+          color:unset;
+          font-size:14px;
+          margin-bottom:0px;
         }
     }
     `
@@ -29,11 +41,16 @@ export class AuthInfoComponent implements OnInit {
   showActivationInfo:boolean = true
   fileList: NzUploadFile[] = [];
   free:boolean = true
-  authInfo:{title:string, infos:Array<{key:string, value:string}>}
+  authInfo:{title:string, infos:Array<{key:string, value:string}>, status:'normal'|'warning'|'freeze', refer:string}
   = {
     title: '授权管理',
-    infos: []
+    infos: [],
+    status: 'normal',
+    refer: '节点数超出授权，请尽快更新授权或减少节点到授权数量内'
   }
+
+  version:string = version
+  updateDate:string = updateDate
 
   constructor (
     private message: EoNgFeedbackMessageService,
@@ -51,7 +68,7 @@ export class AuthInfoComponent implements OnInit {
 
   getInfo () {
     this.api.authGet('activation/info')
-      .subscribe((resp:{code:number, data:{infos:Array<{key:string, value:string}>, title:string}, msg:string}) => {
+      .subscribe((resp:{code:number, data:{infos:Array<{key:string, value:string}>, title:string, status:'normal'|'warning'|'freeze', refer:string}, msg:string}) => {
         if (resp.code === 0) {
           this.authInfo = resp.data
           this.navigationService.reqFlashBreadcrumb([{ title: '授权管理' }])
@@ -76,7 +93,7 @@ export class AuthInfoComponent implements OnInit {
     const formData = new FormData()
     formData.append('authFile', this.authFile as any)
     this.api.authPostWithFile(url, formData)
-      .subscribe((resp:{code:number, data:{infos:Array<{key:string, value:string}>, title:string}, msg:string}) => {
+      .subscribe((resp:{code:number, data:{infos:Array<{key:string, value:string}>, title:string, status:'normal'|'warning'|'freeze', refer:string}, msg:string}) => {
         if (resp.code === 0) {
           this.message.success(resp.msg || '激活成功！', { nzDuration: 1000 })
           if (!this.updateAuth) {

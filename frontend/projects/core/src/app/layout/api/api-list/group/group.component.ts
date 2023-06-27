@@ -1,5 +1,5 @@
 /* eslint-disable dot-notation */
-import { Component, ElementRef, OnInit, TemplateRef, ViewChild } from '@angular/core'
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core'
 import { NavigationEnd, Router } from '@angular/router'
 import { NzTreeNodeOptions, NzFormatEmitEvent, NzTreeNode } from 'ng-zorro-antd/tree'
 import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feedback'
@@ -7,14 +7,13 @@ import { ApiService } from 'projects/core/src/app/service/api.service'
 import { NzModalRef } from 'ng-zorro-antd/modal'
 import { Subscription } from 'rxjs'
 import { EoNgTreeDefaultComponent } from 'eo-ng-tree'
-import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { ApiGroup, EmptyHttpResponse } from 'projects/core/src/app/constant/type'
 import { BaseInfoService } from 'projects/core/src/app/service/base-info.service'
 import { MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
 import { RouterService } from '../../router.service'
 
 @Component({
-  selector: 'eo-ng-api-management',
+  selector: 'eo-ng-api-management-group',
   templateUrl: './group.component.html',
   styles: [
     `
@@ -40,24 +39,16 @@ import { RouterService } from '../../router.service'
     `
   ]
 })
-export class ApiManagementComponent implements OnInit {
-  @ViewChild('addGroupTpl', { read: TemplateRef, static: true }) addGroupTpl: TemplateRef<any> | string = '';
+export class ApiManagementGroupComponent implements OnInit {
   @ViewChild('groupComponent') groupComponent!: ElementRef
   @ViewChild('eoNgTreeDefault') eoNgTreeDefault!: EoNgTreeDefaultComponent
 
   public nodesList:NzTreeNodeOptions[] = []
-  public apiNodesMap:Map<string, any> = new Map()
-  public apiNodesList:Array<any> = []
   groupUuid:string = '' // 供右侧list页面用
   queryName:string = '' // 支持搜索目录名称和api名称
-  expandAll:boolean = false
-  firstLevelMap:Set<string> = new Set()
   showAll:boolean = true
-  searchValue:string = ''
   activatedNode?: NzTreeNode;
   editUuid:string = '' // 正在编辑的分组uuid
-
-  autoTips: Record<string, Record<string, string>> = defaultAutoTips
 
   groupModal: NzModalRef |undefined
   editParentUuid:string = ''
@@ -92,7 +83,7 @@ export class ApiManagementComponent implements OnInit {
     this.api.get('router/groups').subscribe((resp:{code:number, data:ApiGroup, msg:string}) => {
       if (resp.code === 0) {
         this.queryName = ''
-        this.nodesList = this.nodesTransfer(resp.data.root.groups, true)
+        this.nodesList = this.nodesTransfer(resp.data.root.groups)
         setTimeout(() => {
           if (flash && !this.editParentUuid && !this.editUuid) {
             this.groupScrollToBottom()
@@ -104,10 +95,7 @@ export class ApiManagementComponent implements OnInit {
 
   // 遍历目录列表，转化成tree组件需要的参数格式
   // 第一级目录不可以创建api，当root为true时，标志该目录为第一级，并放入firstLevelMap
-  nodesTransfer (data:any, root?:boolean): NzTreeNodeOptions[] {
-    if (root) {
-      this.firstLevelMap = new Set()
-    }
+  nodesTransfer (data:any): NzTreeNodeOptions[] {
     const res:NzTreeNodeOptions[] = []
     for (const index in data) {
       data[index].key = data[index].uuid
@@ -123,9 +111,6 @@ export class ApiManagementComponent implements OnInit {
         data[index].expanded = this.findExpandChildren(data[index].children)
       }
       res.push(data[index])
-      if (root) {
-        this.firstLevelMap.add(data[index].uuid)
-      }
     }
     return res
   }
