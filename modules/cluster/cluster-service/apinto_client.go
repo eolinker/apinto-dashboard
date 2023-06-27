@@ -2,8 +2,6 @@ package cluster_service
 
 import (
 	"context"
-	"sync"
-
 	"github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/modules/cluster"
 	"github.com/eolinker/eosc/common/bean"
@@ -12,22 +10,10 @@ import (
 type apintoClientService struct {
 	clusterNodeService cluster.IClusterNodeService
 	clusterService     cluster.IClusterService
-	lock               *sync.Mutex
-	clientMap          map[int]v1.IClient
-}
-
-func (c *apintoClientService) SetClient(namespaceId, clusterId int) {
-	c.lock.Lock()
-	defer c.lock.Unlock()
-	delete(c.clientMap, clusterId)
-	//重新上线
 }
 
 func newApintoClientService() cluster.IApintoClient {
-	s := &apintoClientService{
-		lock:      new(sync.Mutex),
-		clientMap: make(map[int]v1.IClient),
-	}
+	s := &apintoClientService{}
 	bean.Autowired(&s.clusterService)
 	bean.Autowired(&s.clusterNodeService)
 	//bean.Autowired(&s.resetOnline)
@@ -35,21 +21,7 @@ func newApintoClientService() cluster.IApintoClient {
 }
 
 func (c *apintoClientService) GetClient(ctx context.Context, clusterId int) (v1.IClient, error) {
-	c.lock.Lock()
-	defer c.lock.Unlock()
-	if v, ok := c.clientMap[clusterId]; ok {
-		return v, nil
-	}
-	client, err := c.getClient(ctx, clusterId)
-	if err != nil {
-		return nil, err
-	}
-	c.clientMap[clusterId] = client
-	return client, nil
-}
-
-func (c *apintoClientService) getClient(ctx context.Context, clusterId int) (v1.IClient, error) {
-	nodes, err := c.clusterNodeService.QueryByClusterIds(ctx, clusterId)
+	nodes, err := c.clusterNodeService.QueryByClusterId(ctx, clusterId)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +36,6 @@ func (c *apintoClientService) getClient(ctx context.Context, clusterId int) (v1.
 	newAdmin := make([]string, 0)
 	//newAdmin = append(newAdmin, cluster.Addr)
 	for _, node := range nodes {
-
 		for _, nodeAddr := range node.AdminAddrs {
 			//newNodeAddrSlice := strings.SplitN(strings.ReplaceAll(nodeAddr, "http://", ""), ".", 3)
 			//if len(newNodeAddrSlice) >= 2 {
