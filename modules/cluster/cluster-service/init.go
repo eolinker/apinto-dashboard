@@ -1,7 +1,9 @@
 package cluster_service
 
 import (
+	"github.com/eolinker/apinto-dashboard/cache"
 	"github.com/eolinker/eosc/common/bean"
+	"github.com/go-redis/redis/v8"
 )
 
 func init() {
@@ -25,4 +27,9 @@ func init() {
 	bean.Injection(&clusterCertificate)
 	bean.Injection(&clusterNode)
 	//bean.Injection(&clusterConfig)
+
+	cache.RegisterCacheInitHandler(func(client *redis.ClusterClient) {
+		nodeCache := newINodeCache(client)
+		bean.Injection(&nodeCache)
+	})
 }
