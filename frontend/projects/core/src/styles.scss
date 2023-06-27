@@ -659,6 +659,13 @@ eo-ng-tree-default:not(.ant-select-tree) {
   }
 }
 
+.ant-pagination-options-quick-jumper input:hover,
+.ant-pagination-options-quick-jumper input-focused,
+.ant-pagination-options-quick-jumper input:focus {
+  border-color: var(--primary-color);
+  box-shadow: none;
+}
+
 .ant-table-pagination.ant-pagination {
   box-shadow: 0 -2px 2px -2px var(--border-color);
   padding-top: 9px;
