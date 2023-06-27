@@ -1,9 +1,11 @@
 package namespace_model
 
 import (
-	"github.com/eolinker/apinto-dashboard/modules/namespace/namespace-entry"
+	"time"
 )
 
 type Namespace struct {
-	*namespace_entry.Namespace
+	Id         int
+	Name       string
+	CreateTime time.Time
 }
