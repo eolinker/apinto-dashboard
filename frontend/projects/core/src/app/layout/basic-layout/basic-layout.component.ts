@@ -53,7 +53,7 @@ export class BasicLayoutComponent implements OnInit {
   userAvatar:boolean = false // 是否显示用户头像，取决于是否开启用户权限插件
   isBusiness:boolean = environment.isBusiness
 
-  authStatus:'normal' | 'warning' | 'freeze' = 'normal'
+  authStatus:'normal' | 'waring' | 'freeze' = 'normal'
   btnLabel:string = ''
   btnTooltip:string = ''
 
@@ -62,6 +62,7 @@ export class BasicLayoutComponent implements OnInit {
   private subscription3: Subscription = new Subscription()
   private subscription4: Subscription = new Subscription()
   private subscription5: Subscription = new Subscription()
+  private subAuthCheck: Subscription = new Subscription()
 
   constructor (
     private router: Router,
@@ -120,6 +121,7 @@ export class BasicLayoutComponent implements OnInit {
     this.subscription3.unsubscribe()
     this.subscription4.unsubscribe()
     this.subscription5.unsubscribe()
+    this.subAuthCheck.unsubscribe()
   }
 
   clickIframeBreadcrumb (url:string) {
@@ -151,7 +153,8 @@ export class BasicLayoutComponent implements OnInit {
   }
 
   checkAuthStatus () {
-    this.api.authGet('activation/check').subscribe((resp:{code:number, msg:string, data:{status:'normal'|'warning'|'freeze', prompt:string, label:string}}) => {
+    this.subAuthCheck.unsubscribe()
+    this.subAuthCheck = this.api.authGet('activation/check').subscribe((resp:{code:number, msg:string, data:{status:'normal'|'waring'|'freeze', prompt:string, label:string}}) => {
       if (resp.code === 0) {
         if (resp.data.status === 'freeze') {
           this.router.navigate(['/', 'auth-info'])

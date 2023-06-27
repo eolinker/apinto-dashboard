@@ -74,9 +74,6 @@ export class ApiManagementEditGroupComponent implements OnInit {
     private api:ApiService,
     private fb: UntypedFormBuilder,
     private router:Router) {
-    this.validateApiGroupForm = this.fb.group({
-      groupName: [this.groupName, [Validators.required]]
-    })
   }
 
   ngOnInit (): void {

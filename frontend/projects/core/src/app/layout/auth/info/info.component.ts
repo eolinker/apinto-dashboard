@@ -41,7 +41,7 @@ export class AuthInfoComponent implements OnInit {
   showActivationInfo:boolean = true
   fileList: NzUploadFile[] = [];
   free:boolean = true
-  authInfo:{title:string, infos:Array<{key:string, value:string}>, status:'normal'|'warning'|'freeze', refer:string}
+  authInfo:{title:string, infos:Array<{key:string, value:string}>, status:'normal'|'waring'|'freeze', refer:string}
   = {
     title: '授权管理',
     infos: [],
@@ -68,7 +68,7 @@ export class AuthInfoComponent implements OnInit {
 
   getInfo () {
     this.api.authGet('activation/info')
-      .subscribe((resp:{code:number, data:{infos:Array<{key:string, value:string}>, title:string, status:'normal'|'warning'|'freeze', refer:string}, msg:string}) => {
+      .subscribe((resp:{code:number, data:{infos:Array<{key:string, value:string}>, title:string, status:'normal'|'waring'|'freeze', refer:string}, msg:string}) => {
         if (resp.code === 0) {
           this.authInfo = resp.data
           this.navigationService.reqFlashBreadcrumb([{ title: '授权管理' }])
@@ -93,7 +93,7 @@ export class AuthInfoComponent implements OnInit {
     const formData = new FormData()
     formData.append('authFile', this.authFile as any)
     this.api.authPostWithFile(url, formData)
-      .subscribe((resp:{code:number, data:{infos:Array<{key:string, value:string}>, title:string, status:'normal'|'warning'|'freeze', refer:string}, msg:string}) => {
+      .subscribe((resp:{code:number, data:{infos:Array<{key:string, value:string}>, title:string, status:'normal'|'waring'|'freeze', refer:string}, msg:string}) => {
         if (resp.code === 0) {
           this.message.success(resp.msg || '激活成功！', { nzDuration: 1000 })
           if (!this.updateAuth) {

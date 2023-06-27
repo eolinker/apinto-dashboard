@@ -30,6 +30,7 @@ import { routes } from '../../api-routing.module'
 import { EoNgDropdownModule } from 'eo-ng-dropdown'
 import { ApiManagementGroupComponent } from './group.component'
 import { NzHighlightModule } from 'ng-zorro-antd/core/highlight'
+import { NzTreeNode } from 'ng-zorro-antd/tree'
 
 export class MockElementRef extends ElementRef {
   constructor () { super(null) }
@@ -171,21 +172,19 @@ describe('#init ApiManagementGroupComponent', () => {
     const spyModalService = jest.spyOn(component.modalService, 'create')
     const spyMenuList = jest.spyOn(component, 'getMenuList')
     const spyViewAllApis = jest.spyOn(component, 'viewAllApis')
+
+    const spyScrollToDom = jest.spyOn(component, 'groupScrollToDom')
     // delete a group when view all apis
     expect(component).toBeTruthy()
     expect(component.nodesList).toEqual([])
     expect(component.showAll).toEqual(true)
     expect(spyModalService).not.toHaveBeenCalled()
-    // @ts-ignore
-    jest.replaceProperty(fixture.debugElement.injector.get(BaseInfoService), '_allParams', {
-      apiGroupId: 'mockApiGroupId'
-    })
     component.queryName = 'test'
 
     component.ngOnInit()
     fixture.detectChanges()
-    tick(500)
 
+    tick(500)
     expect(component.showAll).toEqual(true)
     expect(component.groupModal).toBeUndefined()
     expect(spyModalService).not.toHaveBeenCalled()
@@ -199,17 +198,133 @@ describe('#init ApiManagementGroupComponent', () => {
     expect(spyDeleteApiService).not.toHaveBeenCalled()
     expect(spyMenuList).toHaveBeenCalledTimes(1)
     expect(spyViewAllApis).not.toHaveBeenCalled()
+    expect(spyScrollToDom).toHaveBeenCalled()
+    expect(component.groupUuid).toBeUndefined()
 
     component.deleteGroup(component.nodesList[1].key, component.nodesList[1].title)
     fixture.detectChanges()
+    tick(100)
 
     expect(component.showAll).toEqual(true)
     expect(spyDeleteApiService).toHaveBeenCalled()
     expect(spyMenuList).toHaveBeenCalledTimes(2)
     expect(spyViewAllApis).not.toHaveBeenCalled()
-    expect(document.getElementsByTagName('eo-ng-tree-default-node')[0].checkVisibility).toEqual(true)
-    // delete selected group
+    expect(spyScrollToDom).toHaveBeenCalledTimes(2)
+    expect(component.groupUuid).toBeUndefined()
+
     // delete other group when selected one
+    const node = new NzTreeNode(component.nodesList[0])
+    node.isExpanded = false
+    node.origin = component.nodesList[0]
+    component.activeNode({ eventName: 'click', node, keys: [component.nodesList[0].key] })
+    fixture.detectChanges()
+    component.groupUuid = component.nodesList[0].key
+    component.deleteGroup(component.nodesList[1].key, 'test')
+    fixture.detectChanges()
+    tick(100)
+
+    expect(component.showAll).toEqual(false)
+    expect(spyDeleteApiService).toHaveBeenCalledTimes(2)
+    expect(spyMenuList).toHaveBeenCalledTimes(3)
+    expect(spyViewAllApis).not.toHaveBeenCalled()
+    expect(spyScrollToDom).toHaveBeenCalledTimes(3)
+    expect(component.groupUuid).toEqual(component.nodesList[0].key)
+
+    // delete selected group
+    const node2 = new NzTreeNode(component.nodesList[1])
+    node2.isExpanded = false
+    node2.origin = component.nodesList[1]
+    component.activeNode({ eventName: 'click', node: node2, keys: [component.nodesList[1].key] })
+    fixture.detectChanges()
+    component.groupUuid = component.nodesList[1].key
+    // mock new router group after deleting nodesList[1]
+    const MockRouterGroups2 = { ...MockRouterGroups }
+    MockRouterGroups2.data.root.groups.splice(1, 1)
+    spyApiService = jest.spyOn(httpCommonService, 'get').mockImplementation(
+      (...args) => {
+        switch (args[0]) {
+          case 'router/groups':
+            return of(MockRouterGroups2)
+          default:
+            return of(MockEmptySuccessResponse)
+        }
+      }
+    )
+    component.deleteGroup(component.nodesList[1].key, 'test')
+    fixture.detectChanges()
+    tick(100)
+
+    expect(component.selectGroupExist).toEqual(false)
+    expect(component.showAll).toEqual(true)
+    expect(spyDeleteApiService).toHaveBeenCalledTimes(3)
+    expect(spyMenuList).toHaveBeenCalledTimes(4)
+    expect(spyViewAllApis).toHaveBeenCalled()
+    expect(spyScrollToDom).toHaveBeenCalledTimes(4)
+    expect(component.groupUuid).toBeUndefined()
+
     discardPeriodicTasks()
   }))
+
+  it('test viewAllApis', fakeAsync(() => {
+    expect(component).toBeTruthy()
+    expect(component.showAll).toEqual(true)
+    // @ts-ignore
+    jest.replaceProperty(fixture.debugElement.injector.get(BaseInfoService), '_allParams', {
+      apiGroupId: 'mockApiGroupId'
+    })
+    component.ngOnInit()
+    fixture.detectChanges()
+    tick(500)
+
+    expect(component.groupUuid).toEqual('mockApiGroupId')
+    const node = new NzTreeNode({ title: 'test', key: 'test' })
+    node.isSelected = true
+
+    const node2 = new NzTreeNode({ title: 'test', key: 'test' })
+    node2.isSelected = true
+
+    jest.spyOn(component.eoNgTreeDefault, 'getTreeNodeByKey').mockReturnValue(node)
+
+    component.activatedNode = node2
+    component.viewAllApis()
+    fixture.detectChanges()
+
+    expect(node.isSelected).toEqual(false)
+    expect(node2.isSelected).toEqual(false)
+    expect(component.showAll).toEqual(true)
+
+    component.showAll = false
+    component.viewAllApis()
+    fixture.detectChanges()
+
+    expect(node.isSelected).toEqual(false)
+    expect(node2.isSelected).toEqual(false)
+    expect(component.showAll).toEqual(true)
+
+    discardPeriodicTasks()
+  }))
+
+  it('test addApi', () => {
+    expect(component).toBeTruthy()
+    // @ts-ignore
+    const spyRouterChange = jest.spyOn(component.router, 'navigate')
+    expect(spyRouterChange).not.toHaveBeenCalled()
+
+    component.addApi('testUuid', 'http')
+    expect(spyRouterChange).toHaveBeenCalledWith(['/', 'router', 'api', 'create', 'testUuid'])
+
+    component.addApi('testUuid2', 'websocket')
+    expect(spyRouterChange).toHaveBeenCalledWith(['/', 'router', 'api', 'create-ws', 'testUuid2'])
+  })
+
+  it('test ngOnDestroy', () => {
+    expect(component).toBeTruthy()
+    // @ts-ignore
+    const spyOnSubscription = jest.spyOn(component.subscription, 'unsubscribe')
+    expect(spyOnSubscription).not.toHaveBeenCalled()
+
+    component.ngOnDestroy()
+
+    expect(spyOnSubscription).toHaveBeenCalled()
+  })
 })
