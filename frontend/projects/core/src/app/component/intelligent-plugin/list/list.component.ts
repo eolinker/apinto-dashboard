@@ -43,6 +43,7 @@ export class EoIntelligentPluginListComponent implements OnInit {
   modalRef:NzModalRef|undefined
   statusMap:{[k:string]:any} = {}
   tableLoading:boolean = true
+  tableStatusLoading:boolean = true
   subscription: Subscription = new Subscription()
   debounce = debounce
 
@@ -74,7 +75,6 @@ export class EoIntelligentPluginListComponent implements OnInit {
         this.renderSchema = {} // 动态渲染数据，是json schema
         this.modalRef = undefined
         this.statusMap = {}
-        this.tableLoading = true
         this.getClusters()
         this.getRender()
         this.getTableData()
@@ -91,6 +91,7 @@ export class EoIntelligentPluginListComponent implements OnInit {
 
   getTableData = () => {
     this.tableLoading = true
+    this.tableStatusLoading = true
     // 表格内的其他数据与状态数据是分别获取的，如果list先返回，需要先展示除了状态数据以外的其他数据
     forkJoin([this.api.get(`dynamic/${this.moduleName}/list`, {
       page: this.tableData.pageNum,
@@ -153,6 +154,7 @@ export class EoIntelligentPluginListComponent implements OnInit {
     this.driverOptions = data.drivers?.map((driver:DynamicDriverData) => {
       return { label: driver.title, value: driver.name }
     }) || []
+    this.tableLoading = false
   }
 
   refreshTableData (tableData:Array<{[k:string]:any}>, statusData:DynamicListStatus) {
@@ -161,7 +163,7 @@ export class EoIntelligentPluginListComponent implements OnInit {
         return { ...item, ...statusData[item.id] }
       })
       // 将table的loding取消
-      this.tableLoading = false
+      this.tableStatusLoading = false
     }
   }
 
@@ -176,7 +178,7 @@ export class EoIntelligentPluginListComponent implements OnInit {
           {
             title: '状态',
             showFn: () => {
-              return this.tableLoading
+              return this.tableStatusLoading
             }
           }
         )
@@ -185,7 +187,7 @@ export class EoIntelligentPluginListComponent implements OnInit {
           {
             title: this.loadingTpl,
             showFn: (item:any) => {
-              return item.id === this.tableData.data[0].id && this.tableLoading
+              return item.id === this.tableData.data[0].id && this.tableStatusLoading
             },
             seRowspan: () => {
               return this.tableData.data.length
@@ -215,7 +217,7 @@ export class EoIntelligentPluginListComponent implements OnInit {
           ...(field.attr === 'status'
             ? {
                 showFn: () => {
-                  return !this.tableLoading
+                  return !this.tableStatusLoading
                 }
               }
             : {})
@@ -231,7 +233,7 @@ export class EoIntelligentPluginListComponent implements OnInit {
           ...(field.attr === 'status'
             ? {
                 showFn: () => {
-                  return !this.tableLoading
+                  return !this.tableStatusLoading
                 }
               }
             : {})
