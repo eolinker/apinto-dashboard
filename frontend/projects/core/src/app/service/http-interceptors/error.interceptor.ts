@@ -58,7 +58,6 @@ export class ErrorInterceptor implements HttpInterceptor {
   }
 
   checkAuthStatus (event:HttpResponse<any>) {
-    console.log(event.headers.get('X-Apinto-Auth-Status'))
     if (event.headers && event.headers.get('X-Apinto-Auth-Status') && this.authStatus !== event.headers.get('X-Apinto-Auth-Status')) {
       this.authStatus = event.headers.get('X-Apinto-Auth-Status') as 'normal' | 'waring' | 'freeze'
       this.navigationService.reqCheckAuthStatus()
