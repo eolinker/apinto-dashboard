@@ -16,7 +16,6 @@ const (
 
 type IApintoClient interface {
 	GetClient(ctx context.Context, clusterId int) (v1.IClient, error)
-	SetClient(namespace, clusterId int)
 }
 type IClusterCertificateService interface {
 	Insert(ctx context.Context, operator, namespaceId int, clusterName, key, pem string) error
@@ -50,7 +49,9 @@ type IClusterService interface {
 type IClusterNodeService interface {
 	QueryList(ctx context.Context, namespaceId int, clusterName string) ([]*cluster_model.ClusterNode, bool, error)
 	List(ctx context.Context, namespaceId int, clusterName string) ([]*cluster_model.Node, error)
-	QueryByClusterIds(ctx context.Context, clusterIds ...int) ([]*cluster_model.Node, error)
+	QueryByClusterId(ctx context.Context, id int) ([]*cluster_model.Node, error)
+	QueryAllCluster(ctx context.Context) ([]*cluster_model.Node, error)
+	QueryAdminAddrByClusterId(ctx context.Context, id int) ([]string, error)
 	Reset(ctx context.Context, namespaceId, userId int, clusterName, clusterAddr, source string) error
 	Update(ctx context.Context, namespaceId int, clusterName string) error
 	Delete(ctx context.Context, namespaceId int, clusterId int) error
