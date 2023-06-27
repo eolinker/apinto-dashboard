@@ -10,7 +10,7 @@ import { saveAs } from 'file-saver'
     <eo-ng-codebox
         #codeboxRef
         [code]="log"
-        mode="sql"
+        mode="toml"
         theme="monokai"
         [nzIsResizeHeight]="true"
         [oprBtns]="[]"
@@ -45,7 +45,7 @@ export class EoNgLogRetrievalTailComponent {
   }
 
   closeConnect () {
-    this.log += '\n...已中断连接...\n'
+    this.log += '\n[...已中断连接...]\n'
     this.connected = false
     this.wsRef?.ws.close()
     this.subscription.unsubscribe()
@@ -56,20 +56,18 @@ export class EoNgLogRetrievalTailComponent {
   }
 
   connectWs (reConnect?:boolean) {
-    // if (this.tailKey) {
-    //   this.url = `ws://${window.location.host}/api/log/tail/${this.tailKey}`
-    // }
-
     this.wsRef = this.ws.create(this.url)
     this.connected = true
     if (this.wsRef && reConnect) {
-      this.log += '\n...已恢复连接...\n\n'
+      this.log += '\n[...已恢复连接...]\n\n'
     }
     this.subscription = this.wsRef.wsRef.subscribe({
       next: (resp:any) => {
-        this.log += resp
-        this.lineCount++
-        this.tail && this.codeboxRef?.aceEditor.renderer.scrollToLine(this.lineCount)
+        if (resp !== 'connected') {
+          this.log += resp
+          this.lineCount++
+          this.tail && this.codeboxRef?.aceEditor.renderer.scrollToLine(this.lineCount)
+        }
       },
       error: (e:Event) => {
         console.log('ws连接出现错误：', e)
