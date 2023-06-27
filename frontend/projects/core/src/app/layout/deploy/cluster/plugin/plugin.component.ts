@@ -38,7 +38,7 @@ export class DeployClusterPluginComponent implements OnInit {
   readonly nowUrl:string = this.router.routerState.snapshot.url
    pluginsList: ClusterPluginItem[] = []
 
-  drawerRef:NzModalRef | undefined
+  modalRef:NzModalRef | undefined
   nzDisabled:boolean = false
 
   pluginsTableHeadName: THEAD_TYPE[]= [...DeployClusterPluginThead]
@@ -115,7 +115,7 @@ export class DeployClusterPluginComponent implements OnInit {
     e?.stopPropagation()
     switch (usage) {
       case 'editConfig':
-        this.drawerRef = this.modalService.create({
+        this.modalRef = this.modalService.create({
           nzTitle: '编辑配置',
           nzWidth: MODAL_NORMAL_SIZE,
           nzContent: DeployClusterPluginConfigFormComponent,
@@ -129,7 +129,7 @@ export class DeployClusterPluginComponent implements OnInit {
         })
         break
       case 'operateRecords':
-        this.drawerRef = this.modalService.create({
+        this.modalRef = this.modalService.create({
           nzTitle: '更改历史',
           nzWidth: MODAL_NORMAL_SIZE,
           nzContent: DeployClusterPluginHistoryChangeComponent,
@@ -141,7 +141,7 @@ export class DeployClusterPluginComponent implements OnInit {
         })
         break
       case 'publishRecords':
-        this.drawerRef = this.modalService.create({
+        this.modalRef = this.modalService.create({
           nzTitle: '发布历史',
           nzWidth: MODAL_NORMAL_SIZE,
           nzContent: DeployClusterPluginHistoryPublishComponent,
@@ -154,7 +154,7 @@ export class DeployClusterPluginComponent implements OnInit {
         break
 
       case 'publish':
-        this.drawerRef = this.modalService.create({
+        this.modalRef = this.modalService.create({
           nzTitle: '发布',
           nzWidth: MODAL_NORMAL_SIZE,
           nzContent: DeployClusterPluginPublishComponent,
@@ -176,7 +176,7 @@ export class DeployClusterPluginComponent implements OnInit {
 
   closeModal = (fresh?:boolean) => {
     fresh && this.getPluginsList()
-    this.drawerRef?.close()
+    this.modalRef?.close()
   }
 
   copyCallback () {

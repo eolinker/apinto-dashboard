@@ -59,7 +59,7 @@ export class AuditLogListComponent implements OnInit {
   date:Array<Date> = [];
   listOfType:SelectOption[] = [...auditQueryStatusTypeList]
   listOfKind:SelectOption[] = []
-  drawerRef: NzModalRef | undefined
+  modalRef: NzModalRef | undefined
   searchData:{keyword:string, operateType:string, kind:string, start:Date|null, end:Date|null, pageSize:number, pageNum:number, total:number, [key:string]:any} = {
     keyword: '',
     operateType: '',
@@ -126,7 +126,7 @@ export class AuditLogListComponent implements OnInit {
   }
 
   openDrawer (auditLogId:string):void {
-    this.drawerRef = this.modalService.create({
+    this.modalRef = this.modalService.create({
       nzTitle: '日志详情',
       nzWidth: MODAL_NORMAL_SIZE,
       nzContent: AuditLogDetailComponent,
