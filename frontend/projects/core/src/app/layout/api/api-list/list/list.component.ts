@@ -161,7 +161,6 @@ export class ApiManagementListComponent implements OnInit {
 
   changeApisSet (item: {uuid:string, [k:string]:any} | boolean, type?:string) {
     if (type === 'all') {
-      console.log(item, !!item)
       if (item) {
         for (const index in this.apisForm.apis) {
           this.apisSet.add(this.apisForm.apis[index].uuid)
