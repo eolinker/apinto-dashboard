@@ -162,7 +162,54 @@ describe('#init ApiManagementGroupComponent', () => {
     eventsSub.next(new NavigationEnd(1, 'home/', 'home/'))
     fixture.detectChanges()
 
-    // expect(component.groupUuid).toEqual('uuid2')
+    expect(component.groupUuid).toEqual('uuid2')
+    discardPeriodicTasks()
+  }))
+
+  it('test deleteGroup', fakeAsync(() => {
+    // @ts-ignore
+    const spyModalService = jest.spyOn(component.modalService, 'create')
+    const spyMenuList = jest.spyOn(component, 'getMenuList')
+    const spyViewAllApis = jest.spyOn(component, 'viewAllApis')
+    // delete a group when view all apis
+    expect(component).toBeTruthy()
+    expect(component.nodesList).toEqual([])
+    expect(component.showAll).toEqual(true)
+    expect(spyModalService).not.toHaveBeenCalled()
+    // @ts-ignore
+    jest.replaceProperty(fixture.debugElement.injector.get(BaseInfoService), '_allParams', {
+      apiGroupId: 'mockApiGroupId'
+    })
+    component.queryName = 'test'
+
+    component.ngOnInit()
+    fixture.detectChanges()
+    tick(500)
+
+    expect(component.showAll).toEqual(true)
+    expect(component.groupModal).toBeUndefined()
+    expect(spyModalService).not.toHaveBeenCalled()
+
+    component.deleteGroupModal('test', 'uuid')
+    fixture.detectChanges()
+
+    expect(component.showAll).toEqual(true)
+    expect(component.groupModal).not.toBeUndefined()
+    expect(spyModalService).toHaveBeenCalled()
+    expect(spyDeleteApiService).not.toHaveBeenCalled()
+    expect(spyMenuList).toHaveBeenCalledTimes(1)
+    expect(spyViewAllApis).not.toHaveBeenCalled()
+
+    component.deleteGroup(component.nodesList[1].key, component.nodesList[1].title)
+    fixture.detectChanges()
+
+    expect(component.showAll).toEqual(true)
+    expect(spyDeleteApiService).toHaveBeenCalled()
+    expect(spyMenuList).toHaveBeenCalledTimes(2)
+    expect(spyViewAllApis).not.toHaveBeenCalled()
+    expect(document.getElementsByTagName('eo-ng-tree-default-node')[0].checkVisibility).toEqual(true)
+    // delete selected group
+    // delete other group when selected one
     discardPeriodicTasks()
   }))
 })

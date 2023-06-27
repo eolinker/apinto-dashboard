@@ -88,6 +88,7 @@ export class LogRetrievalComponent {
   accGroupLoading:boolean = false
   modalRef:NzModalRef|undefined
   start:boolean = false
+
   constructor (private api:ApiService, private modalService:EoNgFeedbackModalService, private navigationService:EoNgNavigationService) {
 
   }
@@ -164,7 +165,6 @@ export class LogRetrievalComponent {
     const newFiles =
         files.sort((a:LogFileData, b:LogFileData) => ((b.file + '').localeCompare(a.file + '')))
           .map((x:LogFileData) => {
-            console.log(x.mod, moment(x.mod).format('YYYY-MM-DD HH:mm:ss'))
             x.mod = moment(x.mod).format('YYYY-MM-DD HH:mm:ss')
             return x
           })
@@ -188,9 +188,5 @@ export class LogRetrievalComponent {
 
   downloadLog (file:LogFileData) {
     window.location.href = `api/log/download/${file.key}`
-  }
-
-  show (val:any) {
-    console.log(val)
   }
 }
