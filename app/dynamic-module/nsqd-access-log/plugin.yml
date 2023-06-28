@@ -163,7 +163,7 @@ define:  # 动态模块定义
               },
               "name": "auth_secret",
               "x-index": 3,
-              "required": true
+              "required": false
             },
             "type": {
               "title": "输出格式",
