@@ -8,6 +8,7 @@ const (
 	CodeLoginPwdErr         = -5 //密码错误
 	CodeLoginCodeErr        = -6 //验证校验失败
 	CodeCertExceedErr       = -7 //证书过期
+	CodeCertFreeze          = -8
 )
 
 type Result struct {
