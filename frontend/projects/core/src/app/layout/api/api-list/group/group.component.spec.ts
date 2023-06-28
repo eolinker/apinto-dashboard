@@ -1,95 +1,69 @@
-/*
- * @Author: MengjieYang yangmengjie@eolink.com
- * @Date: 2022-08-14 22:56:33
- * @LastEditors: MengjieYang yangmengjie@eolink.com
- * @LastEditTime: 2022-09-20 22:02:26
- * @FilePath: /apinto/src/app/layout/upstream/service-discovery-content/service-discovery-content.component.spec.ts
- * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
- */
-import { ComponentFixture, fakeAsync, TestBed } from '@angular/core/testing'
-import { NzOutletModule } from 'ng-zorro-antd/core/outlet'
-import { NzDrawerModule } from 'ng-zorro-antd/drawer'
-import { HttpClientModule } from '@angular/common/http'
-import { ApiService, API_URL } from 'projects/core/src/app/service/api.service'
-import { RouterModule } from '@angular/router'
-import { ElementRef, Renderer2, ChangeDetectorRef } from '@angular/core'
+import { ComponentFixture, TestBed, discardPeriodicTasks, fakeAsync, tick } from '@angular/core/testing'
+import { ComponentModule } from 'projects/core/src/app/component/component.module'
 import { APP_BASE_HREF } from '@angular/common'
+import { HttpClientModule } from '@angular/common/http'
+import { ElementRef, Renderer2, ChangeDetectorRef } from '@angular/core'
+import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { NoopAnimationsModule } from '@angular/platform-browser/animations'
-import { NzNoAnimationModule } from 'ng-zorro-antd/core/no-animation'
-import { NzOverlayModule } from 'ng-zorro-antd/core/overlay'
-import { environment } from 'projects/core/src/environments/environment'
-import { BidiModule } from '@angular/cdk/bidi'
+import { NavigationEnd, Router, RouterModule } from '@angular/router'
 import { Overlay } from '@angular/cdk/overlay'
-import { of } from 'rxjs'
-import { FormsModule } from '@angular/forms'
-import { EoNgFeedbackModalService, EoNgFeedbackMessageService } from 'eo-ng-feedback'
+import { EoNgFeedbackMessageService, EoNgFeedbackModalModule, EoNgFeedbackModalService, EoNgFeedbackTooltipModule } from 'eo-ng-feedback'
+import { NzNoAnimationModule } from 'ng-zorro-antd/core/no-animation'
+import { NzOutletModule } from 'ng-zorro-antd/core/outlet'
+import { NzOverlayModule } from 'ng-zorro-antd/core/overlay'
+import { BidiModule } from '@angular/cdk/bidi'
+import { MockRenderer, MockMessageService, MockEnsureService, MockEmptySuccessResponse, MockRouterGroups } from 'projects/core/src/app/constant/spec-test'
+import { BehaviorSubject, of } from 'rxjs'
+import { API_URL, ApiService } from 'projects/core/src/app/service/api.service'
+import { environment } from 'projects/core/src/environments/environment'
+import { NzFormModule } from 'ng-zorro-antd/form'
+import { EoNgInputModule } from 'eo-ng-input'
+import { EoNgTreeModule } from 'eo-ng-tree'
+import { EoNgButtonModule } from 'eo-ng-button'
+import { EoNgSwitchModule } from 'eo-ng-switch'
+import { EoNgCheckboxModule } from 'eo-ng-checkbox'
+import { EoNgApintoTableModule } from 'projects/eo-ng-apinto-table/src/public-api'
 import { EoNgSelectModule } from 'eo-ng-select'
-import { LayoutModule } from 'projects/core/src/app/layout/layout.module'
-import { EoNgTableModule } from 'eo-ng-table'
-import { ApiMessageComponent } from '../message/message.component'
-import { ApiManagementListComponent } from '../list/list.component'
-import { ApiPublishComponent } from '../publish/publish.component'
-import { ApiManagementComponent } from './group.component'
+import { BaseInfoService } from 'projects/core/src/app/service/base-info.service'
+import { LayoutModule } from '../../../layout.module'
+import { routes } from '../../api-routing.module'
+import { EoNgDropdownModule } from 'eo-ng-dropdown'
+import { ApiManagementGroupComponent } from './group.component'
+import { NzHighlightModule } from 'ng-zorro-antd/core/highlight'
+import { NzTreeNode } from 'ng-zorro-antd/tree'
 
-class MockRenderer {
-  removeAttribute (element: any, cssClass: string) {
-    return cssClass + 'is removed from' + element
-  }
+export class MockElementRef extends ElementRef {
+  constructor () { super(null) }
 }
 
-class MockMessageService {
-  success () {
-    return 'success'
+describe('#init ApiManagementGroupComponent', () => {
+  let component:ApiManagementGroupComponent
+  let fixture: ComponentFixture<ApiManagementGroupComponent>
+  let httpCommonService:any
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  let spyDeleteApiService:jest.SpyInstance<any>
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  let spyApiService:jest.SpyInstance<any>
+  const eventsSub = new BehaviorSubject<any>(null)
+  const routerStub = {
+    events: eventsSub,
+    url: '',
+    navigate: (...args:Array<string>) => {
+      eventsSub.next(new NavigationEnd(1, args.join('/'), args.join('/')))
+    }
   }
-
-  error () {
-    return 'error'
-  }
-}
-
-class MockEnsureService {
-  create () {
-    return 'modal is create'
-  }
-}
-
-jest.mock('uuid', () => {
-  return {
-    v4: () => 123456789
-  }
-})
-
-describe('ApiManagementComponent test as editPage is false', () => {
-  let component: ApiManagementComponent
-  let fixture: ComponentFixture<ApiManagementComponent>
-  class MockElementRef extends ElementRef {
-    constructor () { super(null) }
-  }
+  global.structuredClone = (val:any) => JSON.parse(JSON.stringify(val))
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        NzOverlayModule, FormsModule, EoNgSelectModule, LayoutModule,
-        BidiModule, NoopAnimationsModule, NzNoAnimationModule,
-        NzDrawerModule, NzOutletModule, HttpClientModule,
-        EoNgTableModule,
-        RouterModule.forRoot([
-          {
-            path: '',
-            component: ApiManagementListComponent
-          },
-          {
-            path: 'message',
-            component: ApiMessageComponent
-          },
-          {
-            path: 'publish',
-            component: ApiPublishComponent
-          }
-        ]
-        )
+        NzOverlayModule, FormsModule, ReactiveFormsModule, ComponentModule, LayoutModule,
+        BidiModule, NoopAnimationsModule, NzNoAnimationModule, NzOutletModule, HttpClientModule,
+        RouterModule.forRoot(routes), NzFormModule, EoNgInputModule, EoNgTreeModule, EoNgButtonModule,
+        EoNgSwitchModule, EoNgCheckboxModule, EoNgApintoTableModule, EoNgSelectModule, EoNgFeedbackModalModule,
+        EoNgFeedbackTooltipModule, EoNgDropdownModule, NzHighlightModule
       ],
-      declarations: [ApiManagementComponent
+      declarations: [ApiManagementGroupComponent
       ],
       providers: [
         { provide: Overlay, useClass: Overlay },
@@ -99,461 +73,258 @@ describe('ApiManagementComponent test as editPage is false', () => {
         { provide: Renderer2, useClass: MockRenderer },
         { provide: EoNgFeedbackMessageService, useClass: MockMessageService },
         { provide: EoNgFeedbackModalService, useClass: MockEnsureService },
-        { provide: ChangeDetectorRef, useClass: ChangeDetectorRef }
-      ]
+        { provide: ChangeDetectorRef, useClass: ChangeDetectorRef },
+        { provide: Router, useValue: routerStub }
+      ],
+      teardown: { destroyAfterEach: false }
     }).compileComponents()
 
-    fixture = TestBed.createComponent(ApiManagementComponent)
+    fixture = TestBed.createComponent(ApiManagementGroupComponent)
     component = fixture.componentInstance
+
     fixture.detectChanges()
-  })
-  it('should create', () => {
-    expect(component).toBeTruthy()
+
+    httpCommonService = fixture.debugElement.injector.get(ApiService)
+
+    spyApiService = jest.spyOn(httpCommonService, 'get').mockImplementation(
+      (...args) => {
+        switch (args[0]) {
+          case 'router/groups':
+            return of(MockRouterGroups)
+          default:
+            return of(MockEmptySuccessResponse)
+        }
+      }
+    )
+
+    spyDeleteApiService = jest.spyOn(httpCommonService, 'delete').mockReturnValue(
+      of(MockEmptySuccessResponse)
+    )
   })
 
-  it('ngOnInit should call getMenuList() and initial folderMenus', () => {
-    const spyGetMenuList = jest.spyOn(component, 'getMenuList')
-    expect(spyGetMenuList).not.toHaveBeenCalled()
-    component.floderMenus = []
-    component.fileMenus = []
+  it('should create and init component', fakeAsync(() => {
+    expect(component).toBeTruthy()
+    expect(component.nodesList).toEqual([])
+    expect(component.showAll).toEqual(true)
+    // @ts-ignore
+    jest.replaceProperty(fixture.debugElement.injector.get(BaseInfoService), '_allParams', {
+      apiGroupId: 'mockApiGroupId'
+    })
+    component.queryName = 'test'
     component.ngOnInit()
     fixture.detectChanges()
-    expect(spyGetMenuList).toHaveBeenCalledTimes(1)
-    expect(component.floderMenus).not.toStrictEqual([])
-    expect(component.fileMenus).not.toStrictEqual([])
-  })
-
-  it('getMenuList with success return', () => {
-    const httpCommonService = fixture.debugElement.injector.get(ApiService)
-    const spyService = jest.spyOn(httpCommonService, 'get').mockReturnValue(of({ code: 0, data: { api: { groupUuid: 123456 }, root: { groups: [] } } }))
-    const spyApiMapTransfer = jest.spyOn(component, 'apiMapTransfer')
-    const spyNodesTransfer = jest.spyOn(component, 'nodesTransfer')
-    // @ts-ignore
-    const spyMessage = jest.spyOn(component.message, 'error')
-    expect(spyService).not.toHaveBeenCalled()
-    expect(spyApiMapTransfer).not.toHaveBeenCalled()
-    expect(spyNodesTransfer).not.toHaveBeenCalled()
-    expect(spyMessage).not.toHaveBeenCalled()
-
-    component.getMenuList()
-    fixture.detectChanges()
-
-    expect(spyService).toHaveBeenCalled()
-    expect(spyApiMapTransfer).toHaveBeenCalled()
-    expect(spyNodesTransfer).toHaveBeenCalled()
-    expect(spyMessage).not.toHaveBeenCalled()
-  })
-
-  it('getMenuList with fail return', () => {
-    const httpCommonService = fixture.debugElement.injector.get(ApiService)
-    const spyService = jest.spyOn(httpCommonService, 'get').mockReturnValue(of({ code: -1, msg: 'fail' }))
-    // @ts-ignore
-    const spyMessage = jest.spyOn(component.message, 'error')
-    expect(spyService).not.toHaveBeenCalled()
-    expect(spyMessage).not.toHaveBeenCalled()
-
-    component.getMenuList()
-    fixture.detectChanges()
-
-    expect(spyService).toHaveBeenCalled()
-    expect(spyMessage).toHaveBeenCalled()
-  })
-
-  it('apiMapTransfer should change list to map', fakeAsync(() => {
-    component.apiNodesMap = new Map()
-    component.apiNodesMap.set('testGroupUuid', ['testApi'])
-    expect(component.apiNodesMap.size).toStrictEqual(1)
-    expect(component.apiNodesMap.get('testGroupUuid')).toStrictEqual(['testApi'])
-
-    component.apiMapTransfer([])
-    fixture.detectChanges()
-    expect(component.apiNodesMap.size).toStrictEqual(0)
-    expect(component.apiNodesMap.get('testGroupUuid')).toBeUndefined()
-
-    component.apiMapTransfer([
-      { title: 'testApi1', name: 'testApi1', uuid: '111', groupUuid: '1111' },
-      { title: 'testApi2', name: 'testApi2', uuid: '222', groupUuid: '2222' },
-      { title: 'testApi3', name: 'testApi3', uuid: '333', groupUuid: '1111' }])
-    fixture.detectChanges()
-    expect(component.apiNodesMap.size).toStrictEqual(2)
-    expect(component.apiNodesMap.get('1111')).toStrictEqual([
-      { title: 'testApi1', name: 'testApi1', key: '111', isLeaf: true, uuid: '111', groupUuid: '1111' },
-      { title: 'testApi3', name: 'testApi3', key: '333', isLeaf: true, uuid: '333', groupUuid: '1111' }
-    ])
-  }))
-
-  it('nodesTransfer test', fakeAsync(() => {
-    const val1:any = [
-      { uuid: '111', name: 'name1', children: [] },
+    tick(500)
+    expect(component.nodesList).toEqual([
       {
-        uuid: '222',
-        name: 'name2',
-        children: [
-          { uuid: '2221', name: 'name21', children: [] },
-          { uuid: '2222', name: 'name22', children: [] },
-          {
-            uuid: '2223',
-            name: 'name23',
-            children: [
-              { uuid: '22231', name: 'name231', children: [] },
-              { uuid: '22232', name: 'name232', children: [] }
-            ]
-          },
-          { uuid: '2224', name: 'name24', children: [] }
-        ]
-      },
-      { uuid: '333', name: 'name3', children: [] }
-    ]
-
-    component.firstLevelMap = new Set()
-    let res = component.nodesTransfer([])
-    fixture.detectChanges()
-    expect(res).toStrictEqual([])
-
-    component.expandAll = true
-    component.firstLevelMap = new Set()
-    component.apiNodesMap.set('2221', [
-      { title: 'testApi1', name: 'testApi1', key: '111', isLeaf: true, uuid: '111', groupUuid: '1111' },
-      { title: 'testApi3', name: 'testApi3', key: '333', isLeaf: true, uuid: '333', groupUuid: '1111' }
-    ])
-    component.apiNodesMap.set('444', [])
-    component.apiNodesMap.set('333', [])
-    res = component.nodesTransfer(val1, true)
-    fixture.detectChanges()
-    expect(res).toStrictEqual([
-      { key: '111', title: 'name1', uuid: '111', name: 'name1', children: [] },
-      {
-        key: '222',
-        title: 'name2',
-        expanded: true,
-        uuid: '222',
-        name: 'name2',
+        uuid: '50458642-5a9f-4136-9ff1-e30d647297e8',
+        key: '50458642-5a9f-4136-9ff1-e30d647297e8',
+        name: 'test1',
+        title: 'test1',
+        expanded: false,
         children: [
           {
-            key: '2221',
-            title: 'name21',
-            expanded: true,
-            uuid: '2221',
-            name: 'name21',
-            children: [
-              { title: 'testApi1', name: 'testApi1', key: '111', isLeaf: true, uuid: '111', groupUuid: '1111' },
-              { title: 'testApi3', name: 'testApi3', key: '333', isLeaf: true, uuid: '333', groupUuid: '1111' }
-            ]
+            uuid: '35938ae4-1a62-4e22-ad8c-3691e111820e',
+            key: '35938ae4-1a62-4e22-ad8c-3691e111820e',
+            name: 'test1-c1',
+            title: 'test1-c1',
+            children: [],
+            isDelete: false
           },
-          { key: '2222', title: 'name22', uuid: '2222', name: 'name22', children: [] },
           {
-            key: '2223',
-            title: 'name23',
-            expanded: true,
-            uuid: '2223',
-            name: 'name23',
-            children: [
-              { key: '22231', title: 'name231', uuid: '22231', name: 'name231', children: [] },
-              { key: '22232', title: 'name232', uuid: '22232', name: 'name232', children: [] }
-            ]
-          },
-          { key: '2224', title: 'name24', uuid: '2224', name: 'name24', children: [] }
-        ]
+            uuid: 'b238751a-dbfb-4610-8f40-a599737ac4e5',
+            key: 'b238751a-dbfb-4610-8f40-a599737ac4e5',
+            name: 'test1-c2',
+            title: 'test1-c2',
+            children: [],
+            isDelete: false
+          }
+        ],
+        isDelete: false
       },
-      { key: '333', title: 'name3', uuid: '333', name: 'name3', children: [] }
+      {
+        uuid: '00db4977-331f-4b7e-93be-b64648751a5f',
+        key: '00db4977-331f-4b7e-93be-b64648751a5f',
+        name: 'test2',
+        title: 'test2',
+        children: [],
+        isDelete: false
+      }
+
     ])
-    expect(component.firstLevelMap).toStrictEqual(new Set(['111', '222', '333']))
+    // @ts-ignore
+    expect(component.baseInfo.allParamsInfo.apiGroupId).toEqual('mockApiGroupId')
+    expect(component.queryName).toEqual('')
+    expect(component.groupUuid).toEqual('mockApiGroupId')
+
+    // @ts-ignore
+    jest.replaceProperty(fixture.debugElement.injector.get(BaseInfoService), '_allParams', {
+      apiGroupId: 'uuid2'
+    })
+    eventsSub.next(new NavigationEnd(1, 'home/', 'home/'))
+    fixture.detectChanges()
+
+    expect(component.groupUuid).toEqual('uuid2')
+    discardPeriodicTasks()
   }))
 
-  it('addGroupModal test', fakeAsync(() => {
+  it('test deleteGroup', fakeAsync(() => {
     // @ts-ignore
     const spyModalService = jest.spyOn(component.modalService, 'create')
-    expect(spyModalService).not.toHaveBeenCalled()
-    component.addGroupModal('root')
-    fixture.detectChanges()
-    expect(spyModalService).toHaveBeenCalledTimes(1)
+    const spyMenuList = jest.spyOn(component, 'getMenuList')
+    const spyViewAllApis = jest.spyOn(component, 'viewAllApis')
 
-    component.addGroupModal({ data: { uuid: '123' } })
+    const spyScrollToDom = jest.spyOn(component, 'groupScrollToDom')
+    // delete a group when view all apis
+    expect(component).toBeTruthy()
+    expect(component.nodesList).toEqual([])
+    expect(component.showAll).toEqual(true)
+    expect(spyModalService).not.toHaveBeenCalled()
+    component.queryName = 'test'
+
+    component.ngOnInit()
     fixture.detectChanges()
-    expect(spyModalService).toHaveBeenCalledTimes(2)
+
+    tick(500)
+    expect(component.showAll).toEqual(true)
+    expect(component.groupModal).toBeUndefined()
+    expect(spyModalService).not.toHaveBeenCalled()
+
+    component.deleteGroupModal('test', 'uuid')
+    fixture.detectChanges()
+
+    expect(component.showAll).toEqual(true)
+    expect(component.groupModal).not.toBeUndefined()
+    expect(spyModalService).toHaveBeenCalled()
+    expect(spyDeleteApiService).not.toHaveBeenCalled()
+    expect(spyMenuList).toHaveBeenCalledTimes(1)
+    expect(spyViewAllApis).not.toHaveBeenCalled()
+    expect(spyScrollToDom).toHaveBeenCalled()
+    expect(component.groupUuid).toBeUndefined()
+
+    component.deleteGroup(component.nodesList[1].key, component.nodesList[1].title)
+    fixture.detectChanges()
+    tick(100)
+
+    expect(component.showAll).toEqual(true)
+    expect(spyDeleteApiService).toHaveBeenCalled()
+    expect(spyMenuList).toHaveBeenCalledTimes(2)
+    expect(spyViewAllApis).not.toHaveBeenCalled()
+    expect(spyScrollToDom).toHaveBeenCalledTimes(2)
+    expect(component.groupUuid).toBeUndefined()
+
+    // delete other group when selected one
+    const node = new NzTreeNode(component.nodesList[0])
+    node.isExpanded = false
+    node.origin = component.nodesList[0]
+    component.activeNode({ eventName: 'click', node, keys: [component.nodesList[0].key] })
+    fixture.detectChanges()
+    component.groupUuid = component.nodesList[0].key
+    component.deleteGroup(component.nodesList[1].key, 'test')
+    fixture.detectChanges()
+    tick(100)
+
+    expect(component.showAll).toEqual(false)
+    expect(spyDeleteApiService).toHaveBeenCalledTimes(2)
+    expect(spyMenuList).toHaveBeenCalledTimes(3)
+    expect(spyViewAllApis).not.toHaveBeenCalled()
+    expect(spyScrollToDom).toHaveBeenCalledTimes(3)
+    expect(component.groupUuid).toEqual(component.nodesList[0].key)
+
+    // delete selected group
+    const node2 = new NzTreeNode(component.nodesList[1])
+    node2.isExpanded = false
+    node2.origin = component.nodesList[1]
+    component.activeNode({ eventName: 'click', node: node2, keys: [component.nodesList[1].key] })
+    fixture.detectChanges()
+    component.groupUuid = component.nodesList[1].key
+    // mock new router group after deleting nodesList[1]
+    const MockRouterGroups2 = { ...MockRouterGroups }
+    MockRouterGroups2.data.root.groups.splice(1, 1)
+    spyApiService = jest.spyOn(httpCommonService, 'get').mockImplementation(
+      (...args) => {
+        switch (args[0]) {
+          case 'router/groups':
+            return of(MockRouterGroups2)
+          default:
+            return of(MockEmptySuccessResponse)
+        }
+      }
+    )
+    component.deleteGroup(component.nodesList[1].key, 'test')
+    fixture.detectChanges()
+    tick(100)
+
+    expect(component.selectGroupExist).toEqual(false)
+    expect(component.showAll).toEqual(true)
+    expect(spyDeleteApiService).toHaveBeenCalledTimes(3)
+    expect(spyMenuList).toHaveBeenCalledTimes(4)
+    expect(spyViewAllApis).toHaveBeenCalled()
+    expect(spyScrollToDom).toHaveBeenCalledTimes(4)
+    expect(component.groupUuid).toBeUndefined()
+
+    discardPeriodicTasks()
   }))
 
-  it('addGroup with success return', () => {
-    const httpCommonService = fixture.debugElement.injector.get(ApiService)
-    const spyService = jest.spyOn(httpCommonService, 'post').mockReturnValue(of({ code: 0, data: { } }))
-    const spyGetMenuList = jest.spyOn(component, 'getMenuList')
+  it('test viewAllApis', fakeAsync(() => {
+    expect(component).toBeTruthy()
+    expect(component.showAll).toEqual(true)
     // @ts-ignore
-    const spyMessageSuccess = jest.spyOn(component.message, 'success')
-    // @ts-ignore
-    const spyMessage = jest.spyOn(component.message, 'error')
-    expect(spyService).not.toHaveBeenCalled()
-    expect(spyGetMenuList).not.toHaveBeenCalled()
-    expect(spyMessageSuccess).not.toHaveBeenCalled()
-    expect(spyMessage).not.toHaveBeenCalled()
-    component.addGroup('test')
+    jest.replaceProperty(fixture.debugElement.injector.get(BaseInfoService), '_allParams', {
+      apiGroupId: 'mockApiGroupId'
+    })
+    component.ngOnInit()
     fixture.detectChanges()
-    expect(spyGetMenuList).toHaveBeenCalled()
-    expect(spyMessageSuccess).toHaveBeenCalled()
-    expect(spyMessage).not.toHaveBeenCalled()
-  })
+    tick(500)
 
-  it('addGroup with fail return', () => {
-    const httpCommonService = fixture.debugElement.injector.get(ApiService)
-    const spyService = jest.spyOn(httpCommonService, 'post').mockReturnValue(of({ code: -1, data: { } }))
-    const spyGetMenuList = jest.spyOn(component, 'getMenuList')
-    // @ts-ignore
-    const spyMessageSuccess = jest.spyOn(component.message, 'success')
-    // @ts-ignore
-    const spyMessage = jest.spyOn(component.message, 'error')
-    expect(spyService).not.toHaveBeenCalled()
-    expect(spyGetMenuList).not.toHaveBeenCalled()
-    expect(spyMessageSuccess).not.toHaveBeenCalled()
-    expect(spyMessage).not.toHaveBeenCalled()
-    component.addGroup('test')
-    fixture.detectChanges()
-    expect(spyGetMenuList).not.toHaveBeenCalled()
-    expect(spyMessageSuccess).not.toHaveBeenCalled()
-    expect(spyMessage).toHaveBeenCalled()
-  })
+    expect(component.groupUuid).toEqual('mockApiGroupId')
+    const node = new NzTreeNode({ title: 'test', key: 'test' })
+    node.isSelected = true
 
-  it('editGroupModal test', fakeAsync(() => {
-    // @ts-ignore
-    const spyModalService = jest.spyOn(component.modalService, 'create')
-    expect(spyModalService).not.toHaveBeenCalled()
-    component.editGroupModal('root')
-    fixture.detectChanges()
-    expect(spyModalService).toHaveBeenCalledTimes(1)
-  }))
+    const node2 = new NzTreeNode({ title: 'test', key: 'test' })
+    node2.isSelected = true
 
-  it('editGroup with success return', () => {
-    const httpCommonService = fixture.debugElement.injector.get(ApiService)
-    const spyService = jest.spyOn(httpCommonService, 'put').mockReturnValue(of({ code: 0, data: { } }))
-    const spyGetMenuList = jest.spyOn(component, 'getMenuList')
-    // @ts-ignore
-    const spyMessageSuccess = jest.spyOn(component.message, 'success')
-    // @ts-ignore
-    const spyMessage = jest.spyOn(component.message, 'error')
-    expect(spyGetMenuList).not.toHaveBeenCalled()
-    expect(spyMessageSuccess).not.toHaveBeenCalled()
-    expect(spyMessage).not.toHaveBeenCalled()
-    expect(spyService).not.toHaveBeenCalled()
-    component.editGroup('test')
-    fixture.detectChanges()
-    expect(spyGetMenuList).toHaveBeenCalled()
-    expect(spyMessageSuccess).toHaveBeenCalled()
-    expect(spyMessage).not.toHaveBeenCalled()
-  })
+    jest.spyOn(component.eoNgTreeDefault, 'getTreeNodeByKey').mockReturnValue(node)
 
-  it('editGroup with fail return', () => {
-    const httpCommonService = fixture.debugElement.injector.get(ApiService)
-    const spyService = jest.spyOn(httpCommonService, 'put').mockReturnValue(of({ code: -1, data: { } }))
-    const spyGetMenuList = jest.spyOn(component, 'getMenuList')
-    // @ts-ignore
-    const spyMessageSuccess = jest.spyOn(component.message, 'success')
-    // @ts-ignore
-    const spyMessage = jest.spyOn(component.message, 'error')
-    expect(spyGetMenuList).not.toHaveBeenCalled()
-    expect(spyMessageSuccess).not.toHaveBeenCalled()
-    expect(spyMessage).not.toHaveBeenCalled()
-    expect(spyService).not.toHaveBeenCalled()
-    component.editGroup('test')
-    fixture.detectChanges()
-    expect(spyGetMenuList).not.toHaveBeenCalled()
-    expect(spyMessageSuccess).not.toHaveBeenCalled()
-    expect(spyMessage).toHaveBeenCalled()
-  })
-
-  it('deleteGroupModal test', fakeAsync(() => {
-    // @ts-ignore
-    const spyModalService = jest.spyOn(component.modalService, 'create')
-    expect(spyModalService).not.toHaveBeenCalled()
-    component.deleteGroupModal({ data: { name: 'test' } })
-    fixture.detectChanges()
-    expect(spyModalService).toHaveBeenCalledTimes(1)
-  }))
-
-  it('deleteGroup with success return', () => {
-    const httpCommonService = fixture.debugElement.injector.get(ApiService)
-    const spyService = jest.spyOn(httpCommonService, 'delete').mockReturnValue(of({ code: 0, data: { } }))
-    const spyGetMenuList = jest.spyOn(component, 'getMenuList')
-    // @ts-ignore
-    const spyMessageSuccess = jest.spyOn(component.message, 'success')
-    // @ts-ignore
-    const spyMessage = jest.spyOn(component.message, 'error')
-    expect(spyService).not.toHaveBeenCalled()
-    expect(spyGetMenuList).not.toHaveBeenCalled()
-    expect(spyMessageSuccess).not.toHaveBeenCalled()
-    expect(spyMessage).not.toHaveBeenCalled()
-    component.deleteGroup('test', 'test')
-    fixture.detectChanges()
-    expect(spyGetMenuList).toHaveBeenCalled()
-    expect(spyMessageSuccess).toHaveBeenCalled()
-    expect(spyMessage).not.toHaveBeenCalled()
-  })
-
-  it('deleteGroup with fail return', () => {
-    const httpCommonService = fixture.debugElement.injector.get(ApiService)
-    const spyService = jest.spyOn(httpCommonService, 'delete').mockReturnValue(of({ code: -1, data: { } }))
-    const spyGetMenuList = jest.spyOn(component, 'getMenuList')
-    // @ts-ignore
-    const spyMessageSuccess = jest.spyOn(component.message, 'success')
-    // @ts-ignore
-    const spyMessage = jest.spyOn(component.message, 'error')
-    expect(spyService).not.toHaveBeenCalled()
-    expect(spyGetMenuList).not.toHaveBeenCalled()
-    expect(spyMessageSuccess).not.toHaveBeenCalled()
-    expect(spyMessage).not.toHaveBeenCalled()
-    component.deleteGroup('test', 'test')
-    fixture.detectChanges()
-    expect(spyGetMenuList).not.toHaveBeenCalled()
-    expect(spyMessageSuccess).not.toHaveBeenCalled()
-    expect(spyMessage).toHaveBeenCalled()
-  })
-
-  it('deleteApiModal test', fakeAsync(() => {
-    // @ts-ignore
-    const spyModalService = jest.spyOn(component.modalService, 'create')
-    expect(spyModalService).not.toHaveBeenCalled()
-    component.deleteApiModal('root')
-    fixture.detectChanges()
-    expect(spyModalService).toHaveBeenCalledTimes(1)
-  }))
-
-  it('deleteApi with success return', () => {
-    const httpCommonService = fixture.debugElement.injector.get(ApiService)
-    const spyService = jest.spyOn(httpCommonService, 'delete').mockReturnValue(of({ code: 0, data: { } }))
-    const spyGetMenuList = jest.spyOn(component, 'getMenuList')
-    // @ts-ignore
-    const spyMessageSuccess = jest.spyOn(component.message, 'success')
-    // @ts-ignore
-    const spyMessage = jest.spyOn(component.message, 'error')
-    expect(spyService).not.toHaveBeenCalled()
-    expect(spyGetMenuList).not.toHaveBeenCalled()
-    expect(spyMessageSuccess).not.toHaveBeenCalled()
-    expect(spyMessage).not.toHaveBeenCalled()
-    component.deleteApi({ data: { uuid: '123' } })
-    fixture.detectChanges()
-    expect(spyGetMenuList).toHaveBeenCalled()
-    expect(spyMessageSuccess).toHaveBeenCalled()
-    expect(spyMessage).not.toHaveBeenCalled()
-  })
-
-  it('deleteApi with fail return', () => {
-    const httpCommonService = fixture.debugElement.injector.get(ApiService)
-    const spyService = jest.spyOn(httpCommonService, 'delete').mockReturnValue(of({ code: -1, data: { } }))
-    const spyGetMenuList = jest.spyOn(component, 'getMenuList')
-    // @ts-ignore
-    const spyMessageSuccess = jest.spyOn(component.message, 'success')
-    // @ts-ignore
-    const spyMessage = jest.spyOn(component.message, 'error')
-    expect(spyService).not.toHaveBeenCalled()
-    expect(spyGetMenuList).not.toHaveBeenCalled()
-    expect(spyMessageSuccess).not.toHaveBeenCalled()
-    expect(spyMessage).not.toHaveBeenCalled()
-    component.deleteApi({ data: { uuid: '123' } })
-    fixture.detectChanges()
-    expect(spyGetMenuList).not.toHaveBeenCalled()
-    expect(spyMessageSuccess).not.toHaveBeenCalled()
-    expect(spyMessage).toHaveBeenCalled()
-  })
-
-  it('openFolder test', () => {
-    const data:any = { node: { id: '123', isExpanded: false }, isExpanded: true }
-    component.openFolder(data)
-    expect(data.node.isExpanded).toStrictEqual(true)
-  })
-
-  it('activeNode test', () => {
-    component.showList = false
-    component.showApiPage = false
-    component.editPage = true
-    component.apiUuid = ''
-    component.groupUuid = ''
-    component.activatedNode = undefined
-
-    const data = { node: { isExpanded: false, origin: { uuid: '123' } } }
-    component.activeNode(data)
-    fixture.detectChanges()
-    expect(data.node.isExpanded).toStrictEqual(true)
-    expect(component.showList).toStrictEqual(true)
-    expect(component.showApiPage).toStrictEqual(false)
-    expect(component.groupUuid).toStrictEqual('123')
-    expect(component.activatedNode).toStrictEqual(data.node)
-
-    component.showList = false
-    component.showApiPage = false
-    component.editPage = false
-    component.apiUuid = ''
-    component.groupUuid = ''
-    component.activatedNode = undefined
-
-    const data2 = { node: { isExpanded: false, origin: { groupUuid: '1234', uuid: '123' } } }
-    component.activeNode(data2)
-    fixture.detectChanges()
-    expect(data2.node.isExpanded).toStrictEqual(true)
-    expect(component.showList).toStrictEqual(false)
-    expect(component.showApiPage).toStrictEqual(true)
-    expect(component.editPage).toStrictEqual(true)
-    expect(component.apiUuid).toStrictEqual('123')
-    expect(component.groupUuid).toStrictEqual('')
-    expect(component.activatedNode).toStrictEqual(data2.node)
-  })
-
-  it('changeToList & viewAllApis & addApi & editApi test', () => {
-    const spyGetMenuList = jest.spyOn(component, 'getMenuList')
-    component.showList = false
-    component.showApiPage = false
-    component.editPage = false
-    component.apiUuid = ''
-    component.groupUuid = ''
-    expect(spyGetMenuList).not.toHaveBeenCalled()
-
-    component.changeToList('123')
-    fixture.detectChanges()
-    expect(component.showList).toStrictEqual(true)
-    expect(component.showApiPage).toStrictEqual(false)
-    expect(component.groupUuid).toStrictEqual('123')
-    expect(spyGetMenuList).toHaveBeenCalled()
-
-    component.showList = false
-    component.showApiPage = false
-    component.editPage = false
-    component.apiUuid = ''
-    component.groupUuid = ''
-    component.queryName = '123'
-    expect(spyGetMenuList).toHaveBeenCalledTimes(1)
-
+    component.activatedNode = node2
     component.viewAllApis()
     fixture.detectChanges()
-    expect(component.showList).toStrictEqual(true)
-    expect(component.showApiPage).toStrictEqual(false)
-    expect(component.groupUuid).toStrictEqual('')
-    expect(component.queryName).toStrictEqual('')
-    expect(spyGetMenuList).toHaveBeenCalledTimes(2)
 
-    component.showList = false
-    component.showApiPage = false
-    component.editPage = false
-    component.apiUuid = ''
-    component.groupUuid = ''
-    expect(spyGetMenuList).toHaveBeenCalledTimes(2)
+    expect(node.isSelected).toEqual(false)
+    expect(node2.isSelected).toEqual(false)
+    expect(component.showAll).toEqual(true)
 
-    component.addApi({ data: { uuid: '123' } })
+    component.showAll = false
+    component.viewAllApis()
     fixture.detectChanges()
-    expect(component.showList).toStrictEqual(false)
-    expect(component.showApiPage).toStrictEqual(true)
-    expect(component.editPage).toStrictEqual(false)
-    expect(component.groupUuid).toStrictEqual('123')
-    expect(spyGetMenuList).toHaveBeenCalledTimes(2)
 
-    component.showList = false
-    component.showApiPage = false
-    component.editPage = false
-    component.apiUuid = ''
-    component.groupUuid = ''
-    expect(spyGetMenuList).toHaveBeenCalledTimes(2)
+    expect(node.isSelected).toEqual(false)
+    expect(node2.isSelected).toEqual(false)
+    expect(component.showAll).toEqual(true)
 
-    component.editApi({ data: { uuid: '123' } })
-    fixture.detectChanges()
-    expect(component.showList).toStrictEqual(false)
-    expect(component.showApiPage).toStrictEqual(true)
-    expect(component.editPage).toStrictEqual(false)
-    expect(component.apiUuid).toStrictEqual('123')
-    expect(spyGetMenuList).toHaveBeenCalledTimes(2)
+    discardPeriodicTasks()
+  }))
+
+  it('test addApi', () => {
+    expect(component).toBeTruthy()
+    // @ts-ignore
+    const spyRouterChange = jest.spyOn(component.router, 'navigate')
+    expect(spyRouterChange).not.toHaveBeenCalled()
+
+    component.addApi('testUuid', 'http')
+    expect(spyRouterChange).toHaveBeenCalledWith(['/', 'router', 'api', 'create', 'testUuid'])
+
+    component.addApi('testUuid2', 'websocket')
+    expect(spyRouterChange).toHaveBeenCalledWith(['/', 'router', 'api', 'create-ws', 'testUuid2'])
+  })
+
+  it('test ngOnDestroy', () => {
+    expect(component).toBeTruthy()
+    // @ts-ignore
+    const spyOnSubscription = jest.spyOn(component.subscription, 'unsubscribe')
+    expect(spyOnSubscription).not.toHaveBeenCalled()
+
+    component.ngOnDestroy()
+
+    expect(spyOnSubscription).toHaveBeenCalled()
   })
 })

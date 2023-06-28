@@ -211,77 +211,87 @@ export class ApplicationAuthenticationFormComponent implements OnInit {
   saveAuth () {
     this.startValidateDynamic = true
     this.showDynamicTips = !this.canBeSave
-    if (this.validateForm.valid && (this.canBeSave || this.validateForm.controls['driver'].value === 'jwt')) {
-      let body:AuthData|undefined
-      if (this.validateForm.controls['driver'].value !== 'jwt') {
-        this.createAuthForm.expireTime = this.validateForm.controls['expireTimeDate'].value ? Math.floor(new Date(this.validateForm.controls['expireTimeDate'].value.setHours(23, 59, 59)).getTime() / 1000) : 0
-        this.createAuthForm.config.publicKey = this.createAuthForm.config.publicKey === null ? '' : this.createAuthForm.config.publicKey
-        this.createAuthForm.config.secret = this.createAuthForm.config.secret === null ? '' : this.createAuthForm.config.secret
-        body = {
-          ...this.createAuthForm as AuthData,
-          title: this.validateForm.controls['title'].value,
-          driver: this.validateForm.controls['driver'].value,
-          hideCredential: this.validateForm.controls['hideCredential'].value,
-          expireTime: this.validateForm.controls['expireTimeDate'].value ? Math.floor(new Date(this.validateForm.controls['expireTimeDate'].value.setHours(23, 59, 59)).getTime() / 1000) : 0,
-          position: this.validateForm.controls['position'].value,
-          tokenName: this.validateForm.controls['tokenName'].value
-        }
-      } else {
-        body = {
-          title: this.validateForm.controls['title'].value,
-          driver: this.validateForm.controls['driver'].value,
-          hideCredential: this.validateForm.controls['hideCredential'].value,
-          expireTime: this.validateForm.controls['expireTimeDate'].value ? Math.floor(new Date(this.validateForm.controls['expireTimeDate'].value.setHours(23, 59, 59)).getTime() / 1000) : 0,
-          position: this.validateForm.controls['position'].value,
-          tokenName: this.validateForm.controls['tokenName'].value,
-          config: {
-            iss: this.validateForm.controls['iss'].value,
-            algorithm: this.validateForm.controls['algorithm'].value,
-            secret: this.validateForm.controls['secret'].value,
-            publicKey: this.validateForm.controls['publicKey'].value,
-            user: this.validateForm.controls['user'].value,
-            userPath: this.validateForm.controls['userPath'].value,
-            claimsToVerify: this.validateForm.controls['claimsToVerify'].value,
-            signatureIsBase64: this.validateForm.controls['signatureIsBase64'].value
+    // 解决出现未输入值但二次切换算法时，表单校验不通过的bug
+    Object.values(this.validateForm.controls).forEach((control) => {
+      if (control.invalid) {
+        control.markAsDirty()
+        control.updateValueAndValidity({ onlySelf: true })
+      }
+    })
+    this.validateForm.updateValueAndValidity()
+    setTimeout(() => {
+      if (this.validateForm.valid && (this.canBeSave || this.validateForm.controls['driver'].value === 'jwt')) {
+        let body:AuthData|undefined
+        if (this.validateForm.controls['driver'].value !== 'jwt') {
+          this.createAuthForm.expireTime = this.validateForm.controls['expireTimeDate'].value ? Math.floor(new Date(this.validateForm.controls['expireTimeDate'].value.setHours(23, 59, 59)).getTime() / 1000) : 0
+          this.createAuthForm.config.publicKey = this.createAuthForm.config.publicKey === null ? '' : this.createAuthForm.config.publicKey
+          this.createAuthForm.config.secret = this.createAuthForm.config.secret === null ? '' : this.createAuthForm.config.secret
+          body = {
+            ...this.createAuthForm as AuthData,
+            title: this.validateForm.controls['title'].value,
+            driver: this.validateForm.controls['driver'].value,
+            hideCredential: this.validateForm.controls['hideCredential'].value,
+            expireTime: this.validateForm.controls['expireTimeDate'].value ? Math.floor(new Date(this.validateForm.controls['expireTimeDate'].value.setHours(23, 59, 59)).getTime() / 1000) : 0,
+            position: this.validateForm.controls['position'].value,
+            tokenName: this.validateForm.controls['tokenName'].value
+          }
+        } else {
+          body = {
+            title: this.validateForm.controls['title'].value,
+            driver: this.validateForm.controls['driver'].value,
+            hideCredential: this.validateForm.controls['hideCredential'].value,
+            expireTime: this.validateForm.controls['expireTimeDate'].value ? Math.floor(new Date(this.validateForm.controls['expireTimeDate'].value.setHours(23, 59, 59)).getTime() / 1000) : 0,
+            position: this.validateForm.controls['position'].value,
+            tokenName: this.validateForm.controls['tokenName'].value,
+            config: {
+              iss: this.validateForm.controls['iss'].value,
+              algorithm: this.validateForm.controls['algorithm'].value,
+              secret: this.validateForm.controls['secret'].value,
+              publicKey: this.validateForm.controls['publicKey'].value,
+              user: this.validateForm.controls['user'].value,
+              userPath: this.validateForm.controls['userPath'].value,
+              claimsToVerify: this.validateForm.controls['claimsToVerify'].value,
+              signatureIsBase64: this.validateForm.controls['signatureIsBase64'].value
+            }
+          }
+
+          if (body.config.algorithm!.includes('HS')) {
+            delete body.config.publicKey
+          } else {
+            delete body.config.secret
+            delete body.config.signatureIsBase64
           }
         }
-
-        if (body.config.algorithm!.includes('HS')) {
-          delete body.config.publicKey
+        if (this.authId) {
+          this.api.put('application/auth', { ...body }, { appId: this.appId, uuid: this.createAuthForm.uuid })
+            .subscribe((resp:EmptyHttpResponse) => {
+              if (resp.code === 0) {
+                this.message.success(resp.msg || '修改鉴权成功', { nzDuration: 1000 })
+                this.closeModal && this.closeModal(true)
+              } else {
+                this.closeModal && this.closeModal()
+              }
+            })
         } else {
-          delete body.config.secret
-          delete body.config.signatureIsBase64
+          this.api.post('application/auth', { ...body }, { appId: this.appId })
+            .subscribe((resp:EmptyHttpResponse) => {
+              if (resp.code === 0) {
+                this.message.success(resp.msg || '新增鉴权成功', { nzDuration: 1000 })
+                this.closeModal && this.closeModal(true)
+              } else {
+                this.closeModal && this.closeModal()
+              }
+            })
         }
-      }
-      if (this.authId) {
-        this.api.put('application/auth', { ...body }, { appId: this.appId, uuid: this.createAuthForm.uuid })
-          .subscribe((resp:EmptyHttpResponse) => {
-            if (resp.code === 0) {
-              this.message.success(resp.msg || '修改鉴权成功', { nzDuration: 1000 })
-              this.closeModal && this.closeModal(true)
-            } else {
-              this.closeModal && this.closeModal()
-            }
-          })
       } else {
-        this.api.post('application/auth', { ...body }, { appId: this.appId })
-          .subscribe((resp:EmptyHttpResponse) => {
-            if (resp.code === 0) {
-              this.message.success(resp.msg || '新增鉴权成功', { nzDuration: 1000 })
-              this.closeModal && this.closeModal(true)
-            } else {
-              this.closeModal && this.closeModal()
-            }
-          })
+        Object.values(this.validateForm.controls).forEach((control) => {
+          if (control.invalid) {
+            control.markAsDirty()
+            control.updateValueAndValidity({ onlySelf: true })
+          }
+        })
       }
-    } else {
-      Object.values(this.validateForm.controls).forEach((control) => {
-        if (control.invalid) {
-          control.markAsDirty()
-          control.updateValueAndValidity({ onlySelf: true })
-        }
-      })
-    }
+    })
   }
 
   // Can not select days after today and today

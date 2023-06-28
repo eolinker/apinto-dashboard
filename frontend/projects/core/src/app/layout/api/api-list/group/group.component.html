@@ -28,16 +28,6 @@
             [(ngModel)]="queryName"
           />
         </eo-ng-search-input-group>
-
-        <!-- <button
-          eo-ng-button
-          nzType="default"
-          class="p-0 ml-[10px] group-icon"
-          eoNgUserAccess="router/api"
-          (click)="addGroupModal('root')"
-        >
-          <svg class="iconpark-icon"><use href="#xinzengfenzu"></use></svg>
-        </button> -->
       </div>
 
       <div
@@ -45,14 +35,17 @@
         #groupComponent
       >
         <div
+          id="tree-node-root"
           class="group-title"
           [ngClass]="{ 'group-title-selected': showAll }"
           (click)="viewAllApis()"
         >
-          <svg class="iconpark-icon mr5 fs18"><use href="#suoyou"></use></svg>
+          <svg class="iconpark-icon mr-[6px] fs18">
+            <use href="#suoyou"></use>
+          </svg>
           <span>所有API</span>
         </div>
-        <div>
+        <div class="max-h-[calc(100%_-_88px)] overflow-y-auto">
           <eo-ng-tree-default
             nzBlockNode
             #eoNgTreeDefault
@@ -63,7 +56,7 @@
           ></eo-ng-tree-default>
         </div>
 
-        <div class="mt-formtop">
+        <div class="mt-formtop mb-[16px] sticky bottom-[16px]">
           <a
             class="ml-[28px] flex items-center"
             eoNgUserAccess="router/api"
@@ -75,7 +68,7 @@
           </a>
         </div>
         <ng-template #nzTreeTpl let-node let-origin="origin">
-          <div class="custom-node">
+          <div class="custom-node" [id]="'tree-node-' + node.key">
             <div class="f-row-js-ac" *ngIf="!node.isLeaf">
               <div style="overflow: hidden; text-overflow: ellipsis">
                 <span
@@ -108,8 +101,12 @@
 
               <eo-ng-dropdown-menu #menu="nzDropdownMenu">
                 <ul nz-menu>
-                  <li nz-menu-item (click)="addApi(origin.uuid, 'http')">添加 HTTP API</li>
-                  <li nz-menu-item (click)="addApi(origin.uuid, 'websocket')">添加 Websocket API</li>
+                  <li nz-menu-item (click)="addApi(origin.uuid, 'http')">
+                    添加 HTTP API
+                  </li>
+                  <li nz-menu-item (click)="addApi(origin.uuid, 'websocket')">
+                    添加 Websocket API
+                  </li>
                   <li nz-menu-item (click)="addGroupModal(origin.uuid)">
                     添加子分组
                   </li>

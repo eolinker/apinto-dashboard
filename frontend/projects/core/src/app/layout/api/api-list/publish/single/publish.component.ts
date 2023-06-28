@@ -1,4 +1,4 @@
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
+import { ChangeDetectorRef, Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { ApiService } from 'projects/core/src/app/service/api.service'
@@ -26,11 +26,17 @@ export class ApiPublishComponent implements OnInit {
   nzDisabled:boolean = false
   getApisData:any
   unpublishMsg:string = ''
+  returnToSdk:Function|undefined
   constructor (
     private message: EoNgFeedbackMessageService,
     private service:RouterService,
     private api:ApiService,
-    private baseInfo:BaseInfoService) {}
+    private baseInfo:BaseInfoService,
+    private cdref:ChangeDetectorRef) {}
+
+  disabledEdit (value:any) {
+    this.nzDisabled = value
+  }
 
   ngOnInit (): void {
     this.getPublishList()
@@ -38,6 +44,7 @@ export class ApiPublishComponent implements OnInit {
 
   ngAfterViewInit () {
     this.publishTableBody = [...this.service.createApiPublishTbody(this)]
+    this.cdref.detectChanges()
   }
 
   getPublishList () {
@@ -100,6 +107,7 @@ export class ApiPublishComponent implements OnInit {
           return item.msg
         }).join('，')
       }
+      this.returnToSdk && this.returnToSdk(resp)
     })
   }
 
@@ -120,6 +128,7 @@ export class ApiPublishComponent implements OnInit {
           return item.msg
         }).join('，')
       }
+      this.returnToSdk && this.returnToSdk(resp)
     })
   }
 }

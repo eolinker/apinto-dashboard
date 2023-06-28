@@ -3,6 +3,7 @@ package cache
 import (
 	"context"
 	"github.com/go-redis/redis/v8"
+	"strings"
 	"time"
 )
 
@@ -20,16 +21,28 @@ type ICommonCache interface {
 	IncrBy(ctx context.Context, key string, val int64, expiration time.Duration) error
 
 	SetNX(ctx context.Context, key string, val interface{}, expiration time.Duration) (bool, error)
+
+	clone(prefix string) ICommonCache
 }
 
 type commonCache struct {
-	client    *redis.ClusterClient
+	client    redis.UniversalClient
 	keyPrefix string
 }
 
-func newCommonCache(client *redis.ClusterClient) ICommonCache {
+func (c *commonCache) clone(prefix string) ICommonCache {
+	return &commonCache{
+		client:    c.client,
+		keyPrefix: prefix,
+	}
+}
 
-	return &commonCache{client: client, keyPrefix: "apinto-dashboard:"}
+func newCommonCache(client redis.UniversalClient, prefix ...string) ICommonCache {
+	keyPrefix := "apinto-dashboard:"
+	if len(prefix) > 0 {
+		keyPrefix = strings.Join(prefix, ":") + ":"
+	}
+	return &commonCache{client: client, keyPrefix: keyPrefix}
 }
 
 func (c *commonCache) Get(ctx context.Context, key string) ([]byte, error) {

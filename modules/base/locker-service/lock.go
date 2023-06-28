@@ -10,18 +10,19 @@ import (
 type LockNameType = string
 
 const (
-	LockNameDiscovery       = "discovery"
-	LockNameService         = "service"
-	LockNameVariable        = "variable"
-	LockNameApplication     = "application"
-	LockNameAPI             = "api"
-	LockNameStrategy        = "strategy"
-	LockNameExtApp          = "ext-app"
-	LockNameMonPartition    = "monitor-partition"
-	LockNamePluginTemplate  = "plugin_template"
-	LockNamePluginNamespace = "plugin_namespace"
-	LockNameClusterPlugin   = "cluster_plugin"
-	LockNameModulePlugin    = "module_plugin" //企业插件
+	LockNameDiscovery          = "discovery"
+	LockNameService            = "service"
+	LockNameVariable           = "variable"
+	LockNameApplication        = "application"
+	LockNameAPI                = "api"
+	LockNameStrategy           = "strategy"
+	LockNameExtApp             = "ext-app"
+	LockNameMonPartition       = "monitor-partition"
+	LockNamePluginTemplate     = "plugin_template"
+	LockNamePluginNamespace    = "plugin_namespace"
+	LockNameClusterPlugin      = "cluster_plugin"
+	LockNameModulePlugin       = "module_plugin" //企业插件
+	LockNameModuleClusterNodes = "cluster_nodes" //集群节点
 )
 
 type IAsynLockService interface {

@@ -7,7 +7,6 @@
  * @FilePath: /apinto/src/app/service/api.service.ts
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
-/* eslint-disable no-useless-constructor */
 import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http'
 import { Inject, Injectable, InjectionToken } from '@angular/core'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
@@ -123,7 +122,7 @@ export class ApiService {
     if (params && params['query']) {
       params['query'] = JSON.stringify(params['query'])
     }
-    params = this.underline(params)
+    params = this.underline(url, params)
 
     for (const index in params) {
       if (typeof params[index] === 'string') {
@@ -162,8 +161,8 @@ export class ApiService {
 
     if (params) { params['namespace'] = 'default' } else { params = { namespace: 'default' } }
 
-    body = !(body instanceof FormData) ? this.underline(body) : body
-    params = this.underline(params)
+    body = !(body instanceof FormData) ? this.underline(url, body) : body
+    params = this.underline(url, params)
 
     return this.http.post(this.urlPrefix + 'api/' + url, body, {
       params: params,
@@ -188,8 +187,8 @@ export class ApiService {
     }
     if (params) { params['namespace'] = 'default' } else { params = { namespace: 'default' } }
 
-    body = this.underline(body)
-    params = this.underline(params)
+    body = this.underline(url, body)
+    params = this.underline(url, params)
 
     return this.http.put(this.urlPrefix + 'api/' + url, body, {
       params: params,
@@ -209,7 +208,7 @@ export class ApiService {
 
     if (params) { params['namespace'] = 'default' } else { params = { namespace: 'default' } }
 
-    params = this.underline(params)
+    params = this.underline(url, params)
     return this.http.delete(this.urlPrefix + 'api/' + url, { params: params })
       .pipe(
         catchError(this.handleError)
@@ -230,8 +229,8 @@ export class ApiService {
     }
     if (params) { params['namespace'] = 'default' } else { params = { namespace: 'default' } }
 
-    body = this.underline(body)
-    params = this.underline(params)
+    body = this.underline(url, body)
+    params = this.underline(url, params)
 
     return this.http.patch(this.urlPrefix + 'api/' + url, body, {
       params: params,
@@ -275,10 +274,13 @@ export class ApiService {
   }
 
   // 驼峰转下划线,其中监控的status_4xx和status_5xx需要特殊处理
-  underline (data:any) :any {
+  underline (url:string, data:any) :any {
+    if (url.startsWith('dynamic')) {
+      return data
+    }
     if (typeof data !== 'object' || !data) return data
     if (Array.isArray(data)) {
-      return data.map(item => this.underline(item))
+      return data.map(item => this.underline(url, item))
     }
     const newData:any = {}
     for (const key in data) {
@@ -286,7 +288,7 @@ export class ApiService {
       let newKey = key[0] + key.substring(1).replace(/([A-Z])/g, (p, m) => `_${m.toLowerCase()}`
       )
       newKey = key === 'status4xx' ? 'status_4xx' : (key === 'status5xx' ? 'status_5xx' : newKey)
-      newData[newKey] = this.underline(data[key])
+      newData[newKey] = this.underline(url, data[key])
     }
     return newData
   }

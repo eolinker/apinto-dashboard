@@ -1,6 +1,4 @@
-/* eslint-disable camelcase */
 /* eslint-disable dot-notation */
-/* eslint-disable no-useless-constructor */
 /*
  * @Author: maggieyyy im.ymj@hotmail.com
  * @Date: 2022-07-12 00:19:11
@@ -13,15 +11,14 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core'
 import { Router } from '@angular/router'
 import { EoNgBreadcrumbOptions } from 'eo-ng-breadcrumb'
 import { MenuOptions } from 'eo-ng-menu'
-import { NzModalRef, NzModalService } from 'ng-zorro-antd/modal'
+import { NzModalRef } from 'ng-zorro-antd/modal'
 import { Subscription } from 'rxjs'
-import { MODAL_SMALL_SIZE } from '../../constant/app.config'
 import { ApiService } from '../../service/api.service'
 import { EoNgNavigationService } from '../../service/eo-ng-navigation.service'
-import { AuthInfoDetailComponent } from '../auth/info/detail/detail.component'
 import { BaseInfoService } from '../../service/base-info.service'
 import { IframeHttpService } from '../../service/iframe-http.service'
 import { environment } from '../../../environments/environment'
+import { TryBusinessAddr } from '../../constant/conf'
 @Component({
   selector: 'basic-layout',
   templateUrl: './basic-layout.component.html',
@@ -56,16 +53,21 @@ export class BasicLayoutComponent implements OnInit {
   userAvatar:boolean = false // 是否显示用户头像，取决于是否开启用户权限插件
   isBusiness:boolean = environment.isBusiness
 
+  authStatus:'normal' | 'waring' | 'freeze' = 'normal'
+  btnLabel:string = ''
+  btnTooltip:string = ''
+
   private subscription1: Subscription = new Subscription()
   private subscription2: Subscription = new Subscription()
   private subscription3: Subscription = new Subscription()
   private subscription4: Subscription = new Subscription()
+  private subscription5: Subscription = new Subscription()
+  private subAuthCheck: Subscription = new Subscription()
 
   constructor (
     private router: Router,
     private api: ApiService,
     private navigationService: EoNgNavigationService,
-    private modalService: NzModalService,
     private baseInfo:BaseInfoService,
     private iframeService:IframeHttpService
   ) {
@@ -79,12 +81,17 @@ export class BasicLayoutComponent implements OnInit {
             bc.title = this.breadcrumbTitleTpl
           }
         }
-        this.breadcrumbOptions = data
+        while (this.breadcrumbOptions.length > 0) {
+          this.breadcrumbOptions.pop()
+        }
+        for (const newBd of data) {
+          this.breadcrumbOptions.push(newBd)
+        }
       })
 
     this.subscription2 = this.navigationService.repFlashMenu().subscribe(() => {
       this.sideMenuOptions = [
-        ...(this.isBusiness ? [] : [this.guideMenu]),
+        { ...this.guideMenu },
         ...this.navigationService.getCurrentMenuList()
       ]
       for (const menu of this.sideMenuOptions) {
@@ -98,10 +105,15 @@ export class BasicLayoutComponent implements OnInit {
         this.selectOrOpenMenu(this.router.url)
       }
     })
+
+    this.subscription5 = this.navigationService.repCheckAuthStatus().subscribe(() => {
+      this.checkAuthStatus()
+    })
   }
 
   ngOnInit () {
     this.getSideMenu()
+    this.checkAuthStatus()
   }
 
   ngOnDestroy () {
@@ -109,6 +121,8 @@ export class BasicLayoutComponent implements OnInit {
     this.subscription2.unsubscribe()
     this.subscription3.unsubscribe()
     this.subscription4.unsubscribe()
+    this.subscription5.unsubscribe()
+    this.subAuthCheck.unsubscribe()
   }
 
   clickIframeBreadcrumb (url:string) {
@@ -123,11 +137,6 @@ export class BasicLayoutComponent implements OnInit {
       .subscribe((res: MenuOptions[]) => {
         this.sideMenuOptions = [this.guideMenu, ...res]
         this.checkOpenMenu()
-        // for (const index in this.sideMenuOptions) {
-        //   this.sideMenuOptions[index].openChange = (value:MenuOptions) => {
-        //     this.openHandler(value['key']!)
-        //   }
-        // }
         this.getAccess()
       })
   }
@@ -144,38 +153,22 @@ export class BasicLayoutComponent implements OnInit {
     }
   }
 
-  getAuthInfo () {
-    if (this.navigationService.getUserAuthAccess()) {
-      this.api.authGet('activation/info').subscribe(
-        (resp: {
-          code: number
-          data: {
-            infos: Array<{ key: string; value: string }>
-            title: string
-          }
-          msg: string
-        }) => {
-          if (resp.code === 0) {
-            this.authInfo = resp.data
-          }
+  checkAuthStatus () {
+    this.subAuthCheck.unsubscribe()
+    this.subAuthCheck = this.api.authGet('activation/check').subscribe((resp:{code:number, msg:string, data:{status:'normal'|'waring'|'freeze', prompt:string, label:string}}) => {
+      if (resp.code === 0) {
+        if (resp.data.status === 'freeze') {
+          this.router.navigate(['/', 'auth-info'])
+          return
         }
-      )
-    }
+        this.authStatus = resp.data.status
+        this.btnLabel = resp.data.label
+        this.btnTooltip = resp.data.prompt
+      }
+    })
   }
 
   openAuthDialog () {
-    // this.modalRef = this.modalService.create({
-    //   nzWrapClassName: 'auth-modal-header',
-    //   nzTitle: `${this.authInfo.title}授权`,
-    //   nzContent: AuthInfoDetailComponent,
-    //   nzComponentParams: {
-    //     eoInfos: this.authInfo.infos,
-    //     updateAuth: this.updateAuth
-    //   },
-    //   nzClosable: true,
-    //   nzFooter: null,
-    //   nzWidth: MODAL_SMALL_SIZE
-    // })
     this.router.navigate(['/', 'auth-info'])
   }
 
@@ -195,17 +188,9 @@ export class BasicLayoutComponent implements OnInit {
         this.router.routerState.snapshot.url === '/' ||
         this.router.routerState.snapshot.url === '/login'
       ) {
-        // this.router.navigate([this.navigationService.getPageRoute()])
-        this.router.navigate(['/', ...(this.isBusiness ? ['router', 'api'] : ['guide'])])
+        this.router.navigate([this.navigationService.getPageRoute()])
       }
-
-      // if (this.router.url !== this.currentRouter) {
-      //   setTimeout(() => {
-      //     this.selectOrOpenMenu(this.router.url)
-      //   }, 0)
-      // }
     }
-    // this.getAuthInfo()
   }
 
   // 根据路由选中并打开对应menu
@@ -227,16 +212,9 @@ export class BasicLayoutComponent implements OnInit {
     }
   }
 
-  // openHandler (key: string): void {
-  //   for (const index in this.sideMenuOptions) {
-  //     if (this.sideMenuOptions[index]['key'] !== key) {
-  //       // this.sideMenuOptions[index].open = false
-  //     } else {
-  //       this.sideMenuOptions[index].open = true
-  //     }
-  //     this.openMap[this.sideMenuOptions[index]['key'] as string] = !!this.sideMenuOptions[index].open
-  //   }
-  // }
+  goToAuth () {
+    this.router.navigate(['/', 'auth-info'])
+  }
 
   goToGithub () {
     window.open('https://github.com/eolinker/apinto')
@@ -244,5 +222,9 @@ export class BasicLayoutComponent implements OnInit {
 
   goToHelp () {
     window.open('https://help.apinto.com/docs')
+  }
+
+  goToRry () {
+    window.open(TryBusinessAddr)
   }
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
+import { ChangeDetectorRef, Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
 import { Router } from '@angular/router'
 import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feedback'
 import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
@@ -25,13 +25,15 @@ export class DeployPluginListComponent implements OnInit {
   pluginsList: PluginItem[]= []
   pluginsTableHeadName:THEAD_TYPE[] = [...PluginsTableHeadName]
   pluginsTableBody:TBODY_TYPE[] = []
+  pluginTableLoading:boolean = false
   constructor (
     private message: EoNgFeedbackMessageService,
     private modalService: EoNgFeedbackModalService,
     private api: ApiService,
     public router: Router,
     private navigationService: EoNgNavigationService,
-    private service:DeployService
+    private service:DeployService,
+    private cdref:ChangeDetectorRef
   ) {
     this.navigationService.reqFlashBreadcrumb([{ title: '节点插件' }])
   }
@@ -42,13 +44,16 @@ export class DeployPluginListComponent implements OnInit {
 
   ngAfterViewInit () {
     this.pluginsTableBody = this.service.createPluginsTbody(this)
+    this.cdref.detectChanges()
   }
 
   getPluginsData () {
+    this.pluginTableLoading = true
     this.api.get('plugins').subscribe((resp:{code:number, data:{plugins:PluginItem[]}, msg:string}) => {
       if (resp.code === 0) {
         this.pluginsList = resp.data.plugins
       }
+      this.pluginTableLoading = false
     })
   }
 

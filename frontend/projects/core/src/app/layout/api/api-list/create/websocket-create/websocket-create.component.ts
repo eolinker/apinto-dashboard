@@ -1,19 +1,7 @@
 /* eslint-disable dot-notation */
-/* eslint-disable no-useless-constructor */
-import {
-  Component,
-
-  Input,
-  OnInit,
-
-  TemplateRef,
-  ViewChild
-} from '@angular/core'
+import { Component, Input, OnInit, TemplateRef, ViewChild } from '@angular/core'
 import { Router } from '@angular/router'
-import {
-  EoNgFeedbackMessageService,
-  EoNgFeedbackModalService
-} from 'eo-ng-feedback'
+import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feedback'
 import { ApiService } from 'projects/core/src/app/service/api.service'
 import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 import { UntypedFormBuilder, FormGroup, Validators } from '@angular/forms'
@@ -28,7 +16,7 @@ import { BaseInfoService } from 'projects/core/src/app/service/base-info.service
 import { cloneDeep } from 'lodash'
 import { MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
 import { ApiManagementProxyComponent } from '../../proxy/proxy.component'
-import { APINotFormGroupData } from '../../../types/types'
+import { APINotFormGroupData, APIProtocol } from '../../../types/types'
 import { methodList, proxyHeaderTableHeadName, proxyHeaderTableBody, hostHeaderTableBody, defaultHostList } from '../../../types/conf'
 import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 @Component({
@@ -69,6 +57,7 @@ export class ApiWebsocketCreateComponent implements OnInit {
   @Input() apiUuid:string = ''
   @Input() editPage:boolean = false
   @Input() groupUuid:string = ''
+  apiProtocol:APIProtocol = 'websocket'
   nzDisabled:boolean = false
   headerList:NzTreeNodeOptions[]= []
   firstLevelList:Array<string> = []
@@ -93,7 +82,8 @@ export class ApiWebsocketCreateComponent implements OnInit {
 
   pluginTemplateList:SelectOption[] = []
   submitButtonLoading:boolean = false
-  constructor (private message: EoNgFeedbackMessageService,
+  showCheckboxGroupValid: boolean = false
+  constructor (public message: EoNgFeedbackMessageService,
     private baseInfo:BaseInfoService,
     public api:ApiService,
     private navigationService:EoNgNavigationService,
@@ -116,7 +106,6 @@ export class ApiWebsocketCreateComponent implements OnInit {
       proxyPath: [''],
       timeout: [10000, [Validators.required]],
       retry: [0, [Validators.required]],
-      enableWebsocket: [false],
       templateUuid: ['']
     })
   }
@@ -150,9 +139,9 @@ export class ApiWebsocketCreateComponent implements OnInit {
     }
 
     this.hostsTableBody[0].disabledFn = () => { return this.nzDisabled }
-    this.hostsTableBody[1].showFn = (item: any) => { return item === this.hostsList[0] }
+    this.hostsTableBody[1].showFn = (item: any) => { return item !== this.hostsList[this.hostsList.length - 1] && !item.key }
     this.hostsTableBody[1].btns[0].disabledFn = () => { return this.nzDisabled }
-    this.hostsTableBody[2].showFn = (item: any) => { return item !== this.hostsList[0] }
+    this.hostsTableBody[2].showFn = (item: any) => { return item !== this.hostsList[this.hostsList.length - 1] && item.key }
     this.hostsTableBody[2].btns[0].disabledFn = () => { return this.nzDisabled }
     this.hostsTableBody[2].btns[1].disabledFn = () => { return this.nzDisabled }
   }
@@ -170,7 +159,7 @@ export class ApiWebsocketCreateComponent implements OnInit {
     this.api.get('router', { uuid: this.apiUuid }).subscribe((resp) => {
       if (resp.code === 0) {
         setFormValue(this.validateForm, resp.data.api)
-        this.validateForm.controls['requestPath'].setValue(resp.data.api.requestPath.slice(1))
+        this.validateForm.controls['requestPath'].setValue(resp.data.api.requestPath[0] === '/' ? resp.data.api.requestPath.slice(1) : resp.data.api.requestPath)
         this.createApiForm = resp.data.api
         this.getHeaderList()
         this.hostsList = [...resp.data.api.hosts?.map((x:string) => ({ key: x })) || [], { key: '' }]
@@ -214,13 +203,6 @@ export class ApiWebsocketCreateComponent implements OnInit {
     return resList
   }
 
-  nzTreeClick (value: any) {
-    if (value.node.origin.selectable === false) {
-      value.node.origin.expanded = !value.node.origin.expanded
-    }
-    this.headerList = [...this.headerList]
-  }
-
   // 获取上游服务列表
   getServiceList () {
     this.api.get('common/provider/Service').subscribe((resp: any) => {
@@ -242,58 +224,6 @@ export class ApiWebsocketCreateComponent implements OnInit {
         })
       }
     })
-  }
-
-  updateAllChecked (): void {
-    if (this.allChecked) {
-      this.methodList = this.methodList.map((item: any) => ({
-        ...item,
-        checked: true
-      }))
-      this.createApiForm.method = []
-      for (const index in this.methodList) {
-        if (this.methodList[index].checked) {
-          this.createApiForm.method.push(this.methodList[index].value)
-        }
-      }
-      this.showCheckboxGroupValid = false
-    } else {
-      this.methodList = this.methodList.map((item: any) => ({
-        ...item,
-        checked: false
-      }))
-      this.createApiForm.method = []
-      this.showCheckboxGroupValid = false
-    }
-  }
-
-  initCheckbox (): void {
-    for (const index in this.methodList) {
-      if (
-        this.createApiForm.method.indexOf(this.methodList[index].label) !== -1
-      ) {
-        this.methodList[index].checked = true
-      }
-    }
-  }
-
-  updateSingleChecked (): void {
-    if (this.methodList.every((item: any) => !item.checked)) {
-      this.allChecked = false
-    } else if (this.methodList.every((item: any) => item.checked)) {
-      this.allChecked = true
-    } else {
-      this.allChecked = false
-    }
-    this.createApiForm.method = []
-    for (const index in this.methodList) {
-      if (this.methodList[index].checked) {
-        this.createApiForm.method.push(this.methodList[index].value)
-      }
-    }
-    if (this.methodList.length > 0) {
-      this.showCheckboxGroupValid = false
-    }
   }
 
   proxyTableClick = (item: any) => {
@@ -324,7 +254,7 @@ export class ApiWebsocketCreateComponent implements OnInit {
             return false
           }
         })
-        this.modalRef.afterClose.subscribe(() => {
+        this.modalRef.afterClose?.subscribe(() => {
           this.proxyEdit = false
         })
         break
@@ -332,9 +262,95 @@ export class ApiWebsocketCreateComponent implements OnInit {
     }
   }
 
+  initCheckbox (): void {
+    for (const index in this.methodList) {
+      if (
+        this.createApiForm.method.indexOf(this.methodList[index].label) !== -1
+      ) {
+        this.methodList[index].checked = true
+      }
+    }
+  }
+
+  updateAllChecked (): void {
+    if (this.allChecked) {
+      this.methodList = this.methodList.map((item: any) => ({
+        ...item,
+        checked: true
+      }))
+      this.createApiForm.method = [...this.methodList.filter((m:CheckBoxOptionInterface) => (m.checked)).map((x:CheckBoxOptionInterface) => (x.value))]
+      this.showCheckboxGroupValid = false
+    } else {
+      this.methodList = this.methodList.map((item: any) => ({
+        ...item,
+        checked: false
+      }))
+      this.createApiForm.method = []
+      this.showCheckboxGroupValid = true
+    }
+  }
+
+  updateSingleChecked (): void {
+    if (this.methodList.every((item: any) => !item.checked)) {
+      this.allChecked = false
+    } else if (this.methodList.every((item: any) => item.checked)) {
+      this.allChecked = true
+    } else {
+      this.allChecked = false
+    }
+    this.createApiForm.method = [...this.methodList.filter((m:CheckBoxOptionInterface) => (m.checked)).map((x:CheckBoxOptionInterface) => (x.value))]
+    this.showCheckboxGroupValid = this.createApiForm.method.length === 0
+  }
+
   // 返回列表页，当fromList为true时，该页面左侧有分组
   backToList () {
     this.router.navigate(['/', 'router', 'api', 'group', 'list'])
+  }
+
+  requestPathChange () {
+    if (!this.validateForm.controls['proxyPath'].value && this.validateForm.controls['requestPath'].value) {
+      this.validateForm.controls['proxyPath'].setValue('/' + this.validateForm.controls['requestPath'].value)
+    }
+  }
+
+  checkTimeout () {
+    if (
+      this.validateForm.controls['timeout'].value &&
+      this.validateForm.controls['timeout'].value < 1
+    ) {
+      this.validateForm.controls['timeout'].setValue(1)
+    }
+  }
+
+  // 保存转发上游请求头数据时，如果是新建数据，直接加入tableList，如果是编辑数据，需要删除原先同key的数据再保存
+  saveProxyHeader (proxyRef: ApiManagementProxyComponent): void {
+    let proxyValid:boolean = false
+    if (proxyRef.validateProxyHeaderForm.controls['optType'].value === 'DELETE') {
+      proxyValid = !!proxyRef.validateProxyHeaderForm.controls['key'].value
+    } else {
+      proxyValid = proxyRef.validateProxyHeaderForm.valid
+    }
+    if (proxyValid) {
+      if (this.proxyEdit) {
+        for (const index in this.createApiForm.proxyHeader) {
+          if (this.createApiForm.proxyHeader[index].key === this.editData.key && this.createApiForm.proxyHeader[index].optType === this.editData.optType && this.createApiForm.proxyHeader[index].value === this.editData.value) {
+            this.createApiForm.proxyHeader.splice(Number(index), 1)
+            break
+          }
+        }
+      }
+      this.createApiForm.proxyHeader = [{ optType: proxyRef.validateProxyHeaderForm.controls['optType'].value, key: proxyRef.validateProxyHeaderForm.controls['key'].value, value: proxyRef.validateProxyHeaderForm.controls['value'].value }, ...this.createApiForm.proxyHeader]
+      this.modalRef?.close()
+    } else {
+      Object.values(proxyRef.validateProxyHeaderForm.controls).forEach(
+        (control) => {
+          if (control.invalid) {
+            control.markAsDirty()
+            control.updateValueAndValidity({ onlySelf: true })
+          }
+        }
+      )
+    }
   }
 
   // 提交api数据
@@ -402,54 +418,6 @@ export class ApiWebsocketCreateComponent implements OnInit {
           control.updateValueAndValidity({ onlySelf: true })
         }
       })
-    }
-  }
-
-  showCheckboxGroupValid: boolean = false
-
-  requestPathChange () {
-    if (!this.validateForm.controls['proxyPath'].value && this.validateForm.controls['requestPath'].value) {
-      this.validateForm.controls['proxyPath'].setValue('/' + this.validateForm.controls['requestPath'].value)
-    }
-  }
-
-  checkTimeout () {
-    if (
-      this.validateForm.controls['timeout'].value !== null &&
-      this.validateForm.controls['timeout'].value < 1
-    ) {
-      this.validateForm.controls['timeout'].setValue(1)
-    }
-  }
-
-  // 保存转发上游请求头数据时，如果是新建数据，直接加入tableList，如果是编辑数据，需要删除原先同key的数据再保存
-  saveProxyHeader (proxyRef: ApiManagementProxyComponent): void {
-    let proxyValid:boolean = false
-    if (proxyRef.validateProxyHeaderForm.controls['optType'].value === 'DELETE') {
-      proxyValid = !!proxyRef.validateProxyHeaderForm.controls['key'].value
-    } else {
-      proxyValid = proxyRef.validateProxyHeaderForm.valid
-    }
-    if (proxyValid) {
-      if (this.proxyEdit) {
-        for (const index in this.createApiForm.proxyHeader) {
-          if (this.createApiForm.proxyHeader[index].key === this.editData.key && this.createApiForm.proxyHeader[index].optType === this.editData.optType && this.createApiForm.proxyHeader[index].value === this.editData.value) {
-            this.createApiForm.proxyHeader.splice(Number(index), 1)
-            break
-          }
-        }
-      }
-      this.createApiForm.proxyHeader = [{ optType: proxyRef.validateProxyHeaderForm.controls['optType'].value, key: proxyRef.validateProxyHeaderForm.controls['key'].value, value: proxyRef.validateProxyHeaderForm.controls['value'].value }, ...this.createApiForm.proxyHeader]
-      this.modalRef?.close()
-    } else {
-      Object.values(proxyRef.validateProxyHeaderForm.controls).forEach(
-        (control) => {
-          if (control.invalid) {
-            control.markAsDirty()
-            control.updateValueAndValidity({ onlySelf: true })
-          }
-        }
-      )
     }
   }
 }

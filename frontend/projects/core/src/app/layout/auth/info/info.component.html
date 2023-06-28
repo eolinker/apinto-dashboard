@@ -1,5 +1,14 @@
 <div class="full-view">
-  <section class="m-auto mt-[20vh] w-[760px] flex flex-col items-center">
+  <eo-ng-feedback-alert
+    *ngIf="authInfo.status && authInfo.status !== 'normal'"
+    [nzType]="authInfo.status === 'waring' ? 'warning' : 'error'"
+    nzMessage="节点数超出授权"
+    [nzDescription]="
+      authInfo.refer || '节点数超出授权，请尽快更新授权或减少节点到授权数量内'
+    "
+    nzShowIcon
+  ></eo-ng-feedback-alert>
+  <section class="m-auto mt-[20vh] w-max-[760px] flex flex-col items-center">
     <header class="flex flex-col items-center">
       <img
         class="m-auto"
@@ -9,7 +18,7 @@
         alt="apinto"
       />
       <p class="text-[20px] font-bold leading-[29px] mt-[8px]">Apinto</p>
-      <p class="font-medium">V3.0.0 (2023-5-22)</p>
+      <p class="font-medium">V{{ version }} ({{ updateDate }})</p>
     </header>
     <div
       class="flex flex-col items-center mt-[40px]"

@@ -2,11 +2,11 @@
   <div class="mx-auto">
     <span class="flex items-center justify-center"
       ><img
-      [src]="
-      isBusiness
-        ? '../../../assets/apinto-pro.svg'
-        : '../../../assets/apinto.svg'
-    "
+        [src]="
+          isBusiness
+            ? '../../../assets/apinto-pro.svg'
+            : '../../../assets/apinto.svg'
+        "
         alt="apinto"
         style="height: 40px; margin-right: 8px"
       /><span class="text-[24px] font-semibold text-[#101010]"
@@ -28,7 +28,7 @@
   </section>
 
   <section class="flex flex-col items-center mt-[46px] text-[#101010]">
-    <p class="leading-[28px]">Version 3.0.0-20230511</p>
+    <p class="leading-[28px]">Version {{ version }}-{{ updateDate }}</p>
     <p class="leading-[28px]">Powered by https://eolink.com</p>
   </section>
 </div>

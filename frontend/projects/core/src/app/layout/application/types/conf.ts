@@ -146,8 +146,8 @@ export const customAttrTableBody: EO_TBODY_TYPE[] = [
     type: 'input',
     placeholder: '请输入Key',
     checkMode: 'change',
-    check: (item: any) => {
-      return !item || /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(item)
+    check: (key: any) => {
+      return !key || /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(key)
     },
     errorTip: '首字母必须为英文'
   },
@@ -160,7 +160,8 @@ export const customAttrTableBody: EO_TBODY_TYPE[] = [
     type: 'btn',
     btns: [
       {
-        title: '添加'
+        title: '减少',
+        action: 'delete'
       }
     ]
   },
@@ -168,45 +169,64 @@ export const customAttrTableBody: EO_TBODY_TYPE[] = [
     type: 'btn',
     btns: [
       {
-        title: '添加'
+        title: '添加',
+        action: 'add'
       },
       {
-        title: '减少'
+        title: '减少',
+        action: 'delete'
       }
     ]
   }
 ]
 
-export const extraHeaderTableBody:EO_TBODY_TYPE[] = [
+export const extraTableHeadName:THEAD_TYPE[] = [
+  { title: '参数位置' },
+  { title: '参数名' },
+  { title: '参数值' },
+  { title: '生效规则' },
   {
-    key: 'key',
-    type: 'input',
-    placeholder: '请输入Key'
-  },
-  {
-    key: 'value',
-    type: 'input',
-    placeholder: '请输入Value'
-  },
-  {
-    type: 'btn',
-    btns: [
-      {
-        title: '添加'
-      }
-    ]
-  },
-  {
-    type: 'btn',
-    btns: [
-      {
-        title: '添加'
-      },
+    title: '操作',
+    right: true
+  }
+]
 
+export const extraTableBody:EO_TBODY_TYPE[] = [
+  {
+    key: 'position'
+  },
+  {
+    key: 'key'
+  },
+  { key: 'value' },
+  {
+    key: 'conflict'
+  },
+  {
+    type: 'btn',
+    right: true,
+    btns: [
       {
-        title: '减少'
+        title: '修改'
+      },
+      {
+        title: '删除'
       }
     ]
+  }]
+
+export const extraConflictList:SelectOption[] = [
+  {
+    label: '替换原参数值',
+    value: 'convert'
+  },
+  {
+    label: '原参数值不存在时，添加额外参数',
+    value: 'origin'
+  },
+  {
+    label: '原参数值存在时返回错误',
+    value: 'error'
   }
 ]
 

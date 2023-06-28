@@ -420,7 +420,7 @@ func (d *dynamicService) Online(ctx context.Context, namespaceId int, profession
 
 		err = d.saveVersion(ctx, version, history, c.Name, c.Addr)
 		if err != nil {
-			errInfo := fmt.Sprintf("fail to online config in cluster(%s),addr is %s,profession is %s,uuid is %s,config is %s", c.Name, c.Addr, profession, name, config)
+			errInfo := fmt.Sprintf("fail to online config in cluster(%s),addr is %s,profession is %s,uuid is %s,config is %s,err is %s", c.Name, c.Addr, profession, name, config, err.Error())
 			log.Error(errInfo)
 			failClusters = append(failClusters, errInfo)
 			continue
@@ -657,26 +657,47 @@ func (d *dynamicService) ClusterStatus(ctx context.Context, namespaceId int, pro
 
 func (d *dynamicService) Create(ctx context.Context, namespaceId int, profession string, module string, skill string, title string, name string, driver string, description string, body string, updater int, depend ...string) error {
 	now := time.Now()
-	info := &dynamic_entry.Dynamic{
-		NamespaceId: namespaceId,
-		Name:        name,
-		Title:       title,
-		Skill:       skill,
-		Driver:      driver,
-		Description: description,
-		Version:     common.GenVersion(now),
-		Config:      body,
-		Profession:  profession,
-		Updater:     updater,
-		CreateTime:  now,
-		UpdateTime:  now,
+	info, err := d.dynamicStore.First(ctx, map[string]interface{}{
+		"namespace":  namespaceId,
+		"profession": profession,
+		"name":       name,
+	})
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return err
 	}
+	if info == nil {
+		info = &dynamic_entry.Dynamic{
+			NamespaceId: namespaceId,
+			Name:        name,
+			Title:       title,
+			Skill:       skill,
+			Driver:      driver,
+			Description: description,
+			Version:     common.GenVersion(now),
+			Config:      body,
+			Profession:  profession,
+			Updater:     updater,
+			CreateTime:  now,
+			UpdateTime:  now,
+		}
+	} else {
+		info.Title = title
+		info.Skill = skill
+		info.Driver = driver
+		info.Description = description
+		info.Version = common.GenVersion(now)
+		info.Config = body
+		info.Updater = updater
+		info.UpdateTime = now
+	}
+
 	ids, err := getDependIDs([]byte(body), depend)
 	if err != nil {
 		return err
 	}
+
 	return d.dynamicQuoteStore.Transaction(ctx, func(txCtx context.Context) error {
-		err = d.dynamicStore.Insert(txCtx, info)
+		err = d.dynamicStore.Save(txCtx, info)
 		if err != nil {
 			return err
 		}

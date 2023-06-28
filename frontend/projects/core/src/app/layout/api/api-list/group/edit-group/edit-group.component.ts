@@ -74,9 +74,6 @@ export class ApiManagementEditGroupComponent implements OnInit {
     private api:ApiService,
     private fb: UntypedFormBuilder,
     private router:Router) {
-    this.validateApiGroupForm = this.fb.group({
-      groupName: [this.groupName, [Validators.required]]
-    })
   }
 
   ngOnInit (): void {
@@ -93,7 +90,7 @@ export class ApiManagementEditGroupComponent implements OnInit {
         if (resp.code === 0) {
           this.message.success(resp.msg || '添加成功', { nzDuration: 1000 })
           this.router.navigate(['/', 'router', 'api', 'group', 'list', uuid])
-          this.closeModal && this.closeModal()
+          this.closeModal && this.closeModal(resp)
         }
       })
     } else {
@@ -112,7 +109,7 @@ export class ApiManagementEditGroupComponent implements OnInit {
       this.api.put('group/api/' + groupUuid, { name: this.validateApiGroupForm.controls['groupName'].value }).subscribe((resp:EmptyHttpResponse) => {
         if (resp.code === 0) {
           this.message.success(resp.msg || '修改成功', { nzDuration: 1000 })
-          this.closeModal && this.closeModal()
+          this.closeModal && this.closeModal(resp)
         }
       })
     } else {

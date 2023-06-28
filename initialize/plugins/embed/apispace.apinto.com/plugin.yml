@@ -1,0 +1,20 @@
+id: "apispace.apinto.com"
+name: "apispace"
+cname: "APISpace接口商店"
+resume: "APISpace是Eolink旗下专业的API开放与交易平台，为超过100万开发者提供专业的API服务，所有 API均提供免费试用，让您无忧探索广阔的API世界"
+version: "v1.0.1"
+icon: "apispace.jpg"
+driver: "remote"
+type: 2 #0为框架模块 1为核心模块 2为内置模块 3为非内置
+auto: true
+is_can_disable: true
+is_can_uninstall: false
+visible_in_navigation: true
+visible_in_market: true
+front:
+navigation: "navigation.api_market"
+group_id: ""
+define:
+  internet: true
+  server: "https://www.apispace.com"
+  path: "/explore/service/?utm_source=apinto"

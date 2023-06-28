@@ -29,7 +29,7 @@ type IAPIService interface {
 	GetAPIListItemAll(ctx context.Context, namespaceID int) ([]*apimodel.APIListItem, error)
 	GetAPIsForSync(ctx context.Context, namespaceID int) ([]*apimodel.APIVersionInfo, error)
 
-	CreateAPI(ctx context.Context, namespaceID int, operator int, input *api_dto.APIInfo) error
+	CreateAPI(ctx context.Context, namespaceID int, operator int, input *api_dto.APIInfo) (string, int, error)
 	UpdateAPI(ctx context.Context, namespaceID int, operator int, input *api_dto.APIInfo) error
 	DeleteAPI(ctx context.Context, namespaceId, operator int, uuid string) error
 	GetGroups(ctx context.Context, namespaceId int, parentUuid, queryName string) (*group_model.CommonGroupRoot, []*group_model.CommonGroupApi, error)

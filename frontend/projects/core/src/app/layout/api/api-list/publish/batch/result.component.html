@@ -1,0 +1,19 @@
+<div class="mt-0 drawer-table">
+  <eo-ng-apinto-table
+    class="drawer-table"
+    [nzTbody]="batchPublishTableBody"
+    [nzThead]="batchPublishTableHeadName"
+    [nzData]="batchPublishTableList"
+    [nzTrStyleFn]="trStyleFn"
+    [nzNoScroll]="true"
+    [nzLoading]="loading"
+    [nzLoadingIndicator]="indicatorTemplate"
+  >
+  </eo-ng-apinto-table>
+  <ng-template #indicatorTemplate>
+    <nz-spin
+      class="w-[100%] h-[100%] flex items-center"
+      [nzTip]="getTip()"
+    ></nz-spin>
+  </ng-template>
+</div>

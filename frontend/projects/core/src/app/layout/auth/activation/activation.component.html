@@ -1,7 +1,7 @@
 <eo-ng-layout style="overflow: hidden">
   <eo-ng-header *ngIf="!updateAuth">
     <div class="logo">
-      <img src="../../../../assets/apinto.svg" alt="apinto" />
+      <img src="../../../../assets/apinto-pro.svg" alt="apinto" />
     </div>
   </eo-ng-header>
 
@@ -19,7 +19,7 @@
           alt="apinto"
         />
         <p class="text-[20px] font-bold leading-[29px] mt-[8px]">Apinto</p>
-        <p class="font-medium">V3.0.0 (2023-5-22)</p>
+        <p class="font-medium">V{{ version }} ({{ updateDate }})</p>
       </header>
       <div
         class="flex flex-col items-center mt-[30px]"

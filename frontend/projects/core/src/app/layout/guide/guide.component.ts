@@ -3,6 +3,8 @@ import { EoNgNavigationService } from '../../service/eo-ng-navigation.service'
 import { ApiService } from '../../service/api.service'
 import { Router } from '@angular/router'
 import { GuideStepList, StepItem, TutorialItem, TutorialsList } from './conf'
+import { TryBusinessAddr } from '../../constant/conf'
+import { environment } from 'projects/core/src/environments/environment'
 
 @Component({
   selector: 'eo-ng-guide',
@@ -31,6 +33,7 @@ export class GuideComponent implements OnInit {
   stepList:Array<StepItem> = [...GuideStepList]
   tutorialsList:Array<TutorialItem> = [...TutorialsList]
   btnLoading:boolean = true
+  isBusiness:boolean = environment.isBusiness
 
   constructor (private navigationService:EoNgNavigationService, private api:ApiService, private router:Router) {}
   ngOnInit (): void {
@@ -73,5 +76,9 @@ export class GuideComponent implements OnInit {
 
   goToGithub (url?:string) {
     window.open(`https://github.com/eolinker/apinto${url || ''}`)
+  }
+
+  goToRry () {
+    window.open(TryBusinessAddr)
   }
 }

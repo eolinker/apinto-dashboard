@@ -11,13 +11,13 @@ import { Router } from '@angular/router'
 })
 export class CacheComponent {
   constructor (private router:Router) {
-    if (this.router.url === '/serv-governance/cache') {
+    if (this.router.url.split('?')[0] === '/serv-governance/cache') {
       this.router.navigate(['/', 'serv-governance', 'cache', 'group'])
     }
   }
 
   ngDoCheck () {
-    if (this.router.url === '/serv-governance/cache') {
+    if (this.router.url.split('?')[0] === '/serv-governance/cache') {
       this.router.navigate(['/', 'serv-governance', 'cache', 'group'])
     }
   }

@@ -5,11 +5,12 @@ import { SelectOption } from 'eo-ng-select'
 import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { EoNgMyValidators } from 'projects/core/src/app/constant/eo-ng-validator'
 import { setFormValue } from 'projects/core/src/app/constant/form'
-import { responseHeaderTableBody } from 'projects/core/src/app/constant/table.conf'
 import { ApiService } from 'projects/core/src/app/service/api.service'
 import { EoNgMessageService } from 'projects/core/src/app/service/eo-ng-message.service'
 import { contentTypesList, methodsList, noticeTypesList } from '../../types/conf'
 import { WebhookData } from '../../types/type'
+import { responseHeaderTableBody } from '../../../serv-governance/types/conf'
+import { EO_TBODY_TYPE } from 'projects/eo-ng-apinto-table/src/public-api'
 
 @Component({
   selector: 'eo-ng-system-webhook-config',
@@ -27,13 +28,12 @@ export class SystemWebhookConfigComponent implements OnInit {
   methodsList:SelectOption[] = methodsList
   contentTypesList:SelectOption[] = contentTypesList
   noticeTypesList:SelectOption[] = noticeTypesList
+  responseHeaderTableBody:EO_TBODY_TYPE[] = [...responseHeaderTableBody]
   responseHeaderList: Array<{
     key: string
     value: string
     [key: string]: any
   }> = [{ key: '', value: '' }]
-
-  responseHeaderTableBody: Array<any> = [...responseHeaderTableBody]
 
   constructor (
     private message: EoNgMessageService,
@@ -53,53 +53,27 @@ export class SystemWebhookConfigComponent implements OnInit {
   }
 
   ngOnInit (): void {
-    for (const resBody of this.responseHeaderTableBody) {
-      resBody.disabledFn = () => {
-        return this.nzDisabled
-      }
+    this.responseHeaderTableBody[0].disabledFn = () => {
+      return this.nzDisabled
     }
-
-    this.responseHeaderTableBody.push(
-      {
-        type: 'btn',
-        showFn: (item: any) => {
-          return item === this.responseHeaderList[0]
-        },
-        btns: [
-          {
-            title: '添加',
-            action: 'add',
-            disabledFn: () => {
-              return this.nzDisabled
-            }
-          }
-        ]
-      })
-
-    this.responseHeaderTableBody.push(
-      {
-        type: 'btn',
-        showFn: (item: any) => {
-          return item !== this.responseHeaderList[0]
-        },
-        btns: [
-          {
-            title: '添加',
-            action: 'add',
-            disabledFn: () => {
-              return this.nzDisabled
-            }
-          },
-          {
-            title: '减少',
-            action: 'delete',
-            disabledFn: () => {
-              return this.nzDisabled
-            }
-          }
-        ]
-      })
-
+    this.responseHeaderTableBody[1].disabledFn = () => {
+      return this.nzDisabled
+    }
+    this.responseHeaderTableBody[2].showFn = (item: any) => {
+      return item !== this.responseHeaderList[this.responseHeaderList.length - 1] && !item.key
+    }
+    this.responseHeaderTableBody[2].btns[0].disabledFn = () => {
+      return this.nzDisabled
+    }
+    this.responseHeaderTableBody[3].showFn = (item: any) => {
+      return item !== this.responseHeaderList[this.responseHeaderList.length - 1] && item.key
+    }
+    this.responseHeaderTableBody[3].btns[0].disabledFn = () => {
+      return this.nzDisabled
+    }
+    this.responseHeaderTableBody[3].btns[1].disabledFn = () => {
+      return this.nzDisabled
+    }
     if (this.webhookId) {
       this.getWebhookMessage(this.webhookId)
     }
@@ -126,7 +100,7 @@ export class SystemWebhookConfigComponent implements OnInit {
       for (const key of keys) {
         res.push({ key: key, value: rawData[key] })
       }
-      return res
+      return [...res, { key: '', value: '' }]
     }
     return [{ key: '', value: '' }]
   }

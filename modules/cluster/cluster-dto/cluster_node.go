@@ -9,6 +9,9 @@ type ClusterNode struct {
 	Status      enum.ClusterNodeStatus `json:"status"`
 }
 
+type ClusterNodeSimple struct {
+	Name string `json:"name"`
+}
 type ClusterNodeInput struct {
 	Source      string `json:"source"`
 	ClusterAddr string `json:"cluster_addr"`

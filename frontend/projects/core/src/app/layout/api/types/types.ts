@@ -1,5 +1,7 @@
 import { PublishStatus } from '../../../constant/type'
 
+export type APIProtocol = 'http'|'websocket'
+
 export interface RouterEnum{
     apiId:string
     name:string
@@ -17,6 +19,25 @@ export interface ProxyHeaderData{
     optType:string
     key:string
     value:string
+}
+
+export type ApiMessage = {
+    name:string
+    uuid:string
+    groupUuid:string
+    desc: string
+      isDisable: boolean
+      scheme: string
+      requestPath: string
+      service:string
+      method: Array<string>
+      proxyPath:string
+      hosts: Array<string>
+      timeout: number,
+      retry: number,
+      match:Array<MatchData>
+      proxyHeader: Array<ProxyHeaderData>
+      templateUuid: string
 }
 
 // api创建表单时部分不能放在FormGroup的数据
