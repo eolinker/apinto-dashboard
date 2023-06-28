@@ -1,5 +1,4 @@
-/* eslint-disable dot-notation */
-import { Component, Output, EventEmitter, TemplateRef, ViewChild, OnInit } from '@angular/core'
+import { Component, Output, EventEmitter, TemplateRef, ViewChild, OnInit, AfterViewInit } from '@angular/core'
 import { FormGroup, UntypedFormBuilder, Validators } from '@angular/forms'
 import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feedback'
 import { SelectOption } from 'eo-ng-select'
@@ -21,7 +20,7 @@ import { APIImportData } from '../../types/types'
   styles: [
   ]
 })
-export class ApiImportComponent implements OnInit {
+export class ApiImportComponent implements AfterViewInit {
   @ViewChild('importContentTpl', { read: TemplateRef, static: true }) importContentTpl: TemplateRef<any> | undefined
   @ViewChild('importFooterTpl', { read: TemplateRef, static: true }) importFooterTpl: TemplateRef<any> | undefined
   @ViewChild('methodTpl', { read: TemplateRef, static: true }) methodTpl: TemplateRef<any> | undefined
@@ -53,7 +52,7 @@ export class ApiImportComponent implements OnInit {
     private fb: UntypedFormBuilder) {
   }
 
-  ngOnInit (): void {
+  ngAfterViewInit ():void {
     // 表格checkbox
     this.resultTableThead[0].click = (item:any) => {
       this.changeApisSet(item, 'all')
@@ -65,9 +64,6 @@ export class ApiImportComponent implements OnInit {
     this.resultTableTbody[2].check = (value:any) => {
       return !!value
     }
-  }
-
-  ngAfterViewInit ():void {
     this.resultTableTbody[3].title = this.methodTpl
   }
 
