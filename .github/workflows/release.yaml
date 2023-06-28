@@ -20,7 +20,7 @@ jobs:
           node-version: '16'
       - name: Yarn install
         run: |
-          cd frontend && yarn install --registry https://registry.npmmirror.com --legacy-peer-deps
+          cd frontend && rm -f yarn.lock && yarn install --registry https://registry.npmmirror.com --legacy-peer-deps
           yarn build
       - name: print files
         run: |
