@@ -90,6 +90,7 @@ export class AuthInfoComponent implements OnInit {
     if (this.updateAuth) {
       url = 'reactivation'
     }
+
     const formData = new FormData()
     formData.append('authFile', this.authFile as any)
     this.api.authPostWithFile(url, formData)
@@ -120,7 +121,7 @@ export class AuthInfoComponent implements OnInit {
       if (e.file.response.code === 0) {
         this.message.success(e.file.response.msg || '操作成功')
         this.showActivationInfo = true
-        this.authInfo.infos = e.file.response.data.infos
+        this.authInfo = e.file.response.data
       } else {
         this.message.error(e.file.response.msg || '操作失败')
       }
