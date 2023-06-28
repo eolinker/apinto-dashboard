@@ -30,10 +30,25 @@
       </eo-ng-dropdown-menu>
 
       <eo-ng-api-import (flashList)="getApisData()"></eo-ng-api-import>
-      <eo-ng-api-batch-publish
-        [(apisSet)]="apisSet"
-        (flashList)="getApisData()"
-      ></eo-ng-api-batch-publish>
+
+      <button
+        eo-ng-button
+        class="ml-btnybase"
+        eoNgUserAccess="router/api"
+        [disabled]="apisSet.size === 0"
+        (click)="batchPublish('online')"
+      >
+        上线
+      </button>
+      <button
+        eo-ng-button
+        class="ml-btnybase"
+        eoNgUserAccess="router/api"
+        [disabled]="apisSet.size === 0"
+        (click)="batchPublish('offline')"
+      >
+        下线
+      </button>
     </div>
     <eo-ng-search-input-group
       [eoInputVal]="apiNameForSear"

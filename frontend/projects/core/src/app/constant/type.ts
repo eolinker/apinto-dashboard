@@ -1,10 +1,10 @@
+/* eslint-disable camelcase */
 export interface EmptyHttpResponse{
   code:number
   data:{}
   msg:string
 }
 
-/* eslint-disable camelcase */
 export interface Operator{
     userId:number,
     username:string,
@@ -51,6 +51,19 @@ export interface ApiGroupsData{
   children:ApiGroupsData[]
   isDelete:boolean
   [key:string]:any
+}
+
+export type ModuleOpenConfigDataType = {
+  name:string
+  value:string
+  type?:string
+}
+export type ModuleOpenConfigData = {
+  name:string
+  url:string
+  query:Array<ModuleOpenConfigDataType>
+  header:Array<ModuleOpenConfigDataType>
+  initialize:Array<ModuleOpenConfigDataType>
 }
 
 // API目录
@@ -143,8 +156,13 @@ export interface PublishManagementData{
 }
 
 // 集群列表接口
+
+export type ClusterEnumData = {
+  name:string, uuid:string,
+  title:string
+}
 export interface ClusterEnum{
-  clusters:Array<{name:string}>
+  clusters:Array<ClusterEnumData>
   name:string
 }
 

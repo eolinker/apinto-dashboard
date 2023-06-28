@@ -91,9 +91,13 @@ export class MatchTableComponent implements OnInit {
           nzWidth: MODAL_SMALL_SIZE,
           nzContent: MatchFormComponent,
           nzComponentParams: {
-            data: data, closeDrawer: this.closeDrawer, matchList: this.matchList, editData: this.editData
+            data: data,
+            closeDrawer: this.closeDrawer,
+            matchList: this.matchList,
+            editData: this.editData
           },
           nzOkDisabled: this.nzDisabled,
+          nzOkText: data ? '提交' : '保存',
           nzOnOk: (component:MatchFormComponent) => {
             component.saveMatch()
             this.matchList = component.matchList

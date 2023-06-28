@@ -12,7 +12,6 @@ import { Router } from '@angular/router'
 import { MODAL_NORMAL_SIZE, MODAL_SMALL_SIZE } from '../../../constant/app.config'
 import { ClusterSimpleOption } from '../../../constant/type'
 import { Subscription } from 'rxjs'
-import { ApplicationPublishComponent } from '../publish/publish.component'
 import { ApplicationCreateComponent } from '../create/create.component'
 import { ApplicationListData } from '../types/types'
 import { EoNgApplicationService } from '../application.service'
@@ -21,8 +20,7 @@ import { SelectOption } from 'eo-ng-select'
 import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { NzModalRef } from 'ng-zorro-antd/modal'
 import { ApiService } from '../../../service/api.service'
-import { EoNgNavigationService } from '../../../service/app-config.service'
-import { BaseInfoService } from '../../../service/base-info.service'
+import { EoNgNavigationService } from '../../../service/eo-ng-navigation.service'
 
 @Component({
   selector: 'eo-ng-application-management-list',
@@ -57,7 +55,6 @@ export class ApplicationManagementListComponent implements OnInit {
     public modalService:EoNgFeedbackModalService,
     public api:ApiService,
     public router:Router,
-    private baseInfo:BaseInfoService,
     public navigationService: EoNgNavigationService) {
 
   }
@@ -118,65 +115,7 @@ export class ApplicationManagementListComponent implements OnInit {
   }
 
   publish (value:any) {
-    this.modalRef = this.modalService.create({
-      nzTitle: `${value.data.name}上线管理`,
-      nzWidth: MODAL_NORMAL_SIZE,
-      nzContent: ApplicationPublishComponent,
-      nzComponentParams: {
-        name: value.data.name,
-        id: value.data.id,
-        desc: value.data.desc,
-        closeModal: () => { this.modalRef?.close() },
-        nzDisabled: this.nzDisabled
-      },
-      nzFooter: [{
-        label: '取消',
-        type: 'default',
-        onClick: () => {
-          this.modalRef?.close()
-        }
-      },
-      {
-        label: '下线',
-        danger: true,
-        onClick: (context:ApplicationPublishComponent) => {
-          return new Promise((resolve, reject) => {
-            context.offline().subscribe((resp) => {
-              if (resp) {
-                this.modalRef?.close()
-                resolve(true)
-                this.getTableData()
-              } else {
-                reject(new Error())
-              }
-            })
-          })
-        },
-        disabled: () => {
-          return this.nzDisabled
-        }
-      },
-      {
-        label: '上线',
-        type: 'primary',
-        onClick: (context:ApplicationPublishComponent) => {
-          return new Promise((resolve, reject) => {
-            context.online().subscribe((resp) => {
-              if (resp) {
-                resolve(true)
-                this.modalRef?.close()
-                this.getTableData()
-              } else {
-                reject(new Error())
-              }
-            })
-          })
-        },
-        disabled: () => {
-          return this.nzDisabled
-        }
-      }]
-    })
+    this.service.publishAppModal(value.data, this)
   }
 
   addData () {
@@ -222,7 +161,6 @@ export class ApplicationManagementListComponent implements OnInit {
 
   // 删除单条数据
    deleteData = (items:{id:string, [k:string]:any}) => {
-     // TODO
      this.api.delete('application', { appId: items.id }).subscribe((resp:any) => {
        if (resp.code === 0) {
          this.message.success(resp.msg || '删除成功!')

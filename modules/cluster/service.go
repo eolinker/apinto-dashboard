@@ -16,7 +16,6 @@ const (
 
 type IApintoClient interface {
 	GetClient(ctx context.Context, clusterId int) (v1.IClient, error)
-	SetClient(namespace, clusterId int)
 }
 type IClusterCertificateService interface {
 	Insert(ctx context.Context, operator, namespaceId int, clusterName, key, pem string) error
@@ -39,34 +38,26 @@ type IClusterService interface {
 	Insert(ctx context.Context, namespaceId, userId int, clusterInput *cluster_dto.ClusterInput) error
 	QueryByNamespaceId(ctx context.Context, namespaceId int, clusterName string) (*cluster_model.Cluster, error)
 	QueryListByNamespaceId(ctx context.Context, namespaceId int) ([]*cluster_model.Cluster, error)
+	QueryListByClusterNames(ctx context.Context, namespaceId int, clusterNames []string) ([]*cluster_model.Cluster, error)
 
 	DeleteByNamespaceIdByName(ctx context.Context, namespaceId, userId int, name string) error
 	Update(ctx context.Context, namespaceId, userId int, name string, clusterInput *cluster_dto.ClusterInput) error
 	UpdateAddr(ctx context.Context, userId, clusterId int, addr, uuid string) error
 	ClusterCount(ctx context.Context, namespaceId int) (int64, error)
 }
-type IClusterConfigService interface {
-	Get(ctx context.Context, namespaceId int, clusterName, configType string) (interface{}, error)
-	Edit(ctx context.Context, namespaceId, operator int, clusterName, configType string, config []byte) error
-	Enable(ctx context.Context, namespaceId, operator int, clusterName, configType string) error
-	Disable(ctx context.Context, namespaceId, operator int, clusterName, configType string) error
-
-	IsConfigTypeExist(configType string) bool
-	CheckInput(configType string, config []byte) error
-	FormatOutput(configType string, operator string, config *cluster_entry.ClusterConfig) interface{}
-	ToApinto(client v1.IClient, name, configType string, config []byte) error
-	OfflineApinto(client v1.IClient, name, configType string) error
-}
 
 type IClusterNodeService interface {
 	QueryList(ctx context.Context, namespaceId int, clusterName string) ([]*cluster_model.ClusterNode, bool, error)
-	QueryByClusterIds(ctx context.Context, clusterIds ...int) ([]*cluster_model.ClusterNode, error)
+	List(ctx context.Context, namespaceId int, clusterName string) ([]*cluster_model.Node, error)
+	QueryByClusterId(ctx context.Context, id int) ([]*cluster_model.Node, error)
+	QueryAllCluster(ctx context.Context) ([]*cluster_model.Node, error)
+	QueryAdminAddrByClusterId(ctx context.Context, id int) ([]string, error)
 	Reset(ctx context.Context, namespaceId, userId int, clusterName, clusterAddr, source string) error
 	Update(ctx context.Context, namespaceId int, clusterName string) error
 	Delete(ctx context.Context, namespaceId int, clusterId int) error
-	NodeRepeatContrast(ctx context.Context, namespaceId, clusterId int, newList []*cluster_model.ClusterNode) error
-	Insert(ctx context.Context, nodes []*cluster_model.ClusterNode) error
-	GetNodesByUrl(addr string) ([]*cluster_model.ClusterNode, error)
+	NodeRepeatContrast(ctx context.Context, namespaceId, clusterId int, newList []*cluster_model.Node) error
+	Insert(ctx context.Context, nodes []*cluster_model.Node) error
+	GetNodesByUrl(addr string) ([]*cluster_model.Node, error)
 	GetClusterInfo(addr string) (*v1.ClusterInfo, error)
 }
 

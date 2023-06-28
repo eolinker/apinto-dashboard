@@ -1,98 +1,65 @@
-/*
- * @Author: MengjieYang yangmengjie@eolink.com
- * @Date: 2022-08-14 22:56:33
- * @LastEditors: MengjieYang yangmengjie@eolink.com
- * @LastEditTime: 2022-09-20 22:01:52
- * @FilePath: /apinto/src/app/layout/upstream/service-discovery-content/service-discovery-content.component.spec.ts
- * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
- */
-import { ComponentFixture, fakeAsync, flush, TestBed } from '@angular/core/testing'
-import { NzOutletModule } from 'ng-zorro-antd/core/outlet'
-import { NzDrawerModule } from 'ng-zorro-antd/drawer'
-import { HttpClientModule } from '@angular/common/http'
-import { ApiService, API_URL } from 'projects/core/src/app/service/api.service'
-import { RouterModule } from '@angular/router'
-import { ElementRef, Renderer2, ChangeDetectorRef } from '@angular/core'
+import { ComponentFixture, TestBed, discardPeriodicTasks, fakeAsync, tick } from '@angular/core/testing'
+import { ComponentModule } from 'projects/core/src/app/component/component.module'
 import { APP_BASE_HREF } from '@angular/common'
+import { HttpClientModule } from '@angular/common/http'
+import { ElementRef, Renderer2, ChangeDetectorRef } from '@angular/core'
+import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { NoopAnimationsModule } from '@angular/platform-browser/animations'
-import { NzNoAnimationModule } from 'ng-zorro-antd/core/no-animation'
-import { NzOverlayModule } from 'ng-zorro-antd/core/overlay'
-import { environment } from 'projects/core/src/environments/environment'
-import { BidiModule } from '@angular/cdk/bidi'
+import { NavigationEnd, Router, RouterModule } from '@angular/router'
 import { Overlay } from '@angular/cdk/overlay'
-import { of } from 'rxjs'
-import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feedback'
-import { FormsModule } from '@angular/forms'
-
+import { EoNgFeedbackMessageService, EoNgFeedbackModalModule, EoNgFeedbackModalService, EoNgFeedbackTooltipModule } from 'eo-ng-feedback'
+import { NzNoAnimationModule } from 'ng-zorro-antd/core/no-animation'
+import { NzOutletModule } from 'ng-zorro-antd/core/outlet'
+import { NzOverlayModule } from 'ng-zorro-antd/core/overlay'
+import { BidiModule } from '@angular/cdk/bidi'
+import { MockRenderer, MockMessageService, MockEnsureService, MockEmptySuccessResponse, MockApiSource, MockApisList, MockApisList2 } from 'projects/core/src/app/constant/spec-test'
+import { BehaviorSubject, of } from 'rxjs'
+import { API_URL, ApiService } from 'projects/core/src/app/service/api.service'
+import { environment } from 'projects/core/src/environments/environment'
+import { NzFormModule } from 'ng-zorro-antd/form'
+import { EoNgInputModule } from 'eo-ng-input'
+import { EoNgTreeModule } from 'eo-ng-tree'
+import { EoNgButtonModule } from 'eo-ng-button'
+import { EoNgSwitchModule } from 'eo-ng-switch'
+import { EoNgCheckboxModule } from 'eo-ng-checkbox'
+import { EoNgApintoTableModule } from 'projects/eo-ng-apinto-table/src/public-api'
 import { EoNgSelectModule } from 'eo-ng-select'
-import { LayoutModule } from 'projects/core/src/app/layout/layout.module'
-import { EoNgTableModule } from 'eo-ng-table'
-import { ApiMessageComponent } from '../message/message.component'
-import { ApiPublishComponent } from '../publish/publish.component'
+import { BaseInfoService } from 'projects/core/src/app/service/base-info.service'
+import { LayoutModule } from '../../../layout.module'
+import { routes } from '../../api-routing.module'
 import { ApiManagementListComponent } from './list.component'
-import { ApiCreateComponent } from '../create/create.component'
+import { EoNgDropdownModule } from 'eo-ng-dropdown'
 
-class MockRenderer {
-  removeAttribute (element: any, cssClass: string) {
-    return cssClass + 'is removed from' + element
-  }
+export class MockElementRef extends ElementRef {
+  constructor () { super(null) }
 }
 
-class MockMessageService {
-  success () {
-    return 'success'
-  }
-
-  error () {
-    return 'error'
-  }
-}
-
-class MockEnsureService {
-  create () {
-    return 'modal is create'
-  }
-}
-
-jest.mock('uuid', () => {
-  return {
-    v4: () => 123456789
-  }
-})
-
-describe('ApiManagementListComponent test as editPage is false', () => {
-  let component: ApiManagementListComponent
+describe('#init ApiManagementListComponent', () => {
+  let component:ApiManagementListComponent
   let fixture: ComponentFixture<ApiManagementListComponent>
-  class MockElementRef extends ElementRef {
-    constructor () { super(null) }
+  let httpCommonService:any
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  let spyDeleteApiService:jest.SpyInstance<any>
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  let spyApiService:jest.SpyInstance<any>
+  const eventsSub = new BehaviorSubject<any>(null)
+  const routerStub = {
+    events: eventsSub,
+    url: '',
+    navigate: (...args:Array<string>) => {
+      eventsSub.next(new NavigationEnd(1, args.join('/'), args.join('/')))
+    }
   }
+  global.structuredClone = (val:any) => JSON.parse(JSON.stringify(val))
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        NzOverlayModule, FormsModule, EoNgSelectModule, LayoutModule,
-        BidiModule, NoopAnimationsModule, NzNoAnimationModule,
-        NzDrawerModule, NzOutletModule, HttpClientModule,
-        EoNgTableModule,
-        RouterModule.forRoot([
-          {
-            path: '',
-            component: ApiManagementListComponent
-          },
-          {
-            path: 'message',
-            component: ApiMessageComponent
-          },
-          {
-            path: 'publish',
-            component: ApiPublishComponent
-          },
-          {
-            path: 'router/create',
-            component: ApiCreateComponent
-          }
-        ]
-        )
+        NzOverlayModule, FormsModule, ReactiveFormsModule, ComponentModule, LayoutModule,
+        BidiModule, NoopAnimationsModule, NzNoAnimationModule, NzOutletModule, HttpClientModule,
+        RouterModule.forRoot(routes), NzFormModule, EoNgInputModule, EoNgTreeModule, EoNgButtonModule,
+        EoNgSwitchModule, EoNgCheckboxModule, EoNgApintoTableModule, EoNgSelectModule, EoNgFeedbackModalModule,
+        EoNgFeedbackTooltipModule, EoNgDropdownModule
       ],
       declarations: [ApiManagementListComponent
       ],
@@ -104,384 +71,360 @@ describe('ApiManagementListComponent test as editPage is false', () => {
         { provide: Renderer2, useClass: MockRenderer },
         { provide: EoNgFeedbackMessageService, useClass: MockMessageService },
         { provide: EoNgFeedbackModalService, useClass: MockEnsureService },
-        { provide: ChangeDetectorRef, useClass: ChangeDetectorRef }
-      ]
+        { provide: ChangeDetectorRef, useClass: ChangeDetectorRef },
+        { provide: Router, useValue: routerStub }
+      ],
+      teardown: { destroyAfterEach: false }
     }).compileComponents()
-
-    Object.defineProperty(window, 'open', {
-      value: jest.fn(() => { return { matches: true } })
-    })
 
     fixture = TestBed.createComponent(ApiManagementListComponent)
     component = fixture.componentInstance
+
     fixture.detectChanges()
+
+    httpCommonService = fixture.debugElement.injector.get(ApiService)
+
+    spyApiService = jest.spyOn(httpCommonService, 'get').mockImplementation(
+      (...args) => {
+        switch (args[0]) {
+          case 'routers':
+            return of(MockApisList)
+          case 'router/source':
+            return of(MockApiSource)
+          default:
+            return of(MockEmptySuccessResponse)
+        }
+      }
+    )
+
+    spyDeleteApiService = jest.spyOn(httpCommonService, 'delete').mockReturnValue(
+      of(MockEmptySuccessResponse)
+    )
   })
-  it('should create', () => {
+
+  it('should create and init component as creating a new api', fakeAsync(() => {
     expect(component).toBeTruthy()
-  })
-
-  it('click table btns', () => {
+    expect(component.sourcesList).toEqual([])
+    expect(component.apisForm.apis).toEqual([])
+    expect(component.apisForm.total).toEqual(0)
+    expect(component.apisForm.pageNum).toEqual(1)
+    expect(component.apisForm.pageSize).toEqual(20)
+    expect(component.nzDisabled).toEqual(false)
     // @ts-ignore
-    const spyRouter = jest.spyOn(component.router, 'navigate')
-    expect(spyRouter).toHaveBeenCalledTimes(0)
-    const open = jest.fn()
-    Object.defineProperty(window, 'open', open)
-    expect(open).not.toHaveBeenCalled()
+    jest.replaceProperty(fixture.debugElement.injector.get(BaseInfoService), '_allParams', {
+      apiGroupId: 'mockApiGroupId'
+    })
+    component.ngOnInit()
+    component.ngAfterViewInit()
+    fixture.detectChanges()
+    tick(500)
+    expect(component.sourcesList).toEqual([
+      { text: '自建', value: 'self-build:-1:' },
+      { text: '导入', value: 'import:-1:' },
+      { text: 'Apikit', value: 'sync:1:' },
+      { text: 'Postcat', value: 'sync:2:' }
+    ])
+    // @ts-ignore
+    expect(component.baseInfo.allParamsInfo.apiGroupId).toEqual('mockApiGroupId')
+    expect(component.nzDisabled).toEqual(false)
+    expect(component.apisTableHeadName.length).toEqual(12)
+    expect(component.apisTableBody.length).toEqual(12)
+    expect(component.apisForm.apis).not.toEqual([])
+    expect(component.apisForm.groupUuid).toEqual('mockApiGroupId')
+    expect(component.apisForm.total).toEqual(7)
+    expect(component.apisForm.pageNum).toEqual(1)
+    expect(component.apisForm.pageSize).toEqual(20)
+    expect(component.apiTableLoading).toEqual(false)
+    discardPeriodicTasks()
+  }))
 
-    const item = { key: 'test' }
-    component.apisTableBody[6].btns[0].click(item)
-    expect(spyRouter).toHaveBeenCalledTimes(1)
-    component.apisTableBody[6].btns[1].click(item)
-    expect(spyRouter).toHaveBeenCalledTimes(2)
-    // component.onlineResultTableBody[4].btns[0].click({ solution: { params: '', name: '' } })
-    // expect(open).toHaveBeenCalledTimes(1)
+  it('should change apisForm and get new api data when url changed', fakeAsync(() => {
+    const spyGetApiData = jest.spyOn(component, 'getApisData')
+    expect(component).toBeTruthy()
+    expect(component.sourcesList).toEqual([])
+    expect(component.apisForm.apis).toEqual([])
+    expect(component.apisForm.total).toEqual(0)
+    expect(component.apisForm.pageNum).toEqual(1)
+    expect(component.apisForm.pageSize).toEqual(20)
+    expect(component.nzDisabled).toEqual(false)
+    expect(spyGetApiData).not.toHaveBeenCalled()
+    // @ts-ignore
+    jest.replaceProperty(fixture.debugElement.injector.get(BaseInfoService), '_allParams', {
+      apiGroupId: 'mockApiGroupId'
+    })
+    component.ngOnInit()
+    component.ngAfterViewInit()
+    fixture.detectChanges()
+    tick()
+    // @ts-ignore
+    expect(component.baseInfo.allParamsInfo.apiGroupId).toEqual('mockApiGroupId')
+    expect(component.nzDisabled).toEqual(false)
+    expect(component.apisTableHeadName.length).toEqual(12)
+    expect(component.apisTableBody.length).toEqual(12)
+    expect(component.apisForm.apis).not.toEqual([])
+    expect(component.apisForm.groupUuid).toEqual('mockApiGroupId')
+    expect(component.apisForm.total).toEqual(7)
+    expect(component.apisForm.pageNum).toEqual(1)
+    expect(component.apisForm.pageSize).toEqual(20)
+    expect(component.apiTableLoading).toEqual(false)
+    expect(spyGetApiData).toHaveBeenCalledTimes(1)
+
+    spyApiService = jest.spyOn(httpCommonService, 'get').mockImplementation(
+      (...args) => {
+        switch (args[0]) {
+          case 'routers':
+            return of(MockApisList2)
+          case 'router/source':
+            return of(MockApiSource)
+          default:
+            return of(MockEmptySuccessResponse)
+        }
+      }
+    )
+
+    // @ts-ignore
+    jest.replaceProperty(fixture.debugElement.injector.get(BaseInfoService), '_allParams', {
+      apiGroupId: 'test'
+    })
+
+    component.apisSet = new Set(['549a9e3f-50ed-f004-c033-df1cc6c48df1'])
+    component.apisTableClick({ data: { uuid: 'test', scheme: 'websocket' } })
+    fixture.detectChanges()
+    tick()
+    expect(component.nzDisabled).toEqual(false)
+    expect(component.apisTableHeadName.length).toEqual(9)
+    expect(component.apisTableBody.length).toEqual(9)
+    expect(component.apisForm.groupUuid).toEqual('test')
+    expect(component.apisForm.apis.length).toEqual(1)
+    expect(component.apisForm.apis[0].checked).toEqual(true)
+    expect(component.apisForm.total).toEqual(7)
+    expect(component.apisForm.pageNum).toEqual(1)
+    expect(component.apisForm.pageSize).toEqual(20)
+    expect(component.apiTableLoading).toEqual(false)
+    expect(spyGetApiData).not.toHaveBeenCalledTimes(1)
+
+    component.apisTableClick({ data: { uuid: 'test', scheme: 'http' } })
+    fixture.detectChanges()
+    tick()
+    expect(component.nzDisabled).toEqual(false)
+    expect(component.apisTableHeadName.length).toEqual(9)
+    expect(component.apisTableBody.length).toEqual(9)
+    expect(component.apisForm.groupUuid).toEqual('test')
+    expect(component.apisForm.apis.length).toEqual(1)
+    expect(component.apisForm.apis[0].checked).toEqual(true)
+    expect(component.apisForm.total).toEqual(7)
+    expect(component.apisForm.pageNum).toEqual(1)
+    expect(component.apisForm.pageSize).toEqual(20)
+    expect(component.apiTableLoading).toEqual(false)
+    expect(spyGetApiData).not.toHaveBeenCalledTimes(1)
+    discardPeriodicTasks()
+  }))
+
+  it('test apiSet', () => {
+    expect(component).toBeTruthy()
+    expect(component.apisSet.size).toEqual(0)
+    expect(component.apisForm.apis.length).toEqual(0)
+    // @ts-ignore
+    jest.replaceProperty(fixture.debugElement.injector.get(BaseInfoService), '_allParams', {
+      apiGroupId: 'mockApiGroupId'
+    })
+
+    component.ngOnInit()
+    component.ngAfterViewInit()
+    fixture.detectChanges()
+
+    expect(component.apisSet.size).toEqual(0)
+    expect(component.apisForm.apis.length).toEqual(7)
+
+    component.changeApisSet(true, 'all')
+    component.ngAfterViewInit()
+    fixture.detectChanges()
+
+    expect(component.apisSet.size).toEqual(7)
+
+    component.changeApisSet(false, 'all')
+    component.ngAfterViewInit()
+    fixture.detectChanges()
+    expect(component.apisSet.size).toEqual(0)
+
+    component.changeApisSet({ uuid: MockApisList.data.apis[2].uuid })
+    component.ngAfterViewInit()
+    fixture.detectChanges()
+    expect(component.apisSet.has(MockApisList.data.apis[2].uuid)).toEqual(true)
+    expect(component.apisSet.size).toEqual(1)
+
+    component.changeApisSet({ uuid: MockApisList.data.apis[3].uuid })
+    component.ngAfterViewInit()
+    fixture.detectChanges()
+    expect(component.apisSet.has(MockApisList.data.apis[2].uuid)).toEqual(true)
+    expect(component.apisSet.has(MockApisList.data.apis[3].uuid)).toEqual(true)
+    expect(component.apisSet.size).toEqual(2)
+
+    component.changeApisSet(false, 'all')
+    component.ngAfterViewInit()
+    fixture.detectChanges()
+    expect(component.apisSet.size).toEqual(0)
+
+    component.changeApisSet(true, 'all')
+    component.ngAfterViewInit()
+    fixture.detectChanges()
+
+    expect(component.apisSet.size).toEqual(7)
+
+    component.changeApisSet({ uuid: MockApisList.data.apis[5].uuid, checked: true })
+    component.ngAfterViewInit()
+    fixture.detectChanges()
+
+    expect(component.apisSet.has(MockApisList.data.apis[2].uuid)).toEqual(true)
+    expect(component.apisSet.has(MockApisList.data.apis[3].uuid)).toEqual(true)
+    expect(component.apisSet.has(MockApisList.data.apis[5].uuid)).toEqual(false)
+    expect(component.apisSet.size).toEqual(6)
   })
 
-  it('ngOnInit should call getApisData()', () => {
-    const spyGetApisData = jest.spyOn(component, 'getApisData')
-    expect(spyGetApisData).not.toHaveBeenCalled()
+  it('test delete api', () => {
+    // @ts-ignore
+    const spyCreateModal = jest.spyOn(component.modalService, 'create')
+    const spyGetApiData = jest.spyOn(component, 'getApisData')
+    // @ts-ignore
+    const spyMessage = jest.spyOn(component.message, 'success')
+    expect(component).toBeTruthy()
+    expect(spyCreateModal).not.toHaveBeenCalled()
+    expect(spyGetApiData).not.toHaveBeenCalled()
+    expect(spyDeleteApiService).not.toHaveBeenCalled()
+    expect(spyMessage).not.toHaveBeenCalled()
+    expect(component.apisSet.size).toEqual(0)
+
     component.ngOnInit()
     fixture.detectChanges()
-    expect(spyGetApisData).toHaveBeenCalledTimes(1)
-  })
 
-  it('trStyleFn test', fakeAsync(() => {
-    const res1 = component.trStyleFn({ status: true })
-    expect(res1).toStrictEqual('color:green')
-
-    const res2 = component.trStyleFn({})
-    expect(res2).toStrictEqual('color:red')
-  }))
-
-  it('getApisData with success return', () => {
-    const httpCommonService = fixture.debugElement.injector.get(ApiService)
-    const spyService = jest.spyOn(httpCommonService, 'get')
-      .mockReturnValue(of({
-        code: 0,
-        data: {
-          apis: [{ groupUuid: 123456 }],
-          total: 10,
-          pageNum: 10,
-          pageSize: 20
-        }
-      }))
-    // @ts-ignore
-    const spyMessage = jest.spyOn(component.message, 'error')
-    expect(spyService).not.toHaveBeenCalled()
+    expect(spyCreateModal).not.toHaveBeenCalled()
+    expect(spyGetApiData).toHaveBeenCalledTimes(1)
+    expect(component.apisForm.apis.length).not.toEqual(0)
+    expect(spyDeleteApiService).not.toHaveBeenCalled()
     expect(spyMessage).not.toHaveBeenCalled()
+    expect(component.apisSet.size).toEqual(0)
 
-    component.getApisData()
+    component.deleteApiModal({ uuid: MockApisList.data.apis[0].uuid })
     fixture.detectChanges()
 
-    expect(spyService).toHaveBeenCalled()
+    expect(spyGetApiData).toHaveBeenCalledTimes(1)
+    expect(spyCreateModal).toHaveBeenCalledTimes(1)
+    expect(component.apisForm.apis.length).toEqual(MockApisList.data.apis.length)
+    expect(spyDeleteApiService).not.toHaveBeenCalled()
     expect(spyMessage).not.toHaveBeenCalled()
-    expect(component.apisForm.apis).toStrictEqual([{ groupUuid: 123456, eoKey: 123456789, checked: false }])
-    expect(component.apisForm.groupUuid).toStrictEqual('')
-    expect(component.apisForm.total).toStrictEqual(10)
-    expect(component.apisForm.pageNum).toStrictEqual(10)
-    expect(component.apisForm.pageSize).toStrictEqual(20)
-    expect(component.objDiffers).not.toStrictEqual([])
-  })
+    expect(component.apisSet.size).toEqual(0)
 
-  it('getApisData with fail return', () => {
-    const httpCommonService = fixture.debugElement.injector.get(ApiService)
-    const spyService = jest.spyOn(httpCommonService, 'get').mockReturnValue(of({ code: -1, msg: 'fail' }))
-    // @ts-ignore
-    const spyMessage = jest.spyOn(component.message, 'error')
-    expect(spyService).not.toHaveBeenCalled()
-    expect(spyMessage).not.toHaveBeenCalled()
-
-    component.getApisData()
+    component.changeApisSet(true, 'all')
     fixture.detectChanges()
 
-    expect(spyService).toHaveBeenCalled()
-    expect(spyMessage).toHaveBeenCalled()
+    expect(spyGetApiData).toHaveBeenCalledTimes(1)
+    expect(spyCreateModal).toHaveBeenCalledTimes(1)
+    expect(component.apisForm.apis.length).toEqual(MockApisList.data.apis.length)
+    expect(spyDeleteApiService).not.toHaveBeenCalled()
+    expect(spyMessage).not.toHaveBeenCalled()
+    expect(component.apisSet.size).toEqual(MockApisList.data.apis.length)
+
+    component.deleteApi(MockApisList.data.apis[2])
+    fixture.detectChanges()
+
+    expect(spyGetApiData).toHaveBeenCalledTimes(2)
+    expect(spyMessage).toHaveBeenCalledWith(MockEmptySuccessResponse.msg, { nzDuration: 1000 })
+    expect(component.apisSet.size).toEqual(MockApisList.data.apis.length - 1)
+    expect(spyCreateModal).toHaveBeenCalledTimes(1)
+    expect(component.apisForm.apis.length).toEqual(MockApisList.data.apis.length)
+    expect(spyDeleteApiService).toHaveBeenCalledTimes(1)
   })
 
-  it('addApi test', fakeAsync(() => {
+  it('test apiList filter', () => {
+    const spyGetApiData = jest.spyOn(component, 'getApisData')
+    expect(component).toBeTruthy()
+    expect(component.sourcesList).toEqual([])
+    expect(spyGetApiData).not.toHaveBeenCalled()
     // @ts-ignore
-    const spyRouterService = jest.spyOn(component.router, 'navigate')
-    expect(spyRouterService).not.toHaveBeenCalled()
+    jest.replaceProperty(fixture.debugElement.injector.get(BaseInfoService), '_allParams', {
+      apiGroupId: 'mockApiGroupId'
+    })
+
+    component.ngOnInit()
+    component.ngAfterViewInit()
+    fixture.detectChanges()
+
+    expect(component.sourcesList).toEqual([
+      { text: '自建', value: 'self-build:-1:' },
+      { text: '导入', value: 'import:-1:' },
+      { text: 'Apikit', value: 'sync:1:' },
+      { text: 'Postcat', value: 'sync:2:' }
+    ])
+    expect(spyGetApiData).toHaveBeenCalledTimes(2)
+
+    component.apisFilterChange({ col: { title: '来源' }, keys: [MockApiSource.data.list[2].id, MockApiSource.data.list[3].id] })
+    fixture.detectChanges()
+
+    expect(component.sourcesList[0]['byDefault']).toEqual(false)
+    expect(component.sourcesList[1]['byDefault']).toEqual(false)
+    expect(component.sourcesList[2]['byDefault']).toEqual(true)
+    expect(component.sourcesList[3]['byDefault']).toEqual(true)
+    expect(spyGetApiData).toHaveBeenCalledTimes(3)
+  })
+
+  it('test addApi', () => {
+    const spyRouterChange = jest.spyOn(component.router, 'navigate')
+    expect(spyRouterChange).not.toHaveBeenCalled()
+    expect(component).toBeTruthy()
+
+    component.apisForm.groupUuid = ''
     component.addApi()
     fixture.detectChanges()
-    expect(spyRouterService).toHaveBeenCalledTimes(1)
-  }))
 
-  it('openDrawer test', () => {
-    expect(component.onlineDrawerRef).toBeUndefined()
-    component.openDrawer('online')
-    fixture.detectChanges()
-    expect(component.onlineDrawerRef).not.toBeUndefined()
+    expect(spyRouterChange).toHaveBeenCalledWith(['/', 'router', 'api', 'create'])
 
-    expect(component.offlineDrawerRef).toBeUndefined()
-    component.openDrawer('offline')
+    component.apisForm.groupUuid = 'test-ws'
+    component.addApi('websocket')
     fixture.detectChanges()
-    expect(component.offlineDrawerRef).not.toBeUndefined()
+
+    expect(spyRouterChange).toHaveBeenCalledWith(['/', 'router', 'api', 'create-ws', 'test-ws'])
+
+    component.apisForm.groupUuid = 'http'
+    component.addApi()
+    fixture.detectChanges()
+
+    expect(spyRouterChange).toHaveBeenCalledWith(['/', 'router', 'api', 'create', 'http'])
+
+    component.apisForm.groupUuid = ''
+    component.addApi('websocket')
+    fixture.detectChanges()
+
+    expect(spyRouterChange).toHaveBeenCalledWith(['/', 'router', 'api', 'create-ws'])
   })
 
-  it('apisOperatorResult test', () => {
-    const spyOnlineApisCheck = jest.spyOn(component, 'onlineApisCheck')
-    const spyOfflineApis = jest.spyOn(component, 'offlineApis')
-    expect(component.onlineDrawerRef).toBeUndefined()
-    expect(spyOnlineApisCheck).not.toHaveBeenCalled()
-    component.apisOperatorResult('online')
-    fixture.detectChanges()
-    expect(component.onlineDrawerRef).not.toBeUndefined()
-    expect(spyOnlineApisCheck).toHaveBeenCalledTimes(1)
-
+  it('test batchPublish ', () => {
     // @ts-ignore
-    const spyOnlineDrawerRef = jest.spyOn(component.onlineDrawerRef, 'close')
-    expect(spyOnlineDrawerRef).not.toHaveBeenCalled()
-    component.apisOperatorResult('online-res')
-    fixture.detectChanges()
-    expect(component.onlineDrawerRef).not.toBeUndefined()
-    expect(spyOnlineApisCheck).toHaveBeenCalledTimes(1)
-    expect(spyOnlineDrawerRef).toHaveBeenCalled()
+    const spyBatchPublishModal = jest.spyOn(component.service, 'batchPublishApiModal')
+    expect(spyBatchPublishModal).not.toHaveBeenCalled()
+    expect(component).toBeTruthy()
 
-    expect(spyOfflineApis).not.toHaveBeenCalled()
-    expect(component.offlineDrawerRef).toBeUndefined()
-    component.apisOperatorResult('offline')
-    fixture.detectChanges()
-    expect(component.offlineDrawerRef).not.toBeUndefined()
-    expect(spyOfflineApis).toHaveBeenCalled()
-  })
-
-  it('openDrawer test', () => {
-    expect(component.onlineDrawerRef).toBeUndefined()
-    component.openDrawer('online')
-    fixture.detectChanges()
-    expect(component.onlineDrawerRef).not.toBeUndefined()
-
-    expect(component.offlineDrawerRef).toBeUndefined()
-    component.openDrawer('offline')
-    fixture.detectChanges()
-    expect(component.offlineDrawerRef).not.toBeUndefined()
-  })
-
-  it('closeDrawer test', fakeAsync(() => {
-    component.openDrawer('online')
-    fixture.detectChanges()
-    expect(component.onlineDrawerRef).not.toBeUndefined()
-
-    // @ts-ignore
-    const spyOnlineDrawerRef = jest.spyOn(component.onlineDrawerRef, 'close')
-
-    component.closeDrawer('online')
-    fixture.detectChanges()
-    flush()
-    expect(spyOnlineDrawerRef).toHaveBeenCalledTimes(1)
-
-    component.openDrawer('offline')
-    fixture.detectChanges()
-    flush()
-    expect(component.offlineDrawerRef).not.toBeUndefined()
-
-    // @ts-ignore
-    const spyOfflineDrawerRef = jest.spyOn(component.offlineDrawerRef, 'close')
-
-    component.closeDrawer('offline')
-    fixture.detectChanges()
-    flush()
-    expect(spyOfflineDrawerRef).toHaveBeenCalledTimes(1)
-
-    component.openDrawer('online')
-    component.openDrawer('offline')
-    fixture.detectChanges()
-    flush()
-    expect(component.onlineDrawerRef).not.toBeUndefined()
-    expect(component.offlineDrawerRef).not.toBeUndefined()
-
-    component.closeDrawer('res')
-    fixture.detectChanges()
-    flush()
-    expect(spyOnlineDrawerRef).toHaveBeenCalledTimes(2)
-    expect(spyOfflineDrawerRef).toHaveBeenCalledTimes(2)
-  }))
-
-  it('onlineApisCheck with success return', () => {
-    const httpCommonService = fixture.debugElement.injector.get(ApiService)
-    const spyService = jest.spyOn(httpCommonService, 'post').mockReturnValue(of({ code: 0, data: { list: [1, 2, 3], onlineToken: '123' } }))
-    // @ts-ignore
-    const spyMessage = jest.spyOn(component.message, 'error')
-    expect(spyService).not.toHaveBeenCalled()
-    expect(spyMessage).not.toHaveBeenCalled()
-    component.onlineApisCheck()
-    fixture.detectChanges()
-    expect(spyMessage).not.toHaveBeenCalled()
-    expect(component.onlineResultList).toStrictEqual([1, 2, 3])
-    expect(component.onlineToken).toStrictEqual('123')
-  })
-
-  it('onlineApisCheck with fail return', () => {
-    const httpCommonService = fixture.debugElement.injector.get(ApiService)
-    const spyService = jest.spyOn(httpCommonService, 'post').mockReturnValue(of({ code: -1, data: { }, msg: 'fail' }))
-    // @ts-ignore
-    const spyMessage = jest.spyOn(component.message, 'error')
-    expect(spyService).not.toHaveBeenCalled()
-    expect(spyMessage).not.toHaveBeenCalled()
-
-    component.onlineApisCheck()
+    component.apisSet = new Set()
+    component.batchPublish('online')
     fixture.detectChanges()
 
-    expect(spyMessage).toHaveBeenCalled()
-  })
+    expect(spyBatchPublishModal).toHaveBeenCalledTimes(1)
 
-  it('onlineApis with success return', () => {
-    const httpCommonService = fixture.debugElement.injector.get(ApiService)
-    const spyService = jest.spyOn(httpCommonService, 'post').mockReturnValue(of({ code: 0, data: { list: [1, 2, 3], onlineToken: '123' } }))
-    const spyApisOperatorResult = jest.spyOn(component, 'apisOperatorResult')
-    // @ts-ignore
-    const spyMessage = jest.spyOn(component.message, 'error')
-    expect(spyService).not.toHaveBeenCalled()
-    expect(spyMessage).not.toHaveBeenCalled()
-    expect(spyApisOperatorResult).not.toHaveBeenCalled()
-    component.onlineApis()
-    fixture.detectChanges()
-    expect(spyMessage).not.toHaveBeenCalled()
-    expect(spyApisOperatorResult).toHaveBeenCalled()
-    expect(component.resultList).toStrictEqual([1, 2, 3])
-  })
-
-  it('onlineApis with fail return', () => {
-    const httpCommonService = fixture.debugElement.injector.get(ApiService)
-    const spyService = jest.spyOn(httpCommonService, 'post').mockReturnValue(of({ code: -1, data: { }, msg: 'fail' }))
-    const spyApisOperatorResult = jest.spyOn(component, 'apisOperatorResult')
-    // @ts-ignore
-    const spyMessage = jest.spyOn(component.message, 'error')
-    expect(spyService).not.toHaveBeenCalled()
-    expect(spyMessage).not.toHaveBeenCalled()
-    expect(spyApisOperatorResult).not.toHaveBeenCalled()
-    component.onlineApis()
-    fixture.detectChanges()
-    expect(spyMessage).toHaveBeenCalled()
-    expect(spyApisOperatorResult).toHaveBeenCalled()
-    expect(component.resultList).toBeUndefined()
-  })
-
-  it('offlineApis with success return', () => {
-    const httpCommonService = fixture.debugElement.injector.get(ApiService)
-    const spyService = jest.spyOn(httpCommonService, 'post').mockReturnValue(of({ code: 0, data: { list: [1, 2, 3], onlineToken: '123' } }))
-    // @ts-ignore
-    const spyMessage = jest.spyOn(component.message, 'error')
-    expect(spyService).not.toHaveBeenCalled()
-    expect(spyMessage).not.toHaveBeenCalled()
-    component.offlineApis()
-    fixture.detectChanges()
-    expect(spyMessage).not.toHaveBeenCalled()
-    expect(component.resultList).toStrictEqual([1, 2, 3])
-  })
-
-  it('offlineApis with fail return', () => {
-    const httpCommonService = fixture.debugElement.injector.get(ApiService)
-    const spyService = jest.spyOn(httpCommonService, 'post').mockReturnValue(of({ code: -1, data: { } }))
-    // @ts-ignore
-    const spyMessage = jest.spyOn(component.message, 'error')
-    expect(spyService).not.toHaveBeenCalled()
-    expect(spyMessage).not.toHaveBeenCalled()
-    component.offlineApis()
-    fixture.detectChanges()
-    expect(component.resultList).toBeUndefined()
-    expect(spyMessage).toHaveBeenCalled()
-  })
-
-  it('changeClustersSet test', fakeAsync(() => {
-    const val1 = [
-      { value: 'val1', checked: false },
-      { value: 'val2', checked: true },
-      { value: 'val3', checked: true }]
-    component.clustersSet = new Set()
-    component.changeClustersSet(val1)
-    fixture.detectChanges()
-    expect(component.clustersSet).toStrictEqual(new Set(['val2', 'val3']))
-
-    const val2 = [
-      { value: 'val1', checked: false },
-      { value: 'val2', checked: false },
-      { value: 'val3', checked: true }]
-    component.clustersSet = new Set()
-    component.changeClustersSet(val2)
-    fixture.detectChanges()
-    expect(component.clustersSet).toStrictEqual(new Set(['val3']))
-  }))
-
-  it('getClusterList with success return', () => {
-    const httpCommonService = fixture.debugElement.injector.get(ApiService)
-    const spyService = jest.spyOn(httpCommonService, 'get')
-      .mockReturnValue(of({
-        code: 0,
-        data: {
-          clusters: [
-            { name: 'name1', env: 'env1', status: 'ABNORMAL' },
-            { name: 'name2', env: 'env2' },
-            { name: 'name3', env: 'env3', status: 'ABNORMAL' }
-          ]
-        }
-      }))
-    const spyOpenDrawer = jest.spyOn(component, 'openDrawer')
-    // @ts-ignore
-    const spyMessage = jest.spyOn(component.message, 'error')
-    expect(spyService).not.toHaveBeenCalled()
-    expect(spyMessage).not.toHaveBeenCalled()
-    expect(spyOpenDrawer).not.toHaveBeenCalled()
-
-    component.getClusterList('test')
+    component.apisSet = new Set(['123', '223', '333'])
+    component.batchPublish('offline')
     fixture.detectChanges()
 
-    expect(spyService).toHaveBeenCalled()
-    expect(spyOpenDrawer).toHaveBeenCalled()
-    expect(spyMessage).not.toHaveBeenCalled()
-  })
+    expect(spyBatchPublishModal).toHaveBeenCalledTimes(2)
 
-  it('getClusterList with fail return', () => {
-    const httpCommonService = fixture.debugElement.injector.get(ApiService)
-    const spyService = jest.spyOn(httpCommonService, 'get').mockReturnValue(of({ code: -1, msg: 'fail' }))
-    // @ts-ignore
-    const spyMessage = jest.spyOn(component.message, 'error')
-    expect(spyService).not.toHaveBeenCalled()
-    expect(spyMessage).not.toHaveBeenCalled()
-
-    component.getClusterList('test')
+    component.apisSet = new Set(['4'])
+    component.batchPublish('online')
     fixture.detectChanges()
 
-    expect(spyService).toHaveBeenCalled()
-    expect(spyMessage).toHaveBeenCalled()
-  })
+    expect(spyBatchPublishModal).toHaveBeenCalledTimes(3)
 
-  it('deleteApi with success return', () => {
-    const httpCommonService = fixture.debugElement.injector.get(ApiService)
-    const spyService = jest.spyOn(httpCommonService, 'delete').mockReturnValue(of({ code: 0, data: { } }))
-    const spyGetApisData = jest.spyOn(component, 'getApisData')
-    // @ts-ignore
-    const spyMessageSuccess = jest.spyOn(component.message, 'success')
-    // @ts-ignore
-    const spyMessage = jest.spyOn(component.message, 'error')
-    expect(spyService).not.toHaveBeenCalled()
-    expect(spyGetApisData).not.toHaveBeenCalled()
-    expect(spyMessageSuccess).not.toHaveBeenCalled()
-    expect(spyMessage).not.toHaveBeenCalled()
-    component.deleteApi({ uuid: '123' })
+    component.apisSet = new Set()
+    component.batchPublish('offline')
     fixture.detectChanges()
-    expect(spyGetApisData).toHaveBeenCalled()
-    expect(spyMessageSuccess).toHaveBeenCalled()
-    expect(spyMessage).not.toHaveBeenCalled()
-  })
 
-  it('deleteApi with fail return', () => {
-    const httpCommonService = fixture.debugElement.injector.get(ApiService)
-    const spyService = jest.spyOn(httpCommonService, 'delete').mockReturnValue(of({ code: -1, data: { } }))
-    const spyGetApisData = jest.spyOn(component, 'getApisData')
-    // @ts-ignore
-    const spyMessageSuccess = jest.spyOn(component.message, 'success')
-    // @ts-ignore
-    const spyMessage = jest.spyOn(component.message, 'error')
-    expect(spyService).not.toHaveBeenCalled()
-    expect(spyGetApisData).not.toHaveBeenCalled()
-    expect(spyMessageSuccess).not.toHaveBeenCalled()
-    expect(spyMessage).not.toHaveBeenCalled()
-    component.deleteApi({ uuid: '123' })
-    fixture.detectChanges()
-    expect(spyGetApisData).not.toHaveBeenCalled()
-    expect(spyMessageSuccess).not.toHaveBeenCalled()
-    expect(spyMessage).toHaveBeenCalled()
+    expect(spyBatchPublishModal).toHaveBeenCalledTimes(4)
   })
 })

@@ -15,7 +15,8 @@ export const SimpleMapComponent = React.forwardRef(
         ? [
             ...Object.keys(value).map((k: string) => {
               return { key: k, value: value[k] }
-            })
+            }),
+            { key: '', value: '' }
           ]
         : [{ key: '', value: '' }]
     )
@@ -45,15 +46,15 @@ export const SimpleMapComponent = React.forwardRef(
     }
 
     const addLine = (index: number) => {
+      kvList.splice(index + 1, 0, { key: '', value: '' })
       const newKvList = [...kvList]
-      newKvList.splice(index + 1, 0, { key: '', value: '' })
       setKvList(newKvList)
       emitNewArr()
     }
 
     const removeLine = (index: number) => {
+      kvList.splice(index, 1)
       const newKvList = [...kvList]
-      newKvList.splice(index, 1)
       setKvList(newKvList)
       emitNewArr()
     }
@@ -77,34 +78,38 @@ export const SimpleMapComponent = React.forwardRef(
                 placeholder={placeholderKey}
               />
               <Input
-                style={{ width: '164px' }}
+                style={{ width: '164px', marginRight: '10px' }}
                 value={n.value}
                 onChange={(e: any) => {
                   changeInputValue(e.target.value, index, 'value')
                 }}
                 placeholder={placeholderValue}
               />
-              <a
-                className="array_item_addition ml-[10px] ant-btn-text anticon"
-                onClick={() => addLine(index)}
-              >
-                <span>
-                  <svg className="iconpark-icon">
-                    <use href="#add-circle"></use>
-                  </svg>
-                </span>
-              </a>
-              {index !== 0 && (
-                <a
-                  className="array_item_addition ant-btn-text anticon"
-                  onClick={() => removeLine(index)}
-                >
-                  <span>
-                    <svg className="iconpark-icon">
-                      <use href="#reduce-one"></use>
-                    </svg>
-                  </span>
-                </a>
+              {index !== kvList.length - 1 && (
+                <div style={{ display: 'inline-block' }}>
+                  {n.key && (
+                    <a
+                      className="arrayItemAddition ant-btn-text anticon"
+                      onClick={() => addLine(index)}
+                    >
+                      <span>
+                        <svg className="iconpark-icon">
+                          <use href="#add-circle"></use>
+                        </svg>
+                      </span>
+                    </a>
+                  )}
+                  <a
+                    className="arrayItemAddition ant-btn-text anticon"
+                    onClick={() => removeLine(index)}
+                  >
+                    <span>
+                      <svg className="iconpark-icon">
+                        <use href="#reduce-one"></use>
+                      </svg>
+                    </span>
+                  </a>
+                </div>
               )}
             </div>
           )

@@ -34,7 +34,7 @@ export class GroupComponent implements OnInit {
     private router: Router,
     private navigationService:EoNgNavigationService
   ) {
-    this.strategyType = this.router.url.split('/')[2]
+    this.strategyType = this.router.url.split('/')[this.router.url.split('/').indexOf('serv-governance') + 1]
     this.getBreadcrumb()
   }
 
@@ -131,8 +131,7 @@ export class GroupComponent implements OnInit {
       this.clusterKey !== data.keys[0] &&
       this.eoNgTreeDefault?.getTreeNodeByKey(this.clusterKey)?.isSelected
     ) {
-      // @ts-ignore
-      this.eoNgTreeDefault.getTreeNodeByKey(this.clusterKey).isSelected = false
+      this.eoNgTreeDefault.getTreeNodeByKey(this.clusterKey)!.isSelected = false
     }
     // 节点是集群名
     if (!data.node.origin.children || data.node.origin.children.length === 0) {

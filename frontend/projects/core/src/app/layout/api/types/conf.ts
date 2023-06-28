@@ -137,8 +137,8 @@ export const hostHeaderTableBody:TBODY_TYPE[] = [
     type: 'btn',
     btns: [
       {
-        title: '添加',
-        action: 'add'
+        title: '减少',
+        action: 'delete'
       }
     ]
   },
@@ -325,7 +325,9 @@ export const apiBatchOnlineVerifyTableBody :EO_TBODY_TYPE[] = [
     right: true,
     showFn: (item:any) => {
       return !item.solution.name
-    }
+    },
+    btns: [
+    ]
   }
 ]
 
@@ -540,3 +542,12 @@ export const PluginTemplatePublishTbody:EO_TBODY_TYPE[] = [
   }
 ]
 
+export const ApiCreateBreadcrumb = [
+  { title: 'API管理', routerLink: 'router/api/group/list' },
+  { title: '新建API' }
+]
+
+export const ApiEditBreadcrumb = [
+  { title: 'API管理', routerLink: 'router/api/group/list' },
+  { title: 'API信息' }
+]

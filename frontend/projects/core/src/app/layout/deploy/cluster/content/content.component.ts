@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 /* eslint-disable dot-notation */
 /*
  * @Author: MengjieYang yangmengjie@eolink.com
@@ -18,9 +17,12 @@ import { DeployService } from '../../deploy.service'
 @Component({
   selector: 'eo-ng-deploy-cluster-content',
   templateUrl: './content.component.html',
-  styleUrls: [
-    './content.component.scss'
-  ]
+  styles: [`
+  :host{
+    height:100%;
+    overflow-y:hidden;
+    display:block;
+  }`]
 })
 export class DeployClusterContentComponent implements OnInit {
   @ViewChild('tab1', { read: TemplateRef, static: true }) tab1: TemplateRef<TabTemplateContext> | string = '全局变量'

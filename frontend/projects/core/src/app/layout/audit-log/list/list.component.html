@@ -1,21 +1,12 @@
 <div class="">
   <div
-    class="list-header pl-btnbase pr-btnrbase py-btnybase grid gap-x-btnbase gap-y-btnybase xl:grid-cols-3 xl:max-w-[992px] lg:grid-cols-2 lg:max-w-[658px] md:grid-cols-1"
+    class="list-header pl-btnbase pr-btnrbase py-btnybase grid gap-x-btnbase gap-y-btnybase xl:grid-cols-4 xl:max-w-[1296px] lg:grid-cols-2 lg:max-w-[658px] md:grid-cols-1"
   >
     <div class="flex flex-nowrap items-center">
       <label class="">操作类型：</label>
       <eo-ng-select
         [(ngModel)]="searchData.operateType"
         [nzOptions]="listOfType"
-        [nzAllowClear]="true"
-        nzPlaceHolder="请选择"
-      ></eo-ng-select>
-    </div>
-    <div class="flex flex-nowrap items-center">
-      <label class="label">操作对象：</label>
-      <eo-ng-select
-        [(ngModel)]="searchData.kind"
-        [nzOptions]="listOfKind"
         [nzAllowClear]="true"
         nzPlaceHolder="请选择"
       ></eo-ng-select>

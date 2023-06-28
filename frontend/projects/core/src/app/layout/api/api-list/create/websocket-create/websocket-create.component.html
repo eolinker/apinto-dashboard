@@ -1,5 +1,5 @@
 <div
-  class="py-btnybase w-[100%] border-[0px] border-b-[1px] border-solid border-b-BORDER sticky t-[0px] bg-MAIN_BG z-[9999]"
+  class="py-btnybase w-[100%] border-[0px] border-b-[1px] border-solid border-b-BORDER sticky top-[0px] bg-MAIN_BG z-[9999]"
 >
   <button eo-ng-button class="mx-btnbase" (click)="backToList()">返回</button>
   <button
@@ -7,7 +7,7 @@
     nzType="primary"
     class="mr-btnrbase"
     [nzLoading]="submitButtonLoading"
-    (click)="saveApi('websocket')"
+    (click)="saveApi(apiProtocol)"
   >
     保存
   </button>
@@ -44,7 +44,6 @@
                   nzDropdownClassName="api-tree-select"
                   [nzNodes]="headerList"
                   nzShowSearch
-                  (nzTreeClick)="nzTreeClick($event)"
                 ></eo-ng-tree-select>
               </nz-form-control>
               <nz-form-control>
@@ -96,8 +95,51 @@
       </div>
       <div class="mt-blockbase">
         <p class="font-bold mb-btnybase">路由匹配规则：</p>
-        <!--http协议用-->
-        <ng-content></ng-content>
+        <ng-container *ngIf="apiProtocol === 'http'">
+          <nz-form-item
+            nz-row
+            class="checkbox-group-api"
+            nzSpan="19"
+            [ngClass]="{ 'ant-form-item-has-error': showCheckboxGroupValid }"
+          >
+            <nz-form-label [nzSpan]="5" nzRequired>请求方式：</nz-form-label>
+            <div nz-col [nzSpan]="19" class="min-w-INPUT_LARGE">
+              <label
+                eo-ng-checkbox
+                [nzDisabled]="nzDisabled"
+                name="allChecked"
+                [(ngModel)]="allChecked"
+                (ngModelChange)="updateAllChecked()"
+                [ngModelOptions]="{ standalone: true }"
+              >
+                All
+              </label>
+              <eo-ng-checkbox-group
+                [nzDisabled]="nzDisabled"
+                name="method"
+                [(ngModel)]="methodList"
+                (ngModelChange)="updateSingleChecked()"
+                [ngModelOptions]="{ standalone: true }"
+              ></eo-ng-checkbox-group>
+            </div>
+          </nz-form-item>
+          <div
+            nz-col
+            [nzOffset]="5"
+            *ngIf="showCheckboxGroupValid"
+            class="ant-form-item-with-help"
+          >
+            <div class="ant-form-item-explain">
+              <div
+                role="alert"
+                class="ant-form-item-explain-error"
+                style="margin-bottom: 20px"
+              >
+                必填项
+              </div>
+            </div>
+          </div>
+        </ng-container>
         <nz-form-item>
           <nz-form-label [nzSpan]="5" nzRequired>请求路径：</nz-form-label>
           <nz-form-control

@@ -1,0 +1,16 @@
+id: "log.apinto.com"
+name: "log"
+cname: "日志检索"
+resume: "检索apinto的文件日志，包括节点日志和基于文件驱动的access日志"
+version: "v1.0.3"
+icon: "日志检索.png"
+driver: "log.apinto.com"
+type: 2 #0为框架模块 1为核心模块 2为内置模块 3为非内置
+auto: true
+is_can_disable: true
+is_can_uninstall: false
+visible_in_navigation: true
+visible_in_market: true
+front:
+navigation: "navigation.system"
+group_id: "log"

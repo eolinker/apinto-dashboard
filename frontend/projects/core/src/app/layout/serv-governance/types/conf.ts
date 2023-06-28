@@ -50,8 +50,8 @@ export const nodesTableBody:TBODY_TYPE[] = [
     type: 'btn',
     btns: [
       {
-        title: '添加',
-        action: 'add'
+        title: '减少',
+        action: 'delete'
       }
     ]
   },
@@ -207,8 +207,8 @@ export const responseHeaderTableBody:TBODY_TYPE[] = [
     type: 'btn',
     btns: [
       {
-        title: '添加',
-        action: 'add'
+        title: '减少',
+        action: 'delete'
       }
     ]
   },

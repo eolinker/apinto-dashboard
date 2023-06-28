@@ -40,6 +40,30 @@
         <a (click)="clickIframeBreadcrumb(url)">{{ title }}</a>
       </ng-template>
       <div>
+        <button
+          *ngIf="isBusiness && authStatus && authStatus !== 'normal'"
+          nzType="primary"
+          [nzDanger]="true"
+          eo-ng-button
+          class="mr-btnbase"
+          (click)="goToAuth()"
+          eoNgFeedbackTooltip
+          [nzTooltipTitle]="btnTooltip"
+          nzTooltipPlacement="bottom"
+          [nzTooltipVisible]="false"
+          nzTooltipTrigger="hover"
+        >
+          {{ btnLabel }}
+        </button>
+        <button
+          *ngIf="!isBusiness"
+          nzType="primary"
+          eo-ng-button
+          class="mr-btnbase"
+          (click)="goToRry()"
+        >
+          试用企业版
+        </button>
         <button eo-ng-button class="mr-btnrbase" (click)="goToHelp()">
           帮助文档
         </button>

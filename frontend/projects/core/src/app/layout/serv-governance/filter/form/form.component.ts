@@ -3,7 +3,6 @@ import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core'
 import { Router } from '@angular/router'
 import { CascaderOption } from 'eo-ng-cascader'
 import { CheckBoxOptionInterface } from 'eo-ng-checkbox'
-import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { SelectOption } from 'eo-ng-select'
 import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { ApiGroup } from 'projects/core/src/app/constant/type'
@@ -18,12 +17,30 @@ import { FilterForm, FilterOption, FilterRemoteOption, RemoteApiItem, RemoteAppI
       textarea {
         min-height: 68px;
       }
-      .form-input {
-        width: 860px !important;
-      }
       .transfer-section{
         border-radius:var(--border-radius);
       }
+      .tips {
+        color: red;
+        font-size: 12px;
+        margin-top: 4px;
+      }
+
+      :host ::ng-deep{
+        .label {
+              width: 78px !important;
+              display: inline-block;
+            }
+            .ant-drawer-body {
+              padding-right: 44px;
+              padding-bottom: 0px;
+            }
+            [eo-ng-transfer-search].ant-input-affix-wrapper.ant-transfer-list-search {
+              input.ant-input {
+                height: 20px !important;
+              }
+            }
+          }
     `
   ]
 })
@@ -126,11 +143,10 @@ export class FilterFormComponent implements OnInit {
   originRemoteList:any[] = [] // 未经筛选的数据列表
 
   constructor (
-    private message: EoNgFeedbackMessageService,
     private router: Router,
     private api: ApiService
   ) {
-    this.strategyType = this.router.url.split('/')[2]
+    this.strategyType = this.router.url.split('/')[this.router.url.split('/').indexOf('serv-governance') + 1]
   }
 
   ngOnInit (): void {
@@ -197,8 +213,7 @@ export class FilterFormComponent implements OnInit {
           this.remoteList = []
           this.remoteSelectList = []
           this.remoteSelectNameList = []
-          // @ts-ignore // TODO 等待接口修改的兼容处理，接口修改后则删除
-          const list = resp.data.target ? resp.data[resp.data.target] : resp.data.list
+          const list:Array<RemoteApiItem|RemoteServiceItem|RemoteAppItem> = resp.data.list
           this.valueName = resp.data.key
           for (const index in list) {
             list[index].checked = this.editFilter && this.filterForm.name === this.editFilter.name
@@ -261,16 +276,12 @@ export class FilterFormComponent implements OnInit {
     setTimeout(() => {
       for (const item of this.remoteList) {
         if (item.checked) {
-          // @ts-ignore // TODO 等待接口修改的兼容处理，接口修改后则删除
           if (this._remoteSelectList.indexOf(item[this.valueName]) === -1) {
-          // @ts-ignore // TODO 等待接口修改的兼容处理，接口修改后则删除
             this._remoteSelectList.push(item[this.valueName])
             this._remoteSelectNameList.push(item.title)
           }
         } else {
-          // @ts-ignore // TODO 等待接口修改的兼容处理，接口修改后则删除
           if (this._remoteSelectList.indexOf(item[this.valueName]) !== -1) {
-          // @ts-ignore // TODO 等待接口修改的兼容处理，接口修改后则删除
             this._remoteSelectList.splice(this._remoteSelectList.indexOf(item[this.valueName]), 1)
             this._remoteSelectNameList.splice(this._remoteSelectNameList.indexOf(item.title), 1)
           }
@@ -309,8 +320,7 @@ export class FilterFormComponent implements OnInit {
       .subscribe((resp: {code:number, data:FilterRemoteOption, msg:string}) => {
         if (resp.code === 0) {
           this.valueName = resp.data.key
-          // @ts-ignore // TODO 等待接口修改的兼容处理，接口修改后则删除
-          this.remoteList = resp.data.target ? resp.data[resp.data.target] : resp.data.list
+          this.remoteList = resp.data.list as any
           this.remoteList = this.remoteList.map((item:any) => {
             item.checked = this._remoteSelectList.indexOf(item.uuid) !== -1
             return item

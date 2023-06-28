@@ -5,6 +5,7 @@ import (
 	grpc_service "github.com/eolinker/apinto-dashboard/grpc-service"
 	apinto_module "github.com/eolinker/apinto-dashboard/module"
 	"github.com/eolinker/apinto-dashboard/modules/grpc-service/service"
+	"github.com/eolinker/apinto-dashboard/modules/module-plugin/embed_registry"
 	"github.com/eolinker/apinto-dashboard/modules/notice"
 	"github.com/soheilhy/cmux"
 	"google.golang.org/grpc"
@@ -12,7 +13,6 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/eolinker/apinto-dashboard/initialize"
 	"github.com/eolinker/apinto-dashboard/modules/core"
 	"github.com/eolinker/apinto-dashboard/modules/plugin/plugin_timer"
 
@@ -60,7 +60,7 @@ func run() {
 	}
 
 	// 执行内置插件初始化
-	err = initialize.InitPlugins()
+	err = embed_registry.InitEmbedPlugins()
 	if err != nil {
 		log.Fatal(err)
 	}
