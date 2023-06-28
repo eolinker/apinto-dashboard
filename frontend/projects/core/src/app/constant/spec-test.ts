@@ -715,3 +715,45 @@ export const MockApisList2 = {
   },
   msg: 'success'
 }
+
+export const MockApiImport = {
+  code: 0,
+  data: {
+    apis: [
+      {
+        id: 1,
+        name: 'Returns pet inventories by status',
+        method: 'GET',
+        path: '/asda/store/inventory',
+        desc: 'Returns a map of status codes to quantities',
+        status: 'normal'
+      },
+      {
+        id: 2,
+        name: 'Delete purchase order by ID',
+        method: 'DELETE',
+        path: '/asda/store/order/{orderId}',
+        desc: 'For valid response try integer IDs with value < 1000. Anything above 1000 or nonintegers will generate API errors',
+        status: 'conflict'
+      },
+      {
+        id: 3,
+        name: 'Find purchase order by ID',
+        method: 'GET',
+        path: '/asda/store/order/{orderId}',
+        desc: 'For valid response try integer IDs with value <= 5 or > 10. Other values will generate exceptions.',
+        status: 'invalid'
+      },
+      {
+        id: 4,
+        name: 'Returns pet inventories by status',
+        method: 'GET',
+        path: '/asda/store/inventory',
+        desc: 'Returns a map of status codes to quantities',
+        status: 'normal'
+      }
+    ],
+    token: 'tokenForTest'
+  },
+  msg: 'success'
+}
