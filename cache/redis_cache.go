@@ -28,7 +28,6 @@ type IRedisCacheNoKey[T any] interface {
 }
 type redisCache[T any, K comparable] struct {
 	client        ICommonCache
-	keyPrefix     string
 	formatHandler func(K) string
 	expiration    time.Duration
 }
@@ -56,7 +55,7 @@ type redisCacheNoKey[T any] struct {
 }
 
 func (r *redisCache[T, K]) Get(ctx context.Context, k K) (*T, error) {
-	kv := r.keyPrefix + r.formatHandler(k)
+	kv := r.formatHandler(k)
 
 	bytes, err := r.client.Get(ctx, kv)
 	if err != nil {
@@ -69,7 +68,7 @@ func (r *redisCache[T, K]) Get(ctx context.Context, k K) (*T, error) {
 
 func (r *redisCache[T, K]) Set(ctx context.Context, k K, t *T) error {
 
-	kv := r.keyPrefix + r.formatHandler(k)
+	kv := r.formatHandler(k)
 
 	bytes, err := structToBytes(t)
 	if err != nil {
@@ -81,7 +80,7 @@ func (r *redisCache[T, K]) Set(ctx context.Context, k K, t *T) error {
 
 func (r *redisCache[T, K]) Delete(ctx context.Context, ks ...K) error {
 	for _, k := range ks {
-		key := r.keyPrefix + r.formatHandler(k)
+		key := r.formatHandler(k)
 		if err := r.client.Del(ctx, key); err != nil {
 			return err
 		}
@@ -111,15 +110,20 @@ func (r *redisCacheNoKey[T]) SetAll(ctx context.Context, t []*T) error {
 	return r.client.Set(ctx, r.key, bytes, r.expiration)
 }
 func CreateRedisCacheNoKey[T any](expiration time.Duration, key string, prefix ...string) IRedisCacheNoKey[T] {
-	keyPrefix := "apinto-dashboard"
+	keyPrefix := "apinto-dashboard:"
 	if len(key) > 0 {
-		keyPrefix = strings.Join(prefix, "-")
+		keyPrefix = strings.Join(prefix, ":")
 	}
 	r := &redisCacheNoKey[T]{
-		key:        fmt.Sprint(keyPrefix, ":", key),
+		key:        key,
 		expiration: expiration,
 	}
-	bean.Autowired(&r.client)
+	var c ICommonCache
+
+	bean.Autowired(&c)
+	bean.AddInitializingBeanFunc(func() {
+		r.client = c.clone(keyPrefix)
+	})
 	return r
 }
 
@@ -129,11 +133,15 @@ func CreateRedisCache[T any, K comparable](expiration time.Duration, format func
 		keyPrefix = strings.Join(key, "-")
 	}
 	r := &redisCache[T, K]{
-		keyPrefix:     keyPrefix,
 		formatHandler: format,
 		expiration:    expiration,
 	}
-	bean.Autowired(&r.client)
+	var c ICommonCache
+
+	bean.Autowired(&c)
+	bean.AddInitializingBeanFunc(func() {
+		r.client = c.clone(keyPrefix)
+	})
 	return r
 }
 func CreateRedisCacheSingleton[T any](expiration time.Duration, key string) IRedisCacheSingleton[T] {
