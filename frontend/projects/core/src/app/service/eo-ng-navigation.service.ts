@@ -43,8 +43,7 @@ export class EoNgNavigationService {
 
   // 获取首页路由地址
   getPageRoute (): string {
-    return (this.isBusiness ? '/router/api' : '/guide')
-    // return this.mainPageRouter
+    return this.isBusiness ? this.mainPageRouter || '/router/api' : '/guide'
   }
 
   // 如果用户没有任何除商业授权以外的功能查看权限, 返回true
@@ -67,17 +66,27 @@ export class EoNgNavigationService {
     return this.flashFlag.asObservable()
   }
 
-  private userUpdeteRightList: Subject<boolean> = new Subject<
+  private checkAuthStatus: Subject<boolean> = new Subject<boolean>()
+
+  reqCheckAuthStatus () {
+    this.checkAuthStatus.next(true)
+  }
+
+  repCheckAuthStatus () {
+    return this.checkAuthStatus.asObservable()
+  }
+
+  private userUpdateRightList: Subject<boolean> = new Subject<
     boolean
   >()
 
   reqUpdateRightList () {
-    this.userUpdeteRightList.next(true)
+    this.userUpdateRightList.next(true)
     this.dataUpdated = true
   }
 
   repUpdateRightList () {
-    return this.userUpdeteRightList.asObservable()
+    return this.userUpdateRightList.asObservable()
   }
 
   getUpdateRightsRouter () {
@@ -175,17 +184,14 @@ export class EoNgNavigationService {
                   matchRouterExact: false,
                   type: this.getDefaultModule(navigation).type
                 }
-              : (navigation.modules?.length > 0
-                  ? { // TODO似乎没用，后续排查
-                    }
-                  : {
-                      children: [{
-                        menu: true,
-                        group: true,
-                        title: '暂无内容',
-                        menuTitleClassName: 'menu-no-content'
-                      }]
-                    }))
+              : {
+                  children: [{
+                    menu: true,
+                    group: true,
+                    title: '暂无内容',
+                    menuTitleClassName: 'menu-no-content'
+                  }]
+                })
         }
         if (navigation.name && navigation.path) {
           this.routerNameMap.set(navigation.path, navigation.name)
@@ -230,14 +236,15 @@ export class EoNgNavigationService {
 
   findMainPage () {
     for (const menu of this.menuList) {
-      if (menu.routerLink && this.accessMap?.get(menu?.routerLink)?.length) {
+      // eslint-disable-next-line dot-notation
+      if (menu.routerLink && menu['name'] && this.accessMap?.has(menu['name']) && !menu.routerLink.includes('module/')) {
         this.mainPageRouter = menu.routerLink
         return
       } else if (menu.children) {
         for (const child of menu.children) {
           if (
-            child.routerLink &&
-            this.accessMap?.get(child?.routerLink)?.length
+            // eslint-disable-next-line dot-notation
+            child.routerLink && this.accessMap?.has(child['name']) && !child.routerLink.includes('module/')
           ) {
             this.mainPageRouter = child.routerLink
             return

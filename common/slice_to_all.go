@@ -23,6 +23,24 @@ func SliceToMapO[K comparable, T, D any](list []T, f func(T) (K, D)) map[K]D {
 	return m
 }
 
+// SliceToSet 列表转成集合
+func SliceToSet[K comparable, T any](list []T, f func(T) K) map[K]struct{} {
+	m := make(map[K]struct{})
+	for _, t := range list {
+		m[f(t)] = struct{}{}
+	}
+	return m
+}
+
+func SliceToMapO[K comparable, T, D any](list []T, f func(T) (K, D)) map[K]D {
+	m := make(map[K]D)
+	for _, t := range list {
+		k, v := f(t)
+		m[k] = v
+	}
+	return m
+}
+
 func SliceToMapArray[K comparable, T any](list []T, f func(T) K) map[K][]T {
 	m := make(map[K][]T)
 	for _, t := range list {

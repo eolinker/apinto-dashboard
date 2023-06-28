@@ -16,6 +16,7 @@
     <nz-form-control [nzSpan]="13">
       <input
         class="w-INPUT_NORMAL"
+        type="password"
         eo-ng-input
         formControlName="old"
         placeholder="请输入6-32位字符"
@@ -37,7 +38,7 @@
         formControlName="password"
         (ngModelChange)="validateConfirmPassword()"
         placeholder="请输入6-32位字符"
-        autocomplete="off"
+        autocomplete="new-password"
       />
       <ng-template #passwordErrorTpl let-control>
         <ng-container *ngIf="control.hasError('required')">必填项</ng-container>
@@ -60,7 +61,7 @@
         type="password"
         formControlName="confirm"
         placeholder="请输入6-32位字符"
-        autocomplete="off"
+        autocomplete="new-password"
       />
       <ng-template #confirmPasswordErrorTpl let-control>
         <ng-container *ngIf="control.hasError('required')">必填项</ng-container>

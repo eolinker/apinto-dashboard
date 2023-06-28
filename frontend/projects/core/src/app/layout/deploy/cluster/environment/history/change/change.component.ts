@@ -32,7 +32,6 @@ import { DeployClusterOperateRecordTbody, DeployClusterOperateRecordThead } from
 })
 export class DeployClusterEnvironmentHistoryChangeComponent implements OnInit {
   @Input() publishTypeTpl: TemplateRef<any> | undefined
-  // eslint-disable-next-line camelcase
   operateRecordsData:{historys:Array<{key:string, oldValue:string, newValue:string, createTime:string, optType:string}>, total:number}=
       {
         historys: [],
@@ -43,7 +42,6 @@ export class DeployClusterEnvironmentHistoryChangeComponent implements OnInit {
   operateRecordTableBody:TBODY_TYPE[]=[...DeployClusterOperateRecordTbody]
 
   // 更改历史分页
-  // eslint-disable-next-line camelcase
   operateRecordsPage:{pageNum:number, pageSize:number, total:number}={
     pageNum: 1,
     pageSize: 15,

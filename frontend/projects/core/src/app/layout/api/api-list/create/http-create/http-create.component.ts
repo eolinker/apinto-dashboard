@@ -1,10 +1,11 @@
 import { Component } from '@angular/core'
 import { ApiWebsocketCreateComponent } from '../websocket-create/websocket-create.component'
 import { setFormValue } from 'projects/core/src/app/constant/form'
+import { APIProtocol } from '../../../types/types'
 
 @Component({
   selector: 'eo-ng-api-http-create',
-  templateUrl: './http-create.component.html',
+  templateUrl: '../websocket-create/websocket-create.component.html',
   styles: [
     `
     :host {
@@ -36,27 +37,18 @@ import { setFormValue } from 'projects/core/src/app/constant/form'
   ]
 })
 export class ApiHttpCreateComponent extends ApiWebsocketCreateComponent {
+  override apiProtocol:APIProtocol = 'http'
   // 当编辑api时，需要获取api信息
   override getApiMessage () {
     this.api.get('router', { uuid: this.apiUuid }).subscribe((resp) => {
       if (resp.code === 0) {
         setFormValue(this.validateForm, resp.data.api)
-        // eslint-disable-next-line dot-notation
-        this.validateForm.controls['requestPath'].setValue(resp.data.api.requestPath.slice(1))
+        this.validateForm.controls['requestPath'].setValue(resp.data.api.requestPath[0] === '/' ? resp.data.api.requestPath.slice(1) : resp.data.api.requestPath)
         this.createApiForm = resp.data.api
         if (
-          !this.createApiForm.method ||
-          this.createApiForm.method.length === 0
+          !resp.data.api.method ||
+          resp.data.api.method.length === 0
         ) {
-          this.createApiForm.method = [
-            'POST',
-            'PUT',
-            'GET',
-            'DELETE',
-            'PATCH',
-            'HEAD',
-            'OPTIONS'
-          ]
           this.allChecked = true
           this.updateAllChecked()
         } else {

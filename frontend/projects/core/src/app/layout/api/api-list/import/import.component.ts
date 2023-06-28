@@ -1,6 +1,4 @@
-/* eslint-disable no-useless-constructor */
-/* eslint-disable dot-notation */
-import { Component, Output, EventEmitter, TemplateRef, ViewChild, OnInit } from '@angular/core'
+import { Component, Output, EventEmitter, TemplateRef, ViewChild, OnInit, AfterViewInit } from '@angular/core'
 import { FormGroup, UntypedFormBuilder, Validators } from '@angular/forms'
 import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feedback'
 import { SelectOption } from 'eo-ng-select'
@@ -22,12 +20,12 @@ import { APIImportData } from '../../types/types'
   styles: [
   ]
 })
-export class ApiImportComponent implements OnInit {
+export class ApiImportComponent implements AfterViewInit {
   @ViewChild('importContentTpl', { read: TemplateRef, static: true }) importContentTpl: TemplateRef<any> | undefined
   @ViewChild('importFooterTpl', { read: TemplateRef, static: true }) importFooterTpl: TemplateRef<any> | undefined
   @ViewChild('methodTpl', { read: TemplateRef, static: true }) methodTpl: TemplateRef<any> | undefined
   @Output() flashList:EventEmitter<any> = new EventEmitter()
-  drawerRef:NzModalRef | undefined
+  modalRef:NzModalRef | undefined
   groupList:any[]= []
   upstreamList:SelectOption[]= []
   importFormPage:boolean = true
@@ -54,7 +52,7 @@ export class ApiImportComponent implements OnInit {
     private fb: UntypedFormBuilder) {
   }
 
-  ngOnInit (): void {
+  ngAfterViewInit ():void {
     // 表格checkbox
     this.resultTableThead[0].click = (item:any) => {
       this.changeApisSet(item, 'all')
@@ -66,9 +64,6 @@ export class ApiImportComponent implements OnInit {
     this.resultTableTbody[2].check = (value:any) => {
       return !!value
     }
-  }
-
-  ngAfterViewInit ():void {
     this.resultTableTbody[3].title = this.methodTpl
   }
 
@@ -95,7 +90,7 @@ export class ApiImportComponent implements OnInit {
       upstream: ['', [Validators.required]],
       requestPrefix: ['', [Validators.pattern('^[^?]*')]]
     })
-    this.drawerRef = this.modalService.create({
+    this.modalRef = this.modalService.create({
       nzTitle: '导入swagger文件',
       nzWidth: MODAL_NORMAL_SIZE,
       nzContent: this.importContentTpl,
@@ -255,7 +250,7 @@ export class ApiImportComponent implements OnInit {
     this.api.put('router/import', { apis: submitApis, token: this.token }).subscribe((resp:EmptyHttpResponse) => {
       if (resp.code === 0) {
         this.message.success(resp.msg || 'API导入成功！', { nzDuration: 1000 })
-        this.drawerRef?.close()
+        this.modalRef?.close()
         this.flashList.emit()
         return true
       } else {

@@ -11,9 +11,9 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-entry"
 	cluster_model2 "github.com/eolinker/apinto-dashboard/modules/cluster/cluster-model"
 	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-store"
-
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
+	"github.com/go-redis/redis/v8"
 	"golang.org/x/sync/errgroup"
 	"strings"
 	"time"
@@ -22,7 +22,17 @@ import (
 type clusterNodeService struct {
 	clusterNodeStore cluster_store.IClusterNodeStore
 	clusterService   cluster.IClusterService
+	nodeCache        INodeCache
 	apintoClient     cluster.IApintoClient
+}
+
+func (c *clusterNodeService) List(ctx context.Context, namespaceId int, clusterName string) ([]*cluster_model2.Node, error) {
+	cm, err := c.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
+	if err != nil {
+		return nil, err
+	}
+	return c.QueryByClusterId(ctx, cm.Id)
+
 }
 
 func (c *clusterNodeService) Delete(ctx context.Context, namespaceId int, clusterId int) error {
@@ -42,51 +52,60 @@ func newClusterNodeService() cluster.IClusterNodeService {
 	bean.Autowired(&s.clusterNodeStore)
 	bean.Autowired(&s.clusterService)
 	bean.Autowired(&s.apintoClient)
+	bean.Autowired(&s.nodeCache)
 
 	return s
 }
 
-func (c *clusterNodeService) Insert(ctx context.Context, nodes []*cluster_model2.ClusterNode) error {
+func (c *clusterNodeService) Insert(ctx context.Context, nodes []*cluster_model2.Node) error {
 	entryNodes := make([]*cluster_entry.ClusterNode, 0, len(nodes))
 	for _, node := range nodes {
-		entryNodes = append(entryNodes, node.ClusterNode)
+		entryNodes = append(entryNodes, node.ToEntity())
 	}
 	return c.clusterNodeStore.Insert(ctx, entryNodes...)
 }
 
 // QueryList 查询集群下的节点列表
 func (c *clusterNodeService) QueryList(ctx context.Context, namespaceId int, clusterName string) ([]*cluster_model2.ClusterNode, bool, error) {
-	cluster, err := c.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
+	clusterModel, err := c.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
 	if err != nil {
 		return nil, false, err
 	}
 
-	list := make([]*cluster_model2.ClusterNode, 0)
+	//控制台集群下存储的节点列表
+	list := make([]*cluster_model2.Node, 0)
 
 	group, _ := errgroup.WithContext(ctx)
 
 	group.Go(func() error {
-		nodes, err := c.clusterNodeStore.GetAllByClusterIds(ctx, cluster.Id)
+		nodes, err := c.QueryByClusterId(ctx, clusterModel.Id)
 		if err != nil {
 			return err
 		}
-		for _, node := range nodes {
-			list = append(list, &cluster_model2.ClusterNode{
-				ClusterNode: node,
-				AdminAddrs:  strings.Split(node.AdminAddr, ","),
-				Status:      1,
-			})
-		}
+		list = append(list, nodes...)
+		//for _, node := range nodes {
+		//	list = append(list, &cluster_model2.Node{
+		//		Node:   *node,
+		//		Status: 1,
+		//	})
+		//}
 		return nil
 	})
-
-	clusterNodes := make([]*cluster_model2.ClusterNode, 0)
+	//调用admin接口返回集群下的节点列表
+	clusterNodes := make([]*cluster_model2.Node, 0)
 	group.Go(func() error {
-		clusterNodes, err = c.GetNodesByUrl(cluster.Addr)
+		ns, err := c.GetNodesByUrl(clusterModel.Addr)
 		if err != nil {
-			log.Errorf("clusterNodeService-QueryList addr=%s err=%s", cluster.Addr, err.Error())
+			log.Errorf("clusterNodeService-QueryList addr=%s err=%s", clusterModel.Addr, err.Error())
 			return err
 		}
+		clusterNodes = append(clusterNodes, ns...)
+		//for _, n := range ns {
+		//	clusterNodes = append(clusterNodes, &cluster_model2.ClusterNode{
+		//		Node:   *n,
+		//		Status: 1,
+		//	})
+		//}
 		return nil
 	})
 
@@ -94,33 +113,78 @@ func (c *clusterNodeService) QueryList(ctx context.Context, namespaceId int, clu
 		return nil, false, err
 	}
 
+	rs := make([]*cluster_model2.ClusterNode, 0, len(list))
+	addList, updateList, delList := common.DiffContrast(list, clusterNodes)
+	isUpdate := len(addList) > 0 || len(updateList) > 0 || len(delList) > 0
+
 	if len(clusterNodes) > 0 {
+		//判断ClusterNodes 集合里 是否存在控制台节点，
+		clusterNodesSet := common.SliceToSet(clusterNodes, func(t *cluster_model2.Node) string {
+			return t.Name
+		})
 		for _, node := range list {
-			node.Status = 2
+			ni := &cluster_model2.ClusterNode{Node: *node, Status: 1}
+			if _, has := clusterNodesSet[node.Name]; has {
+				ni.Status = 2
+			}
+			rs = append(rs, ni)
 		}
 	}
 
-	addList, updateList, delList := common.DiffContrast(list, clusterNodes)
-
-	isUpdate := len(addList) > 0 || len(updateList) > 0 || len(delList) > 0
-
-	return list, isUpdate, nil
+	return rs, isUpdate, nil
 }
 
-func (c *clusterNodeService) QueryByClusterIds(ctx context.Context, clusterIds ...int) ([]*cluster_model2.ClusterNode, error) {
-	nodes, err := c.clusterNodeStore.GetAllByClusterIds(ctx, clusterIds...)
+func (c *clusterNodeService) QueryByClusterId(ctx context.Context, id int) ([]*cluster_model2.Node, error) {
+	nodes, err := c.nodeCache.Get(ctx, id)
+	if err != nil && err != redis.Nil {
+		return nil, err
+	}
+
+	//若redis存在值
+	if err == nil {
+		return *nodes, nil
+	}
+
+	//若redis无缓存
+	nodeEntries, err := c.clusterNodeStore.GetAllByClusterIds(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	list := make([]*cluster_model2.ClusterNode, 0, len(nodes))
+	list := make([]*cluster_model2.Node, 0, len(nodeEntries))
+	for _, node := range nodeEntries {
+		list = append(list, cluster_model2.ReadClusterNode(node))
+	}
+	//缓存
+	_ = c.nodeCache.Set(ctx, id, &list)
+	return list, nil
+
+}
+
+func (c *clusterNodeService) QueryAllCluster(ctx context.Context) ([]*cluster_model2.Node, error) {
+	nodes, err := c.clusterNodeStore.List(ctx, map[string]interface{}{})
+	if err != nil {
+		return nil, err
+	}
+	list := make([]*cluster_model2.Node, 0, len(nodes))
 
 	for _, node := range nodes {
-		list = append(list, &cluster_model2.ClusterNode{
-			ClusterNode: node,
-			AdminAddrs:  strings.Split(node.AdminAddr, ","),
-		})
+		list = append(list, cluster_model2.ReadClusterNode(node))
 	}
 	return list, nil
+}
+
+func (c *clusterNodeService) QueryAdminAddrByClusterId(ctx context.Context, id int) ([]string, error) {
+	nodes, err := c.QueryByClusterId(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	admins := make([]string, 0)
+	for _, node := range nodes {
+		for _, nodeAddr := range node.AdminAddrs {
+			admins = append(admins, nodeAddr)
+		}
+	}
+	return admins, nil
 }
 
 // Reset 重置节点信息
@@ -134,7 +198,7 @@ func (c *clusterNodeService) Reset(ctx context.Context, namespaceId, userId int,
 	if err != nil {
 		return err
 	}
-	nodes := make([]*cluster_model2.ClusterNode, 0)
+	nodes := make([]*cluster_model2.Node, 0)
 	if err = json.Unmarshal(bytes, &nodes); err != nil {
 		return err
 	}
@@ -149,21 +213,20 @@ func (c *clusterNodeService) Reset(ctx context.Context, namespaceId, userId int,
 		return err
 	}
 
+	entryClusterNodes := make([]*cluster_entry.ClusterNode, 0, len(nodes))
 	err = c.clusterNodeStore.Transaction(ctx, func(txCtx context.Context) error {
 		t := time.Now()
-		entryClusterNodes := make([]*cluster_entry.ClusterNode, 0, len(nodes))
+
 		nodesAdminAddr := make([]string, 0, len(nodes))
 
 		for _, node := range nodes {
-			entryClusterNodes = append(entryClusterNodes, &cluster_entry.ClusterNode{
-				ClusterId:   clusterId,
-				NamespaceId: namespaceId,
-				AdminAddr:   node.AdminAddr,
-				ServiceAddr: node.ServiceAddr,
-				Name:        node.Name,
-				CreateTime:  t,
-			})
-			nodesAdminAddr = append(nodesAdminAddr, node.AdminAddr)
+			ent := node.ToEntity()
+			ent.ClusterId = clusterId
+			ent.CreateTime = t
+			ent.NamespaceId = namespaceId
+
+			entryClusterNodes = append(entryClusterNodes, ent)
+			nodesAdminAddr = append(nodesAdminAddr, ent.AdminAddr)
 		}
 		if err = c.clusterNodeStore.UpdateNodes(txCtx, clusterId, entryClusterNodes); err != nil {
 			return err
@@ -174,7 +237,13 @@ func (c *clusterNodeService) Reset(ctx context.Context, namespaceId, userId int,
 	if err != nil {
 		return err
 	}
-	c.apintoClient.SetClient(namespaceId, clusterId)
+	list := make([]*cluster_model2.Node, 0, len(entryClusterNodes))
+	for _, node := range entryClusterNodes {
+		list = append(list, cluster_model2.ReadClusterNode(node))
+	}
+	//缓存
+	_ = c.nodeCache.Set(ctx, clusterId, &list)
+
 	return nil
 }
 
@@ -201,8 +270,8 @@ func (c *clusterNodeService) Update(ctx context.Context, namespaceId int, cluste
 		newClusterNodes = append(newClusterNodes, &cluster_entry.ClusterNode{
 			ClusterId:   clusterInfo.Id,
 			NamespaceId: namespaceId,
-			AdminAddr:   node.AdminAddr,
-			ServiceAddr: node.ServiceAddr,
+			AdminAddr:   strings.Join(node.AdminAddrs, ","),
+			ServiceAddr: strings.Join(node.ServiceAddr, ","),
 			Name:        node.Name,
 			CreateTime:  t,
 		})
@@ -218,12 +287,22 @@ func (c *clusterNodeService) Update(ctx context.Context, namespaceId int, cluste
 	if err != nil {
 		return err
 	}
-	c.apintoClient.SetClient(namespaceId, clusterInfo.Id)
+
+	list := make([]*cluster_model2.Node, 0, len(newClusterNodes))
+	for _, node := range nodes {
+		node.NamespaceId = namespaceId
+		node.ClusterId = clusterInfo.Id
+		node.CreateTime = t
+		list = append(list, node)
+	}
+	//缓存
+	_ = c.nodeCache.Set(ctx, clusterInfo.Id, &list)
+
 	return nil
 }
 
 // NodeRepeatContrast  节点重复对比
-func (c *clusterNodeService) NodeRepeatContrast(ctx context.Context, namespaceId, clusterId int, newList []*cluster_model2.ClusterNode) error {
+func (c *clusterNodeService) NodeRepeatContrast(ctx context.Context, namespaceId, clusterId int, newList []*cluster_model2.Node) error {
 	clusters, err := c.clusterService.GetByNamespaceId(ctx, namespaceId)
 	if err != nil {
 		return err
@@ -232,27 +311,27 @@ func (c *clusterNodeService) NodeRepeatContrast(ctx context.Context, namespaceId
 	clustersMap := common.SliceToMap(clusters, func(t *cluster_model2.Cluster) int {
 		return t.Id
 	})
-	//工作空间下任何一个节点名称和这次添加的有重复,不可保存
-	clusterIds := make([]int, 0)
-	for _, clusterInfo := range clusters {
-		if clusterId == clusterInfo.Id { //过滤本身的
-			continue
-		}
-		clusterIds = append(clusterIds, clusterInfo.Id)
-	}
 
-	clusterNodes, err := c.QueryByClusterIds(ctx, clusterIds...)
+	clusterNodes, err := c.QueryAllCluster(ctx)
 	if err != nil {
 		return err
+	}
+	//工作空间下任何一个节点名称和这次添加的有重复,不可保存
+	filteredNodes := make([]*cluster_model2.Node, 0, len(clusterNodes))
+	for _, node := range clusterNodes {
+		if clusterId == node.ClusterId { //过滤本身的
+			continue
+		}
+		filteredNodes = append(filteredNodes, node)
 	}
 
 	//对比clusterNods和nodes是否有重复的name
 
-	mapNode := common.SliceToMap(newList, func(t *cluster_model2.ClusterNode) string {
+	mapNode := common.SliceToMap(newList, func(t *cluster_model2.Node) string {
 		return t.Name
 	})
 
-	for _, node := range clusterNodes {
+	for _, node := range filteredNodes {
 		if _, ok := mapNode[node.Name]; ok {
 			if clusterInfo, clusterOk := clustersMap[node.ClusterId]; clusterOk {
 				return errors.New(fmt.Sprintf("%s集群已有这个节点信息", clusterInfo.Name))
@@ -264,7 +343,7 @@ func (c *clusterNodeService) NodeRepeatContrast(ctx context.Context, namespaceId
 	return nil
 }
 
-func (c *clusterNodeService) GetNodesByUrl(addr string) ([]*cluster_model2.ClusterNode, error) {
+func (c *clusterNodeService) GetNodesByUrl(addr string) ([]*cluster_model2.Node, error) {
 
 	client, err := v1.NewClient([]string{addr})
 	if err != nil {
@@ -284,18 +363,16 @@ func (c *clusterNodeService) GetNodesByUrl(addr string) ([]*cluster_model2.Clust
 		return nil, err
 	}
 
-	list := make([]*cluster_model2.ClusterNode, 0)
+	list := make([]*cluster_model2.Node, 0)
 	for _, node := range clusterInfo.Nodes {
-		adminAddr := strings.Join(node.Admin, ",")
-		serverAddr := strings.Join(node.Server, ",")
-		list = append(list, &cluster_model2.ClusterNode{
-			ClusterNode: &cluster_entry.ClusterNode{
+		list = append(list,
+
+			&cluster_model2.Node{
 				Name:        node.Name,
-				AdminAddr:   adminAddr,
-				ServiceAddr: serverAddr,
+				AdminAddrs:  node.Admin,
+				ServiceAddr: node.Server,
 			},
-			Status: 2,
-		})
+		)
 	}
 
 	return list, nil

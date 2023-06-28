@@ -5,18 +5,25 @@ import { THEAD_TYPE, TBODY_TYPE } from 'eo-ng-table'
 import { NzModalRef } from 'ng-zorro-antd/modal'
 import { MODAL_SMALL_SIZE } from '../../../constant/app.config'
 import { ApiService } from '../../../service/api.service'
-import { EoNgNavigationService } from '../../../service/app-config.service'
 import { BaseInfoService } from '../../../service/base-info.service'
 import { extraTableHeadName, extraTableBody } from '../types/conf'
 import { ApplicationExtraFormComponent } from './form/form.component'
 import { EmptyHttpResponse } from '../../../constant/type'
 import { EoNgApplicationService } from '../application.service'
 import { ApplicationParamData } from '../types/types'
+import { EoNgNavigationService } from '../../../service/eo-ng-navigation.service'
 
 @Component({
   selector: 'eo-ng-application-extra',
   templateUrl: './extra.component.html',
   styles: [
+    `
+    :host{
+      height:100%;
+      display:block;
+      overflow-y:auto;
+    }
+`
   ]
 })
 export class ApplicationExtraComponent {

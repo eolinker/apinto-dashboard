@@ -2,13 +2,13 @@ import { Component, OnInit } from '@angular/core'
 import { EoNgFeedbackModalService } from 'eo-ng-feedback'
 import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { NzModalRef } from 'ng-zorro-antd/modal'
-import { webhooksTableBody, webhooksTableHead } from 'projects/core/src/app/constant/table.conf'
 import { ApiService } from 'projects/core/src/app/service/api.service'
 import { EoNgMessageService } from 'projects/core/src/app/service/eo-ng-message.service'
 import { WebhookListData } from '../../types/type'
 import { SystemWebhookConfigComponent } from '../config/config.component'
 import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 import { MODAL_NORMAL_SIZE, MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
+import { webhooksTableHead, webhooksTableBody } from '../../types/conf'
 
 @Component({
   selector: 'eo-ng-system-webhook-list',
@@ -77,7 +77,7 @@ export class SystemWebhookListComponent implements OnInit {
   openWebhookModal (id:string = '') {
     this.webhookId = id || ''
     this.modalRef = this.modalService.create({
-      nzTitle: this.webhookId ? '新建Webhook' : '编辑Webhook',
+      nzTitle: this.webhookId ? '编辑Webhook' : '新建Webhook',
       nzContent: SystemWebhookConfigComponent,
       nzComponentParams: {
         webhookId: this.webhookId,
@@ -85,7 +85,7 @@ export class SystemWebhookListComponent implements OnInit {
       },
       nzClosable: true,
       nzWidth: MODAL_NORMAL_SIZE,
-      nzOkText: this.webhookId ? '提交' : '保存',
+      nzOkText: this.webhookId ? '保存' : '提交',
       nzOnOk: (component:SystemWebhookConfigComponent) => {
         component.saveWebhook()
         return false

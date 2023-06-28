@@ -6,6 +6,9 @@ import { ApplicationData } from './types/types'
 import { ApiService } from '../../service/api.service'
 import { ApplicationPublishComponent } from './publish/publish.component'
 import { FilterOpts } from '../../constant/conf'
+import { NzModalRef } from 'ng-zorro-antd/modal'
+import { EoNgFeedbackModalService } from 'eo-ng-feedback'
+import { MODAL_NORMAL_SIZE } from '../../constant/app.config'
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +19,8 @@ export class EoNgApplicationService {
 
   appData:ApplicationData|null = null
   loading:boolean = true
-  constructor (private api:ApiService) {}
+  modalRef:NzModalRef|undefined
+  constructor (private api:ApiService, private modalService:EoNgFeedbackModalService) {}
 
   getApplicationData (appId:string) {
     this.loading = true
@@ -96,7 +100,7 @@ export class EoNgApplicationService {
         type: 'btn',
         right: true,
         btns: [{
-          title: '上线管理',
+          title: '发布管理',
           click: (item:any) => {
             context.publish(item)
           }
@@ -140,5 +144,72 @@ export class EoNgApplicationService {
       { key: 'updateTime' }
     ]
     return tbody
+  }
+
+  publishAppModal (data:{name:string, id:string, desc?:string}, component?:ApplicationManagementListComponent, returnToSdk?:Function) {
+    this.modalRef = this.modalService.create({
+      nzTitle: `${data.name}发布管理`,
+      nzWidth: MODAL_NORMAL_SIZE,
+      nzContent: ApplicationPublishComponent,
+      nzComponentParams: {
+        name: data.name,
+        id: data.id,
+        desc: data?.desc,
+        closeModal: () => { this.modalRef?.close() },
+        nzDisabled: component?.nzDisabled,
+        returnToSdk
+      },
+      nzOnCancel: () => {
+        returnToSdk && returnToSdk({ data: { closeModal: true } })
+      },
+      nzFooter: [{
+        label: '取消',
+        type: 'default',
+        onClick: () => {
+          this.modalRef?.close()
+          returnToSdk && returnToSdk({ data: { closeModal: true } })
+        }
+      },
+      {
+        label: '下线',
+        danger: true,
+        onClick: (context:ApplicationPublishComponent) => {
+          return new Promise((resolve, reject) => {
+            context.offline().subscribe((resp) => {
+              if (resp) {
+                this.modalRef?.close()
+                resolve(true)
+                component?.getTableData()
+              } else {
+                reject(new Error())
+              }
+            })
+          })
+        },
+        disabled: () => {
+          return !!component?.nzDisabled
+        }
+      },
+      {
+        label: '上线',
+        type: 'primary',
+        onClick: (context:ApplicationPublishComponent) => {
+          return new Promise((resolve, reject) => {
+            context.online().subscribe((resp) => {
+              if (resp) {
+                resolve(true)
+                this.modalRef?.close()
+                component?.getTableData()
+              } else {
+                reject(new Error())
+              }
+            })
+          })
+        },
+        disabled: () => {
+          return !!component?.nzDisabled
+        }
+      }]
+    })
   }
 }

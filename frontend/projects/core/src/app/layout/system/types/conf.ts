@@ -99,3 +99,45 @@ export const ExternalAppListTableBody:EO_TBODY_TYPE[] = [
     ]
   }
 ]
+
+// webhook列表参数
+export const webhooksTableHead:THEAD_TYPE[] = [
+  { title: 'Webhook名称' },
+  { title: '通知Url' },
+  { title: '请求方式' },
+  { title: '参数类型' },
+  { title: '更新者' },
+  { title: '更新时间' }
+]
+export const webhooksTableBody:EO_TBODY_TYPE[] = [
+  {
+    key: 'title',
+    copy: true
+  },
+  {
+    key: 'url'
+  },
+  {
+    key: 'method'
+  },
+  {
+    key: 'contentType'
+  },
+  { key: 'operator' },
+  { key: 'updateTime' }
+]
+
+// webhook header列表
+export const responseHeaderTableBody: any[] = [
+  {
+    key: 'key',
+    type: 'input',
+    placeholder: '请输入Key'
+
+  },
+  {
+    key: 'value',
+    type: 'input',
+    placeholder: '请输入Value'
+  }
+]

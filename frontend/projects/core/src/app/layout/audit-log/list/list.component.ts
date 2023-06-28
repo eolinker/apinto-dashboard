@@ -1,5 +1,4 @@
 /* eslint-disable dot-notation */
-/* eslint-disable camelcase */
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
 import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feedback'
 import { SelectOption } from 'eo-ng-select'
@@ -36,6 +35,13 @@ import { AuditLogDetail, AuditLogsData } from '../types/types'
       min-height:32px;
     }
 
+    :host ::ng-deep{
+      .ant-picker-suffix {
+        display: none;
+      }
+
+    }
+
     label{
       width:70px;
     }
@@ -53,7 +59,7 @@ export class AuditLogListComponent implements OnInit {
   date:Array<Date> = [];
   listOfType:SelectOption[] = [...auditQueryStatusTypeList]
   listOfKind:SelectOption[] = []
-  drawerRef: NzModalRef | undefined
+  modalRef: NzModalRef | undefined
   searchData:{keyword:string, operateType:string, kind:string, start:Date|null, end:Date|null, pageSize:number, pageNum:number, total:number, [key:string]:any} = {
     keyword: '',
     operateType: '',
@@ -120,7 +126,7 @@ export class AuditLogListComponent implements OnInit {
   }
 
   openDrawer (auditLogId:string):void {
-    this.drawerRef = this.modalService.create({
+    this.modalRef = this.modalService.create({
       nzTitle: '日志详情',
       nzWidth: MODAL_NORMAL_SIZE,
       nzContent: AuditLogDetailComponent,

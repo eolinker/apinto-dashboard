@@ -177,7 +177,7 @@ export class FuseCreateComponent implements OnInit {
             }
             this.responseHeaderList =
               resp.data.strategy!.config.response.header.length > 0
-                ? resp.data.strategy!.config.response.header
+                ? [...resp.data.strategy!.config.response.header, { key: '', value: '' }]
                 : [{ key: '', value: '' }]
 
             this.responseForm.controls['statusCode'].setValue(

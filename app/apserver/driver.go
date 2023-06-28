@@ -9,6 +9,7 @@ import (
 	_ "github.com/eolinker/apinto-dashboard/modules/core/controller"
 	dynamic_controller "github.com/eolinker/apinto-dashboard/modules/dynamic/dynamic-controller"
 	email_controller "github.com/eolinker/apinto-dashboard/modules/email/controller"
+	logModule "github.com/eolinker/apinto-dashboard/modules/log/module"
 	module_plugin_controller "github.com/eolinker/apinto-dashboard/modules/module-plugin/controller"
 	open_api_controller "github.com/eolinker/apinto-dashboard/modules/openapi/open-api-controller"
 	open_app_controller "github.com/eolinker/apinto-dashboard/modules/openapp/open-app-controller"
@@ -18,6 +19,7 @@ import (
 	variable_controller "github.com/eolinker/apinto-dashboard/modules/variable/variable-controller"
 	webhook_controller "github.com/eolinker/apinto-dashboard/modules/webhook/controller"
 	"github.com/eolinker/apinto-dashboard/plugin/local"
+	"github.com/eolinker/apinto-dashboard/plugin/remote"
 )
 
 func init() {
@@ -39,13 +41,15 @@ func init() {
 	apintoModule.Register("variable.apinto.com", variable_controller.NewVariableDriver())
 
 	apintoModule.Register("local", local.NewDriver())
+	apintoModule.Register("remote", remote.NewDriver())
 
 	apintoModule.Register("email.apinto.com", email_controller.NewEmailDriver())
 	apintoModule.Register("webhook.apinto.com", webhook_controller.NewWebhookDriver())
+	apintoModule.Register("log.apinto.com", logModule.NewDriver())
 
-	apintoModule.Register("dynamic.apinto.com", dynamic_controller.NewDynamicModuleDriver(true, false, true, true))
-	apintoModule.Register("upstream.apinto.com", dynamic_controller.NewDynamicModuleDriver(true, false, false, false))
-	apintoModule.Register("discovery.apinto.com", dynamic_controller.NewDynamicModuleDriver(true, false, false, false))
+	apintoModule.Register("dynamic.apinto.com", dynamic_controller.NewDynamicModuleDriver(false))
+	apintoModule.Register("upstream.apinto.com", dynamic_controller.NewDynamicModuleDriver(false))
+	apintoModule.Register("discovery.apinto.com", dynamic_controller.NewDynamicModuleDriver(false))
 	//apintoModule.Register("application.apinto.com", dynamic_controller.NewDynamicModuleDriver(true, false, false, false))
 
 }

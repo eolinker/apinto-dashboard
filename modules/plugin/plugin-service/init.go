@@ -1,9 +1,7 @@
 package plugin_service
 
 import (
-	"github.com/eolinker/apinto-dashboard/cache"
 	"github.com/eolinker/eosc/common/bean"
-	"github.com/go-redis/redis/v8"
 )
 
 func init() {
@@ -11,9 +9,7 @@ func init() {
 	clusterPluginServiceInfo := newClusterPluginService()
 	bean.Injection(&pluginServiceInfo)
 	bean.Injection(&clusterPluginServiceInfo)
+	iExtenderCache := newIExtenderCache()
+	bean.Injection(&iExtenderCache)
 
-	cache.RegisterCacheInitHandler(func(client *redis.ClusterClient) {
-		iExtenderCache := newIExtenderCache(client)
-		bean.Injection(&iExtenderCache)
-	})
 }

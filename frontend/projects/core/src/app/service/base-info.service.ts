@@ -83,7 +83,7 @@ export class BaseInfoService {
   }
 
   onRouterChange () {
-    let lastParamInfo!: RouteParams
+    let lastParamInfo!: RouteParams | {}
     this.router.events
       .pipe(
         tap((e) => {

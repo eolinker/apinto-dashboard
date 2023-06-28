@@ -9,14 +9,10 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/dto"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/model"
 	"github.com/eolinker/eosc/common/bean"
-	"github.com/eolinker/eosc/log"
 	"github.com/gin-gonic/gin"
-	"github.com/go-basic/uuid"
 	"gopkg.in/yaml.v3"
 	"io"
 	"net/http"
-	"os"
-	"path"
 )
 
 type modulePluginController struct {
@@ -151,6 +147,11 @@ func (p *modulePluginController) getEnableInfo(ginCtx *gin.Context) {
 		return
 	}
 
+	//第一次启动时需要配置server, 则显示插件配置define里的server
+	enableServer := info.Server
+	if enableServer == "" && render.Server != "" && render.Internet {
+		enableServer = render.Server
+	}
 	infoHeader := make([]dto.ExtendParams, 0, len(info.Header))
 	infoQuery := make([]dto.ExtendParams, 0, len(info.Query))
 	infoInitialize := make([]dto.ExtendParams, 0, len(info.Initialize))
@@ -174,7 +175,7 @@ func (p *modulePluginController) getEnableInfo(ginCtx *gin.Context) {
 	}
 	enableInfo := &dto.PluginEnableInfo{
 		Name:       info.Name,
-		Server:     info.Server,
+		Server:     enableServer,
 		Header:     infoHeader,
 		Query:      infoQuery,
 		Initialize: infoInitialize,
@@ -211,6 +212,7 @@ func (p *modulePluginController) getEnableInfo(ginCtx *gin.Context) {
 			Name:        i.Name,
 			Value:       i.Value,
 			Title:       i.Title,
+			Type:        i.Type,
 			Placeholder: i.Placeholder,
 			Desc:        i.Desc,
 		})
@@ -235,12 +237,12 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 	userId := users.GetUserId(ginCtx)
 	pluginPackage, err := ginCtx.FormFile("plugin")
 	if err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("install plugin FormFilefail. err:%s", err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("从请求体读取插件安装包失败. err:%s", err.Error()))
 		return
 	}
 	file, err := pluginPackage.Open()
 	if err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("install plugin openFile fail. err:%s", err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("插件安装包打开失败. err:%s", err.Error()))
 		return
 	}
 	defer file.Close()
@@ -259,99 +261,72 @@ func (p *modulePluginController) install(ginCtx *gin.Context) {
 	//读取压缩文件的内容
 	fileBuffer, err := io.ReadAll(file)
 	if err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("install plugin read file fail. err:%s", err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("读取插件安装包内容失败. err:%s", err.Error()))
 		return
 	}
 
-	randomId := uuid.New()
-	tmpDir := fmt.Sprintf("%s%s%s", PluginDir, string(os.PathSeparator), randomId)
-	err = os.MkdirAll(tmpDir, os.ModePerm)
+	files, err := common.UnzipFromBytes(fileBuffer)
 	if err != nil {
-		log.Error("安装插件失败, 无法创建目录:", err)
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("install plugin read file fail. err:%s", err.Error()))
-		return
-	}
-	err = common.UnzipFromBytes(fileBuffer, tmpDir)
-	if err != nil {
-		//删除目录
-		os.RemoveAll(tmpDir)
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("install plugin decompress file fail. err:%s", err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("解压插件安装包失败. err:%s", err.Error()))
 		return
 	}
 
 	//校验解压目录下有没有必要的文件 plugin.yml icon README.md
-	//读取plugin.yml
-	pluginCfgFile, err := os.Open(path.Join(tmpDir, "plugin.yml"))
-	if err != nil {
-		//文件不存在，删除目录
-		os.RemoveAll(tmpDir)
-		controller.ErrorJson(ginCtx, http.StatusOK, "安装插件失败  配置文件文件不存在.")
+	pluginYml, has := files["plugin.yml"]
+	if !has {
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("安装插件失败, plugin.yml不存在"))
 		return
 	}
-	defer pluginCfgFile.Close()
-	pluginBuffer, err := io.ReadAll(pluginCfgFile)
+	externPCfg := new(model.ExternPluginCfg)
+	err = yaml.Unmarshal(pluginYml, externPCfg)
 	if err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("install plugin read plugin.yml fail. err:%s", err.Error()))
-		return
-	}
-	pluginCfg := new(model.PluginYmlCfg)
-	err = yaml.Unmarshal(pluginBuffer, pluginCfg)
-	if err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("install plugin unmarshal plugin.yml fail. err:%s", err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("plugin.yml解析失败. err:%s", err.Error()))
 		return
 	}
 	//TODO 校验plugin.yml
 
 	//README.md是否存在
-	mdFile, err := os.Open(path.Join(tmpDir, "README.md"))
-	if err != nil {
-		//文件不存在，删除目录
-		os.RemoveAll(tmpDir)
+	_, has = files["README.md"]
+	if !has {
 		controller.ErrorJson(ginCtx, http.StatusOK, "安装插件失败 README.md 文件不存在")
 		return
 	}
-	defer mdFile.Close()
 
 	//图标文件是否存在
-	iconFile, err := os.Open(path.Join(tmpDir, pluginCfg.ICon))
+	_, has = files[externPCfg.ICon]
 	if err != nil {
-		//文件不存在，删除目录
-		os.RemoveAll(tmpDir)
 		controller.ErrorJson(ginCtx, http.StatusOK, "安装插件失败 图标文件不存在")
 		return
 	}
-	defer iconFile.Close()
-
-	err = p.modulePluginService.InstallPlugin(ginCtx, userId, pluginCfg, fileBuffer)
-	if err != nil {
-		//删除目录
-		os.RemoveAll(tmpDir)
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("install plugin fail. err:%s", err.Error()))
-		return
+	pluginCfg := &model.PluginCfg{
+		Version:    externPCfg.Version,
+		Navigation: externPCfg.Navigation,
+		GroupID:    externPCfg.GroupID,
+		Resume:     externPCfg.Resume,
+		Define:     externPCfg.Define,
 	}
-
-	//将临时目录重命名为插件id
-	newDirName := fmt.Sprintf("%s%s%s", PluginDir, string(os.PathSeparator), pluginCfg.ID)
-	err = os.Rename(tmpDir, newDirName)
+	resources := &model.PluginResources{
+		Icon:   externPCfg.ICon,
+		Readme: "README.md",
+		Files:  files,
+	}
+	err = p.modulePluginService.InstallPlugin(ginCtx, userId, externPCfg.ID, externPCfg.Name, externPCfg.CName, externPCfg.Driver, externPCfg.ICon, pluginCfg, resources)
 	if err != nil {
-		log.Errorf("安装插件更改临时目录名失败 err: %s", err)
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("安装插件失败. err:%s", err.Error()))
+		return
 	}
 
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
 func (p *modulePluginController) uninstall(ginCtx *gin.Context) {
-	userId := users.GetUserId(ginCtx)
 	pluginUUID := ginCtx.Query("id")
 
-	err := p.modulePluginService.UninstallPlugin(ginCtx, userId, pluginUUID)
+	err := p.modulePluginService.UninstallPlugin(ginCtx, pluginUUID)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
-
-	//删除插件在本地的缓存
-	os.RemoveAll(fmt.Sprintf("%s%s%s", PluginDir, string(os.PathSeparator), pluginUUID))
 
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }

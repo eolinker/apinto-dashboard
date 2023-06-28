@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 /* eslint-disable dot-notation */
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
 import { FormGroup } from '@angular/forms'
@@ -19,6 +18,12 @@ import { DeployClusterNodesFormComponent } from './form/form.component'
   templateUrl: './nodes.component.html',
   styles: [
     `
+
+    :host{
+      overflow-y:auto;
+      height:100%;
+      display:block;
+    }
 `
   ]
 })

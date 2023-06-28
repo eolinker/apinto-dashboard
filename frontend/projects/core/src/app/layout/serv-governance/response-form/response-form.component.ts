@@ -1,4 +1,3 @@
-/* eslint-disable no-useless-constructor */
 /* eslint-disable dot-notation */
 /*
  * @Author: MengjieYang yangmengjie@eolink.com
@@ -94,13 +93,13 @@ initTable ():void {
     return this.disabled
   }
   this.responseHeaderTableBody[2].showFn = (item: any) => {
-    return item === this._responseHeaderList[0]
+    return item !== this._responseHeaderList[this._responseHeaderList.length - 1] && !item.key
   }
   this.responseHeaderTableBody[2].btns[0].disabledFn = () => {
     return this.disabled
   }
   this.responseHeaderTableBody[3].showFn = (item: any) => {
-    return item !== this._responseHeaderList[0]
+    return item !== this._responseHeaderList[this._responseHeaderList.length - 1] && item.key
   }
   this.responseHeaderTableBody[3].btns[0].disabledFn = () => {
     return this.disabled

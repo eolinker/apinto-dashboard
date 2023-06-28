@@ -20,13 +20,13 @@
 </div>
 <ng-template #nzTrBottomTmp let-item="item" let-apis="apis" let-index="index">
   <tr *ngIf="item.data.isExpand">
-    <td style="border-right: none; background-color: #e8e8e8"></td>
-    <td colspan="3" style="border: none; padding: 0; margin-top: -2px">
+    <td class="border-r-none bg-BORDER"></td>
+    <td colspan="3" class="border-none p-0 mt-[-2px]">
       <div style="width: 100%">
         <eo-ng-apinto-table
-          class="floatR innerTable"
+          class="float-right innerTable"
           [nzTbody]="publishRecordDetailsTableBody"
-          [nzThead]="publishRecordDetailsTabelHeadName"
+          [nzThead]="publishRecordDetailsTableHeadName"
           [(nzData)]="item.data.details"
           nzTableLayout="fixed"
           [nzScrollY]="9999"

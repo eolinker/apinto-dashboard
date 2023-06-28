@@ -15,14 +15,14 @@
     </div>
     <div>
       <button
-        class="ml-btnybase floatR"
+        class="ml-btnybase float-right"
         eo-ng-button
         (click)="openDrawer('publishRecords')"
       >
         发布历史
       </button>
       <button
-        class="floatR"
+        class="float-right"
         eo-ng-button
         (click)="openDrawer('operateRecords')"
       >
@@ -55,11 +55,9 @@
       {{ item.name }}</span
     >
 
-    <ng-container [ngSwitch]="item.changeStatus">
-      <span class="status-new-icon" *ngSwitchCase="'NEW'">新</span>
-      <span class="status-change-icon" *ngSwitchCase="'MODIFY'">改</span>
-      <span class="status-delete-icon" *ngSwitchCase="'DELETE'">删</span>
-    </ng-container>
+    <eo-ng-table-publish-change-status
+      [status]="item.changeStatus"
+    ></eo-ng-table-publish-change-status>
 
     <span
       class="h-[20px] leading-[22px] text-[12px] opacity-0 cursor-pointer inline-flex items-center"
@@ -77,11 +75,9 @@
 </ng-template>
 
 <ng-template #publishStatusTpl let-item="item">
-  <ng-container [ngSwitch]="item.publish">
-    <span *ngSwitchCase="'UNPUBLISHED'" class="red-bold">未发布</span>
-    <span *ngSwitchCase="'PUBLISHED'" class="green-bold">已发布</span>
-    <span *ngSwitchCase="'DEFECT'" style="font-weight: bold">缺失</span>
-  </ng-container>
+  <eo-ng-table-publish-status
+    [publish]="item.publish"
+  ></eo-ng-table-publish-status>
 </ng-template>
 
 <ng-template #publishTypeTpl let-item="item">
