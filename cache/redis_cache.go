@@ -3,7 +3,6 @@ package cache
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/eolinker/eosc/common/bean"
 	"strings"
 	"time"
@@ -149,7 +148,7 @@ func CreateRedisCacheSingleton[T any](expiration time.Duration, key string) IRed
 		base: CreateRedisCache[T, string](expiration, func(k string) string {
 			return k
 		}),
-		key: fmt.Sprintf("apinto-dashboard:%s", key),
+		key: key,
 	}
 }
 func structToBytes[T any](t *T) ([]byte, error) {
