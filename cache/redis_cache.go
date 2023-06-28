@@ -111,7 +111,7 @@ func (r *redisCacheNoKey[T]) SetAll(ctx context.Context, t []*T) error {
 func CreateRedisCacheNoKey[T any](expiration time.Duration, key string, prefix ...string) IRedisCacheNoKey[T] {
 	keyPrefix := "apinto-dashboard:"
 	if len(key) > 0 {
-		keyPrefix = strings.Join(prefix, ":")
+		keyPrefix = strings.Join(prefix, ":") + ":"
 	}
 	r := &redisCacheNoKey[T]{
 		key:        key,
@@ -129,7 +129,7 @@ func CreateRedisCacheNoKey[T any](expiration time.Duration, key string, prefix .
 func CreateRedisCache[T any, K comparable](expiration time.Duration, format func(k K) string, key ...string) IRedisCache[T, K] {
 	keyPrefix := "apinto-dashboard:"
 	if len(key) > 0 {
-		keyPrefix = strings.Join(key, "-")
+		keyPrefix = strings.Join(key, ":") + ":"
 	}
 	r := &redisCache[T, K]{
 		formatHandler: format,

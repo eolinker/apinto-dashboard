@@ -22,7 +22,7 @@ type ICommonCache interface {
 
 	SetNX(ctx context.Context, key string, val interface{}, expiration time.Duration) (bool, error)
 
-	clone(prefix string) ICommonCache
+	clone(prefix ...string) ICommonCache
 }
 
 type commonCache struct {
@@ -30,10 +30,14 @@ type commonCache struct {
 	keyPrefix string
 }
 
-func (c *commonCache) clone(prefix string) ICommonCache {
+func (c *commonCache) clone(prefix ...string) ICommonCache {
+	pv := c.keyPrefix
+	if len(prefix) > 0 {
+		pv = prefix[0]
+	}
 	return &commonCache{
 		client:    c.client,
-		keyPrefix: prefix,
+		keyPrefix: pv,
 	}
 }
 
