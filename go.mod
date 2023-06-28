@@ -3,8 +3,7 @@ module github.com/eolinker/apinto-dashboard
 go 1.18
 
 require (
-	github.com/eolinker/apinto-business v0.0.0-00010101000000-000000000000
-	github.com/eolinker/eosc v0.12.1
+	github.com/eolinker/eosc v0.14.1
 	github.com/gin-gonic/gin v1.9.0
 	github.com/go-basic/uuid v1.0.0
 	github.com/go-redis/redis/v8 v8.11.5
@@ -69,7 +68,3 @@ require (
 	google.golang.org/genproto v0.0.0-20210602131652-f16073e35f0c // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 )
-
-replace github.com/eolinker/eosc => ../eosc
-
-replace github.com/eolinker/apinto-business => ../apinto-business
