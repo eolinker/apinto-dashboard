@@ -41,7 +41,7 @@
       </ng-template>
       <div>
         <button
-          *ngIf="isBusiness && authStatus && authStatus !== 'normal'"
+          *ngIf="showAuthBtn()"
           nzType="primary"
           [nzDanger]="true"
           eo-ng-button
