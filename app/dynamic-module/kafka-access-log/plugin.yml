@@ -103,7 +103,7 @@ define:  # 动态模块定义
                       "wrapperCol": 10
                   },
                   "name": "kafka_version",
-                  "default":"3.1.0",
+                  "default": "3.1.0",
                   "required": true,
                   "enum": [
                       {
@@ -453,6 +453,28 @@ define:  # 动态模块定义
                       }
                   }
               },
+              "timeout": {
+                  "type": "number",
+                  "title": "请求超时时间",
+                  "x-decorator": "FormItem",
+                  "x-component": "NumberPicker",
+                  "x-validator": [
+                      {
+                          "triggerType": "onInput",
+                          "min": 0
+                      }
+                  ],
+                  "x-component-props": {},
+                  "x-decorator-props": {
+                      "labelCol": 6,
+                      "wrapperCol": 10
+                  },
+                  "required": true,
+                  "default": 10,
+                  "name": "timeout",
+                  "description": "单位：s，最小值：1",
+                  "x-index": 7
+              },
               "type": {
                   "title": "输出格式",
                   "x-decorator": "FormItem",
@@ -477,7 +499,7 @@ define:  # 动态模块定义
                   ],
                   "default": "line",
                   "name": "type",
-                  "x-index": 7,
+                  "x-index": 8,
                   "required": true
               },
               "formatter": {
@@ -493,7 +515,7 @@ define:  # 动态模块定义
                       "wrapperCol": 10
                   },
                   "name": "formatter",
-                  "x-index": 8
+                  "x-index": 9
               }
           }
       }
