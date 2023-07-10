@@ -757,3 +757,69 @@ export const MockApiImport = {
   },
   msg: 'success'
 }
+
+export const MockPublishCluster = [{
+  name: 'clusterName1',
+  env: 'clusterEnv1',
+  title: 'clusterTitle1',
+  status: 'GOONLINE',
+  operator: 'operator1',
+  updateTime: '2222-12-22'
+}, {
+  name: 'clusterName2',
+  env: 'clusterEnv2',
+  title: 'clusterTitle2',
+  status: 'OFFLINE',
+  operator: 'operator',
+  updateTime: '2222-12-22'
+}, {
+  name: 'clusterName3',
+  env: 'clusterEnv3',
+  title: 'clusterTitle3',
+  status: 'TOUPDATE',
+  operator: 'operator',
+  updateTime: '2222-12-22'
+}, {
+  name: 'clusterName4',
+  env: 'clusterEnv4',
+  title: 'clusterTitle4',
+  status: 'NOTGOONLINE',
+  operator: 'operator',
+  updateTime: '2222-12-22'
+}
+]
+
+export const MockApiOnlineInfo = {
+  code: 0,
+  data: {
+    info: MockApiWsMessage.data.api,
+    clusters: MockPublishCluster
+  },
+  msg: 'success'
+}
+
+export const MockApiOnlineInfo2 = {
+  code: 0,
+  data: {
+    info: MockApiHttpMessage2.data.api,
+    clusters: MockPublishCluster
+  },
+  msg: 'success'
+}
+
+export const MockPublishFail = {
+  code: -1,
+  data: {
+    router: [
+      {
+        params: {
+          serviceName: 'test',
+          templateUuid: 'uuid'
+        },
+        name: 'testName',
+        msg: 'testMsg'
+      }
+    ]
+  },
+  msg: 'fail'
+}

@@ -30,7 +30,7 @@ export class EoIntelligentPluginPublishComponent implements OnInit {
     public message: EoNgFeedbackMessageService,
     private service:EoIntelligentPluginService,
     public api:ApiService,
-    public cdref:ChangeDetectorRef) {}
+    public cdRef:ChangeDetectorRef) {}
 
   ngOnInit (): void {
     this.getPublishList()
@@ -38,7 +38,7 @@ export class EoIntelligentPluginPublishComponent implements OnInit {
 
   ngAfterViewInit () {
     this.publishTableBody = [...this.service.createPluginTbody(this)]
-    this.cdref.detectChanges()
+    this.cdRef.detectChanges()
   }
 
   getPublishList () {
@@ -54,16 +54,6 @@ export class EoIntelligentPluginPublishComponent implements OnInit {
   tableClick = (item:any) => {
     item.checked = !item.checked
     item.data.checked = !item.data.checked
-    this.checkSelectedCluster()
-  }
-
-  // 点击表头全选
-  checkAll () {
-    this.checkSelectedCluster()
-  }
-
-  // 点击单条数据
-  clickData () {
     this.checkSelectedCluster()
   }
 
