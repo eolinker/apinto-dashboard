@@ -127,7 +127,7 @@ export class DeployClusterNodesFormComponent implements OnInit {
         if (resp.code === 0) {
           this.nodesTestList = resp.data.nodes
           this.source = resp.data.source
-          this.clusterCanBeCreated = resp.data.isUpdate
+          this.clusterCanBeCreated = true
           if (this.nodesTestList.length > 0) {
             this.nodesTestTableShow = true
           }
@@ -138,6 +138,7 @@ export class DeployClusterNodesFormComponent implements OnInit {
             onlySelf: true
           })
         } else {
+          this.clusterCanBeCreated = false
           this.validateResetNodeForm.controls['clusterAddr'].markAsDirty()
           this.validateResetNodeForm.controls['clusterAddr'].updateValueAndValidity({ onlySelf: true })
         }

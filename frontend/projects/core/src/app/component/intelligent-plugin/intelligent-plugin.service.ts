@@ -84,7 +84,7 @@ export class EoIntelligentPluginService {
     [{
       type: 'checkbox',
       click: () => {
-        component.checkAll()
+        component.checkSelectedCluster()
       },
       disabled: component.nzDisabled
     },
@@ -100,7 +100,7 @@ export class EoIntelligentPluginService {
       {
         type: 'checkbox',
         click: () => {
-          component.clickData()
+          component.checkSelectedCluster()
         },
         disabledFn: () => {
           return component.nzDisabled

@@ -130,7 +130,7 @@ export class EoNgApplicationService {
       {
         type: 'checkbox',
         click: () => {
-          component.clickData()
+          component.checkSelectedCluster()
         },
         disabledFn: () => {
           return component.nzDisabled
