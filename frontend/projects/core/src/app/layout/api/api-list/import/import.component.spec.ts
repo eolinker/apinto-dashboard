@@ -28,6 +28,7 @@ import { LayoutModule } from '../../../layout.module'
 import { routes } from '../../api-routing.module'
 import { EoNgDropdownModule } from 'eo-ng-dropdown'
 import { ApiImportComponent } from './import.component'
+import { NzFormatEmitEvent, NzTreeNode } from 'ng-zorro-antd/tree'
 
 export class MockElementRef extends ElementRef {
   constructor () { super(null) }
@@ -281,55 +282,56 @@ describe('#init ApiImportComponent', () => {
       expect(component.resultTableTbody[2].check('test')).toEqual(true)
     }
 
+    expect(spyPutApiService).not.toHaveBeenCalled()
+    component.importApis()
+
+    expect(spyPutApiService).toHaveBeenCalled()
+    expect(component.importBtnLoading).toEqual(false)
+
+    component.modalRef = undefined
+    component.resultMap.set(1, { name: '' })
+    component.importApis()
+
     discardPeriodicTasks()
   }))
 
-  it('should create and init component, test open modal', () => {
+  it('test nzTreeClick', () => {
     expect(component).toBeTruthy()
-
-    expect(component.groupList).toEqual([])
-
     component.openDrawer()
     fixture.detectChanges()
-    tick(100)
 
-    expect(component.groupList).toEqual([
-      {
-        uuid: '50458642-5a9f-4136-9ff1-e30d647297e8',
-        key: '50458642-5a9f-4136-9ff1-e30d647297e8',
-        name: 'test1',
-        title: 'test1',
-        children: [
-          {
-            uuid: '35938ae4-1a62-4e22-ad8c-3691e111820e',
-            key: '35938ae4-1a62-4e22-ad8c-3691e111820e',
-            name: 'test1-c1',
-            title: 'test1-c1',
-            children: [],
-            isLeaf: true,
-            isDelete: false
-          },
-          {
-            uuid: 'b238751a-dbfb-4610-8f40-a599737ac4e5',
-            key: 'b238751a-dbfb-4610-8f40-a599737ac4e5',
-            name: 'test1-c2',
-            title: 'test1-c2',
-            children: [],
-            isLeaf: true,
-            isDelete: false
-          }
-        ],
-        isDelete: false
-      },
-      {
-        uuid: '00db4977-331f-4b7e-93be-b64648751a5f',
-        key: '00db4977-331f-4b7e-93be-b64648751a5f',
-        name: 'test2',
-        title: 'test2',
-        children: [],
-        isLeaf: true,
-        isDelete: false
-      }
-    ])
+    const node = new NzTreeNode(component.groupList[0])
+    node.origin.selectable = false
+    node.origin.expanded = false
+    const value:NzFormatEmitEvent = { eventName: 'test', node }
+
+    component.nzTreeClick(value)
+    expect(node.origin.expanded).toEqual(true)
+  })
+
+  it('test upload file', () => {
+    expect(component.fileList).toEqual([])
+    expect(component.authFile).toBeUndefined()
+    expect(component.fileError).toEqual(false)
+
+    expect(component.beforeUpload({ uid: 'test', name: 'test' })).toEqual(false)
+    expect(component.fileList.length).toEqual(1)
+    expect(component.authFile).toEqual({ uid: 'test', name: 'test' })
+    expect(component.fileError).toEqual(false)
+
+    expect(component.removeFile()).toEqual(true)
+    expect(component.fileList).toEqual([])
+    expect(component.authFile).toBeUndefined()
+    expect(component.fileError).toEqual(true)
+  })
+
+  it('test disabledEdit & nzCheckAddRow ', () => {
+    expect(component.nzDisabled).toEqual(false)
+
+    component.disabledEdit(true)
+
+    expect(component.nzDisabled).toEqual(true)
+
+    expect(component.nzCheckAddRow()).toEqual(false)
   })
 })

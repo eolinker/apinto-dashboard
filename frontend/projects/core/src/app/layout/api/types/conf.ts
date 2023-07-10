@@ -3,7 +3,7 @@ import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { NzCheckBoxOptionInterface } from 'ng-zorro-antd/checkbox'
 import { EO_TBODY_TYPE } from 'projects/eo-ng-apinto-table/src/public-api'
 
-export const optTypeList: SelectOption[] = [
+export const OptTypeList: SelectOption[] = [
   { label: '新增或修改', value: 'ADD' },
   { label: '删除', value: 'DELETE' }
 ]
