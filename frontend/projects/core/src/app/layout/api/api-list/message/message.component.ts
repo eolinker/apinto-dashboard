@@ -9,7 +9,6 @@
 /* eslint-disable dot-notation */
 import { Component } from '@angular/core'
 import { Router } from '@angular/router'
-import { ApiService } from 'projects/core/src/app/service/api.service'
 import { BaseInfoService } from 'projects/core/src/app/service/base-info.service'
 
 @Component({
@@ -19,12 +18,10 @@ import { BaseInfoService } from 'projects/core/src/app/service/base-info.service
   ]
 })
 export class ApiMessageComponent {
-  readonly nowUrl:string = this.router.routerState.snapshot.url
   apiUuid:string = ''
 
   constructor (
     private baseInfo:BaseInfoService,
-    public api:ApiService,
     private router:Router
   ) {
     this.apiUuid = this.baseInfo.allParamsInfo.apiId
