@@ -329,7 +329,7 @@ networks:
 ip route
 ```
 
-执行后得到下列IP列表，从下表可以看到，宿主机默认局域网`ip`是`172.18.31.253`
+执行后得到下列IP列表，从下表可以看到，宿主机默认局域网`ip`是`172.18.31.251`
 
 ![](http://data.eolinker.com/course/RaGBZly2702d3bae33e4b66eed674ce65d0e4b0dbf27ab0.png)
 
@@ -389,7 +389,7 @@ services:
     environment:
       - REDIS_PWD=123456
       - PORT=7201
-      - HOST=172.18.31.253
+      - HOST=172.18.31.251
     volumes: 
       - /var/lib/apinto/redis-cluster/data:/usr/local/cluster_redis/data
     network_mode: host
