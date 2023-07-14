@@ -113,7 +113,9 @@ export class BasicLayoutComponent implements OnInit {
 
   ngOnInit () {
     this.getSideMenu()
-    this.checkAuthStatus()
+    if (this.isBusiness) {
+      this.checkAuthStatus()
+    }
   }
 
   ngOnDestroy () {
