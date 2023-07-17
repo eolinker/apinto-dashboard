@@ -12,7 +12,7 @@ GREEN='\033[0;32m'
 NC='\033[0m' # No Color
 
 # Invoke from project root
-VERSION=$(cat ./scripts/VERSION)
+VERSION=`git describe --abbrev=0 --tags`
 
 # Version function used for version string comparison
 version() { echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }'; }
