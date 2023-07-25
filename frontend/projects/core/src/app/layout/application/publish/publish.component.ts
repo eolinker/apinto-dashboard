@@ -20,13 +20,13 @@ export class ApplicationPublishComponent extends EoIntelligentPluginPublishCompo
     service:EoIntelligentPluginService,
     api:ApiService,
     public appService:EoNgApplicationService,
-    cdref:ChangeDetectorRef) {
-    super(message, service, api, cdref)
+    cdRef:ChangeDetectorRef) {
+    super(message, service, api, cdRef)
   }
 
   override ngAfterViewInit () {
     this.publishTableBody = [...this.appService.createApplicationPublicTbody(this)]
-    this.cdref.detectChanges()
+    this.cdRef.detectChanges()
   }
 
   override getPublishList () {
