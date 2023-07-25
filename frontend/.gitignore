@@ -55,4 +55,3 @@ yarn.lock
 /playwright-report/
 /playwright/.cache/
 /yarn.lock
-/.angular/

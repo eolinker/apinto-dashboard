@@ -54,6 +54,17 @@ export interface APIImportData{
     desc:string
 }
 
+export type APIImportStatus = 'normal' | 'conflict' | 'invalidPath'
+
+export type APIImportItem = {
+    id:number
+    name:string
+    method:string
+    path:string
+    desc:string
+    status:APIImportStatus
+}
+
 // api批量上线检测列表
 export interface APIBatchOnlineVerifyData{
     service:string

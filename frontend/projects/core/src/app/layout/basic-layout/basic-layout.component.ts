@@ -113,7 +113,9 @@ export class BasicLayoutComponent implements OnInit {
 
   ngOnInit () {
     this.getSideMenu()
-    this.checkAuthStatus()
+    if (this.isBusiness) {
+      this.checkAuthStatus()
+    }
   }
 
   ngOnDestroy () {
@@ -157,13 +159,12 @@ export class BasicLayoutComponent implements OnInit {
     this.subAuthCheck.unsubscribe()
     this.subAuthCheck = this.api.authGet('activation/check').subscribe((resp:{code:number, msg:string, data:{status:'normal'|'waring'|'freeze', prompt:string, label:string}}) => {
       if (resp.code === 0) {
-        if (resp.data.status === 'freeze') {
-          this.router.navigate(['/', 'auth-info'])
-          return
-        }
         this.authStatus = resp.data.status
         this.btnLabel = resp.data.label
         this.btnTooltip = resp.data.prompt
+        if (resp.data.status === 'freeze') {
+          this.router.navigate(['/', 'auth-info'])
+        }
       }
     })
   }
@@ -210,6 +211,10 @@ export class BasicLayoutComponent implements OnInit {
       this.sideMenuOptions = [...this.sideMenuOptions]
       this.currentRouter = router
     }
+  }
+
+  showAuthBtn () {
+    return !this.router.url.includes('auth-info') && this.isBusiness && this.authStatus && this.authStatus !== 'normal'
   }
 
   goToAuth () {

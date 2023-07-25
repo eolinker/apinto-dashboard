@@ -4,7 +4,6 @@ import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { ApiService } from 'projects/core/src/app/service/api.service'
 import { RouterService } from '../../../router.service'
 import { ApiData, ApiPublishItem } from '../../../types/types'
-import { BaseInfoService } from 'projects/core/src/app/service/base-info.service'
 
 @Component({
   selector: 'eo-ng-api-publish',
@@ -31,8 +30,7 @@ export class ApiPublishComponent implements OnInit {
     private message: EoNgFeedbackMessageService,
     private service:RouterService,
     private api:ApiService,
-    private baseInfo:BaseInfoService,
-    private cdref:ChangeDetectorRef) {}
+    private cdRef:ChangeDetectorRef) {}
 
   disabledEdit (value:any) {
     this.nzDisabled = value
@@ -44,7 +42,7 @@ export class ApiPublishComponent implements OnInit {
 
   ngAfterViewInit () {
     this.publishTableBody = [...this.service.createApiPublishTbody(this)]
-    this.cdref.detectChanges()
+    this.cdRef.detectChanges()
   }
 
   getPublishList () {
@@ -64,16 +62,6 @@ export class ApiPublishComponent implements OnInit {
   tableClick = (item:any) => {
     item.checked = !item.checked
     item.data.checked = !item.data.checked
-    this.checkSelectedCluster()
-  }
-
-  // 点击表头全选
-  checkAll () {
-    this.checkSelectedCluster()
-  }
-
-  // 点击单条数据
-  clickData () {
     this.checkSelectedCluster()
   }
 

@@ -76,7 +76,7 @@ export class DeployClusterListComponent implements OnInit {
     public router: Router,
     private navigationService: EoNgNavigationService,
     private service:DeployService,
-    private cdref:ChangeDetectorRef
+    private cdRef:ChangeDetectorRef
   ) {
     this.navigationService.reqFlashBreadcrumb([{ title: '网关集群', routerLink: 'deploy/cluster' }])
   }
@@ -88,7 +88,7 @@ export class DeployClusterListComponent implements OnInit {
 
   ngAfterViewInit () {
     this.clustersTableBody = [...this.service.createClusterTbody(this)]
-    this.cdref.detectChanges()
+    this.cdRef.detectChanges()
   }
 
   getClustersData () {
