@@ -61,3 +61,4 @@ vender
 *.gitlab-ci.yml
 /apserver/
 /builds/
+*.tar.gz

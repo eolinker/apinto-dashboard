@@ -33,7 +33,7 @@ export class DeployPluginListComponent implements OnInit {
     public router: Router,
     private navigationService: EoNgNavigationService,
     private service:DeployService,
-    private cdref:ChangeDetectorRef
+    private cdRef:ChangeDetectorRef
   ) {
     this.navigationService.reqFlashBreadcrumb([{ title: '节点插件' }])
   }
@@ -44,7 +44,7 @@ export class DeployPluginListComponent implements OnInit {
 
   ngAfterViewInit () {
     this.pluginsTableBody = this.service.createPluginsTbody(this)
-    this.cdref.detectChanges()
+    this.cdRef.detectChanges()
   }
 
   getPluginsData () {
