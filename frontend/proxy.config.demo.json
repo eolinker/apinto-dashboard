@@ -1,0 +1,14 @@
+{
+  "/api": {
+    "target": "https://demo-dashboard.apinto.com/",
+    "changeOrigin": true
+  },
+  "/_system": {
+    "target": "https://demo-dashboard.apinto.com/",
+    "changeOrigin": true
+  },
+  "/sso": {
+    "target": "https://demo-dashboard.apinto.com/",
+    "changeOrigin": true
+  }
+}
