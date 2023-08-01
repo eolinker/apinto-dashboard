@@ -20,3 +20,12 @@
 
 ## 打包
 `yarn build`
+
+## 本地运行
+如需本地单独运行前端项目，
+
+1. 先移除frontend文件夹根路径的.angular.json文件里的deployUrl配置（如与apinto网关一同运行，则需要恢复该配置）
+
+2. 运行 `yarn start:demo`，该命令将为您在本地运行前端项目，其中请求接口将通过代理连接到 demo-dashboard.apinto.com, 账号信息可查看apinto项目的readme文档
+
+3. 如您已自行部署好apinto后端，可以通过修改proxy.config.demo.json文件里的地址，将请求接口地址改成后端部署地址；如不需要代理，可删除package.json文件中，`yarn start:demo`语句里的代理配置
