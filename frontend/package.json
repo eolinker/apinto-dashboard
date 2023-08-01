@@ -3,8 +3,9 @@
   "version": "3.2.0",
   "scripts": {
     "ng": "ng",
-    "start": "set NODE_OPTIONS=--max_old_space_size=8192 & ng  serve  --proxy-config proxy.config.json ",
-    "start:business": "set NODE_OPTIONS=--max_old_space_size=8192 & ng  serve  --configuration=businessDevelopment --proxy-config proxy.config.json ",
+    "start": "set NODE_OPTIONS=--max_old_space_size=8192 & ng serve --proxy-config proxy.config.json ",
+    "start:demo": "set NODE_OPTIONS=--max_old_space_size=8192 & ng serve  --proxy-config proxy.config.demo.json ",
+    "start:business": "set NODE_OPTIONS=--max_old_space_size=8192 & ng serve  --configuration=businessDevelopment --proxy-config proxy.config.json ",
     "build": "set NODE_OPTIONS=--max_old_space_size=8192 & ng build --configuration production --aot",
     "build:business": "set NODE_OPTIONS=--max_old_space_size=8192 & ng build --configuration=business --aot",
     "watch": "ng build --watch --configuration development",
