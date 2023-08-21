@@ -165,7 +165,7 @@ export class LogRetrievalComponent {
     const newFiles =
         files.sort((a:LogFileData, b:LogFileData) => ((b.file + '').localeCompare(a.file + '')))
           .map((x:LogFileData) => {
-            x.mod = moment(x.mod).format('YYYY-MM-DD HH:mm:ss')
+            x.mod = moment(x.mod).format('yyyy-MM-DD HH:mm:ss')
             return x
           })
     return newFiles
