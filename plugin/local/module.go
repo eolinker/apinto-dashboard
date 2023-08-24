@@ -8,6 +8,13 @@ type tModule struct {
 	name              string
 	middlewareHandler []apinto_module.MiddlewareHandler
 	routersInfo       apinto_module.RoutersInfo
+	proxy             *ProxyAPi
+}
+
+func (m *tModule) Kill() {
+	if m.proxy != nil {
+		m.proxy.client.Kill()
+	}
 }
 
 func (m *tModule) RoutersInfo() apinto_module.RoutersInfo {

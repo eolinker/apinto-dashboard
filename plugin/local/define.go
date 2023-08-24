@@ -1,14 +1,15 @@
 package local
 
 type Define struct {
+	Cmd        string             `json:"cmd"`
 	Middleware []MiddlewareConfig `json:"middleware"`
 	Router     RouterConfig       `json:"router"`
 	Provider   []ProviderConfig   `json:"provider"`
 }
 type MiddlewareConfig struct {
-	Name string   `json:"name"`
-	Path string   `json:"path"`
-	Life string   `json:"life"`
+	Name string `json:"name"`
+	//Path string   `json:"path"`
+	//Life string   `json:"life"`
 	Rule []string `json:"rule"`
 }
 type RouterConfig struct {

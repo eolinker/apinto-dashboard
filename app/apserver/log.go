@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/eolinker/apinto-dashboard/config"
+	plugin_client "github.com/eolinker/apinto-dashboard/plugin/go-plugin/plugin-client"
 	"github.com/eolinker/eosc/log"
 	"github.com/eolinker/eosc/log/filelog"
 	"io"
@@ -19,22 +21,23 @@ func (ws writes) Write(p []byte) (n int, err error) {
 	return
 }
 
-func init() {
+func initLog() {
 	formatter := &log.LineFormatter{
 		TimestampFormat:  "2006-01-02 15:04:05",
 		CallerPrettyfier: nil,
 	}
 
 	fileWriter := filelog.NewFileWriteByPeriod(filelog.Config{
-		Dir:    GetLogDir(),
-		File:   GetLogName(),
-		Expire: GetLogExpire(),
-		Period: filelog.ParsePeriod(GetLogPeriod()),
+		Dir:    config.GetLogDir(),
+		File:   config.GetLogName(),
+		Expire: config.GetLogExpire(),
+		Period: filelog.ParsePeriod(config.GetLogPeriod()),
 	})
-	var writer io.Writer = fileWriter
-	writer = ToCopyToIoWriter(os.Stdout, fileWriter)
 
-	transport := log.NewTransport(writer, GetLogLevel())
+	writer := ToCopyToIoWriter(os.Stdout, fileWriter)
+
+	transport := log.NewTransport(writer, config.GetLogLevel())
+	plugin_client.SetLog(config.GetLogLevel().String(), writer)
 	transport.SetFormatter(formatter)
 	log.Reset(transport)
 }

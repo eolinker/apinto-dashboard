@@ -9,7 +9,7 @@ type AuditLog struct {
 	UserID      int       `gorm:"type:int(11);size:11;not null;column:user_id;comment:用户ID"`
 	Username    string    `gorm:"size:20;not null;column:username;comment:用户名"`
 	IP          string    `gorm:"size:20;not null;column:ip;comment:ip地址"`
-	OperateType int       `gorm:"type:tinyint(1);size:1;not null;column:operate;comment:操作类型 1.创建 2.编辑 3.删除 4.发布"`
+	OperateType int       `gorm:"type:tinyint(2);size:1;not null;column:operate;comment:操作类型 1.创建 2.编辑 3.删除 4.发布"`
 	Kind        string    `gorm:"size:20;not null;column:kind;comment:操作对象"`
 	Object      string    `gorm:"type:text;not null;column:object;comment:对象信息"`
 	URL         string    `gorm:"type:text;not null;column:url;comment:请求url,包括query参数"`

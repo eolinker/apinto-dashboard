@@ -2,7 +2,7 @@ package core
 
 import (
 	"context"
-	apinto_module "github.com/eolinker/apinto-dashboard/module"
+	apintomodule "github.com/eolinker/apinto-dashboard/module"
 	"github.com/eolinker/apinto-dashboard/modules/core/model"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -14,7 +14,7 @@ type ICore interface {
 	ReloadModule() error
 	CheckNewModule(uuid, name, driver string, define, config interface{}) error
 	HasModule(module string, path string) bool
-	SetCoreModule(module apinto_module.CoreModule)
+	SetCoreModule(module apintomodule.CoreModule)
 }
 
 type EngineCreate interface {
