@@ -1,0 +1,23 @@
+port: 8080
+mysql:
+  user_name: "apinto"
+  password: "Apinto123"
+  ip: "47.106.231.246"
+  port: 30006
+  db: "apserver"
+redis:
+  user_name: ""
+  password: "I*IR1VGJ8tT5Y0)G"
+  addr:
+    - 172.18.166.219:7201
+    - 172.18.166.219:7202
+    - 172.18.166.219:7203
+    - 172.18.166.219:7204
+    - 172.18.166.219:7205
+    - 172.18.166.219:7206
+error_log:
+  dir: work/logs              # 日志放置目录, 支持相对路径和绝对路径
+  file_name: error.log         # 错误日志文件名
+  log_level: debug            # 错误日志等级,可选:panic,fatal,error,warning,info,debug,trace 不填或者非法则为info
+  log_expire: 7d                # 错误日志过期时间，默认单位为天，d|天，h|小时, 不合法配置默认为7d
+  log_period: day               # 错误日志切割周期，仅支持day、hour

@@ -83,10 +83,10 @@ type PluginEnableCfgMap struct {
 type PluginDefine struct {
 	//Internet   bool                 `json:"internet,omitempty" yaml:"internet,omitempty"`     //remote
 	Server string `json:"server,omitempty" yaml:"server,omitempty"` //remote
-	Path   string `json:"path,omitempty" yaml:"path,omitempty"`     //remote
+	//Path   string `json:"path,omitempty" yaml:"path,omitempty"`     //remote
 	//Middleware []*MiddlewareDefine  `json:"middleware,omitempty" yaml:"middleware,omitempty"` //local
 	//Router     *RouterDefine        `json:"router,omitempty" yaml:"router,omitempty"`         //local
-	Headers    []ExtendParamsRender `json:"headers,omitempty" yaml:"headers,omitempty"`       //local
+	//Headers    []ExtendParamsRender `json:"headers,omitempty" yaml:"headers,omitempty"`       //local
 	Querys     []ExtendParamsRender `json:"querys,omitempty" yaml:"querys,omitempty"`         //remote local
 	Initialize []ExtendParamsRender `json:"initialize,omitempty" yaml:"initialize,omitempty"` //remote local
 	//Profession string               `json:"profession" yaml:"profession"`                     //dynamic

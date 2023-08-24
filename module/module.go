@@ -29,6 +29,9 @@ type Module interface {
 	Middleware() (Middleware, bool)   //是否提供拦截器
 	Support() (ProviderSupport, bool) //是否提供provider
 }
+type ModuleNeedKill interface {
+	Kill()
+}
 type CoreModule interface {
 	Module
 }

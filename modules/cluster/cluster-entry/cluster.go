@@ -9,10 +9,10 @@ import (
 // Cluster 集群信息表
 type Cluster struct {
 	Id          int       `gorm:"type:int(11);size:11;not null;auto_increment;primary_key;column:id;comment:主键ID"  json:"id,omitempty"`
-	NamespaceId int       `gorm:"type:int(11);size:11;not null;column:namespace;uniqueIndex:namespace_name;comment:工作空间"  json:"namespace_id,omitempty"`
-	Name        string    `gorm:"size:255;not null;column:name;uniqueIndex:namespace_name;comment:集群名" json:"name,omitempty"`
-	Title       string    `gorm:"column:title"`
-	Desc        string    `gorm:"size:255;not null;column:desc;comment:集群名称"  json:"desc,omitempty"`
+	NamespaceId int       `gorm:"type:int(11);size:11;not null;column:namespace;uniqueIndex:namespace;comment:工作空间"  json:"namespace_id,omitempty"`
+	Name        string    `gorm:"size:255;not null;column:name;uniqueIndex:namespace;comment:集群名" json:"name,omitempty"`
+	Title       string    `gorm:"size:255;not null;column:title;comment:集群名称"  json:"title,omitempty"`
+	Desc        string    `gorm:"size:255;not null;column:desc;comment:描述"  json:"desc,omitempty"`
 	Env         string    `gorm:"size:20;not null;column:env;comment:环境"  json:"env,omitempty"`
 	Addr        string    `gorm:"size:255;not null;column:addr;comment:集群地址" json:"addr,omitempty"`
 	UUID        string    `gorm:"size:255;not null;column:uuid;comment:集群ID" json:"uuid,omitempty"`
