@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/eosc/log"
 	"gopkg.in/yaml.v3"
 	"os"
@@ -106,14 +105,14 @@ func GetLogDir() string {
 	logDir := systemConfig.ErrorLog.LogDir
 	if logDir == "" {
 		//默认路径是可执行程序的上一层目录的 work/logs 根据系统自适应
-		lastDir, err := common.GetLastAbsPathByExecutable()
+		lastDir, err := GetLastAbsPathByExecutable()
 		if err != nil {
 			panic(err)
 		}
 		logDir = fmt.Sprintf("%s%swork%slog", lastDir, string(os.PathSeparator), string(os.PathSeparator))
 	} else if !strings.HasPrefix(logDir, string(os.PathSeparator)) {
 		//若目录配置不为绝对路径, 则路径为 上一层目录路径 + 配置的目录路径
-		lastDir, err := common.GetLastAbsPathByExecutable()
+		lastDir, err := GetLastAbsPathByExecutable()
 		if err != nil {
 			panic(err)
 		}
