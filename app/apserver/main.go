@@ -18,6 +18,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/plugin/plugin_timer"
 
 	"github.com/eolinker/apinto-dashboard/app/apserver/version"
+	_ "github.com/eolinker/apinto-dashboard/report"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
 	"github.com/gin-gonic/gin"
