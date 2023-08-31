@@ -246,5 +246,6 @@ func NewService(providerService IProviderService) core.ICore {
 	bean.Autowired(&c.modulePluginService)
 	bean.Autowired(&c.engineCreate)
 	bean.Autowired(&c.cacheCommon)
+
 	return c
 }
