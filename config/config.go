@@ -21,6 +21,7 @@ type Config struct {
 	MysqlConfig DBConfig       `yaml:"mysql"`
 	ErrorLog    ErrorLogConfig `yaml:"error_log"`
 	RedisConfig RedisConfig    `yaml:"redis"`
+	Report      string         `yaml:"report"`
 }
 
 type ErrorLogConfig struct {
@@ -68,7 +69,9 @@ func GetConfigData() *Config {
 func GetPort() int {
 	return systemConfig.Port
 }
-
+func DisableReport() bool {
+	return systemConfig.Report == "off"
+}
 func getDBUserName() string {
 	return systemConfig.MysqlConfig.UserName
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/grpc-service/service"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/embed_registry"
 	"github.com/eolinker/apinto-dashboard/modules/notice"
+	"github.com/eolinker/apinto-dashboard/report"
 	"github.com/soheilhy/cmux"
 	"google.golang.org/grpc"
 	"net"
@@ -18,7 +19,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/plugin/plugin_timer"
 
 	"github.com/eolinker/apinto-dashboard/app/apserver/version"
-	_ "github.com/eolinker/apinto-dashboard/report"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
 	"github.com/gin-gonic/gin"
@@ -58,7 +58,7 @@ func run() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	report.InitReport(config.GetLogDir(), config.DisableReport())
 	// 执行内置插件初始化
 	err = embed_registry.InitEmbedPlugins()
 	if err != nil {
