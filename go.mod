@@ -81,4 +81,4 @@ replace github.com/eolinker/eosc => ../eosc
 
 replace github.com/eolinker/apinto-business => ../apinto-business
 
-replace github.com/hashicorp/go-plugin => ../../hashicorp/go-plugin
+replace github.com/hashicorp/go-plugin => ../go-plugin
