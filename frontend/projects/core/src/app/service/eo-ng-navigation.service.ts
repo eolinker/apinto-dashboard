@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core'
 import { MenuOptions } from 'eo-ng-menu'
-import { Subject, Observable, forkJoin, map } from 'rxjs'
+import { Subject, Observable, forkJoin } from 'rxjs'
 import { ApiService } from './api.service'
 import { v4 as uuidv4 } from 'uuid'
+import { environment } from '../../environments/environment'
 
 @Injectable({
   providedIn: 'root'
@@ -18,6 +19,7 @@ export class EoNgNavigationService {
   accessMap: Map<string, string> = new Map()
   constructor (public api: ApiService) {}
   iframePrefix:string = 'module' // 与后端约定好的，所有iframe打开的页面都要加该前缀
+  isBusiness:boolean = environment.isBusiness
   setUserRoleId (val: string) {
     this.userRoleId = val
   }
@@ -41,8 +43,7 @@ export class EoNgNavigationService {
 
   // 获取首页路由地址
   getPageRoute (): string {
-    return '/guide'
-    // return this.mainPageRouter
+    return this.isBusiness ? this.mainPageRouter || '/router/api' : '/guide'
   }
 
   // 如果用户没有任何除商业授权以外的功能查看权限, 返回true
@@ -65,17 +66,27 @@ export class EoNgNavigationService {
     return this.flashFlag.asObservable()
   }
 
-  private userUpdeteRightList: Subject<boolean> = new Subject<
+  private checkAuthStatus: Subject<boolean> = new Subject<boolean>()
+
+  reqCheckAuthStatus () {
+    this.checkAuthStatus.next(true)
+  }
+
+  repCheckAuthStatus () {
+    return this.checkAuthStatus.asObservable()
+  }
+
+  private userUpdateRightList: Subject<boolean> = new Subject<
     boolean
   >()
 
   reqUpdateRightList () {
-    this.userUpdeteRightList.next(true)
+    this.userUpdateRightList.next(true)
     this.dataUpdated = true
   }
 
   repUpdateRightList () {
-    return this.userUpdeteRightList.asObservable()
+    return this.userUpdateRightList.asObservable()
   }
 
   getUpdateRightsRouter () {
@@ -108,11 +119,11 @@ export class EoNgNavigationService {
   // 获得最新的权限列表和菜单
   getRightsList (): Observable<MenuOptions[]> {
     return new Observable((observer) => {
-      forkJoin([this.api.get('system/modules').pipe(map((resp:any) => {
-        this.generateMenuList(resp)
-      })),
-      this.api.get('my/access')]).subscribe((resp:Array<any>) => {
-        if (resp[1].code === 0) {
+      this.noAccess = true
+
+      forkJoin([this.api.get('system/modules'),
+        this.api.get('my/access')]).subscribe((resp:Array<any>) => {
+        if (resp[0].code === 0 && resp[1].code === 0) {
           this.accessMap = new Map()
           const accessListBackend:Array<{name:string, access:string}> = resp[1].data.access
           for (const access of accessListBackend) {
@@ -121,6 +132,8 @@ export class EoNgNavigationService {
               this.noAccess = false
             }
           }
+          this.generateMenuList(resp[0])
+
           observer.next(this.menuList)
 
           this.reqFlashMenu()
@@ -137,10 +150,9 @@ export class EoNgNavigationService {
       this.modulesMap = new Map()
       this.menuList = []
       this.routerNameMap = new Map()
-      this.noAccess = true
       this.originAccessData = resp.data.access
       for (const navigation of resp.data.navigation) {
-        const menu = {
+        const menu:any = {
           title: navigation.title,
           titleString: navigation.title,
           menu: true,
@@ -148,7 +160,9 @@ export class EoNgNavigationService {
           icon: navigation.icon || 'daohang',
           ...(navigation.modules?.length > 0 && !navigation.default
             ? {
-                children: navigation.modules.map((module: any) => {
+                children: navigation.modules.filter((module:any) => {
+                  return this.accessMap.get(module.name)
+                }).map((module: any) => {
                   this.routerNameMap.set(module.path, module.name)
                   return {
                     title: module.title,
@@ -170,17 +184,14 @@ export class EoNgNavigationService {
                   matchRouterExact: false,
                   type: this.getDefaultModule(navigation).type
                 }
-              : (navigation.modules?.length > 0
-                  ? { // TODO似乎没用，后续排查
-                    }
-                  : {
-                      children: [{
-                        menu: true,
-                        group: true,
-                        title: '暂无内容',
-                        menuTitleClassName: 'menu-no-content'
-                      }]
-                    }))
+              : {
+                  children: [{
+                    menu: true,
+                    group: true,
+                    title: '暂无内容',
+                    menuTitleClassName: 'menu-no-content'
+                  }]
+                })
         }
         if (navigation.name && navigation.path) {
           this.routerNameMap.set(navigation.path, navigation.name)
@@ -188,7 +199,19 @@ export class EoNgNavigationService {
         if ((menu as any).routerLink && !this.routerNameMap.get((menu as any).routerLink)) {
           this.routerNameMap.set((menu as any).routerLink, (menu as any).name)
         }
-        this.menuList.push(menu)
+        if (!menu.name || this.accessMap.get(menu.name)) {
+          if (menu.title === '系统管理' && environment.isBusiness) {
+            menu.children.unshift({
+              name: 'auth',
+              routerLink: 'auth-info',
+              title: '授权管理',
+              titleString: '授权管理',
+              matchRouter: true,
+              matchRouterExact: false
+            })
+          }
+          this.menuList.push(menu)
+        }
       }
 
       if (!this.mainPageRouter) {
@@ -213,14 +236,15 @@ export class EoNgNavigationService {
 
   findMainPage () {
     for (const menu of this.menuList) {
-      if (menu.routerLink && this.accessMap?.get(menu?.routerLink)?.length) {
+      // eslint-disable-next-line dot-notation
+      if (menu.routerLink && menu['name'] && this.accessMap?.has(menu['name']) && !menu.routerLink.includes('module/')) {
         this.mainPageRouter = menu.routerLink
         return
       } else if (menu.children) {
         for (const child of menu.children) {
           if (
-            child.routerLink &&
-            this.accessMap?.get(child?.routerLink)?.length
+            // eslint-disable-next-line dot-notation
+            child.routerLink && this.accessMap?.has(child['name']) && !child.routerLink.includes('module/')
           ) {
             this.mainPageRouter = child.routerLink
             return

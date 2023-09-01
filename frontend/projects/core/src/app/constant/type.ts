@@ -1,10 +1,10 @@
+/* eslint-disable camelcase */
 export interface EmptyHttpResponse{
   code:number
   data:{}
   msg:string
 }
 
-/* eslint-disable camelcase */
 export interface Operator{
     userId:number,
     username:string,
@@ -53,6 +53,19 @@ export interface ApiGroupsData{
   [key:string]:any
 }
 
+export type ModuleOpenConfigDataType = {
+  name:string
+  value:string
+  type?:string
+}
+export type ModuleOpenConfigData = {
+  name:string
+  url:string
+  query:Array<ModuleOpenConfigDataType>
+  header:Array<ModuleOpenConfigDataType>
+  initialize:Array<ModuleOpenConfigDataType>
+}
+
 // API目录
 export interface ApiGroup{
   apis:Array<{
@@ -74,10 +87,13 @@ export interface ClustersData{
   env: string,
   status: 'NORMAL'|'PARTIALLY_NORMAL'|'ABNORMAL',
   desc: string,
+  title:string,
   name: string,
   createTime: string,
   updateTime: string
 }
+
+export type PublishStatus = 'GOONLINE'|'OFFLINE'|'NOTGOONLINE'|'TOUPDATE'
 
 // 简易集群列表，即将集群名与环境名组合在一起的一级目录
 export type ClusterSimpleOption = {
@@ -140,8 +156,13 @@ export interface PublishManagementData{
 }
 
 // 集群列表接口
+
+export type ClusterEnumData = {
+  name:string, uuid:string,
+  title:string
+}
 export interface ClusterEnum{
-  clusters:Array<{name:string}>
+  clusters:Array<ClusterEnumData>
   name:string
 }
 

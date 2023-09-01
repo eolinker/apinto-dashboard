@@ -6,26 +6,19 @@ import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feed
 import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { NzModalRef } from 'ng-zorro-antd/modal'
 import { Subscription } from 'rxjs'
-import { MODAL_NORMAL_SIZE, MODAL_SMALL_SIZE } from '../../../constant/app.config'
+import { MODAL_SMALL_SIZE } from '../../../constant/app.config'
 import { EmptyHttpResponse } from '../../../constant/type'
 import { ApiService } from '../../../service/api.service'
 import { BaseInfoService } from '../../../service/base-info.service'
-import { ServiceGovernancePublishComponent } from '../publish/publish.component'
 import { strategiesTableBody, strategiesTableHeadName } from '../types/conf'
 import { StrategyListData } from '../types/types'
+import { ServiceGovernanceService } from '../service-governance.service'
 
 @Component({
   selector: 'eo-ng-serv-governance-list',
   templateUrl: './list.component.html',
   styles: [
-    `
-  input[eo-ng-input].strategy-priority-input.ant-input:not(.w206):not(.w131):not(.w240){
-    width:calc(100% - 1px) !important;
-    height:38px;
-    min-width:auto !important;
-    padding:0 16px !important;
-    text-align: center;
-  }`
+    ''
   ]
 })
 export class ListComponent implements OnInit {
@@ -45,6 +38,7 @@ export class ListComponent implements OnInit {
 
   strategyType:string = ''
   private subscription: Subscription = new Subscription()
+  private subGetList: Subscription = new Subscription()
 
   strategiesTableHeadName:THEAD_TYPE[]= [...strategiesTableHeadName]
   strategiesTableBody:TBODY_TYPE[] = [...strategiesTableBody]
@@ -52,14 +46,14 @@ export class ListComponent implements OnInit {
   strategiesList:Array<StrategyListData> = []
 
   editingPriority:number|string|null = null
-  // eslint-disable-next-line no-useless-constructor
   constructor (private baseInfo:BaseInfoService,
     private viewportScroller: ViewportScroller,
                 private message: EoNgFeedbackMessageService,
                 private modalService:EoNgFeedbackModalService,
                 private api:ApiService,
+                private service:ServiceGovernanceService,
                 private router:Router) {
-    this.strategyType = this.router.url.split('/')[2]
+    this.strategyType = this.router.url.split('/')[this.router.url.split('/').indexOf('serv-governance') + 1]
   }
 
   ngOnInit (): void {
@@ -85,6 +79,7 @@ export class ListComponent implements OnInit {
 
   ngOnDestroy () {
     this.subscription.unsubscribe()
+    this.subGetList.unsubscribe()
   }
 
   initTable () {
@@ -167,25 +162,20 @@ export class ListComponent implements OnInit {
     } else if (Number(priority) > 999) {
       this.message.error('优先级范围在1-999之间，请修改后提交')
     } else {
+      const checkPMap:boolean = !!this.checkPriorityMap()
       // 2.输入不为空, 检查priorityMap中相同priority的数组, 如果数组内包含其他1个策略, 提示冲突的策略名, 滚动到相应策略, 不允许提交
       if (this.priorityMap.get(priority)?.length === 2) {
         const anotherStrategy = this.priorityMap.get(priority)![0].uuid === uuid ? this.priorityMap.get(priority)![1] : this.priorityMap.get(priority)![0]
         this.viewportScroller.scrollToAnchor(anotherStrategy.uuid)
         this.message.error(`修改后的优先级与${anotherStrategy.name}冲突，无法自动提交`)
-        if (this.priorityDangerP.indexOf(Number(priority)) === -1) {
-          this.priorityDangerP.push(Number(priority))
-        }
         // 3.输入不为空, 检查priorityMap中相同priority的数组, 如果数组内包含其他多个策略, 提示有多个冲突, 不允许提交
       } else if (this.priorityMap.get(priority)!.length > 2) {
         this.message.error('优先级存在冲突或数值超出范围，无法自动提交')
-        if (this.priorityDangerP.indexOf(Number(priority)) === -1) {
-          this.priorityDangerP.push(Number(priority))
-        }
         // 4.输入不为空, 检查priorityMap中其他priority的数组, 如果数组内包含其他多个策略, 提示有多个冲突, 不允许提交
         // 5.输入不为空, 检查priorityMap中其他priority的数组, 如果全部数组的策略个数小于等于1, 允许提交
         // 检查priorityMap,将所有冲突策略的优先级放入priorityDangerP中, 以便页面中的input检测状态
       } else {
-        if (this.checkPriorityMap()) {
+        if (checkPMap) {
           this.editingPriority !== priority && this.changePriority()
         } else {
           this.message.error('优先级存在冲突或数值超出范围，无法自动提交')
@@ -260,7 +250,8 @@ export class ListComponent implements OnInit {
   // 获取策略列表
   getStrategiesList () {
     if (this.clusterName) {
-      this.api.get('strategies/' + this.strategyType, { clusterName: this.clusterName || '' })
+      this.subGetList.unsubscribe()
+      this.subGetList = this.api.get('strategies/' + this.strategyType, { clusterName: this.clusterName || '' })
         .subscribe((resp:{code:number, data:{strategies:StrategyListData[]}, msg:string}) => {
           if (resp.code === 0) {
             this.priorityMap = new Map()
@@ -324,22 +315,8 @@ export class ListComponent implements OnInit {
   openDrawer (type:string) {
     switch (type) {
       case 'publish': {
-        this.drawerPublishRef = this.modalService.create({
-          nzTitle: '发布策略',
-          nzWidth: MODAL_NORMAL_SIZE,
-          nzContent: ServiceGovernancePublishComponent,
-          nzComponentParams: {
-            strategyType: this.strategyType,
-            clusterName: this.clusterName,
-            strategiesStatusTpl: this.strategiesStatusTpl,
-            closeModal: this.cancelDrawer
-          },
-          nzOkDisabled: this.nzDisabled,
-          nzOnOk: (component:ServiceGovernancePublishComponent) => {
-            component.publish()
-            return false
-          }
-        }) }
+        this.service.publishStrategyModal(this.strategyType, this.clusterName, this)
+      }
     }
   }
 

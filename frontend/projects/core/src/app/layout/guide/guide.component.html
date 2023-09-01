@@ -1,4 +1,4 @@
-<section class="p-mbase m-mbase bg-MAIN_BG rounded">
+<section class="p-mbase m-mbase bg-MAIN_BG rounded" *ngIf="!isBusiness">
   <p class="text-[18px] leading-[26px] font-bold">
     ❤️ Hi~ 欢迎使用 Apinto Gateway
   </p>
@@ -16,20 +16,18 @@
     </p>
 
     <div class="mt-mbase">
-      <button
-        eo-ng-button
-        nzType="primary"
-        class="mr-btnrbase"
-        (click)="goToGithub()"
-      >
+      <button eo-ng-button class="mr-btnbase" (click)="goToGithub()">
         Github&nbsp;
         <img
           src="https://img.shields.io/github/stars/eolinker/apinto?style=social"
           alt=""
         />
       </button>
-      <button eo-ng-button (click)="goToGithub('/issues')">
+      <button eo-ng-button class="mr-btnbase" (click)="goToGithub('/issues')">
         提交&nbsp;Issue
+      </button>
+      <button nzType="primary" eo-ng-button (click)="goToRry()">
+        试用企业版
       </button>
     </div>
   </div>
@@ -180,7 +178,6 @@
           </ng-container>
         </ul>
       </div>
-      <!-- <nz-divider *ngIf="!last" nzType="vertical" class="h-auto"></nz-divider> -->
     </ng-container>
   </div>
 </section>

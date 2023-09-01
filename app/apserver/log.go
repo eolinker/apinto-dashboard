@@ -25,15 +25,12 @@ func init() {
 		CallerPrettyfier: nil,
 	}
 
-	fileWriter := filelog.NewFileWriteByPeriod()
-
-	period, err := filelog.ParsePeriod(GetLogPeriod())
-	if err != nil {
-		panic(err)
-	}
-
-	fileWriter.Set(GetLogDir(), GetLogName(), period, GetLogExpire())
-	fileWriter.Open()
+	fileWriter := filelog.NewFileWriteByPeriod(filelog.Config{
+		Dir:    GetLogDir(),
+		File:   GetLogName(),
+		Expire: GetLogExpire(),
+		Period: filelog.ParsePeriod(GetLogPeriod()),
+	})
 	var writer io.Writer = fileWriter
 	writer = ToCopyToIoWriter(os.Stdout, fileWriter)
 

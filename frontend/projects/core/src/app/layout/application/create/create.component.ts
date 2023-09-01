@@ -9,8 +9,10 @@ import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navig
 import { EO_TBODY_TYPE } from 'projects/eo-ng-apinto-table/src/public-api'
 import { defaultAutoTips } from '../../../constant/conf'
 import { ArrayItemData, EmptyHttpResponse, RandomId } from '../../../constant/type'
-import { customAttrTableBody, extraHeaderTableBody } from '../types/conf'
+import { customAttrTableBody } from '../types/conf'
 import { ApplicationData } from '../types/types'
+import { EoNgApplicationService } from '../application.service'
+import { Observable, of } from 'rxjs'
 
 @Component({
   selector: 'eo-ng-application-create',
@@ -29,15 +31,12 @@ export class ApplicationCreateComponent implements OnInit {
   validateForm: FormGroup = new FormGroup({})
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
   customAttrTableBody: EO_TBODY_TYPE[] = [...customAttrTableBody]
-  extraHeaderTableBody:EO_TBODY_TYPE[]= [...extraHeaderTableBody]
   submitButtonLoading:boolean = false
-
+  of = of
   createApplicationForm: {
     customAttrList: ArrayItemData[]
-    extraParamList: ArrayItemData[]
   } = {
-    customAttrList: [],
-    extraParamList: []
+    customAttrList: []
   }
 
   customAttrList:ArrayItemData[] = [
@@ -55,7 +54,8 @@ export class ApplicationCreateComponent implements OnInit {
     private api: ApiService,
     private router: Router,
     private fb: UntypedFormBuilder,
-    private navigationService: EoNgNavigationService
+    private navigationService: EoNgNavigationService,
+    private service:EoNgApplicationService
   ) {
     this.navigationService.reqFlashBreadcrumb([
       { title: '应用管理', routerLink: 'application' },
@@ -85,32 +85,24 @@ export class ApplicationCreateComponent implements OnInit {
   initTable () {
     this.customAttrTableBody[0].disabledFn = () => { return this.nzDisabled }
     this.customAttrTableBody[1].disabledFn = () => { return this.nzDisabled }
-    this.customAttrTableBody[2].showFn = (item: any) => { return item === this.customAttrList[0] }
-    this.customAttrTableBody[2].btns[0].click = (item: any) => { this.editArray(item.data, 'addCustom') }
+    this.customAttrTableBody[2].showFn = (item: any) => { return item !== this.customAttrList[this.customAttrList.length - 1] && !item.key }
     this.customAttrTableBody[2].btns[0].disabledFn = () => { return this.nzDisabled }
-    this.customAttrTableBody[3].showFn = (item: any) => { return item !== this.customAttrList[0] }
-    this.customAttrTableBody[3].btns[0].click = (item: any) => { this.editArray(item.data, 'addCustom') }
+    this.customAttrTableBody[3].showFn = (item: any) => { return item !== this.customAttrList[this.customAttrList.length - 1] && item.key }
     this.customAttrTableBody[3].btns[0].disabledFn = () => { return this.nzDisabled }
-    this.customAttrTableBody[3].btns[1].click = (item: any) => { this.editArray(item.data, 'deleteCustom') }
     this.customAttrTableBody[3].btns[1].disabledFn = () => { return this.nzDisabled }
-
-    this.extraHeaderTableBody[0].disabledFn = () => { return this.nzDisabled }
-    this.extraHeaderTableBody[1].disabledFn = () => { return this.nzDisabled }
-    this.extraHeaderTableBody[2].showFn = (item: any) => { return item === this.extraHeaderList[0] }
-    this.extraHeaderTableBody[2].btns[0].click = (item: any) => { this.editArray(item.data, 'addHeader') }
-    this.extraHeaderTableBody[2].btns[0].disabledFn = () => { return this.nzDisabled }
-    this.extraHeaderTableBody[3].showFn = (item: any) => { return item !== this.extraHeaderList[0] }
-    this.extraHeaderTableBody[3].btns[0].click = (item: any) => { this.editArray(item.data, 'addHeader') }
-    this.extraHeaderTableBody[3].btns[0].disabledFn = () => { return this.nzDisabled }
-    this.extraHeaderTableBody[3].btns[1].click = (item: any) => { this.editArray(item.data, 'deleteHeader') }
-    this.extraHeaderTableBody[3].btns[1].disabledFn = () => { return this.nzDisabled }
   }
 
   getApplicationMessage () {
+    this.service.loading = true
     this.api
       .get('application', { appId: this.appId })
       .subscribe((resp: {code:number, data:{application:ApplicationData}, msg:string}) => {
+        this.service.loading = false
         if (resp.code === 0) {
+          this.service.appData = resp.data.application
+          this.service.appName = resp.data.application.name
+          this.service.appDesc = resp.data.application.desc
+
           this.createApplicationForm = resp.data.application
           this.validateForm.controls['name'].setValue(
             resp.data.application.name
@@ -123,14 +115,13 @@ export class ApplicationCreateComponent implements OnInit {
             this.validateForm.controls['name'].disable()
           }
           this.validateForm.controls['id'].disable()
+          this.service.appName = resp.data.application.name
+          this.service.appDesc = resp.data.application.desc
+          this.service.appData = resp.data.application
 
           this.customAttrList =
             this.createApplicationForm?.customAttrList?.length > 0
-              ? this.createApplicationForm.customAttrList
-              : [{ key: '', value: '', disabled: false }]
-          this.extraHeaderList =
-            this.createApplicationForm?.extraParamList?.length > 0
-              ? this.createApplicationForm.extraParamList
+              ? [...this.createApplicationForm.customAttrList, { key: '', value: '', disabled: false }]
               : [{ key: '', value: '', disabled: false }]
         }
       })
@@ -203,55 +194,62 @@ export class ApplicationCreateComponent implements OnInit {
   // custom_attr是创建和编辑鉴权时都会有的数据，需要将object转化为map发给后端
   // extra_header是编辑鉴权时才会有的数据，也需从Object转为map发送给后端
   saveApplication () {
-    if (this.validateForm.valid) {
-      this.createApplicationForm.customAttrList = this.customAttrList.filter(
-        (item: ArrayItemData) => {
-          return item.key && item.value
-        }
-      )
+    return new Observable((observer) => {
+      if (this.validateForm.valid) {
+        this.createApplicationForm.customAttrList = this.customAttrList.filter(
+          (item: ArrayItemData) => {
+            return item.key && item.value
+          }
+        )
 
-      this.createApplicationForm.extraParamList = this.extraHeaderList.filter(
-        (item: ArrayItemData) => {
-          return item.key && item.value
+        this.submitButtonLoading = true
+        if (!this.editPage) {
+          this.api
+            .post('application', {
+              ...this.createApplicationForm,
+              ...this.validateForm.value
+            })
+            .subscribe((resp: EmptyHttpResponse) => {
+              this.submitButtonLoading = false
+              if (resp.code === 0) {
+                this.message.success(resp.msg || '添加成功', { nzDuration: 1000 })
+                observer.next(true)
+              } else {
+                observer.next(false)
+              }
+            })
+        } else {
+          this.api
+            .put('application', {
+              ...this.createApplicationForm,
+              ...this.validateForm.value
+            })
+            .subscribe((resp: EmptyHttpResponse) => {
+              this.submitButtonLoading = false
+              if (resp.code === 0) {
+                this.message.success(resp.msg || '修改成功', { nzDuration: 1000 })
+                this.getApplicationMessage()
+                observer.next(true)
+              } else {
+                observer.next(false)
+              }
+            })
         }
-      )
-
-      this.submitButtonLoading = true
-      if (!this.editPage) {
-        this.api
-          .post('application', {
-            ...this.createApplicationForm,
-            ...this.validateForm.value
-          })
-          .subscribe((resp: EmptyHttpResponse) => {
-            this.submitButtonLoading = false
-            if (resp.code === 0) {
-              this.message.success(resp.msg || '添加成功', { nzDuration: 1000 })
-              this.backToList()
-            }
-          })
       } else {
-        this.api
-          .put('application', {
-            ...this.createApplicationForm,
-            ...this.validateForm.value
-          })
-          .subscribe((resp: EmptyHttpResponse) => {
-            this.submitButtonLoading = false
-            if (resp.code === 0) {
-              this.message.success(resp.msg || '修改成功', { nzDuration: 1000 })
-              this.backToList()
-            }
-          })
+        Object.values(this.validateForm.controls).forEach((control) => {
+          if (control.invalid) {
+            control.markAsDirty()
+            control.updateValueAndValidity({ onlySelf: true })
+          }
+        })
+        observer.next(false)
       }
-    } else {
-      Object.values(this.validateForm.controls).forEach((control) => {
-        if (control.invalid) {
-          control.markAsDirty()
-          control.updateValueAndValidity({ onlySelf: true })
-        }
-      })
-    }
+    })
+  }
+
+  editApplication () {
+    this.saveApplication().subscribe((resp) => {
+    })
   }
 
   backToList () {

@@ -33,34 +33,37 @@ export interface FilterOption{
 }
 
 export type RemoteAppItem = {
-  name: string
+  title: string
   uuid: string
   desc: string
   checked?:boolean
+  [key: string]: any
 }
 
 export type RemoteApiItem = {
   uuid: string
-  name: string
+  title: string
   service: string
   group: string
   requestPath: string
   checked?:boolean
+  [key: string]: any
 }
 
 export type RemoteServiceItem = {
   uuid: string
-  name: string
+  title: string
   scheme: string
   desc: string
   checked?:boolean
+  [key: string]: any
 }
 export interface FilterRemoteOption{
   target: 'apis'|'services'|'applications'
   titles: Array<{title:string, field:string, [k:string]:any}>
   list:Array<RemoteApiItem|RemoteServiceItem|RemoteAppItem>
   total: number,
-  value:string
+  key:string
 }
 
 export interface CacheStrategyData {

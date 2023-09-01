@@ -3,6 +3,7 @@ package dynamic_controller
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/eolinker/apinto-dashboard/common"
 	"net/http"
 	"strconv"
 
@@ -37,6 +38,7 @@ type dynamicController struct {
 	Fields     []*Basic
 	Skill      string
 	Render     map[string]Render
+	Depends    []string
 }
 
 func newDynamicController(name string, define *DynamicDefine) *dynamicController {
@@ -46,7 +48,7 @@ func newDynamicController(name string, define *DynamicDefine) *dynamicController
 		r := make(Render)
 		err := json.Unmarshal([]byte(value), &r)
 		if err != nil {
-			log.Errorf("dynamic define parse error: %w,body is %s", err, value)
+			log.Errorf("dynamic define parse error: %v,body is %s", err, value)
 			continue
 		}
 		render[key] = r
@@ -62,6 +64,7 @@ func newDynamicController(name string, define *DynamicDefine) *dynamicController
 		Drivers:    define.Drivers,
 		Fields:     define.Fields,
 		Skill:      define.Skill,
+		Depends:    define.Depends,
 		Render:     render,
 	}
 	bean.Autowired(&d.dynamicService)
@@ -119,7 +122,7 @@ func (c *dynamicController) list(ctx *gin.Context) {
 	for _, cc := range cs {
 		fields = append(fields, &Basic{
 			Name:  cc.Name,
-			Title: fmt.Sprintf("状态：%s", cc.Name),
+			Title: fmt.Sprintf("状态：%s", cc.Title),
 			Attr:  "status",
 			Enum: []string{
 				"已发布",
@@ -173,7 +176,7 @@ func (c *dynamicController) online(ctx *gin.Context) {
 		return
 	}
 	userId := users.GetUserId(ctx)
-	success, fail, err := c.dynamicService.Online(ctx, namespaceID, c.Profession, uuid, tmp.Cluster, userId)
+	success, fail, err := c.dynamicService.Online(ctx, namespaceID, c.Profession, c.moduleName, uuid, tmp.Cluster, userId, c.Depends...)
 	if err != nil {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
 		return
@@ -198,7 +201,7 @@ func (c *dynamicController) offline(ctx *gin.Context) {
 		return
 	}
 	userId := users.GetUserId(ctx)
-	success, fail, err := c.dynamicService.Offline(ctx, namespaceID, c.Profession, uuid, tmp.Cluster, userId)
+	success, fail, err := c.dynamicService.Offline(ctx, namespaceID, c.Profession, c.moduleName, uuid, tmp.Cluster, userId)
 	if err != nil {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
 		return
@@ -286,7 +289,7 @@ func (c *dynamicController) batchDelete(ctx *gin.Context) {
 			fail = append(fail, uuid)
 			continue
 		}
-		err = c.dynamicService.Delete(ctx, namespaceID, c.Profession, uuid)
+		err = c.dynamicService.Delete(ctx, namespaceID, c.Profession, c.moduleName, uuid)
 		if err != nil {
 			fail = append(fail, uuid)
 		} else {
@@ -312,12 +315,17 @@ func (c *dynamicController) create(ctx *gin.Context) {
 		return
 	}
 	body, _ := json.Marshal(worker.Append)
-	err = c.dynamicService.Create(ctx, namespaceID, c.Profession, c.Skill, worker.Title, worker.Id, worker.Driver, worker.Description, string(body), users.GetUserId(ctx))
+	err = c.dynamicService.Create(ctx, namespaceID, c.Profession, c.moduleName, c.Skill, worker.Title, worker.Id, worker.Driver, worker.Description, string(body), users.GetUserId(ctx), c.Depends...)
 	if err != nil {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
 		return
 	}
-	ctx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
+	data := common.Map{}
+	info := common.Map{}
+	info["id"] = worker.Id
+	info["source_name"] = fmt.Sprintf("%s@%s", worker.Id, c.moduleName)
+	data["info"] = info
+	ctx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
 
 func (c *dynamicController) save(ctx *gin.Context) {
@@ -330,7 +338,7 @@ func (c *dynamicController) save(ctx *gin.Context) {
 		return
 	}
 	body, _ := json.Marshal(worker.Append)
-	err = c.dynamicService.Save(ctx, namespaceID, c.Profession, worker.Title, uuid, worker.Description, string(body), users.GetUserId(ctx))
+	err = c.dynamicService.Save(ctx, namespaceID, c.Profession, c.moduleName, worker.Title, uuid, worker.Description, string(body), users.GetUserId(ctx), c.Depends...)
 	if err != nil {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
 		return

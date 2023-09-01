@@ -18,7 +18,7 @@ import { NzAvatarModule } from 'ng-zorro-antd/avatar'
 import { EoNgBreadcrumbModule } from 'eo-ng-breadcrumb'
 import { EoNgLayoutModule } from 'eo-ng-layout'
 import { EoNgSelectModule } from 'eo-ng-select'
-import { EoNgFeedbackModalModule, EoNgFeedbackTooltipModule } from 'eo-ng-feedback'
+import { EoNgFeedbackAlertModule, EoNgFeedbackModalModule, EoNgFeedbackTooltipModule } from 'eo-ng-feedback'
 import { EoNgTabsModule } from 'eo-ng-tabs'
 import { EoNgCheckboxModule } from 'eo-ng-checkbox'
 import { EoNgInputModule } from 'eo-ng-input'
@@ -29,7 +29,6 @@ import { EoNgTableModule } from 'eo-ng-table'
 import { EoNgDatePickerModule } from 'eo-ng-date-picker'
 import { EoNgSwitchModule } from 'eo-ng-switch'
 import { EoNgButtonModule } from 'eo-ng-button'
-import { EoNgTransferModule } from '../component/transfer/transfer.module'
 import { EoNgCopyModule } from 'eo-ng-copy'
 import { EoNgUploadModule } from 'eo-ng-upload'
 import { LoginComponent } from './login/login.component'
@@ -50,13 +49,15 @@ import { NzUploadModule } from 'ng-zorro-antd/upload'
 import { EoNgEmptyModule } from 'eo-ng-empty'
 import { AuthInfoDetailComponent } from './auth/info/detail/detail.component'
 import { EoNgMenuModule } from 'eo-ng-menu'
-import { IframePageComponent } from './iframe-page/iframe-page.component'
+import { LocalPluginComponent } from './local-plugin/local-plugin.component'
 import { GuideComponent } from './guide/guide.component'
 import { NzDividerModule } from 'ng-zorro-antd/divider'
 import { DynamicDemoComponent } from './dynamic-demo/dynamic-demo.component'
-import { OuterComponent } from './outer/outer.component'
 import { SafePipe } from '../pipe/safe.pipe'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
+import { NotFoundPageComponent } from './not-found-page/not-found-page.component'
+import { IntelligentPluginComponent } from './intelligent-plugin/intelligent-plugin.component'
+import { RemotePluginComponent } from './remote-plugin/remote-plugin.component'
 
 @NgModule({
   declarations: [
@@ -68,11 +69,13 @@ import { NzSpinModule } from 'ng-zorro-antd/spin'
     AuthInfoComponent,
     AuthUpdateComponent,
     AuthInfoDetailComponent,
-    IframePageComponent,
+    LocalPluginComponent,
     GuideComponent,
     DynamicDemoComponent,
-    OuterComponent,
-    SafePipe
+    SafePipe,
+    NotFoundPageComponent,
+    IntelligentPluginComponent,
+    RemotePluginComponent
   ],
   imports: [
     AppRoutingModule,
@@ -98,7 +101,6 @@ import { NzSpinModule } from 'ng-zorro-antd/spin'
     EoNgSwitchModule,
     NzAvatarModule,
     EoNgButtonModule,
-    EoNgTransferModule,
     NzFormModule,
     ReactiveFormsModule,
     NzLayoutModule,
@@ -113,7 +115,8 @@ import { NzSpinModule } from 'ng-zorro-antd/spin'
     NzUploadModule,
     EoNgEmptyModule,
     NzDividerModule,
-    NzSpinModule
+    NzSpinModule,
+    EoNgFeedbackAlertModule
   ],
   exports: [
     BasicLayoutComponent

@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core'
 import { RouterModule, Routes } from '@angular/router'
 import { ApiListComponent } from './api-list/api-list.component'
-import { ApiManagementComponent } from './api-list/group/group.component'
+import { ApiManagementGroupComponent } from './api-list/group/group.component'
 import { ApiManagementListComponent } from './api-list/list/list.component'
 import { ApiPluginTemplateContentComponent } from './plugin/content/content.component'
 import { ApiPluginTemplateCreateComponent } from './plugin/create/create.component'
@@ -15,7 +15,7 @@ import { ApiHttpCreateComponent } from './api-list/create/http-create/http-creat
 import { ApiHttpMessageComponent } from './api-list/message/http-message/http-message.component'
 import { ApiWebsocketMessageComponent } from './api-list/message/websocket-message/websocket-message.component'
 
-const routes: Routes = [{
+export const routes: Routes = [{
   path: '',
   component: RouterComponent,
   data: { id: '4' },
@@ -26,7 +26,7 @@ const routes: Routes = [{
       children: [
         {
           path: 'group',
-          component: ApiManagementComponent,
+          component: ApiManagementGroupComponent,
           children: [
             {
               path: 'list',

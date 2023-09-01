@@ -5,7 +5,7 @@ import "time"
 type PluginTemplate struct {
 	Id          int       `gorm:"type:int(11);size:11;not null;auto_increment;primary_key;column:id;comment:主键ID" json:"id,omitempty"`
 	NamespaceId int       `gorm:"type:int(11);size:11;not null;column:namespace;comment:工作空间" json:"namespace_id,omitempty"`
-	UUID        string    `gorm:"size:36;not null;column:uuid;dbUniqueIndex:uuid;comment:UUID" json:"uuid,omitempty"`
+	UUID        string    `gorm:"size:36;not null;column:uuid;comment:UUID" json:"uuid,omitempty"`
 	Name        string    `gorm:"size:255;column:name;comment:插件模板名称" json:"name,omitempty"`
 	Desc        string    `gorm:"size:255;column:desc;comment:描述" json:"desc,omitempty"`
 	Operator    int       `gorm:"type:int(11);size:11;column:operator;comment:更新人/操作人" json:"operator,omitempty"`

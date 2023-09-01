@@ -1,6 +1,4 @@
-/* eslint-disable no-useless-constructor */
-/* eslint-disable dot-notation */
-import { Component, Output, EventEmitter, TemplateRef, ViewChild, OnInit } from '@angular/core'
+import { Component, Output, EventEmitter, TemplateRef, ViewChild, AfterViewInit } from '@angular/core'
 import { FormGroup, UntypedFormBuilder, Validators } from '@angular/forms'
 import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feedback'
 import { SelectOption } from 'eo-ng-select'
@@ -14,7 +12,9 @@ import { ApiService } from 'projects/core/src/app/service/api.service'
 import { EO_TBODY_TYPE } from 'projects/eo-ng-apinto-table/src/public-api'
 import { MODAL_NORMAL_SIZE } from 'projects/core/src/app/constant/app.config'
 import { apiImportCheckResultTableHeadName, apiImportCheckResultTableBody } from '../../types/conf'
-import { APIImportData } from '../../types/types'
+import { APIImportData, APIImportItem } from '../../types/types'
+
+type ResultItem = APIImportItem & {checked?:boolean, disabled?:boolean, statusString?:string}
 
 @Component({
   selector: 'eo-ng-api-import',
@@ -22,12 +22,11 @@ import { APIImportData } from '../../types/types'
   styles: [
   ]
 })
-export class ApiImportComponent implements OnInit {
+export class ApiImportComponent implements AfterViewInit {
   @ViewChild('importContentTpl', { read: TemplateRef, static: true }) importContentTpl: TemplateRef<any> | undefined
-  @ViewChild('importFooterTpl', { read: TemplateRef, static: true }) importFooterTpl: TemplateRef<any> | undefined
   @ViewChild('methodTpl', { read: TemplateRef, static: true }) methodTpl: TemplateRef<any> | undefined
   @Output() flashList:EventEmitter<any> = new EventEmitter()
-  drawerRef:NzModalRef | undefined
+  modalRef:NzModalRef | undefined
   groupList:any[]= []
   upstreamList:SelectOption[]= []
   importFormPage:boolean = true
@@ -40,13 +39,14 @@ export class ApiImportComponent implements OnInit {
   resultTableTbody:EO_TBODY_TYPE[] = [...apiImportCheckResultTableBody]
 
   apisSet:Set<number> = new Set()
-  resultList:Array<any> = []
+  resultList:Array<ResultItem> = []
 
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
 
   validateForm:FormGroup = new FormGroup({})
   nzDisabled:boolean = false
   checkButtonLoading:boolean = false
+  importBtnLoading:boolean = false
   constructor (
     private modalService:EoNgFeedbackModalService,
     private message: EoNgFeedbackMessageService,
@@ -54,7 +54,7 @@ export class ApiImportComponent implements OnInit {
     private fb: UntypedFormBuilder) {
   }
 
-  ngOnInit (): void {
+  ngAfterViewInit ():void {
     // 表格checkbox
     this.resultTableThead[0].click = (item:any) => {
       this.changeApisSet(item, 'all')
@@ -66,9 +66,6 @@ export class ApiImportComponent implements OnInit {
     this.resultTableTbody[2].check = (value:any) => {
       return !!value
     }
-  }
-
-  ngAfterViewInit ():void {
     this.resultTableTbody[3].title = this.methodTpl
   }
 
@@ -95,7 +92,7 @@ export class ApiImportComponent implements OnInit {
       upstream: ['', [Validators.required]],
       requestPrefix: ['', [Validators.pattern('^[^?]*')]]
     })
-    this.drawerRef = this.modalService.create({
+    this.modalRef = this.modalService.create({
       nzTitle: '导入swagger文件',
       nzWidth: MODAL_NORMAL_SIZE,
       nzContent: this.importContentTpl,
@@ -103,7 +100,60 @@ export class ApiImportComponent implements OnInit {
       nzOkText: '确定',
       nzCancelText: '取消',
       nzOkDisabled: this.nzDisabled,
-      nzFooter: this.importFooterTpl
+      nzFooter: [
+        {
+          label: '取消',
+          show: () => {
+            return this.importFormPage
+          },
+          onClick: () => {
+            this.modalRef?.close()
+          }
+        },
+        {
+          label: '查重',
+          type: 'primary',
+          show: () => {
+            return this.importFormPage
+          },
+          disabled: () => {
+            return this.nzDisabled
+          },
+          onClick: () => {
+            this.checkConflict()
+          },
+          loading: () => {
+            return this.checkButtonLoading
+          }
+        },
+        {
+          label: '返回上级',
+          show: () => {
+            return !this.importFormPage
+          },
+          onClick: () => {
+            this.importFormPage = true
+            this.resultList = []
+            this.token = ''
+          }
+        },
+        {
+          label: '提交',
+          type: 'primary',
+          show: () => {
+            return !this.importFormPage
+          },
+          disabled: () => {
+            return !this.apisSet.size
+          },
+          onClick: () => {
+            this.importApis()
+          },
+          loading: () => {
+            return this.importBtnLoading
+          }
+        }
+      ]
     })
   }
 
@@ -112,10 +162,7 @@ export class ApiImportComponent implements OnInit {
     this.api.get('router/groups').subscribe((resp:{code:number, data:ApiGroup, msg:string}) => {
       if (resp.code === 0) {
         this.groupList = []
-        const tempList:ApiGroupsData[] = []
-        for (const index in resp.data.root.groups) {
-          tempList.push(resp.data.root.groups[index])
-        }
+        const tempList:ApiGroupsData[] = [...resp.data.root.groups]
         this.groupList = this.transferHeader(tempList)
       }
     })
@@ -137,12 +184,9 @@ export class ApiImportComponent implements OnInit {
 
   // 获取上游服务列表
   getUpstreamList () {
-    this.api.get('common/enum/Service').subscribe((resp:any) => {
+    this.api.get('common/provider/Service').subscribe((resp:any) => {
       if (resp.code === 0) {
-        this.upstreamList = []
-        for (const item of resp.data.Service) {
-          this.upstreamList = [...this.upstreamList, { label: item.title, value: item.name }]
-        }
+        this.upstreamList = [...resp.data.Service.map((x:any) => ({ label: x.title, value: x.name }))]
       }
     })
   }
@@ -175,31 +219,23 @@ export class ApiImportComponent implements OnInit {
       formData.append('upstream', this.validateForm.controls['upstream'].value)
       formData.append('request_prefix', this.validateForm.controls['requestPrefix'].value)
       this.checkButtonLoading = true
-      this.api.post('router/import', formData).subscribe((resp:{code:number, data:{apis:Array<{id:number, name:string, method:string, path:string, desc:string, status:string, [key:string]:any}>, token:string}, msg:string}) => {
+      this.api.post('router/import', formData).subscribe((resp:{code:number, data:{apis:Array<APIImportItem>, token:string}, msg:string}) => {
         this.checkButtonLoading = false
         if (resp.code === 0) {
           this.importFormPage = false
           const validArray = resp.data.apis.filter((value) => {
             return value.status === 'normal'
           })
-          for (const api of resp.data.apis) {
+          this.resultList = resp.data.apis
+
+          for (const api of this.resultList) {
             api['disabled'] = api.status !== 'normal'
+            // 这里全选是因为要让表头上的勾选框被选中，实际提交会过滤掉disabled的api
             api['checked'] = validArray.length > 0
-            switch (api.status) {
-              case 'normal':
-                api['statusString'] = '正常'
-                break
-              case 'conflict':
-                api['statusString'] = '冲突'
-                break
-              case 'invalidPath':
-                api['statusString'] = '无效path'
-                break
-            }
+            api['statusString'] = api.status === 'normal' ? '正常' : (api.status === 'conflict' ? '冲突' : '无效path')
             this.resultMap.set(api.id, api)
             if (!api['disabled']) { this.apisSet.add(api.id) }
           }
-          this.resultList = resp.data.apis
           this.token = resp.data.token
         }
       })
@@ -222,23 +258,24 @@ export class ApiImportComponent implements OnInit {
   }
 
   // 勾选或取消勾选数据
-  changeApisSet (item: any, type?:string) {
+  changeApisSet (item: boolean | ResultItem, type?:string) {
     if (type === 'all') {
       if (item) {
-        for (const index in this.resultList) {
-          if (!this.resultList[index].disabled) { this.apisSet.add(this.resultList[index].id) }
+        for (const r of this.resultList.filter((x:ResultItem) => (!x.disabled))) {
+          this.apisSet.add(r.id)
         }
       } else {
         this.apisSet = new Set()
       }
-    } else {
+      return
+    }
+
     // 被取消勾选
-      if (item?.checked) {
-        this.apisSet.delete(item.id)
-      } else if (!item.disabled) {
+    if ((item as ResultItem)?.checked) {
+      this.apisSet.delete((item as ResultItem).id)
+    } else if (!(item as ResultItem).disabled) {
       // 被选中
-        this.apisSet.add(item.id)
-      }
+      this.apisSet.add((item as ResultItem).id)
     }
   }
 
@@ -252,16 +289,15 @@ export class ApiImportComponent implements OnInit {
       }
       submitApis.push({ id: Number(id), name: this.resultMap.get(id)['name'], desc: this.resultMap.get(id).desc })
     }
+    this.importBtnLoading = true
+
     this.api.put('router/import', { apis: submitApis, token: this.token }).subscribe((resp:EmptyHttpResponse) => {
       if (resp.code === 0) {
         this.message.success(resp.msg || 'API导入成功！', { nzDuration: 1000 })
-        this.drawerRef?.close()
+        this.modalRef?.close()
         this.flashList.emit()
-        return true
-      } else {
-        return false
       }
+      this.importBtnLoading = false
     })
-    return false
   }
 }

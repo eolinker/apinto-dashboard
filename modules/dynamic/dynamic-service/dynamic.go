@@ -5,7 +5,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
+
+	quote_entry "github.com/eolinker/apinto-dashboard/modules/base/quote-entry"
+
+	"github.com/eolinker/apinto-dashboard/modules/variable"
+
+	"github.com/ohler55/ojg/jp"
+
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
 
 	cluster_model "github.com/eolinker/apinto-dashboard/modules/cluster/cluster-model"
 
@@ -27,15 +36,27 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/dynamic"
 	dynamic_store "github.com/eolinker/apinto-dashboard/modules/dynamic/dynamic-store"
 	"github.com/eolinker/eosc/common/bean"
+
+	"github.com/ohler55/ojg/oj"
+)
+
+var (
+	onlineErrMsg  = "cluster: %s,online error: %v"
+	offlineErrMsg = "cluster: %s,offline error: %v"
+	deleteErrMsg  = "cluster: %s,delete error: %v"
 )
 
 type dynamicService struct {
-	userService    user.IUserInfoService
-	clusterService cluster.IClusterService
+	userService     user.IUserInfoService
+	clusterService  cluster.IClusterService
+	variableService variable.IGlobalVariableService
 
 	dynamicStore        dynamic_store.IDynamicStore
+	dynamicQuoteStore   dynamic_store.IDynamicQuoteStore
 	publishHistoryStore dynamic_store.IDynamicPublishHistoryStore
 	publishVersionStore dynamic_store.IDynamicPublishVersionStore
+
+	provider apinto_module.IProviders
 }
 
 func (d *dynamicService) Count(ctx context.Context, namespaceID int, profession string, addition map[string]interface{}) (int, error) {
@@ -106,10 +127,6 @@ func (d *dynamicService) GetIDByName(ctx context.Context, namespaceId int, profe
 		return 0, err
 	}
 	return info.Id, nil
-}
-
-func toVersionKey(name string, cluster string) string {
-	return fmt.Sprintf("%s{%s}", name, cluster)
 }
 
 func (d *dynamicService) GetBySkill(ctx context.Context, namespaceId int, skill string) ([]*dynamic_model.DynamicBasicInfo, error) {
@@ -234,7 +251,7 @@ func (d *dynamicService) ClusterStatuses(ctx context.Context, namespaceId int, p
 		}
 		versions, err := client.Versions(profession)
 		if err != nil {
-			log.Errorf("get worker(%s) list error: %w.", profession, err)
+			log.Errorf("get worker(%s) list error: %v.", profession, err)
 			for _, l := range list {
 				if !isInit {
 					result[l.Name] = make(map[string]string)
@@ -265,7 +282,51 @@ func (d *dynamicService) ClusterStatuses(ctx context.Context, namespaceId int, p
 	return result, nil
 }
 
-func (d *dynamicService) Online(ctx context.Context, namespaceId int, profession string, name string, names []string, updater int) ([]string, []string, error) {
+func getDependIDs(body []byte, depend []string) ([]string, error) {
+	param, err := oj.Parse(body)
+	if err != nil {
+		return nil, err
+	}
+	arr := make([]string, 0, len(depend))
+	for _, d := range depend {
+		x, err := jp.ParseString(d)
+		if err != nil {
+			return nil, err
+		}
+		result := x.Get(param)
+		for _, r := range result {
+			v, ok := r.(string)
+			if ok {
+				arr = append(arr, v)
+			}
+		}
+	}
+	return arr, nil
+}
+
+func (d *dynamicService) replaceDepend(namespaceID int, org string, depends ...string) (string, error) {
+	param, err := oj.Parse([]byte(org))
+	if err != nil {
+		return "", err
+	}
+	for _, dep := range depends {
+		x, err := jp.ParseString(dep)
+		if err != nil {
+			return "", err
+		}
+		result := x.Get(param)
+		for _, r := range result {
+			v, ok := r.(string)
+			if ok {
+				_, id := d.provider.Status(v, namespaceID, "")
+				x.Set(param, id)
+			}
+		}
+	}
+	return oj.JSON(param), nil
+}
+
+func (d *dynamicService) Online(ctx context.Context, namespaceId int, profession string, module string, name string, names []string, updater int, depend ...string) ([]string, []string, error) {
 	info, err := d.dynamicStore.First(ctx, map[string]interface{}{
 		"namespace":  namespaceId,
 		"profession": profession,
@@ -277,7 +338,29 @@ func (d *dynamicService) Online(ctx context.Context, namespaceId int, profession
 		}
 		return nil, nil, err
 	}
+
 	clusters, err := d.clusterService.GetByNames(ctx, namespaceId, names)
+	if err != nil {
+		return nil, nil, err
+	}
+	clusterNames := make([]string, 0, len(clusters))
+	if len(names) > 0 {
+		clusterNames = names
+	} else {
+		for _, c := range clusters {
+			clusterNames = append(clusterNames, c.Name)
+		}
+	}
+	config, err := d.replaceDepend(namespaceId, info.Config, depend...)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	key := fmt.Sprintf("%s@%s", name, module)
+	targets, err := d.dynamicQuoteStore.List(ctx, map[string]interface{}{
+		"namespace": namespaceId,
+		"source":    key,
+	})
 	if err != nil {
 		return nil, nil, err
 	}
@@ -285,7 +368,7 @@ func (d *dynamicService) Online(ctx context.Context, namespaceId int, profession
 	failClusters := make([]string, 0, len(clusters))
 	now := time.Now()
 	var publishConfig v2.WorkerInfo[dynamic_entry.BasicInfo]
-	err = json.Unmarshal([]byte(info.Config), &publishConfig)
+	err = json.Unmarshal([]byte(config), &publishConfig)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -300,6 +383,23 @@ func (d *dynamicService) Online(ctx context.Context, namespaceId int, profession
 
 	cfg := &dynamic_entry.DynamicPublishConfig{BasicInfo: publishConfig.BasicInfo, Append: publishConfig.Append}
 	for _, c := range clusters {
+		depends := make([]string, 0, len(targets))
+		for _, target := range targets {
+			status, id := d.provider.Status(target.Target, namespaceId, c.Name)
+			if status != apinto_module.Online {
+				depends = append(depends, id)
+			}
+		}
+		if len(depends) > 0 {
+			failClusters = append(failClusters, fmt.Sprintf(onlineErrMsg, c.Name, fmt.Errorf("%s need %s", key, strings.Join(depends, ","))))
+			continue
+		}
+		err = d.variableService.CheckQuotedVariablesOnline(ctx, c.Id, c.Title, info.Id, quote_entry.QuoteKindTypeDynamic)
+		if err != nil {
+			failClusters = append(failClusters, fmt.Sprintf(onlineErrMsg, c.Name, err))
+			continue
+		}
+
 		version := &dynamic_entry.DynamicPublishVersion{
 			ClusterId:   c.Id,
 			NamespaceId: namespaceId,
@@ -320,8 +420,9 @@ func (d *dynamicService) Online(ctx context.Context, namespaceId int, profession
 
 		err = d.saveVersion(ctx, version, history, c.Name, c.Addr)
 		if err != nil {
-			log.Errorf("fail to online config in cluster(%s),addr is %s,profession is %s,uuid is %s,config is %s", c.Name, c.Addr, profession, name, info.Config)
-			failClusters = append(failClusters, c.Name)
+			errInfo := fmt.Sprintf("fail to online config in cluster(%s),addr is %s,profession is %s,uuid is %s,config is %s,err is %s", c.Name, c.Addr, profession, name, config, err.Error())
+			log.Error(errInfo)
+			failClusters = append(failClusters, errInfo)
 			continue
 		}
 		successClusters = append(successClusters, c.Name)
@@ -336,7 +437,7 @@ func (d *dynamicService) Online(ctx context.Context, namespaceId int, profession
 	return successClusters, failClusters, nil
 }
 
-func (d *dynamicService) Offline(ctx context.Context, namespaceId int, profession, name string, names []string, updater int) ([]string, []string, error) {
+func (d *dynamicService) Offline(ctx context.Context, namespaceId int, profession, module, name string, names []string, updater int) ([]string, []string, error) {
 	info, err := d.dynamicStore.First(ctx, map[string]interface{}{
 		"namespace":  namespaceId,
 		"profession": profession,
@@ -348,6 +449,15 @@ func (d *dynamicService) Offline(ctx context.Context, namespaceId int, professio
 		}
 		return nil, nil, err
 	}
+	target := fmt.Sprintf("%s@%s", name, module)
+	sources, err := d.dynamicQuoteStore.List(ctx, map[string]interface{}{
+		"namespace": namespaceId,
+		"target":    target,
+	})
+	if err != nil {
+		return nil, nil, err
+	}
+
 	clusters, err := d.clusterService.GetByNames(ctx, namespaceId, names)
 	successClusters := make([]string, 0, len(clusters))
 	failClusters := make([]string, 0, len(clusters))
@@ -368,6 +478,17 @@ func (d *dynamicService) Offline(ctx context.Context, namespaceId int, professio
 
 	cfg := &dynamic_entry.DynamicPublishConfig{BasicInfo: publishConfig.BasicInfo, Append: publishConfig.Append}
 	for _, c := range clusters {
+		depends := make([]string, 0, len(sources))
+		for _, source := range sources {
+			status, id := d.provider.Status(source.Source, namespaceId, c.Name)
+			if status == apinto_module.Online {
+				depends = append(depends, id)
+			}
+		}
+		if len(depends) > 0 {
+			failClusters = append(failClusters, fmt.Sprintf(offlineErrMsg, c.Name, fmt.Errorf("%s is needed,and cannot perform offline operations.ids is %s", target, strings.Join(depends, ","))))
+			continue
+		}
 		version := &dynamic_entry.DynamicPublishVersion{
 			ClusterId:   c.Id,
 			NamespaceId: namespaceId,
@@ -387,8 +508,9 @@ func (d *dynamicService) Offline(ctx context.Context, namespaceId int, professio
 		}
 		err = d.saveVersion(ctx, version, history, c.Name, c.Addr)
 		if err != nil {
-			log.Errorf("fail to online config in cluster(%s),addr is %s,profession is %s,uuid is %s,config is %s", c.Name, c.Addr, profession, name, info.Config)
-			failClusters = append(failClusters, c.Name)
+			errInfo := fmt.Sprintf("fail to offline config in cluster(%s),addr is %s,profession is %s,uuid is %s,config is %s", c.Name, c.Addr, profession, name, info.Config)
+			log.Error(errInfo)
+			failClusters = append(failClusters, errInfo)
 			continue
 		}
 
@@ -487,7 +609,7 @@ func (d *dynamicService) ClusterStatus(ctx context.Context, namespaceId int, pro
 				Title:  c.Name,
 				Status: v2.StatusOffline,
 			})
-			log.Errorf("get cluster status error: %w", err)
+			log.Errorf("get cluster status error: %v", err)
 			continue
 		}
 
@@ -533,26 +655,79 @@ func (d *dynamicService) ClusterStatus(ctx context.Context, namespaceId int, pro
 	}, result, nil
 }
 
-func (d *dynamicService) Create(ctx context.Context, namespaceId int, profession string, skill string, title string, name string, driver string, description string, body string, updater int) error {
+func (d *dynamicService) Create(ctx context.Context, namespaceId int, profession string, module string, skill string, title string, name string, driver string, description string, body string, updater int, depend ...string) error {
 	now := time.Now()
-	info := &dynamic_entry.Dynamic{
-		NamespaceId: namespaceId,
-		Name:        name,
-		Title:       title,
-		Skill:       skill,
-		Driver:      driver,
-		Description: description,
-		Version:     common.GenVersion(now),
-		Config:      body,
-		Profession:  profession,
-		Updater:     updater,
-		CreateTime:  now,
-		UpdateTime:  now,
+	info, err := d.dynamicStore.First(ctx, map[string]interface{}{
+		"namespace":  namespaceId,
+		"profession": profession,
+		"name":       name,
+	})
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return err
 	}
-	return d.dynamicStore.Insert(ctx, info)
+	if info == nil {
+		info = &dynamic_entry.Dynamic{
+			NamespaceId: namespaceId,
+			Name:        name,
+			Title:       title,
+			Skill:       skill,
+			Driver:      driver,
+			Description: description,
+			Version:     common.GenVersion(now),
+			Config:      body,
+			Profession:  profession,
+			Updater:     updater,
+			CreateTime:  now,
+			UpdateTime:  now,
+		}
+	} else {
+		info.Title = title
+		info.Skill = skill
+		info.Driver = driver
+		info.Description = description
+		info.Version = common.GenVersion(now)
+		info.Config = body
+		info.Updater = updater
+		info.UpdateTime = now
+	}
+
+	ids, err := getDependIDs([]byte(body), depend)
+	if err != nil {
+		return err
+	}
+
+	return d.dynamicQuoteStore.Transaction(ctx, func(txCtx context.Context) error {
+		err = d.dynamicStore.Save(txCtx, info)
+		if err != nil {
+			return err
+		}
+		err = d.variableService.QuoteVariables(txCtx, namespaceId, info.Id, quote_entry.QuoteKindTypeDynamic, parseVariables(info.Config))
+		if err != nil {
+			return err
+		}
+		source := fmt.Sprintf("%s@%s", name, module)
+		_, err = d.dynamicQuoteStore.DeleteWhere(txCtx, map[string]interface{}{
+			"namespace": namespaceId,
+			"source":    source,
+		})
+		if err != nil {
+			return err
+		}
+		for _, id := range ids {
+			err = d.dynamicQuoteStore.Save(txCtx, &dynamic_entry.DynamicQuote{
+				Namespace: namespaceId,
+				Source:    source,
+				Target:    id,
+			})
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }
 
-func (d *dynamicService) Save(ctx context.Context, namespaceId int, profession string, title string, name string, description string, body string, updater int) error {
+func (d *dynamicService) Save(ctx context.Context, namespaceId int, profession, module string, title string, name string, description string, body string, updater int, depend ...string) error {
 
 	info, err := d.dynamicStore.First(ctx, map[string]interface{}{
 		"namespace":  namespaceId,
@@ -575,20 +750,82 @@ func (d *dynamicService) Save(ctx context.Context, namespaceId int, profession s
 	info.Version = common.GenVersion(now)
 	info.UpdateTime = now
 
-	return d.dynamicStore.Save(ctx, info)
+	ids, err := getDependIDs([]byte(body), depend)
+	if err != nil {
+		return err
+	}
+	return d.dynamicQuoteStore.Transaction(ctx, func(txCtx context.Context) error {
+		err = d.dynamicStore.Save(txCtx, info)
+		if err != nil {
+			return err
+		}
+		err = d.variableService.QuoteVariables(txCtx, namespaceId, info.Id, quote_entry.QuoteKindTypeDynamic, parseVariables(info.Config))
+		if err != nil {
+			return err
+		}
+		source := fmt.Sprintf("%s@%s", name, module)
+		_, err = d.dynamicQuoteStore.DeleteWhere(txCtx, map[string]interface{}{
+			"namespace": namespaceId,
+			"source":    source,
+		})
+		if err != nil {
+			return err
+		}
+		for _, id := range ids {
+			err = d.dynamicQuoteStore.Save(txCtx, &dynamic_entry.DynamicQuote{
+				Namespace: namespaceId,
+				Source:    source,
+				Target:    id,
+			})
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }
 
-func (d *dynamicService) Delete(ctx context.Context, namespaceId int, profession string, name string) error {
-	_, err := d.dynamicStore.DeleteWhere(ctx, map[string]interface{}{
-		"namespace":  namespaceId,
-		"profession": profession,
-		"name":       name,
+func (d *dynamicService) Delete(ctx context.Context, namespaceId int, profession string, module string, name string) error {
+	return d.dynamicStore.Transaction(ctx, func(txCtx context.Context) error {
+		info, err := d.dynamicStore.First(ctx, map[string]interface{}{
+			"namespace":  namespaceId,
+			"profession": profession,
+			"name":       name,
+		})
+		if err != nil {
+			if err != gorm.ErrRecordNotFound {
+				return err
+			}
+			return nil
+		}
+
+		_, err = d.dynamicQuoteStore.First(txCtx, map[string]interface{}{
+			"namespace": namespaceId,
+			"target":    fmt.Sprintf("%s@%s", name, module),
+		})
+		if err != gorm.ErrRecordNotFound {
+			if err != nil {
+				return err
+			}
+			// 被依赖就不能删
+			return fmt.Errorf("%s@%s is needed", name, module)
+		}
+		_, err = d.dynamicStore.DeleteWhere(txCtx, map[string]interface{}{
+			"namespace":  namespaceId,
+			"profession": profession,
+			"name":       name,
+		})
+		if err != nil {
+			return err
+		}
+		return d.variableService.DeleteVariableQuote(txCtx, info.Id, quote_entry.QuoteKindTypeDynamic)
 	})
-	return err
+
 }
 
 func (d *dynamicService) saveVersion(ctx context.Context, version *dynamic_entry.DynamicPublishVersion, history *dynamic_entry.DynamicPublishHistory, cluster string, addr string) error {
 	return d.publishVersionStore.Transaction(ctx, func(txCtx context.Context) error {
+
 		var err error
 		if err = d.publishVersionStore.Save(txCtx, version); err != nil {
 			return err
@@ -622,9 +859,12 @@ func (d *dynamicService) saveVersion(ctx context.Context, version *dynamic_entry
 func newDynamicService() dynamic.IDynamicService {
 	d := &dynamicService{}
 	bean.Autowired(&d.dynamicStore)
+	bean.Autowired(&d.dynamicQuoteStore)
 	bean.Autowired(&d.userService)
 	bean.Autowired(&d.clusterService)
+	bean.Autowired(&d.variableService)
 	bean.Autowired(&d.publishVersionStore)
 	bean.Autowired(&d.publishHistoryStore)
+	bean.Autowired(&d.provider)
 	return d
 }

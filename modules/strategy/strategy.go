@@ -29,6 +29,7 @@ type IStrategyCommonService interface {
 	GetFilterRemote(ctx context.Context, namespaceId int, targetType, keyword, groupUUID string, pageNum, pageSize int) (*strategy_model.FilterRemoteOutput, int, error)
 
 	GetFilterLabel(ctx context.Context, namespaceId int, name string, value []string) (string, string, string)
+	FilterNameCheck(name string) bool
 }
 
 type IStrategyHandler[T any, K any] interface {

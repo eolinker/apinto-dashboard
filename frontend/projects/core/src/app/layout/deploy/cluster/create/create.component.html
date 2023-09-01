@@ -74,11 +74,11 @@
               class="w-[25%]"
             >
               <eo-ng-option
-                [nzLabel]="'Http'"
+                [nzLabel]="'HTTP'"
                 [nzValue]="'http'"
               ></eo-ng-option>
               <eo-ng-option
-                [nzLabel]="'Https'"
+                [nzLabel]="'HTTPS'"
                 [nzValue]="'https'"
               ></eo-ng-option>
             </eo-ng-select>
@@ -132,8 +132,5 @@
 </div>
 
 <ng-template #nodeStatusTpl let-item="item">
-  <ng-container [ngSwitch]="item.status">
-    <span *ngSwitchCase="'NOTRUNNING'" class="red-bold">未运行</span>
-    <span *ngSwitchCase="'RUNNING'" class="green-bold">运行中</span>
-  </ng-container>
+  <eo-ng-table-running [running]="item.status"></eo-ng-table-running>
 </ng-template>

@@ -1,6 +1,6 @@
 import { THEAD_TYPE } from 'eo-ng-table'
 
-export const IntelligentPluginDefaultThead:THEAD_TYPE[] = [
+export const EoIntelligentPluginDefaultThead:THEAD_TYPE[] = [
   {
     title: '名称',
     left: true

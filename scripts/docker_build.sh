@@ -10,16 +10,17 @@ set -e
 cd "$(dirname "$0")/../"
 . ./scripts/init.sh
 
-VERSION=$1
-MODE=$2
-OUTPUT_DIR=$(mkdir_output "$3")
-PLATFORM=$4
+#VERSION=`git describe --abbrev=0 --tags`
+MODE=$1
+OUTPUT_DIR=$(mkdir_output "$2")
+PLATFORM=$3
 OPTIONS=""
 if [[ "${PLATFORM}" == "mac" ]];then
   OPTIONS="--platform=linux/amd64"
 fi
 
 # 编译
-./scripts/build.sh ${OUTPUT_DIR} ${MODE} ${VERSION}
+./scripts/build.sh ${OUTPUT_DIR} ${MODE} ${VERSION} business
 
 docker build ${OPTIONS} -t docker.eolinker.com/docker/apinto/apserver:${VERSION} --build-arg VERSION=${VERSION} --build-arg APP="apserver" --build-arg DIR=${OUTPUT_DIR} -f scripts/Dockerfile ./
+

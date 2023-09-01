@@ -48,7 +48,13 @@ func (c *clusterService) ClusterCount(ctx context.Context, namespaceId int) (int
 		"namespace": namespaceId,
 	})
 }
-
+func (c *clusterService) Count(ctx context.Context) (int, error) {
+	count, err := c.clusterStore.ClusterCount(ctx, map[string]interface{}{})
+	if err != nil {
+		return 0, err
+	}
+	return int(count), nil
+}
 func (c *clusterService) GetAllCluster(ctx context.Context) ([]*cluster_model2.Cluster, error) {
 	clusters, err := c.clusterStore.GetAll(ctx)
 	if err != nil {
@@ -131,6 +137,22 @@ func (c *clusterService) GetByNames(ctx context.Context, namespaceId int, names 
 	return list, nil
 }
 
+func (c *clusterService) GetByUUIDs(ctx context.Context, namespaceId int, uuids []string) ([]*cluster_model2.Cluster, error) {
+	clusters, err := c.clusterStore.GetByNamespaceByUUIDs(ctx, namespaceId, uuids)
+	if err != nil {
+		return nil, err
+	}
+	list := make([]*cluster_model2.Cluster, 0, len(clusters))
+	for _, clusterInfo := range clusters {
+		value := &cluster_model2.Cluster{
+			Cluster: clusterInfo,
+		}
+		list = append(list, value)
+	}
+
+	return list, nil
+}
+
 // Insert 新增集群
 func (c *clusterService) Insert(ctx context.Context, namespaceId, userId int, clusterInput *cluster_dto.ClusterInput) error {
 	clusterId, _ := c.CheckByNamespaceByName(ctx, namespaceId, clusterInput.Name)
@@ -142,7 +164,7 @@ func (c *clusterService) Insert(ctx context.Context, namespaceId, userId int, cl
 	if err != nil {
 		return err
 	}
-	nodes := make([]*cluster_model2.ClusterNode, 0)
+	nodes := make([]*cluster_model2.Node, 0)
 	if err = json.Unmarshal(bytes, &nodes); err != nil {
 		return err
 	}
@@ -165,6 +187,7 @@ func (c *clusterService) Insert(ctx context.Context, namespaceId, userId int, cl
 		Env:         clusterInput.Env,
 		Addr:        clusterInput.Addr,
 		UUID:        clusterInfo.Cluster,
+		Title:       clusterInput.Title,
 		CreateTime:  t,
 		UpdateTime:  t,
 	}
@@ -183,19 +206,18 @@ func (c *clusterService) Insert(ctx context.Context, namespaceId, userId int, cl
 			return err
 		}
 
-		entryClusterNodes := make([]*cluster_model2.ClusterNode, 0, len(nodes))
-		nodesAdminAddr := make([]string, 0, len(nodes))
+		entryClusterNodes := make([]*cluster_model2.Node, 0, len(nodes))
 
 		for _, node := range nodes {
-			entryClusterNodes = append(entryClusterNodes, &cluster_model2.ClusterNode{ClusterNode: &cluster_entry2.ClusterNode{
+			entryClusterNodes = append(entryClusterNodes, &cluster_model2.Node{
 				NamespaceId: namespaceId,
-				AdminAddr:   node.AdminAddr,
+				AdminAddrs:  node.AdminAddrs,
 				ServiceAddr: node.ServiceAddr,
 				Name:        node.Name,
 				CreateTime:  t,
 				ClusterId:   entryCluster.Id,
-			}})
-			nodesAdminAddr = append(nodesAdminAddr, node.AdminAddr)
+			})
+
 		}
 		for _, node := range entryClusterNodes {
 			node.ClusterId = entryCluster.Id
@@ -229,31 +251,26 @@ func (c *clusterService) QueryListByNamespaceId(ctx context.Context, namespaceId
 		return nil, err
 	}
 
+	list := c.getClustersDetails(ctx, namespaceId, clusters)
+	return list, nil
+}
+
+// QueryListByClusterNames 更具
+func (c *clusterService) QueryListByClusterNames(ctx context.Context, namespaceId int, clusterNames []string) ([]*cluster_model2.Cluster, error) {
+	clusters, err := c.clusterStore.GetByNamespaceByNames(ctx, namespaceId, clusterNames)
+	if err != nil {
+		return nil, err
+	}
+
+	list := c.getClustersDetails(ctx, namespaceId, clusters)
+	return list, nil
+}
+
+// getClustersDetails 返回包括集群运行状态在内的集群信息
+func (c *clusterService) getClustersDetails(ctx context.Context, namespaceId int, clusters []*cluster_entry2.Cluster) []*cluster_model2.Cluster {
 	list := make([]*cluster_model2.Cluster, 0, len(clusters))
 	for _, clusterInfo := range clusters {
-		status := 1
-		clusterNodes, _, _ := c.clusterNodeService.QueryList(ctx, namespaceId, clusterInfo.Name)
-		if len(clusterNodes) == 0 {
-			status = 3 //异常
-		} else {
-			abnormalNum := 0
-			normalNum := 0
-			for _, node := range clusterNodes {
-				if node.Status == 2 {
-					normalNum++
-				} else {
-					abnormalNum++
-				}
-			}
-			if normalNum == len(clusterNodes) { //正常
-				status = 1
-			} else if abnormalNum == len(clusterNodes) {
-				status = 3
-			} else {
-				status = 2 //部分正常
-			}
-		}
-
+		status := c.checkClusterStatus(ctx, namespaceId, clusterInfo.Name)
 		//兼容旧版本数据
 		if clusterInfo.UUID == "" {
 			go func() {
@@ -269,8 +286,34 @@ func (c *clusterService) QueryListByNamespaceId(ctx context.Context, namespaceId
 			Status:  status,
 		})
 	}
+	return list
+}
 
-	return list, nil
+// checkClusterStatus 检测集群状态 1:正常  2:部分正常 3:异常
+func (c *clusterService) checkClusterStatus(ctx context.Context, namespaceId int, clusterName string) int {
+	status := 1
+	clusterNodes, _, _ := c.clusterNodeService.QueryList(ctx, namespaceId, clusterName)
+	if len(clusterNodes) == 0 {
+		status = 3 //异常
+	} else {
+		abnormalNum := 0
+		normalNum := 0
+		for _, node := range clusterNodes {
+			if node.Status == 2 {
+				normalNum++
+			} else {
+				abnormalNum++
+			}
+		}
+		if normalNum == len(clusterNodes) { //正常
+			status = 1
+		} else if abnormalNum == len(clusterNodes) {
+			status = 3
+		} else {
+			status = 2 //部分正常
+		}
+	}
+	return status
 }
 
 func (c *clusterService) SimpleCluster(ctx context.Context, namespaceId int) ([]*cluster_model2.ClusterSimple, error) {
@@ -284,7 +327,8 @@ func (c *clusterService) SimpleCluster(ctx context.Context, namespaceId int) ([]
 	for _, l := range list {
 		clusters = append(clusters, &cluster_model2.ClusterSimple{
 			Name:  l.Name,
-			Title: l.Name,
+			Title: l.Title,
+			Env:   l.Env,
 		})
 	}
 	return clusters, nil
@@ -325,7 +369,11 @@ func (c *clusterService) DeleteByNamespaceIdByName(ctx context.Context, namespac
 		if err = c.clusterVariableService.DeleteAll(txCtx, namespaceId, clusterId, userId); err != nil {
 			return err
 		}
-
+		//删除集群下的节点
+		err := c.clusterNodeService.Delete(txCtx, namespaceId, clusterId)
+		if err != nil {
+			return err
+		}
 		return nil
 	})
 

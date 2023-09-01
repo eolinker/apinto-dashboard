@@ -7,9 +7,9 @@ import (
 
 	"github.com/eolinker/eosc/common/bean"
 
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
 	namespace_controller "github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	notice_controller "github.com/eolinker/apinto-dashboard/modules/notice/controller"
-	apinto_module "github.com/eolinker/apinto-module"
 	"github.com/gin-gonic/gin"
 )
 
@@ -130,7 +130,7 @@ func (m *Module) status(context *gin.Context) {
 
 	namespaceID := namespace_controller.GetNamespaceId(context)
 
-	status := m.providers.Status(key, namespaceID, cluster)
+	status, _ := m.providers.Status(key, namespaceID, cluster)
 
 	context.JSON(200, map[string]interface{}{
 		"code": 0,
@@ -149,17 +149,19 @@ func NewModule() *Module {
 			Handler: namespace_controller.MustNamespace,
 		},
 		{
+			Name:        "login-module",
+			Rule:        apinto_module.MiddlewareRule(apinto_module.RouterLabelModule),
+			Handler:     userController.LoginCheckModule,
+			Replaceable: true,
+		}, {
+			Name:        "login-api",
+			Rule:        apinto_module.MiddlewareRule(apinto_module.RouterLabelApi),
+			Handler:     userController.LoginCheckApi,
+			Replaceable: true,
+		}, {
 			Name:    "userID",
 			Rule:    apinto_module.MiddlewareRule(apinto_module.RouterLabelApi),
 			Handler: userController.SetUser,
-		}, {
-			Name:    "login-api",
-			Rule:    apinto_module.MiddlewareRule(apinto_module.RouterLabelApi),
-			Handler: userController.LoginCheckApi,
-		}, {
-			Name:    "login-api",
-			Rule:    apinto_module.MiddlewareRule(apinto_module.RouterLabelApi),
-			Handler: userController.LoginCheckApi,
 		},
 	}
 	m := &Module{

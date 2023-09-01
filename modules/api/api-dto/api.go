@@ -23,6 +23,7 @@ type APIListItem struct {
 
 type APIListItemPublish struct {
 	Name   string            `json:"name"`
+	Title  string            `json:"title"`
 	Status enum.OnlineStatus `json:"status"`
 }
 
@@ -66,17 +67,17 @@ type ProxyHeader struct {
 
 type ApiBatchOnlineCheckListItem struct {
 	ServiceTemplate string                 `json:"service_template"`
-	ClusterEnv      string                 `json:"cluster"`
+	ClusterTitle    string                 `json:"cluster_name"`
 	Status          bool                   `json:"status"`
 	Result          string                 `json:"result,omitempty"`
 	Solution        *frontend_model.Router `json:"solution,omitempty"`
 }
 
 type ApiBatchCheckListItem struct {
-	ApiName    string `json:"api,omitempty"`
-	ClusterEnv string `json:"cluster"`
-	Status     bool   `json:"status"`
-	Result     string `json:"result,omitempty"`
+	ApiName     string `json:"api,omitempty"`
+	ClusterName string `json:"cluster_name"`
+	Status      bool   `json:"status"`
+	Result      string `json:"result,omitempty"`
 }
 
 type ApiBatchInput struct {
@@ -120,6 +121,7 @@ type ApiPublishInfo struct {
 type ApiPublishCluster struct {
 	Name       string            `json:"name"`
 	Env        string            `json:"env"`
+	Title      string            `json:"title"`
 	Status     enum.OnlineStatus `json:"status"`
 	Operator   string            `json:"operator"`
 	UpdateTime string            `json:"update_time"`

@@ -7,12 +7,12 @@ import (
 
 	"github.com/eolinker/apinto-dashboard/common"
 
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
 	"github.com/eolinker/apinto-dashboard/modules/user"
 	user_dto "github.com/eolinker/apinto-dashboard/modules/user/user-dto"
 	user_entry "github.com/eolinker/apinto-dashboard/modules/user/user-entry"
 	user_model "github.com/eolinker/apinto-dashboard/modules/user/user-model"
 	user_store "github.com/eolinker/apinto-dashboard/modules/user/user-store"
-	apinto_module "github.com/eolinker/apinto-module"
 	"github.com/eolinker/eosc/common/bean"
 )
 
@@ -43,16 +43,17 @@ func decode(v any) (*user_model.UserBase, error) {
 
 func (u *userInfoService) save(ctx context.Context, info *user_entry.UserInfo) error {
 	return u.userInfoStore.Transaction(ctx, func(txCtx context.Context) error {
-		userModel := user_model.CreateUserInfo(info)
+
 		err := u.userInfoStore.Save(ctx, info)
 		if err != nil {
 			return err
 		}
-		err = u.userNameCache.Set(ctx, userModel.UserName, userModel, time.Hour)
+		userModel := user_model.CreateUserInfo(info)
+		err = u.userNameCache.Set(ctx, userModel.UserName, userModel)
 		if err != nil {
 			return err
 		}
-		return u.userIdCache.Set(ctx, userModel.Id, userModel, time.Hour)
+		return u.userIdCache.Set(ctx, userModel.Id, userModel)
 	})
 }
 
@@ -126,7 +127,7 @@ func (u *userInfoService) userUpdate(event string, v any) {
 	userEntry.Avatar = userBase.Avatar
 	userEntry.Phone = userBase.Phone
 	u.userInfoStore.Update(context.Background(), userEntry)
-	u.userNameCache.Set(context.Background(), userEntry.UserName, user_model.CreateUserInfo(userEntry), time.Minute*30)
+	u.userNameCache.Set(context.Background(), userEntry.UserName, user_model.CreateUserInfo(userEntry))
 
 }
 func (u *userInfoService) userDelete(e string, v any) {
@@ -203,8 +204,8 @@ func (u *userInfoService) GetUserInfoMaps(ctx context.Context, userIds ...int) (
 					tempMaps[userInfo.Id] = userModel
 					delete(userSet, userInfo.Id)
 				}
-				u.userIdCache.Set(ctx, userModel.Id, userModel, time.Hour)
-				u.userNameCache.Set(ctx, userModel.UserName, userModel, time.Hour)
+				u.userIdCache.Set(ctx, userModel.Id, userModel)
+				u.userNameCache.Set(ctx, userModel.UserName, userModel)
 			}
 			//补全传入的userIds中数据库不存在的数据
 			for userID := range userSet {
@@ -219,7 +220,7 @@ func (u *userInfoService) GetUserInfoMaps(ctx context.Context, userIds ...int) (
 					Avatar:        "",
 					LastLoginTime: nil,
 				}
-				u.userIdCache.Set(ctx, userModel.Id, userModel, time.Hour)
+				u.userIdCache.Set(ctx, userModel.Id, userModel)
 				tempMaps[userID] = userModel
 			}
 			maps = tempMaps
@@ -267,9 +268,9 @@ func (u *userInfoService) GetUserInfo(ctx context.Context, userID int) (*user_mo
 		}
 	} else {
 		userModel = user_model.CreateUserInfo(userInfo)
-		u.userNameCache.Set(ctx, userModel.UserName, userModel, time.Hour)
+		u.userNameCache.Set(ctx, userModel.UserName, userModel)
 	}
-	u.userIdCache.Set(ctx, userID, userModel, time.Hour)
+	u.userIdCache.Set(ctx, userID, userModel)
 	return userModel, nil
 }
 
@@ -304,9 +305,9 @@ func (u *userInfoService) GetUserInfoByName(ctx context.Context, userName string
 		}
 	} else {
 		userModel = user_model.CreateUserInfo(userInfo)
-		u.userIdCache.Set(ctx, userModel.Id, userModel, time.Hour)
+		u.userIdCache.Set(ctx, userModel.Id, userModel)
 	}
-	u.userNameCache.Set(ctx, userName, userModel, time.Hour)
+	u.userNameCache.Set(ctx, userName, userModel)
 	return userModel, nil
 }
 
@@ -364,8 +365,8 @@ func (u *userInfoService) GetUserInfoByNames(ctx context.Context, userNames ...s
 					tempMaps[userInfo.UserName] = userModel
 					delete(userSet, userInfo.UserName)
 				}
-				u.userIdCache.Set(ctx, userModel.Id, userModel, time.Hour)
-				u.userNameCache.Set(ctx, userModel.UserName, userModel, time.Hour)
+				u.userIdCache.Set(ctx, userModel.Id, userModel)
+				u.userNameCache.Set(ctx, userModel.UserName, userModel)
 			}
 			//补全传入的userIds中数据库不存在的数据
 			for userName := range userSet {
@@ -380,7 +381,7 @@ func (u *userInfoService) GetUserInfoByNames(ctx context.Context, userNames ...s
 					Avatar:        "",
 					LastLoginTime: nil,
 				}
-				u.userNameCache.Set(ctx, userModel.UserName, userModel, time.Hour)
+				u.userNameCache.Set(ctx, userModel.UserName, userModel)
 				tempMaps[userName] = userModel
 			}
 			maps = tempMaps

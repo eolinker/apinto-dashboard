@@ -5,6 +5,16 @@ export interface DeployCertListData{
     operator:string
     createTime:string
     updateTime:string
+    dnsName:Array<string>
+    dnsNameStr?:string
+}
+
+export interface DeployCertData{
+  id:string
+  name:string
+  validTime:string
+  key:string
+  pem:string
 }
 
 export interface RedisData{

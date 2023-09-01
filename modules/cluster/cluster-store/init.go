@@ -11,17 +11,17 @@ func init() {
 		clusterHistory := newClusterHistoryStore(db)
 		clusterCertificate := newClusterCertificateStore(db)
 		clusterNode := newClusterNodeStore(db)
-		clusterRuntime := newClusterRuntimeStore(db)
-		clusterConfig := newClusterConfigStore(db)
-		clusterConfigRuntime := newClusterConfigRuntimeStore(db)
+		//clusterConfig := newClusterConfigStore(db)
+		//bean.Injection(&clusterConfig)
 
 		bean.Injection(&cluster)
 		bean.Injection(&clusterHistory)
 		bean.Injection(&clusterCertificate)
 
 		bean.Injection(&clusterNode)
+		clusterRuntime := newClusterRuntimeStore(db)
 		bean.Injection(&clusterRuntime)
-		bean.Injection(&clusterConfig)
-		bean.Injection(&clusterConfigRuntime)
+		//clusterConfigRuntime := newClusterConfigRuntimeStore(db)
+		//bean.Injection(&clusterConfigRuntime)
 	})
 }

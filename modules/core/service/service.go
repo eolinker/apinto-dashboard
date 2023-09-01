@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/cache"
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
 	"github.com/eolinker/apinto-dashboard/modules/core"
 	"github.com/eolinker/apinto-dashboard/modules/core/controller"
 	module_plugin "github.com/eolinker/apinto-dashboard/modules/module-plugin"
-	apinto_module "github.com/eolinker/apinto-module"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
 	"github.com/go-basic/uuid"
@@ -76,7 +76,7 @@ func (c *coreService) CheckNewModule(UUID, name, driverName string, define, conf
 		return err
 	}
 	modulesData := newTModulesData()
-	builder := apinto_module.NewModuleBuilder(c.engineCreate.CreateEngine(), c.coreModule)
+	builder := apinto_module.NewModuleBuilder(c.engineCreate.CreateEngine())
 	for _, module := range modules {
 		if module.Name == name {
 			if module.UUID == UUID {
@@ -203,7 +203,7 @@ func (c *coreService) rebuild() error {
 		return err
 	}
 	modulesData := newTModulesData()
-	builder := apinto_module.NewModuleBuilder(c.engineCreate.CreateEngine(), c.coreModule, c.filterOptionHandlerManager)
+	builder := apinto_module.NewModuleBuilder(c.engineCreate.CreateEngine(), c.filterOptionHandlerManager)
 	for _, module := range modules {
 		driver, has := apinto_module.GetDriver(module.Driver)
 		if !has {
@@ -245,6 +245,7 @@ func NewService(providerService IProviderService) core.ICore {
 		providerService: providerService,
 		coreModule:      controller.NewModule(),
 	}
+	apinto_module.AddSystemModule(c.coreModule)
 	bean.Autowired(&c.filterOptionHandlerManager)
 	bean.Autowired(&c.modulePluginService)
 	bean.Autowired(&c.engineCreate)

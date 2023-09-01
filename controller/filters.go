@@ -1,8 +1,9 @@
 package controller
 
 import (
-	"github.com/dgrijalva/jwt-go"
+	//"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 const (
@@ -23,7 +24,7 @@ type UserClaim struct {
 	Id        int    `json:"id"`
 	Uname     string `json:"username"`
 	LoginTime string `json:"login_time"`
-	jwt.StandardClaims
+	jwt.RegisteredClaims
 }
 
 func ErrorJsonWithCode(ginCtx *gin.Context, statusCode int, errorCode int, errorMsg string) {

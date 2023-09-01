@@ -43,8 +43,7 @@ func (n *navigation) List(ctx context.Context) ([]*model.Navigation, map[string]
 		moduleMap[m.Navigation] = append(moduleMap[m.Navigation], &model.Module{
 			Name:  m.Name,
 			Title: m.Title,
-			//Type:  m.Type,
-			Path: m.Path,
+			Path:  m.Path,
 		})
 	}
 	list := n.navigationService.List()
@@ -59,6 +58,11 @@ func (n *navigation) List(ctx context.Context) ([]*model.Navigation, map[string]
 		defaultModule := ""
 		if len(ms) == 1 && l.Quick {
 			defaultModule = ms[0].Name
+		}
+
+		//若导航下没有模块, 则不显示
+		if len(ms) == 0 {
+			continue
 		}
 
 		navigations = append(navigations, &model.Navigation{

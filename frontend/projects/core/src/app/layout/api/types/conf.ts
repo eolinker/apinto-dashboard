@@ -3,7 +3,7 @@ import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { NzCheckBoxOptionInterface } from 'ng-zorro-antd/checkbox'
 import { EO_TBODY_TYPE } from 'projects/eo-ng-apinto-table/src/public-api'
 
-export const optTypeList: SelectOption[] = [
+export const OptTypeList: SelectOption[] = [
   { label: '新增或修改', value: 'ADD' },
   { label: '删除', value: 'DELETE' }
 ]
@@ -129,7 +129,7 @@ export const hostHeaderTableBody:TBODY_TYPE[] = [
     placeholder: '请输入域名',
     checkMode: 'change',
     check: (item: any) => {
-      return !item || /[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+.?/.test(item)
+      return !item || /[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})*.?/.test(item)
     },
     errorTip: '格式有误'
   },
@@ -137,8 +137,8 @@ export const hostHeaderTableBody:TBODY_TYPE[] = [
     type: 'btn',
     btns: [
       {
-        title: '添加',
-        action: 'add'
+        title: '减少',
+        action: 'delete'
       }
     ]
   },
@@ -272,7 +272,7 @@ export const apiBatchOnlineVerifyTableBody :EO_TBODY_TYPE[] = [
     copy: true
   },
   {
-    key: 'cluster',
+    key: 'clusterName',
     styleFn: (item:any) => {
       if (!item.status) {
         return 'color:#ff3b30'
@@ -310,9 +310,7 @@ export const apiBatchOnlineVerifyTableBody :EO_TBODY_TYPE[] = [
       click: (item:any) => {
         let routerS:string = '/' + item.data.solution.name
         const routerSArr:Array<string> = routerS.split('/')
-        if (item.data.solution.params.serviceName) {
-          routerSArr.splice(-1, 0, item.data.solution.params.serviceName)
-        } else {
+        if (routerSArr.indexOf('content') !== -1) {
           routerSArr.push(item.data.solution.params.templateUuid)
         }
         routerS = routerSArr.join('/')
@@ -327,7 +325,9 @@ export const apiBatchOnlineVerifyTableBody :EO_TBODY_TYPE[] = [
     right: true,
     showFn: (item:any) => {
       return !item.solution.name
-    }
+    },
+    btns: [
+    ]
   }
 ]
 
@@ -352,7 +352,7 @@ export const apiBatchPublishResultTableBody:EO_TBODY_TYPE[] = [
     copy: true
   },
   {
-    key: 'cluster',
+    key: 'clusterName',
     styleFn: (item:any) => {
       if (!item.status) {
         return 'color:#ff3b30'
@@ -435,7 +435,7 @@ export const PluginTemplatePublishThead:THEAD_TYPE[] = [
 
 export const PluginTemplatePublishTbody:EO_TBODY_TYPE[] = [
   {
-    key: 'name',
+    key: 'title',
     copy: true
   },
   {
@@ -540,4 +540,14 @@ export const PluginTemplatePublishTbody:EO_TBODY_TYPE[] = [
       }
     ]
   }
+]
+
+export const ApiCreateBreadcrumb = [
+  { title: 'API管理', routerLink: 'router/api/group/list' },
+  { title: '新建API' }
+]
+
+export const ApiEditBreadcrumb = [
+  { title: 'API管理', routerLink: 'router/api/group/list' },
+  { title: 'API信息' }
 ]

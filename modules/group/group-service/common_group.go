@@ -444,10 +444,10 @@ func (c *commonGroupService) SubGroupUUIDS(groups map[int][]*group_entry.CommonG
 	}
 }
 
-func (c *commonGroupService) CreateGroup(ctx context.Context, namespaceId, operator int, groupType, tagName, groupName, uuidStr, parentUuid string) (int, error) {
+func (c *commonGroupService) CreateGroup(ctx context.Context, namespaceId, operator int, groupType, tagName, groupName, uuidStr, parentUuid string) (string, error) {
 	tagId := c.getTagId(ctx, namespaceId, groupType, tagName)
 	if tagId == -1 {
-		return 0, errors.New("params error")
+		return "", errors.New("params error")
 	}
 	t := time.Now()
 	var err error
@@ -456,7 +456,7 @@ func (c *commonGroupService) CreateGroup(ctx context.Context, namespaceId, opera
 	if parentUuid != "" {
 		parentServiceGroup, err = c.commonGroupStore.GetByUUID(ctx, parentUuid)
 		if err != nil && err != gorm.ErrRecordNotFound {
-			return 0, err
+			return "", err
 		}
 	}
 
@@ -468,10 +468,10 @@ func (c *commonGroupService) CreateGroup(ctx context.Context, namespaceId, opera
 	// 判断要创建的目录下有没有重名的， 有则返回报错
 	isRepeated, err := c.CheckGroupNameReduplicated(ctx, groupName, parentId)
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 	if isRepeated {
-		return 0, fmt.Errorf("groupName %s is reduplicated. ", groupName)
+		return "", fmt.Errorf("groupName %s is reduplicated. ", groupName)
 	}
 
 	if uuidStr == "" {
@@ -480,7 +480,7 @@ func (c *commonGroupService) CreateGroup(ctx context.Context, namespaceId, opera
 
 	maxSort, err := c.commonGroupStore.GetMaxSort(ctx, namespaceId, groupType, tagId, parentId)
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 	groupInfo := &group_entry.CommonGroup{
 		Uuid:        uuidStr,
@@ -502,10 +502,10 @@ func (c *commonGroupService) CreateGroup(ctx context.Context, namespaceId, opera
 	})
 	err = c.commonGroupStore.Save(ctx, groupInfo)
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 
-	return groupInfo.Id, nil
+	return uuidStr, nil
 
 }
 
@@ -520,15 +520,33 @@ func (c *commonGroupService) IsGroupExist(ctx context.Context, uuid string) (boo
 	return true, nil
 }
 
-func (c *commonGroupService) GetGroupByName(ctx context.Context, groupName string, parentID int) (*group_entry.CommonGroup, error) {
-	list, err := c.commonGroupStore.GetByNameParentID(ctx, groupName, parentID)
+func (c *commonGroupService) GetGroupByName(ctx context.Context, namespaceId int, groupType string, groupName string, parentUUID string) (*group_model.CommonGroupBasic, error) {
+	parentID := 0
+	if parentUUID != "" {
+		parentInfo, err := c.commonGroupStore.GetByUUID(ctx, parentUUID)
+		if err != nil && err != gorm.ErrRecordNotFound {
+			return nil, err
+		}
+		if parentInfo != nil {
+			parentID = parentInfo.Id
+		}
+	}
+	groupInfo, err := c.commonGroupStore.GetByTypeNameParent(ctx, namespaceId, groupType, groupName, parentID)
 	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
 		return nil, err
 	}
-	if len(list) == 0 {
-		return nil, gorm.ErrRecordNotFound
-	}
-	return list[0], nil
+
+	return &group_model.CommonGroupBasic{
+		Uuid:     groupInfo.Uuid,
+		Type:     groupInfo.Type,
+		TagID:    groupInfo.TagID,
+		Name:     groupInfo.Name,
+		ParentId: groupInfo.ParentId,
+		Sort:     groupInfo.Sort,
+	}, nil
 }
 
 // CheckGroupNameReduplicated 检测分组名是否重复

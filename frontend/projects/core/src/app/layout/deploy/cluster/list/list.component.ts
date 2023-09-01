@@ -8,6 +8,7 @@
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
 import {
+  ChangeDetectorRef,
   Component,
   ElementRef,
   OnInit,
@@ -31,9 +32,10 @@ import { ClustersThead } from '../types/conf'
 import { MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
 import { NzModalRef } from 'ng-zorro-antd/modal'
 import { DeployClusterCreateComponent } from '../create/create.component'
-import { ClusterEnum } from 'projects/core/src/app/constant/type'
+import { ClusterEnum, EmptyHttpResponse } from 'projects/core/src/app/constant/type'
 import { SelectOption } from 'eo-ng-select'
-
+import { environment } from 'projects/core/src/environments/environment'
+import { debounce } from 'lodash-es'
 @Component({
   selector: 'eo-ng-deploy-cluster-list',
   templateUrl: './list.component.html',
@@ -43,6 +45,7 @@ export class DeployClusterListComponent implements OnInit {
   @ViewChild('clusterStatusTpl', { read: TemplateRef, static: true })
   clusterStatusTpl: TemplateRef<any> | undefined
 
+  addBtnLoading:boolean = false
   readonly nowUrl: string = this.router.routerState.snapshot.url
   nzDisabled:boolean = false
   validateForm: FormGroup = new FormGroup({})
@@ -66,14 +69,14 @@ export class DeployClusterListComponent implements OnInit {
 
   env:Array<string> = []
 
-  // eslint-disable-next-line no-useless-constructor
   constructor (
     private message: EoNgFeedbackMessageService,
     private modalService: EoNgFeedbackModalService,
     private api: ApiService,
     public router: Router,
     private navigationService: EoNgNavigationService,
-    private service:DeployService
+    private service:DeployService,
+    private cdRef:ChangeDetectorRef
   ) {
     this.navigationService.reqFlashBreadcrumb([{ title: '网关集群', routerLink: 'deploy/cluster' }])
   }
@@ -85,6 +88,7 @@ export class DeployClusterListComponent implements OnInit {
 
   ngAfterViewInit () {
     this.clustersTableBody = [...this.service.createClusterTbody(this)]
+    this.cdRef.detectChanges()
   }
 
   getClustersData () {
@@ -142,85 +146,103 @@ export class DeployClusterListComponent implements OnInit {
   }
 
   addCluster () {
-    this.modalRef = this.modalService.create({
-      nzTitle: '新建集群',
-      nzWidth: MODAL_SMALL_SIZE,
-      nzContent: DeployClusterCreateComponent,
-      nzComponentParams: {
-        closeModal: () => { this.modalRef?.close() }
-      },
-      nzFooter: [{
-        label: '取消',
-        type: 'default',
-        onClick: () => {
-          this.modalRef?.close()
-        }
-      },
-      {
-        label: '下一步，检查集群',
-        type: 'primary',
-        onClick: (context:DeployClusterCreateComponent) => {
-          context.testCluster()
-        },
-        disabled: () => {
-          return this.nzDisabled
-        },
-        show: (context:any) => {
-          return !context.nodesTableShow && !context.checkClusterError
-        },
-        loading: (context:any) => {
-          return context.testButtonLoading
-        }
-      },
-      {
-        label: '重新检查',
-        type: 'primary',
-        onClick: (context:DeployClusterCreateComponent) => {
-          context.testCluster()
-        },
-        disabled: () => {
-          return this.nzDisabled
-        },
-        show: (context:any) => {
-          return !context.nodesTableShow && context.checkClusterError
-        },
-        loading: (context:any) => {
-          return context.testButtonLoading
-        }
-      },
-      {
-        label: '上一步',
-        type: 'default',
-        onClick: (context:DeployClusterCreateComponent) => {
-          context.cancel()
-        },
-        show: (context:any) => {
-          return context.nodesTableShow
-        }
-      },
-      {
-        label: '完成',
-        type: 'primary',
-        onClick: (context:DeployClusterCreateComponent) => {
-          context.saveCluster()
-        },
-        disabled: () => {
-          return this.nzDisabled
-        },
-        show: (context:any) => {
-          return context.nodesTableShow
-        },
-        loading: (context:any) => {
-          return context.submitButtonLoading
-        }
-      }]
+    this.addBtnLoading = true
+    this.api.get('clusters/create_check').subscribe((resp:EmptyHttpResponse) => {
+      this.addBtnLoading = false
+      if (resp.code === 0) {
+        this.modalRef = this.modalService.create({
+          nzTitle: '新建集群',
+          nzWidth: MODAL_SMALL_SIZE,
+          nzContent: DeployClusterCreateComponent,
+          nzComponentParams: {
+            closeModal: () => { this.modalRef?.close() }
+          },
+          nzFooter: [{
+            label: '取消',
+            type: 'default',
+            onClick: () => {
+              this.modalRef?.close()
+            }
+          },
+          {
+            label: '下一步，检查集群',
+            type: 'primary',
+            onClick: (context:DeployClusterCreateComponent) => {
+              context.testCluster()
+            },
+            disabled: () => {
+              return this.nzDisabled
+            },
+            show: (context:any) => {
+              return !context.nodesTableShow && !context.checkClusterError
+            },
+            loading: (context:any) => {
+              return context.testButtonLoading
+            }
+          },
+          {
+            label: '重新检查',
+            type: 'primary',
+            onClick: (context:DeployClusterCreateComponent) => {
+              context.testCluster()
+            },
+            disabled: () => {
+              return this.nzDisabled
+            },
+            show: (context:any) => {
+              return !context.nodesTableShow && context.checkClusterError
+            },
+            loading: (context:any) => {
+              return context.testButtonLoading
+            }
+          },
+          {
+            label: '上一步',
+            type: 'default',
+            onClick: (context:DeployClusterCreateComponent) => {
+              context.cancel()
+            },
+            show: (context:any) => {
+              return context.nodesTableShow
+            }
+          },
+          {
+            label: '完成',
+            type: 'primary',
+            onClick: (context:DeployClusterCreateComponent) => {
+              context.saveCluster()
+            },
+            disabled: () => {
+              return this.nzDisabled
+            },
+            show: (context:any) => {
+              return context.nodesTableShow
+            },
+            loading: (context:any) => {
+              return context.submitButtonLoading
+            }
+          }]
 
+        })
+      } else {
+        this.modalRef = this.modalService.create({
+          nzTitle: '提示',
+          nzContent: '已经达到集群授权数量限制，请联系客服人员增加更多授权',
+          nzClosable: true,
+          nzWidth: MODAL_SMALL_SIZE,
+          nzOkText: '查看授权',
+          nzOnOk: () => {
+            this.modalRef?.close()
+            this.router.navigate(['/', environment.isBusiness ? 'auth-info' : 'auth'])
+          }
+        })
+      }
     })
   }
 
   handleEnvChange () {
     this.clustersDisplayList = this.clustersList.filter((cluster:any) => {
-      return this.env.indexOf(cluster.env) !== -1
+      return this.env.indexOf(cluster.env) !== -1 || this.env.length === 0
     })
   }
 }

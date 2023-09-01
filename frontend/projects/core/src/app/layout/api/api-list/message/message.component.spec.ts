@@ -1,107 +1,78 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing'
-import { NzOutletModule } from 'ng-zorro-antd/core/outlet'
-import { NzDrawerModule } from 'ng-zorro-antd/drawer'
+import { ComponentModule } from 'projects/core/src/app/component/component.module'
+import { APP_BASE_HREF } from '@angular/common'
 import { HttpClientModule } from '@angular/common/http'
+import { ElementRef, ChangeDetectorRef } from '@angular/core'
+import { FormsModule, ReactiveFormsModule } from '@angular/forms'
+import { NoopAnimationsModule } from '@angular/platform-browser/animations'
+import { NavigationEnd, Router, RouterModule } from '@angular/router'
+import { Overlay } from '@angular/cdk/overlay'
+import { NzNoAnimationModule } from 'ng-zorro-antd/core/no-animation'
+import { NzOutletModule } from 'ng-zorro-antd/core/outlet'
+import { NzOverlayModule } from 'ng-zorro-antd/core/overlay'
+import { BidiModule } from '@angular/cdk/bidi'
+import { BehaviorSubject } from 'rxjs'
 import { API_URL } from 'projects/core/src/app/service/api.service'
 import { environment } from 'projects/core/src/environments/environment'
-import { RouterModule } from '@angular/router'
-import { APP_BASE_HREF } from '@angular/common'
-import { NzOverlayModule } from 'ng-zorro-antd/core/overlay'
-import { NoopAnimationsModule } from '@angular/platform-browser/animations'
-import { NzNoAnimationModule } from 'ng-zorro-antd/core/no-animation'
-import { BidiModule } from '@angular/cdk/bidi'
-import { Overlay } from '@angular/cdk/overlay'
-import { EoNgFeedbackDrawerService, EoNgFeedbackModalService, EoNgFeedbackMessageService } from 'eo-ng-feedback'
-import { Subject } from 'rxjs/internal/Subject'
-import { of } from 'rxjs'
-import { ElementRef } from '@angular/core'
-import { ApiCreateComponent } from '../create/create.component'
-import { ApiManagementListComponent } from '../list/list.component'
+import { LayoutModule } from '../../../layout.module'
+import { routes } from '../../api-routing.module'
 import { ApiMessageComponent } from './message.component'
+import { BaseInfoService } from 'projects/core/src/app/service/base-info.service'
 
-class MockDrawerService {
-  result:boolean =false
-
-  nzAfterClose = new Subject<any>();
-
-  create () {
-    return {
-      afterClose: {
-        subscribe: () => { of(this.result) }
-      },
-      close: () => {
-        return 'drawer is close'
-      }
-    }
-  }
-}
-
-class MockMessageService {
-  success () {
-    return 'success'
-  }
-
-  error () {
-    return 'error'
-  }
-}
-
-class MockElementRef extends ElementRef {
+export class MockElementRef extends ElementRef {
   constructor () { super(null) }
 }
 
-class MockEnsureService {
-  create () {
-    return 'modal is create'
-  }
-}
-
-describe('ApiMessageComponent test', () => {
-  let component: ApiMessageComponent
+describe('#init ApiMessageComponent', () => {
+  let component:ApiMessageComponent
   let fixture: ComponentFixture<ApiMessageComponent>
+
+  const eventsSub = new BehaviorSubject<any>(null)
+  const routerStub = {
+    events: eventsSub,
+    url: '',
+    navigate: (...args:Array<string>) => {
+      eventsSub.next(new NavigationEnd(1, args.join('/'), args.join('/')))
+    }
+  }
+
+  global.structuredClone = (val:any) => JSON.parse(JSON.stringify(val))
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        NzOverlayModule,
-        BidiModule, NoopAnimationsModule, NzNoAnimationModule,
-        NzDrawerModule, NzOutletModule, HttpClientModule,
-        RouterModule.forRoot([
-          {
-            path: '',
-            component: ApiManagementListComponent
-          },
-          {
-            path: 'message',
-            component: ApiMessageComponent
-          },
-          {
-            path: 'create',
-            component: ApiCreateComponent
-          }
-        ]
-        )
+        NzOverlayModule, FormsModule, ReactiveFormsModule, ComponentModule, LayoutModule,
+        BidiModule, NoopAnimationsModule, NzNoAnimationModule, NzOutletModule, HttpClientModule,
+        RouterModule.forRoot(routes)
       ],
-      declarations: [
+      declarations: [ApiMessageComponent
       ],
       providers: [
         { provide: Overlay, useClass: Overlay },
         { provide: APP_BASE_HREF, useValue: '/' },
         { provide: API_URL, useValue: environment.urlPrefix },
-        { provide: ElementRef, useValue: new MockElementRef() },
-        { provide: EoNgFeedbackDrawerService, useClass: MockDrawerService },
-        { provide: EoNgFeedbackMessageService, useClass: MockMessageService },
-        { provide: EoNgFeedbackModalService, useClass: MockEnsureService }
-      ]
+        { provide: ChangeDetectorRef, useClass: ChangeDetectorRef },
+        { provide: Router, useValue: routerStub }
+      ],
+      teardown: { destroyAfterEach: false }
     }).compileComponents()
 
     fixture = TestBed.createComponent(ApiMessageComponent)
-
     component = fixture.componentInstance
     fixture.detectChanges()
   })
 
-  it('should create', () => {
+  it('should create and init component', () => {
     expect(component).toBeTruthy()
+    expect(component.apiUuid).toBeUndefined()
+
+    // @ts-ignore
+    jest.replaceProperty(fixture.debugElement.injector.get(BaseInfoService), '_allParams', {
+      apiId: 'mockApiId'
+    })
+    fixture = TestBed.createComponent(ApiMessageComponent)
+    component = fixture.componentInstance
+    fixture.detectChanges()
+    expect(component.apiUuid).toEqual('mockApiId')
   })
 })

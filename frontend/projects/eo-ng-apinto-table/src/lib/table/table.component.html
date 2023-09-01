@@ -64,6 +64,8 @@
   (nzDragEnd)="nzDragEnd.emit($event)"
   (getScrollViewPort)="handlerScrollView($event)"
   [nzLoading]="nzLoading"
+  [nzLoadingIndicator]="nzLoadingIndicator"
+  [nzVirtualMaxItems]="nzVirtualMaxItems"
 >
 </eo-ng-table>
 <ng-template #totalTpl let-total>共 {{ nzTotal }} 条</ng-template>

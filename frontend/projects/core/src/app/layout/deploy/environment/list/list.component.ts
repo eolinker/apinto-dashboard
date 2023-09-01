@@ -1,6 +1,3 @@
-/* eslint-disable no-useless-constructor */
-/* eslint-disable no-undef */
-/* eslint-disable camelcase */
 /* eslint-disable dot-notation */
 /*
  * @Author: MengjieYang yangmengjie@eolink.com
@@ -33,11 +30,6 @@ import { DeployGlobalEnvTableBody, DeployGlobalEnvTableHeadName } from '../types
       label {
         line-height: 32px !important;
       }
-
-      input.ant-input:not(.w206):not(.w131):not(.w240),
-      eo-ng-select.ant-select {
-        width: 216px !important;
-      }
     `
   ]
 })
@@ -65,6 +57,7 @@ export class DeployEnvironmentListComponent {
 
   globalEnvTableHeadName: THEAD_TYPE[] = [...DeployGlobalEnvTableHeadName]
   globalEnvTableBody: EO_TBODY_TYPE[] = [...DeployGlobalEnvTableBody]
+  globalEnvTableLoading:boolean = false
 
   editConfigDrawerRef: NzModalRef | undefined
 
@@ -131,6 +124,7 @@ export class DeployEnvironmentListComponent {
   }
 
   getVariables () {
+    this.globalEnvTableLoading = true
     this.api
       .get('variables', {
         pageNum: this.variablePage.pageNum,
@@ -143,6 +137,7 @@ export class DeployEnvironmentListComponent {
           this.globalEnvForms = resp.data
           this.variablePage.total = resp.data.total
         }
+        this.globalEnvTableLoading = false
       })
   }
 

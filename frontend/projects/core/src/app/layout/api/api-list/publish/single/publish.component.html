@@ -22,9 +22,9 @@
     </div>
     <div>
       <label class="label inline-block text-right">转发服务、路径：</label
-      ><span class="border-[1px] boreder-[solid] border-BORDER">{{
-        apiInfo?.service || ''
-      }}</span
+      ><span
+        class="border-[1px] border-solid border-BORDER rounded px-[8px] mr-[4px]"
+        >{{ apiInfo?.service || '' }}</span
       ><span>{{ apiInfo?.proxyPath || '' }}</span>
     </div>
     <div>
@@ -41,8 +41,13 @@
       [nzTrClick]="nzDisabled ? null : tableClick"
       [nzNoScroll]="true"
       [nzDisabled]="nzDisabled"
+      eoNgUserAccess="router/api"
+      (disabledEdit)="disabledEdit($event)"
     >
     </eo-ng-apinto-table>
+    <p class="text-red-500" *ngIf="unpublishMsg">
+      {{ unpublishMsg }}
+    </p>
   </div>
   <div class="drawer-list-footer mt-formtop flex justify-end">
     <span

@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/controller/users"
+	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	random_controller "github.com/eolinker/apinto-dashboard/modules/base/random-controller"
 	"net/http"
 	"time"
@@ -17,9 +18,9 @@ import (
 
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
 	"github.com/eolinker/apinto-dashboard/modules/user"
 	user_dto "github.com/eolinker/apinto-dashboard/modules/user/user-dto"
-	apinto_module "github.com/eolinker/apinto-module"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/gin-gonic/gin"
 )
@@ -67,7 +68,7 @@ func (u *UserController) myProfile(ginCtx *gin.Context) {
 }
 func (u *UserController) myProfileUpdate(ginCtx *gin.Context) {
 	userId := users.GetUserId(ginCtx)
-
+	ginCtx.Set(controller.Operate, audit_model.LogOperateTypeNone.String())
 	req := &user_dto.UpdateMyProfileReq{}
 	err := ginCtx.BindJSON(req)
 	if err != nil {
@@ -84,7 +85,7 @@ func (u *UserController) myProfileUpdate(ginCtx *gin.Context) {
 }
 func (u *UserController) setPassword(ginCtx *gin.Context) {
 	userId := users.GetUserId(ginCtx)
-
+	ginCtx.Set(controller.Operate, audit_model.LogOperateTypeNone.String())
 	req := &user_dto.UpdateMyPasswordReq{}
 	err := ginCtx.BindJSON(req)
 	if err != nil {
@@ -117,7 +118,7 @@ func (u *UserController) setPassword(ginCtx *gin.Context) {
 		RJwt: common.Md5(userJWT),
 	}
 
-	if err = u.sessionCache.Set(ginCtx, cookieValue, session, time.Hour*24*7); err != nil {
+	if err = u.sessionCache.Set(ginCtx, cookieValue, session); err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
@@ -187,6 +188,7 @@ func (u *UserController) access(ginCtx *gin.Context) {
 }
 
 func (u *UserController) ssoLogin(ginCtx *gin.Context) {
+	ginCtx.Set(controller.Operate, audit_model.LogOperateTypeNone.String())
 	var loginInfo user_dto.UserLogin
 	err := ginCtx.BindJSON(&loginInfo)
 	if err != nil {
@@ -223,7 +225,7 @@ func (u *UserController) ssoLogin(ginCtx *gin.Context) {
 		RJwt: common.Md5(userJWT),
 	}
 
-	if err = u.sessionCache.Set(ginCtx, cookieValue, session, time.Hour*24*7); err != nil {
+	if err = u.sessionCache.Set(ginCtx, cookieValue, session); err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
@@ -240,6 +242,7 @@ func (u *UserController) ssoLogin(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 func (u *UserController) ssoLogout(ginCtx *gin.Context) {
+	ginCtx.Set(controller.Operate, audit_model.LogOperateTypeNone.String())
 	cookie, err := ginCtx.Cookie(controller.Session)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
@@ -254,6 +257,8 @@ func (u *UserController) ssoLogout(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 func (u *UserController) ssoLoginCheck(ginCtx *gin.Context) {
+	ginCtx.Set(controller.Operate, audit_model.LogOperateTypeNone.String())
+
 	cookie, err := ginCtx.Cookie(controller.Session)
 	if err != nil {
 		controller.ErrorJsonWithCode(ginCtx, http.StatusOK, controller.CodeLoginInvalid, loginError)
@@ -300,7 +305,7 @@ func randomRouters() apinto_module.RoutersInfo {
 			Handler:     "core.random.id",
 			Labels:      apinto_module.RouterLabelApi,
 			HandlerFunc: []apinto_module.HandlerFunc{r.GET},
-			Alternative: false,
+			Replaceable: false,
 		}}
 }
 func userRouters() apinto_module.RoutersInfo {
@@ -312,7 +317,7 @@ func userRouters() apinto_module.RoutersInfo {
 			Handler:     "core.my.profile",
 			Labels:      apinto_module.RouterLabelApi,
 			HandlerFunc: []apinto_module.HandlerFunc{userController.myProfile},
-			Alternative: true,
+			Replaceable: true,
 		},
 		{
 			Method:      http.MethodPut,
@@ -320,14 +325,14 @@ func userRouters() apinto_module.RoutersInfo {
 			Handler:     "core.my.profile.reset",
 			Labels:      apinto_module.RouterLabelApi,
 			HandlerFunc: []apinto_module.HandlerFunc{userController.myProfileUpdate},
-			Alternative: true,
+			Replaceable: true,
 		}, {
 			Method:      http.MethodPost,
 			Path:        "/api/my/password",
 			Handler:     "core.my.password",
 			Labels:      apinto_module.RouterLabelApi,
 			HandlerFunc: []apinto_module.HandlerFunc{userController.setPassword},
-			Alternative: true,
+			Replaceable: true,
 		},
 		{
 			Method:      http.MethodGet,
@@ -335,14 +340,14 @@ func userRouters() apinto_module.RoutersInfo {
 			Handler:     "core.my.access",
 			Labels:      apinto_module.RouterLabelApi,
 			HandlerFunc: []apinto_module.HandlerFunc{userController.access},
-			Alternative: true,
+			Replaceable: true,
 		}, {
 			Method:      http.MethodGet,
 			Path:        "/api/user/enum",
 			Handler:     "core.user.enum",
 			Labels:      apinto_module.RouterLabelApi,
 			HandlerFunc: []apinto_module.HandlerFunc{userController.userEnum},
-			Alternative: true,
+			Replaceable: true,
 		},
 		{
 			Method:      http.MethodPost,
@@ -350,7 +355,7 @@ func userRouters() apinto_module.RoutersInfo {
 			Handler:     "core.sso.login",
 			Labels:      apinto_module.RouterLabelAnonymous,
 			HandlerFunc: []apinto_module.HandlerFunc{userController.ssoLogin},
-			Alternative: true,
+			Replaceable: true,
 		},
 		{
 			Method:      http.MethodPost,
@@ -358,14 +363,14 @@ func userRouters() apinto_module.RoutersInfo {
 			Handler:     "core.sso.login.check",
 			Labels:      apinto_module.RouterLabelAnonymous,
 			HandlerFunc: []apinto_module.HandlerFunc{userController.ssoLoginCheck},
-			Alternative: true,
+			Replaceable: true,
 		}, {
 			Method:      http.MethodPost,
 			Path:        "/sso/logout",
 			Handler:     "core.sso.logout",
 			Labels:      apinto_module.RouterLabelAnonymous,
 			HandlerFunc: []apinto_module.HandlerFunc{userController.ssoLogout},
-			Alternative: true,
+			Replaceable: true,
 		},
 	}
 }

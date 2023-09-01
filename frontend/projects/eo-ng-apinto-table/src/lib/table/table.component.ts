@@ -34,8 +34,8 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
   @Input() nzMonitorDT:boolean = false
   @Output() nzChangeTableConfigChange:EventEmitter<{value:any, item:any}> = new EventEmitter()
 
-  scrHeight:any;
-  scrWidth:any;
+  scrHeight:number | undefined;
+  scrWidth:number | undefined
   tableScrollCdk:any
   cursorPointer:boolean = false
   constructor (ngZone:NgZone, cdr:ChangeDetectorRef, private message: EoNgFeedbackMessageService, private el:ElementRef, private router:Router) {
@@ -51,7 +51,6 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
 
   override ngOnInit (): void {
     super.ngOnInit()
-
     this.getThead()
     this.getTbody()
     !this.nzNoScroll && !this.nzScroll.x && this.calculateScroll()
@@ -85,9 +84,11 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
       if (this.nzThead[index].type === 'checkbox' && this.nzDisabled) {
         this.nzThead[index].disabled = true
         this.nzThead[index].left = true
-      } else if (!nameCol) {
+      }
+
+      if (!nameCol) {
         this.nzThead[index].left = true
-        nameCol = true
+        nameCol = this.nzThead[index].type !== 'checkbox'
       }
 
       if (this.nzThead[index].title === '操作') {
@@ -110,9 +111,11 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
     for (const body of this.nzTbody) {
       if (body.type === 'checkbox' && this.nzDisabled) {
         body.left = true
-      } else if (!nameCol) {
+      }
+
+      if (!nameCol) {
         body.left = true
-        nameCol = true
+        nameCol = body.type !== 'checkbox'
       }
 
       if (!body.title && !body.type) {
@@ -178,6 +181,9 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
       case '上线管理': {
         return 'shangxianguanli-new'
       }
+      case '发布管理': {
+        return 'shangxianguanli-new'
+      }
       case '上线': {
         return 'circle-right-up-7mnlo5g9'
       }
@@ -192,6 +198,9 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
       }
       case '复制Token': {
         return 'copy'
+      }
+      case '下载': {
+        return 'download'
       }
     }
     return ''
@@ -211,7 +220,7 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
     if (this.nzMonitorDT) {
       const headerHeight = document.getElementsByClassName('list-header')[0]?.getBoundingClientRect().height || 0// list-header高度，通常为表格上方按钮
       const pagationHeight = this.nzShowPagination ? 48 : 0 // 分页高度
-      scrollY = this.scrHeight - headerHeight - pagationHeight - 4 - 12 - 20 - 50 - 40
+      scrollY = this.scrHeight! - headerHeight - pagationHeight - 4 - 12 - 20 - 50 - 40
     } else {
       if (this.nzScrollY) {
         scrollY = this.nzScrollY
@@ -230,8 +239,8 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
         const clusterDescHeight = document.getElementsByClassName('cluster-desc-block')[0]?.getBoundingClientRect().height || 0 // 集群环境变量里的集群描述高度
         // 表格在弹窗内，需要减去弹窗标题高度53，弹窗顶部100px，弹窗内部上下padding20*2， 表头高度； 否则减去表格顶部间隙12px，底部间隙20px，表头高度
         scrollY = this.el.nativeElement.classList.contains('drawer-table')
-          ? (this.scrHeight > 660 ? 660 - drawerHeaderHeight - drawerFooterHeight - drawerPagationHeight - 40 - 40 - 20 - 63 - drawerButtonAreaHeight : 660 - drawerHeaderHeight - drawerFooterHeight - drawerPagationHeight - 40 - 40 - 14 - 63 - 69 - 150)
-          : (this.scrHeight - navTop - headerHeight - footerHeight - pagationHeight - clusterDescHeight - 40 - 4)
+          ? (this.scrHeight! > 660 ? 660 - drawerHeaderHeight - drawerFooterHeight - drawerPagationHeight! - 40 - 40 - 20 - 63 - drawerButtonAreaHeight : 660 - drawerHeaderHeight - drawerFooterHeight - drawerPagationHeight! - 40 - 40 - 14 - 63 - 69 - 150)
+          : (this.scrHeight! - navTop - headerHeight - footerHeight - pagationHeight - clusterDescHeight! - 40 - 4 - 2)
       }
     }
 
@@ -245,6 +254,7 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
     } else {
       this.nzScroll = { x: this.nzNoScroll || this.nzData.length === 0 ? undefined : this.nzScroll.x || '100%', y: undefined }
     }
+    this.cdr.detectChanges()
   }
 
   stopTrClick (index:number, length:number, e:any) {

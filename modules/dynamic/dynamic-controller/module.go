@@ -3,26 +3,25 @@ package dynamic_controller
 import (
 	"context"
 	"fmt"
-	"github.com/eolinker/apinto-dashboard/common"
 	"net/http"
+	"strings"
+
+	"github.com/eolinker/apinto-dashboard/common"
 
 	v2 "github.com/eolinker/apinto-dashboard/client/v2"
 	"github.com/eolinker/apinto-dashboard/modules/dynamic"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
 
-	"github.com/eolinker/apinto-module"
+	"github.com/eolinker/apinto-dashboard/module"
 )
 
 type DynamicModuleDriver struct {
-	pluginVisible bool
-	showServer    bool
-	canUninstall  bool
-	canDisable    bool
+	showServer bool
 }
 
-func NewDynamicModuleDriver(pluginVisible bool, showServer bool, canUninstall bool, canDisable bool) *DynamicModuleDriver {
-	return &DynamicModuleDriver{pluginVisible: pluginVisible, showServer: showServer, canUninstall: canUninstall, canDisable: canDisable}
+func NewDynamicModuleDriver(showServer bool) *DynamicModuleDriver {
+	return &DynamicModuleDriver{showServer: showServer}
 }
 
 func (c *DynamicModuleDriver) CreatePlugin(define interface{}) (apinto_module.Plugin, error) {
@@ -40,20 +39,8 @@ func (c *DynamicModulePlugin) GetPluginFrontend(moduleName string) string {
 	return fmt.Sprintf("template/%s", moduleName)
 }
 
-func (c *DynamicModulePlugin) IsPluginVisible() bool {
-	return c.pluginVisible
-}
-
 func (c *DynamicModulePlugin) IsShowServer() bool {
 	return c.showServer
-}
-
-func (c *DynamicModulePlugin) IsCanUninstall() bool {
-	return c.canUninstall
-}
-
-func (c *DynamicModulePlugin) IsCanDisable() bool {
-	return c.canDisable
 }
 
 type DynamicModulePlugin struct {
@@ -89,16 +76,22 @@ func (c *DynamicModule) Provider() map[string]apinto_module.Provider {
 		c.skill: newSkillProvider(c.profession, c.skill),
 	}
 }
-func (c *DynamicModule) Status(key string, namespaceId int, cluster string) apinto_module.CargoStatus {
+
+func (c *DynamicModule) Status(key string, namespaceId int, cluster string) (apinto_module.CargoStatus, string) {
+	id := fmt.Sprintf("%s@%s", strings.ToLower(key), c.profession)
+	if cluster == "" {
+		return apinto_module.None, id
+	}
 	status, err := c.dynamicService.ClusterStatusByClusterName(context.Background(), namespaceId, c.profession, key, cluster)
 	if err != nil {
 		log.Error(err)
-		return apinto_module.None
+		return apinto_module.None, id
 	}
+
 	if status.Status == v2.StatusOnline || status.Status == v2.StatusPre {
-		return apinto_module.Online
+		return apinto_module.Online, id
 	}
-	return apinto_module.Offline
+	return apinto_module.Offline, id
 
 }
 

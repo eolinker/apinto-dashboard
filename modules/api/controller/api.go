@@ -10,6 +10,7 @@ import (
 	service "github.com/eolinker/apinto-dashboard/modules/api"
 	"github.com/eolinker/apinto-dashboard/modules/api/api-dto"
 	_ "github.com/eolinker/apinto-dashboard/modules/api/service"
+	status_code "github.com/eolinker/apinto-dashboard/modules/api/status-code"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/group/group-dto"
 	"github.com/eolinker/apinto-dashboard/modules/group/group-model"
@@ -194,6 +195,7 @@ func (a *apiController) routers(ginCtx *gin.Context) {
 		for _, p := range item.Publish {
 			publish = append(publish, &api_dto.APIListItemPublish{
 				Name:   p.Name,
+				Title:  p.Title,
 				Status: enum.OnlineStatus(p.Status),
 			})
 		}
@@ -265,28 +267,30 @@ func (a *apiController) create(ginCtx *gin.Context) {
 
 	input := new(api_dto.APIInfo)
 	if err := ginCtx.BindJSON(input); err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
+		controller.ErrorJsonWithCode(ginCtx, http.StatusOK, status_code.ApiConfigBindErr, err.Error())
 		return
 	}
 
 	//API管理器校验参数
 	driver := a.apiService.GetAPIDriver(input.Scheme)
 	if driver == nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("创建API失败, 协议类型不存在"))
+		controller.ErrorJsonWithCode(ginCtx, http.StatusOK, status_code.ApiSchemeNotExist, fmt.Sprintf("创建API失败, 协议类型不存在"))
 		return
 	}
 	if err := driver.CheckInput(input); err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("创建API失败. err:%s", err.Error()))
+		controller.ErrorJsonWithCode(ginCtx, http.StatusOK, status_code.ApiConfigCheckErr, fmt.Sprintf("创建API失败. err:%s", err.Error()))
 		return
 	}
 
-	err := a.apiService.CreateAPI(ginCtx, namespaceId, userId, input)
+	uuid, statusCode, err := a.apiService.CreateAPI(ginCtx, namespaceId, userId, input)
 	if err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("创建API失败. err:%s", err.Error()))
+		controller.ErrorJsonWithCode(ginCtx, http.StatusOK, statusCode, fmt.Sprintf("创建API失败. err:%s", err.Error()))
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
+	data := common.Map{}
+	data["uuid"] = uuid
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
 
 // alter 修改
@@ -371,10 +375,10 @@ func (a *apiController) batchOnline(ginCtx *gin.Context) {
 
 	for _, item := range batchOnlineList {
 		checkItem := &api_dto.ApiBatchCheckListItem{
-			ApiName:    item.APIName,
-			ClusterEnv: item.ClusterEnv,
-			Status:     item.Status,
-			Result:     item.Result,
+			ApiName:     item.APIName,
+			ClusterName: item.ClusterEnv,
+			Status:      item.Status,
+			Result:      item.Result,
 		}
 
 		outputList = append(outputList, checkItem)
@@ -412,10 +416,10 @@ func (a *apiController) batchOffline(ginCtx *gin.Context) {
 
 	for _, item := range batchOfflineList {
 		checkItem := &api_dto.ApiBatchCheckListItem{
-			ApiName:    item.APIName,
-			ClusterEnv: item.ClusterEnv,
-			Status:     item.Status,
-			Result:     item.Result,
+			ApiName:     item.APIName,
+			ClusterName: item.ClusterEnv,
+			Status:      item.Status,
+			Result:      item.Result,
 		}
 
 		outputList = append(outputList, checkItem)
@@ -454,7 +458,7 @@ func (a *apiController) batchOnlineCheck(ginCtx *gin.Context) {
 	for _, item := range batchOnlineList {
 		checkItem := &api_dto.ApiBatchOnlineCheckListItem{
 			ServiceTemplate: item.ServiceTemplate,
-			ClusterEnv:      item.ClusterEnv,
+			ClusterTitle:    item.ClusterEnv,
 			Status:          item.Status,
 			Result:          item.Result,
 			Solution:        item.Solution,
@@ -562,6 +566,7 @@ func (a *apiController) getOnlineInfo(ginCtx *gin.Context) {
 		clusters = append(clusters, &api_dto.ApiPublishCluster{
 			Name:       clu.ClusterName,
 			Env:        clu.ClusterEnv,
+			Title:      clu.ClusterTitle,
 			Status:     enum.OnlineStatus(clu.Status),
 			Operator:   clu.Operator,
 			UpdateTime: clu.UpdateTime,
@@ -584,7 +589,7 @@ func (a *apiController) getOnlineList(ginCtx *gin.Context) {
 	//
 	//list, err := a.apiService.OnlineList(ginCtx, namespaceId, apiUUID)
 	//if err != nil {
-	//	controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
+	//	controller.ErrorJson(ginCtx, http.StatusOK, err.Logger())
 	//	return
 	//}
 	//
@@ -699,4 +704,22 @@ func (a *apiController) importAPI(ginCtx *gin.Context) {
 	}
 
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
+}
+
+func (a *apiController) checkApiExist(ginCtx *gin.Context) {
+	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
+	uuid := ginCtx.Query("uuid")
+	apiInfo, err := a.apiService.GetAPIInfo(ginCtx, namespaceID, uuid)
+	if err != nil {
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("CheckApiExist fail. err: %s. ", err))
+		return
+	}
+
+	isExist := false
+	if apiInfo != nil {
+		isExist = true
+	}
+	data := common.Map{}
+	data["is_exist"] = isExist
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }

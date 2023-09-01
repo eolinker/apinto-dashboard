@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"sort"
+	"strings"
 
 	"github.com/eolinker/apinto-dashboard/controller/users"
 
@@ -62,6 +63,13 @@ func (c *clusterController) clusters(ginCtx *gin.Context) {
 
 }
 
+// createClusterCheck 获取简易集群列表
+func (c *clusterController) createClusterCheck(ginCtx *gin.Context) {
+
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
+
+}
+
 // simpleClusters 获取简易集群列表
 func (c *clusterController) simpleClusters(ginCtx *gin.Context) {
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
@@ -98,8 +106,9 @@ func (c *clusterController) clusterEnum(ginCtx *gin.Context) {
 
 		for _, clusterInfo := range clusters {
 			clusterOuts = append(clusterOuts, &cluster_dto.ClusterOut{
-				Name: clusterInfo.Name,
-				UUID: clusterInfo.UUID,
+				Name:  clusterInfo.Name,
+				Title: clusterInfo.Title,
+				UUID:  clusterInfo.UUID,
 			})
 		}
 
@@ -227,12 +236,12 @@ func (c *clusterController) update(ginCtx *gin.Context) {
 //	clusterInput := &cluster_dto.ClusterInput{}
 //	err := ginCtx.BindJSON(clusterInput)
 //	if err != nil {
-//		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
+//		controller.ErrorJson(ginCtx, http.StatusOK, err.Logger())
 //		return
 //	}
 //	userId := users.GetUserId(ginCtx)
 //	if err = c.clusterService.UpdateDesc(ginCtx, namespaceId, userId, clusterName, clusterInput.Desc); err != nil {
-//		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
+//		controller.ErrorJson(ginCtx, http.StatusOK, err.Logger())
 //		return
 //	}
 //	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
@@ -253,15 +262,15 @@ func (c *clusterController) test(context *gin.Context) {
 
 	isUpdate := false
 	for _, node := range nodes {
-		status := enum.ClusterNodeStatus(node.Status)
-		if status == enum.ClusterNodeStatusRunning {
-			isUpdate = true
-		}
+		//status := enum.ClusterNodeStatus(node.Status)
+		//if status == enum.ClusterNodeStatusRunning {
+		//	isUpdate = true
+		//}
 		list = append(list, &cluster_dto.ClusterNode{
 			Name:        node.Name,
-			ServiceAddr: node.ServiceAddr,
-			AdminAddr:   node.AdminAddr,
-			Status:      status,
+			ServiceAddr: strings.Join(node.ServiceAddr, ","),
+			AdminAddr:   strings.Join(node.AdminAddrs, ","),
+			Status:      enum.ClusterNodeStatusRunning,
 		})
 
 	}
