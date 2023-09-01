@@ -1,29 +1,28 @@
 package cluster_controller
 
 import (
-	"github.com/eolinker/apinto-dashboard/access"
+	"net/http"
+	"strings"
+
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
+	"github.com/eolinker/apinto-dashboard/controller/users"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/cluster"
 	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-dto"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 type clusterNodeController struct {
 	clusterNodeService cluster.IClusterNodeService
 }
 
-func RegisterClusterNodeRouter(router gin.IRoutes) {
+func newClusterNodeController() *clusterNodeController {
 	c := &clusterNodeController{}
 	bean.Autowired(&c.clusterNodeService)
-
-	router.GET("/cluster/:cluster_name/nodes", controller.GenAccessHandler(access.ClusterView, access.ClusterEdit), c.nodes)
-	router.POST("/cluster/:cluster_name/node/reset", controller.GenAccessHandler(access.ClusterEdit), c.reset)
-	router.PUT("/cluster/:cluster_name/node", controller.GenAccessHandler(access.ClusterEdit), c.put)
+	return c
 }
 
 // gets  获取节点列表
@@ -33,7 +32,7 @@ func (c *clusterNodeController) nodes(ginCtx *gin.Context) {
 
 	nodes, isUpdate, err := c.clusterNodeService.QueryList(ginCtx, namespaceId, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
@@ -41,15 +40,39 @@ func (c *clusterNodeController) nodes(ginCtx *gin.Context) {
 	for _, node := range nodes {
 		list = append(list, &cluster_dto.ClusterNode{
 			Name:        node.Name,
-			ServiceAddr: node.ServiceAddr,
-			AdminAddr:   node.AdminAddr,
+			ServiceAddr: strings.Join(node.ServiceAddr, ","),
+			AdminAddr:   strings.Join(node.AdminAddrs, ","),
 			Status:      enum.ClusterNodeStatus(node.Status),
 		})
 	}
 
-	m := common.Map[string, interface{}]{}
+	m := common.Map{}
 	m["nodes"] = list
 	m["is_update"] = isUpdate
+
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
+}
+
+// gets  获取节点列表
+func (c *clusterNodeController) nodesSimple(ginCtx *gin.Context) {
+	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
+	clusterName := ginCtx.Param("cluster_name")
+
+	nodes, err := c.clusterNodeService.List(ginCtx, namespaceId, clusterName)
+	if err != nil {
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
+		return
+	}
+
+	list := make([]*cluster_dto.ClusterNodeSimple, 0, len(nodes))
+	for _, node := range nodes {
+		list = append(list, &cluster_dto.ClusterNodeSimple{
+			Name: node.Name,
+		})
+	}
+
+	m := common.Map{}
+	m["nodes"] = list
 
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
 }
@@ -61,17 +84,17 @@ func (c *clusterNodeController) reset(ginCtx *gin.Context) {
 
 	input := &cluster_dto.ClusterNodeInput{}
 	if err := ginCtx.BindJSON(input); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 
 	if input.ClusterAddr == "" || input.Source == "" {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult("cluster_add is null or source is null"))
+		controller.ErrorJson(ginCtx, http.StatusOK, "cluster_add is null or source is null")
 		return
 	}
-	userId := controller.GetUserId(ginCtx)
+	userId := users.GetUserId(ginCtx)
 	if err := c.clusterNodeService.Reset(ginCtx, namespaceId, userId, clusterName, input.ClusterAddr, input.Source); err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
@@ -85,7 +108,7 @@ func (c *clusterNodeController) put(ginCtx *gin.Context) {
 
 	err := c.clusterNodeService.Update(ginCtx, namespaceId, clusterName)
 	if err != nil {
-		ginCtx.JSON(http.StatusOK, controller.NewErrorResult(err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))

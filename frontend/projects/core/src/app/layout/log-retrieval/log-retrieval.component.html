@@ -1,0 +1,121 @@
+<div class="h-full overflow-y-hidden">
+  <nz-spin class="h-full" [nzSpinning]="!start">
+    <div
+      #searchGroup
+      class="flex flex-wrap items-center list-header pl-btnbase pr-btnrbase"
+    >
+      <div class="flex flex-nowrap items-center mr-btnbase py-btnybase">
+        <label class="">集群：</label>
+
+        <eo-ng-cascader
+          [nzExpandTrigger]="'hover'"
+          class="w-LOG"
+          required
+          [(ngModel)]="searchData.cluster"
+          (ngModelChange)="getNodeList()"
+          nzPlaceHolder="请选择"
+          [nzOptions]="clusterList"
+          [nzAllowClear]="false"
+        ></eo-ng-cascader>
+      </div>
+      <div class="flex flex-nowrap items-center mr-btnbase py-btnybase">
+        <label class="">节点：</label>
+        <eo-ng-select
+          class="w-LOG"
+          [(ngModel)]="searchData.node"
+          [nzOptions]="nodeList"
+          [nzAllowClear]="false"
+          nzPlaceHolder="请选择"
+        ></eo-ng-select>
+      </div>
+      <div class="flex flex-nowarp py-btnybase">
+        <button class="ant-btn-primary" eo-ng-button (click)="getData()">
+          查询
+        </button>
+      </div>
+    </div>
+
+    <nz-spin class="h-full" [nzSpinning]="accGroupLoading">
+      <eo-ng-empty
+        *ngIf="!accGroupList || accGroupList.length === 0"
+        nzMainTitle="暂无数据"
+        nzInputImage="simple"
+      ></eo-ng-empty>
+
+      <div
+        *ngIf="accGroupList && accGroupList.length > 0"
+        eoNgScrollDom
+        [eoBeforeDom]="searchGroup"
+        class="list-content pb-[4px] overflow-y-auto max-h-[calc(100%_-_52px)]"
+      >
+        <nz-collapse [nzBordered]="false">
+          <nz-collapse-panel
+            #p
+            *ngFor="let panel of accGroupList; let isFirst = first"
+            class="my-btnybase mx-btnbase mr-btnrbase border-[1px] border-BORDER border-solid rounded"
+            [ngClass]="{ 'my-btnybase': !isFirst, 'mb-brnybase': isFirst }"
+            [nzHeader]="collapseTitleTpl"
+            [nzActive]="panel.active"
+          >
+            <ng-template #collapseTitleTpl>
+              <p style="display: flex; align-items: center">
+                <span class="title">{{ panel.name }}</span>
+                <button
+                  eo-ng-button
+                  class="ml-btnbase"
+                  (click)="getTail($event, panel)"
+                >
+                  追踪日志
+                </button>
+              </p>
+            </ng-template>
+            <eo-ng-apinto-table
+              *ngIf="panel.files.length"
+              [nzThead]="accTableHeader"
+              [nzTbody]="accTableBody"
+              [nzScrollY]="400"
+              [(nzData)]="panel.files"
+              [nzVirtualMaxItems]="10"
+            ></eo-ng-apinto-table>
+          </nz-collapse-panel>
+        </nz-collapse>
+      </div>
+    </nz-spin>
+  </nz-spin>
+</div>
+<ng-template #tailLogModalFooterTpl let-data let-ref="modalRef">
+  <div class="flex justify-between">
+    <div class="flex justify-between items-center">
+      <label
+        eo-ng-checkbox
+        class="pt-0"
+        [(ngModel)]="ref.componentInstance.tail"
+        >追踪最新日志</label
+      >
+      <button eo-ng-button (click)="modalRef?.componentInstance?.clear()">
+        清空内容
+      </button>
+      <button
+        *ngIf="modalRef?.componentInstance?.connected"
+        eo-ng-button
+        (click)="modalRef?.componentInstance.closeConnect()"
+      >
+        停用连接
+      </button>
+      <button
+        *ngIf="!modalRef?.componentInstance?.connected"
+        eo-ng-button
+        nzType="primary"
+        (click)="modalRef?.componentInstance.connectWs(true)"
+      >
+        重新连接
+      </button>
+    </div>
+    <div>
+      <button eo-ng-button (click)="modalRef?.componentInstance.download()">
+        下载
+      </button>
+      <button eo-ng-button (click)="modalRef?.close()">关闭</button>
+    </div>
+  </div>
+</ng-template>

@@ -3,9 +3,10 @@ package api_store
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	"github.com/eolinker/apinto-dashboard/modules/api/api-entry"
 	"github.com/eolinker/apinto-dashboard/store"
-	"strings"
 )
 
 type IAPIStore interface {
@@ -21,6 +22,7 @@ type IAPIStore interface {
 	GetByIds(ctx context.Context, namespaceID int, ids []int) ([]*api_entry.API, error)
 	GetListAll(ctx context.Context, namespaceID int) ([]*api_entry.API, error)
 	GetSourceList(ctx context.Context) ([]*api_entry.APISource, error)
+	APICount(ctx context.Context, params map[string]interface{}) (int64, error)
 }
 
 type apiStore struct {
@@ -65,6 +67,12 @@ func (a *apiStore) GetListPageByGroupIDs(ctx context.Context, namespaceID, pageN
 	return apis, int(count), nil
 }
 
+func (a *apiStore) APICount(ctx context.Context, params map[string]interface{}) (int64, error) {
+	var count int64
+	err := a.DB(ctx).Where(params).Model(api_entry.API{}).Count(&count).Error
+	return count, err
+}
+
 func (a *apiStore) GetCountByGroupID(ctx context.Context, namespaceID int, groupID string) (int64, error) {
 	count := int64(0)
 	err := a.DB(ctx).Where("`namespace` = ? and `group_uuid` = ?", namespaceID, groupID).Model(api_entry.API{}).Count(&count).Error
@@ -100,7 +108,11 @@ func (a *apiStore) GetByUUIDs(ctx context.Context, namespaceID int, uuids []stri
 
 func (a *apiStore) GetByPath(ctx context.Context, namespaceID int, path string) ([]*api_entry.API, error) {
 	apis := make([]*api_entry.API, 0)
-	err := a.DB(ctx).Where("`namespace` = ? and `request_path_label` = ?", namespaceID, path).Find(&apis).Error
+	db := a.DB(ctx).Where("`namespace` = ? ", namespaceID)
+	if path != "" {
+		db = db.Where("`request_path_label` like ?", "%"+path+"%")
+	}
+	err := db.Find(&apis).Error
 	return apis, err
 }
 

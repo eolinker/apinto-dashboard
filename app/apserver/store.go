@@ -3,6 +3,6 @@
 
 package main
 
-func init() {
+func initDB() {
 	return
 }

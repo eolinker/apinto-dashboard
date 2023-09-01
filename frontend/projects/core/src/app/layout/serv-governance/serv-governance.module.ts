@@ -32,7 +32,6 @@ import { NzLayoutModule } from 'ng-zorro-antd/layout'
 import { NzModalModule } from 'ng-zorro-antd/modal'
 import { NzTableModule } from 'ng-zorro-antd/table'
 import { ComponentModule } from '../../component/component.module'
-import { EoNgTransferModule } from '../../component/transfer/transfer.module'
 import { DirectiveModule } from '../../directive/directive.module'
 import { GroupComponent } from './group/group.component'
 import { ListComponent } from './list/list.component'
@@ -48,7 +47,6 @@ import { GreyCreateComponent } from './grey/create/create.component'
 import { GreyMessageComponent } from './grey/message/message.component'
 import { VisitCreateComponent } from './visit/create/create.component'
 import { VisitMessageComponent } from './visit/message/message.component'
-import { EoNgAutoCompleteModule } from 'eo-ng-auto-complete'
 import { NzSliderModule } from 'ng-zorro-antd/slider'
 import { NzInputNumberModule } from 'ng-zorro-antd/input-number'
 import { ApiModule } from '../api/api.module'
@@ -107,7 +105,6 @@ import { EoNgEmptyModule } from 'eo-ng-empty'
     EoNgSwitchModule,
     NzAvatarModule,
     EoNgButtonModule,
-    EoNgTransferModule,
     NzFormModule,
     ReactiveFormsModule,
     NzLayoutModule,
@@ -117,7 +114,6 @@ import { EoNgEmptyModule } from 'eo-ng-empty'
     NzHighlightModule,
     DirectiveModule,
     ServGovernanceRoutingModule,
-    EoNgAutoCompleteModule,
     EoNgRadioModule,
     NzSliderModule,
     NzInputNumberModule,

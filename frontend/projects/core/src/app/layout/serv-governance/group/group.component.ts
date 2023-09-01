@@ -1,12 +1,11 @@
 /* eslint-disable dot-notation */
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
 import { Router } from '@angular/router'
-import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { EoNgTreeDefaultComponent } from 'eo-ng-tree'
 import { NzTreeNodeOptions, NzTreeNode } from 'ng-zorro-antd/tree'
 import { ClusterEnum } from '../../../constant/type'
 import { ApiService } from '../../../service/api.service'
-import { AppConfigService } from '../../../service/app-config.service'
+import { EoNgNavigationService } from '../../../service/eo-ng-navigation.service'
 import { BaseInfoService } from '../../../service/base-info.service'
 
 @Component({
@@ -31,12 +30,11 @@ export class GroupComponent implements OnInit {
   strategyType: string = ''
   constructor (
     private baseInfo:BaseInfoService,
-    private message: EoNgFeedbackMessageService,
     private api: ApiService,
     private router: Router,
-    private appConfigService:AppConfigService
+    private navigationService:EoNgNavigationService
   ) {
-    this.strategyType = this.router.url.split('/')[2]
+    this.strategyType = this.router.url.split('/')[this.router.url.split('/').indexOf('serv-governance') + 1]
     this.getBreadcrumb()
   }
 
@@ -116,7 +114,6 @@ export class GroupComponent implements OnInit {
     const res: any = []
     for (const index in data) {
       data[index].key = `${data[index].name}_${env}`
-      data[index].title = data[index].name
       data[index].isLeaf = true
       res.push(data[index])
     }
@@ -134,8 +131,7 @@ export class GroupComponent implements OnInit {
       this.clusterKey !== data.keys[0] &&
       this.eoNgTreeDefault?.getTreeNodeByKey(this.clusterKey)?.isSelected
     ) {
-      // @ts-ignore
-      this.eoNgTreeDefault.getTreeNodeByKey(this.clusterKey).isSelected = false
+      this.eoNgTreeDefault.getTreeNodeByKey(this.clusterKey)!.isSelected = false
     }
     // 节点是集群名
     if (!data.node.origin.children || data.node.origin.children.length === 0) {
@@ -154,22 +150,22 @@ export class GroupComponent implements OnInit {
   getBreadcrumb () {
     switch (this.strategyType) {
       case 'traffic':
-        this.appConfigService.reqFlashBreadcrumb([{ title: '流量策略' }])
+        this.navigationService.reqFlashBreadcrumb([{ title: '流量限制' }])
         break
       case 'grey':
-        this.appConfigService.reqFlashBreadcrumb([{ title: '灰度策略' }])
+        this.navigationService.reqFlashBreadcrumb([{ title: '灰度发布' }])
         break
       case 'fuse':
-        this.appConfigService.reqFlashBreadcrumb([{ title: '熔断策略' }])
+        this.navigationService.reqFlashBreadcrumb([{ title: '熔断策略' }])
         break
       case 'cache':
-        this.appConfigService.reqFlashBreadcrumb([{ title: '缓存策略' }])
+        this.navigationService.reqFlashBreadcrumb([{ title: '数据缓存' }])
         break
       case 'visit':
-        this.appConfigService.reqFlashBreadcrumb([{ title: '访问策略' }])
+        this.navigationService.reqFlashBreadcrumb([{ title: 'API访问权限' }])
         break
       default:
-        this.appConfigService.reqFlashBreadcrumb([{ title: '流量策略' }])
+        this.navigationService.reqFlashBreadcrumb([{ title: '流量限制' }])
     }
   }
 }

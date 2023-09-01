@@ -1,3 +1,7 @@
+import { PublishStatus } from '../../../constant/type'
+
+export type APIProtocol = 'http'|'websocket'
+
 export interface RouterEnum{
     apiId:string
     name:string
@@ -17,6 +21,25 @@ export interface ProxyHeaderData{
     value:string
 }
 
+export type ApiMessage = {
+    name:string
+    uuid:string
+    groupUuid:string
+    desc: string
+      isDisable: boolean
+      scheme: string
+      requestPath: string
+      service:string
+      method: Array<string>
+      proxyPath:string
+      hosts: Array<string>
+      timeout: number,
+      retry: number,
+      match:Array<MatchData>
+      proxyHeader: Array<ProxyHeaderData>
+      templateUuid: string
+}
+
 // api创建表单时部分不能放在FormGroup的数据
 export interface APINotFormGroupData{
     uuid:string,
@@ -31,16 +54,15 @@ export interface APIImportData{
     desc:string
 }
 
-export interface APIList{
-    checked?:boolean
-    groupUuid:string
-    uuid:string
+export type APIImportStatus = 'normal' | 'conflict' | 'invalidPath'
+
+export type APIImportItem = {
+    id:number
     name:string
     method:string
-    service:string
-    requestPath:string
-    updateTime:string
-    isDelete:boolean
+    path:string
+    desc:string
+    status:APIImportStatus
 }
 
 // api批量上线检测列表
@@ -83,4 +105,41 @@ export type PluginTemplateData = {
     name:string
     desc:string
     plugins:PluginTemplateConfigItem[]
+}
+
+export type ApiListItem = {
+    checked?:boolean
+    groupUuid:string
+    uuid:string
+    name:string
+    scheme:'http'|'websocket'
+    method:string
+    requestPath:string
+    publish:Array<{name:string, status:PublishStatus}>
+    source:string
+    updateTime:string
+    isDelete:boolean
+    isDisable:boolean|string
+    [k:string]:any
+}
+
+export type ApiData = {
+    name:string
+    id:string
+    scheme:'http'|'websocket'
+    method:string
+    path:string
+    service:string
+    proxyPath:string
+    desc:string
+}
+
+export type ApiPublishItem = {
+    checked?:boolean
+    name:string
+    title:string
+    env:string
+    status:'GOONLINE'|'OFFLINE'|'NOTGOONLINE'|'TOUPDATE'
+    operator:string
+    updateTime:string
 }

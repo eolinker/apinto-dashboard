@@ -1,0 +1,185 @@
+// 动态渲染相关的scss
+
+// 动态渲染的react组件中的下拉列表、dialog受ng-zorro-antd影响，此处做特殊处理
+.ant-select-dropdown:not(eo-ng-option-container):not(nz-option-container):not(
+    .ant-cascader-dropdown
+  ) {
+  position: absolute;
+
+  .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
+    background-color: var(--select-item-selected-background-color);
+    color: var(--select-item-selected-text-color);
+  }
+}
+
+textarea.ant-input {
+  max-width: unset;
+}
+
+.ant-modal-root {
+  .ant-modal {
+    width: 900px !important;
+  }
+
+  .ant-modal-content {
+    border-radius: var(--border-radius);
+    padding: 0px;
+
+    .ant-modal-close:focus,
+    .ant-modal-close {
+      color: var(--icon-color);
+      .ant-modal-close-x {
+        width: unset;
+        height: unset;
+      }
+    }
+    .ant-modal-header {
+      margin-bottom: 0px;
+
+      .ant-modal-title {
+        color: var(--modal-header-text-color);
+        font-weight: 500;
+        font-size: 16px;
+        line-height: 22px;
+      }
+    }
+
+    .ant-modal-footer {
+      margin-top: 0px;
+    }
+
+    .ant-input-affix-wrapper,
+    textarea,
+    .ant-input-number,
+    .ant-picker,
+    .ant-select,
+    .ant-input-number-input {
+      width: 346px;
+      min-height: 32px;
+    }
+
+    .ant-formily-array-items {
+      width: 400px;
+    }
+
+    .ant-formily-array-items .ant-select {
+      width: unset;
+    }
+
+    .ant-btn-default:not(:disabled):hover,
+    .ant-btn-dashed:not(:disabled):hover {
+      color: var(--button-default-hover-text-color);
+      border-color: var(--button-default-hover-border-color);
+      background-color: var(--button-default-hover-background-color);
+    }
+
+    .ant-btn-primary:not(:disabled):hover {
+      color: var(--button-primary-text-color);
+      border-color: var(--button-primary-hover-border-color);
+      background-color: var(--button-primary-hover-background-color);
+    }
+
+    a,
+    a.ant-typography {
+      color: var(--primary-color);
+    }
+    a:hover,
+    a:active,
+    a.ant-typography:hover {
+      color: var(--button-primary-hover-background-color);
+    }
+
+    .ant-pagination .ant-pagination-item-active {
+      border-color: var(--primary-color);
+    }
+  }
+
+  .ant-switch {
+    width: 28px;
+    height: 16px;
+    min-width: 28px;
+    .ant-switch-handle {
+      height: 12px;
+      width: 12px;
+    }
+    &.ant-switch-checked,
+    &.ant-switch-checked:hover:not(.ant-switch-disabled) {
+      background: var(--primary-color);
+    }
+    &.ant-switch-checked .ant-switch-handle {
+      inset-inline-start: calc(100% - 14px);
+    }
+  }
+}
+
+.ant-formily-item
+  .ant-formily-item-control
+  .ant-formily-item-control-content
+  .ant-formily-item-control-content-component {
+  min-height: 32px;
+  line-height: 32px;
+}
+
+.ant-formily-array-base-config {
+  height: 16px;
+  cursor: pointer;
+  display: inline-block;
+  margin-left: 6px;
+  text-align: center;
+  vertical-align: -0.125em;
+}
+
+.ant-formily-array-base-remove {
+  margin-left: 6px;
+}
+
+.ant-formily-array-base-config:hover,
+.ant-formily-array-base-remove :hover {
+  color: var(--primary-color);
+  height: 16px;
+}
+
+formily2-react-wrapper {
+  > span > div > .ant-formily-item-feedback-layout-loose {
+    .ant-formily-item-feedback-layout-loose:last-child {
+      margin-bottom: 0px;
+    }
+
+    .ant-space-item > .ant-formily-item-feedback-layout-loose {
+      margin-bottom: 22px !important;
+    }
+
+    .ant-formily-array-table
+      .ant-table
+      td
+      .ant-formily-item:not(.ant-formily-item-feedback-layout-popover)
+      .ant-formily-item-help {
+      position: relative;
+      top: 0px;
+      box-shadow: none;
+      background-color: transparent;
+    }
+  }
+
+  .ant-checkbox-wrapper:not(.ant-checkbox-wrapper-disabled):hover {
+    .ant-checkbox-checked:not(.ant-checkbox-disabled),
+    .ant-checkbox-checked:not(.ant-checkbox-disabled) .ant-checkbox-inner {
+      border-color: var(--primary-color);
+      background-color: var(--primary-color);
+    }
+  }
+
+  .ant-checkbox-wrapper:not(.ant-checkbox-wrapper-disabled):hover
+    .ant-checkbox-inner,
+  .ant-checkbox:not(.ant-checkbox-disabled):hover .ant-checkbox-inner,
+  .ant-checkbox-wrapper:not(.ant-checkbox-wrapper-disabled):hover
+    .ant-checkbox-checked:not(.ant-checkbox-disabled):after {
+    border-color: var(--primary-color);
+  }
+
+  .ant-formily-item-error
+    .ant-select:not(.ant-select-disabled):not(.ant-select-customize-input)
+    .ant-select-selector {
+    background-color: transparent;
+  }
+}

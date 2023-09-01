@@ -29,11 +29,10 @@ import { DeployClusterOperateRecordTbody, DeployClusterOperateRecordThead, Deplo
   </div>
   <ng-template #nzTrBottomTmp let-item="item" let-apis="apis" let-index="index">
     <tr *ngIf="item.data.isExpand">
-      <td style="border-right: none; background-color: #e8e8e8"></td>
+      <td style="border-right: none; background-color: var(--border-color)"></td>
       <td
         colspan="3"
         style="
-          background-color: pink;
           border: none;
           padding: 0;
           margin-top: -2px;
@@ -41,9 +40,9 @@ import { DeployClusterOperateRecordTbody, DeployClusterOperateRecordThead, Deplo
       >
         <div style="width: 100%">
           <eo-ng-apinto-table
-            class="floatR innerTable"
+            class="float-right innerTable"
             [nzTbody]="publishRecordDetailsTableBody"
-            [nzThead]="publishRecordDetailsTabelHeadName"
+            [nzThead]="publishRecordDetailsTableHeadName"
             [(nzData)]="item.data.details"
             nzTableLayout="fixed"
             [nzScrollY]="9999"
@@ -66,7 +65,7 @@ export class DeployClusterEnvironmentHistoryPublishComponent implements OnInit {
   @ViewChild('showInnerTableBtnTpl', { read: TemplateRef, static: true }) showInnerTableBtnTpl: TemplateRef<any> | undefined
   @Input() publishTypeTpl: TemplateRef<any> | undefined
 
-  // eslint-disable-next-line camelcase
+  // eslint-disable-next-line
   publishRecordsData:{historys:Array<{id:number, name:string, createTime:string, optType:string, operator:string, detailShow:boolean, detail:Array<{key:string, oldValue:string, newValue:string, optType:string, createTime:string}>}>, total:number}=
       {
         historys: [],
@@ -76,12 +75,11 @@ export class DeployClusterEnvironmentHistoryPublishComponent implements OnInit {
   publishRecordTabelHeadName: THEAD_TYPE[]= [...DeployClusterPublishRecordThead]
   publishRecordTableBody: TBODY_TYPE[]=[...DeployClusterPublishRecordTbody]
 
-  publishRecordDetailsTabelHeadName: THEAD_TYPE[] = [...DeployClusterOperateRecordThead]
+  publishRecordDetailsTableHeadName: THEAD_TYPE[] = [...DeployClusterOperateRecordThead]
   publishRecordDetailsTableBody: TBODY_TYPE[] = [...DeployClusterOperateRecordTbody]
   pageSizeOptions:Array<number>=[15, 20, 50, 100]
 
   // 发布历史分页
-  // eslint-disable-next-line camelcase
   publishRecordsPage:{pageNum:number, pageSize:number, total:number}={
     pageNum: 1,
     pageSize: 15,

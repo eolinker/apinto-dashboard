@@ -1,15 +1,15 @@
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
+import { ChangeDetectorRef, Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
 import { Router } from '@angular/router'
 import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feedback'
 import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
-import { MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
 import { EmptyHttpResponse } from 'projects/core/src/app/constant/type'
 import { ApiService } from 'projects/core/src/app/service/api.service'
-import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 import { of } from 'rxjs'
 import { DeployService } from '../../deploy.service'
 import { PluginsTableHeadName } from '../types/conf'
 import { PluginItem } from '../types/types'
+import { MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
 
 @Component({
   selector: 'eo-ng-deploy-plugin-list',
@@ -25,15 +25,17 @@ export class DeployPluginListComponent implements OnInit {
   pluginsList: PluginItem[]= []
   pluginsTableHeadName:THEAD_TYPE[] = [...PluginsTableHeadName]
   pluginsTableBody:TBODY_TYPE[] = []
+  pluginTableLoading:boolean = false
   constructor (
     private message: EoNgFeedbackMessageService,
     private modalService: EoNgFeedbackModalService,
     private api: ApiService,
     public router: Router,
-    private appConfigService: AppConfigService,
-    private service:DeployService
+    private navigationService: EoNgNavigationService,
+    private service:DeployService,
+    private cdRef:ChangeDetectorRef
   ) {
-    this.appConfigService.reqFlashBreadcrumb([{ title: '插件管理' }])
+    this.navigationService.reqFlashBreadcrumb([{ title: '节点插件' }])
   }
 
   ngOnInit (): void {
@@ -42,13 +44,16 @@ export class DeployPluginListComponent implements OnInit {
 
   ngAfterViewInit () {
     this.pluginsTableBody = this.service.createPluginsTbody(this)
+    this.cdRef.detectChanges()
   }
 
   getPluginsData () {
+    this.pluginTableLoading = true
     this.api.get('plugins').subscribe((resp:{code:number, data:{plugins:PluginItem[]}, msg:string}) => {
       if (resp.code === 0) {
         this.pluginsList = resp.data.plugins
       }
+      this.pluginTableLoading = false
     })
   }
 

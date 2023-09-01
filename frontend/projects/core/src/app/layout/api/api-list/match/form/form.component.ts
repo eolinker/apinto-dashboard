@@ -39,6 +39,10 @@ export class MatchFormComponent implements OnInit {
   nzDisabled:boolean = false
 
   constructor (private fb: UntypedFormBuilder, private router:Router) {
+
+  }
+
+  ngOnInit (): void {
     switch (this.router.url.split('/')[1]) {
       case 'router':
         this.accessUrl = 'router/api'
@@ -47,9 +51,6 @@ export class MatchFormComponent implements OnInit {
         this.accessUrl = 'serv-governance/grey'
         break
     }
-  }
-
-  ngOnInit (): void {
     this.validateMatchForm = this.fb.group({
       position: [this.data?.position || '', [Validators.required]],
       key: [this.data?.key || '', [Validators.required, Validators.pattern('^[a-zA-Z][a-zA-Z0-9-_]*')]],
@@ -63,13 +64,14 @@ export class MatchFormComponent implements OnInit {
   }
 
   saveMatch () {
-    if (this.validateMatchForm.controls['matchType'].value === 'NULL' ||
+    if (this.validateMatchForm.valid) {
+      if (this.validateMatchForm.controls['matchType'].value === 'NULL' ||
     this.validateMatchForm.controls['matchType'].value === 'EXIST' ||
     this.validateMatchForm.controls['matchType'].value === 'UNEXIST' ||
     this.validateMatchForm.controls['matchType'].value === 'ANY') {
-      this.validateMatchForm.controls['pattern'].setValue('')
-    }
-    if (this.validateMatchForm.valid) {
+        this.validateMatchForm.controls['pattern'].setValue('')
+      }
+
       if (!this.data) {
         if (this.matchHeaderSet.has(this.validateMatchForm.controls['key'].value)) {
           for (const index in this.matchList) {
@@ -83,6 +85,9 @@ export class MatchFormComponent implements OnInit {
         for (const index in this.matchList) {
           if (this.matchList[index].key === this.editData!.key && this.matchList[index].position === this.editData!.position && this.matchList[index].pattern === this.editData!.pattern && this.matchList[index].matchType === this.editData!.matchType) {
             this.matchList.splice(Number(index), 1)
+            if (this.matchHeaderSet.has(this.editData!.key)) {
+              this.matchHeaderSet.delete(this.editData!.key)
+            }
             break
           }
         }

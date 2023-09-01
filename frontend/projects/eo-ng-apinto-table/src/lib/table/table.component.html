@@ -38,6 +38,7 @@
   </ng-template>
 </div>
 <eo-ng-table
+  [ngClass]="{ cursorPointer: cursorPointer }"
   [nzTbody]="nzTbody"
   [nzThead]="nzThead"
   [nzData]="nzData"
@@ -53,22 +54,25 @@
   [nzShowTotal]="totalTpl"
   [nzScroll]="nzScroll"
   [nzCheckAddRow]="nzCheckAddRow"
-  (nzFilterChange)="nzFilterChange?.emit($event)"
-  (nzPageIndexChange)="nzPageIndexChange?.emit($event)"
-  (nzPageSizeChange)="nzPageSizeChange?.emit($event)"
-  (nzDataChange)="nzDataChange?.emit($event)"
+  (nzFilterChange)="nzFilterChange.emit($event)"
+  (nzPageIndexChange)="nzPageIndexChange.emit($event)"
+  (nzPageSizeChange)="nzPageSizeChange.emit($event)"
+  (nzDataChange)="nzDataChange.emit($event)"
   [nzTrBottomTmp]="nzTrBottomTmp"
   [nzDraggable]="nzDraggable"
   [nzDragCheck]="nzDragCheck"
-  (nzDragEnd)="nzDragEnd?.emit($event)"
+  (nzDragEnd)="nzDragEnd.emit($event)"
   (getScrollViewPort)="handlerScrollView($event)"
   [nzLoading]="nzLoading"
+  [nzLoadingIndicator]="nzLoadingIndicator"
+  [nzVirtualMaxItems]="nzVirtualMaxItems"
 >
 </eo-ng-table>
 <ng-template #totalTpl let-total>共 {{ nzTotal }} 条</ng-template>
 <ng-template #theadTpl let-item="item" let-index="i">
   <span
     eoNgFeedbackTooltip
+    nzTooltipPlacement="topLeft"
     [nzTooltipTitle]="item.tooltip || ''"
     [nzTooltipTitleContext]="item"
     [nzTooltipVisible]="item.tooltipVisible || false"
@@ -84,6 +88,7 @@
     <span
       class="mr-[8px] inline-block truncate"
       eoNgFeedbackTooltip
+      nzTooltipPlacement="topLeft"
       [nzTooltipTitle]="
         rowItem.json
           ? transferToJson(

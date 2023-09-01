@@ -1,6 +1,8 @@
 import { THEAD_TYPE } from 'eo-ng-table'
 import { EO_TBODY_TYPE } from 'projects/eo-ng-apinto-table/src/public-api'
 
+export const TryBusinessAddr:string = 'https://easy-open-link.feishu.cn/share/base/form/shrcn5Z86ThUCZbQMYb2brmT3Ah'
+
 export const defaultAutoTips: Record<string, Record<string, string>> = {
   'zh-cn': {
     required: '必填项'
@@ -152,7 +154,7 @@ export const CommonPublishTableBody:EO_TBODY_TYPE[] = [
 export const PublishTableBody:EO_TBODY_TYPE[] = [
 
   {
-    key: 'name',
+    key: 'title',
     copy: true
   },
   {
@@ -201,4 +203,11 @@ export const PublishTableBody:EO_TBODY_TYPE[] = [
     ]
   }
 
+]
+
+export const FilterOpts = [
+  { text: '已上线', value: 'GOONLINE' },
+  { text: '待更新', value: 'TOUPDATE' },
+  { text: '已下线', value: 'OFFLINE' },
+  { text: '未上线', value: 'NOTGOONLINE' }
 ]

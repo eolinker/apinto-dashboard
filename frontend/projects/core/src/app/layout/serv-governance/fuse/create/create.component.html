@@ -1,5 +1,8 @@
-<div class="mt-formtop">
+<div class="h-[100%] block">
   <form
+    eoNgScrollDom
+    [eoAfterDom]="btnGroup"
+    class="pt-formtop"
     nz-form
     [nzNoColon]="true"
     [nzAutoTips]="autoTips"
@@ -86,7 +89,6 @@
       <nz-form-label [nzSpan]="6" nzRequired>熔断维度：</nz-form-label>
       <nz-form-control [nzSpan]="13">
         <eo-ng-select
-          class="limit-select"
           name="metric"
           class="w-INPUT_NORMAL"
           required
@@ -165,7 +167,6 @@
                   type="number"
                   eo-ng-input
                   required
-                  class=""
                   placeholder="请输入"
                   formControlName="configFuseCount"
                   eoNgUserAccess="serv-governance/fuse"
@@ -185,7 +186,10 @@
                 ></label
               >
               <nz-form-control nzExtra="单位：s，最小值：1">
-                <eo-ng-input-group nzSuffix="乘连续熔断次数">
+                <eo-ng-input-group
+                  class="w-INPUT_NORMAL"
+                  nzSuffix="乘连续熔断次数"
+                >
                   <input
                     class="w-INPUT_NORMAL"
                     [nzBorderless]="true"
@@ -299,21 +303,23 @@
     </nz-form-item>
   </form>
 
-  <nz-form-item class="mb-0 sticky bg-white bottom-0 py-mbase z-50">
-    <nz-form-control [nzOffset]="6" [nzSpan]="18">
-      <button
-        class="ant-btn-primary"
-        eoNgUserAccess="serv-governance/fuse"
-        type="submit"
-        eo-ng-button
-        (click)="saveStrategy()"
-        [nzLoading]="submitButtonLoading"
-      >
-        {{ editPage ? '提交' : '保存' }}
-      </button>
-      <button eo-ng-button class="ml-btnybase" (click)="backToList()">
-        取消
-      </button>
-    </nz-form-control>
-  </nz-form-item>
+  <div #btnGroup>
+    <nz-form-item class="mb-0 sticky bg-white bottom-0 py-mbase z-50">
+      <nz-form-control [nzOffset]="6" [nzSpan]="18">
+        <button
+          class="ant-btn-primary"
+          eoNgUserAccess="serv-governance/fuse"
+          type="submit"
+          eo-ng-button
+          (click)="saveStrategy()"
+          [nzLoading]="submitButtonLoading"
+        >
+          {{ editPage ? '提交' : '保存' }}
+        </button>
+        <button eo-ng-button class="ml-btnybase" (click)="backToList()">
+          取消
+        </button>
+      </nz-form-control>
+    </nz-form-item>
+  </div>
 </div>

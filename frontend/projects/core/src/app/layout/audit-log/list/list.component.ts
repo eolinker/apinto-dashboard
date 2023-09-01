@@ -1,5 +1,4 @@
 /* eslint-disable dot-notation */
-/* eslint-disable camelcase */
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
 import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feedback'
 import { SelectOption } from 'eo-ng-select'
@@ -7,7 +6,7 @@ import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 import { NzModalRef } from 'ng-zorro-antd/modal'
 import { MODAL_NORMAL_SIZE } from '../../../constant/app.config'
 import { ApiService } from '../../../service/api.service'
-import { AppConfigService } from '../../../service/app-config.service'
+import { EoNgNavigationService } from '../../../service/eo-ng-navigation.service'
 import { AuditLogDetailComponent } from '../detail/detail.component'
 import { auditLogsTableBody, auditLogsTableHeadName, auditQueryStatusTypeList } from '../types/conf'
 import { AuditLogDetail, AuditLogsData } from '../types/types'
@@ -30,10 +29,21 @@ import { AuditLogDetail, AuditLogsData } from '../types/types'
      eo-ng-select.ant-select,
     eo-ng-select-top-control.ant-select-selector,
     nz-range-picker,
-    .group-search-large eo-ng-input-group{
+    eo-ng-search-input-group{
       width:254px !important;
     border-radius: var(--border-radius);
       min-height:32px;
+    }
+
+    :host ::ng-deep{
+      .ant-picker-suffix {
+        display: none;
+      }
+
+    }
+
+    label{
+      width:70px;
     }
 
     `
@@ -49,7 +59,7 @@ export class AuditLogListComponent implements OnInit {
   date:Array<Date> = [];
   listOfType:SelectOption[] = [...auditQueryStatusTypeList]
   listOfKind:SelectOption[] = []
-  drawerRef: NzModalRef | undefined
+  modalRef: NzModalRef | undefined
   searchData:{keyword:string, operateType:string, kind:string, start:Date|null, end:Date|null, pageSize:number, pageNum:number, total:number, [key:string]:any} = {
     keyword: '',
     operateType: '',
@@ -65,8 +75,8 @@ export class AuditLogListComponent implements OnInit {
     private message: EoNgFeedbackMessageService,
      private api:ApiService,
      private modalService: EoNgFeedbackModalService,
-     private appConfigService:AppConfigService) {
-    this.appConfigService.reqFlashBreadcrumb([{ title: '审计日志' }])
+     private navigationService:EoNgNavigationService) {
+    this.navigationService.reqFlashBreadcrumb([{ title: 'Debug日志' }])
   }
 
   ngOnInit (): void {
@@ -116,7 +126,7 @@ export class AuditLogListComponent implements OnInit {
   }
 
   openDrawer (auditLogId:string):void {
-    this.drawerRef = this.modalService.create({
+    this.modalRef = this.modalService.create({
       nzTitle: '日志详情',
       nzWidth: MODAL_NORMAL_SIZE,
       nzContent: AuditLogDetailComponent,

@@ -9,7 +9,8 @@ import { DeployGlobalEnvDetailTableHeadName, DeployGlobalEnvDetailTableBody } fr
   template: `
   <div class="drawer-table">
     <eo-ng-apinto-table
-      class="mr10 mt10"
+    class="drawer-table"
+      class="mr-btnbase mt-btnbase"
       [nzTbody]="globalEnvDetailTableBody"
       [nzThead]="globalEnvDetailTableHeadName"
       [nzData]="globalEnvDetailList"
@@ -20,11 +21,9 @@ import { DeployGlobalEnvDetailTableHeadName, DeployGlobalEnvDetailTableBody } fr
 
 
   <ng-template #variableDetailStatusTpl let-item="item">
-  <ng-container [ngSwitch]="item.publishStatus">
-    <span *ngSwitchCase="'UNPUBLISHED'" class="red-bold">未发布</span>
-    <span *ngSwitchCase="'PUBLISHED'" class="green-bold">已发布</span>
-    <span *ngSwitchCase="'DEFECT'" class="grey-bold">缺失</span>
-  </ng-container>
+  <eo-ng-table-publish-status
+    [publish]="item.publishStatus"
+  ></eo-ng-table-publish-status>
   </ng-template>
   `,
   styles: [
