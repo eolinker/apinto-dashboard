@@ -1,0 +1,23 @@
+:host ::ng-deep {
+  eo-ng-dropdown button {
+    border: none !important;
+    background-color: transparent !important;
+    width: auto;
+    height: 28px !important;
+    line-height: 28px !important;
+  }
+
+  .name-width {
+    height: 0;
+    margin-left: 48px;
+  }
+
+  .avatar {
+    color: var(--MAIN_THEME_BG);
+  }
+
+  .iconfont {
+    font-size: 32px;
+    color: #dadadb;
+  }
+}

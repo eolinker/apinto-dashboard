@@ -15,6 +15,7 @@ type IApplicationStore interface {
 	GetListPage(ctx context.Context, namespaceId, pageNum, pageSize int, queryName string) ([]*application_entry.Application, int, error)
 	GetList(ctx context.Context, namespaceId int, uuids ...string) ([]*application_entry.Application, error)
 	GetListByName(ctx context.Context, namespaceId int, name string) ([]*application_entry.Application, error)
+	GetListByNamespace(ctx context.Context, namespaceId int) ([]*application_entry.Application, error)
 }
 
 type applicationStore struct {
@@ -45,6 +46,10 @@ func (a *applicationStore) GetList(ctx context.Context, namespaceId int, uuids .
 
 func (a *applicationStore) GetListByName(ctx context.Context, namespaceId int, name string) ([]*application_entry.Application, error) {
 	return a.ListQuery(ctx, "`namespace` = ? and like ?", []interface{}{namespaceId, "%" + name + "%"}, "create_time asc")
+}
+
+func (a *applicationStore) GetListByNamespace(ctx context.Context, namespaceId int) ([]*application_entry.Application, error) {
+	return a.ListQuery(ctx, "`namespace` = ?", []interface{}{namespaceId}, "create_time asc")
 }
 
 func newApplicationStore(db store.IDB) IApplicationStore {

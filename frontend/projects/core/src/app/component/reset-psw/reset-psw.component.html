@@ -1,0 +1,74 @@
+<form
+  nz-form
+  [nzNoColon]="true"
+  [nzAutoTips]="autoTips"
+  [formGroup]="validateForm"
+  (ngSubmit)="resetPsw()"
+>
+  <nz-form-item>
+    <nz-form-label [nzSpan]="6" nzRequired>账号：</nz-form-label>
+    <nz-form-control [nzSpan]="13">
+      <input class="w-INPUT_NORMAL" eo-ng-input formControlName="userName" />
+    </nz-form-control>
+  </nz-form-item>
+  <nz-form-item>
+    <nz-form-label [nzSpan]="6" nzRequired>旧密码：</nz-form-label>
+    <nz-form-control [nzSpan]="13">
+      <input
+        class="w-INPUT_NORMAL"
+        type="password"
+        eo-ng-input
+        formControlName="old"
+        placeholder="请输入6-32位字符"
+        autocomplete="off"
+      />
+    </nz-form-control>
+  </nz-form-item>
+  <nz-form-item>
+    <nz-form-label [nzSpan]="6" nzRequired>新密码：</nz-form-label>
+    <nz-form-control
+      [nzSpan]="13"
+      nzDisableAutoTips
+      [nzErrorTip]="passwordErrorTpl"
+    >
+      <input
+        eo-ng-input
+        class="w-INPUT_NORMAL"
+        type="password"
+        formControlName="password"
+        (ngModelChange)="validateConfirmPassword()"
+        placeholder="请输入6-32位字符"
+        autocomplete="new-password"
+      />
+      <ng-template #passwordErrorTpl let-control>
+        <ng-container *ngIf="control.hasError('required')">必填项</ng-container>
+        <ng-container *ngIf="control.hasError('strength')"
+          >密码强度：弱，建议使用英文、数字、特殊字符组合</ng-container
+        >
+      </ng-template>
+    </nz-form-control>
+  </nz-form-item>
+  <nz-form-item class="mb-0">
+    <nz-form-label [nzSpan]="6" nzRequired>确认新密码：</nz-form-label>
+    <nz-form-control
+      [nzSpan]="13"
+      nzDisableAutoTips
+      [nzErrorTip]="confirmPasswordErrorTpl"
+    >
+      <input
+        class="w-INPUT_NORMAL"
+        eo-ng-input
+        type="password"
+        formControlName="confirm"
+        placeholder="请输入6-32位字符"
+        autocomplete="new-password"
+      />
+      <ng-template #confirmPasswordErrorTpl let-control>
+        <ng-container *ngIf="control.hasError('required')">必填项</ng-container>
+        <ng-container *ngIf="control.hasError('confirm')"
+          >新密码与确认新密码不一致</ng-container
+        >
+      </ng-template>
+    </nz-form-control>
+  </nz-form-item>
+</form>

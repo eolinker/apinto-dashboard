@@ -1,9 +1,8 @@
-/* eslint-disable camelcase */
 /* eslint-disable dot-notation */
 /*
- * @Author:
+ * @Author: MengjieYang yangmengjie@eolink.com
  * @Date: 2022-07-20 22:34:58
- * @LastEditors:
+ * @LastEditors: MengjieYang yangmengjie@eolink.com
  * @LastEditTime: 2022-08-30 23:21:12
  * @FilePath: /apinto/src/app/layout/deploy/deploy-cluster-environment/deploy-cluster-environment.component.ts
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
@@ -16,7 +15,7 @@ import { NzModalRef } from 'ng-zorro-antd/modal'
 import { MODAL_NORMAL_SIZE, MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
 import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { ApiService } from 'projects/core/src/app/service/api.service'
-import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 import { BaseInfoService } from 'projects/core/src/app/service/base-info.service'
 import { DeployService } from '../../deploy.service'
 import { DeployClusterEnvConfigThead } from '../types/conf'
@@ -37,6 +36,12 @@ import { DeployClusterEnvironmentPublishComponent } from './publish/publish.comp
     .ant-col-4{
       text-align:right;
     }
+
+    :host{
+      overflow-y:auto;
+      height:100%;
+      display:block;
+    }
 `
   ]
 })
@@ -49,7 +54,7 @@ export class DeployClusterEnvironmentComponent implements OnInit {
   readonly nowUrl:string = this.router.routerState.snapshot.url
    configsList: Array<{ key: string, value: string, variableId: number, publish:string, status:string, desc:string, operator:string, updateTime:string, createTime:string, id: number, checked:boolean}> = []
 
-  drawerRef:NzModalRef | undefined
+  modalRef:NzModalRef | undefined
   nzDisabled:boolean = false
 
   configsTableHeadName: THEAD_TYPE[]= [...DeployClusterEnvConfigThead]
@@ -57,16 +62,15 @@ export class DeployClusterEnvironmentComponent implements OnInit {
 
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
 
-  // eslint-disable-next-line no-useless-constructor
   constructor (
           private baseInfo:BaseInfoService,
           private message: EoNgFeedbackMessageService,
           private modalService:EoNgFeedbackModalService,
           private api:ApiService,
           private router:Router,
-          private appConfigService:AppConfigService,
+          private navigationService:EoNgNavigationService,
           private service:DeployService) {
-    this.appConfigService.reqFlashBreadcrumb([{ title: '网关集群', routerLink: 'deploy/cluster' }, { title: '环境变量' }])
+    this.navigationService.reqFlashBreadcrumb([{ title: '网关集群', routerLink: 'deploy/cluster' }, { title: '全局变量' }])
   }
 
   ngOnInit (): void {
@@ -127,7 +131,7 @@ export class DeployClusterEnvironmentComponent implements OnInit {
     e?.stopPropagation()
     switch (usage) {
       case 'addConfig':
-        this.drawerRef = this.modalService.create({
+        this.modalRef = this.modalService.create({
           nzTitle: '新建配置',
           nzWidth: MODAL_SMALL_SIZE,
           nzContent: DeployClusterEnvironmentConfigFormComponent,
@@ -140,7 +144,7 @@ export class DeployClusterEnvironmentComponent implements OnInit {
         })
         break
       case 'editConfig':
-        this.drawerRef = this.modalService.create({
+        this.modalRef = this.modalService.create({
           nzTitle: '编辑配置',
           nzWidth: MODAL_SMALL_SIZE,
           nzContent: DeployClusterEnvironmentConfigFormComponent,
@@ -154,7 +158,7 @@ export class DeployClusterEnvironmentComponent implements OnInit {
         })
         break
       case 'updateConfig':
-        this.drawerRef = this.modalService.create({
+        this.modalRef = this.modalService.create({
           nzTitle: '同步配置',
           nzWidth: MODAL_NORMAL_SIZE,
           nzContent: DeployClusterEnvironmentConfigUpdateComponent,
@@ -168,7 +172,7 @@ export class DeployClusterEnvironmentComponent implements OnInit {
         })
         break
       case 'operateRecords':
-        this.drawerRef = this.modalService.create({
+        this.modalRef = this.modalService.create({
           nzTitle: '更改历史',
           nzWidth: MODAL_NORMAL_SIZE,
           nzContent: DeployClusterEnvironmentHistoryChangeComponent,
@@ -180,7 +184,7 @@ export class DeployClusterEnvironmentComponent implements OnInit {
         })
         break
       case 'publishRecords':
-        this.drawerRef = this.modalService.create({
+        this.modalRef = this.modalService.create({
           nzTitle: '发布历史',
           nzWidth: MODAL_NORMAL_SIZE,
           nzContent: DeployClusterEnvironmentHistoryPublishComponent,
@@ -192,7 +196,7 @@ export class DeployClusterEnvironmentComponent implements OnInit {
         })
         break
       case 'publish':
-        this.drawerRef = this.modalService.create({
+        this.modalRef = this.modalService.create({
           nzTitle: '发布',
           nzWidth: MODAL_NORMAL_SIZE,
           nzContent: DeployClusterEnvironmentPublishComponent,
@@ -214,7 +218,7 @@ export class DeployClusterEnvironmentComponent implements OnInit {
 
   closeModal = (fresh?:boolean) => {
     fresh && this.getConfigsList()
-    this.drawerRef?.close()
+    this.modalRef?.close()
   }
 
   copyCallback () {

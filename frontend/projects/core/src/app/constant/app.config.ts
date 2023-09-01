@@ -1,7 +1,7 @@
 /*
- * @Author:
+ * @Author: MengjieYang yangmengjie@eolink.com
  * @Date: 2022-07-28 22:12:29
- * @LastEditors:
+ * @LastEditors: MengjieYang yangmengjie@eolink.com
  * @LastEditTime: 2022-09-20 23:17:19
  * @FilePath: /apinto/src/app/constant/app.config.ts
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
@@ -13,6 +13,8 @@ export const APP_CONFIG = new InjectionToken('app.config')
 export const MODAL_NORMAL_SIZE: number = 900
 export const MODAL_SMALL_SIZE: number = 600
 export const MODAL_LARGE_SIZE: number = 1200
+export const version:string = '3.2.1'
+export const updateDate:string = '2023-07-13'
 
 // apinto项目的目录参数,其中view和edit字段需要与后端数据一致,以便匹配(权限用)
 export const AppConfig: any = {
@@ -39,7 +41,7 @@ export const AppConfig: any = {
         },
         {
           title: '服务发现',
-          routerLink: 'upstream/serv-discovery',
+          routerLink: 'upstream/discovery',
           menuIndex: 0,
           id: 202,
           level: 1,
@@ -74,7 +76,7 @@ export const AppConfig: any = {
         },
         {
           title: '插件模板',
-          routerLink: 'router/plugin',
+          routerLink: 'router/plugin-template',
           menuIndex: 0,
           id: 402,
           level: 1,
@@ -120,7 +122,7 @@ export const AppConfig: any = {
         },
         {
           title: '环境变量',
-          routerLink: 'deploy/env',
+          routerLink: 'deploy/variable',
           menuIndex: 0,
           id: 102,
           level: 1,
@@ -295,6 +297,33 @@ export const AppConfig: any = {
       level: 0,
       view: 'authorization_view',
       edit: 'authorization_edit'
+    },
+    {
+      title: '企业插件',
+      routerLink: 'module-plugin',
+      menu: true,
+      id: 10,
+      level: 0,
+      view: 'enterprise_plugin_view',
+      edit: 'enterprise_plugin_edit'
+    },
+    {
+      title: '导航管理',
+      routerLink: 'navigation',
+      menu: true,
+      id: 11,
+      level: 0,
+      view: 'navigation_view',
+      edit: 'navigation_edit'
+    },
+    {
+      title: '拦截器管理',
+      routerLink: 'interceptor',
+      menu: true,
+      id: 12,
+      level: 0,
+      view: 'interceptor_view',
+      edit: 'interceptor_edit'
     }
   ]
 }

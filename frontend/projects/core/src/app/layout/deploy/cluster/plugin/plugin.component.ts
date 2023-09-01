@@ -5,7 +5,7 @@ import { THEAD_TYPE, TBODY_TYPE } from 'eo-ng-table'
 import { NzModalRef } from 'ng-zorro-antd/modal'
 import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { ApiService } from 'projects/core/src/app/service/api.service'
-import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 import { BaseInfoService } from 'projects/core/src/app/service/base-info.service'
 import { DeployService } from '../../deploy.service'
 import { DeployClusterPluginPublishComponent } from './publish/publish.component'
@@ -20,6 +20,12 @@ import { MODAL_NORMAL_SIZE, MODAL_SMALL_SIZE } from 'projects/core/src/app/const
   selector: 'eo-ng-deploy-cluster-plugin',
   templateUrl: './plugin.component.html',
   styles: [
+    `
+    :host{
+      overflow-y:auto;
+      height:100%;
+      display:block;
+    }`
   ]
 })
 export class DeployClusterPluginComponent implements OnInit {
@@ -32,7 +38,7 @@ export class DeployClusterPluginComponent implements OnInit {
   readonly nowUrl:string = this.router.routerState.snapshot.url
    pluginsList: ClusterPluginItem[] = []
 
-  drawerRef:NzModalRef | undefined
+  modalRef:NzModalRef | undefined
   nzDisabled:boolean = false
 
   pluginsTableHeadName: THEAD_TYPE[]= [...DeployClusterPluginThead]
@@ -40,16 +46,15 @@ export class DeployClusterPluginComponent implements OnInit {
 
   autoTips: Record<string, Record<string, string>> = defaultAutoTips
 
-  // eslint-disable-next-line no-useless-constructor
   constructor (
           private baseInfo:BaseInfoService,
           private message: EoNgFeedbackMessageService,
           private modalService:EoNgFeedbackModalService,
           private api:ApiService,
           private router:Router,
-          private appConfigService:AppConfigService,
+          private navigationService:EoNgNavigationService,
           private service:DeployService) {
-    this.appConfigService.reqFlashBreadcrumb([{ title: '网关集群', routerLink: 'deploy/cluster' }, { title: '插件管理' }])
+    this.navigationService.reqFlashBreadcrumb([{ title: '网关集群', routerLink: 'deploy/cluster' }, { title: '节点插件' }])
   }
 
   ngOnInit (): void {
@@ -110,11 +115,11 @@ export class DeployClusterPluginComponent implements OnInit {
     e?.stopPropagation()
     switch (usage) {
       case 'editConfig':
-        this.drawerRef = this.modalService.create({
+        this.modalRef = this.modalService.create({
           nzTitle: '编辑配置',
           nzWidth: MODAL_NORMAL_SIZE,
           nzContent: DeployClusterPluginConfigFormComponent,
-          nzComponentParams: { clusterName: this.clusterName, editData: data, closeModal: this.closeModal },
+          nzComponentParams: { clusterName: this.clusterName, editData: data, closeModal: this.closeModal, nzDisabled: this.nzDisabled },
           nzOkDisabled: this.nzDisabled,
           nzOkText: '提交',
           nzOnOk: (component:DeployClusterPluginConfigFormComponent) => {
@@ -124,7 +129,7 @@ export class DeployClusterPluginComponent implements OnInit {
         })
         break
       case 'operateRecords':
-        this.drawerRef = this.modalService.create({
+        this.modalRef = this.modalService.create({
           nzTitle: '更改历史',
           nzWidth: MODAL_NORMAL_SIZE,
           nzContent: DeployClusterPluginHistoryChangeComponent,
@@ -136,7 +141,7 @@ export class DeployClusterPluginComponent implements OnInit {
         })
         break
       case 'publishRecords':
-        this.drawerRef = this.modalService.create({
+        this.modalRef = this.modalService.create({
           nzTitle: '发布历史',
           nzWidth: MODAL_NORMAL_SIZE,
           nzContent: DeployClusterPluginHistoryPublishComponent,
@@ -149,7 +154,7 @@ export class DeployClusterPluginComponent implements OnInit {
         break
 
       case 'publish':
-        this.drawerRef = this.modalService.create({
+        this.modalRef = this.modalService.create({
           nzTitle: '发布',
           nzWidth: MODAL_NORMAL_SIZE,
           nzContent: DeployClusterPluginPublishComponent,
@@ -171,7 +176,7 @@ export class DeployClusterPluginComponent implements OnInit {
 
   closeModal = (fresh?:boolean) => {
     fresh && this.getPluginsList()
-    this.drawerRef?.close()
+    this.modalRef?.close()
   }
 
   copyCallback () {

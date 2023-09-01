@@ -1,9 +1,8 @@
-/* eslint-disable no-useless-constructor */
 /* eslint-disable dot-notation */
 /*
- * @Author:
+ * @Author: MengjieYang yangmengjie@eolink.com
  * @Date: 2022-10-27 17:39:12
- * @LastEditors:
+ * @LastEditors: MengjieYang yangmengjie@eolink.com
  * @LastEditTime: 2022-10-28 00:15:51
  * @FilePath: /projects/core/src/app/layout/serv-governance/response-form/response-form.component.ts
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
@@ -94,13 +93,13 @@ initTable ():void {
     return this.disabled
   }
   this.responseHeaderTableBody[2].showFn = (item: any) => {
-    return item === this._responseHeaderList[0]
+    return item !== this._responseHeaderList[this._responseHeaderList.length - 1] && !item.key
   }
   this.responseHeaderTableBody[2].btns[0].disabledFn = () => {
     return this.disabled
   }
   this.responseHeaderTableBody[3].showFn = (item: any) => {
-    return item !== this._responseHeaderList[0]
+    return item !== this._responseHeaderList[this._responseHeaderList.length - 1] && item.key
   }
   this.responseHeaderTableBody[3].btns[0].disabledFn = () => {
     return this.disabled

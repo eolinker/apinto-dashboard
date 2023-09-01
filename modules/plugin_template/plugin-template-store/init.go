@@ -7,15 +7,16 @@ import (
 
 func init() {
 	store.RegisterStore(func(db store.IDB) {
-		runtimeStore := newPluginTemplateRuntimeStore(db)
 		historyStore := newPluginTemplateHistoryStore(db)
 		templateStore := newPluginTemplateStore(db)
 		statStore := newPluginTemplateStatStore(db)
 		versionStore := newPluginTemplateVersionStore(db)
-		bean.Injection(&runtimeStore)
+		publishHistory := newPluginTemplatePublishHistoryStore(db)
+
 		bean.Injection(&historyStore)
 		bean.Injection(&templateStore)
 		bean.Injection(&statStore)
 		bean.Injection(&versionStore)
+		bean.Injection(&publishHistory)
 	})
 }

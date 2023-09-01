@@ -4,7 +4,7 @@ import { FormGroup, UntypedFormBuilder, Validators } from '@angular/forms'
 import { Router } from '@angular/router'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { ApiService } from 'projects/core/src/app/service/api.service'
-import { AppConfigService } from 'projects/core/src/app/service/app-config.service'
+import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 import { EoNgMyValidators } from 'projects/core/src/app/constant/eo-ng-validator'
 import { defaultAutoTips } from 'projects/core/src/app/constant/conf'
 import { BaseInfoService } from 'projects/core/src/app/service/base-info.service'
@@ -19,16 +19,35 @@ import { EmptyHttpResponse } from 'projects/core/src/app/constant/type'
   templateUrl: './create.component.html',
   styles: [
     `
-    nz-slider{
-      width:318px;
-    }
+    :host ::ng-deep{
+        nz-slider{
+          width:318px;
+            .ant-slider {
+              margin: 10px 0px !important;
+            }
 
-    nz-sider{
-      width:318px;
-      padding:0px;
-      margin:0px;
-      display:inline-block;
-      vertical-align:middle;
+            .ant-slider-handle {
+              display: none;
+            }
+
+            .ant-slider:hover .ant-slider-rail,
+            .ant-slider-rail {
+              height: 10px !important;
+              border-radius: 16px !important;
+              top: 0px;
+              background-color: #d9d9d9;
+            }
+
+            .ant-slider:hover .ant-slider-track,
+            .ant-slider-track {
+              height: 6px !important;
+              border-radius: 16px !important;
+              top: 2px;
+              background-color: var(--background-color);
+              max-width: 314px;
+              left: 2px !important;
+            }
+        }
     }
 
     nz-input-number{
@@ -77,7 +96,7 @@ export class GreyCreateComponent implements OnInit {
     private message: EoNgFeedbackMessageService,
     private api: ApiService,
     private fb: UntypedFormBuilder,
-    private appConfigService: AppConfigService,
+    private navigationService: EoNgNavigationService,
     private router:Router
   ) {
     this.validateForm = this.fb.group({
@@ -93,9 +112,9 @@ export class GreyCreateComponent implements OnInit {
       percent2: [99]
     })
 
-    this.appConfigService.reqFlashBreadcrumb([
-      { title: '灰度策略', routerLink: 'serv-governance/grey' },
-      { title: '新建灰度策略' }
+    this.navigationService.reqFlashBreadcrumb([
+      { title: '灰度发布', routerLink: 'serv-governance/grey' },
+      { title: '新建灰度发布策略' }
     ])
   }
 
@@ -110,7 +129,7 @@ export class GreyCreateComponent implements OnInit {
   initTable () {
     this.nodesTableBody[0].check = (item:any) => {
       if (!/^((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3}:[0-9]+$/.test(item) &&
-      !/^[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\.?(:[0-9]+)?$/.test(item)) {
+      !/^[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})*\.?(:[0-9]+)?$/.test(item)) {
         return false
       }
       return true
@@ -122,13 +141,13 @@ export class GreyCreateComponent implements OnInit {
       return this.nzDisabled
     }
     this.nodesTableBody[1].showFn = (item:any) => {
-      return item === this.nodesList[0]
+      return item !== this.nodesList[this.nodesList.length - 1] && !item.node
     }
     this.nodesTableBody[1].btns[0].disabledFn = () => {
       return this.nzDisabled
     }
     this.nodesTableBody[2].showFn = (item:any) => {
-      return item !== this.nodesList[0]
+      return item !== this.nodesList[this.nodesList.length - 1] && item.node
     }
     this.nodesTableBody[2].btns[0].disabledFn = () => {
       return this.nzDisabled
@@ -159,10 +178,10 @@ export class GreyCreateComponent implements OnInit {
           msg: string
         }) => {
           if (resp.code === 0) {
-            this.appConfigService.reqFlashBreadcrumb([
+            this.navigationService.reqFlashBreadcrumb([
               {
-                title: '灰度策略',
-                routerLink: 'serv-governance'
+                title: '灰度发布',
+                routerLink: 'serv-governance/grey'
               },
               { title: resp.data.strategy!.name }
             ])
@@ -175,15 +194,13 @@ export class GreyCreateComponent implements OnInit {
               distribution: resp.data.strategy!.config.distribution || 'percent'
             })
 
-            if (resp.data.strategy!.config.distribution === 'percent') {
-              this.validateForm.controls['percent1'].setValue(
+            this.validateForm.controls['percent1'].setValue(
               resp.data.strategy!.config.percent! / 100 || 1
-              )
+            )
 
-              this.validateForm.controls['percent2'].setValue(
-                100 - (resp.data.strategy!.config.percent! / 100 || 1)
-              )
-            }
+            this.validateForm.controls['percent2'].setValue(
+              100 - (resp.data.strategy!.config.percent! / 100 || 0)
+            )
             this.createStrategyForm = resp.data.strategy!
             this.createStrategyForm.filters = this.createStrategyForm.filters || []
             this.createStrategyForm.config.match = this.createStrategyForm.config.match || []
@@ -199,7 +216,7 @@ export class GreyCreateComponent implements OnInit {
             for (const index in resp.data.strategy?.config.nodes) {
               this.nodesList.push({ node: resp.data.strategy?.config.nodes[index as any] || '' })
             }
-            this.nodesList = this.nodesList.length > 0 ? this.nodesList : [{ node: '' }]
+            this.nodesList = this.nodesList.length > 0 ? [...this.nodesList, { node: '' }] : [{ node: '' }]
           }
         }
       )

@@ -1,4 +1,3 @@
-/* eslint-disable no-useless-constructor */
 import { Component, Injectable } from '@angular/core'
 import {
   HttpRequest,
@@ -9,17 +8,19 @@ import {
 } from '@angular/common/http'
 import { tap, Observable } from 'rxjs'
 import { Router } from '@angular/router'
-import { AppConfigService } from '../app-config.service'
 import { NzModalService } from 'ng-zorro-antd/modal'
-import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
+import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feedback'
+import { EoNgNavigationService } from '../eo-ng-navigation.service'
+import { environment } from 'projects/core/src/environments/environment'
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
-  private loadingMessageId:string = ''
+  authStatus:'normal'|'waring'|'freeze' = 'normal'
   constructor (
     private router: Router,
-    private appConfigService: AppConfigService,
+    private navigationService: EoNgNavigationService,
     private modalService:NzModalService,
+    private eoModalService:EoNgFeedbackModalService,
     private message: EoNgFeedbackMessageService) {}
 
   intercept (request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
@@ -27,8 +28,15 @@ export class ErrorInterceptor implements HttpInterceptor {
       tap((event:any) => {
         // this.hideLoader()
         if (event instanceof HttpResponse) {
+          this.checkAuthStatus(event)
           this.checkAccess(event.body.code, event, request.method)
-          event.body.data = this.camel(event.body.data)
+          if (!request.url.includes('api/dynamic/')) {
+            try {
+              event.body.data = this.camel(event.body.data)
+            } catch {
+              console.warn('转化接口数据命名法出现问题')
+            }
+          }
         }
       }
       )
@@ -49,26 +57,50 @@ export class ErrorInterceptor implements HttpInterceptor {
     return newData
   }
 
+  checkAuthStatus (event:HttpResponse<any>) {
+    if (event.headers && event.headers.get('X-Apinto-Auth-Status') && this.authStatus !== event.headers.get('X-Apinto-Auth-Status')) {
+      this.authStatus = event.headers.get('X-Apinto-Auth-Status') as 'normal' | 'waring' | 'freeze'
+      this.navigationService.reqCheckAuthStatus()
+    }
+  }
+
   // 根据后端返回的code判断是否要提示无权限弹窗或跳转路由
   checkAccess (code:number, responseBody:any, requestMethod:string) {
     switch (code) {
       case -2:
         this.modalService.closeAll()
+        this.eoModalService.closeAll()
         this.openAccessModal()
         break
       case -3:
         setTimeout(() => {
-          this.router.navigate(['/', 'login'])
+          this.modalService.closeAll()
+          this.eoModalService.closeAll()
+          if (!this.router.url.includes('/login')) {
+            this.router.navigate(['/', 'login'], { queryParams: { callback: this.router.url }, queryParamsHandling: 'merge' })
+          }
         }, 1000)
         break
       case -7:
-        setTimeout(() => {
-          this.router.navigate(['/', 'auth'])
-        }, 1000)
+        if (environment.isBusiness) {
+          this.eoModalService.closeAll()
+          this.modalService.closeAll()
+          setTimeout(() => {
+            if (!responseBody.url.includes('create_check')) {
+              this.router.navigate(['/', 'auth'])
+            }
+          }, 1000)
+        }
         break
       default:
-        if (!(responseBody.url.includes('sso/login/check')) && !(requestMethod === 'PUT' && responseBody.url.split('?')[0].split('/')[responseBody.url.split('?')[0].split('/').length - 1] === 'online') && code !== 0) {
-          this.message.error(responseBody.body.msg || '操作失败！')
+        if (!this.router.url.startsWith('/remote') && code !== undefined && !(responseBody.url.includes('sso/login/check')) && code !== 0 && code !== 30001) {
+          let msg = responseBody.body.msg
+          if (responseBody.url.includes('router/online') && requestMethod === 'PUT') {
+            msg = responseBody.body.data.router.map((data:any) => {
+              return data.msg
+            }).join('  ')
+          }
+          this.message.error(msg || '操作失败！')
         }
     }
   }
@@ -83,9 +115,9 @@ export class ErrorInterceptor implements HttpInterceptor {
       nzOkText: '确定',
       nzCancelText: '取消',
       nzOnOk: () => {
-        const mainPageUrl = this.appConfigService.getPageRoute()
+        const mainPageUrl = this.navigationService.getPageRoute()
         if (mainPageUrl) {
-          this.router.navigate([this.appConfigService.getPageRoute()])
+          this.router.navigate([this.navigationService.getPageRoute()])
         }
       }
     })

@@ -7,14 +7,17 @@ import (
 type API struct {
 	Id               int       `gorm:"type:int(11);size:11;not null;auto_increment;primary_key;column:id;comment:主键ID" json:"id,omitempty"`
 	NamespaceId      int       `gorm:"type:int(11);size:11;not null;column:namespace;uniqueIndex:namespace_uuid;comment:工作空间" json:"namespace_id,omitempty"`
-	UUID             string    `gorm:"size:36;not null;column:uuid;dbUniqueIndex:namespace_uuid;uniqueIndex:namespace_uuid;comment:UUID" json:"uuid,omitempty"`
+	UUID             string    `gorm:"size:36;not null;column:uuid;uniqueIndex:namespace_uuid;comment:UUID" json:"uuid,omitempty"`
 	GroupUUID        string    `gorm:"size:36;column:group_uuid;comment:api所在分组的UUID;index:group_uuid" json:"group_uuid,omitempty"`
 	Name             string    `gorm:"size:255;column:name;comment:api名称" json:"name,omitempty"`
+	Scheme           string    `gorm:"size:36;column:scheme;comment:协议" json:"scheme,omitempty"`
+	IsDisable        bool      `gorm:"type:tinyint(1);size:1;not null;column:is_disable;comment:是否拦截"`
 	RequestPath      string    `gorm:"size:255;request_path;comment:api请求路径" json:"request_path,omitempty"`
 	RequestPathLabel string    `gorm:"size:255;request_path_label;comment:api请求路径Label" json:"request_path_label,omitempty"`
 	SourceType       string    `gorm:"size:255;source_type;comment:来源类型" json:"source_type,omitempty"`
 	SourceID         int       `gorm:"type:int(11);size:11;column:source_id;comment:来源id,用于关联外部应用" json:"source_id,omitempty"`
 	SourceLabel      string    `gorm:"size:255;source_label;comment:来源标签" json:"source_label,omitempty"`
+	Version          string    `gorm:"size:36;column:version;comment:api版本" json:"version,omitempty"`
 	Desc             string    `gorm:"size:255;column:desc;comment:描述" json:"desc,omitempty"`
 	Operator         int       `gorm:"type:int(11);size:11;column:operator;comment:更新人/操作人" json:"operator,omitempty"`
 	CreateTime       time.Time `gorm:"type:timestamp;NOT NULL;DEFAULT:CURRENT_TIMESTAMP;column:create_time;comment:创建时间" json:"create_time"`

@@ -35,7 +35,6 @@ import { NzModalModule } from 'ng-zorro-antd/modal'
 import { NzTableModule } from 'ng-zorro-antd/table'
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
 import { ComponentModule } from '../../component/component.module'
-import { EoNgTransferModule } from '../../component/transfer/transfer.module'
 import { DirectiveModule } from '../../directive/directive.module'
 import { DeployEnvironmentCreateComponent } from './environment/create/create.component'
 import { DeployEnvironmentListComponent } from './environment/list/list.component'
@@ -61,6 +60,7 @@ import { DeployClusterPluginConfigFormComponent } from './cluster/plugin/config/
 import { DeployClusterPluginHistoryChangeComponent } from './cluster/plugin/history/change/change.component'
 import { DeployClusterPluginHistoryPublishComponent } from './cluster/plugin/history/publish/publish.component'
 import { DeployClusterPluginPublishComponent } from './cluster/plugin/publish/publish.component'
+import { DeployClusterMessageComponent } from './cluster/message/message.component'
 
 @NgModule({
   declarations: [
@@ -90,7 +90,8 @@ import { DeployClusterPluginPublishComponent } from './cluster/plugin/publish/pu
     DeployClusterPluginConfigFormComponent,
     DeployClusterPluginHistoryChangeComponent,
     DeployClusterPluginHistoryPublishComponent,
-    DeployClusterPluginPublishComponent
+    DeployClusterPluginPublishComponent,
+    DeployClusterMessageComponent
   ],
   imports: [
     EoNgLayoutModule,
@@ -114,7 +115,6 @@ import { DeployClusterPluginPublishComponent } from './cluster/plugin/publish/pu
     EoNgSwitchModule,
     NzAvatarModule,
     EoNgButtonModule,
-    EoNgTransferModule,
     NzFormModule,
     ReactiveFormsModule,
     NzLayoutModule,

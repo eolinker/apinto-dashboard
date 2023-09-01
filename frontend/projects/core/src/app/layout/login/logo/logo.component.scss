@@ -1,0 +1,10 @@
+eo-logo:host {
+  img {
+    width: 92px;
+  }
+  cursor: pointer;
+}
+
+::selection {
+  background: var(--find-password);
+}

@@ -110,42 +110,6 @@
     </div>
   </ng-template>
 </ng-template>
-<ng-template #importFooterTpl>
-  <div *ngIf="importFormPage; else elseFooterTpl">
-    <button eo-ng-button class="ml-btnybase" (click)="drawerRef?.close()">
-      取消
-    </button>
-    <button
-      class="ant-btn-primary"
-      eo-ng-button
-      eoNgUserAccess="router/api"
-      (click)="checkConflict()"
-      [nzLoading]="checkButtonLoading"
-    >
-      查重
-    </button>
-  </div>
-  <ng-template #elseFooterTpl>
-    <div>
-      <button
-        eo-ng-button
-        class="ml-btnybase"
-        (click)="importFormPage = true; resultList = []; token = ''"
-      >
-        返回上级
-      </button>
-
-      <button
-        eo-ng-button
-        class="ant-btn-primary"
-        [disabled]="apisSet.size === 0"
-        (click)="importApis()"
-      >
-        提交
-      </button>
-    </div>
-  </ng-template>
-</ng-template>
 
 <ng-template #methodTpl let-item="item">
   <eo-ng-api-method-tag [methodItem]="item.method"></eo-ng-api-method-tag>

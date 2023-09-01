@@ -16,21 +16,81 @@ import { ApiService } from '../../service/api.service'
   styles: [
     `
 
-    .margin-dynamic-row{
-      height:12px;
-    }
 
-    .ant-form-item-extra {
-      min-height:16px;
-    }
+    :host ::ng-deep{
 
-    .ant-form-item-extra + .margin-dynamic-row{
-      height:0px;
-    }
+      .ant-input{
+        width:367px;
+      }
 
-    .error-input > .ant-input{
-      border-color:rgb(255, 60, 50);
-      color:rgb(255, 60, 50);
+      > div > section:last-child nz-space div .ant-input.w131 {
+        width: 164px !important;
+      }
+
+      > div
+        > section:last-child
+        nz-space
+        div:first-child
+        .ant-input:not(.ant-checkbox-input):not(.w131):not(.w206):not(.w240):not(
+          .ant-select-selection-search-input
+        ) {
+        width: 174px !important;
+      }
+
+      section.dynamic_inline_block:last-child {
+        border-color: var(--BORDER);
+        color: var(--BORDER);
+      }
+
+      .dynamic_inline_block nz-space:nth-child(3) {
+            color: blue;
+            a.array_item_addition.ml-btnbase {
+              margin-left: 0px !important;
+            }
+          }
+
+
+        .dynamic_inline_block {
+          display: flex;
+          flex-flow: row nowrap;
+          .ant-input,
+          .ant-select {
+            width: 346px;
+          }
+        }
+
+
+        section.dynamic_inline_block:not(last-child) {
+            width: 100%;
+          }
+
+          section > div a {
+            display: inline-block;
+            height: 32px;
+            line-height: 32px;
+            span {
+              height: 32px;
+              line-height: 32px;
+            }
+          }
+
+      .margin-dynamic-row{
+          height:12px;
+        }
+
+        .ant-form-item-extra {
+          min-height:16px;
+        }
+
+        .ant-form-item-extra + .margin-dynamic-row{
+          height:0px;
+        }
+
+        .error-input > .ant-input{
+          border-color:rgb(255, 60, 50);
+          color:rgb(255, 60, 50);
+        }
+
     }
     `
   ],
@@ -426,7 +486,7 @@ export class DynamicComponentComponent implements OnInit {
   drawerAddRef:NzModalRef | undefined
   envNameForSear:string = ''
   public propertyWaitForChoose:any = null
-  private subscription: Subscription = new Subscription()
+  public subscription: Subscription = new Subscription()
 
   openDrawer (property:any) {
     this.propertyWaitForChoose = property
