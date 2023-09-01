@@ -1,7 +1,6 @@
 package audit_controller
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/controller/users"
@@ -20,13 +19,13 @@ func (a *auditLogController) Handler(ginCtx *gin.Context) {
 	start := time.Now()
 	bodyReader := ginCtx.Request.Body
 	bodyBytes, err := io.ReadAll(bodyReader)
-	bodyReader.Close()
+
 	if err != nil {
 		log.Warn("read body :", err)
 		ginCtx.JSON(http.StatusOK, controller.NewNoAccessError("Invalid request body"))
 		return
 	}
-	ginCtx.Request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+	//ginCtx.Request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 	//将请求体加入到上下文中，兼容需要修改的情况， 比如批量上线接口
 	ginCtx.Set(controller.LogBody, string(bodyBytes))
 

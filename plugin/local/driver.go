@@ -7,7 +7,7 @@ import (
 type tDriver struct {
 }
 
-func NewDriver() *tDriver {
+func NewDriver() apinto_module.Driver {
 	return &tDriver{}
 }
 

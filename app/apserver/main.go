@@ -2,11 +2,13 @@ package main
 
 import (
 	"fmt"
-	grpc_service "github.com/eolinker/apinto-dashboard/grpc-service"
-	apinto_module "github.com/eolinker/apinto-dashboard/module"
+	"github.com/eolinker/apinto-dashboard/config"
+	grpcservice "github.com/eolinker/apinto-dashboard/grpc-service"
+	apintomodule "github.com/eolinker/apinto-dashboard/module"
 	"github.com/eolinker/apinto-dashboard/modules/grpc-service/service"
 	"github.com/eolinker/apinto-dashboard/modules/module-plugin/embed_registry"
 	"github.com/eolinker/apinto-dashboard/modules/notice"
+	"github.com/eolinker/apinto-dashboard/report"
 	"github.com/soheilhy/cmux"
 	"google.golang.org/grpc"
 	"net"
@@ -42,35 +44,33 @@ func main() {
 }
 
 func run() {
-
+	config.ReadConfig()
+	initLog()
 	gin.SetMode(gin.ReleaseMode)
-	//engine := gin.Default()
-
-	//registerRouter(engine)
 
 	var coreService core.ICore
 	bean.Autowired(&coreService)
 	var front core.EngineCreate = new(Front)
 	bean.Injection(&front)
-	initDB()
-
+	config.InitDb()
+	config.InitRedis()
 	err := bean.Check()
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	report.InitReport(config.GetLogDir(), config.DisableReport())
 	// 执行内置插件初始化
 	err = embed_registry.InitEmbedPlugins()
 	if err != nil {
 		log.Fatal(err)
 	}
-	coreService.ReloadModule()
+	_ = coreService.ReloadModule()
 	go plugin_timer.ExtenderTimer()
 
 	//初始化通知渠道驱动
 	initNoticeChannelDriver()
 
-	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", GetPort()))
+	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", config.GetPort()))
 	if err != nil {
 		panic(err)
 	}
@@ -83,8 +83,8 @@ func run() {
 	httpServer := &http.Server{Handler: coreService}
 	grpcServer := grpc.NewServer()
 
-	grpc_service.RegisterGetConsoleInfoServer(grpcServer, service.NewConsoleInfoService())
-	grpc_service.RegisterNoticeSendServer(grpcServer, service.NewNoticeSendService())
+	grpcservice.RegisterGetConsoleInfoServer(grpcServer, service.NewConsoleInfoService())
+	grpcservice.RegisterNoticeSendServer(grpcServer, service.NewNoticeSendService())
 
 	console := newConsoleServer(httpServer, grpcServer)
 	go func() {
@@ -118,7 +118,7 @@ type Front struct {
 
 func (f *Front) CreateEngine() *gin.Engine {
 	engine := gin.Default()
-	engine.Use(apinto_module.SetRepeatReader)
+	engine.Use(apintomodule.SetRepeatReader)
 	return engine
 }
 

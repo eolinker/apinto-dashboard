@@ -46,7 +46,6 @@ import (
 	"github.com/eolinker/eosc/log"
 	"github.com/gin-gonic/gin"
 	"github.com/go-basic/uuid"
-	"golang.org/x/exp/slices"
 	"golang.org/x/sync/errgroup"
 	"gorm.io/gorm"
 )
@@ -1445,83 +1444,6 @@ func (a *apiService) OnlineInfo(ctx context.Context, namespaceId int, uuid strin
 	return info, items, nil
 }
 
-func (a *apiService) OnlineList(ctx context.Context, namespaceId int, uuid string) ([]*apimodel.APIOnlineListItem, error) {
-	//apiInfo, err := a.apiStore.GetByUUID(ctx, namespaceId, uuid)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//
-	////获取工作空间下的所有集群
-	//clusters, err := a.clusterService.GetByNamespaceId(ctx, namespaceId)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//clusterMaps := common.SliceToMap(clusters, func(t *cluster_model.Cluster) int {
-	//	return t.Id
-	//})
-	//
-	////获取当前服务发现下集群运行的版本
-	//runtimes, err := a.apiRuntime.GetByTarget(ctx, apiInfo.Id)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//runtimeMaps := common.SliceToMap(runtimes, func(t *apientry.APIRuntime) int {
-	//	return t.ClusterID
-	//})
-	//
-	////获取操作人用户列表
-	//operatorList := common.SliceToSliceIds(runtimes, func(t *apientry.APIRuntime) int {
-	//	return t.Operator
-	//})
-	//
-	//userInfoMaps, err := a.userInfoService.GetUserInfoMaps(ctx, operatorList...)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//
-	//list := make([]*apimodel.APIOnlineListItem, 0, len(clusters))
-	//
-	//latestVersion, err := a.GetLatestAPIVersion(ctx, apiInfo.Id)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//
-	//for _, clusterInfo := range clusterMaps {
-	//	apiOnline := &apimodel.APIOnlineListItem{
-	//		ClusterName: clusterInfo.Name,
-	//		ClusterEnv:  clusterInfo.Env,
-	//		Status:      1, //默认为未上线状态
-	//	}
-	//	if runtime, ok := runtimeMaps[clusterInfo.Id]; ok {
-	//
-	//		operator := ""
-	//		if userInfo, uOk := userInfoMaps[runtime.Operator]; uOk {
-	//			operator = userInfo.NickName
-	//		}
-	//
-	//		apiOnline.Operator = operator
-	//		apiOnline.Disable = runtime.Disable
-	//		apiOnline.UpdateTime = runtime.UpdateTime
-	//		if runtime.IsOnline {
-	//			apiOnline.Status = 3 //已上线
-	//		} else {
-	//			apiOnline.Status = 2 //已下线
-	//		}
-	//		//已上线需要对比是否更新过 服务发现信息
-	//		if apiOnline.Status == 3 && runtime.VersionID != latestVersion.Id {
-	//			apiOnline.Status = 4 //待更新
-	//		}
-	//	}
-	//
-	//	list = append(list, apiOnline)
-	//}
-	//sort.Slice(list, func(i, j int) bool {
-	//	return list[i].Status > list[j].Status
-	//})
-	//return list, nil
-	return nil, nil
-}
-
 func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, uuid string, clusterNames []string) ([]*frontend_model.Router, error) {
 	apiInfo, err := a.apiStore.GetByUUID(ctx, namespaceId, uuid)
 	if err != nil {
@@ -1822,7 +1744,7 @@ func (a *apiService) GetImportCheckList(ctx context.Context, namespaceId int, fi
 
 		if apis, ok := apiMap[common.ReplaceRestfulPath(item.Path, enum.RestfulLabel)]; ok {
 			for _, groupApi := range apis {
-				if slices.Contains(groupApi.Methods, item.Method) {
+				if common.Contains(groupApi.Methods, item.Method) {
 					item.Status = 2
 					break
 				}
@@ -1944,7 +1866,7 @@ func (a *apiService) ImportAPI(ctx context.Context, namespaceId, operator int, i
 			A:
 				for _, rApi := range rApis {
 					for _, method := range v.Api.Method {
-						if slices.Contains(rApi.Methods, method) {
+						if common.Contains(rApi.Methods, method) {
 							isReduplicated = true
 							break A
 						}

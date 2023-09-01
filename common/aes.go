@@ -4,31 +4,14 @@ import (
 	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
-	"fmt"
+	"github.com/eolinker/eosc/log"
 )
-
-func CBCEncrypter(text []byte, key []byte, iv []byte) []byte {
-	block, err := aes.NewCipher(key)
-	if err != nil {
-		fmt.Println(err)
-	}
-	// 填充
-	paddText := PKCS7Padding(text, block.BlockSize())
-
-	blockMode := cipher.NewCBCEncrypter(block, iv)
-
-	// 加密
-	result := make([]byte, len(paddText))
-	blockMode.CryptBlocks(result, paddText)
-	// 返回密文
-	return result
-}
 
 // CBCDecrypter 解密
 func CBCDecrypter(encrypter []byte, key []byte, iv []byte) []byte {
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err)
 	}
 	blockMode := cipher.NewCBCDecrypter(block, iv)
 	result := make([]byte, len(encrypter))
