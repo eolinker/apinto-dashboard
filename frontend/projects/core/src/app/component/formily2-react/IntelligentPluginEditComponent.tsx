@@ -51,6 +51,7 @@ import { CustomEnvVariableComponent } from './component/editable-env-table/Custo
 import axios from 'axios'
 import { SimpleMapComponent } from './component/simple-map/SimpleMapComponent'
 import { CustomDialogComponent } from './component/dialog/CustomDialogComponent'
+import { ArrayItemBlankComponent } from './component/array-item-blank/ArrayItemBlankComponent'
 
 export const DynamicRender = observer(() => {
   const field = useField()
@@ -85,7 +86,9 @@ const SchemaField = createSchemaField({
     Form,
     FormButtonGroup,
     FormCollapse,
+    // @ts-ignore
     FormDialog,
+    // @ts-ignore
     FormDrawer,
     FormGrid,
     FormItem,
@@ -111,7 +114,8 @@ const SchemaField = createSchemaField({
     CustomCodeboxComponent,
     CustomEnvVariableComponent,
     SimpleMapComponent,
-    CustomDialogComponent
+    CustomDialogComponent,
+    ArrayItemBlankComponent
   }
 })
 
@@ -142,6 +146,7 @@ export const IntelligentPluginEditComponent = React.forwardRef(
           type: 'string',
           title: 'ID',
           required: true,
+          pattern: /^[a-zA-Z][a-zA-Z0-9-_]*$/,
           'x-decorator': 'FormItem',
           'x-decorator-props': {
             labelCol: 6,
@@ -149,8 +154,9 @@ export const IntelligentPluginEditComponent = React.forwardRef(
           },
           'x-component': 'Input',
           'x-component-props': {
-            placeholder: '请输入ID'
-          }
+            placeholder: '支持字母开头、英文数字中横线下划线组合'
+          },
+          'x-disabled': editPage
         },
         title: {
           type: 'string',
@@ -209,7 +215,6 @@ export const IntelligentPluginEditComponent = React.forwardRef(
       onSubmit && onSubmit(value)
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const getSkillData = async (skill: string) => {
       return new Promise((resolve) => {
         axios.get(`api/common/provider/${skill}`).then((resp) => {
@@ -227,7 +232,6 @@ export const IntelligentPluginEditComponent = React.forwardRef(
       })
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const useAsyncDataSource =
       (service: any, skill: string) => (field: any) => {
         field.loading = true
@@ -240,6 +244,7 @@ export const IntelligentPluginEditComponent = React.forwardRef(
         )
       }
     return (
+      // @ts-ignore
       <FormProvider form={form} layout="vertical">
         <SchemaField
           schema={demo ? demoSchema : pluginEditSchema}
@@ -247,9 +252,8 @@ export const IntelligentPluginEditComponent = React.forwardRef(
         />
         {demo && demoSchema && (
           <FormButtonGroup>
-            <Submit ref={submitRef} onSubmit={submit}>
-              提交
-            </Submit>
+            // @ts-ignore
+            <Submit onSubmit={submit}>提交</Submit>
           </FormButtonGroup>
         )}
       </FormProvider>

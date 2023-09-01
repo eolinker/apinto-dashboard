@@ -114,7 +114,7 @@ func (t *greyHandler) CheckInput(input *strategy_dto.StrategyInfoInput[strategy_
 	}
 
 	//校验筛选条件
-	return checkFilters(input.Filters)
+	return checkFilters(input.Filters, "filter")
 }
 
 func (t *greyHandler) ToApintoConfig(conf strategy_entry.StrategyGreyConfig) interface{} {

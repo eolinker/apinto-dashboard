@@ -1,8 +1,8 @@
 package controller
 
 import (
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
 	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
-	apinto_module "github.com/eolinker/apinto-module"
 	"net/http"
 )
 
@@ -136,25 +136,25 @@ func (c *ModulePluginModule) initRouter() {
 			Method:      http.MethodGet,
 			Path:        "/plugin/icon/:id/:file",
 			Handler:     "pluginFront.getPluginIcon",
-			HandlerFunc: []apinto_module.HandlerFunc{controllerPluginFront.checkPluginID, controllerPluginFront.setIConName, controllerPluginFront.getPluginInfo},
+			HandlerFunc: []apinto_module.HandlerFunc{controllerPluginFront.checkPluginID, controllerPluginFront.getICon},
 		},
 		{
 			Method:      http.MethodGet,
 			Path:        "/plugin/icon/:id",
 			Handler:     "pluginFront.getPluginIconDefault",
-			HandlerFunc: []apinto_module.HandlerFunc{controllerPluginFront.checkPluginID, controllerPluginFront.setIConName, controllerPluginFront.getPluginInfo},
+			HandlerFunc: []apinto_module.HandlerFunc{controllerPluginFront.checkPluginID, controllerPluginFront.getICon},
 		},
 		{
 			Method:      http.MethodGet,
 			Path:        "/plugin/md/:id/:file",
 			Handler:     "pluginFront.getPluginMD",
-			HandlerFunc: []apinto_module.HandlerFunc{controllerPluginFront.checkPluginID, controllerPluginFront.setMDName, controllerPluginFront.getPluginInfo},
+			HandlerFunc: []apinto_module.HandlerFunc{controllerPluginFront.checkPluginID, controllerPluginFront.getMD},
 		},
 		{
 			Method:      http.MethodGet,
 			Path:        "/plugin/md/:id",
 			Handler:     "pluginFront.getPluginMDDefault",
-			HandlerFunc: []apinto_module.HandlerFunc{controllerPluginFront.checkPluginID, controllerPluginFront.setMDName, controllerPluginFront.getPluginInfo},
+			HandlerFunc: []apinto_module.HandlerFunc{controllerPluginFront.checkPluginID, controllerPluginFront.getMD},
 		},
 		{
 			Method:      http.MethodGet,

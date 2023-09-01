@@ -1,9 +1,9 @@
 package strategy_dto
 
 import (
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/config"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-model"
-	apinto_module "github.com/eolinker/apinto-module"
 )
 
 type StrategyListOut struct {
@@ -99,8 +99,10 @@ type FilterRemoteOutput struct {
 	//Apis         []*strategy_model.RemoteApis         `json:"apis"`
 	//Services     []*strategy_model.RemoteServices     `json:"services"`
 	//Applications []*strategy_model.RemoteApplications `json:"applications"`
-	List  []any `json:"list"`
-	Total int   `json:"total"`
+	List  []any  `json:"list"`
+	Key   string `json:"key"`
+	Value string `json:"value"`
+	Total int    `json:"total"`
 }
 
 type StrategyPublishHistory struct {

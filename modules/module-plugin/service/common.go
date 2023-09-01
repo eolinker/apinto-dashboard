@@ -19,10 +19,10 @@ func enabledCfgListToMap(input *model.PluginEnableCfg) *model.PluginEnableCfgMap
 	queryMap := make(map[string]string, len(input.Query))
 	initializeMap := make(map[string]string, len(input.Initialize))
 	for _, item := range input.Query {
-		headerMap[item.Name] = item.Value
+		queryMap[item.Name] = item.Value
 	}
 	for _, item := range input.Header {
-		queryMap[item.Name] = item.Value
+		headerMap[item.Name] = item.Value
 	}
 	for _, item := range input.Initialize {
 		initializeMap[item.Name] = item.Value

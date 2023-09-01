@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core'
-import { CommonModule } from '@angular/common'
+import { CommonModule, registerLocaleData } from '@angular/common'
 
 import { ApiRoutingModule } from './api-routing.module'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
@@ -29,21 +29,19 @@ import { NzModalModule } from 'ng-zorro-antd/modal'
 import { NzTableModule } from 'ng-zorro-antd/table'
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
 import { ComponentModule } from '../../component/component.module'
-import { EoNgTransferModule } from '../../component/transfer/transfer.module'
 import { RouterComponent } from './router/router.component'
 import { DirectiveModule } from '../../directive/directive.module'
 import { EoNgApintoTableModule } from 'projects/eo-ng-apinto-table/src/public-api'
 import { NzUploadModule } from 'ng-zorro-antd/upload'
 import { NzDropDownModule } from 'ng-zorro-antd/dropdown'
 import { ApiListComponent } from './api-list/api-list.component'
-import { ApiManagementComponent } from './api-list/group/group.component'
+import { ApiManagementGroupComponent } from './api-list/group/group.component'
 import { ApiManagementListComponent } from './api-list/list/list.component'
 import { ApiMessageComponent } from './api-list/message/message.component'
 import { ApiPublishComponent } from './api-list/publish/single/publish.component'
 import { MatchFormComponent } from './api-list/match/form/form.component'
 import { MatchTableComponent } from './api-list/match/table/table.component'
 import { ApiImportComponent } from './api-list/import/import.component'
-import { ApiBatchPublishComponent } from './api-list/publish/batch/publish.component'
 import { ApiManagementProxyComponent } from './api-list/proxy/proxy.component'
 import { ApiManagementEditGroupComponent } from './api-list/group/edit-group/edit-group.component'
 import { ApiPluginTemplateComponent } from './plugin/plugin.component'
@@ -60,10 +58,15 @@ import { ApiWebsocketCreateComponent } from './api-list/create/websocket-create/
 import { NzTypographyModule } from 'ng-zorro-antd/typography'
 import { ApiHttpMessageComponent } from './api-list/message/http-message/http-message.component'
 import { ApiWebsocketMessageComponent } from './api-list/message/websocket-message/websocket-message.component'
+import { ApiBatchPublishResultComponent } from './api-list/publish/batch/result.component'
+import { NzSpinModule } from 'ng-zorro-antd/spin'
+import { ApiBatchPublishChooseClusterComponent } from './api-list/publish/batch/choose-cluster.component'
+import zh from '@angular/common/locales/zh'
 
+registerLocaleData(zh)
 @NgModule({
   declarations: [
-    ApiManagementComponent,
+    ApiManagementGroupComponent,
     ApiManagementListComponent,
     ApiMessageComponent,
     ApiPublishComponent,
@@ -71,7 +74,6 @@ import { ApiWebsocketMessageComponent } from './api-list/message/websocket-messa
     MatchFormComponent,
     MatchTableComponent,
     ApiImportComponent,
-    ApiBatchPublishComponent,
     ApiManagementProxyComponent,
     ApiManagementEditGroupComponent,
     ApiListComponent,
@@ -86,7 +88,9 @@ import { ApiWebsocketMessageComponent } from './api-list/message/websocket-messa
     ApiHttpCreateComponent,
     ApiWebsocketCreateComponent,
     ApiHttpMessageComponent,
-    ApiWebsocketMessageComponent
+    ApiWebsocketMessageComponent,
+    ApiBatchPublishResultComponent,
+    ApiBatchPublishChooseClusterComponent
   ],
   imports: [
     EoNgLayoutModule,
@@ -110,7 +114,6 @@ import { ApiWebsocketMessageComponent } from './api-list/message/websocket-messa
     EoNgSwitchModule,
     NzAvatarModule,
     EoNgButtonModule,
-    EoNgTransferModule,
     NzFormModule,
     ReactiveFormsModule,
     NzLayoutModule,
@@ -126,7 +129,8 @@ import { ApiWebsocketMessageComponent } from './api-list/message/websocket-messa
     NzDropDownModule,
     EoNgCodeboxModule,
     EoNgCopyModule,
-    NzTypographyModule
+    NzTypographyModule,
+    NzSpinModule
   ],
   exports: [
     MatchTableComponent,

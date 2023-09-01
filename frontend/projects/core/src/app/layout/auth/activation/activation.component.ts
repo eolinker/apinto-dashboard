@@ -1,11 +1,10 @@
-/* eslint-disable camelcase */
-/* eslint-disable no-useless-constructor */
 import { Component, Input, OnInit } from '@angular/core'
 import { Router } from '@angular/router'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
-import { NzUploadFile } from 'ng-zorro-antd/upload'
+import { NzUploadChangeParam, NzUploadFile } from 'ng-zorro-antd/upload'
 import { ApiService } from '../../../service/api.service'
-
+import { environment } from 'projects/core/src/environments/environment'
+import { version, updateDate } from 'projects/core/src/app/constant/app.config'
 @Component({
   selector: 'eo-ng-auth-activation',
   templateUrl: './activation.component.html',
@@ -18,6 +17,69 @@ import { ApiService } from '../../../service/api.service'
       box-shadow:none;
       text-shadow:none;
     }
+
+    :host ::ng-deep{
+        ol {
+          list-style: none;
+          padding-inline-start: 0;
+        }
+
+      .li-num {
+        display: inline-block;
+        font-size: 16px;
+        border-radius: 30px;
+        width: 20px;
+        height: 20px;
+        line-height: 18px;
+        text-align: center;
+        vertical-align: middle;
+      }
+
+      .list-title {
+        height: 20px;
+        span {
+          display: inline-block;
+          font-size: 14px;
+          font-weight: 500;
+          line-height: 20px;
+        }
+      }
+
+      .not-active .list-title {
+        label {
+          color: #d9d9d9;
+        }
+        span {
+          color: var(--TITLE_TEXT);
+        }
+        .li-num {
+          border-color: #d9d9d9;
+        }
+      }
+
+
+      .mt-btnbase {
+        margin-left: 28px;
+
+        input.ant-input {
+          width: 164px !important;
+        }
+
+        button.ant-btn:not(.ant-upload-list-item-card-actions-btn) {
+          display: inline-block;
+          height: 32px;
+          span {
+            font-size: 14px;
+            line-height: 22px;
+          }
+        }
+
+        label.ant-btn-primary {
+          padding: 5px 12px;
+          border-radius: var(--border-radius);
+        }
+      }
+    }
     `
   ]
 })
@@ -29,8 +91,20 @@ export class AuthActivationComponent implements OnInit {
   authFile:NzUploadFile|undefined
   showActivationInfo:boolean = false
   fileList: NzUploadFile[] = [];
+  free:boolean = true
+  isBusiness:boolean = environment.isBusiness
   authInfo:{title:string, infos:Array<{key:string, value:string}>}
-  = { title: '标准版授权', infos: [] }
+  = {
+    title: '标准版授权',
+    infos: [
+      { key: '授权信息', value: '免费版' },
+      { key: '有效期至', value: '永久' }
+
+    ]
+  }
+
+  version:string = version
+  updateDate:string = updateDate
 
   constructor (
     private message: EoNgFeedbackMessageService,
@@ -89,7 +163,7 @@ export class AuthActivationComponent implements OnInit {
       })
   }
 
-  goToLogin () {
+  goToLogin = () => {
     this.router.navigate(['/', 'login'])
   }
 
@@ -97,4 +171,19 @@ export class AuthActivationComponent implements OnInit {
     this.message.success('复制成功', { nzDuration: 1000 })
     if (!this.certCanActive) { this.certCanActive = true }
   };
+
+  onChange (e: NzUploadChangeParam): void {
+    if (e.file.status === 'done') {
+      if (e.file.response.code === 0) {
+        this.message.success(e.file.response.msg || '操作成功')
+        this.showActivationInfo = true
+        this.authInfo.infos = e.file.response.data.infos
+        setTimeout(this.goToLogin, 3000)
+      } else {
+        this.message.error(e.file.response.msg || '操作失败')
+      }
+    } else if (e.file.status === 'error') {
+      this.message.error(`${e.file.name}上传失败，请重试`)
+    }
+  }
 }

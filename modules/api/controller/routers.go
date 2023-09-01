@@ -1,9 +1,9 @@
 package controller
 
 import (
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
 	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	group_controller "github.com/eolinker/apinto-dashboard/modules/group/group-controller"
-	apinto_module "github.com/eolinker/apinto-module"
 	"net/http"
 )
 
@@ -85,8 +85,8 @@ func initRouter(name string) apinto_module.RoutersInfo {
 			Path:        "/api/router/groups",
 			Handler:     "api.groups",
 			HandlerFunc: []apinto_module.HandlerFunc{c.groups},
+			Labels:      apinto_module.RouterLabelAnonymous,
 		},
-
 		{
 			Method:      http.MethodGet,
 			Path:        "/api/router/source",
@@ -110,6 +110,12 @@ func initRouter(name string) apinto_module.RoutersInfo {
 			Path:        "/api/router/import",
 			Handler:     "api.importAPI",
 			HandlerFunc: []apinto_module.HandlerFunc{c.importAPI},
+		},
+		{
+			Method:      http.MethodGet,
+			Path:        "/api/router/check",
+			Handler:     "group.checkApiExist",
+			HandlerFunc: []apinto_module.HandlerFunc{c.checkApiExist},
 		},
 		{
 			Method:      http.MethodGet,
@@ -140,6 +146,12 @@ func initRouter(name string) apinto_module.RoutersInfo {
 			Path:        "/api/groups/:group_type/sort",
 			Handler:     "group.groupSort",
 			HandlerFunc: []apinto_module.HandlerFunc{g.GroupSort},
+		},
+		{
+			Method:      http.MethodPut,
+			Path:        "/api/group/:group_type/check",
+			Handler:     "group.groupCheckExist",
+			HandlerFunc: []apinto_module.HandlerFunc{g.CheckGroupExist},
 		},
 	}
 }

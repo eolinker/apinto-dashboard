@@ -21,6 +21,7 @@ import { DeployService } from '../../../../deploy.service'
             [nzTbody]="clusterTableBody"
             [nzThead]="clusterTableHeadName"
             [(nzData)]="clustersList"
+            [nzTrClick]="clusterTableClick"
             [nzNoScroll]="true"
             [nzScrollY]="120"
           >
@@ -33,7 +34,7 @@ import { DeployService } from '../../../../deploy.service'
               class="ant-form-item-explain-error"
               style="margin-left: var(--LAYOUT_PADDING)"
             >
-              必填项！
+              请至少选中一个集群
             </div>
           </div>
         </div>
@@ -52,6 +53,7 @@ import { DeployService } from '../../../../deploy.service'
           [nzTbody]="configsTable2Body"
           [nzThead]="configsTable2HeadName"
           [(nzData)]="updateConfigsList"
+          [nzTrClick]="configTableClick"
           [nzNoScroll]="true"
         >
         </eo-ng-apinto-table>
@@ -63,7 +65,7 @@ import { DeployService } from '../../../../deploy.service'
             class="ant-form-item-explain-error"
             style="margin-left: var(--LAYOUT_PADDING)"
           >
-          必填项！
+          请至少选中一个配置
           </div>
         </div>
       </div>
@@ -77,18 +79,16 @@ import { DeployService } from '../../../../deploy.service'
 })
 export class DeployClusterEnvironmentConfigUpdateComponent implements OnInit {
   @Input() closeModal?:(value?:any)=>void
-  clustersList:Array<{env:string, status:string, name:string, checked:boolean, id:number}>=[]
+  clustersList:Array<{env:string, status:string, name:string, title:string, checked:boolean, id:number}>=[]
   clusterTableHeadName:THEAD_TYPE[] = [...this.service.createClusterEnvUpdateThead(this)]
   clusterTableBody:TBODY_TYPE[] = [...this.service.createClusterEnvUpdateTbody(this)]
   configsTable2HeadName: THEAD_TYPE[] = [...this.service.createClusterEnvUpdate2Thead(this)]
   configsTable2Body: TBODY_TYPE[]=[...this.service.createClusterEnvUpdate2Tbody(this)]
 
-  // eslint-disable-next-line camelcase
   updateConfigsList: Array<{ key: string, value: string, variableId: number, publish:string, status:string, desc:string, operator:string, updateTime:string, createTime:string, id: number, checked:boolean}> = []
   clusterName:string = ''
 
-  // eslint-disable-next-line camelcase
-  updateConfigForm:{clusters:Array<{name:string, env:string, id:number}>, variables:Array<{key:string, value:string, variableId:number, id:number}>}=
+  updateConfigForm:{clusters:Array<{title:string, name:string, env:string, id:number}>, variables:Array<{key:string, value:string, variableId:number, id:number}>}=
       {
         clusters: [],
         variables: []
@@ -119,6 +119,7 @@ export class DeployClusterEnvironmentConfigUpdateComponent implements OnInit {
       this.updateConfigForm.variables = this.updateConfigsList?.filter(config => {
         return config.checked
       })
+      this.updateConfigsList = [...this.updateConfigsList]
     }, 0)
   }
 
@@ -127,7 +128,20 @@ export class DeployClusterEnvironmentConfigUpdateComponent implements OnInit {
       this.updateConfigForm.clusters = this.clustersList.filter(cluster => {
         return cluster.checked
       })
+      this.clustersList = [...this.clustersList]
     }, 0)
+  }
+
+  clusterTableClick = (item:any) => {
+    item.checked = !item.checked
+    item.data.checked = !item.data.checked
+    this.getClusterCheckedList()
+  }
+
+  configTableClick = (item:any) => {
+    item.checked = !item.checked
+    item.data.checked = !item.data.checked
+    this.getVarCheckedList()
   }
 
   save () {

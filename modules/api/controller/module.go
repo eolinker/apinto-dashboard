@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"github.com/eolinker/apinto-module"
+	"github.com/eolinker/apinto-dashboard/module"
 )
 
 type PluginDriver struct {
@@ -44,9 +44,10 @@ func (c *PluginDriver) CheckConfig(name string, config interface{}) error {
 }
 
 type Module struct {
-	isInit  bool
-	name    string
-	routers apinto_module.RoutersInfo
+	isInit               bool
+	name                 string
+	routers              apinto_module.RoutersInfo
+	filterOptionHandlers []apinto_module.IFilterOptionHandler
 }
 
 func (c *Module) Name() string {
@@ -66,8 +67,9 @@ func (c *Module) Middleware() (apinto_module.Middleware, bool) {
 }
 
 func NewModule(name string) *Module {
-
-	return &Module{name: name}
+	m := &Module{name: name}
+	m.initFilter()
+	return m
 }
 
 func (c *Module) RoutersInfo() apinto_module.RoutersInfo {
@@ -76,4 +78,14 @@ func (c *Module) RoutersInfo() apinto_module.RoutersInfo {
 		c.isInit = true
 	}
 	return c.routers
+}
+
+func (c *Module) FilterOptionHandler() []apinto_module.IFilterOptionHandler {
+	return c.filterOptionHandlers
+}
+
+func (c *Module) initFilter() {
+	c.filterOptionHandlers = []apinto_module.IFilterOptionHandler{
+		newFilterOption(),
+	}
 }

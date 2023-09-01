@@ -10,7 +10,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/notice"
 	notice_model "github.com/eolinker/apinto-dashboard/modules/notice/notice-model"
 	"github.com/eolinker/apinto-dashboard/modules/user"
-	warn_model "github.com/eolinker/apinto-dashboard/modules/warn/warn-model"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
 	"github.com/go-basic/uuid"
@@ -73,23 +72,26 @@ func (n *noticeSendService) Send(ctx context.Context, req *grpc_service.NoticeSe
 	//发送失败的次数和需要发送的次数做对比
 	var sendFail = new(int64)
 	noticeErrGroup, _ := errgroup.WithContext(ctx)
-	sendMsgErrors := make([]*warn_model.SendMsgError, 0)
+	sendMsgErrors := make([]*SendMsgError, 0)
 
 	for channelUuid, noticeMsg := range req.Notices {
 		//利用协程快速发送通知消息
+		channelID := channelUuid
+		title := noticeMsg.Title
+		msg := noticeMsg.Msg
 		noticeErrGroup.Go(func() error {
-			noticeChannelDriver := n.noticeChannelDriver.GetDriver(channelUuid)
+			noticeChannelDriver := n.noticeChannelDriver.GetDriver(channelID)
 			if noticeChannelDriver == nil {
-				log.Errorf("获取不到通知渠道 渠道uuid：%s", channelUuid)
+				log.Errorf("获取不到通知渠道 渠道uuid：%s", channelID)
 				return errors.New("渠道通知获取失败")
 			}
 			sendMsgErrorUuid := uuid.New()
-			sendMsgError := &warn_model.SendMsgError{
+			sendMsgError := &SendMsgError{
 				UUID:              sendMsgErrorUuid,
-				NoticeChannelUUID: channelUuid,
+				NoticeChannelUUID: channelID,
 			}
 
-			if channel, ok := noticeChannelMap[channelUuid]; ok {
+			if channel, ok := noticeChannelMap[channelID]; ok {
 				sends := make([]string, 0)
 				if channel.Type == 2 {
 					if len(userEmailStr) == 0 {
@@ -109,10 +111,10 @@ func (n *noticeSendService) Send(ctx context.Context, req *grpc_service.NoticeSe
 					}
 					sends = noticeUserId
 				}
-				if err = noticeChannelDriver.SendTo(sends, noticeMsg.Title, noticeMsg.Msg); err != nil {
+				if err = noticeChannelDriver.SendTo(sends, title, msg); err != nil {
 					sendMsgError.Msg = err.Error()
 					sendMsgErrors = append(sendMsgErrors, sendMsgError)
-					log.Errorf("告警消息发送失败 sendMsgErrorUuid=%s channelUuid=%s users=%v err=%s", sendMsgErrorUuid, channelUuid, sends, err.Error())
+					log.Errorf("告警消息发送失败 sendMsgErrorUuid=%s channelUuid=%s users=%v err=%s", sendMsgErrorUuid, channelID, sends, err.Error())
 					atomic.AddInt64(sendFail, 1)
 					return err
 				}

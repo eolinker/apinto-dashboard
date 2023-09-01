@@ -33,6 +33,7 @@ type PluginEnableInfo struct {
 
 type PluginEnableRender struct {
 	Internet     bool
+	Server       string //define里的server
 	NameConflict bool
 	//Invisible  bool
 	Headers    []ExtendParamsRender
@@ -49,6 +50,7 @@ type ExtendParamsRender struct {
 	Name        string `json:"name" yaml:"name"`
 	Value       string `json:"value" yaml:"value"`
 	Title       string `json:"title" yaml:"title"`
+	Type        string `json:"type" yaml:"type"`
 	Placeholder string `json:"placeholder" yaml:"placeholder"`
 	Desc        string `json:"desc" yaml:"desc"`
 }
@@ -123,24 +125,13 @@ type DynamicTitleDefine struct {
 	Title string `json:"title" yaml:"title"`
 }
 
-type InnerDefine struct {
-	ID      string                 `json:"id" yaml:"id"`
-	Name    string                 `json:"name" yaml:"name"`
-	Version string                 `json:"version" yaml:"version"`
-	ICon    string                 `json:"icon" yaml:"icon"`
-	Driver  string                 `json:"driver" yaml:"driver"`
-	Core    bool                   `json:"core" yaml:"core"`
-	Install *InnerPluginYmlInstall `json:"install" yaml:"install"`
-	Main    *InnerPluginYmlMain    `json:"main" yaml:"main"`
-}
-
 // MiddlewareItem 拦截器项结构体
 type MiddlewareItem struct {
 	Name string `json:"name"`
 	Desc string `json:"desc"`
 }
 
-type PluginYmlCfg struct {
+type ExternPluginCfg struct {
 	ID         string      `json:"id" yaml:"id"`
 	Name       string      `json:"name" yaml:"name"`
 	Version    string      `json:"version" yaml:"version"`
@@ -150,41 +141,41 @@ type PluginYmlCfg struct {
 	Resume     string      `json:"resume" yaml:"resume"`
 	ICon       string      `json:"icon" yaml:"icon"`
 	Driver     string      `json:"driver" yaml:"driver"`
-	Front      string      `json:"front" yaml:"front"`
 	Define     interface{} `json:"define" yaml:"define"`
 }
 
-type InnerPluginYmlCfg struct {
-	ID         string      `json:"id" yaml:"id"`
-	Name       string      `json:"name" yaml:"name"`
+type InnerPluginCfg struct {
+	ID                  string      `yaml:"id" json:"id"`
+	Name                string      `yaml:"name" json:"name"`
+	CName               string      `yaml:"cname" json:"cname"`
+	Resume              string      `yaml:"resume" json:"resume"`
+	Version             string      `yaml:"version" json:"version"`
+	Icon                string      `yaml:"icon" json:"icon"`
+	Driver              string      `yaml:"driver" json:"driver"`
+	Front               string      `yaml:"front" json:"front"`
+	Navigation          string      `yaml:"navigation" json:"navigation"`
+	GroupID             string      `yaml:"group_id" json:"group_id"`
+	Type                int         `yaml:"type" json:"type"`
+	Auto                bool        `yaml:"auto" json:"auto"`
+	IsCanDisable        bool        `yaml:"is_can_disable" json:"is_can_disable"`
+	IsCanUninstall      bool        `yaml:"is_can_uninstall" json:"is_can_uninstall"`
+	VisibleInNavigation bool        `yaml:"visible_in_navigation" json:"visible_in_navigation"`
+	VisibleInMarket     bool        `yaml:"visible_in_market" json:"visible_in_market"`
+	Define              interface{} `yaml:"define" json:"define"`
+}
+
+type PluginCfg struct {
 	Version    string      `json:"version" yaml:"version"`
-	CName      string      `json:"cname" yaml:"cname"`
-	Resume     string      `json:"resume" yaml:"resume"`
-	ICon       string      `json:"icon" yaml:"icon"`
-	Driver     string      `json:"driver" yaml:"driver"`
-	Front      string      `json:"front" yaml:"front"`
 	Navigation string      `json:"navigation" yaml:"navigation"`
 	GroupID    string      `json:"group_id" yaml:"group_id"`
+	Resume     string      `json:"resume" yaml:"resume"`
 	Type       int         `json:"type" yaml:"type"`
-	Auto       bool        `json:"auto" yaml:"auto"`
 	Define     interface{} `json:"define" yaml:"define"`
 }
 
-type InnerPluginYmlInstall struct {
-	Auto       bool   `json:"auto" yaml:"auto"`
-	Front      string `json:"front" yaml:"front"`
-	Navigation string `json:"navigation" yaml:"navigation"`
-}
-
-type InnerPluginYmlMain struct {
-	Middleware []string `json:"middleware" yaml:"middleware"`
-}
-
-// NavigationEnabledPlugin 用于给导航返回的
-type NavigationEnabledPlugin struct {
-	*entry.ModulePluginEnable
-	UUID  string
-	CName string
+type EmbedPluginCfg struct {
+	PluginCfg *InnerPluginCfg
+	Resources *EmbedPluginResources
 }
 
 // NavigationModuleInfo 导航所需要的模块信息

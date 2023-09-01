@@ -59,12 +59,12 @@ func GetClusterClient(cluster string, addr string) (IClient, error) {
 //		clusterNames = append(clusterNames, name)
 //		client, err := clusterManager.GetClient(name, addr)
 //		if err != nil {
-//			log.Errorf("get client(%s) error: %w.", addr, err)
+//			log.Errorf("get client(%s) error: %v.", addr, err)
 //			continue
 //		}
 //		workers, err := client.List(profession)
 //		if err != nil {
-//			log.Errorf("get worker(%s) list error: %w.", profession, err)
+//			log.Errorf("get worker(%s) list error: %v.", profession, err)
 //			continue
 //		}
 //		for _, w := range workers {

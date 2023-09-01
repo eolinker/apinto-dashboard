@@ -9,6 +9,7 @@ import (
 	v2 "github.com/eolinker/apinto-dashboard/client/v2"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
 	"github.com/eolinker/apinto-dashboard/modules/api"
 	"github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-dashboard/modules/base/frontend-model"
@@ -25,7 +26,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/plugin_template/plugin-template-model"
 	"github.com/eolinker/apinto-dashboard/modules/plugin_template/plugin-template-store"
 	"github.com/eolinker/apinto-dashboard/modules/user"
-	apinto_module "github.com/eolinker/apinto-module"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
 	"github.com/go-basic/uuid"
@@ -33,6 +33,10 @@ import (
 	"sort"
 	"strconv"
 	"time"
+)
+
+const (
+	professionTemplate = "template"
 )
 
 type pluginTemplateService struct {
@@ -93,6 +97,7 @@ func (p *pluginTemplateService) GetList(ctx context.Context, namespaceId int) ([
 
 	userInfoMaps, _ := p.userInfoService.GetUserInfoMaps(ctx, userIds...)
 
+	templateVersions := p.getApintoTemplateVersions(clusters)
 	resultList := make([]*plugin_template_model.PluginTemplate, 0, len(pluginTemplates))
 	for _, template := range pluginTemplates {
 
@@ -101,7 +106,7 @@ func (p *pluginTemplateService) GetList(ctx context.Context, namespaceId int) ([
 			pluginTemplate.OperatorStr = userInfo.NickName
 		}
 
-		isDelete, _ := p.isDelete(ctx, namespaceId, clusters, template)
+		isDelete, _ := p.isDelete(ctx, clusters, template, templateVersions)
 
 		pluginTemplate.IsDelete = isDelete
 		resultList = append(resultList, pluginTemplate)
@@ -114,10 +119,9 @@ func (p *pluginTemplateService) GetList(ctx context.Context, namespaceId int) ([
 	return resultList, nil
 }
 
-func (p *pluginTemplateService) isDelete(ctx context.Context, namespaceId int, clusters []*cluster_model.Cluster, pluginTemplate *plugin_template_entry.PluginTemplate) (bool, error) {
+func (p *pluginTemplateService) isDelete(ctx context.Context, clusters []*cluster_model.Cluster, pluginTemplate *plugin_template_entry.PluginTemplate, templateVersions map[string]map[string]string) (bool, error) {
 	for _, clusterInfo := range clusters {
-		isOnline := p.IsOnline(ctx, namespaceId, clusterInfo.Name, pluginTemplate.UUID)
-		if isOnline {
+		if _, has := templateVersions[clusterInfo.Name][pluginTemplate.UUID]; has {
 			return false, errors.New(fmt.Sprintf("插件模板已在%s集群上线,不可删除", clusterInfo.Name))
 		}
 	}
@@ -134,15 +138,18 @@ func (p *pluginTemplateService) isDelete(ctx context.Context, namespaceId int, c
 	return true, err
 }
 
-func (p *pluginTemplateService) IsOnline(ctx context.Context, namespace int, clusterName string, uuid string) bool {
-	status := p.providers.Status(fmt.Sprintf("%s@template", uuid), namespace, clusterName)
-	isOnline := false
-	switch status {
-	case apinto_module.None, apinto_module.Offline:
-	case apinto_module.Online:
-		isOnline = true
+func (p *pluginTemplateService) IsOnline(clusterName, clusterAddr, uuid string) bool {
+	client, err := v2.GetClusterClient(clusterName, clusterAddr)
+	if err != nil {
+		log.Errorf("get cluster %s Client error: %v", clusterName, err)
+		return false
 	}
-	return isOnline
+	_, err = client.Version(professionTemplate, uuid)
+	if err != nil {
+		log.Errorf("get cluster status error: %v", err)
+		return false
+	}
+	return true
 }
 
 // GetUsableList 获取模板可用列表
@@ -168,6 +175,14 @@ func (p *pluginTemplateService) Create(ctx context.Context, namespaceId, operato
 		input.UUID = uuid.New()
 	}
 
+	extenders, err := p.pluginService.GetExtendersCache(ctx, namespaceId)
+	if err != nil {
+		return err
+	}
+	extendersMap := common.SliceToMap(extenders, func(t *plugin_model.ExtenderInfo) string {
+		return t.Id
+	})
+
 	plugins := make([]*plugin_model.Plugin, 0, len(input.Plugins))
 	for _, pluginInfo := range input.Plugins {
 
@@ -180,7 +195,12 @@ func (p *pluginTemplateService) Create(ctx context.Context, namespaceId, operato
 
 		bytes, _ := json.Marshal(pluginInfo.Config)
 		//检测JsonSchema格式是否正确
-		if err = common.JsonSchemaValid(modelPlugin.Schema, string(bytes)); err != nil {
+		schema := modelPlugin.Schema
+		extenderInfo, has := extendersMap[modelPlugin.Extended]
+		if has {
+			schema = extenderInfo.Schema
+		}
+		if err = common.JsonSchemaValid(schema, string(bytes)); err != nil {
 			return errors.New(fmt.Sprintf("插件名为%s的config配置格式错误 err=%s", modelPlugin.Name, err.Error()))
 		}
 
@@ -263,6 +283,14 @@ func (p *pluginTemplateService) Create(ctx context.Context, namespaceId, operato
 // Update 修改插件模板
 func (p *pluginTemplateService) Update(ctx context.Context, namespaceId, operator int, input *plugin_template_model.PluginTemplateDetail) error {
 
+	extenders, err := p.pluginService.GetExtendersCache(ctx, namespaceId)
+	if err != nil {
+		return err
+	}
+	extendersMap := common.SliceToMap(extenders, func(t *plugin_model.ExtenderInfo) string {
+		return t.Id
+	})
+
 	plugins := make([]*plugin_model.Plugin, 0, len(input.Plugins))
 	for _, pluginInfo := range input.Plugins {
 		modelPlugin, err := p.pluginService.GetByName(ctx, namespaceId, pluginInfo.Name)
@@ -274,8 +302,13 @@ func (p *pluginTemplateService) Update(ctx context.Context, namespaceId, operato
 		plugins = append(plugins, modelPlugin)
 
 		bytes, _ := json.Marshal(pluginInfo.Config)
-		//检测JsonSchema格式是否正确
-		if err = common.JsonSchemaValid(modelPlugin.Schema, string(bytes)); err != nil {
+		//检测JsonSchema格式是否正确, 优先使用缓存里的schema
+		schema := modelPlugin.Schema
+		extenderInfo, has := extendersMap[modelPlugin.Extended]
+		if has {
+			schema = extenderInfo.Schema
+		}
+		if err = common.JsonSchemaValid(schema, string(bytes)); err != nil {
 			return errors.New(fmt.Sprintf("插件名为%s的config配置格式错误 err=%s", modelPlugin.Name, err.Error()))
 		}
 	}
@@ -377,7 +410,8 @@ func (p *pluginTemplateService) Delete(ctx context.Context, namespaceId, operato
 		return err
 	}
 
-	_, err = p.isDelete(ctx, namespaceId, clusters, pluginTemplate)
+	templateVersions := p.getApintoTemplateVersions(clusters)
+	_, err = p.isDelete(ctx, clusters, pluginTemplate, templateVersions)
 	if err != nil {
 		return err
 	}
@@ -513,9 +547,10 @@ func (p *pluginTemplateService) OnlineList(ctx context.Context, namespaceId int,
 
 	for _, clusterInfo := range clusterMaps {
 		onlineItem := &plugin_template_model.PluginTemplateOnlineItem{
-			ClusterName: clusterInfo.Name,
-			ClusterEnv:  clusterInfo.Env,
-			Status:      1, //默认为未上线状态
+			ClusterName:  clusterInfo.Name,
+			ClusterEnv:   clusterInfo.Env,
+			ClusterTitle: clusterInfo.Title,
+			Status:       1, //默认为未上线状态
 		}
 
 		var operator int
@@ -540,7 +575,7 @@ func (p *pluginTemplateService) OnlineList(ctx context.Context, namespaceId int,
 		client, err := v2.GetClusterClient(clusterInfo.Name, clusterInfo.Addr)
 		if err != nil {
 			list = append(list, onlineItem)
-			log.Errorf("get cluster status error: %w", err)
+			log.Errorf("get cluster status error: %v", err)
 			continue
 		}
 
@@ -554,7 +589,7 @@ func (p *pluginTemplateService) OnlineList(ctx context.Context, namespaceId int,
 		onlineItem.Operator = updater
 		onlineItem.UpdateTime = updateTime
 
-		version, err := client.Version("template", pluginTemplate.UUID)
+		version, err := client.Version(professionTemplate, pluginTemplate.UUID)
 		if err != nil {
 			list = append(list, onlineItem)
 			continue
@@ -616,12 +651,6 @@ func (p *pluginTemplateService) Online(ctx context.Context, namespaceId, operato
 
 	}
 
-	//发布到apinto
-	client, err := p.apintoClient.GetClient(ctx, clusterInfo.Id)
-	if err != nil {
-		return nil, err
-	}
-
 	//编写日志操作对象信息
 	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid:        uuid,
@@ -641,12 +670,6 @@ func (p *pluginTemplateService) Online(ctx context.Context, namespaceId, operato
 			Disable: pluginInfo.Disable,
 			Config:  config,
 		}
-	}
-	pluginTemplateConfig := v1.PluginTemplateConfig{
-		Plugins:     pluginMaps,
-		Name:        pluginTemplate.UUID,
-		Driver:      "plugin_template",
-		Description: pluginTemplate.Desc,
 	}
 
 	//事务
@@ -668,7 +691,18 @@ func (p *pluginTemplateService) Online(ctx context.Context, namespaceId, operato
 			return err
 		}
 
-		return client.ForPluginTemplate().Create(pluginTemplateConfig)
+		return v2.Online(clusterInfo.Name, clusterInfo.Addr, professionTemplate, pluginTemplate.UUID, &v2.WorkerInfo[v2.BasicInfo]{
+			BasicInfo: &v2.BasicInfo{
+				Profession:  professionTemplate,
+				Name:        pluginTemplate.UUID,
+				Driver:      "plugin_template",
+				Description: pluginTemplate.Desc,
+				Version:     strconv.Itoa(latestVersion.Id),
+			},
+			Append: map[string]interface{}{
+				"plugins": pluginMaps,
+			},
+		})
 	})
 
 	return nil, err
@@ -741,13 +775,33 @@ func (p *pluginTemplateService) Offline(ctx context.Context, namespaceId, operat
 			return err
 		}
 
-		//发布到apinto
-		client, err := p.apintoClient.GetClient(ctx, clusterInfo.Id)
-		if err != nil {
-			return err
-		}
-
-		return common.CheckWorkerNotExist(client.ForPluginTemplate().Delete(pluginTemplate.UUID))
+		return common.CheckWorkerNotExist(v2.Offline(clusterInfo.Name, clusterInfo.Addr, professionTemplate, uuid))
 	})
 
+}
+
+func (p *pluginTemplateService) GetApintoTemplateVersions(ctx context.Context, namespaceID int) (map[string]map[string]string, error) {
+	clusters, err := p.clusterService.GetByNamespaceId(ctx, namespaceID)
+	if err != nil {
+		return nil, err
+	}
+	return p.getApintoTemplateVersions(clusters), nil
+}
+
+func (p *pluginTemplateService) getApintoTemplateVersions(clusters []*cluster_model.Cluster) map[string]map[string]string {
+	results := make(map[string]map[string]string, len(clusters))
+	for _, c := range clusters {
+		client, err := v2.GetClusterClient(c.Name, c.Addr)
+		if err != nil {
+			log.Errorf("get cluster %s Client error: %v", c.Name, err)
+			continue
+		}
+		versions, err := client.Versions(professionTemplate)
+		if err != nil {
+			log.Errorf("get cluster status error: %v", err)
+			continue
+		}
+		results[c.Name] = versions
+	}
+	return results
 }

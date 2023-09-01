@@ -1,12 +1,13 @@
 package controller
 
 import (
-	"github.com/dgrijalva/jwt-go"
+	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/controller/users"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
+	"github.com/golang-jwt/jwt/v5"
 	"net/http"
 )
 
@@ -38,6 +39,7 @@ func (u *UserController) LoginCheckApi(ginCtx *gin.Context) {
 	uc, err := common.JWTDecode(token, jwtSecret)
 	if err != nil {
 		controller.ErrorJsonWithCode(ginCtx, http.StatusOK, controller.CodeLoginInvalid, loginError)
+		ginCtx.Abort()
 		return
 	}
 
@@ -46,6 +48,44 @@ func (u *UserController) LoginCheckApi(ginCtx *gin.Context) {
 
 	ginCtx.Set(controller.UserName, uc.Uname)
 	ginCtx.Set(controller.Session, session)
+}
+func (u *UserController) LoginCheckModule(ginCtx *gin.Context) {
+
+	session, _ := ginCtx.Cookie(controller.Session)
+	if session == "" {
+
+		doRedirect(ginCtx)
+		return
+	}
+
+	tokens, err := u.sessionCache.Get(ginCtx, session)
+	if err == redis.Nil || tokens == nil {
+		doRedirect(ginCtx)
+		return
+	}
+
+	token := tokens.Jwt
+	rToken := tokens.RJwt
+
+	uc, err := common.JWTDecode(token, jwtSecret)
+	if err != nil {
+		doRedirect(ginCtx)
+		return
+	}
+
+	ginCtx.Writer.Header().Set(controller.Authorization, token)
+	ginCtx.Writer.Header().Set(controller.RAuthorization, rToken)
+
+	ginCtx.Set(controller.UserName, uc.Uname)
+	ginCtx.Set(controller.Session, session)
+}
+
+func doRedirect(ginCtx *gin.Context) {
+
+	url := fmt.Sprint("/login", "?callback=", ginCtx.Request.RequestURI)
+	ginCtx.Header("Cache-Control", "no-store, no-cache, max-age=0, must-revalidate, proxy-revalidate")
+	ginCtx.Redirect(http.StatusFound, url)
+	ginCtx.Abort()
 }
 func (u *UserController) SetUser(ginCtx *gin.Context) {
 	userId := users.GetUserId(ginCtx)

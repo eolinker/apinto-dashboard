@@ -1,6 +1,9 @@
 package cluster_controller
 
 import (
+	"net/http"
+	"strconv"
+
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/controller/users"
@@ -9,8 +12,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-dto"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/gin-gonic/gin"
-	"net/http"
-	"strconv"
 )
 
 type clusterCertificateController struct {
@@ -40,10 +41,18 @@ func (c *clusterCertificateController) gets(ginCtx *gin.Context) {
 			controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 			return
 		}
+		dnsNames := cert.Leaf.DNSNames
+		if dnsNames == nil && cert.Leaf.IPAddresses != nil {
+			dnsNames = make([]string, 0, len(cert.Leaf.IPAddresses))
+			for _, ip := range cert.Leaf.IPAddresses {
+				dnsNames = append(dnsNames, ip.String())
+			}
+		}
 		dtoList = append(dtoList, &cluster_dto.ClusterCertificateOut{
 			Id:           val.Id,
 			ClusterId:    val.ClusterId,
 			Name:         cert.Leaf.Subject.CommonName,
+			DNSName:      dnsNames,
 			ValidTime:    common.TimeToStr(cert.Leaf.NotAfter),
 			OperatorName: val.OperatorName,
 			CreateTime:   common.TimeToStr(val.CreateTime),
@@ -53,6 +62,23 @@ func (c *clusterCertificateController) gets(ginCtx *gin.Context) {
 	m := common.Map{}
 	m["certificates"] = dtoList
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(m))
+}
+
+// gets 获取证书列表
+func (c *clusterCertificateController) get(ginCtx *gin.Context) {
+	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
+	clusterName := ginCtx.Param("cluster_name")
+	certificateIdStr := ginCtx.Param("certificate_id")
+	certificateId, _ := strconv.Atoi(certificateIdStr)
+	info, err := c.clusterCertificateService.Info(ginCtx, namespaceId, certificateId, clusterName)
+	if err != nil {
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
+		return
+	}
+
+	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(map[string]interface{}{
+		"certificate": info,
+	}))
 }
 
 // post 新增

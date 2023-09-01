@@ -16,7 +16,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/cluster"
 	"github.com/gin-gonic/gin"
 
-	apinto_module "github.com/eolinker/apinto-module"
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
 )
 
 type System struct {
@@ -47,13 +47,11 @@ func (s *System) initRouter() {
 		Method:      http.MethodGet,
 		Path:        "/api/system/modules",
 		Handler:     "core.modules",
-		Labels:      apinto_module.RouterLabelModule,
 		HandlerFunc: []apinto_module.HandlerFunc{s.list},
 	}, apinto_module.RouterInfo{
 		Method:      http.MethodGet,
 		Path:        "/api/system/quick_step",
 		Handler:     "core.quick_step",
-		Labels:      apinto_module.RouterLabelModule,
 		HandlerFunc: []apinto_module.HandlerFunc{s.quickStepInfo},
 	})
 }

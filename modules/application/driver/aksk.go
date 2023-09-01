@@ -7,6 +7,7 @@ import (
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/application"
+	application_model "github.com/eolinker/apinto-dashboard/modules/application/application-model"
 	"strings"
 )
 
@@ -27,7 +28,6 @@ func (a *AkSk) GetAuthListInfo(config []byte) string {
 }
 
 func (a *AkSk) CheckInput(config []byte) error {
-
 	akSkConfig := new(AkSkConfig)
 
 	if err := json.Unmarshal(config, akSkConfig); err != nil {
@@ -42,8 +42,15 @@ func (a *AkSk) CheckInput(config []byte) error {
 			return errors.New(fmt.Sprintf("标签信息中的%s为系统关键字", key))
 		}
 	}
-
 	return nil
+}
+
+func (a *AkSk) GetCfgDetails(config []byte) []application_model.AuthDetailItem {
+	akSkConfig := new(AkSkConfig)
+	if err := json.Unmarshal(config, akSkConfig); err != nil {
+		return []application_model.AuthDetailItem{}
+	}
+	return []application_model.AuthDetailItem{{Key: "AK", Value: akSkConfig.Ak}, {Key: "SK", Value: akSkConfig.Sk}}
 }
 
 func (a *AkSk) ToApinto(expire int64, position string, tokenName string, config []byte, hideCredential bool) v1.ApplicationAuth {
@@ -89,147 +96,25 @@ func (a *AkSk) Render() string {
 }
 
 var akSkConfigRender = `{
-	"type": "object",
-	"properties": {
-		"ak": {
-			"type": "string",
-			"title": "AK",
-			"x-component": "Input",
-			"x-component-props": {
-				"placeholder": "请输入"
-			},
-			"required": true
-		},
-		"sk": {
-			"type": "string",
-			"title": "SK",
-			"x-component": "Input",
-			"x-component-props": {
-				"placeholder": "请输入"
-			},
-			"required": true
-		},
-		"label": {
-			"type": "array",
-			"title": "标签信息",
-			"x-component": "ArrayItems",
-			"items": {
-				"type": "void",
-				"x-component": "Space",
-				"x-component-props": {},
-				"properties": {
-					"key": {
-						"type": "string",
-						"x-component": "Input",
-						"x-index": 0,
-						"x-component-props": {
-							"class": "w240",
-							"placeholder": "请输入key"
-						}
-					},
-					"value": {
-						"type": "text",
-						"x-component": "Input",
-						"x-index": 1,
-						"x-component-props": {
-							"class": "w240 mg_button",
-							"placeholder": "请输入value"
-						}
-					},
-					"remove": {
-						"type": "void",
-						"x-component": "ArrayItems.Remove",
-						"x-index": 3
-					},
-					"add": {
-						"type": "void",
-						"x-component": "ArrayItems.Addition",
-						"x-index": 2,
-						"x-component-props": {
-							"class": "mg_button"
-						}
-					}
-				}
-			},
-			"properties": {
-				"params0": {
-					"type": "void",
-					"x-component": "Space",
-					"x-component-props": {
-						"placeholder": "请输入"
-					},
-					"x-index": 0,
-					"properties": {
-						"key": {
-							"type": "text",
-							"x-component": "Input",
-							"x-index": 0,
-							"x-component-props": {
-								"class": "w240",
-								"placeholder": "请输入key"
-							}
-						},
-						"value": {
-							"type": "text",
-							"x-component": "Input",
-							"x-index": 1,
-							"x-component-props": {
-								"class": "w240 mg_button",
-								"placeholder": "请输入value"
-							}
-						},
-						"add": {
-							"type": "void",
-							"x-component": "ArrayItems.Addition",
-							"x-component-props": {
-								"class": "mg_button"
-							},
-							"x-index": 3
-						}
-					}
-				},
-				"params1": {
-					"type": "void",
-					"x-component": "Space",
-					"x-component-props": {
-						"placeholder": "请输入"
-					},
-					"x-index": 0,
-					"properties": {
-						"key": {
-							"type": "text",
-							"x-component": "Input",
-							"x-index": 0,
-							"x-component-props": {
-								"class": "w240",
-								"placeholder": "请输入key"
-							}
-						},
-						"value": {
-							"type": "text",
-							"x-component": "Input",
-							"x-index": 1,
-							"x-component-props": {
-								"class": "w240 mg_button",
-								"placeholder": "请输入value"
-							}
-						},
-						"remove": {
-							"type": "void",
-							"x-component": "ArrayItems.Remove",
-							"x-index": 3
-						},
-						"add": {
-							"type": "void",
-							"x-component": "ArrayItems.Addition",
-							"x-component-props": {
-								"class": "mg_button"
-							},
-							"x-index": 2
-						}
-					}
-				}
-			}
-		}
-	}
-}`
+                "type": "object",
+                "properties": {
+                        "ak": {
+                                "type": "string",
+                                "title": "AK",
+                                "x-component": "Input",
+                                "x-component-props": {
+                                        "placeholder": "请输入"
+                                },
+                                "required": true
+                        },
+                        "sk": {
+                                "type": "string",
+                                "title": "SK",
+                                "x-component": "Input",
+                                "x-component-props": {
+                                        "placeholder": "请输入"
+                                },
+                                "required": true
+                        }
+                }
+        }`

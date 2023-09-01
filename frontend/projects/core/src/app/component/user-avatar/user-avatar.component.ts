@@ -25,8 +25,7 @@ export class UserAvatarComponent implements OnInit {
   userMenu: Array<any> = []
   nickName: string = ''
   userName: string = ''
-  drawerRef:NzModalRef | undefined
-  // eslint-disable-next-line no-useless-constructor
+  modalRef:NzModalRef | undefined
   constructor (private message: EoNgFeedbackMessageService,
                 private modalService:EoNgFeedbackModalService,
                 private router: Router,
@@ -77,7 +76,7 @@ export class UserAvatarComponent implements OnInit {
   openDrawer (usage:string) {
     switch (usage) {
       case 'editCurrentUser':
-        this.drawerRef = this.modalService.create({
+        this.modalRef = this.modalService.create({
           nzTitle: '用户设置',
           nzWidth: MODAL_SMALL_SIZE,
           nzContent: UserProfileComponent,
@@ -92,7 +91,7 @@ export class UserAvatarComponent implements OnInit {
         })
         break
       case 'changePsw':
-        this.drawerRef = this.modalService.create({
+        this.modalRef = this.modalService.create({
           nzTitle: '修改密码',
           nzWidth: MODAL_SMALL_SIZE,
           nzContent: ResetPswComponent,
@@ -117,6 +116,6 @@ export class UserAvatarComponent implements OnInit {
   }
 
   closeModal =() => {
-    this.drawerRef?.close()
+    this.modalRef?.close()
   }
 }

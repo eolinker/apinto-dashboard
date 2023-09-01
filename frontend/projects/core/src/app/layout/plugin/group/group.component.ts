@@ -2,10 +2,8 @@ import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
 import { Router } from '@angular/router'
 import { EoNgTreeDefaultComponent } from 'eo-ng-tree'
 import { NzFormatEmitEvent, NzTreeNode } from 'ng-zorro-antd/tree'
-import { ApiService } from '../../../service/api.service'
-import { EoNgNavigationService } from '../../../service/app-config.service'
-import { BaseInfoService } from '../../../service/base-info.service'
 import { EoNgPluginService } from '../eo-ng-plugin.service'
+import { EoNgNavigationService } from '../../../service/eo-ng-navigation.service'
 
 @Component({
   selector: 'eo-ng-plugin-group',
@@ -25,8 +23,6 @@ export class GroupComponent implements OnInit {
   clusterKey: string = ''
   queryName:string = ''
   constructor (
-    private baseInfo:BaseInfoService,
-    private api: ApiService,
     private router: Router,
     private navigationService:EoNgNavigationService,
     public service:EoNgPluginService
@@ -62,8 +58,7 @@ export class GroupComponent implements OnInit {
       this.service.groupUuid !== data.keys![0] &&
       this.eoNgTreeDefault?.getTreeNodeByKey(this.service.groupUuid)?.isSelected
     ) {
-      // @ts-ignore
-      this.eoNgTreeDefault.getTreeNodeByKey(this.service.groupUuid).isSelected = false
+      this.eoNgTreeDefault.getTreeNodeByKey(this.service.groupUuid)!.isSelected = false
     }
 
     this.service.showAll = false

@@ -7,7 +7,7 @@ import (
 type API struct {
 	Id               int       `gorm:"type:int(11);size:11;not null;auto_increment;primary_key;column:id;comment:主键ID" json:"id,omitempty"`
 	NamespaceId      int       `gorm:"type:int(11);size:11;not null;column:namespace;uniqueIndex:namespace_uuid;comment:工作空间" json:"namespace_id,omitempty"`
-	UUID             string    `gorm:"size:36;not null;column:uuid;dbUniqueIndex:namespace_uuid;uniqueIndex:namespace_uuid;comment:UUID" json:"uuid,omitempty"`
+	UUID             string    `gorm:"size:36;not null;column:uuid;uniqueIndex:namespace_uuid;comment:UUID" json:"uuid,omitempty"`
 	GroupUUID        string    `gorm:"size:36;column:group_uuid;comment:api所在分组的UUID;index:group_uuid" json:"group_uuid,omitempty"`
 	Name             string    `gorm:"size:255;column:name;comment:api名称" json:"name,omitempty"`
 	Scheme           string    `gorm:"size:36;column:scheme;comment:协议" json:"scheme,omitempty"`

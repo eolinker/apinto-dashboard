@@ -1,19 +1,7 @@
 /* eslint-disable dot-notation */
-/* eslint-disable no-useless-constructor */
-import {
-  Component,
-
-  Input,
-  OnInit,
-
-  TemplateRef,
-  ViewChild
-} from '@angular/core'
+import { Component, Input, OnInit, TemplateRef, ViewChild } from '@angular/core'
 import { Router } from '@angular/router'
-import {
-  EoNgFeedbackMessageService,
-  EoNgFeedbackModalService
-} from 'eo-ng-feedback'
+import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feedback'
 import { ApiService } from 'projects/core/src/app/service/api.service'
 import { EoNgNavigationService } from 'projects/core/src/app/service/eo-ng-navigation.service'
 import { UntypedFormBuilder, FormGroup, Validators } from '@angular/forms'
@@ -28,7 +16,7 @@ import { BaseInfoService } from 'projects/core/src/app/service/base-info.service
 import { cloneDeep } from 'lodash'
 import { MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
 import { ApiManagementProxyComponent } from '../../proxy/proxy.component'
-import { APINotFormGroupData } from '../../../types/types'
+import { APINotFormGroupData, APIProtocol } from '../../../types/types'
 import { methodList, proxyHeaderTableHeadName, proxyHeaderTableBody, hostHeaderTableBody, defaultHostList } from '../../../types/conf'
 import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 @Component({
@@ -69,6 +57,7 @@ export class ApiWebsocketCreateComponent implements OnInit {
   @Input() apiUuid:string = ''
   @Input() editPage:boolean = false
   @Input() groupUuid:string = ''
+  apiProtocol:APIProtocol = 'websocket'
   nzDisabled:boolean = false
   headerList:NzTreeNodeOptions[]= []
   firstLevelList:Array<string> = []
@@ -93,7 +82,8 @@ export class ApiWebsocketCreateComponent implements OnInit {
 
   pluginTemplateList:SelectOption[] = []
   submitButtonLoading:boolean = false
-  constructor (private message: EoNgFeedbackMessageService,
+  showCheckboxGroupValid: boolean = false
+  constructor (public message: EoNgFeedbackMessageService,
     private baseInfo:BaseInfoService,
     public api:ApiService,
     private navigationService:EoNgNavigationService,
@@ -116,7 +106,6 @@ export class ApiWebsocketCreateComponent implements OnInit {
       proxyPath: [''],
       timeout: [10000, [Validators.required]],
       retry: [0, [Validators.required]],
-      enableWebsocket: [false],
       templateUuid: ['']
     })
   }
@@ -150,9 +139,9 @@ export class ApiWebsocketCreateComponent implements OnInit {
     }
 
     this.hostsTableBody[0].disabledFn = () => { return this.nzDisabled }
-    this.hostsTableBody[1].showFn = (item: any) => { return item === this.hostsList[0] }
+    this.hostsTableBody[1].showFn = (item: any) => { return item !== this.hostsList[this.hostsList.length - 1] && !item.key }
     this.hostsTableBody[1].btns[0].disabledFn = () => { return this.nzDisabled }
-    this.hostsTableBody[2].showFn = (item: any) => { return item !== this.hostsList[0] }
+    this.hostsTableBody[2].showFn = (item: any) => { return item !== this.hostsList[this.hostsList.length - 1] && item.key }
     this.hostsTableBody[2].btns[0].disabledFn = () => { return this.nzDisabled }
     this.hostsTableBody[2].btns[1].disabledFn = () => { return this.nzDisabled }
   }
@@ -170,10 +159,10 @@ export class ApiWebsocketCreateComponent implements OnInit {
     this.api.get('router', { uuid: this.apiUuid }).subscribe((resp) => {
       if (resp.code === 0) {
         setFormValue(this.validateForm, resp.data.api)
-        this.validateForm.controls['requestPath'].setValue(resp.data.api.requestPath.slice(1))
+        this.validateForm.controls['requestPath'].setValue(resp.data.api.requestPath[0] === '/' ? resp.data.api.requestPath.slice(1) : resp.data.api.requestPath)
         this.createApiForm = resp.data.api
         this.getHeaderList()
-        this.hostsList = [...resp.data.hosts?.map((x:string) => ({ key: x })) || [], { key: '' }]
+        this.hostsList = [...resp.data.api.hosts?.map((x:string) => ({ key: x })) || [], { key: '' }]
       }
     })
   }
@@ -214,16 +203,9 @@ export class ApiWebsocketCreateComponent implements OnInit {
     return resList
   }
 
-  nzTreeClick (value: any) {
-    if (value.node.origin.selectable === false) {
-      value.node.origin.expanded = !value.node.origin.expanded
-    }
-    this.headerList = [...this.headerList]
-  }
-
   // 获取上游服务列表
   getServiceList () {
-    this.api.get('common/enum/Service').subscribe((resp: any) => {
+    this.api.get('common/provider/Service').subscribe((resp: any) => {
       if (resp.code === 0) {
         this.serviceList = []
         for (const item of resp.data.Service) {
@@ -242,58 +224,6 @@ export class ApiWebsocketCreateComponent implements OnInit {
         })
       }
     })
-  }
-
-  updateAllChecked (): void {
-    if (this.allChecked) {
-      this.methodList = this.methodList.map((item: any) => ({
-        ...item,
-        checked: true
-      }))
-      this.createApiForm.method = []
-      for (const index in this.methodList) {
-        if (this.methodList[index].checked) {
-          this.createApiForm.method.push(this.methodList[index].value)
-        }
-      }
-      this.showCheckboxGroupValid = false
-    } else {
-      this.methodList = this.methodList.map((item: any) => ({
-        ...item,
-        checked: false
-      }))
-      this.createApiForm.method = []
-      this.showCheckboxGroupValid = false
-    }
-  }
-
-  initCheckbox (): void {
-    for (const index in this.methodList) {
-      if (
-        this.createApiForm.method.indexOf(this.methodList[index].label) !== -1
-      ) {
-        this.methodList[index].checked = true
-      }
-    }
-  }
-
-  updateSingleChecked (): void {
-    if (this.methodList.every((item: any) => !item.checked)) {
-      this.allChecked = false
-    } else if (this.methodList.every((item: any) => item.checked)) {
-      this.allChecked = true
-    } else {
-      this.allChecked = false
-    }
-    this.createApiForm.method = []
-    for (const index in this.methodList) {
-      if (this.methodList[index].checked) {
-        this.createApiForm.method.push(this.methodList[index].value)
-      }
-    }
-    if (this.methodList.length > 0) {
-      this.showCheckboxGroupValid = false
-    }
   }
 
   proxyTableClick = (item: any) => {
@@ -324,7 +254,7 @@ export class ApiWebsocketCreateComponent implements OnInit {
             return false
           }
         })
-        this.modalRef.afterClose.subscribe(() => {
+        this.modalRef.afterClose?.subscribe(() => {
           this.proxyEdit = false
         })
         break
@@ -332,80 +262,50 @@ export class ApiWebsocketCreateComponent implements OnInit {
     }
   }
 
+  initCheckbox (): void {
+    for (const index in this.methodList) {
+      if (
+        this.createApiForm.method.indexOf(this.methodList[index].label) !== -1
+      ) {
+        this.methodList[index].checked = true
+      }
+    }
+  }
+
+  updateAllChecked (): void {
+    if (this.allChecked) {
+      this.methodList = this.methodList.map((item: any) => ({
+        ...item,
+        checked: true
+      }))
+      this.createApiForm.method = [...this.methodList.filter((m:CheckBoxOptionInterface) => (m.checked)).map((x:CheckBoxOptionInterface) => (x.value))]
+      this.showCheckboxGroupValid = false
+    } else {
+      this.methodList = this.methodList.map((item: any) => ({
+        ...item,
+        checked: false
+      }))
+      this.createApiForm.method = []
+      this.showCheckboxGroupValid = true
+    }
+  }
+
+  updateSingleChecked (): void {
+    if (this.methodList.every((item: any) => !item.checked)) {
+      this.allChecked = false
+    } else if (this.methodList.every((item: any) => item.checked)) {
+      this.allChecked = true
+    } else {
+      this.allChecked = false
+    }
+    this.createApiForm.method = [...this.methodList.filter((m:CheckBoxOptionInterface) => (m.checked)).map((x:CheckBoxOptionInterface) => (x.value))]
+    this.showCheckboxGroupValid = this.createApiForm.method.length === 0
+  }
+
   // 返回列表页，当fromList为true时，该页面左侧有分组
   backToList () {
     this.router.navigate(['/', 'router', 'api', 'group', 'list'])
   }
-
-  // 提交api数据
-  saveApi () {
-    if (this.validateForm.valid) {
-      if (this.allChecked) {
-        this.createApiForm.method = []
-      }
-      this.submitButtonLoading = true
-      if (this.editPage) {
-        this.api.put('router', {
-          scheme: 'websocket',
-          name: this.validateForm.controls['name'].value,
-          uuid: this.createApiForm.uuid,
-          groupUuid: this.validateForm.controls['groupUuid'].value,
-          desc: this.validateForm.controls['desc'].value,
-          isDisable: this.validateForm.controls['isDisable'].value,
-          requestPath: '/' + this.validateForm.controls['requestPath'].value,
-          service: this.validateForm.controls['service'].value,
-          method: this.createApiForm.method,
-          proxyPath: this.validateForm.controls['proxyPath'].value,
-          hosts: this.hostsList.filter((host:{key:string}) => { return host.key }).map((host:{key:string}) => host.key),
-          timeout: Number(this.validateForm.controls['timeout'].value),
-          retry: Number(this.validateForm.controls['retry'].value),
-          templateUuid: this.validateForm.controls['templateUuid'].value || '',
-          proxyHeader: this.createApiForm.proxyHeader,
-          match: this.createApiForm.match
-        }, { uuid: this.apiUuid }).subscribe(resp => {
-          this.submitButtonLoading = false
-          if (resp.code === 0) {
-            this.backToList()
-            this.message.success(resp.msg || '修改成功！', { nzDuration: 1000 })
-          }
-        })
-      } else {
-        this.api.post('router', {
-          scheme: 'websocket',
-          name: this.validateForm.controls['name'].value,
-          uuid: this.createApiForm.uuid,
-          groupUuid: this.validateForm.controls['groupUuid'].value,
-          desc: this.validateForm.controls['desc'].value,
-          isDisable: this.validateForm.controls['isDisable'].value,
-          requestPath: '/' + this.validateForm.controls['requestPath'].value,
-          service: this.validateForm.controls['service'].value,
-          method: this.createApiForm.method,
-          hosts: this.hostsList.filter((host:{key:string}) => { return host.key }).map((host:{key:string}) => host.key),
-          timeout: Number(this.validateForm.controls['timeout'].value),
-          retry: Number(this.validateForm.controls['retry'].value),
-          templateUuid: this.validateForm.controls['templateUuid'].value || '',
-          proxyHeader: this.createApiForm.proxyHeader,
-          match: this.createApiForm.match,
-          proxyPath: '/' + this.validateForm.controls['proxyPath'].value
-        }).subscribe(resp => {
-          this.submitButtonLoading = false
-          if (resp.code === 0) {
-            this.message.success(resp.msg || '添加成功！', { nzDuration: 1000 })
-            this.backToList()
-          }
-        })
-      }
-    } else {
-      Object.values(this.validateForm.controls).forEach((control) => {
-        if (control.invalid) {
-          control.markAsDirty()
-          control.updateValueAndValidity({ onlySelf: true })
-        }
-      })
-    }
-  }
-
-  showCheckboxGroupValid: boolean = false
 
   requestPathChange () {
     if (!this.validateForm.controls['proxyPath'].value && this.validateForm.controls['requestPath'].value) {
@@ -415,7 +315,7 @@ export class ApiWebsocketCreateComponent implements OnInit {
 
   checkTimeout () {
     if (
-      this.validateForm.controls['timeout'].value !== null &&
+      this.validateForm.controls['timeout'].value &&
       this.validateForm.controls['timeout'].value < 1
     ) {
       this.validateForm.controls['timeout'].setValue(1)
@@ -450,6 +350,74 @@ export class ApiWebsocketCreateComponent implements OnInit {
           }
         }
       )
+    }
+  }
+
+  // 提交api数据
+  saveApi (type:'websocket'|'http') {
+    if (this.validateForm.valid && !this.showCheckboxGroupValid) {
+      if (this.allChecked) {
+        this.createApiForm.method = []
+      }
+      this.submitButtonLoading = true
+      if (this.editPage) {
+        this.api.put('router', {
+          scheme: type,
+          name: this.validateForm.controls['name'].value,
+          uuid: this.createApiForm.uuid,
+          groupUuid: this.validateForm.controls['groupUuid'].value,
+          desc: this.validateForm.controls['desc'].value,
+          isDisable: this.validateForm.controls['isDisable'].value,
+          requestPath: '/' + this.validateForm.controls['requestPath'].value,
+          service: this.validateForm.controls['service'].value,
+          method: this.createApiForm.method,
+          proxyPath: this.validateForm.controls['proxyPath'].value,
+          hosts: this.hostsList.filter((host:{key:string}) => { return host.key }).map((host:{key:string}) => host.key),
+          timeout: Number(this.validateForm.controls['timeout'].value),
+          retry: Number(this.validateForm.controls['retry'].value),
+          templateUuid: this.validateForm.controls['templateUuid'].value || '',
+          proxyHeader: this.createApiForm.proxyHeader,
+          match: this.createApiForm.match
+        }, { uuid: this.apiUuid }).subscribe(resp => {
+          this.submitButtonLoading = false
+          if (resp.code === 0) {
+            this.backToList()
+            this.message.success(resp.msg || '修改成功！', { nzDuration: 1000 })
+          }
+        })
+      } else {
+        this.api.post('router', {
+          scheme: type,
+          name: this.validateForm.controls['name'].value,
+          uuid: this.createApiForm.uuid,
+          groupUuid: this.validateForm.controls['groupUuid'].value,
+          desc: this.validateForm.controls['desc'].value,
+          isDisable: this.validateForm.controls['isDisable'].value,
+          requestPath: '/' + this.validateForm.controls['requestPath'].value,
+          service: this.validateForm.controls['service'].value,
+          method: this.createApiForm.method,
+          hosts: this.hostsList.filter((host:{key:string}) => { return host.key }).map((host:{key:string}) => host.key),
+          timeout: Number(this.validateForm.controls['timeout'].value),
+          retry: Number(this.validateForm.controls['retry'].value),
+          templateUuid: this.validateForm.controls['templateUuid'].value || '',
+          proxyHeader: this.createApiForm.proxyHeader,
+          match: this.createApiForm.match,
+          proxyPath: this.validateForm.controls['proxyPath'].value
+        }).subscribe(resp => {
+          this.submitButtonLoading = false
+          if (resp.code === 0) {
+            this.message.success(resp.msg || '添加成功！', { nzDuration: 1000 })
+            this.backToList()
+          }
+        })
+      }
+    } else {
+      Object.values(this.validateForm.controls).forEach((control) => {
+        if (control.invalid) {
+          control.markAsDirty()
+          control.updateValueAndValidity({ onlySelf: true })
+        }
+      })
     }
   }
 }

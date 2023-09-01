@@ -11,6 +11,7 @@ type Application struct {
 	IdStr       string    `gorm:"size:50;not null;column:id_str;dbUniqueIndex:unique;uniqueIndex:namespace_ids;comment:随机生成的16个长度字符串" json:"id_str,omitempty"`
 	Name        string    `gorm:"size:255;not null;column:name;uniqueIndex:namespace_name;comment:应用名称" json:"name,omitempty"`
 	Desc        string    `gorm:"size:255;column:desc;comment:描述" json:"desc,omitempty"`
+	Version     string    `gorm:"size:36;column:version;comment:app版本" json:"version,omitempty"`
 	Operator    int       `gorm:"type:int(11);size:11;column:operator;comment:更新人/操作人" json:"operator,omitempty"`
 	CreateTime  time.Time `gorm:"type:timestamp;NOT NULL;DEFAULT:CURRENT_TIMESTAMP;column:create_time;comment:创建时间" json:"create_time"`
 	UpdateTime  time.Time `gorm:"type:timestamp;NOT NULL;DEFAULT:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;column:update_time;comment:修改时间" json:"update_time"`
@@ -27,7 +28,7 @@ func (a *Application) IdValue() int {
 type ApplicationVersionConfig struct {
 	CustomAttrList []ApplicationCustomAttr `json:"custom_attr_list"`
 	ExtraParamList []ApplicationExtraParam `json:"extra_param_list"`
-	Apis           []string                `json:"apis"`
+	AuthList       []*ApplicationAuth      `json:"auth_list"`
 }
 
 type ApplicationCustomAttr struct {

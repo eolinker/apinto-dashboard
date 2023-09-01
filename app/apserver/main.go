@@ -3,15 +3,16 @@ package main
 import (
 	"fmt"
 	grpc_service "github.com/eolinker/apinto-dashboard/grpc-service"
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
 	"github.com/eolinker/apinto-dashboard/modules/grpc-service/service"
-	apinto_module "github.com/eolinker/apinto-module"
+	"github.com/eolinker/apinto-dashboard/modules/module-plugin/embed_registry"
+	"github.com/eolinker/apinto-dashboard/modules/notice"
 	"github.com/soheilhy/cmux"
 	"google.golang.org/grpc"
 	"net"
 	"net/http"
 	"os"
 
-	"github.com/eolinker/apinto-dashboard/initialize"
 	"github.com/eolinker/apinto-dashboard/modules/core"
 	"github.com/eolinker/apinto-dashboard/modules/plugin/plugin_timer"
 
@@ -59,12 +60,15 @@ func run() {
 	}
 
 	// 执行内置插件初始化
-	err = initialize.InitPlugins()
+	err = embed_registry.InitEmbedPlugins()
 	if err != nil {
 		log.Fatal(err)
 	}
 	coreService.ReloadModule()
 	go plugin_timer.ExtenderTimer()
+
+	//初始化通知渠道驱动
+	initNoticeChannelDriver()
 
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", GetPort()))
 	if err != nil {
@@ -116,4 +120,13 @@ func (f *Front) CreateEngine() *gin.Engine {
 	engine := gin.Default()
 	engine.Use(apinto_module.SetRepeatReader)
 	return engine
+}
+
+func initNoticeChannelDriver() {
+	var noticeChannelService notice.INoticeChannelService
+	bean.Autowired(&noticeChannelService)
+	err := noticeChannelService.InitChannelDriver()
+	if err != nil {
+		panic(err)
+	}
 }

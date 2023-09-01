@@ -4,14 +4,13 @@ import {
   EventEmitter,
   Input,
   Output,
-  SimpleChanges,
   ViewChild
 } from '@angular/core'
 // eslint-disable-next-line no-use-before-define
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
-import { IntelligentPluginEditComponent } from './IntelligentPluginEditComponent'
 import { SelectOption } from 'eo-ng-select'
+import { IntelligentPluginEditComponent } from './IntelligentPluginEditComponent'
 
 const containerElementName = 'customReactComponentContainer'
 
@@ -24,11 +23,81 @@ const containerElementName = 'customReactComponentContainer'
         .ant-input-affix-wrapper,
         textarea,
         .ant-input-number,
-        .ant-formily-array-items,
         ant-picker,
         .ant-select {
           width: 346px;
           min-height: 32px;
+        }
+
+        .ant-formily-item-control-content-component
+          span.ant-input-password
+          + div {
+          width: 346px;
+        }
+
+        .ant-input-number {
+          width: 346px;
+          min-height: 32px;
+          border: 1px solid var(--border-color);
+          border-radius: var(--border-radius);
+          box-shadow: none;
+
+          .ant-input-number-handler-down:hover,
+          .ant-input-number-handler-up:hover {
+            height: 40% !important;
+          }
+
+          .ant-input-number-handler:hover .ant-input-number-handler-up-inner,
+          .ant-input-number-handler:hover .ant-input-number-handler-down-inner {
+            color: var(--primary-color);
+          }
+        }
+
+        .ant-checkbox {
+          top: 0em;
+        }
+
+        .ant-checkbox-group-item .ant-checkbox {
+          top: 0;
+        }
+
+        .ant-input-number:not(.ant-input-number-disabled):hover {
+          border-color: var(--primary-color);
+        }
+
+        .ant-formily-array-items {
+          width: 400px;
+        }
+
+        .ant-input-affix-wrapper-disabled,
+        .ant-input-affix-wrapper-disabled > .ant-input {
+          background: var(--disabled-background-color);
+          cursor: not-allowed;
+        }
+
+        .ant-input-affix-wrapper-disabled {
+          border-color: var(--disabled-border-color);
+        }
+
+        .ant-picker-disabled:hover {
+          border-color: var(--disabled-border-color);
+        }
+
+        .ant-switch {
+          width: 28px;
+          height: 16px;
+          min-width: 28px;
+          .ant-switch-handle {
+            height: 12px;
+            width: 12px;
+          }
+          &.ant-switch-checked,
+          &.ant-switch-checked:hover:not(.ant-switch-disabled) {
+            background: var(--primary-color);
+          }
+          &.ant-switch-checked .ant-switch-handle {
+            inset-inline-start: calc(100% - 14px);
+          }
         }
 
         .ant-formily-array-table {
@@ -76,7 +145,9 @@ const containerElementName = 'customReactComponentContainer'
   ]
 })
 export class CustomReactComponentWrapperComponent {
-  @ViewChild(containerElementName, { static: true }) containerRef!: ElementRef
+  @ViewChild(containerElementName, { static: true }) containerRef:
+    | ElementRef
+    | undefined = undefined
 
   @Output() public componentClick = new EventEmitter<void>()
   @Output() onSubmit = new EventEmitter<any>()
@@ -218,8 +289,7 @@ export class CustomReactComponentWrapperComponent {
     }
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    // eslint-disable-next-line dot-notation
+  ngOnChanges(): void {
     this.render()
   }
 
@@ -228,7 +298,7 @@ export class CustomReactComponentWrapperComponent {
   }
 
   ngOnDestroy() {
-    ReactDOM.unmountComponentAtNode(this.containerRef.nativeElement)
+    ReactDOM.unmountComponentAtNode(this.containerRef!.nativeElement)
   }
 
   handlerSubmit = (value: any) => {
@@ -251,7 +321,7 @@ export class CustomReactComponentWrapperComponent {
           />
         </div>
       </React.StrictMode>,
-      this.containerRef.nativeElement
+      this.containerRef!.nativeElement
     )
   }
 }

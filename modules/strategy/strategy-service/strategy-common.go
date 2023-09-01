@@ -4,18 +4,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sort"
+	"strings"
+
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/enum"
-	"github.com/eolinker/apinto-dashboard/modules/api"
-	"github.com/eolinker/apinto-dashboard/modules/application"
+
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
 	"github.com/eolinker/apinto-dashboard/modules/strategy"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/config"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-model"
-	"github.com/eolinker/apinto-dashboard/modules/upstream"
-	apinto_module "github.com/eolinker/apinto-module"
 	"github.com/eolinker/eosc/common/bean"
-	"sort"
-	"strings"
 )
 
 var (
@@ -47,11 +46,12 @@ type strategyFilterOptions struct {
 	typeConfigs         map[string]string
 }
 type strategyCommonService struct {
-	applicationService application.IApplicationService
-	apiService         api.IAPIService
-	service            upstream.IService
-
 	filterOptions *strategyFilterOptions
+}
+
+func (s *strategyCommonService) FilterNameCheck(name string) bool {
+	_, has := s.filterOptions.typeConfigs[name]
+	return has
 }
 
 func (s *strategyCommonService) GetFilterLabel(ctx context.Context, namespaceId int, name string, values []string) (string, string, string) {
@@ -124,9 +124,7 @@ func (s *strategyCommonService) ResetFilterOptionHandlers(handlers map[string]ap
 
 func newStrategyCommonService() strategy.IStrategyCommonService {
 	s := &strategyCommonService{}
-	bean.Autowired(&s.applicationService)
-	bean.Autowired(&s.service)
-	bean.Autowired(&s.apiService)
+
 	var fm apinto_module.IFilterOptionHandlerManager = s
 	bean.Injection(&fm)
 	s.ResetFilterOptionHandlers(nil)

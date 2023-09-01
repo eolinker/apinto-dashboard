@@ -1,7 +1,4 @@
-/* eslint-disable brace-style */
 /* eslint-disable dot-notation */
-/* eslint-disable no-useless-constructor */
-/* eslint-disable no-undef */
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core'
 import { FormGroup, FormBuilder, Validators } from '@angular/forms'
 import { ActivatedRoute, Router } from '@angular/router'
@@ -9,6 +6,7 @@ import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { ApiService } from '../../../service/api.service'
 import { EoNgNavigationService } from '../../../service/eo-ng-navigation.service'
 import { CryptoService } from '../../../service/crypto.service'
+import { environment } from 'projects/core/src/environments/environment'
 
 @Component({
   selector: 'eo-ng-password',
@@ -22,8 +20,8 @@ export class PasswordComponent implements OnInit {
   isAutoFocus!: boolean
   loginLoading!: boolean
   isShowTooltip!: boolean
-  // @ts-ignore
-  routeQuery = this.route.queryParams.value
+  isBusiness = environment.isBusiness
+
   @ViewChild('needAutoFocus') autoFocusInput!: ElementRef
   constructor (
     private api: ApiService,
@@ -31,7 +29,7 @@ export class PasswordComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private message: EoNgFeedbackMessageService,
-    private appConfig: EoNgNavigationService,
+    private navigationService: EoNgNavigationService,
     private crypto: CryptoService
   ) {}
 
@@ -62,14 +60,13 @@ export class PasswordComponent implements OnInit {
           })
           .subscribe((resp: any) => {
             if (resp.code === 0) {
-              this.appConfig.reqFlashMenu()
+              // this.navigationService.reqFlashMenu()
               this.message.create('success', '登录成功')
               const callbackUrl:string | null = this.route.snapshot.queryParams['callback']
               if (callbackUrl) {
                 this.router.navigate([callbackUrl])
-              }
-              else {
-                this.router.navigate([''])
+              } else {
+                this.router.navigate([this.navigationService.getPageRoute()])
               }
             }
           })

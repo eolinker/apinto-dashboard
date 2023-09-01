@@ -1,5 +1,12 @@
 package common
 
+func MapToSlice[K comparable, T any, D any](m map[K]T, f func(k K, t T) D) []D {
+	r := make([]D, 0, len(m))
+	for k, v := range m {
+		r = append(r, f(k, v))
+	}
+	return r
+}
 func SliceToMap[K comparable, T any](list []T, f func(T) K) map[K]T {
 	m := make(map[K]T)
 	for _, t := range list {
@@ -7,6 +14,16 @@ func SliceToMap[K comparable, T any](list []T, f func(T) K) map[K]T {
 	}
 	return m
 }
+
+// SliceToSet 列表转成集合
+func SliceToSet[K comparable, T any](list []T, f func(T) K) map[K]struct{} {
+	m := make(map[K]struct{})
+	for _, t := range list {
+		m[f(t)] = struct{}{}
+	}
+	return m
+}
+
 func SliceToMapO[K comparable, T, D any](list []T, f func(T) (K, D)) map[K]D {
 	m := make(map[K]D)
 	for _, t := range list {

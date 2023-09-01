@@ -29,7 +29,7 @@ type IAPIService interface {
 	GetAPIListItemAll(ctx context.Context, namespaceID int) ([]*apimodel.APIListItem, error)
 	GetAPIsForSync(ctx context.Context, namespaceID int) ([]*apimodel.APIVersionInfo, error)
 
-	CreateAPI(ctx context.Context, namespaceID int, operator int, input *api_dto.APIInfo) error
+	CreateAPI(ctx context.Context, namespaceID int, operator int, input *api_dto.APIInfo) (string, int, error)
 	UpdateAPI(ctx context.Context, namespaceID int, operator int, input *api_dto.APIInfo) error
 	DeleteAPI(ctx context.Context, namespaceId, operator int, uuid string) error
 	GetGroups(ctx context.Context, namespaceId int, parentUuid, queryName string) (*group_model.CommonGroupRoot, []*group_model.CommonGroupApi, error)
@@ -53,7 +53,7 @@ type IAPIService interface {
 	IsAPIOnline(ctx context.Context, clusterName, clusterAddr string, apiUUID int) bool
 	GetAPIDriver(driverName string) IAPIDriver
 	GetAPINameByID(ctx context.Context, apiID int) (string, error)
-	GetAPIRemoteOptions(ctx context.Context, namespaceId, pageNum, pageSize int, keyword, groupUuid string) ([]*strategy_model.RemoteApis, int, error)
+	GetAPIRemoteOptions(ctx context.Context, namespaceId, pageNum, pageSize int, keyword, groupUuid string) ([]any, int, error)
 	GetAPIRemoteByUUIDS(ctx context.Context, namespace int, uuids []string) ([]*strategy_model.RemoteApis, error)
 	APICount(ctx context.Context, namespaceId int) (int64, error)
 	APIOnlineCount(ctx context.Context, namespaceId int) (int64, error)

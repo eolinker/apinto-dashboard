@@ -23,13 +23,20 @@
     </div>
     <div style="display: 'flex'">
       <label>KEY：</label>
-      <input eo-ng-input [(ngModel)]="searchForm.key" placeholder="请输入" />
+      <input
+        class="w-[216px]"
+        eo-ng-input
+        [(ngModel)]="searchForm.key"
+        placeholder="请输入"
+      />
 
       <label class="ml-btnybase">状态：</label>
       <eo-ng-select
+        class="w-[216px]"
         [(ngModel)]="searchForm.status"
         [nzOptions]="statusList"
         nzPlaceHolder="请选择"
+        [nzAllowClear]="true"
       ></eo-ng-select>
 
       <button class="ml-btnybase" eo-ng-button (click)="resetSearch()">
@@ -59,6 +66,7 @@
       [(nzPageSize)]="variablePage.pageSize"
       (nzPageIndexChange)="getVariables()"
       (nzPageSizeChange)="getVariables()"
+      [nzLoading]="globalEnvTableLoading"
     >
     </eo-ng-apinto-table>
   </div>

@@ -12,12 +12,11 @@ type ApplicationInput struct {
 	Name           string                  `json:"name"`
 	Id             string                  `json:"id"`
 	Desc           string                  `json:"desc"`
-	Apis           []string                `json:"apis"`
 	CustomAttrList []ApplicationCustomAttr `json:"custom_attr_list"`
-	ExtraParamList []ApplicationExtraParam `json:"extra_param_list"`
+	Params         []ExtraParam            `json:"params"`
 }
 
-type ApplicationExtraParam struct {
+type ExtraParam struct {
 	Key      string `json:"key"`
 	Value    string `json:"value"`
 	Conflict string `json:"conflict"`
@@ -53,12 +52,24 @@ func (a *ApplicationInput) Check() error {
 			return errors.New(fmt.Sprintf("自定义属性 key(%s) 重复", key))
 		}
 	}
+
 	tempMap = make(map[string]int)
 
-	for _, extra := range a.ExtraParamList {
+	for _, extra := range a.Params {
 		if extra.Key == "" || extra.Value == "" {
 			return errors.New("额外参数 key or value is null")
 		}
+		switch extra.Conflict {
+		case "origin", "convert", "error":
+		default:
+			return fmt.Errorf("额外参数 生效规则不可以为%s", extra.Conflict)
+		}
+		switch extra.Position {
+		case "header", "body", "query":
+		default:
+			return fmt.Errorf("额外参数 参数位置不可以为%s", extra.Position)
+		}
+
 		tempMap[extra.Key] += 1
 	}
 	for key, val := range tempMap {
@@ -70,18 +81,25 @@ func (a *ApplicationInput) Check() error {
 	return nil
 }
 
-type ApplicationListOut struct {
-	Name       string `json:"name"`
-	Id         string `json:"id"`
-	Desc       string `json:"desc"`
-	Operator   string `json:"operator"`
-	UpdateTime string `json:"update_time"`
-	IsDelete   bool   `json:"is_delete"`
+type ApplicationListItem struct {
+	Name       string                `json:"name"`
+	Id         string                `json:"id"`
+	Desc       string                `json:"desc"`
+	Publish    []*APPListItemPublish `json:"publish"`
+	Operator   string                `json:"operator"`
+	UpdateTime string                `json:"update_time"`
+	IsDelete   bool                  `json:"is_delete"`
+}
+
+type APPListItemPublish struct {
+	Name   string            `json:"name"`
+	Title  string            `json:"title"`
+	Status enum.OnlineStatus `json:"status"`
 }
 
 type ApplicationEnum struct {
-	Name string `json:"name"`
-	Id   string `json:"id"`
+	Title string `json:"title"`
+	Id    string `json:"id"`
 }
 
 type ApplicationFilterOut struct {
@@ -95,5 +113,20 @@ type ApplicationInfoOut struct {
 	Id             string                  `json:"id"`
 	Desc           string                  `json:"desc"`
 	CustomAttrList []ApplicationCustomAttr `json:"custom_attr_list"`
-	ExtraParamList []ApplicationExtraParam `json:"extra_param_list"`
+	Params         []ExtraParam            `json:"params"`
+}
+
+type AppPublishInfo struct {
+	Name string `json:"name"`
+	ID   string `json:"id"`
+	Desc string `json:"desc"`
+}
+
+type AppPublishCluster struct {
+	Name       string            `json:"name"`
+	Env        string            `json:"env"`
+	Title      string            `json:"title"`
+	Status     enum.OnlineStatus `json:"status"`
+	Operator   string            `json:"operator"`
+	UpdateTime string            `json:"update_time"`
 }

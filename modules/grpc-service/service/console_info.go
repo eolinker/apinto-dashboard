@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/grpc-service"
 	"github.com/eolinker/apinto-dashboard/modules/api"
+	"github.com/eolinker/apinto-dashboard/modules/application"
+	"github.com/eolinker/apinto-dashboard/modules/cluster"
 	"github.com/eolinker/apinto-dashboard/modules/dynamic"
 	module_plugin "github.com/eolinker/apinto-dashboard/modules/module-plugin"
 	"github.com/eolinker/apinto-dashboard/modules/namespace"
@@ -26,7 +28,9 @@ type consoleInfoService struct {
 	apiService          api.IAPIService
 	modulePluginService module_plugin.IModulePlugin
 	navigationService   navigation_service.INavigationService
+	applicationService  application.IApplicationService
 	dynamicService      dynamic.IDynamicService
+	clusterService      cluster.IClusterService
 
 	modulesCache INavigationModulesCache
 }
@@ -38,6 +42,8 @@ func NewConsoleInfoService() grpc_service.GetConsoleInfoServer {
 	bean.Autowired(&c.modulePluginService)
 	bean.Autowired(&c.navigationService)
 	bean.Autowired(&c.dynamicService)
+	bean.Autowired(&c.applicationService)
+	bean.Autowired(&c.clusterService)
 
 	bean.Autowired(&c.modulesCache)
 	return c
@@ -131,8 +137,9 @@ func (c *consoleInfoService) GetAllServices(ctx context.Context, req *grpc_servi
 	items := make([]*grpc_service.ServicesItem, 0, len(basicInfos))
 	for _, info := range basicInfos {
 		items = append(items, &grpc_service.ServicesItem{
-			Name: info.ID,
-			Desc: info.Description,
+			Name:  info.ID,
+			Title: info.Title,
+			Desc:  info.Description,
 		})
 	}
 	return &grpc_service.ServicesResp{
@@ -148,8 +155,9 @@ func (c *consoleInfoService) GetAllServicesByNames(ctx context.Context, req *grp
 	items := make([]*grpc_service.ServicesItem, 0, len(basicInfos))
 	for _, info := range basicInfos {
 		items = append(items, &grpc_service.ServicesItem{
-			Name: info.ID,
-			Desc: info.Description,
+			Name:  info.ID,
+			Title: info.Title,
+			Desc:  info.Description,
 		})
 	}
 	return &grpc_service.ServicesResp{
@@ -158,16 +166,16 @@ func (c *consoleInfoService) GetAllServicesByNames(ctx context.Context, req *grp
 }
 
 func (c *consoleInfoService) GetAllApps(ctx context.Context, req *grpc_service.GetAppsReq) (*grpc_service.AppsResp, error) {
-	basicInfos, err := c.dynamicService.ListByKeyword(ctx, int(req.NamespaceId), professionApp, "")
+	basicInfos, err := c.applicationService.AllApp(ctx, int(req.NamespaceId))
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, fmt.Errorf("获取应用列表报错. err: %s", err)
 	}
 	items := make([]*grpc_service.AppsItem, 0, len(basicInfos))
 	for _, info := range basicInfos {
 		items = append(items, &grpc_service.AppsItem{
-			Uuid: info.ID,
-			Name: info.Title,
-			Desc: info.Description,
+			Uuid: info.Uuid,
+			Name: info.Name,
+			Desc: info.Desc,
 		})
 	}
 	return &grpc_service.AppsResp{
@@ -176,16 +184,16 @@ func (c *consoleInfoService) GetAllApps(ctx context.Context, req *grpc_service.G
 }
 
 func (c *consoleInfoService) GetAppsByUuids(ctx context.Context, req *grpc_service.GetAppsByUuidsReq) (*grpc_service.AppsResp, error) {
-	basicInfos, err := c.dynamicService.ListByNames(ctx, int(req.NamespaceId), professionApp, req.Uuids)
+	basicInfos, err := c.applicationService.AppListByUUIDS(ctx, int(req.NamespaceId), req.Uuids)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, fmt.Errorf("获取应用列表报错. err: %s", err)
 	}
 	items := make([]*grpc_service.AppsItem, 0, len(basicInfos))
 	for _, info := range basicInfos {
 		items = append(items, &grpc_service.AppsItem{
-			Uuid: info.ID,
-			Name: info.Title,
-			Desc: info.Description,
+			Uuid: info.Uuid,
+			Name: info.Name,
+			Desc: info.Desc,
 		})
 	}
 	return &grpc_service.AppsResp{
@@ -218,5 +226,65 @@ func (c *consoleInfoService) GetNavigationModules(ctx context.Context, req *grpc
 	return &grpc_service.NavigationModulesResp{
 		NavigationItems: navigationItems,
 		ModulesItems:    modulesItems,
+	}, nil
+}
+
+func (c *consoleInfoService) GetClusters(ctx context.Context, req *grpc_service.GetClustersReq) (*grpc_service.ClusterInfoResp, error) {
+	clusters, err := c.clusterService.GetByNamespaceId(ctx, int(req.NamespaceId))
+	if err != nil {
+		return nil, errors.New("获取集群列表失败")
+	}
+	items := make([]*grpc_service.ClusterInfo, 0, len(clusters))
+	for _, clu := range clusters {
+		items = append(items, &grpc_service.ClusterInfo{
+			Name:  clu.Name,
+			Title: clu.Title,
+			Uuid:  clu.UUID,
+			Env:   clu.Env,
+			Desc:  clu.Desc,
+		})
+	}
+	return &grpc_service.ClusterInfoResp{
+		Items: items,
+	}, nil
+}
+
+func (c *consoleInfoService) GetClustersByNames(ctx context.Context, req *grpc_service.GetClustersReq) (*grpc_service.ClusterInfoResp, error) {
+	clusters, err := c.clusterService.GetByNames(ctx, int(req.NamespaceId), req.Names)
+	if err != nil {
+		return nil, errors.New("获取集群列表失败")
+	}
+	items := make([]*grpc_service.ClusterInfo, 0, len(clusters))
+	for _, clu := range clusters {
+		items = append(items, &grpc_service.ClusterInfo{
+			Name:  clu.Name,
+			Title: clu.Title,
+			Uuid:  clu.UUID,
+			Env:   clu.Env,
+			Desc:  clu.Desc,
+		})
+	}
+	return &grpc_service.ClusterInfoResp{
+		Items: items,
+	}, nil
+}
+
+func (c *consoleInfoService) GetClustersByUUIDs(ctx context.Context, req *grpc_service.GetClustersReq) (*grpc_service.ClusterInfoResp, error) {
+	clusters, err := c.clusterService.GetByUUIDs(ctx, int(req.NamespaceId), req.Uuids)
+	if err != nil {
+		return nil, errors.New("获取集群列表失败")
+	}
+	items := make([]*grpc_service.ClusterInfo, 0, len(clusters))
+	for _, clu := range clusters {
+		items = append(items, &grpc_service.ClusterInfo{
+			Name:  clu.Name,
+			Title: clu.Title,
+			Uuid:  clu.UUID,
+			Env:   clu.Env,
+			Desc:  clu.Desc,
+		})
+	}
+	return &grpc_service.ClusterInfoResp{
+		Items: items,
 	}, nil
 }

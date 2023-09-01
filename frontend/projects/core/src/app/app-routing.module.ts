@@ -14,13 +14,13 @@ import { LoginComponent } from './layout/login/login.component'
 import { BasicLayoutComponent } from './layout/basic-layout/basic-layout.component'
 import { CustomPreloadingStrategy } from './custom-preloading-strategy'
 import { AuthActivationComponent } from './layout/auth/activation/activation.component'
-import { AuthInfoComponent } from './layout/auth/info/info.component'
-import { AuthUpdateComponent } from './layout/auth/update/update.component'
-import { IframePageComponent } from './layout/iframe-page/iframe-page.component'
+import { LocalPluginComponent } from './layout/local-plugin/local-plugin.component'
 import { GuideComponent } from './layout/guide/guide.component'
 import { DynamicDemoComponent } from './layout/dynamic-demo/dynamic-demo.component'
-import { OuterComponent } from './layout/outer/outer.component'
-import { IntelligentPluginLayoutComponent } from './component/intelligent-plugin/layout/layout.component'
+import { environment } from '../environments/environment'
+import { NotFoundPageComponent } from './layout/not-found-page/not-found-page.component'
+import { RemotePluginComponent } from './layout/remote-plugin/remote-plugin.component'
+import { AuthInfoComponent } from './layout/auth/info/info.component'
 const routes: Routes = [
   {
     path: 'auth',
@@ -32,25 +32,23 @@ const routes: Routes = [
   },
   {
     path: '',
+    pathMatch: 'full',
+    component: LoginComponent
+  },
+  {
+    path: '',
     component: BasicLayoutComponent,
     children: [
-
       {
         path: 'guide',
         component: GuideComponent
       },
-      {
-        path: 'auth-info',
-        component: AuthInfoComponent,
-        data: {
-          id: '8'
-        }
-      },
-
-      {
-        path: 'auth-update',
-        component: AuthUpdateComponent
-      },
+      ...(environment.isBusiness
+        ? [{
+            path: 'auth-info',
+            component: AuthInfoComponent
+          }]
+        : []),
       {
         path: 'deploy',
         data: {
@@ -59,14 +57,6 @@ const routes: Routes = [
         loadChildren: () => import('./layout/deploy/deploy.module').then(m => m.DeployModule)
       },
       {
-        path: 'upstream',
-        data: {
-          id: '2'
-        },
-        loadChildren: () => import('./layout/upstream/upstream.module').then(m => m.UpstreamModule)
-      },
-
-      {
         path: 'application',
         data: {
           id: '3'
@@ -74,7 +64,6 @@ const routes: Routes = [
         pathMatch: 'prefix',
         loadChildren: () => import('./layout/application/application.module').then(m => m.ApplicationModule)
       },
-
       {
         path: 'router',
         data: {
@@ -111,11 +100,11 @@ const routes: Routes = [
         loadChildren: () => import('./layout/plugin/plugin-management.module').then(m => m.PluginManagementModule)
       },
       {
-        path: 'navigation',
+        path: 'log',
         data: {
           id: '11'
         },
-        loadChildren: () => import('./layout/navigation/navigation.module').then(m => m.NavigationModule)
+        loadChildren: () => import('./layout/log-retrieval/log-retrieval.module').then(m => m.LogRetrievalModule)
       },
       {
         path: 'dynamic-demo',
@@ -134,9 +123,22 @@ const routes: Routes = [
         children: [
           {
             path: ':moduleName',
-            children: [{ path: ':subPath', component: IframePageComponent }, {
+            children: [{ path: ':subPath', component: LocalPluginComponent }, {
               path: '**',
-              component: IframePageComponent
+              component: LocalPluginComponent
+            }
+            ]
+          }
+        ]
+      },
+      {
+        path: 'remote',
+        children: [
+          {
+            path: ':moduleName',
+            children: [{ path: ':subPath', component: RemotePluginComponent }, {
+              path: '**',
+              component: RemotePluginComponent
             }
             ]
           }
@@ -144,19 +146,13 @@ const routes: Routes = [
       },
       {
         path: 'template',
+        loadChildren: () => import('./layout/intelligent-plugin/intelligent-plugin.module').then(m => m.IntelligentPluginModule)
+      },
+      {
+        path: '**',
         data: {
         },
-        component: OuterComponent,
-        children: [
-          {
-            path: ':moduleName',
-            children: [{
-              path: '**',
-              component: IntelligentPluginLayoutComponent
-            }
-            ]
-          }
-        ]
+        component: NotFoundPageComponent
       }
     ]
   }

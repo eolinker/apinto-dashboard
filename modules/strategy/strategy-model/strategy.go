@@ -1,8 +1,8 @@
 package strategy_model
 
 import (
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-entry"
-	apinto_module "github.com/eolinker/apinto-module"
 	"time"
 )
 
@@ -96,9 +96,9 @@ type RemoteTitles struct {
 }
 
 type RemoteApis struct {
-	Uuid        string `json:"uuid"`
-	Name        string `json:"name"`
-	Service     string `json:"service"`
+	Uuid  string `json:"uuid"`
+	Title string `json:"title"`
+	//Service     string `json:"service"`
 	Group       string `json:"group"`
 	RequestPath string `json:"request_path"`
 }

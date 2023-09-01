@@ -3,11 +3,11 @@ name: "redis"
 cname: "Redis配置"
 resume: "配置Redis Cluster信息，帮助Apinto节点接入Redis资源。"
 version: "v1.0.0"
-icon: "监控告警.png"
+icon: "Redis配置.png"
 driver: "dynamic.apinto.com"
 front: template
 navigation: "navigation.system"
-group_id: "log"
+group_id: "cache"
 define:  # 动态模块定义
   profession: output
   drivers:
@@ -24,7 +24,7 @@ define:  # 动态模块定义
     - name: description
       title: 描述
   render:
-    file: |
+    redis: |
       {
           "type":"object",
           "properties":{
@@ -44,17 +44,20 @@ define:  # 动态模块定义
                           "sort":{
                               "type":"void",
                               "x-decorator":"FormItem",
-                              "x-component":"ArrayItems.SortHandle"
+                              "x-component":"ArrayItems.SortHandle",
+                              "x-index":0
                           },
                           "select":{
                               "type":"string",
                               "x-decorator":"FormItem",
-                              "x-component":"Input"
+                              "x-component":"Input",
+                                    "x-index":1
                           },
                           "remove":{
                               "type":"void",
                               "x-decorator":"FormItem",
-                              "x-component":"ArrayItems.Remove"
+                              "x-component":"ArrayItems.Remove",
+                                    "x-index":2
                           }
                       }
                   },
@@ -86,7 +89,7 @@ define:  # 动态模块定义
                   },
                   "name":"username",
                   "x-index":1,
-                  "required":true
+                  "required":false
               },
               "password":{
                   "type":"string",
@@ -105,7 +108,7 @@ define:  # 动态模块定义
                   },
                   "name":"password",
                   "x-index":2,
-                  "required":true
+                  "required":false
               }
           }
       }

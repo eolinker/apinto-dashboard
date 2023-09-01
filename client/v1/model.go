@@ -405,12 +405,14 @@ type ApplicationConfig struct {
 	Labels      map[string]string       `json:"labels,omitempty"`
 	Additional  []ApplicationAdditional `json:"additional,omitempty"` //额外参数
 	Anonymous   bool                    `json:"anonymous"`            //是否匿名
+	Version     string                  `json:"version"`
 }
 
 type ApplicationAdditional struct {
 	Key      string `json:"key,omitempty"`
 	Value    string `json:"value,omitempty"`
 	Position string `json:"position,omitempty"` //header,query,body
+	Conflict string `json:"conflict,omitempty"`
 }
 
 type ApplicationAuth struct {
@@ -561,6 +563,7 @@ type PluginTemplateConfig struct {
 	Name        string             `json:"name"`
 	Driver      string             `json:"driver"`
 	Description string             `json:"description"`
+	Version     string             `json:"version"`
 }
 
 type PluginTemplateInfo struct {

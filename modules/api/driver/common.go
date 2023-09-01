@@ -261,7 +261,7 @@ func toApinto(name, desc string, disable bool, method []string, requestPath, req
 	appendData["host"] = hosts
 	appendData["location"] = requestPath
 	appendData["rules"] = rules
-	appendData["service"] = fmt.Sprintf("%s@service", serviceName)
+	appendData["service"] = serviceName
 	appendData["template"] = templateID
 	appendData["retry"] = retry
 	appendData["time_out"] = timeout
