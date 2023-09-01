@@ -45,6 +45,7 @@ mkdir -p ../work/logs
 
 ln -snf ../config.yml config.yml
 ln -snf ../work work
+ln -snf ../local local
 ln -snf $project_name ../${appName}
 
 rm -rf ${OUTPUT_DIR}/${appName}/install.sh
