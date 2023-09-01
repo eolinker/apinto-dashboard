@@ -34,6 +34,7 @@ prebuild:
   stage: prefix
   script:
     - echo "prebuild"
+    - chmod +x ./scripts/prefix.sh
     - ./scripts/prefix.sh
 
 frontend-builder: # 前端构建
