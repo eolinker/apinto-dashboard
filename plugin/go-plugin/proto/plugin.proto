@@ -1,0 +1,50 @@
+syntax = "proto3";
+package proto;
+option go_package = "github.com/eolink/apinto-dashboard/plugin/go-plugin/internal/proto";
+message Header {
+  string key = 1;
+  repeated string value = 2;
+}
+message HttpRequest{
+  string method = 1;
+  string url = 2;
+  bytes body = 3;
+  repeated Header headers = 4;
+  bytes keys = 5;
+  string FulPath = 6;
+}
+message HttpResponse{
+  int32 status = 1;
+  bytes body = 2;
+  repeated Header headers = 3;
+}
+
+message MiddlewareRequest{
+  string name = 1;
+  HttpRequest request = 2;
+}
+
+message MiddlewareResponse{
+  bool  abort = 1;
+  string  Action = 2;
+  repeated Header  headers = 3;
+  bytes  Body = 4;
+  int32  StatusCode = 5;
+  string  ContentType = 6;
+  bytes keys = 7;
+
+}
+message MiddlewareInfoRequest{
+  string name = 1;
+}
+message MiddlewareInfoResponse{
+  string name = 1;
+  bool  request  =2;
+  bool  response = 3;
+}
+service Service {
+  rpc Request(HttpRequest) returns (HttpResponse);
+  rpc MiddlewaresRequest(MiddlewareRequest) returns (MiddlewareResponse);
+  rpc MiddlewaresResponse(MiddlewareRequest) returns (MiddlewareResponse);
+  rpc GetMiddlewareInfo(MiddlewareInfoRequest) returns (MiddlewareInfoResponse);
+}

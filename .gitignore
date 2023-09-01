@@ -55,6 +55,7 @@ deploy.gitlab-ci.yml
 /frontend/dist
 /apinto-build/
 /app/work
+/app/apserver/local
 /.pnpm-debug.log
 vender
 /out/

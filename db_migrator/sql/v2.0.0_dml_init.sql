@@ -1,1 +1,0 @@
-INSERT INTO `namespace`(`id`, `name`, `create_time`) VALUES (1, 'default', now());

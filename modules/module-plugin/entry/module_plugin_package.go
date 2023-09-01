@@ -1,8 +1,8 @@
 package entry
 
 type ModulePluginPackage struct {
-	Id      int    `gorm:"id" json:"id"`
-	Package []byte `gorm:"package" json:"package"`
+	Id      int    `gorm:"column:id;type:int(11);autoIncrement:false;primary_key;comment:模块插件表的主键ID" json:"id"`
+	Package []byte `gorm:"column:package;type:mediumblob;not null;comment:安装包" json:"package"`
 }
 
 func (*ModulePluginPackage) TableName() string {
