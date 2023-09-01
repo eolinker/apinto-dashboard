@@ -6,9 +6,12 @@
 cd "$(dirname "$0")"
 cd ../../
 BASEPATH="$(pwd)"
+
+
 # =========================================================================
 # 更新 go-plugin
 # =========================================================================
+echo "更新 go-plugin"
 cd "${BASEPATH}/"
 if [ ! -d "./go-plugin" ]; then
    git clone git@gitlab.eolink.com:apinto/go-plugin.git
@@ -19,6 +22,7 @@ cd "./go-plugin" && git pull
 # =========================================================================
 # 更新 eosc
 # =========================================================================
+echo "更新 eosc"
 cd "${BASEPATH}/"
 if [ ! -d "./eosc" ]; then
    git clone git@gitlab.eolink.com:goku/eosc.git
@@ -29,9 +33,11 @@ cd "./eosc" && git pull
 # 更新 business
 # =========================================================================
 
+echo "更新 business"
 cd "${BASEPATH}/"
 if [ ! -d "./apinto-business" ]; then
-   git clone git@gitlab.eolink.com:apinto/dashboard.git
+
+   git clone git@gitlab.eolink.com:apinto/business.git
    mv dashboard apinto-business
 fi
 cd "./apinto-business" && git pull
