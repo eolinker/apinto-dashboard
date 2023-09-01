@@ -38,6 +38,6 @@ cd "${BASEPATH}/"
 if [ ! -d "./apinto-business" ]; then
 
    git clone git@gitlab.eolink.com:apinto/business.git
-   mv dashboard apinto-business
+   mv business apinto-business
 fi
 cd "./apinto-business" && git pull
