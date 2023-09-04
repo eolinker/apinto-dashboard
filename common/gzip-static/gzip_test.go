@@ -202,6 +202,7 @@ func TestDecompressGzip(t *testing.T) {
 			t.Errorf("unexpected `Content-Length`: %s header", v)
 		}
 		data, err := c.GetRawData()
+		c.Request.Body.Close()
 		if err != nil {
 			t.Fatal(err)
 		}

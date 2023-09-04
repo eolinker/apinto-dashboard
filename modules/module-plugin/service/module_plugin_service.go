@@ -221,12 +221,12 @@ func (m *modulePluginService) GetPluginEnableRender(ctx context.Context, pluginU
 	pluginDefine := new(model.PluginDefine)
 	_ = json.Unmarshal(pluginInfo.Details, pluginDefine)
 
-	switch pluginInfo.Driver {
-	case pluginDriverRemote:
-		//忽略Header
-	case pluginDriverLocal:
-		renderCfg.Headers = pluginDefine.Headers
-	}
+	//switch pluginInfo.Driver {
+	//case pluginDriverRemote:
+	//	//忽略Header
+	//case pluginDriverLocal:
+	//	renderCfg.Headers = pluginDefine.Headers
+	//}
 	driver, has := apinto_module.GetDriver(pluginInfo.Driver)
 	if !has {
 		return nil, ErrModulePluginDriverNotFound

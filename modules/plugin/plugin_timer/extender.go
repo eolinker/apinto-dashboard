@@ -49,7 +49,7 @@ func (e *extender) UpdateExtender() {
 
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println("panic", common.PanicTrace(err))
+			log.Info("panic", common.PanicTrace(err))
 			return
 		}
 	}()

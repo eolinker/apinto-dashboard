@@ -14,6 +14,7 @@ default:
       - ${BUILD_DIR}
 stages:
   - notice
+  - prefix
   - build
   - publish
   - webhook
@@ -29,6 +30,12 @@ feishu-informer: # 飞书回调
       curl -X POST -H "Content-Type: application/json" \
       -d "{\"msg_type\":\"text\",\"content\":{\"text\":\"项目：${CI_PROJECT_NAME}\\n提交人：${GITLAB_USER_NAME}\\n提交信息：${CI_MERGE_REQUEST_TITLE}\\n合并分支信息：${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME} -> ${CI_MERGE_REQUEST_TARGET_BRANCH_NAME}\\n差异性地址：${DIFF_URL}\\n请及时review代码\"}}" \
       https://open.feishu.cn/open-apis/bot/v2/hook/1c334752-2874-41a1-8f1b-3060f2d46b6c
+prebuild:
+  stage: prefix
+  script:
+    - echo "prebuild"
+    - chmod +x ./scripts/prefix.sh
+    - ./scripts/prefix.sh
 
 frontend-builder: # 前端构建
   stage: build

@@ -13,7 +13,7 @@ func indexRouter() apinto_module.RouterInfo {
 		Method:      http.MethodGet,
 		Path:        "/",
 		Handler:     "index",
-		Labels:      apinto_module.RouterLabelModule,
+		Labels:      apinto_module.RouterLabelAssets,
 		HandlerFunc: []apinto_module.HandlerFunc{frontend.IndexHtml},
 	}
 }
