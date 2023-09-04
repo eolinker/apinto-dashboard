@@ -20,7 +20,21 @@ type userInfoStore struct {
 }
 
 func newUserInfoStore(db store.IDB) IUserInfoStore {
-	return &userInfoStore{BaseStore: store.CreateStore[user_entry.UserInfo](db)}
+	us := &userInfoStore{BaseStore: store.CreateStore[user_entry.UserInfo](db)}
+
+	us.Save(context.Background(), &user_entry.UserInfo{
+		Id:            0,
+		Sex:           0,
+		UserName:      "admin",
+		Password:      "40fef0045b126ec72328af3923ba3070",
+		NoticeUserId:  "",
+		NickName:      "",
+		Email:         "",
+		Phone:         "",
+		Avatar:        "",
+		LastLoginTime: nil,
+	})
+	return us
 }
 
 func (u *userInfoStore) GetByUserName(ctx context.Context, userName string) (*user_entry.UserInfo, error) {

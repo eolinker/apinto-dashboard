@@ -9,3 +9,4 @@ apinto_plugin.yml
 work
 /plugin/
 *.exe
+/local/

@@ -51,6 +51,11 @@ type BaseStore[T any] struct {
 }
 
 func CreateStore[T any](db IDB) *BaseStore[T] {
+	ctx := context.Background()
+	err := db.DB(ctx).AutoMigrate(new(T))
+	if err != nil {
+		panic(err)
+	}
 	b := &BaseStore[T]{
 		IDB:        db,
 		TargetType: new(T),

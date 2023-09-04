@@ -2,7 +2,7 @@ package cluster_controller
 
 import (
 	"encoding/json"
-	"fmt"
+	"github.com/eolinker/eosc/log"
 	"net/http"
 	"sort"
 	"strings"
@@ -174,7 +174,7 @@ func (c *clusterController) create(ginCtx *gin.Context) {
 	}
 
 	if input.Name == "" || input.Env == "" || input.Addr == "" || input.Source == "" {
-		fmt.Println(*input)
+		log.Info(*input)
 		controller.ErrorJson(ginCtx, http.StatusOK, "parameter error")
 		return
 	}

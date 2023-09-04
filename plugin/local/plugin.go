@@ -19,74 +19,74 @@ func newTPlugin(define interface{}) (apinto_module.Plugin, error) {
 	return &tPlugin{define: dv}, nil
 }
 
-func (t *tPlugin) CreateModule(name string, config interface{}) (apinto_module.Module, error) {
-	cv, err := t.checkConfig(name, config)
+func (p *tPlugin) CreateModule(name string, config interface{}) (apinto_module.Module, error) {
+	cv, err := p.checkConfig(name, config)
 	if err != nil {
 		return nil, err
 	}
 
-	p := NewProxyAPi(cv.Server, name, cv)
+	proxy := NewProxyAPi(p.define.Cmd, name, cv)
 	module := &tModule{name: name}
 
-	module.routersInfo = append(module.routersInfo, p.CreateHome(t.define.Router.Home)...)
-	for _, html := range t.define.Router.Html {
-		module.routersInfo = append(module.routersInfo, p.CreateHtml(html.Path, html.Label))
+	module.routersInfo = append(module.routersInfo, proxy.CreateHome(p.define.Router.Home)...)
+	for _, html := range p.define.Router.Html {
+		module.routersInfo = append(module.routersInfo, proxy.CreateHtml(html.Path, html.Label))
 	}
-	for _, a := range t.define.Router.Frontend {
+	for _, a := range p.define.Router.Frontend {
 		path := fmt.Sprintf("/%s/", strings.Trim(a, "/"))
-		module.routersInfo = append(module.routersInfo, p.CreateHtml(path, apinto_module.RouterLabelAssets))
+		module.routersInfo = append(module.routersInfo, proxy.CreateHtml(path, apinto_module.RouterLabelAssets))
 	}
-	for path, ms := range t.define.Router.Api {
+	for path, ms := range p.define.Router.Api {
 		for method, att := range ms {
 
-			module.routersInfo = append(module.routersInfo, p.CreateApi(fmt.Sprintf("%s.%s", method, path), method, path, att))
+			module.routersInfo = append(module.routersInfo, proxy.CreateApi(fmt.Sprintf("%s.%s", method, path), method, path, att))
 
 		}
 	}
-	for path, ms := range t.define.Router.OpenApi {
+	for path, ms := range p.define.Router.OpenApi {
 		for method, att := range ms {
-			module.routersInfo = append(module.routersInfo, p.CreateOpenApi(fmt.Sprintf("%s.%s", method, path), method, path, att))
+			module.routersInfo = append(module.routersInfo, proxy.CreateOpenApi(fmt.Sprintf("%s.%s", method, path), method, path, att))
 		}
 	}
-	for _, m := range t.define.Middleware {
+	for _, m := range p.define.Middleware {
 		rules := make([][]string, 0, len(m.Rule))
 		for _, rl := range m.Rule {
 			rules = append(rules, strings.Split(rl, ","))
 		}
-		module.middlewareHandler = append(module.middlewareHandler, p.CreateMiddleware(m.Name, m.Path, m.Life, rules))
+		module.middlewareHandler = append(module.middlewareHandler, proxy.CreateMiddleware(m.Name, rules))
 	}
 
 	return module, nil
 }
 
-func (t *tPlugin) CheckConfig(name string, config interface{}) error {
-	_, err := t.checkConfig(name, config)
+func (p *tPlugin) CheckConfig(name string, config interface{}) error {
+	_, err := p.checkConfig(name, config)
 	if err != nil {
 		return err
 	}
 	return nil
 }
-func (t *tPlugin) checkConfig(name string, config interface{}) (*Config, error) {
+func (p *tPlugin) checkConfig(name string, config interface{}) (*Config, error) {
 	return DecodeConfig(config)
 }
 
-func (c *tPlugin) GetPluginFrontend(moduleName string) string {
+func (p *tPlugin) GetPluginFrontend(moduleName string) string {
 	return fmt.Sprintf("module/%s", moduleName)
 }
 
-func (c *tPlugin) IsPluginVisible() bool {
+func (p *tPlugin) IsPluginVisible() bool {
 	return true
 }
 
-func (c *tPlugin) IsShowServer() bool {
+func (p *tPlugin) IsShowServer() bool {
+	return false
+}
+
+func (p *tPlugin) IsCanUninstall() bool {
 	return true
 }
 
-func (c *tPlugin) IsCanUninstall() bool {
-	return true
-}
-
-func (c *tPlugin) IsCanDisable() bool {
+func (p *tPlugin) IsCanDisable() bool {
 	return true
 }
 
