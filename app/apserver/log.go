@@ -34,7 +34,7 @@ func initLog() {
 		Period: filelog.ParsePeriod(config.GetLogPeriod()),
 	})
 
-	writer := ToCopyToIoWriter(os.Stdout, fileWriter)
+	writer := ToCopyToIoWriter(os.Stderr, fileWriter)
 
 	transport := log.NewTransport(writer, config.GetLogLevel())
 	plugin_client.SetLog(config.GetLogLevel().String(), writer)
