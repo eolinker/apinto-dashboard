@@ -3,7 +3,6 @@ module github.com/eolinker/apinto-dashboard
 go 1.18
 
 require (
-	github.com/eolinker/apinto-business v0.0.0-00010101000000-000000000000
 	github.com/eolinker/eosc v0.14.1
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-basic/uuid v1.0.0
@@ -11,7 +10,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/golang/mock v1.6.0
 	github.com/hashicorp/go-hclog v0.14.1
-	github.com/hashicorp/go-plugin v0.0.0-00010101000000-000000000000
+	github.com/hashicorp/go-plugin v1.5.0
 	github.com/ohler55/ojg v1.18.5
 	github.com/soheilhy/cmux v0.1.5
 	github.com/stretchr/testify v1.8.3
@@ -77,8 +76,6 @@ require (
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 )
 
-replace github.com/eolinker/eosc => ../eosc
+//replace github.com/eolinker/eosc => ../eosc
 
-replace github.com/eolinker/apinto-business => ../apinto-business
-
-replace github.com/hashicorp/go-plugin => ../go-plugin
+replace github.com/hashicorp/go-plugin v1.5.0 => github.com/hmzzrcs/go-plugin v1.5.1
