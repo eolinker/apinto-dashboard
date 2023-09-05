@@ -27,10 +27,7 @@ func (c *remoteStorage) Get(ctx context.Context, module, key string) (*entry.Rem
 }
 
 func newRemoteStorageStore(db store.IDB) IRemoteStorage {
-	err := db.DB(context.Background()).AutoMigrate(&entry.RemoteKeyObject{})
-	if err != nil {
-		panic(err)
-	}
+ 
 	base := store.CreateStore[entry.RemoteKeyObject](db)
 
 	return &remoteStorage{IBaseStore: base}

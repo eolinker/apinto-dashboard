@@ -26,10 +26,7 @@ type modulePluginStore struct {
 
 func newModulePluginStore(db store.IDB) IModulePluginStore {
 	ctx := context.Background()
-	err := db.DB(ctx).AutoMigrate(&entry.ModulePlugin{})
-	if err != nil {
-		panic(err)
-	}
+	ms := &modulePluginStore{BaseStore: store.CreateStore[entry.ModulePlugin](db)}
 	migrate := db.DB(ctx).Migrator()
 	if migrate.HasColumn(&entry.ModulePlugin{}, "type") {
 		db.DB(ctx).Model(&entry.ModulePlugin{}).Where("type = 3").Updates(map[string]interface{}{
@@ -48,7 +45,7 @@ func newModulePluginStore(db store.IDB) IModulePluginStore {
 			panic(err)
 		}
 	}
-	return &modulePluginStore{BaseStore: store.CreateStore[entry.ModulePlugin](db)}
+	return ms
 }
 
 func (c *modulePluginStore) GetPluginList(ctx context.Context, groupID string, searchName string) ([]*entry.PluginListItem, error) {

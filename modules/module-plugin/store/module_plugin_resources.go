@@ -20,9 +20,6 @@ func (c *pluginResources) GetByUUID(ctx context.Context, uuid string) (*entry.Pl
 }
 
 func newPluginResourcesStore(db store.IDB) IPluginResources {
-	err := db.DB(context.Background()).AutoMigrate(&entry.PluginResources{})
-	if err != nil {
-		panic(err)
-	}
+
 	return &pluginResources{IBaseStore: store.CreateStore[entry.PluginResources](db)}
 }

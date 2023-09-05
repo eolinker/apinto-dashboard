@@ -5,6 +5,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/cache"
 	"github.com/eolinker/apinto-dashboard/modules/namespace/namespace-entry"
 	"github.com/eolinker/apinto-dashboard/store"
+	"time"
 )
 
 type INamespaceStore interface {
@@ -19,7 +20,14 @@ type namespaceStore struct {
 }
 
 func newNamespaceStore(db store.IDB) INamespaceStore {
-	return &namespaceStore{BaseStore: store.CreateStore[namespace_entry.Namespace](db)}
+
+	s := &namespaceStore{BaseStore: store.CreateStore[namespace_entry.Namespace](db)}
+	s.Save(context.Background(), &namespace_entry.Namespace{
+		Id:         1,
+		Name:       "default",
+		CreateTime: time.Now(),
+	})
+	return s
 }
 
 func (n *namespaceStore) GetByName(ctx context.Context, name string) (*namespace_entry.Namespace, error) {
