@@ -19,7 +19,7 @@ func InitDb() {
 	dns := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", getDBUserName(), getDBPassword(), getDBIp(), getDBPort(), getDBName())
 	dialector := mysql.Open(dns)
 	db, err := gorm.Open(dialector, &gorm.Config{
-		Logger: logger.New(slog.New(os.Stdout, "\r\n", slog.LstdFlags), logger.Config{
+		Logger: logger.New(slog.New(os.Stderr, "\r\n", slog.LstdFlags), logger.Config{
 			SlowThreshold:             200 * time.Millisecond,
 			LogLevel:                  logger.Warn,
 			IgnoreRecordNotFoundError: false,

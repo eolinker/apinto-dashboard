@@ -50,10 +50,6 @@ type coreService struct {
 	filterOptionHandlerManager apinto_module.IFilterOptionHandlerManager
 }
 
-func (c *coreService) SetCoreModule(module apinto_module.CoreModule) {
-	c.coreModule = module
-}
-
 func (c *coreService) HasModule(module string, path string) bool {
 	if c.modulesData == nil {
 		return false
@@ -250,5 +246,6 @@ func NewService(providerService IProviderService) core.ICore {
 	bean.Autowired(&c.modulePluginService)
 	bean.Autowired(&c.engineCreate)
 	bean.Autowired(&c.cacheCommon)
+
 	return c
 }
