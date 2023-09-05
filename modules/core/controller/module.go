@@ -188,6 +188,26 @@ func NewModule() *Module {
 			Handler:     "core.provider",
 			HandlerFunc: []apinto_module.HandlerFunc{m.enum},
 			Labels:      apinto_module.RouterLabelAssets,
+		}, {
+			Method:      http.MethodGet,
+			Path:        fmt.Sprintf("/api/common/report"),
+			Handler:     "core.provider",
+			HandlerFunc: []apinto_module.HandlerFunc{m.reportStatus},
+			Labels:      apinto_module.RouterLabelAssets,
+		},
+		{
+			Method:      http.MethodPost,
+			Path:        fmt.Sprintf("/api/common/report"),
+			Handler:     "core.provider",
+			HandlerFunc: []apinto_module.HandlerFunc{m.updateReport},
+			Labels:      apinto_module.RouterLabelAssets,
+		},
+		{
+			Method:      http.MethodPut,
+			Path:        fmt.Sprintf("/api/common/report"),
+			Handler:     "core.provider",
+			HandlerFunc: []apinto_module.HandlerFunc{m.updateReport},
+			Labels:      apinto_module.RouterLabelAssets,
 		},
 	}
 	assets := staticFile("/assets", "dist/assets")
