@@ -3,6 +3,7 @@ import { WebsocketService, WsRef } from '../../../service/websocket.service'
 import { EoNgCodeboxComponent } from 'eo-ng-codebox'
 import { Subscription } from 'rxjs'
 import { saveAs } from 'file-saver'
+import { environment } from 'projects/core/src/environments/environment'
 
 @Component({
   selector: 'eo-ng-tail-log',
@@ -37,6 +38,9 @@ export class EoNgLogRetrievalTailComponent {
   constructor (private ws:WebsocketService) {}
 
   ngOnInit () {
+    if (environment.production) {
+      this.url = `ws://${window.location.host}/api/log/tail/${this.tailKey}`
+    }
     this.connectWs()
   }
 
