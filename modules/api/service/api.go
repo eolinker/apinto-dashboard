@@ -2072,6 +2072,22 @@ func (a *apiService) GetLatestAPIVersion(ctx context.Context, apiId int) (*apien
 	return a.apiVersion.Get(ctx, stat.VersionID)
 }
 
+func checkHostRepeat(hostMap map[string]struct{}, hosts []string, path string, method string) error {
+	// 查重Host是否重复
+	if len(hostMap) > 0 {
+		for _, host := range hosts {
+			if _, has := hostMap[host]; has {
+				return fmt.Errorf("requestPath %s, method %s, host %s is reduplicative. ", path, method, host)
+			}
+		}
+	} else {
+		if len(hosts) == 0 {
+			return fmt.Errorf("requestPath %s, method %s, host null is reduplicative. ", path, method)
+		}
+	}
+	return nil
+}
+
 // CheckAPIReDuplicative TODO 检测API配置是否重复，不可同名同request_url同method
 func (a *apiService) CheckAPIReDuplicative(ctx context.Context, namespaceID int, uuid string, input *api_dto.APIInfo) error {
 	//获取相同requestPath的API
@@ -2098,20 +2114,9 @@ func (a *apiService) CheckAPIReDuplicative(ctx context.Context, namespaceID int,
 		//查重Method  空Method数组表示ALL，ALL和其它method不重复，但ALL和ALL会重复
 		//若已有API的method为ALL
 		if len(apiVersion.Method) == 0 && inputLen == 0 {
-			hosts := strings.Split(api.Hosts, ",")
-			// 查重Host是否重复
-			if len(hostMap) > 0 {
-				for _, host := range hosts {
-					if _, has := hostMap[host]; has {
-						return fmt.Errorf("requestPath %s, method ALL, host %s is reduplicative. ", input.RequestPathLabel, host)
-					}
-				}
-			} else {
-				if len(hosts) == 0 {
-					return fmt.Errorf("requestPath %s, method ALL, host null is reduplicative. ", input.RequestPathLabel)
-				}
+			if err := checkHostRepeat(hostMap, strings.Split(api.Hosts, ","), input.RequestPathLabel, "ALL"); err != nil {
+				return err
 			}
-			//return fmt.Errorf("requestPath %s and method ALL is reduplicative. ", input.RequestPathLabel)
 		} else {
 			//若已有API的method不为为ALL
 			if inputLen == 0 {
@@ -2122,20 +2127,9 @@ func (a *apiService) CheckAPIReDuplicative(ctx context.Context, namespaceID int,
 			})
 			for _, m := range input.Method {
 				if _, has := currentMap[m]; has {
-					hosts := strings.Split(api.Hosts, ",")
-					// 查重Host是否重复
-					if len(hostMap) > 0 {
-						for _, host := range hosts {
-							if _, has := hostMap[host]; has {
-								return fmt.Errorf("requestPath %s, method %s, host %s is reduplicative. ", input.RequestPathLabel, m, host)
-							}
-						}
-					} else {
-						if len(hosts) == 0 {
-							return fmt.Errorf("requestPath %s, method %s, host null is reduplicative. ", input.RequestPathLabel, m)
-						}
+					if err := checkHostRepeat(hostMap, strings.Split(api.Hosts, ","), input.RequestPathLabel, m); err != nil {
+						return err
 					}
-					//return fmt.Errorf("requestPath %s and method %s is reduplicative. ", input.RequestPathLabel, m)
 				}
 			}
 		}
