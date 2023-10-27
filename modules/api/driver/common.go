@@ -3,13 +3,14 @@ package driver
 import (
 	"errors"
 	"fmt"
+	"net/textproto"
+	"strings"
+
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/enum"
 	api_dto "github.com/eolinker/apinto-dashboard/modules/api/api-dto"
 	api_entry "github.com/eolinker/apinto-dashboard/modules/api/api-entry"
-	"net/textproto"
-	"strings"
 )
 
 const apintoRestfulRegexp = "([0-9a-zA-Z-_]+)"
@@ -62,13 +63,9 @@ func checkInput(input *api_dto.APIInfo) error {
 	if input.ServiceName == "" {
 		return errors.New("service_name can't be nil. ")
 	}
-
 	var err error
 	//格式化,并且校验请求路径
 	input.RequestPath = "/" + strings.TrimPrefix(strings.TrimSpace(input.RequestPath), "/")
-	if input.RequestPath == "/" {
-		return errors.New("request_path can't be / . ")
-	}
 
 	if input.RequestPath, err = common.CheckAndFormatPath(input.RequestPath); err != nil {
 		return errors.New("request_path is illegal. ")
