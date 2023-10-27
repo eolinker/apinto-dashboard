@@ -185,7 +185,7 @@ docker run -dt --name apinto_mysql -p {PORT}:3306 \
 -v /var/lib/apinto/mysql:/var/lib/mysql \
 --network=apinto --privileged=true --restart=always \
 -e MYSQL_ROOT_PASSWORD={PASSWORD} -e MYSQL_DATABASE=apinto \
-mysql:5.7.21
+mysql:5.7.34 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
 ```
 
 上述命令中，使用`{}`包裹的为可修改变量，变量说明如下
@@ -200,7 +200,7 @@ docker run -dt --name apinto_mysql -p 33306:3306 \
 -v /var/lib/apinto/mysql:/var/lib/mysql \
 --network=apinto --privileged=true \
 -e MYSQL_ROOT_PASSWORD=123456 -e MYSQL_DATABASE=apinto \
-mysql:5.7.21
+mysql:5.7.34 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
 ```
 
 3、安装`Redis`
@@ -254,11 +254,14 @@ vi docker-compose.yml
 version: '3'
 services:
   mysql:
-    image: mysql:5.7.21
+    image: mysql:5.7.34
     privileged: true
     restart: always
     container_name: apinto_mysql
     hostname: apinto_mysql
+    command:
+      - "--character-set-server=utf8mb4"
+      - "--collation-server=utf8mb4_unicode_ci"
     ports:
       - "33306:3306"
     environment:
@@ -339,11 +342,14 @@ ip route
 version: '3'
 services:
   mysql:
-    image: mysql:5.7.21
+    image: mysql:5.7.34
     privileged: true
     restart: always
     container_name: apinto_mysql
     hostname: apinto_mysql
+    command:
+      - "--character-set-server=utf8mb4"
+      - "--collation-server=utf8mb4_unicode_ci"
     ports:
       - "33306:3306"
     environment:

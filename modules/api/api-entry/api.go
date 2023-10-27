@@ -22,6 +22,7 @@ type API struct {
 	Operator         int       `gorm:"type:int(11);size:11;column:operator;comment:更新人/操作人" json:"operator,omitempty"`
 	CreateTime       time.Time `gorm:"type:timestamp;NOT NULL;DEFAULT:CURRENT_TIMESTAMP;column:create_time;comment:创建时间" json:"create_time"`
 	UpdateTime       time.Time `gorm:"type:timestamp;NOT NULL;DEFAULT:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;column:update_time;comment:修改时间" json:"update_time"`
+	Hosts            string    `gorm:"type:text;column:hosts;comment:请求域名限制" json:"hosts,omitempty"`
 }
 
 // /user/{uuid}

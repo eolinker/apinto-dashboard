@@ -20,7 +20,7 @@ if [[ "${PLATFORM}" == "mac" ]];then
 fi
 
 # 编译
-./scripts/build.sh ${OUTPUT_DIR} ${MODE} ${VERSION} business
+./scripts/build.sh ${OUTPUT_DIR} ${MODE} ${VERSION}
 
 docker build ${OPTIONS} -t docker.eolinker.com/docker/apinto/apserver:${VERSION} --build-arg VERSION=${VERSION} --build-arg APP="apserver" --build-arg DIR=${OUTPUT_DIR} -f scripts/Dockerfile ./
 
