@@ -6,12 +6,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	status_code "github.com/eolinker/apinto-dashboard/modules/api/status-code"
-	dynamic_model "github.com/eolinker/apinto-dashboard/modules/dynamic/dynamic-model"
 	"reflect"
 	"sort"
 	"strings"
 	"time"
+
+	status_code "github.com/eolinker/apinto-dashboard/modules/api/status-code"
+	dynamic_model "github.com/eolinker/apinto-dashboard/modules/dynamic/dynamic-model"
 
 	v2 "github.com/eolinker/apinto-dashboard/client/v2"
 	apinto_module "github.com/eolinker/apinto-dashboard/module"
@@ -544,7 +545,7 @@ func (a *apiService) GetAPIVersionInfo(ctx context.Context, namespaceID int, uui
 
 func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator int, input *api_dto.APIInfo) (string, int, error) {
 	uid := input.UUID
-	if err := a.CheckAPIReduplicative(ctx, namespaceID, uid, input); err != nil {
+	if err := a.CheckAPIReDuplicative(ctx, namespaceID, uid, input); err != nil {
 		return "", status_code.ApiRouterReduplicatedErr, err
 	}
 
@@ -601,6 +602,7 @@ func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator in
 			IsDisable:        input.IsDisable,
 			RequestPath:      input.RequestPath,
 			RequestPathLabel: input.RequestPathLabel,
+			Hosts:            strings.Join(input.Hosts, ","),
 			SourceType:       enum.SourceSelfBuild,
 			SourceID:         -1,
 			SourceLabel:      "",
@@ -699,7 +701,7 @@ func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator in
 }
 
 func (a *apiService) UpdateAPI(ctx context.Context, namespaceID int, operator int, input *api_dto.APIInfo) error {
-	if err := a.CheckAPIReduplicative(ctx, namespaceID, input.UUID, input); err != nil {
+	if err := a.CheckAPIReDuplicative(ctx, namespaceID, input.UUID, input); err != nil {
 		return err
 	}
 
@@ -770,6 +772,7 @@ func (a *apiService) UpdateAPI(ctx context.Context, namespaceID int, operator in
 	apiInfo.RequestPathLabel = input.RequestPathLabel
 	apiInfo.Operator = operator
 	apiInfo.UpdateTime = t
+	apiInfo.Hosts = strings.Join(input.Hosts, ",")
 
 	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
 		Uuid: input.UUID,
@@ -2069,12 +2072,32 @@ func (a *apiService) GetLatestAPIVersion(ctx context.Context, apiId int) (*apien
 	return a.apiVersion.Get(ctx, stat.VersionID)
 }
 
-// CheckAPIReduplicative TODO 检测API配置是否重复，不可同名同request_url同method
-func (a *apiService) CheckAPIReduplicative(ctx context.Context, namespaceID int, uuid string, input *api_dto.APIInfo) error {
+func checkHostRepeat(hostMap map[string]struct{}, hosts []string, path string, method string) error {
+	// 查重Host是否重复
+	if len(hostMap) > 0 {
+		for _, host := range hosts {
+			if _, has := hostMap[host]; has {
+				return fmt.Errorf("requestPath %s, method %s, host %s is reduplicative. ", path, method, host)
+			}
+		}
+	} else {
+		if len(hosts) == 0 {
+			return fmt.Errorf("requestPath %s, method %s, host null is reduplicative. ", path, method)
+		}
+	}
+	return nil
+}
+
+// CheckAPIReDuplicative TODO 检测API配置是否重复，不可同名同request_url同method
+func (a *apiService) CheckAPIReDuplicative(ctx context.Context, namespaceID int, uuid string, input *api_dto.APIInfo) error {
 	//获取相同requestPath的API
 	apiList, err := a.apiStore.GetListByRequestPath(ctx, namespaceID, input.RequestPath)
 	if err != nil {
 		return err
+	}
+	hostMap := make(map[string]struct{})
+	for _, host := range input.Hosts {
+		hostMap[host] = struct{}{}
 	}
 	inputLen := len(input.Method)
 	for _, api := range apiList {
@@ -2087,11 +2110,13 @@ func (a *apiService) CheckAPIReduplicative(ctx context.Context, namespaceID int,
 		if err != nil {
 			return err
 		}
-		//查重Method  空Method数组表示ALL，ALL和其它method不重复，但ALL和ALL会重复
 
+		//查重Method  空Method数组表示ALL，ALL和其它method不重复，但ALL和ALL会重复
 		//若已有API的method为ALL
 		if len(apiVersion.Method) == 0 && inputLen == 0 {
-			return fmt.Errorf("requestPath %s and method ALL is reduplicative. ", input.RequestPathLabel)
+			if err := checkHostRepeat(hostMap, strings.Split(api.Hosts, ","), input.RequestPathLabel, "ALL"); err != nil {
+				return err
+			}
 		} else {
 			//若已有API的method不为为ALL
 			if inputLen == 0 {
@@ -2102,7 +2127,9 @@ func (a *apiService) CheckAPIReduplicative(ctx context.Context, namespaceID int,
 			})
 			for _, m := range input.Method {
 				if _, has := currentMap[m]; has {
-					return fmt.Errorf("requestPath %s and method %s is reduplicative. ", input.RequestPathLabel, m)
+					if err := checkHostRepeat(hostMap, strings.Split(api.Hosts, ","), input.RequestPathLabel, m); err != nil {
+						return err
+					}
 				}
 			}
 		}
