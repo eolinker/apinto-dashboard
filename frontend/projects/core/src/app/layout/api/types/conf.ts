@@ -118,10 +118,6 @@ export const proxyHeaderTableBody:EO_TBODY_TYPE[] = [
   }
 ]
 
-export const defaultHostList:Array<{key:string}> = [
-  { key: '' }
-]
-
 export const hostHeaderTableBody:TBODY_TYPE[] = [
   {
     key: 'key',
