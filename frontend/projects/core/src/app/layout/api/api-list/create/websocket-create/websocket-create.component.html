@@ -141,7 +141,7 @@
           </div>
         </ng-container>
         <nz-form-item>
-          <nz-form-label [nzSpan]="5" nzRequired>请求路径：</nz-form-label>
+          <nz-form-label [nzSpan]="5">请求路径：</nz-form-label>
           <nz-form-control
             [nzSpan]="19"
             nzValidatingTip="Validating..."
@@ -156,7 +156,6 @@
                 style="height: unset !important"
                 eo-ng-input
                 name="requestPath"
-                required
                 placeholder="请输入"
                 formControlName="requestPath"
                 (blur)="requestPathChange()"
@@ -166,9 +165,6 @@
             <ng-template #nameErrorTpl let-control>
               <ng-container *ngIf="control.hasError('pattern')"
                 >请求路径不支持含有 ? 的字符串</ng-container
-              >
-              <ng-container *ngIf="control.hasError('required')"
-                >必填项</ng-container
               ></ng-template
             >
           </nz-form-control>
