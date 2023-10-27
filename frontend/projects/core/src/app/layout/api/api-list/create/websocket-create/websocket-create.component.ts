@@ -17,7 +17,7 @@ import { cloneDeep } from 'lodash'
 import { MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
 import { ApiManagementProxyComponent } from '../../proxy/proxy.component'
 import { APINotFormGroupData, APIProtocol } from '../../../types/types'
-import { methodList, proxyHeaderTableHeadName, proxyHeaderTableBody, hostHeaderTableBody, defaultHostList } from '../../../types/conf'
+import { methodList, proxyHeaderTableHeadName, proxyHeaderTableBody, hostHeaderTableBody } from '../../../types/conf'
 import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
 @Component({
   selector: 'eo-ng-api-websocket-create',
@@ -68,7 +68,7 @@ export class ApiWebsocketCreateComponent implements OnInit {
   proxyHeaderTableHeadName:THEAD_TYPE[] = [...proxyHeaderTableHeadName]
   proxyHeaderTableBody:TBODY_TYPE[] = [...proxyHeaderTableBody]
   hostsTableBody:TBODY_TYPE[] = [...hostHeaderTableBody]
-  hostsList:Array<any> = [...defaultHostList]
+  hostsList:Array<any> = [{ key: '' }]
   modalRef:NzModalRef | undefined
   proxyEdit:boolean = false
   editData:any = null
@@ -101,7 +101,7 @@ export class ApiWebsocketCreateComponent implements OnInit {
       name: ['', [Validators.required]],
       desc: [''],
       isDisable: [false],
-      requestPath: ['', [Validators.required, Validators.pattern('^[^?]*')]],
+      requestPath: ['', [Validators.pattern('^[^?]*')]],
       service: ['', [Validators.required]],
       proxyPath: [''],
       timeout: [10000, [Validators.required]],

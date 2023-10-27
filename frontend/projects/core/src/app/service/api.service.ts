@@ -9,6 +9,7 @@
  */
 import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http'
 import { Inject, Injectable, InjectionToken } from '@angular/core'
+import { Router } from '@angular/router'
 import { EoNgFeedbackMessageService } from 'eo-ng-feedback'
 import { catchError, Observable, throwError } from 'rxjs'
 
@@ -19,7 +20,8 @@ export const API_URL = new InjectionToken<string>('apiUrl')
 export class ApiService {
   constructor (private message: EoNgFeedbackMessageService,
               private http:HttpClient,
-              @Inject(API_URL) public urlPrefix:string
+              @Inject(API_URL) public urlPrefix:string,
+              private router:Router
   ) { }
 
   // 登录接口
@@ -251,8 +253,12 @@ export class ApiService {
       console.error(
         `Backend returned code ${error.status}, body was: `, error.error)
     }
-    if (error.error.msg) {
-      this.message.error(error.error.msg)
+    if (error.error.text || error.error.error.message) {
+      this.message.error(`${error.status}！ ${error.error.text || error.error.error.message}`)
+    }
+    // 当权限接口不可获取，表示用户中心系统报错，需要强制退回登录页
+    if (error.url?.includes('/api/my/access')) {
+      this.router.navigate(['/login'])
     }
     // Return an observable with a user-facing error message.
     return throwError(() => new Error('Something bad happened; please try again later.'))
