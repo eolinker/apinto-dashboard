@@ -40,11 +40,9 @@ define:  # 动态模块定义
                   "name": "scopes",
                   "x-index": 0,
                   "required": true,
-                  "x-designable-id": "14ambdfgkyl",
                   "items": {
                       "type": "void",
                       "x-component": "Space",
-                      "x-designable-id": "5dwv836plg8",
                       "properties": {
                           "sort": {
                               "type": "void",
@@ -497,10 +495,97 @@ define:  # 动态模块定义
                           "value": "json"
                       }
                   ],
-                  "default": "line",
+                  "default": "json",
                   "name": "type",
                   "x-index": 8,
                   "required": true
+              },
+              "content_resize": {
+                  "title": "内容截断配置",
+                  "type": "array",
+                  "x-decorator": "FormItem",
+                  "x-component": "ArrayTable",
+                  "x-component-props": {},
+                  "x-decorator-props": {
+                      "labelCol": 6,
+                      "wrapperCol": 10
+                  },
+                  "items": {
+                      "type": "object",
+                      "properties": {
+                          "column1": {
+                              "type": "void",
+                              "x-component": "ArrayTable.Column",
+                              "properties": {
+                                  "sort": {
+                                      "type": "void",
+                                      "x-component": "ArrayTable.SortHandle"
+                                  }
+                              }
+                          },
+                          "column3": {
+                              "type": "void",
+                              "x-component-props": {
+                                  "title": "截断大小（单位：M）"
+                              },
+                              "x-component": "ArrayTable.Column",
+                              "properties": {
+                                  "size": {
+                                      "type": "number",
+                                      "x-decorator": "FormItem",
+                                      "x-component": "NumberPicker"
+                                  }
+                              }
+                          },
+                          "column4": {
+                              "type": "void",
+                              "x-component": "ArrayTable.Column",
+                              "x-component-props": {
+                                  "title": "后缀"
+                              },
+                              "properties": {
+                                  "suffix": {
+                                      "title": "后缀",
+                                      "type": "string",
+                                      "x-decorator": "FormItem",
+                                      "x-component": "Input"
+                                  }
+                              }
+                          },
+                          "column6": {
+                              "type": "void",
+                              "x-component": "ArrayTable.Column",
+                              "properties": {
+                                  "item": {
+                                      "type": "void",
+                                      "x-component": "FormItem",
+                                      "properties": {
+                                          "remove": {
+                                              "type": "void",
+                                              "x-component": "ArrayTable.Remove"
+                                          },
+                                          "moveDown": {
+                                              "type": "void",
+                                              "x-component": "ArrayTable.MoveDown"
+                                          },
+                                          "moveUp": {
+                                              "type": "void",
+                                              "x-component": "ArrayTable.MoveUp"
+                                          }
+                                      }
+                                  }
+                              }
+                          }
+                      }
+                  },
+                  "properties": {
+                      "add": {
+                          "type": "void",
+                          "x-component": "ArrayTable.Addition",
+                          "title": "添加条目"
+                      }
+                  },
+                  "x-index": 9
               },
               "formatter": {
                   "type": "object",
@@ -515,7 +600,7 @@ define:  # 动态模块定义
                       "wrapperCol": 10
                   },
                   "name": "formatter",
-                  "x-index": 9
+                  "x-index": 10
               }
           }
       }
