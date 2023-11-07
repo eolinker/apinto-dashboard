@@ -2,7 +2,7 @@ id: "nsqd-access-log.apinto.com"
 name: "nsqd-access-log"
 cname: "NSQ日志"
 resume: "将请求和响应日志发送到NSQ中"
-version: "v1.0.0"
+version: "v1.1.0"
 icon: "NSQ日志.png"
 driver: "dynamic.apinto.com"
 front: template

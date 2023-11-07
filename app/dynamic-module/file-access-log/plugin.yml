@@ -2,7 +2,7 @@ id: "file-access-log.apinto.com"
 name: "file-access-log"
 cname: "文件日志"
 resume: "将请求和响应数据输出到日志文件中"
-version: "v1.0.0"
+version: "v1.1.0"
 icon: "文件日志.png"
 driver: "dynamic.apinto.com"
 front: template
