@@ -2,7 +2,7 @@ id: "kafka-access-log.apinto.com"
 name: "kafka-access-log"
 cname: "Kafka日志"
 resume: "将请求和响应日志发布到Apache Kafka topic中"
-version: "v1.0.0"
+version: "v1.1.0"
 icon: "Kafka日志.png"
 driver: "dynamic.apinto.com"
 front: template
