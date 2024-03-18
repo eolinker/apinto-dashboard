@@ -4,7 +4,7 @@ import (
 	"sync"
 
 	"github.com/eolinker/eosc/common/bean"
-	"github.com/go-redis/redis/v8"
+	"github.com/redis/go-redis/v9"
 )
 
 type handlerFunc func(client *redis.ClusterClient)

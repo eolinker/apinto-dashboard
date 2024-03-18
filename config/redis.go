@@ -2,9 +2,10 @@ package config
 
 import (
 	"context"
-	"github.com/eolinker/apinto-dashboard/cache"
-	"github.com/go-redis/redis/v8"
 	"time"
+
+	"github.com/eolinker/apinto-dashboard/cache"
+	"github.com/redis/go-redis/v9"
 )
 
 func InitRedis() {
