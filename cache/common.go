@@ -2,9 +2,10 @@ package cache
 
 import (
 	"context"
-	"github.com/go-redis/redis/v8"
 	"strings"
 	"time"
+
+	"github.com/redis/go-redis/v9"
 )
 
 type ICommonCache interface {

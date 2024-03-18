@@ -5,6 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
+	"time"
+
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/modules/cluster"
@@ -13,10 +16,8 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-store"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
-	"github.com/go-redis/redis/v8"
+	"github.com/redis/go-redis/v9"
 	"golang.org/x/sync/errgroup"
-	"strings"
-	"time"
 )
 
 type clusterNodeService struct {
