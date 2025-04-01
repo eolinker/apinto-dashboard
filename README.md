@@ -3,9 +3,6 @@
 
 ![](http://data.eolinker.com/course/eaC48Js3400ffd03c21e36b3eea434dce22d7877a3194f6.png)
 
-Apinto Dashboad主版本应与 Apinto主版本一起使用。
-最新发布的Apinto Dashboad版本是3.0.1，可与Apinto0.12.10以上版本兼容。
-
 ## Demo 
 体验地址：[demo-dashboard.apinto.com](https://demo-dashboard.apinto.com/)
 
@@ -14,9 +11,9 @@ Apinto Dashboad主版本应与 Apinto主版本一起使用。
 密码均为：12345678
 
 
-## 什么是Apinto Dashboad V3.0
+## 什么是Apinto Dashboad V3.x
 
-Apinto Dashboard V3.0 是一个可视化控制台项目，基于开源网关 Apinto，并满足企业级 API 网关需求场景。通过 Dashboard，可以管理集群、上游、应用和 API 等模块，并以集群维度管理各个模块的生命周期。该项目具有出色的用户操作体验，配置流程简短，上手难度低。
+Apinto Dashboard V3.x 是一个可视化控制台项目，基于开源网关 Apinto，并满足企业级 API 网关需求场景。通过 Dashboard，可以管理集群、上游、应用和 API 等模块，并以集群维度管理各个模块的生命周期。该项目具有出色的用户操作体验，配置流程简短，上手难度低。
 
 Apinto Dashboard与Apinto交互流程如下图所示：
 <img width="1664" alt="img_v2_22590d84-f8a4-4d3a-9c67-b481ecfdf1fg" src="https://user-images.githubusercontent.com/18322454/228448391-160153ff-86b8-494c-9a1d-00afb34876a1.png">
