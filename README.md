@@ -1,3 +1,5 @@
+<img width="1248" height="158" alt="img_v3_02ov_62863859-1c94-4bf5-a9fa-748ea978f5fg" src="https://github.com/user-attachments/assets/5e5ab363-203e-496a-abcb-4f44a7326114" />
+
 # Apinto Dashboard
 
 
