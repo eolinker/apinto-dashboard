@@ -10,34 +10,20 @@ package module
 
 import (
 	apinto_module "github.com/eolinker/apinto-dashboard/module"
+	"github.com/eolinker/apinto-dashboard/pm3"
 )
 
 type Driver struct {
 }
 
-func NewDriver() *Driver {
+func (p *Driver) Install(info *pm3.PluginDefine) (ms []pm3.PModule, acs []pm3.PAccess, fs []pm3.PFrontend, err error) {
+	return pm3.ReadPluginAssembly(info)
+}
+
+func (p *Driver) Create(info *pm3.PluginDefine, config pm3.PluginConfig) (pm3.Module, error) {
+	return NewModule(info.Id, info.Name), nil
+}
+
+func NewDriver() apinto_module.Driver {
 	return &Driver{}
-}
-
-func (d *Driver) CreatePlugin(define interface{}) (apinto_module.Plugin, error) {
-	return new(Plugin), nil
-}
-
-type Plugin struct {
-}
-
-func (p *Plugin) CreateModule(name string, config interface{}) (apinto_module.Module, error) {
-	return NewModule(name), nil
-}
-
-func (p *Plugin) CheckConfig(name string, config interface{}) error {
-	return nil
-}
-
-func (p *Plugin) GetPluginFrontend(moduleName string) string {
-	return "/log"
-}
-
-func (p *Plugin) IsShowServer() bool {
-	return false
 }

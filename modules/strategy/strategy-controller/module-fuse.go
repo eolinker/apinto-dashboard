@@ -2,79 +2,66 @@ package strategy_controller
 
 import (
 	"github.com/eolinker/apinto-dashboard/module"
-	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
+	"github.com/eolinker/apinto-dashboard/pm3"
 	"net/http"
 )
 
 type StrategyFuseDriver struct {
 }
 
+func (c *StrategyFuseDriver) Install(info *pm3.PluginDefine) (ms []pm3.PModule, acs []pm3.PAccess, fs []pm3.PFrontend, err error) {
+	return pm3.ReadPluginAssembly(info)
+}
+
+func (c *StrategyFuseDriver) Create(info *pm3.PluginDefine, config pm3.PluginConfig) (pm3.Module, error) {
+	return NewStrategyFuseModule(info.Id, info.Name), nil
+}
+
 func NewStrategyFuse() apinto_module.Driver {
 	return &StrategyFuseDriver{}
 }
 
-func (c *StrategyFuseDriver) CreateModule(name string, config interface{}) (apinto_module.Module, error) {
-	return NewStrategyFuseModule(name), nil
-}
-
-func (c *StrategyFuseDriver) CheckConfig(name string, config interface{}) error {
-	return nil
-}
-
-func (c *StrategyFuseDriver) CreatePlugin(define interface{}) (apinto_module.Plugin, error) {
-	return c, nil
-}
-
-func (c *StrategyFuseDriver) GetPluginFrontend(moduleName string) string {
-	return "serv-governance/fuse"
-}
-
-func (c *StrategyFuseDriver) IsPluginVisible() bool {
-	return true
-}
-
-func (c *StrategyFuseDriver) IsShowServer() bool {
-	return false
-}
-
-func (c *StrategyFuseDriver) IsCanUninstall() bool {
-	return false
-}
-
-func (c *StrategyFuseDriver) IsCanDisable() bool {
-	return true
-}
+//
+//func (c *StrategyFuseDriver) GetPluginFrontend(moduleName string) string {
+//	return "serv-governance/fuse"
+//}
+//
 
 type StrategyFuseModule struct {
+	*pm3.ModuleTool
+
 	isInit  bool
 	name    string
 	routers apinto_module.RoutersInfo
+}
+
+func (c *StrategyFuseModule) Frontend() []pm3.FrontendAsset {
+	return nil
+}
+
+func (c *StrategyFuseModule) Middleware() []pm3.Middleware {
+	return nil
 }
 
 func (c *StrategyFuseModule) Name() string {
 	return c.name
 }
 
-func (c *StrategyFuseModule) Support() (apinto_module.ProviderSupport, bool) {
+func (c *StrategyFuseModule) Support() (pm3.ProviderSupport, bool) {
 	return nil, false
 }
 
-func (c *StrategyFuseModule) Routers() (apinto_module.Routers, bool) {
-	return c, true
+func NewStrategyFuseModule(id, name string) *StrategyFuseModule {
+
+	return &StrategyFuseModule{ModuleTool: pm3.NewModuleTool(id, name),
+		name: name}
 }
 
-func (c *StrategyFuseModule) Middleware() (apinto_module.Middleware, bool) {
-	return nil, false
-}
-
-func NewStrategyFuseModule(name string) *StrategyFuseModule {
-
-	return &StrategyFuseModule{name: name}
-}
-
-func (c *StrategyFuseModule) RoutersInfo() apinto_module.RoutersInfo {
+func (c *StrategyFuseModule) Apis() []pm3.Api {
 	if !c.isInit {
 		c.initRouter()
+		c.InitAccess(c.routers)
+
 		c.isInit = true
 	}
 	return c.routers
@@ -85,70 +72,76 @@ func (c *StrategyFuseModule) initRouter() {
 
 	c.routers = []apinto_module.RouterInfo{
 		{
-			Method:      http.MethodGet,
-			Path:        "/api/strategies/fuse",
-			Handler:     "strategy-fuse.list",
-			HandlerFunc: []apinto_module.HandlerFunc{strategyFuseController.list},
+			Method: http.MethodGet,
+			Path:   "/api/strategies/fuse",
+
+			HandlerFunc: strategyFuseController.list,
 		},
 		{
-			Method:      http.MethodGet,
-			Path:        "/api/strategy/fuse",
-			Handler:     "strategy-fuse.get",
-			HandlerFunc: []apinto_module.HandlerFunc{strategyFuseController.get},
+			Method: http.MethodGet,
+			Path:   "/api/strategy/fuse",
+
+			HandlerFunc: strategyFuseController.get,
 		},
 		{
-			Method:      http.MethodPost,
-			Path:        "/api/strategy/fuse",
-			Handler:     "strategy-fuse.create",
-			HandlerFunc: []apinto_module.HandlerFunc{strategyFuseController.create},
+			Method: http.MethodPost,
+			Path:   "/api/strategy/fuse",
+
+			HandlerFunc: strategyFuseController.create,
 		},
 		{
-			Method:      http.MethodPut,
-			Path:        "/api/strategy/fuse",
-			Handler:     "strategy-fuse.update",
-			HandlerFunc: []apinto_module.HandlerFunc{strategyFuseController.update},
+			Method: http.MethodPut,
+			Path:   "/api/strategy/fuse",
+
+			HandlerFunc: strategyFuseController.update,
 		},
 		{
-			Method:      http.MethodDelete,
-			Path:        "/api/strategy/fuse",
-			Handler:     "strategy-fuse.del",
-			HandlerFunc: []apinto_module.HandlerFunc{strategyFuseController.del},
+			Method: http.MethodDelete,
+			Path:   "/api/strategy/fuse",
+
+			HandlerFunc: strategyFuseController.del,
 		},
 		{
-			Method:      http.MethodPatch,
-			Path:        "/api/strategy/fuse/restore",
-			Handler:     "strategy-fuse.restore",
-			HandlerFunc: []apinto_module.HandlerFunc{strategyFuseController.restore},
+			Method: http.MethodPatch,
+			Path:   "/api/strategy/fuse/restore",
+
+			HandlerFunc: strategyFuseController.restore,
 		},
 		{
-			Method:      http.MethodPatch,
-			Path:        "/api/strategy/fuse/stop",
-			Handler:     "strategy-fuse.updateStop",
-			HandlerFunc: []apinto_module.HandlerFunc{strategyFuseController.updateStop},
+			Method: http.MethodPatch,
+			Path:   "/api/strategy/fuse/enable",
+
+			HandlerFunc: strategyFuseController.enable,
 		},
 		{
-			Method:      http.MethodGet,
-			Path:        "/api/strategy/fuse/to-publishs",
-			Handler:     "strategy-fuse.toPublish",
-			HandlerFunc: []apinto_module.HandlerFunc{strategyFuseController.toPublish},
+			Method: http.MethodPatch,
+			Path:   "/api/strategy/fuse/disable",
+
+			HandlerFunc: strategyFuseController.disable,
 		},
 		{
-			Method:      http.MethodPost,
-			Path:        "/api/strategy/fuse/publish",
-			Handler:     "strategy-fuse.publish",
-			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypePublish.Handler, strategyFuseController.publish},
+			Method: http.MethodGet,
+			Path:   "/api/strategy/fuse/to-publishs",
+
+			HandlerFunc: strategyFuseController.toPublish,
 		},
 		{
-			Method:      http.MethodPost,
-			Path:        "/api/strategy/fuse/priority",
-			Handler:     "strategy-fuse.changePriority",
-			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypeEdit.Handler, strategyFuseController.changePriority},
+			Method: http.MethodPost,
+			Path:   "/api/strategy/fuse/publish",
+
+			HandlerFunc: strategyFuseController.publish,
 		},
 		{
-			Method:      http.MethodGet,
-			Path:        "/api/strategy/fuse/publish-history",
-			Handler:     "strategy-fuse.publishHistory",
-			HandlerFunc: []apinto_module.HandlerFunc{strategyFuseController.publishHistory},
+			Method: http.MethodPost,
+			Path:   "/api/strategy/fuse/priority",
+
+			HandlerFunc: strategyFuseController.changePriority,
+		},
+		{
+			Method: http.MethodGet,
+			Path:   "/api/strategy/fuse/publish-history",
+
+			HandlerFunc: strategyFuseController.publishHistory,
 		},
 	}
 }

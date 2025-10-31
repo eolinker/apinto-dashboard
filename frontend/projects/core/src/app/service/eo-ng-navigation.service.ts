@@ -1,9 +1,11 @@
 import { Injectable } from '@angular/core'
 import { MenuOptions } from 'eo-ng-menu'
-import { Subject, Observable, forkJoin } from 'rxjs'
+import { Subject, Observable, concatMap, from } from 'rxjs'
 import { ApiService } from './api.service'
 import { v4 as uuidv4 } from 'uuid'
 import { environment } from '../../environments/environment'
+import { PluginSlotHubService } from './plugin-slot-hub.service'
+import { BaseInfoService } from './base-info.service'
 
 @Injectable({
   providedIn: 'root'
@@ -14,10 +16,13 @@ export class EoNgNavigationService {
   private viewRightsRouterList: string[] = [] // 当前用户可查看的菜单router列表
   private mainPageRouter: string = '' // 首页路由
   dataUpdated: boolean = false // 是否获取过数据，避免组件在ngOnChanges时读取空数组
+  userInfo:{[k:string]:any} = {} // 用户数据，由用户管理插件传入
   private userRoleId: string = '' // 当前用户角色id
   private userId: string = '' // 当前用户id
-  accessMap: Map<string, string> = new Map()
-  constructor (public api: ApiService) {}
+  private navLayoutHidden:boolean = false
+  constructor (public api: ApiService, private pluginSlotHub:PluginSlotHubService, private baseInfo:BaseInfoService) {
+  }
+
   iframePrefix:string = 'module' // 与后端约定好的，所有iframe打开的页面都要加该前缀
   isBusiness:boolean = environment.isBusiness
   setUserRoleId (val: string) {
@@ -43,7 +48,7 @@ export class EoNgNavigationService {
 
   // 获取首页路由地址
   getPageRoute (): string {
-    return this.isBusiness ? this.mainPageRouter || '/router/api' : '/guide'
+    return this.baseInfo.showGuide ? '/guide' : '/router/api'
   }
 
   // 如果用户没有任何除商业授权以外的功能查看权限, 返回true
@@ -56,6 +61,21 @@ export class EoNgNavigationService {
     return this.viewRightsRouterList.includes('auth-info')
   }
 
+  // 用户是否有某个模块的权限，options目前为空，未来可以用于存储项目/空间id
+  // 权限通过插槽实现，如果项目没有安装用户管理插件，则不存在对应插槽，则默认用户拥有所有模块的编辑权限
+  getUserModuleAccess (moduleName:string, options?:any) {
+    const checkModuleAccess = this.pluginSlotHub.getSlot('checkModuleAccess')
+    return checkModuleAccess ? checkModuleAccess(moduleName, options) : 'edit'
+  }
+
+  setNavHidden (hidden:boolean) {
+    this.navLayoutHidden = hidden
+  }
+
+  getNavHidden () {
+    return this.navLayoutHidden
+  }
+
   private flashFlag: Subject<boolean> = new Subject<boolean>()
 
   reqFlashMenu () {
@@ -64,16 +84,6 @@ export class EoNgNavigationService {
 
   repFlashMenu () {
     return this.flashFlag.asObservable()
-  }
-
-  private checkAuthStatus: Subject<boolean> = new Subject<boolean>()
-
-  reqCheckAuthStatus () {
-    this.checkAuthStatus.next(true)
-  }
-
-  repCheckAuthStatus () {
-    return this.checkAuthStatus.asObservable()
   }
 
   private userUpdateRightList: Subject<boolean> = new Subject<
@@ -120,28 +130,22 @@ export class EoNgNavigationService {
   getRightsList (): Observable<MenuOptions[]> {
     return new Observable((observer) => {
       this.noAccess = true
+      const renewAccess = this.pluginSlotHub.getSlot('renewModuleAccess')
+      const renewAccess$ = renewAccess ? from(renewAccess()) : from([null])
 
-      forkJoin([this.api.get('system/modules'),
-        this.api.get('my/access')]).subscribe((resp:Array<any>) => {
-        if (resp[0].code === 0 && resp[1].code === 0) {
-          this.accessMap = new Map()
-          const accessListBackend:Array<{name:string, access:string}> = resp[1].data.access
-          for (const access of accessListBackend) {
-            this.accessMap.set(access.name, access.access)
-            if (access.access && this.noAccess) {
-              this.noAccess = false
-            }
-          }
-          this.generateMenuList(resp[0])
-
-          observer.next(this.menuList)
-
-          this.reqFlashMenu()
-          this.reqUpdateRightList()
+      renewAccess$.pipe(
+        concatMap(() => {
+          return this.api.get('system/modules')
+        })
+      ).subscribe((resp: any) => {
+        if (resp.code === 0) {
+          this.generateMenuList(resp)
         }
+        observer.next(this.menuList)
+        this.reqFlashMenu()
+        this.reqUpdateRightList()
       })
-    }
-    )
+    })
   }
 
   generateMenuList (resp:any) {
@@ -161,7 +165,8 @@ export class EoNgNavigationService {
           ...(navigation.modules?.length > 0 && !navigation.default
             ? {
                 children: navigation.modules.filter((module:any) => {
-                  return this.accessMap.get(module.name)
+                  // TODO 插件化一期不做权限
+                  return this.getUserModuleAccess(module.name)
                 }).map((module: any) => {
                   this.routerNameMap.set(module.path, module.name)
                   return {
@@ -199,7 +204,9 @@ export class EoNgNavigationService {
         if ((menu as any).routerLink && !this.routerNameMap.get((menu as any).routerLink)) {
           this.routerNameMap.set((menu as any).routerLink, (menu as any).name)
         }
-        if (!menu.name || this.accessMap.get(menu.name)) {
+
+        // TODO 插件化一期不做权限
+        if (this.getUserModuleAccess(menu.name) || (!menu.name && menu.children?.length > 0)) {
           if (menu.title === '系统管理' && environment.isBusiness) {
             menu.children.unshift({
               name: 'auth',
@@ -237,14 +244,18 @@ export class EoNgNavigationService {
   findMainPage () {
     for (const menu of this.menuList) {
       // eslint-disable-next-line dot-notation
-      if (menu.routerLink && menu['name'] && this.accessMap?.has(menu['name']) && !menu.routerLink.includes('module/')) {
+      // TODO 插件化一期不做权限
+      // if (menu.routerLink && menu['name'] && this.getUserModuleAccess(menu['name']) && !menu.routerLink.includes('module/')) {
+      if (menu.routerLink && menu['name'] && !menu.routerLink.includes('module/') && this.getUserModuleAccess(menu['name'])) {
         this.mainPageRouter = menu.routerLink
         return
       } else if (menu.children) {
         for (const child of menu.children) {
           if (
             // eslint-disable-next-line dot-notation
-            child.routerLink && this.accessMap?.has(child['name']) && !child.routerLink.includes('module/')
+          // TODO 插件化一期不做权限
+            // child.routerLink && this.getUserModuleAccess(child['name']) && !child.routerLink.includes('module/')
+            child.routerLink && !child.routerLink.includes('module/') && this.getUserModuleAccess(child['name'])
           ) {
             this.mainPageRouter = child.routerLink
             return
@@ -260,14 +271,14 @@ export class EoNgNavigationService {
   //     if (this.updateRightsRouterList?.length === 0) {
   //       this.getMenuList().subscribe(() => {
   //         observer.next(
-  //           this.accessMap.get(menuRouter)?.filter((x) => {
+  //           this.getUserModuleAccess(menuRouter)?.filter((x) => {
   //             return x.includes('edit')
   //           }).length
   //         )
   //       })
   //     } else {
   //       observer.next(
-  //         this.accessMap.get(menuRouter)?.filter((x) => {
+  //         this.getUserModuleAccess(menuRouter)?.filter((x) => {
   //           return x.includes('edit')
   //         }).length
   //       )

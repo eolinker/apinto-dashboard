@@ -19,9 +19,6 @@ func checkFilters(fileters []*strategy_dto.FilterInput, dsec string) error {
 	filterNameSet := make(map[string]struct{})
 	for _, filter := range fileters {
 		if !strategyCommonService.FilterNameCheck(filter.Name) {
-			//if !common.IsMatchFilterAppKey(filter.Name) {
-			//	return fmt.Errorf("filter.Name %s is illegal. ", filter.Name)
-			//}
 			return fmt.Errorf("%s.Name %s is illegal. ", dsec, filter.Name)
 		}
 

@@ -96,6 +96,23 @@
       <div class="mt-blockbase">
         <p class="font-bold mb-btnybase">路由匹配规则：</p>
         <ng-container *ngIf="apiProtocol === 'http'">
+          <nz-form-item>
+            <nz-form-label [nzSpan]="5" nzRequired>请求协议：</nz-form-label>
+            <nz-form-control [nzSpan]="19">
+              <eo-ng-select
+                class="w-INPUT_LARGE"
+                name="protocols"
+                required
+                nzShowSearch
+                formControlName="protocols"
+                [nzOptions]="protocolList"
+                nzMode="multiple"
+                nzPlaceHolder="默认支持 HTTP、HTTPS"
+                [nzDisabled]="nzDisabled"
+              ></eo-ng-select>
+            </nz-form-control>
+          </nz-form-item>
+
           <nz-form-item
             nz-row
             class="checkbox-group-api"
@@ -141,7 +158,7 @@
           </div>
         </ng-container>
         <nz-form-item>
-          <nz-form-label [nzSpan]="5">请求路径：</nz-form-label>
+          <nz-form-label [nzSpan]="5" nzRequired>请求路径：</nz-form-label>
           <nz-form-control
             [nzSpan]="19"
             nzValidatingTip="Validating..."
@@ -156,6 +173,7 @@
                 style="height: unset !important"
                 eo-ng-input
                 name="requestPath"
+                required
                 placeholder="请输入"
                 formControlName="requestPath"
                 (blur)="requestPathChange()"
@@ -165,6 +183,9 @@
             <ng-template #nameErrorTpl let-control>
               <ng-container *ngIf="control.hasError('pattern')"
                 >请求路径不支持含有 ? 的字符串</ng-container
+              >
+              <ng-container *ngIf="control.hasError('required')"
+                >必填项</ng-container
               ></ng-template
             >
           </nz-form-control>
@@ -210,6 +231,7 @@
               class="w-INPUT_LARGE"
               name="service"
               required
+              nzShowSearch
               formControlName="service"
               [nzOptions]="serviceList"
               nzPlaceHolder="请选择"
@@ -252,7 +274,11 @@
 
         <nz-form-item>
           <nz-form-label [nzSpan]="5" nzRequired>重试次数：</nz-form-label>
-          <nz-form-control [nzSpan]="19">
+          <nz-form-control
+            [nzSpan]="19"
+            nzValidatingTip="Validating..."
+            [nzErrorTip]="retryErrorTpl"
+          >
             <input
               class="w-INPUT_LARGE"
               type="number"
@@ -262,6 +288,14 @@
               formControlName="retry"
               eoNgUserAccess="router/api"
             />
+            <ng-template #retryErrorTpl let-control>
+              <ng-container *ngIf="control.hasError('min')"
+                >重试次数不支持负数</ng-container
+              >
+              <ng-container *ngIf="control.hasError('required')"
+                >必填项</ng-container
+              ></ng-template
+            >
           </nz-form-control>
         </nz-form-item>
 
@@ -306,12 +340,24 @@
       </div>
       <div class="mt-blockbase">
         <p class="font-bold mb-btnybase">API 操作：</p>
+
+        <nz-form-item>
+          <nz-form-label [nzSpan]="5">插件配置： </nz-form-label>
+          <nz-form-control [nzSpan]="19">
+            <eo-ng-plugin-config-modal
+              [(configList)]="configList"
+              [nzDisabled]="nzDisabled"
+            ></eo-ng-plugin-config-modal>
+          </nz-form-control>
+        </nz-form-item>
+
         <nz-form-item>
           <nz-form-label [nzSpan]="5">绑定插件模板：</nz-form-label>
           <nz-form-control [nzSpan]="19">
             <eo-ng-select
               class="w-INPUT_LARGE"
               name="templateUuid"
+              nzShowSearch
               formControlName="templateUuid"
               [nzOptions]="pluginTemplateList"
               nzPlaceHolder="请选择"

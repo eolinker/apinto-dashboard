@@ -110,5 +110,14 @@ type ApiCluster struct {
 	Env        string
 	Status     int
 	Updater    string
+	UpdaterId  int
 	UpdateTime string
+}
+
+func (a *ApiCluster) UserId() int {
+	return a.UpdaterId
+}
+
+func (a *ApiCluster) Set(name string) {
+	a.Updater = name
 }

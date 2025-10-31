@@ -8,8 +8,9 @@ import (
 )
 
 func newStrategyCacheController() *strategyController[strategy_entry.StrategyCacheConfig, strategy_entry.StrategyCacheConfig] {
-	strategyService := strategy_service.NewStrategyService(strategy_handler.NewStrategyCacheHandler("strategy-cache"), config.StrategyCacheRuntimeKind)
+	handler := strategy_handler.NewStrategyCacheHandler("strategy-cache")
+	strategyService := strategy_service.NewStrategyService(handler, config.StrategyCacheRuntimeKind)
 
-	c := newStrategyController(strategyService)
+	c := newStrategyController(strategyService, handler.GetType())
 	return c
 }

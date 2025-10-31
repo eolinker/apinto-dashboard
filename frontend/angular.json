@@ -39,14 +39,14 @@
       "prefix": "eo-ng",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser",
+          "builder": "@angular-builders/custom-webpack:browser",
           "options": {
             "deployUrl": "/frontend/",
             "outputPath": "./dist",
-            "index": "projects/core/src/index.html",  
-            "main": "projects/core/src/main.ts",
+            "index": "projects/core/src/index.html",
             "polyfills": "projects/core/src/polyfills.ts",
-            "tsConfig": "tsconfig.app.json",
+            "main": "projects/core/src/main.ts",
+            "tsConfig": "projects/core/tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
               "projects/core/src/favicon.ico",
@@ -93,7 +93,10 @@
             "allowedCommonJsDependencies": [
               "ace-builds",
               "ace-builds/src-noconflict/ext-language_tools"
-            ]
+            ],
+            "customWebpackConfig": {
+              "path": "projects/core/webpack.config.ts"
+            }
           },
           "configurations": {
             "production": {
@@ -109,6 +112,9 @@
                   "maximumError": "8kb"
                 }
               ],
+              "customWebpackConfig": {
+                "path": "projects/core/webpack.config.ts"
+              },
               "fileReplacements": [
                 {
                   "replace": "projects/core/src/environments/environment.ts",
@@ -144,7 +150,8 @@
               "vendorChunk": true,
               "extractLicenses": false,
               "sourceMap": true,
-              "namedChunks": true
+              "namedChunks": true,
+              "deployUrl": ""
             },
             "businessDevelopment": {
               "buildOptimizer": false,
@@ -164,7 +171,7 @@
           "defaultConfiguration": "production"
         },
         "serve": {
-          "builder": "@angular-devkit/build-angular:dev-server",
+          "builder": "@angular-builders/custom-webpack:dev-server",
           "configurations": {
             "production": {
               "browserTarget": "apinto:build:production"
@@ -182,9 +189,17 @@
           "defaultConfiguration": "development"
         },
         "extract-i18n": {
-          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "builder": "@angular-builders/custom-webpack:extract-i18n",
           "options": {
             "browserTarget": "apinto:build"
+          }
+        },
+        "test": {
+          "builder": "@angular-builders/custom-webpack:karma",
+          "options": {
+            "main": "projects/eo-ng-apinto-table/src/test.ts",
+            "tsConfig": "projects/eo-ng-apinto-table/tsconfig.spec.json",
+            "karmaConfig": "projects/eo-ng-apinto-table/karma.conf.js"
           }
         }
       }
@@ -196,7 +211,7 @@
       "prefix": "eo-ng",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "builder": "@angular-builders/custom-webpack:ng-packagr",
           "options": {
             "project": "projects/eo-ng-apinto-table/ng-package.json"
           },
@@ -217,11 +232,115 @@
           "defaultConfiguration": "production"
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular-builders/custom-webpack:karma",
           "options": {
             "main": "projects/eo-ng-apinto-table/src/test.ts",
             "tsConfig": "projects/eo-ng-apinto-table/tsconfig.spec.json",
             "karmaConfig": "projects/eo-ng-apinto-table/karma.conf.js"
+          }
+        }
+      }
+    },
+    "apintoAuth": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "projects/apinto-auth",
+      "sourceRoot": "projects/apinto-auth/src",
+      "prefix": "auth",
+      "architect": {
+        "build": {
+          "builder": "@angular-builders/custom-webpack:browser",
+          "options": {
+            "deployUrl": "/plugin-frontend/auth/",
+            "outputPath": "dist/apinto-auth",
+            "index": "projects/apinto-auth/src/index.html",
+            "main": "projects/apinto-auth/src/main.ts",
+            "polyfills": ["zone.js"],
+            "tsConfig": "projects/apinto-auth/tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              "projects/apinto-auth/src/favicon.ico",
+              "projects/apinto-auth/src/assets"
+            ],
+            "styles": ["projects/apinto-auth/src/styles.scss"],
+            "scripts": [],
+            "customWebpackConfig": {
+              "path": "projects/apinto-auth/webpack.config.ts"
+            },
+            "commonChunk": false
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "500kb",
+                  "maximumError": "1mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "2kb",
+                  "maximumError": "4kb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "projects/core/src/environments/environment.ts",
+                  "with": "projects/core/src/environments/environment.prod.ts"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true,
+              "deployUrl": ""
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular-builders/custom-webpack:dev-server",
+          "configurations": {
+            "production": {
+              "browserTarget": "apintoAuth:build:production"
+            },
+            "development": {
+              "browserTarget": "apintoAuth:build:development"
+            }
+          },
+          "defaultConfiguration": "development",
+          "options": {
+            "port": 3333,
+            "publicHost": "http://localhost:3333"
+          }
+        },
+        "extract-i18n": {
+          "builder": "@angular-builders/custom-webpack:extract-i18n",
+          "options": {
+            "browserTarget": "apintoAuth:build"
+          }
+        },
+        "test": {
+          "builder": "@angular-builders/custom-webpack:karma",
+          "options": {
+            "polyfills": ["zone.js", "zone.js/testing"],
+            "tsConfig": "projects/apinto-auth/tsconfig.spec.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              "projects/apinto-auth/src/favicon.ico",
+              "projects/apinto-auth/src/assets"
+            ],
+            "styles": ["projects/apinto-auth/src/styles.scss"],
+            "scripts": []
           }
         }
       }

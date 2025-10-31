@@ -15,7 +15,7 @@ type namespaceService struct {
 	namespaceStore       namespace_store.INamespaceStore
 	namespaceCacheByName cache.IRedisCache[namespace_model.Namespace, string]
 	namespaceCacheById   cache.IRedisCache[namespace_model.Namespace, int]
-	namespaceCacheAll    cache.IRedisCacheNoKey[namespace_model.Namespace]
+	namespaceCacheAll    cache.IRedisCacheNoKey[*namespace_model.Namespace]
 }
 
 func newNamespaceService() *namespaceService {

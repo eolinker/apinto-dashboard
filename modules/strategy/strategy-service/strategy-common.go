@@ -36,6 +36,12 @@ var (
 			Type:    config.FilterTypePattern,
 			Pattern: common.CIDRIpv4Exp,
 		},
+		{
+			Name:    config.FilterTime,
+			Title:   "访问时间段",
+			Type:    config.FilterTypePattern,
+			Pattern: common.TimeRangeExp,
+		},
 	}
 )
 
@@ -74,10 +80,8 @@ func (s *strategyCommonService) GetFilterLabel(ctx context.Context, namespaceId 
 		if len(values) > 0 {
 			if values[0] == config.FilterValuesALL {
 				return "API请求方式", "全部请求方式", ""
-
 			} else {
 				return "API请求方式", strings.Join(values, ","), ""
-
 			}
 		}
 	case config.FilterPath:
@@ -88,6 +92,13 @@ func (s *strategyCommonService) GetFilterLabel(ctx context.Context, namespaceId 
 	case config.FilterIP:
 		if len(values) > 0 {
 			return "IP", strings.Join(values, ","), ""
+		}
+	case config.FilterTime:
+		if len(values) > 0 {
+			sort.Slice(values, func(i, j int) bool {
+				return values[i] < values[j]
+			})
+			return "访问时间段", strings.Join(values, "\n"), ""
 		}
 	}
 	return "", "", ""

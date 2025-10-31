@@ -2,6 +2,8 @@ package audit_controller
 
 import (
 	apinto_module "github.com/eolinker/apinto-dashboard/module"
+	"github.com/eolinker/apinto-dashboard/pm3"
+	"github.com/eolinker/apinto-dashboard/pm3/middleware"
 	"github.com/eolinker/eosc/common/bean"
 	"net/http"
 )
@@ -12,7 +14,16 @@ type Driver struct {
 	middlewareHandler []apinto_module.MiddlewareHandler
 }
 
-func NewDriver() *Driver {
+func (d *Driver) Install(info *pm3.PluginDefine) (ms []pm3.PModule, acs []pm3.PAccess, fs []pm3.PFrontend, err error) {
+	return pm3.ReadPluginAssembly(info)
+}
+
+func (d *Driver) Create(info *pm3.PluginDefine, config pm3.PluginConfig) (pm3.Module, error) {
+	return d.newModule(info.Id, info.Name), nil
+
+}
+
+func NewDriver() apinto_module.Driver {
 	a := &auditLogController{}
 	bean.Autowired(&a.auditLogService)
 
@@ -20,83 +31,65 @@ func NewDriver() *Driver {
 		auditController: a,
 		routers: apinto_module.RoutersInfo{
 			{
-				Method:      http.MethodGet,
-				Path:        "/api/audit-logs",
-				Handler:     "audit.getLogs",
-				HandlerFunc: []apinto_module.HandlerFunc{a.getLogs},
+				Method: http.MethodGet,
+				Path:   "/api/audit-logs",
+
+				HandlerFunc: a.getLogs,
 			},
 			{
-				Method:      http.MethodGet,
-				Path:        "/api/audit-log",
-				Handler:     "audit.getDetail",
-				HandlerFunc: []apinto_module.HandlerFunc{a.getDetail},
+				Method: http.MethodGet,
+				Path:   "/api/audit-log",
+
+				HandlerFunc: a.getDetail,
 			},
 			{
-				Method:      http.MethodGet,
-				Path:        "/api/audit-log/kinds",
-				Handler:     "audit.getTargets",
-				HandlerFunc: []apinto_module.HandlerFunc{a.getTargets},
+				Method: http.MethodGet,
+				Path:   "/api/audit-log/kinds",
+
+				HandlerFunc: a.getTargets,
 			},
 		},
 		middlewareHandler: []apinto_module.MiddlewareHandler{
-			{
-				Name:    "auditlog",
-				Rule:    apinto_module.MiddlewareRules{{http.MethodPost}, {http.MethodPatch}, {http.MethodDelete}, {http.MethodPut}, {http.MethodGet, apinto_module.RouterTypeSensitive}},
-				Handler: a.Handler,
-			},
+			middleware.CreateF(a.Handler, func(api pm3.ApiInfo) bool {
+				if api.Method == http.MethodGet {
+					return false
+				}
+				switch api.Authority {
+				case pm3.Private, pm3.Internal:
+					return true
+				}
+				return false
+			}),
 		},
 	}
 }
 
-func (d *Driver) CreateModule(name string, config interface{}) (apinto_module.Module, error) {
-	return d.newModule(name), nil
-}
+func (d *Driver) newModule(id, name string) *Module {
 
-func (d *Driver) CheckConfig(name string, config interface{}) error {
-	return nil
-}
-
-func (d *Driver) CreatePlugin(define interface{}) (apinto_module.Plugin, error) {
-	return d, nil
-}
-
-func (d *Driver) GetPluginFrontend(moduleName string) string {
-	return "audit-log"
-}
-
-func (d *Driver) IsPluginVisible() bool {
-	return true
-}
-
-func (d *Driver) IsShowServer() bool {
-	return false
-}
-
-func (d *Driver) IsCanUninstall() bool {
-	return false
-}
-
-func (d *Driver) IsCanDisable() bool {
-	return true
-}
-
-func (d *Driver) newModule(name string) *Module {
-
-	return &Module{name: name, middlewareHandler: d.middlewareHandler, routers: d.routers}
+	return &Module{
+		ModuleTool: pm3.NewModuleTool(id, name),
+		name:       name, middlewareHandler: d.middlewareHandler, routers: d.routers}
 }
 
 type Module struct {
+	*pm3.ModuleTool
+
 	name string
 
 	routers           apinto_module.RoutersInfo
 	middlewareHandler []apinto_module.MiddlewareHandler
 }
 
-func (m *Module) MiddlewaresInfo() []apinto_module.MiddlewareHandler {
+func (m *Module) Frontend() []pm3.FrontendAsset {
+	return nil
+}
+
+func (m *Module) Middleware() []pm3.Middleware {
 	return m.middlewareHandler
 }
 
-func (m *Module) RoutersInfo() apinto_module.RoutersInfo {
+func (m *Module) Apis() []pm3.Api {
+	m.InitAccess(m.routers)
 	return m.routers
 }
 
@@ -104,14 +97,6 @@ func (m *Module) Name() string {
 	return m.name
 }
 
-func (m *Module) Routers() (apinto_module.Routers, bool) {
-	return m, true
-}
-
-func (m *Module) Middleware() (apinto_module.Middleware, bool) {
-	return m, true
-}
-
-func (m *Module) Support() (apinto_module.ProviderSupport, bool) {
+func (m *Module) Support() (pm3.ProviderSupport, bool) {
 	return nil, false
 }

@@ -10,7 +10,6 @@ import (
 	apimodel "github.com/eolinker/apinto-dashboard/modules/api/model"
 	"github.com/eolinker/apinto-dashboard/modules/base/frontend-model"
 	"github.com/eolinker/apinto-dashboard/modules/group/group-model"
-	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-model"
 )
 
 type IAPIService interface {
@@ -52,8 +51,8 @@ type IAPIService interface {
 	IsAPIOnline(ctx context.Context, clusterName, clusterAddr string, apiUUID int) bool
 	GetAPIDriver(driverName string) IAPIDriver
 	GetAPINameByID(ctx context.Context, apiID int) (string, error)
-	GetAPIRemoteOptions(ctx context.Context, namespaceId, pageNum, pageSize int, keyword, groupUuid string) ([]any, int, error)
-	GetAPIRemoteByUUIDS(ctx context.Context, namespace int, uuids []string) ([]*strategy_model.RemoteApis, error)
+	GetAPIRemoteOptions(ctx context.Context, namespaceId, pageNum, pageSize int, keyword, groupUuid string) ([]*apimodel.ApiOptionItem, int, error)
+	GetAPIRemoteByUUIDS(ctx context.Context, namespace int, uuids []string) ([]*apimodel.ApiOptionItem, error)
 	APICount(ctx context.Context, namespaceId int) (int64, error)
 	APIOnlineCount(ctx context.Context, namespaceId int) (int64, error)
 }
@@ -69,5 +68,5 @@ type APIDriverInfo struct {
 
 type IAPIDriver interface {
 	CheckInput(input *api_dto.APIInfo) error
-	ToApinto(name, desc string, disable bool, method []string, requestPath, requestPathLabel, proxyPath, serviceName string, timeout, retry int, hosts []string, match []*api_entry.MatchConf, header []*api_entry.ProxyHeader, templateUUID string) *v1.RouterConfig
+	ToApinto(name, desc string, disable bool, protocols, method []string, requestPath, requestPathLabel, proxyPath, serviceName string, timeout, retry int, hosts []string, match []*api_entry.MatchConf, header []*api_entry.ProxyHeader, templateUUID string, plugins []*api_entry.APIPlugin) *v1.RouterConfig
 }

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/eolinker/apinto-dashboard/pm3"
 	"strings"
 	"time"
 
@@ -174,6 +175,23 @@ func (d *dynamicService) Info(ctx context.Context, namespaceId int, profession s
 	}, nil
 }
 
+type dynamicItem struct {
+	data    map[string]string
+	updater int
+}
+
+func newDynamicItem(data map[string]string, updater int) *dynamicItem {
+	return &dynamicItem{data: data, updater: updater}
+}
+
+func (d *dynamicItem) UserId() int {
+	return d.updater
+}
+
+func (d *dynamicItem) Set(name string) {
+	d.data["updater"] = name
+}
+
 func (d *dynamicService) List(ctx context.Context, namespaceId int, profession string, columns []string, drivers []string, keyword string, page int, pageSize int) ([]map[string]string, int, error) {
 	list, total, err := d.dynamicStore.ListPageByKeyword(ctx, map[string]interface{}{
 		"namespace":  namespaceId,
@@ -183,21 +201,18 @@ func (d *dynamicService) List(ctx context.Context, namespaceId int, profession s
 		return nil, 0, err
 	}
 	items := make([]map[string]string, 0, len(list))
+	uil := make([]*dynamicItem, 0, len(list))
 	for _, l := range list {
-		updater := ""
-		u, err := d.userService.GetUserInfo(ctx, l.Updater)
-		if err == nil {
-			updater = u.UserName
-		}
 
 		item := map[string]string{
 			"id":          l.Name,
 			"title":       l.Title,
 			"driver":      l.Driver,
 			"description": l.Description,
-			"updater":     updater,
+			"create_time": l.CreateTime.Format("2006-01-02 15:04:05"),
 			"update_time": l.UpdateTime.Format("2006-01-02 15:04:05"),
 		}
+
 		tmp := make(map[string]interface{})
 		err = json.Unmarshal([]byte(l.Config), &tmp)
 		if err == nil {
@@ -216,8 +231,11 @@ func (d *dynamicService) List(ctx context.Context, namespaceId int, profession s
 				}
 			}
 		}
+		uil = append(uil, newDynamicItem(item, l.Updater))
 		items = append(items, item)
 	}
+	_ = user.SetUserName(d.userService, ctx, uil...)
+
 	return items, total, nil
 }
 
@@ -326,7 +344,7 @@ func (d *dynamicService) replaceDepend(namespaceID int, org string, depends ...s
 	return oj.JSON(param), nil
 }
 
-func (d *dynamicService) Online(ctx context.Context, namespaceId int, profession string, module string, name string, names []string, updater int, depend ...string) ([]string, []string, error) {
+func (d *dynamicService) Online(ctx context.Context, namespaceId int, profession string, module string, name string, clusterOperateNames []string, updater int, depend ...string) ([]string, []string, error) {
 	info, err := d.dynamicStore.First(ctx, map[string]interface{}{
 		"namespace":  namespaceId,
 		"profession": profession,
@@ -339,13 +357,13 @@ func (d *dynamicService) Online(ctx context.Context, namespaceId int, profession
 		return nil, nil, err
 	}
 
-	clusters, err := d.clusterService.GetByNames(ctx, namespaceId, names)
+	clusters, err := d.clusterService.GetByNames(ctx, namespaceId, clusterOperateNames)
 	if err != nil {
 		return nil, nil, err
 	}
 	clusterNames := make([]string, 0, len(clusters))
-	if len(names) > 0 {
-		clusterNames = names
+	if len(clusterOperateNames) > 0 {
+		clusterNames = clusterOperateNames
 	} else {
 		for _, c := range clusters {
 			clusterNames = append(clusterNames, c.Name)
@@ -374,6 +392,7 @@ func (d *dynamicService) Online(ctx context.Context, namespaceId int, profession
 	}
 	publishConfig.BasicInfo.Id = fmt.Sprintf("%s@%s", name, profession)
 	publishConfig.BasicInfo.Name = name
+	publishConfig.BasicInfo.Title = info.Title
 	publishConfig.BasicInfo.Driver = info.Driver
 	publishConfig.BasicInfo.Profession = profession
 	publishConfig.BasicInfo.Description = info.Description
@@ -386,7 +405,7 @@ func (d *dynamicService) Online(ctx context.Context, namespaceId int, profession
 		depends := make([]string, 0, len(targets))
 		for _, target := range targets {
 			status, id := d.provider.Status(target.Target, namespaceId, c.Name)
-			if status != apinto_module.Online {
+			if status != pm3.Online {
 				depends = append(depends, id)
 			}
 		}
@@ -434,6 +453,9 @@ func (d *dynamicService) Online(ctx context.Context, namespaceId int, profession
 			err = errors.New("all clusters failed to go online")
 		}
 	}
+	info.Updater = updater
+	d.dynamicStore.Save(ctx, info)
+
 	return successClusters, failClusters, nil
 }
 
@@ -481,7 +503,7 @@ func (d *dynamicService) Offline(ctx context.Context, namespaceId int, professio
 		depends := make([]string, 0, len(sources))
 		for _, source := range sources {
 			status, id := d.provider.Status(source.Source, namespaceId, c.Name)
-			if status == apinto_module.Online {
+			if status == pm3.Online {
 				depends = append(depends, id)
 			}
 		}
@@ -523,6 +545,8 @@ func (d *dynamicService) Offline(ctx context.Context, namespaceId int, professio
 			err = errors.New("all clusters failed to go offline")
 		}
 	}
+	info.Updater = updater
+	d.dynamicStore.Save(ctx, info)
 	return successClusters, failClusters, nil
 }
 
@@ -613,21 +637,13 @@ func (d *dynamicService) ClusterStatus(ctx context.Context, namespaceId int, pro
 			continue
 		}
 
-		updater := ""
-		if operator > 0 {
-			u, err := d.userService.GetUserInfo(ctx, operator)
-			if err == nil {
-				updater = u.UserName
-			}
-		}
-
 		version, err := client.Version(profession, name)
 		if err != nil {
 			result = append(result, &dynamic_model.DynamicCluster{
 				Name:       c.Name,
 				Title:      c.Title,
 				Status:     v2.StatusOffline,
-				Updater:    updater,
+				UpdaterId:  operator,
 				UpdateTime: updateTime,
 			})
 			continue
@@ -643,10 +659,11 @@ func (d *dynamicService) ClusterStatus(ctx context.Context, namespaceId int, pro
 			Name:       c.Name,
 			Title:      c.Title,
 			Status:     status,
-			Updater:    updater,
+			UpdaterId:  operator,
 			UpdateTime: updateTime,
 		})
 	}
+	user.SetUserName(d.userService, ctx, result...)
 	return &dynamic_model.DynamicBasicInfo{
 		ID:          moduleInfo.Name,
 		Title:       moduleInfo.Title,
@@ -841,6 +858,7 @@ func (d *dynamicService) saveVersion(ctx context.Context, version *dynamic_entry
 					BasicInfo: &v2.BasicInfo{
 						Profession:  version.Publish.BasicInfo.Profession,
 						Name:        version.Publish.BasicInfo.Name,
+						Title:       version.Publish.BasicInfo.Title,
 						Driver:      version.Publish.BasicInfo.Driver,
 						Description: version.Publish.BasicInfo.Description,
 						Version:     history.Publish.BasicInfo.Version,

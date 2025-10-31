@@ -1,14 +1,15 @@
 package application_entry
 
 import (
-	"github.com/eolinker/apinto-dashboard/modules/base/history-entry"
 	"time"
+
+	"github.com/eolinker/apinto-dashboard/modules/base/history-entry"
 )
 
 type Application struct {
 	Id          int       `gorm:"type:int(11);size:11;not null;auto_increment;primary_key;column:id;comment:主键ID" json:"id,omitempty"`
 	NamespaceId int       `gorm:"type:int(11);size:11;not null;column:namespace;dbUniqueIndex:unique;uniqueIndex:namespace_name;uniqueIndex:namespace_idstr;comment:工作空间" json:"namespace_id,omitempty"`
-	IdStr       string    `gorm:"size:50;not null;column:id_str;dbUniqueIndex:unique;uniqueIndex:namespace_idstr;comment:随机生成的16个长度字符串" json:"id_str,omitempty"`
+	IdStr       string    `gorm:"size:255;not null;column:id_str;dbUniqueIndex:unique;uniqueIndex:namespace_idstr;comment:随机生成的16个长度字符串" json:"id_str,omitempty"`
 	Name        string    `gorm:"size:255;not null;column:name;uniqueIndex:namespace_name;comment:应用名称" json:"name,omitempty"`
 	Desc        string    `gorm:"size:255;column:desc;comment:描述" json:"desc,omitempty"`
 	Version     string    `gorm:"size:36;not null;column:version;comment:app版本" json:"version,omitempty"`

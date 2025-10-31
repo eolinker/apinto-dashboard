@@ -236,11 +236,11 @@ export class TableComponent extends EoNgTableComponent implements OnInit {
         const drawerPagationHeight = this.nzShowPagination ? 42 : 0 // 分页高度
         const drawerButtonAreaHeight = document.getElementsByClassName('ant-modal-footer')[0]?.getBoundingClientRect().height || 0 // 弹窗底部
 
-        const clusterDescHeight = document.getElementsByClassName('cluster-desc-block')[0]?.getBoundingClientRect().height || 0 // 集群环境变量里的集群描述高度
+        const descHeight = document.getElementsByClassName('desc-block')[0]?.getBoundingClientRect().height || 0 // 集群环境变量里的集群描述高度
         // 表格在弹窗内，需要减去弹窗标题高度53，弹窗顶部100px，弹窗内部上下padding20*2， 表头高度； 否则减去表格顶部间隙12px，底部间隙20px，表头高度
         scrollY = this.el.nativeElement.classList.contains('drawer-table')
           ? (this.scrHeight! > 660 ? 660 - drawerHeaderHeight - drawerFooterHeight - drawerPagationHeight! - 40 - 40 - 20 - 63 - drawerButtonAreaHeight : 660 - drawerHeaderHeight - drawerFooterHeight - drawerPagationHeight! - 40 - 40 - 14 - 63 - 69 - 150)
-          : (this.scrHeight! - navTop - headerHeight - footerHeight - pagationHeight - clusterDescHeight! - 40 - 4 - 2)
+          : (this.scrHeight! - navTop - headerHeight - footerHeight - pagationHeight - descHeight! - 40 - 4 - 2)
       }
     }
 

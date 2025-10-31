@@ -3,6 +3,7 @@ package cache
 import (
 	"context"
 	"fmt"
+	"github.com/eolinker/eosc/log"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -49,6 +50,7 @@ func (lock *tRedisLock) TryLock() (bool, error) {
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	lock.cancelFunc = cancelFunc
 	lock.renew(ctx)
+
 	return success, nil
 }
 
@@ -76,6 +78,10 @@ func (lock *tRedisLock) Unlock() error {
 	script := redis.NewScript(fmt.Sprintf(
 		`if redis.call("get", KEYS[1]) == "%s" then return redis.call("del", KEYS[1]) else return 0 end`,
 		lock.value))
+	if lock.cancelFunc != nil {
+		lock.cancelFunc() //cancel renew goroutine
+		lock.cancelFunc = nil
+	}
 	runCmd := script.Run(context.Background(), lock.redisClient, []string{lock.key})
 	res, err := runCmd.Result()
 	if err != nil {
@@ -83,7 +89,7 @@ func (lock *tRedisLock) Unlock() error {
 	}
 	if tmp, ok := res.(int64); ok {
 		if tmp == 1 {
-			lock.cancelFunc() //cancel renew goroutine
+
 			err := lock.publishLock()
 			if err != nil {
 				return err
@@ -171,11 +177,13 @@ func (lock *tRedisLock) publishLock() error {
 func (lock *tRedisLock) renew(ctx context.Context) {
 	go func() {
 		ticker := time.NewTicker(lock.expiration / 3)
+		defer ticker.Stop()
 		for {
 			select {
 			case <-ctx.Done():
 				return
 			case <-ticker.C:
+				log.Debug("reset lok expire:", lock.key)
 				lock.redisClient.Expire(context.Background(), lock.key, lock.expiration).Result()
 			}
 		}

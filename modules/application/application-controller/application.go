@@ -3,10 +3,16 @@ package application_controller
 import (
 	"encoding/json"
 	"fmt"
+	apinto_module "github.com/eolinker/apinto-dashboard/module"
+	"sync"
+
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/controller/users"
-	"sync"
+	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
+
+	"net/http"
+	"strconv"
 
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/application"
@@ -15,8 +21,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/online/online-dto"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/gin-gonic/gin"
-	"net/http"
-	"strconv"
 )
 
 var (
@@ -162,6 +166,7 @@ func (a *applicationController) info(ginCtx *gin.Context) {
 }
 
 func (a *applicationController) createApp(ginCtx *gin.Context) {
+	audit_model.LogOperateTypeCreate.Handler(ginCtx)
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	userId := users.GetUserId(ginCtx)
 	input := new(application_dto.ApplicationInput)
@@ -174,15 +179,24 @@ func (a *applicationController) createApp(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
-
-	if err := a.applicationService.CreateApp(ginCtx, namespaceId, userId, input); err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
-		return
+	_, err := a.applicationService.AppInfo(ginCtx, namespaceId, input.Id)
+	if err != nil {
+		if err := a.applicationService.CreateApp(ginCtx, namespaceId, userId, input); err != nil {
+			controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
+			return
+		}
+	} else {
+		if err := a.applicationService.UpdateApp(ginCtx, namespaceId, userId, input); err != nil {
+			controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
+			return
+		}
 	}
+
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
 func (a *applicationController) updateApp(ginCtx *gin.Context) {
+	audit_model.LogOperateTypeEdit.Handler(ginCtx)
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	userId := users.GetUserId(ginCtx)
 
@@ -205,6 +219,7 @@ func (a *applicationController) updateApp(ginCtx *gin.Context) {
 }
 
 func (a *applicationController) deleteApp(ginCtx *gin.Context) {
+	audit_model.LogOperateTypeDelete.Handler(ginCtx)
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	id := ginCtx.Query("app_id")
 	userId := users.GetUserId(ginCtx)
@@ -216,6 +231,7 @@ func (a *applicationController) deleteApp(ginCtx *gin.Context) {
 }
 
 func (a *applicationController) online(ginCtx *gin.Context) {
+	audit_model.LogOperateTypePublish.Handler(ginCtx)
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	userId := users.GetUserId(ginCtx)
 	id := ginCtx.Query("app_id")
@@ -232,6 +248,7 @@ func (a *applicationController) online(ginCtx *gin.Context) {
 }
 
 func (a *applicationController) offline(ginCtx *gin.Context) {
+	audit_model.LogOperateTypeOffline.Handler(ginCtx)
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	userId := users.GetUserId(ginCtx)
 	id := ginCtx.Query("app_id")
@@ -329,8 +346,11 @@ func (a *applicationController) auths(ginCtx *gin.Context) {
 }
 
 func (a *applicationController) createAuth(ginCtx *gin.Context) {
+	audit_model.LogOperateTypeCreate.Handler(ginCtx)
+	ginCtx.Set(apinto_module.ApintoModuleName, "authorization")
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	appId := ginCtx.Query("app_id")
+	uuid := ginCtx.Query("uuid")
 	userId := users.GetUserId(ginCtx)
 
 	input := &application_dto.ApplicationAuthInput{}
@@ -342,16 +362,28 @@ func (a *applicationController) createAuth(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, "参数位置必填")
 		return
 	}
-	err := a.applicationService.CreateAuth(ginCtx, namespaceId, userId, appId, input)
+	_, err := a.applicationService.AuthInfo(ginCtx, namespaceId, appId, uuid)
 	if err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
-		return
+		// 获取失败
+		err = a.applicationService.CreateAuth(ginCtx, namespaceId, userId, appId, uuid, input)
+		if err != nil {
+			controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
+			return
+		}
+	} else {
+		err = a.applicationService.UpdateAuth(ginCtx, namespaceId, userId, appId, uuid, input)
+		if err != nil {
+			controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
+			return
+		}
 	}
 
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
 func (a *applicationController) updateAuth(ginCtx *gin.Context) {
+	audit_model.LogOperateTypeEdit.Handler(ginCtx)
+	ginCtx.Set(apinto_module.ApintoModuleName, "authorization")
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	appId := ginCtx.Query("app_id")
 	uuid := ginCtx.Query("uuid")
@@ -372,6 +404,8 @@ func (a *applicationController) updateAuth(ginCtx *gin.Context) {
 }
 
 func (a *applicationController) delAuth(ginCtx *gin.Context) {
+	audit_model.LogOperateTypeDelete.Handler(ginCtx)
+	ginCtx.Set(apinto_module.ApintoModuleName, "authorization")
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	uuid := ginCtx.Query("uuid")
 	userId := users.GetUserId(ginCtx)

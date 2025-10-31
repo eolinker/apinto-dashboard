@@ -10,35 +10,39 @@ package module
 
 import (
 	apinto_module "github.com/eolinker/apinto-dashboard/module"
+	"github.com/eolinker/apinto-dashboard/pm3"
 )
 
 type Module struct {
+	*pm3.ModuleTool
+
 	name    string
 	routers apinto_module.RoutersInfo
 }
 
-func (m *Module) RoutersInfo() apinto_module.RoutersInfo {
+func (m *Module) Frontend() []pm3.FrontendAsset {
+	return nil
+}
+
+func (m *Module) Apis() []pm3.Api {
 	return m.routers
+}
+
+func (m *Module) Middleware() []pm3.Middleware {
+	return nil
+}
+
+func (m *Module) Support() (pm3.ProviderSupport, bool) {
+	return nil, false
 }
 
 func (m *Module) Name() string {
 	return m.name
 }
 
-func (m *Module) Routers() (apinto_module.Routers, bool) {
-	return m, true
-}
-
-func (m *Module) Middleware() (apinto_module.Middleware, bool) {
-	return nil, false
-}
-
-func (m *Module) Support() (apinto_module.ProviderSupport, bool) {
-	return nil, false
-}
-
-func NewModule(name string) *Module {
-	m := &Module{name: name, routers: NewController().RoutersInfo()}
-
+func NewModule(id, name string) apinto_module.Module {
+	m := &Module{ModuleTool: pm3.NewModuleTool(id, name),
+		name: name, routers: NewController().RoutersInfo()}
+	m.InitAccess(m.routers)
 	return m
 }

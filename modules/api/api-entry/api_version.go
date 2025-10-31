@@ -26,8 +26,16 @@ type APIVersionConfig struct {
 	Retry            int      `json:"retry"`
 	Hosts            []string `json:"hosts"`
 	//EnableWebsocket  bool           `json:"enable_websocket"`
-	Match  []*MatchConf   `json:"match"`
-	Header []*ProxyHeader `json:"proxy_header"`
+	Match     []*MatchConf   `json:"match"`
+	Header    []*ProxyHeader `json:"proxy_header"`
+	Protocols []string       `json:"protocols"`
+	Plugins   []*APIPlugin   `json:"plugins"`
+}
+
+type APIPlugin struct {
+	Name    string `json:"name"`
+	Config  string `json:"config"`
+	Disable bool   `json:"disable"`
 }
 
 type MatchConf struct {

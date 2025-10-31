@@ -40,21 +40,20 @@ type Controller struct {
 func (c *Controller) RoutersInfo() apinto_module.RoutersInfo {
 	return apinto_module.RoutersInfo{
 		{
-			Method:      http.MethodGet,
-			Path:        "/api/log/files",
-			Handler:     "log.list.node",
-			HandlerFunc: []apinto_module.HandlerFunc{c.list},
+			Method: http.MethodGet,
+			Path:   "/api/log/files",
+
+			HandlerFunc: c.list,
 		}, {
-			Method:      http.MethodGet,
-			Path:        "/api/log/download/:key",
-			Handler:     "log.list.node",
-			HandlerFunc: []apinto_module.HandlerFunc{c.download},
+			Method: http.MethodGet,
+			Path:   "/api/log/download/:key",
+
+			HandlerFunc: c.download,
 		}, {
-			Method:      http.MethodGet,
-			Path:        "/api/log/tail/:key",
-			Handler:     "log.list.node",
-			HandlerFunc: []apinto_module.HandlerFunc{c.tail},
-			Labels:      apinto_module.RouterLabelAssets,
+			Method: http.MethodGet,
+			Path:   "/api/log/tail/:key",
+
+			HandlerFunc: c.tail,
 		},
 	}
 }

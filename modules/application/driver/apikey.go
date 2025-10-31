@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
+
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/application"
 	application_model "github.com/eolinker/apinto-dashboard/modules/application/application-model"
-	"strings"
 )
 
 type ApikeyConfig struct {
@@ -26,22 +27,22 @@ func (a *Apikey) GetAuthListInfo(config []byte) string {
 	return authConfig.Apikey
 }
 
-func (a *Apikey) CheckInput(config []byte) error {
+func (a *Apikey) CheckInput(config []byte) ([]byte, error) {
 	apikeyConfig := new(ApikeyConfig)
 	if err := json.Unmarshal(config, apikeyConfig); err != nil {
-		return err
+		return nil, err
 	}
 	if apikeyConfig.Apikey == "" {
-		return errors.New("apikey is null")
+		return nil, errors.New("apikey is null")
 	}
 
 	for key, _ := range apikeyConfig.Label {
 		if _, ok := enum.Keyword[strings.ToLower(key)]; ok {
-			return errors.New(fmt.Sprintf("标签信息中的%s为系统关键字", key))
+			return nil, errors.New(fmt.Sprintf("标签信息中的%s为系统关键字", key))
 		}
 	}
 
-	return nil
+	return config, nil
 }
 
 func (a *Apikey) GetCfgDetails(config []byte) []application_model.AuthDetailItem {

@@ -3,6 +3,7 @@ package controller
 import (
 	apinto_module "github.com/eolinker/apinto-dashboard/module"
 	strategy_controller "github.com/eolinker/apinto-dashboard/modules/strategy/strategy-controller"
+	"github.com/eolinker/apinto-dashboard/pm3"
 	"net/http"
 )
 
@@ -12,32 +13,33 @@ func commonStrategy() apinto_module.RoutersInfo {
 		{
 			Method:      http.MethodGet,
 			Path:        "/api/strategy/filter-options",
-			Handler:     "strategy-common.filterOptions",
-			HandlerFunc: []apinto_module.HandlerFunc{commonStrategyController.FilterOptions},
+			HandlerFunc: commonStrategyController.FilterOptions,
+			Authority:   pm3.Public,
 		},
 		{
-			Method:      http.MethodGet,
-			Path:        "/api/strategy/filter-remote/:name",
-			Handler:     "strategy-common.filterRemote",
-			HandlerFunc: []apinto_module.HandlerFunc{commonStrategyController.FilterRemote},
+			Method:    http.MethodGet,
+			Path:      "/api/strategy/filter-remote/:name",
+			Authority: pm3.Public,
+
+			HandlerFunc: commonStrategyController.FilterRemote,
 		},
 		{
 			Method:      http.MethodGet,
 			Path:        "/api/strategy/metrics-options",
-			Handler:     "strategy-common.metricsOptions",
-			HandlerFunc: []apinto_module.HandlerFunc{commonStrategyController.MetricsOptions},
+			HandlerFunc: commonStrategyController.MetricsOptions,
+			Authority:   pm3.Public,
 		},
 		{
 			Method:      http.MethodGet,
 			Path:        "/api/strategy/content-type",
-			Handler:     "strategy-common.contentType",
-			HandlerFunc: []apinto_module.HandlerFunc{commonStrategyController.ContentType},
+			HandlerFunc: commonStrategyController.ContentType,
+			Authority:   pm3.Public,
 		},
 		{
 			Method:      http.MethodGet,
 			Path:        "/api/strategy/charset",
-			Handler:     "strategy-common.charset",
-			HandlerFunc: []apinto_module.HandlerFunc{commonStrategyController.Charset},
+			HandlerFunc: commonStrategyController.Charset,
+			Authority:   pm3.Public,
 		},
 	}
 }

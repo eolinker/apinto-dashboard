@@ -4,6 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sort"
+	"strings"
+	"time"
+
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	v2 "github.com/eolinker/apinto-dashboard/client/v2"
 	"github.com/eolinker/apinto-dashboard/common"
@@ -25,9 +29,6 @@ import (
 	"github.com/eolinker/eosc/log"
 	"github.com/go-basic/uuid"
 	"gorm.io/gorm"
-	"sort"
-	"strings"
-	"time"
 )
 
 const (
@@ -112,9 +113,9 @@ func (a *applicationService) Online(ctx context.Context, namespaceId, userId int
 	//除了匿名应用以外，其他应用需要配置鉴权信息才可上线
 	anonymous := true
 	if applicationInfo.IdStr != anonymousIds {
-		if !a.isApplicationSetAuth(ctx, applicationInfo.Id) {
-			return errors.New("需要配置鉴权信息才可上线")
-		}
+		//if !a.isApplicationSetAuth(ctx, applicationInfo.Id) {
+		//	return errors.New("需要配置鉴权信息才可上线")
+		//}
 		anonymous = false
 	}
 	//获取当前集群信息
@@ -555,10 +556,10 @@ func (a *applicationService) AppList(ctx context.Context, namespaceId, userId, p
 		return nil, 0, err
 	}
 
-	userIds := common.SliceToSliceIds(list, func(t *application_entry.Application) int {
-		return t.Operator
-	})
-	userInfoMaps, _ := a.userInfoService.GetUserInfoMaps(ctx, userIds...)
+	//userIds := common.SliceToSliceIds(list, func(t *application_entry.Application) int {
+	//	return t.Operator
+	//})
+	//userInfoMaps, _ := a.userInfoService.GetUserInfoMaps(ctx, userIds...)
 
 	var clusterInfos []*cluster_model.Cluster
 	if len(clusters) > 0 {
@@ -576,10 +577,6 @@ func (a *applicationService) AppList(ctx context.Context, namespaceId, userId, p
 
 	applications := make([]*application_model.ApplicationListItem, 0, len(list))
 	for _, applicationInfo := range list {
-		operatorName := ""
-		if userInfo, ok := userInfoMaps[applicationInfo.Operator]; ok {
-			operatorName = userInfo.NickName
-		}
 
 		isOnline := false
 		publish := make([]*application_model.APPListItemPublish, 0, len(clusterInfos))
@@ -618,13 +615,12 @@ func (a *applicationService) AppList(ctx context.Context, namespaceId, userId, p
 		}
 
 		item := &application_model.ApplicationListItem{
-			Uuid:         applicationInfo.IdStr,
-			Name:         applicationInfo.Name,
-			Desc:         applicationInfo.Desc,
-			UpdateTime:   applicationInfo.UpdateTime,
-			OperatorName: operatorName,
-			IsDelete:     !isOnline,
-			Publish:      publish,
+			Uuid:       applicationInfo.IdStr,
+			Name:       applicationInfo.Name,
+			Desc:       applicationInfo.Desc,
+			UpdateTime: applicationInfo.UpdateTime,
+			IsDelete:   !isOnline,
+			Publish:    publish,
 		}
 
 		//匿名应用默认不可以删除
@@ -637,7 +633,7 @@ func (a *applicationService) AppList(ctx context.Context, namespaceId, userId, p
 
 	//对列表进行排序，匿名排第一位，其余按更新时间降序
 	sort.Sort(application_model.ApplicationList(applications))
-
+	user.SetUserName(a.userInfoService, ctx, applications...)
 	return applications, count, nil
 }
 func (a *applicationService) AppEnumList(ctx context.Context, namespaceId int) ([]*application_model.ApplicationBasicInfo, error) {
@@ -952,13 +948,6 @@ func (a *applicationService) ClustersStatus(ctx context.Context, namespaceId, ap
 			continue
 		}
 
-		updater := ""
-		if operator > 0 {
-			u, err := a.userInfoService.GetUserInfo(ctx, operator)
-			if err == nil {
-				updater = u.UserName
-			}
-		}
 		version, err := client.Version(professionApplication, appUUID)
 		if err != nil {
 			result = append(result, &application_model.AppCluster{
@@ -966,7 +955,7 @@ func (a *applicationService) ClustersStatus(ctx context.Context, namespaceId, ap
 				Title:      c.Title,
 				Env:        c.Env,
 				Status:     1, //未发布
-				Updater:    updater,
+				UpdaterId:  operator,
 				UpdateTime: updateTime,
 			})
 			continue
@@ -982,10 +971,11 @@ func (a *applicationService) ClustersStatus(ctx context.Context, namespaceId, ap
 			Title:      c.Title,
 			Env:        c.Env,
 			Status:     status,
-			Updater:    updater,
+			UpdaterId:  operator,
 			UpdateTime: updateTime,
 		})
 	}
+	user.SetUserName(a.userInfoService, ctx, result...)
 	return online, result, nil
 }
 
@@ -1034,11 +1024,13 @@ func (a *applicationService) GetAuthList(ctx context.Context, namespaceId int, a
 	return resList, nil
 }
 
-func (a *applicationService) CreateAuth(ctx context.Context, namespaceId, userId int, appId string, input *application_dto.ApplicationAuthInput) error {
+func (a *applicationService) CreateAuth(ctx context.Context, namespaceId, userId int, appId string, authId string, input *application_dto.ApplicationAuthInput) error {
 	driverAuth := a.driverManager.GetDriver(input.Driver)
-	if err := driverAuth.CheckInput(input.Config); err != nil {
+	config, err := driverAuth.CheckInput(input.Config)
+	if err != nil {
 		return err
 	}
+	input.Config = config
 
 	if input.ExpireTime > 0 && input.ExpireTime < time.Now().Unix() {
 		return errors.New("过期时间不能小于当前时间")
@@ -1060,8 +1052,11 @@ func (a *applicationService) CreateAuth(ctx context.Context, namespaceId, userId
 	}
 
 	t := time.Now()
+	if authId == "" {
+		authId = uuid.New()
+	}
 	applicationAuth := &application_entry.ApplicationAuth{
-		Uuid:          uuid.New(),
+		Uuid:          authId,
 		Title:         input.Title,
 		Namespace:     namespaceId,
 		Application:   applicationInfo.Id,
@@ -1129,9 +1124,11 @@ func (a *applicationService) CreateAuth(ctx context.Context, namespaceId, userId
 
 func (a *applicationService) UpdateAuth(ctx context.Context, namespaceId, userId int, appId, uuidStr string, input *application_dto.ApplicationAuthInput) error {
 	driverAuth := a.driverManager.GetDriver(input.Driver)
-	if err := driverAuth.CheckInput(input.Config); err != nil {
+	config, err := driverAuth.CheckInput(input.Config)
+	if err != nil {
 		return err
 	}
+	input.Config = config
 
 	applicationInfo, err := a.applicationStore.GetByIdStr(ctx, namespaceId, appId)
 	if err != nil {
@@ -1246,12 +1243,11 @@ func (a *applicationService) AuthInfo(ctx context.Context, namespaceId int, appI
 	if err != nil {
 		return nil, err
 	}
-	userInfo, _ := a.userInfoService.GetUserInfo(ctx, auth.Operator)
 	resAuth := &application_model.ApplicationAuth{
 		ApplicationAuth: auth,
-		Operator:        userInfo.NickName,
 		Config:          auth.Config,
 	}
+	user.SetUserName(a.userInfoService, ctx, resAuth)
 	return resAuth, nil
 }
 

@@ -3,8 +3,9 @@ package plugin_client
 import (
 	"context"
 	"encoding/json"
-	proto "github.com/eolinker/apinto-dashboard/plugin/go-plugin/proto"
+	"github.com/eolinker/apinto-dashboard/plugin/go-plugin/proto"
 	"github.com/eolinker/apinto-dashboard/plugin/go-plugin/shared"
+	"github.com/eolinker/apinto-dashboard/pm3"
 	"github.com/eolinker/eosc/log"
 	"github.com/gin-gonic/gin"
 	"github.com/hashicorp/go-plugin"
@@ -13,30 +14,139 @@ import (
 
 var _ ClientHandler = (*GrpcClient)(nil)
 
-type ResponseHandler func(ctx context.Context, response *proto.HttpResponse)
-type RequestHandler func(ctx context.Context, request *proto.HttpRequest)
+type ClientHandler = pm3.Module
 
-type MiddlewareResponseHandler func(ctx context.Context, response *proto.MiddlewareResponse)
-type MiddlewareRequestHandler func(ctx context.Context, request *proto.MiddlewareRequest)
-
-type ClientHandler interface {
-	ServerGin(ginCtx *gin.Context, requestHandler RequestHandler, responseHandler ResponseHandler)
-	CreateMiddleware(name string, requestHandler MiddlewareRequestHandler, responseHandler MiddlewareResponseHandler) (*MiddlewareClientHandler, error)
-}
-
-// PluginMap is the map of plugins we can dispense.
-var PluginMap = map[string]plugin.Plugin{}
-
-type MiddlewareClientHandler struct {
-	client          proto.ServiceClient
-	name            string
-	request         bool
-	response        bool
-	requestHandler  MiddlewareRequestHandler
-	responseHandler MiddlewareResponseHandler
-}
 type GrpcClient struct {
-	client proto.ServiceClient
+	*pm3.ModuleTool
+
+	name       string
+	client     proto.ServiceClient
+	apis       []pm3.Api
+	middleware []pm3.Middleware
+	frontends  []pm3.FrontendAsset
+}
+
+func (g *GrpcClient) init(ctx context.Context) error {
+	info, err := g.client.ModuleInfo(ctx, &proto.Empty{})
+	if err != nil {
+		return err
+	}
+	g.apis = make([]pm3.Api, 0, len(info.Apis))
+	for _, a := range info.Apis {
+		g.apis = append(g.apis, g.genApi(a))
+	}
+	g.InitAccess(g.apis)
+
+	g.middleware = make([]pm3.Middleware, 0, len(info.Middlewares))
+	for _, m := range info.Middlewares {
+		g.middleware = append(g.middleware, g.genMiddlewareHandler(m))
+	}
+
+	g.frontends = make([]pm3.FrontendAsset, 0, len(info.Frontend))
+
+	for _, f := range info.Frontend {
+		p := newProxy(g.client, f.Id)
+		g.frontends = append(g.frontends, pm3.FrontendAsset{
+			Path:        f.Path,
+			HandlerFunc: p.Handle,
+		})
+	}
+	return nil
+}
+
+type MiddlewareHandler struct {
+	hasRequestHandler  bool
+	hasResponseHandler bool
+	name               string
+	client             proto.ServiceClient
+}
+
+func (g *MiddlewareHandler) Handle(ginCtx *gin.Context) {
+	if g.hasRequestHandler {
+		req := &proto.MiddlewareRequest{
+			Name:    g.name,
+			Request: readRequest(ginCtx),
+		}
+
+		response, err := g.client.MiddlewaresRequest(ginCtx, req)
+		if err != nil {
+
+			return
+		}
+
+		if !middlewareDoResponse(response, ginCtx) {
+			return
+		}
+	}
+	if g.hasResponseHandler {
+		ginCtx.Next()
+
+		req := &proto.MiddlewareRequest{
+			Name:    g.name,
+			Request: readRequest(ginCtx),
+		}
+
+		mRespResponse, err := g.client.MiddlewaresResponse(ginCtx, req)
+		if err != nil {
+			return
+		}
+
+		middlewareDoResponse(mRespResponse, ginCtx)
+	}
+
+}
+
+func (m *MiddlewareHandler) Check(api pm3.ApiInfo) bool {
+	r, err := m.client.CheckMiddlewareForApi(context.Background(), &proto.MiddlewareInfoRequest{
+		Name: m.name,
+		Api: &proto.ApiInfo{
+			Method:    api.Method,
+			Path:      api.Path,
+			Access:    api.Access,
+			Authority: proto.Authority(api.Authority),
+			Id:        "",
+		},
+	})
+	if err != nil {
+		return false
+	}
+	return r.Result
+}
+
+func (g *GrpcClient) genMiddlewareHandler(info *proto.MiddlewareInfo) *MiddlewareHandler {
+	return &MiddlewareHandler{name: info.Name, client: g.client, hasRequestHandler: info.HasRequestHandler, hasResponseHandler: info.HasResponseHandler}
+}
+
+func (g *GrpcClient) genApi(info *proto.ApiInfo) pm3.Api {
+	p := newProxy(g.client, info.Id)
+	return pm3.Api{
+
+		Authority: pm3.ApiAuthority(info.Authority),
+		Access:    info.Access,
+		Method:    info.Method,
+		Path:      info.Path,
+
+		HandlerFunc: p.Handle,
+	}
+}
+func (g *GrpcClient) Name() string {
+	return g.name
+}
+
+func (g *GrpcClient) Frontend() []pm3.FrontendAsset {
+	return g.frontends
+}
+
+func (g *GrpcClient) Apis() []pm3.Api {
+	return g.apis
+}
+
+func (g *GrpcClient) Middleware() []pm3.Middleware {
+	return g.middleware
+}
+
+func (g *GrpcClient) Support() (pm3.ProviderSupport, bool) {
+	return nil, false
 }
 
 func readRequest(ginCtx *gin.Context) *proto.HttpRequest {
@@ -59,78 +169,7 @@ func readRequest(ginCtx *gin.Context) *proto.HttpRequest {
 	}
 	return r
 }
-func (g *GrpcClient) ServerGin(ginCtx *gin.Context, requestHandler RequestHandler, responseHandler ResponseHandler) {
-	req := readRequest(ginCtx)
-	if requestHandler != nil {
-		requestHandler(ginCtx, req)
-	}
-	resp, err := g.client.Request(ginCtx, req)
-	if err != nil {
-		log.Errorf(ginCtx.AbortWithError(500, err).Error())
-		return
-	}
-	if responseHandler != nil {
-		responseHandler(ginCtx, resp)
-	}
-	header := ginCtx.Writer.Header()
-	for _, h := range resp.Headers {
-		for _, v := range h.Value {
-			header.Add(h.Key, v)
-		}
-	}
 
-	contentType := header.Get("content-type")
-	ginCtx.Data(int(resp.Status), contentType, resp.Body)
-}
-func (g *GrpcClient) CreateMiddleware(name string, requestHandler MiddlewareRequestHandler, responseHandler MiddlewareResponseHandler) (*MiddlewareClientHandler, error) {
-	info, err := g.client.GetMiddlewareInfo(context.Background(), &proto.MiddlewareInfoRequest{Name: name})
-	if err != nil {
-		return nil, err
-	}
-	return &MiddlewareClientHandler{name: name, client: g.client, request: info.Request, response: info.Response, requestHandler: requestHandler, responseHandler: responseHandler}, nil
-}
-func (g *MiddlewareClientHandler) Middleware(ginCtx *gin.Context) {
-	if g.request {
-		req := &proto.MiddlewareRequest{
-			Name:    g.name,
-			Request: readRequest(ginCtx),
-		}
-		if g.requestHandler != nil {
-			g.requestHandler(ginCtx, req)
-		}
-		response, err := g.client.MiddlewaresRequest(ginCtx, req)
-		if err != nil {
-
-			return
-		}
-		if g.responseHandler != nil {
-			g.responseHandler(ginCtx, response)
-		}
-		if !middlewareDoResponse(response, ginCtx) {
-			return
-		}
-	}
-	if g.response {
-		ginCtx.Next()
-
-		req := &proto.MiddlewareRequest{
-			Name:    g.name,
-			Request: readRequest(ginCtx),
-		}
-		if g.requestHandler != nil {
-			g.requestHandler(ginCtx, req)
-		}
-		mRespResponse, err := g.client.MiddlewaresResponse(ginCtx, req)
-		if err != nil {
-			return
-		}
-		if g.responseHandler != nil {
-			g.responseHandler(ginCtx, mRespResponse)
-		}
-		middlewareDoResponse(mRespResponse, ginCtx)
-	}
-
-}
 func middlewareDoResponse(response *proto.MiddlewareResponse, ginCtx *gin.Context) bool {
 	if len(response.Headers) > 0 {
 		for _, h := range response.Headers {
@@ -174,6 +213,8 @@ func middlewareDoResponse(response *proto.MiddlewareResponse, ginCtx *gin.Contex
 
 type GrpcPluginClient struct {
 	plugin.Plugin
+	name string
+	id   string
 }
 
 func (g *GrpcPluginClient) GRPCServer(broker *plugin.GRPCBroker, server *grpc.Server) error {
@@ -182,11 +223,22 @@ func (g *GrpcPluginClient) GRPCServer(broker *plugin.GRPCBroker, server *grpc.Se
 }
 
 func (g *GrpcPluginClient) GRPCClient(ctx context.Context, broker *plugin.GRPCBroker, conn *grpc.ClientConn) (interface{}, error) {
-	return &GrpcClient{client: proto.NewServiceClient(conn)}, nil
+	client := &GrpcClient{
+		ModuleTool: pm3.NewModuleTool(g.id, g.name),
+		client:     proto.NewServiceClient(conn), name: g.name}
+	err := client.init(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
 }
 
-func CreateClientProxy() map[string]plugin.Plugin {
+func CreateClientProxy(id, name string) map[string]plugin.Plugin {
 	return map[string]plugin.Plugin{
-		shared.PluginHandlerName: &GrpcPluginClient{},
+
+		shared.PluginHandlerName: &GrpcPluginClient{
+			id:   id,
+			name: name,
+		},
 	}
 }

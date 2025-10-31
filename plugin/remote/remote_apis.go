@@ -34,23 +34,17 @@ func (r *remotePluginController) createRemoteApis() []apinto_module.RouterInfo {
 		{
 			Method:      "GET",
 			Path:        fmt.Sprintf("/api/remote/%s", r.moduleName),
-			Handler:     fmt.Sprintf("%s.getOpenMode", r.moduleName),
-			Labels:      apinto_module.RouterLabelApi,
-			HandlerFunc: []apinto_module.HandlerFunc{r.getOpenMode()},
+			HandlerFunc: r.getOpenMode(),
 		},
 		{
 			Method:      "GET",
 			Path:        fmt.Sprintf("/api/remote/%s/store/:key", r.moduleName),
-			Handler:     fmt.Sprintf("%s.getRemoteObject", r.moduleName),
-			Labels:      apinto_module.RouterLabelApi,
-			HandlerFunc: []apinto_module.HandlerFunc{r.getObject()},
+			HandlerFunc: r.getObject(),
 		},
 		{
 			Method:      "PUT",
 			Path:        fmt.Sprintf("/api/remote/%s/store/:key", r.moduleName),
-			Handler:     fmt.Sprintf("%s.saveRemoteObject", r.moduleName),
-			Labels:      apinto_module.RouterLabelApi,
-			HandlerFunc: []apinto_module.HandlerFunc{r.saveObject()},
+			HandlerFunc: r.saveObject(),
 		},
 	}
 }
@@ -62,12 +56,10 @@ func (r *remotePluginController) getOpenMode() gin.HandlerFunc {
 		module := common.Map{}
 		module["name"] = r.moduleName
 
-		server := ""
-		if r.define.Internet {
-			server = r.define.Server
-		} else {
-			server = r.cfg.Server
-		}
+		server := r.define.Server
+		//if r.define.Internet {
+		//	server = r.define.Server
+		//}
 
 		url := strings.TrimSuffix(server, "/")
 		if r.define.Path != "" {

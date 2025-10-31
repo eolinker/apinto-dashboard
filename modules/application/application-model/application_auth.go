@@ -15,6 +15,14 @@ type ApplicationAuth struct {
 	Config        string //配置信息
 }
 
+func (a *ApplicationAuth) UserId() int {
+	return a.ApplicationAuth.Operator
+}
+
+func (a *ApplicationAuth) Set(name string) {
+	a.Operator = name
+}
+
 type AppAuthItem struct {
 	UUID           string
 	Title          string

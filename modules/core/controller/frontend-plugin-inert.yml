@@ -1,0 +1,15 @@
+- name: template
+  driver: apinto.intelligent.normal
+  router:
+    - path: template
+      type: normal
+- name: guide
+  driver: apinto.builtIn.component
+  router:
+    - path: guide
+      type: normal
+- name: remote
+  driver: apinto.remote.normal
+  router:
+    - path: remote
+      type: normal

@@ -236,12 +236,7 @@ export class PluginMessageComponent implements OnInit {
         (resp: { code: number; data: PluginInstallData; msg: string }) => {
           if (resp.code === 30001) {
             this.message.success(resp.msg || '启用插件成功')
-            const subscription = this.navigationService
-              .getMenuList()
-              .subscribe(() => {
-                subscription.unsubscribe()
-              })
-            this.getPluginDetail()
+            location.reload()
           } else if (resp.code === 0) {
             params.name = resp.data.module.name
             params.server = resp.data.module.server
@@ -309,13 +304,7 @@ export class PluginMessageComponent implements OnInit {
                 .subscribe((resp: EmptyHttpResponse) => {
                   if (resp.code === 0) {
                     this.message.success(resp.msg || '启用插件成功')
-                    const subscription = this.navigationService
-                      .getMenuList()
-                      .subscribe(() => {
-                        subscription.unsubscribe()
-                      })
-                    this.getPluginDetail()
-                    this.modalRef?.close()
+                    location.reload()
                   }
                 })
             }
@@ -361,13 +350,7 @@ export class PluginMessageComponent implements OnInit {
       .subscribe((resp: EmptyHttpResponse) => {
         if (resp.code === 0) {
           this.message.success(resp.msg || '禁用成功')
-          const subscription = this.navigationService
-            .getMenuList()
-            .subscribe(() => {
-              subscription.unsubscribe()
-            })
-          this.getPluginDetail()
-          this.modalRef?.close()
+          location.reload()
         }
       })
   }
@@ -379,13 +362,8 @@ export class PluginMessageComponent implements OnInit {
       .subscribe((resp: EmptyHttpResponse) => {
         if (resp.code === 0) {
           this.message.success(resp.msg || '卸载成功')
-          const subscription = this.navigationService
-            .getMenuList()
-            .subscribe(() => {
-              subscription.unsubscribe()
-            })
-          this.router.navigate(['/', 'module-plugin', 'group', 'list'])
-          this.modalRef?.close()
+
+          location.reload()
         }
       })
   }

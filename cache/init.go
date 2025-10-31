@@ -1,44 +1,29 @@
 package cache
 
 import (
-	"sync"
+	"fmt"
+
+	"strings"
 
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/redis/go-redis/v9"
 )
 
-type handlerFunc func(client *redis.ClusterClient)
-
 var (
-	client *redis.ClusterClient
-	lock   sync.Mutex
-
-	handlers []handlerFunc
+	client    redis.UniversalClient
+	namespace string
 )
 
-func RegisterCacheInitHandler(h handlerFunc) {
-	lock.Lock()
-	defer lock.Unlock()
-	if client != nil {
-		h(client)
-	} else {
-		handlers = append(handlers, h)
+func InitCache(c redis.UniversalClient, prefix string) {
+	namespace = prefix
+	if namespace == "" {
+		namespace = "apinto"
 	}
-
-}
-func InitCache(c *redis.ClusterClient) {
-	//iUserInfoCache := newUserInfoCache(client)
-	//iUserAccessCache := newUserAccessCache(client)
-	//iSessionCache := newSessionCache(client)
-	lock.Lock()
-	defer lock.Unlock()
+	namespace = fmt.Sprint(strings.Trim(namespace, ":"), ":")
 	client = c
-	iCommonCache := newCommonCache(client)
+	iCommonCache := newCommonCache(client, namespace)
 	bean.Injection(&iCommonCache)
-	lockerManger := newManager(client)
+	lockerManger := newManager(client, namespace)
 	bean.Injection(&lockerManger)
-	for _, h := range handlers {
-		h(client)
-	}
-	handlers = handlers[:0]
+
 }

@@ -12,7 +12,7 @@ export class ServGovernanceFilterService {
   createFilterTbody (context:FilterTableComponent):TBODY_TYPE[] {
     return [
       { key: 'title' },
-      { key: 'label' },
+      { key: context.labelRender || 'label', type: context.labelRender ? 'template' : 'text' },
       {
         type: 'btn',
         right: true,

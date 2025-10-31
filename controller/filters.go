@@ -12,12 +12,12 @@ const (
 	RAuthorization = "RAuthorization"
 	ErrorCode      = "ErrorCode"
 	ErrorMessage   = "ErrorBody"
-	Operate        = "Operate"
-	AuditKind      = "AuditKind"
-	LogBody        = "LogBody"
-	AuditObject    = "auditObject"
-	UserName       = "userName"
-	NamespaceId    = "namespaceId"
+	//Operate        = "Operate"
+	AuditKind   = "AuditKind"
+	LogBody     = "LogBody"
+	AuditObject = "auditObject"
+	UserName    = "userName"
+	NamespaceId = "namespaceId"
 )
 
 type UserClaim struct {

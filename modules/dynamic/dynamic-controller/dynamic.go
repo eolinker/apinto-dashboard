@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/common"
+	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
+	"github.com/eolinker/apinto-dashboard/modules/mpm3"
 	"net/http"
 	"strconv"
 
@@ -15,8 +17,6 @@ import (
 
 	dynamic_dto "github.com/eolinker/apinto-dashboard/modules/dynamic/dynamic-dto"
 
-	module_plugin "github.com/eolinker/apinto-dashboard/modules/module-plugin"
-
 	"github.com/eolinker/apinto-dashboard/controller"
 	namespace_controller "github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/cluster"
@@ -26,9 +26,11 @@ import (
 )
 
 type dynamicController struct {
-	moduleName string
-
-	modulePluginService module_plugin.IModulePlugin
+	//moduleName          string
+	uuid                string
+	name                string
+	cname               string
+	modulePluginService mpm3.IPluginService
 	dynamicService      dynamic.IDynamicService
 	clusterService      cluster.IClusterService
 	drivers             []string
@@ -41,7 +43,7 @@ type dynamicController struct {
 	Depends    []string
 }
 
-func newDynamicController(name string, define *DynamicDefine) *dynamicController {
+func newDynamicController(uuid, name, cname string, define *DynamicDefine) *dynamicController {
 
 	render := make(map[string]Render)
 	for key, value := range define.Render {
@@ -58,7 +60,9 @@ func newDynamicController(name string, define *DynamicDefine) *dynamicController
 		drivers = append(drivers, driver.Name)
 	}
 	d := &dynamicController{
-		moduleName: name,
+		uuid:       uuid,
+		name:       name,
+		cname:      cname,
 		drivers:    drivers,
 		Profession: define.Profession,
 		Drivers:    define.Drivers,
@@ -138,7 +142,7 @@ func (c *dynamicController) list(ctx *gin.Context) {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
 		return
 	}
-	pluginInfo, err := c.modulePluginService.GetEnabledPluginByModuleName(ctx, c.moduleName)
+	pluginInfo, err := c.modulePluginService.GetPlugin(ctx, c.uuid)
 	if err != nil {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
 		return
@@ -167,6 +171,7 @@ func (c *dynamicController) info(ctx *gin.Context) {
 }
 
 func (c *dynamicController) online(ctx *gin.Context) {
+	audit_model.LogOperateTypePublish.Handler(ctx)
 	namespaceID := namespace_controller.GetNamespaceId(ctx)
 	uuid := ctx.Param("uuid")
 	var tmp dynamic_dto.Cluster
@@ -176,7 +181,7 @@ func (c *dynamicController) online(ctx *gin.Context) {
 		return
 	}
 	userId := users.GetUserId(ctx)
-	success, fail, err := c.dynamicService.Online(ctx, namespaceID, c.Profession, c.moduleName, uuid, tmp.Cluster, userId, c.Depends...)
+	success, fail, err := c.dynamicService.Online(ctx, namespaceID, c.Profession, c.name, uuid, tmp.Cluster, userId, c.Depends...)
 	if err != nil {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
 		return
@@ -192,6 +197,7 @@ func (c *dynamicController) online(ctx *gin.Context) {
 }
 
 func (c *dynamicController) offline(ctx *gin.Context) {
+	audit_model.LogOperateTypeOffline.Handler(ctx)
 	namespaceID := namespace_controller.GetNamespaceId(ctx)
 	uuid := ctx.Param("uuid")
 	var tmp dynamic_dto.Cluster
@@ -201,7 +207,7 @@ func (c *dynamicController) offline(ctx *gin.Context) {
 		return
 	}
 	userId := users.GetUserId(ctx)
-	success, fail, err := c.dynamicService.Offline(ctx, namespaceID, c.Profession, c.moduleName, uuid, tmp.Cluster, userId)
+	success, fail, err := c.dynamicService.Offline(ctx, namespaceID, c.Profession, c.name, uuid, tmp.Cluster, userId)
 	if err != nil {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
 		return
@@ -217,15 +223,11 @@ func (c *dynamicController) offline(ctx *gin.Context) {
 }
 
 func (c *dynamicController) render(ctx *gin.Context) {
-	pluginInfo, err := c.modulePluginService.GetEnabledPluginByModuleName(ctx, c.moduleName)
-	if err != nil {
-		controller.ErrorJson(ctx, http.StatusOK, err.Error())
-		return
-	}
+
 	ctx.JSON(http.StatusOK, controller.NewSuccessResult(map[string]interface{}{
-		"id":     pluginInfo.UUID,
-		"name":   pluginInfo.Name,
-		"title":  pluginInfo.CName,
+		"id":     c.uuid,
+		"name":   c.name,
+		"title":  c.cname,
 		"render": c.Render,
 	}))
 }
@@ -270,6 +272,7 @@ func (c *dynamicController) clusterStatus(ctx *gin.Context) {
 }
 
 func (c *dynamicController) batchDelete(ctx *gin.Context) {
+	audit_model.LogOperateTypeDelete.Handler(ctx)
 	namespaceID := namespace_controller.GetNamespaceId(ctx)
 	ids := ctx.Query("uuids")
 	uuids := make([]string, 0)
@@ -289,7 +292,7 @@ func (c *dynamicController) batchDelete(ctx *gin.Context) {
 			fail = append(fail, uuid)
 			continue
 		}
-		err = c.dynamicService.Delete(ctx, namespaceID, c.Profession, c.moduleName, uuid)
+		err = c.dynamicService.Delete(ctx, namespaceID, c.Profession, c.name, uuid)
 		if err != nil {
 			fail = append(fail, uuid)
 		} else {
@@ -307,6 +310,7 @@ func (c *dynamicController) batchDelete(ctx *gin.Context) {
 }
 
 func (c *dynamicController) create(ctx *gin.Context) {
+	audit_model.LogOperateTypeCreate.Handler(ctx)
 	namespaceID := namespace_controller.GetNamespaceId(ctx)
 	var worker dynamic_dto.WorkerInfo
 	err := ctx.BindJSON(&worker)
@@ -315,7 +319,7 @@ func (c *dynamicController) create(ctx *gin.Context) {
 		return
 	}
 	body, _ := json.Marshal(worker.Append)
-	err = c.dynamicService.Create(ctx, namespaceID, c.Profession, c.moduleName, c.Skill, worker.Title, worker.Id, worker.Driver, worker.Description, string(body), users.GetUserId(ctx), c.Depends...)
+	err = c.dynamicService.Create(ctx, namespaceID, c.Profession, c.name, c.Skill, worker.Title, worker.Id, worker.Driver, worker.Description, string(body), users.GetUserId(ctx), c.Depends...)
 	if err != nil {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
 		return
@@ -323,12 +327,13 @@ func (c *dynamicController) create(ctx *gin.Context) {
 	data := common.Map{}
 	info := common.Map{}
 	info["id"] = worker.Id
-	info["source_name"] = fmt.Sprintf("%s@%s", worker.Id, c.moduleName)
+	info["source_name"] = fmt.Sprintf("%s@%s", worker.Id, c.name)
 	data["info"] = info
 	ctx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
 
 func (c *dynamicController) save(ctx *gin.Context) {
+	audit_model.LogOperateTypeEdit.Handler(ctx)
 	namespaceID := namespace_controller.GetNamespaceId(ctx)
 	uuid := ctx.Param("uuid")
 	var worker dynamic_dto.WorkerInfo
@@ -338,7 +343,7 @@ func (c *dynamicController) save(ctx *gin.Context) {
 		return
 	}
 	body, _ := json.Marshal(worker.Append)
-	err = c.dynamicService.Save(ctx, namespaceID, c.Profession, c.moduleName, worker.Title, uuid, worker.Description, string(body), users.GetUserId(ctx), c.Depends...)
+	err = c.dynamicService.Save(ctx, namespaceID, c.Profession, c.name, worker.Title, uuid, worker.Description, string(body), users.GetUserId(ctx), c.Depends...)
 	if err != nil {
 		controller.ErrorJson(ctx, http.StatusOK, err.Error())
 		return

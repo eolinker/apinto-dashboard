@@ -35,8 +35,8 @@ export class EoIntelligentPluginListComponent implements OnInit {
   clusterOptions:SelectOption[] = []
   tableBody:TBODY_TYPE[] = [...this.service.createTbody(this)]
   tableHeadName:THEAD_TYPE[] = [...EoIntelligentPluginDefaultThead]
-  tableData:{data:any[], pagination:boolean, total:number, pageNum:number, pageSize:number}
-  = { data: [], pagination: true, total: 1, pageSize: 20, pageNum: 1 }
+  tableData:{data:any[], pagination:boolean, total:number, pageNum:number, pageSize:number, page_size: number, page_num: number }
+  = { data: [], pagination: true, total: 1, page_size: 20, page_num: 1, pageNum: 1, pageSize: 20 }
 
   driverOptions:SelectOption[] = []
   renderSchema:any = {} // 动态渲染数据，是json schema
@@ -69,7 +69,7 @@ export class EoIntelligentPluginListComponent implements OnInit {
         this.clusterOptions = []
         this.tableBody = [...this.service.createTbody(this)]
         this.tableHeadName = [...EoIntelligentPluginDefaultThead]
-        this.tableData = { data: [], pagination: true, total: 1, pageSize: 20, pageNum: 1 }
+        this.tableData = { data: [], pagination: true, total: 1, page_size: 20, page_num: 1, pageSize: 20, pageNum: 1 }
 
         this.driverOptions = []
         this.renderSchema = {} // 动态渲染数据，是json schema
@@ -95,7 +95,7 @@ export class EoIntelligentPluginListComponent implements OnInit {
     // 表格内的其他数据与状态数据是分别获取的，如果list先返回，需要先展示除了状态数据以外的其他数据
     forkJoin([this.api.get(`dynamic/${this.moduleName}/list`, {
       page: this.tableData.pageNum,
-      pageSize: this.tableData.pageSize,
+      page_size: this.tableData.pageSize,
       keyword: this.keyword,
       cluster: JSON.stringify(this.cluster)
     }).pipe(
@@ -107,7 +107,7 @@ export class EoIntelligentPluginListComponent implements OnInit {
       })),
     this.api.get(`dynamic/${this.moduleName}/status`, {
       page: this.tableData.pageNum,
-      pageSize: this.tableData.pageSize,
+      page_size: this.tableData.pageSize,
       keyword: this.keyword,
       cluster: JSON.stringify(this.cluster)
     })]).subscribe((val:Array<any>) => {

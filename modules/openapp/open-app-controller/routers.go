@@ -2,64 +2,68 @@ package open_app_controller
 
 import (
 	apinto_module "github.com/eolinker/apinto-dashboard/module"
+	"github.com/eolinker/apinto-dashboard/pm3"
+	"github.com/eolinker/apinto-dashboard/pm3/middleware"
 	"net/http"
+	"strings"
 )
 
 func initRouter(name string) (apinto_module.RoutersInfo, []apinto_module.MiddlewareHandler) {
 	e := newExternalApplicationController()
 	return apinto_module.RoutersInfo{{
-			Method:      http.MethodGet,
-			Path:        "/api/external-apps",
-			Handler:     "applications.getList",
-			HandlerFunc: []apinto_module.HandlerFunc{e.getList},
+			Method: http.MethodGet,
+			Path:   "/api/external-apps",
+
+			HandlerFunc: e.getList,
 		},
 			{
-				Method:      http.MethodGet,
-				Path:        "/api/external-app",
-				Handler:     "applications.getInfo",
-				HandlerFunc: []apinto_module.HandlerFunc{e.getInfo},
+				Method: http.MethodGet,
+				Path:   "/api/external-app",
+
+				HandlerFunc: e.getInfo,
 			},
 			{
-				Method:      http.MethodPost,
-				Path:        "/api/external-app",
-				Handler:     "applications.create",
-				HandlerFunc: []apinto_module.HandlerFunc{e.create},
+				Method: http.MethodPost,
+				Path:   "/api/external-app",
+
+				HandlerFunc: e.create,
 			},
 			{
-				Method:      http.MethodPut,
-				Path:        "/api/external-app",
-				Handler:     "applications.edit",
-				HandlerFunc: []apinto_module.HandlerFunc{e.edit},
+				Method: http.MethodPut,
+				Path:   "/api/external-app",
+
+				HandlerFunc: e.edit,
 			},
 			{
-				Method:      http.MethodDelete,
-				Path:        "/api/external-app",
-				Handler:     "applications.delete",
-				HandlerFunc: []apinto_module.HandlerFunc{e.delete},
+				Method: http.MethodDelete,
+				Path:   "/api/external-app",
+
+				HandlerFunc: e.delete,
 			},
 			{
-				Method:      http.MethodPut,
-				Path:        "/api/external-app/enable",
-				Handler:     "applications.enable",
-				HandlerFunc: []apinto_module.HandlerFunc{e.enable},
+				Method: http.MethodPut,
+				Path:   "/api/external-app/enable",
+
+				HandlerFunc: e.enable,
 			},
 			{
-				Method:      http.MethodPut,
-				Path:        "/api/external-app/disable",
-				Handler:     "applications.disable",
-				HandlerFunc: []apinto_module.HandlerFunc{e.disable},
+				Method: http.MethodPut,
+				Path:   "/api/external-app/disable",
+
+				HandlerFunc: e.disable,
 			},
 			{
-				Method:      http.MethodPut,
-				Path:        "/api/external-app/token",
-				Handler:     "applications.flushToken",
-				HandlerFunc: []apinto_module.HandlerFunc{e.flushToken},
+				Method: http.MethodPut,
+				Path:   "/api/external-app/token",
+
+				HandlerFunc: e.flushToken,
 			},
 		}, []apinto_module.MiddlewareHandler{
-			{
-				Name:    "external.ver",
-				Rule:    apinto_module.MiddlewareRule(apinto_module.RouterLabelOpenApi),
-				Handler: e.openApiCheck,
-			},
+			middleware.CreateF(e.openApiCheck, func(api pm3.ApiInfo) bool {
+				if api.Authority == pm3.Internal {
+					return false
+				}
+				return strings.HasPrefix(api.Path, "/api2/")
+			}),
 		}
 }

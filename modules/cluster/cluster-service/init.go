@@ -14,6 +14,7 @@ func init() {
 
 	iClusterService := newClusterService()
 	clusterCertificate := newClusterCertificateService()
+	gmCertificate := newGmClusterCertificateService()
 	clusterNode := newClusterNodeService()
 	//clusterConfig := newClusterConfigService()
 
@@ -23,6 +24,7 @@ func init() {
 
 	bean.Injection(&iClusterService)
 	bean.Injection(&clusterCertificate)
+	bean.Injection(&gmCertificate)
 	bean.Injection(&clusterNode)
 	//bean.Injection(&clusterConfig)
 	nodeCache := newINodeCache()

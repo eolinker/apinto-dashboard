@@ -1,3 +1,9 @@
+/*
+ * @Date: 2023-06-13 14:14:31
+ * @LastEditors: maggieyyy
+ * @LastEditTime: 2023-12-14 21:05:41
+ * @FilePath: \apinto\projects\core\src\app\directive\user-access.directive.ts
+ */
 import { Directive, ElementRef, EventEmitter, Input, OnInit, Output, Renderer2 } from '@angular/core'
 import { Router } from '@angular/router'
 import { Subscription } from 'rxjs'
@@ -39,7 +45,7 @@ export class UserAccessDirective implements OnInit {
   disableEdit () {
     if (this.navigationService.dataUpdated) {
       const moduleName = this.navigationService.routerNameMap.get(this.eoNgUserAccess) || this.eoNgUserAccess
-      this.userRight = this.viewAccess ? !!this.navigationService.accessMap.get(moduleName) : this.navigationService.accessMap.get(moduleName) === 'edit'
+      this.userRight = this.viewAccess ? !!this.navigationService.getUserModuleAccess(moduleName) : this.navigationService.getUserModuleAccess(moduleName) === 'edit'
       if (!this.userRight) {
         if (this.el.nativeElement.localName === 'eo-ng-dropdown' || this.el.nativeElement.localName === 'a') {
           this.renderer.setStyle(this.el.nativeElement, 'visibility', 'hidden')

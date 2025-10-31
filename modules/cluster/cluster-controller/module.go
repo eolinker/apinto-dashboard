@@ -1,6 +1,7 @@
 package cluster_controller
 
 import (
+	"github.com/eolinker/apinto-dashboard/pm3"
 	"net/http"
 
 	"github.com/eolinker/apinto-dashboard/module"
@@ -9,73 +10,59 @@ import (
 type ClusterPluginDriver struct {
 }
 
+func (c *ClusterPluginDriver) Install(info *pm3.PluginDefine) (ms []pm3.PModule, acs []pm3.PAccess, fs []pm3.PFrontend, err error) {
+
+	return pm3.ReadPluginAssembly(info)
+
+}
+
+func (c *ClusterPluginDriver) Create(info *pm3.PluginDefine, config pm3.PluginConfig) (pm3.Module, error) {
+	return NewModule(info.Id, info.Name), nil
+}
+
 func NewClusterPlugin() apinto_module.Driver {
 	return &ClusterPluginDriver{}
 }
 
-func (c *ClusterPluginDriver) CreateModule(name string, config interface{}) (apinto_module.Module, error) {
-	return NewModule(name), nil
-}
-
-func (c *ClusterPluginDriver) CheckConfig(name string, config interface{}) error {
-	return nil
-}
-
-func (c *ClusterPluginDriver) CreatePlugin(define interface{}) (apinto_module.Plugin, error) {
-	return c, nil
-}
-
-func (c *ClusterPluginDriver) GetPluginFrontend(moduleName string) string {
-	return "deploy/cluster"
-}
-
-func (c *ClusterPluginDriver) IsPluginVisible() bool {
-	return true
-}
-
-func (c *ClusterPluginDriver) IsShowServer() bool {
-	return false
-}
-
-func (c *ClusterPluginDriver) IsCanUninstall() bool {
-	return false
-}
-
-func (c *ClusterPluginDriver) IsCanDisable() bool {
-	return false
-}
-
 type Module struct {
+	*pm3.ModuleTool
+
 	isInit bool
 
 	name    string
 	routers apinto_module.RoutersInfo
 }
 
+func (c *Module) Frontend() []pm3.FrontendAsset {
+	return nil
+}
+
+func (c *Module) Apis() []pm3.Api {
+	return c.RoutersInfo()
+}
+
+func (c *Module) Middleware() []pm3.Middleware {
+	return nil
+}
+
+func (c *Module) Support() (pm3.ProviderSupport, bool) {
+	return nil, false
+}
+
 func (c *Module) Name() string {
 	return c.name
 }
 
-func (c *Module) Support() (apinto_module.ProviderSupport, bool) {
-	return nil, false
-}
+func NewModule(id, name string) *Module {
 
-func (c *Module) Routers() (apinto_module.Routers, bool) {
-	return c, true
-}
-
-func (c *Module) Middleware() (apinto_module.Middleware, bool) {
-	return nil, false
-}
-
-func NewModule(name string) *Module {
-
-	return &Module{name: name}
+	return &Module{ModuleTool: pm3.NewModuleTool(id, name),
+		name: name}
 }
 
 func (c *Module) RoutersInfo() apinto_module.RoutersInfo {
 	if !c.isInit {
 		c.initRouter()
+		c.InitAccess(c.routers)
 		c.isInit = true
 	}
 	return c.routers
@@ -85,140 +72,170 @@ func (c *Module) initRouter() {
 	nodeController := newClusterNodeController()
 	//configController := newClusterConfigController()
 	certificateController := newClusterCertificateController()
+	gmCertificateController := newGmCertificateController()
 	c.routers = []apinto_module.RouterInfo{
 		{
-			Method:      http.MethodGet,
-			Path:        "/api/clusters",
-			Handler:     "cluster.list",
-			HandlerFunc: []apinto_module.HandlerFunc{clrController.clusters},
+			Method: http.MethodGet,
+			Path:   "/api/clusters",
+
+			HandlerFunc: clrController.clusters,
 		},
 		{
 			Method:      http.MethodGet,
 			Path:        "/api/clusters/simple",
-			Handler:     "cluster.simple_list",
-			Labels:      apinto_module.RouterLabelAnonymous,
-			HandlerFunc: []apinto_module.HandlerFunc{clrController.simpleClusters},
+			Authority:   pm3.Public,
+			HandlerFunc: clrController.simpleClusters,
 		},
 		{
-			Method:      http.MethodGet,
-			Path:        "/api/clusters/create_check",
-			Handler:     "cluster.simple_list",
-			HandlerFunc: []apinto_module.HandlerFunc{clrController.createClusterCheck},
+			Method: http.MethodGet,
+			Path:   "/api/clusters/create_check",
+
+			HandlerFunc: clrController.createClusterCheck,
 		},
 		{
 			Method:      http.MethodGet,
 			Path:        "/api/cluster/enum",
-			Handler:     "cluster.enum",
-			Labels:      apinto_module.RouterLabelAnonymous,
-			HandlerFunc: []apinto_module.HandlerFunc{clrController.clusterEnum},
+			Authority:   pm3.Public,
+			HandlerFunc: clrController.clusterEnum,
 		},
 		{
-			Method:      http.MethodGet,
-			Path:        "/api/cluster",
-			Handler:     "cluster.info",
-			HandlerFunc: []apinto_module.HandlerFunc{clrController.cluster},
+			Method: http.MethodGet,
+			Path:   "/api/cluster",
+
+			HandlerFunc: clrController.cluster,
 		},
 		{
-			Method:      http.MethodDelete,
-			Path:        "/api/cluster",
-			Handler:     "cluster.delete",
-			HandlerFunc: []apinto_module.HandlerFunc{clrController.del},
+			Method: http.MethodDelete,
+			Path:   "/api/cluster",
+
+			HandlerFunc: clrController.del,
 		}, {
-			Method:      http.MethodPost,
-			Path:        "/api/cluster",
-			Handler:     "cluster.create",
-			HandlerFunc: []apinto_module.HandlerFunc{clrController.create},
+			Method: http.MethodPost,
+			Path:   "/api/cluster",
+
+			HandlerFunc: clrController.create,
 		},
 		{
-			Method:      http.MethodGet,
-			Path:        "/api/cluster-test",
-			Handler:     "cluster.test",
-			HandlerFunc: []apinto_module.HandlerFunc{clrController.test},
+			Method: http.MethodGet,
+			Path:   "/api/cluster-test",
+
+			HandlerFunc: clrController.test,
 		},
 		{
-			Method:      http.MethodPut,
-			Path:        "/api/cluster/:cluster_name",
-			Handler:     "cluster.desc.edit",
-			HandlerFunc: []apinto_module.HandlerFunc{clrController.update},
+			Method: http.MethodPut,
+			Path:   "/api/cluster/:cluster_name",
+
+			HandlerFunc: clrController.update,
 		},
 		{
-			Method:      http.MethodGet,
-			Path:        "/api/cluster/:cluster_name/nodes",
-			Handler:     "cluster.nodes",
-			HandlerFunc: []apinto_module.HandlerFunc{nodeController.nodes},
+			Method: http.MethodGet,
+			Path:   "/api/cluster/:cluster_name/nodes",
+
+			HandlerFunc: nodeController.nodes,
 		},
 		{
-			Method:      http.MethodGet,
-			Path:        "/api/cluster/:cluster_name/nodes/simple",
-			Handler:     "cluster.nodes.simple",
-			HandlerFunc: []apinto_module.HandlerFunc{nodeController.nodesSimple},
+			Method: http.MethodGet,
+			Path:   "/api/cluster/:cluster_name/nodes/simple",
+
+			HandlerFunc: nodeController.nodesSimple,
 		},
 		{
-			Method:      http.MethodPost,
-			Path:        "/api/cluster/:cluster_name/node/reset",
-			Handler:     "cluster.nodes.reset",
-			HandlerFunc: []apinto_module.HandlerFunc{nodeController.reset},
+			Method: http.MethodPost,
+			Path:   "/api/cluster/:cluster_name/node/reset",
+
+			HandlerFunc: nodeController.reset,
 		},
 		{
-			Method:      http.MethodPut,
-			Path:        "/api/cluster/:cluster_name/node",
-			Handler:     "cluster.nodes.edit",
-			HandlerFunc: []apinto_module.HandlerFunc{nodeController.put},
+			Method: http.MethodPut,
+			Path:   "/api/cluster/:cluster_name/node",
+
+			HandlerFunc: nodeController.put,
 		},
 		//{
 		//	Method:      http.MethodGet,
 		//	Path:        "/api/cluster/:cluster_name/configuration/:type",
-		//	Handler:     "cluster.config",
-		//	HandlerFunc: []apinto_module.HandlerFunc{configController.get},
+		//
+		//	HandlerFunc:configController.get,
 		//},
 		//{
 		//	Method:      http.MethodPut,
 		//	Path:        "/api/cluster/:cluster_name/configuration/:type",
-		//	Handler:     "cluster.config.edit",
-		//	HandlerFunc: []apinto_module.HandlerFunc{configController.edit},
+		//
+		//	HandlerFunc:configController.edit,
 		//},
 		//{
 		//	Method:      http.MethodPut,
 		//	Path:        "/api/cluster/:cluster_name/configuration/:type/enable",
-		//	Handler:     "cluster.config.enable",
-		//	HandlerFunc: []apinto_module.HandlerFunc{configController.enable},
+		//
+		//	HandlerFunc:configController.enable,
 		//},
 		//{
 		//	Method:      http.MethodPut,
 		//	Path:        "/api/cluster/:cluster_name/configuration/:type/disable",
-		//	Handler:     "cluster.config.disable",
-		//	HandlerFunc: []apinto_module.HandlerFunc{configController.disable},
+		//
+		//	HandlerFunc:configController.disable,
 		//},
 
 		{
-			Method:      http.MethodPost,
-			Path:        "/api/cluster/:cluster_name/certificate",
-			Handler:     "cluster.certificates.post",
-			HandlerFunc: []apinto_module.HandlerFunc{certificateController.post},
+			Method: http.MethodPost,
+			Path:   "/api/cluster/:cluster_name/certificate",
+
+			HandlerFunc: certificateController.post,
 		},
 		{
-			Method:      http.MethodGet,
-			Path:        "/api/cluster/:cluster_name/certificate/:certificate_id",
-			Handler:     "cluster.certificates.get",
-			HandlerFunc: []apinto_module.HandlerFunc{certificateController.get},
+			Method: http.MethodGet,
+			Path:   "/api/cluster/:cluster_name/certificate/:certificate_id",
+
+			HandlerFunc: certificateController.get,
 		},
 		{
-			Method:      http.MethodPut,
-			Path:        "/api/cluster/:cluster_name/certificate/:certificate_id",
-			Handler:     "cluster.certificates.put",
-			HandlerFunc: []apinto_module.HandlerFunc{certificateController.put},
+			Method: http.MethodPut,
+			Path:   "/api/cluster/:cluster_name/certificate/:certificate_id",
+
+			HandlerFunc: certificateController.put,
 		},
 		{
-			Method:      http.MethodDelete,
-			Path:        "/api/cluster/:cluster_name/certificate/:certificate_id",
-			Handler:     "cluster.certificates.del",
-			HandlerFunc: []apinto_module.HandlerFunc{certificateController.del},
+			Method: http.MethodDelete,
+			Path:   "/api/cluster/:cluster_name/certificate/:certificate_id",
+
+			HandlerFunc: certificateController.del,
 		},
 		{
-			Method:      http.MethodGet,
-			Path:        "/api/cluster/:cluster_name/certificates",
-			Handler:     "cluster.certificates.gets",
-			HandlerFunc: []apinto_module.HandlerFunc{certificateController.gets},
+			Method: http.MethodGet,
+			Path:   "/api/cluster/:cluster_name/certificates",
+
+			HandlerFunc: certificateController.gets,
+		},
+
+		{
+			Method: http.MethodPost,
+			Path:   "/api/cluster/:cluster_name/gm_certificate",
+
+			HandlerFunc: gmCertificateController.post,
+		},
+		{
+			Method: http.MethodGet,
+			Path:   "/api/cluster/:cluster_name/gm_certificate/:certificate_id",
+
+			HandlerFunc: gmCertificateController.get,
+		},
+		{
+			Method: http.MethodPut,
+			Path:   "/api/cluster/:cluster_name/gm_certificate/:certificate_id",
+
+			HandlerFunc: gmCertificateController.put,
+		},
+		{
+			Method: http.MethodDelete,
+			Path:   "/api/cluster/:cluster_name/gm_certificate/:certificate_id",
+
+			HandlerFunc: gmCertificateController.del,
+		},
+		{
+			Method: http.MethodGet,
+			Path:   "/api/cluster/:cluster_name/gm_certificates",
+
+			HandlerFunc: gmCertificateController.gets,
 		},
 	}
 }

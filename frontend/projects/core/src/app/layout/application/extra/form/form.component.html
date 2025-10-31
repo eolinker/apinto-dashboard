@@ -1,3 +1,9 @@
+<!--
+ * @Date: 2023-05-30 17:04:07
+ * @LastEditors: maggieyyy
+ * @LastEditTime: 2024-01-29 17:19:03
+ * @FilePath: \apinto\projects\core\src\app\layout\application\extra\form\form.component.html
+-->
 <form
   nz-form
   [nzNoColon]="true"
@@ -16,6 +22,7 @@
         [nzOptions]="positionList"
         nzPlaceHolder="请选择"
         [nzDisabled]="nzDisabled"
+        nzShowSearch
       ></eo-ng-select>
     </nz-form-control>
   </nz-form-item>
@@ -70,6 +77,7 @@
         [nzOptions]="conflictList"
         nzPlaceHolder="请选择"
         [nzDisabled]="nzDisabled"
+        nzShowSearch
       ></eo-ng-select>
     </nz-form-control>
   </nz-form-item>

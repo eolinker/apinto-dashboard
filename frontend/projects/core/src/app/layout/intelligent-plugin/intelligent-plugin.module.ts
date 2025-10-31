@@ -14,6 +14,12 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { DirectiveModule } from '../../directive/directive.module'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
 
+const sharedEoLibraryModules = [
+  EoNgButtonModule,
+  EoNgSelectModule,
+  EoNgInputModule,
+  EoNgApintoTableModule
+]
 @NgModule({
   declarations: [
     IntelligentPluginLayoutComponent,
@@ -24,15 +30,13 @@ import { NzSpinModule } from 'ng-zorro-antd/spin'
   imports: [
     CommonModule,
     IntelligentPluginRoutingModule,
-    ComponentModule,
     DirectiveModule,
     FormsModule,
     ReactiveFormsModule,
-    EoNgButtonModule,
-    EoNgSelectModule,
-    EoNgInputModule,
-    EoNgApintoTableModule,
+    ComponentModule,
+    ...sharedEoLibraryModules,
     NzSpinModule
   ]
 })
-export class IntelligentPluginModule { }
+export class IntelligentPluginModule {
+}

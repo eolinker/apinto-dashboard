@@ -41,5 +41,14 @@ type DynamicCluster struct {
 	Title      string `json:"title"`
 	Status     string `json:"status"`
 	Updater    string `json:"updater"`
+	UpdaterId  int    `json:"_"`
 	UpdateTime string `json:"update_time"`
+}
+
+func (d *DynamicCluster) UserId() int {
+	return d.UpdaterId
+}
+
+func (d *DynamicCluster) Set(name string) {
+	d.Updater = name
 }

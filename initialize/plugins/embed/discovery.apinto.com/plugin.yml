@@ -2,7 +2,7 @@ id: "discovery.apinto.com"
 name: "discovery"
 cname: "服务发现"
 resume: "使用一个注册中心来记录分布式系统中的全部服务的信息，以便其他服务能够快速的找到这些已注册的服务。"
-version: "v1.0.7"
+version: "v1.3.1"
 icon: "logo.png"
 driver: "discovery.apinto.com"
 type: 1 #0为框架模块 1为核心模块 2为内置模块 3为非内置
@@ -11,12 +11,20 @@ is_can_disable: false
 is_can_uninstall: false
 visible_in_navigation: true
 visible_in_market: true
-front: upstream
+front: template/discovery
 navigation: "navigation.infrastructure"
 group_id: "core_module"
+frontend:
+  - name: discovery
+    driver: apinto.intelligent.normal
+    router:
+      - path: template/discovery
+        type: normal
 define:  # 动态模块定义
   profession: discovery
   drivers:
+    - name: static
+      title: 静态资源
     - name: consul
       title: Consul
     - name: eureka
@@ -882,6 +890,155 @@ define:  # 动态模块定义
                           "x-index": 2
                       }
                   }
+              }
+          }
+      }
+    static: |
+      {
+          "type": "object",
+          "properties": {
+              "health_on": {
+                  "type": "boolean",
+                  "title": "是否开启健康检查",
+                  "x-decorator": "FormItem",
+                  "x-component": "Switch",
+                  "default": false,
+                  "x-decorator-props": {
+                      "labelCol": 6,
+                      "wrapperCol": 10
+                  },
+                  "x-index": 0
+              },
+              "health": {
+                  "type": "object",
+                  "title": "健康检查配置",
+                  "x-decorator": "FormItem",
+                  "x-reactions": [
+                      {
+                          "dependencies": [
+                              ".health_on"
+                          ],
+                          "when": "{{$deps[0] === true}}",
+                          "fulfill": {
+                              "state": {
+                                  "visible": true
+                              }
+                          },
+                          "otherwise": {
+                              "state": {
+                                  "visible": false
+                              }
+                          }
+                      }
+                  ],
+                  "properties": {
+                      "scheme": {
+                          "type": "string",
+                          "title": "请求协议",
+                          "x-decorator": "FormItem",
+                          "x-component": "Select",
+                          "enum": [
+                              {
+                                  "label": "HTTP",
+                                  "value": "http"
+                              },
+                              {
+                                  "label": "HTTPS",
+                                  "value": "https"
+                              }
+                          ],
+                          "x-component-props": {
+                              "placeholder": "请选择请求协议"
+                          },
+                          "default": "http",
+                          "required": true,
+                          "x-index": 0
+                      },
+                      "method": {
+                          "type": "string",
+                          "title": "请求方式",
+                          "x-decorator": "FormItem",
+                          "x-component": "Select",
+                          "enum": [
+                              {
+                                  "label": "GET",
+                                  "value": "GET"
+                              },
+                              {
+                                  "label": "POST",
+                                  "value": "POST"
+                              },
+                              {
+                                  "label": "PUT",
+                                  "value": "PUT"
+                              }
+                          ],
+                          "x-component-props": {
+                              "placeholder": "请选择请求方式"
+                          },
+                          "default": "GET",
+                          "required": true,
+                          "x-index": 1
+                      },
+                      "url": {
+                          "type": "string",
+                          "title": "请求URL",
+                          "x-decorator": "FormItem",
+                          "x-component": "Input",
+                          "x-component-props": {
+                              "placeholder": "请输入请求URL"
+                          },
+                          "default": "/ping",
+                          "required": true,
+                          "x-index": 2
+                      },
+                      "success_code": {
+                          "type": "integer",
+                          "title": "成功状态码",
+                          "minimum": 100,
+                          "description": "最小值：100",
+                          "x-decorator": "FormItem",
+                          "x-component": "NumberPicker",
+                          "x-component-props": {
+                              "placeholder": "请输入成功状态码"
+                          },
+                          "default": 200,
+                          "required": true,
+                          "x-index": 3
+                      },
+                      "period": {
+                          "type": "integer",
+                          "title": "检查频率",
+                          "minimum": 1,
+                          "default": 30,
+                          "description": "单位：s，最小值：1",
+                          "x-decorator": "FormItem",
+                          "x-component": "NumberPicker",
+                          "x-component-props": {
+                              "placeholder": "请输入检查频率"
+                          },
+                          "required": true,
+                          "x-index": 4
+                      },
+                      "timeout": {
+                          "type": "integer",
+                          "title": "超时时间",
+                          "description": "单位：ms",
+                          "x-decorator": "FormItem",
+                          "x-component": "NumberPicker",
+                          "x-component-props": {
+                              "placeholder": "请输入超时时间"
+                          },
+                          "default": 100,
+                          "required": true,
+                          "x-index": 5
+                      }
+                  },
+                  "x-decorator-props": {
+                      "labelCol": 6,
+                      "wrapperCol": 10
+                  },
+                  "x-index": 1
               }
           }
       }

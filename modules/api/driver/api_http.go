@@ -2,6 +2,7 @@ package driver
 
 import (
 	"fmt"
+
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/api"
@@ -25,8 +26,8 @@ func (a *apiHTTP) CheckInput(input *api_dto.APIInfo) error {
 	return checkInput(input)
 }
 
-func (a *apiHTTP) ToApinto(name, desc string, disable bool, method []string, requestPath, requestPathLabel, proxyPath, serviceName string, timeout, retry int, hosts []string, match []*api_entry.MatchConf, header []*api_entry.ProxyHeader, templateUUID string) *v1.RouterConfig {
-	router := toApinto(name, desc, disable, method, requestPath, requestPathLabel, proxyPath, serviceName, timeout, retry, hosts, match, header, templateUUID)
+func (a *apiHTTP) ToApinto(name, desc string, disable bool, protocols, method []string, requestPath, requestPathLabel, proxyPath, serviceName string, timeout, retry int, hosts []string, match []*api_entry.MatchConf, header []*api_entry.ProxyHeader, templateUUID string, plugins []*api_entry.APIPlugin) *v1.RouterConfig {
+	router := toApinto(name, desc, disable, protocols, method, requestPath, requestPathLabel, proxyPath, serviceName, timeout, retry, hosts, match, header, templateUUID, plugins)
 	router.Append["websocket"] = false
 	router.Driver = a.apintoDriverName
 	return router

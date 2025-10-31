@@ -10,13 +10,8 @@ package plugins
 
 import (
 	"embed"
-	"github.com/eolinker/apinto-dashboard/modules/module-plugin/embed_registry"
-	"path"
 
-	"github.com/eolinker/apinto-dashboard/modules/module-plugin/model"
-	"gopkg.in/yaml.v3"
-
-	"github.com/eolinker/eosc/log"
+	"github.com/eolinker/apinto-dashboard/pm3/embed_registry"
 )
 
 var (
@@ -25,37 +20,8 @@ var (
 )
 
 func init() {
-	plugins, err := loadPlugins("embed", "plugin.yml")
+	err := embed_registry.LoadPlugins(&pluginDir, "embed", "plugin.yml")
 	if err != nil {
 		panic(err)
 	}
-	embed_registry.RegisterEmbedPlugin(plugins...)
-}
-
-func loadPlugins(dir string, target string) ([]*model.EmbedPluginCfg, error) {
-	entries, err := pluginDir.ReadDir(dir)
-	if err != nil {
-		return nil, err
-	}
-	plugins := make([]*model.EmbedPluginCfg, 0)
-	for _, e := range entries {
-		filePath := path.Join(dir, e.Name(), target)
-		fileContent, err := pluginDir.ReadFile(filePath)
-		if err != nil {
-			return nil, err
-		}
-		pluginCfg := new(model.InnerPluginCfg)
-		err = yaml.Unmarshal(fileContent, pluginCfg)
-		if err != nil {
-			log.Errorf("parse file(%s) error: %v", filePath, err)
-			return nil, err
-		}
-
-		plugins = append(plugins, &model.EmbedPluginCfg{
-			PluginCfg: pluginCfg,
-			Resources: model.NewEmbedPluginResources(pluginDir, path.Join("embed", e.Name()), pluginCfg.Icon, "README.md"),
-		})
-
-	}
-	return plugins, nil
 }

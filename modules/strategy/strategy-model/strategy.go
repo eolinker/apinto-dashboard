@@ -12,7 +12,16 @@ type Strategy struct {
 	Filters     string
 	Conf        string
 	OperatorStr string
+	OperatorId  int
 	Status      int //这里只能用int 不能用 enum.StrategyOnlineStatus json解析会保报错 //1.待更新 2.已上线 3.待删除 4.未上线
+}
+
+func (s *Strategy) UserId() int {
+	return s.OperatorId
+}
+
+func (s *Strategy) Set(name string) {
+	s.OperatorStr = name
 }
 
 type StrategyToPublish[T any] struct {
@@ -95,14 +104,6 @@ type RemoteTitles struct {
 	Field string `json:"field"`
 }
 
-type RemoteApis struct {
-	Uuid  string `json:"uuid"`
-	Title string `json:"title"`
-	//Service     string `json:"service"`
-	Group       string `json:"group"`
-	RequestPath string `json:"request_path"`
-}
-
 type RemoteServices struct {
 	Uuid   string `json:"uuid"`
 	Name   string `json:"name"`
@@ -122,4 +123,25 @@ type VisitInfoOutputConf struct {
 	InfluenceSphere []*FilterOutput `json:"influence_sphere"`
 	Continue        bool            `json:"continue"`
 	//Extender        *ExtenderData   `json:"extender"`
+}
+
+type DataMaskConfig struct {
+	Rules []*DataMaskRule `json:"rules"`
+}
+
+type DataMaskRule struct {
+	Match *DataMaskBasicItem `json:"match"`
+	Mask  *DataMaskMask      `json:"mask"`
+}
+
+type DataMaskBasicItem struct {
+	Type  string `json:"type"`
+	Value string `json:"value"`
+}
+
+type DataMaskMask struct {
+	Type    string             `json:"type"`
+	Begin   int                `json:"begin"`
+	Length  int                `json:"length"`
+	Replace *DataMaskBasicItem `json:"replace"`
 }

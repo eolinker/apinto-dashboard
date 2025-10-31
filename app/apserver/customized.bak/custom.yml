@@ -1,0 +1,10 @@
+assets:
+  logo: logo.jpg
+  favicon: favicon.jpg
+  auth: logo-auth.jpg
+
+power: "http://q"
+product: "网关"
+guide: false
+ignore:
+  - help.fake.apinto.com

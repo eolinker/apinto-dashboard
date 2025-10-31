@@ -12,6 +12,7 @@ message HttpRequest{
   repeated Header headers = 4;
   bytes keys = 5;
   string FulPath = 6;
+  string id=7;
 }
 message HttpResponse{
   int32 status = 1;
@@ -36,15 +37,47 @@ message MiddlewareResponse{
 }
 message MiddlewareInfoRequest{
   string name = 1;
+  ApiInfo api=3;
 }
 message MiddlewareInfoResponse{
-  string name = 1;
-  bool  request  =2;
-  bool  response = 3;
+  bool  result=1;
 }
+
+enum Authority{
+    UnSet    = 0;
+    Internal =1;
+    Public   =2;
+    Private  =3;
+}
+message ApiInfo{
+  string method=1;
+  string path =2;
+  string access=3;
+  Authority authority=4;
+  string id =5;
+}
+message MiddlewareInfo{
+  string name =1;
+  bool hasRequestHandler=2;
+  bool hasResponseHandler=3;
+}
+message FrontendInfo {
+  string path=1;
+  string id =2;
+}
+message PluginInfos{
+  repeated ApiInfo apis=1;
+  repeated FrontendInfo frontend=2;
+  repeated MiddlewareInfo middlewares=3;
+}
+message Empty{}
+
+
 service Service {
+  rpc ModuleInfo(Empty)returns(PluginInfos);
   rpc Request(HttpRequest) returns (HttpResponse);
   rpc MiddlewaresRequest(MiddlewareRequest) returns (MiddlewareResponse);
   rpc MiddlewaresResponse(MiddlewareRequest) returns (MiddlewareResponse);
-  rpc GetMiddlewareInfo(MiddlewareInfoRequest) returns (MiddlewareInfoResponse);
+  rpc CheckMiddlewareForApi(MiddlewareInfoRequest) returns (MiddlewareInfoResponse);
+
 }

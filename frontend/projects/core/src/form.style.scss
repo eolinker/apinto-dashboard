@@ -109,7 +109,7 @@ form .ant-form-item-label > label {
     }
   }
   .label {
-    width: 120px !important;
+    width: 170px !important;
     height: 32px;
     line-height: 32px;
     padding: 0;
@@ -119,7 +119,10 @@ form .ant-form-item-label > label {
     width: 100%;
   }
   .ant-input.w240 {
-    width: 168px !important;
+    width: 268px !important;
+  }
+  .ant-input.w286 {
+    width: 286px !important;
   }
   .ant-input.w206 {
     width: 215px !important;

@@ -111,3 +111,24 @@ type StrategyResponseHeader struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
 }
+
+type DataMaskConfig struct {
+	Rules []*DataMaskRule `json:"rules"`
+}
+
+type DataMaskRule struct {
+	Match *DataMaskBasicItem `json:"match"`
+	Mask  *DataMaskMask      `json:"mask"`
+}
+
+type DataMaskBasicItem struct {
+	Type  string `json:"type"`
+	Value string `json:"value"`
+}
+
+type DataMaskMask struct {
+	Type    string             `json:"type"`
+	Begin   int                `json:"begin"`
+	Length  int                `json:"length"`
+	Replace *DataMaskBasicItem `json:"replace"`
+}

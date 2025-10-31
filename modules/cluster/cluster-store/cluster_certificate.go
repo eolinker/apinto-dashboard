@@ -26,3 +26,20 @@ func newClusterCertificateStore(db store.IDB) IClusterCertificateStore {
 func (c *clusterCertificateStore) QueryListByClusterId(ctx context.Context, clusterId int) ([]*cluster_entry.ClusterCertificate, error) {
 	return c.ListQuery(ctx, "`cluster` = ?", []interface{}{clusterId}, "")
 }
+
+type IGMCertificateStore interface {
+	store.IBaseStore[cluster_entry.ClusterGMCertificate]
+	QueryListByClusterId(ctx context.Context, clusterId int) ([]*cluster_entry.ClusterGMCertificate, error)
+}
+
+type gmCertificateStore struct {
+	*store.BaseStore[cluster_entry.ClusterGMCertificate]
+}
+
+func newGMClusterCertificateStore(db store.IDB) IGMCertificateStore {
+	return &gmCertificateStore{BaseStore: store.CreateStore[cluster_entry.ClusterGMCertificate](db)}
+}
+
+func (c *gmCertificateStore) QueryListByClusterId(ctx context.Context, clusterId int) ([]*cluster_entry.ClusterGMCertificate, error) {
+	return c.ListQuery(ctx, "`cluster` = ?", []interface{}{clusterId}, "")
+}

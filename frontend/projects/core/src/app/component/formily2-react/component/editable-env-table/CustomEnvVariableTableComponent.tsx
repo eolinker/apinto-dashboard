@@ -76,10 +76,6 @@ export const CustomEnvVariableTableComponent: React.FunctionComponent<Props> = (
 ) => {
   const { chooseEnv } = props
 
-  React.useEffect(() => {
-    getEnvlist()
-  }, [])
-
   // const handleChange = (value: string) => {}
 
   const [dataSource, setDataSource] = React.useState<DataType[]>([
@@ -101,6 +97,30 @@ export const CustomEnvVariableTableComponent: React.FunctionComponent<Props> = (
   const [tableLoading, setTableLoading] = React.useState(true)
   const [total, setTotal] = React.useState(0)
   const editingKey = ''
+
+  const getEnvlist = () => {
+    setEditing(false)
+    axios
+      .get(`${environment.urlPrefix}api/variables`, {
+        params: {
+          page_num: pageNum || 0,
+          page_size: pageSize || 15,
+          key: keyword || ''
+        }
+      })
+      .then((resp) => {
+        setTableLoading(false)
+        if (resp.data.code === 0) {
+          setDataSource(resp.data.data.variables)
+          setTotal(resp.data.data.total)
+        }
+      })
+  }
+
+  React.useEffect(() => {
+    getEnvlist()
+  }, [pageNum, pageSize, keyword])
+
   const columns = [
     {
       title: 'KEY',
@@ -156,33 +176,14 @@ export const CustomEnvVariableTableComponent: React.FunctionComponent<Props> = (
     setDataSource([...newData])
   }
 
-  const getEnvlist = () => {
-    setEditing(false)
-    axios
-      .get(`${environment.urlPrefix}api/variables`, {
-        params: {
-          pageNum: pageNum || 0,
-          pageSize: pageSize || 15,
-          key: keyword || ''
-        }
-      })
-      .then((resp) => {
-        setTableLoading(false)
-        if (resp.data.code === 0) {
-          setDataSource(resp.data.data.variables)
-          setTotal(resp.data.total)
-        }
-      })
-  }
-
   const tableDataChange = (...pagination: any) => {
     setPageNum(pagination[0])
     setPageSize(pagination[1])
-    // getEnvlist()
   }
 
   const keywordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setKeyword(e.target.value)
+    setPageNum(1)
   }
 
   const save = async () => {
@@ -222,7 +223,7 @@ export const CustomEnvVariableTableComponent: React.FunctionComponent<Props> = (
 
   return (
     <div>
-      <div className="pl-btnbase pr-btnrbase pb-btnybase flex flex-nowrap items-center justify-between">
+      <div className="flex flex-nowrap justify-between items-center pl-btnbase pr-btnrbase pb-btnybase">
         <Button onClick={handleAdd} type="primary" style={{ marginBottom: 16 }}>
           添加变量
         </Button>
@@ -258,7 +259,8 @@ export const CustomEnvVariableTableComponent: React.FunctionComponent<Props> = (
             pageSizeOptions: [15, 20, 50, 100],
             showTotal: (total) => `共${total}条`,
             showSizeChanger: true,
-            showQuickJumper: true
+            showQuickJumper: true,
+            total: total
           }}
         />
       </Form>

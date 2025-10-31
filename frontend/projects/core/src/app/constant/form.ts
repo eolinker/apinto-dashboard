@@ -8,7 +8,7 @@ export function setFormValue (form:FormGroup, data:{[key:string]:any}):void {
     if (form.controls[key] instanceof FormGroup) {
       setFormValue(form.controls[key] as FormGroup, data[key])
     } else {
-      form.controls[key].setValue(data[key])
+      form.controls[key].setValue(data?.[key] || null)
     }
   })
 }

@@ -10,7 +10,7 @@ import (
 	_ "github.com/eolinker/apinto-dashboard/modules/dynamic/dynamic-service"
 	_ "github.com/eolinker/apinto-dashboard/modules/group/group-service"
 	_ "github.com/eolinker/apinto-dashboard/modules/grpc-service/service"
-	_ "github.com/eolinker/apinto-dashboard/modules/module-plugin/service"
+	_ "github.com/eolinker/apinto-dashboard/modules/mpm3/service"
 	_ "github.com/eolinker/apinto-dashboard/modules/namespace/namespace-service"
 	_ "github.com/eolinker/apinto-dashboard/modules/navigation/navigation-service"
 	_ "github.com/eolinker/apinto-dashboard/modules/notice/notice-service"

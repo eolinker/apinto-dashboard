@@ -2,7 +2,7 @@
  * @Author: MengjieYang yangmengjie@eolink.com
  * @Date: 2022-08-02 22:18:06
  * @LastEditors: MengjieYang yangmengjie@eolink.com
- * @LastEditTime: 2022-08-11 23:37:32
+ * @LastEditTime: 2024-01-16 17:11:01
  * @FilePath: /apinto/projects/test-app/src/app/array-items/array-items.component.html
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
@@ -131,6 +131,7 @@
               [(ngModel)]="property.default"
               (ngModelChange)="flushData()"
               nzAllowClear
+              nzShowSearch
               [nzPlaceHolder]="property['x-component-props']?.placeholder"
               [nzOptions]="property.enum"
               [nzDisabled]="nzDisabled"
@@ -144,7 +145,7 @@
               [(ngModel)]="property.default"
               (ngModelChange)="flushData()"
               [nzDisabled]="nzDisabled"
-              >{{ property.title }}</label
+              >{{ property.label ?? property.title }}</label
             >
 
             <eo-ng-checkbox-group
@@ -220,6 +221,19 @@
               [(ngModel)]="property.default"
               (ngModelChange)="flushData()"
             />
+            <eo-ng-counter
+              *ngIf="property['x-component'] === 'Counter'"
+              [placeHolder]="
+                property['x-component-props']?.extra ||
+                property['x-component-props']?.placeholder ||
+                ''
+              "
+              [attr.required]="property.required"
+              [minNum]="property.minimum"
+              [maxNum]="property.maximum"
+              [(bindNum)]="property.default"
+              (bindNumChange)="flushData()"
+            ></eo-ng-counter>
             <textarea
               *ngIf="property['x-component'] === 'Input.textarea'"
               nz-input
@@ -473,6 +487,7 @@
               [(ngModel)]="property.default"
               (ngModelChange)="flushData()"
               nzAllowClear
+              nzShowSearch
               [nzPlaceHolder]="property['x-component-props']?.placeholder"
               [nzOptions]="property.enum"
               [nzDisabled]="nzDisabled"
@@ -486,7 +501,7 @@
               [(ngModel)]="property.default"
               (ngModelChange)="flushData()"
               [nzDisabled]="nzDisabled"
-              >{{ property.title }}</label
+              >{{ property.label ?? property.title }}</label
             >
 
             <eo-ng-checkbox-group
@@ -560,6 +575,21 @@
               [(ngModel)]="property.default"
               (ngModelChange)="flushData()"
             />
+
+            <eo-ng-counter
+              *ngIf="property['x-component'] === 'Counter'"
+              [placeHolder]="
+                property['x-component-props']?.extra ||
+                property['x-component-props']?.placeholder ||
+                ''
+              "
+              [attr.required]="property.required"
+              [minNum]="property.minimum"
+              [maxNum]="property.maximum"
+              [(bindNum)]="property.default"
+              (bindNumChange)="flushData()"
+            ></eo-ng-counter>
+
             <textarea
               *ngIf="property['x-component'] === 'Input.textarea'"
               eo-ng-input
@@ -734,6 +764,7 @@
               [(ngModel)]="property.default"
               (ngModelChange)="flushData()"
               nzAllowClear
+              nzShowSearch
               [nzPlaceHolder]="property['x-component-props']?.placeholder"
               [nzOptions]="property.enum"
               [nzDisabled]="nzDisabled"
@@ -771,7 +802,7 @@
               [(ngModel)]="property.default"
               (ngModelChange)="flushData()"
               [nzDisabled]="nzDisabled"
-              >{{ property.title }}</label
+              >{{ property.label ?? property.title }}</label
             >
 
             <eo-ng-checkbox-group
@@ -827,6 +858,21 @@
               (ngModelChange)="flushData()"
               [type]="property.type"
             />
+
+            <eo-ng-counter
+              *ngIf="property['x-component'] === 'Counter'"
+              [placeHolder]="
+                property['x-component-props']?.extra ||
+                property['x-component-props']?.placeholder ||
+                ''
+              "
+              [attr.required]="property.required"
+              [minNum]="property.minimum"
+              [maxNum]="property.maximum"
+              [(bindNum)]="property.default"
+              (bindNumChange)="flushData()"
+            ></eo-ng-counter>
+
             <textarea
               *ngIf="property['x-component'] === 'Input.textarea'"
               eo-ng-input

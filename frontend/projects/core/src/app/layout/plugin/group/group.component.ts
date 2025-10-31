@@ -1,3 +1,9 @@
+/*
+ * @Date: 2023-06-13 14:14:31
+ * @LastEditors: maggieyyy
+ * @LastEditTime: 2023-12-13 15:22:00
+ * @FilePath: \apinto\projects\core\src\app\layout\plugin\group\group.component.ts
+ */
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core'
 import { Router } from '@angular/router'
 import { EoNgTreeDefaultComponent } from 'eo-ng-tree'
@@ -8,7 +14,20 @@ import { EoNgNavigationService } from '../../../service/eo-ng-navigation.service
 @Component({
   selector: 'eo-ng-plugin-group',
   templateUrl: './group.component.html',
-  styles: [
+  styles: [`
+  :host ::ng-deep {
+    eo-ng-tree-default-node.ant-tree-treenode{
+      nz-tree-node-switcher.ant-tree-switcher{
+        display:none
+      }
+      nz-tree-node-title.ant-tree-node-content-wrapper{
+        height:30px;
+        line-height:30px;
+        margin-left:24px;
+      }
+    }
+  }
+  `
   ]
 })
 export class GroupComponent implements OnInit {

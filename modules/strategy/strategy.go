@@ -16,7 +16,7 @@ type IStrategyService[T any, K any] interface {
 	UpdateStop(ctx context.Context, namespaceId, operator int, uuid, clusterName string, stop bool) error
 	ToPublish(ctx context.Context, namespaceId int, clusterName string) ([]*strategy_model.StrategyToPublish[T], error)
 	PublishHistory(ctx context.Context, namespaceId, pageNum, pageSize int, clusterName string) ([]*strategy_model.StrategyPublishHistory, int, error)
-	Publish(ctx context.Context, namespaceId, operator int, clusterName string, input *strategy_dto.StrategyPublish) error
+	Publish(ctx context.Context, namespaceId, operator int, clusterName, strategyType string, input *strategy_dto.StrategyPublish) error
 
 	ChangePriority(ctx context.Context, namespaceId, userId int, clusterName string, maps map[string]int) error
 	CheckInput(input *strategy_dto.StrategyInfoInput[T]) error

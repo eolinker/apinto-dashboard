@@ -17,10 +17,18 @@ export const methodList:NzCheckBoxOptionInterface[] = [
   { label: 'HEAD', value: 'HEAD', checked: false }
 ]
 
-export const positionList:SelectOption[] = [
-  { label: 'HTTP请求头', value: 'header' },
-  { label: '请求参数', value: 'query' },
-  { label: 'Cookie', value: 'cookie' }
+export enum Position {
+  HEADER = 'header',
+  QUERY = 'query',
+  BODY = 'body',
+  COOKIE = 'cookie'
+}
+
+export const positionList: SelectOption[] = [
+  { label: 'HTTP 请求头', value: Position.HEADER },
+  { label: 'Query 参数', value: Position.QUERY },
+  { label: 'Body 参数', value: Position.BODY },
+  { label: 'Cookie', value: Position.COOKIE }
 ]
 
 export const prefixMatchList:SelectOption[] = [
@@ -116,6 +124,10 @@ export const proxyHeaderTableBody:EO_TBODY_TYPE[] = [
       }
     ]
   }
+]
+
+export const defaultHostList:Array<{key:string}> = [
+  { key: '' }
 ]
 
 export const hostHeaderTableBody:TBODY_TYPE[] = [
@@ -376,168 +388,6 @@ export const apiBatchPublishResultTableBody:EO_TBODY_TYPE[] = [
     }
   }
 ]
-
-export const PluginTemplateTableHeadName:THEAD_TYPE[] = [
-  { title: '模板名称' },
-  { title: '描述' },
-  { title: '创建时间' },
-  { title: '更新时间' },
-  { title: '操作' }
-]
-
-export const PluginTemplateConfigThead:THEAD_TYPE[] = [
-  { title: '插件名称' },
-  { title: '状态' },
-  { title: '配置' },
-  { title: '操作' }
-]
-
-export const PluginTemplateConfigTbody:EO_TBODY_TYPE[] = [
-  {
-    key: 'name',
-    copy: true
-  },
-  { key: 'disable' },
-  {
-    key: 'config',
-    json: true,
-    copy: true
-  },
-  {
-    type: 'btn',
-    right: true,
-    btns: [{
-      title: '配置'
-    },
-    {
-      title: '删除',
-      action: 'delete'
-    }
-    ]
-  }
-]
-
-export const PluginTemplatePublishThead:THEAD_TYPE[] = [
-  { title: '集群名称' },
-  { title: '环境' },
-  { title: '状态' },
-  { title: '更新者' },
-  { title: '更新时间' },
-  {
-    title: '操作',
-    right: true
-  }
-]
-
-export const PluginTemplatePublishTbody:EO_TBODY_TYPE[] = [
-  {
-    key: 'title',
-    copy: true
-  },
-  {
-    key: 'env'
-  },
-  { key: 'status' },
-  { key: 'operator' },
-  { key: 'updateTime' },
-  {
-    type: 'btn',
-    right: true,
-    showFn: (item:any) => {
-      return item.status === 'TOUPDATE' && !item.disable
-    },
-    btns: [
-      {
-        title: '更新'
-      },
-      {
-        title: '下线'
-      },
-      {
-        title: '禁用'
-      }
-    ]
-  },
-  {
-    type: 'btn',
-    right: true,
-    showFn: (item:any) => {
-      return item.status === 'TOUPDATE' && item.disable
-    },
-    btns: [
-      {
-        title: '更新'
-      },
-      {
-        title: '下线'
-      },
-      {
-        title: '启用'
-      }
-    ]
-  },
-  {
-    type: 'btn',
-    right: true,
-    showFn: (item:any) => {
-      return item.status === 'GOONLINE' && !item.disable
-    },
-    btns: [
-      {
-        title: '下线'
-      },
-      {
-        title: '禁用'
-      }
-    ]
-  },
-  {
-    type: 'btn',
-    right: true,
-    showFn: (item:any) => {
-      return item.status === 'GOONLINE' && item.disable
-    },
-    btns: [
-      {
-        title: '下线'
-      },
-      {
-        title: '启用'
-      }
-    ]
-  },
-  {
-    type: 'btn',
-    right: true,
-    showFn: (item:any) => {
-      return (item.status === 'OFFLINE' || item.status === 'NOTGOONLINE') && !item.disable
-    },
-    btns: [
-      {
-        title: '上线'
-      },
-      {
-        title: '禁用'
-      }
-    ]
-  },
-  {
-    type: 'btn',
-    right: true,
-    showFn: (item:any) => {
-      return (item.status === 'OFFLINE' || item.status === 'NOTGOONLINE') && item.disable
-    },
-    btns: [
-      {
-        title: '上线'
-      },
-      {
-        title: '启用'
-      }
-    ]
-  }
-]
-
 export const ApiCreateBreadcrumb = [
   { title: 'API管理', routerLink: 'router/api/group/list' },
   { title: '新建API' }

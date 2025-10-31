@@ -184,6 +184,9 @@ export class LogRetrievalComponent {
       },
       nzFooter: this.tailLogModalFooterTpl
     })
+    this.modalRef.afterClose.subscribe(() => {
+      this.modalRef = undefined
+    })
   }
 
   downloadLog (file:LogFileData) {

@@ -66,7 +66,7 @@ func (p *plugin[T]) Set(t []*T) error {
 
 	var resErr error
 	for _, addr := range p.addrs() {
-		url := fmt.Sprintf("%s/api/%s", addr, "setting/plugin")
+		url := fmt.Sprintf("%s/setting/plugin", addr)
 
 		res, code, err := requestDo(http.MethodPut, url, bytes)
 

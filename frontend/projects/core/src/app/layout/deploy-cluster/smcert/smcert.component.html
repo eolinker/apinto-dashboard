@@ -1,0 +1,77 @@
+<div class="">
+  <div
+    class="list-header pl-btnbase pr-btnrbase py-btnybase flex flex-nowrap items-center justify-between"
+  >
+    <button
+      eo-ng-button
+      class="ant-btn-primary"
+      eoNgUserAccess="deploy/cluster"
+      (disabledEdit)="disabledEdit($event)"
+      (click)="openDrawer('addSmcert')"
+    >
+      新建证书
+    </button>
+  </div>
+  <div class="list-content">
+    <eo-ng-apinto-table
+      class=""
+      [nzTbody]="certsTableBody"
+      [nzThead]="certsTableHeadName"
+      [nzData]="certsList"
+      [nzTrClick]="certTableClick"
+      [nzMaxOperatorButton]="2"
+    >
+    </eo-ng-apinto-table>
+  </div>
+</div>
+
+<ng-template #signDnsNameTpl let-item="item">
+  <ng-container
+  [ngTemplateOutlet]="dnsNameTpl"
+  [ngTemplateOutletContext]="{
+    value: item.signDnsName
+  }"
+></ng-container>
+</ng-template>
+
+<ng-template #encDnsNameTpl let-item="item">
+  <ng-container
+    [ngTemplateOutlet]="dnsNameTpl"
+    [ngTemplateOutletContext]="{
+      value: item.encDnsName
+    }"
+  ></ng-container>
+</ng-template>
+
+<ng-template #dnsNameTpl let-value="value">
+  <div class="flex items-center">
+    <div
+      eoNgFeedbackTooltip
+      nzTooltipPlacement="top"
+      [nzTooltipTitle]="signDnsNameTooltipTpl"
+      nzTooltipTrigger="hover"
+    >
+      <ng-container *ngFor="let name of value">
+        <p>{{ name }}</p>
+      </ng-container>
+    </div>
+    <button
+      eo-copy
+      eo-ng-button
+      nzType="primary"
+      nzGhost
+      class="opacity-0 text-table_text ant-btn-text border-transparent h-[22px]"
+      [copyText]="value?.join(' ') || '-'"
+      (copyCallback)="copyCallback($event)"
+      (click)="$event.stopPropagation()"
+    >
+      <svg class="iconpark-icon"><use href="#copy"></use></svg>
+    </button>
+  </div>
+
+  <ng-template #signDnsNameTooltipTpl>
+    <ng-container *ngFor="let name of value">
+      <p>{{ name }}</p>
+    </ng-container>
+  </ng-template>
+</ng-template>

@@ -84,6 +84,41 @@ export interface CacheStrategyData {
     [key: string]: any
   }
 
+export interface MaskRuleData{
+      match:{
+        type:'inner'|'keyword'|'regex'|'json_path'
+        value:'name'|'phone'|'id-card'|'bank-card'|'date'|'amount'|string
+      }
+      mask:{
+        type:'partial-display'|'partial-masking'|'truncation'|'replacement'|'shuffling'
+        begin:number
+        length:number
+        replace:{
+          type:'random'|'custom'
+          value:string
+        }
+      }
+      // eslint-disable-next-line camelcase
+      eoKey?:string
+  }
+
+export interface DataMaskData {
+    name: string
+    uuid?: string
+    desc?: string
+    priority?: number | null
+    filters: Array<{
+      name: string
+      values: Array<string>
+      type?: string
+      label?: string
+      title?: string
+    }>
+    config: {
+      rules:MaskRuleData[]
+    }
+  }
+
 export interface FuseStrategyData {
     name: string
     uuid?: string

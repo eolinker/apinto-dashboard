@@ -19,20 +19,22 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Service_Request_FullMethodName             = "/proto.Service/Request"
-	Service_MiddlewaresRequest_FullMethodName  = "/proto.Service/MiddlewaresRequest"
-	Service_MiddlewaresResponse_FullMethodName = "/proto.Service/MiddlewaresResponse"
-	Service_GetMiddlewareInfo_FullMethodName   = "/proto.Service/GetMiddlewareInfo"
+	Service_ModuleInfo_FullMethodName            = "/proto.Service/ModuleInfo"
+	Service_Request_FullMethodName               = "/proto.Service/Request"
+	Service_MiddlewaresRequest_FullMethodName    = "/proto.Service/MiddlewaresRequest"
+	Service_MiddlewaresResponse_FullMethodName   = "/proto.Service/MiddlewaresResponse"
+	Service_CheckMiddlewareForApi_FullMethodName = "/proto.Service/CheckMiddlewareForApi"
 )
 
 // ServiceClient is the client API for Service service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ServiceClient interface {
+	ModuleInfo(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*PluginInfos, error)
 	Request(ctx context.Context, in *HttpRequest, opts ...grpc.CallOption) (*HttpResponse, error)
 	MiddlewaresRequest(ctx context.Context, in *MiddlewareRequest, opts ...grpc.CallOption) (*MiddlewareResponse, error)
 	MiddlewaresResponse(ctx context.Context, in *MiddlewareRequest, opts ...grpc.CallOption) (*MiddlewareResponse, error)
-	GetMiddlewareInfo(ctx context.Context, in *MiddlewareInfoRequest, opts ...grpc.CallOption) (*MiddlewareInfoResponse, error)
+	CheckMiddlewareForApi(ctx context.Context, in *MiddlewareInfoRequest, opts ...grpc.CallOption) (*MiddlewareInfoResponse, error)
 }
 
 type serviceClient struct {
@@ -41,6 +43,15 @@ type serviceClient struct {
 
 func NewServiceClient(cc grpc.ClientConnInterface) ServiceClient {
 	return &serviceClient{cc}
+}
+
+func (c *serviceClient) ModuleInfo(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*PluginInfos, error) {
+	out := new(PluginInfos)
+	err := c.cc.Invoke(ctx, Service_ModuleInfo_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *serviceClient) Request(ctx context.Context, in *HttpRequest, opts ...grpc.CallOption) (*HttpResponse, error) {
@@ -70,9 +81,9 @@ func (c *serviceClient) MiddlewaresResponse(ctx context.Context, in *MiddlewareR
 	return out, nil
 }
 
-func (c *serviceClient) GetMiddlewareInfo(ctx context.Context, in *MiddlewareInfoRequest, opts ...grpc.CallOption) (*MiddlewareInfoResponse, error) {
+func (c *serviceClient) CheckMiddlewareForApi(ctx context.Context, in *MiddlewareInfoRequest, opts ...grpc.CallOption) (*MiddlewareInfoResponse, error) {
 	out := new(MiddlewareInfoResponse)
-	err := c.cc.Invoke(ctx, Service_GetMiddlewareInfo_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, Service_CheckMiddlewareForApi_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -83,10 +94,11 @@ func (c *serviceClient) GetMiddlewareInfo(ctx context.Context, in *MiddlewareInf
 // All implementations must embed UnimplementedServiceServer
 // for forward compatibility
 type ServiceServer interface {
+	ModuleInfo(context.Context, *Empty) (*PluginInfos, error)
 	Request(context.Context, *HttpRequest) (*HttpResponse, error)
 	MiddlewaresRequest(context.Context, *MiddlewareRequest) (*MiddlewareResponse, error)
 	MiddlewaresResponse(context.Context, *MiddlewareRequest) (*MiddlewareResponse, error)
-	GetMiddlewareInfo(context.Context, *MiddlewareInfoRequest) (*MiddlewareInfoResponse, error)
+	CheckMiddlewareForApi(context.Context, *MiddlewareInfoRequest) (*MiddlewareInfoResponse, error)
 	mustEmbedUnimplementedServiceServer()
 }
 
@@ -94,6 +106,9 @@ type ServiceServer interface {
 type UnimplementedServiceServer struct {
 }
 
+func (UnimplementedServiceServer) ModuleInfo(context.Context, *Empty) (*PluginInfos, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ModuleInfo not implemented")
+}
 func (UnimplementedServiceServer) Request(context.Context, *HttpRequest) (*HttpResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Request not implemented")
 }
@@ -103,8 +118,8 @@ func (UnimplementedServiceServer) MiddlewaresRequest(context.Context, *Middlewar
 func (UnimplementedServiceServer) MiddlewaresResponse(context.Context, *MiddlewareRequest) (*MiddlewareResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method MiddlewaresResponse not implemented")
 }
-func (UnimplementedServiceServer) GetMiddlewareInfo(context.Context, *MiddlewareInfoRequest) (*MiddlewareInfoResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetMiddlewareInfo not implemented")
+func (UnimplementedServiceServer) CheckMiddlewareForApi(context.Context, *MiddlewareInfoRequest) (*MiddlewareInfoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CheckMiddlewareForApi not implemented")
 }
 func (UnimplementedServiceServer) mustEmbedUnimplementedServiceServer() {}
 
@@ -117,6 +132,24 @@ type UnsafeServiceServer interface {
 
 func RegisterServiceServer(s grpc.ServiceRegistrar, srv ServiceServer) {
 	s.RegisterService(&Service_ServiceDesc, srv)
+}
+
+func _Service_ModuleInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ServiceServer).ModuleInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Service_ModuleInfo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ServiceServer).ModuleInfo(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _Service_Request_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -173,20 +206,20 @@ func _Service_MiddlewaresResponse_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Service_GetMiddlewareInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Service_CheckMiddlewareForApi_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(MiddlewareInfoRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ServiceServer).GetMiddlewareInfo(ctx, in)
+		return srv.(ServiceServer).CheckMiddlewareForApi(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Service_GetMiddlewareInfo_FullMethodName,
+		FullMethod: Service_CheckMiddlewareForApi_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ServiceServer).GetMiddlewareInfo(ctx, req.(*MiddlewareInfoRequest))
+		return srv.(ServiceServer).CheckMiddlewareForApi(ctx, req.(*MiddlewareInfoRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -198,6 +231,10 @@ var Service_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "proto.Service",
 	HandlerType: (*ServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "ModuleInfo",
+			Handler:    _Service_ModuleInfo_Handler,
+		},
 		{
 			MethodName: "Request",
 			Handler:    _Service_Request_Handler,
@@ -211,8 +248,8 @@ var Service_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Service_MiddlewaresResponse_Handler,
 		},
 		{
-			MethodName: "GetMiddlewareInfo",
-			Handler:    _Service_GetMiddlewareInfo_Handler,
+			MethodName: "CheckMiddlewareForApi",
+			Handler:    _Service_CheckMiddlewareForApi_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

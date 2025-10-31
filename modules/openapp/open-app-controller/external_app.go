@@ -26,7 +26,7 @@ func (c externalApplicationController) openApiCheck(ginCtx *gin.Context) {
 	appID, err := c.extAppService.CheckExtAPPToken(ginCtx, namespaceID, token)
 	if err != nil {
 		ginCtx.Abort()
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("syncAPI fail. err:%s", err))
+		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
 	ginCtx.Set("appId", appID)

@@ -3,6 +3,7 @@ package plugin_dto
 type PluginListItem struct {
 	Name       string `json:"name,omitempty"`
 	Extended   string `json:"extended,omitempty"`
+	Title      string `json:"title,omitempty"`
 	Desc       string `json:"desc,omitempty"`
 	UpdateTime string `json:"update_time,omitempty"`
 	Operator   string `json:"operator,omitempty"`
@@ -13,6 +14,7 @@ type PluginListItem struct {
 
 type PluginItem struct {
 	Name     string `json:"name"`
+	Title    string `json:"title"`
 	Extended string `json:"extended"`
 	Desc     string `json:"desc"`
 	Rely     string `json:"rely"`

@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http'
 import { Inject, Injectable } from '@angular/core'
-import { Observable, Subject, Subscriber, Subscription, take } from 'rxjs'
+import { Observable, Subject, Subscriber, Subscription } from 'rxjs'
 import { API_URL, ApiService } from './api.service'
 import { NavigationEnd, Router } from '@angular/router'
 import { EoNgNavigationService } from './eo-ng-navigation.service'
@@ -109,7 +109,7 @@ export class IframeHttpService {
           resolve({
             userId: this.navigation.getUserId(),
             userRoleId: this.navigation.getUserRoleId(),
-            userModuleAccess: this.navigation.accessMap.get(this.moduleName)
+            userModuleAccess: this.navigation.getUserModuleAccess(this.moduleName)
           })
         })
       })
@@ -119,7 +119,7 @@ export class IframeHttpService {
         resolve({
           userId: this.navigation.getUserId(),
           userRoleId: this.navigation.getUserRoleId(),
-          userModuleAccess: this.navigation.accessMap.get(this.moduleName)
+          userModuleAccess: this.navigation.getUserModuleAccess(this.moduleName)
         })
       })
     },

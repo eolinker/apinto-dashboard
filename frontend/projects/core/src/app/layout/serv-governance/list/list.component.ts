@@ -278,7 +278,7 @@ export class ListComponent implements OnInit {
   // 当参数为true时,停用策略,false为启用
   stopStrategy (e:Event, item:StrategyListData, isStop:boolean) {
     e.stopPropagation()
-    this.api.patch('strategy/' + this.strategyType + '/stop', { isStop: isStop }, { uuid: (item.uuid || ''), clusterName: (this.clusterName || '') })
+    this.api.patch('strategy/' + this.strategyType + '/' + (isStop ? 'disable' : 'enable'), {}, { uuid: (item.uuid || ''), clusterName: (this.clusterName || '') })
       .subscribe((resp:EmptyHttpResponse) => {
         if (resp.code === 0) {
           item.isStop = isStop
@@ -339,6 +339,8 @@ export class ListComponent implements OnInit {
         return '缓存有效时间'
       case 'visit':
         return '访问规则'
+      case 'data-mask':
+        return '匹配规则数量'
       default:
         return '限流规则'
     }

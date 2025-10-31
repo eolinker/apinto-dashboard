@@ -50,6 +50,14 @@ type APIInfo struct {
 	Match            []*api_entry.MatchConf   `json:"match"`
 	Header           []*api_entry.ProxyHeader `json:"proxy_header"`
 	TemplateUUID     string                   `json:"template_uuid"`
+	Protocols        []string                 `json:"protocols"`
+	Plugins          []*APIPlugin             `json:"plugins"`
+}
+
+type APIPlugin struct {
+	Name    string `json:"name"`
+	Config  string `json:"config"`
+	Disable bool   `json:"disable"`
 }
 
 type MatchConf struct {

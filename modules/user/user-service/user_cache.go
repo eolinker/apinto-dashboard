@@ -22,10 +22,10 @@ func userCacheName(name string) string {
 	return fmt.Sprintf("user_info:name:%s", name)
 }
 func newUserInfoIdCache() IUserInfoCacheId {
-	return cache.CreateRedisCache[user_model.UserInfo, int](time.Hour, userCacheKey, "apinto", "user-dashboard")
+	return cache.CreateRedisCache[user_model.UserInfo, int](time.Hour, userCacheKey)
 
 }
 func newUserInfoNameCache() IUserInfoCacheName {
-	return cache.CreateRedisCache[user_model.UserInfo, string](time.Hour, userCacheName, "apinto", "user-dashboard")
+	return cache.CreateRedisCache[user_model.UserInfo, string](time.Hour, userCacheName)
 
 }

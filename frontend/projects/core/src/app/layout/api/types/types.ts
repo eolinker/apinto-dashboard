@@ -84,29 +84,6 @@ export interface APIBatchPublishData{
     result:string
 }
 
-export type PluginTemplateItem = {
-    uuid:string
-    name:string
-    desc:string
-    createTime:string
-    updateTime:string
-    operator:string
-    isDelete:boolean
-}
-
-export type PluginTemplateConfigItem = {
-    name:string
-    config:string
-    disable:boolean
-    eoKey?:string
-}
-
-export type PluginTemplateData = {
-    name:string
-    desc:string
-    plugins:PluginTemplateConfigItem[]
-}
-
 export type ApiListItem = {
     checked?:boolean
     groupUuid:string

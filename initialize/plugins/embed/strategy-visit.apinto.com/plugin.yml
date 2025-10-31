@@ -2,7 +2,7 @@ id: "strategy-visit.apinto.com"
 name: "visit"
 cname: "API访问权限"
 resume: "保证API接口的安全性和稳定性，防止未经授权的用户、IP、API对API接口进行恶意访问或者滥用资源导致系统宕机或故障。"
-version: "v1.0.7"
+version: "v1.2.1"
 icon: "logo.png"
 driver: "strategy-visit.apinto.com"
 type: 2 #0为框架模块 1为核心模块 2为内置模块 3为非内置
@@ -11,6 +11,12 @@ is_can_disable: true
 is_can_uninstall: false
 visible_in_navigation: true
 visible_in_market: true
-front: serv-governance
+front: serv-governance/visit
 navigation: "navigation.strategy"
 group_id: "strategy"
+frontend:
+  - name: visit-strategy
+    driver: apinto.builtIn.module
+    router:
+      - path: serv-governance/visit
+        type: normal

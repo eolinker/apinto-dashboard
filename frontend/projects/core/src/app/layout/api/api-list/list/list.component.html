@@ -1,9 +1,9 @@
 <!--
  * @Author: MengjieYang yangmengjie@eolink.com
  * @Date: 2022-08-26 23:24:11
- * @LastEditors: MengjieYang yangmengjie@eolink.com
- * @LastEditTime: 2022-09-04 22:03:31
- * @FilePath: /apinto/src/app/layout/api/api-management-list/api-management-list.component.html
+ * @LastEditors: maggieyyy
+ * @LastEditTime: 2024-01-25 12:24:24
+ * @FilePath: \apinto\projects\core\src\app\layout\api\api-list\list\list.component.html
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
 <div class="">
@@ -24,7 +24,7 @@
 
       <eo-ng-dropdown-menu #menu="nzDropdownMenu">
         <ul nz-menu>
-          <li nz-menu-item (click)="addApi()">HTTP</li>
+          <li nz-menu-item (click)="addApi()">HTTP(s)</li>
           <li nz-menu-item (click)="addApi('websocket')">Websocket</li>
         </ul>
       </eo-ng-dropdown-menu>
@@ -86,10 +86,10 @@
 </div>
 
 <ng-template #methodTpl let-item="item">
-  <ng-container *ngIf="item.scheme === 'websocket'">
+  <ng-container *ngIf="item.scheme?.toLowerCase()?.includes('websocket')">
     <span>-</span>
   </ng-container>
-  <ng-container *ngIf="item.scheme === 'http'">
+  <ng-container *ngIf="item.scheme?.toLowerCase()?.includes('http')">
     <div *ngIf="item.method.length < 3">
       <ng-container *ngFor="let methodItem of item.method">
         <eo-ng-api-method-tag [methodItem]="methodItem"></eo-ng-api-method-tag>

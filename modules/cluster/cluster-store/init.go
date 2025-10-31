@@ -10,6 +10,7 @@ func init() {
 		cluster := newClusterStore(db)
 		clusterHistory := newClusterHistoryStore(db)
 		clusterCertificate := newClusterCertificateStore(db)
+		gmCertificate := newGMClusterCertificateStore(db)
 		clusterNode := newClusterNodeStore(db)
 		//clusterConfig := newClusterConfigStore(db)
 		//bean.Injection(&clusterConfig)
@@ -17,6 +18,7 @@ func init() {
 		bean.Injection(&cluster)
 		bean.Injection(&clusterHistory)
 		bean.Injection(&clusterCertificate)
+		bean.Injection(&gmCertificate)
 
 		bean.Injection(&clusterNode)
 		clusterRuntime := newClusterRuntimeStore(db)

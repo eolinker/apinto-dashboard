@@ -74,7 +74,7 @@ export class Formily2ReactComponent {
     try {
       this.form = JSON.parse(this.initFormValue)
     } catch {
-      console.warn('dynamic-demo生成表单失败，请检查form值格式')
+      console.warn(' dynamic-demo生成表单失败，请检查form值格式')
     }
   }
 }

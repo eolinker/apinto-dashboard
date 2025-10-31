@@ -1,9 +1,14 @@
-import { Validators, ValidatorFn, AbstractControl } from '@angular/forms'
+import { Validators, ValidatorFn, AbstractControl, ValidationErrors, FormGroup } from '@angular/forms'
 import { NzSafeAny } from 'ng-zorro-antd/core/types'
 
 // current locale is key of the MyErrorsOptions
 export type EoNgMyErrorsOptions = { 'zh-cn': string; en: string } & Record<string, NzSafeAny>;
 export type EoNgMyValidationErrors = Record<string, EoNgMyErrorsOptions>;
+
+interface Condition {
+  field: string;
+  values: any[];
+}
 
 export class EoNgMyValidators extends Validators {
   static override minLength (minLength: number): ValidatorFn {

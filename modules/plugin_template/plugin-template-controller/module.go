@@ -2,82 +2,62 @@ package plugin_template_controller
 
 import (
 	"github.com/eolinker/apinto-dashboard/module"
-	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
+	"github.com/eolinker/apinto-dashboard/pm3"
 	"net/http"
 )
 
 type PluginTemplateDriver struct {
 }
 
+func (c *PluginTemplateDriver) Install(info *pm3.PluginDefine) (ms []pm3.PModule, acs []pm3.PAccess, fs []pm3.PFrontend, err error) {
+	return pm3.ReadPluginAssembly(info)
+}
+
+func (c *PluginTemplateDriver) Create(info *pm3.PluginDefine, config pm3.PluginConfig) (pm3.Module, error) {
+	return NewPluginTemplateModule(info.Id, info.Name), nil
+}
+
 func NewPluginTemplateDriver() apinto_module.Driver {
 	return &PluginTemplateDriver{}
 }
 
-func (c *PluginTemplateDriver) CreateModule(name string, config interface{}) (apinto_module.Module, error) {
-	return NewPluginTemplateModule(name), nil
-}
-
-func (c *PluginTemplateDriver) CheckConfig(name string, config interface{}) error {
-	return nil
-}
-
-func (c *PluginTemplateDriver) CreatePlugin(define interface{}) (apinto_module.Plugin, error) {
-	return c, nil
-}
-
-func (c *PluginTemplateDriver) GetPluginFrontend(moduleName string) string {
-	return "router/plugin-template"
-}
-
-func (c *PluginTemplateDriver) IsPluginVisible() bool {
-	return true
-}
-
-func (c *PluginTemplateDriver) IsShowServer() bool {
-	return false
-}
-
-func (c *PluginTemplateDriver) IsCanUninstall() bool {
-	return false
-}
-
-func (c *PluginTemplateDriver) IsCanDisable() bool {
-	return false
-}
-
 type PluginTemplateModule struct {
+	*pm3.ModuleTool
+
 	isInit  bool
 	name    string
 	routers apinto_module.RoutersInfo
+}
+
+func (c *PluginTemplateModule) Frontend() []pm3.FrontendAsset {
+	return nil
+}
+
+func (c *PluginTemplateModule) Apis() []pm3.Api {
+	if !c.isInit {
+		c.initRouter()
+		c.InitAccess(c.routers)
+		c.isInit = true
+	}
+	return c.routers
+}
+
+func (c *PluginTemplateModule) Middleware() []pm3.Middleware {
+	return nil
+}
+
+func (c *PluginTemplateModule) Support() (pm3.ProviderSupport, bool) {
+	return nil, false
 }
 
 func (c *PluginTemplateModule) Name() string {
 	return c.name
 }
 
-func (c *PluginTemplateModule) Support() (apinto_module.ProviderSupport, bool) {
-	return nil, false
-}
+func NewPluginTemplateModule(id, name string) *PluginTemplateModule {
 
-func (c *PluginTemplateModule) Routers() (apinto_module.Routers, bool) {
-	return c, true
-}
-
-func (c *PluginTemplateModule) Middleware() (apinto_module.Middleware, bool) {
-	return nil, false
-}
-
-func NewPluginTemplateModule(name string) *PluginTemplateModule {
-
-	return &PluginTemplateModule{name: name}
-}
-
-func (c *PluginTemplateModule) RoutersInfo() apinto_module.RoutersInfo {
-	if !c.isInit {
-		c.initRouter()
-		c.isInit = true
-	}
-	return c.routers
+	return &PluginTemplateModule{ModuleTool: pm3.NewModuleTool(id, name),
+		name: name}
 }
 
 func (c *PluginTemplateModule) initRouter() {
@@ -85,58 +65,58 @@ func (c *PluginTemplateModule) initRouter() {
 
 	c.routers = []apinto_module.RouterInfo{
 		{
-			Method:      http.MethodGet,
-			Path:        "/api/plugin/templates",
-			Handler:     "plugin-template.templates",
-			HandlerFunc: []apinto_module.HandlerFunc{pluginTemplateCtl.templates},
+			Method: http.MethodGet,
+			Path:   "/api/plugin/templates",
+
+			HandlerFunc: pluginTemplateCtl.templates,
 		},
 		{
-			Method:      http.MethodGet,
-			Path:        "/api/plugin/template/enum",
-			Handler:     "plugin-template.templateEnum",
-			HandlerFunc: []apinto_module.HandlerFunc{pluginTemplateCtl.templateEnum},
+			Method: http.MethodGet,
+			Path:   "/api/plugin/template/enum",
+
+			HandlerFunc: pluginTemplateCtl.templateEnum,
 		},
 		{
-			Method:      http.MethodPost,
-			Path:        "/api/plugin/template",
-			Handler:     "plugin-template.createTemplate",
-			HandlerFunc: []apinto_module.HandlerFunc{pluginTemplateCtl.createTemplate},
+			Method: http.MethodPost,
+			Path:   "/api/plugin/template",
+
+			HandlerFunc: pluginTemplateCtl.createTemplate,
 		},
 		{
-			Method:      http.MethodPut,
-			Path:        "/api/plugin/template",
-			Handler:     "plugin-template.updateTemplate",
-			HandlerFunc: []apinto_module.HandlerFunc{pluginTemplateCtl.updateTemplate},
+			Method: http.MethodPut,
+			Path:   "/api/plugin/template",
+
+			HandlerFunc: pluginTemplateCtl.updateTemplate,
 		},
 		{
-			Method:      http.MethodDelete,
-			Path:        "/api/plugin/template",
-			Handler:     "plugin-template.delTemplate",
-			HandlerFunc: []apinto_module.HandlerFunc{pluginTemplateCtl.delTemplate},
+			Method: http.MethodDelete,
+			Path:   "/api/plugin/template",
+
+			HandlerFunc: pluginTemplateCtl.delTemplate,
 		},
 		{
-			Method:      http.MethodGet,
-			Path:        "/api/plugin/template",
-			Handler:     "plugin-template.template",
-			HandlerFunc: []apinto_module.HandlerFunc{pluginTemplateCtl.template},
+			Method: http.MethodGet,
+			Path:   "/api/plugin/template",
+
+			HandlerFunc: pluginTemplateCtl.template,
 		},
 		{
-			Method:      http.MethodGet,
-			Path:        "/api/plugin/template/onlines",
-			Handler:     "plugin-template.onlines",
-			HandlerFunc: []apinto_module.HandlerFunc{pluginTemplateCtl.onlines},
+			Method: http.MethodGet,
+			Path:   "/api/plugin/template/onlines",
+
+			HandlerFunc: pluginTemplateCtl.onlines,
 		},
 		{
-			Method:      http.MethodPut,
-			Path:        "/api/plugin/template/online",
-			Handler:     "plugin-template.online",
-			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypePublish.Handler, pluginTemplateCtl.online},
+			Method: http.MethodPut,
+			Path:   "/api/plugin/template/online",
+
+			HandlerFunc: pluginTemplateCtl.online,
 		},
 		{
-			Method:      http.MethodPut,
-			Path:        "/api/plugin/template/offline",
-			Handler:     "plugin-template.offline",
-			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypePublish.Handler, pluginTemplateCtl.offline},
+			Method: http.MethodPut,
+			Path:   "/api/plugin/template/offline",
+
+			HandlerFunc: pluginTemplateCtl.offline,
 		},
 	}
 }

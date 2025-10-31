@@ -56,7 +56,8 @@ func (e *extender) UpdateExtender() {
 
 	ctx := context.TODO()
 	//key+时间戳
-	lockKey := fmt.Sprintf("updateExtender_%d", time.Now().Unix())
+
+	lockKey := fmt.Sprintf("lock:updateExtender:%s", time.Now().Format("200601021504"))
 	if err := e.lock(ctx, lockKey); err != nil {
 		log.Warnf("lockKey=%s error=%s", lockKey, err.Error())
 		return

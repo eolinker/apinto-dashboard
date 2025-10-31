@@ -6,12 +6,11 @@
     "outDir": "../dist/",
     "forceConsistentCasingInFileNames": true,
     "paths": {
-      "eoNgApintoTable": ["dist/eo-ng-apinto-table"],
-      "eoNgApintoUser": ["dist/eo-ng-apinto-user"]
+      "eoNgApintoTable": ["dist/eo-ng-apinto-table"]
     },
     "strict": true,
     "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true,
+    "noPropertyAccessFromIndexSignature": false,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "sourceMap": true,
@@ -21,10 +20,10 @@
     "moduleResolution": "node",
     "importHelpers": true,
     "target": "ES2022",
-    "module": "es2020",
-    "lib": ["es2020", "dom"],
+    "module": "ES2022",
     "useDefineForClassFields": false,
-    "jsx": "react"
+    "lib": ["ES2022", "dom"],
+    "jsx": "react-jsx"
   },
   "angularCompilerOptions": {
     "skipLibCheck": true,

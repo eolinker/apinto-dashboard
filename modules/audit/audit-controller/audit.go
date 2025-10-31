@@ -28,17 +28,11 @@ func (a *auditLogController) Handler(ginCtx *gin.Context) {
 	//ginCtx.Request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 	//将请求体加入到上下文中，兼容需要修改的情况， 比如批量上线接口
 	ginCtx.Set(controller.LogBody, string(bodyBytes))
-
 	ginCtx.Next()
 
 	kind := ginCtx.GetString(apintoModule.ApintoModuleName)
-	operateStr := ginCtx.GetString(controller.Operate)
-	operate := audit_model.LogOperateTypeNone
-	if operateStr == "" {
-		operate = switchMethod(ginCtx.Request.Method)
-	} else {
-		operate = audit_model.GetLogOperateIndex(operateStr)
-	}
+
+	operate := audit_model.ReadOperateType(ginCtx)
 	if operate == audit_model.LogOperateTypeNone {
 		return
 	}

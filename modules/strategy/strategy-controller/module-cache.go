@@ -2,79 +2,64 @@ package strategy_controller
 
 import (
 	"github.com/eolinker/apinto-dashboard/module"
-	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
+	"github.com/eolinker/apinto-dashboard/pm3"
 	"net/http"
 )
 
 type StrategyCacheDriver struct {
 }
 
+func (c *StrategyCacheDriver) Install(info *pm3.PluginDefine) (ms []pm3.PModule, acs []pm3.PAccess, fs []pm3.PFrontend, err error) {
+	return pm3.ReadPluginAssembly(info)
+}
+
+func (c *StrategyCacheDriver) Create(info *pm3.PluginDefine, config pm3.PluginConfig) (pm3.Module, error) {
+	return NewStrategyCacheModule(info.Id, info.Name), nil
+}
+
 func NewStrategyCache() apinto_module.Driver {
 	return &StrategyCacheDriver{}
 }
 
-func (c *StrategyCacheDriver) CreateModule(name string, config interface{}) (apinto_module.Module, error) {
-	return NewStrategyCacheModule(name), nil
-}
-
-func (c *StrategyCacheDriver) CheckConfig(name string, config interface{}) error {
-	return nil
-}
-
-func (c *StrategyCacheDriver) CreatePlugin(define interface{}) (apinto_module.Plugin, error) {
-	return c, nil
-}
-
-func (c *StrategyCacheDriver) GetPluginFrontend(moduleName string) string {
-	return "serv-governance/cache"
-}
-
-func (c *StrategyCacheDriver) IsPluginVisible() bool {
-	return true
-}
-
-func (c *StrategyCacheDriver) IsShowServer() bool {
-	return false
-}
-
-func (c *StrategyCacheDriver) IsCanUninstall() bool {
-	return false
-}
-
-func (c *StrategyCacheDriver) IsCanDisable() bool {
-	return true
-}
+//func (c *StrategyCacheDriver) GetPluginFrontend(moduleName string) string {
+//	return "serv-governance/cache"
+//}
 
 type StrategyCacheModule struct {
+	*pm3.ModuleTool
+
 	isInit  bool
 	name    string
 	routers apinto_module.RoutersInfo
+}
+
+func (c *StrategyCacheModule) Frontend() []pm3.FrontendAsset {
+	return nil
+}
+
+func (c *StrategyCacheModule) Middleware() []pm3.Middleware {
+	return nil
 }
 
 func (c *StrategyCacheModule) Name() string {
 	return c.name
 }
 
-func (c *StrategyCacheModule) Support() (apinto_module.ProviderSupport, bool) {
+func (c *StrategyCacheModule) Support() (pm3.ProviderSupport, bool) {
 	return nil, false
 }
 
-func (c *StrategyCacheModule) Routers() (apinto_module.Routers, bool) {
-	return c, true
+func NewStrategyCacheModule(id, name string) *StrategyCacheModule {
+
+	return &StrategyCacheModule{ModuleTool: pm3.NewModuleTool(id, name),
+		name: name}
 }
 
-func (c *StrategyCacheModule) Middleware() (apinto_module.Middleware, bool) {
-	return nil, false
-}
-
-func NewStrategyCacheModule(name string) *StrategyCacheModule {
-
-	return &StrategyCacheModule{name: name}
-}
-
-func (c *StrategyCacheModule) RoutersInfo() apinto_module.RoutersInfo {
+func (c *StrategyCacheModule) Apis() []pm3.Api {
 	if !c.isInit {
 		c.initRouter()
+		c.InitAccess(c.routers)
+
 		c.isInit = true
 	}
 	return c.routers
@@ -85,70 +70,76 @@ func (c *StrategyCacheModule) initRouter() {
 
 	c.routers = []apinto_module.RouterInfo{
 		{
-			Method:      http.MethodGet,
-			Path:        "/api/strategies/cache",
-			Handler:     "strategy-cache.list",
-			HandlerFunc: []apinto_module.HandlerFunc{strategyCacheController.list},
+			Method: http.MethodGet,
+			Path:   "/api/strategies/cache",
+
+			HandlerFunc: strategyCacheController.list,
 		},
 		{
-			Method:      http.MethodGet,
-			Path:        "/api/strategy/cache",
-			Handler:     "strategy-cache.get",
-			HandlerFunc: []apinto_module.HandlerFunc{strategyCacheController.get},
+			Method: http.MethodGet,
+			Path:   "/api/strategy/cache",
+
+			HandlerFunc: strategyCacheController.get,
 		},
 		{
-			Method:      http.MethodPost,
-			Path:        "/api/strategy/cache",
-			Handler:     "strategy-cache.create",
-			HandlerFunc: []apinto_module.HandlerFunc{strategyCacheController.create},
+			Method: http.MethodPost,
+			Path:   "/api/strategy/cache",
+
+			HandlerFunc: strategyCacheController.create,
 		},
 		{
-			Method:      http.MethodPut,
-			Path:        "/api/strategy/cache",
-			Handler:     "strategy-cache.update",
-			HandlerFunc: []apinto_module.HandlerFunc{strategyCacheController.update},
+			Method: http.MethodPut,
+			Path:   "/api/strategy/cache",
+
+			HandlerFunc: strategyCacheController.update,
 		},
 		{
-			Method:      http.MethodDelete,
-			Path:        "/api/strategy/cache",
-			Handler:     "strategy-cache.del",
-			HandlerFunc: []apinto_module.HandlerFunc{strategyCacheController.del},
+			Method: http.MethodDelete,
+			Path:   "/api/strategy/cache",
+
+			HandlerFunc: strategyCacheController.del,
 		},
 		{
-			Method:      http.MethodPatch,
-			Path:        "/api/strategy/cache/restore",
-			Handler:     "strategy-cache.restore",
-			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypeEdit.Handler, strategyCacheController.restore},
+			Method: http.MethodPatch,
+			Path:   "/api/strategy/cache/restore",
+
+			HandlerFunc: strategyCacheController.restore,
 		},
 		{
-			Method:      http.MethodPatch,
-			Path:        "/api/strategy/cache/stop",
-			Handler:     "strategy-cache.updateStop",
-			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypeEdit.Handler, strategyCacheController.updateStop},
+			Method: http.MethodPatch,
+			Path:   "/api/strategy/cache/enable",
+
+			HandlerFunc: strategyCacheController.enable,
 		},
 		{
-			Method:      http.MethodGet,
-			Path:        "/api/strategy/cache/to-publishs",
-			Handler:     "strategy-cache.toPublish",
-			HandlerFunc: []apinto_module.HandlerFunc{strategyCacheController.toPublish},
+			Method: http.MethodPatch,
+			Path:   "/api/strategy/cache/disable",
+
+			HandlerFunc: strategyCacheController.disable,
 		},
 		{
-			Method:      http.MethodPost,
-			Path:        "/api/strategy/cache/publish",
-			Handler:     "strategy-cache.publish",
-			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypePublish.Handler, strategyCacheController.publish},
+			Method: http.MethodGet,
+			Path:   "/api/strategy/cache/to-publishs",
+
+			HandlerFunc: strategyCacheController.toPublish,
 		},
 		{
-			Method:      http.MethodPost,
-			Path:        "/api/strategy/cache/priority",
-			Handler:     "strategy-cache.changePriority",
-			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypeEdit.Handler, strategyCacheController.changePriority},
+			Method: http.MethodPost,
+			Path:   "/api/strategy/cache/publish",
+
+			HandlerFunc: strategyCacheController.publish,
 		},
 		{
-			Method:      http.MethodGet,
-			Path:        "/api/strategy/cache/publish-history",
-			Handler:     "strategy-cache.publishHistory",
-			HandlerFunc: []apinto_module.HandlerFunc{strategyCacheController.publishHistory},
+			Method: http.MethodPost,
+			Path:   "/api/strategy/cache/priority",
+
+			HandlerFunc: strategyCacheController.changePriority,
+		},
+		{
+			Method: http.MethodGet,
+			Path:   "/api/strategy/cache/publish-history",
+
+			HandlerFunc: strategyCacheController.publishHistory,
 		},
 	}
 }

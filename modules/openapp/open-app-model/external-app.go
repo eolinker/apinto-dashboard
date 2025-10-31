@@ -15,5 +15,14 @@ type ExtAppListItem struct {
 	Tags       string `json:"tags"`
 	Status     int    `json:"status"`
 	Operator   string `json:"operator"`
+	OperatorId int    `json:"_"`
 	UpdateTime string `json:"update_time"`
+}
+
+func (e *ExtAppListItem) UserId() int {
+	return e.OperatorId
+}
+
+func (e *ExtAppListItem) Set(name string) {
+	e.Operator = name
 }

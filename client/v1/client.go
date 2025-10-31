@@ -27,6 +27,7 @@ type IClient interface {
 	ForRouter() IProfession[RouterConfig, RouterInfo]
 	ForExtender() IExtender
 	ForCert() ICert
+	ForGMCert() IGMCert
 	ForVariable() IVariable
 	ForStrategy() IStrategy
 	ClusterInfo() (*ClusterInfo, error)
@@ -45,10 +46,15 @@ type Client struct {
 	router         IProfession[RouterConfig, RouterInfo]
 	app            IProfession[ApplicationConfig, WorkerInfo]
 	cert           ICert
+	gmCert         IGMCert
 	plugin         IPlugin[GlobalPlugin]
 	variable       IVariable
 	strategy       IStrategy
 	extender       IExtender
+}
+
+func (c *Client) ForGMCert() IGMCert {
+	return c.gmCert
 }
 
 func (c *Client) addrs() []string {
@@ -94,6 +100,7 @@ func (c *Client) init() {
 	c.router = newIProfession[RouterConfig, RouterInfo](c, "router")
 	c.pluginTemplate = newIProfession[PluginTemplateConfig, PluginTemplateInfo](c, "template")
 	c.cert = newCert(c)
+	c.gmCert = newGMCert(c)
 	c.app = newIProfession[ApplicationConfig, WorkerInfo](c, "app")
 	c.plugin = newIPlugin[GlobalPlugin](c)
 	c.strategy = newIStrategy(c)

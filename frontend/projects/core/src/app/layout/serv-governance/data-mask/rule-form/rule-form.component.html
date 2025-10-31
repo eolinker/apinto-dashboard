@@ -1,0 +1,192 @@
+<form
+  nz-form
+  [nzNoColon]="true"
+  [nzAutoTips]="autoTips"
+  [formGroup]="validateMatchForm"
+  autocomplete="off"
+>
+  <div formGroupName="match">
+    <nz-form-item>
+      <nz-form-label [nzSpan]="7" nzRequired>数据匹配规则：</nz-form-label>
+      <nz-form-control [nzSpan]="17">
+        <eo-ng-select
+          formControlName="type"
+          class="w-INPUT_NORMAL"
+          nzShowSearch
+          [nzOptions]="MatchRules"
+          nzPlaceHolder="请选择"
+          eoNgUserAccess="serv-governance/data-mask"
+          [nzDisabled]="nzDisabled"
+          (disabledEdit)="disabledEdit($event)"
+        ></eo-ng-select>
+      </nz-form-control>
+    </nz-form-item>
+
+    <ng-container
+      *ngIf="
+        validateMatchForm.get('match.type')?.value &&
+        validateMatchForm.get('match.type')?.value === 'inner'
+      "
+    >
+      <nz-form-item>
+        <nz-form-label [nzSpan]="7"></nz-form-label>
+        <nz-form-control [nzSpan]="17">
+          <eo-ng-select
+            formControlName="value"
+            class="w-INPUT_NORMAL"
+            nzShowSearch
+            [nzOptions]="DataFormatOptions"
+            nzPlaceHolder="请选择"
+            eoNgUserAccess="serv-governance/data-mask"
+            [nzDisabled]="nzDisabled"
+            (disabledEdit)="disabledEdit($event)"
+          ></eo-ng-select>
+        </nz-form-control>
+      </nz-form-item>
+    </ng-container>
+
+    <ng-container
+      *ngIf="
+        validateMatchForm.get('match.type')?.value &&
+        validateMatchForm.get('match.type')?.value !== 'inner'
+      "
+    >
+      <nz-form-item>
+        <nz-form-label [nzSpan]="7"></nz-form-label>
+        <nz-form-control [nzSpan]="17">
+          <input
+            formControlName="value"
+            type="text"
+            class="w-INPUT_NORMAL"
+            eo-ng-input
+            nzPlaceHolder="请输入"
+            eoNgUserAccess="serv-governance/data-mask"
+          />
+        </nz-form-control>
+      </nz-form-item>
+    </ng-container>
+  </div>
+
+  <div formGroupName="mask">
+    <nz-form-item>
+      <nz-form-label [nzSpan]="7" nzRequired>脱敏规则：</nz-form-label>
+      <nz-form-control [nzSpan]="17">
+        <eo-ng-select
+          formControlName="type"
+          class="w-INPUT_NORMAL"
+          nzShowSearch
+          required
+          [nzOptions]="getMaskingRuleOptions()"
+          nzPlaceHolder="请选择"
+          eoNgUserAccess="serv-governance/data-mask"
+          [nzDisabled]="nzDisabled"
+          (disabledEdit)="disabledEdit($event)"
+        ></eo-ng-select>
+      </nz-form-control>
+    </nz-form-item>
+
+    <ng-container
+      *ngIf="
+        ['partial-display', 'partial-masking', 'truncation'].indexOf(
+          validateMatchForm.get('mask.type')?.value
+        ) !== -1
+      "
+    >
+      <nz-form-item>
+        <nz-form-label [nzSpan]="7" nzLabelAlign="left"></nz-form-label>
+        <div>
+          <div class="w-INPUT_NORMAL flex items-center">
+            <nz-form-label
+              [nzSpan]="7"
+              [style]="{ width: '120px', textAlign: 'left' }"
+              nzRequired
+              >起始位置</nz-form-label
+            >
+            <nz-form-control>
+              <eo-ng-input-group nzSuffix="位">
+                <input
+                  name="begin"
+                  formControlName="begin"
+                  type="number"
+                  eo-ng-input
+                  required
+                  class="w-full"
+                  nzPlaceHolder="请输入"
+                  eoNgUserAccess="serv-governance/data-mask"
+                />
+              </eo-ng-input-group>
+            </nz-form-control>
+          </div>
+        </div>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label [nzSpan]="7"></nz-form-label>
+        <div>
+          <div class="w-INPUT_NORMAL flex items-center">
+            <nz-form-label
+              [nzSpan]="7"
+              [style]="{ width: '120px', textAlign: 'left' }"
+              nzRequired
+              >长度</nz-form-label
+            >
+            <nz-form-control>
+              <eo-ng-input-group nzSuffix="位">
+                <input
+                  name="length"
+                  type="number"
+                  formControlName="length"
+                  eo-ng-input
+                  required
+                  nzPlaceHolder="请输入"
+                  eoNgUserAccess="serv-governance/data-mask"
+                />
+              </eo-ng-input-group>
+            </nz-form-control>
+          </div>
+        </div>
+      </nz-form-item>
+    </ng-container>
+
+    <div
+      formGroupName="replace"
+      *ngIf="validateMatchForm.get('mask.type')?.value === 'replacement'"
+    >
+      <nz-form-item>
+        <nz-form-label [nzSpan]="7"></nz-form-label>
+        <nz-form-control [nzSpan]="17">
+          <eo-ng-select
+            name="metric"
+            class="w-INPUT_NORMAL"
+            required
+            nzShowSearch
+            formControlName="type"
+            [nzOptions]="DataMaskReplaceStrOptions"
+            nzPlaceHolder="请选择"
+            eoNgUserAccess="serv-governance/data-mask"
+            [nzDisabled]="nzDisabled"
+            (disabledEdit)="disabledEdit($event)"
+          ></eo-ng-select>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item
+        *ngIf="validateMatchForm.get('mask.replace.type')?.value === 'custom'"
+      >
+        <nz-form-label [nzSpan]="7"></nz-form-label>
+        <nz-form-control [nzSpan]="17">
+          <input
+            name="value"
+            type="text"
+            eo-ng-input
+            required
+            class="w-INPUT_NORMAL"
+            formControlName="value"
+            nzPlaceHolder="请输入"
+            eoNgUserAccess="serv-governance/data-mask"
+          />
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+  </div>
+</form>

@@ -7,6 +7,8 @@ import (
 	module "github.com/eolinker/apinto-dashboard/module"
 	proto2 "github.com/eolinker/apinto-dashboard/plugin/go-plugin/proto"
 	"github.com/eolinker/apinto-dashboard/plugin/go-plugin/shared"
+	"github.com/eolinker/apinto-dashboard/pm3"
+	"github.com/gin-gonic/gin"
 	"github.com/hashicorp/go-plugin"
 	"io"
 	"net/http"
@@ -15,75 +17,44 @@ import (
 	"google.golang.org/grpc"
 )
 
-type MiddlewareHandFunc func(ctx context.Context, request *module.MiddlewareRequest, writer module.MiddlewareResponseWriter)
-
 type serverMiddlewareHandler struct {
-	requestHandler  MiddlewareHandFunc
-	responseHandler MiddlewareHandFunc
+	requestHandler  shared.MiddlewareHandFunc
+	responseHandler shared.MiddlewareHandFunc
+	checkHandler    func(api pm3.ApiInfo) bool
 }
 
-type Plugin struct {
-	httpHandler shared.HttpHandler
-	middlewares map[string]*serverMiddlewareHandler
-}
+var (
+	_ proto2.ServiceServer = (*Server)(nil)
+)
 
-func NewPlugin(httpHandler shared.HttpHandler) *Plugin {
-	return &Plugin{httpHandler: httpHandler, middlewares: make(map[string]*serverMiddlewareHandler)}
-}
-
-type SetFunc func(builder *serverMiddlewareHandler)
-
-func (b *Plugin) AddMiddleware(name string, setFuncs ...SetFunc) {
-	m := &serverMiddlewareHandler{}
-	for _, setFunc := range setFuncs {
-		setFunc(m)
-	}
-	b.middlewares[name] = m
-}
-func (b *Plugin) Server() {
-	plugin.Serve(b.build())
-}
-func (b *Plugin) build() *plugin.ServeConfig {
-
-	p := &PluginServer{
-		httpHandler: b.httpHandler,
-		middlewares: b.middlewares,
-	}
-	if b.httpHandler == nil {
-		p.httpHandler = http.NotFoundHandler()
-	}
-	return &plugin.ServeConfig{
-		HandshakeConfig: shared.HandshakeConfig,
-		TLSProvider:     nil,
-		Plugins: map[string]plugin.Plugin{
-			shared.PluginHandlerName: &GrpcPluginServer{
-				iml: p,
-			},
-		},
-		VersionedPlugins: nil,
-		GRPCServer:       plugin.DefaultGRPCServer,
-		Logger:           logger,
-		Test:             nil,
-	}
-}
-func ProcessRequestBy(f MiddlewareHandFunc) SetFunc {
-	return func(m *serverMiddlewareHandler) {
-		m.requestHandler = f
-	}
-}
-func ProcessResponseBy(f MiddlewareHandFunc) SetFunc {
-	return func(m *serverMiddlewareHandler) {
-		m.responseHandler = f
-	}
-}
-
-type PluginServer struct {
+type Server struct {
 	proto2.UnimplementedServiceServer
-	httpHandler shared.HttpHandler
+	httpHandler http.Handler
 	middlewares map[string]*serverMiddlewareHandler
+
+	infos    *proto2.PluginInfos
+	handlers map[string]gin.HandlerFunc
 }
 
-func (p *PluginServer) MiddlewaresRequest(ctx context.Context, request *proto2.MiddlewareRequest) (*proto2.MiddlewareResponse, error) {
+func (p *Server) ModuleInfo(ctx context.Context, empty *proto2.Empty) (*proto2.PluginInfos, error) {
+	return p.infos, nil
+}
+
+func (p *Server) CheckMiddlewareForApi(ctx context.Context, request *proto2.MiddlewareInfoRequest) (*proto2.MiddlewareInfoResponse, error) {
+	result := false
+	if h, has := p.middlewares[request.Name]; has {
+		result = h.checkHandler(pm3.ApiInfo{
+			Authority: pm3.ApiAuthority(request.Api.Authority),
+			Access:    request.Api.Access,
+			Method:    request.Api.Method,
+			Path:      request.Api.Path,
+		})
+
+	}
+	return &proto2.MiddlewareInfoResponse{Result: result}, nil
+}
+
+func (p *Server) MiddlewaresRequest(ctx context.Context, request *proto2.MiddlewareRequest) (*proto2.MiddlewareResponse, error) {
 
 	m, ok := p.middlewares[request.Name]
 	if !ok {
@@ -93,7 +64,7 @@ func (p *PluginServer) MiddlewaresRequest(ctx context.Context, request *proto2.M
 	return doMiddlewareHandler(m.requestHandler, ctx, request)
 }
 
-func (p *PluginServer) MiddlewaresResponse(ctx context.Context, request *proto2.MiddlewareRequest) (*proto2.MiddlewareResponse, error) {
+func (p *Server) MiddlewaresResponse(ctx context.Context, request *proto2.MiddlewareRequest) (*proto2.MiddlewareResponse, error) {
 	response := new(proto2.MiddlewareResponse)
 	m, ok := p.middlewares[request.Name]
 	if !ok {
@@ -103,7 +74,7 @@ func (p *PluginServer) MiddlewaresResponse(ctx context.Context, request *proto2.
 	return doMiddlewareHandler(m.responseHandler, ctx, request)
 
 }
-func doMiddlewareHandler(handFunc MiddlewareHandFunc, ctx context.Context, request *proto2.MiddlewareRequest) (*proto2.MiddlewareResponse, error) {
+func doMiddlewareHandler(handFunc shared.MiddlewareHandFunc, ctx context.Context, request *proto2.MiddlewareRequest) (*proto2.MiddlewareResponse, error) {
 	response := new(proto2.MiddlewareResponse)
 	if handFunc == nil {
 		return response, nil
@@ -113,9 +84,14 @@ func doMiddlewareHandler(handFunc MiddlewareHandFunc, ctx context.Context, reque
 		Url:     request.Request.Url,
 		Method:  request.Request.Method,
 		Header:  make(map[string][]string),
+		Keys:    make(map[string]any),
 	}
+
 	for _, h := range request.Request.Headers {
 		r.Header[h.Key] = h.Value
+	}
+	if len(request.Request.Keys) > 0 {
+		json.Unmarshal(request.Request.Keys, &r.Keys)
 	}
 
 	writer := new(module.MiddlewareResponse)
@@ -136,22 +112,27 @@ func doMiddlewareHandler(handFunc MiddlewareHandFunc, ctx context.Context, reque
 
 	return response, nil
 }
-func (p *PluginServer) GetMiddlewareInfo(ctx context.Context, r *proto2.MiddlewareInfoRequest) (*proto2.MiddlewareInfoResponse, error) {
+func (p *Server) GetMiddlewareInfo(ctx context.Context, r *proto2.MiddlewareInfoRequest) (*proto2.MiddlewareInfoResponse, error) {
 	info := &proto2.MiddlewareInfoResponse{
-		Name:     r.Name,
-		Request:  false,
-		Response: false,
+		Result: false,
+	}
+	if r.GetApi() == nil {
+		return info, nil
 	}
 	m, ok := p.middlewares[r.Name]
 	if !ok {
 		return info, nil
 	}
-	info.Request = m.requestHandler != nil
-	info.Response = m.responseHandler != nil
+	m.checkHandler(pm3.ApiInfo{
+		Authority: pm3.ApiAuthority(r.Api.Authority),
+		Access:    r.Api.Access,
+		Method:    r.Api.Method,
+		Path:      r.Api.Path,
+	})
 	return info, nil
 }
 
-func (p *PluginServer) Request(ctx context.Context, request *proto2.HttpRequest) (*proto2.HttpResponse, error) {
+func (p *Server) Request(ctx context.Context, request *proto2.HttpRequest) (*proto2.HttpResponse, error) {
 	uri, err := url.ParseRequestURI(request.Url)
 	if err != nil {
 		return nil, err
@@ -175,7 +156,9 @@ func (p *PluginServer) Request(ctx context.Context, request *proto2.HttpRequest)
 	}
 
 	req.Body = io.NopCloser(bytes.NewReader(request.Body))
+
 	w := newResponseWriter()
+
 	p.httpHandler.ServeHTTP(w, req)
 
 	responseHeader := make([]*proto2.Header, len(w.Header()))
@@ -191,7 +174,7 @@ func (p *PluginServer) Request(ctx context.Context, request *proto2.HttpRequest)
 
 type GrpcPluginServer struct {
 	plugin.Plugin
-	iml *PluginServer
+	iml *Server
 }
 
 func (p *GrpcPluginServer) GRPCServer(broker *plugin.GRPCBroker, server *grpc.Server) error {

@@ -9,7 +9,10 @@ import (
 type LogOperateType int
 
 func (l LogOperateType) Handler(ginCtx *gin.Context) {
-	ginCtx.Set("Operate", int(l))
+	ginCtx.Set("Operate", l.String())
+}
+func ReadOperateType(ginCtx *gin.Context) LogOperateType {
+	return GetLogOperateIndex(ginCtx.GetString("Operate"))
 }
 func init() {
 	for i := LogOperateTypeNone; i < LogOperateTypeALL; i++ {
@@ -31,6 +34,7 @@ const (
 	LogOperateTypeEdit
 	LogOperateTypeDelete
 	LogOperateTypePublish
+	LogOperateTypeOffline
 	LogOperateTypeALL
 )
 
@@ -41,12 +45,14 @@ var (
 		LogOperateTypeEdit:    "edit",
 		LogOperateTypeDelete:  "delete",
 		LogOperateTypePublish: "publish",
+		LogOperateTypeOffline: "offline",
 	}
 	logOperateTypeTitles = map[LogOperateType]string{
 		LogOperateTypeCreate:  "新建",
 		LogOperateTypeEdit:    "编辑",
 		LogOperateTypeDelete:  "删除",
 		LogOperateTypePublish: "发布",
+		LogOperateTypeOffline: "下线",
 	}
 	logOperateTypeIndex = map[string]LogOperateType{}
 )

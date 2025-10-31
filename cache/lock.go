@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	lockerPrefix = "apinto-locker"
+	lockerPrefix = "locker"
 )
 
 type Locker interface {
@@ -31,11 +31,12 @@ type RedisLocker interface {
 	LockerWithExpireTime(name string, expire time.Duration, value ...string) Locker
 }
 type manager struct {
-	client redis.UniversalClient
+	client    redis.UniversalClient
+	namespace string
 }
 
-func newManager(client redis.UniversalClient) RedisLocker {
-	return &manager{client: client}
+func newManager(client redis.UniversalClient, namespace string) RedisLocker {
+	return &manager{client: client, namespace: namespace}
 }
 
 func (m *manager) Locker(name string, value ...string) Locker {
@@ -43,7 +44,7 @@ func (m *manager) Locker(name string, value ...string) Locker {
 	if len(value) > 0 {
 		v = strings.Join(value, "-")
 	}
-	return newRedisLock(client, fmt.Sprintf("%s:%s", lockerPrefix, name), v)
+	return newRedisLock(client, fmt.Sprintf("%s:%s:%s", m.namespace, lockerPrefix, name), v)
 
 }
 
@@ -52,6 +53,6 @@ func (m *manager) LockerWithExpireTime(name string, expire time.Duration, value 
 	if len(value) > 0 {
 		v = strings.Join(value, "-")
 	}
-	return newRedisLockWithExpireTime(client, fmt.Sprintf("%s:%s", lockerPrefix, name), v, expire)
+	return newRedisLockWithExpireTime(client, fmt.Sprintf("%s:%s:%s", m.namespace, lockerPrefix, name), v, expire)
 
 }

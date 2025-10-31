@@ -2,7 +2,7 @@ id: "audit.apinto.com"
 name: "audit-log"
 cname: "Debug日志"
 resume: "Debug日志记录使用者在控制台操作的事件，包括创建、编辑、删除、上线、下线等。"
-version: "v1.0.7"
+version: "v1.2.1"
 icon: "logo.png"
 driver: "audit.apinto.com"
 type: 2 #0为框架模块 1为核心模块 2为内置模块 3为非内置
@@ -11,6 +11,12 @@ is_can_disable: true
 is_can_uninstall: false
 visible_in_navigation: true
 visible_in_market: true
-front:
+front: audit-log
+frontend:
+  - name: audit-log
+    driver: apinto.builtIn.module
+    router:
+      - path: audit-log
+        type: normal
 navigation: "navigation.system"
 group_id: "log"

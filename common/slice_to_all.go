@@ -7,6 +7,7 @@ func MapToSlice[K comparable, T any, D any](m map[K]T, f func(k K, t T) D) []D {
 	}
 	return r
 }
+
 func SliceToMap[K comparable, T any](list []T, f func(T) K) map[K]T {
 	m := make(map[K]T)
 	for _, t := range list {
@@ -24,12 +25,12 @@ func SliceToMapO[K comparable, T, D any](list []T, f func(T) (K, D)) map[K]D {
 }
 
 // SliceToSet 列表转成集合
-func SliceToSet[K comparable, T any](list []T, f func(T) K) map[K]struct{} {
-	m := make(map[K]struct{})
+func SliceToSet[K comparable, T any](list []T, f func(T) K) Set[K] {
+	s := make(Set[K])
 	for _, t := range list {
-		m[f(t)] = struct{}{}
+		s.Set(f(t))
 	}
-	return m
+	return s
 }
 
 func SliceToMapArray[K comparable, T any](list []T, f func(T) K) map[K][]T {
@@ -41,14 +42,14 @@ func SliceToMapArray[K comparable, T any](list []T, f func(T) K) map[K][]T {
 }
 
 func SliceToSliceIds[K comparable, T any](list []T, f func(T) K) []K {
-	ids := make([]K, 0)
+	ids := make([]K, 0, len(list))
 	for _, t := range list {
 		ids = append(ids, f(t))
 	}
 	return ids
 }
 func SliceToSlice[S, D any](list []S, f func(S) D) []D {
-	ids := make([]D, 0)
+	ids := make([]D, 0, len(list))
 	for _, t := range list {
 		ids = append(ids, f(t))
 	}

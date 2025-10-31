@@ -7,8 +7,8 @@ import (
 type API struct {
 	Id               int       `gorm:"type:int(11);size:11;not null;auto_increment;primary_key;column:id;comment:主键ID" json:"id,omitempty"`
 	NamespaceId      int       `gorm:"type:int(11);size:11;not null;column:namespace;uniqueIndex:namespace_name;comment:工作空间" json:"namespace_id,omitempty"`
-	UUID             string    `gorm:"size:36;not null;column:uuid;uniqueIndex:namespace_name;comment:UUID" json:"uuid,omitempty"`
-	GroupUUID        string    `gorm:"size:36;not null;column:group_uuid;comment:api所在分组的UUID;index:group_uuid" json:"group_uuid,omitempty"`
+	UUID             string    `gorm:"size:255;not null;column:uuid;uniqueIndex:namespace_name;comment:UUID" json:"uuid,omitempty"`
+	GroupUUID        string    `gorm:"size:255;not null;column:group_uuid;comment:api所在分组的UUID;index:group_uuid" json:"group_uuid,omitempty"`
 	Name             string    `gorm:"size:255;not null;column:name;comment:api名称" json:"name,omitempty"`
 	Scheme           string    `gorm:"size:36;not null;default:'http';column:scheme;comment:协议" json:"scheme,omitempty"`
 	IsDisable        bool      `gorm:"type:tinyint(1);size:1;default:0;not null;column:is_disable;comment:是否拦截"`
@@ -23,6 +23,7 @@ type API struct {
 	CreateTime       time.Time `gorm:"type:timestamp;NOT NULL;DEFAULT:CURRENT_TIMESTAMP;column:create_time;comment:创建时间" json:"create_time"`
 	UpdateTime       time.Time `gorm:"type:timestamp;NOT NULL;DEFAULT:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;column:update_time;comment:修改时间" json:"update_time"`
 	Hosts            string    `gorm:"type:text;column:hosts;comment:请求域名限制" json:"hosts,omitempty"`
+	Protocols        string    `gorm:"size:255;column:protocols;comment:请求协议限制" json:"protocols,omitempty"`
 }
 
 // /user/{uuid}

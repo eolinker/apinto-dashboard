@@ -1,72 +1,35 @@
 package remote
 
 import (
-	"fmt"
+	"github.com/eolinker/apinto-dashboard/common"
 	apinto_module "github.com/eolinker/apinto-dashboard/module"
+	"github.com/eolinker/apinto-dashboard/pm3"
 )
 
-type rPlugin struct {
-	define *Define
-}
+func checkConfig(config pm3.PluginConfig) (*Config, error) {
 
-func newRPlugin(define interface{}) (apinto_module.Plugin, error) {
-	dv, err := DecodeDefine(define)
-	if err != nil {
-		return nil, err
+	if config == nil {
+		return &Config{}, nil
 	}
-	return &rPlugin{define: dv}, nil
-}
-
-func (r *rPlugin) CreateModule(name string, config interface{}) (apinto_module.Module, error) {
-	cv, err := r.checkConfig(name, config)
-	if err != nil {
-		return nil, err
+	c := &Config{}
+	if ls, has := config["header"]; has {
+		c.Header = common.SliceToMapO(ls, func(t pm3.ExtendParams) (string, string) {
+			return t.Name, t.Value
+		})
 	}
-
-	module := &rModule{name: name}
-
-	//注册远程插件存储接口, 打开方式接口
-	remoteStorage := newRemotePluginController(name, cv, r.define)
-	module.routersInfo = append(module.routersInfo, remoteStorage.createRemoteApis()...)
-
-	return module, nil
-}
-
-func (r *rPlugin) CheckConfig(name string, config interface{}) error {
-	_, err := r.checkConfig(name, config)
-	if err != nil {
-		return err
+	if ls, has := config["query"]; has {
+		c.Query = common.SliceToMapO(ls, func(t pm3.ExtendParams) (string, string) {
+			return t.Name, t.Value
+		})
 	}
-	return nil
-}
-func (r *rPlugin) checkConfig(name string, config interface{}) (*Config, error) {
-	return DecodeConfig(config)
-}
-
-func (r *rPlugin) GetPluginFrontend(moduleName string) string {
-	return fmt.Sprintf("remote/%s", moduleName)
-}
-
-func (r *rPlugin) IsPluginVisible() bool {
-	return true
-}
-
-func (r *rPlugin) IsShowServer() bool {
-	return !r.define.Internet
-}
-
-func (r *rPlugin) IsCanUninstall() bool {
-	return true
-}
-
-func (r *rPlugin) IsCanDisable() bool {
-	return true
+	if ls, has := config["initialize"]; has {
+		c.Initialize = common.SliceToMapO(ls, func(t pm3.ExtendParams) (string, string) {
+			return t.Name, t.Value
+		})
+	}
+	return c, nil
 }
 
 func DecodeDefine(define interface{}) (*Define, error) {
 	return apinto_module.DecodeFor[Define](define)
-}
-func DecodeConfig(config interface{}) (*Config, error) {
-	return apinto_module.DecodeFor[Config](config)
-
 }

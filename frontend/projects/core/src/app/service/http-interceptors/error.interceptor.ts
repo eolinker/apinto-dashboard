@@ -1,43 +1,96 @@
-import { Component, Injectable } from '@angular/core'
+import { Injectable } from '@angular/core'
 import {
   HttpRequest,
   HttpHandler,
   HttpEvent,
   HttpInterceptor,
-  HttpResponse
+  HttpResponse,
+  HttpParams
 } from '@angular/common/http'
-import { tap, Observable } from 'rxjs'
-import { Router } from '@angular/router'
-import { NzModalService } from 'ng-zorro-antd/modal'
-import { EoNgFeedbackMessageService, EoNgFeedbackModalService } from 'eo-ng-feedback'
+import { Observable, from, mergeMap, map, of } from 'rxjs'
 import { EoNgNavigationService } from '../eo-ng-navigation.service'
-import { environment } from 'projects/core/src/environments/environment'
+import { PluginEventHubService } from '../plugin-event-hub.service'
+import { EoNgMessageService } from '../eo-ng-message.service'
+
+// 判断对象是否需要做变量名转化，如果是表单对象、文件流等就不做处理
+const isJsonObject:(obj: any)=> boolean = (obj:any) => {
+  // 首先确保它是一个对象
+  if (typeof obj !== 'object' || obj === null) {
+    return false
+  }
+
+  // 检查对象不是特殊的 HTTP 相关类型
+  return !(obj instanceof FormData ||
+           obj instanceof Blob ||
+           obj instanceof File ||
+           obj instanceof ArrayBuffer ||
+           obj instanceof URLSearchParams ||
+           // 检查其他可能的类型
+           obj instanceof ReadableStream ||
+           obj instanceof FileList)
+}
+
+// 驼峰转下划线,其中监控的status_4xx和status_5xx需要特殊处理
+export const underline:(data:any)=>any = (data:any) => {
+  if (typeof data !== 'object' || !data) return data
+  if (!isJsonObject(data)) { return data };
+  if (Array.isArray(data)) {
+    return data.map(item => underline(item))
+  }
+  const newData:any = {}
+  for (const key in data) {
+    // 首字母不参与转换
+    let newKey = key[0] + key.substring(1).replace(/([A-Z])/g, (p, m) => `_${m.toLowerCase()}`
+    )
+    newKey = key === 'status4xx' ? 'status_4xx' : (key === 'status5xx' ? 'status_5xx' : newKey)
+    newData[newKey] = underline(data[key])
+  }
+  return newData
+}
+
+export const underlinedStr:(str:string)=>string = (str:string) => {
+  return str[0] + str.substring(1).replace(/([A-Z])/g, (p, m) => `_${m.toLowerCase()}`)
+}
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
   authStatus:'normal'|'waring'|'freeze' = 'normal'
   constructor (
-    private router: Router,
     private navigationService: EoNgNavigationService,
-    private modalService:NzModalService,
-    private eoModalService:EoNgFeedbackModalService,
-    private message: EoNgFeedbackMessageService) {}
+    private pluginEventHub:PluginEventHubService,
+    private message:EoNgMessageService) {}
 
   intercept (request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
-    return next.handle(request).pipe(
-      tap((event:any) => {
-        // this.hideLoader()
+    const copiedReq = this.handleRequest(request)
+    return next.handle(copiedReq).pipe(
+      mergeMap((event:any) => {
         if (event instanceof HttpResponse) {
-          this.checkAuthStatus(event)
-          this.checkAccess(event.body.code, event, request.method)
-          if (!request.url.includes('api/dynamic/')) {
-            try {
-              event.body.data = this.camel(event.body.data)
-            } catch {
-              console.warn('转化接口数据命名法出现问题')
-            }
-          }
+          return from(this.pluginEventHub.initHub()!.emit('httpResponse', { data: { req: request, res: event } })).pipe(
+            map((res:any) => {
+              event = res.res
+
+              if (!request.url.includes('api/dynamic/')) {
+                try {
+                  event.body.data = this.camel(event.body.data)
+                } catch {
+                  console.warn(' 转化接口数据命名法出现问题')
+                }
+              }
+
+              if (!request.url.startsWith('/remote') && event.body.code !== undefined && !(request.url.includes('sso/login/check')) && event.body.code !== 0 && event.body.code !== 30001) {
+                let msg = event.body.msg
+                if (event.url.includes('router/online') && request.method === 'PUT') {
+                  msg = event.body.data.router.map((data:any) => {
+                    return data.msg
+                  }).join('  ')
+                }
+                this.message.error(msg || '操作失败！')
+              }
+              return event
+            }))
         }
+
+        return of(event)
       }
       )
     )
@@ -51,97 +104,27 @@ export class ErrorInterceptor implements HttpInterceptor {
     }
     const newData:any = {}
     for (const key in data) {
-      const newKey = key.replace(/_([a-z0-9])/g, (p, m) => m.toUpperCase())
+      const newKey = (key === 'status_4xx' || key === 'status_5xx') ? key : key.replace(/_([a-z0-9])/g, (p, m) => m.toUpperCase())
       newData[newKey] = this.camel(data[key])
     }
     return newData
   }
 
-  checkAuthStatus (event:HttpResponse<any>) {
-    if (event.headers && event.headers.get('X-Apinto-Auth-Status') && this.authStatus !== event.headers.get('X-Apinto-Auth-Status')) {
-      this.authStatus = event.headers.get('X-Apinto-Auth-Status') as 'normal' | 'waring' | 'freeze'
-      this.navigationService.reqCheckAuthStatus()
-    }
-  }
-
-  // 根据后端返回的code判断是否要提示无权限弹窗或跳转路由
-  checkAccess (code:number, responseBody:any, requestMethod:string) {
-    switch (code) {
-      case -2:
-        this.modalService.closeAll()
-        this.eoModalService.closeAll()
-        this.openAccessModal()
-        break
-      case -3:
-        setTimeout(() => {
-          this.modalService.closeAll()
-          this.eoModalService.closeAll()
-          if (!this.router.url.includes('/login')) {
-            this.router.navigate(['/', 'login'], { queryParams: { callback: this.router.url }, queryParamsHandling: 'merge' })
-          }
-        }, 1000)
-        break
-      case -7:
-        if (environment.isBusiness) {
-          this.eoModalService.closeAll()
-          this.modalService.closeAll()
-          setTimeout(() => {
-            if (!responseBody.url.includes('create_check')) {
-              this.router.navigate(['/', 'auth'])
-            }
-          }, 1000)
-        }
-        break
-      default:
-        if (!this.router.url.startsWith('/remote') && code !== undefined && !(responseBody.url.includes('sso/login/check')) && code !== 0 && code !== 30001) {
-          let msg = responseBody.body.msg
-          if (responseBody.url.includes('router/online') && requestMethod === 'PUT') {
-            msg = responseBody.body.data.router.map((data:any) => {
-              return data.msg
-            }).join('  ')
-          }
-          this.message.error(msg || '操作失败！')
-        }
-    }
-  }
-
-  openAccessModal () {
-    this.modalService.confirm({
-      nzWrapClassName: 'modal-header',
-      nzTitle: '权限提示',
-      nzIconType: 'exclamation-circle',
-      nzContent: ModalContentComponent,
-      nzClosable: true,
-      nzOkText: '确定',
-      nzCancelText: '取消',
-      nzOnOk: () => {
-        const mainPageUrl = this.navigationService.getPageRoute()
-        if (mainPageUrl) {
-          this.router.navigate([this.navigationService.getPageRoute()])
-        }
-      }
+  underlineParams (params: HttpParams) {
+    let newParams = params.set('namespace', 'default')
+    params.keys().forEach(key => {
+      const newKey = underlinedStr(key)
+      newParams = newParams.set(newKey, underline(params.get(key))!)
     })
+    return newParams
   }
-}
 
-@Component({
-  selector: 'modal-content',
-  template: `
-    <div class="modal-header">
-    <p>无法获取您当前账号的相关权限信息，请确认是否赋予权限。</p>
-    <p>具体信息，请咨询<span class='blue'>管理员</span></p>
-    </div>
-  `,
-  styles: [
-    `
-    .blue{
-      color:blue;
+  handleRequest (request: HttpRequest<unknown>) {
+    if (request.url.startsWith('dynamic') || request.url.startsWith('/api/dynamic')) {
+      return request
     }
-    .modal-header{
-      margin-top:24px;
-    }
-  `
-  ]
-})
-export class ModalContentComponent {
+    const modifiedParams = this.underlineParams(request.params)
+    const modifiedBody = underline(request.body)
+    return request.clone({ params: modifiedParams, body: modifiedBody })
+  }
 }

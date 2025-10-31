@@ -23,6 +23,14 @@ type IClusterCertificateService interface {
 	DeleteById(ctx context.Context, namespaceId int, clusterName string, id int) error
 }
 
+type IGmCertificateService interface {
+	Insert(ctx context.Context, operator, namespaceId int, clusterName, signKey, signCert, encKey, encCert string) error
+	Update(ctx context.Context, operator, namespaceId, certificateId int, clusterName, signKey, signCert, encKey, encCert string) error
+	Info(ctx context.Context, namespaceId, certificateId int, clusterName string) (*cluster_model.GMCertificate, error)
+	QueryList(ctx context.Context, namespaceId int, clusterName string) ([]*cluster_model.ClusterGMCertificate, error)
+	DeleteById(ctx context.Context, namespaceId int, clusterName string, id int) error
+}
+
 type IClusterService interface {
 	GetAllCluster(ctx context.Context) ([]*cluster_model.Cluster, error)
 	Count(ctx context.Context) (int, error)

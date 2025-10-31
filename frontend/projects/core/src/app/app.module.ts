@@ -1,14 +1,13 @@
 /*
  * @Author: maggieyyy im.ymj@hotmail.com
  * @Date: 2022-07-11 23:20:14
- * @LastEditors: maggieyyy im.ymj@hotmail.com
- * @LastEditTime: 2022-07-12 00:15:53
- * @FilePath: /apinto/src/app/app.module.ts
+ * @LastEditors: maggieyyy
+ * @LastEditTime: 2024-07-02 10:27:27
+ * @FilePath: \apinto\projects\core\src\app\app.module.ts
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
 import { HttpClient, HttpClientModule } from '@angular/common/http'
-import { NgModule } from '@angular/core'
-import { BrowserModule } from '@angular/platform-browser'
+import { APP_INITIALIZER, NgModule, PlatformRef } from '@angular/core'
 import { environment } from 'projects/core/src/environments/environment'
 
 import { AppRoutingModule } from './app-routing.module'
@@ -19,17 +18,36 @@ import { ApiService, API_URL } from './service/api.service'
 import { NzTransferModule } from 'ng-zorro-antd/transfer'
 import { httpInterceptorProviders } from './service/http-interceptors'
 import { EoNgBreadcrumbModule } from 'eo-ng-breadcrumb'
-import { EoNgFeedbackDrawerModule, EoNgFeedbackMessageService } from 'eo-ng-feedback'
+import { EoNgFeedbackDrawerModule, EoNgFeedbackMessageService, EoNgFeedbackModalModule } from 'eo-ng-feedback'
 import { EoNgLayoutModule } from 'eo-ng-layout'
 import { EoNgMenuModule } from 'eo-ng-menu'
-import { EoNgTableModule } from 'eo-ng-table'
 import { NzConfig, NZ_CONFIG } from 'ng-zorro-antd/core/config'
-import { registerLocaleData } from '@angular/common'
+import { CommonModule, registerLocaleData } from '@angular/common'
 import zh from '@angular/common/locales/en-GB'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { ChangeWordColorPipe } from './pipe/change-word-color.pipe'
 import { MarkdownModule, MarkedOptions, MarkedRenderer } from 'ngx-markdown'
+import { EoNgApintoTableModule } from 'projects/eo-ng-apinto-table/src/public-api'
+import { NzFormModule } from 'ng-zorro-antd/form'
+import { platformBrowserDynamic } from '@angular/platform-browser-dynamic'
+import { PlatformProviderService } from './service/platform-provider.service'
+import { PluginLoaderService } from './service/plugin-loader.service'
+import { ScrollingModule } from '@angular/cdk/scrolling'
+import { OverlayModule, ScrollStrategyOptions } from '@angular/cdk/overlay'
+import { NzOverlayModule } from 'ng-zorro-antd/core/overlay'
+import { FormsModule, ReactiveFormsModule } from '@angular/forms'
+import { EoNgTreeModule } from 'eo-ng-tree'
+import { NoopAnimationsModule } from '@angular/platform-browser/animations'
+import { cloneDeep } from 'lodash-es'
+import { AsIframeService } from './service/as-iframe.service'
 
+if (typeof window.structuredClone !== 'function') {
+  console.warn(' 浏览器版本过低，部分功能可能无法正常使用，请及时升级浏览器版本')
+  window.structuredClone = function (obj:any) {
+    // 使用 Lodash 的 _.cloneDeep 或者其他自定义的深拷贝方法
+    return cloneDeep(obj)
+  }
+}
 registerLocaleData(zh)
 const ngZorroConfig: NzConfig = {
   // 注意组件名称没有 nz 前缀
@@ -56,38 +74,71 @@ export function markedOptionsFactory (): MarkedOptions {
   }
 }
 
+export function initializeApp (pluginService: PluginLoaderService, asIframeService:AsIframeService) {
+  (window as any)._apinto_mf = true
+  const isIframe = window.self !== window.top
+  if (isIframe) {
+    asIframeService.startReceiveMessage()
+  }
+  return (): Promise<void> => {
+    // 确保 loadPlugins 返回一个 Promise
+    return pluginService.loadPlugins()
+  }
+}
+
 @NgModule({
   declarations: [
     AppComponent,
     ChangeWordColorPipe
   ],
   imports: [
-    BrowserModule,
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
     EoNgBreadcrumbModule,
     EoNgFeedbackDrawerModule,
     EoNgLayoutModule,
     EoNgMenuModule,
-    EoNgTableModule,
+    EoNgTreeModule,
+    EoNgFeedbackModalModule,
     HttpClientModule,
+    EoNgApintoTableModule,
+    NzFormModule,
     LayoutModule,
     ComponentModule,
     NzTransferModule,
     AppRoutingModule,
     NzSpinModule,
+    ScrollingModule,
+    OverlayModule,
     MarkdownModule.forRoot({
       loader: HttpClient,
       markedOptions: {
         provide: MarkedOptions,
         useFactory: markedOptionsFactory
       }
-    })
+    }),
+    NoopAnimationsModule,
+    NzOverlayModule
   ],
   providers: [
     ApiService,
     EoNgFeedbackMessageService,
     { provide: API_URL, useValue: environment.urlPrefix },
     { provide: NZ_CONFIG, useValue: ngZorroConfig },
-    httpInterceptorProviders],
+    httpInterceptorProviders,
+    {
+      provide: PlatformRef,
+      useFactory: () => platformBrowserDynamic().bootstrapModule(AppModule)
+    },
+    PlatformProviderService,
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeApp,
+      deps: [PluginLoaderService, AsIframeService],
+      multi: true
+    },
+    ScrollStrategyOptions],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

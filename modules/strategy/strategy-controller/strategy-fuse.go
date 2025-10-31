@@ -8,8 +8,9 @@ import (
 )
 
 func newStrategyFuseController() *strategyController[strategy_entry.StrategyFuseConfig, strategy_entry.StrategyFuseConfig] {
-	strategyService := strategy_service.NewStrategyService(strategy_handler.NewStrategyFuseHandler("strategy-fuse"), config.StrategyFuseRuntimeKind)
+	handler := strategy_handler.NewStrategyFuseHandler("strategy-fuse")
+	strategyService := strategy_service.NewStrategyService(handler, config.StrategyFuseRuntimeKind)
 
-	c := newStrategyController(strategyService)
+	c := newStrategyController(strategyService, handler.GetType())
 	return c
 }

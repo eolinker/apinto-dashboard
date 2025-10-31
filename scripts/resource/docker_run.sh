@@ -22,10 +22,12 @@ echo -e "redis:" >> config.yml
 echo -e "  user_name: ${REDIS_USER_NAME}" >> config.yml
 echo -e "  password: ${REDIS_PWD}" >> config.yml
 echo -e "  addr: " >> config.yml
+
 for s in ${arr[@]}
 do
 echo -e "    - $s" >> config.yml
 done
+echo -e "  cluster: ${REDIS_CLUSTER}" >> config.yml
 echo -e "port: 8080" >> config.yml
 echo -e "error_log:" >> config.yml
 echo -e "  dir: ${ERROR_DIR}" >> config.yml

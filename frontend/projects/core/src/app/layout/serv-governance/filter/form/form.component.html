@@ -12,6 +12,7 @@
         [nzOptions]="filterNamesList"
         (disabledEdit)="disabledEdit($event)"
         [nzDisabled]="nzDisabled"
+        nzShowSearch
       ></eo-ng-select>
     </section>
   </div>
@@ -103,7 +104,7 @@
     </section>
 
     <!-- API路径(输入框) -->
-    <section *ngIf="filterType == 'pattern' && filterForm.name !== 'ip'">
+    <section *ngIf="filterType == 'pattern' && filterForm.name === 'path'">
       <input
         eo-ng-input
         class="w-INPUT_NORMAL"
@@ -133,6 +134,51 @@
       <p *ngIf="!filterForm.patternIsPass" class="tips" style="color: 'red'">
         输入的IP或CIDR不符合格式
       </p>
+    </section>
+    <!-- 访问时间段 -->
+    <section *ngIf="filterType === 'pattern' && filterForm.name === 'time'" class="time-range-section">
+      <div class="time-range-item" [class]="{'mt-[12px]': i !== 0}" *ngFor="let timeRange of timeRanges; let i = index">
+        <nz-time-picker 
+          [(ngModel)]="timeRange.start" 
+          (ngModelChange)="updateTimeValues()"
+          [nzDefaultOpenValue]="timeRange.startDefaultOpenValue"
+          [nzDisabled]="nzDisabled"
+          class="time-picker"
+        ></nz-time-picker>
+        <span class="time-separator"> ~ </span>
+        <nz-time-picker 
+          [(ngModel)]="timeRange.end" 
+          (ngModelChange)="updateTimeValues()"
+          [nzDefaultOpenValue]="timeRange.endDefaultOpenValue"
+          [nzDisabled]="nzDisabled"
+          class="time-picker"
+        ></nz-time-picker>
+        <button 
+          class="ml-[12px] cursor-pointer"
+          *ngIf="!nzDisabled"
+          eo-ng-button
+          nzSize="small"
+          nzType="text"
+          (click)="removeTimeRange(i)"
+        >
+          <svg class="iconpark-icon">
+            <use href="#minus"></use>
+          </svg>
+        </button>
+        <div *ngIf="timeRange.error" class="error-tip" style="color: #ff4d4f; font-size: 12px; margin-top: 4px;">
+          {{ timeRange.error }}
+        </div>
+      </div>
+      <button 
+        class="mt-[12px]"
+        *ngIf="!nzDisabled"
+        eo-ng-button
+        (click)="addTimeRange()"
+      >
+        <svg class="iconpark-icon">
+          <use href="#add"></use>
+        </svg>
+      </button>
     </section>
 
     <!-- 一组多选框 -->

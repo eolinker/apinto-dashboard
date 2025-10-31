@@ -1,19 +1,17 @@
 /*
  * @Author: maggieyyy im.ymj@hotmail.com
  * @Date: 2022-07-11 23:20:14
- * @LastEditors: MengjieYang yangmengjie@eolink.com
- * @LastEditTime: 2022-09-20 22:01:32
- * @FilePath: /apinto/src/app/app.module.ts
+ * @LastEditors: maggieyyy
+ * @LastEditTime: 2024-07-02 10:24:35
+ * @FilePath: \apinto\projects\core\src\app\layout\layout.module.ts
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
 import { CommonModule } from '@angular/common'
 import { NgModule } from '@angular/core'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
-import { NoopAnimationsModule } from '@angular/platform-browser/animations'
 import { AppRoutingModule } from '../app-routing.module'
 import { ComponentModule } from '../component/component.module'
 import { BasicLayoutComponent } from './basic-layout/basic-layout.component'
-import { NzTableModule } from 'ng-zorro-antd/table'
 import { NzAvatarModule } from 'ng-zorro-antd/avatar'
 import { EoNgBreadcrumbModule } from 'eo-ng-breadcrumb'
 import { EoNgLayoutModule } from 'eo-ng-layout'
@@ -25,29 +23,20 @@ import { EoNgInputModule } from 'eo-ng-input'
 import { EoNgCascaderModule } from 'eo-ng-cascader'
 import { EoNgDropdownModule } from 'eo-ng-dropdown'
 import { EoNgTreeModule } from 'eo-ng-tree'
-import { EoNgTableModule } from 'eo-ng-table'
 import { EoNgDatePickerModule } from 'eo-ng-date-picker'
 import { EoNgSwitchModule } from 'eo-ng-switch'
 import { EoNgButtonModule } from 'eo-ng-button'
 import { EoNgCopyModule } from 'eo-ng-copy'
 import { EoNgUploadModule } from 'eo-ng-upload'
-import { LoginComponent } from './login/login.component'
+// import { LoginComponent } from './login/login.component'
 import { LogoComponent } from './login/logo/logo.component'
-import { PasswordComponent } from './login/password/password.component'
+// import { PasswordComponent } from './login/password/password.component'
 import { NzFormModule } from 'ng-zorro-antd/form'
-import { NzLayoutModule } from 'ng-zorro-antd/layout'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
-import { NzCheckboxModule } from 'ng-zorro-antd/checkbox'
 import { NzGridModule } from 'ng-zorro-antd/grid'
-import { NzModalModule } from 'ng-zorro-antd/modal'
 import { NzHighlightModule } from 'ng-zorro-antd/core/highlight'
-import { AuthActivationComponent } from './auth/activation/activation.component'
-import { AuthInfoComponent } from './auth/info/info.component'
-import { AuthUpdateComponent } from './auth/update/update.component'
 import { DirectiveModule } from '../directive/directive.module'
 import { NzUploadModule } from 'ng-zorro-antd/upload'
 import { EoNgEmptyModule } from 'eo-ng-empty'
-import { AuthInfoDetailComponent } from './auth/info/detail/detail.component'
 import { EoNgMenuModule } from 'eo-ng-menu'
 import { LocalPluginComponent } from './local-plugin/local-plugin.component'
 import { GuideComponent } from './guide/guide.component'
@@ -58,68 +47,75 @@ import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { NotFoundPageComponent } from './not-found-page/not-found-page.component'
 import { IntelligentPluginComponent } from './intelligent-plugin/intelligent-plugin.component'
 import { RemotePluginComponent } from './remote-plugin/remote-plugin.component'
+import { EoNgApintoTableModule } from 'projects/eo-ng-apinto-table/src/public-api'
+import { PluginWrapperComponent } from './plugin-wrapper/plugin-wrapper.component'
+import { SystemEmailConfigComponent } from './system/email/config/config.component'
+import { SystemWebhookConfigComponent } from './system/webhook/config/config.component'
+import { SystemWebhookListComponent } from './system/webhook/list/list.component'
+import { RedirectPage } from './redirect-page/redirect-page.component'
+import { RouterLayoutComponent } from './router-layout/router-layout.component'
 
+const sharedEoLibraryModules = [
+  EoNgButtonModule,
+  EoNgBreadcrumbModule,
+  EoNgLayoutModule,
+  EoNgMenuModule,
+  EoNgSelectModule,
+  EoNgFeedbackAlertModule,
+  EoNgFeedbackModalModule,
+  EoNgFeedbackTooltipModule,
+  EoNgTabsModule,
+  EoNgCheckboxModule,
+  EoNgInputModule,
+  EoNgCascaderModule,
+  EoNgTreeModule,
+  EoNgDropdownModule,
+  EoNgDatePickerModule,
+  EoNgSwitchModule,
+  EoNgCopyModule,
+  EoNgApintoTableModule,
+  EoNgUploadModule,
+  EoNgEmptyModule
+]
 @NgModule({
   declarations: [
     BasicLayoutComponent,
-    LoginComponent,
+    RedirectPage,
     LogoComponent,
-    PasswordComponent,
-    AuthActivationComponent,
-    AuthInfoComponent,
-    AuthUpdateComponent,
-    AuthInfoDetailComponent,
     LocalPluginComponent,
     GuideComponent,
     DynamicDemoComponent,
     SafePipe,
     NotFoundPageComponent,
     IntelligentPluginComponent,
-    RemotePluginComponent
+    RemotePluginComponent,
+    PluginWrapperComponent,
+    SystemWebhookListComponent,
+    SystemEmailConfigComponent,
+    SystemWebhookConfigComponent,
+    RouterLayoutComponent
   ],
   imports: [
     AppRoutingModule,
-    EoNgBreadcrumbModule,
-    EoNgLayoutModule,
-    EoNgMenuModule,
     CommonModule,
-    EoNgSelectModule,
-    NoopAnimationsModule,
     FormsModule,
-    ComponentModule,
-    EoNgTableModule,
-    EoNgFeedbackModalModule,
-    EoNgFeedbackTooltipModule,
-    EoNgTabsModule,
-    EoNgCheckboxModule,
-    NzTableModule,
-    EoNgInputModule,
-    EoNgCascaderModule,
-    EoNgTreeModule,
-    EoNgDropdownModule,
-    EoNgDatePickerModule,
-    EoNgSwitchModule,
-    NzAvatarModule,
-    EoNgButtonModule,
-    NzFormModule,
     ReactiveFormsModule,
-    NzLayoutModule,
-    NzToolTipModule,
-    NzCheckboxModule,
+    ComponentModule,
+    NzAvatarModule,
+    NzFormModule,
     NzGridModule,
-    NzModalModule,
     NzHighlightModule,
-    EoNgCopyModule,
     DirectiveModule,
-    EoNgUploadModule,
     NzUploadModule,
-    EoNgEmptyModule,
     NzDividerModule,
     NzSpinModule,
-    EoNgFeedbackAlertModule
+    ...sharedEoLibraryModules
   ],
   exports: [
-    BasicLayoutComponent
+    BasicLayoutComponent,
+    RedirectPage,
+    SystemEmailConfigComponent,
+    RouterLayoutComponent
   ],
   providers: []
 })

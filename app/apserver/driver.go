@@ -10,7 +10,7 @@ import (
 	dynamic_controller "github.com/eolinker/apinto-dashboard/modules/dynamic/dynamic-controller"
 	email_controller "github.com/eolinker/apinto-dashboard/modules/email/controller"
 	logModule "github.com/eolinker/apinto-dashboard/modules/log/module"
-	module_plugin_controller "github.com/eolinker/apinto-dashboard/modules/module-plugin/controller"
+	module_plugin_controller "github.com/eolinker/apinto-dashboard/modules/mpm3/controller"
 	open_api_controller "github.com/eolinker/apinto-dashboard/modules/openapi/open-api-controller"
 	open_app_controller "github.com/eolinker/apinto-dashboard/modules/openapp/open-app-controller"
 	plugin_controller "github.com/eolinker/apinto-dashboard/modules/plugin/plugin-controller"
@@ -29,7 +29,7 @@ func init() {
 	apintoModule.Register("audit.apinto.com", auditController.NewDriver())
 	apintoModule.Register("cluster.apinto.com", clusterController.NewClusterPlugin())
 	apintoModule.Register("ext_app.apinto.com", open_app_controller.NewPluginDriver())
-	apintoModule.Register("module_plugin.apinto.com", module_plugin_controller.NewModulePlugin())
+	apintoModule.Register("module_plugin.apinto.com", module_plugin_controller.NewDriver())
 	apintoModule.Register("open_api.apinto.com", open_api_controller.NewPluginDriver())
 	apintoModule.Register("plugin.apinto.com", plugin_controller.NewPluginDriver())
 	apintoModule.Register("plugin_template.apinto.com", plugin_template_controller.NewPluginTemplateDriver())
@@ -38,6 +38,7 @@ func init() {
 	apintoModule.Register("strategy-grey.apinto.com", strategy_controller.NewStrategyGrey())
 	apintoModule.Register("strategy-traffic.apinto.com", strategy_controller.NewStrategyTraffic())
 	apintoModule.Register("strategy-visit.apinto.com", strategy_controller.NewStrategyVisit())
+	apintoModule.Register("strategy-data_mask.apinto.com", strategy_controller.NewStrategyDataMask())
 	apintoModule.Register("variable.apinto.com", variable_controller.NewVariableDriver())
 
 	apintoModule.Register("local", local.NewDriver())
@@ -47,9 +48,9 @@ func init() {
 	apintoModule.Register("webhook.apinto.com", webhook_controller.NewWebhookDriver())
 	apintoModule.Register("log.apinto.com", logModule.NewDriver())
 
-	apintoModule.Register("dynamic.apinto.com", dynamic_controller.NewDynamicModuleDriver(false))
-	apintoModule.Register("upstream.apinto.com", dynamic_controller.NewDynamicModuleDriver(false))
-	apintoModule.Register("discovery.apinto.com", dynamic_controller.NewDynamicModuleDriver(false))
+	apintoModule.Register("dynamic.apinto.com", dynamic_controller.NewDynamicModuleDriver())
+	apintoModule.Register("upstream.apinto.com", dynamic_controller.NewDynamicModuleDriver())
+	apintoModule.Register("discovery.apinto.com", dynamic_controller.NewDynamicModuleDriver())
 	//apintoModule.Register("application.apinto.com", dynamic_controller.NewDynamicModuleDriver(true, false, false, false))
 
 }

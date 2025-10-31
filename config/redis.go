@@ -2,6 +2,7 @@ package config
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/eolinker/apinto-dashboard/cache"
@@ -9,12 +10,21 @@ import (
 )
 
 func InitRedis() {
-
-	client := redis.NewClusterClient(&redis.ClusterOptions{
-		Addrs:    getRedisAddr(),
-		Username: getRedisUserName(),
-		Password: getRedisPwd(),
-	})
+	var client redis.UniversalClient
+	switch strings.ToLower(systemConfig.RedisConfig.Cluster) {
+	case "no", "false":
+		client = redis.NewClient(&redis.Options{
+			Addr:     systemConfig.RedisConfig.Addr[0],
+			Username: systemConfig.RedisConfig.UserName,
+			Password: systemConfig.RedisConfig.Password,
+		})
+	default:
+		client = redis.NewClusterClient(&redis.ClusterOptions{
+			Addrs:    systemConfig.RedisConfig.Addr,
+			Username: systemConfig.RedisConfig.UserName,
+			Password: systemConfig.RedisConfig.Password,
+		})
+	}
 
 	timeout, cancelFunc := context.WithTimeout(context.Background(), time.Second)
 	defer cancelFunc()
@@ -23,5 +33,5 @@ func InitRedis() {
 		panic(err)
 	}
 
-	cache.InitCache(client)
+	cache.InitCache(client, systemConfig.RedisConfig.Prefix)
 }

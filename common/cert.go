@@ -5,6 +5,8 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
+	"github.com/tjfoc/gmsm/gmtls"
+	gm_x509 "github.com/tjfoc/gmsm/x509"
 )
 
 func ParseCert(privateKey, pemValue string) (*tls.Certificate, error) {
@@ -49,5 +51,18 @@ func ParseCert(privateKey, pemValue string) (*tls.Certificate, error) {
 		return nil, err
 	}
 	cert.Leaf = x509Cert
+	return &cert, nil
+}
+
+func ParseGMCert(privateKey, pemValue string) (*gmtls.Certificate, error) {
+	cert, err := gmtls.X509KeyPair([]byte(pemValue), []byte(privateKey))
+	if err != nil {
+		return nil, err
+	}
+	cr, err := gm_x509.ParseCertificate(cert.Certificate[0])
+	if err != nil {
+		return nil, err
+	}
+	cert.Leaf = cr
 	return &cert, nil
 }

@@ -8,9 +8,10 @@ import (
 )
 
 func newStrategyTrafficController() *strategyController[strategy_entry.StrategyTrafficLimitConfig, strategy_entry.StrategyTrafficLimitConfig] {
-	strategyService := strategy_service.NewStrategyService(strategy_handler.NewStrategyTrafficHandler("strategy-limiting"), config.StrategyTrafficRuntimeKind)
+	handler := strategy_handler.NewStrategyTrafficHandler("strategy-limiting")
+	strategyService := strategy_service.NewStrategyService(handler, config.StrategyTrafficRuntimeKind)
 
-	c := newStrategyController(strategyService)
+	c := newStrategyController(strategyService, handler.GetType())
 
 	return c
 }

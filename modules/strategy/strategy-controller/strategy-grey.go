@@ -8,8 +8,9 @@ import (
 )
 
 func newStrategyGreyController() *strategyController[strategy_entry.StrategyGreyConfig, strategy_entry.StrategyGreyConfig] {
-	strategyService := strategy_service.NewStrategyService(strategy_handler.NewStrategyGreyHandler("strategy-grey"), config.StrategyGreyRuntimeKind)
+	handler := strategy_handler.NewStrategyGreyHandler("strategy-grey")
+	strategyService := strategy_service.NewStrategyService(handler, config.StrategyGreyRuntimeKind)
 
-	c := newStrategyController(strategyService)
+	c := newStrategyController(strategyService, handler.GetType())
 	return c
 }

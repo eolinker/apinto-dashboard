@@ -7,7 +7,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func VerifyToken(tokenStr string, secret interface{}) (*jwt.Token, error) {
+func VerifyToken(tokenStr string, secret interface{}, options ...jwt.ParserOption) (*jwt.Token, error) {
 
 	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
 
@@ -15,7 +15,7 @@ func VerifyToken(tokenStr string, secret interface{}) (*jwt.Token, error) {
 			return nil, fmt.Errorf("unexpected signing method :%v", token.Header["alg"])
 		}
 		return secret, nil
-	})
+	}, options...)
 
 	if err != nil {
 		return nil, err

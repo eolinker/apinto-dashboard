@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
 	"io"
+	"os"
 	"os/exec"
 )
 
@@ -17,17 +18,17 @@ var (
 	logLevel  hclog.Level
 )
 
-func CreateClient(name string, path string, configs ...string) *plugin.Client {
+func CreateClient(id, name string, path string, configs ...string) *plugin.Client {
 
 	logger := hclog.New(&hclog.LoggerOptions{
-		Name:       fmt.Sprintf("plugin:%s", name),
+		Name:       fmt.Sprintf("plugin:%s", id),
 		Output:     logOutPut,
 		TimeFormat: "[2006-01-02 15:04:05]",
 		Level:      logLevel,
 	})
 
 	cmd := exec.Command(path)
-	cmd.Args[0] = name
+	cmd.Args[0] = fmt.Sprintf("%s:%s", os.Args[0], id)
 	buf := &bytes.Buffer{}
 	json.NewEncoder(buf).Encode(config.GetConfigData())
 
@@ -39,8 +40,9 @@ func CreateClient(name string, path string, configs ...string) *plugin.Client {
 	}
 	// We're a host! Start by launching the plugin process.
 	c := plugin.NewClient(&plugin.ClientConfig{
-		HandshakeConfig:  shared.HandshakeConfig,
-		Plugins:          CreateClientProxy(),
+		HandshakeConfig: shared.HandshakeConfig,
+		Plugins:         CreateClientProxy(id, name),
+
 		Cmd:              cmd,
 		Logger:           logger,
 		AllowedProtocols: []plugin.Protocol{plugin.ProtocolGRPC},

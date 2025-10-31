@@ -2,8 +2,10 @@ package controller
 
 import (
 	"context"
+	"github.com/eolinker/apinto-dashboard/common"
 	apinto_module "github.com/eolinker/apinto-dashboard/module"
 	"github.com/eolinker/apinto-dashboard/modules/api"
+	apimodel "github.com/eolinker/apinto-dashboard/modules/api/model"
 	"github.com/eolinker/eosc/common/bean"
 )
 
@@ -50,7 +52,10 @@ func (f *FilterOption) GetOptions(namespaceId int, keyword, groupUUID string, pa
 	if err != nil {
 		return nil, 0
 	}
-	return list, i
+
+	return common.SliceToSlice(list, func(s *apimodel.ApiOptionItem) any {
+		return s
+	}), i
 }
 
 func (f *FilterOption) Labels(namespaceId int, values ...string) []string {

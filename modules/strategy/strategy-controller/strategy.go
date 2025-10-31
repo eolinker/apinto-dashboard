@@ -6,6 +6,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/controller/users"
+	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/strategy"
 	"github.com/eolinker/apinto-dashboard/modules/strategy/config"
@@ -27,10 +28,11 @@ import (
 
 type strategyController[T any, K any] struct {
 	strategyService strategy.IStrategyService[T, K]
+	strategyType    string
 }
 
-func newStrategyController[T any, K any](strategyService strategy.IStrategyService[T, K]) *strategyController[T, K] {
-	return &strategyController[T, K]{strategyService: strategyService}
+func newStrategyController[T any, K any](strategyService strategy.IStrategyService[T, K], strategyType string) *strategyController[T, K] {
+	return &strategyController[T, K]{strategyService: strategyService, strategyType: strategyType}
 }
 
 func (s *strategyController[T, K]) list(ginCtx *gin.Context) {
@@ -188,6 +190,7 @@ func (s *strategyController[T, K]) del(ginCtx *gin.Context) {
 }
 
 func (s *strategyController[T, K]) restore(ginCtx *gin.Context) {
+	audit_model.LogOperateTypeEdit.Handler(ginCtx)
 	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Query("cluster_name")
 	if clusterName == "" {
@@ -210,19 +213,24 @@ func (s *strategyController[T, K]) restore(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
 }
 
-func (s *strategyController[T, K]) updateStop(ginCtx *gin.Context) {
+func (s *strategyController[T, K]) enable(ginCtx *gin.Context) {
+	s.updateStatus(ginCtx, false)
+}
+
+func (s *strategyController[T, K]) updateStatus(ginCtx *gin.Context, stop bool) {
+	audit_model.LogOperateTypeEdit.Handler(ginCtx)
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	uuid := ginCtx.Query("uuid")
 	clusterName := ginCtx.Query("cluster_name")
 
-	input := new(strategy_dto.StrategyStatusInput)
-	if err := ginCtx.BindJSON(input); err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
-		return
-	}
+	//input := new(strategy_dto.StrategyStatusInput)
+	//if err := ginCtx.BindJSON(input); err != nil {
+	//	controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
+	//	return
+	//}
 
 	userId := users.GetUserId(ginCtx)
-	err := s.strategyService.UpdateStop(ginCtx, namespaceId, userId, uuid, clusterName, input.IsStop)
+	err := s.strategyService.UpdateStop(ginCtx, namespaceId, userId, uuid, clusterName, stop)
 	if err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
@@ -230,7 +238,10 @@ func (s *strategyController[T, K]) updateStop(ginCtx *gin.Context) {
 
 	data := common.Map{}
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
+}
 
+func (s *strategyController[T, K]) disable(ginCtx *gin.Context) {
+	s.updateStatus(ginCtx, true)
 }
 
 func (s *strategyController[T, K]) toPublish(ginCtx *gin.Context) {
@@ -266,6 +277,7 @@ func (s *strategyController[T, K]) toPublish(ginCtx *gin.Context) {
 }
 
 func (s *strategyController[T, K]) publish(ginCtx *gin.Context) {
+	audit_model.LogOperateTypePublish.Handler(ginCtx)
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Query("cluster_name")
 
@@ -276,7 +288,7 @@ func (s *strategyController[T, K]) publish(ginCtx *gin.Context) {
 	}
 
 	userId := users.GetUserId(ginCtx)
-	if err := s.strategyService.Publish(ginCtx, namespaceId, userId, clusterName, input); err != nil {
+	if err := s.strategyService.Publish(ginCtx, namespaceId, userId, clusterName, s.strategyType, input); err != nil {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
@@ -332,6 +344,7 @@ func (s *strategyController[T, K]) publishHistory(ginCtx *gin.Context) {
 }
 
 func (s *strategyController[T, K]) changePriority(ginCtx *gin.Context) {
+	audit_model.LogOperateTypeEdit.Handler(ginCtx)
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Query("cluster_name")
 

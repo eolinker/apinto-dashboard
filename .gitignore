@@ -63,3 +63,4 @@ vender
 /apserver/
 /builds/
 *.tar.gz
+/all/

@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
+
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/modules/application"
 	application_model "github.com/eolinker/apinto-dashboard/modules/application/application-model"
-	"strings"
 )
 
 type Jwt struct {
@@ -26,27 +27,27 @@ type JwtConfig struct {
 	Label             map[string]string `json:"label"`
 }
 
-func (j *Jwt) CheckInput(config []byte) error {
+func (j *Jwt) CheckInput(config []byte) ([]byte, error) {
 
 	jwtConfig := new(JwtConfig)
 	if err := json.Unmarshal(config, jwtConfig); err != nil {
-		return err
+		return nil, err
 	}
 	if jwtConfig.Iss == "" {
-		return errors.New("iss is null")
+		return nil, errors.New("iss is null")
 	}
 	if jwtConfig.Algorithm == "" {
-		return errors.New("algorithm is null")
+		return nil, errors.New("algorithm is null")
 	}
 	algorithm := strings.ToUpper(jwtConfig.Algorithm)
 	switch algorithm {
 	case "HS256", "HS384", "HS512":
 		if jwtConfig.Secret == "" {
-			return errors.New("secret is null")
+			return nil, errors.New("secret is null")
 		}
 	default:
 		if jwtConfig.PublicKey == "" {
-			return errors.New("public_key is null")
+			return nil, errors.New("public_key is null")
 		}
 	}
 
@@ -55,11 +56,11 @@ func (j *Jwt) CheckInput(config []byte) error {
 		switch claim {
 		case "exp", "nbf":
 		default:
-			return fmt.Errorf("claim key %s is illegal. ", claim)
+			return nil, fmt.Errorf("claim key %s is illegal. ", claim)
 		}
 	}
 
-	return nil
+	return config, nil
 }
 
 func (j *Jwt) GetCfgDetails(config []byte) []application_model.AuthDetailItem {

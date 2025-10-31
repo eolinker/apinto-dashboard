@@ -9,8 +9,9 @@ import (
 )
 
 func newStrategyVisitController() *strategyController[strategy_entry.StrategyVisitConfig, strategy_model.VisitInfoOutputConf] {
-	strategyService := strategy_service.NewStrategyService(strategy_handler.NewStrategyVisitHandler("strategy-visit"), config.StrategyVisitRuntimeKind)
+	handler := strategy_handler.NewStrategyVisitHandler("strategy-visit")
+	strategyService := strategy_service.NewStrategyService(handler, config.StrategyVisitRuntimeKind)
 
-	c := newStrategyController(strategyService)
+	c := newStrategyController(strategyService, handler.GetType())
 	return c
 }

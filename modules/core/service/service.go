@@ -2,15 +2,19 @@ package service
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/eolinker/apinto-dashboard/cache"
 	apinto_module "github.com/eolinker/apinto-dashboard/module"
+	"github.com/eolinker/apinto-dashboard/module/builder"
 	"github.com/eolinker/apinto-dashboard/modules/core"
-	"github.com/eolinker/apinto-dashboard/modules/core/controller"
-	module_plugin "github.com/eolinker/apinto-dashboard/modules/module-plugin"
+	"github.com/eolinker/apinto-dashboard/modules/mpm3"
+	"github.com/eolinker/apinto-dashboard/pm3"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
 	"github.com/go-basic/uuid"
+	"github.com/redis/go-redis/v9"
 	"net/http"
 	"sync"
 	"sync/atomic"
@@ -38,64 +42,48 @@ type coreService struct {
 	localVersion   string
 	lock           sync.RWMutex
 
-	modulePluginService module_plugin.IModulePlugin
-	engineCreate        core.EngineCreate
-	providerService     IProviderService
-	modulesData         *tModulesData
-	cacheCommon         cache.ICommonCache
-	once                sync.Once
-
-	coreModule apinto_module.CoreModule
+	pluginService   mpm3.IPluginService
+	engineCreate    core.EngineCreate
+	providerService IProviderService
+	modulesData     *tModulesData
+	cacheCommon     cache.ICommonCache
+	once            sync.Once
 
 	filterOptionHandlerManager apinto_module.IFilterOptionHandlerManager
 }
 
-func (c *coreService) HasModule(module string, path string) bool {
-	if c.modulesData == nil {
-		return false
-	}
-	c.lock.RLock()
-	defer c.lock.RUnlock()
-	_, has := c.modulesData.data[module]
-	return has
-}
-
-func (c *coreService) CheckNewModule(UUID, name, driverName string, define, config interface{}) error {
-	_, err := createModule(driverName, name, define, config)
-	if err != nil {
-		return err
-	}
-	c.lock.Lock()
-	defer c.lock.Unlock()
-
-	ctx := context.Background()
-	modules, err := c.modulePluginService.GetEnabledPlugins(ctx)
-	if err != nil {
-		return err
-	}
-	//builder := apinto_module.NewModuleBuilder(c.engineCreate.CreateEngine())
-	for _, module := range modules {
-		if module.Name == name {
-			if module.UUID == UUID {
-				continue
-			} else {
-				return fmt.Errorf("%w on %s", apinto_module.ErrorModuleNameConflict, module.UUID)
-			}
-		}
-		//m, err := createModule(module.Driver, module.Name, module.Define, module.Config)
-		//if err != nil {
-		//	continue
-		//}
-		//builder.Append(m)
-	}
-	return nil
-	//builder.Append(newModule)
-	//
-	//_, _, err = builder.Build()
-	//return err
-
-}
-func createModule(driverName, name string, define, config interface{}) (apinto_module.Module, error) {
+//	func (c *coreService) CheckPluginConfig(UUID, name, driverName string, define *pm3.PluginDefine, config []byte) error {
+//		newModule, err := createModule(driverName, define, config)
+//		if err != nil {
+//			return err
+//		}
+//		c.lock.Lock()
+//		defer c.lock.Unlock()
+//
+//		ctx := context.Background()
+//		modules, err := c.pluginService.GetPluginConfig(ctx)
+//		if err != nil {
+//			return err
+//		}
+//		builder := builder.NewModuleBuilder(c.engineCreate.CreateEngine())
+//		for _, module := range modules {
+//			if module.UUID == UUID {
+//				continue
+//			}
+//			m, err := createModule(module.Driver, module.Define, module.Config)
+//			if err != nil {
+//				continue
+//			}
+//			builder.Append(m)
+//		}
+//
+//		builder.Append(newModule)
+//
+//		_, _, err = builder.Build()
+//		//return err
+//
+// }
+func createModule(driverName string, define *pm3.PluginDefine, config pm3.PluginConfig) (pm3.Module, error) {
 	driver, has := apinto_module.GetDriver(driverName)
 	if !has {
 
@@ -103,36 +91,26 @@ func createModule(driverName, name string, define, config interface{}) (apinto_m
 		log.Error(err)
 		return nil, err
 	}
-	plugin, err := driver.CreatePlugin(define)
-	if err != nil {
-		err2 := fmt.Errorf("create plugin %s error:%w", name, err)
-		log.Error(err2)
-		return nil, err2
-	}
-	err = plugin.CheckConfig(name, config)
-	if err != nil {
 
-		err2 := fmt.Errorf("plugin module %s config error:%w", name, err)
+	plugin, err := driver.Create(define, config)
+	if err != nil {
+		err2 := fmt.Errorf("create plugin %s error:%w", define.Id, err)
 		log.Error(err2)
 		return nil, err2
 	}
 
-	m, err := plugin.CreateModule(name, config)
-	if err != nil {
-
-		err2 := fmt.Errorf("create module %s  error:%w", name, err)
-		log.Error(err2)
-		return nil, err2
-	}
-	return m, nil
+	return plugin, nil
 }
 func (c *coreService) ResetVersion(version string) {
-	if version == "" {
-		version = uuid.New()
-	}
+
 	c.lock.Lock()
 	defer c.lock.Unlock()
-
+	if version == "" {
+		if c.localVersion != "" {
+			return
+		}
+		version = uuid.New()
+	}
 	err := c.cacheCommon.Set(context.Background(), moduleConfigVersionKey, []byte(version), 0)
 	go c.reloadModule(version)
 	if err != nil {
@@ -154,27 +132,33 @@ func (c *coreService) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (c *coreService) ReloadModule() error {
 	c.once.Do(func() {
-		c.cacheCommon.SetNX(context.Background(), moduleConfigVersionKey, uuid.New(), 0)
 		go c.doLoop()
 	})
 	version, err := c.cacheCommon.Get(context.Background(), moduleConfigVersionKey)
 	if err != nil {
 		log.Errorf("get module config version:%s", err.Error())
-
-		return err
 	}
 
-	return c.reloadModule(string(version))
+	c.ResetVersion(string(version))
+	return nil
 }
 func (c *coreService) doLoop() {
 	tick := time.NewTicker(time.Second * 10)
 	defer tick.Stop()
+	ctx := context.Background()
 	for range tick.C {
-		version, err := c.cacheCommon.Get(context.Background(), moduleConfigVersionKey)
+		timeout, _ := context.WithTimeout(ctx, time.Second)
+		version, err := c.cacheCommon.Get(timeout, moduleConfigVersionKey)
 		if err != nil {
-			log.Errorf("get module config version:%s", err.Error())
+			if errors.Is(err, redis.Nil) {
+				c.ResetVersion("")
+
+			} else {
+				log.Errorf("get module config version:%s", err.Error())
+			}
 			continue
 		}
+
 		c.reloadModule(string(version))
 	}
 
@@ -197,21 +181,25 @@ func (c *coreService) reloadModule(version string) error {
 
 func (c *coreService) rebuild() error {
 	ctx := context.Background()
-	modules, err := c.modulePluginService.GetEnabledPlugins(ctx)
+	plugins, err := c.pluginService.GetEnabled(ctx)
 	if err != nil {
 		return err
 	}
 
 	modulesData := newTModulesData()
-	builder := apinto_module.NewModuleBuilder(c.engineCreate.CreateEngine(), c.filterOptionHandlerManager)
-	for _, module := range modules {
-		m, err := createModule(module.Driver, module.Name, module.Define, module.Config)
+	builder := builder.NewModuleBuilder(c.engineCreate.CreateEngine(), c.filterOptionHandlerManager)
+	for _, module := range plugins {
+		var cf pm3.PluginConfig
+		if len(module.Config) > 0 {
+			json.Unmarshal(module.Config, &cf)
+		}
+		m, err := createModule(module.Driver, module.Define, cf)
 		if err != nil {
-			log.Errorf("create module %s  error:%s", module.Name, err.Error())
+			log.Errorf("create module %s  error:%s", module.Define.Id, err.Error())
 			continue
 		}
 
-		modulesData.data[module.Name] = m
+		modulesData.data[module.UUID] = m
 		builder.Append(m)
 	}
 
@@ -239,11 +227,10 @@ func NewService(providerService IProviderService) core.ICore {
 
 	c := &coreService{
 		providerService: providerService,
-		coreModule:      controller.NewModule(),
 	}
-	apinto_module.AddSystemModule(c.coreModule)
+
 	bean.Autowired(&c.filterOptionHandlerManager)
-	bean.Autowired(&c.modulePluginService)
+	bean.Autowired(&c.pluginService)
 	bean.Autowired(&c.engineCreate)
 	bean.Autowired(&c.cacheCommon)
 

@@ -2,7 +2,7 @@ package cache
 
 import (
 	"context"
-	"strings"
+	"fmt"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -23,7 +23,7 @@ type ICommonCache interface {
 
 	SetNX(ctx context.Context, key string, val interface{}, expiration time.Duration) (bool, error)
 
-	clone(prefix ...string) ICommonCache
+	clone() ICommonCache
 }
 
 type commonCache struct {
@@ -31,44 +31,40 @@ type commonCache struct {
 	keyPrefix string
 }
 
-func (c *commonCache) clone(prefix ...string) ICommonCache {
-	pv := c.keyPrefix
-	if len(prefix) > 0 {
-		pv = prefix[0]
-	}
+func (c *commonCache) clone() ICommonCache {
+
 	return &commonCache{
 		client:    c.client,
-		keyPrefix: pv,
+		keyPrefix: c.keyPrefix,
 	}
 }
 
-func newCommonCache(client redis.UniversalClient, prefix ...string) ICommonCache {
-	keyPrefix := "apinto-dashboard:"
-	if len(prefix) > 0 {
-		keyPrefix = strings.Join(prefix, ":") + ":"
-	}
-	return &commonCache{client: client, keyPrefix: keyPrefix}
+func newCommonCache(client redis.UniversalClient, namespace string) ICommonCache {
+
+	return &commonCache{client: client, keyPrefix: namespace}
 }
 
 func (c *commonCache) Get(ctx context.Context, key string) ([]byte, error) {
-	return c.client.Get(ctx, c.keyPrefix+key).Bytes()
+	return c.client.Get(ctx, c.key(key)).Bytes()
 }
 
 func (c *commonCache) Set(ctx context.Context, key string, val []byte, expiration time.Duration) error {
-	return c.client.Set(ctx, c.keyPrefix+key, val, expiration).Err()
+	return c.client.Set(ctx, c.key(key), val, expiration).Err()
 }
 
 func (c *commonCache) Incr(ctx context.Context, key string, expiration time.Duration) error {
-	redisKey := c.keyPrefix + key
+	redisKey := c.key(key)
 	err := c.client.Incr(ctx, redisKey).Err()
 	if err != nil {
 		return err
 	}
 	return c.client.Expire(ctx, redisKey, expiration).Err()
 }
-
+func (c *commonCache) key(v string) string {
+	return fmt.Sprint(c.keyPrefix, v)
+}
 func (c *commonCache) IncrBy(ctx context.Context, key string, val int64, expiration time.Duration) error {
-	redisKey := c.keyPrefix + key
+	redisKey := c.key(key)
 	err := c.client.IncrBy(ctx, redisKey, val).Err()
 	if err != nil {
 		return err
@@ -77,13 +73,13 @@ func (c *commonCache) IncrBy(ctx context.Context, key string, val int64, expirat
 }
 
 func (c *commonCache) GetInt(ctx context.Context, key string) (int64, error) {
-	redisKey := c.keyPrefix + key
+	redisKey := c.key(key)
 	return c.client.Get(ctx, redisKey).Int64()
 }
 
 func (c *commonCache) Del(ctx context.Context, keys ...string) error {
 	for _, key := range keys {
-		if err := c.client.Del(ctx, c.keyPrefix+key).Err(); err != nil {
+		if err := c.client.Del(ctx, c.key(key)).Err(); err != nil {
 			return err
 		}
 	}
@@ -95,21 +91,21 @@ func (c *commonCache) HMSet(ctx context.Context, key string, value map[string][]
 	for k, val := range value {
 		values = append(values, k, val)
 	}
-	if err := c.client.HMSet(ctx, c.keyPrefix+key, values...).Err(); err != nil {
+	if err := c.client.HMSet(ctx, c.key(key), values...).Err(); err != nil {
 		return err
 	}
-	c.client.Expire(ctx, c.keyPrefix+key, expiration)
+	c.client.Expire(ctx, c.key(key), expiration)
 	return nil
 }
 
 func (c *commonCache) HDel(ctx context.Context, key string, fields ...string) error {
-	return c.client.HDel(ctx, c.keyPrefix+key, fields...).Err()
+	return c.client.HDel(ctx, c.key(key), fields...).Err()
 }
 
 func (c *commonCache) HGetAll(ctx context.Context, key string) (map[string]string, error) {
-	return c.client.HGetAll(ctx, c.keyPrefix+key).Result()
+	return c.client.HGetAll(ctx, c.key(key)).Result()
 }
 
 func (c *commonCache) SetNX(ctx context.Context, key string, val interface{}, expiration time.Duration) (bool, error) {
-	return c.client.SetNX(ctx, c.keyPrefix+key, val, expiration).Result()
+	return c.client.SetNX(ctx, c.key(key), val, expiration).Result()
 }

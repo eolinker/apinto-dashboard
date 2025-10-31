@@ -473,6 +473,29 @@ type ApplicationAuthJwtConfig struct {
 	Path              string   `json:"path"`                 //获取用户信息字段
 }
 
+type ApplicationAuthUserOauth2Pattern struct {
+	ClientId     string   `json:"client_id"`
+	ClientSecret string   `json:"client_secret"`
+	ClientType   string   `json:"client_type"`
+	HashSecret   bool     `json:"hash_secret"`
+	RedirectUrls []string `json:"redirect_urls" label:"重定向URL"`
+}
+
+type ApplicationAuthOpenIDConnectConfig struct {
+	Issuer                   string   `json:"issuer"`
+	AuthenticatedGroupsClaim []string `json:"authenticated_groups_claim"`
+}
+
+type ApplicationAuthParaHmacConfig struct {
+	ApplicationAuthUserParaHmacPattern
+	Expire int64 `json:"expire"`
+}
+
+type ApplicationAuthUserParaHmacPattern struct {
+	AppId  string `json:"app_id"`
+	AppKey string `json:"app_key"`
+}
+
 //type StrategyInfo struct {
 //	Name     string              `json:"name"`
 //	Stop     bool                `json:"stop"`
@@ -510,6 +533,27 @@ type StrategyVisit struct {
 	Continue        bool                `json:"continue"`
 }
 
+type StrategyDataMask struct {
+	Rules []*DataMaskRule `json:"rules"`
+}
+
+type DataMaskRule struct {
+	Match *DataMaskBasicItem `json:"match"`
+	Mask  *DataMaskMask      `json:"mask"`
+}
+
+type DataMaskBasicItem struct {
+	Type  string `json:"type"`
+	Value string `json:"value"`
+}
+
+type DataMaskMask struct {
+	Type    string             `json:"type"`
+	Begin   int                `json:"begin"`
+	Length  int                `json:"length"`
+	Replace *DataMaskBasicItem `json:"replace"`
+}
+
 // RedisOutput Redis配置
 type RedisOutput struct {
 	OutputConfig
@@ -533,6 +577,16 @@ type CertConfig struct {
 	Key    string `json:"key"`
 	Pem    string `json:"pem"`
 	Driver string `json:"driver"`
+}
+
+type GMCertConfig struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Driver      string `json:"driver"`
+	SignKey     string `json:"sign_key"`
+	SignCert    string `json:"sign_cert"`
+	EncKey      string `json:"enc_key"`
+	EncCert     string `json:"enc_cert"`
 }
 
 type ExtenderListItem struct {

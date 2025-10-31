@@ -2,73 +2,64 @@ package controller
 
 import (
 	"github.com/eolinker/apinto-dashboard/module"
+	"github.com/eolinker/apinto-dashboard/pm3"
 	"net/http"
 )
 
 type webhookDriver struct {
 }
 
+func (c *webhookDriver) Install(info *pm3.PluginDefine) (ms []pm3.PModule, acs []pm3.PAccess, fs []pm3.PFrontend, err error) {
+	return pm3.ReadPluginAssembly(info)
+}
+
+func (c *webhookDriver) Create(info *pm3.PluginDefine, config pm3.PluginConfig) (pm3.Module, error) {
+	return NewWebhookModule(info.Id, info.Name), nil
+}
+
 func NewWebhookDriver() apinto_module.Driver {
 	return &webhookDriver{}
 }
 
-func (c *webhookDriver) CreateModule(name string, config interface{}) (apinto_module.Module, error) {
-	return NewWebhookModule(name), nil
-}
-
-func (c *webhookDriver) CheckConfig(name string, config interface{}) error {
-	return nil
-}
-
-func (c *webhookDriver) CreatePlugin(define interface{}) (apinto_module.Plugin, error) {
-	return c, nil
-}
-
-func (c *webhookDriver) GetPluginFrontend(moduleName string) string {
-	return "system/webhook"
-}
-
-func (c *webhookDriver) IsPluginVisible() bool {
-	return true
-}
-
-func (c *webhookDriver) IsShowServer() bool {
-	return false
-}
-
-func (c *webhookDriver) IsCanUninstall() bool {
-	return false
-}
-
-func (c *webhookDriver) IsCanDisable() bool {
-	return true
-}
+//func (c *webhookDriver) GetPluginFrontend(moduleName string) string {
+//	return "system/webhook"
+//}
 
 type webhookModule struct {
+	*pm3.ModuleTool
+
 	isInit  bool
 	name    string
 	routers apinto_module.RoutersInfo
+}
+
+func (c *webhookModule) Frontend() []pm3.FrontendAsset {
+	return nil
+}
+
+func (c *webhookModule) Apis() []pm3.Api {
+
+	return c.routers
+}
+
+func (c *webhookModule) Middleware() []pm3.Middleware {
+	return nil
 }
 
 func (c *webhookModule) Name() string {
 	return c.name
 }
 
-func (c *webhookModule) Support() (apinto_module.ProviderSupport, bool) {
+func (c *webhookModule) Support() (pm3.ProviderSupport, bool) {
 	return nil, false
 }
 
-func (c *webhookModule) Routers() (apinto_module.Routers, bool) {
-	return c, true
-}
+func NewWebhookModule(id, name string) apinto_module.Module {
 
-func (c *webhookModule) Middleware() (apinto_module.Middleware, bool) {
-	return nil, false
-}
-
-func NewWebhookModule(name string) apinto_module.Module {
-
-	return &webhookModule{name: name}
+	m := &webhookModule{ModuleTool: pm3.NewModuleTool(id, name),
+		name: name}
+	m.initRouter()
+	return m
 }
 
 func (c *webhookModule) RoutersInfo() apinto_module.RoutersInfo {
@@ -84,34 +75,36 @@ func (c *webhookModule) initRouter() {
 
 	c.routers = []apinto_module.RouterInfo{
 		{
-			Method:      http.MethodGet,
-			Path:        "/api/webhooks",
-			Handler:     "webhook.getList",
-			HandlerFunc: []apinto_module.HandlerFunc{webhookCtl.webhooks},
+			Method: http.MethodGet,
+			Path:   "/api/webhooks",
+
+			HandlerFunc: webhookCtl.webhooks,
 		},
 		{
-			Method:      http.MethodGet,
-			Path:        "/api/webhook",
-			Handler:     "webhook.getInfo",
-			HandlerFunc: []apinto_module.HandlerFunc{webhookCtl.webhook},
+			Method: http.MethodGet,
+			Path:   "/api/webhook",
+
+			HandlerFunc: webhookCtl.webhook,
 		},
 		{
-			Method:      http.MethodPost,
-			Path:        "/api/webhook",
-			Handler:     "webhook.createWebhook",
-			HandlerFunc: []apinto_module.HandlerFunc{webhookCtl.createWebhook},
+			Method: http.MethodPost,
+			Path:   "/api/webhook",
+
+			HandlerFunc: webhookCtl.createWebhook,
 		},
 		{
-			Method:      http.MethodPut,
-			Path:        "/api/webhook",
-			Handler:     "webhook.alterWebhook",
-			HandlerFunc: []apinto_module.HandlerFunc{webhookCtl.updateWebhook},
+			Method: http.MethodPut,
+			Path:   "/api/webhook",
+
+			HandlerFunc: webhookCtl.updateWebhook,
 		},
 		{
-			Method:      http.MethodDelete,
-			Path:        "/api/webhook",
-			Handler:     "webhook.alterWebhook",
-			HandlerFunc: []apinto_module.HandlerFunc{webhookCtl.delWebhook},
+			Method: http.MethodDelete,
+			Path:   "/api/webhook",
+
+			HandlerFunc: webhookCtl.delWebhook,
 		},
 	}
+	c.InitAccess(c.routers)
+
 }

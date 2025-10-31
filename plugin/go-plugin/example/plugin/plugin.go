@@ -1,35 +1,45 @@
 package main
 
 import (
-	"context"
-	module "github.com/eolinker/apinto-dashboard/module"
-	"github.com/eolinker/apinto-dashboard/plugin/go-plugin/plugin"
-	"github.com/gin-gonic/gin"
+	"github.com/eolinker/apinto-dashboard/plugin/go-plugin/shared"
+	"github.com/eolinker/apinto-dashboard/pm3"
+	"net/http"
 )
 
-func main() {
+type Plugin struct {
+	frontends   []pm3.FrontendAsset
+	apis        []pm3.Api
+	middlewares []shared.Middleware
+}
 
-	engine := plugin.Engine()
-	engine.Any("/*all", func(ginCtx *gin.Context) {
+func NewPlugin() *Plugin {
+	service := Service{}
 
-		ginCtx.JSON(200, map[string]interface{}{
-			"path":    ginCtx.FullPath(),
-			"url":     ginCtx.Request.URL.String(),
-			"method":  ginCtx.Request.Method,
-			"keys":    ginCtx.Keys,
-			"headers": ginCtx.Request.Header,
-		})
+	apis := make([]pm3.Api, 0)
+	apis = append(apis, pm3.Api{
+
+		Authority: pm3.Public,
+		Access:    "test.test.test",
+		Method:    http.MethodPost,
+		Path:      "/api/myservice/{id}",
+
+		HandlerFunc: service.Test,
 	})
-	ps := plugin.NewPlugin(engine.Handler())
-	ps.AddMiddleware("test",
-		plugin.ProcessRequestBy(func(ctx context.Context, request *module.MiddlewareRequest, writer module.MiddlewareResponseWriter) {
-			writer.AddHeader("test", "test")
-			writer.Set("test", "test")
 
-		}),
-		plugin.ProcessResponseBy(func(ctx context.Context, request *module.MiddlewareRequest, writer module.MiddlewareResponseWriter) {
+	return &Plugin{
+		apis: apis,
+	}
+}
 
-		}))
-	ps.Server()
+func (p *Plugin) Frontend() []pm3.FrontendAsset {
+	return []pm3.FrontendAsset{}
+}
 
+func (p *Plugin) Apis() []pm3.Api {
+	return p.apis
+}
+
+func (p *Plugin) Middleware() []shared.Middleware {
+	//TODO implement me
+	panic("implement me")
 }

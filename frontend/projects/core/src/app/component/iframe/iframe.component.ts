@@ -6,6 +6,7 @@ import { ApiService } from '../../service/api.service'
 import { BaseInfoService } from '../../service/base-info.service'
 import { EoNgNavigationService } from '../../service/eo-ng-navigation.service'
 import { IframeHttpService } from '../../service/iframe-http.service'
+import { underline } from '../../service/http-interceptors/error.interceptor'
 
 @Component({
   selector: 'eo-ng-iframe',
@@ -97,9 +98,9 @@ export class EoIframeComponent implements OnInit {
         const args = event.data.data
         const result = await handler(...args)
         try {
-          result.data = this.api.underline('', result.data)
+          result.data = underline(result.data)
         } catch {
-          console.warn('转化接口数据命名法出现问题')
+          console.warn(' 转化接口数据命名法出现问题')
         }
         ;(this.iframe as any).contentWindow.postMessage({
           requestId: event.data.requestId,
@@ -146,7 +147,7 @@ export class EoIframeComponent implements OnInit {
         data: {
           userId: this.navigation.getUserId(),
           userRoleId: this.navigation.getUserRoleId(),
-          userModuleAccess: this.navigation.accessMap.get(this.moduleName)
+          userModuleAccess: this.navigation.getUserModuleAccess(this.moduleName)
         }
       }, '*')
       window.addEventListener('message', this.listenMessage)
@@ -180,7 +181,7 @@ export class EoIframeComponent implements OnInit {
        data: {
          userId: this.navigation.getUserId(),
          userRoleId: this.navigation.getUserRoleId(),
-         userModuleAccess: this.navigation.accessMap.get(this.moduleName),
+         userModuleAccess: this.navigation.getUserModuleAccess(this.moduleName),
          ...initData
        }
      }, '*')
@@ -222,7 +223,7 @@ export class EoIframeComponent implements OnInit {
 
  testIframe1 () {
    this.iframeService.apinto2PluginApi.chooseEnvVar().then((resp) => {
-     console.log(resp)
+     // console.log(resp)
    })
  }
 }

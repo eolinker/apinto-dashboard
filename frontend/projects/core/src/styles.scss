@@ -876,3 +876,91 @@ eo-ng-codebox div.nz-resizable {
   height: 0px !important;
   min-height: 0;
 }
+
+//TODO 动态表单的代码，不写在这里的话应用鉴权里的样式会丢失，暂时找不到原因，后续可以优化组件
+dynamic-component {
+  .ant-input {
+    width: 367px;
+  }
+
+  eo-ng-counter eo-ng-button-group .ant-input-number {
+    width: 234px !important;
+    border-color: var(--border-color);
+  }
+
+  > div > section:last-child nz-space div .ant-input.w131 {
+    width: 164px !important;
+  }
+
+  > div
+    > section:last-child
+    nz-space
+    div:first-child
+    .ant-input:not(.ant-checkbox-input):not(.w131):not(.w206):not(.w240):not(
+      .w286
+    ):not(.ant-select-selection-search-input) {
+    width: 174px !important;
+  }
+
+  > div
+    > section:last-child
+    nz-space
+    div:first-child
+    .ant-input.w286px:not(.ant-checkbox-input):not(.w131):not(.w206):not(
+      .w240
+    ):not(.w286):not(.ant-select-selection-search-input) {
+    width: 286px !important;
+  }
+
+  section.dynamic_inline_block:last-child {
+    border-color: var(--BORDER);
+    color: var(--BORDER);
+  }
+
+  .dynamic_inline_block nz-space:nth-child(3) {
+    color: blue;
+    a.array_item_addition.ml-btnbase {
+      margin-left: 0px !important;
+    }
+  }
+
+  .dynamic_inline_block {
+    display: flex;
+    flex-flow: row nowrap;
+    .ant-input,
+    .ant-select {
+      width: 346px;
+    }
+  }
+
+  section.dynamic_inline_block:not(last-child) {
+    width: 100%;
+  }
+
+  section > div a {
+    display: inline-block;
+    height: 32px;
+    line-height: 32px;
+    span {
+      height: 32px;
+      line-height: 32px;
+    }
+  }
+
+  .margin-dynamic-row {
+    height: 12px;
+  }
+
+  .ant-form-item-extra {
+    min-height: 16px;
+  }
+
+  .ant-form-item-extra + .margin-dynamic-row {
+    height: 0px;
+  }
+
+  .error-input > .ant-input {
+    border-color: rgb(255, 60, 50);
+    color: rgb(255, 60, 50);
+  }
+}

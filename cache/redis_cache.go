@@ -4,14 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/eolinker/eosc/common/bean"
-	"strings"
 	"time"
 )
 
 type IRedisCache[T any, K comparable] interface {
 	Get(ctx context.Context, k K) (*T, error)
 	Set(ctx context.Context, k K, t *T) error
-
 	Delete(ctx context.Context, keys ...K) error
 }
 
@@ -22,14 +20,16 @@ type IRedisCacheSingleton[T any] interface {
 }
 
 type IRedisCacheNoKey[T any] interface {
-	SetAll(ctx context.Context, t []*T) error
-	GetAll(ctx context.Context) ([]*T, error)
+	SetAll(ctx context.Context, t []T) error
+	GetAll(ctx context.Context) ([]T, error)
+	Delete(ctx context.Context) error
 }
 type redisCache[T any, K comparable] struct {
 	client        ICommonCache
 	formatHandler func(K) string
 	expiration    time.Duration
 }
+
 type redisCacheSingleton[T any] struct {
 	base IRedisCache[T, string]
 	key  string
@@ -51,6 +51,10 @@ type redisCacheNoKey[T any] struct {
 	client     ICommonCache
 	key        string
 	expiration time.Duration
+}
+
+func (r *redisCacheNoKey[T]) Delete(ctx context.Context) error {
+	return r.client.Del(ctx, r.key)
 }
 
 func (r *redisCache[T, K]) Get(ctx context.Context, k K) (*T, error) {
@@ -88,7 +92,7 @@ func (r *redisCache[T, K]) Delete(ctx context.Context, ks ...K) error {
 	return nil
 }
 
-func (r *redisCacheNoKey[T]) GetAll(ctx context.Context) ([]*T, error) {
+func (r *redisCacheNoKey[T]) GetAll(ctx context.Context) ([]T, error) {
 
 	bytes, err := r.client.Get(ctx, r.key)
 	if err != nil {
@@ -99,7 +103,7 @@ func (r *redisCacheNoKey[T]) GetAll(ctx context.Context) ([]*T, error) {
 
 }
 
-func (r *redisCacheNoKey[T]) SetAll(ctx context.Context, t []*T) error {
+func (r *redisCacheNoKey[T]) SetAll(ctx context.Context, t []T) error {
 
 	bytes, err := structToBytesAll(t)
 	if err != nil {
@@ -108,11 +112,9 @@ func (r *redisCacheNoKey[T]) SetAll(ctx context.Context, t []*T) error {
 
 	return r.client.Set(ctx, r.key, bytes, r.expiration)
 }
-func CreateRedisCacheNoKey[T any](expiration time.Duration, key string, prefix ...string) IRedisCacheNoKey[T] {
-	keyPrefix := "apinto-dashboard:"
-	if len(key) > 0 {
-		keyPrefix = strings.Join(prefix, ":") + ":"
-	}
+
+func CreateRedisCacheNoKey[T any](expiration time.Duration, key string) IRedisCacheNoKey[T] {
+
 	r := &redisCacheNoKey[T]{
 		key:        key,
 		expiration: expiration,
@@ -121,16 +123,13 @@ func CreateRedisCacheNoKey[T any](expiration time.Duration, key string, prefix .
 
 	bean.Autowired(&c)
 	bean.AddInitializingBeanFunc(func() {
-		r.client = c.clone(keyPrefix)
+		r.client = c.clone()
 	})
 	return r
 }
 
-func CreateRedisCache[T any, K comparable](expiration time.Duration, format func(k K) string, key ...string) IRedisCache[T, K] {
-	keyPrefix := "apinto-dashboard:"
-	if len(key) > 0 {
-		keyPrefix = strings.Join(key, ":") + ":"
-	}
+func CreateRedisCache[T any, K comparable](expiration time.Duration, format func(k K) string) IRedisCache[T, K] {
+
 	r := &redisCache[T, K]{
 		formatHandler: format,
 		expiration:    expiration,
@@ -139,7 +138,7 @@ func CreateRedisCache[T any, K comparable](expiration time.Duration, format func
 
 	bean.Autowired(&c)
 	bean.AddInitializingBeanFunc(func() {
-		r.client = c.clone(keyPrefix)
+		r.client = c.clone()
 	})
 	return r
 }
@@ -173,7 +172,7 @@ func (r *redisCache[T, K]) toMyStruct(bytes []byte) (*T, error) {
 	return t, nil
 }
 
-func structToBytesAll[T any](t []*T) ([]byte, error) {
+func structToBytesAll[T any](t []T) ([]byte, error) {
 
 	bytes, err := json.Marshal(t)
 	if err != nil {
@@ -184,9 +183,9 @@ func structToBytesAll[T any](t []*T) ([]byte, error) {
 
 }
 
-func toMyStructAll[T any](bytes []byte) ([]*T, error) {
+func toMyStructAll[T any](bytes []byte) ([]T, error) {
 
-	t := make([]*T, 0)
+	t := make([]T, 0)
 	err := json.Unmarshal(bytes, &t)
 	if err != nil {
 		return nil, err

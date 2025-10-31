@@ -4,7 +4,7 @@
 # Description: common variables & functions.
 # ===========================================================================
 
-set -e
+#set -e
 
 # Global variables
 RED='\033[0;31m'

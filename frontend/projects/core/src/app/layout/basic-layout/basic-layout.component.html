@@ -11,12 +11,8 @@
     <div class="logo">
       <img
         [ngClass]="{ 'h-[32px]': isBusiness, 'h-[26px]': !isBusiness }"
-        [src]="
-          isBusiness
-            ? '../../../assets/apinto-pro.svg'
-            : '../../../assets/apinto.svg'
-        "
-        [alt]="isBusiness ? 'apinto-pro' : 'apinto'"
+        src="/logo.png"
+        alt="logo"
       />
       <a
         *ngIf="!isBusiness"
@@ -40,21 +36,7 @@
         <a (click)="clickIframeBreadcrumb(url)">{{ title }}</a>
       </ng-template>
       <div>
-        <button
-          *ngIf="showAuthBtn()"
-          nzType="primary"
-          [nzDanger]="true"
-          eo-ng-button
-          class="mr-btnbase"
-          (click)="goToAuth()"
-          eoNgFeedbackTooltip
-          [nzTooltipTitle]="btnTooltip"
-          nzTooltipPlacement="bottom"
-          [nzTooltipVisible]="false"
-          nzTooltipTrigger="hover"
-        >
-          {{ btnLabel }}
-        </button>
+        <ng-container #authButton> </ng-container>
         <button
           *ngIf="!isBusiness"
           nzType="primary"
@@ -64,13 +46,17 @@
         >
           试用企业版
         </button>
-        <button eo-ng-button class="mr-btnrbase" (click)="goToHelp()">
+        <button
+          *ngIf="showGuide"
+          eo-ng-button
+          class="mr-btnrbase"
+          (click)="goToHelp()"
+        >
           帮助文档
         </button>
-
-        <eo-ng-apinto-user-avatar
-          class="avatar mg-top-right"
-        ></eo-ng-apinto-user-avatar>
+        <span class="inline-flex">
+          <ng-container #topContainer> </ng-container>
+        </span>
       </div>
     </div>
   </eo-ng-header>

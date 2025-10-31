@@ -14,6 +14,14 @@ type GlobalVariableListItem struct {
 	OperatorStr string
 }
 
+func (g *GlobalVariableListItem) UserId() int {
+	return g.Variables.Operator
+}
+
+func (g *GlobalVariableListItem) Set(name string) {
+	g.OperatorStr = name
+}
+
 type GlobalVariableDetails struct {
 	*variable_entry.ClusterVariable
 	Status      int

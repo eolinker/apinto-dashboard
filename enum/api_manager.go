@@ -9,6 +9,7 @@ const (
 	MatchPositionHeader = "header"
 	MatchPositionQuery  = "query"
 	MatchPositionCookie = "cookie"
+	MatchPositionBody   = "body"
 
 	MatchTypeEqual   = "EQUAL"   //全等匹配
 	MatchTypePrefix  = "PREFIX"  //前缀匹配

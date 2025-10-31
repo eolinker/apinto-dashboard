@@ -22,3 +22,25 @@ func (*ClusterCertificate) TableName() string {
 func (c *ClusterCertificate) IdValue() int {
 	return c.Id
 }
+
+type ClusterGMCertificate struct {
+	Id          int       `gorm:"type:int(11);size:11;not null;auto_increment;primary_key;column:id;comment:证书ID"`
+	Uuid        string    `gorm:"size:36;not null;column:uuid;uniqueIndex:uuid;comment:uuid"`
+	ClusterId   int       `gorm:"type:int(11);size:11;not null;index:cluster;column:cluster;comment:集群ID"`
+	NamespaceId int       `gorm:"type:int(11);size:11;not null;column:namespace;comment:工作空间"`
+	Operator    int       `gorm:"type:int(11);size:11;default:null;column:operator;comment:更新人/操作人"`
+	SignKey     string    `gorm:"type:text;not null;column:sign_key"`
+	SignCert    string    `gorm:"type:text;not null;column:sign_cert"`
+	EncKey      string    `gorm:"type:text;not null;column:enc_key"`
+	EncCert     string    `gorm:"type:text;not null;column:enc_cert"`
+	CreateTime  time.Time `gorm:"type:timestamp;NOT NULL;DEFAULT:CURRENT_TIMESTAMP;column:create_time;comment:创建时间"`
+	UpdateTime  time.Time `gorm:"type:timestamp;NOT NULL;DEFAULT:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;column:update_time;comment:修改时间"`
+}
+
+func (*ClusterGMCertificate) TableName() string {
+	return "cluster_gm_certificate"
+}
+
+func (c *ClusterGMCertificate) IdValue() int {
+	return c.Id
+}

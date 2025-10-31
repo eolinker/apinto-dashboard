@@ -28,11 +28,19 @@
   </eo-ng-apinto-table>
   <div
     class="ant-form-item-explain"
-    *ngIf="filterTableTip && (!filterTableTipShowFn || filterTableTipShowFn())"
+    *ngIf="filterTableTip && (!filterTableTipShowFn || filterTableTipShowFn()) && type !== 'apiVisit'"
   >
     <div role="alert" class="ant-form-item-explain-error">
       {{ filterTableTip }}
     </div>
+  </div>
+</div>
+<div
+  class="ant-form-item-explain"
+  *ngIf="filterTableTip && (!filterTableTipShowFn || filterTableTipShowFn()) && type === 'apiVisit'"
+>
+  <div role="alert" class="ant-form-item-explain-error">
+    {{ filterTableTip }}
   </div>
 </div>
 <ng-template #filterContentTpl let-data>
@@ -40,6 +48,7 @@
     [(filterForm)]="filterForm"
     [(filterType)]="filterType"
     [(remoteSelectList)]="remoteSelectList"
+    [type]="type"
     [(remoteSelectNameList)]="remoteSelectNameList"
     [(staticsList)]="staticsList"
     [filterNamesSet]="filterNamesSet"
@@ -60,4 +69,7 @@
     [remoteSelectNameList]="remoteSelectNameList"
     (drawerClose)="drawerClose($event)"
   ></eo-ng-filter-footer>
+</ng-template>
+<ng-template #labelRender let-item="item">
+  <div class="label-content">{{ item.label || '' }}</div>
 </ng-template>

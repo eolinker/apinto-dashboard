@@ -14,7 +14,9 @@ module.exports = {
     'no-unused-vars': 'off',
     '@typescript-eslint/no-unused-vars': 2,
     'no-useless-constructor': 'off',
-    '@typescript-eslint/no-useless-constructor': 'warn'
+    '@typescript-eslint/no-useless-constructor': 'warn',
+    '@typescript-eslint/no-string-literal': 'off',
+    '@typescript-eslint/dot-notation': 'off'
   },
   globals: {
     angular: true,

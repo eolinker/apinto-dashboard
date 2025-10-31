@@ -56,6 +56,7 @@ type BasicInfo struct {
 	Profession  string `json:"profession"`
 	Id          string `json:"id"`
 	Name        string `json:"name"`
+	Title       string `json:"title"`
 	Driver      string `json:"driver"`
 	Description string `json:"description"`
 	Version     string `json:"version"`

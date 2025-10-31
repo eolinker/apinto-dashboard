@@ -13,6 +13,7 @@ import (
 
 	status_code "github.com/eolinker/apinto-dashboard/modules/api/status-code"
 	dynamic_model "github.com/eolinker/apinto-dashboard/modules/dynamic/dynamic-model"
+	"github.com/eolinker/apinto-dashboard/pm3"
 
 	v2 "github.com/eolinker/apinto-dashboard/client/v2"
 	apinto_module "github.com/eolinker/apinto-dashboard/module"
@@ -41,7 +42,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/openapp"
 	"github.com/eolinker/apinto-dashboard/modules/openapp/open-app-model"
 	"github.com/eolinker/apinto-dashboard/modules/plugin_template"
-	"github.com/eolinker/apinto-dashboard/modules/strategy/strategy-model"
 	"github.com/eolinker/apinto-dashboard/modules/user"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
@@ -318,6 +318,14 @@ func (a *apiService) GetAPIList(ctx context.Context, namespaceID int, groupUUID,
 				Status: status,
 			})
 		}
+
+		protocols := strings.ToUpper(strings.Join(version.Protocols, ","))
+		if protocols == "" {
+			protocols = "HTTP,HTTPS "
+		}
+		if api.Scheme == "websocket" {
+			protocols = "Websocket"
+		}
 		item := &apimodel.APIListItem{
 			GroupUUID:   api.GroupUUID,
 			APIUUID:     api.UUID,
@@ -328,7 +336,7 @@ func (a *apiService) GetAPIList(ctx context.Context, namespaceID int, groupUUID,
 			Source:      source,
 			UpdateTime:  api.UpdateTime,
 			IsDelete:    !isOnline,
-			Scheme:      api.Scheme,
+			Scheme:      protocols,
 			Publish:     publish,
 			IsDisable:   api.IsDisable,
 		}
@@ -602,7 +610,6 @@ func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator in
 			IsDisable:        input.IsDisable,
 			RequestPath:      input.RequestPath,
 			RequestPathLabel: input.RequestPathLabel,
-			Hosts:            strings.Join(input.Hosts, ","),
 			SourceType:       enum.SourceSelfBuild,
 			SourceID:         -1,
 			SourceLabel:      "",
@@ -611,6 +618,8 @@ func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator in
 			Operator:         operator,
 			CreateTime:       t,
 			UpdateTime:       t,
+			Hosts:            strings.Join(input.Hosts, ","),
+			Protocols:        strings.Join(input.Protocols, ","),
 		}
 	} else {
 		apiInfo.GroupUUID = input.GroupUUID
@@ -623,13 +632,22 @@ func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator in
 		apiInfo.Desc = input.Desc
 		apiInfo.Operator = operator
 		apiInfo.UpdateTime = t
+		apiInfo.Hosts = strings.Join(input.Hosts, ",")
+		apiInfo.Protocols = strings.Join(input.Protocols, ",")
 	}
 
 	err = a.apiStore.Transaction(ctx, func(txCtx context.Context) error {
 		if err = a.apiStore.Save(txCtx, apiInfo); err != nil {
 			return err
 		}
-
+		plugins := make([]*apientry.APIPlugin, 0, len(input.Plugins))
+		for _, p := range input.Plugins {
+			plugins = append(plugins, &apientry.APIPlugin{
+				Name:    p.Name,
+				Config:  p.Config,
+				Disable: p.Disable,
+			})
+		}
 		//添加版本信息
 		apiVersionInfo := &apientry.APIVersion{
 			ApiID:       apiInfo.Id,
@@ -650,6 +668,8 @@ func (a *apiService) CreateAPI(ctx context.Context, namespaceID int, operator in
 				Hosts:            input.Hosts,
 				Match:            input.Match,
 				Header:           input.Header,
+				Protocols:        input.Protocols,
+				Plugins:          plugins,
 			},
 			Operator:   operator,
 			CreateTime: t,
@@ -772,6 +792,7 @@ func (a *apiService) UpdateAPI(ctx context.Context, namespaceID int, operator in
 	apiInfo.RequestPathLabel = input.RequestPathLabel
 	apiInfo.Operator = operator
 	apiInfo.UpdateTime = t
+	apiInfo.Protocols = strings.Join(input.Protocols, ",")
 	apiInfo.Hosts = strings.Join(input.Hosts, ",")
 
 	controller.SetGinContextAuditObject(ctx, &audit_model.LogObjectInfo{
@@ -780,6 +801,14 @@ func (a *apiService) UpdateAPI(ctx context.Context, namespaceID int, operator in
 	})
 
 	return a.apiStore.Transaction(ctx, func(txCtx context.Context) error {
+		plugins := make([]*apientry.APIPlugin, 0, len(input.Plugins))
+		for _, p := range input.Plugins {
+			plugins = append(plugins, &apientry.APIPlugin{
+				Name:    p.Name,
+				Config:  p.Config,
+				Disable: p.Disable,
+			})
+		}
 
 		latestVersionConfig := apientry.APIVersionConfig{
 			Scheme:           input.Scheme,
@@ -797,6 +826,8 @@ func (a *apiService) UpdateAPI(ctx context.Context, namespaceID int, operator in
 			Hosts:            input.Hosts,
 			Match:            input.Match,
 			Header:           input.Header,
+			Protocols:        input.Protocols,
+			Plugins:          plugins,
 		}
 		//判断配置信息是否有更新
 		if a.isAPIVersionConfChange(latestVersionConfig, currentVersion.APIVersionConfig) {
@@ -1081,7 +1112,7 @@ func (a *apiService) online(ctx context.Context, namespaceId, operator int, api 
 		err = a.apiStore.Transaction(ctx, func(txCtx context.Context) error {
 			//封装router配置
 			apiDriverInfo := a.GetAPIDriver(api.Scheme)
-			routerConfig := apiDriverInfo.ToApinto(api.UUID, api.Desc, api.IsDisable, latest.Method, latest.RequestPath, latest.RequestPathLabel, latest.ProxyPath, serviceID, latest.Timeout, latest.Retry, latest.Hosts, latest.Match, latest.Header, latest.TemplateUUID)
+			routerConfig := apiDriverInfo.ToApinto(api.UUID, api.Desc, api.IsDisable, latest.Protocols, latest.Method, latest.RequestPath, latest.RequestPathLabel, latest.ProxyPath, serviceID, latest.Timeout, latest.Retry, latest.Hosts, latest.Match, latest.Header, latest.TemplateUUID, latest.Plugins)
 
 			publishHistory := &apientry.ApiPublishHistory{
 				VersionName:      api.Version,
@@ -1514,7 +1545,7 @@ func (a *apiService) OnlineAPI(ctx context.Context, namespaceId, operator int, u
 
 		//事务
 		err = a.apiStore.Transaction(ctx, func(txCtx context.Context) error {
-			routerConfig := apiDriverInfo.ToApinto(apiInfo.UUID, apiInfo.Desc, apiInfo.IsDisable, latestVersion.Method, latestVersion.RequestPath, latestVersion.RequestPathLabel, latestVersion.ProxyPath, serviceID, latestVersion.Timeout, latestVersion.Retry, latestVersion.Hosts, latestVersion.Match, latestVersion.Header, latestVersion.TemplateUUID)
+			routerConfig := apiDriverInfo.ToApinto(apiInfo.UUID, apiInfo.Desc, apiInfo.IsDisable, latestVersion.Protocols, latestVersion.Method, latestVersion.RequestPath, latestVersion.RequestPathLabel, latestVersion.ProxyPath, serviceID, latestVersion.Timeout, latestVersion.Retry, latestVersion.Hosts, latestVersion.Match, latestVersion.Header, latestVersion.TemplateUUID, latestVersion.Plugins)
 			publishHistory := &apientry.ApiPublishHistory{
 				VersionName:      apiInfo.Version,
 				ClusterId:        clusterInfo.Id,
@@ -2088,7 +2119,16 @@ func checkHostRepeat(hostMap map[string]struct{}, hosts []string, path string, m
 	return nil
 }
 
-// CheckAPIReDuplicative TODO 检测API配置是否重复，不可同名同request_url同method
+func buildMatchConfMap(origin []*apientry.MatchConf) map[string]struct{} {
+	result := make(map[string]struct{})
+	for _, match := range origin {
+		key := fmt.Sprintf("key:%s-position:%s-pattern:%s-match_type:%s", match.Key, match.Position, match.Pattern, match.MatchType)
+		result[key] = struct{}{}
+	}
+	return result
+}
+
+// CheckAPIReDuplicative TODO 检测API配置是否重复，不可同名同request_url同method、同Host、同
 func (a *apiService) CheckAPIReDuplicative(ctx context.Context, namespaceID int, uuid string, input *api_dto.APIInfo) error {
 	//获取相同requestPath的API
 	apiList, err := a.apiStore.GetListByRequestPath(ctx, namespaceID, input.RequestPath)
@@ -2100,6 +2140,9 @@ func (a *apiService) CheckAPIReDuplicative(ctx context.Context, namespaceID int,
 		hostMap[host] = struct{}{}
 	}
 	inputLen := len(input.Method)
+	currentMap := common.SliceToMap(input.Method, func(method string) string {
+		return method
+	})
 	for _, api := range apiList {
 		//筛去api本身
 		if api.UUID == uuid {
@@ -2115,20 +2158,26 @@ func (a *apiService) CheckAPIReDuplicative(ctx context.Context, namespaceID int,
 		//若已有API的method为ALL
 		if len(apiVersion.Method) == 0 && inputLen == 0 {
 			if err := checkHostRepeat(hostMap, strings.Split(api.Hosts, ","), input.RequestPathLabel, "ALL"); err != nil {
-				return err
+				inputMatch := buildMatchConfMap(input.Match)
+				apiMatch := buildMatchConfMap(apiVersion.Match)
+				if compareMapKey(inputMatch, apiMatch) {
+					return fmt.Errorf("requestPath %s, method %s, match is reduplicative. ", input.RequestPathLabel, input.Method)
+				}
 			}
 		} else {
 			//若已有API的method不为为ALL
 			if inputLen == 0 {
 				continue
 			}
-			currentMap := common.SliceToMap(input.Method, func(method string) string {
-				return method
-			})
-			for _, m := range input.Method {
+
+			for _, m := range apiVersion.Method {
 				if _, has := currentMap[m]; has {
 					if err := checkHostRepeat(hostMap, strings.Split(api.Hosts, ","), input.RequestPathLabel, m); err != nil {
-						return err
+						inputMatch := buildMatchConfMap(input.Match)
+						apiMatch := buildMatchConfMap(apiVersion.Match)
+						if compareMapKey(inputMatch, apiMatch) {
+							return fmt.Errorf("requestPath %s, method %s, match is reduplicative. ", input.RequestPathLabel, input.Method)
+						}
 					}
 				}
 			}
@@ -2137,6 +2186,22 @@ func (a *apiService) CheckAPIReDuplicative(ctx context.Context, namespaceID int,
 	}
 
 	return nil
+}
+
+func compareMapKey(map1 map[string]struct{}, map2 map[string]struct{}) bool {
+	if len(map1) != len(map2) {
+		return false
+	}
+	for key := range map1 {
+		if _, has := map2[key]; !has {
+			return false
+		}
+		delete(map2, key)
+	}
+	if len(map2) > 0 {
+		return false
+	}
+	return true
 }
 
 func (a *apiService) IsAPIOnline(ctx context.Context, clusterName, clusterAddr string, apiID int) bool {
@@ -2172,7 +2237,7 @@ func (a *apiService) GetAPINameByID(ctx context.Context, apiID int) (string, err
 	return info.Name, nil
 }
 
-func (a *apiService) GetAPIRemoteOptions(ctx context.Context, namespaceID, pageNum, pageSize int, keyword, groupUuid string) ([]any, int, error) {
+func (a *apiService) GetAPIRemoteOptions(ctx context.Context, namespaceID, pageNum, pageSize int, keyword, groupUuid string) ([]*apimodel.ApiOptionItem, int, error) {
 	groupList := make([]string, 0)
 	var err error
 	//获取传入的groupUUID下包括子分组的所有UUID
@@ -2194,7 +2259,7 @@ func (a *apiService) GetAPIRemoteOptions(ctx context.Context, namespaceID, pageN
 	if err != nil {
 		return nil, 0, err
 	}
-	apiList := make([]any, 0, len(apis))
+	apiList := make([]*apimodel.ApiOptionItem, 0, len(apis))
 
 	groupUUIDMap := common.SliceToMap(groups, func(t *group_entry.CommonGroup) string {
 		return t.Uuid
@@ -2204,15 +2269,11 @@ func (a *apiService) GetAPIRemoteOptions(ctx context.Context, namespaceID, pageN
 	})
 
 	for _, api := range apis {
-		//version, err := a.GetLatestAPIVersion(ctx, apiService.Id)
-		//if err != nil {
-		//	return nil, 0, err
-		//}
 		parentGroupName := &[]string{}
 
 		a.commonGroup.ParentGroupName(api.GroupUUID, groupUUIDMap, groupIdMap, parentGroupName)
 
-		item := &strategy_model.RemoteApis{
+		item := &apimodel.ApiOptionItem{
 			Uuid:  api.UUID,
 			Title: api.Name,
 			//Service:     version.ServiceName,
@@ -2226,7 +2287,7 @@ func (a *apiService) GetAPIRemoteOptions(ctx context.Context, namespaceID, pageN
 	return apiList, total, nil
 }
 
-func (a *apiService) GetAPIRemoteByUUIDS(ctx context.Context, namespace int, uuids []string) ([]*strategy_model.RemoteApis, error) {
+func (a *apiService) GetAPIRemoteByUUIDS(ctx context.Context, namespace int, uuids []string) ([]*apimodel.ApiOptionItem, error) {
 
 	groups, err := a.commonGroup.GroupListAll(ctx, namespace, group_service.ApiName, group_service.ApiName)
 	if err != nil {
@@ -2255,14 +2316,14 @@ func (a *apiService) GetAPIRemoteByUUIDS(ctx context.Context, namespace int, uui
 	//	return nil, err
 	//}
 
-	apiList := make([]*strategy_model.RemoteApis, 0, len(apis))
+	apiList := make([]*apimodel.ApiOptionItem, 0, len(apis))
 	for _, api := range apis {
 		//version := versionMap[api.Id]
 
 		parentGroupName := &[]string{}
 		a.commonGroup.ParentGroupName(api.GroupUUID, groupUUIDMap, groupIdMap, parentGroupName)
 
-		item := &strategy_model.RemoteApis{
+		item := &apimodel.ApiOptionItem{
 			Uuid:  api.UUID,
 			Title: api.Name,
 			//Service:     version.ServiceName,
@@ -2320,13 +2381,6 @@ func (a *apiService) ClustersStatus(ctx context.Context, namespaceId, apiId int,
 			continue
 		}
 
-		updater := ""
-		if operator > 0 {
-			u, err := a.userInfoService.GetUserInfo(ctx, operator)
-			if err == nil {
-				updater = u.UserName
-			}
-		}
 		version, err := client.Version(professionRouter, apiUUID)
 		if err != nil {
 			result = append(result, &apimodel.ApiCluster{
@@ -2334,7 +2388,7 @@ func (a *apiService) ClustersStatus(ctx context.Context, namespaceId, apiId int,
 				Title:      c.Title,
 				Env:        c.Env,
 				Status:     1, //未发布
-				Updater:    updater,
+				UpdaterId:  operator,
 				UpdateTime: updateTime,
 			})
 			continue
@@ -2350,10 +2404,11 @@ func (a *apiService) ClustersStatus(ctx context.Context, namespaceId, apiId int,
 			Title:      c.Title,
 			Env:        c.Env,
 			Status:     status,
-			Updater:    updater,
+			UpdaterId:  operator,
 			UpdateTime: updateTime,
 		})
 	}
+	user.SetUserName(a.userInfoService, ctx, result...)
 	return online, result, nil
 }
 
@@ -2380,8 +2435,8 @@ func (a *apiService) isServiceOnline(namespaceId int, clusterName, serviceName s
 	status, serviceID := a.providers.Status(serviceName, namespaceId, clusterName)
 	isOnline := false
 	switch status {
-	case apinto_module.None, apinto_module.Offline:
-	case apinto_module.Online:
+	case pm3.None, pm3.Offline:
+	case pm3.Online:
 		isOnline = true
 	}
 	return isOnline, serviceID

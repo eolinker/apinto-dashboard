@@ -3,6 +3,7 @@ package apinto_module
 import (
 	"errors"
 	"fmt"
+	"github.com/eolinker/apinto-dashboard/pm3"
 	"sync"
 )
 
@@ -23,8 +24,12 @@ type Drivers interface {
 	Register(name string, driver Driver) error
 }
 type Driver interface {
-	CreatePlugin(define interface{}) (Plugin, error)
+	//CreatePlugin(define interface{}) (Plugin, error)\
+
+	Install(info *pm3.PluginDefine) (ms []pm3.PModule, acs []pm3.PAccess, fs []pm3.PFrontend, err error)
+	Create(info *pm3.PluginDefine, config pm3.PluginConfig) (pm3.Module, error)
 }
+
 type AccessInfo interface {
 	Name() string
 	CName() string

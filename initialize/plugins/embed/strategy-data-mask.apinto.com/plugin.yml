@@ -1,0 +1,22 @@
+id: "strategy-data_mask.apinto.com"
+name: "data-mask"
+cname: "数据脱敏"
+resume: "通过隐藏、替换、加密、打乱或部分显示等方式，对原始数据进行变形处理，使其在不影响数据结构或功能的情况下，无法轻易恢复为原始的敏感信息。从而保护敏感信息，防止信息泄漏。"
+version: "v1.0.0"
+icon: "logo.png"
+driver: "strategy-data_mask.apinto.com"
+type: 2 #0为框架模块 1为核心模块 2为内置模块 3为非内置
+auto: true
+is_can_disable: true
+is_can_uninstall: false
+visible_in_navigation: true
+visible_in_market: true
+front: serv-governance/data-mask
+navigation: "navigation.strategy"
+group_id: "strategy"
+frontend:
+  - name: data-mask-strategy
+    driver: apinto.builtIn.module
+    router:
+      - path: serv-governance/data-mask
+        type: normal

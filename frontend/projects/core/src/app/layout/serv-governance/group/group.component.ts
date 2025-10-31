@@ -124,7 +124,7 @@ export class GroupComponent implements OnInit {
   // 当节点是环境名时，收缩或展开对应环境内的集群列表
   // 当节点是集群名时，右侧页面需要展示对应集群的策略列表
   activeNode (data: any): void {
-    // console.log(this.eoNgTreeDefault?.getTreeNodeByKey(this.clusterKey))
+    // // console.log(this.eoNgTreeDefault?.getTreeNodeByKey(this.clusterKey))
     // 当选中的节点是集群名且与当前选中节点集群名不同时，取消当前节点的选中
     if (
       data.keys[0] &&
@@ -163,6 +163,9 @@ export class GroupComponent implements OnInit {
         break
       case 'visit':
         this.navigationService.reqFlashBreadcrumb([{ title: 'API访问权限' }])
+        break
+      case 'data-mask':
+        this.navigationService.reqFlashBreadcrumb([{ title: '数据脱敏' }])
         break
       default:
         this.navigationService.reqFlashBreadcrumb([{ title: '流量限制' }])

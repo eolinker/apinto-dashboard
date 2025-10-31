@@ -42,6 +42,7 @@ func (c *clusterCertificateService) Info(ctx context.Context, namespaceId, certi
 
 	return &cluster_model.Certificate{
 		ID:        info.Id,
+		Uuid:      info.UUID,
 		Name:      cert.Leaf.Subject.CommonName,
 		DnsName:   cert.Leaf.DNSNames,
 		Key:       common.Base64Encode([]byte(info.Key)),

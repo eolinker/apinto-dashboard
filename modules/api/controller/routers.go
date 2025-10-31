@@ -2,8 +2,8 @@ package controller
 
 import (
 	apinto_module "github.com/eolinker/apinto-dashboard/module"
-	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	group_controller "github.com/eolinker/apinto-dashboard/modules/group/group-controller"
+	"github.com/eolinker/apinto-dashboard/pm3"
 	"net/http"
 )
 
@@ -13,145 +13,144 @@ func initRouter(name string) apinto_module.RoutersInfo {
 	return []apinto_module.RouterInfo{
 
 		{
-			Method:      http.MethodGet,
-			Path:        "/api/routers",
-			Handler:     "api.routers",
-			HandlerFunc: []apinto_module.HandlerFunc{c.routers},
+			Method: http.MethodGet,
+			Path:   "/api/routers",
+
+			HandlerFunc: c.routers,
 		},
 		{
-			Method:      http.MethodGet,
-			Path:        "/api/router",
-			Handler:     "api.getInfo",
-			HandlerFunc: []apinto_module.HandlerFunc{c.getInfo},
+			Method: http.MethodGet,
+			Path:   "/api/router",
+
+			HandlerFunc: c.getInfo,
 		},
 		{
-			Method:      http.MethodPost,
-			Path:        "/api/router",
-			Handler:     "api.create",
-			HandlerFunc: []apinto_module.HandlerFunc{c.create},
+			Method: http.MethodPost,
+			Path:   "/api/router",
+
+			HandlerFunc: c.create,
 		},
 		{
-			Method:      http.MethodPut,
-			Path:        "/api/router",
-			Handler:     "api.update",
-			HandlerFunc: []apinto_module.HandlerFunc{c.update},
+			Method: http.MethodPut,
+			Path:   "/api/router",
+
+			HandlerFunc: c.update,
 		},
 		{
-			Method:      http.MethodDelete,
-			Path:        "/api/router",
-			Handler:     "api.delete",
-			HandlerFunc: []apinto_module.HandlerFunc{c.delete},
+			Method: http.MethodDelete,
+			Path:   "/api/router",
+
+			HandlerFunc: c.delete,
 		},
 
 		{
-			Method:      http.MethodPost,
-			Path:        "/api/routers/batch-online",
-			Handler:     "api.batchOnline",
-			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypePublish.Handler, c.batchOnline},
+			Method: http.MethodPost,
+			Path:   "/api/routers/batch-online",
+
+			HandlerFunc: c.batchOnline,
 		},
 		{
-			Method:      http.MethodPost,
-			Path:        "/api/routers/batch-offline",
-			Handler:     "api.batchOffline",
-			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypePublish.Handler, c.batchOffline},
+			Method: http.MethodPost,
+			Path:   "/api/routers/batch-offline",
+
+			HandlerFunc: c.batchOffline,
 		},
 		{
-			Method:      http.MethodPost,
-			Path:        "/api/routers/batch-online/check",
-			Handler:     "api.batchOnlineCheck",
-			HandlerFunc: []apinto_module.HandlerFunc{c.batchOnlineCheck},
+			Method: http.MethodPost,
+			Path:   "/api/routers/batch-online/check",
+
+			HandlerFunc: c.batchOnlineCheck,
 		},
 
 		{
-			Method:      http.MethodPut,
-			Path:        "/api/router/online",
-			Handler:     "api.online",
-			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypePublish.Handler, c.online},
+			Method: http.MethodPut,
+			Path:   "/api/router/online",
+
+			HandlerFunc: c.online,
 		},
 		{
-			Method:      http.MethodPut,
-			Path:        "/api/router/offline",
-			Handler:     "api.offline",
-			HandlerFunc: []apinto_module.HandlerFunc{audit_model.LogOperateTypePublish.Handler, c.offline},
+			Method: http.MethodPut,
+			Path:   "/api/router/offline",
+
+			HandlerFunc: c.offline,
 		},
 		{
-			Method:      http.MethodGet,
-			Path:        "/api/router/online/info",
-			Handler:     "api.getOnlineInfo",
-			HandlerFunc: []apinto_module.HandlerFunc{c.getOnlineInfo},
+			Method: http.MethodGet,
+			Path:   "/api/router/online/info",
+
+			HandlerFunc: c.getOnlineInfo,
 		},
 		{
 			Method:      http.MethodGet,
 			Path:        "/api/router/groups",
-			Handler:     "api.groups",
-			HandlerFunc: []apinto_module.HandlerFunc{c.groups},
-			Labels:      apinto_module.RouterLabelAnonymous,
+			Authority:   pm3.Public,
+			HandlerFunc: c.groups,
 		},
 		{
-			Method:      http.MethodGet,
-			Path:        "/api/router/source",
-			Handler:     "api.getSourceList",
-			HandlerFunc: []apinto_module.HandlerFunc{c.getSourceList},
+			Method: http.MethodGet,
+			Path:   "/api/router/source",
+
+			HandlerFunc: c.getSourceList,
 		},
 		{
-			Method:      http.MethodPost,
-			Path:        "/api/router/import",
-			Handler:     "api.getImportCheckList",
-			HandlerFunc: []apinto_module.HandlerFunc{c.getImportCheckList},
+			Method: http.MethodPost,
+			Path:   "/api/router/import",
+
+			HandlerFunc: c.getImportCheckList,
 		},
 		{
-			Method:      http.MethodGet,
-			Path:        "/api/router/enum",
-			Handler:     "api.routerEnum",
-			HandlerFunc: []apinto_module.HandlerFunc{c.routerEnum},
+			Method: http.MethodGet,
+			Path:   "/api/router/enum",
+
+			HandlerFunc: c.routerEnum,
 		},
 		{
-			Method:      http.MethodPut,
-			Path:        "/api/router/import",
-			Handler:     "api.importAPI",
-			HandlerFunc: []apinto_module.HandlerFunc{c.importAPI},
+			Method: http.MethodPut,
+			Path:   "/api/router/import",
+
+			HandlerFunc: c.importAPI,
 		},
 		{
-			Method:      http.MethodGet,
-			Path:        "/api/router/check",
-			Handler:     "group.checkApiExist",
-			HandlerFunc: []apinto_module.HandlerFunc{c.checkApiExist},
+			Method: http.MethodGet,
+			Path:   "/api/router/check",
+
+			HandlerFunc: c.checkApiExist,
 		},
 		{
-			Method:      http.MethodGet,
-			Path:        "/api/group/:group_type",
-			Handler:     "group.groups",
-			HandlerFunc: []apinto_module.HandlerFunc{c.groups},
+			Method: http.MethodGet,
+			Path:   "/api/group/:group_type",
+
+			HandlerFunc: c.groups,
 		},
 		{
-			Method:      http.MethodPost,
-			Path:        "/api/group/:group_type",
-			Handler:     "group.createGroup",
-			HandlerFunc: []apinto_module.HandlerFunc{g.CreateGroup},
+			Method: http.MethodPost,
+			Path:   "/api/group/:group_type",
+
+			HandlerFunc: g.CreateGroup,
 		},
 		{
-			Method:      http.MethodPut,
-			Path:        "/api/group/:group_type/:uuid",
-			Handler:     "group.updateGroup",
-			HandlerFunc: []apinto_module.HandlerFunc{g.UpdateGroup},
+			Method: http.MethodPut,
+			Path:   "/api/group/:group_type/:uuid",
+
+			HandlerFunc: g.UpdateGroup,
 		},
 		{
-			Method:      http.MethodDelete,
-			Path:        "/api/group/:group_type/:uuid",
-			Handler:     "group.delGroup",
-			HandlerFunc: []apinto_module.HandlerFunc{g.DelGroup},
+			Method: http.MethodDelete,
+			Path:   "/api/group/:group_type/:uuid",
+
+			HandlerFunc: g.DelGroup,
 		},
 		{
-			Method:      http.MethodPut,
-			Path:        "/api/groups/:group_type/sort",
-			Handler:     "group.groupSort",
-			HandlerFunc: []apinto_module.HandlerFunc{g.GroupSort},
+			Method: http.MethodPut,
+			Path:   "/api/groups/:group_type/sort",
+
+			HandlerFunc: g.GroupSort,
 		},
 		{
-			Method:      http.MethodPut,
-			Path:        "/api/group/:group_type/check",
-			Handler:     "group.groupCheckExist",
-			HandlerFunc: []apinto_module.HandlerFunc{g.CheckGroupExist},
+			Method: http.MethodPut,
+			Path:   "/api/group/:group_type/check",
+
+			HandlerFunc: g.CheckGroupExist,
 		},
 	}
 }

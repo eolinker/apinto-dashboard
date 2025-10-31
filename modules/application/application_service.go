@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+
 	"github.com/eolinker/apinto-dashboard/client/v1"
 	driverInfo "github.com/eolinker/apinto-dashboard/driver"
 	"github.com/eolinker/apinto-dashboard/modules/application/application-dto"
@@ -27,7 +28,7 @@ type IApplicationService interface {
 	//online.IResetOnlineService
 
 	GetAuthList(ctx context.Context, namespaceId int, appId string) ([]*application_model.AppAuthItem, error)
-	CreateAuth(ctx context.Context, namespaceId, userId int, appId string, input *application_dto.ApplicationAuthInput) error
+	CreateAuth(ctx context.Context, namespaceId, userId int, appId, uuid string, input *application_dto.ApplicationAuthInput) error
 	UpdateAuth(ctx context.Context, namespaceId, userId int, appId, uuid string, input *application_dto.ApplicationAuthInput) error
 	DeleteAuth(ctx context.Context, namespaceId, userId int, uuid string) error
 	AuthInfo(ctx context.Context, namespaceId int, appId, uuid string) (*application_model.ApplicationAuth, error)
@@ -44,7 +45,7 @@ type IAuthDriverManager interface {
 
 type IAuthDriver interface {
 	Render() string
-	CheckInput(config []byte) error
+	CheckInput(config []byte) ([]byte, error)
 	//GetAuthListInfo 获取健全列表展示需要用的参数信息
 	GetAuthListInfo(config []byte) string
 	GetCfgDetails(config []byte) []application_model.AuthDetailItem

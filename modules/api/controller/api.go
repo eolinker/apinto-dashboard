@@ -3,6 +3,11 @@ package controller
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"strconv"
+	"strings"
+	"sync"
+
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/controller/users"
@@ -11,16 +16,13 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/api/api-dto"
 	_ "github.com/eolinker/apinto-dashboard/modules/api/service"
 	status_code "github.com/eolinker/apinto-dashboard/modules/api/status-code"
+	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/group/group-dto"
 	"github.com/eolinker/apinto-dashboard/modules/group/group-model"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/eolinker/eosc/log"
 	"github.com/gin-gonic/gin"
-	"net/http"
-	"strconv"
-	"strings"
-	"sync"
 )
 
 var (
@@ -237,7 +239,18 @@ func (a *apiController) getInfo(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("获取API信息失败 err:%s", err.Error()))
 		return
 	}
-
+	plugins := make([]*api_dto.APIPlugin, 0, len(info.Version.Plugins))
+	for _, p := range info.Version.Plugins {
+		plugins = append(plugins, &api_dto.APIPlugin{
+			Name:    p.Name,
+			Config:  p.Config,
+			Disable: p.Disable,
+		})
+	}
+	protocols := info.Version.Protocols
+	if len(protocols) < 1 {
+		protocols = []string{"http", "https"}
+	}
 	apiInfo := &api_dto.APIInfo{
 		ApiName:      info.Api.Name,
 		UUID:         info.Api.UUID,
@@ -255,6 +268,8 @@ func (a *apiController) getInfo(ginCtx *gin.Context) {
 		Match:        info.Version.Match,
 		Header:       info.Version.Header,
 		TemplateUUID: info.Version.TemplateUUID,
+		Protocols:    protocols,
+		Plugins:      plugins,
 	}
 
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(map[string]interface{}{"api": apiInfo}))
@@ -262,6 +277,7 @@ func (a *apiController) getInfo(ginCtx *gin.Context) {
 
 // create 新建
 func (a *apiController) create(ginCtx *gin.Context) {
+	audit_model.LogOperateTypeCreate.Handler(ginCtx)
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	userId := users.GetUserId(ginCtx)
 
@@ -295,6 +311,7 @@ func (a *apiController) create(ginCtx *gin.Context) {
 
 // alter 修改
 func (a *apiController) update(ginCtx *gin.Context) {
+	audit_model.LogOperateTypeEdit.Handler(ginCtx)
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	userId := users.GetUserId(ginCtx)
 	apiUUID := ginCtx.Query("uuid")
@@ -332,6 +349,7 @@ func (a *apiController) update(ginCtx *gin.Context) {
 
 // delete 删除
 func (a *apiController) delete(ginCtx *gin.Context) {
+	audit_model.LogOperateTypeDelete.Handler(ginCtx)
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	apiUUID := ginCtx.Query("uuid")
 	if apiUUID == "" {
@@ -351,6 +369,7 @@ func (a *apiController) delete(ginCtx *gin.Context) {
 
 // batchOnline 批量上线
 func (a *apiController) batchOnline(ginCtx *gin.Context) {
+	audit_model.LogOperateTypePublish.Handler(ginCtx)
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	userId := users.GetUserId(ginCtx)
 
@@ -392,6 +411,7 @@ func (a *apiController) batchOnline(ginCtx *gin.Context) {
 
 // batchOnline 批量下线
 func (a *apiController) batchOffline(ginCtx *gin.Context) {
+	audit_model.LogOperateTypeOffline.Handler(ginCtx)
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	userId := users.GetUserId(ginCtx)
 
@@ -478,6 +498,7 @@ func (a *apiController) batchOnlineCheck(ginCtx *gin.Context) {
 
 // online 上线
 func (a *apiController) online(ginCtx *gin.Context) {
+	audit_model.LogOperateTypePublish.Handler(ginCtx)
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	userId := users.GetUserId(ginCtx)
 	apiUUID := ginCtx.Query("uuid")
@@ -517,6 +538,7 @@ func (a *apiController) online(ginCtx *gin.Context) {
 
 // online 下线
 func (a *apiController) offline(ginCtx *gin.Context) {
+	audit_model.LogOperateTypeOffline.Handler(ginCtx)
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	userId := users.GetUserId(ginCtx)
 	apiUUID := ginCtx.Query("uuid")
@@ -688,6 +710,7 @@ func (a *apiController) getImportCheckList(ginCtx *gin.Context) {
 
 // importAPI 导入Swagger文档
 func (a *apiController) importAPI(ginCtx *gin.Context) {
+	audit_model.LogOperateTypeCreate.Handler(ginCtx)
 	namespaceID := namespace_controller.GetNamespaceId(ginCtx)
 	userId := users.GetUserId(ginCtx)
 

@@ -29,7 +29,7 @@ func (e *extender) Info(group, project, name string) (*ExtenderInfo, error) {
 		url := fmt.Sprintf("%s/extender/%s:%s/%s", addr, group, project, name)
 		res, code, err := requestDo(http.MethodGet, url, nil)
 		if err != nil {
-			log.Errorf("extender-api-List err=%s", err.Error())
+			log.Errorf("extender-api-Navigations err=%s", err.Error())
 			resErr = err
 			continue
 		}
@@ -55,18 +55,18 @@ func (e *extender) List() ([]*ExtenderListItem, error) {
 		url := fmt.Sprintf("%s/extender", addr)
 		res, code, err := requestDo(http.MethodGet, url, nil)
 		if err != nil {
-			log.Errorf("extender-api-List err=%s", err.Error())
+			log.Errorf("extender-api-Navigations err=%s", err.Error())
 			resErr = err
 			continue
 		}
 		resultList := make([]*ExtenderListItem, 0)
 		if code != http.StatusOK {
-			log.Errorf("extender-api-List err=%s", string(res))
+			log.Errorf("extender-api-Navigations err=%s", string(res))
 			resErr = errors.New(string(res))
 			continue
 		}
 		if err = json.Unmarshal(res, &resultList); err != nil {
-			log.Errorf("extender-api-List-jsonUnmarshal err=%s", err.Error())
+			log.Errorf("extender-api-Navigations-jsonUnmarshal err=%s", err.Error())
 			resErr = err
 			continue
 		}

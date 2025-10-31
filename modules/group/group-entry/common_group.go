@@ -5,7 +5,7 @@ import "time"
 // CommonGroup 通用目录表
 type CommonGroup struct {
 	Id          int       `gorm:"type:int(11);size:11;not null;auto_increment;primary_key;column:id;comment:主键ID"`
-	Uuid        string    `gorm:"size:36;default:null;column:uuid;uniqueIndex:uuid;comment:uuid"`
+	Uuid        string    `gorm:"size:255;default:null;column:uuid;uniqueIndex:uuid;comment:uuid"`
 	NamespaceId int       `gorm:"type:int(11);size:11;not null;index:type;column:namespace;comment:工作空间"`
 	Type        string    `gorm:"size:50;not null;index:type;column:type;comment:类型"`
 	TagID       int       `gorm:"type:int(11);size:11;not null;index:type;column:tag;comment:根据type区分是哪个表的ID"`

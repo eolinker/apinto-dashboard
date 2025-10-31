@@ -14,8 +14,7 @@ import (
 	apimodel "github.com/eolinker/apinto-dashboard/modules/api/model"
 	frontend_model "github.com/eolinker/apinto-dashboard/modules/base/frontend-model"
 	group_model "github.com/eolinker/apinto-dashboard/modules/group/group-model"
-	strategy_model "github.com/eolinker/apinto-dashboard/modules/strategy/strategy-model"
-	gomock "github.com/golang/mock/gomock"
+ 	gomock "github.com/golang/mock/gomock"
 )
 
 // MockIAPIService is a mock of IAPIService interface.
@@ -338,10 +337,10 @@ func (mr *MockIAPIServiceMockRecorder) GetAPINameByID(ctx, apiID interface{}) *g
 }
 
 // GetAPIRemoteByUUIDS mocks base method.
-func (m *MockIAPIService) GetAPIRemoteByUUIDS(ctx context.Context, namespace int, uuids []string) ([]*strategy_model.RemoteApis, error) {
+func (m *MockIAPIService) GetAPIRemoteByUUIDS(ctx context.Context, namespace int, uuids []string) ([]*apimodel.ApiOptionItem, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAPIRemoteByUUIDS", ctx, namespace, uuids)
-	ret0, _ := ret[0].([]*strategy_model.RemoteApis)
+	ret0, _ := ret[0].([]*apimodel.ApiOptionItem)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -353,10 +352,10 @@ func (mr *MockIAPIServiceMockRecorder) GetAPIRemoteByUUIDS(ctx, namespace, uuids
 }
 
 // GetAPIRemoteOptions mocks base method.
-func (m *MockIAPIService) GetAPIRemoteOptions(ctx context.Context, namespaceId, pageNum, pageSize int, keyword, groupUuid string) ([]*strategy_model.RemoteApis, int, error) {
+func (m *MockIAPIService) GetAPIRemoteOptions(ctx context.Context, namespaceId, pageNum, pageSize int, keyword, groupUuid string) ([]*apimodel.ApiOptionItem, int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAPIRemoteOptions", ctx, namespaceId, pageNum, pageSize, keyword, groupUuid)
-	ret0, _ := ret[0].([]*strategy_model.RemoteApis)
+	ret0, _ := ret[0].([]*apimodel.ApiOptionItem)
 	ret1, _ := ret[1].(int)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2

@@ -32,9 +32,19 @@ type ApplicationListItem struct {
 	Name         string
 	Desc         string
 	UpdateTime   time.Time
+	Operator     int
 	OperatorName string
 	IsDelete     bool
 	Publish      []*APPListItemPublish
+}
+
+func (a *ApplicationListItem) UserId() int {
+	return a.Operator
+
+}
+
+func (a *ApplicationListItem) Set(name string) {
+	a.OperatorName = name
 }
 
 type ApplicationInfo struct {
@@ -112,6 +122,16 @@ type AppCluster struct {
 	Title      string
 	Env        string
 	Status     int
+	UpdaterId  int
 	Updater    string
 	UpdateTime string
+}
+
+func (a *AppCluster) UserId() int {
+
+	return a.UpdaterId
+}
+
+func (a *AppCluster) Set(name string) {
+	a.Updater = name
 }

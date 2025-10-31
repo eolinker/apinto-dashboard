@@ -10,36 +10,53 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/openapi"
 	"github.com/eolinker/apinto-dashboard/modules/openapi/openapi-dto"
 	"github.com/eolinker/apinto-dashboard/modules/openapp"
+	"github.com/eolinker/apinto-dashboard/pm3"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
 	"strings"
-	"sync"
 )
+
+func init() {
+	RegisterRouter(newOpenApiController())
+}
+
+func newOpenApiController() *apiOpenAPIController {
+	a := &apiOpenAPIController{}
+	bean.Autowired(&a.extAPPService)
+	bean.Autowired(&a.apiOpenAPIService)
+
+	return a
+
+}
 
 type apiOpenAPIController struct {
 	apiOpenAPIService openapi.IAPIOpenAPIService
 	extAPPService     openapp.IExternalApplicationService
 }
 
-var (
-	locker             sync.Mutex
-	controllerInstance *apiOpenAPIController
-)
+func (a *apiOpenAPIController) Name() string {
+	return "api"
+}
 
-func newOpenApiController() *apiOpenAPIController {
-	if controllerInstance == nil {
-		locker.Lock()
-		defer locker.Unlock()
-		if controllerInstance == nil {
-			controllerInstance = &apiOpenAPIController{}
-			bean.Autowired(&controllerInstance.extAPPService)
-			bean.Autowired(&controllerInstance.apiOpenAPIService)
-		}
+func (a *apiOpenAPIController) Apis() []pm3.Api {
+	return []pm3.Api{
+		{
+			Method: http.MethodGet,
+			Path:   "/api2/apis/import",
+
+			HandlerFunc: a.getImportInfo,
+			Authority:   pm3.Public,
+		},
+		{
+			Method: http.MethodPost,
+			Path:   "/api2/apis/import",
+
+			HandlerFunc: a.syncAPI,
+			Authority:   pm3.Public,
+		},
 	}
-	return controllerInstance
-
 }
 
 func (a *apiOpenAPIController) getImportInfo(ginCtx *gin.Context) {
@@ -234,4 +251,8 @@ func (a *apiOpenAPIController) getNodeInfo(nodeStr string) (*openapi_dto.ImportN
 		Url:    url,
 		Weight: weight,
 	}, nil
+}
+
+func (a *apiOpenAPIController) importAPIs() string {
+	return "importAPIs"
 }

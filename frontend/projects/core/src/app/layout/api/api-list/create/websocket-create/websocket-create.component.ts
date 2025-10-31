@@ -17,8 +17,11 @@ import { cloneDeep } from 'lodash'
 import { MODAL_SMALL_SIZE } from 'projects/core/src/app/constant/app.config'
 import { ApiManagementProxyComponent } from '../../proxy/proxy.component'
 import { APINotFormGroupData, APIProtocol } from '../../../types/types'
-import { methodList, proxyHeaderTableHeadName, proxyHeaderTableBody, hostHeaderTableBody } from '../../../types/conf'
+import { methodList, proxyHeaderTableHeadName, proxyHeaderTableBody, hostHeaderTableBody, defaultHostList } from '../../../types/conf'
 import { TBODY_TYPE, THEAD_TYPE } from 'eo-ng-table'
+import { PluginTemplateConfigItem } from 'projects/core/src/app/component/plugin-config-modal/plugin-config-modal.component'
+import { EoNgJsonService } from 'projects/core/src/app/service/eo-ng-json.service'
+
 @Component({
   selector: 'eo-ng-api-websocket-create',
   templateUrl: './websocket-create.component.html',
@@ -68,7 +71,7 @@ export class ApiWebsocketCreateComponent implements OnInit {
   proxyHeaderTableHeadName:THEAD_TYPE[] = [...proxyHeaderTableHeadName]
   proxyHeaderTableBody:TBODY_TYPE[] = [...proxyHeaderTableBody]
   hostsTableBody:TBODY_TYPE[] = [...hostHeaderTableBody]
-  hostsList:Array<any> = [{ key: '' }]
+  hostsList:Array<any> = [...defaultHostList]
   modalRef:NzModalRef | undefined
   proxyEdit:boolean = false
   editData:any = null
@@ -83,13 +86,18 @@ export class ApiWebsocketCreateComponent implements OnInit {
   pluginTemplateList:SelectOption[] = []
   submitButtonLoading:boolean = false
   showCheckboxGroupValid: boolean = false
+  protocolList:SelectOption[] = [{ label: 'HTTP', value: 'http' }, { label: 'HTTPS', value: 'https' }]
+  pluginConfigError:boolean = false
+  configList: PluginTemplateConfigItem[] = []
+
   constructor (public message: EoNgFeedbackMessageService,
     private baseInfo:BaseInfoService,
     public api:ApiService,
     private navigationService:EoNgNavigationService,
     private fb: UntypedFormBuilder,
     private router: Router,
-    private modalService: EoNgFeedbackModalService
+    private modalService: EoNgFeedbackModalService,
+    public jsonService:EoNgJsonService
   ) {
     this.navigationService.reqFlashBreadcrumb([
       { title: 'API管理', routerLink: 'router/api/group/list' },
@@ -101,11 +109,12 @@ export class ApiWebsocketCreateComponent implements OnInit {
       name: ['', [Validators.required]],
       desc: [''],
       isDisable: [false],
-      requestPath: ['', [Validators.pattern('^[^?]*')]],
+      requestPath: ['', [Validators.required, Validators.pattern('^[^?]*')]],
       service: ['', [Validators.required]],
+      protocols: [['http', 'https']],
       proxyPath: [''],
       timeout: [10000, [Validators.required]],
-      retry: [0, [Validators.required]],
+      retry: [0, [Validators.required, Validators.min(0)]],
       templateUuid: ['']
     })
   }
@@ -163,6 +172,15 @@ export class ApiWebsocketCreateComponent implements OnInit {
         this.createApiForm = resp.data.api
         this.getHeaderList()
         this.hostsList = [...resp.data.api.hosts?.map((x:string) => ({ key: x })) || [], { key: '' }]
+        this.configList = resp.data?.api.plugins?.map((plugin:any) => {
+          plugin.disable = !plugin.disable
+          try {
+            plugin.config = JSON.stringify(this.jsonService.handleJsonSchema2Json(JSON.parse(plugin.config))) === '{}' ? plugin.config : JSON.stringify(this.jsonService.handleJsonSchema2Json(JSON.parse(plugin.config)))
+          } catch {
+            plugin.config = JSON.stringify(plugin.config)
+          }
+          return plugin
+        }) || []
       }
     })
   }
@@ -355,30 +373,39 @@ export class ApiWebsocketCreateComponent implements OnInit {
 
   // 提交api数据
   saveApi (type:'websocket'|'http') {
+    // this.startValid = true
     if (this.validateForm.valid && !this.showCheckboxGroupValid) {
+      const pluginListApi: PluginTemplateConfigItem[] = [] // 提交接口时转换disable
+      for (const plugin of this.configList) {
+        pluginListApi.push({ ...plugin, disable: !plugin.disable })
+      }
+
       if (this.allChecked) {
         this.createApiForm.method = []
       }
       this.submitButtonLoading = true
+      const body = {
+        scheme: type,
+        name: this.validateForm.controls['name'].value,
+        uuid: this.createApiForm.uuid,
+        groupUuid: this.validateForm.controls['groupUuid'].value,
+        desc: this.validateForm.controls['desc'].value,
+        isDisable: this.validateForm.controls['isDisable'].value,
+        requestPath: '/' + this.validateForm.controls['requestPath'].value,
+        service: this.validateForm.controls['service'].value,
+        protocols: type === 'websocket' ? undefined : this.validateForm.controls['protocols'].value,
+        method: this.createApiForm.method,
+        hosts: this.hostsList.filter((host:{key:string}) => { return host.key }).map((host:{key:string}) => host.key),
+        timeout: Number(this.validateForm.controls['timeout'].value),
+        retry: Number(this.validateForm.controls['retry'].value),
+        templateUuid: this.validateForm.controls['templateUuid'].value || '',
+        proxyHeader: this.createApiForm.proxyHeader,
+        match: this.createApiForm.match,
+        proxyPath: this.validateForm.controls['proxyPath'].value,
+        plugins: pluginListApi
+      }
       if (this.editPage) {
-        this.api.put('router', {
-          scheme: type,
-          name: this.validateForm.controls['name'].value,
-          uuid: this.createApiForm.uuid,
-          groupUuid: this.validateForm.controls['groupUuid'].value,
-          desc: this.validateForm.controls['desc'].value,
-          isDisable: this.validateForm.controls['isDisable'].value,
-          requestPath: '/' + this.validateForm.controls['requestPath'].value,
-          service: this.validateForm.controls['service'].value,
-          method: this.createApiForm.method,
-          proxyPath: this.validateForm.controls['proxyPath'].value,
-          hosts: this.hostsList.filter((host:{key:string}) => { return host.key }).map((host:{key:string}) => host.key),
-          timeout: Number(this.validateForm.controls['timeout'].value),
-          retry: Number(this.validateForm.controls['retry'].value),
-          templateUuid: this.validateForm.controls['templateUuid'].value || '',
-          proxyHeader: this.createApiForm.proxyHeader,
-          match: this.createApiForm.match
-        }, { uuid: this.apiUuid }).subscribe(resp => {
+        this.api.put('router', body, { uuid: this.apiUuid }).subscribe(resp => {
           this.submitButtonLoading = false
           if (resp.code === 0) {
             this.backToList()
@@ -386,24 +413,7 @@ export class ApiWebsocketCreateComponent implements OnInit {
           }
         })
       } else {
-        this.api.post('router', {
-          scheme: type,
-          name: this.validateForm.controls['name'].value,
-          uuid: this.createApiForm.uuid,
-          groupUuid: this.validateForm.controls['groupUuid'].value,
-          desc: this.validateForm.controls['desc'].value,
-          isDisable: this.validateForm.controls['isDisable'].value,
-          requestPath: '/' + this.validateForm.controls['requestPath'].value,
-          service: this.validateForm.controls['service'].value,
-          method: this.createApiForm.method,
-          hosts: this.hostsList.filter((host:{key:string}) => { return host.key }).map((host:{key:string}) => host.key),
-          timeout: Number(this.validateForm.controls['timeout'].value),
-          retry: Number(this.validateForm.controls['retry'].value),
-          templateUuid: this.validateForm.controls['templateUuid'].value || '',
-          proxyHeader: this.createApiForm.proxyHeader,
-          match: this.createApiForm.match,
-          proxyPath: this.validateForm.controls['proxyPath'].value
-        }).subscribe(resp => {
+        this.api.post('router', body).subscribe(resp => {
           this.submitButtonLoading = false
           if (resp.code === 0) {
             this.message.success(resp.msg || '添加成功！', { nzDuration: 1000 })

@@ -56,3 +56,4 @@ yarn.lock
 /playwright/.cache/
 /yarn.lock
 /pnpm-lock.yaml
+/.angular/

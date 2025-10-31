@@ -5,4 +5,6 @@ type AuthConfig struct {
 	JwtConfig
 	ApikeyConfig
 	BasicConfig
+	Oauth2Config
+	ParaHmacConfig
 }

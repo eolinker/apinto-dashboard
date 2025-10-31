@@ -1,13 +1,14 @@
 package application_entry
 
 import (
-	"github.com/eolinker/apinto-dashboard/modules/base/history-entry"
 	"time"
+
+	"github.com/eolinker/apinto-dashboard/modules/base/history-entry"
 )
 
 type ApplicationAuth struct {
 	Id            int       `gorm:"type:int(11);size:11;not null;auto_increment;primary_key;column:id;comment:主键ID" json:"id,omitempty"`
-	Uuid          string    `gorm:"size:36;not null;column:uuid;uniqueIndex:uuid;comment:uuid" json:"uuid,omitempty"`
+	Uuid          string    `gorm:"size:255;not null;column:uuid;uniqueIndex:uuid;comment:uuid" json:"uuid,omitempty"`
 	Title         string    `gorm:"size:255;not null;column:title;comment:鉴权名称" json:"title,omitempty"`
 	Namespace     int       `gorm:"type:int(11);size:11;not null;column:namespace;comment:工作空间" json:"namespace,omitempty"`
 	Application   int       `gorm:"type:int(11);size:11;not null;index:application;column:application;comment:应用ID" json:"application,omitempty"`

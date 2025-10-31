@@ -1,329 +1,52 @@
 /*
  * @Author: MengjieYang yangmengjie@eolink.com
  * @Date: 2022-07-28 22:12:29
- * @LastEditors: MengjieYang yangmengjie@eolink.com
- * @LastEditTime: 2022-09-20 23:17:19
- * @FilePath: /apinto/src/app/constant/app.config.ts
+ * @LastEditors: maggieyyy
+ * @LastEditTime: 2024-07-02 10:26:00
+ * @FilePath: \apinto\projects\core\src\app\constant\app.config.ts
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
 
-import { InjectionToken } from '@angular/core'
+import { GuideComponent } from '../layout/guide/guide.component'
+import { DynamicDemoComponent } from '../layout/dynamic-demo/dynamic-demo.component'
+import { BasicLayoutComponent } from '../layout/basic-layout/basic-layout.component'
+import { RemotePluginComponent } from '../layout/remote-plugin/remote-plugin.component'
+import { PluginWrapperComponent } from '../layout/plugin-wrapper/plugin-wrapper.component'
+import { SystemEmailConfigComponent } from '../layout/system/email/config/config.component'
+import { SystemWebhookListComponent } from '../layout/system/webhook/list/list.component'
+import { RedirectPage } from '../layout/redirect-page/redirect-page.component'
+import { RouterLayoutComponent } from '../layout/router-layout/router-layout.component'
 
-export const APP_CONFIG = new InjectionToken('app.config')
 export const MODAL_NORMAL_SIZE: number = 900
 export const MODAL_SMALL_SIZE: number = 600
 export const MODAL_LARGE_SIZE: number = 1200
-export const version:string = '3.3.2'
-export const updateDate:string = '2023-10-27'
 
-// apinto项目的目录参数,其中view和edit字段需要与后端数据一致,以便匹配(权限用)
-export const AppConfig: any = {
-  menuList: [
-    {
-      title: '上游服务',
-      icon: 'connection-box',
-      menuIndex: 0,
-      router: 'upstream',
-      id: 2,
-      menu: true,
-      level: 0,
-      children: [
-        {
-          title: '上游管理',
-          routerLink: 'upstream/upstream',
-          menuIndex: 0,
-          id: 201,
-          level: 1,
-          matchRouter: true,
-          matchRouterExact: false,
-          view: 'service_view',
-          edit: 'service_edit'
-        },
-        {
-          title: '服务发现',
-          routerLink: 'upstream/discovery',
-          menuIndex: 0,
-          id: 202,
-          level: 1,
-          matchRouter: true,
-          matchRouterExact: false,
-          view: 'discovery_view',
-          edit: 'discovery_edit'
-        }
-      ]
-    },
-    {
-      title: 'API管理',
-      icon: 'APIjiekou-7mme3dcg',
-      routerLink: 'router',
-      matchRouter: true,
-      matchRouterExact: false,
-      menuIndex: 0,
-      id: 4,
-      menu: true,
-      level: 1,
-      children: [
-        {
-          title: 'API列表',
-          routerLink: 'router/api',
-          menuIndex: 0,
-          id: 401,
-          level: 1,
-          matchRouter: true,
-          matchRouterExact: false,
-          view: 'api_view',
-          edit: 'api_edit'
-        },
-        {
-          title: '插件模板',
-          routerLink: 'router/plugin-template',
-          menuIndex: 0,
-          id: 402,
-          level: 1,
-          matchRouter: true,
-          matchRouterExact: false,
-          view: 'plugin_template_view',
-          edit: 'plugin_template_edit'
-        }
-      ]
-    },
-    {
-      title: '应用管理',
-      routerLink: 'application',
-      matchRouter: true,
-      matchRouterExact: false,
-      menuIndex: 0,
-      id: 3,
-      menu: true,
-      level: 1,
-      view: 'application_view',
-      edit: 'application_edit',
-      icon: 'yingyong-7mmhj11e'
-    },
-    {
-      title: '基础设施',
-      menuIndex: 0,
-      icon: 'file-cabinet',
-      id: 1,
-      router: 'deploy',
-      menu: true,
-      level: 0,
-      children: [
-        {
-          title: '网关集群',
-          routerLink: 'deploy/cluster',
-          menuIndex: 0,
-          id: 101,
-          level: 1,
-          matchRouter: true,
-          matchRouterExact: false,
-          view: 'cluster_view',
-          edit: 'cluster_edit'
-        },
-        {
-          title: '环境变量',
-          routerLink: 'deploy/variable',
-          menuIndex: 0,
-          id: 102,
-          level: 1,
-          matchRouter: true,
-          matchRouterExact: false,
-          view: 'variable_view',
-          edit: 'variable_edit'
-        },
-        {
-          title: '插件管理',
-          routerLink: 'deploy/plugin',
-          menuIndex: 0,
-          id: 103,
-          level: 1,
-          matchRouter: true,
-          matchRouterExact: false,
-          view: 'plugin_view',
-          edit: 'plugin_edit'
-        }
-      ]
-    },
-    {
-      title: '服务治理',
-      menuIndex: 0,
-      id: 5,
-      menu: true,
-      router: 'serv-governance',
-      icon: 'network-tree',
-      level: 0,
-      children: [
-        {
-          title: '流量策略',
-          routerLink: 'serv-governance/traffic',
-          menuIndex: 0,
-          id: 501,
-          level: 1,
-          matchRouter: true,
-          matchRouterExact: false,
-          view: 'strategy_traffic_view',
-          edit: 'strategy_traffic_edit'
-        },
-        {
-          title: '熔断策略',
-          routerLink: 'serv-governance/fuse',
-          menuIndex: 0,
-          id: 502,
-          level: 1,
-          matchRouter: true,
-          matchRouterExact: false,
-          view: 'strategy_fuse_view',
-          edit: 'strategy_fuse_edit'
-        },
-        {
-          title: '访问策略',
-          routerLink: 'serv-governance/visit',
-          menuIndex: 0,
-          id: 503,
-          level: 1,
-          matchRouter: true,
-          matchRouterExact: false,
-          view: 'strategy_visit_view',
-          edit: 'strategy_visit_edit'
-        },
-        {
-          title: '缓存策略',
-          routerLink: 'serv-governance/cache',
-          menuIndex: 0,
-          id: 504,
-          level: 1,
-          matchRouter: true,
-          matchRouterExact: false,
-          view: 'strategy_cache_view',
-          edit: 'strategy_cache_edit'
-        },
-        {
-          title: '灰度策略',
-          routerLink: 'serv-governance/grey',
-          menuIndex: 0,
-          id: 505,
-          level: 1,
-          matchRouter: true,
-          matchRouterExact: false,
-          view: 'strategy_grey_view',
-          edit: 'strategy_grey_edit'
-        }
-      ]
-    },
-    {
-      title: '系统管理',
-      menuIndex: 0,
-      menu: true,
-      router: 'system',
-      icon: 'system',
-      id: 6,
-      level: 0,
-      children: [
-        {
-          title: '用户角色',
-          routerLink: 'system/role',
-          menuIndex: 0,
-          id: 601,
-          level: 1,
-          matchRouter: true,
-          matchRouterExact: false,
-          view: 'user_role_view',
-          edit: 'user_role_edit'
-        },
-        {
-          title: '外部应用',
-          routerLink: 'system/ext-app',
-          menuIndex: 0,
-          id: 602,
-          level: 1,
-          matchRouter: true,
-          matchRouterExact: false,
-          view: 'ext_app_view',
-          edit: 'ext_app_edit'
-        },
-        {
-          title: '邮箱设置',
-          routerLink: 'system/email',
-          menuIndex: 0,
-          id: 603,
-          level: 1,
-          matchRouter: true,
-          matchRouterExact: false,
-          view: 'notice_email_view',
-          edit: 'notice_email_edit'
-        },
-        {
-          title: 'webhook管理',
-          routerLink: 'system/webhook',
-          menuIndex: 0,
-          id: 604,
-          level: 1,
-          matchRouter: true,
-          matchRouterExact: false,
-          view: 'notice_webhook_view',
-          edit: 'notice_webhook_edit'
-        }
-      ]
-    },
-    {
-      title: '审计日志',
-      routerLink: 'audit-log',
-      matchRouter: true,
-      matchRouterExact: false,
-      menuIndex: 0,
-      menu: true,
-      icon: 'form-one',
-      id: 7,
-      level: 0,
-      view: 'audit_log_view'
-    },
-    {
-      title: '监控告警',
-      routerLink: 'monitor-alarm',
-      menu: true,
-      matchRouter: true,
-      matchRouterExact: false,
-      icon: 'jiankongshexiangtou',
-      id: 901,
-      level: 0,
-      view: 'mon_partition_view',
-      edit: 'mon_partition_edit'
-    },
-    {
-      title: '查看授权',
-      routerLink: 'auth-info',
-      menu: false,
-      id: 8,
-      level: 0,
-      view: 'authorization_view',
-      edit: 'authorization_edit'
-    },
-    {
-      title: '企业插件',
-      routerLink: 'module-plugin',
-      menu: true,
-      id: 10,
-      level: 0,
-      view: 'enterprise_plugin_view',
-      edit: 'enterprise_plugin_edit'
-    },
-    {
-      title: '导航管理',
-      routerLink: 'navigation',
-      menu: true,
-      id: 11,
-      level: 0,
-      view: 'navigation_view',
-      edit: 'navigation_edit'
-    },
-    {
-      title: '拦截器管理',
-      routerLink: 'interceptor',
-      menu: true,
-      id: 12,
-      level: 0,
-      view: 'interceptor_view',
-      edit: 'interceptor_edit'
-    }
-  ]
-}
+// 内置插件与对应组件/模块
+export const routerMap:Map<string, any> = new Map([
+  ['basicLayout', { type: 'component', component: BasicLayoutComponent }],
+  ['redirectPage', { type: 'component', component: RedirectPage }],
+  ['guide', { type: 'component', component: GuideComponent }],
+  ['cluster', { type: 'module', module: () => import('projects/core/src/app/layout/deploy-cluster/deploy-cluster.module').then(m => m.DeployClusterModule) }],
+  ['global-env', { type: 'module', module: () => import('projects/core/src/app/layout/global-env-var/global-env-var.module').then(m => m.GlobalEnvVarModule) }],
+  ['node-plugin', { type: 'module', module: () => import('projects/core/src/app/layout/node-plugin/node-plugin.module').then(m => m.NodePluginModule) }],
+  ['application', { type: 'module', module: () => import('projects/core/src/app/layout/application/application.module').then(m => m.ApplicationModule) }],
+  ['api', { type: 'module', module: () => import('projects/core/src/app/layout/api/api.module').then(m => m.ApiModule) }],
+  ['plugin-template', { type: 'module', module: () => import('projects/core/src/app/layout/plugin-template/plugin-template.module').then(m => m.PluginTemplateModule) }],
+  ['traffic-strategy', { type: 'module', module: () => import('projects/core/src/app/layout/serv-governance/traffic-strategy/traffic-strategy.module').then(m => m.TrafficStrategyModule) }],
+  ['fuse-strategy', { type: 'module', module: () => import('projects/core/src/app/layout/serv-governance/fuse-strategy/fuse-strategy.module').then(m => m.FuseStrategyModule) }],
+  ['visit-strategy', { type: 'module', module: () => import('projects/core/src/app/layout/serv-governance/visit-strategy/visit-strategy.module').then(m => m.VisitStrategyModule) }],
+  ['cache-strategy', { type: 'module', module: () => import('projects/core/src/app/layout/serv-governance/cache-strategy/cache-strategy.module').then(m => m.CacheStrategyModule) }],
+  ['grey-strategy', { type: 'module', module: () => import('projects/core/src/app/layout/serv-governance/grey-strategy/grey-strategy.module').then(m => m.GreyStrategyModule) }],
+  ['data-mask-strategy', { type: 'module', module: () => import('projects/core/src/app/layout/serv-governance/data-mask/data-mask.module').then(m => m.DataMaskModule) }],
+  ['open-api', { type: 'module', module: () => import('projects/core/src/app/layout/open-api/open-api.module').then(m => m.OpenApiModule) }],
+  ['email', { type: 'component', component: SystemEmailConfigComponent }],
+  ['webhook', { type: 'component', component: SystemWebhookListComponent }],
+  ['audit-log', { type: 'module', module: () => import('projects/core/src/app/layout/audit-log/audit-log.module').then(m => m.AuditLogModule) }],
+  ['module-plugin', { type: 'module', module: () => import('projects/core/src/app/layout/plugin/plugin-management.module').then(m => m.PluginManagementModule) }],
+  ['log', { type: 'module', module: () => import('projects/core/src/app/layout/log-retrieval/log-retrieval.module').then(m => m.LogRetrievalModule) }],
+  ['intelligent', { type: 'module', module: () => import('projects/core/src/app/layout/intelligent-plugin/intelligent-plugin.module').then(m => m.IntelligentPluginModule) }],
+  ['dynamic-demo', { type: 'component', component: DynamicDemoComponent }],
+  ['remote', { type: 'component', component: RemotePluginComponent }],
+  ['plugin-wrapper', { type: 'component', component: PluginWrapperComponent }],
+  ['nav-hidden', { type: 'component', component: RouterLayoutComponent }]
+])

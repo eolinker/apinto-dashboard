@@ -1,3 +1,9 @@
+/*
+ * @Date: 2023-05-25 18:56:05
+ * @LastEditors: maggieyyy
+ * @LastEditTime: 2024-04-16 18:47:46
+ * @FilePath: \apinto\projects\core\src\environments\environment.ts
+ */
 export const environment = {
   production: false,
   isBusiness: false,

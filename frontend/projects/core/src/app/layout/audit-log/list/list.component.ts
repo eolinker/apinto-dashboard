@@ -174,6 +174,8 @@ export class AuditLogListComponent implements OnInit {
         return '删除'
       case 'publish':
         return '发布'
+      case 'offline':
+        return '下线'
       default:
         return '编辑'
     }

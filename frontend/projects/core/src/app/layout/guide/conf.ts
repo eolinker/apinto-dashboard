@@ -21,7 +21,7 @@ export const GuideStepList:Array<StepItem> = [
     title: '创建网关集群',
     desc: ['创建 Apinto 网关集群，集群用于承载网络流量'],
     status: 'undo',
-    toDoUrl: 'deploy/cluster/create',
+    toDoUrl: 'deploy/cluster',
     doneUrl: 'deploy/cluster',
     color: '#ee6760'
   },

@@ -1,5 +1,12 @@
+/*
+ * @Date: 2023-05-25 18:56:03
+ * @LastEditors: maggieyyy
+ * @LastEditTime: 2023-12-13 11:19:16
+ * @FilePath: \apinto\projects\core\src\app\component\card-list\card-list.component.ts
+ */
 import { Component, EventEmitter, Inject, Input, Output, TemplateRef } from '@angular/core'
 import { API_URL } from '../../service/api.service'
+import { BaseInfoService } from '../../service/base-info.service'
 
 export type CardItem = {title:string|TemplateRef<any>, enable:boolean, desc:string, iconAddr?:string, isInner?:boolean, id:string, [k:string]:any}
 @Component({
@@ -19,7 +26,7 @@ export type CardItem = {title:string|TemplateRef<any>, enable:boolean, desc:stri
 
             <ng-template #cardStatusTml>
               <ng-container *ngIf="type === 'plugin'">
-              <span class="mr-[8px] text-[12px] font-medium text-[#00785A] bg-[#00785A1A] px-[4px] py-[2px] leading-[20px] rounded" *ngIf="card?.isInner">Apinto 内置</span>
+              <span class="mr-[8px] text-[12px] font-medium text-[#00785A] bg-[#00785A1A] px-[4px] py-[2px] leading-[20px] rounded" *ngIf="card?.isInner">{{product}} 内置</span>
               </ng-container>
             </ng-template>
             <ng-template #avatarTemplate>
@@ -76,9 +83,9 @@ export class CardListComponent {
 
   @Input() type:string = 'plugin'
   @Output() cardClick:EventEmitter<CardItem> = new EventEmitter()
-
+  product = this.baseInfo.product
   constructor (
-    @Inject(API_URL) public urlPrefix:string) {
+    @Inject(API_URL) public urlPrefix:string, private baseInfo:BaseInfoService) {
   }
 
   handlerCardClick (card:CardItem) {

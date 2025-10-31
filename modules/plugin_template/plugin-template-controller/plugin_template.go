@@ -2,10 +2,13 @@ package plugin_template_controller
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/controller/users"
 	"github.com/eolinker/apinto-dashboard/enum"
+	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/plugin_template"
 	"github.com/eolinker/apinto-dashboard/modules/plugin_template/plugin-template-dto"
@@ -13,7 +16,6 @@ import (
 	"github.com/eolinker/apinto-dashboard/modules/plugin_template/plugin-template-model"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 type pluginTemplateController struct {
@@ -125,16 +127,24 @@ func (p *pluginTemplateController) createTemplate(ginCtx *gin.Context) {
 	detail := &plugin_template_model.PluginTemplateDetail{
 		PluginTemplate: &plugin_template_model.PluginTemplate{
 			PluginTemplate: &plugin_template_entry.PluginTemplate{
+				UUID: input.Uuid,
 				Name: input.Name,
 				Desc: input.Desc,
 			},
 		},
 		Plugins: plugins,
 	}
-
-	if err := p.pluginTemplateService.Create(ginCtx, namespaceId, userId, detail); err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
-		return
+	_, err := p.pluginTemplateService.GetByUUID(ginCtx, namespaceId, input.Uuid)
+	if err != nil {
+		if err := p.pluginTemplateService.Create(ginCtx, namespaceId, userId, detail); err != nil {
+			controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
+			return
+		}
+	} else {
+		if err := p.pluginTemplateService.Update(ginCtx, namespaceId, userId, detail); err != nil {
+			controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
+			return
+		}
 	}
 
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(nil))
@@ -271,6 +281,7 @@ func (p *pluginTemplateController) onlines(ginCtx *gin.Context) {
 
 // 上线管理-上线/更新
 func (p *pluginTemplateController) online(ginCtx *gin.Context) {
+	audit_model.LogOperateTypePublish.Handler(ginCtx)
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	userId := users.GetUserId(ginCtx)
 	uuid := ginCtx.Query("uuid")
@@ -310,6 +321,7 @@ func (p *pluginTemplateController) online(ginCtx *gin.Context) {
 
 // 下线
 func (p *pluginTemplateController) offline(ginCtx *gin.Context) {
+	audit_model.LogOperateTypePublish.Handler(ginCtx)
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	userId := users.GetUserId(ginCtx)
 	uuid := ginCtx.Query("uuid")

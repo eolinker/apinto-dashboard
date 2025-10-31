@@ -1,3 +1,9 @@
+/*
+ * @Date: 2023-06-29 17:10:34
+ * @LastEditors: maggieyyy
+ * @LastEditTime: 2024-01-29 18:59:12
+ * @FilePath: \apinto\projects\core\src\app\layout\api\api-list\create\http-create\http-create.component.ts
+ */
 import { Component } from '@angular/core'
 import { ApiWebsocketCreateComponent } from '../websocket-create/websocket-create.component'
 import { setFormValue } from 'projects/core/src/app/constant/form'
@@ -43,7 +49,10 @@ export class ApiHttpCreateComponent extends ApiWebsocketCreateComponent {
     this.api.get('router', { uuid: this.apiUuid }).subscribe((resp) => {
       if (resp.code === 0) {
         setFormValue(this.validateForm, resp.data.api)
-        this.validateForm.controls['requestPath'].setValue(resp.data.api.requestPath[0] === '/' ? resp.data.api.requestPath.slice(1) : resp.data.api.requestPath)
+        // @ts-ignore
+        this.validateForm.controls.retry.setValue(resp.data.api.retry)
+        // @ts-ignore
+        this.validateForm.controls.requestPath.setValue(resp.data.api.requestPath[0] === '/' ? resp.data.api.requestPath.slice(1) : resp.data.api.requestPath)
         this.createApiForm = resp.data.api
         if (
           !resp.data.api.method ||
@@ -56,6 +65,15 @@ export class ApiHttpCreateComponent extends ApiWebsocketCreateComponent {
         }
         this.getHeaderList()
         this.hostsList = [...resp.data.api.hosts?.map((x:string) => ({ key: x })) || [], { key: '' }]
+        this.configList = resp.data?.api.plugins?.map((plugin:any) => {
+          plugin.disable = !plugin.disable
+          try {
+            plugin.config = JSON.stringify(this.jsonService.handleJsonSchema2Json(JSON.parse(plugin.config))) === '{}' ? plugin.config : JSON.stringify(this.jsonService.handleJsonSchema2Json(JSON.parse(plugin.config)))
+          } catch {
+            plugin.config = JSON.stringify(plugin.config)
+          }
+          return plugin
+        }) || []
       }
     })
   }

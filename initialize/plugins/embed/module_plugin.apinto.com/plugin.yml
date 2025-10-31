@@ -2,7 +2,7 @@ id: "module_plugin.apinto.com"
 name: "module-plugin"
 cname: "插件管理"
 resume: ""
-version: "v1.0.5"
+version: "v1.2.1"
 icon: "logo.png"
 driver: "module_plugin.apinto.com"
 type: 0 #0为框架模块 1为核心模块 2为内置模块 3为非内置
@@ -11,6 +11,12 @@ is_can_disable: false
 is_can_uninstall: false
 visible_in_navigation: true
 visible_in_market: false
-front:
+front: module-plugin
 navigation: "navigation.module_plugin"
 group_id: "core_module"
+frontend:
+  - name: module-plugin
+    driver: apinto.builtIn.module
+    router:
+      - path: module-plugin
+        type: normal

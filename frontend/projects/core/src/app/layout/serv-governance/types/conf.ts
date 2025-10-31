@@ -75,6 +75,39 @@ export const metricsList:SelectOption[] = [
   { label: 'API', value: '{api}' }
 ]
 
+export const MatchRules:SelectOption[] = [
+  { label: '数据格式', value: 'inner' },
+  { label: '关键字', value: 'keyword' },
+  { label: '正则表达式', value: 'regex' },
+  { label: 'JSON Path', value: 'json_path' }
+]
+
+export const DataFormatOptions:SelectOption[] = [
+  { label: '姓名', value: 'name' },
+  { label: '手机号', value: 'phone' },
+  { label: '身份证号', value: 'id-card' },
+  { label: '银行卡号', value: 'bank-card' },
+  { label: '日期', value: 'date' },
+  { label: '金额', value: 'amount' }
+]
+
+export const DataMaskBaseOptions:SelectOption[] = [
+  { label: '局部显示', value: 'partial-display' },
+  { label: '局部遮蔽', value: 'partial-masking' },
+  { label: '截取', value: 'truncation' },
+  { label: '替换', value: 'replacement' }
+]
+
+export const DataMaskOrderOptions:SelectOption[] = [
+  ...DataMaskBaseOptions,
+  { label: '乱序', value: 'shuffling' }
+]
+
+export const DataMaskReplaceStrOptions:SelectOption[] = [
+  { label: '随机字符串', value: 'random' },
+  { label: '自定义字符串', value: 'custom' }
+]
+
 export const distributionOptions: RadioOption[] = [
   { label: '按百分比', value: 'percent' },
   { label: '按规则', value: 'match' }
@@ -84,6 +117,7 @@ export const visitRuleList:SelectOption[] = [
   { label: '允许', value: 'allow' },
   { label: '拒绝', value: 'refuse' }
 ]
+
 // 策略列表表格参数
 export const strategiesTableHeadName:THEAD_TYPE[] = [
   {
@@ -221,6 +255,46 @@ export const responseHeaderTableBody:TBODY_TYPE[] = [
       },
       {
         title: '减少',
+        action: 'delete'
+      }
+    ]
+  }
+]
+
+// 高级匹配表格参数
+export const ruleHeaderTableHeadName:THEAD_TYPE[] = [
+  { title: '匹配类型', width: 80 },
+  { title: '匹配值', width: 80 },
+  { title: '脱敏类型', width: 80 },
+  { title: '脱敏方式' },
+  {
+    title: '操作',
+    right: true
+  }
+]
+
+export const ruleHeaderTableBody:EO_TBODY_TYPE[] = [
+  {
+    key: 'matchType'
+  },
+  {
+    key: 'matchValue'
+  },
+  {
+    key: 'maskType'
+  },
+  {
+    key: 'maskRule'
+  },
+  {
+    type: 'btn',
+    right: true,
+    btns: [
+      {
+        title: '配置'
+      },
+      {
+        title: '删除',
         action: 'delete'
       }
     ]

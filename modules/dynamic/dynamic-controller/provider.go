@@ -3,8 +3,7 @@ package dynamic_controller
 import (
 	"context"
 	"fmt"
-
-	apinto_module "github.com/eolinker/apinto-dashboard/module"
+	"github.com/eolinker/apinto-dashboard/pm3"
 
 	"github.com/eolinker/apinto-dashboard/modules/dynamic"
 	"github.com/eolinker/eosc/common/bean"
@@ -23,15 +22,15 @@ func newSkillProvider(profession string, skill string) *skillProvider {
 	return p
 }
 
-func (s *skillProvider) Provide(namespaceID int) []apinto_module.Cargo {
+func (s *skillProvider) Provide(namespaceID int) []pm3.Cargo {
 	list, err := s.dynamicService.GetBySkill(context.Background(), namespaceID, s.skill)
 	if err != nil {
 		log.Error("get skill error: ", err)
 		return nil
 	}
-	result := make([]apinto_module.Cargo, 0, len(list))
+	result := make([]pm3.Cargo, 0, len(list))
 	for _, l := range list {
-		result = append(result, apinto_module.Cargo{
+		result = append(result, pm3.Cargo{
 			Value: l.ID,
 			Title: fmt.Sprintf("%s[%s]", l.Title, l.Driver),
 		})

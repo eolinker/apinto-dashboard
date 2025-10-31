@@ -2,6 +2,9 @@ package controller
 
 import (
 	"fmt"
+	"github.com/eolinker/apinto-dashboard/frontend"
+	"github.com/eolinker/apinto-dashboard/pm3"
+	"github.com/eolinker/apinto-dashboard/pm3/middleware"
 	"net/http"
 	"strings"
 
@@ -18,17 +21,23 @@ var (
 )
 
 type Module struct {
-	middlewareHandler []apinto_module.MiddlewareHandler
-	routers           apinto_module.RoutersInfo
+	*pm3.ModuleTool
 
-	providers apinto_module.IProviders
+	middlewareHandler []pm3.Middleware
+	frontendAssets    []pm3.FrontendAsset
+	apis              []pm3.Api
+	providers         apinto_module.IProviders
 }
 
-func (m *Module) RoutersInfo() apinto_module.RoutersInfo {
-	return m.routers
+func (m *Module) Frontend() []pm3.FrontendAsset {
+	return m.frontendAssets
 }
 
-func (m *Module) MiddlewaresInfo() []apinto_module.MiddlewareHandler {
+func (m *Module) Apis() []pm3.Api {
+	return m.apis
+}
+
+func (m *Module) Middleware() []pm3.Middleware {
 	return m.middlewareHandler
 }
 
@@ -36,15 +45,7 @@ func (m *Module) Name() string {
 	return "core"
 }
 
-func (m *Module) Routers() (apinto_module.Routers, bool) {
-	return m, true
-}
-
-func (m *Module) Middleware() (apinto_module.Middleware, bool) {
-	return m, true
-}
-
-func (m *Module) Support() (apinto_module.ProviderSupport, bool) {
+func (m *Module) Support() (pm3.ProviderSupport, bool) {
 	return nil, false
 }
 
@@ -62,7 +63,7 @@ func (m *Module) provider(context *gin.Context) {
 		return
 	}
 	cargos := provider.Provide(namespaceID)
-	result := make([]*apinto_module.CargoItem, 0, len(cargos))
+	result := make([]*pm3.CargoItem, 0, len(cargos))
 	for _, c := range cargos {
 		result = append(result, c.Export())
 	}
@@ -89,7 +90,7 @@ func (m *Module) enum(context *gin.Context) {
 		return
 	}
 	cargos := provider.Provide(namespaceID)
-	result := make([]*apinto_module.CargoItem, 0, len(cargos))
+	result := make([]*pm3.CargoItem, 0, len(cargos))
 	for _, c := range cargos {
 		export := c.Export()
 		index := strings.LastIndex(export.Value, "@")
@@ -140,95 +141,65 @@ func (m *Module) status(context *gin.Context) {
 	})
 
 }
-func NewModule() *Module {
-	userController := newUserController()
+func NewModule(id, name string) *Module {
 	middlewareHandler := []apinto_module.MiddlewareHandler{
-		{
-			Name:    "namespace",
-			Rule:    apinto_module.MiddlewareRule(apinto_module.RouterLabelApi),
-			Handler: namespace_controller.MustNamespace,
-		},
-		{
-			Name:        "login-module",
-			Rule:        apinto_module.MiddlewareRule(apinto_module.RouterLabelModule),
-			Handler:     userController.LoginCheckModule,
-			Replaceable: true,
-		}, {
-			Name:        "login-api",
-			Rule:        apinto_module.MiddlewareRule(apinto_module.RouterLabelApi),
-			Handler:     userController.LoginCheckApi,
-			Replaceable: true,
-		}, {
-			Name:    "userID",
-			Rule:    apinto_module.MiddlewareRule(apinto_module.RouterLabelApi),
-			Handler: userController.SetUser,
-		},
+		middleware.Create(namespace_controller.MustNamespace, middleware.IsApi),
 	}
-	m := &Module{
 
+	m := &Module{
+		ModuleTool:        pm3.NewModuleTool(id, name),
 		middlewareHandler: middlewareHandler,
+		frontendAssets:    frontend.Frontends(),
 	}
-	routers := apinto_module.RoutersInfo{
+	routers := make([]pm3.Api, 0, 25)
+	routers = apinto_module.RoutersInfo{
 		{
 			Method:      http.MethodGet,
 			Path:        fmt.Sprintf("/api/common/provider/:skill"),
-			Handler:     "core.provider",
-			HandlerFunc: []apinto_module.HandlerFunc{m.provider},
-			Labels:      apinto_module.RouterLabelAssets,
+			HandlerFunc: m.provider,
+			Authority:   pm3.Public,
 		},
 		{
-			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("/api/common/status"),
-			Handler:     "core.provider",
-			HandlerFunc: []apinto_module.HandlerFunc{m.status},
-			Labels:      apinto_module.RouterLabelAssets,
+			Method: http.MethodGet,
+			Path:   fmt.Sprintf("/api/common/status"),
+
+			HandlerFunc: m.status,
+			Authority:   pm3.Public,
 		}, {
-			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("/api/common/enum/:skill"),
-			Handler:     "core.provider",
-			HandlerFunc: []apinto_module.HandlerFunc{m.enum},
-			Labels:      apinto_module.RouterLabelAssets,
+			Method: http.MethodGet,
+			Path:   fmt.Sprintf("/api/common/enum/:skill"),
+
+			HandlerFunc: m.enum,
+			Authority:   pm3.Public,
 		}, {
 			Method:      http.MethodGet,
 			Path:        fmt.Sprintf("/api/common/report"),
-			Handler:     "core.provider",
-			HandlerFunc: []apinto_module.HandlerFunc{m.reportStatus},
-			Labels:      apinto_module.RouterLabelAssets,
+			HandlerFunc: m.reportStatus,
+			Authority:   pm3.Public,
 		},
 		{
 			Method:      http.MethodPost,
 			Path:        fmt.Sprintf("/api/common/report"),
-			Handler:     "core.provider",
-			HandlerFunc: []apinto_module.HandlerFunc{m.updateReport},
-			Labels:      apinto_module.RouterLabelAssets,
+			HandlerFunc: m.updateReport,
+			Authority:   pm3.Public,
 		},
 		{
 			Method:      http.MethodPut,
 			Path:        fmt.Sprintf("/api/common/report"),
-			Handler:     "core.provider",
-			HandlerFunc: []apinto_module.HandlerFunc{m.updateReport},
-			Labels:      apinto_module.RouterLabelAssets,
+			HandlerFunc: m.updateReport,
+			Authority:   pm3.Public,
 		},
 	}
-	assets := staticFile("/assets", "dist/assets")
-	routers = append(routers, assets...)
-	aceBuilds := staticFile("/ace-builds", "dist/ace-builds")
-	routers = append(routers, aceBuilds...)
-	frontend := staticFile("/frontend", "dist")
-	routers = append(routers, frontend...)
 
-	routers = append(routers, favicon())
-	routers = append(routers, indexRouter())
 	routers = append(routers, commonStrategy()...)
-	routers = append(routers, moduleRouters()...)
-	systemRouter := newSystem()
-	routers = append(routers, systemRouter.RoutersInfo()...)
+	systemRouter := systemRouters()
+	routers = append(routers, systemRouter...)
 	routers = append(routers, envEnumRouters()...)
 	routers = append(routers, notice_controller.InitRouter()...)
-	routers = append(routers, userRouters()...)
 	routers = append(routers, randomRouters()...)
-	m.routers = routers
-
+	routers = append(routers, userApis()...)
+	m.apis = routers
+	m.InitAccess(m.apis)
 	bean.Autowired(&m.providers)
 	return m
 }

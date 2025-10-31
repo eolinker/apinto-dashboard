@@ -9,12 +9,13 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 ARG APP
 ARG VERSION
 ARG DIR
+ARG BUILD_ARCH
 
 RUN mkdir -p /${APP}
 
-COPY ${DIR}/${APP}_${VERSION}_linux_amd64.tar.gz /${APP}
+COPY ${DIR}/${APP}_${VERSION}_linux_${BUILD_ARCH}.tar.gz /${APP}
 
-RUN cd /${APP} && tar -zxvf ${APP}_${VERSION}_linux_amd64.tar.gz && rm -rf ${APP}_${VERSION}_linux_amd64.tar.gz && ln -snF ${APP}_${VERSION} ${APP}
+RUN cd /${APP} && tar -zxvf ${APP}_${VERSION}_linux_${BUILD_ARCH}.tar.gz && rm -rf ${APP}_${VERSION}_linux_${BUILD_ARCH}.tar.gz && ln -snF ${APP}_${VERSION} ${APP}
 
 WORKDIR /$APP/$APP
 

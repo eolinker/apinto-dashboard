@@ -2,10 +2,13 @@ package main
 
 import (
 	"github.com/eolinker/apinto-dashboard/config"
+	"github.com/eolinker/apinto-dashboard/module/builder"
 	client "github.com/eolinker/apinto-dashboard/plugin/go-plugin/plugin-client"
 	shared "github.com/eolinker/apinto-dashboard/plugin/go-plugin/shared"
 	"github.com/eolinker/eosc/log"
 	"github.com/gin-gonic/gin"
+	"net"
+	"net/http"
 )
 
 func main() {
@@ -29,19 +32,17 @@ func main() {
 	// We should have a Greeter now! This feels like a normal interface
 	// implementation but is in fact over an RPC connection.
 	handler := raw.(client.ClientHandler)
-	middleware, err := handler.CreateMiddleware("test", nil, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-	gin.SetMode(gin.ReleaseMode)
-	engine := gin.New()
 
-	engine.Any("/*tt", middleware.Middleware, func(context *gin.Context) {
-		handler.ServerGin(context, nil, nil)
-	})
-	err = engine.Run(":8880")
+	b := builder.NewModuleBuilder(gin.New())
+	b.Append(handler)
+	server, _, err := b.Build()
 	if err != nil {
-		log.Info(err)
 		return
 	}
+	listen, err := net.Listen("tcp", ":8880")
+	if err != nil {
+		return
+	}
+	http.Serve(listen, server)
+
 }

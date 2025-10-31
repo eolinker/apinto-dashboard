@@ -14,3 +14,6 @@ type Module struct {
 	//Type  string `json:"type"`
 	Path string `json:"path"`
 }
+
+type PluginConfig struct {
+}

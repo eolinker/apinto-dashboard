@@ -9,9 +9,9 @@ func init() {
 	bean.Injection(&infoService)
 	userInfo := newUserInfoIdCache()
 	userNameInfo := newUserInfoNameCache()
-	session := newSessionCache()
+	//session := newSessionCache()
 	bean.Injection(&userInfo)
 	bean.Injection(&userNameInfo)
-	bean.Injection(&session)
+	//bean.Injection(&session)
 
 }

@@ -19,6 +19,6 @@ func init() {
 	v.namespaceCacheById = cache.CreateRedisCache[namespace_model.Namespace, int](time.Minute*30, func(id int) string {
 		return fmt.Sprintf("namespace:id:%d", id)
 	})
-	v.namespaceCacheAll = cache.CreateRedisCacheNoKey[namespace_model.Namespace](time.Minute*30, "namespace:all")
+	v.namespaceCacheAll = cache.CreateRedisCacheNoKey[*namespace_model.Namespace](time.Minute*30, "namespace:all")
 	bean.Injection(&i)
 }

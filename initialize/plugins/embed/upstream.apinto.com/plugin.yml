@@ -2,7 +2,7 @@ id: "upstream.apinto.com"
 name: "upstream"
 cname: "上游服务"
 resume: "配置上游服务信息，通过API绑定，实现完整转发流程。支持IP Hash、带权轮询等负载均衡算法，合理分配上游服务压力，保证上游服务稳定性。"
-version: "v1.0.7"
+version: "v1.2.1"
 icon: "logo.png"
 driver: "upstream.apinto.com"
 type: 1 #0为框架模块 1为核心模块 2为内置模块 3为非内置
@@ -11,9 +11,15 @@ is_can_disable: false
 is_can_uninstall: false
 visible_in_navigation: true
 visible_in_market: true
-front: template
+front: template/upstream
 navigation: "navigation.upstream"
 group_id: "core_module"
+frontend:
+  - name: upstream
+    driver: apinto.intelligent.normal
+    router:
+      - path: template/upstream
+        type: normal
 define:  # 动态模块定义
   options:
     name: service
@@ -355,7 +361,7 @@ define:  # 动态模块定义
                       "labelCol": 6,
                       "wrapperCol": 10
                   },
-                  "default": "pass",
+                  "default": "node",
                   "required": true,
                   "enum": [
                       {
@@ -425,7 +431,7 @@ define:  # 动态模块定义
                       "wrapperCol": 10
                   },
                   "required": true,
-                  "default": 1000,
+                  "default": 10000,
                   "name": "timeout",
                   "description": "单位：ms，最小值：1",
                   "x-index": 9

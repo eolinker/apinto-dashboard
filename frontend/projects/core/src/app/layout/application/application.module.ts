@@ -19,15 +19,8 @@ import { EoNgSwitchModule } from 'eo-ng-switch'
 import { EoNgTableModule } from 'eo-ng-table'
 import { EoNgTabsModule } from 'eo-ng-tabs'
 import { EoNgTreeModule } from 'eo-ng-tree'
-import { NzAvatarModule } from 'ng-zorro-antd/avatar'
-import { NzCheckboxModule } from 'ng-zorro-antd/checkbox'
-import { NzHighlightModule } from 'ng-zorro-antd/core/highlight'
 import { NzFormModule } from 'ng-zorro-antd/form'
 import { NzGridModule } from 'ng-zorro-antd/grid'
-import { NzLayoutModule } from 'ng-zorro-antd/layout'
-import { NzModalModule } from 'ng-zorro-antd/modal'
-import { NzTableModule } from 'ng-zorro-antd/table'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
 import { ComponentModule } from '../../component/component.module'
 import { ApplicationAuthenticationComponent } from './authentication/authentication.component'
 import { ApplicationContentComponent } from './content/content.component'
@@ -43,6 +36,25 @@ import { ApplicationExtraComponent } from './extra/extra.component'
 import { ApplicationAuthenticationViewComponent } from './authentication/view/view.component'
 import { ApplicationExtraFormComponent } from './extra/form/form.component'
 
+const sharedEoLibraryModules = [
+  EoNgButtonModule,
+  EoNgBreadcrumbModule,
+  EoNgLayoutModule,
+  EoNgMenuModule,
+  EoNgSelectModule,
+  EoNgFeedbackModalModule,
+  EoNgFeedbackTooltipModule,
+  EoNgTabsModule,
+  EoNgCheckboxModule,
+  EoNgInputModule,
+  EoNgCascaderModule,
+  EoNgTreeModule,
+  EoNgDropdownModule,
+  EoNgDatePickerModule,
+  EoNgSwitchModule,
+  EoNgTableModule,
+  EoNgApintoTableModule
+]
 @NgModule({
   declarations: [
     ApplicationManagementComponent,
@@ -58,38 +70,15 @@ import { ApplicationExtraFormComponent } from './extra/form/form.component'
     ApplicationExtraFormComponent
   ],
   imports: [
-    EoNgLayoutModule,
-    EoNgMenuModule,
     CommonModule,
-    EoNgBreadcrumbModule,
-    EoNgSelectModule,
     FormsModule,
-    ComponentModule,
-    EoNgTableModule,
-    EoNgFeedbackModalModule,
-    EoNgFeedbackTooltipModule,
-    EoNgTabsModule,
-    EoNgCheckboxModule,
-    NzTableModule,
-    EoNgInputModule,
-    EoNgCascaderModule,
-    EoNgTreeModule,
-    EoNgDropdownModule,
-    EoNgDatePickerModule,
-    EoNgSwitchModule,
-    NzAvatarModule,
-    EoNgButtonModule,
-    NzFormModule,
     ReactiveFormsModule,
-    NzLayoutModule,
-    NzToolTipModule,
-    NzCheckboxModule,
-    NzGridModule,
-    NzModalModule,
-    NzHighlightModule,
-    DirectiveModule,
     ApplicationRoutingModule,
-    EoNgApintoTableModule,
+    DirectiveModule,
+    ComponentModule,
+    ...sharedEoLibraryModules,
+    NzFormModule,
+    NzGridModule,
     NzSpinModule
   ]
 })

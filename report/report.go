@@ -130,23 +130,18 @@ func getNodes() []string {
 		return nil
 	}
 	if len(nodeps) > 0 {
-		nodes := make([]string, 0, len(nodeps))
-		for _, nodep := range nodeps {
-			nodes = append(nodes, *nodep)
-		}
-		return nodes
+
+		return nodeps
 	}
 	nodes, err := nodeService.QueryAllCluster(context.Background())
 	if err != nil {
 		return nil
 	}
-	var ids []string = make([]string, 0, len(nodes))
-	nodeps = make([]*string, 0, len(nodes))
+	nodeps = make([]string, 0, len(nodes))
 	for _, node := range nodes {
-		ids = append(ids, node.Name)
-		nodeps = append(nodeps, &node.Name)
+		nodeps = append(nodeps, node.Name)
 	}
 
 	_ = nodeCache.SetAll(context.Background(), nodeps)
-	return ids
+	return nodeps
 }

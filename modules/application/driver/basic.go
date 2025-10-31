@@ -4,12 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
+
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/application"
 	application_model "github.com/eolinker/apinto-dashboard/modules/application/application-model"
-	"strings"
 )
 
 type Basic struct {
@@ -22,22 +23,22 @@ type BasicConfig struct {
 	Label    map[string]string `json:"label"`
 }
 
-func (b *Basic) CheckInput(config []byte) error {
+func (b *Basic) CheckInput(config []byte) ([]byte, error) {
 	basicConfig := new(BasicConfig)
 	if err := json.Unmarshal(config, basicConfig); err != nil {
-		return err
+		return nil, err
 	}
 	if basicConfig.UserName == "" || basicConfig.Password == "" {
-		return errors.New("username or password is null")
+		return nil, errors.New("username or password is null")
 	}
 
 	for key, _ := range basicConfig.Label {
 		if _, ok := enum.Keyword[strings.ToLower(key)]; ok {
-			return errors.New(fmt.Sprintf("标签信息中的%s为系统关键字", key))
+			return nil, errors.New(fmt.Sprintf("标签信息中的%s为系统关键字", key))
 		}
 	}
 
-	return nil
+	return config, nil
 }
 
 func (b *Basic) GetAuthListInfo(config []byte) string {

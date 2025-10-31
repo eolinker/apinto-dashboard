@@ -1,50 +1,70 @@
 package local
 
 import (
+	"fmt"
 	apinto_module "github.com/eolinker/apinto-dashboard/module"
+	client "github.com/eolinker/apinto-dashboard/plugin/go-plugin/plugin-client"
+	"github.com/eolinker/apinto-dashboard/plugin/go-plugin/shared"
+	"github.com/hashicorp/go-plugin"
 )
 
-type tModule struct {
-	name              string
-	middlewareHandler []apinto_module.MiddlewareHandler
-	routersInfo       apinto_module.RoutersInfo
-	proxy             *ProxyAPi
+var (
+	_ apinto_module.ModuleNeedKill = (*ProxyAPi)(nil)
+)
+
+type ProxyAPi struct {
+	client *plugin.Client
+	cmd    string
+	id     string
+	module string
+	params map[string]string
+
+	client.ClientHandler
 }
 
-func (m *tModule) Kill() {
-	if m.proxy != nil {
-		m.proxy.client.Kill()
+func (p *ProxyAPi) Kill() {
+	p.kill()
+}
+
+func (p *ProxyAPi) kill() {
+
+	if p.client != nil {
+		p.client.Kill()
+		p.client = nil
 	}
-}
 
-func (m *tModule) RoutersInfo() apinto_module.RoutersInfo {
-	return m.routersInfo
 }
-
-func (m *tModule) MiddlewaresInfo() []apinto_module.MiddlewareHandler {
-	return m.middlewareHandler
-}
-
-func (m *tModule) Name() string {
-	return m.name
-}
-
-func (m *tModule) Routers() (apinto_module.Routers, bool) {
-	if len(m.routersInfo) == 0 {
-		return nil, false
+func (p *ProxyAPi) initClient() error {
+	params := make([]string, 0, len(p.params))
+	for k, v := range p.params {
+		params = append(params, fmt.Sprintf("%s=%s", k, v))
 	}
-	return m, true
-}
+	c := client.CreateClient(p.id, p.module, cmdPath(p.cmd), params...)
 
-func (m *tModule) Middleware() (apinto_module.Middleware, bool) {
-	if len(m.middlewareHandler) == 0 {
-		return nil, false
+	rpcClient, err := c.Client()
+	if err != nil {
+		return err
 	}
-	return m, true
+	// Request the plugin
+	raw, err := rpcClient.Dispense(shared.PluginHandlerName)
+	if err != nil {
+
+		return err
+	}
+
+	// We should have a Greeter now! This feels like a normal interface
+	// implementation but is in fact over an RPC connection.
+	handler := raw.(client.ClientHandler)
+	p.ClientHandler = handler
+	p.client = c
+	return nil
 }
+func NewProxyAPi(cmd string, id, module string, config *Config) (*ProxyAPi, error) {
 
-func (m *tModule) Support() (apinto_module.ProviderSupport, bool) {
-
-	return nil, false
-
+	p := &ProxyAPi{cmd: cmd, id: id, module: module, params: config.Initialize}
+	err := p.initClient()
+	if err != nil {
+		return nil, err
+	}
+	return p, nil
 }

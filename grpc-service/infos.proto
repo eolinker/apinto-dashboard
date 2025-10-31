@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/eolinker/apinto-monitor/grpc-service";
+option go_package = "github.com/eolinker/apinto-dashboard/grpc-service";
 
 message EmptyRequest {
 }
@@ -90,11 +90,16 @@ message NavigationItem {
   string id = 1; //navigation_id
   string cname = 2;
 }
-
+message AccessItem {
+  string name=1;
+  string cname=2;
+  repeated string depend=3;
+}
 message ModuleItem {
   string name = 1;
   string cname = 2;
   string navigation_id = 3;
+  repeated AccessItem access = 4;
 }
 
 message GetClustersReq{
@@ -114,7 +119,19 @@ message ClusterInfo{
   string env = 4;
   string desc = 5;
 }
+message UserInfoRequest{
+  int64  id = 1;
+  string userName=2;
+  int32  sex =3;
+  string noticeUserId=4;
+  string nickName = 5;
+  string email=6;
+  string phone=7;
+  string avatar=8;
+}
+message UserInfoResponse{
 
+}
 service GetConsoleInfo {
   rpc GetAllNamespaces (EmptyRequest) returns (NamespacesListResp) {}
 
@@ -133,4 +150,5 @@ service GetConsoleInfo {
   rpc GetClusters(GetClustersReq) returns(ClusterInfoResp) {}
   rpc GetClustersByNames(GetClustersReq) returns(ClusterInfoResp) {}
   rpc GetClustersByUUIDs(GetClustersReq) returns(ClusterInfoResp) {}
+  rpc SaveUserInfo(UserInfoRequest)returns (UserInfoResponse){}
 }

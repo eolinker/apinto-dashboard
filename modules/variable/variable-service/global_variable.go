@@ -76,23 +76,11 @@ func (g *globalVariableService) List(ctx context.Context, pageNum, pageSize, nam
 		return nil, 0, err
 	}
 
-	userIds := common.SliceToSliceIds(variables, func(t *variable_entry.Variables) int {
-		return t.Operator
-	})
-
-	userInfoMaps, _ := g.userInfoService.GetUserInfoMaps(ctx, userIds...)
-
 	variableList := make([]*variable_model.GlobalVariableListItem, 0, len(variables))
 	for _, variableInfo := range variables {
 
-		operatorName := ""
-		if userInfo, ok := userInfoMaps[variableInfo.Operator]; ok {
-			operatorName = userInfo.NickName
-		}
-
 		item := &variable_model.GlobalVariableListItem{
-			Variables:   variableInfo,
-			OperatorStr: operatorName,
+			Variables: variableInfo,
 		}
 
 		item.Status = 1 //空闲
@@ -109,6 +97,7 @@ func (g *globalVariableService) List(ctx context.Context, pageNum, pageSize, nam
 		}
 		variableList = append(variableList, item)
 	}
+	user.SetUserName(g.userInfoService, ctx, variableList...)
 	return variableList, total, nil
 }
 

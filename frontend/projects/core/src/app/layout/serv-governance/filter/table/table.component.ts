@@ -13,6 +13,10 @@ import { ServGovernanceFilterService } from '../serv-governance-filter.service'
   selector: 'eo-ng-filter-table',
   templateUrl: './table.component.html',
   styles: [
+    `.label-content {
+      white-space: pre-line;
+      word-break: break-word;
+    }`
   ]
 })
 export class FilterTableComponent implements OnInit {
@@ -21,6 +25,11 @@ export class FilterTableComponent implements OnInit {
 
   @ViewChild('filterFooterTpl', { read: TemplateRef, static: true })
   filterFooterTpl: TemplateRef<any> | undefined
+
+  @ViewChild('labelRender', { static: true })
+  labelRender: TemplateRef<any> | null = null
+
+  @Input() type:string = ''
 
   @Input()
   get filterShowList () {

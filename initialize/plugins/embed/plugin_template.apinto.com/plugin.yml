@@ -2,7 +2,7 @@ id: "plugin_template.apinto.com"
 name: "plugin-template"
 cname: "API操作模板"
 resume: ""
-version: "v1.0.4"
+version: "v1.2.1"
 icon: "logo.png"
 driver: "plugin_template.apinto.com"
 type: 0 #0为框架模块 1为核心模块 2为内置模块 3为非内置
@@ -11,6 +11,12 @@ is_can_disable: false
 is_can_uninstall: false
 visible_in_navigation: true
 visible_in_market: false
-front: router
+front: router/plugin-template
 navigation: "navigation.public_config"
 group_id: "core_module"
+frontend:
+  - name: plugin-template
+    driver: apinto.builtIn.module
+    router:
+      - path: router/plugin-template
+        type: normal

@@ -7,10 +7,10 @@ import (
 )
 
 type IExtenderCache interface {
-	cache.IRedisCacheNoKey[plugin_model.ExtenderInfo]
+	cache.IRedisCacheNoKey[*plugin_model.ExtenderInfo]
 }
 
 func newIExtenderCache() IExtenderCache {
-	return cache.CreateRedisCacheNoKey[plugin_model.ExtenderInfo](time.Minute*5, "extender")
+	return cache.CreateRedisCacheNoKey[*plugin_model.ExtenderInfo](time.Minute*5, "extender")
 
 }

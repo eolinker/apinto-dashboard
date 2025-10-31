@@ -22,6 +22,7 @@ import (
 var _ grpc_service.NoticeSendServer = (*noticeSendService)(nil)
 
 type noticeSendService struct {
+	grpc_service.UnimplementedNoticeSendServer
 	userService          user.IUserInfoService
 	noticeChannelService notice.INoticeChannelService
 	noticeChannelDriver  notice.INoticeChannelDriverManager

@@ -1,6 +1,9 @@
 package plugin_controller
 
 import (
+	"net/http"
+	"strings"
+
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	plugin2 "github.com/eolinker/apinto-dashboard/client/v1/initialize/plugin"
 	"github.com/eolinker/apinto-dashboard/common"
@@ -13,7 +16,6 @@ import (
 	plugin_service "github.com/eolinker/apinto-dashboard/modules/plugin/plugin-service"
 	"github.com/eolinker/eosc/common/bean"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 type pluginController struct {
@@ -38,11 +40,12 @@ func (p *pluginController) plugin(ginCtx *gin.Context) {
 		controller.ErrorJson(ginCtx, http.StatusOK, err.Error())
 		return
 	}
-
+	names := strings.Split(pluginInfo.Extended, ":")
 	data := common.Map{}
 	data["plugin"] = plugin_dto.PluginItem{
 		Name:     pluginInfo.Name,
 		Extended: pluginInfo.Extended,
+		Title:    names[len(names)-1],
 		Desc:     pluginInfo.Desc,
 		Rely:     pluginInfo.RelyName,
 	}
@@ -65,10 +68,12 @@ func (p *pluginController) plugins(ginCtx *gin.Context) {
 		if !pluginInfo.UpdateTime.IsZero() {
 			updateTime = common.TimeToStr(pluginInfo.UpdateTime)
 		}
-
+		extends := strings.Split(pluginInfo.Extended, ":")
+		title := extends[len(extends)-1]
 		resultList = append(resultList, plugin_dto.PluginListItem{
 			Name:       pluginInfo.Name,
 			Extended:   pluginInfo.Extended,
+			Title:      title,
 			Desc:       pluginInfo.Desc,
 			UpdateTime: updateTime,
 			Operator:   pluginInfo.OperatorStr,
@@ -196,17 +201,25 @@ func (p *pluginController) pluginExtendeds(ginCtx *gin.Context) {
 	blackMaps := common.SliceToMap(blackExtendedPluginConf, func(t *v1.GlobalPlugin) string {
 		return t.Id
 	})
-
-	names := make([]string, 0)
+	type Extended struct {
+		Name  string `json:"name"`
+		Title string `json:"title"`
+	}
+	extends := make([]*Extended, 0)
 	for _, extender := range extenderList {
 		if _, ok := blackMaps[extender.Id]; ok {
 			continue
 		}
-		names = append(names, extender.Id)
+		names := strings.Split(extender.Id, ":")
+		title := names[len(names)-1]
+		extends = append(extends, &Extended{
+			Name:  extender.Id,
+			Title: title,
+		})
 	}
 
 	data := common.Map{}
-	data["extendeds"] = names
+	data["extendeds"] = extends
 	ginCtx.JSON(http.StatusOK, controller.NewSuccessResult(data))
 }
 

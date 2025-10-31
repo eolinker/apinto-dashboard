@@ -2,14 +2,15 @@ package config
 
 import (
 	"fmt"
-	"github.com/eolinker/eosc/log"
-	"gopkg.in/yaml.v3"
 	"os"
 	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/eolinker/eosc/log"
+	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -44,6 +45,8 @@ type RedisConfig struct {
 	UserName string   `yaml:"user_name"`
 	Password string   `yaml:"password"`
 	Addr     []string `yaml:"addr"`
+	Prefix   string   `yaml:"prefix"`
+	Cluster  string   `yaml:"cluster"`
 }
 
 func ReadConfig() {
@@ -72,36 +75,10 @@ func GetPort() int {
 func DisableReport() bool {
 	return systemConfig.Report == "off"
 }
-func getDBUserName() string {
-	return systemConfig.MysqlConfig.UserName
-}
 
-func getDBPassword() string {
-	return systemConfig.MysqlConfig.Password
-}
+func getDBNS() string {
+	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", systemConfig.MysqlConfig.UserName, systemConfig.MysqlConfig.Password, systemConfig.MysqlConfig.Ip, systemConfig.MysqlConfig.Port, systemConfig.MysqlConfig.Db)
 
-func getDBIp() string {
-	return systemConfig.MysqlConfig.Ip
-}
-
-func getDBPort() int {
-	return systemConfig.MysqlConfig.Port
-}
-
-func getDBName() string {
-	return systemConfig.MysqlConfig.Db
-}
-
-func getRedisAddr() []string {
-	return systemConfig.RedisConfig.Addr
-}
-
-func getRedisUserName() string {
-	return systemConfig.RedisConfig.UserName
-}
-
-func getRedisPwd() string {
-	return systemConfig.RedisConfig.Password
 }
 
 func GetLogDir() string {

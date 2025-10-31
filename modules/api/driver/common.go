@@ -1,6 +1,7 @@
 package driver
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/textproto"
@@ -106,7 +107,7 @@ func checkInput(input *api_dto.APIInfo) error {
 			return errors.New("Match.Key can't be nil. ")
 		}
 		switch m.Position {
-		case enum.MatchPositionHeader, enum.MatchPositionQuery, enum.MatchPositionCookie:
+		case enum.MatchPositionHeader, enum.MatchPositionQuery, enum.MatchPositionCookie, enum.MatchPositionBody:
 		default:
 			return fmt.Errorf("position %s is illegal. ", m.Position)
 		}
@@ -158,7 +159,7 @@ func checkInput(input *api_dto.APIInfo) error {
 	return nil
 }
 
-func toApinto(name, desc string, disable bool, method []string, requestPath, requestPathLabel, proxyPath, serviceName string, timeout, retry int, hosts []string, match []*api_entry.MatchConf, header []*api_entry.ProxyHeader, templateUUID string) *v1.RouterConfig {
+func toApinto(name, desc string, disable bool, protocols, method []string, requestPath, requestPathLabel, proxyPath, serviceName string, timeout, retry int, hosts []string, match []*api_entry.MatchConf, header []*api_entry.ProxyHeader, templateUUID string, plugins []*api_entry.APIPlugin) *v1.RouterConfig {
 
 	rewriteHeaders := make(map[string]string)
 	for _, ph := range header {
@@ -250,10 +251,15 @@ func toApinto(name, desc string, disable bool, method []string, requestPath, req
 	if hosts == nil {
 		hosts = []string{}
 	}
+	if protocols == nil {
+		protocols = []string{}
+
+	}
 
 	appendData := make(map[string]interface{}, 12)
 	appendData["disable"] = disable
 	appendData["listen"] = 0
+	appendData["protocols"] = protocols
 	appendData["method"] = method
 	appendData["host"] = hosts
 	appendData["location"] = requestPath
@@ -262,12 +268,21 @@ func toApinto(name, desc string, disable bool, method []string, requestPath, req
 	appendData["template"] = templateID
 	appendData["retry"] = retry
 	appendData["time_out"] = timeout
-	appendData["plugins"] = map[string]*v1.Plugin{
+	plg := map[string]*v1.Plugin{
 		"proxy_rewrite": { //插件名写死
 			Disable: false,
 			Config:  rewritePlugin,
 		},
 	}
+	for _, p := range plugins {
+		cfg := make(map[string]interface{})
+		json.Unmarshal([]byte(p.Config), &cfg)
+		plg[p.Name] = &v1.Plugin{
+			Disable: p.Disable,
+			Config:  cfg,
+		}
+	}
+	appendData["plugins"] = plg
 
 	return &v1.RouterConfig{
 		Name:        name,

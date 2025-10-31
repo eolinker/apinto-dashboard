@@ -81,6 +81,9 @@ export class FilterFooterComponent {
       }
       case 'pattern': {
         this.filterForm.text = this.filterForm.values[0]
+        if (this.filterForm.name === 'time') {
+          this.filterForm.text = this.filterForm.values.join('\n')
+        }
         break
       }
       default:

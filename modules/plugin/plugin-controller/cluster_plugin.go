@@ -7,6 +7,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/controller/users"
 	"github.com/eolinker/apinto-dashboard/enum"
+	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/plugin"
 	plugin_dto "github.com/eolinker/apinto-dashboard/modules/plugin/plugin-dto"
@@ -36,7 +37,7 @@ func (p *pluginClusterController) plugins(ginCtx *gin.Context) {
 
 	plugins, err := p.clusterPluginService.GetList(ginCtx, namespaceID, clusterName)
 	if err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Get ClusterlPlugin List fail. err: %s", err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Get ClusterlPlugin Navigations fail. err: %s", err.Error()))
 		return
 	}
 	list := make([]*plugin_dto.CluPluginListItem, 0, len(plugins))
@@ -285,6 +286,7 @@ func (p *pluginClusterController) toPublish(ginCtx *gin.Context) {
 
 // 发布插件
 func (p *pluginClusterController) publish(ginCtx *gin.Context) {
+	audit_model.LogOperateTypePublish.Handler(ginCtx)
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Param("cluster_name")
 

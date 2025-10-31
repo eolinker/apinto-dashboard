@@ -40,7 +40,7 @@ export const CustomCodeboxComponent = React.forwardRef(
         try {
           res = JSON.parse(value)
         } catch {
-          console.warn('输入的json语句格式有误')
+          console.warn(' 输入的json语句格式有误')
         }
       }
       onChange(res)

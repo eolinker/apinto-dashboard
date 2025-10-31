@@ -13,7 +13,9 @@ var goversion = "unknown"
 var gitcommit = "unknown"
 var buildtime = "unknown"
 var builduser = "unknown"
-
+var (
+	buildInfo = make(map[string]string)
+)
 var profileInfo []byte
 
 func init() {
@@ -24,6 +26,12 @@ func init() {
 	fmt.Fprintf(buffer, "Built on: %s\n", buildtime)
 	fmt.Fprintf(buffer, "Built by: %s\n", builduser)
 	profileInfo = buffer.Bytes()
+
+	buildInfo["git_commint"] = gitcommit
+	buildInfo["build_user"] = builduser
+	buildInfo["version"] = Version
+	buildInfo["build_time"] = buildtime
+	buildInfo["goversion"] = goversion
 }
 func Handler(ctx *gin.Context) {
 
@@ -42,4 +50,7 @@ func Build() *cli.Command {
 
 func GetVersion() string {
 	return Version
+}
+func BuildInfo() map[string]string {
+	return buildInfo
 }

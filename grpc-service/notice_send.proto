@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/eolinker/apinto-monitor/grpc-service";
+option go_package = "github.com/eolinker/apinto-dashboard/grpc-service";
 
 message NoticeSendResp {
   int32 send_status = 1;

@@ -1,3 +1,9 @@
+<!--
+ * @Date: 2023-06-29 17:10:34
+ * @LastEditors: maggieyyy
+ * @LastEditTime: 2024-01-29 17:18:47
+ * @FilePath: \apinto\projects\core\src\app\layout\application\authentication\form\form.component.html
+-->
 <form
   nz-form
   [nzNoColon]="true"
@@ -29,10 +35,11 @@
         class="w-INPUT_NORMAL"
         name="driver"
         required
+        nzShowSearch
         formControlName="driver"
         (ngModelChange)="changeBasedata()"
         [nzOptions]="driverList"
-        [nzDisabled]="nzDisabled"
+        [nzDisabled]="!!authId ?? nzDisabled"
       ></eo-ng-select>
     </nz-form-control>
   </nz-form-item>
@@ -47,6 +54,7 @@
           class="form-input"
           name="position"
           required
+          nzShowSearch
           formControlName="position"
           [nzOptions]="positionList"
           eoNgUserAccess="application"
@@ -114,6 +122,7 @@
           class="w-INPUT_NORMAL"
           name="algorithm"
           required
+          nzShowSearch
           formControlName="algorithm"
           [nzOptions]="listOfAlgorithm"
           eoNgUserAccess="application"
@@ -204,6 +213,7 @@
           nzPlaceHolder="请选择校验字段"
           nzMode="multiple"
           [nzAllowClear]="true"
+          nzShowSearch
         ></eo-ng-select>
       </nz-form-control>
     </nz-form-item>

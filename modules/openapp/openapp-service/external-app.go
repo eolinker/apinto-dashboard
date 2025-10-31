@@ -47,10 +47,6 @@ func (e *externalApplicationService) AppList(ctx context.Context, namespaceId in
 
 	list := make([]*openappModel.ExtAppListItem, 0, len(items))
 	for _, item := range items {
-		userInfo, err := e.userInfoService.GetUserInfo(ctx, item.Operator)
-		if err != nil {
-			return nil, err
-		}
 
 		status := 1 //1表示启用， 2表示禁用
 		if item.IsDisable {
@@ -63,13 +59,13 @@ func (e *externalApplicationService) AppList(ctx context.Context, namespaceId in
 			Token:      item.Token,
 			Tags:       item.Tags,
 			Status:     status,
-			Operator:   userInfo.NickName,
+			OperatorId: item.Operator,
 			UpdateTime: common.TimeToStr(item.UpdateTime),
 		}
 
 		list = append(list, app)
 	}
-
+	user.SetUserName(e.userInfoService, ctx, list...)
 	return list, nil
 }
 

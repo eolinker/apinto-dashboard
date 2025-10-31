@@ -4,14 +4,18 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/eolinker/apinto-dashboard/common"
 	"github.com/eolinker/apinto-dashboard/grpc-service"
 	"github.com/eolinker/apinto-dashboard/modules/api"
 	"github.com/eolinker/apinto-dashboard/modules/application"
 	"github.com/eolinker/apinto-dashboard/modules/cluster"
 	"github.com/eolinker/apinto-dashboard/modules/dynamic"
-	module_plugin "github.com/eolinker/apinto-dashboard/modules/module-plugin"
+	"github.com/eolinker/apinto-dashboard/modules/mpm3"
+	"github.com/eolinker/apinto-dashboard/modules/mpm3/model"
 	"github.com/eolinker/apinto-dashboard/modules/namespace"
 	navigation_service "github.com/eolinker/apinto-dashboard/modules/navigation"
+	"github.com/eolinker/apinto-dashboard/modules/user"
+	userModel "github.com/eolinker/apinto-dashboard/modules/user/user-model"
 	"github.com/eolinker/eosc/common/bean"
 	"gorm.io/gorm"
 )
@@ -26,13 +30,33 @@ const (
 type consoleInfoService struct {
 	namespaceService    namespace.INamespaceService
 	apiService          api.IAPIService
-	modulePluginService module_plugin.IModulePlugin
+	modulePluginService mpm3.IModuleService
 	navigationService   navigation_service.INavigationService
+	accessService       mpm3.IAccessService
 	applicationService  application.IApplicationService
 	dynamicService      dynamic.IDynamicService
 	clusterService      cluster.IClusterService
+	userService         user.IUserInfoService
+	modulesCache        INavigationModulesCache
+	grpc_service.UnimplementedGetConsoleInfoServer
+}
 
-	modulesCache INavigationModulesCache
+func (c *consoleInfoService) SaveUserInfo(ctx context.Context, request *grpc_service.UserInfoRequest) (*grpc_service.UserInfoResponse, error) {
+	userInfo := &userModel.UserInfo{
+		Id:           int(request.Id),
+		Sex:          int(request.Sex),
+		UserName:     request.UserName,
+		NoticeUserId: request.NoticeUserId,
+		NickName:     request.NickName,
+		Email:        request.Email,
+		Phone:        request.Phone,
+		Avatar:       request.Avatar,
+	}
+	err := c.userService.SaveUserInfo(ctx, userInfo)
+	if err != nil {
+		return nil, err
+	}
+	return &grpc_service.UserInfoResponse{}, nil
 }
 
 func NewConsoleInfoService() grpc_service.GetConsoleInfoServer {
@@ -44,8 +68,10 @@ func NewConsoleInfoService() grpc_service.GetConsoleInfoServer {
 	bean.Autowired(&c.dynamicService)
 	bean.Autowired(&c.applicationService)
 	bean.Autowired(&c.clusterService)
+	bean.Autowired(&c.accessService)
 
 	bean.Autowired(&c.modulesCache)
+	bean.Autowired(&c.userService)
 	return c
 }
 
@@ -202,11 +228,14 @@ func (c *consoleInfoService) GetAppsByUuids(ctx context.Context, req *grpc_servi
 }
 
 func (c *consoleInfoService) GetNavigationModules(ctx context.Context, req *grpc_service.EmptyRequest) (*grpc_service.NavigationModulesResp, error) {
-	modules, err := c.modulePluginService.GetNavigationModules(ctx) //这个接口已从缓存中拿了
-	if err != nil {
-		return nil, errors.New("获取导航模块列表失败")
-	}
+	modules := c.modulePluginService.GetEnable(ctx) //这个接口已从缓存中拿了
+
 	navigations := c.navigationService.List()
+	accessList := c.accessService.GetEnable(ctx)
+	accessOfModule := common.SliceToMapArray(accessList, func(t *model.Access) string {
+		return t.Module
+	})
+
 	navigationItems := make([]*grpc_service.NavigationItem, 0, len(navigations))
 	modulesItems := make([]*grpc_service.ModuleItem, 0, len(modules))
 
@@ -217,11 +246,25 @@ func (c *consoleInfoService) GetNavigationModules(ctx context.Context, req *grpc
 		})
 	}
 	for _, item := range modules {
-		modulesItems = append(modulesItems, &grpc_service.ModuleItem{
+
+		mi := &grpc_service.ModuleItem{
 			Name:         item.Name,
-			Cname:        item.Title,
+			Cname:        item.CName,
 			NavigationId: item.Navigation,
-		})
+			Access:       nil,
+		}
+		if aom, h := accessOfModule[item.Name]; h {
+			asl := make([]*grpc_service.AccessItem, 0, len(aom))
+			for _, it := range aom {
+				asl = append(asl, &grpc_service.AccessItem{
+					Name:   it.Name,
+					Cname:  it.CName,
+					Depend: it.Depend,
+				})
+			}
+			mi.Access = asl
+		}
+		modulesItems = append(modulesItems, mi)
 	}
 	return &grpc_service.NavigationModulesResp{
 		NavigationItems: navigationItems,

@@ -7,6 +7,7 @@ import (
 	"github.com/eolinker/apinto-dashboard/controller"
 	"github.com/eolinker/apinto-dashboard/controller/users"
 	"github.com/eolinker/apinto-dashboard/enum"
+	audit_model "github.com/eolinker/apinto-dashboard/modules/audit/audit-model"
 	"github.com/eolinker/apinto-dashboard/modules/base/namespace-controller"
 	"github.com/eolinker/apinto-dashboard/modules/cluster/cluster-dto"
 	"github.com/eolinker/apinto-dashboard/modules/variable"
@@ -38,7 +39,7 @@ func (c *clusterVariableController) gets(ginCtx *gin.Context) {
 
 	variables, err := c.clusterVariableService.GetList(ginCtx, namespaceID, clusterName)
 	if err != nil {
-		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Get ClusterlVariable List fail. err: %s", err.Error()))
+		controller.ErrorJson(ginCtx, http.StatusOK, fmt.Sprintf("Get ClusterlVariable Navigations fail. err: %s", err.Error()))
 		return
 	}
 	list := make([]*cluster_dto.ClusterVariableItem, 0, len(variables))
@@ -258,6 +259,7 @@ func (c *clusterVariableController) toPublishs(ginCtx *gin.Context) {
 
 // publish 发布
 func (c *clusterVariableController) publish(ginCtx *gin.Context) {
+	audit_model.LogOperateTypePublish.Handler(ginCtx)
 	namespaceId := namespace_controller.GetNamespaceId(ginCtx)
 	clusterName := ginCtx.Param("cluster_name")
 

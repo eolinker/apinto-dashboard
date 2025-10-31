@@ -89,12 +89,6 @@ func (s *strategyService[T, K]) GetList(ctx context.Context, namespaceId int, cl
 
 	_, publishMaps, err := s.getRuntimePublishMaps(ctx, clusterInfo.Id)
 
-	userIds := common.SliceToSliceIds(strategies, func(t *strategy_entry.Strategy) int {
-		return t.Operator
-	})
-
-	userInfoMaps, _ := s.userInfoService.GetUserInfoMaps(ctx, userIds...)
-
 	resList := make([]*strategy_model.Strategy, 0, len(strategies))
 	for _, strategyInfo := range strategies {
 
@@ -126,22 +120,17 @@ func (s *strategyService[T, K]) GetList(ctx context.Context, namespaceId int, cl
 			return nil, err
 		}
 
-		operatorName := ""
-		if userInfo, ok := userInfoMaps[strategyInfo.Operator]; ok {
-			operatorName = userInfo.NickName
-		}
-
 		resList = append(resList, &strategy_model.Strategy{
-			Strategy:    strategyInfo,
-			Version:     version,
-			Filters:     filters,
-			Conf:        s.strategyHandler.GetListLabel(s.decodeConfig(version.StrategyConfigInfo.Config)),
-			OperatorStr: operatorName,
-			Status:      status,
+			Strategy:   strategyInfo,
+			Version:    version,
+			Filters:    filters,
+			OperatorId: strategyInfo.Operator,
+			Conf:       s.strategyHandler.GetListLabel(s.decodeConfig(version.StrategyConfigInfo.Config)),
+			Status:     status,
 		})
 
 	}
-
+	user.SetUserName(s.userInfoService, ctx, resList...)
 	return resList, nil
 }
 
@@ -621,7 +610,7 @@ func (s *strategyService[T, K]) UpdateStop(ctx context.Context, namespaceId, ope
 
 }
 
-func (s *strategyService[T, K]) Publish(ctx context.Context, namespaceId, operator int, clusterName string, input *strategy_dto.StrategyPublish) error {
+func (s *strategyService[T, K]) Publish(ctx context.Context, namespaceId, operator int, clusterName, strategyType string, input *strategy_dto.StrategyPublish) error {
 
 	clusterInfo, err := s.clusterService.GetByNamespaceByName(ctx, namespaceId, clusterName)
 	if err != nil {
@@ -700,6 +689,9 @@ func (s *strategyService[T, K]) Publish(ctx context.Context, namespaceId, operat
 	strategyVersionPublishConfig := make([]*strategy_entry.StrategyPublishConfigInfo, 0)
 
 	for _, info := range publishMaps {
+		if info.StrategyVersion.Type != strategyType {
+			continue
+		}
 		strategyVersionPublishConfig = append(strategyVersionPublishConfig, info)
 	}
 	sort.Slice(strategyVersionPublishConfig, func(i, j int) bool {

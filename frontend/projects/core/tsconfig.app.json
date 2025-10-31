@@ -1,0 +1,26 @@
+/* To learn more about this file see: https://angular.io/config/tsconfig. */
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/app",
+    "types": []
+  },
+  "files": ["./src/main.ts", "./src/polyfills.ts"],
+  "include": [
+    "projects/core/src/**/*.d.ts",
+    "projects/core/src/app/layout/serv-governance/serv-governance.module.ts",
+    "projects/core/src/app/layout/serv-governance/cache-strategy/cache-strategy.module.ts",
+    "projects/core/src/app/layout/serv-governance/fuse-strategy/fuse-strategy.module.ts",
+    "projects/core/src/app/layout/serv-governance/traffic-strategy/traffic-strategy.module.ts",
+    "projects/core/src/app/layout/serv-governance/visit-strategy/visit-strategy.module.ts",
+    "projects/core/src/app/layout/serv-governance/grey-strategy/grey-strategy.module.ts",
+    "projects/core/src/app/layout/intelligent-plugin/intelligent-plugin.module.ts",
+    "projects/core/src/app/layout/application/application.module.ts",
+    "projects/core/src/app/layout/api/api.module.ts",
+    "projects/core/src/app/layout/deploy-cluster/deploy-cluster.module.ts",
+    "projects/core/src/app/layout/global-env-var/global-env-var.module.ts",
+    "projects/core/src/app/layout/node-plugin/node-plugin.module.ts",
+    "projects/core/src/app/layout/plugin-template/plugin-template.module.ts",
+    "projects/core/src/app/layout/open-api/open-api.module.ts"
+  ]
+}

@@ -1,26 +1,47 @@
 package open_api_controller
 
 import (
-	apinto_module "github.com/eolinker/apinto-dashboard/module"
-	"net/http"
+	"github.com/eolinker/apinto-dashboard/pm3"
+	"github.com/eolinker/eosc"
 )
 
-func initRouter(name string) apinto_module.RoutersInfo {
-	c := newOpenApiController()
-	return apinto_module.RoutersInfo{
-		{
-			Method:      http.MethodGet,
-			Path:        "/api2/apis/import",
-			Handler:     "applications.getImportInfo",
-			HandlerFunc: []apinto_module.HandlerFunc{c.getImportInfo},
-			Labels:      apinto_module.RouterLabelOpenApi,
-		},
-		{
-			Method:      http.MethodPost,
-			Path:        "/api2/apis/import",
-			Handler:     "applications.syncAPI",
-			HandlerFunc: []apinto_module.HandlerFunc{c.syncAPI},
-			Labels:      apinto_module.RouterLabelOpenApi,
-		},
+type IRouter interface {
+	Name() string
+	Apis() []pm3.Api
+}
+
+var defaultRouterManager = NewRouterManager()
+
+type RouterManager struct {
+	routers eosc.Untyped[string, IRouter]
+}
+
+func (r *RouterManager) Register(router IRouter) {
+	r.routers.Set(router.Name(), router)
+}
+
+func (r *RouterManager) GetRouter(name string) (IRouter, bool) {
+	return r.routers.Get(name)
+}
+
+func (r *RouterManager) AllRouters() []IRouter {
+	return r.routers.List()
+}
+
+func NewRouterManager() *RouterManager {
+	return &RouterManager{
+		routers: eosc.BuildUntyped[string, IRouter](),
 	}
+}
+
+func RegisterRouter(router IRouter) {
+	defaultRouterManager.Register(router)
+}
+
+func GetRouter(name string) (IRouter, bool) {
+	return defaultRouterManager.GetRouter(name)
+}
+
+func AllRouters() []IRouter {
+	return defaultRouterManager.AllRouters()
 }

@@ -9,7 +9,6 @@ import { EoNgButtonModule } from 'eo-ng-button'
 import { EoNgSelectModule } from 'eo-ng-select'
 import { EoNgDatePickerModule } from 'eo-ng-date-picker'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
-import { EoNgTableModule } from 'eo-ng-table'
 import { ComponentModule } from '../../component/component.module'
 import { EoNgApintoTableModule } from 'projects/eo-ng-apinto-table/src/public-api'
 
@@ -20,6 +19,16 @@ import { EoNgCopyModule } from 'eo-ng-copy'
 
 registerLocaleData(zh)
 
+const sharedEoLibraryModules = [
+  EoNgButtonModule,
+  EoNgSelectModule,
+  EoNgFeedbackTooltipModule,
+  EoNgInputModule,
+  EoNgDatePickerModule,
+  EoNgApintoTableModule,
+  EoNgCopyModule
+]
+
 @NgModule({
   declarations: [
     AuditLogComponent,
@@ -28,18 +37,11 @@ registerLocaleData(zh)
   ],
   imports: [
     CommonModule,
-    AuditLogRoutingModule,
-    EoNgInputModule,
-    EoNgButtonModule,
-    EoNgSelectModule,
-    EoNgTableModule,
     FormsModule,
     ReactiveFormsModule,
-    EoNgDatePickerModule,
     ComponentModule,
-    EoNgApintoTableModule,
-    EoNgFeedbackTooltipModule,
-    EoNgCopyModule
+    AuditLogRoutingModule,
+    ...sharedEoLibraryModules
   ]
 })
 export class AuditLogModule { }

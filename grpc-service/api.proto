@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+option go_package = "github.com/eolinker/apinto-dashboard/grpc-service";
+
+message ApiId {
+  string uuid=1;
+}
+message ApiSearchRequest{
+  string group=1;
+  string keyword=2;
+}
+message ApiItem{
+  string uuid=1;
+  string name =2;
+  string desc=3;
+  string path=4;
+  string group=5;
+  string groupName=6;
+  int32 namespaceId=7;
+}
+
+message ApiCreateByTemplateRequest{
+  string templateApiUuid=1;
+  string uuid=2;
+  string name =3;
+  string desc=4;
+  string path=5;
+  repeated string methods=6;
+  string operator=7;
+}
+
+enum CreateStatus
+{
+  // 成功
+  SUCCESS=0;
+  // API已经存在
+  APIExist=1;
+  // 模板API不存在
+  TemplateAPINotExist=2;
+  // 操作失败
+  Fail=3;
+}
+
+message ApiCreateResponse{
+  string uuid=1;
+  string errorMsg=2;
+
+  CreateStatus status=3;
+}
+
+service ApiService{
+  rpc CreateFromTemplate(stream ApiCreateByTemplateRequest)returns(stream ApiCreateResponse){}
+  rpc ForeachInfo(ApiSearchRequest) returns(stream ApiItem){}
+}

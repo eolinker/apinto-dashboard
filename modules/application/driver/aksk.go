@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
+
 	v1 "github.com/eolinker/apinto-dashboard/client/v1"
 	"github.com/eolinker/apinto-dashboard/enum"
 	"github.com/eolinker/apinto-dashboard/modules/application"
 	application_model "github.com/eolinker/apinto-dashboard/modules/application/application-model"
-	"strings"
 )
 
 type AkSkConfig struct {
@@ -27,22 +28,22 @@ func (a *AkSk) GetAuthListInfo(config []byte) string {
 	return fmt.Sprintf("AK=%s,SK=%s", authConfig.Ak, authConfig.Sk)
 }
 
-func (a *AkSk) CheckInput(config []byte) error {
+func (a *AkSk) CheckInput(config []byte) ([]byte, error) {
 	akSkConfig := new(AkSkConfig)
 
 	if err := json.Unmarshal(config, akSkConfig); err != nil {
-		return err
+		return nil, err
 	}
 	if akSkConfig.Sk == "" || akSkConfig.Ak == "" {
-		return errors.New("ak or sk is null")
+		return nil, errors.New("ak or sk is null")
 	}
 
 	for key, _ := range akSkConfig.Label {
 		if _, ok := enum.Keyword[strings.ToLower(key)]; ok {
-			return errors.New(fmt.Sprintf("标签信息中的%s为系统关键字", key))
+			return nil, errors.New(fmt.Sprintf("标签信息中的%s为系统关键字", key))
 		}
 	}
-	return nil
+	return config, nil
 }
 
 func (a *AkSk) GetCfgDetails(config []byte) []application_model.AuthDetailItem {
